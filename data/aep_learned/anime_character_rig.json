@@ -1,0 +1,91 @@
+{
+  "common_effect_chains": [
+    {
+      "effects": [
+        "?????      ",
+        "Gaussian Blur",
+        "Motion Tile"
+      ],
+      "layer_type": "precomp",
+      "total_frequency": 1
+    },
+    {
+      "effects": [
+        "S_?? ",
+        "暗角    "
+      ],
+      "layer_type": "adjustment",
+      "total_frequency": 1
+    }
+  ],
+  "common_color_patterns": {
+    "Lumetri Color": 1
+  },
+  "common_naming_patterns": [
+    [
+      "word:",
+      48
+    ],
+    [
+      "prefix:[SwayControl1]",
+      12
+    ],
+    [
+      "prefix:     [p1]",
+      12
+    ],
+    [
+      "prefix:     [p2]",
+      12
+    ],
+    [
+      "prefix:     [p3]",
+      12
+    ],
+    [
+      "prefix:     [p4]",
+      8
+    ],
+    [
+      "prefix:     [p5]",
+      3
+    ],
+    [
+      "word:调整图层",
+      2
+    ],
+    [
+      "word:预合成",
+      1
+    ],
+    [
+      "word:图层",
+      1
+    ]
+  ],
+  "plugin_frequency": {
+    "Deep Glow 2": 3,
+    "Optical Flares": 1
+  },
+  "technique_frequency": [
+    [
+      "发光",
+      1
+    ],
+    [
+      "光晕",
+      1
+    ],
+    [
+      "调色",
+      1
+    ]
+  ],
+  "template_count": 1,
+  "summary": {
+    "template_count": 1,
+    "avg_layers_per_template": 371.0,
+    "avg_effects_per_template": 54.0,
+    "avg_keyframes_per_template": 0.0
+  }
+}

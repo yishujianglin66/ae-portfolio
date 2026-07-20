@@ -1,0 +1,6 @@
+{
+  "typewriter": "text.sourceText = text.sourceText.substr(0, Math.floor(time*5));",
+  "fade_in": "opacity = linear(time, inPoint, inPoint+1, 0, 100);",
+  "slide_up": "value + [0, linear(time, inPoint, inPoint+0.5, 100, 0)];",
+  "scale_bounce": "value * linear(time, inPoint, inPoint+0.3, 0, 100) / 100;"
+}

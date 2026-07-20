@@ -1,0 +1,85 @@
+{
+  "version": "2.0",
+  "description": "统一多工具集成调度器 - 工具路径配置（真实执行模式）",
+  "platform": "windows",
+  "search_paths": {
+    "adobe": [
+      "C:\\Program Files\\Adobe\\Adobe After Effects 2026",
+      "D:\\pr\\Adobe Premiere Pro 2026",
+      "D:\\ps\\Adobe Photoshop 2026",
+      "D:\\Ai\\Adobe Illustrator 2026",
+      "D:\\Me\\Adobe Media Encoder 2026"
+    ],
+    "ffmpeg": [
+      "C:\\ffmpeg\\bin"
+    ],
+    "topaz": [
+      "D:\\top\\Topaz Video AI Pro"
+    ],
+    "blender": [
+      "D:\\Blender\\Blender 5.1.0"
+    ]
+  },
+  "tools": {
+    "after_effects": {
+      "name": "Adobe After Effects 2026",
+      "executable": "AfterFX.exe",
+      "install_path": "C:\\Program Files\\Adobe\\Adobe After Effects 2026\\Support Files",
+      "enabled": true
+    },
+    "premiere_pro": {
+      "name": "Adobe Premiere Pro 2026",
+      "executable": "Adobe Premiere Pro.exe",
+      "install_path": "D:\\pr\\Adobe Premiere Pro 2026",
+      "enabled": true
+    },
+    "photoshop": {
+      "name": "Adobe Photoshop 2026",
+      "executable": "Photoshop.exe",
+      "install_path": "D:\\ps\\Adobe Photoshop 2026",
+      "enabled": true
+    },
+    "illustrator": {
+      "name": "Adobe Illustrator 2026",
+      "executable": "Illustrator.exe",
+      "install_path": "D:\\Ai\\Adobe Illustrator 2026\\Support Files\\Contents\\Windows",
+      "enabled": true
+    },
+    "media_encoder": {
+      "name": "Adobe Media Encoder 2026",
+      "executable": "Adobe Media Encoder.exe",
+      "install_path": "D:\\Me\\Adobe Media Encoder 2026",
+      "enabled": true
+    },
+    "audition": {
+      "name": "Adobe Audition 2026",
+      "executable": "Audition.exe",
+      "install_path": "",
+      "enabled": false
+    },
+    "ffmpeg": {
+      "name": "FFmpeg",
+      "executable": "ffmpeg.exe",
+      "install_path": "C:\\ffmpeg\\bin",
+      "enabled": true
+    },
+    "topaz_video_ai": {
+      "name": "Topaz Video AI Pro",
+      "executable": "Topaz Video AI BETA.exe",
+      "install_path": "D:\\top\\Topaz Video AI Pro",
+      "enabled": true
+    },
+    "blender": {
+      "name": "Blender 5.1.0",
+      "executable": "blender.exe",
+      "install_path": "D:\\Blender\\Blender 5.1.0",
+      "enabled": true
+    }
+  },
+  "defaults": {
+    "output_dir": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output",
+    "mode": "real",
+    "log_level": "info",
+    "timeout_seconds": 3600
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "test_time": "2026-07-15T18:28:56.941384",
+  "test_cases": 10,
+  "v4_flash": {
+    "accuracy": 90.0,
+    "avg_latency_ms": 1945.0,
+    "total_tokens": 2961,
+    "cost_yuan": 0.0044415,
+    "details": [
+      {
+        "input": "扣个人像",
+        "expected": "roto",
+        "actual": "roto",
+        "correct": true,
+        "latency_ms": 2190,
+        "tokens": 308,
+        "confidence": 0.95
+      },
+      {
+        "input": "做个角色遮罩",
+        "expected": "roto",
+        "actual": "roto",
+        "correct": true,
+        "latency_ms": 1694,
+        "tokens": 282,
+        "confidence": 0.95
+      },
+      {
+        "input": "背景抠掉",
+        "expected": "roto",
+        "actual": "roto",
+        "correct": true,
+        "latency_ms": 1684,
+        "tokens": 281,
+        "confidence": 0.98
+      },
+      {
+        "input": "自动 rotoscope",
+        "expected": "roto",
+        "actual": "roto",
+        "correct": true,
+        "latency_ms": 1934,
+        "tokens": 292,
+        "confidence": 0.95
+      },
+      {
+        "input": "跟踪这个物体",
+        "expected": "track",
+        "actual": "track",
+        "correct": true,
+        "latency_ms": 1776,
+        "tokens": 276,
+        "confidence": 0.95
+      },
+      {
+        "input": "平面跟踪",
+        "expected": "track",
+        "actual": "track",
+        "correct": true,
+        "latency_ms": 1891,
+        "tokens": 289,
+        "confidence": 0.95
+      },
+      {
+        "input": "做个点跟踪",
+        "expected": "track",
+        "actual": "track",
+        "correct": true,
+        "latency_ms": 1551,
+        "tokens": 286,
+        "confidence": 0.95
+      },
+      {
+        "input": "修掉这个瑕疵",
+        "expected": "paint",
+        "actual": "paint",
+        "correct": true,
+        "latency_ms": 1800,
+        "tokens": 290,
+        "confidence": 0.95
+      },
+      {
+        "input": "Paint 修复",
+        "expected": "paint",
+        "actual": "paint",
+        "correct": true,
+        "latency_ms": 1965,
+        "tokens": 282,
+        "confidence": 0.95
+      },
+      {
+        "input": "用 Silhouette 处理",
+        "expected": "roto",
+        "actual": "unknown",
+        "correct": false,
+        "latency_ms": 2965,
+        "tokens": 375,
+        "confidence": 0
+      }
+    ]
+  },
+  "v4_pro": {
+    "accuracy": 100.0,
+    "avg_latency_ms": 2656.0,
+    "total_tokens": 1465,
+    "cost_yuan": 0.006592499999999999,
+    "details": [
+      {
+        "input": "扣个人像",
+        "expected": "roto",
+        "actual": "roto",
+        "correct": true,
+        "latency_ms": 3068,
+        "tokens": 309,
+        "confidence": 0.95
+      },
+      {
+        "input": "做个角色遮罩",
+        "expected": "roto",
+        "actual": "roto",
+        "correct": true,
+        "latency_ms": 2768,
+        "tokens": 294,
+        "confidence": 1.0
+      },
+      {
+        "input": "背景抠掉",
+        "expected": "roto",
+        "actual": "roto",
+        "correct": true,
+        "latency_ms": 2531,
+        "tokens": 288,
+        "confidence": 0.98
+      },
+      {
+        "input": "自动 rotoscope",
+        "expected": "roto",
+        "actual": "roto",
+        "correct": true,
+        "latency_ms": 2363,
+        "tokens": 290,
+        "confidence": 0.99
+      },
+      {
+        "input": "跟踪这个物体",
+        "expected": "track",
+        "actual": "track",
+        "correct": true,
+        "latency_ms": 2550,
+        "tokens": 284,
+        "confidence": 1.0
+      }
+    ]
+  },
+  "local_regex": {
+    "accuracy": 100.0,
+    "avg_latency_ms": 0.1,
+    "total_tokens": 0,
+    "cost_yuan": 0
+  }
+}

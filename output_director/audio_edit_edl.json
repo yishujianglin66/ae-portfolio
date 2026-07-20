@@ -1,0 +1,345 @@
+{
+  "audio": "D:\\AE-Work\\output\\VinlandSaga_Battle_V17.mp4",
+  "bpm": 128.0,
+  "duration": 30.0,
+  "beats": 64,
+  "clips": [
+    {
+      "clip_index": 0,
+      "material_index": 0,
+      "start_time": 0.0,
+      "end_time": 29.531,
+      "duration": 29.531,
+      "avg_energy": 0.643,
+      "speed": 1.2,
+      "transition": {
+        "type": "dissolve",
+        "duration": 0.3
+      },
+      "start_beat": 0,
+      "end_beat": 63,
+      "ramps": [
+        {
+          "time": 0.0,
+          "remap_value": 95.0,
+          "energy": 0.3
+        },
+        {
+          "time": 0.469,
+          "remap_value": 95.0,
+          "energy": 0.3
+        },
+        {
+          "time": 0.938,
+          "remap_value": 95.0,
+          "energy": 0.3
+        },
+        {
+          "time": 1.406,
+          "remap_value": 95.0,
+          "energy": 0.3
+        },
+        {
+          "time": 1.875,
+          "remap_value": 95.0,
+          "energy": 0.3
+        },
+        {
+          "time": 2.344,
+          "remap_value": 95.0,
+          "energy": 0.3
+        },
+        {
+          "time": 2.812,
+          "remap_value": 95.0,
+          "energy": 0.3
+        },
+        {
+          "time": 3.281,
+          "remap_value": 151.7,
+          "energy": 0.678
+        },
+        {
+          "time": 3.75,
+          "remap_value": 153.5,
+          "energy": 0.69
+        },
+        {
+          "time": 4.219,
+          "remap_value": 154.55,
+          "energy": 0.697
+        },
+        {
+          "time": 4.688,
+          "remap_value": 155.0,
+          "energy": 0.7
+        },
+        {
+          "time": 5.156,
+          "remap_value": 154.7,
+          "energy": 0.698
+        },
+        {
+          "time": 5.625,
+          "remap_value": 153.64999999999998,
+          "energy": 0.691
+        },
+        {
+          "time": 6.094,
+          "remap_value": 151.85000000000002,
+          "energy": 0.679
+        },
+        {
+          "time": 6.562,
+          "remap_value": 149.45,
+          "energy": 0.663
+        },
+        {
+          "time": 7.031,
+          "remap_value": 146.45,
+          "energy": 0.643
+        },
+        {
+          "time": 7.5,
+          "remap_value": 143.0,
+          "energy": 0.62
+        },
+        {
+          "time": 7.969,
+          "remap_value": 138.95,
+          "energy": 0.593
+        },
+        {
+          "time": 8.438,
+          "remap_value": 134.75,
+          "energy": 0.565
+        },
+        {
+          "time": 8.906,
+          "remap_value": 130.10000000000002,
+          "energy": 0.534
+        },
+        {
+          "time": 9.375,
+          "remap_value": 176.75,
+          "energy": 0.845
+        },
+        {
+          "time": 9.844,
+          "remap_value": 183.65,
+          "energy": 0.891
+        },
+        {
+          "time": 10.312,
+          "remap_value": 190.1,
+          "energy": 0.934
+        },
+        {
+          "time": 10.781,
+          "remap_value": 195.2,
+          "energy": 0.968
+        },
+        {
+          "time": 11.25,
+          "remap_value": 198.65,
+          "energy": 0.991
+        },
+        {
+          "time": 11.719,
+          "remap_value": 200.0,
+          "energy": 1.0
+        },
+        {
+          "time": 12.188,
+          "remap_value": 199.25,
+          "energy": 0.995
+        },
+        {
+          "time": 12.656,
+          "remap_value": 196.25,
+          "energy": 0.975
+        },
+        {
+          "time": 13.125,
+          "remap_value": 191.6,
+          "energy": 0.944
+        },
+        {
+          "time": 13.594,
+          "remap_value": 185.45000000000002,
+          "energy": 0.903
+        },
+        {
+          "time": 14.062,
+          "remap_value": 178.7,
+          "energy": 0.858
+        },
+        {
+          "time": 14.531,
+          "remap_value": 171.65,
+          "energy": 0.811
+        },
+        {
+          "time": 15.0,
+          "remap_value": 165.2,
+          "energy": 0.768
+        },
+        {
+          "time": 15.469,
+          "remap_value": 160.1,
+          "energy": 0.734
+        },
+        {
+          "time": 15.938,
+          "remap_value": 156.5,
+          "energy": 0.71
+        },
+        {
+          "time": 16.406,
+          "remap_value": 155.0,
+          "energy": 0.7
+        },
+        {
+          "time": 16.875,
+          "remap_value": 155.75,
+          "energy": 0.705
+        },
+        {
+          "time": 17.344,
+          "remap_value": 158.45,
+          "energy": 0.723
+        },
+        {
+          "time": 17.812,
+          "remap_value": 163.1,
+          "energy": 0.754
+        },
+        {
+          "time": 18.281,
+          "remap_value": 169.10000000000002,
+          "energy": 0.794
+        },
+        {
+          "time": 18.75,
+          "remap_value": 176.0,
+          "energy": 0.84
+        },
+        {
+          "time": 19.219,
+          "remap_value": 183.05,
+          "energy": 0.887
+        },
+        {
+          "time": 19.688,
+          "remap_value": 110.0,
+          "energy": 0.4
+        },
+        {
+          "time": 20.156,
+          "remap_value": 110.0,
+          "energy": 0.4
+        },
+        {
+          "time": 20.625,
+          "remap_value": 110.0,
+          "energy": 0.4
+        },
+        {
+          "time": 21.094,
+          "remap_value": 110.0,
+          "energy": 0.4
+        },
+        {
+          "time": 21.562,
+          "remap_value": 110.0,
+          "energy": 0.4
+        },
+        {
+          "time": 22.031,
+          "remap_value": 110.0,
+          "energy": 0.4
+        },
+        {
+          "time": 22.5,
+          "remap_value": 110.0,
+          "energy": 0.4
+        },
+        {
+          "time": 22.969,
+          "remap_value": 110.0,
+          "energy": 0.4
+        },
+        {
+          "time": 23.438,
+          "remap_value": 110.0,
+          "energy": 0.4
+        },
+        {
+          "time": 23.906,
+          "remap_value": 110.0,
+          "energy": 0.4
+        },
+        {
+          "time": 24.375,
+          "remap_value": 193.4,
+          "energy": 0.956
+        },
+        {
+          "time": 24.844,
+          "remap_value": 185.3,
+          "energy": 0.902
+        },
+        {
+          "time": 25.312,
+          "remap_value": 177.05,
+          "energy": 0.847
+        },
+        {
+          "time": 25.781,
+          "remap_value": 168.8,
+          "energy": 0.792
+        },
+        {
+          "time": 26.25,
+          "remap_value": 160.7,
+          "energy": 0.738
+        },
+        {
+          "time": 26.719,
+          "remap_value": 152.45,
+          "energy": 0.683
+        },
+        {
+          "time": 27.188,
+          "remap_value": 144.2,
+          "energy": 0.628
+        },
+        {
+          "time": 27.656,
+          "remap_value": 135.95,
+          "energy": 0.573
+        },
+        {
+          "time": 28.125,
+          "remap_value": 127.85000000000001,
+          "energy": 0.519
+        },
+        {
+          "time": 28.594,
+          "remap_value": 119.60000000000001,
+          "energy": 0.464
+        },
+        {
+          "time": 29.062,
+          "remap_value": 111.35,
+          "energy": 0.409
+        },
+        {
+          "time": 29.531,
+          "remap_value": 103.25,
+          "energy": 0.355
+        }
+      ]
+    }
+  ]
+}

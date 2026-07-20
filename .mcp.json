@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "AfterEffectsMCP": {
+      "command": "node",
+      "args": ["c:\\Users\\Administrator\\Desktop\\after-effects-mcp-main\\build\\index.js"],
+      "cwd": "c:\\Users\\Administrator\\Desktop\\after-effects-mcp-main"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault",
+        "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\data",
+        "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output",
+        "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\frames"
+      ]
+    }
+  }
+}

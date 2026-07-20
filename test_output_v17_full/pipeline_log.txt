@@ -1,0 +1,55 @@
+V17 全链路实战测试日志
+时间: 2026-07-19 22:26:21
+目标: D:\AE-Work\output\VinlandSaga_Battle_V17.mp4
+============================================================
+
+总计: 44 | 通过: 43 | 失败: 1 | 通过率: 97.7%
+
+=== 错误与警告 (1 项) ===
+  [FAIL] FFmpeg V17 转720p: rc=3752568763
+
+=== 详细结果 ===
+  [PASS] AE MCP Client 模块导入: 
+  [PASS] AECommandClient 实例化: 
+  [PASS] AE Bridge ping: {'status': 'success', 'result': {'pong': True, 'appName': None, 'appVersion': '2
+  [PASS] AfterEffectsMCP 配置存在: 
+  [PASS] V17 JSX 功能覆盖: 5/9: 表达式, 文字图层, 摄像机, 关键帧, 素材导入
+  [PASS] Bridge脚本: ae_mcp_bridge_v26.jsx: 
+  [PASS] Bridge脚本: ae_mcp_auto_listener.jsx: 
+  [PASS] Bridge脚本: ae_mcp_listener.jsx: 
+  [PASS] Whisper 模块可用: 
+  [PASS] Whisper V17 转写: status=simulated
+  [PASS] 模拟SRT字幕生成: 220 bytes
+  [PASS] AI字幕预设可用: 3 steps: ['extract_audio', 'whisper_transcribe', 'ae_import_subtitle']
+  [PASS] 文字动画表达式模板: 3 个模板
+  [PASS] DaVinci 模块导入: 
+  [PASS] DaVinci Resolve 安装检测: 已安装
+  [PASS] DaVinci 预设列表: 12 个: ['default', 'cinematic', 'warm_vintage', 'cool_teal', 'vivid_pop']
+  [PASS] DaVinci 调色执行: result=ResolveColorResult(success=True, input_path='D:\\AE-Work\\ou
+  [PASS] LUT 文件: 目录存在但无LUT文件
+  [PASS] OpenSourceHub 工具状态: 可用: ['rife', 'sam2', 'whisper', 'remotion', 'openmontage', 'moviepy']
+  [PASS] MoviePy 截取V17前3秒: status=error, 453ms
+  [PASS] MoviePy V17 变速1.5x: status=success
+  [PASS] MoviePy V17 缩放480p: status=success
+  [PASS] RIFE 帧插值可用: 可执行2x/4x/8x插帧
+  [PASS] RIFE 操作列表: 6 个: ['interpolate_2x', 'interpolate_4x', 'interpolate_8x', 'slow_motion']
+  [PASS] SAM2 视频分割可用: 可执行自动分割/目标追踪
+  [PASS] SAM2 操作列表: 6 个: ['segment_image', 'segment_video', 'auto_mask_generate', 'track_object']
+  [PASS] Remotion 可用: 可执行编程式视频生成
+  [PASS] Remotion 操作列表: 6 个: ['render_video', 'render_sequence', 'create_from_template', 'batch_render']
+  [FAIL] FFmpeg V17 转720p: rc=3752568763
+  [PASS] FFmpeg V17 转GIF: 743KB
+  [PASS] 统一调度器初始化: 
+  [PASS] 工具总数: 16 个 (可用: 10)
+  [PASS] 工作流预设总数: 9 个: ['enhance_quality', 'delivery_pipeline', '3d_composite', 'batch_process', 'ai_subtitle_pipeline', 'smart_roto_pipeline', 'open_production_pipeline', 'enhanced_upscale_pipeline', 'batch_social_media']
+  [PASS] 预设完整性: enhance_quality: 
+  [PASS] 预设完整性: delivery_pipeline: 
+  [PASS] 预设完整性: 3d_composite: 
+  [PASS] 预设完整性: batch_process: 
+  [PASS] 预设完整性: ai_subtitle_pipeline: 
+  [PASS] 预设完整性: smart_roto_pipeline: 
+  [PASS] 预设完整性: open_production_pipeline: 
+  [PASS] 预设完整性: enhanced_upscale_pipeline: 
+  [PASS] 预设完整性: batch_social_media: 
+  [PASS] OpenSourceHub 桥接: 
+  [PASS] 桥接层执行 MoviePy: keys=['files', 'data', 'status', 'log']

@@ -1,0 +1,25 @@
+schema: spec-driven
+
+context: |
+  Project: AE-Knowledge-Vault
+  Tech stack: Python 3.12, Node.js 22, TypeScript, After Effects (ExtendScript/JSX)
+  Domain: AI-driven video editing, After Effects automation, MCP integration
+  Architecture: Multi-module toolchain with FastAPI backend + Nginx reverse proxy
+  Key components:
+    - ae-mcp-server: After Effects MCP bridge (Node.js)
+    - ae-mcp-client: Python MCP client
+    - compiler: TypeScript/JSX compiler for AE scripts
+    - puppet-automation: Puppet effect automation
+    - style_copy: Style transfer for video editing
+    - 10-风格化剪辑知识库: Style editing knowledge base (207 files)
+    - 14-Silhouette知识库: Silhouette Roto knowledge base (88 files)
+  Conventions: Chinese documentation, English code, modular Python scripts
+  LLM providers: DuckMiss (Claude), GPT-5.x, DeepSeek, Doubao ARK
+
+rules:
+  proposal:
+    - Keep proposals focused on one subsystem at a time
+    - Include impact analysis on existing AE scripts and MCP integrations
+  tasks:
+    - Break tasks into chunks of max 2 hours
+    - Prioritize backward compatibility with existing AE projects

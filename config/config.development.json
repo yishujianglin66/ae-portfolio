@@ -1,0 +1,84 @@
+{
+  "version": "1.0.0",
+  "environment": "development",
+  "directories": {
+    "video_library": "D:/AE-Work/视频素材库",
+    "audio_library": "D:/AE-Work/音频素材库",
+    "image_library": "D:/AE-Work/图片素材库",
+    "bgm_library": "D:/AE-Work/音频素材库/BGM",
+    "sound_effects": "D:/AE-Work/音效素材库",
+    "download_temp": "D:/AE-Work/临时下载",
+    "output": "D:/AE-Work/成品库",
+    "logs": "D:/AE-Work/日志与报告",
+    "cookies": "D:/AE-Work/cookies",
+    "vector_index": "D:/AE-Work/向量索引",
+    "temp_frames": "D:/AE-Work/临时帧",
+    "ae_projects": "D:/AE-Work/项目库"
+  },
+  "tools": {
+    "yt_dlp": "yt-dlp",
+    "ffmpeg": "C:/ffmpeg/bin/ffmpeg.exe",
+    "ffprobe": "C:/ffmpeg/bin/ffprobe.exe",
+    "python": "python"
+  },
+  "download": {
+    "max_concurrent": 3,
+    "timeout": 300,
+    "retries": 3,
+    "audio_only_formats": ["m4a", "mp3", "wav"],
+    "video_formats": ["mp4", "mov", "webm"]
+  },
+  "audio": {
+    "default_sample_rate": 44100,
+    "default_bitrate": "192k",
+    "analysis": {
+      "tempo_window": 10,
+      "beat_threshold": 0.5
+    }
+  },
+  "mcp_bridge": {
+    "command_dir": "~/Documents/ae-mcp-bridge",
+    "command_file": "command.json",
+    "result_file": "result.json",
+    "log_file": "bridge.log",
+    "poll_interval_ms": 1000,
+    "command_timeout": 30,
+    "signature_enabled": true,
+    "signature_algorithm": "HMAC-SHA256"
+  },
+  "platforms": {
+    "douyin": {
+      "enabled": true,
+      "cookie_env_key": "DOUYIN_COOKIE",
+      "cookie_path_env_key": "DOUYIN_COOKIE_PATH",
+      "download_mode": "watermark_free"
+    },
+    "bilibili": {
+      "enabled": true,
+      "prefer_high_quality": true,
+      "cookie_env_key": "BILIBILI_COOKIE"
+    },
+    "youtube": {
+      "enabled": true,
+      "language": "zh-CN"
+    },
+    "tiktok": {
+      "enabled": true
+    },
+    "kuaishou": {
+      "enabled": false
+    }
+  },
+  "security": {
+    "command_signature": {
+      "enabled": true,
+      "secret_env_key": "MCP_BRIDGE_SECRET",
+      "timestamp_tolerance": 300
+    }
+  },
+  "auto_import": {
+    "enabled": true,
+    "target_composition": "Main Comp",
+    "after_import_action": "center_and_fit"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "description": "错误测试: 缺少compRef, 引用不存在, 参数无效"
+  },
+  "operations": [
+    {
+      "op": "createComp",
+      "ref": "comp1",
+      "name": "测试"
+    },
+    {
+      "op": "addLayer",
+      "ref": "layer1",
+      "compRef": "不存在的ref",
+      "layerType": "text",
+      "text": "Hello"
+    },
+    {
+      "op": "addLayer",
+      "ref": "layer2",
+      "compRef": "comp1",
+      "layerType": "invalid_type"
+    },
+    {
+      "op": "createComp",
+      "ref": "comp1",
+      "name": "重复ref"
+    },
+    {
+      "op": "setKeyframe",
+      "layerRef": "layer1",
+      "propertyPath": "Position",
+      "keyframes": []
+    },
+    {
+      "op": "setBlendMode",
+      "layerRef": "layer1",
+      "blendMode": "invalid_mode"
+    }
+  ]
+}

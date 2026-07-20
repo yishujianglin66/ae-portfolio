@@ -1,0 +1,118 @@
+V17 自动化生产流水线日志
+时间: 2026-07-19 22:57:58
+目标: D:\AE-Work\output\VinlandSaga_Battle_V17.mp4
+============================================================
+
+  [22:55:03][INFO] 系统内存: 15.7GB 总量, 7.5GB 可用, 负载52%
+  [22:55:03][INFO] V17 素材: 44.5MB
+  [22:55:07][INFO] 开源工具: 6/7 可用
+  [22:55:13][INFO] 统一调度器: 10/16 工具可用
+  [22:55:23][INFO] AE Bridge: 连通
+  [22:55:28][INFO] DaVinci Resolve: 已安装
+  [22:55:28][INFO] 环境检查完成, 工具状态: {'rife': 'OK', 'sam2': 'OK', 'video2x': 'N/A', 'whisper': 'OK', 'remotion': 'OK', 'openmontage': 'OK', 'moviepy': 'OK', 'unified_integrator': '10/16', 'ae_bridge': 'OK', 'davinci': 'OK'}
+  [22:55:28][INFO] 内存充足: 可用=7.2GB/15.7GB (46%空闲)
+  [22:55:28][INFO] >>> 自动启动 After Effects...
+  [22:55:28][INFO] 正在启动 After Effects (C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\AfterFX.exe)...
+  [22:55:28][INFO] After Effects 进程已启动，等待就绪(最多90s)...
+  [22:55:37][INFO] After Effects 已就绪 (耗时9s, 内存可用=7.1GB)
+  [22:55:37][INFO] 等待 AE Bridge 连通...
+  [22:55:47][INFO] AE Bridge 已连通 (第1次尝试)
+  [22:55:47][INFO] 获取 AE 项目信息...
+  [22:55:57][INFO] 项目信息: {'success': False, 'status': 'timeout', 'error': 'Timeout after 10s'}
+  [22:55:57][INFO] 通过 JSX 脚本创建 V17 测试合成...
+  [22:55:59][INFO] 合成创建: {'status': 'success', 'result': {}, 'timestamp': '2026-07-19T22:55:58'}
+  [22:55:59][INFO] 通过 JSX 脚本导入 V17 素材...
+  [22:56:00][INFO] 素材导入: {'status': 'success', 'result': {}, 'timestamp': '2026-07-19T22:55:59'}
+  [22:56:00][INFO] 通过 JSX 脚本应用 Lumetri Color...
+  [22:56:01][INFO] 效果应用: {'status': 'success', 'result': {}, 'timestamp': '2026-07-19T22:56:00'}
+  [22:56:01][INFO] >>> AE 任务完成，关闭 After Effects 释放内存...
+  [22:56:01][INFO] 正在关闭 After Effects...
+  [22:56:04][INFO] After Effects 已关闭 (内存可用=7.1GB)
+  [22:56:04][INFO] 内存充足: 可用=7.1GB/15.7GB (46%空闲)
+  [22:56:04][INFO] Phase 2 完成
+  [22:56:04][INFO] 内存充足: 可用=7.1GB/15.7GB (46%空闲)
+  [22:56:04][INFO] SRT 字幕生成: 310 bytes
+  [22:56:04][INFO] 通过 JSX 导入字幕文件...
+  [22:56:14][INFO] 字幕导入: {'success': False, 'status': 'timeout', 'error': 'Timeout after 10s'}
+  [22:56:14][INFO] 文字动画表达式: 4 个模板已保存
+  [22:56:14][INFO] 内存充足: 可用=7.3GB/15.7GB (47%空闲)
+  [22:56:14][INFO] Phase 3 完成
+  [22:56:14][INFO] 内存充足: 可用=7.3GB/15.7GB (47%空闲)
+  [22:56:14][INFO] 设置 RESOLVE_SCRIPT_LIB=D:\DaVinci Resolve\fusionscript.dll
+  [22:56:14][INFO] >>> 自动启动 DaVinci Resolve...
+  [22:56:14][INFO] 正在启动 DaVinci Resolve (D:\DaVinci Resolve\Resolve.exe)...
+  [22:56:14][INFO] DaVinci Resolve 进程已启动，等待就绪(最多90s)...
+  [22:56:24][INFO] DaVinci Resolve 已就绪 (耗时9s, 内存可用=5.7GB)
+  [22:56:24][INFO] 等待 DaVinci Resolve API 就绪...
+  [22:56:29][INFO] API 加载尝试 1/8: initialization of fusionscript failed without raising an exc
+  [22:56:34][INFO] API 加载尝试 2/8: initialization of fusionscript failed without raising an exc
+  [22:56:39][INFO] API 加载尝试 3/8: initialization of fusionscript failed without raising an exc
+  [22:56:44][INFO] API 加载尝试 4/8: initialization of fusionscript failed without raising an exc
+  [22:56:49][INFO] API 加载尝试 5/8: initialization of fusionscript failed without raising an exc
+  [22:56:55][INFO] API 加载尝试 6/8: initialization of fusionscript failed without raising an exc
+  [22:57:00][INFO] API 加载尝试 7/8: initialization of fusionscript failed without raising an exc
+  [22:57:05][INFO] API 加载尝试 8/8: initialization of fusionscript failed without raising an exc
+  [22:57:05][WARN] DaVinci API 未就绪，调色将使用模拟模式
+  [22:57:05][WARN] DaVinci API 不可用, 使用模拟调色
+  [22:57:07][INFO] 调色结果: success=True, mode=simulate
+  [22:57:07][INFO] 输出路径: c:\Users\Administrator\Desktop\AE-Knowledge-Vault\output_production\v17_davinci_graded.mp4
+  [22:57:07][INFO] >>> DaVinci 任务完成，关闭 Resolve 释放内存...
+  [22:57:08][INFO] 正在关闭 DaVinci Resolve...
+  [22:57:11][INFO] DaVinci Resolve 已关闭 (内存可用=7.0GB)
+  [22:57:11][INFO] 内存充足: 可用=7.0GB/15.7GB (45%空闲)
+  [22:57:11][INFO] Phase 4 完成
+  [22:57:11][INFO] 内存充足: 可用=7.0GB/15.7GB (45%空闲)
+  [22:57:11][INFO] MoviePy: 加载 V17 视频...
+  [22:57:11][INFO] MoviePy: V17 加载成功 23.2s [1080, 1920]
+  [22:57:11][INFO] MoviePy: 截取精华片段(0-8s)...
+  [22:57:14][INFO] MoviePy: 精华片段 2788KB
+  [22:57:15][INFO] MoviePy: 生成2倍速版本...
+  [22:57:21][INFO] MoviePy: 2倍速 5276KB
+  [22:57:21][INFO] MoviePy: 生成720p版本...
+  [22:57:39][INFO] MoviePy: 720p 1956KB (405x720)
+  [22:57:39][INFO] MoviePy: 提取关键帧...
+  [22:57:40][INFO] MoviePy: 5 个关键帧已提取
+  [22:57:40][INFO] 内存充足: 可用=7.0GB/15.7GB (45%空闲)
+  [22:57:40][INFO] OpenCV: 场景切换检测...
+  [22:57:54][INFO] OpenCV: 检测到 121 个场景切换点
+  [22:57:54][INFO] 内存充足: 可用=7.1GB/15.7GB (45%空闲)
+  [22:57:56][INFO]   rife: READY
+  [22:57:56][INFO]   sam2: READY
+  [22:57:56][INFO]   video2x: N/A
+  [22:57:56][INFO]   whisper: READY
+  [22:57:56][INFO]   remotion: READY
+  [22:57:56][INFO]   openmontage: READY
+  [22:57:56][INFO]   moviepy: READY
+  [22:57:56][INFO] 内存充足: 可用=7.1GB/15.7GB (45%空闲)
+  [22:57:56][INFO] Phase 5 完成
+  [22:57:56][INFO] 内存充足: 可用=7.1GB/15.7GB (46%空闲)
+  [22:57:56][INFO] FFmpeg: 生成 GIF 预览...
+  [22:57:57][INFO] GIF 预览: 743KB
+  [22:57:57][INFO] FFmpeg: 生成缩略图序列...
+  [22:57:58][INFO] 缩略图: 23 张
+  [22:57:58][INFO] 内存充足: 可用=7.1GB/15.7GB (46%空闲)
+  [22:57:58][INFO] Phase 6 完成
+  [22:57:58][INFO] ========================================
+  [22:57:58][INFO] 清理: 关闭所有启动的软件...
+  [22:57:58][INFO] After Effects 未在运行
+  [22:57:58][INFO] DaVinci Resolve 未在运行
+  [22:57:58][INFO] 最终内存: 可用=7.1GB, 负载=54%
+  [22:57:58][INFO] 输出文件: 14 个
+  [22:57:58][INFO] 报告已保存: c:\Users\Administrator\Desktop\AE-Knowledge-Vault\output_production\production_report.json
+
+============================================================
+输出文件: 14 个
+  production_log.txt (6.9KB)
+  production_report.json (7.8KB)
+  text_animations.json (0.3KB)
+  v17_2x_speed.mp4 (5276.4KB)
+  v17_720p.mp4 (1955.8KB)
+  v17_davinci_graded.mp4 (43267.2KB)
+  v17_final_preview.gif (742.9KB)
+  v17_highlight.mp4 (2787.7KB)
+  v17_keyframe_00.png (583.1KB)
+  v17_keyframe_01.png (175.4KB)
+  v17_keyframe_02.png (622.9KB)
+  v17_keyframe_03.png (382.7KB)
+  v17_keyframe_04.png (1087.3KB)
+  v17_production.srt (0.3KB)

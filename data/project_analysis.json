@@ -1,0 +1,669 @@
+{
+  "top_modules": {
+    ".mypy_cache": {
+      "direct_files": 2,
+      "by_ext": {
+        "gitignore": 1,
+        "tag": 1
+      }
+    },
+    "00-每日记录": {
+      "direct_files": 0,
+      "by_ext": {}
+    },
+    "01-项目概览": {
+      "direct_files": 4,
+      "by_ext": {
+        "md": 4
+      }
+    },
+    "02-开发文档": {
+      "direct_files": 7,
+      "by_ext": {
+        "md": 7
+      }
+    },
+    "03-阶段报告": {
+      "direct_files": 1,
+      "by_ext": {
+        "md": 1
+      }
+    },
+    "04-设计模式与反模式": {
+      "direct_files": 4,
+      "by_ext": {
+        "md": 4
+      }
+    },
+    "05-测试套件": {
+      "direct_files": 39,
+      "by_ext": {
+        "jsx": 17,
+        "js": 11,
+        "md": 10,
+        "py": 1
+      }
+    },
+    "06-AI辅助开发": {
+      "direct_files": 4,
+      "by_ext": {
+        "md": 4
+      }
+    },
+    "07-MCP参考指南": {
+      "direct_files": 8,
+      "by_ext": {
+        "md": 8
+      }
+    },
+    "08-安装与部署": {
+      "direct_files": 3,
+      "by_ext": {
+        "md": 3
+      }
+    },
+    "09-计划文件": {
+      "direct_files": 2,
+      "by_ext": {
+        "md": 2
+      }
+    },
+    "10-风格化剪辑知识库": {
+      "direct_files": 207,
+      "by_ext": {
+        "md": 207
+      }
+    },
+    "11-大师知识库": {
+      "direct_files": 6,
+      "by_ext": {
+        "md": 6
+      }
+    },
+    "12-漫剪拉镜大师": {
+      "direct_files": 9,
+      "by_ext": {
+        "md": 9
+      }
+    },
+    "13-素材获取与搜索": {
+      "direct_files": 1,
+      "by_ext": {
+        "md": 1
+      }
+    },
+    "14-Silhouette知识库": {
+      "direct_files": 88,
+      "by_ext": {
+        "md": 88
+      }
+    },
+    "98-附件": {
+      "direct_files": 0,
+      "by_ext": {}
+    },
+    "99-收件箱": {
+      "direct_files": 3,
+      "by_ext": {
+        "md": 2,
+        "base": 1
+      }
+    },
+    "99-模板": {
+      "direct_files": 1,
+      "by_ext": {
+        "md": 1
+      }
+    },
+    "ae-dashboard": {
+      "direct_files": 20,
+      "by_ext": {
+        "png": 13,
+        "json": 3,
+        "js": 2,
+        "html": 1,
+        "ts": 1
+      }
+    },
+    "ae-mcp-server": {
+      "direct_files": 4,
+      "by_ext": {
+        "json": 3,
+        "md": 1
+      }
+    },
+    "AE-Scripts": {
+      "direct_files": 1,
+      "by_ext": {
+        "md": 1
+      }
+    },
+    "aep_analyzer": {
+      "direct_files": 5,
+      "by_ext": {
+        "py": 5
+      }
+    },
+    "archive": {
+      "direct_files": 0,
+      "by_ext": {}
+    },
+    "compiler": {
+      "direct_files": 8,
+      "by_ext": {
+        "ts": 6,
+        "json": 2
+      }
+    },
+    "config": {
+      "direct_files": 12,
+      "by_ext": {
+        "json": 6,
+        "py": 5,
+        "jsx": 1
+      }
+    },
+    "core": {
+      "direct_files": 7,
+      "by_ext": {
+        "py": 7
+      }
+    },
+    "data": {
+      "direct_files": 3,
+      "by_ext": {
+        "db": 1,
+        "db-shm": 1,
+        "db-wal": 1
+      }
+    },
+    "docs": {
+      "direct_files": 2,
+      "by_ext": {
+        "md": 2
+      }
+    },
+    "integrator_web": {
+      "direct_files": 3,
+      "by_ext": {
+        "js": 1,
+        "html": 1,
+        "css": 1
+      }
+    },
+    "knowledge_base": {
+      "direct_files": 8,
+      "by_ext": {
+        "py": 8
+      }
+    },
+    "mcp-extension": {
+      "direct_files": 4,
+      "by_ext": {
+        "ts": 3,
+        "ps1": 1
+      }
+    },
+    "nginx": {
+      "direct_files": 1,
+      "by_ext": {
+        "conf": 1
+      }
+    },
+    "OpenSpace": {
+      "direct_files": 8,
+      "by_ext": {
+        "md": 3,
+        "gitignore": 1,
+        "": 1,
+        "in": 1,
+        "toml": 1
+      }
+    },
+    "openspec": {
+      "direct_files": 1,
+      "by_ext": {
+        "yaml": 1
+      }
+    },
+    "output": {
+      "direct_files": 21,
+      "by_ext": {
+        "json": 11,
+        "md": 6,
+        "jsx": 2,
+        "mp3": 1,
+        "mp4": 1
+      }
+    },
+    "performance": {
+      "direct_files": 5,
+      "by_ext": {
+        "py": 3,
+        "md": 2
+      }
+    },
+    "phase7-media-tools": {
+      "direct_files": 11,
+      "by_ext": {
+        "js": 6,
+        "md": 3,
+        "json": 1,
+        "ts": 1
+      }
+    },
+    "puppet-automation": {
+      "direct_files": 12,
+      "by_ext": {
+        "py": 7,
+        "env": 1,
+        "example": 1,
+        "log": 1,
+        "md": 1
+      }
+    },
+    "puppet_effects": {
+      "direct_files": 6,
+      "by_ext": {
+        "py": 6
+      }
+    },
+    "reports": {
+      "direct_files": 3,
+      "by_ext": {
+        "md": 3
+      }
+    },
+    "resources": {
+      "direct_files": 0,
+      "by_ext": {}
+    },
+    "scripts": {
+      "direct_files": 70,
+      "by_ext": {
+        "ps1": 23,
+        "jsx": 23,
+        "py": 22,
+        "json": 2
+      }
+    },
+    "software_sdk": {
+      "direct_files": 4,
+      "by_ext": {
+        "py": 4
+      }
+    },
+    "style_copy": {
+      "direct_files": 6,
+      "by_ext": {
+        "py": 6
+      }
+    },
+    "temp_user_data": {
+      "direct_files": 1,
+      "by_ext": {
+        "json": 1
+      }
+    },
+    "templates": {
+      "direct_files": 4,
+      "by_ext": {
+        "jsx": 3,
+        "json": 1
+      }
+    },
+    "test-projects": {
+      "direct_files": 0,
+      "by_ext": {}
+    },
+    "test_reports": {
+      "direct_files": 4,
+      "by_ext": {
+        "json": 4
+      }
+    },
+    "tests": {
+      "direct_files": 87,
+      "by_ext": {
+        "py": 82,
+        "js": 3,
+        "jsx": 2
+      }
+    },
+    "tmp": {
+      "direct_files": 0,
+      "by_ext": {}
+    }
+  },
+  "root_py_files": 242,
+  "root_jsx_files": 13,
+  "root_py_list": [
+    "adobe_suite_integration.py",
+    "ae_agent_pipeline.py",
+    "ae_bridge_base.py",
+    "ae_command_generator.py",
+    "ae_composition_presets.py",
+    "ae_extension_integrator.py",
+    "ae_mcp_client.py",
+    "ae_process_manager.py",
+    "ae_smart_orchestrator.py",
+    "ae_ts_compiler_client.py",
+    "ai_agent.py",
+    "ai_chat_api.py",
+    "ai_scheduler.py",
+    "ai_video_generator.py",
+    "analyze_all_images.py",
+    "analyze_clip.py",
+    "analyze_v13_inputs.py",
+    "api_server.py",
+    "apply_puppet_full.py",
+    "apply_puppet_style.py",
+    "asset_manager.py",
+    "audio-analyzer.py",
+    "audio_analyzer_enhanced.py",
+    "audio_analyzer_librosa.py",
+    "audio_driven_effects.py",
+    "auth_system.py",
+    "batch_queue.py",
+    "beat_keyframe_mapper.py",
+    "beat_orchestrator.py",
+    "beat_sync_generator.py",
+    "blender_3d_integration.py",
+    "check_ae_result.py",
+    "check_codec.py",
+    "check_sources.py",
+    "clarification_engine.py",
+    "color_grading_applier.py",
+    "config_schema.py",
+    "database.py",
+    "davinci_resolve_integration.py",
+    "debug_paths.py",
+    "deepseek_v4_client.py",
+    "deploy_e2e_tool.py",
+    "deploy_mcp.py",
+    "diag_ae_project.py",
+    "distributed_scheduler.py",
+    "doubao_client.py",
+    "douyin-downloader.py",
+    "douyin_login_auto.py",
+    "douyin_login_complete.py",
+    "douyin_login_helper.py",
+    "download_bilibili_materials.py",
+    "download_references_v4.py",
+    "download_zhuangzhuang.py",
+    "effect_composer.py",
+    "effect_composition_engine.py",
+    "effect_description_parser.py",
+    "effect_generators.py",
+    "effect_knowledge_graph.py",
+    "effect_name_map.py",
+    "effect_registry.py",
+    "effect_reproducer.py",
+    "exceptions.py",
+    "expression_library.py",
+    "extract_clips.py",
+    "extract_clips_cv2.py",
+    "extract_refs.py",
+    "failure_recovery.py",
+    "feedback_loop_manager.py",
+    "feedback_manager.py",
+    "ffmpeg-toolkit.py",
+    "filter_engine.py",
+    "generate_puppet_video.py",
+    "generate_test_media.py",
+    "generate_v17_plan.py",
+    "hybrid_coordinator.py",
+    "image_analyzer.py",
+    "image_handler.py",
+    "integrator_api.py",
+    "intent_router.py",
+    "intent_to_report.py",
+    "kb_qa.py",
+    "keyframe_animation_generator.py",
+    "knowledge_searcher.py",
+    "layer_orchestrator.py",
+    "learning_loop.py",
+    "logger.py",
+    "mcp_bridge_client.py",
+    "media-fetcher.py",
+    "media-manager.py",
+    "media-search.py",
+    "media_metadata_db.py",
+    "media_preprocessor.py",
+    "mediapipe_integration.py",
+    "model_router.py",
+    "monitoring.py",
+    "multi_software_bridge.py",
+    "nlu_parser.py",
+    "parameter_mapper.py",
+    "parameter_optimizer.py",
+    "persistent_learning_loop.py",
+    "phase2_real_audio_integration.py",
+    "ping_bridge.py",
+    "plugin_system.py",
+    "puppet_auto_processor.py",
+    "puppet_style_engine.py",
+    "puppet_workflow_orchestrator.py",
+    "render_phase2.py",
+    "render_v4.py",
+    "report_to_ops.py",
+    "resource_manager.py",
+    "result_verifier.py",
+    "run_audio_analysis.py",
+    "run_puppet_in_ae.py",
+    "run_rebuild.py",
+    "run_vinland_project_v8.py",
+    "saitama_reproduce.py",
+    "scene_3d_orchestrator.py",
+    "scene_detector.py",
+    "scene_orchestrator.py",
+    "send_v15_final.py",
+    "send_v15_to_ae.py",
+    "send_v16_improved.py",
+    "send_v17_pro.py",
+    "silhouette_executor.py",
+    "silhouette_fx_emulator.py",
+    "silhouette_fx_verify.py",
+    "silhouette_roto_e2e.py",
+    "silhouette_roto_test.py",
+    "silhouette_test_simple.py",
+    "silhouette_to_ae_demo.py",
+    "simple_test.py",
+    "style_template_library.py",
+    "system_memory.py",
+    "task_persistence.py",
+    "tasks_to_csv.py",
+    "test-media-system.py",
+    "test_action.py",
+    "test_ae_paths.py",
+    "test_api_integration.py",
+    "test_batch_keyframes.py",
+    "test_cam_props.py",
+    "test_canimport.py",
+    "test_cookie_read.py",
+    "test_deepseek_v4_api.py",
+    "test_direct_download.py",
+    "test_dof_params.py",
+    "test_dof_params2.py",
+    "test_douyin_api.py",
+    "test_douyin_api2.py",
+    "test_douyin_browser.py",
+    "test_douyin_download.py",
+    "test_douyin_mobile.py",
+    "test_douyin_network.py",
+    "test_douyin_playwright.py",
+    "test_download_flow.py",
+    "test_e2e_integration.py",
+    "test_e2e_pipeline.py",
+    "test_e2e_pipeline_flow.py",
+    "test_e2e_puppet_workflow.py",
+    "test_e2e_silhouette_pipeline.py",
+    "test_edge_cases.py",
+    "test_edge_login.py",
+    "test_execute_return.py",
+    "test_full_style.py",
+    "test_h264_import.py",
+    "test_import_methods.py",
+    "test_import_options.py",
+    "test_import_single.py",
+    "test_inc_full.py",
+    "test_inc_layers.py",
+    "test_integration_all.py",
+    "test_llm_memory_integration.py",
+    "test_mcp_bridge.py",
+    "test_pipeline_integration.py",
+    "test_puppet_auto_e2e.py",
+    "test_puppet_style.py",
+    "test_puppet_style2.py",
+    "test_pw_direct.py",
+    "test_real_mode.py",
+    "test_redirect.py",
+    "test_render_vinland.py",
+    "test_roto_action.py",
+    "test_roto_e2e_final.py",
+    "test_roto_pipeline.py",
+    "test_run.py",
+    "test_silhouette_integration.py",
+    "test_silhouette_v2.py",
+    "test_simple_safe.py",
+    "test_toolchain_integration.py",
+    "test_unified_integrator.py",
+    "test_v4_nlu_comparison.py",
+    "test_video_generator.py",
+    "test_zhuangzhuang.py",
+    "text_animation_engine.py",
+    "text_animator.py",
+    "third_party_detection.py",
+    "tool_executor.py",
+    "toolchain_api.py",
+    "toolchain_manager.py",
+    "topaz_integration.py",
+    "training_logger.py",
+    "training_state_manager.py",
+    "transcode_for_ae.py",
+    "transition_engine.py",
+    "transition_map.py",
+    "transition_rebuilder.py",
+    "unified_asset_manager.py",
+    "unified_tool_integrator.py",
+    "update_bridge_2026.py",
+    "v4_advisor.py",
+    "v4_experience_review.py",
+    "v4_orchestrator.py",
+    "v4_phase2_review.py",
+    "v4_remote_orchestrator.py",
+    "v4_script_fix.py",
+    "v4_video_script.py",
+    "validate_v13_jsx.py",
+    "vector_index_faiss.py",
+    "verify_energy.py",
+    "verify_phase2_run.py",
+    "version_compare.py",
+    "video-effect-analyzer.py",
+    "video_analyzer_enhanced.py",
+    "video_effect_analyzer_v2.py",
+    "video_generator.py",
+    "video_quality_assessor.py",
+    "video_reproduce_pipeline.py",
+    "video_reverse_engine.py",
+    "vinland_saga_v12_davinci.py",
+    "vinland_saga_v12_davinci_standalone.py",
+    "vision_client.py",
+    "visual_analysis.py",
+    "vocabulary_map.py",
+    "vrs_audio_sync_analyzer.py",
+    "vrs_compiler_bridge.py",
+    "vrs_iteration_optimizer.py",
+    "vrs_knowledge_rag.py",
+    "vrs_orchestrator.py",
+    "vrs_structure_inferrer.py",
+    "workflow_batch_integration.py",
+    "workflow_dsl.py",
+    "write_energy_chunks.py"
+  ],
+  "knowledge_bases": {
+    "00-每日记录": 0,
+    "01-项目概览": 4,
+    "02-开发文档": 7,
+    "03-阶段报告": 1,
+    "04-设计模式与反模式": 4,
+    "05-测试套件": 10,
+    "06-AI辅助开发": 4,
+    "07-MCP参考指南": 8,
+    "08-安装与部署": 3,
+    "09-计划文件": 2,
+    "10-风格化剪辑知识库": 207,
+    "11-大师知识库": 6,
+    "12-漫剪拉镜大师": 9,
+    "13-素材获取与搜索": 1,
+    "14-Silhouette知识库": 88,
+    "98-附件": 0,
+    "99-收件箱": 2,
+    "99-模板": 1
+  },
+  "core_packages": {
+    "software_sdk": {
+      "direct_py": 4,
+      "sub_py": 6,
+      "total_py": 10
+    },
+    "aep_analyzer": {
+      "direct_py": 5,
+      "sub_py": 0,
+      "total_py": 5
+    },
+    "core": {
+      "direct_py": 7,
+      "sub_py": 0,
+      "total_py": 7
+    },
+    "config": {
+      "direct_py": 5,
+      "sub_py": 0,
+      "total_py": 5
+    },
+    "compiler": {
+      "direct_py": 0,
+      "sub_py": 1,
+      "total_py": 1
+    },
+    "mcp-extension": {
+      "direct_py": 0,
+      "sub_py": 3,
+      "total_py": 3
+    },
+    "phase7-media-tools": {
+      "direct_py": 0,
+      "sub_py": 0,
+      "total_py": 0
+    },
+    "scripts": {
+      "direct_py": 22,
+      "sub_py": 0,
+      "total_py": 22
+    },
+    "tests": {
+      "direct_py": 82,
+      "sub_py": 0,
+      "total_py": 82
+    }
+  },
+  "integrations": {
+    "after_effects": {
+      "status": "active",
+      "mcp": "AfterEffectsMCP"
+    },
+    "blender": {
+      "status": "connected",
+      "path": "D:\\Blender\\Blender 5.1.0\\blender.exe"
+    },
+    "silhouette": {
+      "status": "connected",
+      "path": "C:\\Program Files\\BorisFX\\Silhouette 2026.0\\Silhouette.exe"
+    },
+    "davinci_resolve": {
+      "status": "connected",
+      "path": "D:\\DaVinci Resolve\\Resolve.exe"
+    }
+  }
+}

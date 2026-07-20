@@ -1,0 +1,398 @@
+{
+  "scenes": [
+    {
+      "name": "Intro",
+      "start": 0.0,
+      "end": 4.0,
+      "texts": [
+        {
+          "text": "VINLAND SAGA",
+          "scene": "intro_hero",
+          "y": 153.6,
+          "size": 88,
+          "anim": "bounce_in",
+          "start": 0.3,
+          "end": 3.8
+        },
+        {
+          "text": "冰 海 战 记",
+          "scene": "intro_hero",
+          "y": 345.59999999999997,
+          "size": 56,
+          "anim": "tracking_fade",
+          "start": 1.0,
+          "end": 3.8
+        },
+        {
+          "text": "—— 战士的史诗 ——",
+          "scene": "intro_credit",
+          "y": 460.79999999999995,
+          "size": 30,
+          "anim": "tracking_fade",
+          "start": 2.0,
+          "end": 3.6
+        }
+      ]
+    },
+    {
+      "name": "Build",
+      "start": 4.0,
+      "end": 9.0,
+      "texts": [
+        {
+          "text": "当战争的火焰再次燃起",
+          "scene": "build_action",
+          "y": 1632.0,
+          "size": 36,
+          "anim": "tracking_fade",
+          "start": 5.0,
+          "end": 7.5
+        },
+        {
+          "text": "THE SAGA CONTINUES",
+          "scene": "build_action",
+          "y": 1689.6,
+          "size": 26,
+          "anim": "tracking_fade",
+          "start": 7.5,
+          "end": 9.0
+        }
+      ]
+    },
+    {
+      "name": "Drop",
+      "start": 9.0,
+      "end": 15.0,
+      "texts": [
+        {
+          "text": "BATTLE",
+          "scene": "drop_battle_en",
+          "y": 1536.0,
+          "size": 110,
+          "anim": "kinetic_smash",
+          "start": 9.0,
+          "end": 10.8
+        },
+        {
+          "text": "VS",
+          "scene": "drop_battle_en",
+          "y": 960.0,
+          "size": 140,
+          "anim": "kinetic_smash",
+          "start": 11.5,
+          "end": 12.5
+        },
+        {
+          "text": "REDEMPTION",
+          "scene": "drop_battle_en",
+          "y": 384.0,
+          "size": 80,
+          "anim": "bounce_in",
+          "start": 13.0,
+          "end": 14.8
+        },
+        {
+          "text": "战",
+          "scene": "drop_battle_cn",
+          "y": 1248.0,
+          "size": 130,
+          "anim": "kinetic_smash",
+          "start": 9.3,
+          "end": 9.7
+        },
+        {
+          "text": "斗",
+          "scene": "drop_battle_cn",
+          "y": 1248.0,
+          "size": 130,
+          "anim": "kinetic_smash",
+          "start": 10.4,
+          "end": 10.8
+        },
+        {
+          "text": "提尔芬",
+          "scene": "drop_battle_cn",
+          "y": 1248.0,
+          "size": 80,
+          "anim": "bounce_in",
+          "start": 11.2,
+          "end": 12.0
+        },
+        {
+          "text": "蛇",
+          "scene": "drop_battle_cn",
+          "y": 1248.0,
+          "size": 130,
+          "anim": "kinetic_smash",
+          "start": 13.5,
+          "end": 13.9
+        }
+      ]
+    },
+    {
+      "name": "Break",
+      "start": 15.0,
+      "end": 19.0,
+      "texts": [
+        {
+          "text": "战争之后……",
+          "scene": "break_memory",
+          "y": 960.0,
+          "size": 40,
+          "anim": "tracking_fade",
+          "start": 15.5,
+          "end": 17.5
+        },
+        {
+          "text": "REDEMPTION",
+          "scene": "break_quote",
+          "y": 1075.2,
+          "size": 30,
+          "anim": "tracking_fade",
+          "start": 17.0,
+          "end": 18.8
+        }
+      ]
+    },
+    {
+      "name": "Outro",
+      "start": 19.0,
+      "end": 23.15,
+      "texts": [
+        {
+          "text": "VINLAND SAGA",
+          "scene": "outro_hero",
+          "y": 729.6,
+          "size": 80,
+          "anim": "bounce_in",
+          "start": 19.5,
+          "end": 22.5
+        },
+        {
+          "text": "冰 海 战 记",
+          "scene": "outro_hero",
+          "y": 883.2,
+          "size": 50,
+          "anim": "tracking_fade",
+          "start": 20.0,
+          "end": 22.5
+        },
+        {
+          "text": "— FIN —",
+          "scene": "outro_credit",
+          "y": 1056.0,
+          "size": 36,
+          "anim": "tracking_fade",
+          "start": 21.5,
+          "end": 23.0
+        },
+        {
+          "text": "Director: Vinland Saga Team",
+          "scene": "outro_credit",
+          "y": 1766.4,
+          "size": 18,
+          "anim": "tracking_fade",
+          "start": 22.3,
+          "end": 23.1
+        }
+      ]
+    }
+  ],
+  "used_fonts": [
+    {
+      "key": "hero_cn_brutal",
+      "name": "方正兰亭粗黑简",
+      "postscript": "FZLanTingHeiS-ExtraBold",
+      "tag": "中文暴力粗黑",
+      "sample_text": "VINLAND SAGA"
+    },
+    {
+      "key": "credit_cn_puhui",
+      "name": "阿里巴巴普惠体 Light",
+      "postscript": "AlibabaPuHuiTi-3-45-Light",
+      "tag": "轻盈现代",
+      "sample_text": "Director: X"
+    },
+    {
+      "key": "sub_cn_impact",
+      "name": "方正正中黑简体",
+      "postscript": "FZJingHeiS-R-GB",
+      "tag": "方正粗黑",
+      "sample_text": "战"
+    },
+    {
+      "key": "sub_en_impact",
+      "name": "Impact",
+      "postscript": "Impact",
+      "tag": "经典冲击",
+      "sample_text": "VS"
+    },
+    {
+      "key": "serif_cn_classic",
+      "name": "思源宋体SC",
+      "postscript": "NotoSerifSC-VF",
+      "tag": "开源宋体",
+      "sample_text": "战士的史诗"
+    },
+    {
+      "key": "serif_en_playfair",
+      "name": "Playfair Display",
+      "postscript": "PlayfairDisplay-Bold",
+      "tag": "优雅衬线",
+      "sample_text": "REDEMPTION"
+    }
+  ],
+  "styling_guide": {
+    "scene_to_font": "主视觉→暴力粗黑(方正兰亭)；卡点战吼→极粗冲击(Impact/Bebas)；诗意留白→衬线(思源宋体/Playfair)；科技数据→DIN/Consolas",
+    "font_pairing": "中文暴力粗黑+英文极粗(Impact)是燃向混剪黄金组合；衬线+无衬线形成冷热对比；字重差>300才形成视觉层级",
+    "color_rule": "白字+黑描边是基础安全组合；战斗字幕用青/橙/红三色呼应BPM情绪；数据面板用单色高亮(青/绿)配深色描边",
+    "tracking_rule": "字距+0~+30适合短促卡点；+50~+150适合电影感大标题；字距动画必须用SourceText.expression，不能用关键帧",
+    "es3_pitfall": "ExtendScript基于ES3,只能用PostScript名(不是文件名)；ScriptUI.newFont()不支持,Date.toISOString()不存在"
+  },
+  "validation": [
+    {
+      "key": "hero_cn_brutal",
+      "name": "方正兰亭粗黑简",
+      "installed": true,
+      "tag": "中文暴力粗黑"
+    },
+    {
+      "key": "hero_cn_brush",
+      "name": "书体坊米芾体",
+      "installed": true,
+      "tag": "中文书法狂草"
+    },
+    {
+      "key": "hero_en_impact",
+      "name": "Impact",
+      "installed": true,
+      "tag": "英文极粗冲击"
+    },
+    {
+      "key": "hero_en_metal",
+      "name": "Bahnschrift Condensed",
+      "installed": true,
+      "tag": "金属感窄体"
+    },
+    {
+      "key": "section_cn_modern",
+      "name": "阿里巴巴普惠体 Heavy",
+      "installed": true,
+      "tag": "现代互联网感"
+    },
+    {
+      "key": "section_en_anton",
+      "name": "Anton",
+      "installed": true,
+      "tag": "超窄粗体"
+    },
+    {
+      "key": "section_en_din",
+      "name": "DIN Next LT Pro Bold",
+      "installed": true,
+      "tag": "工业数字"
+    },
+    {
+      "key": "sub_cn_impact",
+      "name": "方正正中黑简体",
+      "installed": true,
+      "tag": "方正粗黑"
+    },
+    {
+      "key": "sub_en_bebas",
+      "name": "Bebas Neue",
+      "installed": true,
+      "tag": "极窄极粗"
+    },
+    {
+      "key": "sub_en_impact",
+      "name": "Impact",
+      "installed": true,
+      "tag": "经典冲击"
+    },
+    {
+      "key": "sub_cyber_pixel",
+      "name": "04B_03B",
+      "installed": true,
+      "tag": "像素游戏风"
+    },
+    {
+      "key": "serif_cn_classic",
+      "name": "思源宋体SC",
+      "installed": true,
+      "tag": "开源宋体"
+    },
+    {
+      "key": "serif_cn_fang",
+      "name": "方正书宋简体",
+      "installed": true,
+      "tag": "传统书宋"
+    },
+    {
+      "key": "serif_en_playfair",
+      "name": "Playfair Display",
+      "installed": true,
+      "tag": "优雅衬线"
+    },
+    {
+      "key": "handwrite_cn_ma",
+      "name": "马善政",
+      "installed": true,
+      "tag": "中文毛笔"
+    },
+    {
+      "key": "handwrite_en_brush",
+      "name": "Brush Script MT",
+      "installed": true,
+      "tag": "英文手写"
+    },
+    {
+      "key": "deco_cn_xuan",
+      "name": "汉仪小麦体",
+      "installed": true,
+      "tag": "圆润可爱"
+    },
+    {
+      "key": "deco_cn_bungee",
+      "name": "Bangers",
+      "installed": true,
+      "tag": "漫画爆炸"
+    },
+    {
+      "key": "deco_cn_loli",
+      "name": "义启童真体",
+      "installed": true,
+      "tag": "童趣手绘"
+    },
+    {
+      "key": "data_en_din",
+      "name": "DIN Next LT Pro Bold",
+      "installed": true,
+      "tag": "工业DIN"
+    },
+    {
+      "key": "data_en_consolas",
+      "name": "Consolas",
+      "installed": true,
+      "tag": "等宽代码"
+    },
+    {
+      "key": "data_en_bahnschrift",
+      "name": "Bahnschrift",
+      "installed": true,
+      "tag": "可变窄体"
+    },
+    {
+      "key": "credit_cn_puhui",
+      "name": "阿里巴巴普惠体 Light",
+      "installed": true,
+      "tag": "轻盈现代"
+    },
+    {
+      "key": "credit_cn_kaiti",
+      "name": "方正楷体简体",
+      "installed": true,
+      "tag": "传统楷体"
+    }
+  ]
+}

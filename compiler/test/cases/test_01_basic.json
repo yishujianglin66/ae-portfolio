@@ -1,0 +1,105 @@
+{
+  "metadata": {
+    "source": "test_case_01_basic",
+    "confidence": 0.95,
+    "description": "基础测试: 创建合成+文字层+发光效果+关键帧动画"
+  },
+  "operations": [
+    {
+      "op": "createComp",
+      "ref": "main_comp",
+      "name": "测试合成",
+      "width": 1920,
+      "height": 1080,
+      "frameRate": 30,
+      "duration": 5,
+      "bgColor": [0, 0, 0]
+    },
+    {
+      "op": "addLayer",
+      "ref": "title_layer",
+      "compRef": "main_comp",
+      "layerType": "text",
+      "name": "标题文字",
+      "text": "Hello AE",
+      "fontSize": 96,
+      "font": "Arial",
+      "fillColor": [1, 1, 1],
+      "position": [960, 540],
+      "opacity": 0
+    },
+    {
+      "op": "addEffect",
+      "ref": "glow_fx",
+      "layerRef": "title_layer",
+      "matchName": "ADBE Glow",
+      "settings": {
+        "Glow Threshold": 40,
+        "Glow Radius": 30,
+        "Glow Intensity": 1.5
+      }
+    },
+    {
+      "op": "addLayer",
+      "ref": "adj_layer",
+      "compRef": "main_comp",
+      "layerType": "adjustment",
+      "name": "调色层"
+    },
+    {
+      "op": "addEffect",
+      "ref": "vignette_fx",
+      "layerRef": "adj_layer",
+      "matchName": "ADBE Vignette",
+      "settings": {
+        "Amount": -65,
+        "Softness": 50
+      }
+    },
+    {
+      "op": "setKeyframe",
+      "layerRef": "title_layer",
+      "propertyPath": "Transform/Opacity",
+      "keyframes": [
+        {
+          "time": 0,
+          "value": 0,
+          "easing": { "type": "ease_out", "outInfluence": 33 }
+        },
+        {
+          "time": 1,
+          "value": 100,
+          "easing": { "type": "ease_out", "outInfluence": 33 }
+        }
+      ]
+    },
+    {
+      "op": "setKeyframe",
+      "layerRef": "title_layer",
+      "propertyPath": "Transform/Position",
+      "keyframes": [
+        {
+          "time": 0,
+          "value": [960, 600],
+          "easing": { "type": "ease_in_out", "inInfluence": 33, "outInfluence": 33 }
+        },
+        {
+          "time": 1,
+          "value": [960, 540],
+          "easing": { "type": "ease_in_out", "inInfluence": 33, "outInfluence": 33 }
+        }
+      ]
+    },
+    {
+      "op": "setExpression",
+      "layerRef": "title_layer",
+      "propertyPath": "Transform/Rotation",
+      "expression": "wiggle(2, 5);"
+    },
+    {
+      "op": "setBlendMode",
+      "layerRef": "title_layer",
+      "blendMode": "screen"
+    }
+  ]
+}

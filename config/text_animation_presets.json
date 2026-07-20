@@ -1,0 +1,1048 @@
+{
+  "version": "2.0",
+  "description": "文字动画预设库 - MCP自动化调用版（4大品类60个预设）",
+  "mcp_endpoint": "executeAtomScript",
+  "mcp_command_format": {
+    "command": "executeAtomScript",
+    "params_key": "scriptContent",
+    "note": "所有预设通过 executeAtomScript 命令调用，scriptContent 字段传入 JSX 模板（IIFE 包装，显式 return JSON.stringify(_result)）"
+  },
+  "invoke_protocol": {
+    "step_1": "MCP 网关读取本 JSON 获取预设元数据与参数定义",
+    "step_2": "调用方传入 preset_id + 参数覆盖值",
+    "step_3": "网关将 jsx_template 中的占位符 {{param}} 替换为实际值",
+    "step_4": "通过 send_command('executeAtomScript', {scriptContent: filled_jsx}) 发送到 AE",
+    "step_5": "AE 端执行 IIFE，返回 JSON 结果"
+  },
+  "placeholder_syntax": "{{param_name}} 表示运行时由 MCP 网关替换的参数占位符",
+  "categories": {
+    "kinetic_typography": {
+      "display_name": "Kinetic Typography 动态排版",
+      "count": 15,
+      "presets": [
+        {
+          "id": "kt_char_waterfall",
+          "name": "字符瀑布流",
+          "name_en": "Character Waterfall",
+          "description": "字符从上至下流水入场，逐字延迟掉落",
+          "tags": ["入场", "逐字", "流动", "MV"],
+          "difficulty": 3,
+          "duration_default": 1.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "fallHeight", "type": "number", "default": 200, "min": 50, "max": 1000, "description": "下落高度(px)"},
+            {"name": "charDelay", "type": "number", "default": 3, "min": 0, "max": 15, "description": "字间延迟(帧)"},
+            {"name": "duration", "type": "number", "default": 1.5, "min": 0.5, "max": 3.0, "description": "总时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_Waterfall';a.addProperty('ADBE Text Position').setValue([0,{{fallHeight}}]);a.addProperty('ADBE Text Opacity').setValue(0);a.addProperty('ADBE Text Rotation').setValue(-15);var s=a.property('ADBE Text Selectors').property(1);s.property('ADBE Text Selector Shape').setValue(3);var fh={{fallHeight}};var cd={{charDelay}};var d={{duration}};s.property('ADBE Text Selector Offset').setValueAtTime(0,-100);s.property('ADBE Text Selector Offset').setValueAtTime(d,100);s.property('ADBE Text Selector Ease High').setValue(80);s.property('ADBE Text Selector Ease Low').setValue(20);_r={status:'success',preset:'kt_char_waterfall',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_tracking_breathe",
+          "name": "字距呼吸",
+          "name_en": "Tracking Breathe",
+          "description": "字间距周期性扩张收缩，呼吸感律动",
+          "tags": ["强调", "循环", "字距", "呼吸"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "trackingAmount", "type": "number", "default": 15, "min": 1, "max": 50, "description": "字距变化量(px)"},
+            {"name": "frequency", "type": "number", "default": 1.0, "min": 0.2, "max": 5.0, "description": "呼吸频率(Hz)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_TrackingBreathe';var trk=a.addProperty('ADBE Text Tracking');trk.setValue({{trackingAmount}});var ta={{trackingAmount}};var f={{frequency}};trk.expression='Math.sin(time*'+f+'*2*Math.PI)*'+ta;_r={status:'success',preset:'kt_tracking_breathe',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_text_dance",
+          "name": "文字舞蹈",
+          "name_en": "Text Dance",
+          "description": "字符随节拍上下跳舞，活泼律动",
+          "tags": ["强调", "循环", "舞蹈", "节拍"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "danceHeight", "type": "number", "default": 20, "min": 5, "max": 100, "description": "跳跃高度(px)"},
+            {"name": "frequency", "type": "number", "default": 2.0, "min": 0.5, "max": 10.0, "description": "跳舞频率(Hz)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_Dance';var pos=a.addProperty('ADBE Text Position');var dh={{danceHeight}};var f={{frequency}};pos.expression='[0,Math.abs(Math.sin(time*'+f+'*2*Math.PI))*'+dh+']';var s=a.property('ADBE Text Selectors').addProperty('ADBE Wiggly Selector');s.property('ADBE Text Selector Wiggles').setValue(2);_r={status:'success',preset:'kt_text_dance',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_elastic_morph",
+          "name": "弹性变形",
+          "name_en": "Elastic Morph",
+          "description": "文字弹性变形拉伸，果冻质感",
+          "tags": ["入场", "弹性", "变形", "创意"],
+          "difficulty": 3,
+          "duration_default": 1.2,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "stretchX", "type": "number", "default": 200, "min": 110, "max": 400, "description": "X拉伸(%)"},
+            {"name": "duration", "type": "number", "default": 1.2, "min": 0.5, "max": 2.5, "description": "时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_ElasticMorph';var sc=a.addProperty('ADBE Text Scale');var sx={{stretchX}};var d={{duration}};sc.setValue([sx,100]);sc.expressionAtTime=undefined;var s=a.property('ADBE Text Selectors').property(1);s.property('ADBE Text Selector Offset').setValueAtTime(0,-100);s.property('ADBE Text Selector Offset').setValueAtTime(d,100);s.property('ADBE Text Selector Ease High').setValue(100);_r={status:'success',preset:'kt_elastic_morph',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_beat_bounce",
+          "name": "节拍弹跳",
+          "name_en": "Beat Bounce",
+          "description": "文字随节拍弹跳，强拍大跳弱拍小跳",
+          "tags": ["强调", "节拍", "弹跳", "MV"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "bounceHeight", "type": "number", "default": 30, "min": 5, "max": 150, "description": "弹跳高度(px)"},
+            {"name": "bpm", "type": "number", "default": 120, "min": 60, "max": 200, "description": "BPM节拍"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_BeatBounce';var pos=a.addProperty('ADBE Text Position');var bh={{bounceHeight}};var bpm={{bpm}};var bp=60/bpm;pos.expression='[0,-Math.abs(Math.sin(time*Math.PI/'+bp+'))*'+bh+']';_r={status:'success',preset:'kt_beat_bounce',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_char_wave",
+          "name": "字符波浪",
+          "name_en": "Character Wave",
+          "description": "字符波浪式起伏，如水波流动",
+          "tags": ["强调", "循环", "波浪", "流动"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "waveAmplitude", "type": "number", "default": 25, "min": 5, "max": 100, "description": "波浪幅度(px)"},
+            {"name": "waveFrequency", "type": "number", "default": 2.0, "min": 0.5, "max": 8.0, "description": "波浪频率(Hz)"},
+            {"name": "waveSpeed", "type": "number", "default": 1.0, "min": 0.1, "max": 5.0, "description": "流动速度"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_Wave';var pos=a.addProperty('ADBE Text Position');var wa={{waveAmplitude}};var wf={{waveFrequency}};var ws={{waveSpeed}};pos.expression='[0,Math.sin((textIndex*'+wf+'+time*'+ws+') *2*Math.PI)*'+wa+']';_r={status:'success',preset:'kt_char_wave',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_rotate_array",
+          "name": "旋转排列",
+          "name_en": "Rotate Array",
+          "description": "字符旋转排列入场，从随机角度归位",
+          "tags": ["入场", "旋转", "排列", "创意"],
+          "difficulty": 3,
+          "duration_default": 1.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "startAngle", "type": "number", "default": 180, "min": 45, "max": 360, "description": "起始角度(°)"},
+            {"name": "duration", "type": "number", "default": 1.5, "min": 0.5, "max": 3.0, "description": "时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_RotateArray';var rot=a.addProperty('ADBE Text Rotation');rot.setValue({{startAngle}});var s=a.property('ADBE Text Selectors').property(1);var d={{duration}};s.property('ADBE Text Selector Offset').setValueAtTime(0,-100);s.property('ADBE Text Selector Offset').setValueAtTime(d,100);s.property('ADBE Text Selector Ease High').setValue(90);_r={status:'success',preset:'kt_rotate_array',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_path_flow",
+          "name": "路径流动",
+          "name_en": "Path Flow",
+          "description": "文字沿曲线路径流动入场",
+          "tags": ["入场", "路径", "流动", "创意"],
+          "difficulty": 4,
+          "duration_default": 2.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "flowOffset", "type": "number", "default": 100, "min": 20, "max": 500, "description": "流动偏移(px)"},
+            {"name": "duration", "type": "number", "default": 2.0, "min": 0.5, "max": 4.0, "description": "时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_PathFlow';var pos=a.addProperty('ADBE Text Position');var fo={{flowOffset}};var d={{duration}};pos.setValue([fo,0]);var s=a.property('ADBE Text Selectors').property(1);s.property('ADBE Text Selector Offset').setValueAtTime(0,-100);s.property('ADBE Text Selector Offset').setValueAtTime(d,100);s.property('ADBE Text Selector Ease High').setValue(75);_r={status:'success',preset:'kt_path_flow',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_strobe_flicker",
+          "name": "频闪闪烁",
+          "name_en": "Strobe Flicker",
+          "description": "文字高频频闪，警示感强烈",
+          "tags": ["强调", "频闪", "闪烁", "警示"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "frequency", "type": "number", "default": 8.0, "min": 1.0, "max": 30.0, "description": "频闪频率(Hz)"},
+            {"name": "minOpacity", "type": "number", "default": 30, "min": 0, "max": 80, "description": "最低透明度(%)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_Strobe';var op=a.addProperty('ADBE Text Opacity');var f={{frequency}};var mo={{minOpacity}};op.expression='Math.sin(time*'+f+'*2*Math.PI)>0?100:'+mo;_r={status:'success',preset:'kt_strobe_flicker',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_text_stretch",
+          "name": "文字拉伸",
+          "name_en": "Text Stretch",
+          "description": "文字横向拉伸收缩，弹性回弹",
+          "tags": ["强调", "拉伸", "弹性", "创意"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "stretchAmount", "type": "number", "default": 150, "min": 110, "max": 300, "description": "拉伸量(%)"},
+            {"name": "frequency", "type": "number", "default": 1.5, "min": 0.3, "max": 5.0, "description": "频率(Hz)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_Stretch';var sc=a.addProperty('ADBE Text Scale');var sa={{stretchAmount}};var f={{frequency}};sc.expression='[100+Math.sin(time*'+f+'*2*Math.PI)*'+(sa-100)+',100]';_r={status:'success',preset:'kt_text_stretch',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_3d_flip_array",
+          "name": "3D翻转阵列",
+          "name_en": "3D Flip Array",
+          "description": "字符3D翻转阵列入场，逐字翻牌",
+          "tags": ["入场", "3D", "翻转", "阵列"],
+          "difficulty": 4,
+          "duration_default": 2.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "flipAxis", "type": "string", "default": "Y", "options": ["X", "Y"], "description": "翻转轴"},
+            {"name": "duration", "type": "number", "default": 2.0, "min": 0.5, "max": 4.0, "description": "时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}L.threeDLayer=true;var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_3DFlip';var r=a.addProperty('ADBE Text Rotation');r.setValue(90);var s=a.property('ADBE Text Selectors').property(1);var d={{duration}};s.property('ADBE Text Selector Offset').setValueAtTime(0,-100);s.property('ADBE Text Selector Offset').setValueAtTime(d,100);s.property('ADBE Text Selector Ease High').setValue(85);_r={status:'success',preset:'kt_3d_flip_array',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_scatter_converge",
+          "name": "字符散聚",
+          "name_en": "Scatter Converge",
+          "description": "字符散开后汇聚，随机归位",
+          "tags": ["入场", "散聚", "随机", "创意"],
+          "difficulty": 4,
+          "duration_default": 1.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "scatterRange", "type": "number", "default": 200, "min": 50, "max": 800, "description": "散开范围(px)"},
+            {"name": "duration", "type": "number", "default": 1.5, "min": 0.5, "max": 3.0, "description": "时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_Scatter';var pos=a.addProperty('ADBE Text Position');var sr={{scatterRange}};pos.expression='[seedRandom(textIndex,true);random(-'+sr+','+sr+'),seedRandom(textIndex+1,true);random(-'+sr+','+sr+')]';var s=a.property('ADBE Text Selectors').property(1);var d={{duration}};s.property('ADBE Text Selector Offset').setValueAtTime(0,100);s.property('ADBE Text Selector Offset').setValueAtTime(d,0);_r={status:'success',preset:'kt_scatter_converge',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_typewriter_shake",
+          "name": "打字抖动",
+          "name_en": "Typewriter Shake",
+          "description": "打字机效果+字符抖动，复古科技感",
+          "tags": ["入场", "打字机", "抖动", "科技"],
+          "difficulty": 3,
+          "duration_default": 3.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "typeSpeed", "type": "number", "default": 5, "min": 1, "max": 30, "description": "打字速度(帧/字)"},
+            {"name": "shakeAmount", "type": "number", "default": 3, "min": 0, "max": 20, "description": "抖动量(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_TypeShake';a.addProperty('ADBE Text Opacity').setValue(0);var s=a.property('ADBE Text Selectors').property(1);var ts={{typeSpeed}};s.property('ADBE Text Selector End').expression='Math.min(100,time*100/'+ts/15+')';var a2=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a2.name='KT_TypeShake_Jitter';var pos=a2.addProperty('ADBE Text Position');var sa={{shakeAmount}};pos.expression='[wiggle(15,'+sa+')[0],wiggle(15,'+sa+')[1]]';var w=a2.property('ADBE Text Selectors').addProperty('ADBE Wiggly Selector');w.property('ADBE Text Selector Wiggles').setValue(3);_r={status:'success',preset:'kt_typewriter_shake',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_beat_scale",
+          "name": "节拍缩放",
+          "name_en": "Beat Scale",
+          "description": "文字随节拍缩放，强拍放大弱拍收缩",
+          "tags": ["强调", "节拍", "缩放", "MV"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "scaleAmount", "type": "number", "default": 20, "min": 5, "max": 80, "description": "缩放变化量(%)"},
+            {"name": "bpm", "type": "number", "default": 120, "min": 60, "max": 200, "description": "BPM节拍"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_BeatScale';var sc=a.addProperty('ADBE Text Scale');var sa={{scaleAmount}};var bpm={{bpm}};var bp=60/bpm;sc.expression='[100+Math.abs(Math.sin(time*Math.PI/'+bp+'))*'+sa+',100+Math.abs(Math.sin(time*Math.PI/'+bp+'))*'+sa+']';_r={status:'success',preset:'kt_beat_scale',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "kt_relay_pass",
+          "name": "字符接力",
+          "name_en": "Relay Pass",
+          "description": "字符依次传递动画，波浪式接力",
+          "tags": ["入场", "接力", "波浪", "创意"],
+          "difficulty": 3,
+          "duration_default": 2.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "passDelay", "type": "number", "default": 5, "min": 1, "max": 20, "description": "接力延迟(帧)"},
+            {"name": "liftHeight", "type": "number", "default": 30, "min": 5, "max": 150, "description": "抬起高度(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='KT_Relay';var pos=a.addProperty('ADBE Text Position');var lh={{liftHeight}};var pd={{passDelay}};pos.expression='[0,Math.sin((time-textIndex*'+pd+'/30)*Math.PI)*'+lh+']';var s=a.property('ADBE Text Selectors').property(1);s.property('ADBE Text Selector Shape').setValue(3);_r={status:'success',preset:'kt_relay_pass',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        }
+      ]
+    },
+    "cyberpunk": {
+      "display_name": "Cyberpunk 故障霓虹",
+      "count": 15,
+      "presets": [
+        {
+          "id": "cp_rgb_split",
+          "name": "RGB分离故障",
+          "name_en": "RGB Split Glitch",
+          "description": "红绿蓝通道分离，赛博朋克标志性故障",
+          "tags": ["故障", "RGB", "赛博朋克", "入场"],
+          "difficulty": 3,
+          "duration_default": 1.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "splitAmount", "type": "number", "default": 15, "min": 2, "max": 80, "description": "通道分离量(px)"},
+            {"name": "frequency", "type": "number", "default": 5, "min": 1, "max": 30, "description": "故障频率(Hz)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var sa={{splitAmount}};var f={{frequency}};var e=L.property('ADBE Effect Parade');var off=e.addProperty('ADBE Offset');off.property('ADBE Offset Center').expression='[wiggle('+f+','+sa+')[0],0]';var sh=e.addProperty('ADBE Shift Channels');sh.property('ADBE Shift Channels-0002').setValue(2);_r={status:'success',preset:'cp_rgb_split',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_data_corrupt",
+          "name": "数据损坏",
+          "name_en": "Data Corruption",
+          "description": "文字数据损坏效果，字符随机替换",
+          "tags": ["故障", "数据", "损坏", "赛博朋克"],
+          "difficulty": 4,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "corruptionLevel", "type": "number", "default": 50, "min": 10, "max": 100, "description": "损坏程度(%)"},
+            {"name": "frequency", "type": "number", "default": 8, "min": 1, "max": 30, "description": "损坏频率(Hz)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='CP_DataCorrupt';var co=a.addProperty('ADBE Text Character Offset');var cl={{corruptionLevel}};var f={{frequency}};co.expression='Math.sin(time*'+f+'*2*Math.PI)*'+cl;var s=a.property('ADBE Text Selectors').addProperty('ADBE Wiggly Selector');s.property('ADBE Text Selector Wiggles').setValue(5);s.property('ADBE Text Selector Amount').setValue(cl);_r={status:'success',preset:'cp_data_corrupt',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_neon_pulse",
+          "name": "霓虹脉冲",
+          "name_en": "Neon Pulse",
+          "description": "霓虹灯脉冲发光，赛博夜景",
+          "tags": ["霓虹", "脉冲", "发光", "赛博朋克"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "neonColor", "type": "color", "default": [1,0,1], "description": "霓虹色[R,G,B 0-1]"},
+            {"name": "pulseSpeed", "type": "number", "default": 2, "min": 0.2, "max": 10, "description": "脉冲速度(Hz)"},
+            {"name": "glowRadius", "type": "number", "default": 25, "min": 5, "max": 100, "description": "辉光半径(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var nc=[{{neonColor}}];var ps={{pulseSpeed}};var gr={{glowRadius}};var e=L.property('ADBE Effect Parade');var g=e.addProperty('ADBE Glo2');g.property('ADBE Glo2-0001').setValue(gr);g.property('ADBE Glo2-0002').expression='0.5+Math.abs(Math.sin(time*'+ps+'*2*Math.PI))*1.5';g.property('ADBE Glo2-0004').setValue(nc);g.property('ADBE Glo2-0005').setValue(nc);_r={status:'success',preset:'cp_neon_pulse',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_hologram_scan",
+          "name": "全息扫描",
+          "name_en": "Hologram Scan",
+          "description": "全息扫描线效果，未来科技感",
+          "tags": ["全息", "扫描", "科技", "赛博朋克"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "scanSpeed", "type": "number", "default": 2, "min": 0.2, "max": 10, "description": "扫描速度"},
+            {"name": "lineSpacing", "type": "number", "default": 4, "min": 1, "max": 20, "description": "扫描线间距(px)"},
+            {"name": "holoColor", "type": "color", "default": [0,1,0.5], "description": "全息色[R,G,B 0-1]"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var ss={{scanSpeed}};var ls={{lineSpacing}};var hc=[{{holoColor}}];var e=L.property('ADBE Effect Parade');var grid=e.addProperty('ADBE Grid');grid.property('ADBE Grid-0002').setValue(ls);grid.property('ADBE Grid-0004').setValue(50);var t=e.addProperty('ADBE Tint');t.property('ADBE Tint-0001').setValue(hc);t.property('ADBE Tint-0002').setValue([1,1,1]);var op=L.property('ADBE Transform Group').property('ADBE Opacity');op.expression='60+Math.abs(Math.sin(time*'+ss+'*2*Math.PI))*40';_r={status:'success',preset:'cp_hologram_scan',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_pixel_glitch",
+          "name": "像素化故障",
+          "name_en": "Pixel Glitch",
+          "description": "像素化故障扭曲，8bit赛博风",
+          "tags": ["故障", "像素", "8bit", "赛博朋克"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "pixelSize", "type": "number", "default": 8, "min": 2, "max": 40, "description": "像素块大小(px)"},
+            {"name": "glitchAmount", "type": "number", "default": 20, "min": 0, "max": 100, "description": "故障量(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var ps={{pixelSize}};var ga={{glitchAmount}};var e=L.property('ADBE Effect Parade');var m=e.addProperty('ADBE Mosaic');m.property('ADBE Mosaic-0001').setValue([ps,ps]);var off=e.addProperty('ADBE Offset');off.property('ADBE Offset Center').expression='[wiggle(8,'+ga+')[0],0]';_r={status:'success',preset:'cp_pixel_glitch',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_signal_interference",
+          "name": "信号干扰",
+          "name_en": "Signal Interference",
+          "description": "信号干扰条纹，电视雪花感",
+          "tags": ["故障", "信号", "干扰", "赛博朋克"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "interferenceLevel", "type": "number", "default": 30, "min": 5, "max": 100, "description": "干扰强度(%)"},
+            {"name": "frequency", "type": "number", "default": 10, "min": 1, "max": 30, "description": "频率(Hz)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var il={{interferenceLevel}};var f={{frequency}};var e=L.property('ADBE Effect Parade');var wn=e.addProperty('ADBE Wave Warp');wn.property('ADBE Wave Warp-0001').setValue(50);wn.property('ADBE Wave Warp-0002').setValue(5);wn.property('ADBE Wave Warp-0003').expression=''+il/10+'+Math.sin(time*'+f+')*'+il/20;wn.property('ADBE Wave Warp-0005').setValue(0);var ns=e.addProperty('ADBE Noise');ns.property('ADBE Noise-0001').setValue(il);_r={status:'success',preset:'cp_signal_interference',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_neon_ignite",
+          "name": "霓虹点亮",
+          "name_en": "Neon Ignite",
+          "description": "霓虹灯逐渐点亮，先闪后亮",
+          "tags": ["入场", "霓虹", "点亮", "赛博朋克"],
+          "difficulty": 3,
+          "duration_default": 1.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "neonColor", "type": "color", "default": [0,1,1], "description": "霓虹色[R,G,B 0-1]"},
+            {"name": "duration", "type": "number", "default": 1.5, "min": 0.5, "max": 3.0, "description": "点亮时长(秒)"},
+            {"name": "flickerCount", "type": "number", "default": 3, "min": 0, "max": 8, "description": "点亮前闪烁次数"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var nc=[{{neonColor}}];var d={{duration}};var fc={{flickerCount}};var e=L.property('ADBE Effect Parade');var g=e.addProperty('ADBE Glo2');g.property('ADBE Glo2-0001').setValue(30);g.property('ADBE Glo2-0002').expression='time<'+d+'?Math.abs(Math.sin(time*'+fc+'*10))*(100/'+d+'):1.5';g.property('ADBE Glo2-0004').setValue(nc);var op=L.property('ADBE Transform Group').property('ADBE Opacity');op.expression='time<'+d+'?50+Math.abs(Math.sin(time*'+fc+'*10))*50:100';_r={status:'success',preset:'cp_neon_ignite',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_glitch_flicker",
+          "name": "故障闪烁",
+          "name_en": "Glitch Flicker",
+          "description": "高频故障闪烁，强烈视觉冲击",
+          "tags": ["故障", "闪烁", "高频", "赛博朋克"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "frequency", "type": "number", "default": 12, "min": 2, "max": 30, "description": "闪烁频率(Hz)"},
+            {"name": "displaceAmount", "type": "number", "default": 10, "min": 0, "max": 50, "description": "位移量(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var f={{frequency}};var da={{displaceAmount}};var op=L.property('ADBE Transform Group').property('ADBE Opacity');op.expression='Math.sin(time*'+f+'*2*Math.PI)>0.3?100:30';var pos=L.property('ADBE Transform Group').property('ADBE Position');pos.expression='[wiggle('+f+','+da+')[0]+value[0],wiggle('+f+','+da+')[1]+value[1]]';_r={status:'success',preset:'cp_glitch_flicker',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_digital_shatter",
+          "name": "数字破碎",
+          "name_en": "Digital Shatter",
+          "description": "文字数字化破碎飞散",
+          "tags": ["出场", "破碎", "数字", "赛博朋克"],
+          "difficulty": 4,
+          "duration_default": 1.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "shatterForce", "type": "number", "default": 50, "min": 10, "max": 200, "description": "破碎力度"},
+            {"name": "duration", "type": "number", "default": 1.0, "min": 0.3, "max": 2.0, "description": "时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var sf={{shatterForce}};var d={{duration}};var e=L.property('ADBE Effect Parade');var sh=e.addProperty('ADBE Shatter');sh.property('ADBE Shatter-0001').setValue(1);sh.property('ADBE Shatter-0002').setValue(sf);sh.property('ADBE Shatter-0005').setValue(0.3);sh.property('ADBE Shatter-0007').expression='time/'+d;_r={status:'success',preset:'cp_digital_shatter',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_scanline_pass",
+          "name": "扫描线穿越",
+          "name_en": "Scanline Pass",
+          "description": "扫描线穿过文字显现",
+          "tags": ["入场", "扫描线", "穿越", "赛博朋克"],
+          "difficulty": 3,
+          "duration_default": 1.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "scanSpeed", "type": "number", "default": 1.0, "min": 0.2, "max": 5.0, "description": "扫描速度"},
+            {"name": "scanWidth", "type": "number", "default": 100, "min": 20, "max": 500, "description": "扫描带宽度(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var ss={{scanSpeed}};var sw={{scanWidth}};var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='CP_Scanline';a.addProperty('ADBE Text Opacity').setValue(0);var s=a.property('ADBE Text Selectors').addProperty('ADBE Expression Selector');s.property('ADBE Text Selector Amount').expression='Math.abs(time*'+ss+'*100-textIndex*5)<'+sw+'?100:0';_r={status:'success',preset:'cp_scanline_pass',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_matrix_rain",
+          "name": "矩阵雨",
+          "name_en": "Matrix Rain",
+          "description": "矩阵雨字符下落，黑客帝国风",
+          "tags": ["特效", "矩阵", "雨", "赛博朋克"],
+          "difficulty": 4,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "fallSpeed", "type": "number", "default": 200, "min": 50, "max": 800, "description": "下落速度(px/s)"},
+            {"name": "matrixColor", "type": "color", "default": [0,1,0], "description": "矩阵色[R,G,B 0-1]"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var fs={{fallSpeed}};var mc=[{{matrixColor}}];var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='CP_Matrix';var pos=a.addProperty('ADBE Text Position');pos.expression='[0,time*'+fs+']';var co=a.addProperty('ADBE Text Character Offset');co.setValue(100);var s=a.property('ADBE Text Selectors').addProperty('ADBE Wiggly Selector');s.property('ADBE Text Selector Wiggles').setValue(10);var fc=L.property('ADBE Text Properties').property('ADBE Text Options').property('ADBE Text Fill Color');fc.setValue(mc);_r={status:'success',preset:'cp_matrix_rain',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_terminal_type",
+          "name": "终端打字",
+          "name_en": "Terminal Type",
+          "description": "终端命令行打字效果",
+          "tags": ["入场", "终端", "打字", "赛博朋克"],
+          "difficulty": 2,
+          "duration_default": 3.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "typeSpeed", "type": "number", "default": 8, "min": 1, "max": 30, "description": "打字速度(帧/字)"},
+            {"name": "terminalColor", "type": "color", "default": [0,1,0], "description": "终端色[R,G,B 0-1]"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var ts={{typeSpeed}};var tc=[{{terminalColor}}];var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='CP_Terminal';a.addProperty('ADBE Text Opacity').setValue(0);var s=a.property('ADBE Text Selectors').property(1);s.property('ADBE Text Selector End').expression='Math.min(100,time*100/'+ts/8+')';var fc=tp.property('ADBE Text Options').property('ADBE Text Fill Color');fc.setValue(tc);_r={status:'success',preset:'cp_terminal_type',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_electric_jitter",
+          "name": "电流抖动",
+          "name_en": "Electric Jitter",
+          "description": "电流抖动效果，电光闪烁",
+          "tags": ["故障", "电流", "抖动", "赛博朋克"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "jitterAmount", "type": "number", "default": 8, "min": 1, "max": 30, "description": "抖动量(px)"},
+            {"name": "frequency", "type": "number", "default": 20, "min": 5, "max": 50, "description": "抖动频率(Hz)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var ja={{jitterAmount}};var f={{frequency}};var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='CP_Electric';var pos=a.addProperty('ADBE Text Position');pos.expression='[wiggle('+f+','+ja+')[0],wiggle('+f+','+ja+')[1]]';var s=a.property('ADBE Text Selectors').addProperty('ADBE Wiggly Selector');s.property('ADBE Text Selector Wiggles').setValue(f);var e=L.property('ADBE Effect Parade');var g=e.addProperty('ADBE Glo2');g.property('ADBE Glo2-0001').setValue(10);g.property('ADBE Glo2-0002').expression='0.5+Math.random()';_r={status:'success',preset:'cp_electric_jitter',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_cyber_glow",
+          "name": "赛博光晕",
+          "name_en": "Cyber Glow",
+          "description": "赛博朋克光晕，双色光效",
+          "tags": ["发光", "光晕", "赛博朋克", "强调"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "primaryColor", "type": "color", "default": [1,0,0.5], "description": "主光色[R,G,B 0-1]"},
+            {"name": "secondaryColor", "type": "color", "default": [0,0.5,1], "description": "副光色[R,G,B 0-1]"},
+            {"name": "glowRadius", "type": "number", "default": 30, "min": 5, "max": 100, "description": "辉光半径(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var pc=[{{primaryColor}}];var sc=[{{secondaryColor}}];var gr={{glowRadius}};var e=L.property('ADBE Effect Parade');var g=e.addProperty('ADBE Glo2');g.property('ADBE Glo2-0001').setValue(gr);g.property('ADBE Glo2-0002').expression='1+Math.sin(time*2)*0.5';g.property('ADBE Glo2-0004').expression='time%2<1?['+pc+']:['+sc+']';g.property('ADBE Glo2-0005').expression='time%2<1?['+pc+']:['+sc+']';_r={status:'success',preset:'cp_cyber_glow',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "cp_data_stream",
+          "name": "数据流文字",
+          "name_en": "Data Stream",
+          "description": "数据流动文字，字符不断变换",
+          "tags": ["特效", "数据流", "变换", "赛博朋克"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "streamSpeed", "type": "number", "default": 10, "min": 1, "max": 30, "description": "流动速度"},
+            {"name": "charRange", "type": "number", "default": 50, "min": 10, "max": 100, "description": "字符范围"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var ss={{streamSpeed}};var cr={{charRange}};var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='CP_DataStream';var co=a.addProperty('ADBE Text Character Offset');co.expression='Math.sin(time*'+ss+'+textIndex)*'+cr;var s=a.property('ADBE Text Selectors').addProperty('ADBE Wiggly Selector');s.property('ADBE Text Selector Wiggles').setValue(ss);s.property('ADBE Text Selector Correlation').setValue(0);_r={status:'success',preset:'cp_data_stream',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        }
+      ]
+    },
+    "cinematic": {
+      "display_name": "Cinematic 电影标题",
+      "count": 15,
+      "presets": [
+        {
+          "id": "ci_epic_opener",
+          "name": "史诗开场",
+          "name_en": "Epic Opener",
+          "description": "史诗大片开场标题，光爆+缩放模糊",
+          "tags": ["入场", "史诗", "大片", "电影"],
+          "difficulty": 4,
+          "duration_default": 2.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 2.5, "min": 1.0, "max": 5.0, "description": "时长(秒)"},
+            {"name": "lightIntensity", "type": "number", "default": 150, "min": 50, "max": 300, "description": "光爆强度"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var d={{duration}};var li={{lightIntensity}};var tr=L.property('ADBE Transform Group');var sc=tr.property('ADBE Scale');sc.setValueAtTime(0,[300,300]);sc.setValueAtTime(d,[100,100]);sc.setInterpolationTypeAtKey(1,KeyframeInterpolationType.BEZIER);sc.setInterpolationTypeAtKey(2,KeyframeInterpolationType.BEZIER);var op=tr.property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(d*0.3,100);var e=L.property('ADBE Effect Parade');var lb=e.addProperty('ADBE Light Burst');lb.property('ADBE Light Burst-0001').setValue(li);lb.property('ADBE Light Burst-0002').expression='time<'+d+'?time/'+d+':1';var bl=e.addProperty('ADBE Gaussian Blur');bl.property('ADBE Gaussian Blur-0001').expression='time<'+d+'?('+(1-time/d)+')*50:0';_r={status:'success',preset:'ci_epic_opener',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_metallic_text",
+          "name": "金属质感",
+          "name_en": "Metallic Text",
+          "description": "金属光泽文字，高端质感",
+          "tags": ["特效", "金属", "质感", "电影"],
+          "difficulty": 4,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "metalColor", "type": "color", "default": [0.8,0.7,0.5], "description": "金属色[R,G,B 0-1]"},
+            {"name": "shineAngle", "type": "number", "default": 45, "min": 0, "max": 360, "description": "光泽角度(°)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var mc=[{{metalColor}}];var sa={{shineAngle}};var e=L.property('ADBE Effect Parade');var glass=e.addProperty('ADBE CC Glass');glass.property('ADBE CC Glass-0001').setValue(10);glass.property('ADBE CC Glass-0004').setValue(50);var ls=e.addProperty('ADBE CC Light Sweep');ls.property('ADBE CC Light Sweep-0002').setValue(sa);ls.property('ADBE CC Light Sweep-0004').expression='time*45%360';ls.property('ADBE CC Light Sweep-0005').setValue(100);var rp=e.addProperty('ADBE Ramp');rp.property('ADBE Ramp-0001').setValue([0,0]);rp.property('ADBE Ramp-0002').setValue([1920,0]);rp.property('ADBE Ramp-0003').setValue([0.2,0.2,0.2]);rp.property('ADBE Ramp-0004').setValue(mc);_r={status:'success',preset:'ci_metallic_text',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_light_sweep",
+          "name": "光斑扫过",
+          "name_en": "Light Sweep",
+          "description": "光斑扫过文字显现，电影感",
+          "tags": ["入场", "光斑", "扫过", "电影"],
+          "difficulty": 3,
+          "duration_default": 1.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 1.5, "min": 0.5, "max": 3.0, "description": "时长(秒)"},
+            {"name": "sweepWidth", "type": "number", "default": 100, "min": 20, "max": 500, "description": "光斑宽度(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var d={{duration}};var sw={{sweepWidth}};var e=L.property('ADBE Effect Parade');var ls=e.addProperty('ADBE CC Light Sweep');ls.property('ADBE CC Light Sweep-0002').setValue(0);ls.property('ADBE CC Light Sweep-0003').setValue(sw);ls.property('ADBE CC Light Sweep-0004').expression='(time/'+d+')*1920-960';ls.property('ADBE CC Light Sweep-0005').setValue(100);_r={status:'success',preset:'ci_light_sweep',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_slow_motion_in",
+          "name": "慢动作入场",
+          "name_en": "Slow Motion In",
+          "description": "慢动作文字入场，3D空间推进",
+          "tags": ["入场", "慢动作", "3D", "电影"],
+          "difficulty": 3,
+          "duration_default": 2.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 2.0, "min": 1.0, "max": 4.0, "description": "时长(秒)"},
+            {"name": "zDistance", "type": "number", "default": 2000, "min": 500, "max": 5000, "description": "Z轴距离(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}L.threeDLayer=true;var d={{duration}};var zd={{zDistance}};var tr=L.property('ADBE Transform Group');var pz=tr.property('ADBE Position');pz.setValueAtTime(0,[960,540,zd]);pz.setValueAtTime(d,[960,540,0]);pz.setInterpolationTypeAtKey(1,KeyframeInterpolationType.BEZIER);pz.setInterpolationTypeAtKey(2,KeyframeInterpolationType.BEZIER);var rt=tr.property('ADBE Rotate Y');rt.setValueAtTime(0,-15);rt.setValueAtTime(d,0);var e=L.property('ADBE Effect Parade');var mb=e.addProperty('ADBE Pixel Motion Blur');mb.property('ADBE Pixel Motion Blur-0001').setValue(180);_r={status:'success',preset:'ci_slow_motion_in',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_depth_of_field",
+          "name": "景深虚化",
+          "name_en": "Depth of Field",
+          "description": "景深虚化聚焦，电影镜头感",
+          "tags": ["入场", "景深", "虚化", "电影"],
+          "difficulty": 3,
+          "duration_default": 1.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 1.5, "min": 0.5, "max": 3.0, "description": "时长(秒)"},
+            {"name": "maxBlur", "type": "number", "default": 50, "min": 10, "max": 150, "description": "最大模糊(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var d={{duration}};var mb={{maxBlur}};var e=L.property('ADBE Effect Parade');var cl=e.addProperty('ADBE Camera Lens Blur');cl.property('ADBE Camera Lens Blur-0001').expression='time<'+d+'?'+mb+'*(1-time/'+d+'):0';var op=L.property('ADBE Transform Group').property('ADBE Opacity');op.setValueAtTime(0,30);op.setValueAtTime(d,100);_r={status:'success',preset:'ci_depth_of_field',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_light_rays",
+          "name": "光线穿透",
+          "name_en": "Light Rays",
+          "description": "光线穿透文字，神圣感",
+          "tags": ["特效", "光线", "穿透", "电影"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "rayIntensity", "type": "number", "default": 100, "min": 20, "max": 300, "description": "光线强度"},
+            {"name": "rayColor", "type": "color", "default": [1,0.9,0.7], "description": "光线色[R,G,B 0-1]"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var ri={{rayIntensity}};var rc=[{{rayColor}}];var e=L.property('ADBE Effect Parade');var lr=e.addProperty('ADBE CC Light Rays');lr.property('ADBE CC Light Rays-0001').setValue(ri);lr.property('ADBE CC Light Rays-0003').expression='960+Math.sin(time)*100';lr.property('ADBE CC Light Rays-0004').expression='540+Math.cos(time)*50';lr.property('ADBE CC Light Rays-0006').setValue(rc);_r={status:'success',preset:'ci_light_rays',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_subtitle",
+          "name": "电影字幕",
+          "name_en": "Cinema Subtitle",
+          "description": "电影字幕样式，Letterbox+渐显",
+          "tags": ["入场", "字幕", "电影", "渐显"],
+          "difficulty": 2,
+          "duration_default": 1.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 1.0, "min": 0.3, "max": 3.0, "description": "渐显时长(秒)"},
+            {"name": "letterboxHeight", "type": "number", "default": 100, "min": 50, "max": 200, "description": "黑边高度(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var d={{duration}};var lh={{letterboxHeight}};var op=L.property('ADBE Transform Group').property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(d,100);var s1=c.layers.addSolid([0,0,0],'_Letterbox_Top');s1.property('ADBE Transform Group').property('ADBE Position').setValue([c.width/2,lh/2]);s1.property('ADBE Transform Group').property('ADBE Scale').setValue([c.width,lh]);var s2=c.layers.addSolid([0,0,0],'_Letterbox_Bot');s2.property('ADBE Transform Group').property('ADBE Position').setValue([c.width/2,c.height-lh/2]);s2.property('ADBE Transform Group').property('ADBE Scale').setValue([c.width,lh]);s1.moveAfter(L);s2.moveAfter(s1);_r={status:'success',preset:'ci_subtitle',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_gradient_glow",
+          "name": "渐变光晕",
+          "name_en": "Gradient Glow",
+          "description": "渐变光晕文字，梦幻电影感",
+          "tags": ["特效", "渐变", "光晕", "电影"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "glowColor1", "type": "color", "default": [1,0.5,0.3], "description": "渐变色1[R,G,B 0-1]"},
+            {"name": "glowColor2", "type": "color", "default": [0.3,0.5,1], "description": "渐变色2[R,G,B 0-1]"},
+            {"name": "glowRadius", "type": "number", "default": 40, "min": 5, "max": 150, "description": "辉光半径(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var g1=[{{glowColor1}}];var g2=[{{glowColor2}}];var gr={{glowRadius}};var e=L.property('ADBE Effect Parade');var rp=e.addProperty('ADBE Ramp');rp.property('ADBE Ramp-0001').setValue([0,0]);rp.property('ADBE Ramp-0002').setValue([c.width,0]);rp.property('ADBE Ramp-0003').setValue(g1);rp.property('ADBE Ramp-0004').setValue(g2);var g=e.addProperty('ADBE Glo2');g.property('ADBE Glo2-0001').setValue(gr);g.property('ADBE Glo2-0002').setValue(1.5);_r={status:'success',preset:'ci_gradient_glow',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_dark_title",
+          "name": "暗黑标题",
+          "name_en": "Dark Title",
+          "description": "暗黑电影标题，红描边+暗角",
+          "tags": ["入场", "暗黑", "描边", "电影"],
+          "difficulty": 3,
+          "duration_default": 1.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "strokeColor", "type": "color", "default": [0.8,0,0], "description": "描边色[R,G,B 0-1]"},
+            {"name": "duration", "type": "number", "default": 1.5, "min": 0.5, "max": 3.0, "description": "时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var sc=[{{strokeColor}}];var d={{duration}};var tp=L.property('ADBE Text Properties');var so=tp.property('ADBE Text Options').property('ADBE Text Stroke Option');so.setValue(3);var sw=tp.property('ADBE Text Options').property('ADBE Text Stroke Width');sw.setValue(5);var sct=tp.property('ADBE Text Options').property('ADBE Text Stroke Color');sct.setValue(sc);var op=L.property('ADBE Transform Group').property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(d,100);op.expression='value+Math.sin(time*3)*10';var e=L.property('ADBE Effect Parade');var vg=e.addProperty('ADBE CC Vignette');vg.property('ADBE CC Vignette-0001').setValue(50);_r={status:'success',preset:'ci_dark_title',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_particle_converge",
+          "name": "粒子汇聚",
+          "name_en": "Particle Converge",
+          "description": "粒子汇聚成文字，震撼入场",
+          "tags": ["入场", "粒子", "汇聚", "电影"],
+          "difficulty": 4,
+          "duration_default": 2.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 2.0, "min": 1.0, "max": 4.0, "description": "时长(秒)"},
+            {"name": "particleCount", "type": "number", "default": 200, "min": 50, "max": 500, "description": "粒子数量"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var d={{duration}};var pc={{particleCount}};var e=L.property('ADBE Effect Parade');var ps=e.addProperty('ADBE CC Particle Systems II');ps.property('ADBE CC Particle Systems II-0001').setValue(pc);ps.property('ADBE CC Particle Systems II-0002').setValue(1);ps.property('ADBE CC Particle Systems II-0005').expression='time<'+d+'?2:0';ps.property('ADBE CC Particle Systems II-0010').setValue(0.5);ps.property('ADBE CC Particle Systems II-0022').setValue(2);var op=L.property('ADBE Transform Group').property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(d*0.5,100);_r={status:'success',preset:'ci_particle_converge',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_lens_flare",
+          "name": "镜头光晕",
+          "name_en": "Lens Flare",
+          "description": "镜头光晕标题，扫光混合",
+          "tags": ["特效", "镜头光晕", "扫光", "电影"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "flareBrightness", "type": "number", "default": 150, "min": 50, "max": 300, "description": "光晕亮度"},
+            {"name": "flareColor", "type": "color", "default": [1,0.9,0.8], "description": "光晕色[R,G,B 0-1]"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var fb={{flareBrightness}};var fc=[{{flareColor}}];var e=L.property('ADBE Effect Parade');var lf=e.addProperty('ADBE Lens Flare');lf.property('ADBE Lens Flare-0001').expression='[960+Math.sin(time*0.5)*400,540]';lf.property('ADBE Lens Flare-0002').expression=fb+'+Math.sin(time*2)*50';lf.property('ADBE Lens Flare-0003').setValue(2);L.blendingMode=BlendingMode.ADD;_r={status:'success',preset:'ci_lens_flare',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_scroll_credits",
+          "name": "字幕滚动",
+          "name_en": "Scroll Credits",
+          "description": "滚动字幕条，片尾致谢",
+          "tags": ["出场", "滚动", "字幕", "电影"],
+          "difficulty": 2,
+          "duration_default": 10.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "scrollSpeed", "type": "number", "default": 100, "min": 20, "max": 500, "description": "滚动速度(px/s)"},
+            {"name": "fadeInDuration", "type": "number", "default": 1.0, "min": 0, "max": 3.0, "description": "淡入时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var ss={{scrollSpeed}};var fd={{fadeInDuration}};var tr=L.property('ADBE Transform Group');var pos=tr.property('ADBE Position');pos.expression='[value[0],1080-time*'+ss+']';var op=tr.property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(fd,100);_r={status:'success',preset:'ci_scroll_credits',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_burning_text",
+          "name": "燃烧文字",
+          "name_en": "Burning Text",
+          "description": "燃烧火焰文字，热度感",
+          "tags": ["特效", "燃烧", "火焰", "电影"],
+          "difficulty": 4,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "fireIntensity", "type": "number", "default": 100, "min": 20, "max": 300, "description": "火焰强度"},
+            {"name": "fireColor", "type": "color", "default": [1,0.3,0], "description": "火焰色[R,G,B 0-1]"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var fi={{fireIntensity}};var fc=[{{fireColor}}];var e=L.property('ADBE Effect Parade');var fn=e.addProperty('ADBE Fractal Noise');fn.property('ADBE Fractal Noise-0001').setValue(2);fn.property('ADBE Fractal Noise-0003').expression='time';fn.property('ADBE Fractal Noise-0005').setValue(fi/10);fn.property('ADBE Fractal Noise-0010').setValue(3);var ti=e.addProperty('ADBE Tint');ti.property('ADBE Tint-0001').setValue(fc);ti.property('ADBE Tint-0002').setValue([1,1,0]);var ps=e.addProperty('ADBE CC Particle Systems II');ps.property('ADBE CC Particle Systems II-0001').setValue(fi);ps.property('ADBE CC Particle Systems II-0005').setValue(2);ps.property('ADBE CC Particle Systems II-0022').setValue(1);_r={status:'success',preset:'ci_burning_text',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_frost_freeze",
+          "name": "冰冻结霜",
+          "name_en": "Frost Freeze",
+          "description": "冰冻结霜效果，冷冽感",
+          "tags": ["特效", "冰冻", "结霜", "电影"],
+          "difficulty": 4,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "frostAmount", "type": "number", "default": 50, "min": 10, "max": 150, "description": "结霜量"},
+            {"name": "frostColor", "type": "color", "default": [0.7,0.9,1], "description": "冰霜色[R,G,B 0-1]"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var fa={{frostAmount}};var fco=[{{frostColor}}];var e=L.property('ADBE Effect Parade');var fn=e.addProperty('ADBE Fractal Noise');fn.property('ADBE Fractal Noise-0001').setValue(1);fn.property('ADBE Fractal Noise-0005').setValue(fa/10);fn.property('ADBE Fractal Noise-0010').setValue(5);var ti=e.addProperty('ADBE Tint');ti.property('ADBE Tint-0001').setValue([0.5,0.5,0.5]);ti.property('ADBE Tint-0002').setValue(fco);var gl=e.addProperty('ADBE CC Glass');gl.property('ADBE CC Glass-0001').setValue(fa/5);gl.property('ADBE CC Glass-0004').setValue(60);_r={status:'success',preset:'ci_frost_freeze',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "ci_trailer_title",
+          "name": "大片预告",
+          "name_en": "Trailer Title",
+          "description": "大片预告标题，切入+震动+高对比",
+          "tags": ["入场", "预告", "大片", "电影"],
+          "difficulty": 3,
+          "duration_default": 1.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 1.0, "min": 0.3, "max": 2.0, "description": "时长(秒)"},
+            {"name": "shakeIntensity", "type": "number", "default": 15, "min": 0, "max": 50, "description": "震动强度(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var d={{duration}};var si={{shakeIntensity}};var tr=L.property('ADBE Transform Group');var op=tr.property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(0.05,100);op.setValueAtTime(d,100);var pos=tr.property('ADBE Position');pos.expression='[wiggle(20,'+si+')[0]+960,wiggle(20,'+si+')[1]+540]';var e=L.property('ADBE Effect Parade');var cc=e.addProperty('ADBE Curve Control');var lvl=e.addProperty('ADBE Levels');lvl.property('ADBE Levels-0006').expression='time<'+d+'?1+(1-time/'+d+')*(2-1):1';_r={status:'success',preset:'ci_trailer_title',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        }
+      ]
+    },
+    "social_media": {
+      "display_name": "社交媒体卡点风",
+      "count": 15,
+      "presets": [
+        {
+          "id": "sm_douyin_bounce",
+          "name": "抖音弹跳标题",
+          "name_en": "Douyin Bounce Title",
+          "description": "抖音风格弹跳标题，缩放回弹",
+          "tags": ["入场", "弹跳", "抖音", "卡点"],
+          "difficulty": 2,
+          "duration_default": 0.8,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "bounceScale", "type": "number", "default": 130, "min": 110, "max": 200, "description": "回弹缩放(%)"},
+            {"name": "duration", "type": "number", "default": 0.8, "min": 0.3, "max": 1.5, "description": "时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var bs={{bounceScale}};var d={{duration}};var tr=L.property('ADBE Transform Group');var sc=tr.property('ADBE Scale');sc.setValueAtTime(0,[0,0]);sc.setValueAtTime(d*0.4,[bs,bs]);sc.setValueAtTime(d*0.7,[95,95]);sc.setValueAtTime(d,[100,100]);sc.setInterpolationTypeAtKey(2,KeyframeInterpolationType.BEZIER);sc.setInterpolationTypeAtKey(3,KeyframeInterpolationType.BEZIER);var op=tr.property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(d*0.1,100);_r={status:'success',preset:'sm_douyin_bounce',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_beat_scale",
+          "name": "卡点缩放标题",
+          "name_en": "Beat Scale Title",
+          "description": "节拍点缩放重击标题",
+          "tags": ["强调", "卡点", "缩放", "节拍"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "scaleAmount", "type": "number", "default": 30, "min": 5, "max": 100, "description": "缩放变化(%)"},
+            {"name": "bpm", "type": "number", "default": 120, "min": 60, "max": 200, "description": "BPM节拍"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var sa={{scaleAmount}};var bpm={{bpm}};var bp=60/bpm;var tr=L.property('ADBE Transform Group');var sc=tr.property('ADBE Scale');sc.expression='[100+Math.abs(Math.sin(time*Math.PI/'+bp+'))*'+sa+',100+Math.abs(Math.sin(time*Math.PI/'+bp+'))*'+sa+']';_r={status:'success',preset:'sm_beat_scale',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_vertical_neon",
+          "name": "竖屏霓虹标题",
+          "name_en": "Vertical Neon Title",
+          "description": "竖屏霓虹标题，发光闪烁",
+          "tags": ["霓虹", "竖屏", "发光", "抖音"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "neonColor", "type": "color", "default": [0,1,1], "description": "霓虹色[R,G,B 0-1]"},
+            {"name": "flickerSpeed", "type": "number", "default": 3, "min": 0.5, "max": 15, "description": "闪烁速度(Hz)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var nc=[{{neonColor}}];var fs={{flickerSpeed}};var e=L.property('ADBE Effect Parade');var g=e.addProperty('ADBE Glo2');g.property('ADBE Glo2-0001').setValue(40);g.property('ADBE Glo2-0002').expression='1+Math.abs(Math.sin(time*'+fs+'*2*Math.PI))*2';g.property('ADBE Glo2-0004').setValue(nc);g.property('ADBE Glo2-0005').setValue(nc);var op=L.property('ADBE Transform Group').property('ADBE Opacity');op.expression='90+Math.sin(time*'+fs+'*2*Math.PI)*10';_r={status:'success',preset:'sm_vertical_neon',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_flash_subtitle",
+          "name": "闪现字幕",
+          "name_en": "Flash Subtitle",
+          "description": "节拍点闪现字幕，快速切换",
+          "tags": ["入场", "闪现", "字幕", "卡点"],
+          "difficulty": 2,
+          "duration_default": 0.3,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "flashDuration", "type": "number", "default": 0.3, "min": 0.1, "max": 1.0, "description": "闪现时长(秒)"},
+            {"name": "scalePop", "type": "number", "default": 150, "min": 110, "max": 250, "description": "弹出缩放(%)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var fd={{flashDuration}};var sp={{scalePop}};var tr=L.property('ADBE Transform Group');var op=tr.property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(0.02,100);op.setValueAtTime(fd,0);var sc=tr.property('ADBE Scale');sc.setValueAtTime(0,[sp,sp]);sc.setValueAtTime(fd*0.5,[100,100]);_r={status:'success',preset:'sm_flash_subtitle',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_danmaku_scroll",
+          "name": "弹幕滚动",
+          "name_en": "Danmaku Scroll",
+          "description": "弹幕滚动文字，从右向左",
+          "tags": ["循环", "弹幕", "滚动", "B站"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "scrollSpeed", "type": "number", "default": 300, "min": 50, "max": 1000, "description": "滚动速度(px/s)"},
+            {"name": "yPosition", "type": "number", "default": 540, "min": 0, "max": 1920, "description": "Y轴位置(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var ss={{scrollSpeed}};var yp={{yPosition}};var tr=L.property('ADBE Transform Group');var pos=tr.property('ADBE Position');pos.expression='[c.width+200-time*'+ss+','+yp+']';_r={status:'success',preset:'sm_danmaku_scroll',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_emoji_text",
+          "name": "表情包文字",
+          "name_en": "Emoji Text",
+          "description": "表情包风格文字，超大描边+抖动",
+          "tags": ["强调", "表情包", "描边", "抖动"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "strokeWidth", "type": "number", "default": 15, "min": 5, "max": 40, "description": "描边宽度(px)"},
+            {"name": "jitterAmount", "type": "number", "default": 8, "min": 0, "max": 30, "description": "抖动量(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var sw={{strokeWidth}};var ja={{jitterAmount}};var tp=L.property('ADBE Text Properties');var so=tp.property('ADBE Text Options').property('ADBE Text Stroke Option');so.setValue(3);tp.property('ADBE Text Options').property('ADBE Text Stroke Width').setValue(sw);tp.property('ADBE Text Options').property('ADBE Text Stroke Color').setValue([0,0,0]);var tr=L.property('ADBE Transform Group');var pos=tr.property('ADBE Position');pos.expression='[wiggle(15,'+ja+')[0]+value[0],wiggle(15,'+ja+')[1]+value[1]]';_r={status:'success',preset:'sm_emoji_text',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_beat_glitch",
+          "name": "卡点故障标题",
+          "name_en": "Beat Glitch Title",
+          "description": "卡点故障标题，位置抖动+RGB偏移",
+          "tags": ["故障", "卡点", "RGB", "抖音"],
+          "difficulty": 3,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "glitchAmount", "type": "number", "default": 15, "min": 2, "max": 50, "description": "故障量(px)"},
+            {"name": "bpm", "type": "number", "default": 140, "min": 60, "max": 200, "description": "BPM节拍"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var ga={{glitchAmount}};var bpm={{bpm}};var bp=60/bpm;var tr=L.property('ADBE Transform Group');var pos=tr.property('ADBE Position');pos.expression='[value[0]+Math.sin(time*Math.PI/'+bp+')*'+ga+',value[1]]';var e=L.property('ADBE Effect Parade');var off=e.addProperty('ADBE Offset');off.property('ADBE Offset Center').expression='[Math.sin(time*Math.PI/'+bp+')*'+ga+',0]';_r={status:'success',preset:'sm_beat_glitch',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_rainbow_gradient",
+          "name": "彩虹渐变标题",
+          "name_en": "Rainbow Gradient",
+          "description": "彩虹渐变标题，色相循环",
+          "tags": ["特效", "彩虹", "渐变", "循环"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "cycleSpeed", "type": "number", "default": 1.0, "min": 0.1, "max": 5.0, "description": "循环速度"},
+            {"name": "saturation", "type": "number", "default": 100, "min": 0, "max": 100, "description": "饱和度(%)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var cs={{cycleSpeed}};var sa={{saturation}}/100;var tp=L.property('ADBE Text Properties');var fc=tp.property('ADBE Text Options').property('ADBE Text Fill Color');fc.expression='hslToRgb((time*'+cs+')%1,'+sa+',0.5,1)';_r={status:'success',preset:'sm_rainbow_gradient',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_vertical_big",
+          "name": "竖屏大字标题",
+          "name_en": "Vertical Big Title",
+          "description": "竖屏超大字标题，居中缩放入场",
+          "tags": ["入场", "竖屏", "大字", "抖音"],
+          "difficulty": 1,
+          "duration_default": 0.8,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 0.8, "min": 0.3, "max": 2.0, "description": "时长(秒)"},
+            {"name": "startScale", "type": "number", "default": 200, "min": 110, "max": 400, "description": "起始缩放(%)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var d={{duration}};var ss={{startScale}};var tr=L.property('ADBE Transform Group');var pos=tr.property('ADBE Position');pos.setValue([c.width/2,c.height/2]);var sc=tr.property('ADBE Scale');sc.setValueAtTime(0,[ss,ss]);sc.setValueAtTime(d,[100,100]);sc.setInterpolationTypeAtKey(1,KeyframeInterpolationType.BEZIER);sc.setInterpolationTypeAtKey(2,KeyframeInterpolationType.BEZIER);var op=tr.property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(d*0.2,100);_r={status:'success',preset:'sm_vertical_big',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_quick_flash",
+          "name": "快闪文字",
+          "name_en": "Quick Flash Text",
+          "description": "快闪文字效果，密集节拍闪现",
+          "tags": ["入场", "快闪", "节拍", "抖音"],
+          "difficulty": 3,
+          "duration_default": 2.0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "flashCount", "type": "number", "default": 8, "min": 2, "max": 20, "description": "闪现次数"},
+            {"name": "duration", "type": "number", "default": 2.0, "min": 0.5, "max": 5.0, "description": "总时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var fc={{flashCount}};var d={{duration}};var itv=d/fc;var tr=L.property('ADBE Transform Group');var op=tr.property('ADBE Opacity');op.setValueAtTime(0,0);for(var k=0;k<fc;k++){op.setValueAtTime(k*itv,100);op.setValueAtTime(k*itv+itv*0.5,0);}var sc=tr.property('ADBE Scale');sc.expression='100+Math.sin(time*'+fc+'*Math.PI)*30';_r={status:'success',preset:'sm_quick_flash',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_beat_cut",
+          "name": "节拍切割",
+          "name_en": "Beat Cut",
+          "description": "节拍切割文字，滑入+方向模糊",
+          "tags": ["入场", "节拍", "切割", "滑入"],
+          "difficulty": 3,
+          "duration_default": 0.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 0.5, "min": 0.2, "max": 1.5, "description": "时长(秒)"},
+            {"name": "slideDistance", "type": "number", "default": 200, "min": 50, "max": 800, "description": "滑入距离(px)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var d={{duration}};var sd={{slideDistance}};var tr=L.property('ADBE Transform Group');var pos=tr.property('ADBE Position');var cx=c.width/2;var cy=c.height/2;pos.setValueAtTime(0,[cx-sd,cy]);pos.setValueAtTime(d,[cx,cy]);pos.setInterpolationTypeAtKey(1,KeyframeInterpolationType.LINEAR);pos.setInterpolationTypeAtKey(2,KeyframeInterpolationType.BEZIER);var e=L.property('ADBE Effect Parade');var mb=e.addProperty('ADBE Directional Blur');mb.property('ADBE Directional Blur-0001').setValue(0);mb.property('ADBE Directional Blur-0002').expression='time<'+d+'?'+sd/2+':0';_r={status:'success',preset:'sm_beat_cut',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_char_explosion",
+          "name": "字符爆炸",
+          "name_en": "Character Explosion",
+          "description": "字符爆炸效果，逐字飞散",
+          "tags": ["出场", "爆炸", "逐字", "抖音"],
+          "difficulty": 3,
+          "duration_default": 0.8,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "explosionForce", "type": "number", "default": 200, "min": 50, "max": 800, "description": "爆炸力度(px)"},
+            {"name": "duration", "type": "number", "default": 0.8, "min": 0.3, "max": 2.0, "description": "时长(秒)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var ef={{explosionForce}};var d={{duration}};var tp=L.property('ADBE Text Properties');var a=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a.name='SM_Explosion';var pos=a.addProperty('ADBE Text Position');pos.expression='[seedRandom(textIndex,true);random(-'+ef+','+ef+'),seedRandom(textIndex+99,true);random(-'+ef+','+ef+')]';var sc=a.addProperty('ADBE Text Scale');sc.setValue([300,300]);var rot=a.addProperty('ADBE Text Rotation');rot.expression='seedRandom(textIndex+50,true);random(-360,360)';var op=a.addProperty('ADBE Text Opacity');op.setValue(0);var s=a.property('ADBE Text Selectors').property(1);s.property('ADBE Text Selector Offset').setValueAtTime(0,0);s.property('ADBE Text Selector Offset').setValueAtTime(d,100);_r={status:'success',preset:'sm_char_explosion',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_slide_beat",
+          "name": "滑动卡点",
+          "name_en": "Slide Beat",
+          "description": "滑动卡点文字，四方向滑入",
+          "tags": ["入场", "滑动", "卡点", "抖音"],
+          "difficulty": 2,
+          "duration_default": 0.5,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 0.5, "min": 0.2, "max": 1.5, "description": "时长(秒)"},
+            {"name": "direction", "type": "string", "default": "left", "options": ["left", "right", "up", "down"], "description": "滑入方向"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var d={{duration}};var dir='{{direction}}';var cx=c.width/2;var cy=c.height/2;var sx=cx,sy=cy;if(dir=='left')sx=cx-c.width;if(dir=='right')sx=cx+c.width;if(dir=='up')sy=cy-c.height;if(dir=='down')sy=cy+c.height;var tr=L.property('ADBE Transform Group');var pos=tr.property('ADBE Position');pos.setValueAtTime(0,[sx,sy]);pos.setValueAtTime(d,[cx,cy]);pos.setInterpolationTypeAtKey(1,KeyframeInterpolationType.BEZIER);pos.setInterpolationTypeAtKey(2,KeyframeInterpolationType.BEZIER);var op=tr.property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(d*0.3,100);_r={status:'success',preset:'sm_slide_beat',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_blink_emphasis",
+          "name": "闪烁强调",
+          "name_en": "Blink Emphasis",
+          "description": "闪烁强调文字，透明度+Glow脉冲",
+          "tags": ["强调", "闪烁", "Glow", "抖音"],
+          "difficulty": 2,
+          "duration_default": 0,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "frequency", "type": "number", "default": 4, "min": 0.5, "max": 15, "description": "闪烁频率(Hz)"},
+            {"name": "glowColor", "type": "color", "default": [1,1,0], "description": "辉光色[R,G,B 0-1]"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var f={{frequency}};var gc=[{{glowColor}}];var tr=L.property('ADBE Transform Group');var op=tr.property('ADBE Opacity');op.expression='Math.sin(time*'+f+'*2*Math.PI)>0?100:30';var e=L.property('ADBE Effect Parade');var g=e.addProperty('ADBE Glo2');g.property('ADBE Glo2-0001').setValue(30);g.property('ADBE Glo2-0002').expression='Math.abs(Math.sin(time*'+f+'*2*Math.PI))*2';g.property('ADBE Glo2-0004').setValue(gc);_r={status:'success',preset:'sm_blink_emphasis',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        },
+        {
+          "id": "sm_elastic_in",
+          "name": "弹性入场",
+          "name_en": "Elastic In",
+          "description": "弹性入场文字，超调震荡弹簧",
+          "tags": ["入场", "弹性", "弹簧", "抖音"],
+          "difficulty": 3,
+          "duration_default": 1.2,
+          "parameters": [
+            {"name": "textLayerName", "type": "string", "default": "标题文字", "description": "目标文字图层名"},
+            {"name": "duration", "type": "number", "default": 1.2, "min": 0.5, "max": 2.5, "description": "时长(秒)"},
+            {"name": "overshoot", "type": "number", "default": 130, "min": 105, "max": 200, "description": "超调量(%)"}
+          ],
+          "applies": ["TextLayer"],
+          "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L){_r={status:'error',message:'Layer not found'};return JSON.stringify(_r);}var d={{duration}};var os={{overshoot}};var tr=L.property('ADBE Transform Group');var sc=tr.property('ADBE Scale');sc.setValueAtTime(0,[0,0]);sc.setValueAtTime(d*0.3,[os,os]);sc.setValueAtTime(d*0.5,[95,95]);sc.setValueAtTime(d*0.7,[os*0.95,os*0.95]);sc.setValueAtTime(d,[100,100]);for(var k=1;k<=sc.numKeys;k++){sc.setInterpolationTypeAtKey(k,KeyframeInterpolationType.BEZIER);}var op=tr.property('ADBE Opacity');op.setValueAtTime(0,0);op.setValueAtTime(d*0.1,100);_r={status:'success',preset:'sm_elastic_in',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();"
+        }
+      ]
+    }
+  },
+  "quick_reference": {
+    "total_presets": 60,
+    "by_category": {
+      "kinetic_typography": 15,
+      "cyberpunk": 15,
+      "cinematic": 15,
+      "social_media": 15
+    },
+    "mcp_invoke_example": {
+      "command": "executeAtomScript",
+      "params": {
+        "scriptContent": "<filled_jsx_after_placeholder_replacement>"
+      },
+      "expected_response": {
+        "status": "success",
+        "preset": "kt_char_waterfall",
+        "layer": "标题文字"
+      }
+    },
+    "placeholder_replacement_rules": {
+      "syntax": "{{param_name}}",
+      "replacement": "MCP gateway replaces placeholders at runtime with actual parameter values",
+      "string_type": "wrap_with_single_quotes",
+      "number_type": "raw_value",
+      "color_array_type": "[r,g,b] float 0-1"
+    },
+    "validation_checklist": [
+      "IIFE wrapper with try/catch",
+      "explicit return JSON.stringify(_r)",
+      "line width <= 80 chars",
+      "AE 2026 (26.x) compatible",
+      "no app.project.selection assignment (read-only)",
+      "no moveToBeginning/setIndex chain misuse",
+      "use moveBefore() for bottom-up layer ordering",
+      "adjustmentLayer=true for effect layers"
+    ]
+  }
+}

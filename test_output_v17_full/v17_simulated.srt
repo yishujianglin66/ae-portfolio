@@ -1,0 +1,11 @@
+1
+00:00:01,000 --> 00:00:04,000
+Vinland Saga V17 - Battle Scene
+
+2
+00:00:05,000 --> 00:00:08,000
+Action sequence with dynamic camera
+
+3
+00:00:10,000 --> 00:00:14,000
+Cinematic color grading by DaVinci Resolve

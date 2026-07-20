@@ -1,0 +1,6 @@
+{
+  "texture": "wood_grain",
+  "palette": "warm_browns",
+  "joint_style": "articulated",
+  "stylization_backend": "builtin"
+}

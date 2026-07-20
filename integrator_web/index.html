@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统一工具集成调度器 - 管理控制台</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">⚙️</div>
+                <span class="logo-text">工具调度器</span>
+            </div>
+            <nav class="nav">
+                <button class="nav-item active" data-page="v4">
+                    <span class="nav-icon">🧠</span>
+                    <span>V4 智能编排</span>
+                </button>
+                <button class="nav-item" data-page="workflows">
+                    <span class="nav-icon">🎬</span>
+                    <span>工作流</span>
+                </button>
+                <button class="nav-item" data-page="monitor">
+                    <span class="nav-icon">📊</span>
+                    <span>监控</span>
+                </button>
+                <button class="nav-item" data-page="tools">
+                    <span class="nav-icon">🛠️</span>
+                    <span>工具管理</span>
+                </button>
+                <button class="nav-item" data-page="history">
+                    <span class="nav-icon">📜</span>
+                    <span>历史记录</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main">
+            <!-- 顶部栏 -->
+            <header class="header">
+                <h1 id="page-title">工作流管理</h1>
+                <div class="header-right">
+                    <div class="status-indicator">
+                        <div class="status-dot online"></div>
+                        <span>API 在线</span>
+                    </div>
+                    <button class="btn-refresh" onclick="refreshData()">
+                        🔄 刷新
+                    </button>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div id="page-content" class="content">
+                <!-- V4智能编排页面 -->
+                <div id="page-v4" class="page">
+                    <div class="v4-container">
+                        <div class="v4-input-section">
+                            <h3>自然语言需求</h3>
+                            <p class="v4-hint">输入你的需求，V4会自动分析并生成工具链工作流</p>
+                            <textarea id="v4-request" class="v4-textarea" rows="4"
+                                placeholder="例如：把视频超分到4K并加电影调色&#10;或：提取视频音频并压缩为MP3"></textarea>
+                            <div class="v4-controls">
+                                <select id="v4-model">
+                                    <option value="pro">V4-Pro (1.6T, 效果优先)</option>
+                                    <option value="flash">V4-Flash (284B, 快速)</option>
+                                </select>
+                                <select id="v4-mode">
+                                    <option value="real">真实执行</option>
+                                    <option value="simulate">模拟模式</option>
+                                    <option value="auto">自动模式</option>
+                                </select>
+                                <label class="v4-checkbox">
+                                    <input type="checkbox" id="v4-dry-run">
+                                    仅预览（不执行）
+                                </label>
+                                <button class="btn btn-primary" id="v4-run-btn" onclick="runV4Orchestrate()">
+                                    🚀 V4 编排执行
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="v4-status" class="v4-status hidden">
+                            <div class="v4-loading">
+                                <div class="spinner"></div>
+                                <span id="v4-status-text">V4 分析中...</span>
+                            </div>
+                        </div>
+
+                        <div id="v4-result" class="v4-result hidden">
+                            <div class="v4-result-header">
+                                <h3 id="v4-workflow-name">工作流名称</h3>
+                                <span id="v4-workflow-desc" class="v4-workflow-desc"></span>
+                            </div>
+
+                            <div id="v4-steps-list" class="v4-steps-list">
+                                <!-- 动态生成步骤 -->
+                            </div>
+
+                            <div id="v4-execution-result" class="v4-execution-result hidden">
+                                <h4>执行结果</h4>
+                                <div class="v4-stats" id="v4-stats">
+                                    <!-- 动态生成统计 -->
+                                </div>
+                                <div id="v4-output-files" class="v4-output-files">
+                                    <!-- 动态生成输出文件 -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="v4-error" class="v4-error hidden">
+                            <div class="v4-error-icon">❌</div>
+                            <div class="v4-error-message" id="v4-error-message"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 工作流管理页面 -->
+                <div id="page-workflows" class="page">
+                    <!-- 搜索和筛选 -->
+                    <div class="search-bar">
+                        <input type="text" id="preset-search" placeholder="搜索工作流预设..." oninput="filterPresets()">
+                        <select id="category-filter" onchange="filterPresets()">
+                            <option value="">所有分类</option>
+                            <option value="quality">质量优化</option>
+                            <option value="creative">创意制作</option>
+                            <option value="delivery">交付输出</option>
+                            <option value="batch">批量处理</option>
+                            <option value="adobe">Adobe工作流</option>
+                        </select>
+                    </div>
+
+                    <!-- 预设卡片网格 -->
+                    <div id="presets-grid" class="grid">
+                        <!-- 动态生成 -->
+                    </div>
+
+                    <!-- 启动工作流弹窗 -->
+                    <div id="modal-start" class="modal hidden">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>启动工作流</h3>
+                                <button class="modal-close" onclick="closeModal('modal-start')">×</button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label>预设名称</label>
+                                    <input type="text" id="start-preset-name" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>输入文件</label>
+                                    <input type="text" id="start-input-file" placeholder="输入文件路径或留空">
+                                </div>
+                                <div class="form-group">
+                                    <label>执行模式</label>
+                                    <select id="start-mode">
+                                        <option value="auto">自动模式</option>
+                                        <option value="simulate">模拟模式</option>
+                                        <option value="real">真实执行</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>最大并行线程数</label>
+                                    <input type="number" id="start-workers" value="4" min="1" max="16">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" onclick="closeModal('modal-start')">取消</button>
+                                <button class="btn btn-primary" onclick="startWorkflow()">启动</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 监控页面 -->
+                <div id="page-monitor" class="page hidden">
+                    <div class="monitor-layout">
+                        <!-- 左侧：活跃工作流列表 -->
+                        <div class="monitor-sidebar">
+                            <h3>活跃工作流</h3>
+                            <div id="active-workflows-list" class="workflow-list">
+                                <!-- 动态生成 -->
+                            </div>
+                            <div id="empty-active" class="empty-state">
+                                <div class="empty-icon">🕒</div>
+                                <p>暂无活跃工作流</p>
+                                <button class="btn btn-outline" onclick="switchPage('workflows')">启动工作流</button>
+                            </div>
+                        </div>
+
+                        <!-- 右侧：详情面板 -->
+                        <div class="monitor-detail">
+                            <div id="detail-empty" class="empty-state">
+                                <div class="empty-icon">📋</div>
+                                <p>选择一个工作流查看详情</p>
+                            </div>
+                            <div id="detail-content" class="detail-content hidden">
+                                <div class="detail-header">
+                                    <div>
+                                        <h2 id="detail-name">工作流名称</h2>
+                                        <div class="detail-meta">
+                                            <span class="badge" id="detail-id">ID</span>
+                                            <span class="badge" id="detail-status">状态</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-actions">
+                                        <button class="btn btn-warning" id="action-pause" onclick="controlWorkflow('pause')">⏸️ 暂停</button>
+                                        <button class="btn btn-success" id="action-resume" onclick="controlWorkflow('resume')">▶️ 恢复</button>
+                                        <button class="btn btn-danger" id="action-cancel" onclick="controlWorkflow('cancel')">✖️ 取消</button>
+                                    </div>
+                                </div>
+
+                                <!-- 进度条 -->
+                                <div class="progress-section">
+                                    <div class="progress-bar">
+                                        <div id="progress-fill" class="progress-fill"></div>
+                                    </div>
+                                    <div class="progress-info">
+                                        <span id="progress-text">0%</span>
+                                        <span id="progress-time">0.0s</span>
+                                    </div>
+                                </div>
+
+                                <!-- 步骤列表 -->
+                                <div class="steps-section">
+                                    <h3>执行步骤</h3>
+                                    <div id="steps-list" class="steps-list">
+                                        <!-- 动态生成 -->
+                                    </div>
+                                </div>
+
+                                <!-- 输出文件 -->
+                                <div class="output-section">
+                                    <h3>输出文件</h3>
+                                    <div id="output-files" class="output-files">
+                                        <!-- 动态生成 -->
+                                    </div>
+                                </div>
+
+                                <!-- 链接 -->
+                                <div class="links-section">
+                                    <a id="link-log" href="#" target="_blank" class="link-btn">📝 查看日志</a>
+                                    <a id="link-report" href="#" target="_blank" class="link-btn">📊 查看报告</a>
+                                    <a id="link-checkpoint" href="#" target="_blank" class="link-btn">💾 检查点</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 工具管理页面 -->
+                <div id="page-tools" class="page hidden">
+                    <div class="tools-grid">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 历史记录页面 -->
+                <div id="page-history" class="page hidden">
+                    <div id="history-list" class="history-list">
+                        <!-- 动态生成 -->
+                    </div>
+                    <div id="empty-history" class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>暂无历史记录</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast 通知 -->
+    <div id="toast" class="toast hidden">
+        <div class="toast-icon" id="toast-icon">✅</div>
+        <div class="toast-content">
+            <div class="toast-title" id="toast-title">成功</div>
+            <div class="toast-message" id="toast-message">操作完成</div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

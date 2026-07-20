@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "name": "test_custom_wf",
+    "display_name": "Test Custom Workflow",
+    "description": "A test workflow",
+    "category": "user",
+    "style": null
+  },
+  "workflow": {
+    "1": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "test.png"
+      }
+    },
+    "2": {
+      "class_type": "SaveImage",
+      "inputs": {
+        "images": [
+          "1",
+          0
+        ]
+      }
+    }
+  }
+}

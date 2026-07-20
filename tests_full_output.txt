@@ -1,0 +1,547 @@
+﻿python.exe : test_analyze_nonexistent_file (test_audio_analyzer.TestAudioAnalyzerEdgeCases.test_analyze_nonexistent_fil
+e)
+At line:15 char:4785
++ ...  = "utf-8"; & "C:\Users\Administrator\AppData\Local\Programs\Python\P ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (test_analyze_no...nexistent_file):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+不存在的文件返回错误 ... ok
+test_detect_key_12_chroma_values (test_audio_analyzer.TestAudioAnalyzerEdgeCases.test_detect_key_12_chroma_values)
+所有12个调名都能被正确识别 ... ok
+test_find_best_bgm_nonexistent_dir (test_audio_analyzer.TestAudioAnalyzerEdgeCases.test_find_best_bgm_nonexistent_dir)
+不存在的目录返回空列表 ... ok
+test_similarity_score_bounded (test_audio_analyzer.TestAudioAnalyzerEdgeCases.test_similarity_score_bounded)
+相似度分数始终在 0-1 范围 ... ok
+test_detect_key_a_minor (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_detect_key_a_minor)
+A 音最高时应返回 A ... ok
+test_detect_key_all_zero (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_detect_key_all_zero)
+全零 chroma 返回 Unknown ... ok
+test_detect_key_c_major (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_detect_key_c_major)
+C 大调检测: C 音最高 ... ok
+test_detect_key_f_natural (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_detect_key_f_natural)
+F 音最高 ... ok
+test_detect_key_f_sharp (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_detect_key_f_sharp)
+F# 音最高 ... ok
+test_detect_sections_basic (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_detect_sections_basic)
+正常节拍应返回分段 ... ok
+test_detect_sections_too_few_beats (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_detect_sections_too_few_bea
+ts)
+少于4个节拍返回空列表 ... ok
+test_get_section_action_cycle (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_get_section_action_cycle)
+section action 应循环7种类型 ... ok
+test_infer_genre_ambient (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_infer_genre_ambient)
+tempo < 80 + energy < 0.15 → ambient ... ok
+test_infer_genre_classical (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_infer_genre_classical)
+tempo < 90 + energy < 0.2 → classical ... ok
+test_infer_genre_epic (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_infer_genre_epic)
+tempo > 90 + energy > 0.3 → epic ... ok
+test_infer_genre_pop (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_infer_genre_pop)
+tempo > 120 + energy > 0.2 → pop ... ok
+test_infer_genre_returns_string (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_infer_genre_returns_string)
+所有输入应返回有效字符串 ... ok
+test_infer_genre_rock (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_infer_genre_rock)
+tempo > 140 + energy > 0.25 → rock ... ok
+test_infer_mood_calm (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_infer_mood_calm)
+低 tempo + 低 energy → calm ... ok
+test_infer_mood_epic (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_infer_mood_epic)
+中 tempo + 很高 energy → epic ... ok
+test_infer_mood_excited (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_infer_mood_excited)
+高 tempo + 高 energy → excited ... ok
+test_infer_mood_returns_valid_score (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_infer_mood_returns_valid_s
+core)
+所有 mood score 应在 0-1 范围 ... ok
+test_mode_score_major_higher (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_mode_score_major_higher)
+大调和弦音高时应返回正数 ... ok
+test_mode_score_minor_lower (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_mode_score_minor_lower)
+小调和弦音高时应返回负数 ... ok
+test_similarity_empty_features (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_similarity_empty_features)
+空特征应返回 0 ... ok
+test_similarity_identical (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_similarity_identical)
+相同特征应获得高分 ... ok
+test_similarity_no_match (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_similarity_no_match)
+完全不匹配应获得低分 ... ok
+test_similarity_partial_match (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_similarity_partial_match)
+部分匹配的分数介于极端值之间 ... ok
+test_similarity_tempo_only (test_audio_analyzer.TestAudioAnalyzerPureFunctions.test_similarity_tempo_only)
+仅 tempo 匹配时分数 <= 0.3 ... ok
+test_convert_video_format_nonexistent_file (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_convert_video_forma
+t_nonexistent_file)
+不存在的文件返回错误 ... ok
+test_extract_audio_nonexistent_file (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_extract_audio_nonexistent_
+file)
+不存在的文件返回错误 ... ok
+test_extract_audio_segment_nonexistent_file (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_extract_audio_segm
+ent_nonexistent_file)
+不存在的文件返回错误 ... ok
+test_extract_video_segment_nonexistent_file (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_extract_video_segm
+ent_nonexistent_file)
+不存在的文件返回错误 ... ok
+test_get_audio_codec_flac (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_get_audio_codec_flac) ... ok
+test_get_audio_codec_m4a (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_get_audio_codec_m4a) ... ok
+test_get_audio_codec_mp3 (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_get_audio_codec_mp3) ... ok
+test_get_audio_codec_ogg (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_get_audio_codec_ogg) ... ok
+test_get_audio_codec_unknown (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_get_audio_codec_unknown)
+未知格式默认返回 libmp3lame ... ok
+test_get_audio_codec_wav (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_get_audio_codec_wav) ... ok
+test_get_media_info_nonexistent_file (test_audio_analyzer.TestFFmpegToolkitPureFunctions.test_get_media_info_nonexisten
+t_file)
+不存在的文件返回错误 ... ok
+test_custom_init (test_audio_feature_extractor.TestAudioFeatureSet.test_custom_init) ... ok
+test_default_init (test_audio_feature_extractor.TestAudioFeatureSet.test_default_init) ... ok
+test_infer_mood_angry (test_audio_feature_extractor.TestAudioFeatureSet.test_infer_mood_angry) ... ok
+test_infer_mood_boundary_zero (test_audio_feature_extractor.TestAudioFeatureSet.test_infer_mood_boundary_zero) ... ok
+test_infer_mood_calm (test_audio_feature_extractor.TestAudioFeatureSet.test_infer_mood_calm) ... ok
+test_infer_mood_happy (test_audio_feature_extractor.TestAudioFeatureSet.test_infer_mood_happy) ... ok
+test_infer_mood_sad (test_audio_feature_extractor.TestAudioFeatureSet.test_infer_mood_sad) ... ok
+test_to_dict_chroma_truncation (test_audio_feature_extractor.TestAudioFeatureSet.test_to_dict_chroma_truncation) ... ok
+test_to_dict_custom (test_audio_feature_extractor.TestAudioFeatureSet.test_to_dict_custom) ... ok
+test_to_dict_default (test_audio_feature_extractor.TestAudioFeatureSet.test_to_dict_default) ... ok
+test_to_dict_mfccs_truncation (test_audio_feature_extractor.TestAudioFeatureSet.test_to_dict_mfccs_truncation) ... ok
+test_to_dict_rounding (test_audio_feature_extractor.TestAudioFeatureSet.test_to_dict_rounding) ... ok
+test_nested_merge (test_config_manager.TestDeepMerge.test_nested_merge) ... ok
+test_override_with_non_dict (test_config_manager.TestDeepMerge.test_override_with_non_dict) ... ok
+test_simple_merge (test_config_manager.TestDeepMerge.test_simple_merge) ... ok
+test_default_config_has_keys (test_config_manager.TestGetConfig.test_default_config_has_keys) ... ok
+test_development_environment (test_config_manager.TestGetConfig.test_development_environment) ... ok
+test_env_override (test_config_manager.TestGetConfig.test_env_override) ... ok
+test_production_environment (test_config_manager.TestGetConfig.test_production_environment) ... ok
+test_test_environment (test_config_manager.TestGetConfig.test_test_environment) ... ok
+test_get_secret_default (test_config_manager.TestGetSecret.test_get_secret_default) ... ok
+test_get_secret_from_env (test_config_manager.TestGetSecret.test_get_secret_from_env) ... ok
+test_get_secret_none_default (test_config_manager.TestGetSecret.test_get_secret_none_default) ... ok
+test_set_bool (test_config_manager.TestSetNested.test_set_bool) ... ok
+test_set_int (test_config_manager.TestSetNested.test_set_int) ... ok
+test_set_list (test_config_manager.TestSetNested.test_set_list) ... ok
+test_set_nested (test_config_manager.TestSetNested.test_set_nested) ... ok
+test_set_simple (test_config_manager.TestSetNested.test_set_simple) ... ok
+test_deduplicate_empty_results (test_cross_platform_searcher.TestDeduplication.test_deduplicate_empty_results) ... ok
+test_deduplicate_no_duplicates (test_cross_platform_searcher.TestDeduplication.test_deduplicate_no_duplicates) ... ok
+test_deduplicate_title_similarity (test_cross_platform_searcher.TestDeduplication.test_deduplicate_title_similarity) ..
+. ok
+test_deduplicate_url_hash (test_cross_platform_searcher.TestDeduplication.test_deduplicate_url_hash) ... ok
+test_evaluate_quality_4k (test_cross_platform_searcher.TestQualityEvaluation.test_evaluate_quality_4k) ... ok
+test_evaluate_quality_empty (test_cross_platform_searcher.TestQualityEvaluation.test_evaluate_quality_empty) ... ok
+test_evaluate_quality_high_with_watermark (test_cross_platform_searcher.TestQualityEvaluation.test_evaluate_quality_hig
+h_with_watermark) ... ok
+test_evaluate_quality_like_ratio (test_cross_platform_searcher.TestQualityEvaluation.test_evaluate_quality_like_ratio) 
+... ok
+test_evaluate_quality_medium (test_cross_platform_searcher.TestQualityEvaluation.test_evaluate_quality_medium) ... ok
+test_evaluate_quality_sorting (test_cross_platform_searcher.TestQualityEvaluation.test_evaluate_quality_sorting) ... ok
+test_merge_results_both (test_cross_platform_searcher.TestResultMerging.test_merge_results_both) ... ok
+test_merge_results_deduplication (test_cross_platform_searcher.TestResultMerging.test_merge_results_deduplication) ... 
+ok
+test_merge_results_empty (test_cross_platform_searcher.TestResultMerging.test_merge_results_empty) ... ok
+test_merge_results_local_only (test_cross_platform_searcher.TestResultMerging.test_merge_results_local_only) ... ok
+test_merge_results_remote_only (test_cross_platform_searcher.TestResultMerging.test_merge_results_remote_only) ... ok
+test_merge_results_weights (test_cross_platform_searcher.TestResultMerging.test_merge_results_weights) ... ok
+test_search_downloaders_unavailable (test_cross_platform_searcher.TestSearch.test_search_downloaders_unavailable) ... o
+k
+test_search_empty_query (test_cross_platform_searcher.TestSearch.test_search_empty_query) ... ok
+test_search_with_platforms (test_cross_platform_searcher.TestSearch.test_search_with_platforms) ... ok
+test_search_result_to_dict (test_cross_platform_searcher.TestSearchResultConversion.test_search_result_to_dict) ... ok
+test_title_similarity_different (test_cross_platform_searcher.TestTitleSimilarity.test_title_similarity_different) ... 
+ok
+test_title_similarity_empty (test_cross_platform_searcher.TestTitleSimilarity.test_title_similarity_empty) ... ok
+test_title_similarity_identical (test_cross_platform_searcher.TestTitleSimilarity.test_title_similarity_identical) ... 
+ok
+test_title_similarity_one_empty (test_cross_platform_searcher.TestTitleSimilarity.test_title_similarity_one_empty) ... 
+ok
+test_title_similarity_similar (test_cross_platform_searcher.TestTitleSimilarity.test_title_similarity_similar) ... ok
+test_empty_cookies (test_douyin_downloader.TestCookiesToHeader.test_empty_cookies) ... ok
+test_multiple_cookies (test_douyin_downloader.TestCookiesToHeader.test_multiple_cookies) ... ok
+test_single_cookie (test_douyin_downloader.TestCookiesToHeader.test_single_cookie) ... ok
+test_parse_cookies_with_spaces (test_douyin_downloader.TestParseCookieString.test_parse_cookies_with_spaces) ... ok
+test_parse_cookies_with_special_chars (test_douyin_downloader.TestParseCookieString.test_parse_cookies_with_special_cha
+rs) ... ok
+test_parse_cookies_without_value (test_douyin_downloader.TestParseCookieString.test_parse_cookies_without_value) ... ok
+test_parse_empty_string (test_douyin_downloader.TestParseCookieString.test_parse_empty_string) ... ok
+test_parse_multiple_cookies (test_douyin_downloader.TestParseCookieString.test_parse_multiple_cookies) ... ok
+test_parse_single_cookie (test_douyin_downloader.TestParseCookieString.test_parse_single_cookie) ... ok
+test_parse_comment_lines (test_douyin_downloader.TestParseNetscapeCookie.test_parse_comment_lines) ... ok
+test_parse_empty_file (test_douyin_downloader.TestParseNetscapeCookie.test_parse_empty_file) ... ok
+test_parse_malformed_line (test_douyin_downloader.TestParseNetscapeCookie.test_parse_malformed_line) ... ok
+test_parse_multiple_cookies (test_douyin_downloader.TestParseNetscapeCookie.test_parse_multiple_cookies) ... ok
+test_parse_nonexistent_file (test_douyin_downloader.TestParseNetscapeCookie.test_parse_nonexistent_file) ... ok
+test_parse_valid_cookie (test_douyin_downloader.TestParseNetscapeCookie.test_parse_valid_cookie) ... ok
+test_safe_filename_empty (test_douyin_downloader.TestSafeFilename.test_safe_filename_empty) ... ok
+test_safe_filename_newlines (test_douyin_downloader.TestSafeFilename.test_safe_filename_newlines) ... ok
+test_safe_filename_normal (test_douyin_downloader.TestSafeFilename.test_safe_filename_normal) ... ok
+test_safe_filename_null_bytes (test_douyin_downloader.TestSafeFilename.test_safe_filename_null_bytes) ... ok
+test_safe_filename_strip_dots (test_douyin_downloader.TestSafeFilename.test_safe_filename_strip_dots) ... ok
+test_safe_filename_strip_spaces (test_douyin_downloader.TestSafeFilename.test_safe_filename_strip_spaces) ... ok
+test_safe_filename_truncation (test_douyin_downloader.TestSafeFilename.test_safe_filename_truncation) ... ok
+test_safe_filename_with_special_chars (test_douyin_downloader.TestSafeFilename.test_safe_filename_with_special_chars) .
+.. ok
+test_sanitize_case_insensitive (test_douyin_downloader.TestSanitizeError.test_sanitize_case_insensitive) ... ok
+test_sanitize_colon_format (test_douyin_downloader.TestSanitizeError.test_sanitize_colon_format) ... ok
+test_sanitize_cookie_value (test_douyin_downloader.TestSanitizeError.test_sanitize_cookie_value) ... ok
+test_sanitize_empty_string (test_douyin_downloader.TestSanitizeError.test_sanitize_empty_string) ... ok
+test_sanitize_keeps_other_text (test_douyin_downloader.TestSanitizeError.test_sanitize_keeps_other_text) ... ok
+test_sanitize_multiple_patterns (test_douyin_downloader.TestSanitizeError.test_sanitize_multiple_patterns) ... ok
+test_sanitize_sessionid (test_douyin_downloader.TestSanitizeError.test_sanitize_sessionid) ... ok
+test_sanitize_ttwid (test_douyin_downloader.TestSanitizeError.test_sanitize_ttwid) ... ok
+test_validate_all_fields (test_douyin_downloader.TestValidateCookiesDict.test_validate_all_fields) ... ok
+test_validate_empty_cookies (test_douyin_downloader.TestValidateCookiesDict.test_validate_empty_cookies) ... ok
+test_validate_only_ttwid (test_douyin_downloader.TestValidateCookiesDict.test_validate_only_ttwid) ... ok
+test_validate_ttwid_and_sessionid (test_douyin_downloader.TestValidateCookiesDict.test_validate_ttwid_and_sessionid) ..
+. ok
+test_cookies_to_header_empty (test_downloader_utils.TestCookieParsing.test_cookies_to_header_empty) ... ok
+test_cookies_to_header_multiple (test_downloader_utils.TestCookieParsing.test_cookies_to_header_multiple) ... ok
+test_cookies_to_header_single (test_downloader_utils.TestCookieParsing.test_cookies_to_header_single) ... ok
+test_parse_cookie_string_empty (test_downloader_utils.TestCookieParsing.test_parse_cookie_string_empty) ... ok
+test_parse_cookie_string_multiple (test_downloader_utils.TestCookieParsing.test_parse_cookie_string_multiple) ... ok
+test_parse_cookie_string_single (test_downloader_utils.TestCookieParsing.test_parse_cookie_string_single) ... ok
+test_parse_cookie_string_with_empty (test_downloader_utils.TestCookieParsing.test_parse_cookie_string_with_empty) ... o
+k
+test_parse_cookie_string_with_whitespace (test_downloader_utils.TestCookieParsing.test_parse_cookie_string_with_whitesp
+ace) ... ok
+test_parse_netscape_cookie_nonexistent (test_downloader_utils.TestCookieParsing.test_parse_netscape_cookie_nonexistent)
+ ... ok
+test_parse_netscape_cookie_skips_comments (test_downloader_utils.TestCookieParsing.test_parse_netscape_cookie_skips_com
+ments) ... ok
+test_parse_netscape_cookie_valid (test_downloader_utils.TestCookieParsing.test_parse_netscape_cookie_valid) ... ok
+test_resolve_cookie_file (test_downloader_utils.TestCookieResolution.test_resolve_cookie_file) ... ok
+test_resolve_cookie_nonexistent_file (test_downloader_utils.TestCookieResolution.test_resolve_cookie_nonexistent_file)
+不存在的cookie文件应回退到空结果（mock模块级常量避免读取默认路径） ... ok
+test_resolve_cookie_string (test_downloader_utils.TestCookieResolution.test_resolve_cookie_string) ... ok
+test_validate_cookies_has_required (test_downloader_utils.TestCookieResolution.test_validate_cookies_has_required) ... 
+ok
+test_validate_cookies_has_session (test_downloader_utils.TestCookieResolution.test_validate_cookies_has_session) ... ok
+test_validate_cookies_missing_required (test_downloader_utils.TestCookieResolution.test_validate_cookies_missing_requir
+ed) ... ok
+test_validate_cookies_no_session (test_downloader_utils.TestCookieResolution.test_validate_cookies_no_session) ... ok
+test_env_exists (test_downloader_utils.TestEnvOrDefault.test_env_exists) ... ok
+test_env_not_exists (test_downloader_utils.TestEnvOrDefault.test_env_not_exists) ... ok
+test_detect_bilibili (test_downloader_utils.TestPlatformDetection.test_detect_bilibili) ... ok
+test_detect_bilibili_short (test_downloader_utils.TestPlatformDetection.test_detect_bilibili_short) ... ok
+test_detect_douyin_ies (test_downloader_utils.TestPlatformDetection.test_detect_douyin_ies) ... ok
+test_detect_douyin_long_url (test_downloader_utils.TestPlatformDetection.test_detect_douyin_long_url) ... ok
+test_detect_douyin_short_url (test_downloader_utils.TestPlatformDetection.test_detect_douyin_short_url) ... ok
+test_detect_empty (test_downloader_utils.TestPlatformDetection.test_detect_empty) ... ok
+test_detect_kuaishou (test_downloader_utils.TestPlatformDetection.test_detect_kuaishou) ... ok
+test_detect_none (test_downloader_utils.TestPlatformDetection.test_detect_none) ... ok
+test_detect_tiktok (test_downloader_utils.TestPlatformDetection.test_detect_tiktok) ... ok
+test_detect_unknown (test_downloader_utils.TestPlatformDetection.test_detect_unknown) ... ok
+test_detect_youtube (test_downloader_utils.TestPlatformDetection.test_detect_youtube) ... ok
+test_detect_youtube_short (test_downloader_utils.TestPlatformDetection.test_detect_youtube_short) ... ok
+test_empty_name (test_downloader_utils.TestSafeFilename.test_empty_name) ... ok
+test_filename_with_special_chars (test_downloader_utils.TestSafeFilename.test_filename_with_special_chars) ... ok
+test_illegal_characters (test_downloader_utils.TestSafeFilename.test_illegal_characters) ... ok
+test_length_limit (test_downloader_utils.TestSafeFilename.test_length_limit) ... ok
+test_normal_name (test_downloader_utils.TestSafeFilename.test_normal_name) ... ok
+test_trim_dots (test_downloader_utils.TestSafeFilename.test_trim_dots) ... ok
+test_trim_whitespace (test_downloader_utils.TestSafeFilename.test_trim_whitespace) ... ok
+test_unicode_filename (test_downloader_utils.TestSafeFilename.test_unicode_filename) ... ok
+test_convert_video_nonexistent_file (test_ffmpeg_toolkit.TestFFmpegToolkitConvertVideoFormat.test_convert_video_nonexis
+tent_file) ... ok
+test_convert_video_success (test_ffmpeg_toolkit.TestFFmpegToolkitConvertVideoFormat.test_convert_video_success) ... ok
+test_extract_audio_bitrate_default (test_ffmpeg_toolkit.TestFFmpegToolkitExtractAudio.test_extract_audio_bitrate_defaul
+t) ... ok
+test_extract_audio_ffmpeg_failure (test_ffmpeg_toolkit.TestFFmpegToolkitExtractAudio.test_extract_audio_ffmpeg_failure)
+ ... ok
+test_extract_audio_nonexistent_file (test_ffmpeg_toolkit.TestFFmpegToolkitExtractAudio.test_extract_audio_nonexistent_f
+ile) ... ok
+test_extract_audio_timeout (test_ffmpeg_toolkit.TestFFmpegToolkitExtractAudio.test_extract_audio_timeout) ... ok
+test_extract_audio_with_custom_output (test_ffmpeg_toolkit.TestFFmpegToolkitExtractAudio.test_extract_audio_with_custom
+_output) ... ok
+test_extract_audio_segment_nonexistent_file (test_ffmpeg_toolkit.TestFFmpegToolkitExtractAudioSegment.test_extract_audi
+o_segment_nonexistent_file) ... ok
+test_extract_audio_segment_valid (test_ffmpeg_toolkit.TestFFmpegToolkitExtractAudioSegment.test_extract_audio_segment_v
+alid) ... ok
+test_extract_video_segment_no_audio (test_ffmpeg_toolkit.TestFFmpegToolkitExtractVideoSegment.test_extract_video_segmen
+t_no_audio) ... ok
+test_extract_video_segment_nonexistent_file (test_ffmpeg_toolkit.TestFFmpegToolkitExtractVideoSegment.test_extract_vide
+o_segment_nonexistent_file) ... ok
+test_extract_video_segment_with_audio (test_ffmpeg_toolkit.TestFFmpegToolkitExtractVideoSegment.test_extract_video_segm
+ent_with_audio) ... ok
+test_get_media_info_ffprobe_error (test_ffmpeg_toolkit.TestFFmpegToolkitGetMediaInfo.test_get_media_info_ffprobe_error)
+ ... ok
+test_get_media_info_nonexistent_file (test_ffmpeg_toolkit.TestFFmpegToolkitGetMediaInfo.test_get_media_info_nonexistent
+_file) ... ok
+test_get_media_info_valid_output (test_ffmpeg_toolkit.TestFFmpegToolkitGetMediaInfo.test_get_media_info_valid_output) .
+.. ok
+test_get_audio_codec_flac (test_ffmpeg_toolkit.TestFFmpegToolkitHelpers.test_get_audio_codec_flac) ... ok
+test_get_audio_codec_m4a (test_ffmpeg_toolkit.TestFFmpegToolkitHelpers.test_get_audio_codec_m4a) ... ok
+test_get_audio_codec_mp3 (test_ffmpeg_toolkit.TestFFmpegToolkitHelpers.test_get_audio_codec_mp3) ... ok
+test_get_audio_codec_unknown (test_ffmpeg_toolkit.TestFFmpegToolkitHelpers.test_get_audio_codec_unknown) ... ok
+test_get_audio_codec_wav (test_ffmpeg_toolkit.TestFFmpegToolkitHelpers.test_get_audio_codec_wav) ... ok
+test_config_has_required_keys (test_ffmpeg_toolkit.TestFFmpegToolkitInit.test_config_has_required_keys) ... ok
+test_init_with_default_config (test_ffmpeg_toolkit.TestFFmpegToolkitInit.test_init_with_default_config) ... ok
+test_test_ffmpeg_both_available (test_ffmpeg_toolkit.TestFFmpegToolkitTestFFmpeg.test_test_ffmpeg_both_available) ... o
+k
+test_test_ffmpeg_both_unavailable (test_ffmpeg_toolkit.TestFFmpegToolkitTestFFmpeg.test_test_ffmpeg_both_unavailable) .
+.. ok
+test_test_ffmpeg_ffmpeg_only (test_ffmpeg_toolkit.TestFFmpegToolkitTestFFmpeg.test_test_ffmpeg_ffmpeg_only) ... ok
+test_filter_bpm_match (test_hybrid_retriever.TestFilterByAudioFeatures.test_filter_bpm_match) ... ok
+test_filter_combined (test_hybrid_retriever.TestFilterByAudioFeatures.test_filter_combined) ... ok
+test_filter_duration_range (test_hybrid_retriever.TestFilterByAudioFeatures.test_filter_duration_range) ... ok
+test_filter_empty_items (test_hybrid_retriever.TestFilterByAudioFeatures.test_filter_empty_items) ... ok
+test_filter_genre_match (test_hybrid_retriever.TestFilterByAudioFeatures.test_filter_genre_match) ... ok
+test_filter_mood_match (test_hybrid_retriever.TestFilterByAudioFeatures.test_filter_mood_match) ... ok
+test_filter_no_audio_features (test_hybrid_retriever.TestFilterByAudioFeatures.test_filter_no_audio_features) ... ok
+test_hybrid_search_empty_results (test_hybrid_retriever.TestHybridSearch.test_hybrid_search_empty_results)
+不存在的索引文件应返回空列表 ... 索引加载失败: [Errno 2] No such file or directory: 'nonexistent.json'
+ok
+test_hybrid_search_weights (test_hybrid_retriever.TestHybridSearch.test_hybrid_search_weights)
+联合搜索应正确融合语义和音频权重 ... ok
+test_search_by_image_empty_index (test_hybrid_retriever.TestSemanticSearch.test_search_by_image_empty_index)
+不存在的索引文件应返回空列表 ... 索引加载失败: [Errno 2] No such file or directory: 'nonexistent.json'
+ok
+test_semantic_search_empty_index (test_hybrid_retriever.TestSemanticSearch.test_semantic_search_empty_index)
+不存在的索引文件应返回空列表 ... 索引加载失败: [Errno 2] No such file or directory: 'nonexistent.json'
+ok
+test_array_preserves_order (test_mcp_signature.TestCanonicalize.test_array_preserves_order) ... ok
+test_nested_object (test_mcp_signature.TestCanonicalize.test_nested_object) ... ok
+test_simple_object (test_mcp_signature.TestCanonicalize.test_simple_object) ... ok
+test_string_escaping (test_mcp_signature.TestCanonicalize.test_string_escaping) ... ok
+test_generates_string (test_mcp_signature.TestGenerateSecret.test_generates_string) ... ok
+test_generates_unique (test_mcp_signature.TestGenerateSecret.test_generates_unique) ... ok
+test_hex_format (test_mcp_signature.TestGenerateSecret.test_hex_format) ... ok
+test_sign_adds_signature (test_mcp_signature.TestSignAndVerify.test_sign_adds_signature) ... ok
+test_sign_deterministic (test_mcp_signature.TestSignAndVerify.test_sign_deterministic) ... ok
+test_verify_empty_secret_fails (test_mcp_signature.TestSignAndVerify.test_verify_empty_secret_fails) ... ok
+test_verify_expired_timestamp_fails (test_mcp_signature.TestSignAndVerify.test_verify_expired_timestamp_fails) ... ok
+test_verify_future_timestamp_fails (test_mcp_signature.TestSignAndVerify.test_verify_future_timestamp_fails) ... ok
+test_verify_missing_signature_fails (test_mcp_signature.TestSignAndVerify.test_verify_missing_signature_fails) ... ok
+test_verify_tampered_fails (test_mcp_signature.TestSignAndVerify.test_verify_tampered_fails) ... ok
+test_verify_valid_signature (test_mcp_signature.TestSignAndVerify.test_verify_valid_signature) ... ok
+test_verify_wrong_secret_fails (test_mcp_signature.TestSignAndVerify.test_verify_wrong_secret_fails) ... ok
+test_extract_bpm_exact (test_semantic_parser.TestBPMExtraction.test_extract_bpm_exact) ... ok
+test_extract_bpm_range_keyword_fast (test_semantic_parser.TestBPMExtraction.test_extract_bpm_range_keyword_fast) ... ok
+test_extract_bpm_range_keyword_slow (test_semantic_parser.TestBPMExtraction.test_extract_bpm_range_keyword_slow) ... ok
+test_extract_bpm_with_spaces (test_semantic_parser.TestBPMExtraction.test_extract_bpm_with_spaces) ... ok
+test_platform_keywords_contains_common_platforms (test_semantic_parser.TestPlatformKeywordsUniqueness.test_platform_key
+words_contains_common_platforms)
+验证PLATFORM_KEYWORDS包含常见平台 ... ok
+test_platform_keywords_no_duplicates (test_semantic_parser.TestPlatformKeywordsUniqueness.test_platform_keywords_no_dup
+licates)
+验证PLATFORM_KEYWORDS字典中没有重复键 ... ok
+test_parse_bpm_exact_value (test_semantic_parser.TestSemanticParser.test_parse_bpm_exact_value) ... ok
+test_parse_bpm_lowercase (test_semantic_parser.TestSemanticParser.test_parse_bpm_lowercase) ... ok
+test_parse_bpm_range_keyword (test_semantic_parser.TestSemanticParser.test_parse_bpm_range_keyword) ... ok
+test_parse_combined_query (test_semantic_parser.TestSemanticParser.test_parse_combined_query) ... ok
+test_parse_confidence_calculation (test_semantic_parser.TestSemanticParser.test_parse_confidence_calculation) ... ok
+test_parse_empty_input (test_semantic_parser.TestSemanticParser.test_parse_empty_input) ... ok
+test_parse_genre_chinese_folk (test_semantic_parser.TestSemanticParser.test_parse_genre_chinese_folk) ... ok
+test_parse_genre_pop (test_semantic_parser.TestSemanticParser.test_parse_genre_pop) ... ok
+test_parse_genre_rock (test_semantic_parser.TestSemanticParser.test_parse_genre_rock) ... ok
+test_parse_media_type_audio (test_semantic_parser.TestSemanticParser.test_parse_media_type_audio) ... ok
+test_parse_media_type_image (test_semantic_parser.TestSemanticParser.test_parse_media_type_image) ... ok
+test_parse_media_type_video (test_semantic_parser.TestSemanticParser.test_parse_media_type_video) ... ok
+test_parse_mood_excited (test_semantic_parser.TestSemanticParser.test_parse_mood_excited) ... ok
+test_parse_mood_happy (test_semantic_parser.TestSemanticParser.test_parse_mood_happy) ... ok
+test_parse_mood_sad (test_semantic_parser.TestSemanticParser.test_parse_mood_sad) ... ok
+test_parse_platform_douyin (test_semantic_parser.TestSemanticParser.test_parse_platform_douyin) ... ok
+test_parse_platform_multiple (test_semantic_parser.TestSemanticParser.test_parse_platform_multiple) ... ok
+test_parse_quality_bluray (test_semantic_parser.TestSemanticParser.test_parse_quality_bluray) ... ok
+test_parse_quality_high (test_semantic_parser.TestSemanticParser.test_parse_quality_high) ... ok
+test_parse_semantic_query_cleaning (test_semantic_parser.TestSemanticParser.test_parse_semantic_query_cleaning) ... ok
+test_parse_tags_extraction (test_semantic_parser.TestSemanticParser.test_parse_tags_extraction) ... ok
+test_parse_watermark_free (test_semantic_parser.TestSemanticParser.test_parse_watermark_free) ... ok
+test_parse_watermark_free_other (test_semantic_parser.TestSemanticParser.test_parse_watermark_free_other) ... ok
+test_extract_semantic_query_over_cleaning_protection (test_semantic_parser.TestSemanticQueryExtraction.test_extract_sem
+antic_query_over_cleaning_protection) ... ok
+test_extract_semantic_query_preserves_meaning (test_semantic_parser.TestSemanticQueryExtraction.test_extract_semantic_q
+uery_preserves_meaning) ... ok
+test_extract_semantic_query_removes_keywords (test_semantic_parser.TestSemanticQueryExtraction.test_extract_semantic_qu
+ery_removes_keywords) ... ok
+test_extract_semantic_query_short_text_preserved (test_semantic_parser.TestSemanticQueryExtraction.test_extract_semanti
+c_query_short_text_preserved) ... ok
+test_extractor_fallback (test_smart_matcher.TestAudioFeatureSet.test_extractor_fallback) ... ok
+test_infer_mood (test_smart_matcher.TestAudioFeatureSet.test_infer_mood) ... ok
+test_to_dict (test_smart_matcher.TestAudioFeatureSet.test_to_dict) ... ok
+test_deduplicate (test_smart_matcher.TestCrossPlatformSearcher.test_deduplicate) ... ok
+test_evaluate_quality (test_smart_matcher.TestCrossPlatformSearcher.test_evaluate_quality) ... ok
+test_evaluate_quality_with_zero_view_count (test_smart_matcher.TestCrossPlatformSearcher.test_evaluate_quality_with_zer
+o_view_count)
+测试view_count为0时不应崩溃 ... ok
+test_merge_results (test_smart_matcher.TestCrossPlatformSearcher.test_merge_results) ... ok
+test_title_similarity (test_smart_matcher.TestCrossPlatformSearcher.test_title_similarity) ... ok
+test_fuse_empty (test_smart_matcher.TestRRFFusion.test_fuse_empty) ... ok
+test_fuse_single_list (test_smart_matcher.TestRRFFusion.test_fuse_single_list) ... ok
+test_fuse_two_lists (test_smart_matcher.TestRRFFusion.test_fuse_two_lists) ... ok
+test_fuse_with_weights (test_smart_matcher.TestRRFFusion.test_fuse_with_weights) ... ok
+test_rrf_score_formula (test_smart_matcher.TestRRFFusion.test_rrf_score_formula)
+验证RRF公式: score = weight / (k + rank) ... ok
+test_bpm_extraction (test_smart_matcher.TestSemanticParser.test_bpm_extraction) ... ok
+test_complex_query (test_smart_matcher.TestSemanticParser.test_complex_query) ... ok
+test_confidence_increases_with_features (test_smart_matcher.TestSemanticParser.test_confidence_increases_with_features)
+ ... ok
+test_empty_input (test_smart_matcher.TestSemanticParser.test_empty_input) ... ok
+test_genre_extraction (test_smart_matcher.TestSemanticParser.test_genre_extraction) ... ok
+test_kuaishou_not_matched_as_bpm (test_smart_matcher.TestSemanticParser.test_kuaishou_not_matched_as_bpm)
+快手不应被BPM范围词'快'误匹配 ... ok
+test_media_type_extraction (test_smart_matcher.TestSemanticParser.test_media_type_extraction) ... ok
+test_mood_extraction (test_smart_matcher.TestSemanticParser.test_mood_extraction) ... ok
+test_platform_extraction (test_smart_matcher.TestSemanticParser.test_platform_extraction) ... ok
+test_quality_extraction (test_smart_matcher.TestSemanticParser.test_quality_extraction) ... ok
+test_semantic_query_cleanup (test_smart_matcher.TestSemanticParser.test_semantic_query_cleanup) ... ok
+test_watermark_extraction (test_smart_matcher.TestSemanticParser.test_watermark_extraction) ... ok
+test_engine_info (test_smart_matcher.TestSmartMatcher.test_engine_info) ... 离线模式：CLAP使用模拟向量生成
+ok
+test_extract_audio_nonexistent (test_smart_matcher.TestSmartMatcher.test_extract_audio_nonexistent) ... 离线模式：CLAP使用模拟向量
+生成
+ok
+test_match_no_index (test_smart_matcher.TestSmartMatcher.test_match_no_index) ... 离线模式：CLAP使用模拟向量生成
+ok
+test_match_parsed_query (test_smart_matcher.TestSmartMatcher.test_match_parsed_query) ... 离线模式：CLAP使用模拟向量生成
+ok
+test_record_action (test_smart_matcher.TestSmartMatcher.test_record_action) ... 离线模式：CLAP使用模拟向量生成
+ok
+test_adjust_weights (test_smart_matcher.TestSmartRanker.test_adjust_weights) ... ok
+test_default_weights (test_smart_matcher.TestSmartRanker.test_default_weights) ... ok
+test_diversity (test_smart_matcher.TestSmartRanker.test_diversity) ... ok
+test_rank_empty (test_smart_matcher.TestSmartRanker.test_rank_empty) ... ok
+test_rank_with_results (test_smart_matcher.TestSmartRanker.test_rank_with_results) ... ok
+test_cold_start (test_smart_matcher.TestUserPreference.test_cold_start) ... ok
+test_personalize_cold_start (test_smart_matcher.TestUserPreference.test_personalize_cold_start) ... ok
+test_personalize_with_history (test_smart_matcher.TestUserPreference.test_personalize_with_history) ... ok
+test_personalize_with_invalid_bpm (test_smart_matcher.TestUserPreference.test_personalize_with_invalid_bpm)
+测试personalize_results处理无效BPM值 ... ok
+test_record_action_with_invalid_bpm (test_smart_matcher.TestUserPreference.test_record_action_with_invalid_bpm)
+测试BPM为无效值时不应崩溃 ... ok
+test_record_and_retrieve (test_smart_matcher.TestUserPreference.test_record_and_retrieve) ... ok
+test_suggested_queries (test_smart_matcher.TestUserPreference.test_suggested_queries) ... ok
+test_diversity_adjusts_scores (test_smart_ranker.TestDiversityGuarantee.test_diversity_adjusts_scores) ... ok
+test_diversity_penalty (test_smart_ranker.TestDiversityGuarantee.test_diversity_penalty) ... ok
+test_diversity_with_few_results (test_smart_ranker.TestDiversityGuarantee.test_diversity_with_few_results) ... ok
+test_calculate_freshness_score_30_days (test_smart_ranker.TestFreshnessScoreCalculation.test_calculate_freshness_score_
+30_days) ... ok
+test_calculate_freshness_score_invalid_date (test_smart_ranker.TestFreshnessScoreCalculation.test_calculate_freshness_s
+core_invalid_date) ... ok
+test_calculate_freshness_score_no_metadata (test_smart_ranker.TestFreshnessScoreCalculation.test_calculate_freshness_sc
+ore_no_metadata) ... ok
+test_calculate_freshness_score_recent (test_smart_ranker.TestFreshnessScoreCalculation.test_calculate_freshness_score_r
+ecent) ... ok
+test_mood_adjustment_happy (test_smart_ranker.TestMoodWeightAdjustments.test_mood_adjustment_happy) ... ok
+test_mood_adjustment_romantic (test_smart_ranker.TestMoodWeightAdjustments.test_mood_adjustment_romantic) ... ok
+test_mood_adjustment_unknown (test_smart_ranker.TestMoodWeightAdjustments.test_mood_adjustment_unknown) ... ok
+test_score_audio (test_smart_ranker.TestMultiDimensionScoring.test_score_audio) ... ok
+test_score_freshness (test_smart_ranker.TestMultiDimensionScoring.test_score_freshness) ... ok
+test_score_freshness_no_timestamp (test_smart_ranker.TestMultiDimensionScoring.test_score_freshness_no_timestamp) ... o
+k
+test_score_popularity (test_smart_ranker.TestMultiDimensionScoring.test_score_popularity) ... ok
+test_score_quality (test_smart_ranker.TestMultiDimensionScoring.test_score_quality) ... ok
+test_score_semantic (test_smart_ranker.TestMultiDimensionScoring.test_score_semantic) ... ok
+test_calculate_popularity_score_high (test_smart_ranker.TestPopularityScoreCalculation.test_calculate_popularity_score_
+high) ... ok
+test_calculate_popularity_score_medium (test_smart_ranker.TestPopularityScoreCalculation.test_calculate_popularity_scor
+e_medium) ... ok
+test_calculate_popularity_score_zero (test_smart_ranker.TestPopularityScoreCalculation.test_calculate_popularity_score_
+zero) ... ok
+test_rank_empty_results (test_smart_ranker.TestSmartRankerBasic.test_rank_empty_results) ... ok
+test_rank_results_with_scores (test_smart_ranker.TestSmartRankerBasic.test_rank_results_with_scores) ... ok
+test_rank_single_result (test_smart_ranker.TestSmartRankerBasic.test_rank_single_result) ... ok
+test_adjust_weights_clamping (test_smart_ranker.TestWeightAdjustments.test_adjust_weights_clamping) ... ok
+test_adjust_weights_decrease (test_smart_ranker.TestWeightAdjustments.test_adjust_weights_decrease) ... ok
+test_adjust_weights_increase (test_smart_ranker.TestWeightAdjustments.test_adjust_weights_increase) ... ok
+test_adjust_weights_invalid_key (test_smart_ranker.TestWeightAdjustments.test_adjust_weights_invalid_key) ... ok
+test_get_weight_summary (test_smart_ranker.TestWeightAdjustments.test_get_weight_summary) ... ok
+test_instance_caching (test_unified_downloader.TestModuleLoader.test_instance_caching)
+验证缓存key命中时返回缓存实例 ... ok
+test_reset_clears_cache (test_unified_downloader.TestModuleLoader.test_reset_clears_cache) ... ok
+test_detect_platform_bilibili (test_unified_downloader.TestUnifiedDownloaderDetection.test_detect_platform_bilibili) ..
+. ok
+test_detect_platform_douyin (test_unified_downloader.TestUnifiedDownloaderDetection.test_detect_platform_douyin) ... ok
+test_detect_platform_empty (test_unified_downloader.TestUnifiedDownloaderDetection.test_detect_platform_empty) ... ok
+test_detect_platform_kuaishou (test_unified_downloader.TestUnifiedDownloaderDetection.test_detect_platform_kuaishou) ..
+. ok
+test_detect_platform_tiktok (test_unified_downloader.TestUnifiedDownloaderDetection.test_detect_platform_tiktok) ... ok
+test_detect_platform_unknown (test_unified_downloader.TestUnifiedDownloaderDetection.test_detect_platform_unknown) ... 
+ok
+test_detect_platform_youtube (test_unified_downloader.TestUnifiedDownloaderDetection.test_detect_platform_youtube) ... 
+ok
+test_download_bgm_unknown_platform (test_unified_downloader.TestUnifiedDownloaderDownload.test_download_bgm_unknown_pla
+tform) ... ok
+test_download_unknown_platform (test_unified_downloader.TestUnifiedDownloaderDownload.test_download_unknown_platform) .
+.. ok
+test_download_unsupported_platform (test_unified_downloader.TestUnifiedDownloaderDownload.test_download_unsupported_pla
+tform) ... ok
+test_get_video_info_unknown_platform (test_unified_downloader.TestUnifiedDownloaderDownload.test_get_video_info_unknown
+_platform) ... ok
+test_get_video_info_unsupported_platform (test_unified_downloader.TestUnifiedDownloaderDownload.test_get_video_info_uns
+upported_platform) ... ok
+test_default_empty_keys (test_unified_search.TestAPIKeyLoading.test_default_empty_keys) ... ok
+test_env_var_priority (test_unified_search.TestAPIKeyLoading.test_env_var_priority) ... ok
+test_empty_results (test_unified_search.TestDedupResults.test_empty_results) ... ok
+test_exact_duplicates (test_unified_search.TestDedupResults.test_exact_duplicates) ... ok
+test_no_duplicates (test_unified_search.TestDedupResults.test_no_duplicates) ... ok
+test_results_without_title (test_unified_search.TestDedupResults.test_results_without_title) ... ok
+test_similar_duplicates (test_unified_search.TestDedupResults.test_similar_duplicates) ... ok
+test_empty_media_id (test_unified_search.TestDownloadMediaValidation.test_empty_media_id) ... ok
+test_empty_output_dir (test_unified_search.TestDownloadMediaValidation.test_empty_output_dir) ... ok
+test_invalid_platform (test_unified_search.TestDownloadMediaValidation.test_invalid_platform) ... ok
+test_safe_call_exception (test_unified_search.TestSafeCall.test_safe_call_exception) ... ok
+test_safe_call_success (test_unified_search.TestSafeCall.test_safe_call_success) ... ok
+test_supported_media_types (test_unified_search.TestSupportedConstants.test_supported_media_types) ... ok
+test_supported_platforms (test_unified_search.TestSupportedConstants.test_supported_platforms) ... ok
+test_case_insensitive (test_unified_search.TestTitleSimilarity.test_case_insensitive) ... ok
+test_completely_different (test_unified_search.TestTitleSimilarity.test_completely_different) ... ok
+test_empty_title (test_unified_search.TestTitleSimilarity.test_empty_title) ... ok
+test_identical_titles (test_unified_search.TestTitleSimilarity.test_identical_titles) ... ok
+test_one_empty_title (test_unified_search.TestTitleSimilarity.test_one_empty_title) ... ok
+test_partial_match (test_unified_search.TestTitleSimilarity.test_partial_match) ... ok
+test_punctuation_stripped (test_unified_search.TestTitleSimilarity.test_punctuation_stripped) ... ok
+test_empty_query (test_unified_search.TestUnifiedSearchValidation.test_empty_query) ... ok
+test_invalid_media_type (test_unified_search.TestUnifiedSearchValidation.test_invalid_media_type) ... ok
+test_no_api_keys (test_unified_search.TestUnifiedSearchValidation.test_no_api_keys) ... ok
+test_per_page_too_large (test_unified_search.TestUnifiedSearchValidation.test_per_page_too_large) ... ok
+test_per_page_too_small (test_unified_search.TestUnifiedSearchValidation.test_per_page_too_small) ... ok
+test_query_not_string (test_unified_search.TestUnifiedSearchValidation.test_query_not_string) ... ok
+test_search_images_shortcut (test_unified_search.TestUnifiedSearchValidation.test_search_images_shortcut) ... ok
+test_search_music_shortcut (test_unified_search.TestUnifiedSearchValidation.test_search_music_shortcut) ... ok
+test_search_videos_shortcut (test_unified_search.TestUnifiedSearchValidation.test_search_videos_shortcut) ... ok
+test_action_weights_download (test_user_preference.TestActionWeights.test_action_weights_download) ... ok
+test_action_weights_like (test_user_preference.TestActionWeights.test_action_weights_like) ... ok
+test_action_weights_skip (test_user_preference.TestActionWeights.test_action_weights_skip) ... ok
+test_cold_start_false (test_user_preference.TestColdStartHandling.test_cold_start_false) ... ok
+test_cold_start_true (test_user_preference.TestColdStartHandling.test_cold_start_true) ... ok
+test_personalize_results_cold_start (test_user_preference.TestColdStartHandling.test_personalize_results_cold_start) ..
+. ok
+test_personalize_results_bpm_match (test_user_preference.TestPersonalizedRecommendation.test_personalize_results_bpm_ma
+tch) ... ok
+test_personalize_results_genre_match (test_user_preference.TestPersonalizedRecommendation.test_personalize_results_genr
+e_match) ... ok
+test_personalize_results_mood_match (test_user_preference.TestPersonalizedRecommendation.test_personalize_results_mood_
+match) ... ok
+test_personalize_results_platform_match (test_user_preference.TestPersonalizedRecommendation.test_personalize_results_p
+latform_match) ... ok
+test_personalize_results_quality_match (test_user_preference.TestPersonalizedRecommendation.test_personalize_results_qu
+ality_match) ... ok
+test_learn_bpm_preference (test_user_preference.TestPreferenceLearning.test_learn_bpm_preference) ... ok
+test_learn_genre_preference (test_user_preference.TestPreferenceLearning.test_learn_genre_preference) ... ok
+test_learn_mood_preference (test_user_preference.TestPreferenceLearning.test_learn_mood_preference) ... ok
+test_learn_platform_preference (test_user_preference.TestPreferenceLearning.test_learn_platform_preference) ... ok
+test_preference_normalization (test_user_preference.TestPreferenceLearning.test_preference_normalization) ... ok
+test_recent_actions_limit (test_user_preference.TestRecentActionsLimit.test_recent_actions_limit) ... ok
+test_get_suggested_queries_cold_start (test_user_preference.TestSuggestedQueries.test_get_suggested_queries_cold_start)
+ ... ok
+test_get_suggested_queries_count (test_user_preference.TestSuggestedQueries.test_get_suggested_queries_count) ... ok
+test_get_suggested_queries_with_preferences (test_user_preference.TestSuggestedQueries.test_get_suggested_queries_with_
+preferences) ... ok
+test_record_action_download (test_user_preference.TestUserPreferenceBasic.test_record_action_download) ... ok
+test_record_action_empty (test_user_preference.TestUserPreferenceBasic.test_record_action_empty) ... ok
+test_record_action_search (test_user_preference.TestUserPreferenceBasic.test_record_action_search) ... ok
+test_clean_nonexistent (test_vector_store.TestCleanIndex.test_clean_nonexistent) ... ok
+test_clean_valid (test_vector_store.TestCleanIndex.test_clean_valid) ... ok
+test_stats_nonexistent (test_vector_store.TestGetIndexStats.test_stats_nonexistent) ... ok
+test_stats_valid (test_vector_store.TestGetIndexStats.test_stats_valid) ... ok
+test_load_invalid_json (test_vector_store.TestLoadIndex.test_load_invalid_json) ... ok
+test_load_nonexistent (test_vector_store.TestLoadIndex.test_load_nonexistent) ... ok
+test_load_valid_index (test_vector_store.TestLoadIndex.test_load_valid_index) ... ok
+test_merge_duplicates (test_vector_store.TestMergeIndexes.test_merge_duplicates) ... ok
+test_merge_empty_list (test_vector_store.TestMergeIndexes.test_merge_empty_list) ... ok
+test_merge_multiple_indexes (test_vector_store.TestMergeIndexes.test_merge_multiple_indexes) ... ok
+test_merge_single_index (test_vector_store.TestMergeIndexes.test_merge_single_index) ... ok
+test_save_index (test_vector_store.TestSaveIndex.test_save_index) ... ok
+test_save_index_with_parent_dir (test_vector_store.TestSaveIndex.test_save_index_with_parent_dir) ... ok
+test_validate_invalid_vector (test_vector_store.TestValidateIndex.test_validate_invalid_vector) ... ok
+test_validate_missing_fields (test_vector_store.TestValidateIndex.test_validate_missing_fields) ... ok
+test_validate_nonexistent (test_vector_store.TestValidateIndex.test_validate_nonexistent) ... ok
+test_validate_valid_empty (test_vector_store.TestValidateIndex.test_validate_valid_empty) ... ok
+
+----------------------------------------------------------------------
+Ran 406 tests in 0.293s
+
+OK

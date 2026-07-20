@@ -1,0 +1,161 @@
+{
+  "version": "1.0",
+  "description": "木偶风格化预设配置 - 支持运行时热加载和自定义扩展",
+  "presets": {
+    "wooden_puppet": {
+      "name": "wooden_puppet",
+      "display_name": "木质木偶",
+      "category": "材质风格",
+      "description": "经典木质木偶效果，木纹纹理、暖棕色调、硬边描边",
+      "keywords": ["木质", "木偶", "木纹", "暖色调", "传统"],
+      "intensity_range": [0.3, 1.8],
+      "material": "wooden_puppet",
+      "stop_motion": null,
+      "joint_preset": "simple_puppet",
+      "joint_config": {
+        "show_joint_seams": true,
+        "seam_radius": 10.0,
+        "show_strings": false,
+        "joint_gap": 3.0
+      },
+      "mini_scene_preset": "theater_stage",
+      "face_puppet_enabled": true,
+      "face_preset": "classic_button"
+    },
+    "ceramic_puppet": {
+      "name": "ceramic_puppet",
+      "display_name": "陶瓷木偶",
+      "category": "材质风格",
+      "description": "精致陶瓷木偶效果，瓷釉高光、冷色调、光滑质感",
+      "keywords": ["陶瓷", "瓷釉", "光滑", "冷色调", "精致"],
+      "intensity_range": [0.3, 2.0],
+      "material": "ceramic_puppet",
+      "stop_motion": null,
+      "joint_preset": "simple_puppet",
+      "joint_config": {
+        "show_joint_seams": false,
+        "show_strings": false,
+        "joint_gap": 0.0
+      },
+      "mini_scene_preset": "toy_table",
+      "face_puppet_enabled": true,
+      "face_preset": "porcelain_doll"
+    },
+    "cloth_puppet": {
+      "name": "cloth_puppet",
+      "display_name": "布偶/毛绒",
+      "category": "材质风格",
+      "description": "柔软布偶效果，毛绒纹理、粗糙边缘、柔和色彩",
+      "keywords": ["布偶", "毛绒", "柔软", "温暖", "可爱"],
+      "intensity_range": [0.2, 1.5],
+      "material": "cloth_puppet",
+      "stop_motion": null,
+      "joint_preset": "simple_puppet",
+      "joint_config": {
+        "show_joint_seams": true,
+        "seam_radius": 12.0,
+        "show_strings": false,
+        "joint_gap": 2.0
+      },
+      "mini_scene_preset": "toy_table",
+      "face_puppet_enabled": true,
+      "face_preset": "rag_doll"
+    },
+    "clay_puppet": {
+      "name": "clay_puppet",
+      "display_name": "黏土/橡皮泥",
+      "category": "材质风格",
+      "description": "黏土动画效果，指纹纹理、圆润边缘、柔和对比",
+      "keywords": ["黏土", "橡皮泥", "圆润", "手工", "童趣"],
+      "intensity_range": [0.3, 1.8],
+      "material": "clay_puppet",
+      "stop_motion": "12fps_smooth",
+      "joint_preset": "simple_puppet",
+      "joint_config": {
+        "show_joint_seams": false,
+        "show_strings": false,
+        "joint_gap": 1.0
+      },
+      "mini_scene_preset": "toy_table",
+      "face_puppet_enabled": false,
+      "face_preset": "classic_button"
+    },
+    "metal_puppet": {
+      "name": "metal_puppet",
+      "display_name": "金属木偶",
+      "category": "材质风格",
+      "description": "机械金属木偶效果，冷钢色调、高对比度、金属高光",
+      "keywords": ["金属", "机械", "冷色调", "工业", "朋克"],
+      "intensity_range": [0.4, 2.0],
+      "material": "metal_puppet",
+      "stop_motion": null,
+      "joint_preset": "human_upper_body",
+      "joint_config": {
+        "show_joint_seams": true,
+        "seam_radius": 8.0,
+        "show_strings": false,
+        "joint_gap": 4.0
+      },
+      "mini_scene_preset": "miniature_city",
+      "face_puppet_enabled": false,
+      "face_preset": "classic_button"
+    },
+    "stop_motion_basic": {
+      "name": "stop_motion_basic",
+      "display_name": "基础定格动画",
+      "category": "动画风格",
+      "description": "经典定格动画效果，12fps、轻微抖动和闪烁",
+      "keywords": ["定格", "逐帧", "定格动画", "经典", "复古"],
+      "intensity_range": [0.2, 1.5],
+      "material": null,
+      "stop_motion": "12fps_smooth",
+      "joint_preset": null,
+      "joint_config": {},
+      "mini_scene_preset": null,
+      "face_puppet_enabled": false,
+      "face_preset": "classic_button"
+    },
+    "marionette": {
+      "name": "marionette",
+      "display_name": "提线木偶",
+      "category": "动画风格",
+      "description": "提线木偶效果，木质材质+悬挂线+摆动动画",
+      "keywords": ["提线", "悬挂", "木偶", "摆动", "传统"],
+      "intensity_range": [0.3, 1.8],
+      "material": "wooden_puppet",
+      "stop_motion": "8fps_classic",
+      "joint_preset": "marionette_basic",
+      "joint_config": {
+        "show_joint_seams": true,
+        "seam_radius": 12.0,
+        "show_strings": true,
+        "string_count": 4,
+        "string_opacity": 0.65,
+        "joint_gap": 4.0
+      },
+      "mini_scene_preset": "marionette_stage",
+      "face_puppet_enabled": true,
+      "face_preset": "classic_button"
+    },
+    "shadow_puppet": {
+      "name": "shadow_puppet",
+      "display_name": "皮影",
+      "category": "动画风格",
+      "description": "中国皮影戏效果，剪影风格、关节可动、暖光投影",
+      "keywords": ["皮影", "剪影", "投影", "中国风", "传统"],
+      "intensity_range": [0.4, 2.0],
+      "material": null,
+      "stop_motion": "15fps_modern",
+      "joint_preset": "simple_puppet",
+      "joint_config": {
+        "show_joint_seams": true,
+        "seam_radius": 6.0,
+        "show_strings": false,
+        "joint_gap": 2.0
+      },
+      "mini_scene_preset": "shadow_puppet",
+      "face_puppet_enabled": true,
+      "face_preset": "stitched"
+    }
+  }
+}

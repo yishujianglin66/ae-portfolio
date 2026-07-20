@@ -1,0 +1,126 @@
+{
+    "_comment": "AE 音频驱动自动化参数配置模板 - 修改此文件即可自定义效果",
+    
+    "audio_settings": {
+        "min_duration_sec": 8.0,
+        "sample_rate": 48000,
+        "bpm_detection": "auto",
+        "force_bpm": null
+    },
+    
+    "beat_detection": {
+        "strong_beat_threshold": 1.3,
+        "local_energy_window_frames": 5,
+        "min_beat_interval_sec": 0.25
+    },
+    
+    "keyframe_templates": {
+        "strong_beat": {
+            "scale": {
+                "frames": [
+                    {"offset_sec": -0.04, "value": [95, 95], "ease": "linear"},
+                    {"offset_sec": 0.00, "value": [120, 120], "ease": "easeOut"},
+                    {"offset_sec": 0.04, "value": [110, 110], "ease": "easeInOut"},
+                    {"offset_sec": 0.08, "value": [102, 102], "ease": "linear"},
+                    {"offset_sec": 0.16, "value": [100, 100], "ease": "linear"}
+                ]
+            },
+            "opacity": {
+                "frames": [
+                    {"offset_sec": 0.00, "value": 100, "ease": "easeOut"},
+                    {"offset_sec": 0.04, "value": 90, "ease": "linear"},
+                    {"offset_sec": 0.12, "value": 80, "ease": "linear"}
+                ]
+            },
+            "rotation": {
+                "base_angle_per_sec": 30,
+                "impact_add": 8,
+                "bounce_sub": 3
+            }
+        },
+        "weak_beat": {
+            "scale": {
+                "frames": [
+                    {"offset_sec": 0.00, "value": [103, 103], "ease": "easeInOut"},
+                    {"offset_sec": 0.08, "value": [100, 100], "ease": "linear"}
+                ]
+            },
+            "opacity": {
+                "frames": [
+                    {"offset_sec": 0.00, "value": 88, "ease": "easeOut"},
+                    {"offset_sec": 0.08, "value": 82, "ease": "linear"}
+                ]
+            }
+        }
+    },
+    
+    "frequency_bands": {
+        "low": {
+            "range_hz": [20, 200],
+            "slider_name": "LowFreq Energy",
+            "target_properties": ["Blur", "ColorTemp"],
+            "description": "低频驱动模糊与色温变化（环境震动）"
+        },
+        "mid": {
+            "range_hz": [500, 2000],
+            "slider_name": "MidFreq Energy",
+            "target_properties": ["Opacity", "Rotation"],
+            "description": "中频驱动视觉核心（人声/兵器）"
+        },
+        "high": {
+            "range_hz": [4000, 12000],
+            "slider_name": "HighFreq Energy",
+            "target_properties": ["Glow", "ParticleRate"],
+            "description": "高频驱动发光与粒子（打击感）"
+        },
+        "global": {
+            "slider_name": "Global Energy",
+            "source": "rms_normalized",
+            "description": "全局RMS能量归一化值"
+        }
+    },
+    
+    "expression_templates": {
+        "opacity_driven": {
+            "template": "eng = thisComp.layer(\"Audio Controller\").effect(\"Global Energy\")(\"Slider\") / 100; base = 70; amp = 30 * eng; base + amp + Math.sin(time * Math.PI * 2 * 2.133) * (10 * eng);",
+            "description": "全局能量驱动的不透明度，叠加正弦波呼吸"
+        },
+        "rotation_driven": {
+            "template": "eng = thisComp.layer(\"Audio Controller\").effect(\"Global Energy\")(\"Slider\") / 100; accum = time * 30; accum + Math.sin(time * Math.PI * 2 * 2.133) * (5 * eng);",
+            "description": "全局能量驱动的旋转，叠加摆动"
+        },
+        "glow_highfreq": {
+            "template": "highEng = thisComp.layer(\"Audio Controller\").effect(\"HighFreq Energy\")(\"Slider\") / 100; baseGlow = 0.3; maxGlow = 3.0; baseGlow + (maxGlow - baseGlow) * highEng;",
+            "description": "高频能量驱动的辉光强度"
+        }
+    },
+    
+    "layer_strategy": {
+        "enabled": false,
+        "background": {
+            "layer_name": "Background",
+            "bind_frequency": "low",
+            "properties": ["Scale", "Blur"]
+        },
+        "foreground": {
+            "layer_name": "Foreground",
+            "bind_frequency": "high",
+            "properties": ["Opacity", "Glow"]
+        }
+    },
+    
+    "style_adaptive": {
+        "enabled": false,
+        "on_beat_threshold": 0.7,
+        "double_time_threshold": 0.35,
+        "half_time_threshold": 0.15,
+        "description": "根据能量自动切换风格：on_beat(正常), double_time(快速), half_time(慢速)"
+    },
+    
+    "render_settings": {
+        "output_format": "H.264",
+        "output_extension": ".mp4",
+        "quality": "Best",
+        "frame_rate": 30
+    }
+}

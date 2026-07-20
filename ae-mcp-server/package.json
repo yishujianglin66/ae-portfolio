@@ -1,0 +1,35 @@
+{
+  "name": "ae-mcp-server",
+  "version": "1.0.0",
+  "description": "Adobe After Effects MCP Server - 通过文件桥接与 AE 通信的 MCP 服务",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "ae-mcp-server": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "inspect": "node --inspect dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "after-effects",
+    "ae",
+    "modelcontextprotocol"
+  ],
+  "author": "AE Knowledge Vault",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,933 @@
+{
+  "$schema": "workflow_presets_v1.json",
+  "version": "1.0.0",
+  "description": "跨工具工作流预设模板库 - 基于知识库中的跨工具集成工作流",
+  "knowledge_base_ref": "跨工具集成工作流-全工具联动指南",
+
+  "presets": {
+    "enhance_quality_4k": {
+      "name": "4K视频质量增强",
+      "description": "低清视频→Topaz 4K超分+降噪+60fps插帧→H.265编码输出",
+      "category": "质量增强",
+      "tags": ["topaz", "ffmpeg", "upscale", "denoise", "interpolate"],
+      "estimated_time": "30-120分钟/小时视频",
+      "quality_level": "high",
+      "steps": [
+        {
+          "step_id": "probe",
+          "name": "素材质量检测",
+          "tool": "ffmpeg",
+          "operation": "probe",
+          "description": "检测输入视频的分辨率、帧率、编码、码率等信息",
+          "params": {},
+          "depends_on": []
+        },
+        {
+          "step_id": "topaz_enhance",
+          "name": "Topaz AI 4K增强",
+          "tool": "topaz_video_ai",
+          "operation": "enhance",
+          "description": "Proteus超分+Artemis降噪+Apollo 60fps插帧",
+          "params": {
+            "model": "proteus",
+            "scale": 2,
+            "denoise_model": "artemis",
+            "interpolate_model": "apollo",
+            "target_fps": 60,
+            "restore_compression": 70,
+            "dehalo": 25,
+            "output_format": "prores422hq"
+          },
+          "depends_on": ["probe"]
+        },
+        {
+          "step_id": "encode_hevc",
+          "name": "H.265编码输出",
+          "tool": "ffmpeg",
+          "operation": "transcode",
+          "description": "H.265 NVENC硬件编码，4K交付格式",
+          "params": {
+            "codec": "hevc_nvenc",
+            "preset": "p7",
+            "cq": 23,
+            "audio_codec": "aac",
+            "audio_bitrate": "320k"
+          },
+          "depends_on": ["topaz_enhance"]
+        }
+      ]
+    },
+
+    "ai_creative_vfx": {
+      "name": "AI创意特效生成",
+      "description": "Pika/Runway生成特效素材→AE合成→风格化调色→输出",
+      "category": "AI创意",
+      "tags": ["runway", "pika", "after_effects", "vfx", "style_transfer"],
+      "estimated_time": "15-60分钟",
+      "quality_level": "medium",
+      "steps": [
+        {
+          "step_id": "generate_asset",
+          "name": "AI生成特效素材",
+          "tool": "runwayml",
+          "operation": "generate",
+          "description": "使用Runway Gen-4.5或Pika生成特效素材",
+          "params": {
+            "generator": "runway_gen45",
+            "prompt": "",
+            "duration": 5,
+            "fps": 24,
+            "resolution": "1080p",
+            "seed": -1
+          },
+          "depends_on": []
+        },
+        {
+          "step_id": "keying",
+          "name": "绿幕抠像",
+          "tool": "after_effects",
+          "operation": "apply_effect",
+          "description": "Keylight精细抠像，边缘优化",
+          "params": {
+            "effect": "Keylight",
+            "screen_color": "#00FF00",
+            "screen_gain": 1.0,
+            "screen_balance": 0.5,
+            "despill_bias": 0.5
+          },
+          "depends_on": ["generate_asset"]
+        },
+        {
+          "step_id": "composite",
+          "name": "AE合成与调色",
+          "tool": "after_effects",
+          "operation": "apply_effect",
+          "description": "色彩匹配+光效合成+运动模糊+颗粒匹配",
+          "params": {
+            "effects": ["Color Balance", "Glow", "CC Force Motion Blur", "Film Grain"]
+          },
+          "depends_on": ["keying"]
+        },
+        {
+          "step_id": "final_render",
+          "name": "最终渲染输出",
+          "tool": "after_effects",
+          "operation": "render",
+          "description": "ProRes 422 HQ输出",
+          "params": {
+            "format": "ProRes 422 HQ",
+            "channels": "RGB+Alpha"
+          },
+          "depends_on": ["composite"]
+        }
+      ]
+    },
+
+    "blender_3d_composite": {
+      "name": "Blender三维合成流水线",
+      "description": "Blender多通道EXR渲染→AE多通道合成→最终调色输出",
+      "category": "三维合成",
+      "tags": ["blender", "after_effects", "3d", "exr", "compositing"],
+      "estimated_time": "1-6小时",
+      "quality_level": "high",
+      "steps": [
+        {
+          "step_id": "blender_render",
+          "name": "Blender多通道渲染",
+          "tool": "blender",
+          "operation": "render",
+          "description": "EXR多通道渲染（Beauty/Depth/Normal/MotionVector/CryptoMatte/AO/Shadow）",
+          "params": {
+            "engine": "CYCLES",
+            "resolution": [1920, 1080],
+            "samples": 256,
+            "frame_start": 1,
+            "frame_end": 60,
+            "fps": 24,
+            "use_gpu": true,
+            "denoise": true,
+            "passes": [
+              "Combined",
+              "Depth",
+              "Normal",
+              "Vector",
+              "CryptoObject",
+              "CryptoMaterial",
+              "AO",
+              "Shadow",
+              "DiffuseDirect",
+              "DiffuseIndirect",
+              "GlossyDirect",
+              "GlossyIndirect",
+              "Emission"
+            ],
+            "output_format": "OPEN_EXR_MULTILAYER",
+            "compression": "PIZ"
+          },
+          "depends_on": []
+        },
+        {
+          "step_id": "ae_import_exr",
+          "name": "导入EXR多通道",
+          "tool": "after_effects",
+          "operation": "import_footage",
+          "description": "导入EXR序列，提取各通道",
+          "params": {
+            "import_as": "composition",
+            "sequence": true,
+            "frame_rate": 24
+          },
+          "depends_on": ["blender_render"]
+        },
+        {
+          "step_id": "ae_depth_of_field",
+          "name": "后期景深",
+          "tool": "after_effects",
+          "operation": "apply_effect",
+          "description": "使用Depth通道添加镜头景深效果",
+          "params": {
+            "effect": "Lens Blur",
+            "depth_channel": "Depth",
+            "focal_distance": 0.5,
+            "focal_size": 0.1,
+            "iris_shape": "hexagon",
+            "iris_rotation": 0,
+            "blur_gain": 1.0
+          },
+          "depends_on": ["ae_import_exr"]
+        },
+        {
+          "step_id": "ae_motion_blur",
+          "name": "运动模糊",
+          "tool": "after_effects",
+          "operation": "apply_effect",
+          "description": "使用Motion Vector通道添加运动模糊",
+          "params": {
+            "effect": "ReelSmart Motion Blur",
+            "vector_channel": "Motion Vectors",
+            "blur_amount": 1.0,
+            "blur_limit": 20
+          },
+          "depends_on": ["ae_depth_of_field"]
+        },
+        {
+          "step_id": "ae_grade",
+          "name": "色彩分级",
+          "tool": "after_effects",
+          "operation": "apply_effect",
+          "description": "使用各分量通道精细调色",
+          "params": {
+            "effects": ["Color Balance", "Curves", "Levels", "Lumetri Color"]
+          },
+          "depends_on": ["ae_motion_blur"]
+        },
+        {
+          "step_id": "final_output",
+          "name": "渲染输出",
+          "tool": "after_effects",
+          "operation": "render",
+          "description": "ProRes 4444 XQ输出",
+          "params": {
+            "format": "ProRes 4444 XQ",
+            "channels": "RGB+Alpha"
+          },
+          "depends_on": ["ae_grade"]
+        }
+      ]
+    },
+
+    "social_media_delivery": {
+      "name": "社交媒体多平台交付",
+      "description": "一键生成B站/抖音/YouTube/微信/视频号等多平台格式",
+      "category": "交付输出",
+      "tags": ["ffmpeg", "delivery", "social_media", "batch"],
+      "estimated_time": "5-30分钟",
+      "quality_level": "high",
+      "steps": [
+        {
+          "step_id": "source_prores",
+          "name": "源文件质量检测",
+          "tool": "ffmpeg",
+          "operation": "probe",
+          "description": "检测源文件参数",
+          "params": {},
+          "depends_on": []
+        },
+        {
+          "step_id": "topaz_enhance",
+          "name": "Topaz输出增强",
+          "tool": "topaz_video_ai",
+          "operation": "enhance",
+          "description": "Rhea增强+Apollo高帧率",
+          "params": {
+            "model": "rhea",
+            "scale": 1,
+            "interpolate_model": "apollo",
+            "target_fps": 60,
+            "sharpen": 60,
+            "output_format": "prores422"
+          },
+          "depends_on": ["source_prores"]
+        },
+        {
+          "step_id": "encode_bilibili",
+          "name": "B站/抖音 1080p",
+          "tool": "ffmpeg",
+          "operation": "transcode",
+          "description": "H.264 1080p 8-12 Mbps",
+          "params": {
+            "codec": "libx264",
+            "preset": "slow",
+            "bitrate": "10M",
+            "maxrate": "15M",
+            "bufsize": "20M",
+            "audio_codec": "aac",
+            "audio_bitrate": "320k",
+            "resolution": "1920x1080"
+          },
+          "depends_on": ["topaz_enhance"]
+        },
+        {
+          "step_id": "encode_youtube_4k",
+          "name": "YouTube 4K",
+          "tool": "ffmpeg",
+          "operation": "transcode",
+          "description": "H.264 4K 40-60 Mbps",
+          "params": {
+            "codec": "libx264",
+            "preset": "slow",
+            "bitrate": "45M",
+            "maxrate": "60M",
+            "bufsize": "80M",
+            "audio_codec": "aac",
+            "audio_bitrate": "384k",
+            "resolution": "3840x2160"
+          },
+          "depends_on": ["topaz_enhance"]
+        },
+        {
+          "step_id": "encode_wechat",
+          "name": "微信/视频号 720p",
+          "tool": "ffmpeg",
+          "operation": "transcode",
+          "description": "H.264 720p 3-5 Mbps 适合移动端",
+          "params": {
+            "codec": "libx264",
+            "preset": "medium",
+            "bitrate": "4M",
+            "maxrate": "5M",
+            "bufsize": "8M",
+            "audio_codec": "aac",
+            "audio_bitrate": "128k",
+            "resolution": "1280x720"
+          },
+          "depends_on": ["topaz_enhance"]
+        },
+        {
+          "step_id": "encode_archive",
+          "name": "存档 ProRes 422 HQ",
+          "tool": "ffmpeg",
+          "operation": "transcode",
+          "description": "ProRes 422 HQ 高质量存档",
+          "params": {
+            "codec": "prores_ks",
+            "profile": "3",
+            "audio_codec": "pcm_s16le",
+            "container": "mov"
+          },
+          "depends_on": ["topaz_enhance"]
+        }
+      ]
+    },
+
+    "batch_normalize": {
+      "name": "批量素材规范化",
+      "description": "批量将不同格式/编码/帧率的素材统一为标准编辑格式",
+      "category": "批量处理",
+      "tags": ["ffmpeg", "batch", "normalization", "proxy"],
+      "estimated_time": "取决于素材数量",
+      "quality_level": "medium",
+      "steps": [
+        {
+          "step_id": "scan_input",
+          "name": "扫描输入目录",
+          "tool": "ffmpeg",
+          "operation": "probe",
+          "description": "扫描并检测所有输入文件参数",
+          "params": {
+            "recursive": true,
+            "file_types": [".mp4", ".mov", ".avi", ".mkv", ".mxf"]
+          },
+          "depends_on": []
+        },
+        {
+          "step_id": "batch_transcode",
+          "name": "批量转码规范化",
+          "tool": "ffmpeg",
+          "operation": "transcode",
+          "description": "统一转码为ProRes 422 1080p 24fps",
+          "params": {
+            "codec": "prores_ks",
+            "profile": "2",
+            "resolution": "1920x1080",
+            "fps": 24,
+            "audio_codec": "pcm_s16le",
+            "container": "mov",
+            "batch": true
+          },
+          "depends_on": ["scan_input"]
+        },
+        {
+          "step_id": "batch_proxy",
+          "name": "生成代理文件",
+          "tool": "ffmpeg",
+          "operation": "transcode",
+          "description": "生成HD代理用于剪辑",
+          "params": {
+            "codec": "prores_ks",
+            "profile": "0",
+            "resolution": "960x540",
+            "fps": 24,
+            "audio_codec": "aac",
+            "audio_bitrate": "128k",
+            "container": "mov",
+            "suffix": "_proxy",
+            "batch": true
+          },
+          "depends_on": ["batch_transcode"]
+        },
+        {
+          "step_id": "generate_report",
+          "name": "生成处理报告",
+          "tool": "ffmpeg",
+          "operation": "probe",
+          "description": "生成批量处理报告（文件数/总时长/总大小）",
+          "params": {
+            "report_format": "json",
+            "include": ["filename", "duration", "resolution", "codec", "size"]
+          },
+          "depends_on": ["batch_proxy"]
+        }
+      ]
+    },
+
+    "cinematic_color_grade": {
+      "name": "电影感调色流水线",
+      "description": "素材→Resolve初级调色→AE风格化→最终输出",
+      "category": "调色",
+      "tags": ["davinci_resolve", "after_effects", "color_grading", "cinematic"],
+      "estimated_time": "30-120分钟",
+      "quality_level": "high",
+      "steps": [
+        {
+          "step_id": "resolve_import",
+          "name": "导入Resolve",
+          "tool": "davinci_resolve",
+          "operation": "import",
+          "description": "导入素材到Resolve媒体池",
+          "params": {},
+          "depends_on": []
+        },
+        {
+          "step_id": "resolve_primary",
+          "name": "一级调色",
+          "tool": "davinci_resolve",
+          "operation": "color",
+          "description": "色轮+曲线+对比度，调整白平衡和曝光",
+          "params": {
+            "grade_type": "primary",
+            "color_space": "Rec.709",
+            "gamma": 2.4
+          },
+          "depends_on": ["resolve_import"]
+        },
+        {
+          "step_id": "resolve_secondary",
+          "name": "二级调色",
+          "tool": "davinci_resolve",
+          "operation": "color",
+          "description": "限定器+动态窗口，局部调色",
+          "params": {
+            "grade_type": "secondary",
+            "qualifier": true,
+            "power_window": true
+          },
+          "depends_on": ["resolve_primary"]
+        },
+        {
+          "step_id": "resolve_lut",
+          "name": "LUT风格化",
+          "tool": "davinci_resolve",
+          "operation": "color",
+          "description": "应用电影LUT，添加胶片感",
+          "params": {
+            "grade_type": "look",
+            "lut_file": "",
+            "lut_strength": 0.7,
+            "film_grain": true
+          },
+          "depends_on": ["resolve_secondary"]
+        },
+        {
+          "step_id": "ae_style",
+          "name": "AE风格化增强",
+          "tool": "after_effects",
+          "operation": "apply_effect",
+          "description": "光效+胶片颗粒+暗角+色彩分离",
+          "params": {
+            "effects": ["Optical Flares", "Film Grain", "Lens Distortion", "Chromatic Aberration"]
+          },
+          "depends_on": ["resolve_lut"]
+        },
+        {
+          "step_id": "final_delivery",
+          "name": "最终交付",
+          "tool": "davinci_resolve",
+          "operation": "deliver",
+          "description": "多格式交付输出",
+          "params": {
+            "formats": ["ProRes 4444", "H.264", "H.265"]
+          },
+          "depends_on": ["ae_style"]
+        }
+      ]
+    },
+
+    "adobe_full_pipeline": {
+      "name": "Adobe全家桶全链路制作",
+      "description": "Ai设计→PS处理→PR剪辑→AE特效→ME编码→AU音频全流程制作",
+      "category": "Adobe全家桶",
+      "tags": ["adobe", "full_pipeline", "illustrator", "photoshop", "premiere", "after_effects", "media_encoder", "audition"],
+      "estimated_time": "2-8小时/项目",
+      "quality_level": "high",
+      "steps": [
+        {
+          "step_id": "ai_design",
+          "name": "Illustrator图形设计",
+          "tool": "illustrator",
+          "operation": "create_mograph",
+          "description": "创建动态图形元素和Logo设计",
+          "params": {
+            "assets": ["logo.svg", "title_bg.ai", "icon_set.ai"]
+          },
+          "depends_on": []
+        },
+        {
+          "step_id": "ps_process",
+          "name": "Photoshop素材处理",
+          "tool": "photoshop",
+          "operation": "batch_process",
+          "description": "批量处理图片素材：抠图、调色、尺寸统一",
+          "params": {
+            "count": 20,
+            "operations": ["remove_background", "adjust_color", "resize"]
+          },
+          "depends_on": ["ai_design"]
+        },
+        {
+          "step_id": "pr_edit",
+          "name": "Premiere Pro粗剪",
+          "tool": "premiere_pro",
+          "operation": "create_sequence",
+          "description": "素材整理、粗剪、转场添加、Lumetri调色",
+          "params": {
+            "sequence_name": "Main_Sequence",
+            "preset": "4K_25fps",
+            "transitions": true,
+            "lumetri_grade": true
+          },
+          "depends_on": ["ps_process"]
+        },
+        {
+          "step_id": "ae_vfx",
+          "name": "After Effects特效合成",
+          "tool": "after_effects",
+          "operation": "apply_effect",
+          "description": "动态链接到AE，添加特效、文字动画、粒子效果",
+          "params": {
+            "effects": ["文字动画", "粒子效果", "镜头光晕", "动态拼贴"]
+          },
+          "depends_on": ["pr_edit"]
+        },
+        {
+          "step_id": "au_audio",
+          "name": "Audition音频处理",
+          "tool": "audition",
+          "operation": "mastering",
+          "description": "音频降噪、混音、母带处理",
+          "params": {
+            "tracks": 4,
+            "operations": ["noise_reduction", "audio_mix", "mastering"]
+          },
+          "depends_on": ["ae_vfx"]
+        },
+        {
+          "step_id": "me_encode",
+          "name": "Media Encoder批量编码",
+          "tool": "media_encoder",
+          "operation": "batch_encode",
+          "description": "多格式批量编码输出：H.264/ProRes/H.265",
+          "params": {
+            "count": 3,
+            "formats": ["H.264", "ProRes 422 HQ", "H.265"]
+          },
+          "depends_on": ["au_audio"]
+        }
+      ]
+    },
+
+    "pr_ae_dynamic_link": {
+      "name": "PR-AE动态链接工作流",
+      "description": "Premiere粗剪→动态链接AE做特效→回批PR调色→AME输出",
+      "category": "Adobe全家桶",
+      "tags": ["premiere", "after_effects", "media_encoder", "dynamic_link", "vfx"],
+      "estimated_time": "30-180分钟/项目",
+      "quality_level": "high",
+      "steps": [
+        {
+          "step_id": "pr_import",
+          "name": "PR素材导入与粗剪",
+          "tool": "premiere_pro",
+          "operation": "import_media",
+          "description": "导入素材并创建序列进行粗剪",
+          "params": {
+            "files": ["clip1.mov", "clip2.mov", "clip3.mov"],
+            "sequence_name": "Rough_Edit"
+          },
+          "depends_on": []
+        },
+        {
+          "step_id": "pr_cut",
+          "name": "精剪与转场",
+          "tool": "premiere_pro",
+          "operation": "add_transition",
+          "description": "精剪、添加转场效果、文字标题",
+          "params": {
+            "transition_type": "cross_dissolve",
+            "titles_count": 5
+          },
+          "depends_on": ["pr_import"]
+        },
+        {
+          "step_id": "ae_composite",
+          "name": "AE动态链接合成",
+          "tool": "after_effects",
+          "operation": "apply_effect",
+          "description": "通过动态链接在AE中制作特效合成",
+          "params": {
+            "effect": "高级特效合成",
+            "dynamic_link": true
+          },
+          "depends_on": ["pr_cut"]
+        },
+        {
+          "step_id": "pr_color",
+          "name": "PR Lumetri调色",
+          "tool": "premiere_pro",
+          "operation": "apply_lumetri",
+          "description": "回批PR后进行Lumetri一级二级调色",
+          "params": {
+            "lut": "Cinematic_Look.cube",
+            "primary": true,
+            "secondary": true
+          },
+          "depends_on": ["ae_composite"]
+        },
+        {
+          "step_id": "me_export",
+          "name": "AME批量输出",
+          "tool": "media_encoder",
+          "operation": "start_queue",
+          "description": "通过Media Encoder批量多格式输出",
+          "params": {
+            "item_count": 3,
+            "presets": ["高比特率", "Youtube_4K", "抖音竖屏"]
+          },
+          "depends_on": ["pr_color"]
+        }
+      ]
+    },
+
+    "ps_ai_design_to_vfx": {
+      "name": "PS-Ai设计到AE特效工作流",
+      "description": "Ai矢量设计→PS图像处理→分层导入AE→动态图形动画",
+      "category": "Adobe全家桶",
+      "tags": ["illustrator", "photoshop", "after_effects", "mograph", "design"],
+      "estimated_time": "1-4小时/项目",
+      "quality_level": "medium",
+      "steps": [
+        {
+          "step_id": "ai_vector",
+          "name": "Ai矢量图形设计",
+          "tool": "illustrator",
+          "operation": "create_shape",
+          "description": "创建矢量形状、Logo、图标设计",
+          "params": {
+            "shapes": ["logo", "title_frame", "decorative_elements"],
+            "style": "现代扁平化"
+          },
+          "depends_on": []
+        },
+        {
+          "step_id": "ps_composite",
+          "name": "PS图像合成处理",
+          "tool": "photoshop",
+          "operation": "add_layer",
+          "description": "图层合成、蒙版处理、色彩调整、智能对象准备",
+          "params": {
+            "layers": 8,
+            "masks": true,
+            "adjustments": ["curves", "color_balance", "gradient_map"]
+          },
+          "depends_on": ["ai_vector"]
+        },
+        {
+          "step_id": "ae_import_psd",
+          "name": "AE分层导入",
+          "tool": "after_effects",
+          "operation": "import_footage",
+          "description": "PSD分层导入AE，保持图层结构和可编辑性",
+          "params": {
+            "import_as": "composition",
+            "retain_layers": true,
+            "layered_psd": true
+          },
+          "depends_on": ["ps_composite"]
+        },
+        {
+          "step_id": "ae_animate",
+          "name": "AE动态图形动画",
+          "tool": "after_effects",
+          "operation": "create_comp",
+          "description": "制作MG动画、文字动效、转场过渡",
+          "params": {
+            "comp_name": "Main_Title",
+            "animations": ["入场动画", "循环动画", "出场动画"],
+            "duration_sec": 5
+          },
+          "depends_on": ["ae_import_psd"]
+        },
+        {
+          "step_id": "me_render",
+          "name": "AME渲染输出",
+          "tool": "media_encoder",
+          "operation": "export_h264",
+          "description": "通过AME队列渲染输出最终成品",
+          "params": {
+            "bitrate": "20 Mbps",
+            "format": "H.264",
+            "audio_codec": "AAC"
+          },
+          "depends_on": ["ae_animate"]
+        }
+      ]
+    },
+
+    "social_media_adobe": {
+      "name": "社交媒体内容生产（Adobe全家桶）",
+      "description": "一站式社交媒体短视频生产：PS做封面→AE做特效→PR剪辑→ME批量输出各平台格式",
+      "category": "Adobe全家桶",
+      "tags": ["social_media", "photoshop", "after_effects", "premiere", "media_encoder", "batch"],
+      "estimated_time": "1-2小时/条",
+      "quality_level": "medium",
+      "steps": [
+        {
+          "step_id": "ps_cover",
+          "name": "PS封面设计",
+          "tool": "photoshop",
+          "operation": "export_jpg",
+          "description": "设计视频封面图、缩略图、宣传海报",
+          "params": {
+            "quality": 90,
+            "sizes": ["1920x1080", "1080x1920", "1080x1080"]
+          },
+          "depends_on": []
+        },
+        {
+          "step_id": "ae_subtitles",
+          "name": "AE字幕包装",
+          "tool": "after_effects",
+          "operation": "apply_effect",
+          "description": "添加动态字幕、花字、贴纸、表情包特效",
+          "params": {
+            "effects": ["动态字幕", "花字特效", "转场贴纸"],
+            "subtitle_style": "抖音风格"
+          },
+          "depends_on": ["ps_cover"]
+        },
+        {
+          "step_id": "pr_assemble",
+          "name": "PR剪辑包装",
+          "tool": "premiere_pro",
+          "operation": "add_title",
+          "description": "素材剪辑、BGM卡点、音效添加、调色",
+          "params": {
+            "titles_count": 8,
+            "bgm_sync": true,
+            "color_grade": "ins风"
+          },
+          "depends_on": ["ae_subtitles"]
+        },
+        {
+          "step_id": "me_batch_social",
+          "name": "AME多平台批量输出",
+          "tool": "media_encoder",
+          "operation": "batch_encode",
+          "description": "一键输出B站/抖音/小红书/视频号等多平台格式",
+          "params": {
+            "count": 5,
+            "platforms": ["bilibili", "douyin", "xiaohongshu", "wechat", "youtube"]
+          },
+          "depends_on": ["pr_assemble"]
+        }
+      ]
+    },
+
+    "adobe_batch_proxy": {
+      "name": "Adobe批量代理与素材规范化",
+      "description": "AME批量创建代理→PR代理剪辑→PS批量修图→批量交付",
+      "category": "Adobe全家桶",
+      "tags": ["batch", "proxy", "media_encoder", "premiere", "photoshop", "workflow"],
+      "estimated_time": "10-60分钟/批",
+      "quality_level": "medium",
+      "steps": [
+        {
+          "step_id": "me_proxy",
+          "name": "AME批量代理生成",
+          "tool": "media_encoder",
+          "operation": "create_proxy",
+          "description": "批量创建代理文件，便于流畅剪辑",
+          "params": {
+            "count": 50,
+            "proxy_format": "ProRes Proxy",
+            "resolution": "1/4"
+          },
+          "depends_on": []
+        },
+        {
+          "step_id": "pr_proxy_edit",
+          "name": "PR代理剪辑",
+          "tool": "premiere_pro",
+          "operation": "import_media",
+          "description": "使用代理文件进行高效剪辑",
+          "params": {
+            "proxy_mode": true,
+            "editing": true
+          },
+          "depends_on": ["me_proxy"]
+        },
+        {
+          "step_id": "ps_batch_retouch",
+          "name": "PS批量修图",
+          "tool": "photoshop",
+          "operation": "batch_process",
+          "description": "批量调色、磨皮、尺寸统一、水印添加",
+          "params": {
+            "count": 100,
+            "operations": ["resize", "adjust_color", "watermark"]
+          },
+          "depends_on": ["pr_proxy_edit"]
+        },
+        {
+          "step_id": "me_full_res",
+          "name": "AME全分辨率批处理",
+          "tool": "media_encoder",
+          "operation": "batch_encode",
+          "description": "链接回全分辨率素材，批量渲染交付",
+          "params": {
+            "count": 10,
+            "formats": ["H.264", "ProRes 422 HQ"]
+          },
+          "depends_on": ["ps_batch_retouch"]
+        }
+      ]
+    }
+  },
+
+  "tool_capabilities": {
+    "ffmpeg": {
+      "name": "FFmpeg",
+      "operations": ["probe", "transcode", "extract_audio", "filter", "concat", "split"],
+      "input_formats": ["mp4", "mov", "avi", "mkv", "mxf", "wav", "mp3", "aac", "flac"],
+      "output_formats": ["mp4", "mov", "mkv", "avi", "webm", "gif", "wav", "mp3", "aac", "flac"],
+      "hardware_accel": ["nvenc", "qsv", "amf", "vaapi"]
+    },
+    "topaz_video_ai": {
+      "name": "Topaz Video AI",
+      "operations": ["enhance", "upscale", "interpolate", "denoise", "stabilize"],
+      "models": [
+        "proteus", "artemis", "gaia", "theia", "ahd",
+        "chronos", "apollo", "aion",
+        "rhea", "iris", "astra",
+        "dione_dv", "dione_sv", "dione_ntsc", "dione_pal",
+        "starlight", "nyx", "hyperion"
+      ],
+      "output_formats": ["prores422", "prores422hq", "prores4444", "mp4", "jpg", "png", "tiff", "exr"]
+    },
+    "blender": {
+      "name": "Blender",
+      "operations": ["render", "model", "animate", "script"],
+      "engines": ["BLENDER_EEVEE", "CYCLES", "BLENDER_WORKBENCH"],
+      "output_formats": ["PNG", "JPEG", "OPEN_EXR", "OPEN_EXR_MULTILAYER", "TIFF", "FFmpeg_video"],
+      "passes": ["Combined", "Depth", "Normal", "Vector", "UV", "Mist", "Emission", "Environment", "Diffuse", "Glossy", "Transmission", "Subsurface", "CryptoObject", "CryptoMaterial", "CryptoAsset"]
+    },
+    "after_effects": {
+      "name": "Adobe After Effects",
+      "operations": ["create_comp", "import_footage", "apply_effect", "add_layer", "render", "add_keyframe", "expression"],
+      "supported_effects_count": 2217,
+      "plugin_packages": ["Trapcode Suite", "Sapphire", "Boris Continuum", "Video Copilot", "RevisionFX"]
+    },
+    "davinci_resolve": {
+      "name": "DaVinci Resolve",
+      "operations": ["import", "edit", "color", "fusion", "deliver", "fairlight"],
+      "pages": ["Media", "Cut", "Edit", "Fusion", "Color", "Fairlight", "Deliver"],
+      "color_tools": ["Color Wheels", "Curves", "Qualifier", "Power Window", "LUT", "Film Look", "Color Matching"]
+    },
+    "premiere_pro": {
+      "name": "Adobe Premiere Pro",
+      "operations": ["import", "edit", "transitions", "export"],
+      "features": ["Dynamic Link", "Multi-cam", "Essential Graphics", "Lumetri Color"]
+    },
+    "photoshop": {
+      "name": "Adobe Photoshop",
+      "operations": ["texture_gen", "frame_process", "matte_paint", "batch_export"],
+      "features": ["Layers", "Smart Objects", "Actions", "Filters", "Neural Filters"]
+    },
+    "runwayml": {
+      "name": "RunwayML",
+      "operations": ["generate", "edit", "green_screen", "motion_brush"],
+      "models": ["Gen-4.5", "Gen-4", "Gen-3", "Act-One", "Act-Two", "Motion Brush"],
+      "features": ["Camera Control", "Character Consistency", "Multi-Subject"]
+    },
+    "pika": {
+      "name": "Pika",
+      "operations": ["generate", "edit", "pikaffects"],
+      "models": ["Pika 2.5", "Pika 2.0"],
+      "pikaffects": ["fire", "ice", "lightning", "water", "smoke", "explode", "glitch", "anime", "crayon", "3d"]
+    }
+  },
+
+  "quality_presets": {
+    "high_quality": {
+      "description": "高质量交付 - 电影级",
+      "codec": "ProRes 4444 XQ",
+      "bitrate_multiplier": 1.5,
+      "topaz_model": "rhea",
+      "render_quality": "best"
+    },
+    "balanced": {
+      "description": "平衡质量与速度",
+      "codec": "ProRes 422 HQ",
+      "bitrate_multiplier": 1.0,
+      "topaz_model": "proteus",
+      "render_quality": "good"
+    },
+    "fast_preview": {
+      "description": "快速预览 - 速度优先",
+      "codec": "H.264",
+      "bitrate_multiplier": 0.5,
+      "topaz_model": "fast",
+      "render_quality": "draft"
+    }
+  }
+}

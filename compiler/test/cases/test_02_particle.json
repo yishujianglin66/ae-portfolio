@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "source": "test_case_02_particle",
+    "description": "粒子系统+发光: 创建合成+实色层+Particular+DeepGlow+遮罩"
+  },
+  "operations": [
+    {
+      "op": "createComp",
+      "ref": "particle_comp",
+      "name": "粒子场景",
+      "width": 1920,
+      "height": 1080,
+      "frameRate": 30,
+      "duration": 10,
+      "bgColor": [0, 0, 0]
+    },
+    {
+      "op": "addLayer",
+      "ref": "particle_layer",
+      "compRef": "particle_comp",
+      "layerType": "solid",
+      "name": "粒子发射器",
+      "color": [0, 0, 0],
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "op": "addEffect",
+      "ref": "particular_fx",
+      "layerRef": "particle_layer",
+      "matchName": "ACP Particular",
+      "settings": {
+        "Emitter Type": 1,
+        "Particles/sec": 250,
+        "Particle Life": 3.5,
+        "Particle Size": 25
+      }
+    },
+    {
+      "op": "addEffect",
+      "ref": "deep_glow_fx",
+      "layerRef": "particle_layer",
+      "matchName": "Deep Glow",
+      "settings": {
+        "Threshold": 25,
+        "Radius": 50,
+        "Intensity": 2.0
+      }
+    },
+    {
+      "op": "addLayer",
+      "ref": "mask_layer",
+      "compRef": "particle_comp",
+      "layerType": "solid",
+      "name": "遮罩控制层",
+      "color": [1, 1, 1],
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "op": "addMask",
+      "ref": "main_mask",
+      "layerRef": "mask_layer",
+      "vertices": [[480, 270], [1440, 270], [1440, 810], [480, 810]],
+      "closed": true,
+      "mode": "add",
+      "feather": 100,
+      "opacity": 80
+    },
+    {
+      "op": "setTrackMatte",
+      "layerRef": "particle_layer",
+      "matteRef": "mask_layer",
+      "matteType": "luma"
+    },
+    {
+      "op": "setParent",
+      "layerRef": "deep_glow_fx",
+      "parentRef": "particular_fx"
+    }
+  ]
+}

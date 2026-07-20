@@ -1,0 +1,19 @@
+{
+  "name": "phase7-media-tools",
+  "version": "1.0.0",
+  "description": "AE MCP Phase7 - 素材获取与管理工具",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "after-effects",
+    "mcp",
+    "media-downloader",
+    "yt-dlp"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  }
+}

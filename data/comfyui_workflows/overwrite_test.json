@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "name": "overwrite_test",
+    "display_name": "overwrite_test",
+    "description": "",
+    "category": "user",
+    "style": null
+  },
+  "workflow": {
+    "1": {
+      "class_type": "Modified",
+      "inputs": {}
+    }
+  }
+}

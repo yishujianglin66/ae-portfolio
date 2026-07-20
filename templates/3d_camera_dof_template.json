@@ -1,0 +1,491 @@
+{
+  "project_name": "3D_Camera_DOF_Template",
+  "version": "1.0.0",
+  "description": "三维层+摄像机景深+粒子系统 标准工程模板 - 动漫风格漫剪",
+  "based_on_analysis": "抖音一拳超人视频逆向分析",
+  "composition": {
+    "width": 576,
+    "height": 768,
+    "frame_rate": 30,
+    "duration": 17.6,
+    "pixel_aspect": 1.0,
+    "background_color": [0.1, 0.1, 0.15]
+  },
+  "camera": {
+    "type": "two_node",
+    "name": "Main Camera",
+    "focal_length": 50,
+    "zoom": 900,
+    "depth_of_field": {
+      "enabled": true,
+      "focus_distance": 800,
+      "aperture": 30,
+      "blur_level": 180,
+      "iris_shape": "hexagon",
+      "iris_rotation": 0,
+      "iris_roundness": 80,
+      "iris_aspect_ratio": 1.0,
+      "diffraction_fringe": 20,
+      "highlight_gain": 100,
+      "highlight_threshold": 50
+    },
+    "position": {
+      "start": [288, 384, -1000],
+      "end": [288, 384, -700]
+    },
+    "point_of_interest": {
+      "start": [288, 384, 0],
+      "end": [288, 384, 0]
+    },
+    "animation": {
+      "type": "slow_push",
+      "ease": "ease_in_out",
+      "wiggle": {
+        "enabled": true,
+        "position_frequency": 2,
+        "position_amount": 3,
+        "rotation_frequency": 0.5,
+        "rotation_amount": 0.3
+      }
+    }
+  },
+  "lights": [
+    {
+      "name": "Key Light",
+      "type": "point",
+      "intensity": 100,
+      "color": [1.0, 0.97, 0.94],
+      "position": [-200, -300, -400],
+      "casts_shadows": true,
+      "shadow_darkness": 80,
+      "shadow_diffusion": 15
+    },
+    {
+      "name": "Fill Light",
+      "type": "ambient",
+      "intensity": 35,
+      "color": [0.88, 0.94, 1.0],
+      "casts_shadows": false
+    },
+    {
+      "name": "Rim Light",
+      "type": "point",
+      "intensity": 70,
+      "color": [0.95, 0.97, 1.0],
+      "position": [200, -100, 300],
+      "casts_shadows": false
+    }
+  ],
+  "layer_stack": [
+    {
+      "name": "Adjustment_GlobalColor",
+      "type": "adjustment",
+      "3d": false,
+      "effects": [
+        {
+          "name": "Lumetri Color",
+          "params": {
+            "temperature": -8,
+            "tint": 7,
+            "contrast": 20,
+            "highlights": -15,
+            "shadows": 8,
+            "whites": -8,
+            "blacks": 6,
+            "saturation": 5,
+            "sharpen": 30
+          }
+        },
+        {
+          "name": "Sharpen",
+          "params": {
+            "amount": 25
+          }
+        },
+        {
+          "name": "Noise",
+          "params": {
+            "amount_of_noise": 5,
+            "use_color_noise": false,
+            "noise_type": "uniform"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adjustment_Vignette",
+      "type": "adjustment",
+      "3d": false,
+      "effects": [
+        {
+          "name": "Lens Vignette",
+          "params": {
+            "amount": -20,
+            "midpoint": 0.6,
+            "roundness": 1.0,
+            "softness": 0.8
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adjustment_Glow",
+      "type": "adjustment",
+      "3d": false,
+      "blend_mode": "screen",
+      "opacity": 60,
+      "effects": [
+        {
+          "name": "Glow",
+          "params": {
+            "glow_threshold": 70,
+            "glow_radius": 30,
+            "glow_intensity": 2.0,
+            "glow_colors": "a_and_b_colors",
+            "color_a": [1.0, 0.9, 0.7],
+            "color_b": [1.0, 0.5, 0.3]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Particles_Foreground",
+      "type": "solid",
+      "3d": true,
+      "z_position": -250,
+      "scale": 130,
+      "color": [0, 0, 0],
+      "blend_mode": "screen",
+      "effects": [
+        {
+          "name": "CC Particle World",
+          "params": {
+            "birth_rate": 15,
+            "longevity": 2.5,
+            "position_z": -0.5,
+            "radius_x": 1.5,
+            "radius_y": 1.5,
+            "radius_z": 0.3,
+            "particle_type": "Lens Convex",
+            "size": 0.08,
+            "size_variation": 50,
+            "max_opacity": 80,
+            "color": [1.0, 0.95, 0.85],
+            "gravity": 0.05,
+            "wind_x": 0.3,
+            "wind_y": 0.02,
+            "wind_z": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "name": "Foreground_Element",
+      "type": "footage",
+      "3d": true,
+      "z_position": -150,
+      "scale": 120,
+      "placeholder": true,
+      "note": "放置前景素材 - 远景建筑轮廓/近景物体"
+    },
+    {
+      "name": "Main_Subject",
+      "type": "footage",
+      "3d": true,
+      "z_position": 0,
+      "scale": 100,
+      "placeholder": true,
+      "note": "主体素材 - 人物/主要画面",
+      "effects": [
+        {
+          "name": "Drop Shadow",
+          "params": {
+            "shadow_color": [0, 0, 0],
+            "opacity": 50,
+            "direction": 135,
+            "distance": 8,
+            "softness": 10
+          }
+        }
+      ]
+    },
+    {
+      "name": "Midground_Element",
+      "type": "footage",
+      "3d": true,
+      "z_position": 150,
+      "scale": 88,
+      "placeholder": true,
+      "note": "中景素材 - 建筑/景物"
+    },
+    {
+      "name": "Particles_Midground",
+      "type": "solid",
+      "3d": true,
+      "z_position": 100,
+      "scale": 100,
+      "color": [0, 0, 0],
+      "blend_mode": "screen",
+      "effects": [
+        {
+          "name": "CC Particle World",
+          "params": {
+            "birth_rate": 50,
+            "longevity": 3,
+            "position_z": 0.2,
+            "radius_x": 2,
+            "radius_y": 2.5,
+            "radius_z": 1,
+            "particle_type": "Lens Fade",
+            "size": 0.04,
+            "size_variation": 40,
+            "max_opacity": 90,
+            "color": [1.0, 1.0, 0.9],
+            "gravity": 0.1,
+            "wind_x": 0.1,
+            "wind_y": 0.01,
+            "wind_z": 0.05
+          }
+        }
+      ]
+    },
+    {
+      "name": "Background_Sky",
+      "type": "solid",
+      "3d": true,
+      "z_position": 400,
+      "scale": 72,
+      "color": [0.15, 0.18, 0.25],
+      "effects": [
+        {
+          "name": "Fractal Noise",
+          "params": {
+            "fractal_type": "dynamic",
+            "noise_type": "soft_linear",
+            "contrast": 200,
+            "brightness": -30,
+            "scale": 300,
+            "complexity": 6,
+            "evolution": "0x+0°"
+          }
+        },
+        {
+          "name": "Colorama",
+          "params": {
+            "use_preset_palette": "Fire",
+            "output_cycle": "preset",
+            "cycle_repetitions": 1
+          }
+        },
+        {
+          "name": "Fast Blur",
+          "params": {
+            "blurriness": 10,
+            "blur_dimensions": "horizontal_and_vertical",
+            "repeat_edge_pixels": true
+          }
+        }
+      ],
+      "note": "云雾/天空背景 - 可替换为实拍素材"
+    },
+    {
+      "name": "Particles_Background",
+      "type": "solid",
+      "3d": true,
+      "z_position": 350,
+      "scale": 75,
+      "color": [0, 0, 0],
+      "blend_mode": "screen",
+      "opacity": 70,
+      "effects": [
+        {
+          "name": "CC Particle World",
+          "params": {
+            "birth_rate": 100,
+            "longevity": 5,
+            "position_z": 0.5,
+            "radius_x": 3,
+            "radius_y": 3,
+            "radius_z": 2,
+            "particle_type": "Lens Fade",
+            "size": 0.02,
+            "size_variation": 60,
+            "max_opacity": 60,
+            "color": [0.9, 0.95, 1.0],
+            "gravity": 0.02,
+            "wind_x": 0.05,
+            "wind_y": 0.005,
+            "wind_z": 0.02
+          }
+        }
+      ]
+    },
+    {
+      "name": "Shadow_Catcher",
+      "type": "shadow_catcher",
+      "3d": true,
+      "z_position": 50,
+      "note": "接收阴影的层 - AE 2024+ 支持"
+    }
+  ],
+  "null_objects": [
+    {
+      "name": "Camera_Rig",
+      "3d": true,
+      "children": ["Main Camera"],
+      "note": "控制摄像机整体运动 - 轨道旋转用",
+      "rotation_animation": {
+        "y_rotation": {
+          "start": 0,
+          "end": 15,
+          "unit": "degrees"
+        }
+      }
+    },
+    {
+      "name": "Global_Controller",
+      "3d": false,
+      "note": "全局控制层 - 用表达式链接各参数",
+      "slider_controls": [
+        { "name": "Global_Scale", "default": 100 },
+        { "name": "DOF_Amount", "default": 100 },
+        { "name": "Particle_Amount", "default": 100 },
+        { "name": "Glow_Intensity", "default": 100 }
+      ]
+    }
+  ],
+  "optical_flares": {
+    "enabled": true,
+    "preset": "Cinema Spotlight",
+    "position": [288, 150],
+    "brightness": 80,
+    "scale": 100,
+    "color": [1.0, 0.95, 0.85],
+    "twinkle": 30,
+    "spin": 5,
+    "chromatic_aberration": 40,
+    "inner_glow": 50,
+    "outer_glow": 70,
+    "blend_mode": "screen"
+  },
+  "saber_effect": {
+    "enabled": false,
+    "core_size": 2,
+    "glow_radius": 20,
+    "glow_intensity": 4,
+    "inner_color": [1, 1, 1],
+    "outer_color": [1, 0.8, 0.5],
+    "distortion": 15,
+    "distortion_type": 2,
+    "distortion_speed": 2,
+    "flicker": 8
+  },
+  "animation_presets": {
+    "camera_push": {
+      "name": "Slow Push In",
+      "duration": 4,
+      "z_distance": 200,
+      "ease_type": "ease_out"
+    },
+    "camera_orbit": {
+      "name": "Orbit Around Subject",
+      "duration": 6,
+      "y_rotation": 20,
+      "ease_type": "ease_in_out"
+    },
+    "camera_shake": {
+      "name": "Handheld Camera",
+      "position_wiggle": "wiggle(2, 5)",
+      "rotation_wiggle": "wiggle(0.5, 0.5)"
+    }
+  },
+  "scale_compensation_formula": "original_scale * (camera_distance - z_depth) / camera_distance",
+  "depth_of_field_formula": "blur ∝ aperture / abs(focus_distance - layer_z) * blur_level",
+  "performance_tips": [
+    "预览时关闭景深 (Depth of Field) 以提高帧率",
+    "粒子数量控制在200以内，用Glow增强视觉效果",
+    "静态背景预渲染为视频文件",
+    "使用低分辨率代理素材预览",
+    "E3D预览用Draft模式，最终渲染用Full模式",
+    "调整层效果过多时，合并为一个调整层"
+  ],
+  "required_plugins": [
+    {
+      "name": "Lumetri Color",
+      "type": "built-in",
+      "required": true
+    },
+    {
+      "name": "CC Particle World",
+      "type": "built-in",
+      "required": true
+    },
+    {
+      "name": "Fractal Noise",
+      "type": "built-in",
+      "required": true
+    },
+    {
+      "name": "Optical Flares",
+      "type": "third_party (Video Copilot)",
+      "required": false,
+      "alternative": "Glow + Fractal Noise 模拟"
+    },
+    {
+      "name": "Element 3D",
+      "type": "third_party (Video Copilot)",
+      "required": false,
+      "alternative": "AE原生3D图层"
+    },
+    {
+      "name": "Trapcode Particular",
+      "type": "third_party (Red Giant)",
+      "required": false,
+      "alternative": "CC Particle World"
+    },
+    {
+      "name": "Saber",
+      "type": "third_party (Video Copilot)",
+      "required": false,
+      "alternative": "Glow + 描边效果"
+    }
+  ],
+  "workflow_steps": [
+    "1. 导入素材并在PS中分层（前景/中景/背景）",
+    "2. 替换模板中的占位图层为实际素材",
+    "3. 调整各层Z轴位置，确保视觉层次正确",
+    "4. 微调缩放补偿值，使画面比例正常",
+    "5. 设置摄像机焦点距离和光圈大小",
+    "6. 调整粒子数量和参数以匹配画面风格",
+    "7. 调整调色参数（Lumetri Color）",
+    "8. 添加摄像机动画和关键帧",
+    "9. 预览并微调所有参数",
+    "10. 高质量渲染输出"
+  ],
+  "troubleshooting": {
+    "景深不生效": [
+      "检查摄像机是否开启Depth of Field",
+      "检查Aperture值是否足够大（建议>10）",
+      "检查图层是否为3D图层",
+      "检查Focus Distance是否在合理范围"
+    ],
+    "粒子不显示": [
+      "检查混合模式是否为Screen/Add",
+      "检查粒子大小和数量是否为0",
+      "检查粒子是否在摄像机视野外",
+      "检查Z轴位置是否被其他层遮挡"
+    ],
+    "3D层排序混乱": [
+      "检查各层Z轴位置是否正确",
+      "检查是否开启了3D开关",
+      "检查是否有图层冲突",
+      "尝试调整图层顺序"
+    ],
+    "渲染太慢": [
+      "降低粒子数量",
+      "关闭景深预览",
+      "降低抗锯齿质量",
+      "使用代理素材"
+    ]
+  }
+}

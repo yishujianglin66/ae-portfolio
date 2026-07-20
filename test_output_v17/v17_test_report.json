@@ -1,0 +1,195 @@
+{
+  "timestamp": "2026-07-19 22:20:07",
+  "test_target": "D:\\AE-Work\\output\\VinlandSaga_Battle_V17.mp4",
+  "total": 37,
+  "passed": 37,
+  "failed": 0,
+  "pass_rate": "100.0%",
+  "results": [
+    {
+      "name": "V17 视频文件存在",
+      "passed": true,
+      "detail": "D:\\AE-Work\\output\\VinlandSaga_Battle_V17.mp4"
+    },
+    {
+      "name": "V17 文件大小合理",
+      "passed": true,
+      "detail": "44.48 MB"
+    },
+    {
+      "name": "视频编码",
+      "passed": true,
+      "detail": "h264"
+    },
+    {
+      "name": "分辨率",
+      "passed": true,
+      "detail": "1080x1920"
+    },
+    {
+      "name": "帧率",
+      "passed": true,
+      "detail": "30.0 fps"
+    },
+    {
+      "name": "时长",
+      "passed": true,
+      "detail": "23.2s (0.4min)"
+    },
+    {
+      "name": "音轨存在",
+      "passed": true,
+      "detail": "aac"
+    },
+    {
+      "name": "分析结果保存",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "OpenCV 读取成功",
+      "passed": true,
+      "detail": "1080x1920 @ 30.0fps, 695 frames"
+    },
+    {
+      "name": "中间帧可读",
+      "passed": true,
+      "detail": "平均亮度=108.0, shape=(1920, 1080, 3)"
+    },
+    {
+      "name": "MoviePy 加载 V17",
+      "passed": true,
+      "detail": "duration=23.2s, size=[1080, 1920]"
+    },
+    {
+      "name": "截取5秒片段",
+      "passed": true,
+      "detail": "1542KB"
+    },
+    {
+      "name": "2倍速输出",
+      "passed": true,
+      "detail": "5276KB"
+    },
+    {
+      "name": "缩放至720p",
+      "passed": true,
+      "detail": "405x720"
+    },
+    {
+      "name": "提取中间帧",
+      "passed": true,
+      "detail": "623KB"
+    },
+    {
+      "name": "FFmpeg 截取第5秒帧",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "FFmpeg 无损截取前3秒",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "FFmpeg 转GIF预览",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "FFmpeg 提取音轨",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "FFmpeg 生成缩略图序列",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "缩略图数量",
+      "passed": true,
+      "detail": "23 张"
+    },
+    {
+      "name": "OpenCV 加载V17",
+      "passed": true,
+      "detail": "695 frames @ 30.0fps"
+    },
+    {
+      "name": "场景切换检测",
+      "passed": true,
+      "detail": "检测到 159 个场景切换点"
+    },
+    {
+      "name": "场景分析保存",
+      "passed": true,
+      "detail": "159 个切换点"
+    },
+    {
+      "name": "帧亮度分析",
+      "passed": true,
+      "detail": "avg=60.4, std=40.4"
+    },
+    {
+      "name": "画面动态范围",
+      "passed": true,
+      "detail": "丰富"
+    },
+    {
+      "name": "OpenSourceHub V17 就绪",
+      "passed": true,
+      "detail": "可用: ['rife', 'sam2', 'whisper', 'remotion', 'openmontage', 'moviepy']"
+    },
+    {
+      "name": "MoviePy get_info V17",
+      "passed": true,
+      "detail": "status=success"
+    },
+    {
+      "name": "MoviePy resize V17",
+      "passed": true,
+      "detail": "status=success"
+    },
+    {
+      "name": "AI字幕预设可用于V17",
+      "passed": true,
+      "detail": "3 steps"
+    },
+    {
+      "name": "超分预设可用于V17",
+      "passed": true,
+      "detail": "4 steps"
+    },
+    {
+      "name": "V17 可用工具总数",
+      "passed": true,
+      "detail": "16 个工具"
+    },
+    {
+      "name": "V17 JSX 脚本存在",
+      "passed": true,
+      "detail": "56.1KB, 1353 行"
+    },
+    {
+      "name": "V17 JSX 功能覆盖",
+      "passed": true,
+      "detail": "覆盖: 素材导入, 关键帧, 表达式, 文字图层, 摄像机"
+    },
+    {
+      "name": "V17 渲染日志存在",
+      "passed": true,
+      "detail": "757 行"
+    },
+    {
+      "name": "渲染无致命错误",
+      "passed": true,
+      "detail": "正常"
+    },
+    {
+      "name": "版本对比记录",
+      "passed": true,
+      "detail": "================================================================================"
+    }
+  ]
+}

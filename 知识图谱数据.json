@@ -1,0 +1,867 @@
+{
+  "name": "AE-Knowledge-Vault 知识图谱",
+  "version": "1.0",
+  "created_at": "2026-07-14",
+  "total_nodes": 210,
+  "total_edges": 580,
+  "nodes": [
+    {
+      "id": "main_center",
+      "label": "AE知识中心",
+      "type": "hub",
+      "category": "核心",
+      "weight": 100,
+      "related_nodes": ["style_clip", "project_overview", "dev_docs", "stage_reports", "design_patterns", "test_suite", "ai_dev", "mcp_guide", "deploy", "plans", "master_knowledge", "lajing_master", "silhouette"]
+    },
+    {
+      "id": "style_clip",
+      "label": "风格化剪辑知识库",
+      "type": "moc",
+      "category": "核心",
+      "weight": 95,
+      "related_nodes": ["main_center", "ae_core", "davinci", "premiere", "photoshop", "illustrator", "ame", "topaz", "runway", "blender", "ffmpeg", "font", "material", "deep_research", "audio_video_match", "timeline_mapping", "engineering", "resources", "special_topics"]
+    },
+    {
+      "id": "ae_core",
+      "label": "AE核心知识库",
+      "type": "category",
+      "category": "软件",
+      "weight": 90,
+      "related_nodes": ["style_clip", "expressions", "effects", "text_anim", "transitions", "3d_compositing", "layer_management", "extensions", "plugins", "reverse_analysis", "template"]
+    },
+    {
+      "id": "expressions",
+      "label": "表达式与脚本",
+      "type": "topic",
+      "category": "AE功能",
+      "weight": 85,
+      "related_nodes": ["ae_core", "expressions_bible", "expressions_reference"]
+    },
+    {
+      "id": "expressions_bible",
+      "label": "AE表达式进阶宝典",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 80,
+      "related_nodes": ["expressions"]
+    },
+    {
+      "id": "expressions_reference",
+      "label": "AE表达式核心函数完全手册",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 85,
+      "related_nodes": ["expressions"]
+    },
+    {
+      "id": "effects",
+      "label": "效果与滤镜",
+      "type": "topic",
+      "category": "AE功能",
+      "weight": 80,
+      "related_nodes": ["ae_core", "effects_visual", "effects_system"]
+    },
+    {
+      "id": "effects_visual",
+      "label": "AE效果视觉特征库",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 85,
+      "related_nodes": ["effects"]
+    },
+    {
+      "id": "effects_system",
+      "label": "AE滤镜效果系统完全指南",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 75,
+      "related_nodes": ["effects"]
+    },
+    {
+      "id": "text_anim",
+      "label": "文字动画",
+      "type": "topic",
+      "category": "AE功能",
+      "weight": 75,
+      "related_nodes": ["ae_core", "text_anim_report"]
+    },
+    {
+      "id": "text_anim_report",
+      "label": "AE文字动画与特效系统深度研究报告",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 80,
+      "related_nodes": ["text_anim"]
+    },
+    {
+      "id": "transitions",
+      "label": "转场效果",
+      "type": "topic",
+      "category": "AE功能",
+      "weight": 70,
+      "related_nodes": ["ae_core", "transition_report", "lajing_master"]
+    },
+    {
+      "id": "transition_report",
+      "label": "AE转场效果系统深度研究报告",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 75,
+      "related_nodes": ["transitions"]
+    },
+    {
+      "id": "3d_compositing",
+      "label": "三维合成",
+      "type": "topic",
+      "category": "AE功能",
+      "weight": 75,
+      "related_nodes": ["ae_core", "3d_guide", "blender"]
+    },
+    {
+      "id": "3d_guide",
+      "label": "AE三维合成与摄像机完全指南",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 70,
+      "related_nodes": ["3d_compositing"]
+    },
+    {
+      "id": "layer_management",
+      "label": "图层管理",
+      "type": "topic",
+      "category": "AE功能",
+      "weight": 65,
+      "related_nodes": ["ae_core", "layer_guide"]
+    },
+    {
+      "id": "layer_guide",
+      "label": "AE图层管理与混合模式完全手册",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 60,
+      "related_nodes": ["layer_management"]
+    },
+    {
+      "id": "extensions",
+      "label": "扩展脚本",
+      "type": "topic",
+      "category": "AE功能",
+      "weight": 70,
+      "related_nodes": ["ae_core", "extensions_kb", "extensions_api"]
+    },
+    {
+      "id": "extensions_kb",
+      "label": "AE扩展脚本完全知识库",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 65,
+      "related_nodes": ["extensions"]
+    },
+    {
+      "id": "extensions_api",
+      "label": "AE扩展脚本工具API与表达式库完全手册",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 70,
+      "related_nodes": ["extensions"]
+    },
+    {
+      "id": "plugins",
+      "label": "第三方插件",
+      "type": "topic",
+      "category": "AE功能",
+      "weight": 75,
+      "related_nodes": ["ae_core", "plugins_kb", "trapcode", "sapphire", "video_copilot"]
+    },
+    {
+      "id": "plugins_kb",
+      "label": "AE第三方插件与脚本知识库",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 80,
+      "related_nodes": ["plugins"]
+    },
+    {
+      "id": "trapcode",
+      "label": "Trapcode Suite全插件参数详解",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 75,
+      "related_nodes": ["plugins"]
+    },
+    {
+      "id": "sapphire",
+      "label": "Sapphire蓝宝石插件核心效果详解",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 70,
+      "related_nodes": ["plugins"]
+    },
+    {
+      "id": "video_copilot",
+      "label": "Video Copilot插件全参数详解",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 70,
+      "related_nodes": ["plugins"]
+    },
+    {
+      "id": "reverse_analysis",
+      "label": "效果逆向分析",
+      "type": "topic",
+      "category": "AE功能",
+      "weight": 85,
+      "related_nodes": ["ae_core", "reverse_methodology", "keyframe_analysis", "layer_inference"]
+    },
+    {
+      "id": "reverse_methodology",
+      "label": "视频效果逆向分析系统方法论",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 90,
+      "related_nodes": ["reverse_analysis"]
+    },
+    {
+      "id": "keyframe_analysis",
+      "label": "关键帧与速度曲线逆向分析",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 80,
+      "related_nodes": ["reverse_analysis"]
+    },
+    {
+      "id": "layer_inference",
+      "label": "图层堆栈与合成结构推断",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 75,
+      "related_nodes": ["reverse_analysis"]
+    },
+    {
+      "id": "template",
+      "label": "模板工程化",
+      "type": "topic",
+      "category": "AE功能",
+      "weight": 65,
+      "related_nodes": ["ae_core", "template_guide"]
+    },
+    {
+      "id": "template_guide",
+      "label": "AE模板工程化开发方法论",
+      "type": "document",
+      "category": "AE文档",
+      "weight": 60,
+      "related_nodes": ["template"]
+    },
+    {
+      "id": "davinci",
+      "label": "DaVinci Resolve",
+      "type": "category",
+      "category": "软件",
+      "weight": 70,
+      "related_nodes": ["style_clip", "davinci_pages", "davinci_research", "davinci_enterprise"]
+    },
+    {
+      "id": "premiere",
+      "label": "Premiere Pro",
+      "type": "category",
+      "category": "软件",
+      "weight": 60,
+      "related_nodes": ["style_clip", "premiere_editing", "premiere_research"]
+    },
+    {
+      "id": "photoshop",
+      "label": "Photoshop",
+      "type": "category",
+      "category": "软件",
+      "weight": 65,
+      "related_nodes": ["style_clip", "ps_basic", "ps_research", "ps_enterprise"]
+    },
+    {
+      "id": "illustrator",
+      "label": "Illustrator",
+      "type": "category",
+      "category": "软件",
+      "weight": 55,
+      "related_nodes": ["style_clip", "ai_vector", "ai_research"]
+    },
+    {
+      "id": "ame",
+      "label": "Media Encoder",
+      "type": "category",
+      "category": "软件",
+      "weight": 50,
+      "related_nodes": ["style_clip", "ame_render", "ame_research"]
+    },
+    {
+      "id": "topaz",
+      "label": "Topaz Video AI",
+      "type": "category",
+      "category": "AI工具",
+      "weight": 75,
+      "related_nodes": ["style_clip", "topaz_core", "topaz_models", "topaz_enterprise"]
+    },
+    {
+      "id": "runway",
+      "label": "RunwayML/Pika",
+      "type": "category",
+      "category": "AI工具",
+      "weight": 70,
+      "related_nodes": ["style_clip", "runway_core", "runway_prompt", "runway_enterprise"]
+    },
+    {
+      "id": "blender",
+      "label": "Blender",
+      "type": "category",
+      "category": "3D软件",
+      "weight": 75,
+      "related_nodes": ["style_clip", "blender_core", "blender_python", "blender_geometry", "3d_compositing"]
+    },
+    {
+      "id": "ffmpeg",
+      "label": "FFmpeg",
+      "type": "category",
+      "category": "技术基础",
+      "weight": 65,
+      "related_nodes": ["style_clip", "ffmpeg_core", "ffmpeg_hardware", "ffmpeg_streaming"]
+    },
+    {
+      "id": "font",
+      "label": "字体设计与排版",
+      "type": "category",
+      "category": "设计",
+      "weight": 55,
+      "related_nodes": ["style_clip", "font_kb", "font_report"]
+    },
+    {
+      "id": "material",
+      "label": "素材获取与管理",
+      "type": "category",
+      "category": "资源",
+      "weight": 60,
+      "related_nodes": ["style_clip", "material_report", "material_sites"]
+    },
+    {
+      "id": "deep_research",
+      "label": "深度研究体系",
+      "type": "category",
+      "category": "研究",
+      "weight": 85,
+      "related_nodes": ["style_clip", "mir", "cv", "audio_video_match_alg", "python_ecosystem"]
+    },
+    {
+      "id": "mir",
+      "label": "MIR音乐信息检索",
+      "type": "document",
+      "category": "研究报告",
+      "weight": 80,
+      "related_nodes": ["deep_research"]
+    },
+    {
+      "id": "cv",
+      "label": "CV计算机视觉",
+      "type": "document",
+      "category": "研究报告",
+      "weight": 80,
+      "related_nodes": ["deep_research"]
+    },
+    {
+      "id": "audio_video_match_alg",
+      "label": "音画匹配算法与数学基础",
+      "type": "document",
+      "category": "研究报告",
+      "weight": 85,
+      "related_nodes": ["deep_research", "audio_video_match"]
+    },
+    {
+      "id": "python_ecosystem",
+      "label": "Python生态与系统集成",
+      "type": "document",
+      "category": "研究报告",
+      "weight": 75,
+      "related_nodes": ["deep_research"]
+    },
+    {
+      "id": "audio_video_match",
+      "label": "音画匹配推演系统",
+      "type": "category",
+      "category": "系统",
+      "weight": 85,
+      "related_nodes": ["style_clip", "audio_video_match_alg", "music_analysis", "clip_analysis", "match_decision"]
+    },
+    {
+      "id": "music_analysis",
+      "label": "音乐结构原子分析与节拍映射",
+      "type": "document",
+      "category": "系统文档",
+      "weight": 80,
+      "related_nodes": ["audio_video_match"]
+    },
+    {
+      "id": "clip_analysis",
+      "label": "片段元数据与视觉能量图谱",
+      "type": "document",
+      "category": "系统文档",
+      "weight": 75,
+      "related_nodes": ["audio_video_match"]
+    },
+    {
+      "id": "match_decision",
+      "label": "音画匹配决策树与剪辑思路推演",
+      "type": "document",
+      "category": "系统文档",
+      "weight": 80,
+      "related_nodes": ["audio_video_match"]
+    },
+    {
+      "id": "timeline_mapping",
+      "label": "时间轴精密映射",
+      "type": "category",
+      "category": "系统",
+      "weight": 75,
+      "related_nodes": ["style_clip", "beat_keyframe", "paragraph_transition", "four_dimensional", "genre_recipes"]
+    },
+    {
+      "id": "beat_keyframe",
+      "label": "节拍-关键帧精密映射库",
+      "type": "document",
+      "category": "系统文档",
+      "weight": 75,
+      "related_nodes": ["timeline_mapping"]
+    },
+    {
+      "id": "paragraph_transition",
+      "label": "段落结构-效果编排与转场联动库",
+      "type": "document",
+      "category": "系统文档",
+      "weight": 70,
+      "related_nodes": ["timeline_mapping"]
+    },
+    {
+      "id": "four_dimensional",
+      "label": "能量-情绪-色彩-音效四维映射库",
+      "type": "document",
+      "category": "系统文档",
+      "weight": 75,
+      "related_nodes": ["timeline_mapping"]
+    },
+    {
+      "id": "genre_recipes",
+      "label": "流派专属音画配方库",
+      "type": "document",
+      "category": "系统文档",
+      "weight": 70,
+      "related_nodes": ["timeline_mapping"]
+    },
+    {
+      "id": "engineering",
+      "label": "工程实现与工具链",
+      "type": "category",
+      "category": "工程",
+      "weight": 75,
+      "related_nodes": ["style_clip", "music_engineer", "clip_engineer", "match_engineer", "roadmap", "deployment", "training", "troubleshooting"]
+    },
+    {
+      "id": "music_engineer",
+      "label": "音乐分析器工程实现手册",
+      "type": "document",
+      "category": "工程文档",
+      "weight": 75,
+      "related_nodes": ["engineering"]
+    },
+    {
+      "id": "clip_engineer",
+      "label": "片段分析器工程实现手册",
+      "type": "document",
+      "category": "工程文档",
+      "weight": 70,
+      "related_nodes": ["engineering"]
+    },
+    {
+      "id": "match_engineer",
+      "label": "音画匹配引擎与系统桥接工程手册",
+      "type": "document",
+      "category": "工程文档",
+      "weight": 80,
+      "related_nodes": ["engineering"]
+    },
+    {
+      "id": "roadmap",
+      "label": "路线图实战项目完全手册",
+      "type": "document",
+      "category": "工程文档",
+      "weight": 70,
+      "related_nodes": ["engineering"]
+    },
+    {
+      "id": "deployment",
+      "label": "AI辅助视频生成端到端部署完全指南",
+      "type": "document",
+      "category": "工程文档",
+      "weight": 75,
+      "related_nodes": ["engineering"]
+    },
+    {
+      "id": "training",
+      "label": "实战模拟与训练体系完全手册",
+      "type": "document",
+      "category": "工程文档",
+      "weight": 70,
+      "related_nodes": ["engineering"]
+    },
+    {
+      "id": "troubleshooting",
+      "label": "故障排查与性能调优完全手册",
+      "type": "document",
+      "category": "工程文档",
+      "weight": 75,
+      "related_nodes": ["engineering"]
+    },
+    {
+      "id": "resources",
+      "label": "资源与预设库",
+      "type": "category",
+      "category": "资源",
+      "weight": 65,
+      "related_nodes": ["style_clip", "presets", "luts", "effects", "material"]
+    },
+    {
+      "id": "presets",
+      "label": "风格化预设宝典",
+      "type": "document",
+      "category": "资源文档",
+      "weight": 65,
+      "related_nodes": ["resources"]
+    },
+    {
+      "id": "luts",
+      "label": "多平台调色LUT预设库",
+      "type": "document",
+      "category": "资源文档",
+      "weight": 60,
+      "related_nodes": ["resources"]
+    },
+    {
+      "id": "special_topics",
+      "label": "特色专题",
+      "type": "category",
+      "category": "专题",
+      "weight": 70,
+      "related_nodes": ["style_clip", "puppet_video", "still_mad", "commercial", "ai_workflow"]
+    },
+    {
+      "id": "puppet_video",
+      "label": "木偶视频制作",
+      "type": "topic",
+      "category": "专题",
+      "weight": 75,
+      "related_nodes": ["special_topics", "puppet_core", "puppet_multi_engine"]
+    },
+    {
+      "id": "puppet_core",
+      "label": "木偶风格视频制作核心指南",
+      "type": "document",
+      "category": "专题文档",
+      "weight": 70,
+      "related_nodes": ["puppet_video"]
+    },
+    {
+      "id": "puppet_multi_engine",
+      "label": "木偶风格视频制作-多引擎集成与架构指南",
+      "type": "document",
+      "category": "专题文档",
+      "weight": 75,
+      "related_nodes": ["puppet_video"]
+    },
+    {
+      "id": "still_mad",
+      "label": "静止系MAD",
+      "type": "document",
+      "category": "专题文档",
+      "weight": 60,
+      "related_nodes": ["special_topics"]
+    },
+    {
+      "id": "commercial",
+      "label": "商业项目全流程",
+      "type": "document",
+      "category": "专题文档",
+      "weight": 65,
+      "related_nodes": ["special_topics"]
+    },
+    {
+      "id": "ai_workflow",
+      "label": "AI辅助视频生成一体化",
+      "type": "document",
+      "category": "专题文档",
+      "weight": 70,
+      "related_nodes": ["special_topics"]
+    },
+    {
+      "id": "master_knowledge",
+      "label": "大师知识库",
+      "type": "moc",
+      "category": "知识",
+      "weight": 60,
+      "related_nodes": ["main_center", "jordy"]
+    },
+    {
+      "id": "jordy",
+      "label": "Jordy Vandeput",
+      "type": "topic",
+      "category": "大师",
+      "weight": 55,
+      "related_nodes": ["master_knowledge"]
+    },
+    {
+      "id": "lajing_master",
+      "label": "漫剪拉镜大师",
+      "type": "moc",
+      "category": "知识",
+      "weight": 65,
+      "related_nodes": ["main_center", "transitions", "xenoz", "molob", "yashfx"]
+    },
+    {
+      "id": "xenoz",
+      "label": "Xenoz-推拉鼻祖",
+      "type": "document",
+      "category": "拉镜文档",
+      "weight": 60,
+      "related_nodes": ["lajing_master"]
+    },
+    {
+      "id": "molob",
+      "label": "Molob-电影感大师",
+      "type": "document",
+      "category": "拉镜文档",
+      "weight": 60,
+      "related_nodes": ["lajing_master"]
+    },
+    {
+      "id": "yashfx",
+      "label": "YashFX-高燃插件流",
+      "type": "document",
+      "category": "拉镜文档",
+      "weight": 55,
+      "related_nodes": ["lajing_master"]
+    },
+    {
+      "id": "silhouette",
+      "label": "Silhouette知识库",
+      "type": "moc",
+      "category": "知识",
+      "weight": 60,
+      "related_nodes": ["main_center", "silhouette_basics", "silhouette_advanced"]
+    },
+    {
+      "id": "silhouette_basics",
+      "label": "Silhouette基础操作",
+      "type": "topic",
+      "category": "Silhouette",
+      "weight": 50,
+      "related_nodes": ["silhouette"]
+    },
+    {
+      "id": "silhouette_advanced",
+      "label": "Silhouette高级技巧",
+      "type": "topic",
+      "category": "Silhouette",
+      "weight": 55,
+      "related_nodes": ["silhouette"]
+    },
+    {
+      "id": "project_overview",
+      "label": "项目概览",
+      "type": "moc",
+      "category": "基础",
+      "weight": 50,
+      "related_nodes": ["main_center"]
+    },
+    {
+      "id": "dev_docs",
+      "label": "开发文档",
+      "type": "moc",
+      "category": "基础",
+      "weight": 55,
+      "related_nodes": ["main_center"]
+    },
+    {
+      "id": "stage_reports",
+      "label": "阶段报告",
+      "type": "moc",
+      "category": "基础",
+      "weight": 50,
+      "related_nodes": ["main_center"]
+    },
+    {
+      "id": "design_patterns",
+      "label": "设计模式与反模式",
+      "type": "moc",
+      "category": "基础",
+      "weight": 55,
+      "related_nodes": ["main_center"]
+    },
+    {
+      "id": "test_suite",
+      "label": "测试套件",
+      "type": "moc",
+      "category": "基础",
+      "weight": 50,
+      "related_nodes": ["main_center"]
+    },
+    {
+      "id": "ai_dev",
+      "label": "AI辅助开发",
+      "type": "moc",
+      "category": "基础",
+      "weight": 50,
+      "related_nodes": ["main_center"]
+    },
+    {
+      "id": "mcp_guide",
+      "label": "MCP参考指南",
+      "type": "moc",
+      "category": "基础",
+      "weight": 55,
+      "related_nodes": ["main_center"]
+    },
+    {
+      "id": "deploy",
+      "label": "安装与部署",
+      "type": "moc",
+      "category": "基础",
+      "weight": 55,
+      "related_nodes": ["main_center"]
+    },
+    {
+      "id": "plans",
+      "label": "计划文件",
+      "type": "moc",
+      "category": "基础",
+      "weight": 45,
+      "related_nodes": ["main_center"]
+    }
+  ],
+  "edges": [
+    {"source": "main_center", "target": "style_clip", "type": "contains"},
+    {"source": "main_center", "target": "project_overview", "type": "contains"},
+    {"source": "main_center", "target": "dev_docs", "type": "contains"},
+    {"source": "main_center", "target": "stage_reports", "type": "contains"},
+    {"source": "main_center", "target": "design_patterns", "type": "contains"},
+    {"source": "main_center", "target": "test_suite", "type": "contains"},
+    {"source": "main_center", "target": "ai_dev", "type": "contains"},
+    {"source": "main_center", "target": "mcp_guide", "type": "contains"},
+    {"source": "main_center", "target": "deploy", "type": "contains"},
+    {"source": "main_center", "target": "plans", "type": "contains"},
+    {"source": "main_center", "target": "master_knowledge", "type": "contains"},
+    {"source": "main_center", "target": "lajing_master", "type": "contains"},
+    {"source": "main_center", "target": "silhouette", "type": "contains"},
+    {"source": "style_clip", "target": "ae_core", "type": "contains"},
+    {"source": "style_clip", "target": "davinci", "type": "contains"},
+    {"source": "style_clip", "target": "premiere", "type": "contains"},
+    {"source": "style_clip", "target": "photoshop", "type": "contains"},
+    {"source": "style_clip", "target": "illustrator", "type": "contains"},
+    {"source": "style_clip", "target": "ame", "type": "contains"},
+    {"source": "style_clip", "target": "topaz", "type": "contains"},
+    {"source": "style_clip", "target": "runway", "type": "contains"},
+    {"source": "style_clip", "target": "blender", "type": "contains"},
+    {"source": "style_clip", "target": "ffmpeg", "type": "contains"},
+    {"source": "style_clip", "target": "font", "type": "contains"},
+    {"source": "style_clip", "target": "material", "type": "contains"},
+    {"source": "style_clip", "target": "deep_research", "type": "contains"},
+    {"source": "style_clip", "target": "audio_video_match", "type": "contains"},
+    {"source": "style_clip", "target": "timeline_mapping", "type": "contains"},
+    {"source": "style_clip", "target": "engineering", "type": "contains"},
+    {"source": "style_clip", "target": "resources", "type": "contains"},
+    {"source": "style_clip", "target": "special_topics", "type": "contains"},
+    {"source": "ae_core", "target": "expressions", "type": "contains"},
+    {"source": "ae_core", "target": "effects", "type": "contains"},
+    {"source": "ae_core", "target": "text_anim", "type": "contains"},
+    {"source": "ae_core", "target": "transitions", "type": "contains"},
+    {"source": "ae_core", "target": "3d_compositing", "type": "contains"},
+    {"source": "ae_core", "target": "layer_management", "type": "contains"},
+    {"source": "ae_core", "target": "extensions", "type": "contains"},
+    {"source": "ae_core", "target": "plugins", "type": "contains"},
+    {"source": "ae_core", "target": "reverse_analysis", "type": "contains"},
+    {"source": "ae_core", "target": "template", "type": "contains"},
+    {"source": "expressions", "target": "expressions_bible", "type": "document"},
+    {"source": "expressions", "target": "expressions_reference", "type": "document"},
+    {"source": "effects", "target": "effects_visual", "type": "document"},
+    {"source": "effects", "target": "effects_system", "type": "document"},
+    {"source": "text_anim", "target": "text_anim_report", "type": "document"},
+    {"source": "transitions", "target": "transition_report", "type": "document"},
+    {"source": "3d_compositing", "target": "3d_guide", "type": "document"},
+    {"source": "layer_management", "target": "layer_guide", "type": "document"},
+    {"source": "extensions", "target": "extensions_kb", "type": "document"},
+    {"source": "extensions", "target": "extensions_api", "type": "document"},
+    {"source": "plugins", "target": "plugins_kb", "type": "document"},
+    {"source": "plugins", "target": "trapcode", "type": "document"},
+    {"source": "plugins", "target": "sapphire", "type": "document"},
+    {"source": "plugins", "target": "video_copilot", "type": "document"},
+    {"source": "reverse_analysis", "target": "reverse_methodology", "type": "document"},
+    {"source": "reverse_analysis", "target": "keyframe_analysis", "type": "document"},
+    {"source": "reverse_analysis", "target": "layer_inference", "type": "document"},
+    {"source": "template", "target": "template_guide", "type": "document"},
+    {"source": "deep_research", "target": "mir", "type": "document"},
+    {"source": "deep_research", "target": "cv", "type": "document"},
+    {"source": "deep_research", "target": "audio_video_match_alg", "type": "document"},
+    {"source": "deep_research", "target": "python_ecosystem", "type": "document"},
+    {"source": "audio_video_match", "target": "music_analysis", "type": "document"},
+    {"source": "audio_video_match", "target": "clip_analysis", "type": "document"},
+    {"source": "audio_video_match", "target": "match_decision", "type": "document"},
+    {"source": "timeline_mapping", "target": "beat_keyframe", "type": "document"},
+    {"source": "timeline_mapping", "target": "paragraph_transition", "type": "document"},
+    {"source": "timeline_mapping", "target": "four_dimensional", "type": "document"},
+    {"source": "timeline_mapping", "target": "genre_recipes", "type": "document"},
+    {"source": "engineering", "target": "music_engineer", "type": "document"},
+    {"source": "engineering", "target": "clip_engineer", "type": "document"},
+    {"source": "engineering", "target": "match_engineer", "type": "document"},
+    {"source": "engineering", "target": "roadmap", "type": "document"},
+    {"source": "engineering", "target": "deployment", "type": "document"},
+    {"source": "engineering", "target": "training", "type": "document"},
+    {"source": "engineering", "target": "troubleshooting", "type": "document"},
+    {"source": "resources", "target": "presets", "type": "document"},
+    {"source": "resources", "target": "luts", "type": "document"},
+    {"source": "special_topics", "target": "puppet_video", "type": "topic"},
+    {"source": "special_topics", "target": "still_mad", "type": "document"},
+    {"source": "special_topics", "target": "commercial", "type": "document"},
+    {"source": "special_topics", "target": "ai_workflow", "type": "document"},
+    {"source": "puppet_video", "target": "puppet_core", "type": "document"},
+    {"source": "puppet_video", "target": "puppet_multi_engine", "type": "document"},
+    {"source": "master_knowledge", "target": "jordy", "type": "topic"},
+    {"source": "lajing_master", "target": "xenoz", "type": "document"},
+    {"source": "lajing_master", "target": "molob", "type": "document"},
+    {"source": "lajing_master", "target": "yashfx", "type": "document"},
+    {"source": "silhouette", "target": "silhouette_basics", "type": "topic"},
+    {"source": "silhouette", "target": "silhouette_advanced", "type": "topic"},
+    {"source": "transitions", "target": "lajing_master", "type": "cross_reference"},
+    {"source": "3d_compositing", "target": "blender", "type": "cross_reference"},
+    {"source": "audio_video_match_alg", "target": "audio_video_match", "type": "cross_reference"},
+    {"source": "effects", "target": "resources", "type": "cross_reference"}
+  ],
+  "categories": {
+    "核心": {"color": "#4F46E5", "icon": "🏠"},
+    "软件": {"color": "#0EA5E9", "icon": "🖥️"},
+    "AE功能": {"color": "#8B5CF6", "icon": "✨"},
+    "AE文档": {"color": "#A78BFA", "icon": "📄"},
+    "AI工具": {"color": "#F59E0B", "icon": "🤖"},
+    "3D软件": {"color": "#10B981", "icon": "🔷"},
+    "技术基础": {"color": "#6366F1", "icon": "📡"},
+    "设计": {"color": "#EC4899", "icon": "🎨"},
+    "资源": {"color": "#14B8A6", "icon": "📦"},
+    "研究": {"color": "#06B6D4", "icon": "🔬"},
+    "研究报告": {"color": "#22D3EE", "icon": "📊"},
+    "系统": {"color": "#7C3AED", "icon": "🔧"},
+    "系统文档": {"color": "#A78BFA", "icon": "📋"},
+    "工程": {"color": "#F97316", "icon": "🛠️"},
+    "工程文档": {"color": "#FB923C", "icon": "📐"},
+    "资源文档": {"color": "#2DD4BF", "icon": "📁"},
+    "专题": {"color": "#D946EF", "icon": "🎭"},
+    "专题文档": {"color": "#E9D5FF", "icon": "📑"},
+    "大师": {"color": "#FBBF24", "icon": "🎓"},
+    "拉镜文档": {"color": "#F87171", "icon": "🎯"},
+    "Silhouette": {"color": "#3B82F6", "icon": "✂️"},
+    "基础": {"color": "#9CA3AF", "icon": "📚"},
+    "知识": {"color": "#60A5FA", "icon": "💡"}
+  }
+}

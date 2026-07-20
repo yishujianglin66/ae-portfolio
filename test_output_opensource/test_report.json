@@ -1,0 +1,294 @@
+{
+  "timestamp": "2026-07-19 22:00:22",
+  "total": 57,
+  "passed": 57,
+  "failed": 0,
+  "pass_rate": "100.0%",
+  "results": [
+    {
+      "name": "工具注册: rife",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "工具注册: sam2",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "工具注册: video2x",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "工具注册: whisper",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "工具注册: remotion",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "工具注册: openmontage",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "工具注册: moviepy",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "至少1个工具可用",
+      "passed": true,
+      "detail": "可用: ['rife', 'sam2', 'whisper', 'remotion', 'openmontage', 'moviepy']"
+    },
+    {
+      "name": "状态报告生成",
+      "passed": true,
+      "detail": "长度: 776"
+    },
+    {
+      "name": "list_tools()",
+      "passed": true,
+      "detail": "共 7 个"
+    },
+    {
+      "name": "list_operations(rife)",
+      "passed": true,
+      "detail": "6 个操作"
+    },
+    {
+      "name": "list_operations(whisper)",
+      "passed": true,
+      "detail": "6 个操作"
+    },
+    {
+      "name": "list_operations(moviepy)",
+      "passed": true,
+      "detail": "9 个操作"
+    },
+    {
+      "name": "Whisper 可用性检测",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Whisper 操作列表",
+      "passed": true,
+      "detail": "6 个操作: ['transcribe', 'generate_subtitles', 'detect_language', 'timestamp_align', 'extract_segments']"
+    },
+    {
+      "name": "测试音频文件存在",
+      "passed": true,
+      "detail": "chime.mp3"
+    },
+    {
+      "name": "Whisper transcribe 执行",
+      "passed": true,
+      "detail": "status=simulated, duration=48876ms"
+    },
+    {
+      "name": "ToolType.RIFE",
+      "passed": true,
+      "detail": "=rife"
+    },
+    {
+      "name": "ToolType.SAM2",
+      "passed": true,
+      "detail": "=sam2"
+    },
+    {
+      "name": "ToolType.WHISPER",
+      "passed": true,
+      "detail": "=whisper"
+    },
+    {
+      "name": "ToolType.REMOTION",
+      "passed": true,
+      "detail": "=remotion"
+    },
+    {
+      "name": "ToolType.MOVIEPY",
+      "passed": true,
+      "detail": "=moviepy"
+    },
+    {
+      "name": "ToolType.OPENMONTAGE",
+      "passed": true,
+      "detail": "=openmontage"
+    },
+    {
+      "name": "ToolType.VIDEO2X",
+      "passed": true,
+      "detail": "=video2x"
+    },
+    {
+      "name": "ToolType.SILHOUETTE",
+      "passed": true,
+      "detail": "=silhouette"
+    },
+    {
+      "name": "WorkflowPreset.AI_SUBTITLE",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "WorkflowPreset.SMART_ROTO",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "WorkflowPreset.OPEN_PRODUCTION",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "WorkflowPreset.ENHANCED_UPSCALE",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "WorkflowPreset.BATCH_SOCIAL",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设 ai_subtitle_pipeline 步骤数",
+      "passed": true,
+      "detail": "3/3"
+    },
+    {
+      "name": "预设 ai_subtitle_pipeline 步骤完整性",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设 smart_roto_pipeline 步骤数",
+      "passed": true,
+      "detail": "3/3"
+    },
+    {
+      "name": "预设 smart_roto_pipeline 步骤完整性",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设 open_production_pipeline 步骤数",
+      "passed": true,
+      "detail": "3/3"
+    },
+    {
+      "name": "预设 open_production_pipeline 步骤完整性",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设 enhanced_upscale_pipeline 步骤数",
+      "passed": true,
+      "detail": "4/4"
+    },
+    {
+      "name": "预设 enhanced_upscale_pipeline 步骤完整性",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设 batch_social_media 步骤数",
+      "passed": true,
+      "detail": "3/3"
+    },
+    {
+      "name": "预设 batch_social_media 步骤完整性",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "总工作流预设数",
+      "passed": true,
+      "detail": "共 9 个 (期望>=9)"
+    },
+    {
+      "name": "MoviePy 可用性检测",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "MoviePy 操作列表",
+      "passed": true,
+      "detail": "9 个操作"
+    },
+    {
+      "name": "测试视频文件存在",
+      "passed": true,
+      "detail": "background-tech-data-flow.mp4"
+    },
+    {
+      "name": "MoviePy extract_audio 执行",
+      "passed": true,
+      "detail": "status=success, duration=461ms"
+    },
+    {
+      "name": "MoviePy cut_clip 执行",
+      "passed": true,
+      "detail": "status=error"
+    },
+    {
+      "name": "UnifiedToolIntegrator 初始化",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "OpenSourceHub 桥接存在",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "合并工具状态报告",
+      "passed": true,
+      "detail": "共 16 个工具"
+    },
+    {
+      "name": "开源工具在合并列表中",
+      "passed": true,
+      "detail": "找到: ['rife', 'sam2', 'video2x', 'whisper', 'remotion', 'openmontage', 'moviepy']"
+    },
+    {
+      "name": "_execute_opensource_step 方法存在",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "桥接层执行 Whisper 步骤",
+      "passed": true,
+      "detail": "keys=['files', 'data', 'status', 'log']"
+    },
+    {
+      "name": "预设 ai_subtitle_pipeline 可访问",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设 smart_roto_pipeline 可访问",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设 open_production_pipeline 可访问",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设 enhanced_upscale_pipeline 可访问",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设 batch_social_media 可访问",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

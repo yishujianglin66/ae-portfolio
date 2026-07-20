@@ -1,0 +1,337 @@
+```json
+{
+  "title": "《冰海战记》战斗剪辑脚本：托尔芬的决意",
+  "audio": {
+    "file": "ae实战音乐.mp3",
+    "duration": 23.15,
+    "bpm": 112.35,
+    "beat_duration_ms": 534,
+    "style": "激昂战斗音乐，以战鼓、弦乐和金属质感为主"
+  },
+  "timeline": {
+    "intro": { "start": 0.0, "end": 4.0 },
+    "build": { "start": 4.0, "end": 9.0 },
+    "drop": { "start": 9.0, "end": 15.0 },
+    "break": { "start": 15.0, "end": 19.0 },
+    "outro": { "start": 19.0, "end": 23.15 }
+  },
+  "segments": [
+    {
+      "name": "Intro 铺垫",
+      "start": 0.0,
+      "end": 4.0,
+      "description": "冷寂的氛围拉开序幕，引入主角托尔芬的孤独与决意。",
+      "shots": [
+        {
+          "time": "0.0-2.0",
+          "type": "氛围镜头",
+          "source": "冰海战记.mp4 (截取海面、冰原或长船远影)",
+          "framing": "大远景，缓慢推进",
+          "effects": [
+            "调整曲线压暗阴影，降低饱和度，整体偏青蓝色",
+            "添加轻微 Film Grain 和 Fog 效果模拟北欧寒气",
+            "应用 Camera Lens Blur 让边缘模糊，中心清晰"
+          ],
+          "layers": {
+            "background": "冷色调静态海景或雪原（循环扩展）",
+            "main": "托尔芬侧影或剪影（半透明叠加）",
+            "foreground": "缓缓飘落的雪花粒子层"
+          }
+        },
+        {
+          "time": "2.0-4.0",
+          "type": "角色特写",
+          "source": "托尔芬.mp4（截取面部特写或握刀手部）",
+          "framing": "缓慢放大至面部",
+          "effects": [
+            "Color Balance：中间调向青蓝偏移，阴影加冷紫",
+            "添加细微的 Vignette 和 Glow 在刀刃反光处"
+          ],
+          "layers": {
+            "background": "深色烟雾动态背景",
+            "main": "托尔芬面部或手部特写",
+            "foreground": "浮尘粒子和细微冰晶"
+          }
+        }
+      ],
+      "transition_out": "通过急速拉镜 + 模糊 + 白光闪烁进入 Build 段"
+    },
+    {
+      "name": "Build 积蓄",
+      "start": 4.0,
+      "end": 9.0,
+      "description": "节奏加快，展示训练、奔跑或备战镜头，能量逐步攀升。",
+      "shots": [
+        {
+          "time": "4.0-6.0",
+          "type": "动态动作",
+          "source": "冰海战记.mp4（战斗奔跑、挥砍预备动作）",
+          "framing": "中景跟拍，轻微晃动",
+          "effects": [
+            "加速至 120% 并配合 Motion Blur",
+            "增加 Radial Blur 在画面边缘模拟速度感"
+          ],
+          "sync": "与鼓点同步切换镜头"
+        },
+        {
+          "time": "6.0-7.5",
+          "type": "武器细节",
+          "source": "托尔芬.mp4（拔刀、刀光特写）",
+          "framing": "极特写，快速剪辑",
+          "effects": [
+            "添加 CC Light Rays 强调刀光",
+            "使用快速色彩闪烁（曝光短暂提高）卡强拍"
+          ],
+          "sync": "6.42 (强拍) 刀光闪烁"
+        },
+        {
+          "time": "7.5-9.0",
+          "type": "多镜头快速混剪",
+          "source": "混合素材（冲刺、眼神、兵器碰撞）",
+          "framing": "频闪切换",
+          "effects": [
+            "每3帧切换一次镜头，增加 Glitch 转场",
+            "整体色调逐渐升温，红色暗部浮现"
+          ],
+          "sync": "8.0 和 8.54 处强拍切换"
+        }
+      ],
+      "transition_out": "高速 Zoom In + 瞬间黑屏转 Drop"
+    },
+    {
+      "name": "Drop 爆发",
+      "start": 9.0,
+      "end": 15.0,
+      "description": "音乐最强段落，战斗高潮，托尔芬全力一击。",
+      "shots": [
+        {
+          "time": "9.0-10.5",
+          "type": "战斗高潮A",
+          "source": "冰海战记.mp4（关键挥砍或跳跃斩击）",
+          "framing": "全身动态，追随动作",
+          "effects": [
+            "应用 Time Remap 慢动作定格在击中瞬间",
+            "添加 Shockwave 效果（径向模糊+闪光）在打击点",
+            "画面震动表达式：wiggle(2,5) 配合鼓点"
+          ],
+          "sync": "9.0 (Drop 起始) 强光爆炸"
+        },
+        {
+          "time": "10.5-12.5",
+          "type": "反应镜头",
+          "source": "托尔芬.mp4（怒吼或血迹特写）",
+          "framing": "面部特写，伴随粒子飞溅",
+          "effects": [
+            "快速拉镜 + 翻转色相营造混乱感",
+            "鲜血粒子层（Particular）向前喷溅"
+          ],
+          "sync": "11.2 和 12.0 处强拍增强震动"
+        },
+        {
+          "time": "12.5-15.0",
+          "type": "终结技&环绕镜头",
+          "source": "冰海战记.mp4（敌人倒下或托尔芬落地）",
+          "framing": "低角度仰拍，环绕慢动作",
+          "effects": [
+            "添加 Lens Flare 在武器与天空交界处",
+            "整体色调变为高对比度冷蓝，仅保留刀刃暖色反光",
+            "背景增加飘落的灰烬或火星"
+          ],
+          "sync": "13.5 最后一击定格，音乐延音"
+        }
+      ],
+      "transition_out": "画面冻结并碎裂，过渡到 Break"
+    },
+    {
+      "name": "Break 喘息",
+      "start": 15.0,
+      "end": 19.0,
+      "description": "短暂安静，展示角色情感，为尾声做铺垫。",
+      "shots": [
+        {
+          "time": "15.0-17.0",
+          "type": "情感凝视",
+          "source": "托尔芬.mp4（疲惫但坚定的眼神）",
+          "framing": "缓慢推近眼睛",
+          "effects": [
+            "调色板转为低饱和、柔和冷色",
+            "添加水面波纹扭曲效果（Displacement Map）反映内心波动"
+          ]
+        },
+        {
+          "time": "17.0-19.0",
+          "type": "回忆/闪回",
+          "source": "冰海战记.mp4（父亲托尔兹的背影或儿时画面）",
+          "framing": "叠加半透明，柔光处理",
+          "effects": [
+            "应用 Fast Blur 和降低透明度模拟回忆",
+            "添加老旧胶片划痕和闪烁"
+          ]
+        }
+      ],
+      "transition_out": "淡出至白，引入 Outro"
+    },
+    {
+      "name": "Outro 结束",
+      "start": 19.0,
+      "end": 23.15,
+      "description": "音乐收尾，托尔芬迈向新战场的背影，标题浮现。",
+      "shots": [
+        {
+          "time": "19.0-21.0",
+          "type": "背影离去",
+          "source": "冰海战记.mp4（行走在雪原的背影）",
+          "framing": "固定远景，人物渐行渐远",
+          "effects": [
+            "添加飘扬的披风动态（木偶工具或网格变形）",
+            "地面增加风雪粒子，跟随风向"
+          ]
+        },
+        {
+          "time": "21.0-23.15",
+          "type": "标题画面",
+          "source": "纯黑背景 + 标题动画",
+          "framing": "居中",
+          "effects": [
+            "文字使用金属质感，缓慢浮现",
+            "背景添加微弱飘雪，带镜头光晕"
+          ],
+          "text": {
+            "content": "VINLAND SAGA",
+            "style": "锐利衬线字体，冰蓝渐变",
+            "animation": "逐个字母放大浮现，最后加上刀痕划开效果"
+          }
+        }
+      ]
+    }
+  ],
+  "beats": {
+    "description": "BPM 112.35，每拍0.534秒，强拍每4拍出现一次（约2.14秒），标记视觉冲击时刻。",
+    "hit_points": [
+      { "time_sec": 0.0, "label": "Intro 第一拍" },
+      { "time_sec": 2.14, "label": "Build 入口，鼓点加密度" },
+      { "time_sec": 4.28, "label": "Build 内动作加速" },
+      { "time_sec": 6.42, "label": "Build → Drop 预备，刀光闪烁" },
+      { "time_sec": 8.56, "label": "Drop 爆发前一拍急速呼吸" },
+      { "time_sec": 9.0, "label": "Drop 主爆发，打击点闪光" },
+      { "time_sec": 11.22, "label": "Drop 第二波重击" },
+      { "time_sec": 13.36, "label": "终结技定格" },
+      { "time_sec": 15.5, "label": "Break 情感聚焦" },
+      { "time_sec": 17.64, "label": "回忆闪现" },
+      { "time_sec": 19.78, "label": "Outro 背影，音乐减弱" },
+      { "time_sec": 21.92, "label": "标题浮现" }
+    ]
+  },
+  "effects": {
+    "global_grading": {
+      "description": "全片冷色调，高对比度，阴影偏青，高光略暖（仅保留刃光和火光）",
+      "adjustments": {
+        "curves": "RGB曲线拉亮高光、压暗阴影，蓝色通道高光提升",
+        "color_wheels": {
+          "shadows": "青蓝色 (H:200, S:40, L:-10)",
+          "midtones": "冷灰 (H:210, S:15, L:0)",
+          "highlights": "淡橘色 (H:35, S:20, L:+5)"
+        },
+        "vibrance": -10,
+        "saturation": -15
+      }
+    },
+    "per_segment_effects": {
+      "intro": ["Film Grain 5%", "Fog 3D 浓雾", "CC Toner (蓝色映射)"],
+      "build": [
+        "Motion Blur 180°",
+        "Radial Blur 速度感",
+        "Glitch 转场",
+        "曝光闪烁 (Wiggle 表达式)"
+      ],
+      "drop": [
+        "Time Remap 慢动作",
+        "Shockwave 径向模糊",
+        "画面震动 (wiggle(3,10))",
+        "Particular 粒子（火星、碎冰）"
+      ],
+      "break": [
+        "Displacement Map 水面扭曲",
+        "Old Film 划痕叠加",
+        "快速模糊 淡入淡出"
+      ],
+      "outro": [
+        "Puppet Pin 披风飘动",
+        "Snow 粒子系统",
+        "Optical Flares 光晕",
+        "文本预设动画 (Typewriter + Slash)"
+      ]
+    }
+  },
+  "colors": {
+    "primary_palette": {
+      "deep_ice_blue": "#2B4C7E",
+      "shadow_teal": "#1A3A4A",
+      "frost_white": "#D6E4F0",
+      "blood_red_accent": "#8B1E1E",
+      "steel_grey": "#4A5A6A",
+      "golden_spark": "#C8A45C"
+    },
+    "usage": "主调为深冰蓝和阴影青，高光保留一点金色用于刀刃反光和标题，血液作为强调色仅在动作高潮出现"
+  },
+  "text": {
+    "subtitles": [
+      {
+        "time": "2.5-4.0",
+        "content": "戦士として…",
+        "meaning": "作为战士…",
+        "animation": "淡入，字体为粗糙毛笔风格，位于底部中央"
+      },
+      {
+        "time": "9.0-9.5",
+        "content": "今！",
+        "meaning": "就是现在！",
+        "animation": "巨大字体冲击缩放，伴随闪光"
+      },
+      {
+        "time": "14.0-15.0",
+        "content": "仇を越えて",
+        "meaning": "超越仇恨",
+        "animation": "逐个浮现，融化消散转场"
+      },
+      {
+        "time": "21.0-23.15",
+        "content": "VINLAND SAGA",
+        "animation": "金属质感标题，刀痕切割特效"
+      }
+    ]
+  },
+  "layers_structure": {
+    "description": "标准分层架构，所有镜头均按此结构叠加，AE合成顺序从上到下：",
+    "layers": [
+      {
+        "name": "特效及粒子层 (Effects & Particles)",
+        "content": "雪花、火星、灰尘、光晕等动态叠加，使用Particular或预设素材"
+      },
+      {
+        "name": "前景层 (Foreground)",
+        "content": "部分遮挡主体的环境元素，如飘动的布、草木、飞溅的血液"
+      },
+      {
+        "name": "主体层 (Main Subject)",
+        "content": "角色动作、武器、表情等核心画面，应用时间重映射和调色"
+      },
+      {
+        "name": "背景层 (Background)",
+        "content": "场景环境，如海面、雪原、战场残骸，可添加模糊或视差效果"
+      },
+      {
+        "name": "调色与全局效果 (Adjustment Layer)",
+        "content": "全局Color Balance、Curves、LUT、Vignette等，统一管理色彩"
+      }
+    ]
+  },
+  "transitions": [
+    {
+      "from_segment": "Intro",
+      "to_segment": "Build",
+      "technique": "White Flash + 快速Z轴缩放，持续时间0.5秒，伴随军鼓滚奏"
+    },
+    {
+      "from_segment": "Build",
+      "to_segment": "Drop",

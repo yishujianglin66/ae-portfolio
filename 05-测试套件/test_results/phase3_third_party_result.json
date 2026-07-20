@@ -1,0 +1,89 @@
+{
+  "software_detection": {
+    "timestamp": "2026-07-14T18:59:18.949510",
+    "software": [
+      {
+        "name": "Topaz Video AI",
+        "available": true,
+        "path": "D:\\top\\Topaz Video AI Pro\\Topaz Video AI BETA.exe",
+        "purpose": "视频超分、补帧、降噪"
+      },
+      {
+        "name": "DaVinci Resolve",
+        "available": true,
+        "path": "D:\\DaVinci Resolve\\Resolve.exe",
+        "purpose": "专业调色、色彩分级"
+      },
+      {
+        "name": "Blender",
+        "available": true,
+        "path": "D:\\Blender\\Blender 5.1.0\\blender.exe",
+        "purpose": "3D建模、渲染"
+      },
+      {
+        "name": "Adobe Photoshop",
+        "available": true,
+        "path": "D:\\ps\\Adobe Photoshop 2026\\Photoshop.exe",
+        "purpose": "图像处理、素材制作"
+      },
+      {
+        "name": "Adobe Premiere Pro",
+        "available": true,
+        "path": "D:\\pr\\Adobe Premiere Pro 2026\\Adobe Premiere Pro.exe",
+        "purpose": "时间线剪辑"
+      },
+      {
+        "name": "FFmpeg",
+        "available": true,
+        "path": "C:\\ffmpeg\\bin\\ffmpeg.exe",
+        "purpose": "素材转码、格式转换"
+      },
+      {
+        "name": "MediaPipe",
+        "available": false,
+        "path": null,
+        "purpose": "人物检测、姿态估计、面部跟踪"
+      }
+    ],
+    "summary": {
+      "total": 7,
+      "available": 6,
+      "not_available": 1,
+      "availability_rate": 85.71428571428571
+    }
+  },
+  "integration_modules": {
+    "modules": [
+      {
+        "name": "TopazEnhancer",
+        "loaded": true,
+        "available": true,
+        "cli_path": "D:\\top\\Topaz Video AI Pro\\Topaz Video AI BETA.exe"
+      },
+      {
+        "name": "DavinciColorist",
+        "loaded": true,
+        "available": true,
+        "exe_path": "D:\\DaVinci Resolve\\Resolve.exe"
+      },
+      {
+        "name": "Blender3DIntegrator",
+        "loaded": true,
+        "available": true,
+        "exe_path": null
+      },
+      {
+        "name": "AIVideoGenerator",
+        "loaded": true,
+        "runway_available": false,
+        "pika_available": false
+      },
+      {
+        "name": "MediaPipeIntegrator",
+        "loaded": true,
+        "mode": "simulate"
+      }
+    ]
+  },
+  "timestamp": "2026-07-14T18:59:29.277631"
+}

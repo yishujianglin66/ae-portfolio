@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "environment": "production",
+  "directories": {
+    "video_library": "D:/AE-Work-Prod/视频素材库",
+    "audio_library": "D:/AE-Work-Prod/音频素材库",
+    "image_library": "D:/AE-Work-Prod/图片素材库",
+    "bgm_library": "D:/AE-Work-Prod/音频素材库/BGM",
+    "sound_effects": "D:/AE-Work-Prod/音效素材库",
+    "download_temp": "D:/AE-Work-Prod/临时下载",
+    "output": "D:/AE-Work-Prod/成品库",
+    "logs": "D:/AE-Work-Prod/日志与报告",
+    "cookies": "D:/AE-Work-Prod/cookies",
+    "vector_index": "D:/AE-Work-Prod/向量索引",
+    "temp_frames": "D:/AE-Work-Prod/临时帧",
+    "ae_projects": "D:/AE-Work-Prod/项目库"
+  },
+  "download": {
+    "max_concurrent": 5,
+    "timeout": 600,
+    "retries": 5
+  },
+  "mcp_bridge": {
+    "command_dir": "~/Documents/ae-mcp-bridge",
+    "poll_interval_ms": 500,
+    "command_timeout": 60,
+    "signature_enabled": true
+  },
+  "security": {
+    "command_signature": {
+      "enabled": true,
+      "timestamp_tolerance": 60
+    }
+  },
+  "auto_import": {
+    "enabled": true
+  }
+}

@@ -1,0 +1,176 @@
+## 结论（问题定位与修复方向）
+
+1. **错误原因**：`foregroundLayer` / `mainLayer` 等变量在获取图层引用时值为 `null`，导致在调用 `moveToBeginning()` / `moveAfter()` 等图层编排方法时触发 `TypeError`。  
+   - 根本原因：素材导入失败（路径错误或文件不存在）→`importFootage()` 返回 `null` → 用 `null` 创建图层失败（部分AE版本会直接抛出）或创建的图层变量未赋值，后续编排时变量为 `null`。  
+   - 脚本中断点：在创建一个需依赖外部素材的图层（如 `Main_Thorfinn`）时，因素材无效而中断，但之前已成功创建的 `Background_Vinland` 和 `Soundtrack` 仍保留在合成中，符合你看到的仅 2 层结果。
+
+2. **`layer.parent = nullLayer` 本身语法正确**，但必须保证 `nullLayer` 是有效的图层对象，且该操作不会引发 `null` 错误。当前错误不在此处。
+
+3. **`moveAfter` 无语法错误**，但调用时若调用者或目标图层为 `null`，就会报错。代码片段中的编排逻辑在所有图层创建后才执行，但此时某些图层变量仍为 `null`，因此触发 1305 行异常。
+
+4. **修复方案**：
+   - 增强素材导入的容错：检查素材是否存在，若导入失败则使用纯色占位图层代替。
+   - 每个图层创建后立即检查返回值，失败时回退到生成颜色层。
+   - 在图层编排前验证所有图层变量非空，缺失时自动补充占位层或跳过操作。
+   - 提供完整的、可运行的修复脚本（见下文）。
+
+---
+
+## 详细分析
+
+### 1. 脚本中断位置推断
+根据合成中仅剩两层（`Background_Vinland` 和 `Soundtrack`），结合常见 AE 脚本执行顺序：
+1. 先创建背景 `Background_Vinland` → 成功。
+2. 创建 `Soundtrack`（通常是音频层或空层）→ 成功。
+3. 导入视频素材 `冰海战记.mp4` / `托尔芬.mp4` → **路径无效导致 `null`**。
+4. 用 `null` 素材调用 `comp.layers.add(null)`：在部分 AE 环境中直接抛出异常，脚本终止，但之前已创建的两层保留。误在中途出错的代码行可能是 `add()` 行（而非 1305）。  
+   如果 `add(null)` 没有立即崩溃（某些版本可能返回 `null` 或跳过），那么变量 `mainLayer` 等保持未初始化状态，等到后续 1305 行试图对 `null` 操作时就报错。根据你的错误信息，后者可能性更高。
+
+### 2. `parent` 属性设置
+- `layer.parent = nullLayer` 是 ExtendScript 的标准写法，效果等同于在 UI 中设定父级。
+- 但注意：如果 `nullLayer` 是刚刚创建的（同合成内），直接赋值没有问题。如果 `nullLayer` 位于不同合成，会报错。当前场景是同一合成，所以该部分不会导致错误。
+- 错误 `Camera_Controller` 为空，是因为 `createCameraNull()` 可能被调用但在内部循环时，图层可能不满足条件（`indexOf("Main_")`），或者函数执行时尚未创建任何主体图层，但不会导致函数返回 `null`，它会返回 `nullLayer`。合成中该层应存在，只是“空”指的是没有关键帧/属性。如果它不在合成里，说明 `createCameraNull` 根本没成功执行。鉴于合成只有两个层，推测 `createCameraNull` 根本没被调用到就中断了。
+
+### 3. `moveAfter` 用法
+语法正确，常见陷阱是目标图层必须已经存在于合成中，并且不能是自身。但当前问题出在调用者为 `null`。
+
+### 4. 修复思路（健壮化）
+- 封装一个安全的 `safeAddLayer`：先用 `app.project.importFile()` 导入，失败时创建同尺寸的彩色固态层占位，保证图层变量始终有效。
+- 分层创建，每步均检查结果。
+- 编排前二次验证。
+
+---
+
+## 可运行的修复代码
+
+以下脚本可直接在 After Effects 中运行（ExtendScript），假设已存在一个名为 `MainComp` 的合成，尺寸为 1920×1080。若合成不同，请调整 `compName`、`WIDTH`、`HEIGHT`。
+
+```javascript
+// 全局设置
+var VIDEO_PATH = "D:/素材/冰海战记/";   // 请修改为实际素材路径
+var WIDTH = 1920;
+var HEIGHT = 1080;
+var comp = app.project.items.addComp("MainComp", WIDTH, HEIGHT, 1, 30, 10); // 安全创建
+
+// 安全导入函数：导入失败时返回一个纯色占位图层
+function safeImport(path, fallbackName, fallbackColor) {
+    var file = new File(path);
+    if (file.exists) {
+        try {
+            var footage = app.project.importFile(new ImportOptions(file));
+            return footage;
+        } catch (e) {
+            alert("素材导入失败: " + path + " 使用占位层代替");
+        }
+    }
+    // 返回一个占位素材（创建一个彩色固态层，返回 null？不，这里返回 null，由调用者创建实色层）
+    return null;
+}
+
+// 安全添加图层：若素材为空，则创建纯色层，始终返回有效图层对象
+function safeAddLayer(comp, footage, name, fallbackColor) {
+    var layer;
+    if (footage) {
+        try {
+            layer = comp.layers.add(footage);
+        } catch (e) {
+            // 如果添加失败（例如素材损坏），降级为纯色层
+            layer = comp.layers.addSolid(fallbackColor, name, WIDTH, HEIGHT, 1);
+        }
+    } else {
+        layer = comp.layers.addSolid(fallbackColor, name, WIDTH, HEIGHT, 1);
+    }
+    if (layer) layer.name = name;
+    return layer;
+}
+
+// 1. 导入素材（带容错）
+var vinlandFootage = safeImport(VIDEO_PATH + "冰海战记.mp4", "Vinland", [0.2, 0.3, 0.5]);
+var thorfinnFootage = safeImport(VIDEO_PATH + "托尔芬.mp4", "Thorfinn", [0.8, 0.2, 0.2]);
+
+// 2. 创建各个图层
+var bgLayer       = safeAddLayer(comp, vinlandFootage, "Background_Vinland", [0.1, 0.1, 0.1]);
+var mainLayer     = safeAddLayer(comp, null, "Main_Thorfinn", [0.8, 0.6, 0.2]); // 主角层暂用纯色
+var battleLayer   = safeAddLayer(comp, vinlandFootage, "Battle_Vinland", [0.5, 0.2, 0.5]);
+var thorfinnBattleLayer = safeAddLayer(comp, thorfinnFootage, "Thorfinn_Battle", [0.9, 0.4, 0.1]);
+var outroLayer    = safeAddLayer(comp, null, "Outro", [0.1, 0.5, 0.1]);
+var fxLayer       = safeAddLayer(comp, null, "FX_Layer", [0, 0, 0]);
+var foregroundLayer= safeAddLayer(comp, null, "Foreground", [1, 1, 1]);
+var audioCtrl     = safeAddLayer(comp, null, "Audio_Controller", [0, 0, 0]); // 可用空对象
+var gradingLayer  = safeAddLayer(comp, null, "Global_Grading", [0.5, 0.5, 0.5]);
+var soundtrackLayer = safeAddLayer(comp, null, "Soundtrack", [0, 0, 0]); // 空层用于音频
+
+// 3. 创建 Camera_Controller 空对象
+var cameraCtrl = comp.layers.addNull();
+cameraCtrl.name = "Camera_Controller";
+cameraCtrl.startTime = 0;
+cameraCtrl.scale.setValueAtTime(0, [100, 100]);
+cameraCtrl.position.setValueAtTime(0, [WIDTH/2, HEIGHT/2]);
+cameraCtrl.rotation.setValueAtTime(0, 0);
+
+// 4. 设置父级链接（仅当图层存在且不是空对象本身）
+function safeSetParent(child, parent) {
+    if (child && parent && child != parent) {
+        child.parent = parent;
+    } else {
+        $.writeln("跳过无效父级链接: " + (child ? child.name : "无") + " -> " + (parent ? parent.name : "无"));
+    }
+}
+
+// 将所有动态图层链接到 Camera_Controller
+var dynamicLayers = [mainLayer, battleLayer, thorfinnBattleLayer, outroLayer];
+for (var i = 0; i < dynamicLayers.length; i++) {
+    safeSetParent(dynamicLayers[i], cameraCtrl);
+}
+
+// 5. 图层顺序编排（先确保所有图层存在，再移动）
+// 将所有目标图层引用放在数组中检查
+var layersToOrder = [
+    foregroundLayer, fxLayer, outroLayer, thorfinnBattleLayer,
+    battleLayer, mainLayer, bgLayer, audioCtrl, gradingLayer, soundtrackLayer, cameraCtrl
+];
+for (var j = 0; j < layersToOrder.length; j++) {
+    if (!layersToOrder[j] || !layersToOrder[j].isValid) {
+        alert("错误: 图层 " + j + " 未创建，请检查素材路径或占位逻辑");
+        // 这里可以选择创建默认纯色层作兜底
+    }
+}
+
+// 执行编排
+try {
+    foregroundLayer.moveToBeginning();
+    fxLayer.moveAfter(foregroundLayer);
+    outroLayer.moveAfter(fxLayer);
+    thorfinnBattleLayer.moveAfter(outroLayer);
+    battleLayer.moveAfter(thorfinnBattleLayer);
+    mainLayer.moveAfter(battleLayer);
+    bgLayer.moveAfter(mainLayer);
+    audioCtrl.moveAfter(bgLayer);
+    gradingLayer.moveAfter(audioCtrl);
+    soundtrackLayer.moveAfter(gradingLayer);
+    // Camera_Controller 通常放在最底层或最顶层，视需求而定，这里放在soundtrack之后
+    cameraCtrl.moveAfter(soundtrackLayer);
+} catch (e) {
+    alert("图层编排错误: " + e.toString() + "\n请检查图层变量是否存在。");
+}
+
+alert("脚本执行完毕！图层总数: " + comp.numLayers);
+```
+
+---
+
+## 关键修复点说明
+
+| 问题 | 修复方式 |
+|------|----------|
+| 素材路径无效导致 `null` | `safeImport()` 检查文件是否存在，失败不崩溃；`safeAddLayer()` 若素材为 `null` 则创建 `addSolid` 占位层，保证图层变量非空 |
+| 变量为 `null` 后调用方法 | 编排前逐一验证图层有效性，`try-catch` 包裹编排逻辑，输出可读错误信息 |
+| 父级链接潜在失效 | 使用 `safeSetParent()` 包装，避免对无效图层的赋值，同时输出调试信息 |
+| 缺少图层时脚本继续 | 所有图层通过 `safeAddLayer` 必定创建（可能是纯色），合成不再缺少关键层，编排不会因为 `null` 崩溃 |
+
+---
+
+## 额外建议
+
+- 如果素材路径经常变动，可将路径写入配置文件或界面输入框。
+- 对于仅用于音频的层（如

@@ -1,0 +1,436 @@
+{
+  "version": "2.0",
+  "description": "AE项目字体资源主配置 - V12后本地安装3038款字体的全景分类与AE调用规范",
+  "platform": "Windows",
+  "ae_version": "2025.3",
+  "fonts_dir_user": "C:\\Users\\Administrator\\AppData\\Local\\Microsoft\\Windows\\Fonts",
+  "fonts_dir_resource": "D:\\AE-Work\\resources\\fonts",
+  "fonts_dir_system": "C:\\Windows\\Fonts",
+  "installed_count": 3038,
+
+  "categories": {
+    "hero_title": {
+      "display": "主标题/封面字",
+      "scene": "片头主视觉、封面、海报",
+      "principle": "100% 视觉冲击 + 风格独特 + 与画面主体强对比",
+      "fonts": [
+        {
+          "key": "hero_cn_brutal",
+          "name": "方正兰亭粗黑简",
+          "postscript": "FZLanTingHeiS-ExtraBold",
+          "tag": "中文暴力粗黑",
+          "weight": 900,
+          "color": "#FFFFFF",
+          "stroke": "#000000",
+          "stroke_w": 2.0,
+          "sample_text": "VINLAND SAGA",
+          "best_for": ["战斗史诗", "燃向混剪", "主视觉"]
+        },
+        {
+          "key": "hero_cn_brush",
+          "name": "书体坊米芾体",
+          "postscript": "STMFuTi",
+          "tag": "中文书法狂草",
+          "weight": 700,
+          "color": "#E6C77E",
+          "stroke": "#1A0A00",
+          "stroke_w": 1.2,
+          "sample_text": "冰海战记",
+          "best_for": ["文化片", "武侠", "国风"]
+        },
+        {
+          "key": "hero_en_impact",
+          "name": "Impact",
+          "postscript": "Impact",
+          "tag": "英文极粗冲击",
+          "weight": 900,
+          "color": "#FFFFFF",
+          "stroke": "#000000",
+          "stroke_w": 3.0,
+          "sample_text": "BATTLE",
+          "best_for": ["战斗字幕", "短视频爆点"]
+        },
+        {
+          "key": "hero_en_metal",
+          "name": "Bahnschrift Condensed",
+          "postscript": "Bahnschrift",
+          "tag": "金属感窄体",
+          "weight": 800,
+          "color": "#D4D4D4",
+          "stroke": "#1A1A1A",
+          "stroke_w": 2.0,
+          "sample_text": "EPISODE 01",
+          "best_for": ["科技感", "工业感", "电影标题"]
+        }
+      ]
+    },
+
+    "section_title": {
+      "display": "段落标题/分幕",
+      "scene": "章节切分、幕落、数字序号",
+      "principle": "醒目但次于主标题、字距+50到+150、字重700-800",
+      "fonts": [
+        {
+          "key": "section_cn_modern",
+          "name": "阿里巴巴普惠体 Heavy",
+          "postscript": "AlibabaPuHuiTi-3-85-Heavy",
+          "tag": "现代互联网感",
+          "weight": 800,
+          "color": "#F5F5F5",
+          "stroke": "#0F0F0F",
+          "stroke_w": 1.0,
+          "sample_text": "CHAPTER II",
+          "best_for": ["分幕", "段落", "商业感"]
+        },
+        {
+          "key": "section_en_anton",
+          "name": "Anton",
+          "postscript": "Anton-Regular",
+          "tag": "超窄粗体",
+          "weight": 800,
+          "color": "#FFFFFF",
+          "stroke": "#000000",
+          "stroke_w": 1.5,
+          "sample_text": "PART 02",
+          "best_for": ["分幕数字", "紧张节奏"]
+        },
+        {
+          "key": "section_en_din",
+          "name": "DIN Next LT Pro Bold",
+          "postscript": "DINNextLTPro-Bold",
+          "tag": "工业数字",
+          "weight": 700,
+          "color": "#FFFFFF",
+          "stroke": "#000000",
+          "stroke_w": 1.0,
+          "sample_text": "PART 02",
+          "best_for": ["纪实感", "数据感"]
+        }
+      ]
+    },
+
+    "subtitle_dense": {
+      "display": "密集字幕/对白",
+      "scene": "快节奏混剪、卡点文字、Drop段战吼",
+      "principle": "短促有力、闪入闪出、字重≥800、字号80-140",
+      "fonts": [
+        {
+          "key": "sub_cn_impact",
+          "name": "方正正中黑简体",
+          "postscript": "FZJingHeiS-R-GB",
+          "tag": "方正粗黑",
+          "weight": 900,
+          "color": "#FFFFFF",
+          "stroke": "#FF2200",
+          "stroke_w": 2.0,
+          "sample_text": "战",
+          "best_for": ["卡点战吼", "单字重击"]
+        },
+        {
+          "key": "sub_en_bebas",
+          "name": "Bebas Neue",
+          "postscript": "BebasNeue",
+          "tag": "极窄极粗",
+          "weight": 900,
+          "color": "#FFFFFF",
+          "stroke": "#000000",
+          "stroke_w": 1.5,
+          "sample_text": "FIGHT",
+          "best_for": ["英文卡点", "BGM落点"]
+        },
+        {
+          "key": "sub_en_impact",
+          "name": "Impact",
+          "postscript": "Impact",
+          "tag": "经典冲击",
+          "weight": 900,
+          "color": "#FFEE00",
+          "stroke": "#000000",
+          "stroke_w": 2.5,
+          "sample_text": "VS",
+          "best_for": ["战斗对位", "双角色对峙"]
+        },
+        {
+          "key": "sub_cyber_pixel",
+          "name": "04B_03B",
+          "postscript": "04b_03b",
+          "tag": "像素游戏风",
+          "weight": 700,
+          "color": "#00FFC8",
+          "stroke": "#000000",
+          "stroke_w": 1.0,
+          "sample_text": "LEVEL 05",
+          "best_for": ["赛博朋克", "8-bit", "游戏感"]
+        }
+      ]
+    },
+
+    "subtitle_serif": {
+      "display": "衬线情感字幕",
+      "scene": "Break段留白、情感沉淀、诗意字幕",
+      "principle": "衬线增加文学感、字重Regular-Light、字号24-48",
+      "fonts": [
+        {
+          "key": "serif_cn_classic",
+          "name": "思源宋体SC",
+          "postscript": "NotoSerifSC-VF",
+          "tag": "开源宋体",
+          "weight": 400,
+          "color": "#E8DCC4",
+          "stroke": "#000000",
+          "stroke_w": 0.5,
+          "sample_text": "战士的史诗",
+          "best_for": ["诗意标题", "文艺", "纪录片"]
+        },
+        {
+          "key": "serif_cn_fang",
+          "name": "方正书宋简体",
+          "postscript": "FZShuSong-Z01S",
+          "tag": "传统书宋",
+          "weight": 400,
+          "color": "#F5E6C8",
+          "stroke": "#1A0A00",
+          "stroke_w": 0.3,
+          "sample_text": "史诗的落幕",
+          "best_for": ["正式", "文化", "古风"]
+        },
+        {
+          "key": "serif_en_playfair",
+          "name": "Playfair Display",
+          "postscript": "PlayfairDisplay-Bold",
+          "tag": "优雅衬线",
+          "weight": 700,
+          "color": "#FFFFFF",
+          "stroke": "#000000",
+          "stroke_w": 0.8,
+          "sample_text": "REDEMPTION",
+          "best_for": ["电影收尾", "英文诗意"]
+        }
+      ]
+    },
+
+    "subtitle_handwrite": {
+      "display": "手写/书法字幕",
+      "scene": "亲笔感、个人化、签名款",
+      "principle": "极小段使用、避免超过6个字、强调温度感",
+      "fonts": [
+        {
+          "key": "handwrite_cn_ma",
+          "name": "马善政",
+          "postscript": "MaShanZheng",
+          "tag": "中文毛笔",
+          "weight": 400,
+          "color": "#1A0A00",
+          "stroke": "#FFFFFF",
+          "stroke_w": 0.5,
+          "sample_text": "战",
+          "best_for": ["单字意境", "墨韵", "国风"]
+        },
+        {
+          "key": "handwrite_en_brush",
+          "name": "Brush Script MT",
+          "postscript": "BrushScriptMT",
+          "tag": "英文手写",
+          "weight": 400,
+          "color": "#FFFFFF",
+          "stroke": "#000000",
+          "stroke_w": 0.5,
+          "sample_text": "Saga",
+          "best_for": ["签名", "怀旧"]
+        }
+      ]
+    },
+
+    "subtitle_decorative": {
+      "display": "装饰/卡通/个性字幕",
+      "scene": "萌系、搞怪、二次元、节日",
+      "principle": "短句使用、字重<600、配合表情/贴纸",
+      "fonts": [
+        {
+          "key": "deco_cn_xuan",
+          "name": "汉仪小麦体",
+          "postscript": "HYXiaoMaiTiJ",
+          "tag": "圆润可爱",
+          "weight": 400,
+          "color": "#FF6B9D",
+          "stroke": "#FFFFFF",
+          "stroke_w": 1.5,
+          "sample_text": "萌萌哒",
+          "best_for": ["萌系", "儿童", "治愈"]
+        },
+        {
+          "key": "deco_cn_bungee",
+          "name": "Bangers",
+          "postscript": "Bangers",
+          "tag": "漫画爆炸",
+          "weight": 700,
+          "color": "#FFEE00",
+          "stroke": "#000000",
+          "stroke_w": 2.0,
+          "sample_text": "POW!",
+          "best_for": ["漫画感", "炸场", "搞笑"]
+        },
+        {
+          "key": "deco_cn_loli",
+          "name": "义启童真体",
+          "postscript": "YiqiTongZhen",
+          "tag": "童趣手绘",
+          "weight": 400,
+          "color": "#FFA8C5",
+          "stroke": "#5A2A4A",
+          "stroke_w": 1.0,
+          "sample_text": "可爱",
+          "best_for": ["儿童", "少女", "Vlog"]
+        }
+      ]
+    },
+
+    "data_panel": {
+      "display": "数据/科技面板字",
+      "scene": "数据可视化、Cyber面板、终端界面",
+      "principle": "等宽或窄体、字距+50以上、字色单一",
+      "fonts": [
+        {
+          "key": "data_en_din",
+          "name": "DIN Next LT Pro Bold",
+          "postscript": "DINNextLTPro-Bold",
+          "tag": "工业DIN",
+          "weight": 700,
+          "color": "#00FFC8",
+          "stroke": "#000000",
+          "stroke_w": 0.5,
+          "sample_text": "23:15:08",
+          "best_for": ["时间码", "数据"]
+        },
+        {
+          "key": "data_en_consolas",
+          "name": "Consolas",
+          "postscript": "Consolas",
+          "tag": "等宽代码",
+          "weight": 400,
+          "color": "#00FF66",
+          "stroke": "#000000",
+          "stroke_w": 0.3,
+          "sample_text": "sys_init()",
+          "best_for": ["代码感", "终端"]
+        },
+        {
+          "key": "data_en_bahnschrift",
+          "name": "Bahnschrift",
+          "postscript": "Bahnschrift",
+          "tag": "可变窄体",
+          "weight": 700,
+          "color": "#00BFFF",
+          "stroke": "#001A33",
+          "stroke_w": 0.3,
+          "sample_text": "FPS 60",
+          "best_for": ["科技面板", "系统UI"]
+        }
+      ]
+    },
+
+    "ending_credit": {
+      "display": "片尾/署名/片尾字幕",
+      "scene": "Outro段、署名、版权",
+      "principle": "优雅内敛、字号16-28、字重Regular",
+      "fonts": [
+        {
+          "key": "credit_cn_puhui",
+          "name": "阿里巴巴普惠体 Light",
+          "postscript": "AlibabaPuHuiTi-3-45-Light",
+          "tag": "轻盈现代",
+          "weight": 300,
+          "color": "#FFFFFF",
+          "stroke": "#000000",
+          "stroke_w": 0.2,
+          "sample_text": "Director: X",
+          "best_for": ["片尾", "署名", "现代"]
+        },
+        {
+          "key": "credit_cn_kaiti",
+          "name": "方正楷体简体",
+          "postscript": "FZKaiTi",
+          "tag": "传统楷体",
+          "weight": 400,
+          "color": "#F5E6C8",
+          "stroke": "#1A0A00",
+          "stroke_w": 0.2,
+          "sample_text": "监制 / 制作",
+          "best_for": ["古风片尾", "文化署名"]
+        }
+      ]
+    }
+  },
+
+  "scene_font_mapping": {
+    "intro_hero": "hero_cn_brutal",
+    "intro_credit": "credit_cn_puhui",
+    "build_emotion": "serif_cn_classic",
+    "build_action": "sub_cn_impact",
+    "drop_battle_cn": "sub_cn_impact",
+    "drop_battle_en": "sub_en_impact",
+    "drop_cyber": "sub_cyber_pixel",
+    "break_quote": "serif_en_playfair",
+    "break_memory": "serif_cn_classic",
+    "outro_hero": "hero_cn_brutal",
+    "outro_credit": "credit_cn_puhui",
+    "data_panel": "data_en_din",
+    "vfx_explosion": "sub_en_bebas",
+    "vfx_glitch": "sub_cyber_pixel"
+  },
+
+  "animation_recipes": {
+    "bounce_in": {
+      "desc": "弹性缩放入场",
+      "keyframes": [
+        {"t": 0.00, "scale": [0, 0], "opacity": 0},
+        {"t": 0.12, "scale": [108, 108], "opacity": 100},
+        {"t": 0.35, "scale": [98, 98], "opacity": 100},
+        {"t": 0.50, "scale": [100, 100], "opacity": 100}
+      ],
+      "best_with": ["hero_*", "section_*", "sub_*"]
+    },
+    "tracking_fade": {
+      "desc": "字距淡入",
+      "expression": "var td=value;td.tracking=linear(time-thisProperty.propertyGroup(3).startTime,0,0.5,30,0);td;",
+      "best_with": ["hero_cn_brutal", "section_cn_modern", "credit_*"]
+    },
+    "glitch_pop": {
+      "desc": "故障弹出",
+      "keyframes": [
+        {"t": 0.00, "scale": [110, 110], "opacity": 100, "x_shift": 8},
+        {"t": 0.05, "scale": [100, 100], "opacity": 100, "x_shift": -8},
+        {"t": 0.10, "scale": [105, 105], "opacity": 100, "x_shift": 4},
+        {"t": 0.15, "scale": [100, 100], "opacity": 100, "x_shift": 0}
+      ],
+      "best_with": ["sub_cyber_pixel", "sub_en_impact", "data_*"]
+    },
+    "typewriter": {
+      "desc": "打字机效果",
+      "expression": "text.sourceText=text.sourceText.substr(0,Math.floor((time-thisProperty.propertyGroup(3).startTime)*15));",
+      "best_with": ["data_*", "credit_*"]
+    },
+    "kinetic_smash": {
+      "desc": "动能撞击",
+      "keyframes": [
+        {"t": 0.00, "scale": [200, 200], "opacity": 0, "rotation": -8},
+        {"t": 0.18, "scale": [100, 100], "opacity": 100, "rotation": 0},
+        {"t": 0.30, "scale": [108, 108], "opacity": 100, "rotation": 0},
+        {"t": 0.40, "scale": [100, 100], "opacity": 100, "rotation": 0}
+      ],
+      "best_with": ["hero_*", "sub_en_impact", "sub_cn_impact"]
+    }
+  },
+
+  "fix_rules": {
+    "extend_script_es3": {
+      "must_use": "PostScript字体名（不是文件名）",
+      "must_avoid": "ScriptUI.newFont()、Date.toISOString()",
+      "iso_timestamp_helper": "isoTimestamp() 自定义函数"
+    },
+    "tracking_animation": {
+      "rule": "字距动画需用SourceText.expression，不能用Tracking关键帧",
+      "reason": "ExtendScript关键帧对SourceText.tracking支持不全"
+    }
+  }
+}

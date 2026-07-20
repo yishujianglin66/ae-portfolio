@@ -1,0 +1,250 @@
+"""
+knowledge_base/adapters/transition_adapter.py - 转场配方适配器 (Layer 4)
+
+将知识库中解析的转场配方转换为与 TRANSITION_IMPL_MAP 兼容的 Dict[str, Dict[str, Any]] 格式。
+
+用法：
+    from knowledge_base.adapters.transition_adapter import TransitionAdapter
+
+    adapter = TransitionAdapter()
+    recipes = adapter.extract_from_blocks(blocks, source_file="file.md")
+    trans_map = adapter.to_dict(recipes)
+    merged = adapter.merge_with_fallback(recipes, fallback_map)
+"""
+from __future__ import annotations
+
+import re
+from typing import Any, Dict, List, Optional
+
+from knowledge_base.types import BlockType, MdBlock, TransitionRecipe
+from knowledge_base.table_extractor import TableExtractor
+
+
+class TransitionAdapter:
+    """转场配方适配器 - 输出与 TRANSITION_IMPL_MAP 兼容的格式。"""
+
+    # 匹配 "**type**: display_name=xxx, effect=yyy" 格式
+    _KV_LINE_RE = re.compile(
+        r"[-*]?\s*\*{0,2}([^*\n:]+?)\*{0,2}\s*[:：]\s*(.+)"
+    )
+
+    # 常见列名变体（仅匹配转场专用列名，避免误匹配通用表格）
+    _TYPE_COLS = {"转场类型", "transition_type", "transition"}
+    _NAME_COLS = {"显示名", "display_name", "中文名"}
+    _EFFECT_COLS = {"效果match", "effect_match"}
+    _PARAMS_COLS = {"参数", "params", "parameters"}
+
+    def __init__(self) -> None:
+        self._table_extractor = TableExtractor()
+
+    def extract_from_blocks(
+        self,
+        blocks: List[MdBlock],
+        source_file: str = "",
+    ) -> List[TransitionRecipe]:
+        """从 MdBlock 列表中提取转场配方。
+
+        扫描所有 TABLE 块，查找包含"类型"和"效果"列的表格。
+
+        Args:
+            blocks: MdBlock 列表
+            source_file: 来源文件名
+
+        Returns:
+            TransitionRecipe 列表
+        """
+        recipes: List[TransitionRecipe] = []
+
+        for block in blocks:
+            if block.block_type != BlockType.TABLE:
+                continue
+
+            rows = self._table_extractor.extract(block)
+            if not rows:
+                continue
+
+            headers = list(rows[0].columns.keys())
+            type_col = self._find_column(headers, self._TYPE_COLS)
+            name_col = self._find_column(headers, self._NAME_COLS)
+            effect_col = self._find_column(headers, self._EFFECT_COLS)
+            params_col = self._find_column(headers, self._PARAMS_COLS)
+
+            # 必须同时有类型列和效果列才视为转场配方表
+            if not type_col or not effect_col:
+                continue
+
+            for row in rows:
+                trans_type = row.columns.get(type_col, "").strip()
+                if not trans_type:
+                    continue
+
+                # 转为 snake_case
+                trans_type = self._to_snake_case(trans_type)
+
+                display_name = ""
+                if name_col:
+                    display_name = row.columns.get(name_col, "").strip()
+
+                effect_match = ""
+                if effect_col:
+                    effect_match = row.columns.get(effect_col, "").strip()
+
+                params: Dict[str, Any] = {}
+                if params_col:
+                    params_str = row.columns.get(params_col, "").strip()
+                    params = self._parse_params(params_str)
+
+                recipes.append(TransitionRecipe(
+                    transition_type=trans_type,
+                    display_name=display_name,
+                    effect_match=effect_match,
+                    params=params,
+                    source_file=source_file,
+                ))
+
+        return recipes
+
+    def extract_from_text_blocks(
+        self,
+        blocks: List[MdBlock],
+        source_file: str = "",
+    ) -> List[TransitionRecipe]:
+        """从文本块中提取转场配方。
+
+        匹配格式：
+            - **type**: display_name=xxx, effect=yyy
+
+        Args:
+            blocks: MdBlock 列表
+            source_file: 来源文件名
+
+        Returns:
+            TransitionRecipe 列表
+        """
+        recipes: List[TransitionRecipe] = []
+
+        for block in blocks:
+            if block.block_type not in (BlockType.PARAGRAPH, BlockType.LIST):
+                continue
+
+            for line in block.content.split("\n"):
+                m = self._KV_LINE_RE.search(line)
+                if not m:
+                    continue
+
+                trans_type = m.group(1).strip()
+                trans_type = re.sub(r"\*{1,2}([^*]+)\*{1,2}", r"\1", trans_type)
+                trans_type = self._to_snake_case(trans_type)
+
+                rest = m.group(2).strip()
+                display_name = ""
+                effect_match = ""
+
+                # 解析 display_name=xxx
+                dm = re.search(r"display_name\s*=\s*([^,，]+)", rest)
+                if dm:
+                    display_name = dm.group(1).strip()
+
+                # 解析 effect=xxx
+                em = re.search(r"effect\s*=\s*(\S+)", rest)
+                if em:
+                    effect_match = em.group(1).strip()
+
+                recipes.append(TransitionRecipe(
+                    transition_type=trans_type,
+                    display_name=display_name,
+                    effect_match=effect_match,
+                    source_file=source_file,
+                ))
+
+        return recipes
+
+    def to_dict(self, recipes: List[TransitionRecipe]) -> Dict[str, Dict[str, Any]]:
+        """转换为 Dict[str, Dict[str, Any]] 格式。
+
+        Args:
+            recipes: TransitionRecipe 列表
+
+        Returns:
+            与 TRANSITION_IMPL_MAP 格式兼容的字典
+        """
+        result: Dict[str, Dict[str, Any]] = {}
+        for r in recipes:
+            entry: Dict[str, Any] = {
+                "display_name": r.display_name,
+                "effect_match": r.effect_match,
+            }
+            if r.params:
+                entry["params"] = r.params
+            if r.animate:
+                entry["animate"] = r.animate
+            result[r.transition_type] = entry
+        return result
+
+    def merge_with_fallback(
+        self,
+        kb_recipes: List[TransitionRecipe],
+        fallback: Dict[str, Dict[str, Any]],
+    ) -> Dict[str, Dict[str, Any]]:
+        """合并知识库配方与硬编码 fallback。
+
+        Args:
+            kb_recipes: 从知识库提取的配方
+            fallback: 硬编码 fallback
+
+        Returns:
+            合并后的字典
+        """
+        result: Dict[str, Dict[str, Any]] = dict(fallback)
+        for r in kb_recipes:
+            entry: Dict[str, Any] = {
+                "display_name": r.display_name,
+                "effect_match": r.effect_match,
+            }
+            if r.params:
+                entry["params"] = r.params
+            if r.animate:
+                entry["animate"] = r.animate
+            result[r.transition_type] = entry
+        return result
+
+    @staticmethod
+    def _to_snake_case(text: str) -> str:
+        """将文本转为 snake_case。"""
+        # 空格/连字符 -> 下划线
+        text = re.sub(r"[\s\-]+", "_", text)
+        # CamelCase -> snake_case
+        text = re.sub(r"([a-z])([A-Z])", r"\1_\2", text)
+        return text.lower().strip("_")
+
+    @staticmethod
+    def _parse_params(params_str: str) -> Dict[str, Any]:
+        """解析参数字符串 "key1=val1, key2=val2"。"""
+        params: Dict[str, Any] = {}
+        if not params_str:
+            return params
+
+        for pair in params_str.split(","):
+            pair = pair.strip()
+            if "=" not in pair:
+                continue
+            key, val = pair.split("=", 1)
+            key = key.strip()
+            val = val.strip()
+            # 尝试转为数值
+            try:
+                params[key] = int(val)
+            except ValueError:
+                try:
+                    params[key] = float(val)
+                except ValueError:
+                    params[key] = val
+        return params
+
+    @staticmethod
+    def _find_column(headers: List[str], candidates: set[str]) -> Optional[str]:
+        """在表头中查找匹配候选名称的列。"""
+        for h in headers:
+            if h.lower().strip() in candidates:
+                return h
+        return None

@@ -1,0 +1,48 @@
+{
+  "prompt": "冰海战记高燃混剪, 电影感, 30秒",
+  "style": "cinematic",
+  "phases": {
+    "collection": {
+      "total": 1,
+      "files": [
+        "VinlandSaga_Battle_V17.mp4"
+      ]
+    },
+    "analysis": {
+      "analyzed": 1,
+      "summaries": [
+        {
+          "name": "VinlandSaga_Battle_V17.mp4",
+          "mood": "fast_paced",
+          "duration": 23.2
+        }
+      ]
+    },
+    "script": {
+      "title": "冰海战记：血与魂",
+      "duration": 30,
+      "segments": 5
+    },
+    "translation": {
+      "jsx_lines": 207
+    },
+    "stage3d": {
+      "camera": "移",
+      "lighting": "cinematic",
+      "stage_lines": 78
+    },
+    "execution": {
+      "success": true,
+      "status": "success",
+      "message": "E2E音乐视频合成创建成功",
+      "compName": "E2E_音乐视频_v3",
+      "totalLayers": 12,
+      "bpm": 120,
+      "beatKeyframes": 0,
+      "energyPeaks": 0,
+      "timestamp": "2026-07-10T11:07:36.878Z"
+    }
+  },
+  "elapsed_seconds": 40.9,
+  "output_dir": "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output_director"
+}

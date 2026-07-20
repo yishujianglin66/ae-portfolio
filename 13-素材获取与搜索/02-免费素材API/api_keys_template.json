@@ -1,0 +1,15 @@
+{
+  "pixabay_api_key": "YOUR_PIXABAY_API_KEY_HERE",
+  "pexels_api_key": "YOUR_PEXELS_API_KEY_HERE",
+  "jamendo_client_id": "YOUR_JAMENDO_CLIENT_ID_HERE",
+  "_instructions": {
+    "pixabay": "在 https://pixabay.com/api/docs/ 注册获取API Key",
+    "pexels": "在 https://www.pexels.com/api/ 注册获取API Key",
+    "jamendo": "在 https://developer.jamendo.com/v3.0 注册获取Client ID"
+  },
+  "_rate_limits": {
+    "pixabay": "100 requests/hour",
+    "pexels": "200 requests/hour",
+    "jamendo": "无明确限制（但需合理使用）"
+  }
+}

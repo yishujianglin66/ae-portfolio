@@ -1,0 +1,144 @@
+{
+  "title": "冰海战记：血与魂",
+  "total_duration": 30,
+  "resolution": {
+    "width": 1080,
+    "height": 1920
+  },
+  "fps": 23.976,
+  "segments": [
+    {
+      "name": "序章·冰封之怒",
+      "type": "intro",
+      "start": 0,
+      "end": 4,
+      "material_index": 1,
+      "mood": "压抑而肃穆，暴风雨前的宁静",
+      "camera": {
+        "movement": "推",
+        "speed": "slow",
+        "technique": "Dolly Zoom"
+      },
+      "text_overlay": {
+        "text": "命运之刃，早已淬火",
+        "position": "center",
+        "font_size": 48,
+        "color": "#d4af37",
+        "animation": "fade_in"
+      },
+      "effects": [
+        "胶片颗粒",
+        "暗角"
+      ],
+      "transition_to_next": "crossfade"
+    },
+    {
+      "name": "崛起·复仇之火",
+      "type": "build",
+      "start": 4,
+      "end": 12,
+      "material_index": 1,
+      "mood": "愤怒升腾，战意渐浓",
+      "camera": {
+        "movement": "摇",
+        "speed": "normal",
+        "technique": " whip pan"
+      },
+      "text_overlay": {
+        "text": "仇恨是火，也是剑",
+        "position": "bottom",
+        "font_size": 40,
+        "color": "#ff4500",
+        "animation": "slide_up"
+      },
+      "effects": [
+        "色差",
+        "镜头光晕"
+      ],
+      "transition_to_next": "cut"
+    },
+    {
+      "name": "激战·血染冰海",
+      "type": "drop",
+      "start": 12,
+      "end": 22,
+      "material_index": 1,
+      "mood": "疯狂、密集、肾上腺素飙升",
+      "camera": {
+        "movement": "移",
+        "speed": "fast",
+        "technique": "快速摇移+手持抖动"
+      },
+      "text_overlay": {
+        "text": "以血还血！",
+        "position": "center",
+        "font_size": 60,
+        "color": "#ffffff",
+        "animation": "scale_bounce"
+      },
+      "effects": [
+        "闪白",
+        "时间重映射",
+        "RGB分离"
+      ],
+      "transition_to_next": "zoom"
+    },
+    {
+      "name": "喘息·寂静之后",
+      "type": "break",
+      "start": 22,
+      "end": 26,
+      "material_index": 1,
+      "mood": "短暂宁静，雪花飘落，内心独白",
+      "camera": {
+        "movement": "拉",
+        "speed": "slow",
+        "technique": "慢镜头"
+      },
+      "text_overlay": {
+        "text": "杀戮的尽头，是什么？",
+        "position": "top",
+        "font_size": 36,
+        "color": "#a0a0a0",
+        "animation": "typewriter"
+      },
+      "effects": [
+        "柔光",
+        "粒子雪花"
+      ],
+      "transition_to_next": "dissolve"
+    },
+    {
+      "name": "终章·战士的荣耀",
+      "type": "outro",
+      "start": 26,
+      "end": 30,
+      "material_index": 1,
+      "mood": "悲壮、决绝、升华",
+      "camera": {
+        "movement": "环绕",
+        "speed": "normal",
+        "technique": "轨道环绕"
+      },
+      "text_overlay": {
+        "text": "战士之魂，永不熄灭",
+        "position": "center",
+        "font_size": 52,
+        "color": "#c0c0c0",
+        "animation": "fade_in"
+      },
+      "effects": [
+        "胶片划痕",
+        "淡出"
+      ],
+      "transition_to_next": "crossfade"
+    }
+  ],
+  "color_grading": {
+    "temperature": 15,
+    "tint": -5,
+    "contrast": 35,
+    "saturation": 20
+  },
+  "bgm_mood": "史诗、战鼓、弦乐渐强、爆发"
+}

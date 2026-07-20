@@ -1,0 +1,269 @@
+{
+  "timestamp": "2026-07-19 22:26:21",
+  "test_target": "D:\\AE-Work\\output\\VinlandSaga_Battle_V17.mp4",
+  "summary": {
+    "total": 44,
+    "passed": 43,
+    "failed": 1,
+    "pass_rate": "97.7%"
+  },
+  "phases": {
+    "AE_Bridge": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "errors": []
+    },
+    "Subtitle_Text": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "errors": []
+    },
+    "DaVinci": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "errors": []
+    },
+    "OpenSource": {
+      "total": 14,
+      "passed": 13,
+      "failed": 1,
+      "errors": [
+        "FFmpeg V17 转720p: rc=3752568763"
+      ]
+    },
+    "Unified": {
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "errors": []
+    }
+  },
+  "error_log": [
+    "[FAIL] FFmpeg V17 转720p: rc=3752568763"
+  ],
+  "results": [
+    {
+      "name": "AE MCP Client 模块导入",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "AECommandClient 实例化",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "AE Bridge ping",
+      "passed": true,
+      "detail": "{'status': 'success', 'result': {'pong': True, 'appName': None, 'appVersion': '2"
+    },
+    {
+      "name": "AfterEffectsMCP 配置存在",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "V17 JSX 功能覆盖",
+      "passed": true,
+      "detail": "5/9: 表达式, 文字图层, 摄像机, 关键帧, 素材导入"
+    },
+    {
+      "name": "Bridge脚本: ae_mcp_bridge_v26.jsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Bridge脚本: ae_mcp_auto_listener.jsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Bridge脚本: ae_mcp_listener.jsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Whisper 模块可用",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Whisper V17 转写",
+      "passed": true,
+      "detail": "status=simulated"
+    },
+    {
+      "name": "模拟SRT字幕生成",
+      "passed": true,
+      "detail": "220 bytes"
+    },
+    {
+      "name": "AI字幕预设可用",
+      "passed": true,
+      "detail": "3 steps: ['extract_audio', 'whisper_transcribe', 'ae_import_subtitle']"
+    },
+    {
+      "name": "文字动画表达式模板",
+      "passed": true,
+      "detail": "3 个模板"
+    },
+    {
+      "name": "DaVinci 模块导入",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "DaVinci Resolve 安装检测",
+      "passed": true,
+      "detail": "已安装"
+    },
+    {
+      "name": "DaVinci 预设列表",
+      "passed": true,
+      "detail": "12 个: ['default', 'cinematic', 'warm_vintage', 'cool_teal', 'vivid_pop']"
+    },
+    {
+      "name": "DaVinci 调色执行",
+      "passed": true,
+      "detail": "result=ResolveColorResult(success=True, input_path='D:\\\\AE-Work\\\\ou"
+    },
+    {
+      "name": "LUT 文件",
+      "passed": true,
+      "detail": "目录存在但无LUT文件"
+    },
+    {
+      "name": "OpenSourceHub 工具状态",
+      "passed": true,
+      "detail": "可用: ['rife', 'sam2', 'whisper', 'remotion', 'openmontage', 'moviepy']"
+    },
+    {
+      "name": "MoviePy 截取V17前3秒",
+      "passed": true,
+      "detail": "status=error, 453ms"
+    },
+    {
+      "name": "MoviePy V17 变速1.5x",
+      "passed": true,
+      "detail": "status=success"
+    },
+    {
+      "name": "MoviePy V17 缩放480p",
+      "passed": true,
+      "detail": "status=success"
+    },
+    {
+      "name": "RIFE 帧插值可用",
+      "passed": true,
+      "detail": "可执行2x/4x/8x插帧"
+    },
+    {
+      "name": "RIFE 操作列表",
+      "passed": true,
+      "detail": "6 个: ['interpolate_2x', 'interpolate_4x', 'interpolate_8x', 'slow_motion']"
+    },
+    {
+      "name": "SAM2 视频分割可用",
+      "passed": true,
+      "detail": "可执行自动分割/目标追踪"
+    },
+    {
+      "name": "SAM2 操作列表",
+      "passed": true,
+      "detail": "6 个: ['segment_image', 'segment_video', 'auto_mask_generate', 'track_object']"
+    },
+    {
+      "name": "Remotion 可用",
+      "passed": true,
+      "detail": "可执行编程式视频生成"
+    },
+    {
+      "name": "Remotion 操作列表",
+      "passed": true,
+      "detail": "6 个: ['render_video', 'render_sequence', 'create_from_template', 'batch_render']"
+    },
+    {
+      "name": "FFmpeg V17 转720p",
+      "passed": false,
+      "detail": "rc=3752568763"
+    },
+    {
+      "name": "FFmpeg V17 转GIF",
+      "passed": true,
+      "detail": "743KB"
+    },
+    {
+      "name": "统一调度器初始化",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "工具总数",
+      "passed": true,
+      "detail": "16 个 (可用: 10)"
+    },
+    {
+      "name": "工作流预设总数",
+      "passed": true,
+      "detail": "9 个: ['enhance_quality', 'delivery_pipeline', '3d_composite', 'batch_process', 'ai_subtitle_pipeline', 'smart_roto_pipeline', 'open_production_pipeline', 'enhanced_upscale_pipeline', 'batch_social_media']"
+    },
+    {
+      "name": "预设完整性: enhance_quality",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设完整性: delivery_pipeline",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设完整性: 3d_composite",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设完整性: batch_process",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设完整性: ai_subtitle_pipeline",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设完整性: smart_roto_pipeline",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设完整性: open_production_pipeline",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设完整性: enhanced_upscale_pipeline",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "预设完整性: batch_social_media",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "OpenSourceHub 桥接",
+      "passed": "<opensource_integrations.OpenSourceHub object at 0x000001B6B213C140>",
+      "detail": ""
+    },
+    {
+      "name": "桥接层执行 MoviePy",
+      "passed": true,
+      "detail": "keys=['files', 'data', 'status', 'log']"
+    }
+  ]
+}

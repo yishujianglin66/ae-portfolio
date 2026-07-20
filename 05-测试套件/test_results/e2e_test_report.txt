@@ -1,0 +1,34 @@
+=== End-to-End Workflow Test Report ===
+Timestamp: 2026-07-14T09:21:38.225Z
+Overall: ALL PASSED
+
+--- Perception ---
+[PASS] mediaPreprocessing (1ms)
+[PASS] sceneDetection
+[PASS] audioAnalysis
+
+--- Understanding ---
+[PASS] intentRecognition
+[PASS] styleAnalysis
+
+--- Planning ---
+[PASS] compositionPlanning
+[PASS] effectComposition
+
+--- Execution ---
+[PASS] createComposition (7ms)
+[PASS] importFootage (6ms)
+[PASS] addLayers (3ms)
+[PASS] applyEffects (10ms)
+[PASS] setKeyframes (3ms)
+
+--- Feedback ---
+[PASS] verifyComposition
+[PASS] verifyEffectProperties
+[PASS] saveProject (22ms)
+
+=== Summary ===
+Phases: 5
+Tests: 15
+Passed: 15
+Failed: 0

@@ -1,0 +1,12 @@
+=== AE Automation Test Results ===
+Time: 2026-07-14T09:09:57.727Z
+Overall: ALL PASSED
+
+[PASS] createComposition
+  Details: {"name":"AutoTest_Comp_1784020197727","width":1920,"height":1080}
+[PASS] importFootage
+  Details: {"name":"test_image.png"}
+[PASS] addLayerToComp
+  Details: {"layerName":"test_image.png","index":1}
+[PASS] applyEffect
+  Details: {"effectName":"Gaussian Blur","blurriness":10}

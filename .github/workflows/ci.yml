@@ -1,0 +1,206 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  # ==================== Python 后端测试 ====================
+  backend-test:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastapi uvicorn pydantic python-multipart psutil
+
+      - name: Test enterprise modules
+        run: |
+          py -3.11 auth_system.py
+          py -3.11 distributed_scheduler.py
+          py -3.11 monitoring.py
+
+      - name: Start API server for integration tests
+        run: |
+          $env:AEK_ENVIRONMENT = "test"
+          Start-Job -ScriptBlock { Set-Location $env:GITHUB_WORKSPACE; py -3.11 api_server.py }
+          Start-Sleep -Seconds 5
+
+      - name: Run integration tests
+        run: |
+          py -3.11 test_api_integration.py
+
+      - name: Install pytest test dependencies
+        run: |
+          pip install pytest numpy opencv-python-headless requests loguru
+
+      - name: Run pytest service test suite
+        env:
+          AEK_ENVIRONMENT: test
+        run: |
+          py -3.11 -m pytest tests/test_audio_analysis_service.py tests/test_scene_detection_service.py tests/test_ai_agent.py tests/test_career_growth_analyzer.py tests/test_integration_services.py -v --tb=short
+
+      - name: Python linting (flake8)
+        run: |
+          pip install flake8
+          flake8 api_server.py auth_system.py monitoring.py distributed_scheduler.py database.py plugin_system.py --max-line-length=120 --extend-ignore=E501,W503,E203
+        continue-on-error: true
+
+      - name: Security scan
+        run: |
+          python -c "
+          import os, re, sys
+          patterns = {
+              'hardcoded_password': re.compile(r'password\s*=\s*[\"\\'][^\"\\']+[\"\\']', re.IGNORECASE),
+              'hardcoded_api_key': re.compile(r'(api_key|apikey|secret)\s*=\s*[\"\\'][^\"\\']{10,}[\"\\']', re.IGNORECASE),
+              'private_key': re.compile(r'-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----'),
+          }
+          skip_dirs = {'.git', '__pycache__', 'node_modules', '.obsidian', '.trae', 'puppet-automation'}
+          skip_ext = {'.md', '.txt', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.json'}
+          issues = []
+          for dirpath, dirnames, filenames in os.walk('.'):
+              dirnames[:] = [d for d in dirnames if d not in skip_dirs]
+              for filename in filenames:
+                  ext = os.path.splitext(filename)[1].lower()
+                  if ext in skip_ext:
+                      continue
+                  filepath = os.path.join(dirpath, filename)
+                  try:
+                      with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                          content = f.read()
+                      for issue_name, pattern in patterns.items():
+                          matches = pattern.findall(content)
+                          if matches:
+                              rel_path = os.path.relpath(filepath, '.')
+                              issues.append(f'{rel_path}: {len(matches)} {issue_name} match(es)')
+                  except Exception:
+                      pass
+          if issues:
+              print('Security scan found potential issues:')
+              for issue in issues:
+                  print(f'  - {issue}')
+          else:
+              print('Security scan passed: no obvious secrets found')
+          "
+
+  # ==================== 前端构建测试 ====================
+  frontend-build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        node-version: ["22.x"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: ae-dashboard/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ae-dashboard
+        run: npm ci
+
+      - name: TypeScript type check
+        working-directory: ae-dashboard
+        run: npx tsc --noEmit
+
+      - name: Production build
+        working-directory: ae-dashboard
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          if (Test-Path ae-dashboard/dist/index.html) {
+            Write-Host "Frontend build verified: index.html exists"
+          } else {
+            Write-Host "ERROR: index.html not found in dist/"
+            exit 1
+          }
+
+  # ==================== TypeScript 编译器测试 ====================
+  compiler-test:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        node-version: ["22.x"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: compiler/package-lock.json
+
+      - name: Install compiler dependencies
+        working-directory: compiler
+        run: npm ci
+
+      - name: TypeScript compilation
+        working-directory: compiler
+        run: npm run build
+
+      - name: Run unit tests
+        working-directory: compiler
+        run: |
+          npm run build:phase3-test
+          npm run build:phase4-test
+          npm run build:phase5-test
+
+  # ==================== Docker 构建测试 ====================
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: ae-knowledge-vault:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify docker-compose config
+        run: docker compose config
+
+  # ==================== 汇总 ====================
+  summary:
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-build, compiler-test, docker-build]
+    steps:
+      - name: Pipeline Summary
+        run: |
+          echo "================================"
+          echo "  CI Pipeline Summary"
+          echo "================================"
+          echo "Backend tests:  PASSED"
+          echo "Frontend build: PASSED"
+          echo "Compiler tests: PASSED"
+          echo "Docker build:   PASSED"
+          echo "================================"

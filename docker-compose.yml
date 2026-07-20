@@ -1,0 +1,59 @@
+# ============================================================
+# AE-Knowledge-Vault 全栈 Docker Compose
+# 服务：backend (FastAPI) + nginx (前端+反代)
+# ============================================================
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ae-vault-backend
+    restart: unless-stopped
+    environment:
+      - AEK_ENVIRONMENT=production
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - AE_VAULT_SECRET_KEY=${AE_VAULT_SECRET_KEY:-ae-knowledge-vault-secret-key-please-change-in-production}
+      - ACCESS_TOKEN_TTL=3600
+      - REFRESH_TOKEN_TTL=604800
+      - SCHEDULER_WORKERS=3
+      - METRICS_INTERVAL=15.0
+      - ALERT_CHECK_INTERVAL=10.0
+      - LOG_LEVEL=INFO
+    volumes:
+      - ae-data:/app/data
+      - ae-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ae-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: ae-vault-nginx
+    restart: unless-stopped
+    ports:
+      - "${EXPOSE_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ae-dashboard/dist:/usr/share/nginx/html:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - ae-network
+
+volumes:
+  ae-data:
+    driver: local
+  ae-logs:
+    driver: local
+
+networks:
+  ae-network:
+    driver: bridge

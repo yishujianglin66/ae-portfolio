@@ -1,0 +1,23 @@
+[2026-07-14T09:21:38.226Z] === E2E Workflow Test Started ===
+[2026-07-14T09:21:38.236Z] === Perception ===
+[2026-07-14T09:21:38.244Z] [PASS] mediaPreprocessing (1ms)
+[2026-07-14T09:21:38.251Z] [PASS] sceneDetection (0ms)
+[2026-07-14T09:21:38.260Z] [PASS] audioAnalysis (0ms)
+[2026-07-14T09:21:38.267Z] === Understanding ===
+[2026-07-14T09:21:38.276Z] [PASS] intentRecognition (0ms)
+[2026-07-14T09:21:38.284Z] [PASS] styleAnalysis (0ms)
+[2026-07-14T09:21:38.292Z] === Planning ===
+[2026-07-14T09:21:38.300Z] [PASS] compositionPlanning (0ms)
+[2026-07-14T09:21:38.309Z] [PASS] effectComposition (0ms)
+[2026-07-14T09:21:38.317Z] === Execution ===
+[2026-07-14T09:21:38.328Z] [PASS] createComposition (7ms)
+[2026-07-14T09:21:38.337Z] [PASS] importFootage (6ms)
+[2026-07-14T09:21:38.345Z] [PASS] addLayers (3ms)
+[2026-07-14T09:21:38.355Z] [PASS] applyEffects (10ms)
+[2026-07-14T09:21:38.363Z] [PASS] setKeyframes (3ms)
+[2026-07-14T09:21:38.370Z] === Feedback ===
+[2026-07-14T09:21:38.377Z] [PASS] verifyComposition (0ms)
+[2026-07-14T09:21:38.385Z] [PASS] verifyEffectProperties (0ms)
+[2026-07-14T09:21:38.407Z] [PASS] saveProject (22ms)
+[2026-07-14T09:21:38.415Z] === E2E Workflow Test Completed ===
+[2026-07-14T09:21:38.423Z] Total Tests: 15, Passed: 15, Failed: 0
