@@ -7,7 +7,7 @@
     并自动创建符号链接让C盘的AE能够加载D盘脚本。
 .NOTES
     必须以管理员身份运行
-    适用AE版本: 2025, 2026
+    适用AE版本: 2025
 #>
 
 # 配置路径
@@ -21,7 +21,7 @@ $Config = @{
     # C盘CEP扩展目录（符号链接目标）
     C_CEPDir          = "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions"
     # C盘ScriptUI目录（符号链接目标）
-    C_ScriptUIDir     = "C:\Program Files\Adobe\Adobe After Effects 2026\Support Files\Scripts\ScriptUI Panels"
+    C_ScriptUIDir     = "C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\Scripts\ScriptUI Panels"
     # AE 2025 ScriptUI路径（备用）
     C_ScriptUIDir2025 = "C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\Scripts\ScriptUI Panels"
 }
@@ -140,10 +140,10 @@ function Repair-SymbolicLinks {
     }
     
     # 检查ScriptUI Panels符号链接
-    $scriptUIPath = "C:\Program Files\Adobe\Adobe After Effects 2026\Support Files\Scripts\ScriptUI Panels"
+    $scriptUIPath = "C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\Scripts\ScriptUI Panels"
     if (!(Test-Path $scriptUIPath) -or !((Get-Item $scriptUIPath -Force).Attributes -match "ReparsePoint")) {
         Write-Host "  修复: ScriptUI Panels" -ForegroundColor Yellow
-        $scriptDir = "C:\Program Files\Adobe\Adobe After Effects 2026\Support Files\Scripts"
+        $scriptDir = "C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\Scripts"
         if (Test-Path "$scriptDir\ScriptUI Panels.bak") {
             Rename-Item "$scriptDir\ScriptUI Panels.bak" "ScriptUI Panels" -Force
         }
@@ -174,7 +174,7 @@ function Show-Status {
     $cepItems = Get-ChildItem $Config.C_CEPDir -Force -ErrorAction SilentlyContinue | Where-Object { $_.Attributes -match "ReparsePoint" }
     Write-Host "  CEP Junction: $($cepItems.Count) 个"
     
-    $scriptUIItem = Get-Item "C:\Program Files\Adobe\Adobe After Effects 2026\Support Files\Scripts\ScriptUI Panels" -Force -ErrorAction SilentlyContinue
+    $scriptUIItem = Get-Item "C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\Scripts\ScriptUI Panels" -Force -ErrorAction SilentlyContinue
     if ($scriptUIItem -and ($scriptUIItem.Attributes -match "ReparsePoint")) {
         Write-Host "  ScriptUI Panels: Junction 正常" -ForegroundColor Green
     } else {

@@ -65,6 +65,7 @@ class TaskPersistence:
         self._history: List[Dict[str, Any]] = []
         self._auto_save_timer: Optional[threading.Timer] = None
         self._running = False
+        self._closed = False
 
         if self._config.enabled:
             self._ensure_storage_dir()
@@ -94,11 +95,22 @@ class TaskPersistence:
             return
 
         try:
+            # 检查文件是否为空
+            if os.path.getsize(self._tasks_file) == 0:
+                _logger.warning(f"任务文件为空，跳过加载: {self._tasks_file}")
+                return
+
             with open(self._tasks_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
+                content = f.read().strip()
+                if not content:
+                    _logger.warning(f"任务文件内容为空字符串，跳过加载: {self._tasks_file}")
+                    return
+                data = json.loads(content)
                 if isinstance(data, dict):
                     self._tasks = data
                     _logger.info(f"已加载 {len(self._tasks)} 个任务")
+        except json.JSONDecodeError as e:
+            _logger.error(f"任务文件格式错误 (JSON解析失败): {e}, 文件: {self._tasks_file}")
         except Exception as e:
             _logger.error(f"加载任务失败: {e}")
 
@@ -125,11 +137,22 @@ class TaskPersistence:
             return
 
         try:
+            # 检查文件是否为空
+            if os.path.getsize(self._history_file) == 0:
+                _logger.warning(f"历史文件为空，跳过加载: {self._history_file}")
+                return
+
             with open(self._history_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
+                content = f.read().strip()
+                if not content:
+                    _logger.warning(f"历史文件内容为空字符串，跳过加载: {self._history_file}")
+                    return
+                data = json.loads(content)
                 if isinstance(data, list):
                     self._history = data[-self._config.max_history:]
                     _logger.info(f"已加载 {len(self._history)} 条历史记录")
+        except json.JSONDecodeError as e:
+            _logger.error(f"历史文件格式错误 (JSON解析失败): {e}, 文件: {self._history_file}")
         except Exception as e:
             _logger.error(f"加载历史记录失败: {e}")
 
@@ -406,7 +429,10 @@ class TaskPersistence:
     # --------------------------------------------------------------------
 
     def shutdown(self):
-        """关闭持久化管理器"""
+        """关闭持久化管理器（幂等，多次调用安全）"""
+        if self._closed:
+            return
+        self._closed = True
         self._running = False
 
         if self._auto_save_timer:

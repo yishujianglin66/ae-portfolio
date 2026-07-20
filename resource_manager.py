@@ -127,6 +127,8 @@ class ResourceManager:
     提供系统资源监控、阈值检查和任务资源调度能力。
     """
 
+    _detection_done = False  # 类级别标志，确保检测日志只打一次
+
     def __init__(self, thresholds: Optional[ResourceThresholds] = None):
         self._thresholds = thresholds or ResourceThresholds()
         self._lock = threading.RLock()
@@ -139,19 +141,16 @@ class ResourceManager:
         self._detect_libraries()
 
     def _detect_libraries(self):
-        """检测可用的库"""
+        """检测可用的库（日志只在首次调用时输出）"""
         try:
             import psutil
             self._psutil_available = True
-            _logger.info("psutil 可用，CPU/内存/磁盘监控已启用")
         except ImportError:
-            _logger.warning("psutil 未安装，CPU/内存/磁盘监控不可用")
+            pass
 
         try:
             import torch
             self._cuda_available = torch.cuda.is_available()
-            if self._cuda_available:
-                _logger.info(f"CUDA 可用，GPU 数量: {torch.cuda.device_count()}")
         except ImportError:
             pass
 
@@ -159,9 +158,21 @@ class ResourceManager:
             import pynvml
             pynvml.nvmlInit()
             self._pynvml_available = True
-            _logger.info("pynvml 可用，GPU 详细监控已启用")
         except Exception:
             pass
+
+        # 只在首次实例化时输出检测日志
+        if not ResourceManager._detection_done:
+            ResourceManager._detection_done = True
+            if self._psutil_available:
+                _logger.info("psutil 可用，CPU/内存/磁盘监控已启用")
+            else:
+                _logger.warning("psutil 未安装，CPU/内存/磁盘监控不可用")
+            if self._cuda_available:
+                import torch
+                _logger.info(f"CUDA 可用，GPU 数量: {torch.cuda.device_count()}")
+            if self._pynvml_available:
+                _logger.info("pynvml 可用，GPU 详细监控已启用")
 
     # --------------------------------------------------------------------
     # CPU 信息

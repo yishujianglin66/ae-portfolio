@@ -61,7 +61,7 @@ def generate_jsx_validation_script():
  4. 生成验证报告
  
  使用方法：
- - 在 After Effects 2026 中通过 File > Scripts > Run Script File... 运行此脚本
+ - 在 After Effects 2025 中通过 File > Scripts > Run Script File... 运行此脚本
  - 脚本运行完成后，会在项目面板生成 "Validation_Report" 合成
  - 同时会输出详细日志到 AE 的 Info 面板
  ============================================================================
@@ -336,7 +336,7 @@ if __name__ == "__main__":
     print(f"   类别数量: {len(CATEGORIES)}")
     print("")
     print("使用方法:")
-    print("1. 打开 After Effects 2026")
+    print("1. 打开 After Effects 2025")
     print(f"2. 通过 File > Scripts > Run Script File... 选择: {output_path}")
     print("3. 查看 Info 面板的详细输出")
     print("4. 查看项目面板中的 Validation_Report 合成")

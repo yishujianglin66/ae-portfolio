@@ -507,6 +507,452 @@ with open(r"{marker_path}", "w") as f:
             error=stderr[:1000] if not success and stderr else None,
         )
 
+    async def export_camera_data(
+        self,
+        blend_file: Path | str,
+        output_path: Path | str,
+    ) -> EngineResult:
+        """导出相机数据供 AE 使用。
+
+        从 .blend 文件中提取相机位置、旋转、焦距等数据，
+        输出为 JSON 格式，可在 AE 中通过脚本重建相机运动。
+
+        Args:
+            blend_file: Blender 场景文件路径
+            output_path: 输出 JSON 文件路径
+
+        Returns:
+            EngineResult 包含相机数据
+        """
+        import json
+
+        blend_file = Path(blend_file)
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if not blend_file.exists():
+            return EngineResult(
+                success=False,
+                error=f"Blend file not found: {blend_file}",
+            )
+
+        blend_path_esc = str(blend_file).replace("\\", "\\\\")
+        output_path_esc = str(output_path).replace("\\", "\\\\")
+        script_content = f"""
+import bpy
+import json
+
+bpy.ops.wm.open_mainfile(filepath=r"{blend_path_esc}")
+
+cameras = []
+for obj in bpy.data.objects:
+    if obj.type == 'CAMERA':
+        scene = bpy.context.scene
+        frames = []
+        for frame in range(scene.frame_start, scene.frame_end + 1):
+            scene.frame_set(frame)
+            loc = obj.location
+            rot = obj.rotation_euler
+            cameras.append({{
+                "name": obj.name,
+                "frame": frame,
+                "location": [loc.x, loc.y, loc.z],
+                "rotation": [rot.x, rot.y, rot.z],
+                "focal_length": obj.data.lens,
+                "sensor_width": obj.data.sensor_width,
+            }})
+
+with open(r"{output_path_esc}", "w") as f:
+    json.dump({{"cameras": cameras}}, f, indent=2)
+"""
+        result = await self.run_script(script_content)
+        if result.success and output_path.exists():
+            return EngineResult(
+                success=True,
+                output_path=output_path,
+                metadata={"camera_data_path": str(output_path)},
+            )
+        return EngineResult(
+            success=False,
+            error="Camera export failed",
+            metadata=result.metadata,
+        )
+
+    async def render_foreground_element(
+        self,
+        output_dir: Path | str,
+        element_type: str = "logo",
+        element_params: dict[str, Any] | None = None,
+        resolution: tuple[int, int] = (1920, 1080),
+        frame_start: int = 1,
+        frame_end: int = 60,
+        engine: str = "BLENDER_EEVEE",
+        transparent_background: bool = True,
+    ) -> EngineResult:
+        """渲染 3D 前景元素（带 Alpha 通道）。
+
+        生成可用于 AE 合成的 3D 前景元素，支持多种类型：
+        - logo: 3D Logo 动画
+        - text: 3D 文字
+        - particles: 粒子效果
+        - decoration: 装饰性元素
+
+        Args:
+            output_dir: 输出目录（PNG 序列帧将输出到此目录）
+            element_type: 元素类型（logo, text, particles, decoration）
+            element_params: 元素参数字典（根据类型不同而不同）
+            resolution: 输出分辨率 (width, height)
+            frame_start: 起始帧
+            frame_end: 结束帧
+            engine: 渲染引擎（BLENDER_EEVEE / CYCLES）
+            transparent_background: 是否使用透明背景
+
+        Returns:
+            EngineResult: 渲染结果，metadata 包含 frames_dir, frame_count
+        """
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        frames_output = output_dir / "frames"
+        frames_output.mkdir(parents=True, exist_ok=True)
+        marker_path = Path(tempfile.gettempdir()) / f"bl_fg_{output_dir.name}.mark"
+
+        element_params = element_params or {}
+        color = self._color_tuple(element_params.get("color", "#FFFFFF"))
+        text_content = element_params.get("text", "3D TEXT")
+        extrusion_depth = element_params.get("extrusion_depth", 0.2)
+        bevel_size = element_params.get("bevel_size", 0.02)
+        rotation_speed = element_params.get("rotation_speed", 0.5)
+        float_amplitude = element_params.get("float_amplitude", 0.1)
+
+        frames_path_escaped = str(frames_output).replace("\\", "\\\\")
+        marker_path_escaped = str(marker_path).replace("\\", "\\\\")
+
+        script_content = f"""
+import bpy
+import math
+import os
+
+bpy.ops.object.select_all(action='SELECT')
+bpy.ops.object.delete()
+
+scene = bpy.context.scene
+scene.render.engine = '{engine}'
+scene.render.resolution_x = {resolution[0]}
+scene.render.resolution_y = {resolution[1]}
+scene.render.resolution_percentage = 100
+scene.render.image_settings.file_format = 'PNG'
+scene.render.image_settings.color_mode = 'RGBA'
+scene.frame_start = {frame_start}
+scene.frame_end = {frame_end}
+
+if {transparent_background}:
+    scene.render.film_transparent = True
+
+if '{element_type}' == 'text':
+    bpy.ops.object.text_add(location=(0, 0, 0))
+    text_obj = bpy.context.active_object
+    text_obj.data.body = "{text_content}"
+    text_obj.data.size = 1.0
+    text_obj.data.align_x = 'CENTER'
+    text_obj.data.align_y = 'CENTER'
+
+    text_obj.data.extrude = {extrusion_depth}
+    text_obj.data.bevel_depth = {bevel_size}
+    text_obj.data.bevel_resolution = 4
+
+    mat = bpy.data.materials.new(name="ElementMaterial")
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs['Base Color'].default_value = {color}
+    bsdf.inputs['Metallic'].default_value = 0.8
+    bsdf.inputs['Roughness'].default_value = 0.2
+    if text_obj.data.materials:
+        text_obj.data.materials[0] = mat
+    else:
+        text_obj.data.materials.append(mat)
+
+    text_obj.keyframe_insert(data_path="rotation_euler", frame={frame_start})
+    text_obj.rotation_euler.z = 2 * math.pi * {rotation_speed}
+    text_obj.keyframe_insert(data_path="rotation_euler", frame={frame_end})
+
+    text_obj.keyframe_insert(data_path="location", frame={frame_start})
+    text_obj.location.z = {float_amplitude}
+    text_obj.keyframe_insert(data_path="location", frame={frame_start} + ({frame_end} - {frame_start}) // 2)
+    text_obj.location.z = 0
+    text_obj.keyframe_insert(data_path="location", frame={frame_end})
+
+elif '{element_type}' == 'logo':
+    bpy.ops.mesh.primitive_cube_add(size=1)
+    cube = bpy.context.active_object
+    cube.scale = (1.5, 0.1, 1.0)
+
+    mat = bpy.data.materials.new(name="ElementMaterial")
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs['Base Color'].default_value = {color}
+    bsdf.inputs['Metallic'].default_value = 0.9
+    bsdf.inputs['Roughness'].default_value = 0.1
+    if cube.data.materials:
+        cube.data.materials[0] = mat
+    else:
+        cube.data.materials.append(mat)
+
+    cube.keyframe_insert(data_path="rotation_euler", frame={frame_start})
+    cube.rotation_euler.y = 2 * math.pi * {rotation_speed}
+    cube.keyframe_insert(data_path="rotation_euler", frame={frame_end})
+
+elif '{element_type}' == 'particles':
+    bpy.ops.mesh.primitive_ico_sphere_add(radius=0.05, location=(0, 0, 0))
+    particle_obj = bpy.context.active_object
+
+    mat = bpy.data.materials.new(name="ParticleMaterial")
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs['Base Color'].default_value = {color}
+    bsdf.inputs['Emission'].default_value = {color}
+    bsdf.inputs['Emission Strength'].default_value = 2.0
+    if particle_obj.data.materials:
+        particle_obj.data.materials[0] = mat
+    else:
+        particle_obj.data.materials.append(mat)
+
+    particle_obj.modifiers.new(name="ParticleSystem", type='PARTICLE_SYSTEM')
+    ps = particle_obj.particle_systems[0]
+    ps.settings.count = 200
+    ps.settings.frame_start = {frame_start}
+    ps.settings.frame_end = {frame_end}
+    ps.settings.lifetime = 30
+    ps.settings.normal_factor = 2.0
+    ps.settings.render_type = 'HALO'
+    ps.settings.particle_size = 0.05
+else:
+    bpy.ops.mesh.primitive_torus_add(major_radius=1, minor_radius=0.1, location=(0, 0, 0))
+    deco = bpy.context.active_object
+
+    mat = bpy.data.materials.new(name="ElementMaterial")
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs['Base Color'].default_value = {color}
+    bsdf.inputs['Metallic'].default_value = 0.7
+    bsdf.inputs['Roughness'].default_value = 0.3
+    if deco.data.materials:
+        deco.data.materials[0] = mat
+    else:
+        deco.data.materials.append(mat)
+
+    deco.keyframe_insert(data_path="rotation_euler", frame={frame_start})
+    deco.rotation_euler.z = 2 * math.pi * {rotation_speed}
+    deco.keyframe_insert(data_path="rotation_euler", frame={frame_end})
+
+bpy.ops.object.camera_add(location=(0, -5, 2))
+cam = bpy.context.active_object
+cam.rotation_euler = (1.1, 0, 0)
+cam.data.lens = 50
+scene.camera = cam
+
+bpy.ops.object.light_add(type='AREA', location=(2, -3, 3))
+key_light = bpy.context.active_object
+key_light.data.energy = 1000
+key_light.data.size = 2
+
+bpy.ops.object.light_add(type='AREA', location=(-2, -3, 2))
+fill_light = bpy.context.active_object
+fill_light.data.energy = 300
+fill_light.data.size = 2
+
+frames_dir = r"{frames_path_escaped}"
+os.makedirs(frames_dir, exist_ok=True)
+scene.render.filepath = os.path.join(frames_dir, "")
+bpy.ops.render.render(animation=True)
+
+with open(r"{marker_path_escaped}", "w") as f:
+    f.write("SUCCESS\\n")
+    f.write(f"frames: {frames_dir}\\n")
+"""
+
+        script_file = Path(tempfile.gettempdir()) / f"bl_fg_{output_dir.name}.py"
+        script_file.write_text(script_content, encoding="utf-8")
+
+        cmd = [str(self.executable_path), "--background", "--python", str(script_file)]
+        code, stdout, stderr = await asyncio.to_thread(
+            self._run_subprocess, cmd, timeout=7200
+        )
+
+        success = code == 0 and marker_path.exists()
+        script_file.unlink(missing_ok=True)
+        marker_path.unlink(missing_ok=True)
+
+        frames_list = sorted(frames_output.glob("*.png")) if frames_output.exists() else []
+
+        logger.info(
+            f"[Blender] Foreground element render done: type={element_type}, "
+            f"frames={len(frames_list)}"
+        )
+
+        return EngineResult(
+            success=success,
+            output_path=frames_output if success else None,
+            metadata={
+                "element_type": element_type,
+                "frames_dir": str(frames_output) if frames_output.exists() else None,
+                "frame_count": len(frames_list),
+                "frame_range": [frame_start, frame_end],
+                "engine": engine,
+                "transparent": transparent_background,
+                "stdout_tail": stdout[-500:] if stdout else "",
+            },
+            error=stderr[:1000] if not success and stderr else None,
+        )
+
+    async def export_camera_data(
+        self,
+        blend_path: Path | str,
+        output_path: Path | str,
+        camera_name: str = "Camera",
+        frame_start: int = 1,
+        frame_end: int = 60,
+    ) -> EngineResult:
+        """导出摄像机数据给 After Effects。
+
+        将 Blender 中的摄像机动画数据导出为 JSON 格式，
+        包含位置、旋转、焦距等关键帧数据，可在 AE 中用于：
+        - 3D 摄像机跟踪匹配
+        - 摄像机动画同步
+        - 景深效果匹配
+
+        Args:
+            blend_path: 已存在的 .blend 文件路径
+            output_path: 输出 JSON 文件路径
+            camera_name: 摄像机名称（默认 "Camera"）
+            frame_start: 起始帧
+            frame_end: 结束帧
+
+        Returns:
+            EngineResult: 导出结果，metadata 包含 output_path, frame_count
+        """
+        blend_path = Path(blend_path)
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if not blend_path.exists():
+            return EngineResult(
+                success=False,
+                error=f"Blend file not found: {blend_path}",
+            )
+
+        marker_path = Path(tempfile.gettempdir()) / f"bl_cam_{output_path.stem}.mark"
+
+        blend_path_escaped = str(blend_path).replace("\\", "\\\\")
+        output_path_escaped = str(output_path).replace("\\", "\\\\")
+        marker_path_escaped = str(marker_path).replace("\\", "\\\\")
+
+        script_content = f"""
+import bpy
+import json
+import math
+
+bpy.ops.wm.open_mainfile(filepath=r"{blend_path_escaped}")
+
+cam = bpy.data.objects.get("{camera_name}")
+if cam is None:
+    for obj in bpy.data.objects:
+        if obj.type == 'CAMERA':
+            cam = obj
+            break
+
+if cam is None:
+    with open(r"{marker_path_escaped}", "w") as f:
+        f.write("ERROR\\n")
+        f.write("Camera not found\\n")
+    exit(1)
+
+camera_data = {{
+    "camera_name": cam.name,
+    "type": "perspective",
+    "sensor_width": cam.data.sensor_width,
+    "sensor_height": cam.data.sensor_height,
+    "lens": cam.data.lens,
+    "focal_length": cam.data.lens,
+    "frame_start": {frame_start},
+    "frame_end": {frame_end},
+    "fps": bpy.context.scene.render.fps,
+    "resolution": [
+        bpy.context.scene.render.resolution_x,
+        bpy.context.scene.render.resolution_y
+    ],
+    "keyframes": []
+}}
+
+for frame in range({frame_start}, {frame_end} + 1):
+    bpy.context.scene.frame_set(frame)
+    keyframe = {{
+        "frame": frame,
+        "position": [
+            cam.location.x,
+            cam.location.y,
+            cam.location.z
+        ],
+        "rotation_euler": [
+            cam.rotation_euler.x,
+            cam.rotation_euler.y,
+            cam.rotation_euler.z
+        ],
+        "rotation_quaternion": [
+            cam.rotation_quaternion.w,
+            cam.rotation_quaternion.x,
+            cam.rotation_quaternion.y,
+            cam.rotation_quaternion.z
+        ],
+        "scale": [
+            cam.scale.x,
+            cam.scale.y,
+            cam.scale.z
+        ],
+        "lens": cam.data.lens,
+        "f_stop": cam.data.dof.aperture_fstop if cam.data.dof else 0,
+        "focus_distance": cam.data.dof.focus_distance if cam.data.dof else 10,
+    }}
+    camera_data["keyframes"].append(keyframe)
+
+with open(r"{output_path_escaped}", "w", encoding="utf-8") as f:
+    json.dump(camera_data, f, ensure_ascii=False, indent=2)
+
+with open(r"{marker_path_escaped}", "w") as f:
+    f.write("SUCCESS\\n")
+    f.write(f"output: {output_path_escaped}\\n")
+    f.write(f"keyframes: {len(camera_data['keyframes'])}\\n")
+"""
+
+        script_file = Path(tempfile.gettempdir()) / f"bl_cam_{output_path.stem}.py"
+        script_file.write_text(script_content, encoding="utf-8")
+
+        cmd = [str(self.executable_path), "--background", "--python", str(script_file)]
+        code, stdout, stderr = await asyncio.to_thread(
+            self._run_subprocess, cmd, timeout=3600
+        )
+
+        success = code == 0 and marker_path.exists() and output_path.exists()
+        script_file.unlink(missing_ok=True)
+        marker_path.unlink(missing_ok=True)
+
+        logger.info(
+            f"[Blender] Camera data export done: {output_path.name}, "
+            f"frames={frame_end - frame_start + 1}"
+        )
+
+        return EngineResult(
+            success=success,
+            output_path=output_path if success else None,
+            metadata={
+                "camera_name": camera_name,
+                "frame_count": frame_end - frame_start + 1,
+                "frame_range": [frame_start, frame_end],
+                "output_format": "json",
+                "stdout_tail": stdout[-500:] if stdout else "",
+            },
+            error=stderr[:1000] if not success and stderr else None,
+        )
+
     async def execute(self, **kwargs) -> EngineResult:
         action = kwargs.pop("action", "create_puppet_stage")
         handlers = {
@@ -514,6 +960,8 @@ with open(r"{marker_path}", "w") as f:
             "run_script": self.run_script,
             "render_animation": self.render_animation,
             "export_for_ae": self.export_for_ae,
+            "render_foreground_element": self.render_foreground_element,
+            "export_camera_data": self.export_camera_data,
         }
         handler = handlers.get(action)
         if handler is None:
@@ -522,3 +970,10 @@ with open(r"{marker_path}", "w") as f:
                 error=f"Unknown action '{action}'. Available: {list(handlers.keys())}",
             )
         return await handler(**kwargs)
+
+
+# ========================================================================
+# P2 分层渲染管线 - 类级别别名（必须在类定义完成后设置）
+# ========================================================================
+
+BlenderEngine.render_foreground_layer = BlenderEngine.render_foreground_element

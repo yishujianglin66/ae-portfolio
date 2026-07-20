@@ -163,9 +163,8 @@ py-modules = [
     "opensource_integrations",
     # 统一多工具集成
     "unified_tool_integrator",
-    "multi_software_bridge",
 ]
-packages = ["core", "config", "puppet_effects", "performance"]
+packages = ["core", "config", "puppet_effects", "performance", "vrs", "software_sdk"]
 
 # ============================================================
 # pytest 配置

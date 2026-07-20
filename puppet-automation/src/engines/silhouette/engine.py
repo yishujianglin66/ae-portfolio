@@ -294,12 +294,392 @@ main()
             error=stderr[:1000] if code != 0 else None,
         )
 
+    IMPORT_SHAPES_TEMPLATE = '''
+"""Auto-generated Silhouette import shapes script."""
+from fx import *
+import json
+import sys
+
+_PARAMS = json.loads(r"""%PARAMS_JSON%""")
+
+def main():
+    params = _PARAMS
+    shapes_path = params["shapes_path"]
+    input_path = params["input_path"]
+    output_path = params["output_path"]
+    marker_path = params["marker_path"]
+
+    with open(shapes_path, "r") as f:
+        shape_data = json.load(f)
+
+    session = createObject("Session")
+    session.property("mediaPath").setValue(input_path, 0)
+
+    source_node = createObject("SourceNode")
+    source_node.property("mediaPath").setValue(input_path, 0)
+
+    roto_node = createObject("RotoNode")
+    roto_node.property("mode").setValue("foreground", 0)
+    roto_node.property("quality").setValue(80, 0)
+
+    shape_name = shape_data.get("name", "imported_shape")
+    frames = shape_data.get("frames", [])
+
+    if frames:
+        shape_obj = roto_node.property("shapes").addProperty("Shape")
+        shape_obj.name = shape_name
+
+        for frame_data in frames:
+            frame_idx = frame_data.get("frame", 0)
+            contours = frame_data.get("contours", [])
+
+            for ci, contour in enumerate(contours):
+                points = contour.get("points", [])
+                if len(points) < 3:
+                    continue
+
+                path_prop = shape_obj.property("paths").addProperty("Path")
+                path_prop.name = f"contour_{ci}"
+
+                for pi, pt in enumerate(points):
+                    point_prop = path_prop.property("points").addProperty("BezierPoint")
+                    point_prop.property("x").setValue(pt["x"], frame_idx)
+                    point_prop.property("y").setValue(pt["y"], frame_idx)
+
+    output_node = createObject("OutputNode")
+    output_node.property("format").setValue("OpenEXR", 0)
+    output_node.property("outputPath").setValue(output_path, 0)
+
+    source_node.outputs[0].connect(roto_node.inputs[1])
+    roto_node.outputs[0].connect(output_node.inputs[0])
+
+    roto_node.execute()
+
+    start_frame = int(session.property("startFrame").getValue(0))
+    end_frame = int(session.property("endFrame").getValue(0))
+    output_node.property('firstFrame').setValue(start_frame, 0)
+    output_node.property('lastFrame').setValue(end_frame, 0)
+
+    with open(marker_path, "w") as f:
+        f.write("SUCCESS\\n")
+        f.write("output: " + output_path + "\\n")
+        f.write("shapes_imported: " + str(len(frames)) + "\\n")
+
+main()
+'''
+
+    REFINE_MASK_TEMPLATE = '''
+"""Auto-generated Silhouette mask refinement script."""
+from fx import *
+import json
+import sys
+
+_PARAMS = json.loads(r"""%PARAMS_JSON%""")
+
+def main():
+    params = _PARAMS
+    input_path = params["input_path"]
+    mask_dir = params["mask_dir"]
+    output_path = params["output_path"]
+    marker_path = params["marker_path"]
+    feather = params.get("feather", 2.0)
+    motion_blur = params.get("motion_blur", 0.5)
+    bezier_simplify = params.get("bezier_simplify", 1.0)
+
+    session = createObject("Session")
+    session.property("mediaPath").setValue(input_path, 0)
+
+    source_node = createObject("SourceNode")
+    source_node.property("mediaPath").setValue(input_path, 0)
+
+    roto_node = createObject("RotoNode")
+    roto_node.property("mode").setValue("foreground", 0)
+    roto_node.property("quality").setValue(90, 0)
+
+    roto_node.property("edgeFeather").setValue(feather, 0)
+    roto_node.property("motionBlur").setValue(motion_blur, 0)
+    roto_node.property("bezierSimplify").setValue(bezier_simplify, 0)
+
+    output_node = createObject("OutputNode")
+    output_node.property("format").setValue("OpenEXR", 0)
+    output_node.property("outputPath").setValue(output_path, 0)
+
+    source_node.outputs[0].connect(roto_node.inputs[1])
+    roto_node.outputs[0].connect(output_node.inputs[0])
+
+    roto_node.execute()
+
+    start_frame = int(session.property("startFrame").getValue(0))
+    end_frame = int(session.property("endFrame").getValue(0))
+    output_node.property('firstFrame').setValue(start_frame, 0)
+    output_node.property('lastFrame').setValue(end_frame, 0)
+
+    with open(marker_path, "w") as f:
+        f.write("SUCCESS\\n")
+        f.write("output: " + output_path + "\\n")
+        f.write("feather: " + str(feather) + "\\n")
+        f.write("motion_blur: " + str(motion_blur) + "\\n")
+
+main()
+'''
+
+    RENDER_ALPHA_TEMPLATE = '''
+"""Auto-generated Silhouette alpha render script."""
+from fx import *
+import json
+import sys
+
+_PARAMS = json.loads(r"""%PARAMS_JSON%""")
+
+def main():
+    params = _PARAMS
+    input_path = params["input_path"]
+    output_path = params["output_path"]
+    marker_path = params["marker_path"]
+    output_format = params.get("output_format", "PNG")
+    alpha_only = params.get("alpha_only", True)
+
+    session = createObject("Session")
+    session.property("mediaPath").setValue(input_path, 0)
+
+    source_node = createObject("SourceNode")
+    source_node.property("mediaPath").setValue(input_path, 0)
+
+    output_node = createObject("OutputNode")
+    output_node.property("format").setValue(output_format, 0)
+    output_node.property("outputPath").setValue(output_path, 0)
+
+    if alpha_only:
+        output_node.property("alphaOnly").setValue(True, 0)
+
+    source_node.outputs[0].connect(output_node.inputs[0])
+
+    start_frame = int(session.property("startFrame").getValue(0))
+    end_frame = int(session.property("endFrame").getValue(0))
+    output_node.property('firstFrame').setValue(start_frame, 0)
+    output_node.property('lastFrame').setValue(end_frame, 0)
+
+    with open(marker_path, "w") as f:
+        f.write("SUCCESS\\n")
+        f.write("output: " + output_path + "\\n")
+        f.write("alpha_only: " + str(alpha_only) + "\\n")
+
+main()
+'''
+
+    async def import_roto_shapes(
+        self,
+        shapes_path: Path | str,
+        input_path: Path | str,
+        output_path: Path | str,
+    ) -> EngineResult:
+        """导入 SAM2 生成的形状数据到 Silhouette。
+
+        将 SAM2 导出的 JSON 形状数据导入 Silhouette RotoNode，
+        作为自动 roto 的基础形状。
+
+        Args:
+            shapes_path: SAM2 导出的形状 JSON 文件路径
+            input_path: 输入视频/图像序列路径
+            output_path: 输出会话或遮罩路径
+
+        Returns:
+            EngineResult 包含导入结果
+        """
+        shapes_path = Path(shapes_path)
+        input_path = Path(input_path)
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if not shapes_path.exists():
+            return EngineResult(
+                success=False,
+                error=f"Shapes file not found: {shapes_path}",
+            )
+
+        marker_path = Path(tempfile.gettempdir()) / f"sil_import_{output_path.stem}.mark"
+
+        params = {
+            "shapes_path": str(shapes_path),
+            "input_path": str(input_path),
+            "output_path": str(output_path),
+            "marker_path": str(marker_path),
+        }
+        params_json = json.dumps(params, ensure_ascii=False)
+
+        script_content = self.IMPORT_SHAPES_TEMPLATE.replace("%PARAMS_JSON%", params_json)
+        script_file = Path(tempfile.gettempdir()) / f"sil_import_{output_path.stem}.py"
+        script_file.write_text(script_content, encoding="utf-8")
+
+        cmd = [str(self.executable_path), "-script", str(script_file), "-headless"]
+        code, stdout, stderr = await asyncio.to_thread(
+            self._run_subprocess, cmd, timeout=14400
+        )
+
+        success = code == 0 and marker_path.exists()
+        script_file.unlink(missing_ok=True)
+        marker_path.unlink(missing_ok=True)
+
+        return EngineResult(
+            success=success,
+            output_path=output_path if success else None,
+            metadata={
+                "shapes_path": str(shapes_path),
+                "stdout_tail": stdout[-500:] if stdout else "",
+            },
+            error=stderr[:1000] if not success and stderr else None,
+        )
+
+    async def refine_mask(
+        self,
+        mask_dir: Path | str,
+        output_dir: Path | str,
+        video_path: Optional[Path | str] = None,
+        feather: float = 2.0,
+        motion_blur: float = 0.5,
+        bezier_simplify: float = 1.0,
+    ) -> EngineResult:
+        """精修 mask - 贝塞尔曲线简化、边缘羽化、运动模糊。
+
+        使用 Silhouette 的 RotoNode 对输入遮罩进行精修处理，
+        包括边缘羽化、运动模糊和贝塞尔曲线简化。
+
+        Args:
+            mask_dir: 输入遮罩序列目录
+            output_dir: 输出精修后遮罩目录
+            video_path: 原始视频路径（可选，用于运动分析）
+            feather: 边缘羽化值（像素）
+            motion_blur: 运动模糊强度（0-1）
+            bezier_simplify: 贝塞尔曲线简化容差
+
+        Returns:
+            EngineResult 包含精修结果
+        """
+        mask_dir = Path(mask_dir)
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        if not mask_dir.exists():
+            return EngineResult(
+                success=False,
+                error=f"Mask directory not found: {mask_dir}",
+            )
+
+        mask_files = sorted(mask_dir.glob("*.png"))
+        if not mask_files:
+            return EngineResult(
+                success=False,
+                error=f"No mask files found in {mask_dir}",
+            )
+
+        input_path = video_path or mask_files[0]
+        marker_path = Path(tempfile.gettempdir()) / f"sil_refine_{output_dir.name}.mark"
+
+        params = {
+            "input_path": str(input_path),
+            "mask_dir": str(mask_dir),
+            "output_path": str(output_dir),
+            "marker_path": str(marker_path),
+            "feather": feather,
+            "motion_blur": motion_blur,
+            "bezier_simplify": bezier_simplify,
+        }
+        params_json = json.dumps(params, ensure_ascii=False)
+
+        script_content = self.REFINE_MASK_TEMPLATE.replace("%PARAMS_JSON%", params_json)
+        script_file = Path(tempfile.gettempdir()) / f"sil_refine_{output_dir.name}.py"
+        script_file.write_text(script_content, encoding="utf-8")
+
+        cmd = [str(self.executable_path), "-script", str(script_file), "-headless"]
+        code, stdout, stderr = await asyncio.to_thread(
+            self._run_subprocess, cmd, timeout=14400
+        )
+
+        success = code == 0 and marker_path.exists()
+        script_file.unlink(missing_ok=True)
+        marker_path.unlink(missing_ok=True)
+
+        return EngineResult(
+            success=success,
+            output_path=output_dir if success else None,
+            metadata={
+                "feather": feather,
+                "motion_blur": motion_blur,
+                "bezier_simplify": bezier_simplify,
+                "input_mask_count": len(mask_files),
+                "stdout_tail": stdout[-500:] if stdout else "",
+            },
+            error=stderr[:1000] if not success and stderr else None,
+        )
+
+    async def render_alpha(
+        self,
+        input_path: Path | str,
+        output_path: Path | str,
+        output_format: str = "PNG",
+        alpha_only: bool = True,
+    ) -> EngineResult:
+        """渲染 alpha 通道序列。
+
+        将 Silhouette 会话或视频渲染为 alpha 通道图像序列。
+
+        Args:
+            input_path: 输入视频/会话路径
+            output_path: 输出 alpha 序列路径
+            output_format: 输出格式（PNG, OpenEXR, TIFF 等）
+            alpha_only: 是否仅输出 alpha 通道
+
+        Returns:
+            EngineResult 包含渲染结果
+        """
+        input_path = Path(input_path)
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        marker_path = Path(tempfile.gettempdir()) / f"sil_alpha_{output_path.stem}.mark"
+
+        params = {
+            "input_path": str(input_path),
+            "output_path": str(output_path),
+            "marker_path": str(marker_path),
+            "output_format": output_format,
+            "alpha_only": alpha_only,
+        }
+        params_json = json.dumps(params, ensure_ascii=False)
+
+        script_content = self.RENDER_ALPHA_TEMPLATE.replace("%PARAMS_JSON%", params_json)
+        script_file = Path(tempfile.gettempdir()) / f"sil_alpha_{output_path.stem}.py"
+        script_file.write_text(script_content, encoding="utf-8")
+
+        cmd = [str(self.executable_path), "-script", str(script_file), "-headless"]
+        code, stdout, stderr = await asyncio.to_thread(
+            self._run_subprocess, cmd, timeout=14400
+        )
+
+        success = code == 0 and marker_path.exists()
+        script_file.unlink(missing_ok=True)
+        marker_path.unlink(missing_ok=True)
+
+        return EngineResult(
+            success=success,
+            output_path=output_path if success else None,
+            metadata={
+                "output_format": output_format,
+                "alpha_only": alpha_only,
+                "stdout_tail": stdout[-500:] if stdout else "",
+            },
+            error=stderr[:1000] if not success and stderr else None,
+        )
+
     async def execute(self, **kwargs) -> EngineResult:
         """Dispatch engine actions."""
         action = kwargs.pop("action", "create_roto_session")
         handlers = {
             "create_roto_session": self.create_roto_session,
             "run_tracker": self.run_tracker,
+            "import_roto_shapes": self.import_roto_shapes,
+            "refine_mask": self.refine_mask,
+            "render_alpha": self.render_alpha,
         }
         handler = handlers.get(action)
         if handler is None:
@@ -308,3 +688,12 @@ main()
                 error=f"Unknown action '{action}'. Available: {list(handlers.keys())}",
             )
         return await handler(**kwargs)
+
+
+# ========================================================================
+# P2 联合抠像工作流 - 类级别别名（必须在类定义完成后设置）
+# ========================================================================
+
+SilhouetteEngine.import_shapes = SilhouetteEngine.import_roto_shapes
+SilhouetteEngine.refine_shapes = SilhouetteEngine.refine_mask
+SilhouetteEngine.export_roto = SilhouetteEngine.render_alpha

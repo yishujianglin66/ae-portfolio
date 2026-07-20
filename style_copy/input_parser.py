@@ -27,16 +27,28 @@ from typing import Dict, Optional, Tuple
 
 import importlib
 
-MediaFetcherModule = importlib.import_module("media-fetcher")
-MediaFetcher = MediaFetcherModule.MediaFetcher
+# 可选依赖: media-fetcher (视频下载)
+try:
+    MediaFetcherModule = importlib.import_module("media-fetcher")
+    MediaFetcher = MediaFetcherModule.MediaFetcher
+    MEDIA_FETCHER_AVAILABLE = True
+except (ImportError, ModuleNotFoundError):
+    MediaFetcher = None
+    MEDIA_FETCHER_AVAILABLE = False
+
 from scene_detector import SceneDetector
 
-# 从 media-config.json 读取 ffmpeg 路径
+# 可选配置: media-config.json (ffmpeg路径)
 _CONFIG_PATH = Path(__file__).parent.parent / "config" / "media-config.json"
-with open(_CONFIG_PATH, "r", encoding="utf-8") as _f:
-    _MEDIA_CONFIG = json.load(_f)
-FFMPEG_BIN = _MEDIA_CONFIG["tools"]["ffmpeg"]
-FFPROBE_BIN = _MEDIA_CONFIG["tools"]["ffprobe"]
+if _CONFIG_PATH.exists():
+    with open(_CONFIG_PATH, "r", encoding="utf-8") as _f:
+        _MEDIA_CONFIG = json.load(_f)
+    FFMPEG_BIN = _MEDIA_CONFIG["tools"]["ffmpeg"]
+    FFPROBE_BIN = _MEDIA_CONFIG["tools"]["ffprobe"]
+else:
+    import shutil
+    FFMPEG_BIN = shutil.which("ffmpeg") or r"C:\ffmpeg\bin\ffmpeg.exe"
+    FFPROBE_BIN = shutil.which("ffprobe") or r"C:\ffmpeg\bin\ffprobe.exe"
 
 
 class InputParser:
@@ -47,7 +59,7 @@ class InputParser:
     def __init__(self, work_dir: Optional[str] = None):
         self.work_dir = Path(work_dir) if work_dir else Path(tempfile.mkdtemp(prefix="style_copy_"))
         self.work_dir.mkdir(parents=True, exist_ok=True)
-        self.fetcher = MediaFetcher()
+        self.fetcher = MediaFetcher() if MEDIA_FETCHER_AVAILABLE else None
         self.scene_detector = SceneDetector()
     
     def parse(self, input_str: str) -> Dict:

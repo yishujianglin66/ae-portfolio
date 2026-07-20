@@ -120,7 +120,7 @@ class ConfigManager:
             },
             # Topaz Video AI 配置
             "topaz": {
-                "install_path": r"D:\top\Topaz Video AI Pro\Topaz Video AI BETA.exe",
+                "install_path": r"D:\Topaz Video AI\Topaz Video AI.exe",
                 "model": "amqs",                # 增强模型：amqs / proteus / iris 等
                 "output_dir": "./topaz_output",
                 "max_retries": 2,
@@ -145,7 +145,7 @@ class ConfigManager:
             },
             # Blender 配置
             "blender": {
-                "install_path": r"D:\Blender\Blender 5.1.0\blender.exe",  # 修复 P0-2：原 Blender 4.2 路径不存在，改为实际安装路径（与 settings.py 的 blender_path 一致）
+                "install_path": r"C:\Program Files\Blender Foundation\Blender 4.2\blender.exe",
                 "python_script_path": "./scripts/blender",
                 "output_dir": "./blender_output",
                 "max_retries": 2,
@@ -153,21 +153,11 @@ class ConfigManager:
                 "timeout_ms": 600000,
             },
             # FFmpeg 配置
-            # 修复 P0-3：原 D:\ffmpeg\bin\ffmpeg.exe 不存在，统一改为 C:\ffmpeg\bin\ffmpeg.exe
             "ffmpeg": {
-                "bin_path": r"C:\ffmpeg\bin\ffmpeg.exe",
+                "bin_path": r"D:\ffmpeg\bin\ffmpeg.exe",
                 "max_retries": 2,
                 "retry_delay_ms": 2000,
                 "timeout_ms": 300000,
-            },
-            # DaVinci Resolve 配置（P0-4 补全，与 settings.py 的 davinci_path 一致）
-            "davinci": {
-                "install_path": r"D:\DaVinci Resolve",
-                "scripting_modules_dir": r"C:\ProgramData\Blackmagic Design\DaVinci Resolve\Support\Developer\Scripting\Modules",
-            },
-            # Adobe Media Encoder 配置（P0-5 补全，与 settings.py 的 media_encoder_path 一致）
-            "media_encoder": {
-                "install_path": r"D:\Me\Adobe Media Encoder 2025\Adobe Media Encoder.exe",
             },
             # 服务器配置
             "server": {
@@ -202,14 +192,6 @@ class ConfigManager:
                 "fonts_dir": "D:/AE-Work/resources/fonts",
                 "luts_dir": "D:/AE-Work/resources/luts",
                 "davinci_dir": "D:/AE-Work/resources/davinci",
-                # 扩展资源目录（百度网盘整理后新增）
-                "models_dir": "D:/AE-Work/resources/models",          # 3D 模型
-                "tutorials_dir": "D:/AE-Work/resources/tutorials",    # 教程视频
-                "docs_dir": "D:/AE-Work/resources/docs",              # 教程文档
-                "references_dir": "D:/AE-Work/resources/references",  # 素材网站
-                "premiere_dir": "D:/AE-Work/resources/premiere",      # PR 插件与 LUTS
-                "presets_dir": "D:/AE-Work/resources/presets",        # 预设资源
-                "software_dir": "D:/AE-Work/resources/software",      # 软件安装包
                 "cache_enabled": True,
                 "cache_size_gb": 10,
             },
@@ -311,9 +293,9 @@ class ConfigManager:
                 "image_model_pro": "doubao-seedream-5-0-pro-260628",
                 "image_model_standard": "doubao-seedream-5-0-260128",
                 "image_model_lite": "doubao-seedream-4-5-251128",
-                # 视频生成模型
-                "video_model_pro": "doubao-seedance-2-0-260128",
-                "video_model_fast": "doubao-seedance-2-0-fast-260128",
+                # 视频生成模型 (2.0系列不可用，使用1.5/1.0)
+                "video_model_pro": "doubao-seedance-1-5-pro-251128",
+                "video_model_fast": "doubao-seedance-1-0-pro-fast-250722",
                 # 3D生成模型
                 "3d_model": "doubao-seed3d-2-0-251228",
                 # Embedding模型

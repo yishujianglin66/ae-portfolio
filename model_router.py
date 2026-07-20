@@ -188,7 +188,7 @@ MODEL_NAMES = {
     "vision_pro": "doubao-vision-pro-32k-240428",
     "vision_lite": "doubao-vision-lite-32k-240428",
     "image_gen": "doubao-seedream-5-0-pro-260628",
-    "video_gen": "doubao-seedance-2-0-260128",
+    "video_gen": "doubao-seedance-1-5-pro-251128",  # 2.0不可用，使用1.5
     "embedding": "doubao-embedding-240428",
     
     "doubao_pro": "doubao-seed-2-1-pro-260628",
@@ -198,18 +198,18 @@ MODEL_NAMES = {
     "doubao_translation": "doubao-seed-translation-250722",
     "doubao_character": "doubao-seed-character-251228",
     
-    # DuckMiss中转站模型
+    # DuckMiss中转站模型 (可用: claude-sonnet-4-6, claude-opus-4-6/7/8, claude-sonnet-5, claude-fable-5)
     "duckmiss_pro": "claude-opus-4-8",
     "duckmiss_default": "claude-sonnet-4-6",
-    "duckmiss_fast": "claude-haiku-4-5-20251001",
+    "duckmiss_fast": "claude-sonnet-4-6",
     "duckmiss_vision": "claude-sonnet-4-6",  # 多模态支持
     
-    # GPT网关模型
-    "gpt_pro": "gpt-5.6-terra",
-    "gpt_default": "gpt-5.5",
-    "gpt_fast": "gpt-5.4-mini",
-    "gpt_code": "gpt-5.6-luna",
-    "gpt_vision": "gpt-5.6-sol",
+    # GPT网关模型 (复用DuckMiss Claude)
+    "gpt_pro": "claude-opus-4-8",
+    "gpt_default": "claude-sonnet-4-6",
+    "gpt_fast": "claude-sonnet-4-6",
+    "gpt_code": "claude-sonnet-4-6",
+    "gpt_vision": "claude-sonnet-4-6",
 }
 
 
@@ -217,33 +217,33 @@ MODEL_NAMES = {
 DUCK_MISS_MODELS = {
     "text": "claude-sonnet-4-6",               # 文本对话（均衡）
     "pro": "claude-opus-4-8",                  # 高质量推理
-    "fast": "claude-haiku-4-5-20251001",       # 快速响应
+    "fast": "claude-sonnet-4-6",               # 快速响应
     "vision": "claude-sonnet-4-6",             # 视觉理解（多模态）
     "code": "claude-sonnet-4-6",               # 代码生成
 }
 
-# GPT网关模型配置
+# GPT网关模型配置 (复用DuckMiss)
 GPT_GATEWAY_MODELS = {
-    "text": "gpt-5.5",                          # 文本对话（均衡）
-    "pro": "gpt-5.6-terra",                    # 高质量推理
-    "fast": "gpt-5.4-mini",                    # 快速响应
-    "vision": "gpt-5.6-sol",                   # 视觉理解（多模态）
-    "code": "gpt-5.6-luna",                    # 代码生成
+    "text": "claude-sonnet-4-6",
+    "pro": "claude-opus-4-8",
+    "fast": "claude-sonnet-4-6",
+    "vision": "claude-sonnet-4-6",
+    "code": "claude-sonnet-4-6",
 }
 
 # 模型能力矩阵（用于智能选择最优模型）
 MODEL_CAPABILITY_MATRIX = {
     # 任务类型: (最优提供商, 模型, 次选提供商, 模型)
-    "visual_analysis": ("claude", "claude-sonnet-4-6", "gpt", "gpt-5.6-sol"),
-    "deep_reasoning": ("claude", "claude-opus-4-8", "gpt", "gpt-5.6-terra"),
-    "code_generation": ("gpt", "gpt-5.6-luna", "claude", "claude-sonnet-4-6"),
-    "fast_classification": ("claude", "claude-haiku-4-5-20251001", "gpt", "gpt-5.4-mini"),
-    "parameter_inference": ("claude", "claude-opus-4-8", "gpt", "gpt-5.6-terra"),
-    "color_analysis": ("claude", "claude-sonnet-4-6", "gpt", "gpt-5.6-sol"),
-    "rhythm_analysis": ("claude", "claude-haiku-4-5-20251001", "gpt", "gpt-5.4-mini"),
-    "creative_writing": ("gpt", "gpt-5.6-terra", "claude", "claude-opus-4-8"),
-    "multimodal_understanding": ("claude", "claude-sonnet-4-6", "gpt", "gpt-5.6-sol"),
-    "complex_planning": ("claude", "claude-opus-4-8", "gpt", "gpt-5.6-terra"),
+    "visual_analysis": ("claude", "claude-sonnet-4-6", "ark", "ep-20260716122053-t2lst"),
+    "deep_reasoning": ("claude", "claude-opus-4-8", "ark", "deepseek-v4-flash-260425"),
+    "code_generation": ("claude", "claude-sonnet-4-6", "ark", "deepseek-v4-flash-260425"),
+    "fast_classification": ("claude", "claude-sonnet-4-6", "ark", "deepseek-v4-flash-260425"),
+    "parameter_inference": ("claude", "claude-opus-4-8", "ark", "deepseek-v4-flash-260425"),
+    "color_analysis": ("claude", "claude-sonnet-4-6", "ark", "deepseek-v4-flash-260425"),
+    "rhythm_analysis": ("claude", "claude-sonnet-4-6", "ark", "deepseek-v4-flash-260425"),
+    "creative_writing": ("claude", "claude-opus-4-8", "ark", "deepseek-v4-flash-260425"),
+    "multimodal_understanding": ("claude", "claude-sonnet-4-6", "ark", "ep-20260716122053-t2lst"),
+    "complex_planning": ("claude", "claude-opus-4-8", "ark", "deepseek-v4-flash-260425"),
 }
 
 

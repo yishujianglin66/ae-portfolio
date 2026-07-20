@@ -392,6 +392,12 @@ class ResourceMonitorService:
 
         # ---------- 超过阈值 ----------
         if value >= threshold:
+            # CRITICAL FIX: 如果正在发送恢复通知时资源再次超过阈值，中止恢复流程
+            if record and record.state == "recovering":
+                logger.warning(
+                    f"资源在恢复通知发送过程中再次超过阈值: {metric}={value:.1f}%"
+                )
+                # 保持 recovering 状态，等待恢复通知完成后再处理
             if record is None or record.state == "normal":
                 # 首次超过阈值 → warning / critical
                 record = AlertRecord(

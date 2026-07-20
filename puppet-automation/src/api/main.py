@@ -71,36 +71,6 @@ from ..models.pipeline import PipelineJob, PuppetStyle, VideoMetadata
 from ..ai_planner import AIPlanner
 
 
-class _ConfigService:
-    """Configuration wrapper for MCP tool access."""
-
-    def __init__(self, settings_obj):
-        self._settings = settings_obj
-
-    def get_safe_config(self):
-        """Get safe configuration (secrets masked)."""
-        import re
-        from pathlib import Path
-
-        result = {}
-        for key, val in self._settings.model_dump().items():
-            if isinstance(val, Path):
-                result[key] = str(val)
-            elif isinstance(val, str) and any(kw in key.lower() for kw in ["key", "token", "secret", "password"]):
-                result[key] = "***" if val else ""
-            else:
-                result[key] = val
-        return result
-
-    def get_resource_paths(self):
-        """Get all resource directory paths."""
-        paths = {}
-        for key, val in self._settings.model_dump().items():
-            if key.endswith("_dir") or key.endswith("_path"):
-                paths[key] = str(val)
-        return paths
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application startup/shutdown lifecycle."""
@@ -149,6 +119,11 @@ async def lifespan(app: FastAPI):
 
     app.state.engines = engines
     logger.info(f"Initialized {len(engines)}/{len(engine_classes)} engines")
+
+    # Initialize MCP Gateway
+    gateway = initialize_gateway(engines)
+    app.state.mcp_gateway = gateway
+    logger.info(f"MCP Gateway: {len(gateway.tools)} tools, {len(gateway.engines)} engines")
 
     # Initialize Pipeline Orchestrator
     orchestrator = PipelineOrchestrator(engines)
@@ -247,52 +222,6 @@ async def lifespan(app: FastAPI):
         logger.warning(f"RenderJobRepository init failed: {e}")
         app.state.render_repository = None
 
-    # Initialize AE high-level services (fail-safe: skip on init error)
-    # 文字效果 / 插件封装 / 多段调色 / 音频绑定 — 仅实例化，不触发 AE 调用
-    try:
-        from ..services import (
-            AEPluginService,
-            AudioBindingService,
-            ColorGradingService,
-            TextEffectService,
-        )
-        # 复用已初始化的 AE 引擎，若不可用则按配置新建（仅实例化，不调用）
-        ae_svc_engine = engines.get("ae") or AEEngine(settings.aerender_path)
-        app.state.text_effect_service = TextEffectService(ae_engine=ae_svc_engine)
-        app.state.ae_plugin_service = AEPluginService(ae_engine=ae_svc_engine)
-        app.state.color_grading_service = ColorGradingService(ae_engine=ae_svc_engine)
-        app.state.audio_binding_service = AudioBindingService(ae_engine=ae_svc_engine)
-        logger.info("AE high-level services initialized (text/plugin/color/audio)")
-    except Exception as e:
-        logger.warning(f"AE high-level services init failed: {e}")
-        app.state.text_effect_service = None
-        app.state.ae_plugin_service = None
-        app.state.color_grading_service = None
-        app.state.audio_binding_service = None
-
-    # Initialize Resource Index Service (统一资源索引 - P0 任务)
-    # 提供 D:/AE-Work/resources/ 资源库的 find_font/find_lut/list_fonts 等 API
-    # 供 AI 规划器注入提示词与引擎/服务查询资源使用
-    try:
-        from ..services.resource_index_service import resource_index_service
-        app.state.resource_index_service = resource_index_service
-        logger.info("Resource Index Service initialized (lazy scan on first query)")
-    except Exception as e:
-        logger.warning(f"Resource Index Service init failed: {e}")
-        app.state.resource_index_service = None
-
-    # Initialize MCP Gateway (after all engines & services are ready)
-    mcp_services = {}
-    if getattr(app.state, "resource_index_service", None):
-        mcp_services["resource_index"] = app.state.resource_index_service
-    if getattr(app.state, "ae_plugin_service", None):
-        mcp_services["ae_plugin"] = app.state.ae_plugin_service
-    mcp_services["config"] = _ConfigService(settings)
-
-    gateway = initialize_gateway(engines, mcp_services)
-    app.state.mcp_gateway = gateway
-    logger.info(f"MCP Gateway: {len(gateway.tools)} tools, {len(gateway.engines)} engines, {len(mcp_services)} services")
-
     yield
 
     logger.info("Shutting down Puppet Automation Pipeline...")
@@ -387,104 +316,6 @@ async def execute_engine(
 
 # ---- MCP Gateway ----
 app.include_router(mcp_router)
-
-
-# ---- Resource Index Service (P0 任务：统一资源索引) ----
-@app.get("/api/v1/resources/summary")
-async def get_resource_summary():
-    """获取资源索引摘要（各类别资源数量）。
-
-    首次调用会触发资源库扫描，可能耗时几秒到几十秒。
-    """
-    svc = app.state.resource_index_service
-    if svc is None:
-        raise HTTPException(status_code=503, detail="Resource Index Service not available")
-    await svc._ensure_initialized()
-    summary = svc.get_index_summary()
-    return {
-        "total": svc.get_total_count(),
-        "categories": summary,
-        "initialized": svc.is_initialized(),
-    }
-
-
-@app.post("/api/v1/resources/refresh")
-async def refresh_resource_index(
-    _auth: bool = Depends(require_mcp_auth),
-):
-    """刷新资源索引（重新扫描资源库）。"""
-    svc = app.state.resource_index_service
-    if svc is None:
-        raise HTTPException(status_code=503, detail="Resource Index Service not available")
-    await svc.refresh_index()
-    return {
-        "status": "refreshed",
-        "total": svc.get_total_count(),
-        "categories": svc.get_index_summary(),
-    }
-
-
-@app.get("/api/v1/resources/{category}")
-async def list_resources(
-    category: str,
-    limit: int = 100,
-    offset: int = 0,
-):
-    """列出指定类别的资源清单。
-
-    Args:
-        category: 资源类别（fonts/luts/effects/psd/audio/video/models/davinci/premiere/projects）
-        limit: 返回数量上限（默认 100，最大 500）
-        offset: 分页偏移量
-    """
-    svc = app.state.resource_index_service
-    if svc is None:
-        raise HTTPException(status_code=503, detail="Resource Index Service not available")
-    valid_categories = {
-        "fonts", "luts", "effects", "psd", "audio",
-        "video", "models", "davinci", "premiere", "projects",
-    }
-    if category not in valid_categories:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid category '{category}'. Valid: {sorted(valid_categories)}",
-        )
-    limit = max(1, min(limit, 500))
-    items = await svc.list_resources_by_type(category, limit, offset)
-    return {
-        "category": category,
-        "count": len(items),
-        "limit": limit,
-        "offset": offset,
-        "items": items,
-    }
-
-
-@app.get("/api/v1/resources/{category}/find")
-async def find_resource(
-    category: str,
-    name: str,
-    exact: bool = False,
-):
-    """按名称查找资源文件路径。
-
-    Args:
-        category: 资源类别
-        name: 资源名称（文件名，可不含扩展名）
-        exact: 是否精确匹配（默认模糊匹配）
-    """
-    svc = app.state.resource_index_service
-    if svc is None:
-        raise HTTPException(status_code=503, detail="Resource Index Service not available")
-    path = await svc.find_resource(category, name, exact)
-    if path is None:
-        raise HTTPException(status_code=404, detail=f"Resource '{name}' not found in '{category}'")
-    return {
-        "category": category,
-        "name": name,
-        "found": True,
-        "path": str(path),
-    }
 
 
 # ---- Pipeline Orchestration ----
@@ -1944,32 +1775,6 @@ async def cancel_render_job(
         "job_id": job_id,
         "job": updated.to_dict() if updated else None,
         "message": f"Render job '{job_id}' cancelled",
-    }
-
-
-# ============================================================
-# AE High-Level Services - 文字效果/插件/调色/音频绑定
-# ============================================================
-
-@app.get("/api/v1/ae-services/status")
-async def ae_services_status(_auth: bool = Depends(require_mcp_auth)):
-    """获取 AE 高层服务（文字效果/插件/调色/音频绑定）的初始化状态。
-
-    用于运维侧确认四个高层服务是否随服务启动成功加载。
-    业务调用端点按需在后续迭代中补齐，此处仅暴露就绪状态。
-    """
-    services = {
-        "text_effect": getattr(app.state, "text_effect_service", None),
-        "ae_plugin": getattr(app.state, "ae_plugin_service", None),
-        "color_grading": getattr(app.state, "color_grading_service", None),
-        "audio_binding": getattr(app.state, "audio_binding_service", None),
-    }
-    return {
-        "success": True,
-        "services": {
-            name: {"initialized": svc is not None}
-            for name, svc in services.items()
-        },
     }
 
 

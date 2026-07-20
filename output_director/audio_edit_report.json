@@ -4,9 +4,9 @@
   "duration": 30.0,
   "beats": 64,
   "mood": "energetic",
-  "clips": 1,
-  "jsx_lines": 140,
-  "elapsed": 14.5,
+  "clips": 5,
+  "jsx_lines": 206,
+  "elapsed": 1.8,
   "outputs": {
     "jsx": "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output_director\\audio_edit.jsx",
     "edl": "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output_director\\audio_edit_edl.json"

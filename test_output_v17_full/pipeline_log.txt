@@ -1,5 +1,5 @@
 V17 全链路实战测试日志
-时间: 2026-07-19 22:26:21
+时间: 2026-07-20 19:26:29
 目标: D:\AE-Work\output\VinlandSaga_Battle_V17.mp4
 ============================================================
 
@@ -28,7 +28,7 @@ V17 全链路实战测试日志
   [PASS] DaVinci 调色执行: result=ResolveColorResult(success=True, input_path='D:\\AE-Work\\ou
   [PASS] LUT 文件: 目录存在但无LUT文件
   [PASS] OpenSourceHub 工具状态: 可用: ['rife', 'sam2', 'whisper', 'remotion', 'openmontage', 'moviepy']
-  [PASS] MoviePy 截取V17前3秒: status=error, 453ms
+  [PASS] MoviePy 截取V17前3秒: status=error, 415ms
   [PASS] MoviePy V17 变速1.5x: status=success
   [PASS] MoviePy V17 缩放480p: status=success
   [PASS] RIFE 帧插值可用: 可执行2x/4x/8x插帧

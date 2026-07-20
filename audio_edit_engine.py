@@ -151,17 +151,123 @@ class EditDecisionGenerator:
     """根据音频分析生成剪辑决策表 (EDL)"""
 
     def generate(self, audio_features: Dict[str, Any],
-                 material_count: int = 3) -> List[Dict[str, Any]]:
-        """生成 EDL"""
+                 material_count: int = 3,
+                 material_durations: List[float] = None) -> List[Dict[str, Any]]:
+        """
+        生成 EDL。
+
+        Args:
+            audio_features: 音频分析结果
+            material_count: 素材文件数量
+            material_durations: 每个素材文件的时长(秒)
+        """
         beats = audio_features.get("beats", [])
         energy_vals = audio_features.get("energy_values", [])
         bpm = audio_features.get("bpm", 128)
         duration = audio_features.get("duration", 30)
+        sections = audio_features.get("sections", [])
 
         if not beats:
             return []
 
-        # 策略: 每个素材覆盖若干节拍，在强拍处切换
+        # 智能分段策略:
+        # - 多素材: 每个素材覆盖一段音频
+        # - 单素材: 按音频段落(intro/verse/chorus/drop/outro)切分
+        if material_count <= 1:
+            edl = self._generate_single_material_edl(
+                beats, energy_vals, duration, sections, bpm)
+        else:
+            edl = self._generate_multi_material_edl(
+                beats, energy_vals, duration, material_count, bpm)
+
+        # 如果有素材时长信息, 调整 source_in/source_out
+        if material_durations:
+            for clip in edl:
+                mat_idx = clip["material_index"]
+                if mat_idx < len(material_durations):
+                    mat_dur = material_durations[mat_idx]
+                    # 根据速度计算需要的源素材时长
+                    needed = clip["duration"] * clip["speed"]
+                    # 在素材内循环使用
+                    if needed > mat_dur:
+                        clip["loop"] = True
+                    clip["source_in"] = 0
+                    clip["source_out"] = min(needed, mat_dur)
+
+        log(f"  EDL 生成: {len(edl)} 段, BPM={bpm}")
+        return edl
+
+    def _generate_single_material_edl(self, beats: List[float],
+                                       energy_vals: List[float],
+                                       duration: float,
+                                       sections: List[str],
+                                       bpm: float) -> List[Dict]:
+        """单素材智能分段: 按音频段落或能量变化切分"""
+        edl = []
+
+        # 策略1: 如果有段落信息, 按段落切分
+        if sections and len(sections) >= 2:
+            section_boundaries = self._find_section_boundaries(
+                beats, energy_vals, sections, duration)
+            for i, (start_t, end_t) in enumerate(section_boundaries):
+                seg_energies = [e for e, bt in zip(energy_vals, beats)
+                                if start_t <= bt < end_t]
+                avg_energy = sum(seg_energies) / max(len(seg_energies), 1)
+                speed = self._energy_to_speed(avg_energy)
+                transition = self._pick_transition(avg_energy, i)
+                edl.append({
+                    "clip_index": i,
+                    "material_index": 0,  # 始终用同一个素材
+                    "start_time": round(start_t, 3),
+                    "end_time": round(end_t, 3),
+                    "duration": round(end_t - start_t, 3),
+                    "avg_energy": round(avg_energy, 3),
+                    "speed": speed,
+                    "transition": transition,
+                    "section_type": sections[i] if i < len(sections) else "verse",
+                    "start_beat": 0,
+                    "end_beat": 0,
+                })
+        else:
+            # 策略2: 按能量变化自动切分 (每8-16拍一段)
+            beats_per_seg = 8 if bpm > 140 else 12 if bpm > 100 else 16
+            seg_count = max(3, len(beats) // beats_per_seg)
+            beats_per_clip = max(4, len(beats) // seg_count)
+
+            for i in range(seg_count):
+                start_idx = i * beats_per_clip
+                end_idx = min((i + 1) * beats_per_clip, len(beats) - 1)
+                if start_idx >= len(beats):
+                    break
+
+                start_t = beats[start_idx]
+                end_t = beats[end_idx] if end_idx < len(beats) else duration
+                seg_e = energy_vals[start_idx:end_idx + 1] if energy_vals else [0.5]
+                avg_e = sum(seg_e) / max(len(seg_e), 1)
+                speed = self._energy_to_speed(avg_e)
+                transition = self._pick_transition(avg_e, i)
+
+                edl.append({
+                    "clip_index": i,
+                    "material_index": 0,
+                    "start_time": round(start_t, 3),
+                    "end_time": round(end_t, 3),
+                    "duration": round(end_t - start_t, 3),
+                    "avg_energy": round(avg_e, 3),
+                    "speed": speed,
+                    "transition": transition,
+                    "start_beat": start_idx,
+                    "end_beat": end_idx,
+                })
+
+        return edl
+
+    def _generate_multi_material_edl(self, beats: List[float],
+                                      energy_vals: List[float],
+                                      duration: float,
+                                      material_count: int,
+                                      bpm: float) -> List[Dict]:
+        """多素材: 每个素材覆盖一段音频"""
         beats_per_clip = max(4, len(beats) // material_count)
         edl = []
 
@@ -175,14 +281,9 @@ class EditDecisionGenerator:
             start_time = beats[start_beat_idx]
             end_time = beats[end_beat_idx] if end_beat_idx < len(beats) else duration
 
-            # 计算该段平均能量
             seg_energies = energy_vals[start_beat_idx:end_beat_idx + 1] if energy_vals else [0.5]
             avg_energy = sum(seg_energies) / max(len(seg_energies), 1)
-
-            # 根据能量决定速度
             speed = self._energy_to_speed(avg_energy)
-
-            # 根据能量决定转场
             transition = self._pick_transition(avg_energy, i)
 
             edl.append({
@@ -198,8 +299,42 @@ class EditDecisionGenerator:
                 "end_beat": end_beat_idx,
             })
 
-        log(f"  EDL 生成: {len(edl)} 段, BPM={bpm}")
         return edl
+
+    def _find_section_boundaries(self, beats: List[float],
+                                  energy_vals: List[float],
+                                  sections: List[str],
+                                  duration: float) -> List[Tuple[float, float]]:
+        """根据段落类型找到切分点"""
+        n_sections = len(sections)
+        boundaries = []
+        seg_dur = duration / n_sections
+        for i in range(n_sections):
+            start = i * seg_dur
+            end = (i + 1) * seg_dur if i < n_sections - 1 else duration
+            # 对齐到最近的节拍
+            start = self._snap_to_beat(start, beats, direction="next")
+            end = self._snap_to_beat(end, beats, direction="prev")
+            boundaries.append((start, end))
+        return boundaries
+
+    def _snap_to_beat(self, time: float, beats: List[float],
+                      direction: str = "nearest") -> float:
+        """将时间对齐到最近的节拍"""
+        if not beats:
+            return time
+        if direction == "next":
+            for bt in beats:
+                if bt >= time - 0.1:
+                    return bt
+            return beats[-1]
+        elif direction == "prev":
+            for bt in reversed(beats):
+                if bt <= time + 0.1:
+                    return bt
+            return beats[0]
+        else:
+            return min(beats, key=lambda bt: abs(bt - time))
 
     def _energy_to_speed(self, energy: float) -> float:
         """能量 → 播放速度 (0.5x - 2.0x)"""
@@ -214,15 +349,26 @@ class EditDecisionGenerator:
         return 0.6  # 低能量慢放
 
     def _pick_transition(self, energy: float, idx: int) -> Dict[str, Any]:
-        """根据能量选择转场"""
-        if energy > 0.8:
-            return {"type": "cut", "duration": 0.0}  # 硬切
+        """根据能量选择转场 (映射到真实 AE 效果)"""
+        # 高能量: 硬切/快速效果
+        if energy > 0.85:
+            return {"type": "cut", "duration": 0.0,
+                    "ae_effect": None, "desc": "硬切"}
+        elif energy > 0.75:
+            return {"type": "glow_flash", "duration": 0.15,
+                    "ae_effect": "ADBE Lensflare", "desc": "镜头光晕闪"}
         elif energy > 0.6:
-            return {"type": "dissolve", "duration": 0.3}
-        elif energy > 0.4:
-            return {"type": "wipe_right", "duration": 0.5}
+            return {"type": "dissolve", "duration": 0.3,
+                    "ae_effect": "ADBE Transition - Cross Dissolve", "desc": "交叉溶解"}
+        elif energy > 0.45:
+            return {"type": "wipe_right", "duration": 0.5,
+                    "ae_effect": "ADBE Transition - Linear Wipe", "desc": "线性擦除"}
+        elif energy > 0.3:
+            return {"type": "slide", "duration": 0.4,
+                    "ae_effect": "ADBE Transform", "desc": "滑动"}
         else:
-            return {"type": "fade_black", "duration": 0.8}
+            return {"type": "fade_black", "duration": 0.8,
+                    "ae_effect": "ADBE Transition - Dip to Black", "desc": "黑场过渡"}
 
 
 # ================================================================

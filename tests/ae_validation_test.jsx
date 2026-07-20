@@ -9,7 +9,7 @@
  4. 生成验证报告
  
  使用方法：
- - 在 After Effects 2026 中通过 File > Scripts > Run Script File... 运行此脚本
+ - 在 After Effects 2025 中通过 File > Scripts > Run Script File... 运行此脚本
  - 脚本运行完成后，会在项目面板生成 "Validation_Report" 合成
  - 同时会输出详细日志到 AE 的 Info 面板
  ============================================================================

@@ -1,5 +1,192 @@
 # DaVinci Resolve Fusion页面完全指南
 
+> 版本: 2025-v1 | 适用: 节点式合成/特效/动态图形
+
+## 一、Fusion基础
+
+### 1.1 Fusion vs AE
+
+| 特性 | Fusion | AE |
+|------|--------|-----|
+| 架构 | 节点式 | 图层式 |
+| 学习曲线 | 陡峭 | 平缓 |
+| 复杂度 | 适合复杂合成 | 适合快速迭代 |
+| 3D | 内置3D空间 | 需要插件 |
+| 价格 | 免费版功能完整 | 需订阅 |
+| 集成 | Resolve内部 | 动态链接PR |
+
+### 1.2 节点基础
+
+| 节点类型 | 图标 | 用途 |
+|----------|------|------|
+| MediaIn | 输入 | 素材导入 |
+| MediaOut | 输出 | 合成输出 |
+| Merge | 合并 | 图层叠加 |
+| Transform | 变换 | 位置/缩放/旋转 |
+| Background | 背景 | 纯色/渐变 |
+| Text+ | 文字 | 动态文字 |
+| Blur | 模糊 | 高斯/方向 |
+| ColorCorrect | 调色 | 基础调色 |
+| Matte | 遮罩 | 形状遮罩 |
+| Tracker | 跟踪 | 运动跟踪 |
+
+### 1.3 节点连接
+
+```
+基本连接:
+MediaIn → Transform → Merge(前景) → MediaOut
+                         ↑
+Background → Merge(背景)
+
+Merge节点:
+- 黄色三角: 前景输入
+- 绿色三角: 背景输入
+- 蓝色三角: 遮罩输入
+```
+
+## 二、核心节点详解
+
+### 2.1 Merge节点
+
+| 参数 | 作用 |
+|------|------|
+| Center | 前景位置 |
+| Size | 前景缩放 |
+| Angle | 前景旋转 |
+| Blend | 混合模式 |
+| Operator | 合成操作 |
+
+### 2.2 Transform节点
+
+| 参数 | 作用 |
+|------|------|
+| Center.X/Y | 位置 |
+| Size.X/Y | 缩放(锁定比例) |
+| Angle | 旋转 |
+| Pivot | 旋转中心 |
+
+### 2.3 调色节点
+
+| 节点 | 功能 |
+|------|------|
+| ColorCorrector | 完整调色 |
+| BrightnessContrast | 亮度对比度 |
+| HueCurves | 色相曲线 |
+| LUTLookup | 加载LUT |
+| ColorSpaceTransform | 色彩空间转换 |
+
+## 三、遮罩与键控
+
+### 3.1 遮罩节点
+
+| 节点 | 形状 | 用途 |
+|------|------|------|
+| Polygon | 多边形 | 自由形状遮罩 |
+| Rectangle | 矩形 | 区域遮罩 |
+| Ellipse | 椭圆 | 圆形遮罩 |
+| BSpline | B样条 | 平滑曲线遮罩 |
+
+### 3.2 键控
+
+```
+Delta Keyer流程:
+1. 添加Delta Keyer节点
+2. 用吸管选取背景色(绿幕)
+3. 调整前景/背景采样
+4. 边缘精修
+5. 溢色抑制
+```
+
+## 四、3D空间
+
+### 4.1 3D节点
+
+| 节点 | 功能 |
+|------|------|
+| Shape3D | 3D几何体 |
+| Text3D | 3D文字 |
+| Camera3D | 3D摄像机 |
+| Light3D | 灯光 |
+| Renderer3D | 渲染输出 |
+| FBX Mesh | 导入FBX模型 |
+
+### 4.2 3D合成流程
+
+```
+1. 创建3D场景:
+   Shape3D → 设置几何体和材质
+   
+2. 添加灯光:
+   Light3D → 调整位置和颜色
+   
+3. 创建摄像机:
+   Camera3D → 设置视角
+   
+4. 渲染:
+   所有3D节点 → Renderer3D → MediaOut
+   
+5. 与2D合成:
+   Renderer3D → Merge → MediaOut
+```
+
+## 五、跟踪
+
+### 5.1 平面跟踪
+
+```
+1. 添加Planar Tracker节点
+2. 框选跟踪区域
+3. 选择运动类型:
+   - Translation(位移)
+   - Scale/Rotation(缩放旋转)
+   - Perspective(透视)
+4. 点击Track Forward
+5. 输出到:
+   - Transform(应用运动)
+   - Corner Position(角定位)
+   - Match Move(完全匹配)
+```
+
+### 5.2 摄像机跟踪
+
+```
+1. 添加Camera Tracker节点
+2. 分析素材
+3. 检测跟踪点
+4. 解算摄像机
+5. 创建3D场景
+6. 放置CG元素
+```
+
+## 六、表达式与宏
+
+### 6.1 表达式
+
+```
+Fusion表达式示例:
+- time: 当前时间(帧)
+- time/25: 秒数(25fps)
+- sin(time*0.1)*100: 正弦波动
+- random(1,100): 随机数
+
+常用表达式:
+位置: {0.5+sin(time*0.05)*0.3, 0.5}
+旋转: time*5
+缩放: 1+sin(time*0.1)*0.2
+```
+
+### 6.2 宏(Macro)
+
+```
+创建宏:
+1. 选中多个节点
+2. 右键 → 创建宏
+3. 暴露参数给外部
+4. 保存为.setting文件
+5. 可复用到其他项目
+```
+# DaVinci Resolve Fusion页面完全指南
+
 > 适用版本：DaVinci Resolve Studio 21.0 | 更新日期：2026-07-14 | 分类：DaVinci Resolve知识库
 
 ---

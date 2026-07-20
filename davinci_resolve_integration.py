@@ -6,7 +6,7 @@ DaVinci Resolve 调色集成模块 v1.0
 通过 Python API 和 CLI 命令行接口集成 DaVinci Resolve，支持视频调色、
 节点管理、LUT 应用、渲染输出等专业调色功能，提供真实模式、模拟模式和自动降级模式。
 
-安装路径: C:\Program Files\Blackmagic Design\DaVinci Resolve
+安装路径: C:\\Program Files\\Blackmagic Design\\DaVinci Resolve
 Python API: DaVinciResolveScript 模块
 CLI 工具: Resolve.exe
 

@@ -170,9 +170,12 @@ class ProviderHealth:
     status: ProviderStatus = ProviderStatus.HEALTHY
     consecutive_failures: int = 0
     last_success_time: float = 0.0
+    last_failure_time: float = 0.0
     last_error: str = ""
     total_requests: int = 0
     total_failures: int = 0
+    # 自动恢复：UNAVAILABLE 状态下 60 秒后自动重试
+    RECOVERY_INTERVAL_SEC: int = 60
 
 
 # -----------------------------------------------------------------------------
@@ -377,7 +380,7 @@ class LLMGateway:
                 "models": {
                     "vision": os.environ.get("DUCKMISS_VISION_MODEL", "claude-sonnet-4-6"),
                     "thinking": os.environ.get("DUCKMISS_THINKING_MODEL", "claude-opus-4-8"),
-                    "fast": os.environ.get("DUCKMISS_FAST_MODEL", "claude-haiku-4-5-20251001"),
+                    "fast": os.environ.get("DUCKMISS_FAST_MODEL", "claude-sonnet-4-6"),
                     "default": os.environ.get("DUCKMISS_DEFAULT_MODEL", "claude-sonnet-4-6"),
                 },
             }
@@ -389,10 +392,10 @@ class LLMGateway:
                 "base_url": os.environ.get("GPT_GATEWAY_BASE_URL", "https://duckmiss.site/v1"),
                 "api_key": gpt_key,
                 "models": {
-                    "vision": os.environ.get("GPT_GATEWAY_VISION_MODEL", "gpt-5.6-sol"),
-                    "code": os.environ.get("GPT_GATEWAY_CODE_MODEL", "gpt-5.6-luna"),
-                    "reasoning": os.environ.get("GPT_GATEWAY_REASONING_MODEL", "gpt-5.6-terra"),
-                    "default": "gpt-5.6",
+                    "vision": os.environ.get("GPT_GATEWAY_VISION_MODEL", "claude-sonnet-4-6"),
+                    "code": os.environ.get("GPT_GATEWAY_CODE_MODEL", "claude-sonnet-4-6"),
+                    "reasoning": os.environ.get("GPT_GATEWAY_REASONING_MODEL", "claude-opus-4-8"),
+                    "default": "claude-sonnet-4-6",
                 },
             }
 
@@ -424,9 +427,12 @@ class LLMGateway:
             }
 
         self._config.providers = providers
-        # 初始化每个 Provider 的健康状态
+        # 初始化每个 Provider 的健康状态（重置已存在的 Provider）
         for name in providers:
-            if name not in self._provider_health:
+            if name in self._provider_health:
+                # 重置健康状态，允许新配置的 API Key 重试
+                self._provider_health[name] = ProviderHealth(name=name)
+            else:
                 self._provider_health[name] = ProviderHealth(name=name)
 
         self._logger.info(
@@ -438,6 +444,44 @@ class LLMGateway:
         return bool(self._config.base_url and self._config.api_key)
 
     # -------------------------------------------------------------------------
+    # 知识库上下文注入
+    # -------------------------------------------------------------------------
+
+    def _inject_kb_context(self, system_prompt: str, query: str, task_type: str = "") -> str:
+        """将知识库相关内容注入到 system_prompt
+
+        当任务类型与效果/转场/调色相关时，自动检索知识库并注入上下文。
+
+        Args:
+            system_prompt: 原始系统提示词
+            query: 用户查询/意图描述
+            task_type: 任务类型
+
+        Returns:
+            增强后的 system_prompt
+        """
+        # 只在相关任务类型时注入
+        kb_relevant_types = {
+            "effect_planning", "intent_classification",
+            "scene_description", "quality_review", "general",
+        }
+        if task_type and task_type not in kb_relevant_types:
+            return system_prompt
+
+        try:
+            from kb_loader import KBLoader
+            loader = KBLoader.get_instance()
+            kb_context = loader.get_context_for_llm(task_type, query)
+            if kb_context:
+                if system_prompt:
+                    return f"{system_prompt}\n\n{kb_context}"
+                return kb_context
+        except Exception as e:
+            self._logger.debug(f"知识库上下文注入失败（不影响主流程）: {e}")
+
+        return system_prompt
+
+    # -------------------------------------------------------------------------
     # HTTP 客户端
     # -------------------------------------------------------------------------
 
@@ -446,7 +490,14 @@ class LLMGateway:
         if self._http_client is None:
             try:
                 import aiohttp
+                # CRITICAL FIX: 限制最大连接数，防止资源泄漏
+                connector = aiohttp.TCPConnector(
+                    limit=20,              # 总连接数上限
+                    limit_per_host=10,     # 每个 host 的连接数上限
+                    ttl_dns_cache=300,     # DNS 缓存 5 分钟
+                )
                 self._http_client = aiohttp.ClientSession(
+                    connector=connector,
                     timeout=aiohttp.ClientTimeout(
                         total=self._config.timeout_seconds
                     )
@@ -540,9 +591,14 @@ class LLMGateway:
                 if not fb_url or not fb_key:
                     continue
 
+                # 使用 fallback 配置中的 default_model，避免传递不支持的 "auto"
+                fb_model = fb.get("default_model", "") or model
+                if fb_model == "auto" or not fb_model:
+                    fb_model = model
+
                 self._logger.warning(f"主 Provider 失败，尝试降级: {fb_url}")
                 response = await self._call_provider(
-                    fb_url, fb_key, model,
+                    fb_url, fb_key, fb_model,
                     messages, temperature, max_tokens,
                 )
                 if response.success:
@@ -588,6 +644,10 @@ class LLMGateway:
         elif images is not None and task_type == TaskType.SCENE_DESCRIPTION:
             # 视觉理解任务用低温度保证输出稳定
             temperature = min(temperature, 0.3)
+
+        # 知识库上下文自动注入（不影响非相关任务）
+        task_type_str = task_type.value if hasattr(task_type, 'value') else str(task_type)
+        system_prompt = self._inject_kb_context(system_prompt, message, task_type_str)
 
         # 多Provider路由：优先按 TASK_PROVIDER_MAP 调用
         if self._config.providers:
@@ -767,12 +827,29 @@ class LLMGateway:
         provider_name = self._extract_provider_name(base_url)
         health = self._provider_health.get(provider_name, ProviderHealth(name=provider_name))
 
+        # 自动恢复机制：UNAVAILABLE 状态超过 RECOVERY_INTERVAL_SEC 秒后自动转回 HEALTHY
         if health.status == ProviderStatus.UNAVAILABLE:
-            return LLMResponse(
-                success=False,
-                provider=provider_name,
-                error=f"Provider {provider_name} 不可用（连续失败 {health.consecutive_failures} 次）"
-            )
+            import time as _time
+            if health.last_failure_time > 0:
+                elapsed = _time.time() - health.last_failure_time
+                if elapsed >= health.RECOVERY_INTERVAL_SEC:
+                    health.status = ProviderStatus.HEALTHY
+                    health.consecutive_failures = 0
+                    self._logger.info(
+                        f"Provider {provider_name} 自动恢复（距上次失败 {elapsed:.0f}s）"
+                    )
+                else:
+                    return LLMResponse(
+                        success=False,
+                        provider=provider_name,
+                        error=f"Provider {provider_name} 不可用（连续失败 {health.consecutive_failures} 次，{health.RECOVERY_INTERVAL_SEC - int(elapsed)}s 后自动恢复）"
+                    )
+            else:
+                return LLMResponse(
+                    success=False,
+                    provider=provider_name,
+                    error=f"Provider {provider_name} 不可用（连续失败 {health.consecutive_failures} 次）"
+                )
 
         client = await self._get_http_client()
         if client is None:
@@ -815,6 +892,8 @@ class LLMGateway:
 
                         if health.consecutive_failures >= 3:
                             health.status = ProviderStatus.UNAVAILABLE
+                            import time as _time
+                            health.last_failure_time = _time.time()
 
                         self._stats["total_failures"] += 1
                         return LLMResponse(
@@ -866,6 +945,10 @@ class LLMGateway:
                 health.consecutive_failures += 1
                 health.total_failures += 1
                 health.last_error = "Timeout"
+                if health.consecutive_failures >= 3:
+                    health.status = ProviderStatus.UNAVAILABLE
+                    import time as _time
+                    health.last_failure_time = _time.time()
                 self._stats["total_failures"] += 1
                 return LLMResponse(
                     success=False,
@@ -882,6 +965,10 @@ class LLMGateway:
                 health.consecutive_failures += 1
                 health.total_failures += 1
                 health.last_error = str(e)
+                if health.consecutive_failures >= 3:
+                    health.status = ProviderStatus.UNAVAILABLE
+                    import time as _time
+                    health.last_failure_time = _time.time()
                 self._stats["total_failures"] += 1
                 return LLMResponse(
                     success=False,

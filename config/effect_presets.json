@@ -1,0 +1,490 @@
+{
+  "version": "1.0.0",
+  "description": "AE 常用效果预设模板 - 20+ 常用效果的完整参数定义",
+  "last_updated": "2026-07-20",
+  "effects": {
+    "Lens Flare": {
+      "match_name": "ADBE Lens Flare",
+      "category": "light",
+      "plugin_package": "Adobe Built-in",
+      "description": "镜头光晕效果，模拟摄像机镜头的光晕和眩光",
+      "params": {
+        "Flare Center": {"type": "point", "default": [50, 50], "description": "光晕中心位置"},
+        "Flare Brightness": {"type": "number", "min": 0, "max": 300, "default": 100, "description": "光晕亮度"},
+        "Lens Type": {"type": "enum", "values": ["50-300mm Zoom", "35mm Prime", "105mm Prime", "Anamorphic"], "default": "50-300mm Zoom", "description": "镜头类型"},
+        "Blend With Original": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "与原图混合"}
+      },
+      "usage_scenarios": ["光效增强", "镜头眩光", "电影感光效", "转场光效", "科幻特效"],
+      "presets": [
+        {"name": "柔和日光", "params": {"Flare Brightness": 80, "Lens Type": "50-300mm Zoom"}, "description": "温暖的日光效果"},
+        {"name": "电影镜头", "params": {"Flare Brightness": 120, "Lens Type": "Anamorphic"}, "description": "变形宽银幕镜头光"},
+        {"name": "强烈星光", "params": {"Flare Brightness": 200, "Lens Type": "105mm Prime"}, "description": "强烈的星光效果"}
+      ]
+    },
+    "Glow": {
+      "match_name": "ADBE Glo2",
+      "category": "light",
+      "plugin_package": "Adobe Built-in",
+      "description": "发光效果，在画面亮部添加扩散的光晕",
+      "params": {
+        "Glow Threshold": {"type": "number", "min": 0, "max": 100, "default": 50, "description": "发光阈值"},
+        "Glow Radius": {"type": "number", "min": 0, "max": 300, "default": 15, "description": "发光半径"},
+        "Glow Intensity": {"type": "number", "min": 0, "max": 5, "default": 1.0, "description": "发光强度"},
+        "Glow Colors": {"type": "enum", "values": ["Original Colors", "A & B Colors", "Arbitrary Map"], "default": "A & B Colors", "description": "发光颜色模式"},
+        "Color A": {"type": "color", "default": [1.0, 0.8, 0.5, 1.0], "description": "颜色A"},
+        "Color B": {"type": "color", "default": [1.0, 0.6, 0.3, 1.0], "description": "颜色B"},
+        "Blend With Original": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "与原图混合"}
+      },
+      "usage_scenarios": ["发光效果", "光效增强", "文字发光", "霓虹效果", "科幻特效"],
+      "presets": [
+        {"name": "柔和发光", "params": {"Glow Threshold": 60, "Glow Radius": 10, "Glow Intensity": 0.8}, "description": "温和的发光效果"},
+        {"name": "霓虹灯管", "params": {"Glow Threshold": 40, "Glow Radius": 25, "Glow Intensity": 2.0}, "description": "霓虹灯般的发光"},
+        {"name": "强烈光晕", "params": {"Glow Threshold": 30, "Glow Radius": 50, "Glow Intensity": 3.0}, "description": "强烈的光晕效果"}
+      ]
+    },
+    "Gaussian Blur": {
+      "match_name": "ADBE Gaussian Blur 2",
+      "category": "blur",
+      "plugin_package": "Adobe Built-in",
+      "description": "高斯模糊效果，提供高质量的模糊效果",
+      "params": {
+        "Blurriness": {"type": "number", "min": 0, "max": 1000, "default": 10, "description": "模糊强度"},
+        "Blur Dimensions": {"type": "enum", "values": ["Horizontal & Vertical", "Horizontal Only", "Vertical Only"], "default": "Horizontal & Vertical", "description": "模糊维度"},
+        "Repeat Edge Pixels": {"type": "boolean", "default": false, "description": "重复边缘像素"}
+      },
+      "usage_scenarios": ["背景虚化", "景深效果", "运动模糊", "柔化画面", "过渡转场"],
+      "presets": [
+        {"name": "轻微模糊", "params": {"Blurriness": 3}, "description": "轻微柔化画面"},
+        {"name": "中度模糊", "params": {"Blurriness": 15}, "description": "中等程度模糊"},
+        {"name": "重度模糊", "params": {"Blurriness": 50}, "description": "强烈模糊效果"},
+        {"name": "水平运动模糊", "params": {"Blurriness": 30, "Blur Dimensions": "Horizontal Only"}, "description": "模拟水平运动"}
+      ]
+    },
+    "Color Balance": {
+      "match_name": "ADBE Color Balance",
+      "category": "color",
+      "plugin_package": "Adobe Built-in",
+      "description": "色彩平衡效果，调整阴影、中间调和高光的颜色",
+      "params": {
+        "Red Shadow Level": {"type": "number", "min": -100, "max": 100, "default": 0, "description": "阴影红色电平"},
+        "Green Shadow Level": {"type": "number", "min": -100, "max": 100, "default": 0, "description": "阴影绿色电平"},
+        "Blue Shadow Level": {"type": "number", "min": -100, "max": 100, "default": 0, "description": "阴影蓝色电平"},
+        "Red Midtone Level": {"type": "number", "min": -100, "max": 100, "default": 0, "description": "中间调红色电平"},
+        "Green Midtone Level": {"type": "number", "min": -100, "max": 100, "default": 0, "description": "中间调绿色电平"},
+        "Blue Midtone Level": {"type": "number", "min": -100, "max": 100, "default": 0, "description": "中间调蓝色电平"},
+        "Red Highlight Level": {"type": "number", "min": -100, "max": 100, "default": 0, "description": "高光红色电平"},
+        "Green Highlight Level": {"type": "number", "min": -100, "max": 100, "default": 0, "description": "高光绿色电平"},
+        "Blue Highlight Level": {"type": "number", "min": -100, "max": 100, "default": 0, "description": "高光蓝色电平"},
+        "Preserve Luminosity": {"type": "boolean", "default": true, "description": "保持亮度"}
+      },
+      "usage_scenarios": ["调色", "色彩校正", "色温调整", "风格化调色", "肤色美化"],
+      "presets": [
+        {"name": "暖色调", "params": {"Red Midtone Level": 10, "Blue Midtone Level": -10, "Green Midtone Level": 5}, "description": "温暖的色调"},
+        {"name": "冷色调", "params": {"Red Midtone Level": -10, "Blue Midtone Level": 10, "Green Midtone Level": 5}, "description": "清冷的色调"},
+        {"name": "电影青橙", "params": {"Red Shadow Level": 15, "Blue Highlight Level": 15, "Blue Shadow Level": -10, "Red Highlight Level": -10}, "description": "经典电影青橙色调"}
+      ]
+    },
+    "Curves": {
+      "match_name": "ADBE Curves",
+      "category": "color",
+      "plugin_package": "Adobe Built-in",
+      "description": "曲线效果，精确调整色调和颜色通道",
+      "params": {
+        "RGB Curve": {"type": "curve", "default": [[0, 0], [128, 128], [255, 255]], "description": "RGB 合成曲线"},
+        "Red Curve": {"type": "curve", "default": [[0, 0], [255, 255]], "description": "红色通道曲线"},
+        "Green Curve": {"type": "curve", "default": [[0, 0], [255, 255]], "description": "绿色通道曲线"},
+        "Blue Curve": {"type": "curve", "default": [[0, 0], [255, 255]], "description": "蓝色通道曲线"},
+        "Alpha Curve": {"type": "curve", "default": [[0, 0], [255, 255]], "description": "Alpha 通道曲线"}
+      },
+      "usage_scenarios": ["调色", "色彩校正", "对比度调整", "风格化调色", "电影级调色"],
+      "presets": [
+        {"name": "增强对比", "params": {"RGB Curve": [[0, 0], [64, 48], [192, 207], [255, 255]]}, "description": "S型曲线增强对比度"},
+        {"name": "压暗提亮", "params": {"RGB Curve": [[0, 30], [128, 128], [255, 230]]}, "description": "压缩动态范围"},
+        {"name": "胶片质感", "params": {"RGB Curve": [[0, 20], [64, 70], [192, 190], [255, 240]]}, "description": "模拟胶片的响应曲线"}
+      ]
+    },
+    "Levels": {
+      "match_name": "ADBE Levels (Individual Controls)",
+      "category": "color",
+      "plugin_package": "Adobe Built-in",
+      "description": "色阶效果，调整画面的亮度和对比度",
+      "params": {
+        "Red Input Black": {"type": "number", "min": 0, "max": 255, "default": 0, "description": "红色输入黑场"},
+        "Red Input White": {"type": "number", "min": 0, "max": 255, "default": 255, "description": "红色输入白场"},
+        "Red Gamma": {"type": "number", "min": 0.1, "max": 10, "default": 1.0, "description": "红色Gamma"},
+        "Red Output Black": {"type": "number", "min": 0, "max": 255, "default": 0, "description": "红色输出黑场"},
+        "Red Output White": {"type": "number", "min": 0, "max": 255, "default": 255, "description": "红色输出白场"},
+        "Green Input Black": {"type": "number", "min": 0, "max": 255, "default": 0, "description": "绿色输入黑场"},
+        "Green Input White": {"type": "number", "min": 0, "max": 255, "default": 255, "description": "绿色输入白场"},
+        "Green Gamma": {"type": "number", "min": 0.1, "max": 10, "default": 1.0, "description": "绿色Gamma"},
+        "Green Output Black": {"type": "number", "min": 0, "max": 255, "default": 0, "description": "绿色输出黑场"},
+        "Green Output White": {"type": "number", "min": 0, "max": 255, "default": 255, "description": "绿色输出白场"},
+        "Blue Input Black": {"type": "number", "min": 0, "max": 255, "default": 0, "description": "蓝色输入黑场"},
+        "Blue Input White": {"type": "number", "min": 0, "max": 255, "default": 255, "description": "蓝色输入白场"},
+        "Blue Gamma": {"type": "number", "min": 0.1, "max": 10, "default": 1.0, "description": "蓝色Gamma"},
+        "Blue Output Black": {"type": "number", "min": 0, "max": 255, "default": 0, "description": "蓝色输出黑场"},
+        "Blue Output White": {"type": "number", "min": 0, "max": 255, "default": 255, "description": "蓝色输出白场"}
+      },
+      "usage_scenarios": ["调色", "色彩校正", "亮度调整", "对比度调整", "色阶修复"],
+      "presets": [
+        {"name": "增加对比度", "params": {"Red Input Black": 20, "Red Input White": 235, "Green Input Black": 20, "Green Input White": 235, "Blue Input Black": 20, "Blue Input White": 235}, "description": "增加画面对比度"},
+        {"name": "降低对比度", "params": {"Red Output Black": 30, "Red Output White": 225, "Green Output Black": 30, "Green Output White": 225, "Blue Output Black": 30, "Blue Output White": 225}, "description": "降低画面对比度"},
+        {"name": "提亮画面", "params": {"Red Gamma": 1.5, "Green Gamma": 1.5, "Blue Gamma": 1.5}, "description": "提亮中间调"}
+      ]
+    },
+    "Tritone": {
+      "match_name": "ADBE Tritone",
+      "category": "color",
+      "plugin_package": "Adobe Built-in",
+      "description": "三色调效果，用三种颜色替换画面的阴影、中间调和高光",
+      "params": {
+        "Shadows": {"type": "color", "default": [0.0, 0.0, 0.2, 1.0], "description": "阴影颜色"},
+        "Midtones": {"type": "color", "default": [0.5, 0.5, 0.5, 1.0], "description": "中间调颜色"},
+        "Highlights": {"type": "color", "default": [1.0, 0.9, 0.7, 1.0], "description": "高光颜色"},
+        "Blend With Original": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "与原图混合"}
+      },
+      "usage_scenarios": ["风格化调色", "双色调", "电影感", "复古效果", "色彩风格化"],
+      "presets": [
+        {"name": "暖金调", "params": {"Shadows": [0.1, 0.05, 0.0, 1.0], "Midtones": [0.6, 0.4, 0.2, 1.0], "Highlights": [1.0, 0.9, 0.7, 1.0]}, "description": "温暖的金色调"},
+        {"name": "冷蓝调", "params": {"Shadows": [0.0, 0.0, 0.15, 1.0], "Midtones": [0.2, 0.3, 0.5, 1.0], "Highlights": [0.7, 0.8, 1.0, 1.0]}, "description": "清冷的蓝色调"},
+        {"name": "复古棕褐", "params": {"Shadows": [0.1, 0.05, 0.0, 1.0], "Midtones": [0.5, 0.35, 0.2, 1.0], "Highlights": [0.9, 0.8, 0.6, 1.0]}, "description": "复古棕褐色调"}
+      ]
+    },
+    "Fill": {
+      "match_name": "ADBE Fill",
+      "category": "generate",
+      "plugin_package": "Adobe Built-in",
+      "description": "填充效果，用纯色填充图层",
+      "params": {
+        "Color": {"type": "color", "default": [1.0, 0.0, 0.0, 1.0], "description": "填充颜色"},
+        "Opacity": {"type": "number", "min": 0, "max": 100, "default": 100, "description": "不透明度"},
+        "Blend Mode": {"type": "enum", "values": ["Normal", "Add", "Screen", "Multiply", "Overlay", "Soft Light", "Color", "Luminosity"], "default": "Normal", "description": "混合模式"}
+      },
+      "usage_scenarios": ["颜色填充", "纯色背景", "着色效果", "色调统一", "合成辅助"],
+      "presets": [
+        {"name": "纯黑填充", "params": {"Color": [0.0, 0.0, 0.0, 1.0]}, "description": "纯黑色填充"},
+        {"name": "纯白填充", "params": {"Color": [1.0, 1.0, 1.0, 1.0]}, "description": "纯白色填充"},
+        {"name": "半透明灰", "params": {"Color": [0.5, 0.5, 0.5, 1.0], "Opacity": 50}, "description": "半透明灰色"}
+      ]
+    },
+    "Stroke": {
+      "match_name": "ADBE Stroke",
+      "category": "generate",
+      "plugin_package": "Adobe Built-in",
+      "description": "描边效果，沿路径或遮罩边缘绘制线条",
+      "params": {
+        "Color": {"type": "color", "default": [1.0, 0.0, 0.0, 1.0], "description": "描边颜色"},
+        "Brush Size": {"type": "number", "min": 0, "max": 100, "default": 2, "description": "画笔大小"},
+        "Brush Hardness": {"type": "number", "min": 0, "max": 100, "default": 100, "description": "画笔硬度"},
+        "Opacity": {"type": "number", "min": 0, "max": 100, "default": 100, "description": "不透明度"},
+        "Start": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "起点"},
+        "End": {"type": "number", "min": 0, "max": 100, "default": 100, "description": "终点"},
+        "Spacing": {"type": "number", "min": 1, "max": 1000, "default": 1, "description": "间距"},
+        "Paint Style": {"type": "enum", "values": ["On Transparent", "On Original Image", "Reveal Original Image"], "default": "On Transparent", "description": "绘制样式"}
+      },
+      "usage_scenarios": ["路径动画", "描边文字", "图形绘制", "线条动画", "UI动画"],
+      "presets": [
+        {"name": "细线条", "params": {"Brush Size": 1, "Brush Hardness": 100}, "description": "细线条描边"},
+        {"name": "粗线条", "params": {"Brush Size": 8, "Brush Hardness": 100}, "description": "粗线条描边"},
+        {"name": "柔和发光边", "params": {"Brush Size": 5, "Brush Hardness": 30}, "description": "柔和的发光边缘"}
+      ]
+    },
+    "Drop Shadow": {
+      "match_name": "ADBE Drop Shadow",
+      "category": "perspective",
+      "plugin_package": "Adobe Built-in",
+      "description": "投影效果，为图层添加阴影",
+      "params": {
+        "Shadow Color": {"type": "color", "default": [0.0, 0.0, 0.0, 1.0], "description": "阴影颜色"},
+        "Opacity": {"type": "number", "min": 0, "max": 100, "default": 75, "description": "不透明度"},
+        "Direction": {"type": "number", "min": 0, "max": 360, "default": 135, "description": "方向"},
+        "Distance": {"type": "number", "min": 0, "max": 1000, "default": 5, "description": "距离"},
+        "Softness": {"type": "number", "min": 0, "max": 1000, "default": 5, "description": "柔化"},
+        "Shadow Only": {"type": "boolean", "default": false, "description": "仅阴影"}
+      },
+      "usage_scenarios": ["文字投影", "图层阴影", "立体效果", "UI设计", "卡片设计"],
+      "presets": [
+        {"name": "轻微投影", "params": {"Distance": 3, "Softness": 3, "Opacity": 50}, "description": "轻微的投影效果"},
+        {"name": "标准投影", "params": {"Distance": 8, "Softness": 8, "Opacity": 75}, "description": "标准投影效果"},
+        {"name": "长投影", "params": {"Distance": 30, "Softness": 5, "Opacity": 60, "Direction": 135}, "description": "流行的长投影效果"}
+      ]
+    },
+    "CC Particle World": {
+      "match_name": "CC Particle World",
+      "category": "particle",
+      "plugin_package": "Adobe Cycore FX",
+      "description": "CC粒子世界，三维粒子系统效果",
+      "params": {
+        "Birth Rate": {"type": "number", "min": 0, "max": 5, "default": 1.5, "description": "出生率"},
+        "Longevity (sec)": {"type": "number", "min": 0.1, "max": 10, "default": 2.0, "description": "生命周期(秒)"},
+        "Producer Position": {"type": "point", "default": [0, 0, 0], "description": "发射器位置"},
+        "Producer Radius X": {"type": "number", "min": 0, "max": 1, "default": 0.1, "description": "发射器X半径"},
+        "Producer Radius Y": {"type": "number", "min": 0, "max": 1, "default": 0.1, "description": "发射器Y半径"},
+        "Producer Radius Z": {"type": "number", "min": 0, "max": 1, "default": 0.1, "description": "发射器Z半径"},
+        "Velocity": {"type": "number", "min": 0, "max": 1, "default": 0.3, "description": "速度"},
+        "Inherit Velocity": {"type": "number", "min": 0, "max": 1, "default": 0, "description": "继承速度"},
+        "Gravity": {"type": "number", "min": -1, "max": 1, "default": 0.15, "description": "重力"},
+        "Resistance": {"type": "number", "min": 0, "max": 1, "default": 0, "description": "阻力"},
+        "Direction": {"type": "number", "min": 0, "max": 360, "default": 90, "description": "方向"},
+        "Extra": {"type": "number", "min": 0, "max": 2, "default": 1, "description": "额外参数"},
+        "Particle Type": {"type": "enum", "values": ["Line", "Star", "Shimmer", "Faded Sphere", "Ghosy Sphere", "Bubble", "Lens", "Motion Polygon", "Lens Convex"], "default": "Lens", "description": "粒子类型"},
+        "Birth Size": {"type": "number", "min": 0, "max": 1, "default": 0.1, "description": "出生大小"},
+        "Death Size": {"type": "number", "min": 0, "max": 1, "default": 0.3, "description": "死亡大小"},
+        "Size Variation": {"type": "number", "min": 0, "max": 1, "default": 0.5, "description": "大小变化"},
+        "Birth Color": {"type": "color", "default": [1.0, 1.0, 1.0, 1.0], "description": "出生颜色"},
+        "Death Color": {"type": "color", "default": [1.0, 0.5, 0.0, 1.0], "description": "死亡颜色"},
+        "Color Map": {"type": "enum", "values": ["Birth to Death", "Birth Size Death", "Bounce", "Tent"], "default": "Birth to Death", "description": "颜色映射"}
+      },
+      "usage_scenarios": ["粒子特效", "空间粒子", "星空效果", "尘埃效果", "魔法特效"],
+      "presets": [
+        {"name": "星空", "params": {"Particle Type": "Lens", "Birth Rate": 0.5, "Longevity (sec)": 5, "Gravity": 0, "Velocity": 0.1}, "description": "星空中的闪烁星星"},
+        {"name": "尘埃粒子", "params": {"Particle Type": "Faded Sphere", "Birth Rate": 2, "Gravity": 0.05, "Velocity": 0.1}, "description": "空气中的尘埃"},
+        {"name": "魔法火花", "params": {"Particle Type": "Star", "Birth Rate": 3, "Gravity": 0.2, "Velocity": 0.5}, "description": "魔法火花效果"}
+      ]
+    },
+    "Saber": {
+      "match_name": "VC SaberFX",
+      "category": "light",
+      "plugin_package": "Video Copilot",
+      "description": "Saber 光剑效果，创建能量光束和发光边缘",
+      "params": {
+        "Glow Color": {"type": "color", "default": [0.0, 0.5, 1.0, 1.0], "description": "发光颜色"},
+        "Core Color": {"type": "color", "default": [1.0, 1.0, 1.0, 1.0], "description": "核心颜色"},
+        "Core Size": {"type": "number", "min": 0, "max": 100, "default": 5, "description": "核心宽度"},
+        "Glow Size": {"type": "number", "min": 0, "max": 500, "default": 30, "description": "发光大小"},
+        "Glow Intensity": {"type": "number", "min": 0, "max": 10, "default": 2.0, "description": "发光强度"},
+        "Blend Mode": {"type": "enum", "values": ["Normal", "Add", "Screen", "Lighten"], "default": "Screen", "description": "混合模式"}
+      },
+      "usage_scenarios": ["光剑效果", "能量光束", "文字发光", "描边光效", "科幻特效"],
+      "presets": [
+        {"name": "蓝色光剑", "params": {"Glow Color": [0.0, 0.5, 1.0, 1.0], "Core Size": 5, "Glow Size": 30}, "description": "经典蓝色光剑"},
+        {"name": "红色光剑", "params": {"Glow Color": [1.0, 0.0, 0.0, 1.0], "Core Size": 6, "Glow Size": 35}, "description": "红色光剑"},
+        {"name": "绿色能量", "params": {"Glow Color": [0.0, 1.0, 0.3, 1.0], "Core Size": 4, "Glow Size": 25}, "description": "绿色能量光束"}
+      ]
+    },
+    "Optical Flares": {
+      "match_name": "VC Optical Flares",
+      "category": "light",
+      "plugin_package": "Video Copilot",
+      "description": "Optical Flares 镜头光斑，专业级镜头光晕效果",
+      "params": {
+        "Brightness": {"type": "number", "min": 0, "max": 300, "default": 100, "description": "亮度"},
+        "Scale": {"type": "number", "min": 0, "max": 500, "default": 100, "description": "缩放"},
+        "Position XY": {"type": "point", "default": [50, 50], "description": "位置"},
+        "Color": {"type": "color", "default": [1.0, 0.9, 0.7, 1.0], "description": "颜色"},
+        "Flicker": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "闪烁"},
+        "Preset": {"type": "string", "default": "Default", "description": "预设名称"}
+      },
+      "usage_scenarios": ["镜头光晕", "光效增强", "电影感光效", "转场光效", "科幻特效"],
+      "presets": [
+        {"name": "默认光斑", "params": {"Preset": "Default", "Brightness": 100}, "description": "默认镜头光斑"},
+        {"name": "温暖日光", "params": {"Preset": "Sunlight", "Brightness": 120, "Color": [1.0, 0.85, 0.6, 1.0]}, "description": "温暖的日光"},
+        {"name": "变形镜头", "params": {"Preset": "Anamorphic", "Brightness": 150}, "description": "变形宽银幕镜头光"}
+      ]
+    },
+    "Twixtor": {
+      "match_name": "REVisionFX Twixtor",
+      "category": "utility",
+      "plugin_package": "REVision FX",
+      "description": "Twixtor 超级慢动作，高质量时间重映射效果",
+      "params": {
+        "Speed": {"type": "number", "min": 0.01, "max": 1000, "default": 50, "description": "速度(%)"},
+        "Frame Rate": {"type": "number", "min": 1, "max": 240, "default": 24, "description": "帧率"},
+        "Interpolation": {"type": "enum", "values": ["Warp+Nearest", "Warped", "Nearest", "Frame Mix"], "default": "Warped", "description": "插值方式"},
+        "Motion Sensitivity": {"type": "number", "min": 0, "max": 100, "default": 50, "description": "运动敏感度"},
+        "Frame Blending": {"type": "boolean", "default": true, "description": "帧混合"}
+      },
+      "usage_scenarios": ["慢动作", "速度 ramp", "时间扭曲", "帧率转换", "高速摄影"],
+      "presets": [
+        {"name": "1/2 速度", "params": {"Speed": 50, "Interpolation": "Warped"}, "description": "一半速度慢动作"},
+        {"name": "1/4 速度", "params": {"Speed": 25, "Interpolation": "Warped"}, "description": "四分之一速度"},
+        {"name": "超慢动作", "params": {"Speed": 10, "Interpolation": "Warped", "Motion Sensitivity": 70}, "description": "超慢动作效果"}
+      ]
+    },
+    "Magic Bullet Looks": {
+      "match_name": "Magic Bullet Looks",
+      "category": "color",
+      "plugin_package": "Red Giant Magic Bullet",
+      "description": "Magic Bullet Looks 电影级调色，完整的调色工作流",
+      "params": {
+        "Look": {"type": "string", "default": "Default", "description": "调色预设名"},
+        "Strength": {"type": "number", "min": 0, "max": 100, "default": 100, "description": "强度"},
+        "Subject": {"type": "string", "default": "", "description": "主体遮罩"},
+        "Matte": {"type": "string", "default": "", "description": "遮罩类型"},
+        "Diffusion": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "扩散"},
+        "Grain": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "颗粒"},
+        "Vignette": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "暗角"}
+      },
+      "usage_scenarios": ["电影级调色", "风格化调色", "LUT应用", "肤色美化", "胶片模拟"],
+      "presets": [
+        {"name": "电影感", "params": {"Look": "Cinematic", "Strength": 100, "Grain": 20, "Vignette": 30}, "description": "经典电影调色"},
+        {"name": "Teal & Orange", "params": {"Look": "TealOrange", "Strength": 80}, "description": "青橙色调"},
+        {"name": "复古胶片", "params": {"Look": "VintageFilm", "Strength": 70, "Grain": 40}, "description": "复古胶片效果"}
+      ]
+    },
+    "BCC Lens Flare": {
+      "match_name": "BCC Lens Flare",
+      "category": "light",
+      "plugin_package": "Boris Continuum",
+      "description": "BCC 镜头光斑，Boris Continuum 的光晕效果",
+      "params": {
+        "Flare Type": {"type": "enum", "values": ["Standard", "Anamorphic", "Chromatic", "CinemaScope"], "default": "Standard", "description": "光斑类型"},
+        "Intensity": {"type": "number", "min": 0, "max": 200, "default": 100, "description": "强度"},
+        "Position": {"type": "point", "default": [50, 50], "description": "位置"},
+        "Color": {"type": "color", "default": [1.0, 0.9, 0.7, 1.0], "description": "颜色"},
+        "Streaks": {"type": "number", "min": 0, "max": 100, "default": 50, "description": "条纹"},
+        "Glow": {"type": "number", "min": 0, "max": 100, "default": 50, "description": "发光"}
+      },
+      "usage_scenarios": ["镜头光晕", "光效增强", "电影感光效", "转场光效"],
+      "presets": [
+        {"name": "标准光斑", "params": {"Flare Type": "Standard", "Intensity": 100}, "description": "标准镜头光斑"},
+        {"name": "变形镜头", "params": {"Flare Type": "Anamorphic", "Intensity": 120, "Streaks": 80}, "description": "变形宽银幕光斑"}
+      ]
+    },
+    "Sapphire LensFlare": {
+      "match_name": "S_LensFlare",
+      "category": "light",
+      "plugin_package": "Sapphire",
+      "description": "Sapphire 镜头光斑，高品质光学镜头光晕",
+      "params": {
+        "Brightness": {"type": "number", "min": 0, "max": 200, "default": 100, "description": "亮度"},
+        "Flare": {"type": "number", "min": 0, "max": 100, "default": 50, "description": "光斑"},
+        "Position": {"type": "point", "default": [50, 50], "description": "位置"},
+        "Color": {"type": "color", "default": [1.0, 0.95, 0.85, 1.0], "description": "颜色"},
+        "Hue Shift": {"type": "number", "min": -180, "max": 180, "default": 0, "description": "色相偏移"},
+        "Saturation": {"type": "number", "min": 0, "max": 200, "default": 100, "description": "饱和度"}
+      },
+      "usage_scenarios": ["镜头光晕", "光效增强", "电影感光效", "高质量光效"],
+      "presets": [
+        {"name": "电影镜头", "params": {"Brightness": 100, "Flare": 60}, "description": "电影感镜头光斑"},
+        {"name": "暖金调", "params": {"Color": [1.0, 0.85, 0.6, 1.0], "Brightness": 120}, "description": "温暖的金色光斑"}
+      ]
+    },
+    "Red Giant Universe": {
+      "match_name": "Universe VHS",
+      "category": "stylize",
+      "plugin_package": "Red Giant Universe",
+      "description": "Red Giant Universe VHS 效果，复古录像带风格",
+      "params": {
+        "Amount": {"type": "number", "min": 0, "max": 100, "default": 50, "description": "效果强度"},
+        "Glitches": {"type": "number", "min": 0, "max": 100, "default": 30, "description": "故障"},
+        "Scanlines": {"type": "number", "min": 0, "max": 100, "default": 40, "description": "扫描线"},
+        "Color Bleeding": {"type": "number", "min": 0, "max": 100, "default": 35, "description": "颜色渗透"},
+        "Noise": {"type": "number", "min": 0, "max": 100, "default": 25, "description": "噪点"},
+        "Tracking": {"type": "number", "min": 0, "max": 100, "default": 20, "description": "跟踪抖动"}
+      },
+      "usage_scenarios": ["复古效果", "VHS录像带", "故障艺术", "怀旧风格", "音乐MV"],
+      "presets": [
+        {"name": "轻微VHS", "params": {"Amount": 30, "Glitches": 10, "Scanlines": 30}, "description": "轻微的VHS效果"},
+        {"name": "经典VHS", "params": {"Amount": 60, "Glitches": 30, "Scanlines": 50, "Noise": 30}, "description": "经典录像带效果"},
+        {"name": "损坏磁带", "params": {"Amount": 90, "Glitches": 60, "Scanlines": 70, "Tracking": 50}, "description": "严重损坏的磁带效果"}
+      ]
+    },
+    "Trapcode Particular": {
+      "match_name": "TC Particular",
+      "category": "particle",
+      "plugin_package": "Red Giant Trapcode",
+      "description": "Trapcode Particular 粒子系统，专业级3D粒子效果",
+      "params": {
+        "Particles/Sec": {"type": "number", "min": 0, "max": 10000, "default": 100, "description": "每秒粒子数"},
+        "Emitter Type": {"type": "enum", "values": ["Point", "Box", "Sphere", "Grid", "Light", "Layer", "Layer Grid"], "default": "Point", "description": "发射器类型"},
+        "Position XY": {"type": "point", "default": [50, 50], "description": "XY位置"},
+        "Position Z": {"type": "number", "min": -10000, "max": 10000, "default": 0, "description": "Z位置"},
+        "Velocity": {"type": "number", "min": 0, "max": 1000, "default": 100, "description": "速度"},
+        "Velocity Random": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "速度随机"},
+        "Gravity": {"type": "number", "min": -1000, "max": 1000, "default": 50, "description": "重力"},
+        "Physics Time Factor": {"type": "number", "min": 0, "max": 10, "default": 1, "description": "物理时间因子"},
+        "Particle Type": {"type": "enum", "values": ["Sphere", "Glow Sphere", "Star", "Cloudlet", "Streaklet", "Sprite", "Textured Polygon", "Textured Sprite", "Textured Polygon II", "Sprite Colorize", "Sprite Fill", "Glow Sphere (No DOF)", "Sphere Feather", "Cloud", "Smoke"], "default": "Glow Sphere", "description": "粒子类型"},
+        "Life [sec]": {"type": "number", "min": 0, "max": 60, "default": 3, "description": "生命周期(秒)"},
+        "Life Random": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "生命随机"},
+        "Size": {"type": "number", "min": 0, "max": 1000, "default": 5, "description": "大小"},
+        "Size Random": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "大小随机"},
+        "Set Color": {"type": "enum", "values": ["At Start", "Over Life", "Random From Gradient", "Random From Start Color"], "default": "At Start", "description": "颜色设置"},
+        "Color": {"type": "color", "default": [1.0, 0.8, 0.5, 1.0], "description": "颜色"},
+        "Opacity": {"type": "number", "min": 0, "max": 100, "default": 100, "description": "不透明度"},
+        "Transfer Mode": {"type": "enum", "values": ["Normal", "Add", "Screen", "Lighten", "Normal/Add Dissolve"], "default": "Add", "description": "传输模式"}
+      },
+      "usage_scenarios": ["粒子特效", "爆炸效果", "烟雾模拟", "雨雪效果", "魔法特效", "火花效果"],
+      "presets": [
+        {"name": "火焰爆炸", "params": {"Particles/Sec": 500, "Particle Type": "Cloudlet", "Gravity": 100, "Size": 15, "Set Color": "Over Life", "Transfer Mode": "Add"}, "description": "火焰爆炸效果"},
+        {"name": "星光粒子", "params": {"Particles/Sec": 50, "Particle Type": "Glow Sphere", "Gravity": 0, "Size": 3, "Transfer Mode": "Add"}, "description": "星光闪烁粒子"},
+        {"name": "烟雾", "params": {"Particles/Sec": 100, "Particle Type": "Cloudlet", "Gravity": -20, "Size": 30, "Opacity": 50, "Transfer Mode": "Normal"}, "description": "烟雾效果"},
+        {"name": "雨滴", "params": {"Particles/Sec": 500, "Particle Type": "Streaklet", "Emitter Type": "Box", "Velocity": 500, "Gravity": 500, "Size": 2, "Transfer Mode": "Normal"}, "description": "下雨效果"}
+      ]
+    },
+    "Camera Lens Blur": {
+      "match_name": "ADBE Camera Lens Blur",
+      "category": "blur",
+      "plugin_package": "Adobe Built-in",
+      "description": "相机镜头模糊，模拟真实相机的景深和散景效果",
+      "params": {
+        "Blur Radius": {"type": "number", "min": 0, "max": 1000, "default": 20, "description": "模糊半径"},
+        "Iris Properties": {
+          "Iris Shape": {"type": "enum", "values": ["Polygon", "Circle"], "default": "Polygon"},
+          "Iris Number of Sides": {"type": "number", "min": 3, "max": 16, "default": 6, "description": "边数"},
+          "Iris Rotation": {"type": "number", "min": -180, "max": 180, "default": 0, "description": "旋转"},
+          "Iris Roundness": {"type": "number", "min": 0, "max": 100, "default": 50, "description": "圆度"},
+          "Iris Aspect Ratio": {"type": "number", "min": 0, "max": 100, "default": 0, "description": "宽高比"},
+          "description": "光圈属性"
+        },
+        "Blur Center": {"type": "point", "default": [50, 50], "description": "模糊中心"},
+        "Channel Blur": {"type": "enum", "values": ["RGBA", "RGB", "Alpha"], "default": "RGB", "description": "通道模糊"},
+        "Repeat Edge Pixels": {"type": "boolean", "default": false, "description": "重复边缘像素"}
+      },
+      "usage_scenarios": ["景深效果", "散景效果", "背景虚化", "电影感", "镜头模拟"],
+      "presets": [
+        {"name": "轻微虚化", "params": {"Blur Radius": 5}, "description": "轻微的背景虚化"},
+        {"name": "标准散景", "params": {"Blur Radius": 25, "Iris Shape": "Polygon", "Iris Number of Sides": 6}, "description": "标准六边形散景"},
+        {"name": "圆形散景", "params": {"Blur Radius": 40, "Iris Shape": "Circle"}, "description": "圆形散景效果"},
+        {"name": "电影光圈", "params": {"Blur Radius": 30, "Iris Shape": "Polygon", "Iris Number of Sides": 8, "Iris Roundness": 80}, "description": "电影级光圈形状"}
+      ]
+    },
+    "Fractal Noise": {
+      "match_name": "ADBE Fractal Noise",
+      "category": "generate",
+      "plugin_package": "Adobe Built-in",
+      "description": "分形噪波，生成有机的噪波和纹理图案",
+      "params": {
+        "Fractal Type": {"type": "enum", "values": ["Basic", "Turbulent Smooth", "Turbulent Basic", "Turbulent", "Dynamic Progressive", "Dynamic Twist", "Subscale", "Subscale Noise", "Threads", "Max", "Stratus", "Rocky", "Terrain", "Swirly", "Wispy", "Turbulent Sharp", "Dynamic Sharp", "Vortex", "Splats"], "default": "Dynamic Progressive", "description": "分形类型"},
+        "Noise Type": {"type": "enum", "values": ["Soft Linear", "Linear", "Spline", "Soft Linear Prime", "Linear Prime", "Spline Prime"], "default": "Soft Linear", "description": "噪波类型"},
+        "Contrast": {"type": "number", "min": 0, "max": 500, "default": 100, "description": "对比度"},
+        "Brightness": {"type": "number", "min": -100, "max": 100, "default": 0, "description": "亮度"},
+        "Scale": {"type": "number", "min": 0, "max": 1000, "default": 100, "description": "缩放"},
+        "Offset (Turbulence)": {"type": "point", "default": [0, 0], "description": "偏移"},
+        "Complexity": {"type": "number", "min": 1, "max": 10, "default": 3, "description": "复杂度"},
+        "Evolution": {"type": "number", "min": 0, "max": 360, "default": 0, "description": "演化"},
+        "Evolution Options": {
+          "Cycle Evolution": {"type": "boolean", "default": false, "description": "循环演化"},
+          "Cycle (in Revolutions)": {"type": "number", "min": 1, "max": 100, "default": 1, "description": "循环周期"},
+          "Random Seed": {"type": "number", "min": 0, "max": 10000, "default": 0, "description": "随机种子"},
+          "description": "演化选项"
+        }
+      },
+      "usage_scenarios": ["噪波纹理", "云烟雾", "特效元素", "置换贴图", "背景生成", "故障效果"],
+      "presets": [
+        {"name": "云朵", "params": {"Fractal Type": "Turbulent Smooth", "Noise Type": "Soft Linear", "Contrast": 100, "Brightness": 0, "Scale": 200, "Complexity": 5}, "description": "柔和的云朵效果"},
+        {"name": "烟雾", "params": {"Fractal Type": "Turbulent Smooth", "Noise Type": "Spline", "Contrast": 80, "Brightness": 10, "Scale": 150, "Complexity": 4}, "description": "烟雾效果"},
+        {"name": "等离子体", "params": {"Fractal Type": "Turbulent", "Noise Type": "Spline", "Contrast": 150, "Brightness": -20, "Scale": 50, "Complexity": 3}, "description": "等离子体效果"},
+        {"name": "大理石纹理", "params": {"Fractal Type": "Threads", "Noise Type": "Linear", "Contrast": 200, "Brightness": -50, "Scale": 80, "Complexity": 6}, "description": "大理石纹理"}
+      ]
+    },
+    "CC Bend It": {
+      "match_name": "ADBE CC Bend It",
+      "category": "distort",
+      "plugin_package": "Adobe Cycore FX",
+      "description": "CC Bend It 弯曲扭曲效果，将画面沿直线弯曲",
+      "params": {
+        "Bend": {"type": "number", "min": -1000, "max": 1000, "default": 50, "description": "弯曲强度"},
+        "Adjust Distortion": {"type": "number", "min": 0, "max": 100, "default": 50, "description": "调整扭曲"},
+        "Render Precisely": {"type": "boolean", "default": false, "description": "精确渲染"},
+        "Start Point": {"type": "point", "default": [0, 50], "description": "起点"},
+        "End Point": {"type": "point", "default": [100, 50], "description": "终点"}
+      },
+      "usage_scenarios": ["弯曲变形", "弹性动画", "角色动画", "卡通效果"],
+      "presets": [
+        {"name": "轻微弯曲", "params": {"Bend": 20}, "description": "轻微的弯曲效果"},
+        {"name": "强烈弯曲", "params": {"Bend": 100}, "description": "强烈的弯曲效果"}
+      ]
+    }
+  }
+}

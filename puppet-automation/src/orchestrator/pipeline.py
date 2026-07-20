@@ -76,21 +76,41 @@ class Phase1Preprocess(PhaseBase):
         try:
             logger.info(f"[Phase1] Starting preprocessing for job {job.job_id}")
 
-            metadata = await self._probe_video(job.input_video)
-            scenes = await self._detect_scenes(job.input_video)
-            faces = await self._detect_faces(job.input_video) if job.enable_face_puppet else []
-            poses = await self._estimate_pose(job.input_video) if job.enable_body_puppet else []
-            audio = await self._analyze_audio(job.input_video) if job.enable_audio else None
+            # CRITICAL FIX: 校验视频路径，防止路径遍历攻击
+            video_path = Path(job.input_video).resolve()
+            if not video_path.exists():
+                raise ValueError(f"视频文件不存在: {video_path}")
+            if not video_path.is_absolute():
+                raise ValueError(f"视频路径必须是绝对路径: {video_path}")
+            # 禁止访问系统敏感目录
+            forbidden_paths = [
+                Path("C:/Windows"),
+                Path("C:/Program Files"),
+                Path("D:/Windows"),
+                Path("/etc"),
+                Path("/root"),
+            ]
+            for forbidden in forbidden_paths:
+                if str(video_path).startswith(str(forbidden)):
+                    raise PermissionError(f"禁止访问系统目录: {video_path}")
+
+            metadata = await self._probe_video(str(video_path))
+            scenes = await self._detect_scenes(str(video_path))
+            faces = await self._detect_faces(str(video_path)) if job.enable_face_puppet else []
+            poses = await self._estimate_pose(str(video_path)) if job.enable_body_puppet else []
+            audio = await self._analyze_audio(str(video_path)) if job.enable_audio else None
 
             output_dir = self.work_dir / "phase1"
             output_dir.mkdir(parents=True, exist_ok=True)
 
             # Save analysis results
+            # CRITICAL FIX: Save ALL frames to avoid data inconsistency
+            # Downstream stages depend on total_* counts matching actual array lengths
             analysis_data = {
                 "metadata": metadata.model_dump() if metadata else None,
                 "scenes": [s.model_dump() for s in scenes],
-                "faces": [f.model_dump() for f in faces[:10]],
-                "poses": [p.model_dump() for p in poses[:10]],
+                "faces": [f.model_dump() for f in faces],  # FIX: 移除截断，保存所有帧
+                "poses": [p.model_dump() for p in poses],  # FIX: 移除截断，保存所有帧
                 "audio": audio.model_dump() if audio else None,
                 "total_scenes": len(scenes),
                 "total_faces_frames": len(faces),
@@ -502,10 +522,20 @@ class Phase2Keying(PhaseBase):
             alpha_writer = cv2.VideoWriter(alpha_path, fourcc, fps, (width, height), 0)
 
             frame_count = 0
-            while True:
+            # CRITICAL FIX: 添加超时和最大迭代限制，防止无限循环
+            max_iterations = max_frames * 2 if max_frames > 0 else 100000
+            iteration = 0
+            while iteration < max_iterations:
+                iteration += 1
+
                 ret, frame = cap.read()
                 if not ret:
                     break
+                # CRITICAL FIX: 额外检查 frame 是否为 None（防止 OpenCV bug）
+                if frame is None:
+                    logger.warning("[Phase2] cap.read() 返回 frame=None，停止处理")
+                    break
+
                 # 可配置帧数限制（0 表示不限制）
                 if max_frames > 0 and frame_count >= max_frames:
                     logger.info(f"[Phase2] rembg 达到 max_frames 上限 ({max_frames})，停止处理")
@@ -523,6 +553,13 @@ class Phase2Keying(PhaseBase):
                     alpha_writer.write(alpha)
 
                 frame_count += 1
+
+            # CRITICAL FIX: 检查是否因迭代上限退出（可能是无限循环）
+            if iteration >= max_iterations:
+                logger.error(
+                    f"[Phase2] rembg 达到最大迭代上限 ({max_iterations})，"
+                    f"已处理 {frame_count} 帧，可能存在无限循环"
+                )
 
             cap.release()
             fg_writer.release()

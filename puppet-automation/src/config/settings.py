@@ -95,6 +95,15 @@ class Settings(BaseSettings):
     # Adobe Media Encoder（与 AE 2025 同版本系列，保证队列直发兼容）
     media_encoder_path: Path = Path("D:/Me/Adobe Media Encoder 2025/Adobe Media Encoder.exe")
 
+    # Adobe Premiere Pro（剪辑节奏 + 动态链接）
+    premiere_path: Path = Path("C:/Program Files/Adobe/Adobe Premiere Pro 2025/Adobe Premiere Pro.exe")
+
+    # Adobe Photoshop（素材预处理 + PSD分层 + LUT生成）
+    photoshop_path: Path = Path("C:/Program Files/Adobe/Adobe Photoshop 2025/Photoshop.exe")
+
+    # Adobe Audition（AI降噪 + 响度统一 + 音频修复）
+    audition_path: Path = Path("C:/Program Files/Adobe/Adobe Audition 2025/Adobe Audition.exe")
+
     # FFmpeg: prefer system install, fallback to imageio-ffmpeg binary
     # 修复 P0-3：原 C:/tools/ffmpeg/bin/ 路径不存在，统一改为实际安装路径 C:/ffmpeg/bin/
     ffmpeg_path: Path = Path("C:/ffmpeg/bin/ffmpeg.exe")
@@ -124,6 +133,18 @@ class Settings(BaseSettings):
     mcp_gateway_host: str = "0.0.0.0"
     mcp_gateway_port: int = 3000
     mcp_auth_token: str = "change-me-in-production"
+
+    # Premiere MCP Bridge（文件轮询通信）
+    pr_bridge_dir: Path = project_root / ".pr-mcp-bridge"
+    pr_bridge_timeout: int = 15
+    pr_bridge_poll_interval: float = 0.3
+    pr_bridge_signature_enabled: bool = False
+
+    # Photoshop MCP Bridge（文件轮询通信）
+    ps_bridge_dir: Path = project_root / ".ps-mcp-bridge"
+    ps_bridge_timeout: int = 15
+    ps_bridge_poll_interval: float = 0.3
+    ps_bridge_signature_enabled: bool = False
 
     # GPU
     cuda_visible_devices: str = "0"

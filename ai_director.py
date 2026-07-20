@@ -245,14 +245,15 @@ class ScriptGenerator:
     """用 LLM + 知识库生成剪辑剧本"""
 
     def __init__(self):
-        # 优先使用火山方舟 ARK API
+        # DuckMiss Claude (主力 - 更高质量)
+        self.duck_key = ENV.get("DUCK_MISS_API_KEY", "")
+        self.duck_key_backup = ENV.get("DUCK_MISS_API_KEY_BACKUP", "")
+        self.duck_url = ENV.get("DUCK_MISS_BASE_URL", "https://duckmiss.site/v1")
+        self.duck_model = ENV.get("DUCK_MISS_DEFAULT_MODEL", "claude-sonnet-4-6")
+        # ARK (备用)
         self.ark_key = ENV.get("DOUBAO_API_KEY", "")
         self.ark_url = "https://ark.cn-beijing.volces.com/api/v3"
         self.ark_model = ENV.get("ARK_MODEL_FLASH", "deepseek-v4-flash-260425")
-        # Fallback: DuckMiss
-        self.duck_key = ENV.get("DUCK_MISS_API_KEY", "")
-        self.duck_url = ENV.get("DUCK_MISS_BASE_URL", "https://duckmiss.site/v1")
-        self.duck_model = ENV.get("DUCK_MISS_FAST_MODEL", "claude-haiku-4-5-20251001")
 
     def generate_script(self, user_prompt: str,
                         material_analyses: List[Dict],
@@ -343,15 +344,20 @@ class ScriptGenerator:
             return self._fallback_script(user_prompt, material_analyses, style)
 
     def _call_llm(self, system: str, user: str) -> Optional[Dict]:
-        """调用 LLM API (ARK 优先, DuckMiss 备选)"""
+        """调用 LLM API (DuckMiss Claude 优先, ARK 备选)"""
+        # 尝试 DuckMiss (Claude - 更高质量)
+        if self.duck_key:
+            result = self._call_duckmiss(system, user, self.duck_key)
+            if result:
+                return result
+        # 尝试 DuckMiss 备用 Key
+        if self.duck_key_backup:
+            result = self._call_duckmiss(system, user, self.duck_key_backup)
+            if result:
+                return result
         # 尝试 ARK API
         if self.ark_key:
             result = self._call_ark(system, user)
-            if result:
-                return result
-        # 尝试 DuckMiss
-        if self.duck_key:
-            result = self._call_duckmiss(system, user)
             if result:
                 return result
         log("  所有 LLM API 不可用，使用 fallback", "WARN")
@@ -390,14 +396,16 @@ class ScriptGenerator:
             log(f"  ARK API 异常: {e}", "WARN")
             return None
     
-    def _call_duckmiss(self, system: str, user: str) -> Optional[Dict]:
-        """DuckMiss API"""
+    def _call_duckmiss(self, system: str, user: str, key: str = None) -> Optional[Dict]:
+        """DuckMiss API (Claude)"""
         try:
             import urllib.request
+            api_key = key or self.duck_key
             url = f"{self.duck_url}/chat/completions"
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.duck_key}",
+                "Authorization": f"Bearer {api_key}",
+                "User-Agent": "Mozilla/5.0",
             }
             data = json.dumps({
                 "model": self.duck_model,
@@ -724,15 +732,21 @@ class ScriptToJSXTranslator:
         return jsx_code
 
     def _map_effect_name(self, name: str) -> str:
-        """效果名映射: 显示名 → AE matchName"""
+        """效果名映射: 显示名 → AE matchName（使用 effect_registry + 知识库）"""
+        try:
+            from effect_registry import get_effect_matchname, KEYWORD_TO_EFFECT_MAP
+            ae_fx = get_effect_matchname(name)
+            if ae_fx:
+                return ae_fx
+        except Exception:
+            pass
+
         effect_map = {
             "Lumetri Color": "ADBE Lumetri",
             "Glow": "ADBE Glo2",
             "Gaussian Blur": "ADBE Gaussian Blur 2",
             "Brightness & Contrast": "ADBE Brightness & Contrast 2",
-            "ADBE Brightness & Contrast 2": "ADBE Brightness & Contrast 2",
             "Color Balance": "ADBE Color Balance",
-            "ADBE Color Balance": "ADBE Color Balance",
             "Vignette": "ADBE Vignette",
             "Noise": "ADBE Noise",
             "Sharpen": "ADBE Sharpen",
@@ -742,7 +756,6 @@ class ScriptToJSXTranslator:
             "Turbulent Displace": "ADBE ATRC",
             "CC Light Sweep": "CC Light Sweep",
             "Particular": "Particular",
-            # 非真实效果，跳过
             "slow_motion": "",
             "reverse": "",
         }
@@ -851,12 +864,29 @@ class AIDirector:
         self.script_gen = ScriptGenerator()
         self.translator = ScriptToJSXTranslator()
         self.executor = AEExecutor()
+        # === 新增: 素材搜索与AI生成引擎 ===
+        self.material_searcher = None  # 延迟初始化
+        self.aigc_generator = None     # 延迟初始化
         # 3D 舞台编排器 (延迟初始化)
         self._stage3d = None
         # 风格迁移引擎 (延迟初始化)
         self._style_migrator = None
         # 音频剪辑引擎 (延迟初始化)
         self._audio_engine = None
+
+    def _get_material_searcher(self):
+        """获取素材搜索器 (延迟初始化)"""
+        if self.material_searcher is None:
+            from material_searcher import MaterialSearcher
+            self.material_searcher = MaterialSearcher(self.output_dir / "materials")
+        return self.material_searcher
+
+    def _get_aigc_generator(self):
+        """获取AI生成器 (延迟初始化)"""
+        if self.aigc_generator is None:
+            from aigc_generator import AIGCGenerator
+            self.aigc_generator = AIGCGenerator(self.output_dir / "materials")
+        return self.aigc_generator
 
     def _get_stage3d(self, w: int, h: int, dur: float, fps: float):
         if self._stage3d is None:
@@ -892,23 +922,73 @@ class AIDirector:
         print(f"  风格: {style}")
         print("=" * 60)
 
-        # ── Phase 1: 素材搜集 ──
-        print("\n--- Phase 1: 素材搜集 ---")
+        # ── Phase 1: 素材搜集 (新工作流: 搜索下载 → 筛选 → AI补充) ──
+        print("\n--- Phase 1: 素材搜集 (搜索+AI补充) ---")
         material_files = []
+
+        # Step 1: 处理用户提供的URL和本地路径
         if material_urls:
             results = self.collector.collect_from_urls(material_urls)
             material_files.extend([r["path"] for r in results if r.get("success") and r.get("path")])
         if material_paths:
             results = self.collector.collect_from_local(material_paths)
             material_files.extend([r["path"] for r in results if r.get("success")])
-        if not material_files:
-            log("无外部素材，扫描本地素材库...", "WARN")
-            local = self.collector.scan_local_library()
-            material_files = [v["path"] for v in local[:5]]
 
+        # Step 2: 主动搜索下载素材 (核心改进)
+        min_materials = 3  # 最少需要的素材数量
+        if len(material_files) < min_materials:
+            log(f"用户素材不足 ({len(material_files)}/{min_materials})，启动主动搜索...")
+            try:
+                searcher = self._get_material_searcher()
+                search_results = searcher.search(
+                    user_prompt=user_prompt,
+                    material_urls=material_urls,
+                    min_results=min_materials,
+                    max_per_source=3,
+                )
+                # 添加搜索到的素材
+                for r in search_results:
+                    if r.get("success") and r.get("path"):
+                        material_files.append(r["path"])
+                log(f"搜索完成，当前素材: {len(material_files)} 个")
+            except Exception as e:
+                log(f"素材搜索失败(非致命): {e}", "WARN")
+
+        # Step 3: 扫描本地素材库作为补充
+        if len(material_files) < min_materials:
+            log("扫描本地素材库...")
+            local = self.collector.scan_local_library()
+            for v in local[:min_materials - len(material_files)]:
+                material_files.append(v["path"])
+
+        # Step 4: AI生成补充素材 (当真实素材仍然不足时)
+        if len(material_files) < min_materials:
+            missing = min_materials - len(material_files)
+            log(f"真实素材仍不足，启动AI生成补充 ({missing} 个)...")
+            try:
+                generator = self._get_aigc_generator()
+                aigc_results = generator.generate_supplementary(
+                    user_prompt=user_prompt,
+                    missing_count=missing,
+                    style=style,
+                    material_type="video",
+                )
+                for r in aigc_results:
+                    if r.get("success") and r.get("path"):
+                        material_files.append(r["path"])
+                        log(f"  AI素材已添加: {Path(r['path']).name}")
+            except Exception as e:
+                log(f"AI生成失败(非致命): {e}", "WARN")
+
+        # 最终报告
         report["phases"]["collection"] = {
             "total": len(material_files),
             "files": [Path(f).name for f in material_files],
+            "sources": {
+                "user_provided": material_urls is not None or material_paths is not None,
+                "searched": len(material_files) > 0,
+                "aigc_supplemented": any("aigc_" in Path(f).name for f in material_files),
+            }
         }
         log(f"素材就绪: {len(material_files)} 个")
 

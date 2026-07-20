@@ -344,3 +344,247 @@ class ComfyUIEngine:
             if node_config.get("class_type") == class_type:
                 return node_id
         return None
+
+    # ============================================================
+    # 内置工作流模板（文生图 / 图生图 / ControlNet）
+    # ============================================================
+
+    def build_txt2img_workflow(
+        self,
+        prompt: str,
+        negative_prompt: str = "",
+        width: int = 1024,
+        height: int = 1024,
+        steps: int = 20,
+        cfg: float = 7.0,
+        sampler: str = "dpmpp_2m",
+        scheduler: str = "karras",
+        seed: int = -1,
+        batch_size: int = 1,
+        model: str = "sd_xl_base_1.0.safetensors",
+    ) -> dict[str, Any]:
+        """构建文生图工作流。"""
+        workflow = {
+            "1": {
+                "class_type": "CheckpointLoaderSimple",
+                "inputs": {"ckpt_name": model},
+            },
+            "2": {
+                "class_type": "CLIPTextEncode",
+                "inputs": {"text": prompt, "clip": ["1", 1]},
+            },
+            "3": {
+                "class_type": "CLIPTextEncode",
+                "inputs": {"text": negative_prompt, "clip": ["1", 1]},
+            },
+            "4": {
+                "class_type": "KSampler",
+                "inputs": {
+                    "seed": seed,
+                    "steps": steps,
+                    "cfg": cfg,
+                    "sampler_name": sampler,
+                    "scheduler": scheduler,
+                    "denoise": 1.0,
+                    "model": ["1", 0],
+                    "positive": ["2", 0],
+                    "negative": ["3", 0],
+                    "latent_image": ["5", 0],
+                },
+            },
+            "5": {
+                "class_type": "EmptyLatentImage",
+                "inputs": {"width": width, "height": height, "batch_size": batch_size},
+            },
+            "6": {
+                "class_type": "VAEDecode",
+                "inputs": {"samples": ["4", 0], "vae": ["1", 2]},
+            },
+            "7": {
+                "class_type": "SaveImage",
+                "inputs": {"filename_prefix": "txt2img", "images": ["6", 0]},
+            },
+        }
+        return workflow
+
+    def build_img2img_workflow(
+        self,
+        image_path: str,
+        prompt: str,
+        negative_prompt: str = "",
+        denoise: float = 0.7,
+        steps: int = 20,
+        cfg: float = 7.0,
+        sampler: str = "dpmpp_2m",
+        scheduler: str = "karras",
+        seed: int = -1,
+        model: str = "sd_xl_base_1.0.safetensors",
+    ) -> dict[str, Any]:
+        """构建图生图工作流。"""
+        workflow = {
+            "1": {
+                "class_type": "CheckpointLoaderSimple",
+                "inputs": {"ckpt_name": model},
+            },
+            "2": {
+                "class_type": "CLIPTextEncode",
+                "inputs": {"text": prompt, "clip": ["1", 1]},
+            },
+            "3": {
+                "class_type": "CLIPTextEncode",
+                "inputs": {"text": negative_prompt, "clip": ["1", 1]},
+            },
+            "4": {
+                "class_type": "LoadImage",
+                "inputs": {"image": image_path},
+            },
+            "5": {
+                "class_type": "VAEEncode",
+                "inputs": {"pixels": ["4", 0], "vae": ["1", 2]},
+            },
+            "6": {
+                "class_type": "KSampler",
+                "inputs": {
+                    "seed": seed,
+                    "steps": steps,
+                    "cfg": cfg,
+                    "sampler_name": sampler,
+                    "scheduler": scheduler,
+                    "denoise": denoise,
+                    "model": ["1", 0],
+                    "positive": ["2", 0],
+                    "negative": ["3", 0],
+                    "latent_image": ["5", 0],
+                },
+            },
+            "7": {
+                "class_type": "VAEDecode",
+                "inputs": {"samples": ["6", 0], "vae": ["1", 2]},
+            },
+            "8": {
+                "class_type": "SaveImage",
+                "inputs": {"filename_prefix": "img2img", "images": ["7", 0]},
+            },
+        }
+        return workflow
+
+    def build_controlnet_workflow(
+        self,
+        image_path: str,
+        prompt: str,
+        control_type: str = "canny",
+        negative_prompt: str = "",
+        strength: float = 1.0,
+        steps: int = 20,
+        cfg: float = 7.0,
+        seed: int = -1,
+        model: str = "sd_xl_base_1.0.safetensors",
+        control_net_model: str = "control-lora-canny-rank256.safetensors",
+    ) -> dict[str, Any]:
+        """构建 ControlNet 工作流。control_type: canny/depth/openpose/softedge/ipadapter"""
+        preprocessor_map = {
+            "canny": "Canny",
+            "depth": "DepthAnythingV2Preprocessor",
+            "openpose": "OpenPosePreprocessor",
+            "softedge": "SoftEdgePreprocessor",
+        }
+        preprocessor = preprocessor_map.get(control_type, "Canny")
+        workflow = {
+            "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": model}},
+            "2": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["1", 1]}},
+            "3": {"class_type": "CLIPTextEncode", "inputs": {"text": negative_prompt, "clip": ["1", 1]}},
+            "4": {"class_type": "LoadImage", "inputs": {"image": image_path}},
+            "5": {"class_type": preprocessor, "inputs": {"image": ["4", 0]}},
+            "6": {"class_type": "ControlNetLoader", "inputs": {"control_net_name": control_net_model}},
+            "7": {
+                "class_type": "ControlNetApply",
+                "inputs": {"strength": strength, "conditioning": ["2", 0], "control_net": ["6", 0], "image": ["5", 0]},
+            },
+            "8": {"class_type": "EmptyLatentImage", "inputs": {"width": 1024, "height": 1024, "batch_size": 1}},
+            "9": {
+                "class_type": "KSampler",
+                "inputs": {
+                    "seed": seed, "steps": steps, "cfg": cfg,
+                    "sampler_name": "dpmpp_2m", "scheduler": "karras", "denoise": 1.0,
+                    "model": ["1", 0], "positive": ["7", 0], "negative": ["3", 0], "latent_image": ["8", 0],
+                },
+            },
+            "10": {"class_type": "VAEDecode", "inputs": {"samples": ["9", 0], "vae": ["1", 2]}},
+            "11": {"class_type": "SaveImage", "inputs": {"filename_prefix": "controlnet", "images": ["10", 0]}},
+        }
+        return workflow
+
+    # ============================================================
+    # 便捷方法
+    # ============================================================
+
+    async def txt2img(self, prompt: str, output_dir: Optional[Path] = None, **kwargs: Any) -> EngineResult:
+        """文生图。"""
+        workflow = self.build_txt2img_workflow(prompt, **kwargs)
+        return await self.run_workflow(workflow, output_dir=output_dir)
+
+    async def img2img(
+        self, image_path: Path | str, prompt: str, output_dir: Optional[Path] = None, **kwargs: Any
+    ) -> EngineResult:
+        """图生图（自动上传图片）。"""
+        image_path = Path(image_path)
+        uploaded_name = await self.upload_image(image_path)
+        if not uploaded_name:
+            return EngineResult(success=False, error="图片上传失败")
+        workflow = self.build_img2img_workflow(uploaded_name, prompt, **kwargs)
+        return await self.run_workflow(workflow, output_dir=output_dir)
+
+    async def controlnet_generate(
+        self, image_path: Path | str, prompt: str, control_type: str = "canny",
+        output_dir: Optional[Path] = None, **kwargs: Any
+    ) -> EngineResult:
+        """ControlNet 生成。"""
+        image_path = Path(image_path)
+        uploaded_name = await self.upload_image(image_path)
+        if not uploaded_name:
+            return EngineResult(success=False, error="图片上传失败")
+        workflow = self.build_controlnet_workflow(uploaded_name, prompt, control_type=control_type, **kwargs)
+        return await self.run_workflow(workflow, output_dir=output_dir)
+
+    async def batch_generate(
+        self, prompts: list[str], output_dir: Optional[Path] = None, **kwargs: Any
+    ) -> list[EngineResult]:
+        """批量文生图。"""
+        results = []
+        for i, prompt in enumerate(prompts):
+            logger.info(f"[ComfyUI] 批量生成 {i+1}/{len(prompts)}: {prompt[:50]}...")
+            result = await self.txt2img(prompt, output_dir=output_dir, **kwargs)
+            results.append(result)
+        return results
+
+    async def list_models(self) -> list[str]:
+        """列出可用的 Checkpoint 模型。"""
+        try:
+            resp = await self.client.get(f"{self.base_url}/models/checkpoints")
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as e:
+            logger.warning(f"[ComfyUI] 获取模型列表失败: {e}")
+            return []
+
+    async def list_controlnets(self) -> list[str]:
+        """列出可用的 ControlNet 模型。"""
+        try:
+            resp = await self.client.get(f"{self.base_url}/models/controlnet")
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as e:
+            logger.warning(f"[ComfyUI] 获取 ControlNet 列表失败: {e}")
+            return []
+
+    def get_supported_features(self) -> dict[str, Any]:
+        """获取支持的功能清单。"""
+        return {
+            "txt2img": True,
+            "img2img": True,
+            "controlnet": ["canny", "depth", "openpose", "softedge", "ipadapter"],
+            "samplers": ["euler", "euler_ancestral", "dpmpp_2m", "dpmpp_sde", "dpmpp_2m_sde"],
+            "schedulers": ["normal", "karras", "exponential", "sgm_uniform"],
+            "batch": True,
+            "workflow_templates": True,
+        }

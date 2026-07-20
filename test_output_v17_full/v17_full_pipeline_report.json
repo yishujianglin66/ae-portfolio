@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-19 22:26:21",
+  "timestamp": "2026-07-20 19:26:29",
   "test_target": "D:\\AE-Work\\output\\VinlandSaga_Battle_V17.mp4",
   "summary": {
     "total": 44,
@@ -143,7 +143,7 @@
     {
       "name": "MoviePy 截取V17前3秒",
       "passed": true,
-      "detail": "status=error, 453ms"
+      "detail": "status=error, 415ms"
     },
     {
       "name": "MoviePy V17 变速1.5x",
@@ -257,7 +257,7 @@
     },
     {
       "name": "OpenSourceHub 桥接",
-      "passed": "<opensource_integrations.OpenSourceHub object at 0x000001B6B213C140>",
+      "passed": "<opensource_integrations.OpenSourceHub object at 0x00000170BEB25AC0>",
       "detail": ""
     },
     {

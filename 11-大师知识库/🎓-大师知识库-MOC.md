@@ -13,6 +13,9 @@ tags: [MOC, 大师, 讲师, 电影制作, 知识萃取]
 | 讲师 | 身份 | 入口 | 核心领域 |
 |------|------|------|---------|
 | **Jordy Vandeput** | Cinecom 创始人 · 270万订阅 | [[Jordy-Vandeput-总览]] | 创意剪辑 · VFX · 电影制作 · YouTube创作 |
+| **Peter McKinnon** | 摄影/剪辑大师 · 400万订阅 | [[Peter-McKinnon-电影感创作技法]] | 电影感 · 转场创意 · 调色 · B-Roll |
+| **Casey Neistat** | Vlog之父 · 1000万订阅 | [[Casey-Neistat-Vlog叙事剪辑大师]] | Vlog叙事 · 快节奏 · 故事驱动 · 跳切 |
+| **Devin Graham** | 极限运动视觉 · 800万订阅 | [[Devin-Graham-极限运动视觉叙事]] | 一镜到底 · 视觉奇观 · 精密编排 |
 
 ---
 

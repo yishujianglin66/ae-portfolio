@@ -39,8 +39,8 @@ def _get_engine(name: str):
                 from unified_asset_manager import UnifiedAssetManager
                 _ENGINES["asset"] = UnifiedAssetManager()
             elif name == "bridge":
-                from multi_software_bridge import MultiSoftwareBridge
-                _ENGINES["bridge"] = MultiSoftwareBridge()
+                from software_sdk import SoftwareRegistry
+                _ENGINES["bridge"] = SoftwareRegistry()
         except ImportError as e:
             print(f"⚠️  引擎加载失败 {name}: {e}")
             return None

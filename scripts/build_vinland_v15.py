@@ -36,11 +36,11 @@ def patch_v14_to_v15():
 
     # 2. 修复 AE 2026 路径 → 2025
     content = content.replace(
-        '"C:/Program Files/Adobe/Adobe After Effects 2026/Support Files/Lumetri/LUTs/Creative/"',
+        '"C:/Program Files/Adobe/Adobe After Effects 2025/Support Files/Lumetri/LUTs/Creative/"',
         '"C:/Program Files/Adobe/Adobe After Effects 2025/Support Files/Lumetri/LUTs/Creative/"'
     )
     content = content.replace(
-        '"C:/Program Files/Adobe/Adobe After Effects 2026/Support Files/Lumetri/LUTs/Technical/"',
+        '"C:/Program Files/Adobe/Adobe After Effects 2025/Support Files/Lumetri/LUTs/Technical/"',
         '"C:/Program Files/Adobe/Adobe After Effects 2025/Support Files/Lumetri/LUTs/Technical/"'
     )
 

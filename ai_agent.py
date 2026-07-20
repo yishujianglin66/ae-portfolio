@@ -88,20 +88,20 @@ DUCK_MISS_API_KEY = os.environ.get("DUCK_MISS_API_KEY", "")
 DUCK_MISS_BASE_URL = os.environ.get("DUCK_MISS_BASE_URL", "https://duckmiss.site/v1")
 DUCK_MISS_DEFAULT_MODEL = os.environ.get("DUCK_MISS_DEFAULT_MODEL", "claude-sonnet-4-6")
 DUCK_MISS_PRO_MODEL = os.environ.get("DUCK_MISS_PRO_MODEL", "claude-opus-4-8")
-DUCK_MISS_FAST_MODEL = os.environ.get("DUCK_MISS_FAST_MODEL", "claude-haiku-4-5-20251001")
+DUCK_MISS_FAST_MODEL = os.environ.get("DUCK_MISS_FAST_MODEL", "claude-sonnet-4-6")
 DUCK_MISS_VISION_MODEL = os.environ.get("DUCK_MISS_VISION_MODEL", "claude-sonnet-4-6")
 if DUCK_MISS_API_KEY and DUCK_MISS_BASE_URL:
     DUCK_MISS_AVAILABLE = True
 
-# GPT网关配置 - 第二中转站
+# GPT网关配置 - 复用DuckMiss Claude
 GPT_GATEWAY_AVAILABLE = False
-GPT_GATEWAY_API_KEY = os.environ.get("GPT_GATEWAY_API_KEY", "")
-GPT_GATEWAY_BASE_URL = os.environ.get("GPT_GATEWAY_BASE_URL", "https://duckmiss.site/v1")
-GPT_GATEWAY_PRO_MODEL = os.environ.get("GPT_GATEWAY_PRO_MODEL", "gpt-5.6-terra")
-GPT_GATEWAY_DEFAULT_MODEL = os.environ.get("GPT_GATEWAY_DEFAULT_MODEL", "gpt-5.5")
-GPT_GATEWAY_FAST_MODEL = os.environ.get("GPT_GATEWAY_FAST_MODEL", "gpt-5.4-mini")
-GPT_GATEWAY_CODE_MODEL = os.environ.get("GPT_GATEWAY_CODE_MODEL", "gpt-5.6-luna")
-GPT_GATEWAY_VISION_MODEL = os.environ.get("GPT_GATEWAY_VISION_MODEL", "gpt-5.6-sol")
+GPT_GATEWAY_API_KEY = os.environ.get("DUCK_MISS_API_KEY_BACKUP", "")
+GPT_GATEWAY_BASE_URL = os.environ.get("DUCK_MISS_BASE_URL", "https://duckmiss.site/v1")
+GPT_GATEWAY_PRO_MODEL = os.environ.get("GPT_GATEWAY_PRO_MODEL", "claude-opus-4-8")
+GPT_GATEWAY_DEFAULT_MODEL = os.environ.get("GPT_GATEWAY_DEFAULT_MODEL", "claude-sonnet-4-6")
+GPT_GATEWAY_FAST_MODEL = os.environ.get("GPT_GATEWAY_FAST_MODEL", "claude-sonnet-4-6")
+GPT_GATEWAY_CODE_MODEL = os.environ.get("GPT_GATEWAY_CODE_MODEL", "claude-sonnet-4-6")
+GPT_GATEWAY_VISION_MODEL = os.environ.get("GPT_GATEWAY_VISION_MODEL", "claude-sonnet-4-6")
 if GPT_GATEWAY_API_KEY and GPT_GATEWAY_BASE_URL:
     GPT_GATEWAY_AVAILABLE = True
 
@@ -119,7 +119,7 @@ ARK_MODELS = {
     "vision_pro": "doubao-vision-pro-32k-240428",
     "vision_lite": "doubao-vision-lite-32k-240428",
     "image_gen": "doubao-seedream-5-0-pro-260628",
-    "video_gen": "doubao-seedance-2-0-260128",
+    "video_gen": "doubao-seedance-1-5-pro-251128",  # 2.0不可用
     "embedding": "doubao-embedding-240428",
 }
 

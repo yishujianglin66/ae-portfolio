@@ -1,136 +1,122 @@
-# Batch Install Fonts Script - Current User Method
-# Install fonts to user font directory (no admin required)
-# Source: D:\AE-Work\resources\fonts
+# Font Auto-Installer - Silent install all fonts
+# Usage: Right-click -> Run with PowerShell (as admin)
 
-$ErrorActionPreference = "SilentlyContinue"
-$fontSourceDir = "D:\AE-Work\resources\fonts"
+$ErrorActionPreference = "Continue"
 
-# User font directory (no admin required)
-$userFontsDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
-$registryPath = "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
+# Font library path
+$fontRoot = "D:\AE-Work\resources\fonts"
+$windowsFontsDir = "$env:WINDIR\Fonts"
+$regPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts"
 
-# Create user fonts directory if not exists
-if (-not (Test-Path $userFontsDir)) {
-    New-Item -ItemType Directory -Path $userFontsDir -Force | Out-Null
-    Write-Host "Created user fonts directory: $userFontsDir" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "  Font Auto-Installer" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+
+# Check admin
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+Write-Host "Admin: $isAdmin" -ForegroundColor $(if($isAdmin){'Green'}else{'Red'})
+
+if (-not $isAdmin) {
+    Write-Host "ERROR: Run as administrator!" -ForegroundColor Red
+    Start-Sleep 3
+    exit 1
 }
 
-# Ensure registry path exists
-if (-not (Test-Path $registryPath)) {
-    New-Item -Path $registryPath -Force | Out-Null
+# Get installed fonts from registry
+Write-Host "`nScanning installed fonts..." -ForegroundColor Yellow
+$installedFonts = @{}
+$regFonts = Get-ItemProperty -Path $regPath -ErrorAction SilentlyContinue
+if ($regFonts) {
+    $regFonts.PSObject.Properties | ForEach-Object {
+        if ($_.Name -notmatch "^PS" -and $_.Value) {
+            $fileName = [System.IO.Path]::GetFileName($_.Value)
+            $installedFonts[$fileName.ToLower()] = $_.Name
+        }
+    }
 }
+Write-Host "  Installed: $($installedFonts.Count)" -ForegroundColor Green
 
-# Font extensions
+# Scan all fonts in library
+Write-Host "`nScanning font library..." -ForegroundColor Yellow
 $fontExts = @(".ttf", ".otf", ".ttc", ".fon")
+$allFonts = Get-ChildItem -Path $fontRoot -Recurse -File |
+            Where-Object { $fontExts -contains $_.Extension.ToLower() -and $_.Directory.Name -match "^\d+-" }
+Write-Host "  Found: $($allFonts.Count) fonts" -ForegroundColor Green
 
-# Get all font files
-$fontFiles = Get-ChildItem -Path $fontSourceDir -Recurse -File | Where-Object { $fontExts -contains $_.Extension.ToLower() }
-
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Batch Font Installer (User Scope)" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Total fonts to install: $($fontFiles.Count)" -ForegroundColor Yellow
-Write-Host "Target directory: $userFontsDir" -ForegroundColor Cyan
-Write-Host ""
-
-# Get list of currently installed fonts from registry
-$installedFonts = @()
-try {
-    $regKey = Get-ItemProperty -Path $registryPath
-    $regKey.PSObject.Properties | Where-Object { $_.Name -notlike "PS*" } | ForEach-Object {
-        $installedFonts += $_.Value
+# Filter to install
+$toInstall = @()
+$alreadyInstalled = 0
+foreach ($font in $allFonts) {
+    if ($installedFonts.ContainsKey($font.Name.ToLower())) {
+        $alreadyInstalled++
+    } else {
+        $toInstall += $font
     }
-} catch {
-    Write-Host "Warning: Cannot read registry, will attempt all fonts" -ForegroundColor Yellow
+}
+Write-Host "  Already installed: $alreadyInstalled" -ForegroundColor Green
+Write-Host "  To install: $($toInstall.Count)" -ForegroundColor Yellow
+
+if ($toInstall.Count -eq 0) {
+    Write-Host "`nAll fonts already installed!" -ForegroundColor Green
+    Start-Sleep 2
+    exit 0
 }
 
-Write-Host "Already installed: $($installedFonts.Count) fonts" -ForegroundColor Cyan
-Write-Host ""
+# Install fonts
+Write-Host "`nInstalling fonts..." -ForegroundColor Yellow
+$success = 0
+$failed = 0
+$i = 0
 
-$successCount = 0
-$skipCount = 0
-$failCount = 0
-$failList = @()
-
-$counter = 0
-foreach ($fontFile in $fontFiles) {
-    $counter++
-    $fontName = $fontFile.Name
-    $fontPath = $fontFile.FullName
-    $destPath = Join-Path $userFontsDir $fontName
-
-    # Progress display
-    if ($counter % 100 -eq 0 -or $counter -eq $fontFiles.Count) {
-        Write-Host "[$counter/$($fontFiles.Count)] Success:$successCount Skipped:$skipCount Failed:$failCount" -ForegroundColor Green
-    }
-
-    # Check if font file already exists in target
-    if (Test-Path $destPath) {
-        $skipCount++
-        continue
-    }
-
+foreach ($font in $toInstall) {
+    $i++
     try {
-        # Copy font file to user fonts directory
-        Copy-Item -Path $fontPath -Destination $destPath -Force -ErrorAction Stop
+        $destPath = Join-Path $windowsFontsDir $font.Name
 
-        # Get font display name (without extension)
-        $fontDisplayName = [System.IO.Path]::GetFileNameWithoutExtension($fontName)
-        $ext = $fontFile.Extension.ToLower()
+        # Copy font file
+        Copy-Item -Path $font.FullName -Destination $destPath -Force -ErrorAction Stop
 
-        # Determine registry value name suffix based on extension
-        $regSuffix = switch ($ext) {
+        # Register in registry
+        $baseName = [System.IO.Path]::GetFileNameWithoutExtension($font.Name)
+        $ext = $font.Extension.ToLower()
+        $fontType = switch ($ext) {
             ".ttf" { " (TrueType)" }
             ".otf" { " (OpenType)" }
             ".ttc" { " (TrueType)" }
-            ".fon" { " (VGA res)" }
+            ".fon" { "" }
             default { " (TrueType)" }
         }
+        $displayName = $baseName + $fontType
 
-        $regName = $fontDisplayName + $regSuffix
+        New-ItemProperty -Path $regPath -Name $displayName -Value $font.Name -PropertyType String -Force | Out-Null
 
-        # Register in HKCU registry with full path
-        New-ItemProperty -Path $registryPath -Name $regName -Value $destPath -PropertyType String -Force -ErrorAction Stop | Out-Null
-
-        $successCount++
+        $success++
+        # Progress every 100 fonts
+        if ($i % 100 -eq 0) {
+            Write-Host "  Progress: $i / $($toInstall.Count) (OK: $success, FAIL: $failed)" -ForegroundColor Cyan
+        }
     } catch {
-        $failCount++
-        $failList += "$fontName : $($_.Exception.Message)"
+        $failed++
     }
 }
 
-Write-Host ""
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Installation Summary" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Successfully installed: $successCount" -ForegroundColor Green
-Write-Host "Skipped (already exists): $skipCount" -ForegroundColor Yellow
-Write-Host "Failed: $failCount" -ForegroundColor Red
-Write-Host ""
-
-if ($failList.Count -gt 0) {
-    Write-Host "--- Failed list (first 20) ---" -ForegroundColor Red
-    $failList | Select-Object -First 20 | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
-}
-
-# Notify system of font change
-Write-Host ""
-Write-Host "Notifying system to refresh font cache..." -ForegroundColor Cyan
-Add-Type -TypeDefinition @"
-using System;
-using System.Runtime.InteropServices;
-public class FontHelper3 {
-    [DllImport("user32.dll")]
-    public static extern int SendMessageTimeout(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam, int fuFlags, int uTimeout, out IntPtr lpdwResult);
-    
-    public const int HWND_BROADCAST = 0xffff;
-    public const int WM_FONTCHANGE = 0x001D;
-}
+# Notify system about font change
+Write-Host "`nNotifying system..." -ForegroundColor Yellow
+Add-Type -Namespace Win32 -Name Native -MemberDefinition @"
+[System.Runtime.InteropServices.DllImport("user32.dll")]
+public static extern int SendMessageTimeout(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam, int fuFlags, int uTimeout, out IntPtr lpdwResult);
 "@
-
+$HWND_BROADCAST = [IntPtr]0xffff
+$WM_FONTCHANGE = 0x001D
 $result = [IntPtr]::Zero
-[FontHelper3]::SendMessageTimeout([IntPtr][FontHelper3]::HWND_BROADCAST, [FontHelper3]::WM_FONTCHANGE, [IntPtr]::Zero, [IntPtr]::Zero, 0, 1000, [ref]$result) | Out-Null
-Write-Host "Font cache refresh complete!" -ForegroundColor Green
-Write-Host ""
-Write-Host "Note: Fonts installed to user scope. All applications can use them." -ForegroundColor Cyan
+[Win32.Native]::SendMessageTimeout($HWND_BROADCAST, $WM_FONTCHANGE, [IntPtr]::Zero, [IntPtr]::Zero, 0, 1000, [ref]$result) | Out-Null
+
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host "  Installation Complete!" -ForegroundColor Green
+Write-Host "  Installed: $success" -ForegroundColor Green
+Write-Host "  Failed: $failed" -ForegroundColor $(if($failed -eq 0){'Green'}else{'Yellow'})
+Write-Host "  Was installed: $alreadyInstalled" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "`nRestart your applications to use the new fonts."
+Write-Host "Press any key to exit..."
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
