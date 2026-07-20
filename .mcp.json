@@ -5,6 +5,21 @@
       "args": ["c:\\Users\\Administrator\\Desktop\\after-effects-mcp-main\\build\\index.js"],
       "cwd": "c:\\Users\\Administrator\\Desktop\\after-effects-mcp-main"
     },
+    "AdobePhotoshopMCP": {
+      "command": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "args": ["c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\adobe_mcp_server.py", "--app", "photoshop"],
+      "cwd": "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault"
+    },
+    "AdobePremiereMCP": {
+      "command": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "args": ["c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\adobe_mcp_server.py", "--app", "premiere"],
+      "cwd": "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault"
+    },
+    "AdobeMediaEncoderMCP": {
+      "command": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "args": ["c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\adobe_mcp_server.py", "--app", "media_encoder"],
+      "cwd": "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault"
+    },
     "filesystem": {
       "command": "npx",
       "args": [
