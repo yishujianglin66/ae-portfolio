@@ -1,0 +1,270 @@
+# P0#2 v3b 6类重训配置 (2026-08-18 B6决策)
+# 根因修复：语义重叠(50%) + 训练配置(30%) + 标签噪声(20%)
+# 预期val_acc范围: [0.75, 0.82]，目标0.80
+# 用法: py -3.12 -m ai.t12_train --config output/evidence/p02_retrain_config_6class.yaml
+
+experiment:
+  name: "ip_classifier_v3b_6class_retrain"
+  version: "v3b"
+  date: "2026-08-18"
+  base_model: "cnn_distill_2.5M"
+  base_model_checkpoint: "models/ip_classifier_distill_22class_0.751.pt"
+  resume_from_checkpoint: false
+  target_classes: 6
+  task_type: "camera_movement_classification"
+  class_mapping_10to6:
+    push: 0
+    zoom_in: 0
+    zoom_back: 1
+    zoom_out: 1
+    static: 2
+    pan_left: 3
+    pan_right: 4
+    diag_pan: 5
+  class_names_6:
+    0: "push_or_zoom_in"
+    1: "zoom_back_or_zoom_out"
+    2: "static"
+    3: "pan_left"
+    4: "pan_right"
+    5: "diag_pan"
+  notes:
+    - "合并策略: push+zoom_in→0; zoom_back+zoom_out→1; 其余4类独立保留"
+    - "底模选择: 继承22类蒸馏模型(val_acc=0.751)，不使用ResNet v2(val_acc=0.3477)"
+    - "决策依据: P0#2根因分析报告 val_acc=0.4603"
+
+data:
+  train_jsonl: "data/ip_classifier/train_6class.jsonl"
+  val_jsonl: "data/ip_classifier/val_6class.jsonl"
+  test_jsonl: "data/ip_classifier/test_6class.jsonl"
+  frames_root_dir: "data/ip_classifier/frames/"
+  frame_file_pattern: "frame_{idx:02d}.jpg"
+  frames_per_sample: 4
+  image_size: [224, 224]
+  input_channels: 3
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+  normalization_source: "ImageNet pretrained statistics"
+  train_val_split_mode: "by_video"
+  val_video_ratio: 0.2
+  split_random_seed: 42
+  min_samples_per_class_train: 50
+  min_samples_per_class_val: 10
+  augmentation:
+    enabled: true
+    horizontal_flip_p: 0.5
+    vertical_flip_p: 0.0
+    random_rotate_deg: 10
+    rotate_fill_mode: "constant"
+    color_jitter:
+      brightness: 0.2
+      contrast: 0.2
+      saturation: 0.2
+      hue: 0.05
+    random_erasing_p: 0.1
+    random_erasing_scale: [0.02, 0.2]
+    random_erasing_ratio: [0.3, 3.3]
+    random_crop_p: 0.5
+    random_crop_padding: 24
+    random_grayscale_p: 0.05
+    gaussian_blur_p: 0.05
+    gaussian_blur_kernel_size: 3
+    augmix_enabled: false
+    cutmix_enabled: false
+    mixup_enabled: false
+    mosaic_enabled: false
+  sampler:
+    weighted_random_sampler: true
+    class_weights_mode: "inverse_freq"
+    weight_smoothing_factor: 1.0
+    replacement: true
+    manual_class_weights:
+      0: 1.0
+      1: 1.0
+      2: 1.0
+      3: 1.1
+      4: 1.1
+      5: 1.5
+  num_workers: 4
+  pin_memory: true
+  prefetch_factor: 2
+  persistent_workers: true
+
+train:
+  epochs: 30
+  batch_size: 16
+  gradient_accumulation_steps: 1
+  effective_batch_size: 16
+  learning_rate: 0.00005
+  learning_rate_comment: "5e-5: 从v3a的2e-4降低4倍，修复震荡不收敛"
+  min_learning_rate: 0.000001
+  lr_scheduler: "cosine_with_warmup"
+  warmup_epochs: 2
+  warmup_start_factor: 0.01
+  t_max: 30
+  eta_min: 0.000001
+  weight_decay: 0.0001
+  weight_decay_comment: "AdamW标准1e-4，不使用L2正则替代"
+  optimizer: "adamw"
+  optimizer_betas: [0.9, 0.999]
+  optimizer_eps: 1.0e-8
+  momentum: 0.9
+  nesterov: false
+  amsgrad: false
+  loss_function: "cross_entropy"
+  class_weight_loss: true
+  class_weight_mode: "inverse_freq"
+  label_smoothing: 0.05
+  gradient_clip_norm: 1.0
+  gradient_clip_value: null
+  early_stop_patience: 7
+  early_stop_min_delta: 0.001
+  early_stop_mode: "max"
+  dropout_rate: 0.2
+  stochastic_depth_p: 0.0
+  seed: 42
+  cudnn_benchmark: true
+  cudnn_deterministic: false
+  use_amp: true
+  amp_dtype: "float16"
+  ema_enabled: false
+  ema_decay: 0.9999
+  swa_enabled: false
+  swa_start_epoch: 20
+  swa_anneal_epochs: 10
+  profiling_enabled: false
+  profiling_schedule_wait: 1
+  profiling_schedule_warmup: 1
+  profiling_schedule_active: 3
+  profiling_schedule_repeat: 1
+
+validation:
+  every_n_epochs: 1
+  run_validation_on_train_begin: true
+  run_validation_on_train_end: true
+  batch_size: 32
+  metrics:
+    - accuracy
+    - balanced_accuracy
+    - f1_macro
+    - f1_weighted
+    - precision_macro
+    - recall_macro
+    - confusion_matrix
+    - cohen_kappa
+    - matthews_corrcoef
+    - per_class_precision
+    - per_class_recall
+    - per_class_f1
+  target_val_acc: 0.80
+  target_val_balanced_accuracy: 0.78
+  target_val_f1_macro: 0.77
+  save_top_k_checkpoints: 3
+  confusion_matrix_normalize: "true"
+  confusion_matrix_save_png: true
+  per_class_report_format: "markdown"
+
+output:
+  save_dir: "output/models/ip_classifier_v3b_6class/"
+  save_best_only: true
+  save_last_checkpoint: true
+  save_epoch_checkpoint_interval: 5
+  monitor: "val_balanced_accuracy"
+  monitor_mode: "max"
+  checkpoint_filename_format: "epoch={epoch:02d}-val_bal_acc={val_balanced_accuracy:.4f}.pt"
+  best_checkpoint_filename: "best_model.pt"
+  last_checkpoint_filename: "last_checkpoint.pt"
+  save_config_to_checkpoint: true
+  export_onnx: true
+  onnx_opset_version: 14
+  onnx_dynamic_batch: true
+  onnx_filename: "ip_classifier_v3b_6class.onnx"
+  export_torchscript: true
+  torchscript_filename: "ip_classifier_v3b_6class.pt"
+  log_dir: "output/logs/ip_classifier_v3b_6class/"
+  log_to_tensorboard: true
+  log_to_wandb: false
+  log_interval_batches: 10
+  log_graph_on_start: false
+  save_predictions: true
+  predictions_filename: "val_predictions.json"
+  save_confusion_matrix: true
+  confusion_matrix_filename: "confusion_matrix_val.png"
+  save_classification_report: true
+  classification_report_filename: "classification_report_val.md"
+  save_training_curves: true
+  training_curves_filename: "training_curves.png"
+
+model:
+  backbone: "resnet18"
+  backbone_pretrained: true
+  backbone_weights: "IMAGENET1K_V1"
+  freeze_backbone: false
+  freeze_backbone_epochs: 2
+  backbone_out_features: 512
+  feature_extractor: null
+  pooling: "avg"
+  use_frames_aggregation: true
+  frames_aggregation: "attention_pool"
+  frames_attention_hidden_dim: 128
+  projection_head:
+    enabled: true
+    hidden_dims: [256, 128]
+    dropout: 0.2
+    activation: "relu"
+    use_batchnorm: true
+  classifier_head:
+    in_features: 128
+    num_classes: 6
+    dropout: 0.1
+    bias: true
+  feature_fusion: null
+
+post_processing:
+  test_time_augmentation:
+    enabled: true
+    n_augmentations: 5
+    merge_strategy: "mean"
+  frame_voting:
+    enabled: true
+    voting_strategy: "majority"
+    min_frames_required: 2
+    confidence_threshold: 0.5
+  label_smoothing_calibration:
+    enabled: false
+    temperature: 1.0
+  rejection_handling:
+    enabled: false
+    reject_threshold: 0.3
+    reject_class_name: "uncertain"
+
+merge_pipeline:
+  enabled: true
+  source_10class_train_jsonl: "data/raw_camera_labels/camera_10class_raw.jsonl"
+  source_10class_val_jsonl: "data/raw_camera_labels/camera_10class_val.jsonl"
+  merge_log_filename: "merge_10to6_log.json"
+  dry_run_first: true
+  generate_merge_stats_report: true
+  merge_stats_report_filename: "merge_stats_report.md"
+  vlm_label_refinement:
+    enabled: true
+    vlm_refinement_script: "ai/t26_vlm_relable.py"
+    target_confidence_threshold: 0.55
+    refine_only_ambiguous_pairs: true
+    ambiguous_class_pairs:
+      - ["push", "zoom_in"]
+      - ["zoom_back", "zoom_out"]
+
+acceptance_criteria:
+  primary_metric: "val_balanced_accuracy"
+  pass_threshold: 0.75
+  ideal_threshold: 0.80
+  secondary_metrics:
+    val_f1_macro: 0.74
+    worst_class_recall: 0.60
+    per_class_min_f1: 0.55
+  golden_set_evaluation:
+    enabled: true
+    golden_set_path: "data/benchmark_golden.json"
+    golden_video_level_accuracy_threshold: 0.82
+    per_sample_majority_vote_required: true

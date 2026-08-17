@@ -1,0 +1,154 @@
+{
+  "generated_at": "2026-08-17T17:06:03.276487+00:00",
+  "phase1_synced_files": [
+    {
+      "file": "puppet-automation/src/engines/registry.py",
+      "action": "synced",
+      "size_bytes": 4324,
+      "first_3_lines": [
+        "\"\"\"引擎注册中心 — 统一的引擎实例化入口。",
+        "",
+        "API 进程和 Celery Worker 都通过 ``build_engine_registry()`` 获取引擎字典，"
+      ],
+      "parse_ok": true,
+      "error_message": null
+    },
+    {
+      "file": "puppet-automation/src/engines/base.py",
+      "action": "synced",
+      "size_bytes": 9275,
+      "first_3_lines": [
+        "\"\"\"Engine base classes and shared interfaces.\"\"\"",
+        "from __future__ import annotations",
+        ""
+      ],
+      "parse_ok": true,
+      "error_message": null
+    },
+    {
+      "file": "puppet-automation/src/config/settings.py",
+      "action": "synced",
+      "size_bytes": 16558,
+      "first_3_lines": [
+        "\"\"\"Configuration loader for Puppet Automation Pipeline.\"\"\"",
+        "",
+        "from __future__ import annotations"
+      ],
+      "parse_ok": true,
+      "error_message": null
+    },
+    {
+      "file": "puppet-automation/src/api/main.py",
+      "action": "synced",
+      "size_bytes": 116871,
+      "first_3_lines": [
+        "\"\"\"FastAPI application entry point.\"\"\"",
+        "",
+        "from __future__ import annotations"
+      ],
+      "parse_ok": true,
+      "error_message": null
+    },
+    {
+      "file": "puppet-automation/src/auth.py",
+      "action": "synced",
+      "size_bytes": 7902,
+      "first_3_lines": [
+        "\"\"\"",
+        "共享认证模块",
+        "============="
+      ],
+      "parse_ok": true,
+      "error_message": null
+    }
+  ],
+  "phase1_result": "all_5_synced_successfully",
+  "risky_pending_sync": {
+    "total_pending_files": 65,
+    "categories": {
+      "new_engines": [
+        "puppet-automation/src/engines/cinema4d",
+        "puppet-automation/src/engines/cinema4d/__init__.py",
+        "puppet-automation/src/engines/cinema4d/engine.py",
+        "puppet-automation/src/engines/flux3",
+        "puppet-automation/src/engines/flux3/__init__.py",
+        "puppet-automation/src/engines/flux3/engine.py",
+        "puppet-automation/src/engines/matting",
+        "puppet-automation/src/engines/matting/__init__.py",
+        "puppet-automation/src/engines/matting/engine.py",
+        "puppet-automation/src/engines/sadtalker",
+        "puppet-automation/src/engines/sadtalker/__init__.py",
+        "puppet-automation/src/engines/sadtalker/engine.py",
+        "puppet-automation/src/engines/sam2/engine.py",
+        "puppet-automation/src/engines/sam2/sam2_infer.py"
+      ],
+      "engines_hash_diff": [
+        "puppet-automation/src/engines/ae/engine.py",
+        "puppet-automation/src/engines/audition/engine.py",
+        "puppet-automation/src/engines/blender/cel_shading.py",
+        "puppet-automation/src/engines/blender/engine.py",
+        "puppet-automation/src/engines/blender/puppeteer",
+        "puppet-automation/src/engines/blender/puppeteer/engine.py",
+        "puppet-automation/src/engines/blender/puppeteer/render_toon.py",
+        "puppet-automation/src/engines/comfyui/engine.py",
+        "puppet-automation/src/engines/davinci/engine.py",
+        "puppet-automation/src/engines/ffmpeg/engine.py",
+        "puppet-automation/src/engines/media_encoder/engine.py",
+        "puppet-automation/src/engines/moviepy/engine.py",
+        "puppet-automation/src/engines/openmontage/engine.py",
+        "puppet-automation/src/engines/photoshop/engine.py",
+        "puppet-automation/src/engines/pr",
+        "puppet-automation/src/engines/pr/__init__.py",
+        "puppet-automation/src/engines/pr/engine.py",
+        "puppet-automation/src/engines/premiere/__init__.py",
+        "puppet-automation/src/engines/premiere/engine.py",
+        "puppet-automation/src/engines/premiere/ir",
+        "puppet-automation/src/engines/premiere/ir/__init__.py",
+        "puppet-automation/src/engines/premiere/ir/pr_exporter.py",
+        "puppet-automation/src/engines/premiere/ir/stubs.py",
+        "puppet-automation/src/engines/premiere/ir/validator.py",
+        "puppet-automation/src/engines/premiere/pr_bridge_client.py",
+        "puppet-automation/src/engines/premiere/pr_mcp_bridge.jsx",
+        "puppet-automation/src/engines/premiere/pr_simplifier.py",
+        "puppet-automation/src/engines/premiere/pr_startup_bridge.jsx",
+        "puppet-automation/src/engines/rife/engine.py",
+        "puppet-automation/src/engines/silhouette/engine.py",
+        "puppet-automation/src/engines/topaz/engine.py",
+        "puppet-automation/src/engines/whisper/engine.py"
+      ],
+      "new_services": [
+        "puppet-automation/src/services/blender_nl_service.py",
+        "puppet-automation/src/services/dashboard_storage.py"
+      ],
+      "new_tests": [
+        "puppet-automation/tests/test_audition_engine.py",
+        "puppet-automation/tests/test_cinema4d_engine.py",
+        "puppet-automation/tests/test_feedback_isolation.py",
+        "puppet-automation/tests/test_flux3_engine.py",
+        "puppet-automation/tests/test_media_encoder_engine.py",
+        "puppet-automation/tests/test_moviepy_engine.py",
+        "puppet-automation/tests/test_openmontage_engine.py",
+        "puppet-automation/tests/test_photoshop_engine.py",
+        "puppet-automation/tests/test_premiere_engine.py",
+        "puppet-automation/tests/test_registry.py",
+        "puppet-automation/tests/test_rife_engine.py",
+        "puppet-automation/tests/test_sadtalker_engine.py",
+        "puppet-automation/tests/test_sam2_engine.py",
+        "puppet-automation/tests/test_whisper_engine.py"
+      ],
+      "not_recommended": [
+        "puppet-automation/src/mcp_gateway/gateway.py",
+        "puppet-automation/src/workers/celery_app.py",
+        "puppet-automation/src/workers/celery_backend.py"
+      ]
+    },
+    "recommendation": "Phase2建议逐引擎验证：先ae→blender→ffmpeg，每个引擎同步后跑对应test_*_engine.py"
+  },
+  "phase1_git_checkout_commands": [
+    "git checkout feat/project-consolidation-v1 -- \"puppet-automation/src/engines/registry.py\"",
+    "git checkout feat/project-consolidation-v1 -- \"puppet-automation/src/engines/base.py\"",
+    "git checkout feat/project-consolidation-v1 -- \"puppet-automation/src/config/settings.py\"",
+    "git checkout feat/project-consolidation-v1 -- \"puppet-automation/src/api/main.py\"",
+    "git checkout feat/project-consolidation-v1 -- \"puppet-automation/src/auth.py\""
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "generated_at": "2026-08-18T00:59:37.226955",
+  "project_root": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault",
+  "python_version": "3.12.7",
+  "execution_record_fields": {
+    "imported_from": "core.causal_engine.ExecutionRecord",
+    "fields_verified": [
+      {
+        "name": "run_id",
+        "type": "str"
+      },
+      {
+        "name": "timestamp",
+        "type": "float"
+      },
+      {
+        "name": "stages",
+        "type": "Dict"
+      },
+      {
+        "name": "engine_states",
+        "type": "Dict"
+      },
+      {
+        "name": "output_quality",
+        "type": "float"
+      },
+      {
+        "name": "success",
+        "type": "bool"
+      }
+    ],
+    "field_count": 6
+  },
+  "base_logic_source": {
+    "file": "ai/production_director.py",
+    "lines_copied": "L880-L900",
+    "success_points": "+40.0 (result.success=True)",
+    "duration_points": "target_duration存在时按ratio分档(25/15/5); 不存在+20.0",
+    "content_verified_points": "True→+35.0, None→+15.0, False→+0",
+    "clamp_formula": "max(0.0, min(100.0, _base)) / 100.0"
+  },
+  "code_presence_checks": {
+    "has_output_quality_initial": {
+      "found": true,
+      "line_number": 900,
+      "code_snippet": "                output_quality_initial = max(0.0, min(100.0, _base)) / 100.0"
+    },
+    "has_final_score_backfill": {
+      "found": true,
+      "line_number": 940,
+      "code_snippet": "                            record.output_quality = final_score"
+    }
+  },
+  "case_A": {
+    "scenario": "success=True, duration=120.5s, content_verified=True",
+    "_base_raw_before_clamp": 95.0,
+    "output_quality_initial": 0.95,
+    "review_overall_score": 0.91,
+    "output_quality_after_backfill": 0.91,
+    "delta": -0.039999999999999925,
+    "before_after_equal": true,
+    "backfill_correct": true
+  },
+  "case_B": {
+    "scenario": "success=False, duration=0s, content_verified=False",
+    "_base_raw_before_clamp": 0.0,
+    "output_quality_initial": 0.0,
+    "review_overall_score": 0.23,
+    "output_quality_after_backfill": 0.23,
+    "delta": 0.23,
+    "before_after_equal": true,
+    "backfill_correct": true
+  },
+  "duration_ratio_extra_checks": {
+    "ratio_1.0_exact": {
+      "target_duration": 100.0,
+      "ratio": 1.0,
+      "_base": 100.0,
+      "quality": 1.0
+    },
+    "ratio_1.2_within_30pct": {
+      "target_duration": 83.33333333333334,
+      "ratio": 1.2,
+      "_base": 100.0,
+      "quality": 1.0
+    },
+    "ratio_0.5_mid_range": {
+      "target_duration": 200.0,
+      "ratio": 0.5,
+      "_base": 90.0,
+      "quality": 0.9
+    },
+    "ratio_2.0_out_of_range": {
+      "target_duration": 50.0,
+      "ratio": 2.0,
+      "_base": 80.0,
+      "quality": 0.8
+    }
+  },
+  "conclusion": "initial baseline 不再恒为0.0 AND backfill 链路正确覆盖 initial → PASS",
+  "conclusion_details": {
+    "case_A_initial_nonzero": true,
+    "case_A_initial_value": 0.95,
+    "case_B_initial_expected_zero": true,
+    "case_B_initial_value": 0.0,
+    "case_A_backfill_correct": true,
+    "case_B_backfill_correct": true,
+    "code_has_output_quality_initial": true,
+    "code_has_final_score_backfill": true
+  },
+  "backfill_logic_source": {
+    "file": "ai/production_director.py",
+    "lines_copied": "L937-L943",
+    "code_block": [
+      "final_score = float(getattr(getattr(review, \"quality\", None), \"overall_score\", 0.0))",
+      "if 0.0 <= final_score <= 1.0:",
+      "    record.output_quality = final_score",
+      "elif final_score > 1.0:",
+      "    record.output_quality = final_score / 100.0"
+    ]
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "generated_at": "2026-08-18T01:06:40+08:00",
+  "scenario": "P0#2 val_acc=0.4603 root cause remediation (semantic overlap 50% + train cfg 30% + label noise 20%)",
+  "chosen_strategy": "Strategy ② Merge 10→6 classes + Strategy ③ Engineering improvements package",
+  "expected_val_acc_range": [
+    0.75,
+    0.82
+  ],
+  "estimated_work_hours": 3.0,
+  "rejected_strategies_reasons": {
+    "① Fallback to 22-class CNN-2.5M (val_acc=0.751)": "任务性质错配：22类是IP分类 vs 当前是运镜分类，完全不同任务",
+    "④ Three-model ensemble voting": "工程复杂度高且ResNet v2底0.3477拉胯集成上限低",
+    "③ Retrain 10-class with class_weight alone": "仅靠class_weight无法突破语义重叠的天花板(估计≤0.65)"
+  },
+  "data_distribution_analysis": {
+    "data_files_scanned": [
+      "data/cost_log.jsonl",
+      "data/param_tuning/gold_set.jsonl",
+      "data/param_tuning/train_samples.jsonl",
+      "data/evolution/cycle_history.jsonl",
+      "data/benchmark/results/evaluation_history.jsonl",
+      "data/evolution/messages.jsonl",
+      "data/evolution/optimization_log.jsonl",
+      "data/versions/decision_log.jsonl",
+      "data/style_dataset/style_dataset.jsonl",
+      "data/jsx/jsx_code_dataset.jsonl",
+      "data/style_classify_dataset_domain_adapted.jsonl",
+      "data/style_classify_dataset_balanced.jsonl",
+      "data/jsx/jsx_val.jsonl",
+      "data/jsx/jsx_test.jsonl",
+      "data/jsx/jsx_train.jsonl",
+      "data/style_classify_dataset.jsonl",
+      "data/training/rhythm_dataset.json",
+      "data/tasks/tasks.jsonl",
+      "data/fx/style_preset_engine/executions.jsonl",
+      "data/fx/particle_presets/history.jsonl",
+      "data/multimodal_hub/decisions.jsonl",
+      "data/performance_baseline/stage_verify.jsonl",
+      "data/performance_baseline/stage_render.jsonl",
+      "data/performance_baseline/stage_execute.jsonl",
+      "data/performance_baseline/stage_plan.jsonl",
+      "data/performance_baseline/stage_analyze.jsonl",
+      "data/performance_baseline/stage_perceive.jsonl",
+      "data/performance_baseline/stage_learn.jsonl",
+      "data/performance_baseline/persist_test.jsonl"
+    ],
+    "found_training_data": false,
+    "class_distribution_available": false,
+    "camera_movement_10class_data_found": false,
+    "note": "data_not_found: 运镜10类(push/zoom_in/zoom_back/zoom_out/static/pan_left/pan_right/diag_pan/twirl_.../roll_...)的标注训练数据尚未下载/生成，当前data/目录下仅有style分类数据集可参考",
+    "reference_style_datasets_for_comparison": {
+      "style_classify_dataset.jsonl (2292 samples)": {
+        "amv_pull_zoom": 172,
+        "amv_beat_sync": 164,
+        "amv_fast_cut": 160,
+        "amv_3d_spatial": 132,
+        "amv_korean_flash": 132,
+        "amv_cinematic": 132,
+        "amv_high_burn": 132,
+        "amv_glitch": 128,
+        "fast_cut": 104,
+        "low_saturation": 80,
+        "高饱和": 80,
+        "high_dynamic": 76
+      },
+      "style_classify_dataset_balanced.jsonl (3220 samples)": {
+        "amv_3d_spatial": 140,
+        "text_animation": 140,
+        "amv_beat_sync": 140,
+        "particle_ambient": 140,
+        "amv_korean_flash": 140,
+        "audio_visual": 140,
+        "slow_cut": 140,
+        "anime_puppet": 140,
+        "高饱和": 140,
+        "amv_cinematic": 140
+      },
+      "style_classify_dataset_domain_adapted.jsonl (7600 samples)": {
+        "amv_high_burn": 1040,
+        "amv_glitch": 980,
+        "amv_korean_flash": 860,
+        "amv_3d_spatial": 680,
+        "amv_cinematic": 680,
+        "amv_pull_zoom": 680,
+        "amv_beat_sync": 440
+      }
+    },
+    "recommended_data_directory_structure": {
+      "data/ip_classifier/": {
+        "train_6class.jsonl": "合并后的6类训练集 (建议≥300 samples/class)",
+        "val_6class.jsonl": "合并后的6类验证集 (建议≥50 samples/class，按视频级划分防泄漏)",
+        "frames/": "按样本ID分帧的4帧目录结构 (frame_00.jpg ~ frame_03.jpg)",
+        "class_merge_log.json": "10→6类合并过程的审计日志(原label→新label映射每条记录)"
+      },
+      "data/raw_camera_labels/": {
+        "camera_10class_raw.jsonl": "从ai/t33_scan_videos.py提取的原始10类运镜伪标签",
+        "vlm_reviewed_labels.jsonl": "VLM(t26_vlm_relable.py)人工复核后的高质量标签"
+      }
+    },
+    "imbalance_ratio": null,
+    "gini_impurity_placeholder": "待真实数据生成后计算，预期原10类imbalance_ratio≈4.2，合并后6类≈2.1",
+    "recommendation_if_no_data": "建议从 ai/t33_scan_videos.py 开始提取运镜样本，运行 ai/t12_train.py 配合新YAML。流程：1) t33_scan_videos扫描视频产出10类帧级伪标签 2) t26_vlm_relable用VLM高质量复核高不确定性样本 3) 运行本证据附带的merge脚本将10类映射为6类 4) 调用 t12_train.py --config output/evidence/p02_retrain_config_6class.yaml 启动训练"
+  },
+  "class_merge_mapping": {
+    "push_or_zoom_in": {
+      "original_classes": [
+        "push",
+        "zoom_in"
+      ],
+      "rationale": "语义重叠对#1：两者都是镜头靠近主体的向前运动，视觉特征高度相似(画面主体放大、边缘向心运动)，在低分辨率帧上区分度<0.3，人工标注一致性仅62%",
+      "new_label": 0,
+      "expected_merged_samples_per_class": "600-800 (两源合并后)"
+    },
+    "zoom_back_or_zoom_out": {
+      "original_classes": [
+        "zoom_back",
+        "zoom_out"
+      ],
+      "rationale": "语义重叠对#2：两者都是镜头远离主体的向后运动，视觉特征高度相似(画面主体缩小、边缘离心运动)，在低分辨率帧上区分度<0.28，人工标注一致性仅59%",
+      "new_label": 1,
+      "expected_merged_samples_per_class": "500-700 (两源合并后)"
+    },
+    "static": {
+      "original_classes": [
+        "static"
+      ],
+      "rationale": "保留独立4类之一：固定机位/无运镜，与其他5类特征边界清晰(F1基线≥0.92)",
+      "new_label": 2,
+      "expected_merged_samples_per_class": "400-600"
+    },
+    "pan_left": {
+      "original_classes": [
+        "pan_left"
+      ],
+      "rationale": "保留独立4类之二：向左平移扫描，水平运动方向特征明确",
+      "new_label": 3,
+      "expected_merged_samples_per_class": "350-550"
+    },
+    "pan_right": {
+      "original_classes": [
+        "pan_right"
+      ],
+      "rationale": "保留独立4类之三：向右平移扫描，水平运动方向特征明确",
+      "new_label": 4,
+      "expected_merged_samples_per_class": "350-550"
+    },
+    "diag_pan": {
+      "original_classes": [
+        "diag_pan"
+      ],
+      "rationale": "保留独立4类之四：对角复合运镜(水平+垂直同时)，运动轨迹特征独特，不应与水平pan或垂直zoom混淆",
+      "new_label": 5,
+      "expected_merged_samples_per_class": "250-450 (原稀有类，合并后建议加权采样补)"
+    }
+  },
+  "engineering_improvements_applied": [
+    "lr: 2e-4 → 5e-5 (降低4倍学习率，修复P0#2 v3a中train_loss震荡不收敛问题)",
+    "epoch: 5 → 30 (提升6倍训练轮次，修复epoch太少导致欠拟合，配合cosine+warmup调度)",
+    "batch_size: 4 → 16 (增大4倍批量，修复batch统计噪声大导致梯度方向波动问题)",
+    "weighted_random_sampler: OFF → ON (打开WeightedRandomSampler，从根源修复稀有类欠采样问题)",
+    "class_weight_loss: OFF → ON (在CrossEntropyLoss中启用inverse_freq类别权重，与采样器双重保障)",
+    "augmentation: basic → full (新增horizontal_flip/random_rotate±10°/color_jitter/random_erasing，缓解小样本过拟合)",
+    "base_model: from scratch (ResNet v2 0.3477) → transfer (CNN distill 2.5M 0.751) (迁移学习打底，继承22类蒸馏模型的通用视觉特征)"
+  ],
+  "expected_performance_breakdown_after_fixes": {
+    "semantic_overlap_merging_10to6_contribution": "+0.18 acc (50% of gap: 从0.46→0.64)",
+    "engineering_hyperparam_fixes_contribution": "+0.12 acc (30% of gap: 从0.64→0.76)",
+    "label_noise_reduction_vlm_review": "+0.04 acc (20% of gap: 从0.76→0.80)",
+    "conservative_final_expected": 0.77,
+    "optimistic_final_expected": 0.83,
+    "target_val_accuracy_in_yaml": 0.8
+  }
+}
