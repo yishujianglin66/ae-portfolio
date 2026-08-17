@@ -1,0 +1,26 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+  # 本地 lint 棘轮：仅校验「本次改动的文件」（pre-commit 默认行为），
+  # 避免历史 348 处 E231 等存量违规阻断提交；与 ci.yml 的 ignore 列表保持一致。
+  # 详见 02-开发文档/代码审查标准与流程.md §4.1（门1）。
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        args:
+          - '--max-line-length=120'
+          - '--extend-ignore=E501,W503,E203,F401,F841,F541,F823,W293,E128,E402,E127,E261,E306,W292'

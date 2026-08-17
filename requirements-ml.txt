@@ -1,0 +1,21 @@
+# AE-Knowledge-Vault — 重型 ML 依赖（语义搜索 / 风格分析）
+# ============================================================================
+# 体积大、安装慢，建议与核心依赖分开安装：
+#   pip install -r requirements-ml.txt
+#
+# 说明：
+# - torch 默认会拉取匹配 CUDA 的版本；纯 CPU 环境可改用 torch>=2.1+cpu
+#   （参见 https://pytorch.org/get-started/locally/ 获取 CPU wheel 索引）。
+# - essentia 在 Windows 上需要预编译包，建议优先用 conda 或从
+#   https://essentia.upf.edu/ 获取 Windows 二进制，而非从源码编译。
+# - 13-素材获取与搜索 / V4 风格分析会用到以下能力：
+#     sentence-transformers + open-clip-torch  → CLIP 图文语义检索
+#     laion-clap                                → 音频-文本跨模态检索
+#     essentia                                 → BPM / 调性 / 情绪等音频特征
+# ============================================================================
+
+torch>=2.1
+sentence-transformers>=2.3
+open-clip-torch>=2.0
+laion-clap>=1.0
+essentia>=2.1

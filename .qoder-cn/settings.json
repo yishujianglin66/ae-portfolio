@@ -1,0 +1,15 @@
+{
+  "enabledPlugins": {
+    "architecture-visualization@qoder-marketplace": true,
+    "context7@qoder-marketplace": true,
+    "postman@qoder-marketplace": true,
+    "redis@qoder-marketplace": true,
+    "design-review@qoder-marketplace": true,
+    "alibabacloud-core@qoder-marketplace": true,
+    "meoo@qoder-marketplace": true,
+    "prompt-design-studio@qoder-marketplace": true,
+    "qmind-knowledge-cn@qoder-marketplace": true,
+    "chrome-devtools-mcp@qoder-marketplace": true,
+    "superpowers@qoder-marketplace": true
+  }
+}

@@ -1,0 +1,35 @@
+# NVIDIA 开源项目集成依赖
+# =========================
+# 安装命令: pip install -r requirements-nvidia-opensource.txt
+#
+# 注意: PyTorch 需要匹配 CUDA 版本
+# CUDA 12.1: --index-url https://download.pytorch.org/whl/cu121
+# CUDA 12.4: --index-url https://download.pytorch.org/whl/cu124
+# CPU only: --index-url https://download.pytorch.org/whl/cpu
+
+# === PyTorch (CUDA 12.1) ===
+torch==2.3.1
+torchvision==0.18.1
+torchaudio==2.3.1
+
+# === Hugging Face 生态 ===
+transformers>=4.40.0
+accelerate>=0.30.0
+bitsandbytes>=0.43.0
+huggingface-hub>=0.23.0
+safetensors>=0.4.0
+
+# === 语音转文字 (faster-whisper, 比 openai-whisper 快 4-8 倍) ===
+faster-whisper>=1.0.0
+# openai-whisper>=20231117  # 可选，作为回退
+
+# === 推理优化 ===
+onnxruntime-gpu>=1.18.0
+# tensorrt>=8.6.0  # 可选，需要 CUDA Toolkit
+
+# === 数据/科学计算 ===
+numpy>=1.24.0
+scipy>=1.10.0
+
+# === 日志 ===
+loguru>=0.7.0
