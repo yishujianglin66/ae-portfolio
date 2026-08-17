@@ -33,7 +33,7 @@ import re
 import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 
 def _sanitize_log_text(text: str) -> str:
@@ -114,6 +114,7 @@ class ProviderStatus(Enum):
     HEALTHY = auto()
     DEGRADED = auto()
     UNAVAILABLE = auto()
+    HALF_OPEN = auto()  # 熔断冷却结束，放行单次探测请求（半开状态）
 
 
 @dataclass
@@ -174,8 +175,15 @@ class ProviderHealth:
     last_error: str = ""
     total_requests: int = 0
     total_failures: int = 0
-    # 自动恢复：UNAVAILABLE 状态下 60 秒后自动重试
+    # 熔断器参数：连续失败 CIRCUIT_FAILURE_THRESHOLD 次触发熔断，
+    # 冷却 RECOVERY_INTERVAL_SEC 秒后转入 HALF_OPEN 单次探测
+    CIRCUIT_FAILURE_THRESHOLD: int = 3
     RECOVERY_INTERVAL_SEC: int = 60
+    # 性能追踪（健康感知排序用）
+    total_successes: int = 0
+    total_latency_ms: float = 0.0
+    # 半开探测计数（同一时刻只放行 1 个探测请求）
+    half_open_probes: int = 0
 
 
 # -----------------------------------------------------------------------------
@@ -266,6 +274,31 @@ TASK_PROVIDER_MAP: Dict[TaskType, Tuple[str, str]] = {
     TaskType.GENERAL: ("claude", "default"),                # 通用 → Claude sonnet
 }
 
+# -----------------------------------------------------------------------------
+# P1：模型级降级 + 成本-质量路由（参考 OpenRouter 多模型路由）
+# -----------------------------------------------------------------------------
+
+# 模型档位质量梯度（从高到低）。同 Provider 内档位失败时沿此序列向低质量回退；
+# 具体档位是否参与回退取决于该 Provider 实际配置的 models 键。
+MODEL_QUALITY_TIERS: List[str] = [
+    "reasoning", "code", "vision", "thinking", "default", "fast",
+]
+
+# 质量敏感任务：只降 Provider、不降模型档位（保证输出质量不因降级而牺牲）
+QUALITY_SENSITIVE_TASKS: Set[TaskType] = {
+    TaskType.SCENE_DESCRIPTION,
+    TaskType.EFFECT_PLANNING,
+    TaskType.QUALITY_REVIEW,
+    TaskType.PARAMETER_OPTIMIZATION,
+}
+
+# 成本敏感任务：本身就走 fast 档位，可额外优先便宜模型（无需特殊处理，档位回退自然覆盖）
+COST_SENSITIVE_TASKS: Set[TaskType] = {
+    TaskType.INTENT_CLASSIFICATION,
+    TaskType.FEEDBACK_ANALYSIS,
+    TaskType.EFFECT_SEARCH,
+}
+
 
 # -----------------------------------------------------------------------------
 # LLM 网关核心
@@ -311,6 +344,13 @@ class LLMGateway:
         for fb in self._config.fallback_providers:
             name = self._extract_provider_name(fb.get("base_url", ""))
             if name not in self._provider_health:
+                self._provider_health[name] = ProviderHealth(name=name)
+
+        # 多 Provider 模式：为 providers 字典中的每个 Provider 注册健康跟踪，
+        # 否则 chat_with_provider 临时切换 base_url 后熔断器/健康统计失效
+        for p_cfg in self._config.providers.values():
+            name = self._extract_provider_name(p_cfg.get("base_url", ""))
+            if name and name not in self._provider_health:
                 self._provider_health[name] = ProviderHealth(name=name)
 
     def _extract_provider_name(self, url: str) -> str:
@@ -583,9 +623,10 @@ class LLMGateway:
             max_tokens,
         )
 
-        # 降级处理
+        # 降级处理（健康感知排序：健康 Provider 优先，熔断冷却中的剔除）
         if not response.success and self._config.enable_fallback:
-            for fb in self._config.fallback_providers:
+            candidates = self._order_fallback_candidates(self._config.fallback_providers)
+            for fb in candidates:
                 fb_url = fb.get("base_url", "")
                 fb_key = fb.get("api_key", "")
                 if not fb_url or not fb_key:
@@ -662,6 +703,8 @@ class LLMGateway:
                     model_type = "vision"
 
             try:
+                # 成本-质量路由：质量敏感任务锁定档位（只降 Provider 不降档），
+                # 其余任务允许同 Provider 内档位回退（优先便宜模型）
                 response = await self.chat_with_provider(
                     prompt=message,
                     provider=provider,
@@ -670,6 +713,7 @@ class LLMGateway:
                     images=images,
                     temperature=temperature,
                     max_tokens=max_tokens,
+                    allow_tier_fallback=task_type not in QUALITY_SENSITIVE_TASKS,
                 )
                 if response.success:
                     return response
@@ -695,6 +739,26 @@ class LLMGateway:
             images=images,
         )
 
+    def _tier_fallback_sequence(
+        self,
+        model_type: str,
+        models: Dict[str, Any],
+        allow_tier_fallback: bool,
+    ) -> List[str]:
+        """计算同 Provider 的模型档位回退序列（质量从高到低，按实际配置过滤）。
+
+        从当前档位起沿 ``MODEL_QUALITY_TIERS`` 向低质量方向收集该 Provider
+        已配置的档位；``allow_tier_fallback=False``（质量敏感任务）时锁定原档位。
+        """
+        if model_type not in MODEL_QUALITY_TIERS:
+            # 未知档位：仅尝试原档位（内部仍回退到 default 模型）
+            return [model_type]
+        start_idx = MODEL_QUALITY_TIERS.index(model_type)
+        seq = [t for t in MODEL_QUALITY_TIERS[start_idx:] if t in models]
+        if not allow_tier_fallback:
+            seq = seq[:1]
+        return seq or [model_type]
+
     async def chat_with_provider(
         self,
         prompt: str,
@@ -704,6 +768,7 @@ class LLMGateway:
         images: Optional[List[str]] = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
+        allow_tier_fallback: bool = True,
     ) -> LLMResponse:
         """按指定 Provider 和模型类型调用 LLM。
 
@@ -714,6 +779,8 @@ class LLMGateway:
                 ``reasoning`` / ``default``
             system_prompt: 系统提示词
             images: base64 编码的图片列表（VISION 模式）
+            allow_tier_fallback: 是否允许同 Provider 内模型档位回退
+                （质量敏感任务置 False，只降 Provider 不降档位）
 
         Returns:
             LLMResponse：Provider 未配置时返回 ``success=False``。
@@ -727,7 +794,6 @@ class LLMGateway:
 
         p = providers[provider]
         models = p.get("models", {})
-        model = models.get(model_type, models.get("default", "auto"))
 
         # 临时切换主配置，使 _call_provider_internal 复用现有调用链路
         old_base = self._config.base_url
@@ -736,17 +802,29 @@ class LLMGateway:
         try:
             self._config.base_url = p["base_url"]
             self._config.api_key = p["api_key"]
-            self._config.default_model = model
-            response = await self._call_provider_internal(
-                prompt=prompt,
-                model=model,
-                system_prompt=system_prompt,
-                images=images,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                provider_name=provider,
+            # 模型级降级：同 Provider 内沿质量梯度向低档位回退，全失败才交给上层换 Provider
+            last_response: Optional[LLMResponse] = None
+            for tier in self._tier_fallback_sequence(model_type, models, allow_tier_fallback):
+                model = models.get(tier, models.get("default", "auto"))
+                self._config.default_model = model
+                last_response = await self._call_provider_internal(
+                    prompt=prompt,
+                    model=model,
+                    system_prompt=system_prompt,
+                    images=images,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    provider_name=provider,
+                )
+                if last_response.success:
+                    return last_response
+            # 所有档位失败：返回最后一次失败（含档位回退信息）
+            assert last_response is not None
+            last_response.error = (
+                f"{last_response.error} [provider={provider}, 档位回退: "
+                f"{self._tier_fallback_sequence(model_type, models, allow_tier_fallback)}]"
             )
-            return response
+            return last_response
         finally:
             self._config.base_url = old_base
             self._config.api_key = old_key
@@ -814,6 +892,90 @@ class LLMGateway:
 
         return response
 
+    def _health_score(self, provider_name: str) -> float:
+        """健康感知评分（数值越低越优先被选为 failover 候选）。
+
+        评分维度（参考 OpenRouter 多模型路由的健康感知策略）：
+        - 熔断冷却中的 Provider 返回 +inf，直接从候选中剔除；
+        - 冷却已过（待半开探测）的 Provider 加重惩罚，排在健康 Provider 之后；
+        - 连续失败次数、历史失败率、平均延迟线性累加作为次级排序信号。
+        """
+        h = self._provider_health.get(provider_name)
+        if h is None:
+            return 0.0
+        score = 0.0
+        if h.status == ProviderStatus.UNAVAILABLE:
+            if h.last_failure_time > 0:
+                elapsed = time.time() - h.last_failure_time
+                if elapsed < h.RECOVERY_INTERVAL_SEC:
+                    return float("inf")
+            # 冷却已过：允许作为半开探测候选，但排在健康 Provider 之后
+            score += 2.0
+        elif h.status == ProviderStatus.HALF_OPEN:
+            score += 2.0
+        elif h.status == ProviderStatus.DEGRADED:
+            score += 1.0
+        score += min(h.consecutive_failures, 5) * 0.2
+        if h.total_requests >= 5:
+            score += (h.total_failures / h.total_requests) * 1.0
+        if h.total_successes > 0:
+            avg_ms = h.total_latency_ms / h.total_successes
+            score += min(avg_ms / 10000.0, 0.5)
+        return score
+
+    def _order_fallback_candidates(
+        self, fallbacks: List[Dict[str, str]]
+    ) -> List[Dict[str, str]]:
+        """按健康分对降级候选排序（稳定排序：健康优先，熔断冷却中剔除）。
+
+        静态配置顺序只在健康分相同时生效，避免已有部署的语义突变。
+        """
+        scored = []
+        for fb in fallbacks:
+            name = self._extract_provider_name(fb.get("base_url", ""))
+            scored.append((self._health_score(name), name, fb))
+        scored.sort(key=lambda t: t[0])
+        ordered = [fb for s, _, fb in scored if s != float("inf")]
+        skipped = [name for s, name, _ in scored if s == float("inf")]
+        if skipped:
+            self._logger.info(f"failover 剔除熔断冷却中的 Provider: {skipped}")
+        original = [
+            self._extract_provider_name(fb.get("base_url", "")) for fb in fallbacks
+        ]
+        reordered = [
+            self._extract_provider_name(fb.get("base_url", "")) for fb in ordered
+        ]
+        if reordered != original:
+            self._logger.info(
+                f"failover 候选按健康重排: {original} -> {reordered}"
+            )
+        return ordered
+
+    def _register_provider_failure(
+        self, health: ProviderHealth, error_msg: str
+    ) -> None:
+        """记录 Provider 失败并推进熔断状态机（三处失败路径共用，保证语义一致）。"""
+        health.consecutive_failures += 1
+        health.total_failures += 1
+        health.last_error = error_msg
+        health.last_failure_time = time.time()
+        health.half_open_probes = 0
+        if health.status == ProviderStatus.HALF_OPEN:
+            health.status = ProviderStatus.UNAVAILABLE
+            self._logger.warning(
+                f"Provider {health.name} 半开探测失败，重新熔断 {health.RECOVERY_INTERVAL_SEC}s"
+            )
+        elif (
+            health.consecutive_failures >= health.CIRCUIT_FAILURE_THRESHOLD
+            and health.status != ProviderStatus.UNAVAILABLE
+        ):
+            health.status = ProviderStatus.UNAVAILABLE
+            self._logger.warning(
+                f"Provider {health.name} 连续失败 {health.consecutive_failures} 次，"
+                f"熔断 {health.RECOVERY_INTERVAL_SEC}s"
+            )
+        self._stats["total_failures"] += 1
+
     async def _call_provider(
         self,
         base_url: str,
@@ -827,22 +989,24 @@ class LLMGateway:
         provider_name = self._extract_provider_name(base_url)
         health = self._provider_health.get(provider_name, ProviderHealth(name=provider_name))
 
-        # 自动恢复机制：UNAVAILABLE 状态超过 RECOVERY_INTERVAL_SEC 秒后自动转回 HEALTHY
+        # 熔断状态机：UNAVAILABLE --冷却期到--> HALF_OPEN(单探测)
+        #   -> 探测成功 => HEALTHY（完全恢复）
+        #   -> 探测失败 => UNAVAILABLE（重新冷却）
         if health.status == ProviderStatus.UNAVAILABLE:
-            import time as _time
             if health.last_failure_time > 0:
-                elapsed = _time.time() - health.last_failure_time
+                elapsed = time.time() - health.last_failure_time
                 if elapsed >= health.RECOVERY_INTERVAL_SEC:
-                    health.status = ProviderStatus.HEALTHY
-                    health.consecutive_failures = 0
+                    health.status = ProviderStatus.HALF_OPEN
+                    health.half_open_probes = 0
                     self._logger.info(
-                        f"Provider {provider_name} 自动恢复（距上次失败 {elapsed:.0f}s）"
+                        f"Provider {provider_name} 熔断冷却结束（{elapsed:.0f}s），转入 HALF_OPEN 探测"
                     )
                 else:
+                    remaining = health.RECOVERY_INTERVAL_SEC - int(elapsed)
                     return LLMResponse(
                         success=False,
                         provider=provider_name,
-                        error=f"Provider {provider_name} 不可用（连续失败 {health.consecutive_failures} 次，{health.RECOVERY_INTERVAL_SEC - int(elapsed)}s 后自动恢复）"
+                        error=f"Provider {provider_name} 熔断中（连续失败 {health.consecutive_failures} 次，{remaining}s 后半开探测）"
                     )
             else:
                 return LLMResponse(
@@ -850,6 +1014,17 @@ class LLMGateway:
                     provider=provider_name,
                     error=f"Provider {provider_name} 不可用（连续失败 {health.consecutive_failures} 次）"
                 )
+        elif health.status == ProviderStatus.HALF_OPEN and health.half_open_probes >= 1:
+            # 同一时刻只放行 1 个探测请求，避免半开状态被并发打穿
+            return LLMResponse(
+                success=False,
+                provider=provider_name,
+                error=f"Provider {provider_name} 半开探测进行中，等待探测结果"
+            )
+
+        # 标记半开探测占用
+        if health.status == ProviderStatus.HALF_OPEN:
+            health.half_open_probes += 1
 
         client = await self._get_http_client()
         if client is None:
@@ -886,16 +1061,9 @@ class LLMGateway:
                             await asyncio.sleep(self._config.retry_delay_ms / 1000)
                             continue
 
-                        health.consecutive_failures += 1
-                        health.total_failures += 1
-                        health.last_error = f"HTTP {resp.status}: {safe_error_text}"
-
-                        if health.consecutive_failures >= 3:
-                            health.status = ProviderStatus.UNAVAILABLE
-                            import time as _time
-                            health.last_failure_time = _time.time()
-
-                        self._stats["total_failures"] += 1
+                        self._register_provider_failure(
+                            health, f"HTTP {resp.status}: {safe_error_text}"
+                        )
                         return LLMResponse(
                             success=False,
                             provider=provider_name,
@@ -914,10 +1082,13 @@ class LLMGateway:
                     tokens_out = usage.get("completion_tokens", 0)
                     used_model = data.get("model", model)
 
-                    # 更新健康状态
+                    # 更新健康状态（半开探测成功 → 完全恢复）
                     health.status = ProviderStatus.HEALTHY
                     health.consecutive_failures = 0
+                    health.half_open_probes = 0
                     health.last_success_time = time.time()
+                    health.total_successes += 1
+                    health.total_latency_ms += latency_ms
 
                     # 更新统计
                     self._stats["total_successes"] += 1
@@ -942,14 +1113,7 @@ class LLMGateway:
                     await asyncio.sleep(self._config.retry_delay_ms / 1000)
                     continue
 
-                health.consecutive_failures += 1
-                health.total_failures += 1
-                health.last_error = "Timeout"
-                if health.consecutive_failures >= 3:
-                    health.status = ProviderStatus.UNAVAILABLE
-                    import time as _time
-                    health.last_failure_time = _time.time()
-                self._stats["total_failures"] += 1
+                self._register_provider_failure(health, "Timeout")
                 return LLMResponse(
                     success=False,
                     provider=provider_name,
@@ -962,14 +1126,7 @@ class LLMGateway:
                     await asyncio.sleep(self._config.retry_delay_ms / 1000)
                     continue
 
-                health.consecutive_failures += 1
-                health.total_failures += 1
-                health.last_error = str(e)
-                if health.consecutive_failures >= 3:
-                    health.status = ProviderStatus.UNAVAILABLE
-                    import time as _time
-                    health.last_failure_time = _time.time()
-                self._stats["total_failures"] += 1
+                self._register_provider_failure(health, str(e))
                 return LLMResponse(
                     success=False,
                     provider=provider_name,
@@ -1054,6 +1211,10 @@ class LLMGateway:
                 "status": h.status.name,
                 "last_success": h.last_success_time,
                 "consecutive_failures": h.consecutive_failures,
+                "half_open_probes": h.half_open_probes,
+                "avg_latency_ms": round(h.total_latency_ms / h.total_successes, 1)
+                if h.total_successes > 0
+                else None,
             }
             for name, h in self._provider_health.items()
         }
