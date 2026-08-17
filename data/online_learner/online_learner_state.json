@@ -1,0 +1,185 @@
+{
+  "total_observations": 4306,
+  "stages": {
+    "verify": {
+      "duration": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 1152,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "quality": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 1152,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "success_rate": {
+        "mean": 0.9678819444444449,
+        "variance": 0.0008146048718815001,
+        "std": 0.028541283641096104,
+        "count": 1152,
+        "min": 0.0,
+        "max": 1.0,
+        "last": 0.0
+      },
+      "drift_counter": 0
+    },
+    "execute": {
+      "duration": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 719,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "quality": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 719,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "success_rate": {
+        "mean": 0.8414464534075101,
+        "variance": 0.0009888736324571703,
+        "std": 0.031446361195807224,
+        "count": 719,
+        "min": 0.0,
+        "max": 1.0,
+        "last": 0.0
+      },
+      "drift_counter": 0
+    },
+    "plan": {
+      "duration": {
+        "mean": 0.034026465028355386,
+        "variance": 2.2011492981809867e-06,
+        "std": 0.001483627075171179,
+        "count": 529,
+        "min": 0.0,
+        "max": 9.0,
+        "last": 0.0
+      },
+      "quality": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 529,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "success_rate": {
+        "mean": 1.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 529,
+        "min": 1.0,
+        "max": 1.0,
+        "last": 1.0
+      },
+      "drift_counter": 520
+    },
+    "render": {
+      "duration": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 816,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "quality": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 816,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "success_rate": {
+        "mean": 0.9681372549019616,
+        "variance": 0.0011514630351523636,
+        "std": 0.03393321433569717,
+        "count": 816,
+        "min": 0.0,
+        "max": 1.0,
+        "last": 0.0
+      },
+      "drift_counter": 0
+    },
+    "perceive": {
+      "duration": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 553,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "quality": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 553,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "success_rate": {
+        "mean": 1.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 553,
+        "min": 1.0,
+        "max": 1.0,
+        "last": 1.0
+      },
+      "drift_counter": 0
+    },
+    "analyze": {
+      "duration": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 537,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "quality": {
+        "mean": 0.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 537,
+        "min": 0.0,
+        "max": 0.0,
+        "last": 0.0
+      },
+      "success_rate": {
+        "mean": 1.0,
+        "variance": 0.0,
+        "std": 0.0,
+        "count": 537,
+        "min": 1.0,
+        "max": 1.0,
+        "last": 1.0
+      },
+      "drift_counter": 0
+    }
+  }
+}

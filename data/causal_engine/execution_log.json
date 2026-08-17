@@ -1,0 +1,1912 @@
+[
+  {
+    "run_id": "flagship_flagship_e2e_1785993748",
+    "timestamp": 1785993748.279633,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "flagship_flagship_e2e_1786001172",
+    "timestamp": 1786001172.1870027,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "flagship_flagship_e2e_1786001993",
+    "timestamp": 1786001993.6632402,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "prod_fbcc7b0a8f52",
+    "timestamp": 1784473078.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ae"
+      },
+      "plan": {
+        "success": true,
+        "duration": 9.0,
+        "error": "",
+        "engine": "ae"
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "davinci"
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      }
+    },
+    "success": false,
+    "output_quality": 98.0
+  },
+  {
+    "run_id": "prod_91ed07c854a6",
+    "timestamp": 0.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "plan": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "prod_5470595604e1",
+    "timestamp": 0.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "plan": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "prod_dc5543b81b82",
+    "timestamp": 0.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "plan": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "prod_8e80566cd036",
+    "timestamp": 0.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "plan": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "prod_339b9dcdbf1a",
+    "timestamp": 0.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "plan": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "prod_829a55276e17",
+    "timestamp": 0.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "plan": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": "ffmpeg"
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_6ee548b4e1c2",
+    "timestamp": 1785686400.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_dabca18581bc",
+    "timestamp": 1785772800.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_1d1624adc090",
+    "timestamp": 1785859200.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_52777f4e46ff",
+    "timestamp": 1785945600.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_d40179bd81df",
+    "timestamp": 1786377600.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_0d9ca031dc8d",
+    "timestamp": 1786464000.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_759f09e0f0a1",
+    "timestamp": 1786550400.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_b10f4b87922a",
+    "timestamp": 1786636800.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_f6ee97f49712",
+    "timestamp": 1786723200.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_d269a849c422",
+    "timestamp": 1785686400.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_7112d8fe3433",
+    "timestamp": 1785772800.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_ece9c46492e2",
+    "timestamp": 1785859200.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_fa4c601fd139",
+    "timestamp": 1785945600.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_893883004b9b",
+    "timestamp": 1786377600.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_5c38724c3a82",
+    "timestamp": 1786464000.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_c1eb1e26760d",
+    "timestamp": 1786550400.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_52d6d2b2022c",
+    "timestamp": 1786636800.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_af625a84df05",
+    "timestamp": 1786723200.0,
+    "stages": {
+      "perceive": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_ad1764eafdc7",
+    "timestamp": 1785859200.0,
+    "stages": {
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_2a305ad77c3d",
+    "timestamp": 1785945600.0,
+    "stages": {
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_5abd2099aa02",
+    "timestamp": 1786377600.0,
+    "stages": {
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_9c457f62ae15",
+    "timestamp": 1786464000.0,
+    "stages": {
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_df0e87404f00",
+    "timestamp": 1786550400.0,
+    "stages": {
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_63cb83d5a61b",
+    "timestamp": 1786636800.0,
+    "stages": {
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_47460bed58f8",
+    "timestamp": 1786723200.0,
+    "stages": {
+      "analyze": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_f7e517c4a87f",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_36b060804d10",
+    "timestamp": 1786723200.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_569248f14ae8",
+    "timestamp": 1786723200.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_ccfdeccce12f",
+    "timestamp": 1786723200.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_2447b6848e62",
+    "timestamp": 1786723200.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_b3db10120cad",
+    "timestamp": 1785945600.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-06 13:32:24 - resource-manager - ERROR - 获取 CPU 信息失败: boom; 2026-08-06 13:32:24 - resource-manager - ERROR - 获取内存信息失败: nope; 2026-08-06 16:09:03 - resource-manager - ERROR - 获取 CPU 信息失败: boom",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_ed018f81a5f3",
+    "timestamp": 1786377600.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-11 17:18:51 - resource-manager - ERROR - 获取 CPU 信息失败: boom; 2026-08-11 17:18:51 - resource-manager - ERROR - 获取内存信息失败: nope; 2026-08-11 20:40:22 - resource-manager - ERROR - 获取 CPU 信息失败: boom",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_f2cf1bfa1cec",
+    "timestamp": 1786464000.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-12 10:01:34 - resource-manager - ERROR - 获取 CPU 信息失败: boom; 2026-08-12 10:01:34 - resource-manager - ERROR - 获取内存信息失败: nope; 2026-08-12 11:08:43 - resource-manager - ERROR - 获取 CPU 信息失败: boom",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_541f11f31b16",
+    "timestamp": 1786550400.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-13 08:14:57 - resource-manager - ERROR - 获取 CPU 信息失败: boom; 2026-08-13 08:14:57 - resource-manager - ERROR - 获取 CPU 信息失败: boom; 2026-08-13 08:14:57 - resource-manager - ERROR - 获取内存信息失败: nope",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_aeda50c1043f",
+    "timestamp": 1786636800.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-14 19:09:50 - resource-manager - ERROR - 获取 CPU 信息失败: boom; 2026-08-14 19:09:50 - resource-manager - ERROR - 获取内存信息失败: nope; 2026-08-14 19:15:46 - resource-manager - ERROR - 获取 CPU 信息失败: boom",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_e81e6b3c8fb9",
+    "timestamp": 1786723200.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-15 02:32:35 - resource-manager - ERROR - 获取 CPU 信息失败: boom; 2026-08-15 02:32:35 - resource-manager - ERROR - 获取内存信息失败: nope",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_e58f8ca1aa1b",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_8c7934ce2767",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_bbcd4b612e4a",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_01d66f19deeb",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_f55f0be5368a",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_1a4a3d2b13db",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_f0190baf97f6",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_022b343402ab",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_84af6575bd53",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_ff571c54b4c7",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_f789f9d9a22e",
+    "timestamp": 1785945600.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-06 13:32:59 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_s8h35l6c\\tasks.json; 2026-08-06 16:09:12 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_xtih2me7\\tasks.json; 2026-08-06 17:00:06 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_yd6zvgb_\\tasks.json",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_613b1ac3b5f5",
+    "timestamp": 1786377600.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-11 17:19:26 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_uxi8ddz8\\tasks.json; 2026-08-11 20:41:00 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_gbjtl48d\\tasks.json; 2026-08-11 21:04:51 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_kksfd8ke\\tasks.json",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_6ee2672504cb",
+    "timestamp": 1786464000.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-12 10:02:05 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_xpxo1v97\\tasks.json; 2026-08-12 11:09:24 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_hhneopxc\\tasks.json",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_eb99ecd883ec",
+    "timestamp": 1786550400.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-13 08:15:42 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test__7t2i4x7\\tasks.json; 2026-08-13 08:15:42 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_2hmqnvpx\\tasks.json; 2026-08-13 08:16:55 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_ye3n3udo\\tasks.json",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_b3d2eb7c10a0",
+    "timestamp": 1786636800.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-14 19:10:29 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_o0u_96jh\\tasks.json; 2026-08-14 19:16:27 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_1vp4yj0y\\tasks.json; 2026-08-14 19:31:56 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_lr6giwe0\\tasks.json",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "syslog_af31b954895d",
+    "timestamp": 1786723200.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "2026-08-15 02:33:47 - task-persistence - ERROR - 任务文件格式错误 (JSON解析失败): Expecting value: line 1 column 1 (char 0), 文件: C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\task_persist_test_xn8xak33\\tasks.json",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "struct_errors",
+    "timestamp": 0.0,
+    "stages": {
+      "execute": {
+        "success": false,
+        "duration": 0.0,
+        "error": "bad operand type for abs(): 'str'",
+        "engine": ""
+      },
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "aerender CLI outputs 0-byte/empty files when project not saved or comp has no active camera",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "struct_fallback_render_retry",
+    "timestamp": 0.0,
+    "stages": {
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "struct_fallback_render_skip",
+    "timestamp": 0.0,
+    "stages": {
+      "render": {
+        "success": false,
+        "duration": 0.0,
+        "error": "x",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "struct_fallback_retry",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "struct_fallback_fb-task_fallback",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "struct_fallback_execute_retry",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": false,
+        "duration": 0.0,
+        "error": "bad operand type for abs(): 'str'",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "struct_fallback_path_a",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "struct_fallback_path_b",
+    "timestamp": 0.0,
+    "stages": {
+      "verify": {
+        "success": false,
+        "duration": 0.0,
+        "error": "",
+        "engine": ""
+      }
+    },
+    "success": false,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_309fa7e54e67",
+    "timestamp": 1784476800.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_9e13f075c53e",
+    "timestamp": 1784476800.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "成功",
+        "engine": ""
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "容错",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_d9344ccf409d",
+    "timestamp": 1784563200.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "完成",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_4eb040676a92",
+    "timestamp": 1784563200.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "成功",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_bf97e9e0d09a",
+    "timestamp": 1784563200.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "完成",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "优化",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_46365f1d6bab",
+    "timestamp": 1784563200.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "fallback",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_5eeaaccee9c3",
+    "timestamp": 1784563200.0,
+    "stages": {
+      "execute": {
+        "success": false,
+        "duration": 0.0,
+        "error": "问题（均已解决",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "容错",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_68cd701c0bec",
+    "timestamp": 1784563200.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "打通",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_b8336bfb5662",
+    "timestamp": 1784563200.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "成功",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_adf0a3934b41",
+    "timestamp": 1784649600.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "完成",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "优化",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_4163a4e8f0a0",
+    "timestamp": 1784736000.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "成功",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "改进",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_3964c9170dbe",
+    "timestamp": 1784736000.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "完成",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_8b89430d85b3",
+    "timestamp": 1784908800.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "陷阱",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "完成",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_ef65295ce211",
+    "timestamp": 1785254400.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "优化",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_7fae8b61687e",
+    "timestamp": 1785254400.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_e342993c2e7a",
+    "timestamp": 1785254400.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "备选",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_e37920145309",
+    "timestamp": 1785254400.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "完成",
+        "engine": ""
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "注意",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "提升",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_c1fca1b9677f",
+    "timestamp": 1785340800.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_15872ddf03df",
+    "timestamp": 1785340800.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "fallback",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_c93c5d2de432",
+    "timestamp": 1785340800.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "fallback",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_acfcc227f91d",
+    "timestamp": 1785340800.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "通过",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "优化",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_a7a3ed3c5d93",
+    "timestamp": 1785340800.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "提升",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_4ea021c3703d",
+    "timestamp": 1785340800.0,
+    "stages": {
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "fallback",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_a598fd0e9870",
+    "timestamp": 1785340800.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "完成",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_a54e87a7a2a6",
+    "timestamp": 1785427200.0,
+    "stages": {
+      "execute": {
+        "success": false,
+        "duration": 0.0,
+        "error": "失败伪装成功 → ✅ 已修复",
+        "engine": ""
+      },
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "验证",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_14562975e2d9",
+    "timestamp": 1785859200.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "通过",
+        "engine": ""
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_6a9fe65c4601",
+    "timestamp": 1785859200.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "打通",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "优化",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_d98cee2a32e6",
+    "timestamp": 1785859200.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "成功",
+        "engine": ""
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "注意",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_f739f6aadd44",
+    "timestamp": 1785945600.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "成功",
+        "engine": ""
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "注意",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "提升",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  },
+  {
+    "run_id": "daily_8724bccd7888",
+    "timestamp": 1786032000.0,
+    "stages": {
+      "verify": {
+        "success": true,
+        "duration": 0.0,
+        "error": "完成",
+        "engine": ""
+      },
+      "execute": {
+        "success": true,
+        "duration": 0.0,
+        "error": "必须",
+        "engine": ""
+      },
+      "render": {
+        "success": true,
+        "duration": 0.0,
+        "error": "降级",
+        "engine": ""
+      }
+    },
+    "success": true,
+    "output_quality": 0.0
+  }
+]

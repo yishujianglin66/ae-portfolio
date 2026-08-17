@@ -1,0 +1,45 @@
+{
+  "report_id": "pm_fcadeab10df8",
+  "run_id": "test_001",
+  "signature": {
+    "signature": "2dcee0d599042e06",
+    "error_type": "RuntimeError",
+    "stage": "execute",
+    "keywords": [
+      "bridge",
+      "timeout"
+    ]
+  },
+  "failure": {
+    "run_id": "test_001",
+    "stage": "execute",
+    "error_type": "RuntimeError",
+    "error_message": "AE Bridge timeout",
+    "traceback_str": "",
+    "timestamp": 0.0,
+    "context": {},
+    "trace_id": ""
+  },
+  "root_causes": [],
+  "recommendations": [
+    {
+      "title": "重试失败阶段",
+      "description": "阶段 execute 因 RuntimeError 失败；建议检查错误信息并重试",
+      "confidence": 0.3,
+      "source": "heuristic",
+      "action": "retry_with_logs"
+    },
+    {
+      "title": "检查超时配置",
+      "description": "错误涉及超时，建议增加超时阈值或优化性能",
+      "confidence": 0.7,
+      "source": "expert",
+      "action": "increase_timeout"
+    }
+  ],
+  "distilled_rules": [],
+  "similar_failures": [],
+  "created_at": 1785338095.8785872,
+  "trace_spans": [],
+  "artifacts": []
+}

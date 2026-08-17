@@ -1,0 +1,177 @@
+{
+  "execution_history_size": 1,
+  "review_history": [
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1784951589.2592075
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1784951669.306396
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1784951809.6939118
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1784957510.3055549
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785053829.2142696
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785053863.1581662
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785054039.5676827
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785080192.7925825
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785080818.6841922
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785080873.7607844
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785081687.8942177
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785081803.1337352
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785082693.1600494
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785082955.9768271
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785083128.6261435
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785083676.218974
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785084753.5087895
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785085530.7537172
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785085916.119664
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785086170.9926164
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785086896.4338171
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785109220.1980243
+    },
+    {
+      "run_id": "test_review",
+      "quality": 58.0,
+      "deviation": 0.29,
+      "success": true,
+      "timestamp": 1785109547.9593093
+    }
+  ],
+  "last_evolution_run": 80,
+  "recent_runs": [
+    {
+      "run_id": "test_review",
+      "timestamp": 0.0,
+      "success": true,
+      "quality": 58.0,
+      "duration": 120,
+      "strategy_id": ""
+    }
+  ]
+}

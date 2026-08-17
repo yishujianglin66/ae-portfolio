@@ -1,0 +1,24 @@
+{
+  "total_samples": 30,
+  "unique_styles": 12,
+  "labels": {
+    "ambient_calm": 3,
+    "amv_highenergy": 4,
+    "cinematic_film": 3,
+    "cyberpunk": 4,
+    "emotional_lyric": 3,
+    "hardcore_battle": 3,
+    "high_key_bright": 3,
+    "vintage_film": 3,
+    "neon": 1,
+    "glitch": 1,
+    "ink_wash": 1,
+    "cinematic": 1
+  },
+  "sources": {
+    "style_card": 8,
+    "style_card_desc_only": 8,
+    "style_card_knobs": 8,
+    "style_template": 6
+  }
+}

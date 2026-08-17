@@ -1,0 +1,148 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "date": "2026-08",
+    "note": "风格模板库（P4-C）。所有 effect/param matchName 均为中文 AE 实测验证值，来源: video/style_migrator.py AE_2025_EFFECT_MAP + ae_additive_scripts/particleFXMaster.jsx + textImpactMaster.jsx。evaluation_targets 供 core/evolution/evaluator.py 消费。",
+    "verified_matchnames": {
+      "lumetri": "ADBE Lumetri",
+      "glow": "ADBE Glo2",
+      "brightness_contrast": "ADBE Brightness & Contrast 2",
+      "hue_saturation": "ADBE HUE SATURATION",
+      "cc_particle_world": "CC Particle World",
+      "cc_particle_systems_2": "CC Particle Systems II",
+      "cc_rainfall": "CSRainfall",
+      "cc_snowfall": "CSSnowfall",
+      "fractal_noise": "ADBE Fractal Noise"
+    }
+  },
+  "templates": {
+    "amv_highenergy": {
+      "name": "高燃混剪",
+      "desc": "高对比+暖高光，火花粒子随 beat 爆发，文字打击感入场",
+      "mood": ["高燃", "打击感", "节奏快"],
+      "color_grade": [
+        {"effect": "ADBE Lumetri", "params": {"ADBE Lumetri-0012": 25, "ADBE Lumetri-0031": 115, "ADBE Lumetri-0011": 5, "ADBE Lumetri-0007": 8}}
+      ],
+      "particles": [
+        {"action": "layered", "preset": "amv_highenergy"},
+        {"action": "beat_burst", "on_beats": true, "baseRate": 3, "peakRate": 22, "decay": 0.12}
+      ],
+      "text_fx": [
+        {"engine": "textImpactMaster", "action": "impact", "startScale": 170, "flash": true},
+        {"engine": "textImpactMaster", "action": "beat_sync", "peakScale": 118}
+      ],
+      "evaluation_targets": {
+        "contrast": "high",
+        "saturation": "high",
+        "color_temperature": "warm",
+        "particle_presence": true,
+        "glow_ratio_min": 0.0
+      }
+    },
+    "cyberpunk": {
+      "name": "赛博朋克",
+      "desc": "青品霓虹+雨夜，能量粒子+雨层，故障字点缀",
+      "mood": ["赛博朋克", "霓虹", "雨夜", "科技感"],
+      "color_grade": [
+        {"effect": "ADBE Lumetri", "params": {"ADBE Lumetri-0012": 30, "ADBE Lumetri-0031": 125, "ADBE Lumetri-0007": -15, "ADBE Lumetri-0014": -10}}
+      ],
+      "particles": [
+        {"action": "layered", "preset": "cyberpunk"}
+      ],
+      "text_fx": [
+        {"engine": "textImpactMaster", "action": "rgb_glitch", "glitchKeys": 12},
+        {"engine": "textFXMaster", "action": "style", "style": "cyberpunk"}
+      ],
+      "evaluation_targets": {
+        "contrast": "high",
+        "saturation": "high",
+        "color_temperature": "cool",
+        "particle_presence": true,
+        "glow_ratio_min": 0.02
+      }
+    },
+    "neon": {
+      "name": "霓虹",
+      "desc": "高饱和霓虹辉光，能量粒子+霓虹雾，文字 neon 风格",
+      "mood": ["霓虹", "夜店", "炫彩"],
+      "color_grade": [
+        {"effect": "ADBE Lumetri", "params": {"ADBE Lumetri-0031": 130, "ADBE Lumetri-0012": 20, "ADBE Lumetri-0008": 10}},
+        {"effect": "ADBE Glo2", "params": {"ADBE Glo2-0002": 60, "ADBE Glo2-0003": 40, "ADBE Glo2-0004": 0.8}}
+      ],
+      "particles": [
+        {"action": "generate", "type": "energy"},
+        {"action": "atmosphere", "mood": "neonfog"}
+      ],
+      "text_fx": [
+        {"engine": "textFXMaster", "action": "style", "style": "neon"}
+      ],
+      "evaluation_targets": {
+        "saturation": "high",
+        "particle_presence": true,
+        "glow_ratio_min": 0.05
+      }
+    },
+    "glitch": {
+      "name": "故障风",
+      "desc": "撕裂错位+闪烁，RGB 故障字+火花粒子跳切",
+      "mood": ["故障", "失真", "电子干扰"],
+      "color_grade": [
+        {"effect": "ADBE Lumetri", "params": {"ADBE Lumetri-0012": 35, "ADBE Lumetri-0031": 90, "ADBE Lumetri-0011": -5}}
+      ],
+      "particles": [
+        {"action": "generate", "type": "spark"},
+        {"action": "beat_burst", "on_beats": true, "baseRate": 1, "peakRate": 18, "decay": 0.08}
+      ],
+      "text_fx": [
+        {"engine": "textImpactMaster", "action": "rgb_glitch", "glitchKeys": 16, "offsetMax": 18}
+      ],
+      "evaluation_targets": {
+        "contrast": "high",
+        "particle_presence": true,
+        "glow_ratio_min": 0.0
+      }
+    },
+    "ink_wash": {
+      "name": "水墨",
+      "desc": "低饱和+墨色氛围雾，文字 inkWash 风格，留白克制",
+      "mood": ["水墨", "国风", "静谧"],
+      "color_grade": [
+        {"effect": "ADBE Lumetri", "params": {"ADBE Lumetri-0031": 55, "ADBE Lumetri-0012": 15, "ADBE Lumetri-0011": 3}}
+      ],
+      "particles": [
+        {"action": "atmosphere", "mood": "ink"},
+        {"action": "generate", "type": "dust"}
+      ],
+      "text_fx": [
+        {"engine": "textFXMaster", "action": "style", "style": "inkWash"},
+        {"engine": "textFXMaster", "action": "animate", "animType": "fadeCascade"}
+      ],
+      "evaluation_targets": {
+        "saturation": "low",
+        "contrast": "low",
+        "particle_presence": false
+      }
+    },
+    "cinematic": {
+      "name": "电影感",
+      "desc": "低饱和+微暗角+漂浮微尘，文字优雅渐显",
+      "mood": ["电影感", "高级", "克制"],
+      "color_grade": [
+        {"effect": "ADBE Lumetri", "params": {"ADBE Lumetri-0031": 80, "ADBE Lumetri-0012": 18, "ADBE Lumetri-0007": -6, "ADBE Lumetri-0051": -25, "ADBE Lumetri-0052": 55}}
+      ],
+      "particles": [
+        {"action": "layered", "preset": "cinematic"}
+      ],
+      "text_fx": [
+        {"engine": "textFXMaster", "action": "animate", "animType": "fadeCascade"},
+        {"engine": "textFXMaster", "action": "style", "style": "softGlow"}
+      ],
+      "evaluation_targets": {
+        "saturation": "low",
+        "contrast": "low",
+        "particle_presence": true,
+        "glow_ratio_min": 0.0
+      }
+    }
+  }
+}

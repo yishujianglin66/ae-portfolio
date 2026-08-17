@@ -1,0 +1,306 @@
+{
+  "version": "1.0.0",
+  "description": "管线能力注册表",
+  "presets": {
+    "scale_bounce": {
+      "usages": 2,
+      "successes": 2,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "slide_left": {
+      "usages": 1,
+      "successes": 1,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "slide_right": {
+      "usages": 1,
+      "successes": 1,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "rotate_3d": {
+      "usages": 2,
+      "successes": 2,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "drop_top": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0,
+      "last_used": null,
+      "font_variants_used": {}
+    },
+    "fade_scale": {
+      "usages": 1,
+      "successes": 1,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "glow_pulse": {
+      "usages": 1,
+      "successes": 1,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "glitch_shake": {
+      "usages": 1,
+      "successes": 1,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "elastic_overshoot": {
+      "usages": 2,
+      "successes": 2,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "rgb_split": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0,
+      "last_used": null,
+      "font_variants_used": {}
+    },
+    "speed_impact": {
+      "usages": 1,
+      "successes": 1,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "flip_card": {
+      "usages": 1,
+      "successes": 1,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "neon_stroke": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0,
+      "last_used": null,
+      "font_variants_used": {}
+    },
+    "shockwave": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0,
+      "last_used": null,
+      "font_variants_used": {}
+    },
+    "ink_spread": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0,
+      "last_used": null,
+      "font_variants_used": {}
+    },
+    "glitch_flash": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0,
+      "last_used": null,
+      "font_variants_used": {}
+    },
+    "particle_dissolve": {
+      "usages": 1,
+      "successes": 1,
+      "avg_score": 0.61,
+      "last_used": "2026-08-05 18:54",
+      "font_variants_used": {}
+    },
+    "neon_breathe": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0,
+      "last_used": null,
+      "font_variants_used": {}
+    }
+  },
+  "fonts": {
+    "MicrosoftYaHei": {
+      "usages": 1,
+      "avg_score": 0.61
+    },
+    "Consolas": {
+      "usages": 1,
+      "avg_score": 0.61
+    },
+    "Arial": {
+      "usages": 1,
+      "avg_score": 0.61
+    },
+    "Arial Narrow": {
+      "usages": 1,
+      "avg_score": 0.61
+    },
+    "Impact": {
+      "usages": 1,
+      "avg_score": 0.61
+    }
+  },
+  "color_grading_styles": {
+    "cinematic_warm": {
+      "usages": 4,
+      "successes": 4,
+      "avg_score": 0.61
+    },
+    "cinematic_cool": {
+      "usages": 3,
+      "successes": 3,
+      "avg_score": 0.61
+    },
+    "desaturated": {
+      "usages": 7,
+      "successes": 7,
+      "avg_score": 0.61
+    },
+    "high_contrast": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0
+    },
+    "vintage_fade": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0
+    },
+    "neon_glow": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0
+    },
+    "natural": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0
+    }
+  },
+  "edit_techniques": {
+    "match_cut": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0
+    },
+    "j_cut": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0
+    },
+    "l_cut": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0
+    },
+    "jump_cut": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0
+    },
+    "montage_sequence": {
+      "usages": 0,
+      "successes": 0,
+      "avg_score": 0.0
+    }
+  },
+  "run_history": [
+    {
+      "timestamp": "2026-08-05 18:54",
+      "presets": [
+        "scale_bounce",
+        "slide_left",
+        "slide_right",
+        "elastic_overshoot",
+        "particle_dissolve",
+        "glow_pulse",
+        "fade_scale",
+        "rotate_3d",
+        "flip_card",
+        "elastic_overshoot",
+        "speed_impact",
+        "glitch_shake",
+        "scale_bounce",
+        "rotate_3d"
+      ],
+      "fonts": [
+        "Arial",
+        "Arial Narrow",
+        "Consolas",
+        "Impact",
+        "MicrosoftYaHei"
+      ],
+      "score": 0.61,
+      "success": true
+    }
+  ],
+  "datasets": {
+    "movieshots": {
+      "type": "camera_movement_annotations",
+      "desc": "MovieShots (ECCV2020): 47,463 条运镜+景别标注 (v1 33653 + v2 606 + v3 13204)",
+      "labels": "Static/Motion/Pull/Push/Multi_movement + scale LS/FS/MS/CS/ECS",
+      "path": "D:\\AE-Data\\MovieNet\\MovieShots\\movieshots_unified.jsonl",
+      "videos": "D:\\AE-Data\\MovieNet\\MovieShots\\trailer\\trailer (33,653 mp4)",
+      "license": "研究用途 (MovieNet Team, 禁止商用)",
+      "registered_at": "2026-08-14 02:06"
+    },
+    "animeshooter": {
+      "type": "shot_material_source",
+      "desc": "AnimeShooter (2025, CC BY-NC 4.0): 29,428 个 YouTube 视频的多镜头动画数据集, 镜头级边界+视觉描述 (无运镜标签, 需 VLM 自标, Step 4 素材源)",
+      "labels": "镜头边界 (shot start/end) + narrative/descriptive caption, 无运镜标签",
+      "path": "D:\\AE-Data\\AnimeShooter\\animeshooter_shots.jsonl",
+      "videos": "29,428 YouTube 视频 (yt-dlp 按 video_ids.txt 下载)",
+      "license": "CC BY-NC 4.0 (学术用途)",
+      "registered_at": "2026-08-14 12:06"
+    },
+    "camerabench": {
+      "type": "camera_vocabulary_benchmark",
+      "desc": "CameraBench (syCen): 运镜原语分类法评测集 (34 原语/4 维度), 已下载+校准 → core/camera_vocabulary.py 映射表",
+      "labels": "方向 19 + 跟拍 7 + 速度 3 + 稳定 4 + 复杂度 1",
+      "path": "D:\\AE-Data\\CameraBench\\test.jsonl",
+      "videos": "D:\\AE-Data\\CameraBench\\videos.csv (645 视频)",
+      "license": "见仓库 (HF)",
+      "registered_at": "2026-08-14 12:06"
+    },
+    "autoshot": {
+      "type": "shot_boundary_dataset",
+      "desc": "AutoShot/SHOT (CVPR NAS 2023): 快手短视频切点数据集, TransNetV2 F1=0.799(召回0.716) vs AutoShot F1=0.840 → 差距在硬切召回; 最佳阈值 0.296",
+      "labels": "镜头切点 (硬切/闪帧), 853 视频/11,606 切点 (200 测试视频 2,716)",
+      "path": "D:\\AE-Data\\AutoShot\\kuaishou_v2.txt (标注已解析: 434 视频/5,950 切点)",
+      "videos": "快手原视频 (百度网盘/Google Drive, GB 级, 需账号, 本会话未下载)",
+      "license": "研究用途 (作者公开)",
+      "registered_at": "2026-08-14 12:06"
+    }
+  },
+  "pretrained_models": {
+    "videomae_movieshots_movement": {
+      "type": "video_classification",
+      "desc": "VideoMAE 在 MovieShots 运镜 4 类上微调 (MIT), acc 91.35%, 已验证 58 素材 0.33s/视频",
+      "labels": "Static/Motion/Pull/Push",
+      "path": "D:\\AE-Data\\Models\\VideoMAE-MovieShots\\movement",
+      "source": "https://huggingface.co/gullalc/videomae-base-finetuned-kinetics-movieshots-movement",
+      "license": "MIT",
+      "registered_at": "2026-08-14 02:06"
+    },
+    "deepghs_anime_classification": {
+      "type": "image_classification",
+      "desc": "deepghs/anime_classification (MIT): 动漫内容 5 分类 (3d/bangumi/comic/illustration/not_painting), 已接入 scripts/tag_anime_content.py, 58 素材打标 4.6min CPU",
+      "labels": "3d/bangumi/comic/illustration/not_painting (focal loss, 用 argmax 不用置信度)",
+      "path": "D:\\AE-Data\\Models\\anime_classification\\mobilenetv3_v1.2_dist\\model.onnx",
+      "source": "https://huggingface.co/deepghs/anime_classification",
+      "license": "MIT",
+      "registered_at": "2026-08-14 12:06"
+    }
+  }
+}

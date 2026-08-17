@@ -1,0 +1,384 @@
+{
+  "models": {
+    "student_ip_classifier": {
+      "inventory": {
+        "model_name": "student_ip_classifier",
+        "model_version": "inventory",
+        "model_type": "distillation_student",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\student_ip_classifier.pt",
+        "base_model": "T21蒸馏",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "IP识别(学生)",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "IP识别(学生)",
+            "type": "distillation_student",
+            "size_mb": 42.76,
+            "source": "T21蒸馏",
+            "status": "trained"
+          }
+        }
+      }
+    },
+    "clip_lora_aot": {
+      "inventory": {
+        "model_name": "clip_lora_aot",
+        "model_version": "inventory",
+        "model_type": "lora_finetune",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\clip_lora_aot.pt",
+        "base_model": "T7 LoRA对比学习",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "IP识别(LoRA微调)",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "IP识别(LoRA微调)",
+            "type": "lora_finetune",
+            "size_mb": 341.99,
+            "source": "T7 LoRA对比学习",
+            "status": "trained"
+          }
+        }
+      }
+    },
+    "t12_mood_scene_classifier": {
+      "inventory": {
+        "model_name": "t12_mood_scene_classifier",
+        "model_version": "inventory",
+        "model_type": "mlp_head",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\t12_mood_scene_classifier.pt",
+        "base_model": "T12 MLP兜底",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "mood/scene_type分类",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "mood/scene_type分类",
+            "type": "mlp_head",
+            "size_mb": 0.29,
+            "source": "T12 MLP兜底",
+            "status": "trained"
+          }
+        }
+      }
+    },
+    "ensemble_kb": {
+      "inventory": {
+        "model_name": "ensemble_kb",
+        "model_version": "inventory",
+        "model_type": "ensemble_knn",
+        "model_path": "memory(BackboneRegistry)",
+        "base_model": "T5/T6双底座集成",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "IP识别(集成)",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "IP识别(集成)",
+            "type": "ensemble_knn",
+            "size_mb": null,
+            "source": "T5/T6双底座集成",
+            "status": "active"
+          }
+        }
+      }
+    },
+    "bge_m3_index": {
+      "inventory": {
+        "model_name": "bge_m3_index",
+        "model_version": "inventory",
+        "model_type": "vector_index",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\cache\\bge_m3_index\\bge_m3_embeddings.npy",
+        "base_model": "T11 BGE-M3",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "语义检索",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "语义检索",
+            "type": "vector_index",
+            "size_mb": 0.14,
+            "source": "T11 BGE-M3",
+            "status": "active"
+          }
+        }
+      }
+    },
+    "golden_v1_knn": {
+      "inventory": {
+        "model_name": "golden_v1_knn",
+        "model_version": "inventory",
+        "model_type": "knn_baseline",
+        "model_path": "ip_proto_classifier",
+        "base_model": "P2.2基线",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "IP识别(基线)",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "IP识别(基线)",
+            "type": "knn_baseline",
+            "size_mb": null,
+            "source": "P2.2基线",
+            "status": "active"
+          }
+        }
+      }
+    },
+    "movieshots_camera_clf": {
+      "inventory": {
+        "model_name": "movieshots_camera_clf",
+        "model_version": "inventory",
+        "model_type": "camera_movement_classifier",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\output\\movieshots_smoke.pt",
+        "base_model": "MovieShots (ECCV2020, 47,463 annotations)",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "运镜分类(光流MLP)",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "运镜分类(光流MLP)",
+            "type": "camera_movement_classifier",
+            "size_mb": 0.02,
+            "source": "MovieShots (ECCV2020, 47,463 annotations)",
+            "status": "smoke_artifact"
+          }
+        }
+      }
+    },
+    "videomae_movieshots_movement": {
+      "inventory": {
+        "model_name": "videomae_movieshots_movement",
+        "model_version": "inventory",
+        "model_type": "videomae_finetuned",
+        "model_path": "D:\\AE-Data\\Models\\VideoMAE-MovieShots\\movement\\model.safetensors",
+        "base_model": "gullalc/videomae-base-finetuned-kinetics-movieshots-movement (HF, MIT)",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "运镜分类(VideoMAE, 5类)",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "运镜分类(VideoMAE, 5类)",
+            "type": "videomae_finetuned",
+            "size_mb": 328.96,
+            "source": "gullalc/videomae-base-finetuned-kinetics-movieshots-movement (HF, MIT)",
+            "status": "active"
+          }
+        }
+      }
+    },
+    "ip_classifier": {
+      "inventory": {
+        "model_name": "ip_classifier",
+        "model_version": "inventory",
+        "model_type": "classifier",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\ip_classifier.pt",
+        "base_model": "T5 主分类器",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "IP识别(主)",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "IP识别(主)",
+            "type": "classifier",
+            "size_mb": 42.76,
+            "source": "T5 主分类器",
+            "status": "trained"
+          }
+        }
+      }
+    },
+    "scene_classifier_v1": {
+      "inventory": {
+        "model_name": "scene_classifier_v1",
+        "model_version": "inventory",
+        "model_type": "classifier",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\scene_classifier_v1.pt",
+        "base_model": "场景分类 v1",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "场景分类",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "场景分类",
+            "type": "classifier",
+            "size_mb": 42.73,
+            "source": "场景分类 v1",
+            "status": "trained"
+          }
+        }
+      }
+    },
+    "camera_primitive_clf": {
+      "inventory": {
+        "model_name": "camera_primitive_clf",
+        "model_version": "inventory",
+        "model_type": "sklearn_classifier",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\camera_primitive_clf.pkl",
+        "base_model": "T3 光流运镜原语",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "运镜原语分类(光流特征)",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "运镜原语分类(光流特征)",
+            "type": "sklearn_classifier",
+            "size_mb": 3.73,
+            "source": "T3 光流运镜原语",
+            "status": "trained"
+          }
+        }
+      }
+    },
+    "rhythm_reward_v2": {
+      "inventory": {
+        "model_name": "rhythm_reward_v2",
+        "model_version": "inventory",
+        "model_type": "reward_model",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\rhythm_reward_v2.pkl",
+        "base_model": "卡点对齐奖励",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "节奏奖励(卡点质量)",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "节奏奖励(卡点质量)",
+            "type": "reward_model",
+            "size_mb": 0.37,
+            "source": "卡点对齐奖励",
+            "status": "active"
+          }
+        }
+      }
+    },
+    "yolov8x_det": {
+      "inventory": {
+        "model_name": "yolov8x_det",
+        "model_version": "inventory",
+        "model_type": "yolo_detector",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\yolov8x.pt",
+        "base_model": "ultralytics yolov8x",
+        "training_method": "external",
+        "params_million": 0.0,
+        "train_samples": 0,
+        "eval_metrics": {},
+        "cost_effectiveness": 0.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-14 14:29:28",
+        "status": "staging",
+        "description": "目标检测(通用)",
+        "tags": [],
+        "metadata": {
+          "inventory": {
+            "task": "目标检测(通用)",
+            "type": "yolo_detector",
+            "size_mb": 130.55,
+            "source": "ultralytics yolov8x",
+            "status": "active"
+          }
+        }
+      }
+    }
+  },
+  "production_models": {},
+  "ab_tests": {},
+  "updated_at": "2026-08-14 14:29:29"
+}

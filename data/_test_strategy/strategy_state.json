@@ -1,0 +1,2100 @@
+{
+  "library": {
+    "strategies": {
+      "default_balanced": {
+        "strategy_id": "default_balanced",
+        "name": "均衡策略",
+        "version": 1,
+        "parent_id": "",
+        "condition_pattern": {
+          "priority": "balanced"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "质量验证"
+          }
+        ],
+        "expected_quality": 0.7,
+        "expected_speed": 0.5,
+        "expected_reliability": 0.7,
+        "applicable_engines": [
+          "ae",
+          "davinci",
+          "ffmpeg"
+        ],
+        "applicable_modes": [
+          "auto",
+          "reference_video",
+          "mixed"
+        ],
+        "status": "ACTIVE",
+        "success_count": 1,
+        "failure_count": 1,
+        "total_usage": 2,
+        "last_used": 1785109547.9398797,
+        "recent_success": [
+          true,
+          false
+        ],
+        "created_at": 1785109547.932401,
+        "created_by": "system",
+        "metadata": {}
+      },
+      "default_quality": {
+        "strategy_id": "default_quality",
+        "name": "质量优先策略",
+        "version": 1,
+        "parent_id": "",
+        "condition_pattern": {
+          "priority": "quality"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "深度感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "深度分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "精细规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {
+              "quality": "max"
+            },
+            "condition": "",
+            "description": "最高质量渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "严格质量验证"
+          },
+          {
+            "step_id": "s7",
+            "stage": "learn",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "学习优化"
+          }
+        ],
+        "expected_quality": 0.9,
+        "expected_speed": 0.3,
+        "expected_reliability": 0.6,
+        "applicable_engines": [
+          "ae",
+          "davinci",
+          "ffmpeg"
+        ],
+        "applicable_modes": [
+          "auto",
+          "reference_video",
+          "mixed"
+        ],
+        "status": "ACTIVE",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785109547.932401,
+        "created_by": "system",
+        "metadata": {}
+      },
+      "default_speed": {
+        "strategy_id": "default_speed",
+        "name": "速度优先策略",
+        "version": 1,
+        "parent_id": "",
+        "condition_pattern": {
+          "priority": "speed"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "simplify",
+            "params": {},
+            "condition": "",
+            "description": "快速感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "simplify",
+            "params": {},
+            "condition": "",
+            "description": "快速分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "simplify",
+            "params": {},
+            "condition": "",
+            "description": "模板规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "标准执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {
+              "quality": "preview"
+            },
+            "condition": "",
+            "description": "预览渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "skip",
+            "params": {},
+            "condition": "",
+            "description": "跳过验证"
+          }
+        ],
+        "expected_quality": 0.5,
+        "expected_speed": 0.9,
+        "expected_reliability": 0.8,
+        "applicable_engines": [
+          "ae",
+          "ffmpeg"
+        ],
+        "applicable_modes": [
+          "auto"
+        ],
+        "status": "ACTIVE",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785109547.932401,
+        "created_by": "system",
+        "metadata": {}
+      },
+      "default_safe": {
+        "strategy_id": "default_safe",
+        "name": "安全策略",
+        "version": 1,
+        "parent_id": "",
+        "condition_pattern": {
+          "risk": "high"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {
+              "retry_on_fail": true
+            },
+            "condition": "",
+            "description": "带重试执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {
+              "fallback": "ffmpeg"
+            },
+            "condition": "",
+            "description": "带降级渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "严格验证"
+          }
+        ],
+        "expected_quality": 0.7,
+        "expected_speed": 0.4,
+        "expected_reliability": 0.95,
+        "applicable_engines": [
+          "ae",
+          "davinci",
+          "ffmpeg"
+        ],
+        "applicable_modes": [
+          "auto",
+          "reference_video",
+          "mixed"
+        ],
+        "status": "ACTIVE",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785109547.932401,
+        "created_by": "system",
+        "metadata": {}
+      },
+      "mut_4e49881f": {
+        "strategy_id": "mut_4e49881f",
+        "name": "安全策略_mut",
+        "version": 1,
+        "parent_id": "default_safe",
+        "condition_pattern": {
+          "risk": "high"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {
+              "retry_on_fail": true
+            },
+            "condition": "",
+            "description": "带重试执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {
+              "fallback": "ffmpeg"
+            },
+            "condition": "",
+            "description": "带降级渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "严格验证"
+          }
+        ],
+        "expected_quality": 0.7136612860184627,
+        "expected_speed": 0.4,
+        "expected_reliability": 0.95,
+        "applicable_engines": [
+          "ae",
+          "davinci",
+          "ffmpeg"
+        ],
+        "applicable_modes": [
+          "auto",
+          "reference_video",
+          "mixed"
+        ],
+        "status": "TESTING",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785083128.6261435,
+        "created_by": "evolution",
+        "metadata": {}
+      },
+      "mut_7f5af868": {
+        "strategy_id": "mut_7f5af868",
+        "name": "速度优先策略_mut",
+        "version": 1,
+        "parent_id": "default_speed",
+        "condition_pattern": {
+          "priority": "speed"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "simplify",
+            "params": {},
+            "condition": "",
+            "description": "快速感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "simplify",
+            "params": {},
+            "condition": "",
+            "description": "快速分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "simplify",
+            "params": {},
+            "condition": "",
+            "description": "模板规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "标准执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {
+              "quality": "preview"
+            },
+            "condition": "",
+            "description": "预览渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "skip",
+            "params": {},
+            "condition": "",
+            "description": "跳过验证"
+          }
+        ],
+        "expected_quality": 0.5,
+        "expected_speed": 0.9956974384392199,
+        "expected_reliability": 0.8,
+        "applicable_engines": [
+          "ae",
+          "ffmpeg"
+        ],
+        "applicable_modes": [
+          "auto"
+        ],
+        "status": "TESTING",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785083128.6261435,
+        "created_by": "evolution",
+        "metadata": {}
+      },
+      "evo_8f77b71b": {
+        "strategy_id": "evo_8f77b71b",
+        "name": "均衡策略×安全策略_mut_v1",
+        "version": 1,
+        "parent_id": "default_balanced",
+        "condition_pattern": {
+          "priority": "balanced",
+          "risk": "high"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {
+              "retry_on_fail": true
+            },
+            "condition": "",
+            "description": "带重试执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {
+              "fallback": "ffmpeg"
+            },
+            "condition": "",
+            "description": "带降级渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "严格验证"
+          }
+        ],
+        "expected_quality": 0.7068306430092313,
+        "expected_speed": 0.45,
+        "expected_reliability": 0.825,
+        "applicable_engines": [
+          "davinci",
+          "ffmpeg",
+          "ae"
+        ],
+        "applicable_modes": [],
+        "status": "TESTING",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785083128.6297219,
+        "created_by": "evolution",
+        "metadata": {}
+      },
+      "evo_47f7eea3": {
+        "strategy_id": "evo_47f7eea3",
+        "name": "安全策略_mut×均衡策略_v1",
+        "version": 1,
+        "parent_id": "mut_4e49881f",
+        "condition_pattern": {
+          "risk": "high"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "质量验证"
+          }
+        ],
+        "expected_quality": 0.7068306430092313,
+        "expected_speed": 0.45,
+        "expected_reliability": 0.825,
+        "applicable_engines": [
+          "davinci",
+          "ffmpeg",
+          "ae"
+        ],
+        "applicable_modes": [],
+        "status": "TESTING",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785083128.6297219,
+        "created_by": "evolution",
+        "metadata": {}
+      },
+      "evo_fba04cb3": {
+        "strategy_id": "evo_fba04cb3",
+        "name": "均衡策略×均衡策略×安全策略_mut_v1_v1",
+        "version": 1,
+        "parent_id": "default_balanced",
+        "condition_pattern": {
+          "priority": "balanced",
+          "risk": "high"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "严格验证"
+          }
+        ],
+        "expected_quality": 0.7034153215046156,
+        "expected_speed": 0.475,
+        "expected_reliability": 0.7625,
+        "applicable_engines": [
+          "davinci",
+          "ffmpeg",
+          "ae"
+        ],
+        "applicable_modes": [],
+        "status": "TESTING",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785083128.6363153,
+        "created_by": "evolution",
+        "metadata": {}
+      },
+      "evo_c7a6afd8": {
+        "strategy_id": "evo_c7a6afd8",
+        "name": "均衡策略×安全策略_mut_v1×均衡策略_v1",
+        "version": 1,
+        "parent_id": "evo_8f77b71b",
+        "condition_pattern": {
+          "priority": "balanced",
+          "risk": "high"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {
+              "retry_on_fail": true
+            },
+            "condition": "",
+            "description": "带重试执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {
+              "fallback": "ffmpeg"
+            },
+            "condition": "",
+            "description": "带降级渲染"
+          },
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "质量验证"
+          }
+        ],
+        "expected_quality": 0.7034153215046156,
+        "expected_speed": 0.475,
+        "expected_reliability": 0.7625,
+        "applicable_engines": [
+          "davinci",
+          "ffmpeg",
+          "ae"
+        ],
+        "applicable_modes": [],
+        "status": "TESTING",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785083128.6363153,
+        "created_by": "evolution",
+        "metadata": {}
+      },
+      "evo_b365810d": {
+        "strategy_id": "evo_b365810d",
+        "name": "均衡策略×均衡策略×安全策略_mut_v1_v1",
+        "version": 1,
+        "parent_id": "default_balanced",
+        "condition_pattern": {
+          "priority": "balanced"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整分析"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {
+              "retry_on_fail": true
+            },
+            "condition": "",
+            "description": "带重试执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {
+              "fallback": "ffmpeg"
+            },
+            "condition": "",
+            "description": "带降级渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "严格验证"
+          }
+        ],
+        "expected_quality": 0.7034153215046156,
+        "expected_speed": 0.475,
+        "expected_reliability": 0.7625,
+        "applicable_engines": [
+          "davinci",
+          "ffmpeg",
+          "ae"
+        ],
+        "applicable_modes": [],
+        "status": "TESTING",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785083128.6363153,
+        "created_by": "evolution",
+        "metadata": {}
+      },
+      "evo_828ba411": {
+        "strategy_id": "evo_828ba411",
+        "name": "均衡策略×安全策略_mut_v1×均衡策略_v1",
+        "version": 1,
+        "parent_id": "evo_8f77b71b",
+        "condition_pattern": {
+          "priority": "balanced",
+          "risk": "high"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整规划"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "质量验证"
+          }
+        ],
+        "expected_quality": 0.7034153215046156,
+        "expected_speed": 0.475,
+        "expected_reliability": 0.7625,
+        "applicable_engines": [
+          "davinci",
+          "ffmpeg",
+          "ae"
+        ],
+        "applicable_modes": [],
+        "status": "TESTING",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785083128.6363153,
+        "created_by": "evolution",
+        "metadata": {}
+      },
+      "evo_5fcd7ec1": {
+        "strategy_id": "evo_5fcd7ec1",
+        "name": "安全策略_mut×均衡策略_v1×速度优先策略_mut_v1",
+        "version": 1,
+        "parent_id": "evo_47f7eea3",
+        "condition_pattern": {
+          "risk": "high"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整感知"
+          },
+          {
+            "step_id": "s1",
+            "stage": "perceive",
+            "action_type": "simplify",
+            "params": {},
+            "condition": "",
+            "description": "快速感知"
+          },
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "simplify",
+            "params": {},
+            "condition": "",
+            "description": "快速分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "simplify",
+            "params": {},
+            "condition": "",
+            "description": "模板规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "标准执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {
+              "quality": "preview"
+            },
+            "condition": "",
+            "description": "预览渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "skip",
+            "params": {},
+            "condition": "",
+            "description": "跳过验证"
+          }
+        ],
+        "expected_quality": 0.6034153215046156,
+        "expected_speed": 0.7228487192196099,
+        "expected_reliability": 0.8125,
+        "applicable_engines": [
+          "davinci",
+          "ffmpeg",
+          "ae"
+        ],
+        "applicable_modes": [],
+        "status": "TESTING",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785083128.6487002,
+        "created_by": "evolution",
+        "metadata": {}
+      },
+      "evo_efd78bd6": {
+        "strategy_id": "evo_efd78bd6",
+        "name": "速度优先策略_mut×安全策略_mut×均衡策略_v1_v1",
+        "version": 1,
+        "parent_id": "mut_7f5af868",
+        "condition_pattern": {
+          "priority": "speed",
+          "risk": "high"
+        },
+        "action_sequence": [
+          {
+            "step_id": "s2",
+            "stage": "analyze",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整分析"
+          },
+          {
+            "step_id": "s3",
+            "stage": "plan",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整规划"
+          },
+          {
+            "step_id": "s4",
+            "stage": "execute",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整执行"
+          },
+          {
+            "step_id": "s5",
+            "stage": "render",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "完整渲染"
+          },
+          {
+            "step_id": "s6",
+            "stage": "verify",
+            "action_type": "run",
+            "params": {},
+            "condition": "",
+            "description": "质量验证"
+          }
+        ],
+        "expected_quality": 0.6034153215046156,
+        "expected_speed": 0.7228487192196099,
+        "expected_reliability": 0.8125,
+        "applicable_engines": [
+          "davinci",
+          "ffmpeg",
+          "ae"
+        ],
+        "applicable_modes": [],
+        "status": "TESTING",
+        "success_count": 0,
+        "failure_count": 0,
+        "total_usage": 0,
+        "last_used": 0.0,
+        "recent_success": [],
+        "created_at": 1785083128.6487002,
+        "created_by": "evolution",
+        "metadata": {}
+      }
+    },
+    "lineage": {
+      "default_safe": [
+        "mut_4e49881f"
+      ],
+      "default_speed": [
+        "mut_7f5af868"
+      ],
+      "default_balanced": [
+        "evo_8f77b71b",
+        "evo_fba04cb3",
+        "evo_b365810d"
+      ],
+      "mut_4e49881f": [
+        "evo_47f7eea3"
+      ],
+      "evo_8f77b71b": [
+        "evo_c7a6afd8",
+        "evo_828ba411"
+      ],
+      "evo_47f7eea3": [
+        "evo_5fcd7ec1"
+      ],
+      "mut_7f5af868": [
+        "evo_efd78bd6"
+      ]
+    }
+  },
+  "ts_params": {
+    "default_balanced": [
+      27.75,
+      29.0
+    ],
+    "default_quality": [
+      2.75,
+      5.0
+    ],
+    "default_speed": [
+      1.25,
+      5.0
+    ],
+    "default_safe": [
+      1.25,
+      18.0
+    ],
+    "mut_4e49881f": [
+      3.0,
+      3.0
+    ],
+    "mut_7f5af868": [
+      3.0,
+      3.0
+    ],
+    "evo_8f77b71b": [
+      3.0,
+      3.0
+    ],
+    "evo_47f7eea3": [
+      3.0,
+      3.0
+    ],
+    "evo_fba04cb3": [
+      3.0,
+      3.0
+    ],
+    "evo_c7a6afd8": [
+      3.0,
+      3.0
+    ],
+    "evo_b365810d": [
+      3.0,
+      3.0
+    ],
+    "evo_828ba411": [
+      3.0,
+      3.0
+    ],
+    "evo_5fcd7ec1": [
+      3.0,
+      3.0
+    ],
+    "evo_efd78bd6": [
+      3.0,
+      3.0
+    ]
+  },
+  "execution_history": [
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1784951589.2452073
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1784951589.2461946
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1784951669.2804928
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1784951669.2815263
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1784951809.6798828
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1784951809.6813748
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1784957510.2895596
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1784957510.29071
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785053829.1941283
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785053829.1949685
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785053863.1485593
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785053863.1492631
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785054039.5551102
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785054039.5560918
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785080192.7766726
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785080192.7777193
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785080818.6561036
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785080818.6580966
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785080873.7471044
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785080873.7481005
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785081687.8574781
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785081687.8597558
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785081803.0962436
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785081803.098854
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785082693.1384194
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785082693.140544
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785082955.9544148
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785082955.956461
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 98.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8631198
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.864716
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.866829
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8688507
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8698547
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8723578
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8734407
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.874962
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8766181
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.87765
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8795013
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8805282
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.883049
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8845625
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8860695
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.888073
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8900828
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8931344
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.894645
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.896166
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.8981705
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9001994
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9022317
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9104793
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9130418
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9155462
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.917556
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9195578
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9220705
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9234107
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9244487
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9259624
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9290555
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.930063
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9320767
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.933096
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.935144
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9366646
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9377124
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9397204
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.941739
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9432473
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.944264
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.946817
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9488325
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.950868
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9523828
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9539273
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.955471
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.957565
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9596634
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9606843
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.962741
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9657772
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9680717
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9700854
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9721
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9736702
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9767501
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9777532
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9798114
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9828262
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9843626
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.985878
+    },
+    {
+      "strategy_id": "default_safe",
+      "success": false,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9880593
+    },
+    {
+      "strategy_id": "default_quality",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9902442
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9922762
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.9938233
+    },
+    {
+      "strategy_id": "default_quality",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.995841
+    },
+    {
+      "strategy_id": "default_quality",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.997358
+    },
+    {
+      "strategy_id": "default_quality",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082956.999855
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082957.0004525
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082957.003121
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082957.0056572
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082957.0071778
+    },
+    {
+      "strategy_id": "default_quality",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082957.0091882
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082957.011757
+    },
+    {
+      "strategy_id": "default_quality",
+      "success": true,
+      "quality": 0.0,
+      "duration": 0.0,
+      "timestamp": 1785082957.013825
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785083128.6077347
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785083128.6100209
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785083676.1692786
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785083676.1714003
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785084753.468863
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785084753.4728882
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785085530.679386
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785085530.6834056
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785085916.0975397
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785085916.099039
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785086170.9686599
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785086170.9707127
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785086896.3935766
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785086896.3976955
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785109220.154827
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785109220.1598346
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": true,
+      "quality": 75,
+      "duration": 120,
+      "timestamp": 1785109547.9373794
+    },
+    {
+      "strategy_id": "default_balanced",
+      "success": false,
+      "quality": 30,
+      "duration": 60,
+      "timestamp": 1785109547.9398797
+    }
+  ]
+}

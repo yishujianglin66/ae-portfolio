@@ -1,0 +1,1961 @@
+{
+  "metadata": {
+    "ae": {
+      "name": "ae",
+      "version": "builtin",
+      "capabilities": [
+        "execute",
+        "render"
+      ],
+      "cost_per_sec": 0.05,
+      "quality_tier": "high"
+    },
+    "davinci": {
+      "name": "davinci",
+      "version": "builtin",
+      "capabilities": [
+        "render"
+      ],
+      "cost_per_sec": 0.08,
+      "quality_tier": "ultra"
+    },
+    "ffmpeg": {
+      "name": "ffmpeg",
+      "version": "builtin",
+      "capabilities": [
+        "execute",
+        "render"
+      ],
+      "cost_per_sec": 0.01,
+      "quality_tier": "medium"
+    },
+    "moviepy": {
+      "name": "moviepy",
+      "version": "builtin",
+      "capabilities": [
+        "render"
+      ],
+      "cost_per_sec": 0.005,
+      "quality_tier": "low"
+    }
+  },
+  "history": {
+    "smoke": {
+      "verify": [
+        {
+          "success": true,
+          "duration": 0.1,
+          "quality": 80.0,
+          "timestamp": 1785989764.8255036
+        }
+      ]
+    },
+    "ffmpeg": {
+      "render": [
+        {
+          "success": true,
+          "duration": 1.23,
+          "quality": 85.0,
+          "timestamp": 1785989804.670703
+        },
+        {
+          "success": true,
+          "duration": 6.01147198677063,
+          "quality": 100.0,
+          "timestamp": 1785993254.3518705
+        },
+        {
+          "success": true,
+          "duration": 8.086633205413818,
+          "quality": 100.0,
+          "timestamp": 1785993401.7853875
+        },
+        {
+          "success": true,
+          "duration": 8.52666687965393,
+          "quality": 100.0,
+          "timestamp": 1785993512.430931
+        },
+        {
+          "success": true,
+          "duration": 9.398022413253784,
+          "quality": 100.0,
+          "timestamp": 1785993723.0552728
+        },
+        {
+          "success": true,
+          "duration": 12.570111274719238,
+          "quality": 100.0,
+          "timestamp": 1786003308.3138344
+        },
+        {
+          "success": true,
+          "duration": 11.396241426467896,
+          "quality": 100.0,
+          "timestamp": 1786003694.9171114
+        },
+        {
+          "success": true,
+          "duration": 9.262686252593994,
+          "quality": 100.0,
+          "timestamp": 1786003979.3556733
+        },
+        {
+          "success": true,
+          "duration": 11.279789686203003,
+          "quality": 100.0,
+          "timestamp": 1786004871.9625382
+        },
+        {
+          "success": true,
+          "duration": 10.661466360092163,
+          "quality": 100.0,
+          "timestamp": 1786005408.521339
+        }
+      ]
+    },
+    "verify": {
+      "verify": [
+        {
+          "success": false,
+          "duration": 0.5,
+          "quality": 0.0,
+          "timestamp": 1785989804.6717036
+        },
+        {
+          "success": true,
+          "duration": 3.6486573219299316,
+          "quality": 81.4,
+          "timestamp": 1785993258.0066633
+        },
+        {
+          "success": true,
+          "duration": 4.089781999588013,
+          "quality": 81.4,
+          "timestamp": 1785993405.8841147
+        },
+        {
+          "success": true,
+          "duration": 4.267469882965088,
+          "quality": 81.4,
+          "timestamp": 1785993516.7079306
+        },
+        {
+          "success": true,
+          "duration": 4.419695138931274,
+          "quality": 81.4,
+          "timestamp": 1785993727.4852347
+        },
+        {
+          "success": true,
+          "duration": 24.490315437316895,
+          "quality": 70.6,
+          "timestamp": 1785994373.5575368
+        },
+        {
+          "success": true,
+          "duration": 16.247538089752197,
+          "quality": 70.6,
+          "timestamp": 1785994741.8476458
+        },
+        {
+          "success": true,
+          "duration": 15.418578147888184,
+          "quality": 70.6,
+          "timestamp": 1785994969.8697238
+        },
+        {
+          "success": true,
+          "duration": 17.51428532600403,
+          "quality": 70.6,
+          "timestamp": 1785995862.1550434
+        },
+        {
+          "success": true,
+          "duration": 6.467186689376831,
+          "quality": 81.4,
+          "timestamp": 1786003314.7945974
+        },
+        {
+          "success": true,
+          "duration": 6.823101043701172,
+          "quality": 81.4,
+          "timestamp": 1786003701.7573533
+        },
+        {
+          "success": true,
+          "duration": 6.678077936172485,
+          "quality": 81.4,
+          "timestamp": 1786003986.0474176
+        },
+        {
+          "success": true,
+          "duration": 7.619657278060913,
+          "quality": 81.4,
+          "timestamp": 1786004879.5982738
+        },
+        {
+          "success": true,
+          "duration": 6.559047698974609,
+          "quality": 81.4,
+          "timestamp": 1786005415.0944967
+        },
+        {
+          "success": true,
+          "duration": 7.019937753677368,
+          "quality": 84.3,
+          "timestamp": 1786008269.2032897
+        }
+      ]
+    },
+    "ae": {},
+    "davinci": {},
+    "moviepy": {},
+    "perceive": {
+      "perceive": [
+        {
+          "success": true,
+          "duration": 52.558865547180176,
+          "quality": 100.0,
+          "timestamp": 1785993175.273804
+        },
+        {
+          "success": true,
+          "duration": 59.77829718589783,
+          "quality": 100.0,
+          "timestamp": 1785993367.6372137
+        },
+        {
+          "success": true,
+          "duration": 45.11265301704407,
+          "quality": 100.0,
+          "timestamp": 1785993478.4249976
+        },
+        {
+          "success": true,
+          "duration": 47.12511372566223,
+          "quality": 100.0,
+          "timestamp": 1785993688.863957
+        },
+        {
+          "success": true,
+          "duration": 59.02339220046997,
+          "quality": 100.0,
+          "timestamp": 1785994321.477468
+        },
+        {
+          "success": true,
+          "duration": 45.09062337875366,
+          "quality": 100.0,
+          "timestamp": 1785994700.6823993
+        },
+        {
+          "success": true,
+          "duration": 46.28497076034546,
+          "quality": 100.0,
+          "timestamp": 1785994930.2247837
+        },
+        {
+          "success": true,
+          "duration": 92.36380910873413,
+          "quality": 100.0,
+          "timestamp": 1785995816.4902713
+        },
+        {
+          "success": true,
+          "duration": 50.95810270309448,
+          "quality": 100.0,
+          "timestamp": 1786003185.513235
+        },
+        {
+          "success": true,
+          "duration": 55.04830193519592,
+          "quality": 100.0,
+          "timestamp": 1786003636.843954
+        },
+        {
+          "success": true,
+          "duration": 42.137178897857666,
+          "quality": 100.0,
+          "timestamp": 1786003931.122593
+        },
+        {
+          "success": true,
+          "duration": 48.02444839477539,
+          "quality": 100.0,
+          "timestamp": 1786004825.2307832
+        },
+        {
+          "success": true,
+          "duration": 43.55233907699585,
+          "quality": 100.0,
+          "timestamp": 1786005358.5126197
+        },
+        {
+          "success": true,
+          "duration": 54.4619345664978,
+          "quality": 100.0,
+          "timestamp": 1786008198.9735231
+        }
+      ]
+    },
+    "analyze": {
+      "analyze": [
+        {
+          "success": true,
+          "duration": 50.1639609336853,
+          "quality": 100.0,
+          "timestamp": 1785993225.4654102
+        },
+        {
+          "success": true,
+          "duration": 6.931020021438599,
+          "quality": 100.0,
+          "timestamp": 1785993374.5880325
+        },
+        {
+          "success": true,
+          "duration": 6.171773910522461,
+          "quality": 100.0,
+          "timestamp": 1785993484.6176305
+        },
+        {
+          "success": true,
+          "duration": 5.944900035858154,
+          "quality": 100.0,
+          "timestamp": 1785993694.8264034
+        },
+        {
+          "success": true,
+          "duration": 7.683596849441528,
+          "quality": 100.0,
+          "timestamp": 1785994329.1836352
+        },
+        {
+          "success": true,
+          "duration": 6.231945037841797,
+          "quality": 100.0,
+          "timestamp": 1785994706.9348006
+        },
+        {
+          "success": true,
+          "duration": 5.935286521911621,
+          "quality": 100.0,
+          "timestamp": 1785994936.1803143
+        },
+        {
+          "success": true,
+          "duration": 8.001962184906006,
+          "quality": 100.0,
+          "timestamp": 1785995824.5958676
+        },
+        {
+          "success": true,
+          "duration": 74.22572565078735,
+          "quality": 100.0,
+          "timestamp": 1786003259.7603538
+        },
+        {
+          "success": true,
+          "duration": 19.934795141220093,
+          "quality": 100.0,
+          "timestamp": 1786003656.846533
+        },
+        {
+          "success": true,
+          "duration": 18.743762969970703,
+          "quality": 100.0,
+          "timestamp": 1786003949.8897467
+        },
+        {
+          "success": true,
+          "duration": 15.64060091972351,
+          "quality": 100.0,
+          "timestamp": 1786004840.8944676
+        },
+        {
+          "success": true,
+          "duration": 18.35024404525757,
+          "quality": 100.0,
+          "timestamp": 1786005377.0113044
+        },
+        {
+          "success": true,
+          "duration": 42.216193199157715,
+          "quality": 100.0,
+          "timestamp": 1786008241.2896965
+        }
+      ]
+    },
+    "plan": {
+      "plan": [
+        {
+          "success": true,
+          "duration": 0.8512496948242188,
+          "quality": 100.0,
+          "timestamp": 1785993226.328866
+        },
+        {
+          "success": true,
+          "duration": 0.6766467094421387,
+          "quality": 100.0,
+          "timestamp": 1785993375.2737398
+        },
+        {
+          "success": true,
+          "duration": 0.6478190422058105,
+          "quality": 100.0,
+          "timestamp": 1785993485.2739196
+        },
+        {
+          "success": true,
+          "duration": 0.6130270957946777,
+          "quality": 100.0,
+          "timestamp": 1785993695.452759
+        },
+        {
+          "success": true,
+          "duration": 0.699531078338623,
+          "quality": 100.0,
+          "timestamp": 1785994329.8952775
+        },
+        {
+          "success": true,
+          "duration": 0.7231390476226807,
+          "quality": 100.0,
+          "timestamp": 1785994707.6710513
+        },
+        {
+          "success": true,
+          "duration": 0.6349442005157471,
+          "quality": 100.0,
+          "timestamp": 1785994936.8268216
+        },
+        {
+          "success": true,
+          "duration": 0.7047789096832275,
+          "quality": 100.0,
+          "timestamp": 1785995825.313199
+        },
+        {
+          "success": true,
+          "duration": 0.8721859455108643,
+          "quality": 100.0,
+          "timestamp": 1786003260.6472566
+        },
+        {
+          "success": true,
+          "duration": 0.7399661540985107,
+          "quality": 100.0,
+          "timestamp": 1786003657.5998278
+        },
+        {
+          "success": true,
+          "duration": 0.8601222038269043,
+          "quality": 100.0,
+          "timestamp": 1786003950.7612836
+        },
+        {
+          "success": true,
+          "duration": 0.6958744525909424,
+          "quality": 100.0,
+          "timestamp": 1786004841.6039896
+        },
+        {
+          "success": true,
+          "duration": 0.657257080078125,
+          "quality": 100.0,
+          "timestamp": 1786005377.6784708
+        },
+        {
+          "success": true,
+          "duration": 0.9232871532440186,
+          "quality": 100.0,
+          "timestamp": 1786008242.230022
+        }
+      ]
+    },
+    "historical_ffmpeg": {
+      "execute": [
+        {
+          "success": true,
+          "duration": 21.99622869491577,
+          "quality": 100.0,
+          "timestamp": 1785993248.334354
+        },
+        {
+          "success": true,
+          "duration": 18.409059286117554,
+          "quality": 100.0,
+          "timestamp": 1785993393.6897633
+        },
+        {
+          "success": true,
+          "duration": 18.614162921905518,
+          "quality": 100.0,
+          "timestamp": 1785993503.8951113
+        },
+        {
+          "success": true,
+          "duration": 18.183957815170288,
+          "quality": 100.0,
+          "timestamp": 1785993713.6442091
+        },
+        {
+          "success": true,
+          "duration": 18.97681713104248,
+          "quality": 100.0,
+          "timestamp": 1785994348.8817506
+        },
+        {
+          "success": true,
+          "duration": 17.732967376708984,
+          "quality": 100.0,
+          "timestamp": 1785994725.413928
+        },
+        {
+          "success": true,
+          "duration": 17.352145195007324,
+          "quality": 100.0,
+          "timestamp": 1785994954.1892152
+        },
+        {
+          "success": true,
+          "duration": 19.122137546539307,
+          "quality": 100.0,
+          "timestamp": 1785995844.4481323
+        },
+        {
+          "success": true,
+          "duration": 35.06647348403931,
+          "quality": 100.0,
+          "timestamp": 1786003295.7250633
+        },
+        {
+          "success": true,
+          "duration": 25.894888162612915,
+          "quality": 100.0,
+          "timestamp": 1786003683.5083294
+        },
+        {
+          "success": true,
+          "duration": 19.299428939819336,
+          "quality": 100.0,
+          "timestamp": 1786003970.081344
+        },
+        {
+          "success": true,
+          "duration": 19.055436849594116,
+          "quality": 100.0,
+          "timestamp": 1786004860.671009
+        },
+        {
+          "success": true,
+          "duration": 20.154105186462402,
+          "quality": 100.0,
+          "timestamp": 1786005397.8449898
+        },
+        {
+          "success": true,
+          "duration": 19.754029035568237,
+          "quality": 100.0,
+          "timestamp": 1786008262.034432
+        }
+      ]
+    },
+    "learn": {
+      "learn": [
+        {
+          "success": true,
+          "duration": 0.036367177963256836,
+          "quality": 81.4,
+          "timestamp": 1785993258.0457902
+        },
+        {
+          "success": true,
+          "duration": 0.0491337776184082,
+          "quality": 81.4,
+          "timestamp": 1785993405.938919
+        },
+        {
+          "success": true,
+          "duration": 0.042809486389160156,
+          "quality": 81.4,
+          "timestamp": 1785993516.758268
+        },
+        {
+          "success": true,
+          "duration": 0.07604002952575684,
+          "quality": 81.4,
+          "timestamp": 1785993727.5694902
+        },
+        {
+          "success": true,
+          "duration": 0.044753313064575195,
+          "quality": 70.6,
+          "timestamp": 1785994373.695859
+        },
+        {
+          "success": true,
+          "duration": 0.0405576229095459,
+          "quality": 70.6,
+          "timestamp": 1785994741.8963828
+        },
+        {
+          "success": true,
+          "duration": 0.039086103439331055,
+          "quality": 70.6,
+          "timestamp": 1785994969.915828
+        },
+        {
+          "success": true,
+          "duration": 0.058370351791381836,
+          "quality": 70.6,
+          "timestamp": 1785995862.221407
+        },
+        {
+          "success": true,
+          "duration": 0.0773155689239502,
+          "quality": 81.4,
+          "timestamp": 1786003314.883957
+        },
+        {
+          "success": true,
+          "duration": 0.059583187103271484,
+          "quality": 81.4,
+          "timestamp": 1786003701.8280454
+        },
+        {
+          "success": true,
+          "duration": 0.0573732852935791,
+          "quality": 81.4,
+          "timestamp": 1786003986.1193929
+        },
+        {
+          "success": true,
+          "duration": 0.0605769157409668,
+          "quality": 81.4,
+          "timestamp": 1786004879.6722047
+        },
+        {
+          "success": true,
+          "duration": 0.11179423332214355,
+          "quality": 81.4,
+          "timestamp": 1786005415.2165847
+        }
+      ]
+    },
+    "render": {
+      "render": [
+        {
+          "success": true,
+          "duration": 0.15345335006713867,
+          "quality": 100.0,
+          "timestamp": 1785994349.0466895
+        },
+        {
+          "success": true,
+          "duration": 0.1469707489013672,
+          "quality": 100.0,
+          "timestamp": 1785994725.5779321
+        },
+        {
+          "success": true,
+          "duration": 0.23000502586364746,
+          "quality": 100.0,
+          "timestamp": 1785994954.4302247
+        },
+        {
+          "success": true,
+          "duration": 0.1607520580291748,
+          "quality": 100.0,
+          "timestamp": 1785995844.6198626
+        },
+        {
+          "success": true,
+          "duration": 0.10251545906066895,
+          "quality": 100.0,
+          "timestamp": 1786008262.1570117
+        }
+      ]
+    }
+  },
+  "choice_log": {
+    "execute:ae:1785993122708": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993122.7088468
+    },
+    "render:ae:1785993122708": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993122.7088468
+    },
+    "execute:davinci:1785993122708": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993122.7088468
+    },
+    "render:davinci:1785993122708": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993122.7088468
+    },
+    "execute:ffmpeg:1785993122708": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.67932,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993122.7088468
+    },
+    "render:ffmpeg:1785993122708": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.67932,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993122.7088468
+    },
+    "execute:moviepy:1785993122708": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993122.7088468
+    },
+    "render:moviepy:1785993122708": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993122.7088468
+    },
+    "execute:ffmpeg:1785993226338": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.67932,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993226.3381252
+    },
+    "execute:ae:1785993307856": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993307.8568232
+    },
+    "render:ae:1785993307856": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993307.8568232
+    },
+    "execute:davinci:1785993307856": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993307.8568232
+    },
+    "render:davinci:1785993307856": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993307.8568232
+    },
+    "execute:ffmpeg:1785993307856": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.734265,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993307.8568232
+    },
+    "render:ffmpeg:1785993307856": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.734265,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993307.8568232
+    },
+    "execute:moviepy:1785993307856": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993307.8568232
+    },
+    "render:moviepy:1785993307856": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993307.8568232
+    },
+    "execute:ffmpeg:1785993375280": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.734265,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993375.280704
+    },
+    "execute:ae:1785993433309": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993433.3095908
+    },
+    "render:ae:1785993433309": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993433.3095908
+    },
+    "execute:davinci:1785993433309": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993433.3095908
+    },
+    "render:davinci:1785993433309": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993433.3095908
+    },
+    "execute:ffmpeg:1785993433309": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.7678028571428571,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993433.3095908
+    },
+    "render:ffmpeg:1785993433309": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.7678028571428571,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993433.3095908
+    },
+    "execute:moviepy:1785993433309": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993433.3095908
+    },
+    "render:moviepy:1785993433309": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993433.3095908
+    },
+    "execute:ffmpeg:1785993485280": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.7678028571428571,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993485.2809484
+    },
+    "execute:ae:1785993641736": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993641.73685
+    },
+    "render:ae:1785993641736": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993641.73685
+    },
+    "execute:davinci:1785993641736": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993641.73685
+    },
+    "render:davinci:1785993641736": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993641.73685
+    },
+    "execute:ffmpeg:1785993641736": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.7917075,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993641.73685
+    },
+    "render:ffmpeg:1785993641736": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.7917075,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993641.73685
+    },
+    "execute:moviepy:1785993641736": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993641.73685
+    },
+    "render:moviepy:1785993641736": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993641.73685
+    },
+    "execute:ffmpeg:1785993695460": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.7917075,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785993695.4602513
+    },
+    "execute:ae:1785994262430": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994262.4307778
+    },
+    "render:ae:1785994262430": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994262.4307778
+    },
+    "execute:davinci:1785994262430": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994262.4307778
+    },
+    "render:davinci:1785994262430": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994262.4307778
+    },
+    "execute:ffmpeg:1785994262430": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994262.4307778
+    },
+    "render:ffmpeg:1785994262430": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994262.4307778
+    },
+    "execute:moviepy:1785994262430": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994262.4307778
+    },
+    "render:moviepy:1785994262430": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994262.4307778
+    },
+    "execute:ffmpeg:1785994329904": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994329.9049335
+    },
+    "execute:ae:1785994655589": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994655.5897825
+    },
+    "render:ae:1785994655589": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994655.5897825
+    },
+    "execute:davinci:1785994655589": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994655.5897825
+    },
+    "render:davinci:1785994655589": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994655.5897825
+    },
+    "execute:ffmpeg:1785994655589": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994655.5897825
+    },
+    "render:ffmpeg:1785994655589": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994655.5897825
+    },
+    "execute:moviepy:1785994655589": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994655.5897825
+    },
+    "render:moviepy:1785994655589": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994655.5897825
+    },
+    "execute:ffmpeg:1785994707680": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994707.6809607
+    },
+    "execute:ae:1785994883924": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994883.9243147
+    },
+    "render:ae:1785994883924": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994883.9243147
+    },
+    "execute:davinci:1785994883924": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994883.9243147
+    },
+    "render:davinci:1785994883924": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994883.9243147
+    },
+    "execute:ffmpeg:1785994883924": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994883.9243147
+    },
+    "render:ffmpeg:1785994883924": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994883.9243147
+    },
+    "execute:moviepy:1785994883924": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994883.9243147
+    },
+    "render:moviepy:1785994883924": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994883.9243147
+    },
+    "execute:ffmpeg:1785994936838": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785994936.838068
+    },
+    "execute:ae:1785995724124": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785995724.1244686
+    },
+    "render:ae:1785995724124": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785995724.1244686
+    },
+    "execute:davinci:1785995724124": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785995724.1244686
+    },
+    "render:davinci:1785995724124": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785995724.1244686
+    },
+    "execute:ffmpeg:1785995724124": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785995724.1244686
+    },
+    "render:ffmpeg:1785995724124": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785995724.1244686
+    },
+    "execute:moviepy:1785995724124": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785995724.1244686
+    },
+    "render:moviepy:1785995724124": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785995724.1244686
+    },
+    "execute:ffmpeg:1785995825326": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1785995825.3265107
+    },
+    "execute:ae:1786003134543": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003134.543034
+    },
+    "render:ae:1786003134543": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003134.543034
+    },
+    "execute:davinci:1786003134543": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003134.543034
+    },
+    "render:davinci:1786003134543": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003134.543034
+    },
+    "execute:ffmpeg:1786003134543": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003134.543034
+    },
+    "render:ffmpeg:1786003134543": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003134.543034
+    },
+    "execute:moviepy:1786003134543": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003134.543034
+    },
+    "render:moviepy:1786003134543": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003134.543034
+    },
+    "execute:ffmpeg:1786003260659": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8098560000000001,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003260.6590927
+    },
+    "execute:ae:1786003581782": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003581.7829015
+    },
+    "render:ae:1786003581782": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003581.7829015
+    },
+    "execute:davinci:1786003581782": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003581.7829015
+    },
+    "render:davinci:1786003581782": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003581.7829015
+    },
+    "execute:ffmpeg:1786003581782": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8241750000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003581.7829015
+    },
+    "render:ffmpeg:1786003581782": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.8241750000000001,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003581.7829015
+    },
+    "execute:moviepy:1786003581782": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003581.7829015
+    },
+    "render:moviepy:1786003581782": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003581.7829015
+    },
+    "execute:ffmpeg:1786003657613": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8241750000000001,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003657.6134412
+    },
+    "execute:ae:1786003888938": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003888.9387567
+    },
+    "render:ae:1786003888938": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003888.9387567
+    },
+    "execute:davinci:1786003888938": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003888.9387567
+    },
+    "render:davinci:1786003888938": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003888.9387567
+    },
+    "execute:ffmpeg:1786003888938": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8357867532467533,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003888.9387567
+    },
+    "render:ffmpeg:1786003888938": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.8357867532467533,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003888.9387567
+    },
+    "execute:moviepy:1786003888938": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003888.9387567
+    },
+    "render:moviepy:1786003888938": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003888.9387567
+    },
+    "execute:ffmpeg:1786003950782": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8357867532467533,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786003950.7829182
+    },
+    "execute:ae:1786004777154": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786004777.1548674
+    },
+    "render:ae:1786004777154": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786004777.1548674
+    },
+    "execute:davinci:1786004777154": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786004777.1548674
+    },
+    "render:davinci:1786004777154": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786004777.1548674
+    },
+    "execute:ffmpeg:1786004777154": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.84540375,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786004777.1548674
+    },
+    "render:ffmpeg:1786004777154": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.84540375,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786004777.1548674
+    },
+    "execute:moviepy:1786004777154": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786004777.1548674
+    },
+    "render:moviepy:1786004777154": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786004777.1548674
+    },
+    "execute:ffmpeg:1786004841615": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.84540375,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786004841.6155722
+    },
+    "execute:ae:1786005314717": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786005314.7179065
+    },
+    "render:ae:1786005314717": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786005314.7179065
+    },
+    "execute:davinci:1786005314717": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786005314.7179065
+    },
+    "render:davinci:1786005314717": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786005314.7179065
+    },
+    "execute:ffmpeg:1786005314717": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8535046153846154,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786005314.7179065
+    },
+    "render:ffmpeg:1786005314717": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.8535046153846154,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786005314.7179065
+    },
+    "execute:moviepy:1786005314717": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786005314.7179065
+    },
+    "render:moviepy:1786005314717": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786005314.7179065
+    },
+    "execute:ffmpeg:1786005377690": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8535046153846154,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786005377.6908846
+    },
+    "execute:ae:1786008144428": {
+      "stage": "execute",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786008144.428426
+    },
+    "render:ae:1786008144428": {
+      "stage": "render",
+      "engine": "ae",
+      "score": 0.5771000000000001,
+      "candidates": [
+        "ae"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786008144.428426
+    },
+    "execute:davinci:1786008144428": {
+      "stage": "execute",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786008144.428426
+    },
+    "render:davinci:1786008144428": {
+      "stage": "render",
+      "engine": "davinci",
+      "score": 0.5952,
+      "candidates": [
+        "davinci"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786008144.428426
+    },
+    "execute:ffmpeg:1786008144429": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8604244285714286,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786008144.429933
+    },
+    "render:ffmpeg:1786008144429": {
+      "stage": "render",
+      "engine": "ffmpeg",
+      "score": 0.8604244285714286,
+      "candidates": [
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786008144.429933
+    },
+    "execute:moviepy:1786008144429": {
+      "stage": "execute",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786008144.429933
+    },
+    "render:moviepy:1786008144429": {
+      "stage": "render",
+      "engine": "moviepy",
+      "score": 0.5197400000000001,
+      "candidates": [
+        "moviepy"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786008144.429933
+    },
+    "execute:ffmpeg:1786008242280": {
+      "stage": "execute",
+      "engine": "ffmpeg",
+      "score": 0.8604244285714286,
+      "candidates": [
+        "ae",
+        "ffmpeg"
+      ],
+      "reason": "Bayesian-smoothed success rate * quality * speed * tier",
+      "timestamp": 1786008242.280403
+    }
+  },
+  "version": "1.0",
+  "saved_at": 1786008269.2032897
+}

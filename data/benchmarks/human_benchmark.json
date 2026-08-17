@@ -1,0 +1,154 @@
+{
+  "human": [
+    {
+      "work": "do you mean（简单）",
+      "video": "D:\\AE-Work\\resources\\tutorials\\AE教程10集\\do you mean（简单）\\成品.mp4",
+      "scores": {
+        "score_dynamism": 7.68,
+        "score_composition": 6.91,
+        "score_color_harmony": 6.52,
+        "score_text_read": 8.41,
+        "score_texture": 4.99,
+        "score_pacing": 7.41,
+        "score_overall": 7.03
+      }
+    },
+    {
+      "work": "五条悟（一般）",
+      "video": "D:\\AE-Work\\resources\\tutorials\\AE教程10集\\五条悟（一般）\\成品.mp4",
+      "scores": {
+        "score_dynamism": 7.35,
+        "score_composition": 6.68,
+        "score_color_harmony": 6.54,
+        "score_text_read": 8.32,
+        "score_texture": 4.79,
+        "score_pacing": 7.17,
+        "score_overall": 6.85
+      }
+    },
+    {
+      "work": "初音（简单）",
+      "video": "D:\\AE-Work\\resources\\tutorials\\AE教程10集\\初音（简单）\\成品.mp4",
+      "scores": {
+        "score_dynamism": 6.95,
+        "score_composition": 6.34,
+        "score_color_harmony": 6.53,
+        "score_text_read": 8.17,
+        "score_texture": 4.52,
+        "score_pacing": 6.83,
+        "score_overall": 6.59
+      }
+    },
+    {
+      "work": "李诗雅竖屏（简单）",
+      "video": "D:\\AE-Work\\resources\\tutorials\\AE教程10集\\李诗雅竖屏（简单）\\成品.mp4",
+      "scores": {
+        "score_dynamism": 7.19,
+        "score_composition": 6.41,
+        "score_color_harmony": 6.56,
+        "score_text_read": 8.26,
+        "score_texture": 4.62,
+        "score_pacing": 7.03,
+        "score_overall": 6.71
+      }
+    },
+    {
+      "work": "独自升级（一般）",
+      "video": "D:\\AE-Work\\resources\\tutorials\\AE教程10集\\独自升级（一般）\\成品.mp4",
+      "scores": {
+        "score_dynamism": 7.95,
+        "score_composition": 7.05,
+        "score_color_harmony": 6.6,
+        "score_text_read": 8.52,
+        "score_texture": 5.18,
+        "score_pacing": 7.62,
+        "score_overall": 7.19
+      }
+    },
+    {
+      "work": "猫猫（一般）",
+      "video": "D:\\AE-Work\\resources\\tutorials\\AE教程10集\\猫猫（一般）\\成品.mp4",
+      "scores": {
+        "score_dynamism": 7.14,
+        "score_composition": 6.39,
+        "score_color_harmony": 6.54,
+        "score_text_read": 8.26,
+        "score_texture": 4.57,
+        "score_pacing": 6.99,
+        "score_overall": 6.68
+      }
+    },
+    {
+      "work": "美人鱼（较难）",
+      "video": "D:\\AE-Work\\resources\\tutorials\\AE教程10集\\美人鱼（较难）\\成品.mp4",
+      "scores": {
+        "score_dynamism": 7.63,
+        "score_composition": 6.92,
+        "score_color_harmony": 6.51,
+        "score_text_read": 8.4,
+        "score_texture": 4.97,
+        "score_pacing": 7.4,
+        "score_overall": 7.02
+      }
+    },
+    {
+      "work": "蓝色监狱（量多）",
+      "video": "D:\\AE-Work\\resources\\tutorials\\AE教程10集\\蓝色监狱（量多）\\成品.mp4",
+      "scores": {
+        "score_dynamism": 7.73,
+        "score_composition": 6.99,
+        "score_color_harmony": 6.56,
+        "score_text_read": 8.47,
+        "score_texture": 5.01,
+        "score_pacing": 7.45,
+        "score_overall": 7.08
+      }
+    },
+    {
+      "work": "辉夜（一般）",
+      "video": "D:\\AE-Work\\resources\\tutorials\\AE教程10集\\辉夜（一般）\\成品.mp4",
+      "scores": {
+        "score_dynamism": 7.73,
+        "score_composition": 6.82,
+        "score_color_harmony": 6.58,
+        "score_text_read": 8.45,
+        "score_texture": 4.91,
+        "score_pacing": 7.42,
+        "score_overall": 7.01
+      }
+    }
+  ],
+  "human_avg": {
+    "score_dynamism": 7.483333333333334,
+    "score_composition": 6.723333333333334,
+    "score_color_harmony": 6.5488888888888885,
+    "score_text_read": 8.362222222222222,
+    "score_texture": 4.84,
+    "score_pacing": 7.257777777777779,
+    "score_overall": 6.906666666666665
+  },
+  "ours": [
+    {
+      "work": "finale.mp4",
+      "scores": {
+        "score_dynamism": 7.63,
+        "score_composition": 6.85,
+        "score_color_harmony": 6.58,
+        "score_text_read": 8.42,
+        "score_texture": 5.02,
+        "score_pacing": 7.38,
+        "score_overall": 7.02
+      }
+    }
+  ],
+  "ours_avg": {
+    "score_dynamism": 7.63,
+    "score_composition": 6.85,
+    "score_color_harmony": 6.58,
+    "score_text_read": 8.42,
+    "score_texture": 5.02,
+    "score_pacing": 7.38,
+    "score_overall": 7.02
+  },
+  "scorer": "local"
+}

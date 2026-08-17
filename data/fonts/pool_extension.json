@@ -1,0 +1,485 @@
+[
+ {
+  "category": "01-中文字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\01-中文字体\\本墨陈黑.ttf",
+  "ps_name": "Benmo Chenhei",
+  "family": "Benmo Chenhei"
+ },
+ {
+  "category": "01-中文字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\01-中文字体\\雷克萨斯简黑.TTF",
+  "ps_name": "LEXUS-HeiS-Bold-U",
+  "family": "MHeiGB"
+ },
+ {
+  "category": "01-中文字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\01-中文字体\\迷你简菱心.TTF",
+  "ps_name": "JLinXin",
+  "family": "迷你简菱心"
+ },
+ {
+  "category": "01-中文字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\01-中文字体\\汉仪黑荔枝体简_1.ttf",
+  "ps_name": "HYHeiLiZhiTiJ",
+  "family": "HYHeiLiZhiTiJ"
+ },
+ {
+  "category": "01-中文字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\01-中文字体\\汉仪细秀体简.ttf",
+  "ps_name": "HYXiXiuTiJ",
+  "family": "HYXiXiuTiJ L"
+ },
+ {
+  "category": "01-中文字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\01-中文字体\\蒙纳简中刚黑 MStiffHeiPRC-Medium.OTF",
+  "ps_name": "MStiffHeiPRC-Medium",
+  "family": "MStiffHeiPRC"
+ },
+ {
+  "category": "01-中文字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\01-中文字体\\站酷快乐体2016修订版.ttf",
+  "ps_name": "HappyZcool-2016",
+  "family": "HappyZcool-2016"
+ },
+ {
+  "category": "01-中文字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\01-中文字体\\浙江民間書刻體.ttf",
+  "ps_name": "ChekiangSung",
+  "family": "Chekiang Sung"
+ },
+ {
+  "category": "02-英文字体",
+  "style_hint": "英文展示",
+  "file": "D:\\AE-Work\\resources\\fonts\\02-英文字体\\DIN-Euro_1.otf",
+  "ps_name": "DIN-Euro",
+  "family": "DIN"
+ },
+ {
+  "category": "02-英文字体",
+  "style_hint": "英文展示",
+  "file": "D:\\AE-Work\\resources\\fonts\\02-英文字体\\VIPESSRG.TTF",
+  "ps_name": "ViperSquadronSolid",
+  "family": "Viper Squadron Solid"
+ },
+ {
+  "category": "02-英文字体",
+  "style_hint": "英文展示",
+  "file": "D:\\AE-Work\\resources\\fonts\\02-英文字体\\roxanne.ttf",
+  "ps_name": "Roxanne",
+  "family": "Roxanne"
+ },
+ {
+  "category": "02-英文字体",
+  "style_hint": "英文展示",
+  "file": "D:\\AE-Work\\resources\\fonts\\02-英文字体\\04B_03B.TTF",
+  "ps_name": "04b03b",
+  "family": "04b_03b"
+ },
+ {
+  "category": "02-英文字体",
+  "style_hint": "英文展示",
+  "file": "D:\\AE-Work\\resources\\fonts\\02-英文字体\\ZPSJ-004.ttf",
+  "ps_name": "ZPSJ-004\u0000",
+  "family": "ZPSJ-004\u0000"
+ },
+ {
+  "category": "02-英文字体",
+  "style_hint": "英文展示",
+  "file": "D:\\AE-Work\\resources\\fonts\\02-英文字体\\acid.otf",
+  "ps_name": "Acid",
+  "family": "Acid"
+ },
+ {
+  "category": "02-英文字体",
+  "style_hint": "英文展示",
+  "file": "D:\\AE-Work\\resources\\fonts\\02-英文字体\\Cafe Lounge 19.ttf",
+  "ps_name": "CafeLounge19",
+  "family": "Cafe Lounge 19"
+ },
+ {
+  "category": "02-英文字体",
+  "style_hint": "英文展示",
+  "file": "D:\\AE-Work\\resources\\fonts\\02-英文字体\\telegrafico.ttf",
+  "ps_name": "Telegrafico",
+  "family": "Telegrafico"
+ },
+ {
+  "category": "03-书法字体",
+  "style_hint": "hardcore/vintage 汉字大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\03-书法字体\\康熙字典体完整版.otf",
+  "ps_name": "TpldKhangXiDict",
+  "family": "TypeLand KhangXi Dict"
+ },
+ {
+  "category": "03-书法字体",
+  "style_hint": "hardcore/vintage 汉字大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\03-书法字体\\TpldKhangXiDictTrial_1.otf",
+  "ps_name": "TpldKhangXiDictTrial",
+  "family": "TypeLand KhangXi Dict Trial"
+ },
+ {
+  "category": "03-书法字体",
+  "style_hint": "hardcore/vintage 汉字大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\03-书法字体\\TpldKhangXiDictTrial_2.otf",
+  "ps_name": "TpldKhangXiDictTrial",
+  "family": "TypeLand KhangXi Dict Trial"
+ },
+ {
+  "category": "03-书法字体",
+  "style_hint": "hardcore/vintage 汉字大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\03-书法字体\\TpldKhangXiDictTrial.otf",
+  "ps_name": "TpldKhangXiDictTrial",
+  "family": "TypeLand KhangXi Dict Trial"
+ },
+ {
+  "category": "03-书法字体",
+  "style_hint": "hardcore/vintage 汉字大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\03-书法字体\\康熙字典体完整版本.otf",
+  "ps_name": "TpldKhangXiDict",
+  "family": "TypeLand KhangXi Dict"
+ },
+ {
+  "category": "03-书法字体",
+  "style_hint": "hardcore/vintage 汉字大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\03-书法字体\\汉仪字典宋简.ttf",
+  "ps_name": "HYa7gj",
+  "family": "汉仪字典宋简"
+ },
+ {
+  "category": "03-书法字体",
+  "style_hint": "hardcore/vintage 汉字大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\03-书法字体\\TypeLand 康熙字典體.otf",
+  "ps_name": "TpldKhangXiDict",
+  "family": "TypeLand KhangXi Dict"
+ },
+ {
+  "category": "03-书法字体",
+  "style_hint": "hardcore/vintage 汉字大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\03-书法字体\\康熙字典体完整版_0.otf",
+  "ps_name": "TpldKhangXiDict",
+  "family": "TypeLand KhangXi Dict"
+ },
+ {
+  "category": "04-卡通可爱字体",
+  "style_hint": "ambient/emotional",
+  "file": "D:\\AE-Work\\resources\\fonts\\04-卡通可爱字体\\义启紫水晶体.TTF",
+  "ps_name": "iekie-zishuijingti",
+  "family": "iekie zishuijingti"
+ },
+ {
+  "category": "04-卡通可爱字体",
+  "style_hint": "ambient/emotional",
+  "file": "D:\\AE-Work\\resources\\fonts\\04-卡通可爱字体\\造字工房尚黑G0v1常规体_1.otf",
+  "ps_name": "RTWSShangGoG0v1-Regular",
+  "family": "RTWS ShangGothic G0v1 Regular"
+ },
+ {
+  "category": "04-卡通可爱字体",
+  "style_hint": "ambient/emotional",
+  "file": "D:\\AE-Work\\resources\\fonts\\04-卡通可爱字体\\kiddySans.ttf",
+  "ps_name": "kiddySans",
+  "family": "kiddySans"
+ },
+ {
+  "category": "04-卡通可爱字体",
+  "style_hint": "ambient/emotional",
+  "file": "D:\\AE-Work\\resources\\fonts\\04-卡通可爱字体\\腾祥麦黑简.TTF",
+  "ps_name": "Tensentype MaiHeiJ",
+  "family": "Tensentype MaiHeiJ"
+ },
+ {
+  "category": "04-卡通可爱字体",
+  "style_hint": "ambient/emotional",
+  "file": "D:\\AE-Work\\resources\\fonts\\04-卡通可爱字体\\造字工房版黑G0v1常规体_1.ttf",
+  "ps_name": "RTWSBanHeiG0v1-Regular",
+  "family": "RTWS BanHei G0v1 Regular"
+ },
+ {
+  "category": "04-卡通可爱字体",
+  "style_hint": "ambient/emotional",
+  "file": "D:\\AE-Work\\resources\\fonts\\04-卡通可爱字体\\义启心宽体.TTF",
+  "ps_name": "iekie xinkuanti",
+  "family": "iekie xinkuanti"
+ },
+ {
+  "category": "04-卡通可爱字体",
+  "style_hint": "ambient/emotional",
+  "file": "D:\\AE-Work\\resources\\fonts\\04-卡通可爱字体\\方正基础像素.TTF",
+  "ps_name": "FZJCXS",
+  "family": "FZJCXS"
+ },
+ {
+  "category": "04-卡通可爱字体",
+  "style_hint": "ambient/emotional",
+  "file": "D:\\AE-Work\\resources\\fonts\\04-卡通可爱字体\\Baby Face.TTF",
+  "ps_name": "BabyFace",
+  "family": "Baby Face"
+ },
+ {
+  "category": "05-日文字体",
+  "style_hint": "amv 日式",
+  "file": "D:\\AE-Work\\resources\\fonts\\05-日文字体\\Franklin Gothic Medium.ttf",
+  "ps_name": "FranklinGothic-Medium",
+  "family": "Franklin Gothic Medium"
+ },
+ {
+  "category": "05-日文字体",
+  "style_hint": "amv 日式",
+  "file": "D:\\AE-Work\\resources\\fonts\\05-日文字体\\GOTHICB.TTF",
+  "ps_name": "CenturyGothic-Bold",
+  "family": "Century Gothic"
+ },
+ {
+  "category": "05-日文字体",
+  "style_hint": "amv 日式",
+  "file": "D:\\AE-Work\\resources\\fonts\\05-日文字体\\小塚明朝旧字形.ttf",
+  "ps_name": "–°âV",
+  "family": "–°âV"
+ },
+ {
+  "category": "05-日文字体",
+  "style_hint": "amv 日式",
+  "file": "D:\\AE-Work\\resources\\fonts\\05-日文字体\\GOTHICBI.TTF",
+  "ps_name": "CenturyGothic-BoldItalic",
+  "family": "Century Gothic"
+ },
+ {
+  "category": "05-日文字体",
+  "style_hint": "amv 日式",
+  "file": "D:\\AE-Work\\resources\\fonts\\05-日文字体\\gothic.ttf",
+  "ps_name": "CenturyGothic",
+  "family": "Century Gothic"
+ },
+ {
+  "category": "05-日文字体",
+  "style_hint": "amv 日式",
+  "file": "D:\\AE-Work\\resources\\fonts\\05-日文字体\\tradegothic-bold.otf",
+  "ps_name": "TradeGothic-Bold",
+  "family": "TradeGothic"
+ },
+ {
+  "category": "05-日文字体",
+  "style_hint": "amv 日式",
+  "file": "D:\\AE-Work\\resources\\fonts\\05-日文字体\\AdobeGothicStd-Bold.otf",
+  "ps_name": "AdobeGothicStd-Bold",
+  "family": "Adobe Gothic Std B"
+ },
+ {
+  "category": "05-日文字体",
+  "style_hint": "amv 日式",
+  "file": "D:\\AE-Work\\resources\\fonts\\05-日文字体\\日文LOGO.ttf",
+  "ps_name": "RiWenLOGO",
+  "family": "RiWenLOGO"
+ },
+ {
+  "category": "06-艺术设计字体",
+  "style_hint": "cyberpunk/edit",
+  "file": "D:\\AE-Work\\resources\\fonts\\06-艺术设计字体\\ArtlookinOneType.ttf",
+  "ps_name": "ArtlookinOneType",
+  "family": "ArtlookinOneType"
+ },
+ {
+  "category": "06-艺术设计字体",
+  "style_hint": "cyberpunk/edit",
+  "file": "D:\\AE-Work\\resources\\fonts\\06-艺术设计字体\\HeartlandRegular.TTF",
+  "ps_name": "HeartlandRegular",
+  "family": "HeartlandRegular"
+ },
+ {
+  "category": "06-艺术设计字体",
+  "style_hint": "cyberpunk/edit",
+  "file": "D:\\AE-Work\\resources\\fonts\\06-艺术设计字体\\kartikab.ttf",
+  "ps_name": "Kartika-Bold",
+  "family": "Kartika"
+ },
+ {
+  "category": "06-艺术设计字体",
+  "style_hint": "cyberpunk/edit",
+  "file": "D:\\AE-Work\\resources\\fonts\\06-艺术设计字体\\逐浪创意粗行体.otf",
+  "ps_name": "ZoomlaCusong-A009",
+  "family": "ZoomlaCusong-A009"
+ },
+ {
+  "category": "06-艺术设计字体",
+  "style_hint": "cyberpunk/edit",
+  "file": "D:\\AE-Work\\resources\\fonts\\06-艺术设计字体\\kartika.ttf",
+  "ps_name": "Kartika",
+  "family": "Kartika"
+ },
+ {
+  "category": "07-毛笔书法字体",
+  "style_hint": "hardcore_battle 撞拍大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\07-毛笔书法字体\\AVATAR__.TTF",
+  "ps_name": "Avatar",
+  "family": "Avatar"
+ },
+ {
+  "category": "07-毛笔书法字体",
+  "style_hint": "hardcore_battle 撞拍大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\07-毛笔书法字体\\SLIVER__.TTF",
+  "ps_name": "Sliver",
+  "family": "Sliver"
+ },
+ {
+  "category": "07-毛笔书法字体",
+  "style_hint": "hardcore_battle 撞拍大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\07-毛笔书法字体\\04B_09.TTF",
+  "ps_name": "04b09",
+  "family": "04b_09"
+ },
+ {
+  "category": "07-毛笔书法字体",
+  "style_hint": "hardcore_battle 撞拍大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\07-毛笔书法字体\\hand-of-sean.ttf",
+  "ps_name": "HandofSean",
+  "family": "Hand of Sean"
+ },
+ {
+  "category": "07-毛笔书法字体",
+  "style_hint": "hardcore_battle 撞拍大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\07-毛笔书法字体\\04B_24.TTF",
+  "ps_name": "04b24",
+  "family": "04b"
+ },
+ {
+  "category": "07-毛笔书法字体",
+  "style_hint": "hardcore_battle 撞拍大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\07-毛笔书法字体\\BABYBLOC.TTF",
+  "ps_name": "babybloc",
+  "family": "Baby Blocks"
+ },
+ {
+  "category": "07-毛笔书法字体",
+  "style_hint": "hardcore_battle 撞拍大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\07-毛笔书法字体\\液晶显示字体DIGITEK.TTF",
+  "ps_name": "Digitek",
+  "family": "Digitek"
+ },
+ {
+  "category": "07-毛笔书法字体",
+  "style_hint": "hardcore_battle 撞拍大字",
+  "file": "D:\\AE-Work\\resources\\fonts\\07-毛笔书法字体\\Action_Force.ttf",
+  "ps_name": "ActionForceNormal",
+  "family": "Action Force"
+ },
+ {
+  "category": "08-方正字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\08-方正字体\\方正方魅简体.TTF",
+  "ps_name": "FZFMJW--GB1-0",
+  "family": "FZFangMeiS-R-GB"
+ },
+ {
+  "category": "08-方正字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\08-方正字体\\方正晶中黑.ttf",
+  "ps_name": "FZJZHH",
+  "family": "FZJZHH"
+ },
+ {
+  "category": "08-方正字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\08-方正字体\\方正兰亭黑扁简体.ttf",
+  "ps_name": "FZLTHBJW--GB1-0",
+  "family": "FZLanTingHeiS-RC-GB"
+ },
+ {
+  "category": "08-方正字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\08-方正字体\\方正经黑简体_0.otf",
+  "ps_name": "FZJHJW-GB1-0",
+  "family": "FZJHJW-GB1-0"
+ },
+ {
+  "category": "08-方正字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\08-方正字体\\方正晶特黑.ttf",
+  "ps_name": "FZJTH",
+  "family": "FZJTH"
+ },
+ {
+  "category": "08-方正字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\08-方正字体\\方正晶大黑.ttf",
+  "ps_name": "FZJDH",
+  "family": "FZJDH"
+ },
+ {
+  "category": "08-方正字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\08-方正字体\\方正兰亭特黑长简.TTF",
+  "ps_name": "FZLTTHCJW--GB1-0",
+  "family": "FZLanTingHeiS-HN-GB"
+ },
+ {
+  "category": "08-方正字体",
+  "style_hint": "通用中文",
+  "file": "D:\\AE-Work\\resources\\fonts\\08-方正字体\\方正细谭黑简体.TTF",
+  "ps_name": "FZXTHJW--GB1-0",
+  "family": "FZTanHeiS-L-GB"
+ },
+ {
+  "category": "09-造字工房字体",
+  "style_hint": "edit 标题",
+  "file": "D:\\AE-Work\\resources\\fonts\\09-造字工房字体\\造字工房尚黑纤细体.otf",
+  "ps_name": "RTWSShangGoG0v1-ExLight",
+  "family": "RTWS ShangGothic G0v1 Extra Light"
+ },
+ {
+  "category": "09-造字工房字体",
+  "style_hint": "edit 标题",
+  "file": "D:\\AE-Work\\resources\\fonts\\09-造字工房字体\\造字工房尚黑特细超长体.otf",
+  "ps_name": "RTWSShangGoG0v1-UltLightCom",
+  "family": "RTWS ShangGothic G0v1 Ultra Light Compressed"
+ },
+ {
+  "category": "09-造字工房字体",
+  "style_hint": "edit 标题",
+  "file": "D:\\AE-Work\\resources\\fonts\\09-造字工房字体\\造字工房尚黑常规体.otf",
+  "ps_name": "RTWSShangGoG0v1-Regular",
+  "family": "RTWS ShangGothic G0v1 Regular"
+ },
+ {
+  "category": "09-造字工房字体",
+  "style_hint": "edit 标题",
+  "file": "D:\\AE-Work\\resources\\fonts\\09-造字工房字体\\造字工房尚黑细超长体.otf",
+  "ps_name": "RTWSShangGoG0v1-LightCom",
+  "family": "RTWS ShangGothic G0v1 Light Compressed"
+ },
+ {
+  "category": "09-造字工房字体",
+  "style_hint": "edit 标题",
+  "file": "D:\\AE-Work\\resources\\fonts\\09-造字工房字体\\Comfortaa-Regular.ttf",
+  "ps_name": "Comfortaa",
+  "family": "Comfortaa"
+ },
+ {
+  "category": "09-造字工房字体",
+  "style_hint": "edit 标题",
+  "file": "D:\\AE-Work\\resources\\fonts\\09-造字工房字体\\造字工房尚黑细体.otf",
+  "ps_name": "RTWSShangGoG0v1-Light",
+  "family": "RTWS ShangGothic G0v1 Light"
+ },
+ {
+  "category": "09-造字工房字体",
+  "style_hint": "edit 标题",
+  "file": "D:\\AE-Work\\resources\\fonts\\09-造字工房字体\\Comfortaa.ttf",
+  "ps_name": "Comfortaa-Bold",
+  "family": "Comfortaa"
+ },
+ {
+  "category": "09-造字工房字体",
+  "style_hint": "edit 标题",
+  "file": "D:\\AE-Work\\resources\\fonts\\09-造字工房字体\\造字工房尚黑纤细超长体.otf",
+  "ps_name": "RTWSShangGoG0v1-ExLightCom",
+  "family": "RTWS ShangGothic G0v1 Extra Light Compressed"
+ }
+]

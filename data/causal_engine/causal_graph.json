@@ -1,0 +1,489 @@
+{
+  "nodes": {
+    "ae_output_format": {
+      "id": "ae_output_format",
+      "node_type": "OUTPUT_QUALITY",
+      "engine": "ae",
+      "name": "ae_output_format",
+      "metadata": {}
+    },
+    "ae_execute": {
+      "id": "ae_execute",
+      "node_type": "ENGINE_STAGE",
+      "engine": "ae",
+      "name": "ae_execute",
+      "metadata": {}
+    },
+    "davinci_color": {
+      "id": "davinci_color",
+      "node_type": "ENGINE_STAGE",
+      "engine": "davinci",
+      "name": "davinci_color",
+      "metadata": {}
+    },
+    "ffmpeg_cpu": {
+      "id": "ffmpeg_cpu",
+      "node_type": "ENGINE_STATE",
+      "engine": "ffmpeg",
+      "name": "ffmpeg_cpu",
+      "metadata": {}
+    },
+    "effect_params": {
+      "id": "effect_params",
+      "node_type": "PARAMETER",
+      "engine": "pipeline",
+      "name": "effect_params",
+      "metadata": {}
+    },
+    "davinci_db_state": {
+      "id": "davinci_db_state",
+      "node_type": "ENGINE_STATE",
+      "engine": "davinci",
+      "name": "davinci_db_state",
+      "metadata": {}
+    },
+    "ffmpeg_transcode": {
+      "id": "ffmpeg_transcode",
+      "node_type": "ENGINE_STAGE",
+      "engine": "ffmpeg",
+      "name": "ffmpeg_transcode",
+      "metadata": {}
+    },
+    "input_resolution": {
+      "id": "input_resolution",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "input_resolution",
+      "metadata": {}
+    },
+    "ae_memory": {
+      "id": "ae_memory",
+      "node_type": "ENGINE_STATE",
+      "engine": "ae",
+      "name": "ae_memory",
+      "metadata": {}
+    },
+    "input_codec": {
+      "id": "input_codec",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "input_codec",
+      "metadata": {}
+    },
+    "ae_memory_gb": {
+      "id": "ae_memory_gb",
+      "node_type": "ENGINE_STATE",
+      "engine": "ae",
+      "name": "ae_memory_gb",
+      "metadata": {}
+    },
+    "analyze_duration": {
+      "id": "analyze_duration",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "analyze_duration",
+      "metadata": {}
+    },
+    "analyze_success": {
+      "id": "analyze_success",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "analyze_success",
+      "metadata": {}
+    },
+    "davinci_memory_gb": {
+      "id": "davinci_memory_gb",
+      "node_type": "ENGINE_STATE",
+      "engine": "davinci",
+      "name": "davinci_memory_gb",
+      "metadata": {}
+    },
+    "execute_duration": {
+      "id": "execute_duration",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "execute_duration",
+      "metadata": {}
+    },
+    "execute_success": {
+      "id": "execute_success",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "execute_success",
+      "metadata": {}
+    },
+    "ffmpeg_memory_gb": {
+      "id": "ffmpeg_memory_gb",
+      "node_type": "ENGINE_STATE",
+      "engine": "ffmpeg",
+      "name": "ffmpeg_memory_gb",
+      "metadata": {}
+    },
+    "output_quality": {
+      "id": "output_quality",
+      "node_type": "OUTPUT_QUALITY",
+      "engine": "pipeline",
+      "name": "output_quality",
+      "metadata": {}
+    },
+    "perceive_duration": {
+      "id": "perceive_duration",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "perceive_duration",
+      "metadata": {}
+    },
+    "perceive_success": {
+      "id": "perceive_success",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "perceive_success",
+      "metadata": {}
+    },
+    "plan_duration": {
+      "id": "plan_duration",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "plan_duration",
+      "metadata": {}
+    },
+    "plan_success": {
+      "id": "plan_success",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "plan_success",
+      "metadata": {}
+    },
+    "render_duration": {
+      "id": "render_duration",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "render_duration",
+      "metadata": {}
+    },
+    "render_success": {
+      "id": "render_success",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "render_success",
+      "metadata": {}
+    },
+    "verify_duration": {
+      "id": "verify_duration",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "verify_duration",
+      "metadata": {}
+    },
+    "verify_success": {
+      "id": "verify_success",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "verify_success",
+      "metadata": {}
+    },
+    "ae_bridge_memory_gb": {
+      "id": "ae_bridge_memory_gb",
+      "node_type": "ENGINE_STATE",
+      "engine": "ae",
+      "name": "ae_bridge_memory_gb",
+      "metadata": {}
+    },
+    "ame_memory_gb": {
+      "id": "ame_memory_gb",
+      "node_type": "ENGINE_STATE",
+      "engine": "pipeline",
+      "name": "ame_memory_gb",
+      "metadata": {}
+    },
+    "librosa_memory_gb": {
+      "id": "librosa_memory_gb",
+      "node_type": "ENGINE_STATE",
+      "engine": "pipeline",
+      "name": "librosa_memory_gb",
+      "metadata": {}
+    },
+    "opencv_memory_gb": {
+      "id": "opencv_memory_gb",
+      "node_type": "ENGINE_STATE",
+      "engine": "pipeline",
+      "name": "opencv_memory_gb",
+      "metadata": {}
+    },
+    "premiere_memory_gb": {
+      "id": "premiere_memory_gb",
+      "node_type": "ENGINE_STATE",
+      "engine": "pipeline",
+      "name": "premiere_memory_gb",
+      "metadata": {}
+    },
+    "system_memory_gb": {
+      "id": "system_memory_gb",
+      "node_type": "ENGINE_STATE",
+      "engine": "pipeline",
+      "name": "system_memory_gb",
+      "metadata": {}
+    },
+    "critic_memory_gb": {
+      "id": "critic_memory_gb",
+      "node_type": "ENGINE_STATE",
+      "engine": "pipeline",
+      "name": "critic_memory_gb",
+      "metadata": {}
+    }
+  },
+  "edges": [
+    {
+      "source": "ae_execute",
+      "target": "davinci_color",
+      "weight": 0.7,
+      "confidence": 0.8,
+      "is_expert": true,
+      "sample_count": 0,
+      "last_updated": 1786766232.7578163
+    },
+    {
+      "source": "ae_execute",
+      "target": "ffmpeg_transcode",
+      "weight": -0.9,
+      "confidence": 0.9,
+      "is_expert": true,
+      "sample_count": 0,
+      "last_updated": 1786766232.7578163
+    },
+    {
+      "source": "davinci_color",
+      "target": "ffmpeg_transcode",
+      "weight": 0.6,
+      "confidence": 0.7,
+      "is_expert": true,
+      "sample_count": 0,
+      "last_updated": 1786766232.7578163
+    },
+    {
+      "source": "ae_memory",
+      "target": "ae_execute",
+      "weight": -0.5,
+      "confidence": 0.7,
+      "is_expert": true,
+      "sample_count": 0,
+      "last_updated": 1786766232.7578163
+    },
+    {
+      "source": "ffmpeg_cpu",
+      "target": "ffmpeg_transcode",
+      "weight": -0.4,
+      "confidence": 0.6,
+      "is_expert": true,
+      "sample_count": 0,
+      "last_updated": 1786766232.7578163
+    },
+    {
+      "source": "effect_params",
+      "target": "ae_execute",
+      "weight": -0.3,
+      "confidence": 0.6,
+      "is_expert": true,
+      "sample_count": 0,
+      "last_updated": 1786766232.7578163
+    },
+    {
+      "source": "ae_output_format",
+      "target": "davinci_color",
+      "weight": 0.5,
+      "confidence": 0.7,
+      "is_expert": true,
+      "sample_count": 0,
+      "last_updated": 1786766232.7578163
+    },
+    {
+      "source": "davinci_db_state",
+      "target": "davinci_color",
+      "weight": -0.4,
+      "confidence": 0.6,
+      "is_expert": true,
+      "sample_count": 0,
+      "last_updated": 1786766232.7578163
+    },
+    {
+      "source": "input_resolution",
+      "target": "ae_memory",
+      "weight": 0.6,
+      "confidence": 0.8,
+      "is_expert": true,
+      "sample_count": 0,
+      "last_updated": 1786766232.7578163
+    },
+    {
+      "source": "input_codec",
+      "target": "ffmpeg_transcode",
+      "weight": -0.3,
+      "confidence": 0.6,
+      "is_expert": true,
+      "sample_count": 0,
+      "last_updated": 1786766232.7578163
+    },
+    {
+      "source": "plan_duration",
+      "target": "plan_success",
+      "weight": 0.5136716903786369,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "analyze_success",
+      "target": "output_quality",
+      "weight": 0.5220720301879263,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "analyze_success",
+      "target": "plan_success",
+      "weight": 0.6902566867686306,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "analyze_duration",
+      "target": "perceive_duration",
+      "weight": 0.9850121670885451,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "analyze_duration",
+      "target": "verify_duration",
+      "weight": 0.7306137932668841,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "execute_duration",
+      "target": "render_duration",
+      "weight": 0.833745264761367,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "execute_duration",
+      "target": "output_quality",
+      "weight": 0.8827319273647867,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "execute_duration",
+      "target": "perceive_duration",
+      "weight": 0.9571657434592337,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 15,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "execute_success",
+      "target": "render_success",
+      "weight": 0.6872573699739443,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "execute_success",
+      "target": "plan_success",
+      "weight": 0.5252257314388896,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "execute_success",
+      "target": "verify_success",
+      "weight": 0.4824865199497815,
+      "confidence": 0.7500000000000002,
+      "is_expert": false,
+      "sample_count": 6,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "perceive_success",
+      "target": "plan_success",
+      "weight": 0.5129891760425774,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "perceive_success",
+      "target": "verify_success",
+      "weight": -0.3468909530866045,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "render_duration",
+      "target": "verify_duration",
+      "weight": 0.7900172891374628,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "output_quality",
+      "target": "plan_duration",
+      "weight": 0.6994917537471961,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "output_quality",
+      "target": "perceive_duration",
+      "weight": 0.8879870895495666,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "plan_success",
+      "target": "render_duration",
+      "weight": 0.5233457388651894,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    },
+    {
+      "source": "render_success",
+      "target": "verify_success",
+      "weight": 0.6121585998321992,
+      "confidence": 1.0,
+      "is_expert": false,
+      "sample_count": 19,
+      "last_updated": 1786766237.9885094
+    }
+  ]
+}

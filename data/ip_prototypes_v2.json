@@ -1,0 +1,5534 @@
+{
+  "version": "v2",
+  "timestamp": "2026-08-09 13:12:53",
+  "vlm_source": "D:\\aot_corpus\\vlm_full\\results.jsonl",
+  "vlm_total_frames": 59497,
+  "vlm_matched_ips": 61,
+  "vlm_new_ips": 0,
+  "scene_mood_matrix": [
+    {
+      "scene": "battle",
+      "mood": "hot",
+      "count": 15173
+    },
+    {
+      "scene": "dialog",
+      "mood": "tense",
+      "count": 8461
+    },
+    {
+      "scene": "battle",
+      "mood": "tense",
+      "count": 5689
+    },
+    {
+      "scene": "emotional",
+      "mood": "hot",
+      "count": 5600
+    },
+    {
+      "scene": "emotional",
+      "mood": "tense",
+      "count": 4809
+    },
+    {
+      "scene": "emotional",
+      "mood": "sad",
+      "count": 4355
+    },
+    {
+      "scene": "emotional",
+      "mood": "warm",
+      "count": 3470
+    },
+    {
+      "scene": "daily",
+      "mood": "warm",
+      "count": 2881
+    },
+    {
+      "scene": "dialog",
+      "mood": "warm",
+      "count": 2744
+    },
+    {
+      "scene": "landscape",
+      "mood": "warm",
+      "count": 2362
+    },
+    {
+      "scene": "ceremony",
+      "mood": "warm",
+      "count": 623
+    },
+    {
+      "scene": "daily",
+      "mood": "tense",
+      "count": 565
+    },
+    {
+      "scene": "landscape",
+      "mood": "tense",
+      "count": 550
+    },
+    {
+      "scene": "ceremony",
+      "mood": "tense",
+      "count": 546
+    },
+    {
+      "scene": "ceremony",
+      "mood": "hot",
+      "count": 269
+    },
+    {
+      "scene": "dialog",
+      "mood": "hot",
+      "count": 255
+    },
+    {
+      "scene": "landscape",
+      "mood": "sad",
+      "count": 253
+    },
+    {
+      "scene": "landscape",
+      "mood": "hot",
+      "count": 230
+    },
+    {
+      "scene": "daily",
+      "mood": "hot",
+      "count": 148
+    },
+    {
+      "scene": "dialog",
+      "mood": "funny",
+      "count": 126
+    }
+  ],
+  "prototypes": {
+    "FATE": {
+      "name_cn": "FATE",
+      "name_en": "Fate stay night",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Fate stay night",
+        "a scene from Fate stay night anime series",
+        "Fate stay night anime character",
+        "a promotional image of Fate stay night",
+        "Fate stay night anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《FATE》的画面截图",
+        "《FATE》动漫中的一幕",
+        "FATE动画角色",
+        "《FATE》的宣传图",
+        "FATE动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 81,
+      "vlm_scene_dist": {
+        "ceremony": 33,
+        "daily": 13,
+        "dialog": 12,
+        "landscape": 11,
+        "emotional": 7,
+        "battle": 5
+      },
+      "vlm_mood_dist": {
+        "warm": 58,
+        "hot": 14,
+        "tense": 8,
+        "sad": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "卫宫士郎",
+          "count": 9
+        },
+        {
+          "name": "远坂凛",
+          "count": 4
+        },
+        {
+          "name": "吉尔伽美什",
+          "count": 4
+        },
+        {
+          "name": "阿尔托莉雅·潘德拉贡",
+          "count": 3
+        },
+        {
+          "name": "卫宫切嗣",
+          "count": 2
+        },
+        {
+          "name": "伊莉雅丝菲尔·冯·爱因兹贝伦",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 26
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 11
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 11
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 8
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 5
+        }
+      ],
+      "vlm_dominant_scene": "ceremony",
+      "vlm_dominant_mood": "warm"
+    },
+    "黑岩射手": {
+      "name_cn": "黑岩射手",
+      "name_en": "Black Rock Shooter",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Black Rock Shooter",
+        "a scene from Black Rock Shooter anime series",
+        "Black Rock Shooter anime character",
+        "a promotional image of Black Rock Shooter",
+        "Black Rock Shooter anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《黑岩射手》的画面截图",
+        "《黑岩射手》动漫中的一幕",
+        "黑岩射手动画角色",
+        "《黑岩射手》的宣传图",
+        "黑岩射手动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 17,
+      "vlm_scene_dist": {
+        "dialog": 6,
+        "emotional": 4,
+        "ceremony": 4,
+        "daily": 3
+      },
+      "vlm_mood_dist": {
+        "warm": 10,
+        "sad": 3,
+        "tense": 3,
+        "hot": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "黑岩射手",
+          "count": 10
+        },
+        {
+          "name": "间谍过家家角色",
+          "count": 2
+        },
+        {
+          "name": "芙莉莲",
+          "count": 1
+        },
+        {
+          "name": "[角色1]",
+          "count": 1
+        },
+        {
+          "name": "[角色2]",
+          "count": 1
+        },
+        {
+          "name": "[角色看不清]",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 5
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 3
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 3
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "ceremony",
+          "mood": "tense",
+          "count": 2
+        }
+      ],
+      "vlm_dominant_scene": "dialog",
+      "vlm_dominant_mood": "warm"
+    },
+    "地缚少年花子君": {
+      "name_cn": "地缚少年花子君",
+      "name_en": "Toilet-bound Hanako-kun",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Toilet-bound Hanako-kun",
+        "a scene from Toilet-bound Hanako-kun anime series",
+        "Toilet-bound Hanako-kun anime character",
+        "a promotional image of Toilet-bound Hanako-kun",
+        "Toilet-bound Hanako-kun anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《地缚少年花子君》的画面截图",
+        "《地缚少年花子君》动漫中的一幕",
+        "地缚少年花子君动画角色",
+        "《地缚少年花子君》的宣传图",
+        "地缚少年花子君动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 255,
+      "vlm_scene_dist": {
+        "dialog": 59,
+        "landscape": 56,
+        "emotional": 47,
+        "daily": 46,
+        "ceremony": 30,
+        "comedy": 9,
+        "battle": 8
+      },
+      "vlm_mood_dist": {
+        "warm": 163,
+        "funny": 37,
+        "sad": 28,
+        "tense": 21,
+        "hot": 6
+      },
+      "vlm_top_characters": [
+        {
+          "name": "花子君",
+          "count": 165
+        },
+        {
+          "name": "其他角色",
+          "count": 25
+        },
+        {
+          "name": "千寻",
+          "count": 16
+        },
+        {
+          "name": "芙莉莲",
+          "count": 14
+        },
+        {
+          "name": "影山茂夫",
+          "count": 13
+        },
+        {
+          "name": "女学生",
+          "count": 11
+        },
+        {
+          "name": "佐仓杏子",
+          "count": 7
+        },
+        {
+          "name": "男学生",
+          "count": 6
+        },
+        {
+          "name": "高岭蕾",
+          "count": 3
+        },
+        {
+          "name": "佐仓千代",
+          "count": 3
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 50
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 36
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 31
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 29
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 20
+        }
+      ],
+      "vlm_dominant_scene": "dialog",
+      "vlm_dominant_mood": "warm"
+    },
+    "无限滑板": {
+      "name_cn": "无限滑板",
+      "name_en": "SK8 the Infinity",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime SK8 the Infinity",
+        "a scene from SK8 the Infinity anime series",
+        "SK8 the Infinity anime character",
+        "a promotional image of SK8 the Infinity",
+        "SK8 the Infinity anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《无限滑板》的画面截图",
+        "《无限滑板》动漫中的一幕",
+        "无限滑板动画角色",
+        "《无限滑板》的宣传图",
+        "无限滑板动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 37,
+      "vlm_scene_dist": {
+        "daily": 24,
+        "landscape": 9,
+        "battle": 2,
+        "emotional": 1,
+        "ceremony": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 31,
+        "hot": 2,
+        "sad": 2,
+        "funny": 1,
+        "tense": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "角色1",
+          "count": 3
+        },
+        {
+          "name": "不知火",
+          "count": 1
+        },
+        {
+          "name": "未知角色",
+          "count": 1
+        },
+        {
+          "name": "影山飞雄",
+          "count": 1
+        },
+        {
+          "name": "槙野",
+          "count": 1
+        },
+        {
+          "name": "槙野的同伴",
+          "count": 1
+        },
+        {
+          "name": "花子君",
+          "count": 1
+        },
+        {
+          "name": "其他角色",
+          "count": 1
+        },
+        {
+          "name": "芙莉莲",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 22
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 8
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 1
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 1
+        },
+        {
+          "scene": "daily",
+          "mood": "hot",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "海贼王": {
+      "name_cn": "海贼王",
+      "name_en": "One Piece",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime One Piece",
+        "a scene from One Piece anime series",
+        "One Piece anime character",
+        "a promotional image of One Piece",
+        "One Piece anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《海贼王》的画面截图",
+        "《海贼王》动漫中的一幕",
+        "海贼王动画角色",
+        "《海贼王》的宣传图",
+        "海贼王动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 36,
+      "vlm_scene_dist": {
+        "battle": 18,
+        "ceremony": 6,
+        "emotional": 5,
+        "landscape": 4,
+        "daily": 3
+      },
+      "vlm_mood_dist": {
+        "hot": 25,
+        "warm": 11
+      },
+      "vlm_top_characters": [
+        {
+          "name": "艾斯",
+          "count": 7
+        },
+        {
+          "name": "蒙奇·D·路飞",
+          "count": 3
+        },
+        {
+          "name": "艾尼路",
+          "count": 2
+        },
+        {
+          "name": "特拉法尔加·罗",
+          "count": 2
+        },
+        {
+          "name": "凯多",
+          "count": 1
+        },
+        {
+          "name": "夏洛特·玲玲",
+          "count": 1
+        },
+        {
+          "name": "山治",
+          "count": 1
+        },
+        {
+          "name": "白胡子",
+          "count": 1
+        },
+        {
+          "name": "路飞",
+          "count": 1
+        },
+        {
+          "name": "波雅·汉库克",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 18
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 6
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 4
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 3
+        },
+        {
+          "scene": "daily",
+          "mood": "hot",
+          "count": 2
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "hot"
+    },
+    "火影忍者": {
+      "name_cn": "火影忍者",
+      "name_en": "Naruto",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Naruto",
+        "a scene from Naruto anime series",
+        "Naruto anime character",
+        "a promotional image of Naruto",
+        "Naruto anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《火影忍者》的画面截图",
+        "《火影忍者》动漫中的一幕",
+        "火影忍者动画角色",
+        "《火影忍者》的宣传图",
+        "火影忍者动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 31,
+      "vlm_scene_dist": {
+        "battle": 21,
+        "emotional": 4,
+        "daily": 3,
+        "dialog": 2,
+        "landscape": 1
+      },
+      "vlm_mood_dist": {
+        "hot": 23,
+        "tense": 3,
+        "warm": 3,
+        "sad": 2
+      },
+      "vlm_top_characters": [
+        {
+          "name": "宇智波佐助",
+          "count": 11
+        },
+        {
+          "name": "漩涡鸣人",
+          "count": 8
+        },
+        {
+          "name": "春野樱",
+          "count": 3
+        },
+        {
+          "name": "宇智波带土",
+          "count": 2
+        },
+        {
+          "name": "宇智波鼬",
+          "count": 2
+        },
+        {
+          "name": "日向雏田",
+          "count": 2
+        },
+        {
+          "name": "角色2",
+          "count": 1
+        },
+        {
+          "name": "宇智波斑",
+          "count": 1
+        },
+        {
+          "name": "旗木卡卡西",
+          "count": 1
+        },
+        {
+          "name": "宇智波止水",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 21
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 2
+        },
+        {
+          "scene": "dialog",
+          "mood": "tense",
+          "count": 2
+        },
+        {
+          "scene": "daily",
+          "mood": "sad",
+          "count": 2
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 2
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "hot"
+    },
+    "Move": {
+      "name_cn": "Move",
+      "name_en": "K-pop music video performance stage",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime K-pop music video performance stage",
+        "a scene from K-pop music video performance stage anime series",
+        "K-pop music video performance stage anime character",
+        "a promotional image of K-pop music video performance stage",
+        "K-pop music video performance stage anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《Move》的画面截图",
+        "《Move》动漫中的一幕",
+        "Move动画角色",
+        "《Move》的宣传图",
+        "Move动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "时光代理人": {
+      "name_cn": "时光代理人",
+      "name_en": "Link Click anime",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Link Click anime",
+        "a scene from Link Click anime anime series",
+        "Link Click anime anime character",
+        "a promotional image of Link Click anime",
+        "Link Click anime anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《时光代理人》的画面截图",
+        "《时光代理人》动漫中的一幕",
+        "时光代理人动画角色",
+        "《时光代理人》的宣传图",
+        "时光代理人动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 9,
+      "vlm_scene_dist": {
+        "daily": 6,
+        "landscape": 2,
+        "dialog": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 9
+      },
+      "vlm_top_characters": [
+        {
+          "name": "程小时",
+          "count": 7
+        },
+        {
+          "name": "陆光",
+          "count": 4
+        },
+        {
+          "name": "程小时的同伴",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 6
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "灵笼": {
+      "name_cn": "灵笼",
+      "name_en": "Ling Cage Chinese 3D anime",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Ling Cage Chinese 3D anime",
+        "a scene from Ling Cage Chinese 3D anime anime series",
+        "Ling Cage Chinese 3D anime anime character",
+        "a promotional image of Ling Cage Chinese 3D anime",
+        "Ling Cage Chinese 3D anime anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《灵笼》的画面截图",
+        "《灵笼》动漫中的一幕",
+        "灵笼动画角色",
+        "《灵笼》的宣传图",
+        "灵笼动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 1,
+      "vlm_scene_dist": {
+        "daily": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "张天笑",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "灼眼的夏娜": {
+      "name_cn": "灼眼的夏娜",
+      "name_en": "Shakugan no Shana",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Shakugan no Shana",
+        "a scene from Shakugan no Shana anime series",
+        "Shakugan no Shana anime character",
+        "a promotional image of Shakugan no Shana",
+        "Shakugan no Shana anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《灼眼的夏娜》的画面截图",
+        "《灼眼的夏娜》动漫中的一幕",
+        "灼眼的夏娜动画角色",
+        "《灼眼的夏娜》的宣传图",
+        "灼眼的夏娜动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 95,
+      "vlm_scene_dist": {
+        "battle": 55,
+        "emotional": 27,
+        "ceremony": 6,
+        "landscape": 3,
+        "daily": 2,
+        "dialog": 2
+      },
+      "vlm_mood_dist": {
+        "hot": 83,
+        "warm": 11,
+        "sad": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "夏娜",
+          "count": 42
+        },
+        {
+          "name": "坂井悠二",
+          "count": 8
+        },
+        {
+          "name": "坂本",
+          "count": 1
+        },
+        {
+          "name": "其他角色",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 55
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 23
+        },
+        {
+          "scene": "ceremony",
+          "mood": "hot",
+          "count": 3
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 3
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 3
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "hot"
+    },
+    "猫和老鼠": {
+      "name_cn": "猫和老鼠",
+      "name_en": "Tom and Jerry",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Tom and Jerry",
+        "a scene from Tom and Jerry anime series",
+        "Tom and Jerry anime character",
+        "a promotional image of Tom and Jerry",
+        "Tom and Jerry anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《猫和老鼠》的画面截图",
+        "《猫和老鼠》动漫中的一幕",
+        "猫和老鼠动画角色",
+        "《猫和老鼠》的宣传图",
+        "猫和老鼠动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 1,
+      "vlm_scene_dist": {
+        "battle": 1
+      },
+      "vlm_mood_dist": {
+        "funny": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "汤姆",
+          "count": 1
+        },
+        {
+          "name": "杰瑞",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "funny",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "funny"
+    },
+    "咒术回战": {
+      "name_cn": "咒术回战",
+      "name_en": "Jujutsu Kaisen",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Jujutsu Kaisen",
+        "a scene from Jujutsu Kaisen anime series",
+        "Jujutsu Kaisen anime character",
+        "a promotional image of Jujutsu Kaisen",
+        "Jujutsu Kaisen anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《咒术回战》的画面截图",
+        "《咒术回战》动漫中的一幕",
+        "咒术回战动画角色",
+        "《咒术回战》的宣传图",
+        "咒术回战动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 597,
+      "vlm_scene_dist": {
+        "emotional": 300,
+        "battle": 231,
+        "dialog": 27,
+        "ceremony": 26,
+        "daily": 10,
+        "landscape": 3
+      },
+      "vlm_mood_dist": {
+        "hot": 416,
+        "warm": 79,
+        "sad": 63,
+        "tense": 39
+      },
+      "vlm_top_characters": [
+        {
+          "name": "五条悟",
+          "count": 335
+        },
+        {
+          "name": "伏黑惠",
+          "count": 118
+        },
+        {
+          "name": "虎杖悠仁",
+          "count": 14
+        },
+        {
+          "name": "夏油杰",
+          "count": 13
+        },
+        {
+          "name": "狗卷棘",
+          "count": 2
+        },
+        {
+          "name": "七海千秋",
+          "count": 1
+        },
+        {
+          "name": "钉崎野蔷薇",
+          "count": 1
+        },
+        {
+          "name": "链锯人",
+          "count": 1
+        },
+        {
+          "name": "电次",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 224
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 183
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 62
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 32
+        },
+        {
+          "scene": "emotional",
+          "mood": "tense",
+          "count": 23
+        }
+      ],
+      "vlm_dominant_scene": "emotional",
+      "vlm_dominant_mood": "hot"
+    },
+    "K": {
+      "name_cn": "K",
+      "name_en": "K anime project",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime K anime project",
+        "a scene from K anime project anime series",
+        "K anime project anime character",
+        "a promotional image of K anime project",
+        "K anime project anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《K》的画面截图",
+        "《K》动漫中的一幕",
+        "K动画角色",
+        "《K》的宣传图",
+        "K动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 1,
+      "vlm_scene_dist": {
+        "ceremony": 1
+      },
+      "vlm_mood_dist": {
+        "tense": 1
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "ceremony",
+          "mood": "tense",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "ceremony",
+      "vlm_dominant_mood": "tense"
+    },
+    "抽烟猫": {
+      "name_cn": "抽烟猫",
+      "name_en": "cat smoking meme video",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime cat smoking meme video",
+        "a scene from cat smoking meme video anime series",
+        "cat smoking meme video anime character",
+        "a promotional image of cat smoking meme video",
+        "cat smoking meme video anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《抽烟猫》的画面截图",
+        "《抽烟猫》动漫中的一幕",
+        "抽烟猫动画角色",
+        "《抽烟猫》的宣传图",
+        "抽烟猫动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 33,
+      "vlm_scene_dist": {
+        "daily": 16,
+        "emotional": 6,
+        "battle": 4,
+        "comedy": 3,
+        "ceremony": 2,
+        "dialog": 1,
+        "landscape": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 12,
+        "hot": 9,
+        "funny": 6,
+        "tense": 3,
+        "sad": 3
+      },
+      "vlm_top_characters": [
+        {
+          "name": "抽烟猫",
+          "count": 20
+        },
+        {
+          "name": "朴璐美",
+          "count": 1
+        },
+        {
+          "name": "羊群",
+          "count": 1
+        },
+        {
+          "name": "最上嗣生",
+          "count": 1
+        },
+        {
+          "name": "另一角色",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 11
+        },
+        {
+          "scene": "comedy",
+          "mood": "funny",
+          "count": 3
+        },
+        {
+          "scene": "daily",
+          "mood": "hot",
+          "count": 3
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 3
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 3
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "鬼灭之刃": {
+      "name_cn": "鬼灭之刃",
+      "name_en": "Demon Slayer Kimetsu no Yaiba",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Demon Slayer Kimetsu no Yaiba",
+        "a scene from Demon Slayer Kimetsu no Yaiba anime series",
+        "Demon Slayer Kimetsu no Yaiba anime character",
+        "a promotional image of Demon Slayer Kimetsu no Yaiba",
+        "Demon Slayer Kimetsu no Yaiba anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《鬼灭之刃》的画面截图",
+        "《鬼灭之刃》动漫中的一幕",
+        "鬼灭之刃动画角色",
+        "《鬼灭之刃》的宣传图",
+        "鬼灭之刃动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 13,
+      "vlm_scene_dist": {
+        "battle": 9,
+        "daily": 2,
+        "emotional": 2
+      },
+      "vlm_mood_dist": {
+        "hot": 10,
+        "warm": 2,
+        "sad": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "灶门炭治郎",
+          "count": 7
+        },
+        {
+          "name": "栗花落香奈乎",
+          "count": 2
+        },
+        {
+          "name": "富冈义勇",
+          "count": 2
+        },
+        {
+          "name": "不死川实弥",
+          "count": 1
+        },
+        {
+          "name": "鬼舞辻无惨",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 9
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 1
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "hot"
+    },
+    "浪客行": {
+      "name_cn": "浪客行",
+      "name_en": "Vagabond manga style warrior",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Vagabond manga style warrior",
+        "a scene from Vagabond manga style warrior anime series",
+        "Vagabond manga style warrior anime character",
+        "a promotional image of Vagabond manga style warrior",
+        "Vagabond manga style warrior anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《浪客行》的画面截图",
+        "《浪客行》动漫中的一幕",
+        "浪客行动画角色",
+        "《浪客行》的宣传图",
+        "浪客行动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "龙族": {
+      "name_cn": "龙族",
+      "name_en": "Dragon Raja anime",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Dragon Raja anime",
+        "a scene from Dragon Raja anime anime series",
+        "Dragon Raja anime anime character",
+        "a promotional image of Dragon Raja anime",
+        "Dragon Raja anime anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《龙族》的画面截图",
+        "《龙族》动漫中的一幕",
+        "龙族动画角色",
+        "《龙族》的宣传图",
+        "龙族动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "赛博朋克：边缘行者": {
+      "name_cn": "赛博朋克：边缘行者",
+      "name_en": "Cyberpunk Edgerunners",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Cyberpunk Edgerunners",
+        "a scene from Cyberpunk Edgerunners anime series",
+        "Cyberpunk Edgerunners anime character",
+        "a promotional image of Cyberpunk Edgerunners",
+        "Cyberpunk Edgerunners anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《赛博朋克：边缘行者》的画面截图",
+        "《赛博朋克：边缘行者》动漫中的一幕",
+        "赛博朋克：边缘行者动画角色",
+        "《赛博朋克：边缘行者》的宣传图",
+        "赛博朋克：边缘行者动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 22,
+      "vlm_scene_dist": {
+        "landscape": 16,
+        "battle": 5,
+        "dialog": 1
+      },
+      "vlm_mood_dist": {
+        "hot": 12,
+        "warm": 5,
+        "tense": 4,
+        "cold": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "里奇·布里格斯",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "hot",
+          "count": 8
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 4
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 4
+        },
+        {
+          "scene": "landscape",
+          "mood": "tense",
+          "count": 3
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "hot"
+    },
+    "链锯人": {
+      "name_cn": "链锯人",
+      "name_en": "Chainsaw Man",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Chainsaw Man",
+        "a scene from Chainsaw Man anime series",
+        "Chainsaw Man anime character",
+        "a promotional image of Chainsaw Man",
+        "Chainsaw Man anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《链锯人》的画面截图",
+        "《链锯人》动漫中的一幕",
+        "链锯人动画角色",
+        "《链锯人》的宣传图",
+        "链锯人动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 608,
+      "vlm_scene_dist": {
+        "battle": 333,
+        "emotional": 99,
+        "ceremony": 66,
+        "daily": 57,
+        "dialog": 27,
+        "landscape": 26
+      },
+      "vlm_mood_dist": {
+        "hot": 396,
+        "warm": 110,
+        "tense": 62,
+        "sad": 38,
+        "cold": 2
+      },
+      "vlm_top_characters": [
+        {
+          "name": "链锯人",
+          "count": 120
+        },
+        {
+          "name": "帕瓦",
+          "count": 90
+        },
+        {
+          "name": "电次",
+          "count": 86
+        },
+        {
+          "name": "电锯人",
+          "count": 64
+        },
+        {
+          "name": "帕克",
+          "count": 13
+        },
+        {
+          "name": "电锯人（链锯人）",
+          "count": 6
+        },
+        {
+          "name": "电锯人（帕瓦）",
+          "count": 3
+        },
+        {
+          "name": "玛奇玛",
+          "count": 2
+        },
+        {
+          "name": "恶魔",
+          "count": 2
+        },
+        {
+          "name": "淀司",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 315
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 49
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 43
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 34
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 32
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "hot"
+    },
+    "原神": {
+      "name_cn": "原神",
+      "name_en": "Genshin Impact",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Genshin Impact",
+        "a scene from Genshin Impact anime series",
+        "Genshin Impact anime character",
+        "a promotional image of Genshin Impact",
+        "Genshin Impact anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《原神》的画面截图",
+        "《原神》动漫中的一幕",
+        "原神动画角色",
+        "《原神》的宣传图",
+        "原神动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 11,
+      "vlm_scene_dist": {
+        "landscape": 8,
+        "daily": 2,
+        "emotional": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 9,
+        "sad": 2
+      },
+      "vlm_top_characters": [
+        {
+          "name": "空",
+          "count": 1
+        },
+        {
+          "name": "派蒙",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 6
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "landscape",
+          "mood": "sad",
+          "count": 2
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "斩·赤红之瞳": {
+      "name_cn": "斩·赤红之瞳",
+      "name_en": "Akame ga Kill",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Akame ga Kill",
+        "a scene from Akame ga Kill anime series",
+        "Akame ga Kill anime character",
+        "a promotional image of Akame ga Kill",
+        "Akame ga Kill anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《斩·赤红之瞳》的画面截图",
+        "《斩·赤红之瞳》动漫中的一幕",
+        "斩·赤红之瞳动画角色",
+        "《斩·赤红之瞳》的宣传图",
+        "斩·赤红之瞳动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 2,
+      "vlm_scene_dist": {
+        "dialog": 1,
+        "battle": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 1,
+        "tense": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "Night Raid成员",
+          "count": 2
+        },
+        {
+          "name": "塔兹米",
+          "count": 1
+        },
+        {
+          "name": "雷姆",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 1
+        },
+        {
+          "scene": "battle",
+          "mood": "tense",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "dialog",
+      "vlm_dominant_mood": "warm"
+    },
+    "某科学的超电磁炮": {
+      "name_cn": "某科学的超电磁炮",
+      "name_en": "A Certain Scientific Railgun",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime A Certain Scientific Railgun",
+        "a scene from A Certain Scientific Railgun anime series",
+        "A Certain Scientific Railgun anime character",
+        "a promotional image of A Certain Scientific Railgun",
+        "A Certain Scientific Railgun anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《某科学的超电磁炮》的画面截图",
+        "《某科学的超电磁炮》动漫中的一幕",
+        "某科学的超电磁炮动画角色",
+        "《某科学的超电磁炮》的宣传图",
+        "某科学的超电磁炮动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 61,
+      "vlm_scene_dist": {
+        "daily": 32,
+        "dialog": 14,
+        "emotional": 7,
+        "ceremony": 4,
+        "landscape": 4
+      },
+      "vlm_mood_dist": {
+        "warm": 48,
+        "funny": 7,
+        "hot": 4,
+        "tense": 1,
+        "sad": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "白井黑子",
+          "count": 38
+        },
+        {
+          "name": "佐天泪子",
+          "count": 17
+        },
+        {
+          "name": "御坂美琴",
+          "count": 5
+        },
+        {
+          "name": "上条当麻",
+          "count": 4
+        },
+        {
+          "name": "食蜂操祈",
+          "count": 2
+        },
+        {
+          "name": "月咏小萌",
+          "count": 1
+        },
+        {
+          "name": "常盘台中学学生",
+          "count": 1
+        },
+        {
+          "name": "马场芳郎",
+          "count": 1
+        },
+        {
+          "name": "石川由依",
+          "count": 1
+        },
+        {
+          "name": "立石琴子",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 25
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 11
+        },
+        {
+          "scene": "daily",
+          "mood": "funny",
+          "count": 7
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 4
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 4
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "JOJO的奇妙冒险": {
+      "name_cn": "JOJO的奇妙冒险",
+      "name_en": "JoJo's Bizarre Adventure",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime JoJo's Bizarre Adventure",
+        "a scene from JoJo's Bizarre Adventure anime series",
+        "JoJo's Bizarre Adventure anime character",
+        "a promotional image of JoJo's Bizarre Adventure",
+        "JoJo's Bizarre Adventure anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《JOJO的奇妙冒险》的画面截图",
+        "《JOJO的奇妙冒险》动漫中的一幕",
+        "JOJO的奇妙冒险动画角色",
+        "《JOJO的奇妙冒险》的宣传图",
+        "JOJO的奇妙冒险动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 26,
+      "vlm_scene_dist": {
+        "ceremony": 13,
+        "emotional": 8,
+        "dialog": 3,
+        "battle": 2
+      },
+      "vlm_mood_dist": {
+        "hot": 12,
+        "warm": 11,
+        "tense": 3
+      },
+      "vlm_top_characters": [
+        {
+          "name": "吉良吉影",
+          "count": 7
+        },
+        {
+          "name": "乔鲁诺·乔巴拿",
+          "count": 2
+        },
+        {
+          "name": "空条承太郎",
+          "count": 1
+        },
+        {
+          "name": "空条徐伦",
+          "count": 1
+        },
+        {
+          "name": "乔斯达家族的替身（The World）",
+          "count": 1
+        },
+        {
+          "name": "乔斯达家族成员（如乔瑟夫·乔斯达）",
+          "count": 1
+        },
+        {
+          "name": "乔瑟夫·乔斯达",
+          "count": 1
+        },
+        {
+          "name": "乔斯达家族成员",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 9
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 6
+        },
+        {
+          "scene": "ceremony",
+          "mood": "hot",
+          "count": 4
+        },
+        {
+          "scene": "dialog",
+          "mood": "tense",
+          "count": 2
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 2
+        }
+      ],
+      "vlm_dominant_scene": "ceremony",
+      "vlm_dominant_mood": "hot"
+    },
+    "进击的巨人": {
+      "name_cn": "进击的巨人",
+      "name_en": "Attack on Titan",
+      "tier": "existing",
+      "en_templates": [
+        "a screenshot from the anime Attack on Titan",
+        "a scene from Attack on Titan anime series",
+        "Attack on Titan anime character",
+        "a promotional image of Attack on Titan",
+        "Attack on Titan anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《进击的巨人》的画面截图",
+        "《进击的巨人》动漫中的一幕",
+        "进击的巨人动画角色",
+        "《进击的巨人》的宣传图",
+        "进击的巨人动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 53675,
+      "vlm_scene_dist": {
+        "battle": 19918,
+        "emotional": 16426,
+        "dialog": 11192,
+        "daily": 3019,
+        "landscape": 2048,
+        "ceremony": 1060,
+        "comedy": 11,
+        "tense": 1
+      },
+      "vlm_mood_dist": {
+        "hot": 20387,
+        "tense": 20236,
+        "warm": 9160,
+        "sad": 3695,
+        "funny": 171,
+        "cold": 25,
+        "cool": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "艾伦·耶格尔",
+          "count": 28685
+        },
+        {
+          "name": "利威尔·阿克曼",
+          "count": 14331
+        },
+        {
+          "name": "三笠·阿克曼",
+          "count": 9680
+        },
+        {
+          "name": "利威尔兵长",
+          "count": 4662
+        },
+        {
+          "name": "阿明·阿诺德",
+          "count": 4658
+        },
+        {
+          "name": "米卡莎·阿克曼",
+          "count": 3492
+        },
+        {
+          "name": "艾尔文·史密斯",
+          "count": 2647
+        },
+        {
+          "name": "巨人",
+          "count": 2357
+        },
+        {
+          "name": "格里沙·耶格尔",
+          "count": 2096
+        },
+        {
+          "name": "阿尼·利昂纳德",
+          "count": 1650
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 14306
+        },
+        {
+          "scene": "dialog",
+          "mood": "tense",
+          "count": 8385
+        },
+        {
+          "scene": "battle",
+          "mood": "tense",
+          "count": 5610
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 5277
+        },
+        {
+          "scene": "emotional",
+          "mood": "tense",
+          "count": 4744
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "hot"
+    },
+    "间谍过家家": {
+      "name_cn": "间谍过家家",
+      "name_en": "Spy x Family",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Spy x Family",
+        "a scene from Spy x Family anime series",
+        "Spy x Family anime character",
+        "a promotional image of Spy x Family",
+        "Spy x Family anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《间谍过家家》的画面截图",
+        "《间谍过家家》动漫中的一幕",
+        "间谍过家家动画角色",
+        "《间谍过家家》的宣传图",
+        "间谍过家家动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 224,
+      "vlm_scene_dist": {
+        "daily": 89,
+        "dialog": 73,
+        "emotional": 25,
+        "ceremony": 25,
+        "battle": 5,
+        "comedy": 5,
+        "landscape": 2
+      },
+      "vlm_mood_dist": {
+        "warm": 164,
+        "tense": 27,
+        "funny": 19,
+        "sad": 8,
+        "hot": 6
+      },
+      "vlm_top_characters": [
+        {
+          "name": "阿尼亚·福杰",
+          "count": 82
+        },
+        {
+          "name": "安妮亚·福杰",
+          "count": 70
+        },
+        {
+          "name": "黄昏",
+          "count": 66
+        },
+        {
+          "name": "约尔·福杰",
+          "count": 54
+        },
+        {
+          "name": "安妮亚",
+          "count": 22
+        },
+        {
+          "name": "伊甸",
+          "count": 13
+        },
+        {
+          "name": "约尔",
+          "count": 8
+        },
+        {
+          "name": "[角色1]",
+          "count": 7
+        },
+        {
+          "name": "[角色2]",
+          "count": 7
+        },
+        {
+          "name": "伊甸·福杰",
+          "count": 6
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 85
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 46
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 20
+        },
+        {
+          "scene": "dialog",
+          "mood": "tense",
+          "count": 16
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 11
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "葬送的芙莉莲": {
+      "name_cn": "葬送的芙莉莲",
+      "name_en": "Frieren Beyond Journey's End",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Frieren Beyond Journey's End",
+        "a scene from Frieren Beyond Journey's End anime series",
+        "Frieren Beyond Journey's End anime character",
+        "a promotional image of Frieren Beyond Journey's End",
+        "Frieren Beyond Journey's End anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《葬送的芙莉莲》的画面截图",
+        "《葬送的芙莉莲》动漫中的一幕",
+        "葬送的芙莉莲动画角色",
+        "《葬送的芙莉莲》的宣传图",
+        "葬送的芙莉莲动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 1822,
+      "vlm_scene_dist": {
+        "emotional": 993,
+        "landscape": 332,
+        "ceremony": 176,
+        "daily": 166,
+        "dialog": 115,
+        "battle": 39,
+        "flashback": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 883,
+        "sad": 854,
+        "tense": 37,
+        "hot": 36,
+        "cold": 6,
+        "cool": 5,
+        "funny": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "芙莉莲",
+          "count": 1162
+        },
+        {
+          "name": "艾泽",
+          "count": 71
+        },
+        {
+          "name": "其他角色",
+          "count": 45
+        },
+        {
+          "name": "辛美尔",
+          "count": 32
+        },
+        {
+          "name": "男主角",
+          "count": 31
+        },
+        {
+          "name": "少年",
+          "count": 21
+        },
+        {
+          "name": "菲伦",
+          "count": 9
+        },
+        {
+          "name": "艾莉娜",
+          "count": 9
+        },
+        {
+          "name": "利姆鲁",
+          "count": 7
+        },
+        {
+          "name": "艾莉亚",
+          "count": 6
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 658
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 331
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 206
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 151
+        },
+        {
+          "scene": "landscape",
+          "mood": "sad",
+          "count": 101
+        }
+      ],
+      "vlm_dominant_scene": "emotional",
+      "vlm_dominant_mood": "warm"
+    },
+    "药屋少女的呢喃": {
+      "name_cn": "药屋少女的呢喃",
+      "name_en": "The Apothecary Diaries",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime The Apothecary Diaries",
+        "a scene from The Apothecary Diaries anime series",
+        "The Apothecary Diaries anime character",
+        "a promotional image of The Apothecary Diaries",
+        "The Apothecary Diaries anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《药屋少女的呢喃》的画面截图",
+        "《药屋少女的呢喃》动漫中的一幕",
+        "药屋少女的呢喃动画角色",
+        "《药屋少女的呢喃》的宣传图",
+        "药屋少女的呢喃动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 134,
+      "vlm_scene_dist": {
+        "daily": 104,
+        "dialog": 11,
+        "emotional": 9,
+        "ceremony": 5,
+        "landscape": 4,
+        "battle": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 125,
+        "sad": 4,
+        "tense": 3,
+        "hot": 2
+      },
+      "vlm_top_characters": [
+        {
+          "name": "药屋岳",
+          "count": 22
+        },
+        {
+          "name": "药屋老师",
+          "count": 20
+        },
+        {
+          "name": "药屋透",
+          "count": 19
+        },
+        {
+          "name": "药屋千叶",
+          "count": 11
+        },
+        {
+          "name": "药屋透子",
+          "count": 8
+        },
+        {
+          "name": "芙莉莲",
+          "count": 5
+        },
+        {
+          "name": "药屋真琴",
+          "count": 4
+        },
+        {
+          "name": "药屋岳人",
+          "count": 4
+        },
+        {
+          "name": "药屋岳的助手",
+          "count": 2
+        },
+        {
+          "name": "药屋少女",
+          "count": 2
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 103
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 11
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 4
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 4
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 3
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "我推的孩子": {
+      "name_cn": "我推的孩子",
+      "name_en": "Oshi no Ko",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Oshi no Ko",
+        "a scene from Oshi no Ko anime series",
+        "Oshi no Ko anime character",
+        "a promotional image of Oshi no Ko",
+        "Oshi no Ko anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《我推的孩子》的画面截图",
+        "《我推的孩子》动漫中的一幕",
+        "我推的孩子动画角色",
+        "《我推的孩子》的宣传图",
+        "我推的孩子动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 4,
+      "vlm_scene_dist": {
+        "ceremony": 3,
+        "emotional": 1
+      },
+      "vlm_mood_dist": {
+        "sad": 4
+      },
+      "vlm_top_characters": [
+        {
+          "name": "[角色部分可见]",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "ceremony",
+          "mood": "sad",
+          "count": 3
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "ceremony",
+      "vlm_dominant_mood": "sad"
+    },
+    "蓝色监狱": {
+      "name_cn": "蓝色监狱",
+      "name_en": "Blue Lock",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Blue Lock",
+        "a scene from Blue Lock anime series",
+        "Blue Lock anime character",
+        "a promotional image of Blue Lock",
+        "Blue Lock anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《蓝色监狱》的画面截图",
+        "《蓝色监狱》动漫中的一幕",
+        "蓝色监狱动画角色",
+        "《蓝色监狱》的宣传图",
+        "蓝色监狱动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 5,
+      "vlm_scene_dist": {
+        "dialog": 2,
+        "ceremony": 2,
+        "battle": 1
+      },
+      "vlm_mood_dist": {
+        "hot": 2,
+        "funny": 2,
+        "warm": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "坂田将吾",
+          "count": 2
+        },
+        {
+          "name": "凪诚士郎",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "dialog",
+          "mood": "funny",
+          "count": 2
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 1
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 1
+        },
+        {
+          "scene": "ceremony",
+          "mood": "hot",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "dialog",
+      "vlm_dominant_mood": "hot"
+    },
+    "排球少年": {
+      "name_cn": "排球少年",
+      "name_en": "Haikyuu",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Haikyuu",
+        "a scene from Haikyuu anime series",
+        "Haikyuu anime character",
+        "a promotional image of Haikyuu",
+        "Haikyuu anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《排球少年》的画面截图",
+        "《排球少年》动漫中的一幕",
+        "排球少年动画角色",
+        "《排球少年》的宣传图",
+        "排球少年动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 50,
+      "vlm_scene_dist": {
+        "daily": 30,
+        "emotional": 7,
+        "battle": 5,
+        "dialog": 4,
+        "landscape": 2,
+        "ceremony": 2
+      },
+      "vlm_mood_dist": {
+        "warm": 36,
+        "hot": 10,
+        "tense": 4
+      },
+      "vlm_top_characters": [
+        {
+          "name": "影山飞雄",
+          "count": 21
+        },
+        {
+          "name": "日向翔阳",
+          "count": 3
+        },
+        {
+          "name": "洁世一",
+          "count": 3
+        },
+        {
+          "name": "不知火一树",
+          "count": 1
+        },
+        {
+          "name": "日向翔太",
+          "count": 1
+        },
+        {
+          "name": "菅原孝支",
+          "count": 1
+        },
+        {
+          "name": "川崎怜太郎",
+          "count": 1
+        },
+        {
+          "name": "菊地俊斗",
+          "count": 1
+        },
+        {
+          "name": "孤爪研磨",
+          "count": 1
+        },
+        {
+          "name": "宫侑",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 29
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 5
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 4
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 2
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "我的英雄学院": {
+      "name_cn": "我的英雄学院",
+      "name_en": "My Hero Academia",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime My Hero Academia",
+        "a scene from My Hero Academia anime series",
+        "My Hero Academia anime character",
+        "a promotional image of My Hero Academia",
+        "My Hero Academia anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《我的英雄学院》的画面截图",
+        "《我的英雄学院》动漫中的一幕",
+        "我的英雄学院动画角色",
+        "《我的英雄学院》的宣传图",
+        "我的英雄学院动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 39,
+      "vlm_scene_dist": {
+        "daily": 13,
+        "emotional": 11,
+        "ceremony": 9,
+        "dialog": 4,
+        "battle": 2
+      },
+      "vlm_mood_dist": {
+        "warm": 26,
+        "hot": 10,
+        "tense": 2,
+        "funny": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "绿谷出久",
+          "count": 20
+        },
+        {
+          "name": "丽日御茶子",
+          "count": 8
+        },
+        {
+          "name": "轰焦冻",
+          "count": 5
+        },
+        {
+          "name": "饭田天哉",
+          "count": 3
+        },
+        {
+          "name": "相泽消太",
+          "count": 2
+        },
+        {
+          "name": "天野明",
+          "count": 1
+        },
+        {
+          "name": "其他角色",
+          "count": 1
+        },
+        {
+          "name": "[角色头部可见，但无法辨识]",
+          "count": 1
+        },
+        {
+          "name": "[角色1]",
+          "count": 1
+        },
+        {
+          "name": "[角色2]",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 12
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 9
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 8
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 3
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 2
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "Re:从零开始的异世界生活": {
+      "name_cn": "Re:从零开始的异世界生活",
+      "name_en": "Re:Zero",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Re:Zero",
+        "a scene from Re:Zero anime series",
+        "Re:Zero anime character",
+        "a promotional image of Re:Zero",
+        "Re:Zero anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《Re:从零开始的异世界生活》的画面截图",
+        "《Re:从零开始的异世界生活》动漫中的一幕",
+        "Re:从零开始的异世界生活动画角色",
+        "《Re:从零开始的异世界生活》的宣传图",
+        "Re:从零开始的异世界生活动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 11,
+      "vlm_scene_dist": {
+        "ceremony": 4,
+        "landscape": 3,
+        "battle": 2,
+        "emotional": 1,
+        "dialog": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 5,
+        "hot": 3,
+        "sad": 2,
+        "tense": 1
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 2
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "landscape",
+          "mood": "sad",
+          "count": 1
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "ceremony",
+      "vlm_dominant_mood": "warm"
+    },
+    "为美好的世界献上祝福": {
+      "name_cn": "为美好的世界献上祝福",
+      "name_en": "KonoSuba",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime KonoSuba",
+        "a scene from KonoSuba anime series",
+        "KonoSuba anime character",
+        "a promotional image of KonoSuba",
+        "KonoSuba anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《为美好的世界献上祝福》的画面截图",
+        "《为美好的世界献上祝福》动漫中的一幕",
+        "为美好的世界献上祝福动画角色",
+        "《为美好的世界献上祝福》的宣传图",
+        "为美好的世界献上祝福动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 3,
+      "vlm_scene_dist": {
+        "dialog": 2,
+        "daily": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 3
+      },
+      "vlm_top_characters": [
+        {
+          "name": "阿克娅",
+          "count": 1
+        },
+        {
+          "name": "和真",
+          "count": 1
+        },
+        {
+          "name": "佐藤和真",
+          "count": 1
+        },
+        {
+          "name": "惠惠",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "dialog",
+      "vlm_dominant_mood": "warm"
+    },
+    "无职转生": {
+      "name_cn": "无职转生",
+      "name_en": "Mushoku Tensei",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Mushoku Tensei",
+        "a scene from Mushoku Tensei anime series",
+        "Mushoku Tensei anime character",
+        "a promotional image of Mushoku Tensei",
+        "Mushoku Tensei anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《无职转生》的画面截图",
+        "《无职转生》动漫中的一幕",
+        "无职转生动画角色",
+        "《无职转生》的宣传图",
+        "无职转生动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "关于我转生变成史莱姆这档事": {
+      "name_cn": "关于我转生变成史莱姆这档事",
+      "name_en": "That Time I Got Reincarnated as a Slime",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime That Time I Got Reincarnated as a Slime",
+        "a scene from That Time I Got Reincarnated as a Slime anime series",
+        "That Time I Got Reincarnated as a Slime anime character",
+        "a promotional image of That Time I Got Reincarnated as a Slime",
+        "That Time I Got Reincarnated as a Slime anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《关于我转生变成史莱姆这档事》的画面截图",
+        "《关于我转生变成史莱姆这档事》动漫中的一幕",
+        "关于我转生变成史莱姆这档事动画角色",
+        "《关于我转生变成史莱姆这档事》的宣传图",
+        "关于我转生变成史莱姆这档事动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "Overlord": {
+      "name_cn": "Overlord",
+      "name_en": "Overlord anime",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Overlord anime",
+        "a scene from Overlord anime anime series",
+        "Overlord anime anime character",
+        "a promotional image of Overlord anime",
+        "Overlord anime anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《Overlord》的画面截图",
+        "《Overlord》动漫中的一幕",
+        "Overlord动画角色",
+        "《Overlord》的宣传图",
+        "Overlord动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 18,
+      "vlm_scene_dist": {
+        "landscape": 12,
+        "ceremony": 3,
+        "emotional": 2,
+        "battle": 1
+      },
+      "vlm_mood_dist": {
+        "tense": 10,
+        "sad": 4,
+        "warm": 3,
+        "hot": 1
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "tense",
+          "count": 8
+        },
+        {
+          "scene": "ceremony",
+          "mood": "tense",
+          "count": 2
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "landscape",
+          "mood": "sad",
+          "count": 2
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "tense"
+    },
+    "一拳超人": {
+      "name_cn": "一拳超人",
+      "name_en": "One Punch Man",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime One Punch Man",
+        "a scene from One Punch Man anime series",
+        "One Punch Man anime character",
+        "a promotional image of One Punch Man",
+        "One Punch Man anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《一拳超人》的画面截图",
+        "《一拳超人》动漫中的一幕",
+        "一拳超人动画角色",
+        "《一拳超人》的宣传图",
+        "一拳超人动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 126,
+      "vlm_scene_dist": {
+        "battle": 107,
+        "emotional": 14,
+        "daily": 3,
+        "ceremony": 2
+      },
+      "vlm_mood_dist": {
+        "hot": 122,
+        "warm": 3,
+        "tense": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "琦玉",
+          "count": 31
+        },
+        {
+          "name": "杰诺斯",
+          "count": 2
+        },
+        {
+          "name": "埼玉",
+          "count": 2
+        },
+        {
+          "name": "杰诺",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 107
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 12
+        },
+        {
+          "scene": "daily",
+          "mood": "hot",
+          "count": 2
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "ceremony",
+          "mood": "tense",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "hot"
+    },
+    "灵能百分百": {
+      "name_cn": "灵能百分百",
+      "name_en": "Mob Psycho 100",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Mob Psycho 100",
+        "a scene from Mob Psycho 100 anime series",
+        "Mob Psycho 100 anime character",
+        "a promotional image of Mob Psycho 100",
+        "Mob Psycho 100 anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《灵能百分百》的画面截图",
+        "《灵能百分百》动漫中的一幕",
+        "灵能百分百动画角色",
+        "《灵能百分百》的宣传图",
+        "灵能百分百动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 7,
+      "vlm_scene_dist": {
+        "emotional": 4,
+        "dialog": 1,
+        "daily": 1,
+        "comedy": 1
+      },
+      "vlm_mood_dist": {
+        "tense": 5,
+        "hot": 1,
+        "funny": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "影山茂夫",
+          "count": 7
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "emotional",
+          "mood": "tense",
+          "count": 4
+        },
+        {
+          "scene": "dialog",
+          "mood": "tense",
+          "count": 1
+        },
+        {
+          "scene": "daily",
+          "mood": "hot",
+          "count": 1
+        },
+        {
+          "scene": "comedy",
+          "mood": "funny",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "emotional",
+      "vlm_dominant_mood": "tense"
+    },
+    "钢之炼金术师": {
+      "name_cn": "钢之炼金术师",
+      "name_en": "Fullmetal Alchemist",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Fullmetal Alchemist",
+        "a scene from Fullmetal Alchemist anime series",
+        "Fullmetal Alchemist anime character",
+        "a promotional image of Fullmetal Alchemist",
+        "Fullmetal Alchemist anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《钢之炼金术师》的画面截图",
+        "《钢之炼金术师》动漫中的一幕",
+        "钢之炼金术师动画角色",
+        "《钢之炼金术师》的宣传图",
+        "钢之炼金术师动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 2,
+      "vlm_scene_dist": {
+        "dialog": 1,
+        "battle": 1
+      },
+      "vlm_mood_dist": {
+        "tense": 1,
+        "hot": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "伊莱亚斯·约翰·雷姆斯",
+          "count": 1
+        },
+        {
+          "name": "未知角色",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "dialog",
+          "mood": "tense",
+          "count": 1
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "dialog",
+      "vlm_dominant_mood": "tense"
+    },
+    "死亡笔记": {
+      "name_cn": "死亡笔记",
+      "name_en": "Death Note",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Death Note",
+        "a scene from Death Note anime series",
+        "Death Note anime character",
+        "a promotional image of Death Note",
+        "Death Note anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《死亡笔记》的画面截图",
+        "《死亡笔记》动漫中的一幕",
+        "死亡笔记动画角色",
+        "《死亡笔记》的宣传图",
+        "死亡笔记动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 10,
+      "vlm_scene_dist": {
+        "emotional": 7,
+        "battle": 2,
+        "daily": 1
+      },
+      "vlm_mood_dist": {
+        "tense": 5,
+        "hot": 3,
+        "sad": 2
+      },
+      "vlm_top_characters": [
+        {
+          "name": "夜神月",
+          "count": 9
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "emotional",
+          "mood": "tense",
+          "count": 4
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 2
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 2
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 1
+        },
+        {
+          "scene": "daily",
+          "mood": "tense",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "emotional",
+      "vlm_dominant_mood": "tense"
+    },
+    "Code Geass": {
+      "name_cn": "Code Geass",
+      "name_en": "Code Geass",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Code Geass",
+        "a scene from Code Geass anime series",
+        "Code Geass anime character",
+        "a promotional image of Code Geass",
+        "Code Geass anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《Code Geass》的画面截图",
+        "《Code Geass》动漫中的一幕",
+        "Code Geass动画角色",
+        "《Code Geass》的宣传图",
+        "Code Geass动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "EVA": {
+      "name_cn": "EVA",
+      "name_en": "Neon Genesis Evangelion",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Neon Genesis Evangelion",
+        "a scene from Neon Genesis Evangelion anime series",
+        "Neon Genesis Evangelion anime character",
+        "a promotional image of Neon Genesis Evangelion",
+        "Neon Genesis Evangelion anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《EVA》的画面截图",
+        "《EVA》动漫中的一幕",
+        "EVA动画角色",
+        "《EVA》的宣传图",
+        "EVA动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 2,
+      "vlm_scene_dist": {
+        "emotional": 2
+      },
+      "vlm_mood_dist": {
+        "sad": 1,
+        "tense": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "碇真嗣",
+          "count": 2
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 1
+        },
+        {
+          "scene": "emotional",
+          "mood": "tense",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "emotional",
+      "vlm_dominant_mood": "sad"
+    },
+    "星际牛仔": {
+      "name_cn": "星际牛仔",
+      "name_en": "Cowboy Bebop",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Cowboy Bebop",
+        "a scene from Cowboy Bebop anime series",
+        "Cowboy Bebop anime character",
+        "a promotional image of Cowboy Bebop",
+        "Cowboy Bebop anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《星际牛仔》的画面截图",
+        "《星际牛仔》动漫中的一幕",
+        "星际牛仔动画角色",
+        "《星际牛仔》的宣传图",
+        "星际牛仔动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 56,
+      "vlm_scene_dist": {
+        "landscape": 37,
+        "daily": 11,
+        "dialog": 4,
+        "battle": 3,
+        "emotional": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 37,
+        "tense": 11,
+        "cold": 4,
+        "hot": 3,
+        "cool": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "斯派克·斯皮格尔",
+          "count": 17
+        },
+        {
+          "name": "菲·瓦伦坦",
+          "count": 8
+        },
+        {
+          "name": "艾德",
+          "count": 3
+        },
+        {
+          "name": "巴特",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 23
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 11
+        },
+        {
+          "scene": "landscape",
+          "mood": "tense",
+          "count": 9
+        },
+        {
+          "scene": "landscape",
+          "mood": "cold",
+          "count": 4
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 3
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "攻壳机动队": {
+      "name_cn": "攻壳机动队",
+      "name_en": "Ghost in the Shell",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Ghost in the Shell",
+        "a scene from Ghost in the Shell anime series",
+        "Ghost in the Shell anime character",
+        "a promotional image of Ghost in the Shell",
+        "Ghost in the Shell anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《攻壳机动队》的画面截图",
+        "《攻壳机动队》动漫中的一幕",
+        "攻壳机动队动画角色",
+        "《攻壳机动队》的宣传图",
+        "攻壳机动队动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 82,
+      "vlm_scene_dist": {
+        "battle": 28,
+        "daily": 22,
+        "landscape": 14,
+        "dialog": 10,
+        "emotional": 8
+      },
+      "vlm_mood_dist": {
+        "tense": 44,
+        "warm": 20,
+        "hot": 15,
+        "sad": 1,
+        "cool": 1,
+        "cold": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "草薙素子",
+          "count": 41
+        },
+        {
+          "name": "巴特",
+          "count": 13
+        },
+        {
+          "name": "施瓦茨",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "tense",
+          "count": 15
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 13
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 13
+        },
+        {
+          "scene": "landscape",
+          "mood": "tense",
+          "count": 10
+        },
+        {
+          "scene": "dialog",
+          "mood": "tense",
+          "count": 8
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "tense"
+    },
+    "心理测量者": {
+      "name_cn": "心理测量者",
+      "name_en": "Psycho-Pass",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Psycho-Pass",
+        "a scene from Psycho-Pass anime series",
+        "Psycho-Pass anime character",
+        "a promotional image of Psycho-Pass",
+        "Psycho-Pass anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《心理测量者》的画面截图",
+        "《心理测量者》动漫中的一幕",
+        "心理测量者动画角色",
+        "《心理测量者》的宣传图",
+        "心理测量者动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 68,
+      "vlm_scene_dist": {
+        "emotional": 28,
+        "dialog": 16,
+        "daily": 13,
+        "battle": 7,
+        "ceremony": 4
+      },
+      "vlm_mood_dist": {
+        "tense": 35,
+        "warm": 19,
+        "sad": 8,
+        "hot": 6
+      },
+      "vlm_top_characters": [
+        {
+          "name": "狡啮慎也",
+          "count": 17
+        },
+        {
+          "name": "草薙素子",
+          "count": 7
+        },
+        {
+          "name": "狡噛慎也",
+          "count": 6
+        },
+        {
+          "name": "巴特",
+          "count": 5
+        },
+        {
+          "name": "枪田郁美",
+          "count": 5
+        },
+        {
+          "name": "[角色看不清]",
+          "count": 4
+        },
+        {
+          "name": "常守朱",
+          "count": 4
+        },
+        {
+          "name": "枪田飒太",
+          "count": 2
+        },
+        {
+          "name": "须乡实里",
+          "count": 2
+        },
+        {
+          "name": "[角色1]",
+          "count": 2
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "dialog",
+          "mood": "tense",
+          "count": 14
+        },
+        {
+          "scene": "emotional",
+          "mood": "tense",
+          "count": 10
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 10
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 7
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 7
+        }
+      ],
+      "vlm_dominant_scene": "emotional",
+      "vlm_dominant_mood": "tense"
+    },
+    "来自深渊": {
+      "name_cn": "来自深渊",
+      "name_en": "Made in Abyss",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Made in Abyss",
+        "a scene from Made in Abyss anime series",
+        "Made in Abyss anime character",
+        "a promotional image of Made in Abyss",
+        "Made in Abyss anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《来自深渊》的画面截图",
+        "《来自深渊》动漫中的一幕",
+        "来自深渊动画角色",
+        "《来自深渊》的宣传图",
+        "来自深渊动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 245,
+      "vlm_scene_dist": {
+        "landscape": 212,
+        "battle": 16,
+        "daily": 7,
+        "emotional": 6,
+        "dialog": 3,
+        "ceremony": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 164,
+        "tense": 34,
+        "hot": 24,
+        "sad": 17,
+        "cold": 5,
+        "cool": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "莉可",
+          "count": 37
+        },
+        {
+          "name": "雷格",
+          "count": 12
+        },
+        {
+          "name": "深渊的居民",
+          "count": 4
+        },
+        {
+          "name": "拉姆",
+          "count": 2
+        },
+        {
+          "name": "芙莉莲",
+          "count": 2
+        },
+        {
+          "name": "拉拉",
+          "count": 2
+        },
+        {
+          "name": "深渊巨兽",
+          "count": 2
+        },
+        {
+          "name": "艾莉",
+          "count": 2
+        },
+        {
+          "name": "拉斐特",
+          "count": 1
+        },
+        {
+          "name": "未知角色",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 150
+        },
+        {
+          "scene": "landscape",
+          "mood": "tense",
+          "count": 29
+        },
+        {
+          "scene": "landscape",
+          "mood": "sad",
+          "count": 14
+        },
+        {
+          "scene": "landscape",
+          "mood": "hot",
+          "count": 13
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 11
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "迷宫饭": {
+      "name_cn": "迷宫饭",
+      "name_en": "Delicious in Dungeon",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Delicious in Dungeon",
+        "a scene from Delicious in Dungeon anime series",
+        "Delicious in Dungeon anime character",
+        "a promotional image of Delicious in Dungeon",
+        "Delicious in Dungeon anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《迷宫饭》的画面截图",
+        "《迷宫饭》动漫中的一幕",
+        "迷宫饭动画角色",
+        "《迷宫饭》的宣传图",
+        "迷宫饭动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 1,
+      "vlm_scene_dist": {
+        "daily": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 1
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "辉夜大小姐想让我告白": {
+      "name_cn": "辉夜大小姐想让我告白",
+      "name_en": "Kaguya-sama Love is War",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Kaguya-sama Love is War",
+        "a scene from Kaguya-sama Love is War anime series",
+        "Kaguya-sama Love is War anime character",
+        "a promotional image of Kaguya-sama Love is War",
+        "Kaguya-sama Love is War anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《辉夜大小姐想让我告白》的画面截图",
+        "《辉夜大小姐想让我告白》动漫中的一幕",
+        "辉夜大小姐想让我告白动画角色",
+        "《辉夜大小姐想让我告白》的宣传图",
+        "辉夜大小姐想让我告白动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "东京复仇者": {
+      "name_cn": "东京复仇者",
+      "name_en": "Tokyo Revengers",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Tokyo Revengers",
+        "a scene from Tokyo Revengers anime series",
+        "Tokyo Revengers anime character",
+        "a promotional image of Tokyo Revengers",
+        "Tokyo Revengers anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《东京复仇者》的画面截图",
+        "《东京复仇者》动漫中的一幕",
+        "东京复仇者动画角色",
+        "《东京复仇者》的宣传图",
+        "东京复仇者动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "文豪野犬": {
+      "name_cn": "文豪野犬",
+      "name_en": "Bungo Stray Dogs",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Bungo Stray Dogs",
+        "a scene from Bungo Stray Dogs anime series",
+        "Bungo Stray Dogs anime character",
+        "a promotional image of Bungo Stray Dogs",
+        "Bungo Stray Dogs anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《文豪野犬》的画面截图",
+        "《文豪野犬》动漫中的一幕",
+        "文豪野犬动画角色",
+        "《文豪野犬》的宣传图",
+        "文豪野犬动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 1,
+      "vlm_scene_dist": {
+        "dialog": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "中原中也",
+          "count": 1
+        },
+        {
+          "name": "芥川龙之介",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "dialog",
+      "vlm_dominant_mood": "warm"
+    },
+    "紫罗兰永恒花园": {
+      "name_cn": "紫罗兰永恒花园",
+      "name_en": "Violet Evergarden",
+      "tier": "tier1",
+      "en_templates": [
+        "a screenshot from the anime Violet Evergarden",
+        "a scene from Violet Evergarden anime series",
+        "Violet Evergarden anime character",
+        "a promotional image of Violet Evergarden",
+        "Violet Evergarden anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《紫罗兰永恒花园》的画面截图",
+        "《紫罗兰永恒花园》动漫中的一幕",
+        "紫罗兰永恒花园动画角色",
+        "《紫罗兰永恒花园》的宣传图",
+        "紫罗兰永恒花园动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "斗罗大陆": {
+      "name_cn": "斗罗大陆",
+      "name_en": "Soul Land Douluo Dalu",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Soul Land Douluo Dalu",
+        "a scene from Soul Land Douluo Dalu anime series",
+        "Soul Land Douluo Dalu anime character",
+        "a promotional image of Soul Land Douluo Dalu",
+        "Soul Land Douluo Dalu anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《斗罗大陆》的画面截图",
+        "《斗罗大陆》动漫中的一幕",
+        "斗罗大陆动画角色",
+        "《斗罗大陆》的宣传图",
+        "斗罗大陆动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "斗破苍穹": {
+      "name_cn": "斗破苍穹",
+      "name_en": "Battle Through the Heavens",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Battle Through the Heavens",
+        "a scene from Battle Through the Heavens anime series",
+        "Battle Through the Heavens anime character",
+        "a promotional image of Battle Through the Heavens",
+        "Battle Through the Heavens anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《斗破苍穹》的画面截图",
+        "《斗破苍穹》动漫中的一幕",
+        "斗破苍穹动画角色",
+        "《斗破苍穹》的宣传图",
+        "斗破苍穹动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "完美世界": {
+      "name_cn": "完美世界",
+      "name_en": "Perfect World donghua",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Perfect World donghua",
+        "a scene from Perfect World donghua anime series",
+        "Perfect World donghua anime character",
+        "a promotional image of Perfect World donghua",
+        "Perfect World donghua anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《完美世界》的画面截图",
+        "《完美世界》动漫中的一幕",
+        "完美世界动画角色",
+        "《完美世界》的宣传图",
+        "完美世界动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "凡人修仙传": {
+      "name_cn": "凡人修仙传",
+      "name_en": "A Record of a Mortal's Journey to Immortality",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime A Record of a Mortal's Journey to Immortality",
+        "a scene from A Record of a Mortal's Journey to Immortality anime series",
+        "A Record of a Mortal's Journey to Immortality anime character",
+        "a promotional image of A Record of a Mortal's Journey to Immortality",
+        "A Record of a Mortal's Journey to Immortality anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《凡人修仙传》的画面截图",
+        "《凡人修仙传》动漫中的一幕",
+        "凡人修仙传动画角色",
+        "《凡人修仙传》的宣传图",
+        "凡人修仙传动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "一人之下": {
+      "name_cn": "一人之下",
+      "name_en": "Hitori no Shita The Outcast",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Hitori no Shita The Outcast",
+        "a scene from Hitori no Shita The Outcast anime series",
+        "Hitori no Shita The Outcast anime character",
+        "a promotional image of Hitori no Shita The Outcast",
+        "Hitori no Shita The Outcast anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《一人之下》的画面截图",
+        "《一人之下》动漫中的一幕",
+        "一人之下动画角色",
+        "《一人之下》的宣传图",
+        "一人之下动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "雾山五行": {
+      "name_cn": "雾山五行",
+      "name_en": "Fog Hill of Five Elements",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Fog Hill of Five Elements",
+        "a scene from Fog Hill of Five Elements anime series",
+        "Fog Hill of Five Elements anime character",
+        "a promotional image of Fog Hill of Five Elements",
+        "Fog Hill of Five Elements anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《雾山五行》的画面截图",
+        "《雾山五行》动漫中的一幕",
+        "雾山五行动画角色",
+        "《雾山五行》的宣传图",
+        "雾山五行动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "百妖谱": {
+      "name_cn": "百妖谱",
+      "name_en": "Fairies Albums",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Fairies Albums",
+        "a scene from Fairies Albums anime series",
+        "Fairies Albums anime character",
+        "a promotional image of Fairies Albums",
+        "Fairies Albums anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《百妖谱》的画面截图",
+        "《百妖谱》动漫中的一幕",
+        "百妖谱动画角色",
+        "《百妖谱》的宣传图",
+        "百妖谱动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "天官赐福": {
+      "name_cn": "天官赐福",
+      "name_en": "Heaven Official's Blessing",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Heaven Official's Blessing",
+        "a scene from Heaven Official's Blessing anime series",
+        "Heaven Official's Blessing anime character",
+        "a promotional image of Heaven Official's Blessing",
+        "Heaven Official's Blessing anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《天官赐福》的画面截图",
+        "《天官赐福》动漫中的一幕",
+        "天官赐福动画角色",
+        "《天官赐福》的宣传图",
+        "天官赐福动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "魔道祖师": {
+      "name_cn": "魔道祖师",
+      "name_en": "Grandmaster of Demonic Cultivation",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Grandmaster of Demonic Cultivation",
+        "a scene from Grandmaster of Demonic Cultivation anime series",
+        "Grandmaster of Demonic Cultivation anime character",
+        "a promotional image of Grandmaster of Demonic Cultivation",
+        "Grandmaster of Demonic Cultivation anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《魔道祖师》的画面截图",
+        "《魔道祖师》动漫中的一幕",
+        "魔道祖师动画角色",
+        "《魔道祖师》的宣传图",
+        "魔道祖师动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "伍六七": {
+      "name_cn": "伍六七",
+      "name_en": "Scissor Seven",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Scissor Seven",
+        "a scene from Scissor Seven anime series",
+        "Scissor Seven anime character",
+        "a promotional image of Scissor Seven",
+        "Scissor Seven anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《伍六七》的画面截图",
+        "《伍六七》动漫中的一幕",
+        "伍六七动画角色",
+        "《伍六七》的宣传图",
+        "伍六七动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "Bleach": {
+      "name_cn": "Bleach",
+      "name_en": "Bleach anime",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Bleach anime",
+        "a scene from Bleach anime anime series",
+        "Bleach anime anime character",
+        "a promotional image of Bleach anime",
+        "Bleach anime anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《Bleach》的画面截图",
+        "《Bleach》动漫中的一幕",
+        "Bleach动画角色",
+        "《Bleach》的宣传图",
+        "Bleach动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "银魂": {
+      "name_cn": "银魂",
+      "name_en": "Gintama",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Gintama",
+        "a scene from Gintama anime series",
+        "Gintama anime character",
+        "a promotional image of Gintama",
+        "Gintama anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《银魂》的画面截图",
+        "《银魂》动漫中的一幕",
+        "银魂动画角色",
+        "《银魂》的宣传图",
+        "银魂动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 1,
+      "vlm_scene_dist": {
+        "landscape": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 1
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "全职猎人": {
+      "name_cn": "全职猎人",
+      "name_en": "Hunter x Hunter",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Hunter x Hunter",
+        "a scene from Hunter x Hunter anime series",
+        "Hunter x Hunter anime character",
+        "a promotional image of Hunter x Hunter",
+        "Hunter x Hunter anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《全职猎人》的画面截图",
+        "《全职猎人》动漫中的一幕",
+        "全职猎人动画角色",
+        "《全职猎人》的宣传图",
+        "全职猎人动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "幽游白书": {
+      "name_cn": "幽游白书",
+      "name_en": "Yu Yu Hakusho",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Yu Yu Hakusho",
+        "a scene from Yu Yu Hakusho anime series",
+        "Yu Yu Hakusho anime character",
+        "a promotional image of Yu Yu Hakusho",
+        "Yu Yu Hakusho anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《幽游白书》的画面截图",
+        "《幽游白书》动漫中的一幕",
+        "幽游白书动画角色",
+        "《幽游白书》的宣传图",
+        "幽游白书动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "龙珠": {
+      "name_cn": "龙珠",
+      "name_en": "Dragon Ball",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Dragon Ball",
+        "a scene from Dragon Ball anime series",
+        "Dragon Ball anime character",
+        "a promotional image of Dragon Ball",
+        "Dragon Ball anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《龙珠》的画面截图",
+        "《龙珠》动漫中的一幕",
+        "龙珠动画角色",
+        "《龙珠》的宣传图",
+        "龙珠动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 8,
+      "vlm_scene_dist": {
+        "battle": 8
+      },
+      "vlm_mood_dist": {
+        "hot": 8
+      },
+      "vlm_top_characters": [
+        {
+          "name": "悟空",
+          "count": 3
+        },
+        {
+          "name": "弗利萨",
+          "count": 1
+        },
+        {
+          "name": "孙悟空",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 8
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "hot"
+    },
+    "数码宝贝": {
+      "name_cn": "数码宝贝",
+      "name_en": "Digimon",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Digimon",
+        "a scene from Digimon anime series",
+        "Digimon anime character",
+        "a promotional image of Digimon",
+        "Digimon anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《数码宝贝》的画面截图",
+        "《数码宝贝》动漫中的一幕",
+        "数码宝贝动画角色",
+        "《数码宝贝》的宣传图",
+        "数码宝贝动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "宝可梦": {
+      "name_cn": "宝可梦",
+      "name_en": "Pokemon anime",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Pokemon anime",
+        "a scene from Pokemon anime anime series",
+        "Pokemon anime anime character",
+        "a promotional image of Pokemon anime",
+        "Pokemon anime anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《宝可梦》的画面截图",
+        "《宝可梦》动漫中的一幕",
+        "宝可梦动画角色",
+        "《宝可梦》的宣传图",
+        "宝可梦动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "游戏王": {
+      "name_cn": "游戏王",
+      "name_en": "Yu-Gi-Oh",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Yu-Gi-Oh",
+        "a scene from Yu-Gi-Oh anime series",
+        "Yu-Gi-Oh anime character",
+        "a promotional image of Yu-Gi-Oh",
+        "Yu-Gi-Oh anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《游戏王》的画面截图",
+        "《游戏王》动漫中的一幕",
+        "游戏王动画角色",
+        "《游戏王》的宣传图",
+        "游戏王动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "名侦探柯南": {
+      "name_cn": "名侦探柯南",
+      "name_en": "Detective Conan",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Detective Conan",
+        "a scene from Detective Conan anime series",
+        "Detective Conan anime character",
+        "a promotional image of Detective Conan",
+        "Detective Conan anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《名侦探柯南》的画面截图",
+        "《名侦探柯南》动漫中的一幕",
+        "名侦探柯南动画角色",
+        "《名侦探柯南》的宣传图",
+        "名侦探柯南动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 26,
+      "vlm_scene_dist": {
+        "dialog": 11,
+        "daily": 11,
+        "emotional": 2,
+        "ceremony": 1,
+        "battle": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 19,
+        "tense": 4,
+        "sad": 2,
+        "funny": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "工藤新一",
+          "count": 21
+        },
+        {
+          "name": "毛利小五郎",
+          "count": 4
+        },
+        {
+          "name": "灰原哀",
+          "count": 2
+        },
+        {
+          "name": "毛利兰",
+          "count": 2
+        },
+        {
+          "name": "怪盗基德",
+          "count": 2
+        },
+        {
+          "name": "浅野恭司",
+          "count": 2
+        },
+        {
+          "name": "诸伏高明",
+          "count": 1
+        },
+        {
+          "name": "诸伏景光",
+          "count": 1
+        },
+        {
+          "name": "有马贵将",
+          "count": 1
+        },
+        {
+          "name": "白仓由美",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 10
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 9
+        },
+        {
+          "scene": "dialog",
+          "mood": "tense",
+          "count": 2
+        },
+        {
+          "scene": "ceremony",
+          "mood": "sad",
+          "count": 1
+        },
+        {
+          "scene": "battle",
+          "mood": "tense",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "dialog",
+      "vlm_dominant_mood": "warm"
+    },
+    "蜡笔小新": {
+      "name_cn": "蜡笔小新",
+      "name_en": "Crayon Shin-chan",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Crayon Shin-chan",
+        "a scene from Crayon Shin-chan anime series",
+        "Crayon Shin-chan anime character",
+        "a promotional image of Crayon Shin-chan",
+        "Crayon Shin-chan anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《蜡笔小新》的画面截图",
+        "《蜡笔小新》动漫中的一幕",
+        "蜡笔小新动画角色",
+        "《蜡笔小新》的宣传图",
+        "蜡笔小新动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 5,
+      "vlm_scene_dist": {
+        "landscape": 5
+      },
+      "vlm_mood_dist": {
+        "warm": 5
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 5
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "哆啦A梦": {
+      "name_cn": "哆啦A梦",
+      "name_en": "Doraemon",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Doraemon",
+        "a scene from Doraemon anime series",
+        "Doraemon anime character",
+        "a promotional image of Doraemon",
+        "Doraemon anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《哆啦A梦》的画面截图",
+        "《哆啦A梦》动漫中的一幕",
+        "哆啦A梦动画角色",
+        "《哆啦A梦》的宣传图",
+        "哆啦A梦动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "美少女战士": {
+      "name_cn": "美少女战士",
+      "name_en": "Sailor Moon",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Sailor Moon",
+        "a scene from Sailor Moon anime series",
+        "Sailor Moon anime character",
+        "a promotional image of Sailor Moon",
+        "Sailor Moon anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《美少女战士》的画面截图",
+        "《美少女战士》动漫中的一幕",
+        "美少女战士动画角色",
+        "《美少女战士》的宣传图",
+        "美少女战士动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "魔卡少女樱": {
+      "name_cn": "魔卡少女樱",
+      "name_en": "Cardcaptor Sakura",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Cardcaptor Sakura",
+        "a scene from Cardcaptor Sakura anime series",
+        "Cardcaptor Sakura anime character",
+        "a promotional image of Cardcaptor Sakura",
+        "Cardcaptor Sakura anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《魔卡少女樱》的画面截图",
+        "《魔卡少女樱》动漫中的一幕",
+        "魔卡少女樱动画角色",
+        "《魔卡少女樱》的宣传图",
+        "魔卡少女樱动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "轻音少女": {
+      "name_cn": "轻音少女",
+      "name_en": "K-On",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime K-On",
+        "a scene from K-On anime series",
+        "K-On anime character",
+        "a promotional image of K-On",
+        "K-On anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《轻音少女》的画面截图",
+        "《轻音少女》动漫中的一幕",
+        "轻音少女动画角色",
+        "《轻音少女》的宣传图",
+        "轻音少女动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 3,
+      "vlm_scene_dist": {
+        "dialog": 3
+      },
+      "vlm_mood_dist": {
+        "funny": 2,
+        "warm": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "田井中律",
+          "count": 4
+        },
+        {
+          "name": "平泽唯",
+          "count": 2
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "dialog",
+          "mood": "funny",
+          "count": 2
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "dialog",
+      "vlm_dominant_mood": "funny"
+    },
+    "凉宫春日的忧郁": {
+      "name_cn": "凉宫春日的忧郁",
+      "name_en": "The Melancholy of Haruhi Suzumiya",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime The Melancholy of Haruhi Suzumiya",
+        "a scene from The Melancholy of Haruhi Suzumiya anime series",
+        "The Melancholy of Haruhi Suzumiya anime character",
+        "a promotional image of The Melancholy of Haruhi Suzumiya",
+        "The Melancholy of Haruhi Suzumiya anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《凉宫春日的忧郁》的画面截图",
+        "《凉宫春日的忧郁》动漫中的一幕",
+        "凉宫春日的忧郁动画角色",
+        "《凉宫春日的忧郁》的宣传图",
+        "凉宫春日的忧郁动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "命运石之门": {
+      "name_cn": "命运石之门",
+      "name_en": "Steins Gate",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Steins Gate",
+        "a scene from Steins Gate anime series",
+        "Steins Gate anime character",
+        "a promotional image of Steins Gate",
+        "Steins Gate anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《命运石之门》的画面截图",
+        "《命运石之门》动漫中的一幕",
+        "命运石之门动画角色",
+        "《命运石之门》的宣传图",
+        "命运石之门动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "罪恶王冠": {
+      "name_cn": "罪恶王冠",
+      "name_en": "Guilty Crown",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Guilty Crown",
+        "a scene from Guilty Crown anime series",
+        "Guilty Crown anime character",
+        "a promotional image of Guilty Crown",
+        "Guilty Crown anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《罪恶王冠》的画面截图",
+        "《罪恶王冠》动漫中的一幕",
+        "罪恶王冠动画角色",
+        "《罪恶王冠》的宣传图",
+        "罪恶王冠动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 9,
+      "vlm_scene_dist": {
+        "emotional": 3,
+        "ceremony": 3,
+        "dialog": 2,
+        "landscape": 1
+      },
+      "vlm_mood_dist": {
+        "tense": 4,
+        "warm": 2,
+        "sad": 2,
+        "hot": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "樱满集",
+          "count": 2
+        },
+        {
+          "name": "楪祈",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "ceremony",
+          "mood": "tense",
+          "count": 2
+        },
+        {
+          "scene": "dialog",
+          "mood": "tense",
+          "count": 2
+        },
+        {
+          "scene": "emotional",
+          "mood": "hot",
+          "count": 1
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 1
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "emotional",
+      "vlm_dominant_mood": "tense"
+    },
+    "刀剑神域": {
+      "name_cn": "刀剑神域",
+      "name_en": "Sword Art Online",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Sword Art Online",
+        "a scene from Sword Art Online anime series",
+        "Sword Art Online anime character",
+        "a promotional image of Sword Art Online",
+        "Sword Art Online anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《刀剑神域》的画面截图",
+        "《刀剑神域》动漫中的一幕",
+        "刀剑神域动画角色",
+        "《刀剑神域》的宣传图",
+        "刀剑神域动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 3,
+      "vlm_scene_dist": {
+        "battle": 3
+      },
+      "vlm_mood_dist": {
+        "hot": 2,
+        "tense": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "桐人",
+          "count": 2
+        },
+        {
+          "name": "桐谷和人",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 2
+        },
+        {
+          "scene": "battle",
+          "mood": "tense",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "battle",
+      "vlm_dominant_mood": "hot"
+    },
+    "在下坂本有何贵干": {
+      "name_cn": "在下坂本有何贵干",
+      "name_en": "Sakamoto desu ga",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Sakamoto desu ga",
+        "a scene from Sakamoto desu ga anime series",
+        "Sakamoto desu ga anime character",
+        "a promotional image of Sakamoto desu ga",
+        "Sakamoto desu ga anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《在下坂本有何贵干》的画面截图",
+        "《在下坂本有何贵干》动漫中的一幕",
+        "在下坂本有何贵干动画角色",
+        "《在下坂本有何贵干》的宣传图",
+        "在下坂本有何贵干动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 2,
+      "vlm_scene_dist": {
+        "ceremony": 1,
+        "daily": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 2
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 1
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "ceremony",
+      "vlm_dominant_mood": "warm"
+    },
+    "齐木楠雄的灾难": {
+      "name_cn": "齐木楠雄的灾难",
+      "name_en": "The Disastrous Life of Saiki K",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime The Disastrous Life of Saiki K",
+        "a scene from The Disastrous Life of Saiki K anime series",
+        "The Disastrous Life of Saiki K anime character",
+        "a promotional image of The Disastrous Life of Saiki K",
+        "The Disastrous Life of Saiki K anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《齐木楠雄的灾难》的画面截图",
+        "《齐木楠雄的灾难》动漫中的一幕",
+        "齐木楠雄的灾难动画角色",
+        "《齐木楠雄的灾难》的宣传图",
+        "齐木楠雄的灾难动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 1,
+      "vlm_scene_dist": {
+        "daily": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "齐木楠雄",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "日常": {
+      "name_cn": "日常",
+      "name_en": "Nichijou",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Nichijou",
+        "a scene from Nichijou anime series",
+        "Nichijou anime character",
+        "a promotional image of Nichijou",
+        "Nichijou anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《日常》的画面截图",
+        "《日常》动漫中的一幕",
+        "日常动画角色",
+        "《日常》的宣传图",
+        "日常动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 53,
+      "vlm_scene_dist": {
+        "daily": 23,
+        "dialog": 12,
+        "emotional": 8,
+        "landscape": 8,
+        "ceremony": 1,
+        "comedy": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 39,
+        "funny": 11,
+        "sad": 3
+      },
+      "vlm_top_characters": [
+        {
+          "name": "小林",
+          "count": 12
+        },
+        {
+          "name": "佐仓千代",
+          "count": 8
+        },
+        {
+          "name": "小荠",
+          "count": 5
+        },
+        {
+          "name": "角色1",
+          "count": 5
+        },
+        {
+          "name": "角色2",
+          "count": 4
+        },
+        {
+          "name": "[]",
+          "count": 3
+        },
+        {
+          "name": "平泽唯",
+          "count": 3
+        },
+        {
+          "name": "长门有希",
+          "count": 3
+        },
+        {
+          "name": "佐仓杏子",
+          "count": 2
+        },
+        {
+          "name": "高桥",
+          "count": 2
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 15
+        },
+        {
+          "scene": "dialog",
+          "mood": "warm",
+          "count": 10
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 8
+        },
+        {
+          "scene": "daily",
+          "mood": "funny",
+          "count": 8
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 5
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "月刊少女野崎同学": {
+      "name_cn": "月刊少女野崎同学",
+      "name_en": "Monthly Girls Nozaki-kun",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Monthly Girls Nozaki-kun",
+        "a scene from Monthly Girls Nozaki-kun anime series",
+        "Monthly Girls Nozaki-kun anime character",
+        "a promotional image of Monthly Girls Nozaki-kun",
+        "Monthly Girls Nozaki-kun anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《月刊少女野崎同学》的画面截图",
+        "《月刊少女野崎同学》动漫中的一幕",
+        "月刊少女野崎同学动画角色",
+        "《月刊少女野崎同学》的宣传图",
+        "月刊少女野崎同学动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "冰菓": {
+      "name_cn": "冰菓",
+      "name_en": "Hyouka",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Hyouka",
+        "a scene from Hyouka anime series",
+        "Hyouka anime character",
+        "a promotional image of Hyouka",
+        "Hyouka anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《冰菓》的画面截图",
+        "《冰菓》动漫中的一幕",
+        "冰菓动画角色",
+        "《冰菓》的宣传图",
+        "冰菓动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "角斗士": {
+      "name_cn": "角斗士",
+      "name_en": "Angle Player",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Angle Player",
+        "a scene from Angle Player anime series",
+        "Angle Player anime character",
+        "a promotional image of Angle Player",
+        "Angle Player anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《角斗士》的画面截图",
+        "《角斗士》动漫中的一幕",
+        "角斗士动画角色",
+        "《角斗士》的宣传图",
+        "角斗士动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "黑之契约者": {
+      "name_cn": "黑之契约者",
+      "name_en": "Darker than Black",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Darker than Black",
+        "a scene from Darker than Black anime series",
+        "Darker than Black anime character",
+        "a promotional image of Darker than Black",
+        "Darker than Black anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《黑之契约者》的画面截图",
+        "《黑之契约者》动漫中的一幕",
+        "黑之契约者动画角色",
+        "《黑之契约者》的宣传图",
+        "黑之契约者动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 5,
+      "vlm_scene_dist": {
+        "ceremony": 5
+      },
+      "vlm_mood_dist": {
+        "tense": 5
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "ceremony",
+          "mood": "tense",
+          "count": 5
+        }
+      ],
+      "vlm_dominant_scene": "ceremony",
+      "vlm_dominant_mood": "tense"
+    },
+    "Blood Blockade Battlefront": {
+      "name_cn": "Blood Blockade Battlefront",
+      "name_en": "Kekkai Sensen",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Kekkai Sensen",
+        "a scene from Kekkai Sensen anime series",
+        "Kekkai Sensen anime character",
+        "a promotional image of Kekkai Sensen",
+        "Kekkai Sensen anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《Blood Blockade Battlefront》的画面截图",
+        "《Blood Blockade Battlefront》动漫中的一幕",
+        "Blood Blockade Battlefront动画角色",
+        "《Blood Blockade Battlefront》的宣传图",
+        "Blood Blockade Battlefront动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "天元突破": {
+      "name_cn": "天元突破",
+      "name_en": "Tengen Toppa Gurren Lagann",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Tengen Toppa Gurren Lagann",
+        "a scene from Tengen Toppa Gurren Lagann anime series",
+        "Tengen Toppa Gurren Lagann anime character",
+        "a promotional image of Tengen Toppa Gurren Lagann",
+        "Tengen Toppa Gurren Lagann anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《天元突破》的画面截图",
+        "《天元突破》动漫中的一幕",
+        "天元突破动画角色",
+        "《天元突破》的宣传图",
+        "天元突破动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "新海诚": {
+      "name_cn": "新海诚",
+      "name_en": "Makoto Shinkai anime",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Makoto Shinkai anime",
+        "a scene from Makoto Shinkai anime anime series",
+        "Makoto Shinkai anime anime character",
+        "a promotional image of Makoto Shinkai anime",
+        "Makoto Shinkai anime anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《新海诚》的画面截图",
+        "《新海诚》动漫中的一幕",
+        "新海诚动画角色",
+        "《新海诚》的宣传图",
+        "新海诚动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 6,
+      "vlm_scene_dist": {
+        "landscape": 4,
+        "ceremony": 2
+      },
+      "vlm_mood_dist": {
+        "warm": 6
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 4
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 2
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "萤火虫之墓": {
+      "name_cn": "萤火虫之墓",
+      "name_en": "Grave of the Fireflies",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Grave of the Fireflies",
+        "a scene from Grave of the Fireflies anime series",
+        "Grave of the Fireflies anime character",
+        "a promotional image of Grave of the Fireflies",
+        "Grave of the Fireflies anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《萤火虫之墓》的画面截图",
+        "《萤火虫之墓》动漫中的一幕",
+        "萤火虫之墓动画角色",
+        "《萤火虫之墓》的宣传图",
+        "萤火虫之墓动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "千与千寻": {
+      "name_cn": "千与千寻",
+      "name_en": "Spirited Away",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Spirited Away",
+        "a scene from Spirited Away anime series",
+        "Spirited Away anime character",
+        "a promotional image of Spirited Away",
+        "Spirited Away anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《千与千寻》的画面截图",
+        "《千与千寻》动漫中的一幕",
+        "千与千寻动画角色",
+        "《千与千寻》的宣传图",
+        "千与千寻动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 27,
+      "vlm_scene_dist": {
+        "landscape": 21,
+        "daily": 3,
+        "emotional": 2,
+        "ceremony": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 27
+      },
+      "vlm_top_characters": [
+        {
+          "name": "千寻",
+          "count": 11
+        },
+        {
+          "name": "锅炉爷爷",
+          "count": 2
+        },
+        {
+          "name": "无脸男",
+          "count": 2
+        },
+        {
+          "name": "赈早见琥珀主",
+          "count": 2
+        },
+        {
+          "name": "新海诚风格角色",
+          "count": 1
+        },
+        {
+          "name": "汤婆婆",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 21
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 3
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 2
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "龙猫": {
+      "name_cn": "龙猫",
+      "name_en": "My Neighbor Totoro",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime My Neighbor Totoro",
+        "a scene from My Neighbor Totoro anime series",
+        "My Neighbor Totoro anime character",
+        "a promotional image of My Neighbor Totoro",
+        "My Neighbor Totoro anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《龙猫》的画面截图",
+        "《龙猫》动漫中的一幕",
+        "龙猫动画角色",
+        "《龙猫》的宣传图",
+        "龙猫动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 2,
+      "vlm_scene_dist": {
+        "daily": 1,
+        "landscape": 1
+      },
+      "vlm_mood_dist": {
+        "warm": 2
+      },
+      "vlm_top_characters": [
+        {
+          "name": "小月",
+          "count": 1
+        },
+        {
+          "name": "龙猫",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 1
+        },
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "daily",
+      "vlm_dominant_mood": "warm"
+    },
+    "风之谷": {
+      "name_cn": "风之谷",
+      "name_en": "Nausicaa of the Valley of the Wind",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Nausicaa of the Valley of the Wind",
+        "a scene from Nausicaa of the Valley of the Wind anime series",
+        "Nausicaa of the Valley of the Wind anime character",
+        "a promotional image of Nausicaa of the Valley of the Wind",
+        "Nausicaa of the Valley of the Wind anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《风之谷》的画面截图",
+        "《风之谷》动漫中的一幕",
+        "风之谷动画角色",
+        "《风之谷》的宣传图",
+        "风之谷动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 2,
+      "vlm_scene_dist": {
+        "landscape": 2
+      },
+      "vlm_mood_dist": {
+        "warm": 2
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 2
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "幽灵公主": {
+      "name_cn": "幽灵公主",
+      "name_en": "Princess Mononoke",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Princess Mononoke",
+        "a scene from Princess Mononoke anime series",
+        "Princess Mononoke anime character",
+        "a promotional image of Princess Mononoke",
+        "Princess Mononoke anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《幽灵公主》的画面截图",
+        "《幽灵公主》动漫中的一幕",
+        "幽灵公主动画角色",
+        "《幽灵公主》的宣传图",
+        "幽灵公主动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 4,
+      "vlm_scene_dist": {
+        "landscape": 4
+      },
+      "vlm_mood_dist": {
+        "warm": 4
+      },
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 4
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "哈尔的移动城堡": {
+      "name_cn": "哈尔的移动城堡",
+      "name_en": "Howl's Moving Castle",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Howl's Moving Castle",
+        "a scene from Howl's Moving Castle anime series",
+        "Howl's Moving Castle anime character",
+        "a promotional image of Howl's Moving Castle",
+        "Howl's Moving Castle anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《哈尔的移动城堡》的画面截图",
+        "《哈尔的移动城堡》动漫中的一幕",
+        "哈尔的移动城堡动画角色",
+        "《哈尔的移动城堡》的宣传图",
+        "哈尔的移动城堡动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "铃芽之旅": {
+      "name_cn": "铃芽之旅",
+      "name_en": "Suzume",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Suzume",
+        "a scene from Suzume anime series",
+        "Suzume anime character",
+        "a promotional image of Suzume",
+        "Suzume anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《铃芽之旅》的画面截图",
+        "《铃芽之旅》动漫中的一幕",
+        "铃芽之旅动画角色",
+        "《铃芽之旅》的宣传图",
+        "铃芽之旅动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 171,
+      "vlm_scene_dist": {
+        "landscape": 115,
+        "emotional": 41,
+        "ceremony": 11,
+        "daily": 2,
+        "dialog": 2
+      },
+      "vlm_mood_dist": {
+        "warm": 150,
+        "sad": 20,
+        "cold": 1
+      },
+      "vlm_top_characters": [
+        {
+          "name": "铃芽",
+          "count": 58
+        },
+        {
+          "name": "草太",
+          "count": 38
+        },
+        {
+          "name": "乌鸦",
+          "count": 6
+        },
+        {
+          "name": "新海诚风格角色",
+          "count": 6
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 101
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 34
+        },
+        {
+          "scene": "landscape",
+          "mood": "sad",
+          "count": 13
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 11
+        },
+        {
+          "scene": "emotional",
+          "mood": "sad",
+          "count": 7
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "你的名字": {
+      "name_cn": "你的名字",
+      "name_en": "Your Name Kimi no Na wa",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Your Name Kimi no Na wa",
+        "a scene from Your Name Kimi no Na wa anime series",
+        "Your Name Kimi no Na wa anime character",
+        "a promotional image of Your Name Kimi no Na wa",
+        "Your Name Kimi no Na wa anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《你的名字》的画面截图",
+        "《你的名字》动漫中的一幕",
+        "你的名字动画角色",
+        "《你的名字》的宣传图",
+        "你的名字动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 631,
+      "vlm_scene_dist": {
+        "landscape": 469,
+        "emotional": 118,
+        "ceremony": 19,
+        "daily": 11,
+        "battle": 11,
+        "dialog": 3
+      },
+      "vlm_mood_dist": {
+        "warm": 589,
+        "sad": 31,
+        "hot": 11
+      },
+      "vlm_top_characters": [
+        {
+          "name": "立花泷",
+          "count": 100
+        },
+        {
+          "name": "宫水三叶",
+          "count": 65
+        },
+        {
+          "name": "角色1",
+          "count": 23
+        },
+        {
+          "name": "角色轮廓",
+          "count": 3
+        },
+        {
+          "name": "新海诚风格角色",
+          "count": 2
+        },
+        {
+          "name": "一只松鼠",
+          "count": 1
+        },
+        {
+          "name": "鸟",
+          "count": 1
+        },
+        {
+          "name": "玫瑰花",
+          "count": 1
+        },
+        {
+          "name": "角色2",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "warm",
+          "count": 448
+        },
+        {
+          "scene": "emotional",
+          "mood": "warm",
+          "count": 108
+        },
+        {
+          "scene": "landscape",
+          "mood": "sad",
+          "count": 21
+        },
+        {
+          "scene": "ceremony",
+          "mood": "warm",
+          "count": 19
+        },
+        {
+          "scene": "daily",
+          "mood": "warm",
+          "count": 11
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "warm"
+    },
+    "天气之子": {
+      "name_cn": "天气之子",
+      "name_en": "Weathering with You",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Weathering with You",
+        "a scene from Weathering with You anime series",
+        "Weathering with You anime character",
+        "a promotional image of Weathering with You",
+        "Weathering with You anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《天气之子》的画面截图",
+        "《天气之子》动漫中的一幕",
+        "天气之子动画角色",
+        "《天气之子》的宣传图",
+        "天气之子动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "Promare": {
+      "name_cn": "Promare",
+      "name_en": "Promare anime",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime Promare anime",
+        "a scene from Promare anime anime series",
+        "Promare anime anime character",
+        "a promotional image of Promare anime",
+        "Promare anime anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《Promare》的画面截图",
+        "《Promare》动漫中的一幕",
+        "Promare动画角色",
+        "《Promare》的宣传图",
+        "Promare动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 0,
+      "vlm_scene_dist": {},
+      "vlm_mood_dist": {},
+      "vlm_top_characters": [],
+      "vlm_scene_mood_top": []
+    },
+    "SSSS.GRIDMAN": {
+      "name_cn": "SSSS.GRIDMAN",
+      "name_en": "SSSS Gridman",
+      "tier": "tier2",
+      "en_templates": [
+        "a screenshot from the anime SSSS Gridman",
+        "a scene from SSSS Gridman anime series",
+        "SSSS Gridman anime character",
+        "a promotional image of SSSS Gridman",
+        "SSSS Gridman anime wallpaper"
+      ],
+      "cn_templates": [
+        "动画片《SSSS.GRIDMAN》的画面截图",
+        "《SSSS.GRIDMAN》动漫中的一幕",
+        "SSSS.GRIDMAN动画角色",
+        "《SSSS.GRIDMAN》的宣传图",
+        "SSSS.GRIDMAN动漫壁纸"
+      ],
+      "n_templates": 10,
+      "vlm_frame_count": 2,
+      "vlm_scene_dist": {
+        "landscape": 1,
+        "battle": 1
+      },
+      "vlm_mood_dist": {
+        "hot": 2
+      },
+      "vlm_top_characters": [
+        {
+          "name": "GRIDMAN",
+          "count": 1
+        }
+      ],
+      "vlm_scene_mood_top": [
+        {
+          "scene": "landscape",
+          "mood": "hot",
+          "count": 1
+        },
+        {
+          "scene": "battle",
+          "mood": "hot",
+          "count": 1
+        }
+      ],
+      "vlm_dominant_scene": "landscape",
+      "vlm_dominant_mood": "hot"
+    }
+  }
+}

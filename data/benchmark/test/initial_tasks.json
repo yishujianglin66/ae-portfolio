@@ -1,0 +1,25 @@
+[
+  {
+    "id": "test_style_001",
+    "task_type": "style_transfer",
+    "input": "制作复古VHS风格：扫描线、色差偏移、画面轻微抖动",
+    "expected_output": {
+      "effects_contain": ["scanlines", "chromatic_aberration"],
+      "has_jitter": true,
+      "color_temperature": "warm"
+    },
+    "rubrics": "存在可见扫描线纹理，红蓝色差偏移，画面有模拟磁带的不稳定抖动感",
+    "tags": ["style", "vhs", "retro"]
+  },
+  {
+    "id": "test_effect_001",
+    "task_type": "effect_apply",
+    "input": "做一个时间冻结效果：主体静止，背景粒子继续运动",
+    "expected_output": {
+      "has_time_remap": true,
+      "has_particle_layer": true
+    },
+    "rubrics": "主体图层在冻结段完全静止(时间重映射)，而背景粒子层保持运动，形成时间差对比",
+    "tags": ["effect", "time_freeze", "particles"]
+  }
+]

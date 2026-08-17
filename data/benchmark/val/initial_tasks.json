@@ -1,0 +1,37 @@
+[
+  {
+    "id": "val_style_001",
+    "task_type": "style_transfer",
+    "input": "制作水墨国风风格：黑白灰为主，局部朱红点缀，晕染转场",
+    "expected_output": {
+      "saturation": "very_low",
+      "color_palette": ["black", "white", "red"],
+      "transitions_contain": ["dissolve"]
+    },
+    "rubrics": "整体接近水墨质感(低饱和黑白灰)，存在局部红色点缀，转场柔和如晕染",
+    "tags": ["style", "ink", "chinese"]
+  },
+  {
+    "id": "val_effect_001",
+    "task_type": "effect_apply",
+    "input": "给文字图层做打字机逐字出现动画，配合光标闪烁",
+    "expected_output": {
+      "has_text_animator": true,
+      "animation_type": "typewriter"
+    },
+    "rubrics": "文字逐字/逐字符显现而非整体淡入，节奏均匀，无跳帧",
+    "tags": ["effect", "text", "typewriter"]
+  },
+  {
+    "id": "val_color_grade_001",
+    "task_type": "color_grade",
+    "input": "做成复古暖调胶片感：低饱和、偏暖、带颗粒",
+    "expected_output": {
+      "saturation": "low",
+      "color_temperature": "warm",
+      "effects_contain": ["film_grain"]
+    },
+    "rubrics": "饱和度降低，色温偏暖(V>U)，颗粒效果已应用",
+    "tags": ["color", "film", "warm"]
+  }
+]

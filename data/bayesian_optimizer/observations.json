@@ -1,0 +1,1915 @@
+{
+  "Glow": [
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.5299904,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.5495763,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.5896006,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.6057496,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.756202,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.77244,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.7884803,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.8038883,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.8207593,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.8364813,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.8527355,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.8686903,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766239.8849382,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.0130727,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.034844,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.0585978,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.0774944,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.3297307,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.400726,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.4268355,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.4478571,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.7873633,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.8071861,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.8272884,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.8473966,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766240.8688653,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766245.3264015,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766245.3532228,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766245.3809087,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766258.6181238,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766258.6361606,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766258.6552005,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766258.6732337,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766287.9680376,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766319.3222756,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766368.4876597,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766368.5107634,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 30.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766452.2183304,
+      "success": false
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766492.794251,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766492.8040636,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766492.8138926,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766593.6050346,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766593.650923,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766593.6805358,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766650.987485,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766651.028925,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766651.0673654,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766661.9342222,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766661.9952753,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766662.0485582,
+      "success": true
+    }
+  ],
+  "FastBlur": [
+    {
+      "params": {
+        "blur_radius": 10.0,
+        "blur_direction": 0.0
+      },
+      "quality": 78.5,
+      "render_time": 28.1,
+      "file_size": 0.0,
+      "timestamp": 1785341101.5306005,
+      "success": true
+    },
+    {
+      "params": {
+        "blur_radius": 42.0,
+        "blur_direction": 0.0
+      },
+      "quality": 98,
+      "render_time": 6.36,
+      "file_size": 19.96,
+      "timestamp": 1785369172.6630032,
+      "success": true
+    },
+    {
+      "params": {
+        "blur_radius": 55.0,
+        "blur_direction": 180.0
+      },
+      "quality": 94.05,
+      "render_time": 7.4,
+      "file_size": 18.4,
+      "timestamp": 1785369172.6768997,
+      "success": true
+    },
+    {
+      "params": {
+        "blur_radius": 30.0,
+        "blur_direction": 90.0
+      },
+      "quality": 93.53,
+      "render_time": 5.4,
+      "file_size": 21.4,
+      "timestamp": 1785369172.6794279,
+      "success": true
+    },
+    {
+      "params": {
+        "blur_radius": 12.0,
+        "blur_direction": 45.0
+      },
+      "quality": 81.52,
+      "render_time": 3.96,
+      "file_size": 23.56,
+      "timestamp": 1785369172.6834426,
+      "success": true
+    },
+    {
+      "params": {
+        "blur_radius": 85.0,
+        "blur_direction": 270.0
+      },
+      "quality": 75.62,
+      "render_time": 9.8,
+      "file_size": 14.8,
+      "timestamp": 1785369172.6859672,
+      "success": true
+    },
+    {
+      "params": {
+        "blur_radius": 42.0,
+        "blur_direction": 0.0
+      },
+      "quality": 98,
+      "render_time": 6.36,
+      "file_size": 19.96,
+      "timestamp": 1785369189.8999953,
+      "success": true
+    },
+    {
+      "params": {
+        "blur_radius": 55.0,
+        "blur_direction": 180.0
+      },
+      "quality": 94.05,
+      "render_time": 7.4,
+      "file_size": 18.4,
+      "timestamp": 1785369189.905046,
+      "success": true
+    },
+    {
+      "params": {
+        "blur_radius": 30.0,
+        "blur_direction": 90.0
+      },
+      "quality": 93.53,
+      "render_time": 5.4,
+      "file_size": 21.4,
+      "timestamp": 1785369189.9103765,
+      "success": true
+    },
+    {
+      "params": {
+        "blur_radius": 12.0,
+        "blur_direction": 45.0
+      },
+      "quality": 81.52,
+      "render_time": 3.96,
+      "file_size": 23.56,
+      "timestamp": 1785369189.91401,
+      "success": true
+    },
+    {
+      "params": {
+        "blur_radius": 85.0,
+        "blur_direction": 270.0
+      },
+      "quality": 75.62,
+      "render_time": 9.8,
+      "file_size": 14.8,
+      "timestamp": 1785369189.919235,
+      "success": true
+    }
+  ],
+  "UnsharpMask": [
+    {
+      "params": {
+        "unsharp_amount": 24.88971515463343,
+        "unsharp_radius": 55.07741739907119,
+        "unsharp_threshold": 128.3767039550896
+      },
+      "quality": 78.5,
+      "render_time": 28.1,
+      "file_size": 0.0,
+      "timestamp": 1785341101.534127,
+      "success": true
+    },
+    {
+      "params": {
+        "unsharp_amount": 70.0,
+        "unsharp_radius": 1.5,
+        "unsharp_threshold": 2.0
+      },
+      "quality": 96.9,
+      "render_time": 5.62,
+      "file_size": 26.1,
+      "timestamp": 1785369172.6904573,
+      "success": true
+    },
+    {
+      "params": {
+        "unsharp_amount": 85.0,
+        "unsharp_radius": 2.2,
+        "unsharp_threshold": 0.0
+      },
+      "quality": 97,
+      "render_time": 6.03,
+      "file_size": 26.55,
+      "timestamp": 1785369172.694046,
+      "success": true
+    },
+    {
+      "params": {
+        "unsharp_amount": 60.0,
+        "unsharp_radius": 1.2,
+        "unsharp_threshold": 5.0
+      },
+      "quality": 89.63,
+      "render_time": 5.38,
+      "file_size": 25.8,
+      "timestamp": 1785369172.6955824,
+      "success": true
+    },
+    {
+      "params": {
+        "unsharp_amount": 98.0,
+        "unsharp_radius": 6.0,
+        "unsharp_threshold": 0.0
+      },
+      "quality": 59.0,
+      "render_time": 6.86,
+      "file_size": 26.94,
+      "timestamp": 1785369172.6992843,
+      "success": true
+    },
+    {
+      "params": {
+        "unsharp_amount": 30.0,
+        "unsharp_radius": 0.5,
+        "unsharp_threshold": 20.0
+      },
+      "quality": 64.67,
+      "render_time": 4.67,
+      "file_size": 24.9,
+      "timestamp": 1785369172.7034798,
+      "success": true
+    },
+    {
+      "params": {
+        "unsharp_amount": 70.0,
+        "unsharp_radius": 1.5,
+        "unsharp_threshold": 2.0
+      },
+      "quality": 96.9,
+      "render_time": 5.62,
+      "file_size": 26.1,
+      "timestamp": 1785369189.9238715,
+      "success": true
+    },
+    {
+      "params": {
+        "unsharp_amount": 85.0,
+        "unsharp_radius": 2.2,
+        "unsharp_threshold": 0.0
+      },
+      "quality": 97,
+      "render_time": 6.03,
+      "file_size": 26.55,
+      "timestamp": 1785369189.927894,
+      "success": true
+    },
+    {
+      "params": {
+        "unsharp_amount": 60.0,
+        "unsharp_radius": 1.2,
+        "unsharp_threshold": 5.0
+      },
+      "quality": 89.63,
+      "render_time": 5.38,
+      "file_size": 25.8,
+      "timestamp": 1785369189.931297,
+      "success": true
+    },
+    {
+      "params": {
+        "unsharp_amount": 98.0,
+        "unsharp_radius": 6.0,
+        "unsharp_threshold": 0.0
+      },
+      "quality": 59.0,
+      "render_time": 6.86,
+      "file_size": 26.94,
+      "timestamp": 1785369189.936457,
+      "success": true
+    },
+    {
+      "params": {
+        "unsharp_amount": 30.0,
+        "unsharp_radius": 0.5,
+        "unsharp_threshold": 20.0
+      },
+      "quality": 64.67,
+      "render_time": 4.67,
+      "file_size": 24.9,
+      "timestamp": 1785369189.941482,
+      "success": true
+    }
+  ],
+  "CC_StarGlow": [
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766298.102255,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766304.397762,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766308.9102664,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766313.8004193,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766319.352127,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766324.7902641,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766330.2431388,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766335.6205297,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766340.8174622,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766345.9826758,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766351.6177843,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766357.0075526,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766362.722001,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766368.533348,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766374.0291917,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766379.6671796,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766385.3611653,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766391.2843242,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766398.0755062,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766409.0755732,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766420.8922417,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766426.9965916,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766433.3515873,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766440.3363404,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766445.707578,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766452.237198,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766457.7847767,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766464.188304,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766471.5242927,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766477.9771898,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766486.1339412,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766492.82664,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766500.1093028,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766508.6010149,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766520.9197292,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766533.1738317,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766545.353539,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766560.3744984,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766572.8945158,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766581.1625907,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766593.7058387,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766604.9351614,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766615.3676057,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766625.6895177,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766639.5920405,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766651.0893688,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766662.1005394,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766671.985109,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766682.4409175,
+      "success": true
+    },
+    {
+      "params": {
+        "intensity": 50.0,
+        "radius": 10.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1786766692.8391452,
+      "success": true
+    }
+  ],
+  "TurbulentDisplace": [
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785560456.9314916,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785560458.1069388,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.12,
+      "file_size": 100.0,
+      "timestamp": 1785560459.6753964,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.14,
+      "file_size": 100.0,
+      "timestamp": 1785560461.0539176,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785560462.2486598,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785560463.5894094,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785560465.6138556,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.13,
+      "file_size": 100.0,
+      "timestamp": 1785560467.653195,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.21,
+      "file_size": 100.0,
+      "timestamp": 1785560469.2395043,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785562006.108799,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785562019.091041,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.12,
+      "file_size": 100.0,
+      "timestamp": 1785562032.9696105,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.14,
+      "file_size": 100.0,
+      "timestamp": 1785562047.3038533,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785562061.3062282,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785562075.3829727,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785562089.905589,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.13,
+      "file_size": 100.0,
+      "timestamp": 1785562104.869532,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.21,
+      "file_size": 100.0,
+      "timestamp": 1785562119.7766156,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 0.02,
+      "file_size": 100.0,
+      "timestamp": 1785562134.927663,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785580946.8626704,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785580961.6755266,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.12,
+      "file_size": 100.0,
+      "timestamp": 1785580977.5563333,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.14,
+      "file_size": 100.0,
+      "timestamp": 1785580992.0987265,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785581006.8151896,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785581021.870083,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785581037.7202096,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.13,
+      "file_size": 100.0,
+      "timestamp": 1785581053.762624,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.21,
+      "file_size": 100.0,
+      "timestamp": 1785581069.243236,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 0.02,
+      "file_size": 100.0,
+      "timestamp": 1785581084.9661381,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1785581100.336297,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785581740.8129523,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785581742.0478036,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.12,
+      "file_size": 100.0,
+      "timestamp": 1785581743.1375468,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.14,
+      "file_size": 100.0,
+      "timestamp": 1785581744.0818331,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785581745.0310335,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785581746.2011986,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.11,
+      "file_size": 100.0,
+      "timestamp": 1785581747.4547982,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.13,
+      "file_size": 100.0,
+      "timestamp": 1785581748.6840255,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 5.21,
+      "file_size": 100.0,
+      "timestamp": 1785581750.1188066,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 0.02,
+      "file_size": 100.0,
+      "timestamp": 1785581751.4035895,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 30.0,
+      "file_size": 100.0,
+      "timestamp": 1785581752.8007045,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 0.01,
+      "file_size": 100.0,
+      "timestamp": 1785581754.2439458,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 4.23,
+      "file_size": 100.0,
+      "timestamp": 1786744778.3559473,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 4.23,
+      "file_size": 100.0,
+      "timestamp": 1786746114.470586,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 2.14,
+      "file_size": 100.0,
+      "timestamp": 1786746138.8069346,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 4.23,
+      "file_size": 100.0,
+      "timestamp": 1786755033.9290922,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 2.14,
+      "file_size": 100.0,
+      "timestamp": 1786755045.1504939,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 4.23,
+      "file_size": 100.0,
+      "timestamp": 1786761181.1036475,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 2.14,
+      "file_size": 100.0,
+      "timestamp": 1786761213.9839683,
+      "success": true
+    },
+    {
+      "params": {
+        "file_size_mb": 0.0,
+        "nodes": 0.0
+      },
+      "quality": 70.0,
+      "render_time": 2.14,
+      "file_size": 100.0,
+      "timestamp": 1786761245.1882577,
+      "success": true
+    }
+  ]
+}

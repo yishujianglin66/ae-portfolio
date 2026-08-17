@@ -1,0 +1,671 @@
+{
+  "duration_params": {
+    "perceive": [
+      15.0,
+      4.5
+    ],
+    "analyze": [
+      20.0,
+      6.0
+    ],
+    "plan": [
+      10.0,
+      3.0
+    ],
+    "execute": [
+      60.0,
+      18.0
+    ],
+    "render": [
+      120.0,
+      36.0
+    ],
+    "verify": [
+      30.0,
+      9.0
+    ],
+    "learn": [
+      5.0,
+      1.5
+    ]
+  },
+  "success_params": {
+    "perceive": [
+      19.0,
+      1.0000000000000009
+    ],
+    "analyze": [
+      18.0,
+      1.9999999999999996
+    ],
+    "plan": [
+      18.400000000000002,
+      1.5999999999999992
+    ],
+    "execute": [
+      15.0,
+      5.0
+    ],
+    "render": [
+      16.0,
+      3.999999999999999
+    ],
+    "verify": [
+      19.0,
+      1.0000000000000009
+    ],
+    "learn": [
+      19.6,
+      0.40000000000000036
+    ]
+  },
+  "observations": {
+    "perceive": [],
+    "analyze": [],
+    "plan": [],
+    "execute": [],
+    "render": [],
+    "verify": [],
+    "learn": []
+  },
+  "prediction_history": [
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1784951589.2323198
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1784951589.2344487
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1784951669.2471337
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1784951669.2481732
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1784951809.667979
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1784951809.6699398
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1784957510.276793
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1784957510.278295
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785053829.1839023
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785053829.1859057
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785053863.1410084
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785053863.1430473
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785054039.543562
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785054039.5458972
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785080192.760226
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785080192.7623186
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785080818.6375203
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785080818.6415462
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785080873.736546
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785080873.7398987
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785081687.836808
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785081687.8437462
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785081803.048957
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785081803.0658364
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785082693.1258132
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785082693.1280973
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785082955.9404535
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785082955.943071
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785083128.592521
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785083128.5980716
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785083676.157875
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785083676.158872
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785084753.4512937
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785084753.4537966
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785085530.6328473
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785085530.635874
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785085916.0713038
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785085916.0749063
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785086170.9522753
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785086170.9543731
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785086896.3588848
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785086896.363406
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785109220.1187282
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785109220.1229732
+    },
+    {
+      "input": {
+        "material_count": 5,
+        "video_count": 3,
+        "duration": 120
+      },
+      "prediction": {
+        "total_duration": 789.9000000000001,
+        "overall_sr": 0.1408598927668387,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785109547.9149756
+    },
+    {
+      "input": {
+        "material_count": 10,
+        "video_count": 0,
+        "duration": 300
+      },
+      "prediction": {
+        "total_duration": 1600.0,
+        "overall_sr": 0.11973090885181288,
+        "quality": 63.57142857142857
+      },
+      "timestamp": 1785109547.9188166
+    }
+  ]
+}

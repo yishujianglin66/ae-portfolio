@@ -1,0 +1,8 @@
+{
+  "embed": {
+    "success": true,
+    "embedding_dim": 512,
+    "latency_ms": 122.98583984375,
+    "throughput": 24.196930508575615
+  }
+}

@@ -1,0 +1,654 @@
+{
+  "Glow": [
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785081687.7606866,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785081687.7703629,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785081743.259153,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785081802.9856522,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785081803.0006096,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785081803.0159004,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785082619.6717267,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785082693.0432835,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785082693.0525079,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785082693.0620747,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785082876.432771,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785082955.906323,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785082955.916612,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785082955.925834,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785083043.1374831,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785083128.55563,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785083128.5668163,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785083128.5780962,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785083589.4200613,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785083676.0650454,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785083676.0761077,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785083676.092448,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785084647.9204009,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785084749.5126836,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785084750.9317882,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785084752.1653821,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785085427.8756163,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785085530.4674325,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785085530.4790812,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785085530.4961069,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785085811.0240088,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785085915.964561,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785085915.9753034,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785085915.9999826,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785086060.6286023,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785086170.858104,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785086170.8702233,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785086170.8790789,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785086776.8915207,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785086895.9236078,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785086895.9725943,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785086895.9878066,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785109160.359571,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785109219.9488122,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785109219.957058,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785109219.9630687,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 30,
+        "glow_intensity": 1.0,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 3.0,
+      "file_size": 100,
+      "timestamp": 1785109467.234934,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 40,
+        "glow_radius": 25,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 70,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785109547.792608,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 45,
+        "glow_radius": 28,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 75,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785109547.7981422,
+      "success": true
+    },
+    {
+      "params": {
+        "glow_threshold": 50,
+        "glow_radius": 31,
+        "glow_intensity": 0.8,
+        "glow_colors": 0
+      },
+      "quality": 80,
+      "render_time": 2.5,
+      "file_size": 90,
+      "timestamp": 1785109547.8031964,
+      "success": true
+    }
+  ]
+}

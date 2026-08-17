@@ -1,0 +1,159 @@
+[
+  {
+    "error_type": "ValueError",
+    "error_msg": "opacity 0.5 out of range",
+    "error_keywords": [
+      "opacity",
+      "0.5",
+      "out",
+      "range"
+    ],
+    "context_keys": [
+      "stage"
+    ],
+    "context_stage": "execute",
+    "fix_applied": "multiply_100",
+    "fix_code": "",
+    "success_count": 1,
+    "occurrence_count": 1,
+    "first_seen": "2026-07-25T09:40:31.276740",
+    "last_seen": "2026-07-25T09:40:31.276740"
+  },
+  {
+    "error_type": "JSXExecutionError",
+    "error_msg": "app.project.activeItem is null/wrong after addComp() - template returns 'No active comp'",
+    "error_keywords": [
+      "activeItem",
+      "addComp",
+      "No active comp",
+      "null"
+    ],
+    "context_keys": [
+      "stage",
+      "preset_id"
+    ],
+    "context_stage": "execute",
+    "fix_applied": "replace_activeItem_with_comp_variable",
+    "fix_code": "preset_code = jsx_inner.replace('app.project.activeItem', 'comp')",
+    "root_cause": "AE addComp() does NOT set activeItem. Must use variable reference or set activeItem explicitly.",
+    "prevention": "Never rely on app.project.activeItem in scripted comp creation. Pass comp as variable.",
+    "success_count": 1,
+    "occurrence_count": 109,
+    "first_seen": "2026-07-29T10:00:00",
+    "last_seen": "2026-07-29T14:00:00"
+  },
+  {
+    "error_type": "JSXReferenceError",
+    "error_msg": "COMP_REF is not defined - 3D title template placeholder not replaced",
+    "error_keywords": [
+      "COMP_REF",
+      "ReferenceError",
+      "3d_title",
+      "placeholder"
+    ],
+    "context_keys": [
+      "stage",
+      "category"
+    ],
+    "context_stage": "execute",
+    "fix_applied": "replace_COMP_REF_with_comp",
+    "fix_code": "preset_code = jsx_inner.replace('COMP_REF', 'comp')",
+    "root_cause": "3D title presets use COMP_REF as comp placeholder. Must be replaced before injection.",
+    "prevention": "Check for COMP_REF placeholder in templates and replace with actual comp variable.",
+    "success_count": 1,
+    "occurrence_count": 4,
+    "first_seen": "2026-07-29T12:00:00",
+    "last_seen": "2026-07-29T12:30:00"
+  },
+  {
+    "error_type": "SilentFailure",
+    "error_msg": "catch(pe){} swallows all errors - animation code fails silently, output appears successful",
+    "error_keywords": [
+      "catch",
+      "silent",
+      "empty catch",
+      "swallow",
+      "no error reported"
+    ],
+    "context_keys": [
+      "stage"
+    ],
+    "context_stage": "execute",
+    "fix_applied": "remove_empty_catch_add_error_reporting",
+    "fix_code": "Return JSON.stringify({status:'error', error:e.toString()}) instead of empty catch",
+    "root_cause": "Empty catch blocks hide failures. Verification only checked file existence, not content.",
+    "prevention": "Never use empty catch. Always log/return error details. Verify animation properties exist.",
+    "success_count": 1,
+    "occurrence_count": 109,
+    "first_seen": "2026-07-29T10:00:00",
+    "last_seen": "2026-07-29T14:00:00"
+  },
+  {
+    "error_type": "RenderOutputError",
+    "error_msg": "aerender CLI outputs 0-byte/empty files when project not saved or comp has no active camera",
+    "error_keywords": [
+      "aerender",
+      "empty file",
+      "0 bytes",
+      "CLI render"
+    ],
+    "context_keys": [
+      "stage"
+    ],
+    "context_stage": "render",
+    "fix_applied": "use_ae_internal_render_queue",
+    "fix_code": "app.project.renderQueue.render() instead of aerender CLI",
+    "root_cause": "aerender CLI has issues with unsaved projects and certain comp configurations.",
+    "prevention": "Prefer AE internal renderQueue.render() via Bridge. Verify output size > threshold.",
+    "success_count": 1,
+    "occurrence_count": 109,
+    "first_seen": "2026-07-29T09:00:00",
+    "last_seen": "2026-07-29T11:00:00"
+  },
+  {
+    "error_type": "BridgeParseError",
+    "error_msg": "Bridge result nested at r.result.data.result not r.result.result",
+    "error_keywords": [
+      "bridge",
+      "parse",
+      "nested",
+      "result.data.result"
+    ],
+    "context_keys": [
+      "stage"
+    ],
+    "context_stage": "execute",
+    "fix_applied": "multi_level_nested_parsing",
+    "fix_code": "inner = r.get('result',{}); if inner.get('success') and 'data' in inner: result_str = inner['data'].get('result','')",
+    "root_cause": "AE Bridge wraps response in nested structure. Must check both paths.",
+    "prevention": "Always parse Bridge response with multi-level fallback: result.data.result OR result.result.",
+    "success_count": 1,
+    "occurrence_count": 18,
+    "first_seen": "2026-07-28T16:00:00",
+    "last_seen": "2026-07-29T10:00:00"
+  },
+  {
+    "error_type": "TypeError",
+    "error_msg": "bad operand type for abs(): 'str'",
+    "error_keywords": [
+      "bad",
+      "operand",
+      "type",
+      "abs():",
+      "'str'"
+    ],
+    "context_keys": [
+      "stage",
+      "run_id",
+      "attempt",
+      "iteration"
+    ],
+    "context_stage": "execute",
+    "fix_applied": "pending",
+    "fix_code": "",
+    "success_count": 0,
+    "occurrence_count": 2,
+    "first_seen": "2026-07-30T18:24:06.733053",
+    "last_seen": "2026-07-30T18:24:10.636075"
+  }
+]

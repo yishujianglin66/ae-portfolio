@@ -1,0 +1,335 @@
+[
+  {
+    "id": "style_001",
+    "task_type": "style_transfer",
+    "input": "将视频转换为赛博朋克风格，添加霓虹灯光效",
+    "expected_output": {
+      "has_neon_glow": true,
+      "color_temperature": "cool",
+      "contrast": "high",
+      "effects_contain": [
+        "glow"
+      ]
+    },
+    "rubrics": "检查是否包含霓虹色(青/品红)发光效果，对比度是否明显提升，色温偏冷",
+    "tags": [
+      "style",
+      "cyberpunk",
+      "glow"
+    ]
+  },
+  {
+    "id": "style_002",
+    "task_type": "style_transfer",
+    "input": "把这段素材做成日系胶片风格，低饱和、偏暖、带颗粒感",
+    "expected_output": {
+      "saturation": "low",
+      "color_temperature": "warm",
+      "effects_contain": [
+        "film_grain"
+      ]
+    },
+    "rubrics": "饱和度应降低，整体色温偏暖，有胶片颗粒质感，高光柔和不刺眼",
+    "tags": [
+      "style",
+      "film",
+      "warm"
+    ]
+  },
+  {
+    "id": "style_003",
+    "task_type": "style_transfer",
+    "input": "制作高燃混剪风格：快切、强节奏、配合鼓点的闪白转场",
+    "expected_output": {
+      "pace": "fast",
+      "transitions_contain": [
+        "flash",
+        "hard_cut"
+      ],
+      "avg_shot_duration_max": 1.5
+    },
+    "rubrics": "镜头平均时长不超过1.5秒，存在闪白或硬切转场，整体节奏快且与音乐节拍对齐",
+    "tags": [
+      "style",
+      "amv",
+      "fast_cut"
+    ]
+  },
+  {
+    "id": "effect_001",
+    "task_type": "effect_apply",
+    "input": "给主角图层添加发光效果，强度适中不溢出",
+    "expected_output": {
+      "effect_name": "ADBE Glo2",
+      "param_ranges": {
+        "Glow Threshold": [
+          30,
+          60
+        ],
+        "Glow Intensity": [
+          0.5,
+          2.0
+        ]
+      }
+    },
+    "rubrics": "正确添加 Glow 类效果，Threshold 在 30-60 之间，Intensity 在 0.5-2.0 之间，无过度曝光",
+    "tags": [
+      "effect",
+      "glow"
+    ]
+  },
+  {
+    "id": "effect_002",
+    "task_type": "effect_apply",
+    "input": "扣掉画面中的人物并保留背景，边缘要干净",
+    "expected_output": {
+      "has_mask_or_keying": true,
+      "edge_quality": "clean"
+    },
+    "rubrics": "人物被完整移除，背景无明显破损，边缘无绿边/黑边残留",
+    "tags": [
+      "effect",
+      "keying",
+      "removal"
+    ]
+  },
+  {
+    "id": "color_grade_001",
+    "task_type": "color_grade",
+    "input": "对画面做暖色调色：整体偏暖、对比度拉高，像黄昏时分的氛围",
+    "expected_output": {
+      "color_temperature": "warm",
+      "contrast": "high"
+    },
+    "rubrics": "色温偏暖(V>U)，对比度动态范围明显，无黑屏/静帧",
+    "tags": [
+      "color",
+      "warm",
+      "contrast"
+    ]
+  },
+  {
+    "id": "color_grade_002",
+    "task_type": "color_grade",
+    "input": "调成冷调青蓝风格，低饱和、高对比，冷峻科技感",
+    "expected_output": {
+      "color_temperature": "cool",
+      "saturation": "low",
+      "contrast": "high"
+    },
+    "rubrics": "色温偏冷(U>V)，饱和度降低，对比度拉高",
+    "tags": [
+      "color",
+      "cool",
+      "teal"
+    ]
+  },
+  {
+    "id": "color_grade_003",
+    "task_type": "color_grade",
+    "input": "高饱和鲜艳调色：色彩浓郁、对比强烈，适合商业宣传片",
+    "expected_output": {
+      "saturation": "high",
+      "contrast": "high"
+    },
+    "rubrics": "饱和度明显升高(SATAVG>90)，对比度拉高，画面鲜艳",
+    "tags": [
+      "color",
+      "vivid",
+      "commercial"
+    ]
+  },
+  {
+    "id": "effect_003",
+    "task_type": "effect_apply",
+    "input": "给画面叠加胶片颗粒效果，模拟老电影质感，同时略微降低饱和度",
+    "expected_output": {
+      "effects_contain": [
+        "film_grain"
+      ],
+      "saturation": "low"
+    },
+    "rubrics": "颗粒/噪点效果已应用到执行记录，饱和度降低",
+    "tags": [
+      "effect",
+      "grain",
+      "film"
+    ]
+  },
+  {
+    "id": "effect_004",
+    "task_type": "effect_apply",
+    "input": "添加辉光效果让高光区域柔和发光，营造梦幻氛围",
+    "expected_output": {
+      "effects_contain": [
+        "glow"
+      ]
+    },
+    "rubrics": "Glow 类效果已应用到执行记录，无黑屏产出",
+    "tags": [
+      "effect",
+      "glow",
+      "dreamy"
+    ]
+  },
+  {
+    "id": "particle_001",
+    "task_type": "effect_apply",
+    "input": "给画面叠加漂浮微尘粒子层，增强电影感氛围，粒子要持续运动",
+    "expected_output": {
+      "effects_contain": [
+        "particle"
+      ],
+      "particle_presence": true
+    },
+    "rubrics": "粒子效果已应用，产物帧间差实测证明持续运动(非静帧)，无黑屏",
+    "tags": [
+      "particle",
+      "dust",
+      "cinematic"
+    ]
+  },
+  {
+    "id": "textfx_001",
+    "task_type": "effect_apply",
+    "input": "标题文字做成故障风：RGB 错位+辉光，带持续闪变",
+    "expected_output": {
+      "effects_contain": [
+        "glow",
+        "glitch"
+      ],
+      "particle_presence": true
+    },
+    "rubrics": "故障字效果已应用（辉光+跳切闪变），产物非静帧非黑屏",
+    "tags": [
+      "text",
+      "glitch",
+      "glow"
+    ]
+  },
+  {
+    "id": "regression_001",
+    "task_type": "import_safety",
+    "input": "验证 effects.effect_registry 可被任意目录下的模块正确 import",
+    "expected_output": {
+      "import_path": "from effects.effect_registry import KEYWORD_TO_EFFECT_MAP",
+      "mapping_count_min": 200
+    },
+    "rubrics": "import 不报 ModuleNotFoundError；映射数 >= 200",
+    "tags": [
+      "regression",
+      "import",
+      "effect_registry"
+    ]
+  },
+  {
+    "id": "regression_002",
+    "task_type": "import_safety",
+    "input": "验证 learning.parameter_optimizer 可正确导入且 ParameterOptimizer 可实例化",
+    "expected_output": {
+      "import_ok": true,
+      "optimize_result_effect": "ADBE Gaussian Blur 2"
+    },
+    "rubrics": "from learning.parameter_optimizer import ParameterOptimizer 不报错；optimize(blur) 返回正确效果名",
+    "tags": [
+      "regression",
+      "import",
+      "parameter_optimizer"
+    ]
+  },
+  {
+    "id": "regression_003",
+    "task_type": "path_safety",
+    "input": "验证 os.chdir() 后 Path(__file__).resolve() 仍返回绝对路径",
+    "expected_output": {
+      "is_absolute": true,
+      "parent_exists": true
+    },
+    "rubrics": "resolve() 后的路径是绝对的且父目录存在",
+    "tags": [
+      "regression",
+      "path",
+      "resolve"
+    ]
+  },
+  {
+    "id": "regression_004",
+    "task_type": "adapter_interface",
+    "input": "验证所有开源适配器的 execute() 方法支持无参调用",
+    "expected_output": {
+      "all_adapters_accept_no_params": true
+    },
+    "rubrics": "adapter.execute('list_operations') 不报 missing argument",
+    "tags": [
+      "regression",
+      "adapter",
+      "interface"
+    ]
+  },
+  {
+    "id": "regression_005",
+    "task_type": "knowledge_base",
+    "input": "验证知识库加载后 effect_registry 映射数 >= 1000",
+    "expected_output": {
+      "mapping_count_min": 1000,
+      "kb_loaded": true
+    },
+    "rubrics": "KEYWORD_TO_EFFECT_MAP 长度 >= 1000",
+    "tags": [
+      "regression",
+      "knowledge_base",
+      "effect_registry"
+    ]
+  },
+  {
+    "id": "regression_006",
+    "task_type": "self_evolution",
+    "input": "验证自进化全链路 7 模块全部可 import",
+    "expected_output": {
+      "modules_ok": [
+        "learning.parameter_optimizer",
+        "learning.persistent_learning_loop",
+        "core.evolution.evaluator",
+        "core.evolution.optimizer_agent",
+        "core.evolution.run_evolution",
+        "pipeline.unified_pipeline",
+        "ai.accept_runner"
+      ]
+    },
+    "rubrics": "7 个模块全部 import 成功，无 ModuleNotFoundError",
+    "tags": [
+      "regression",
+      "self_evolution",
+      "import"
+    ]
+  },
+  {
+    "id": "integration_001",
+    "task_type": "integration_check",
+    "input": "验证 integration_registry 注册表包含所有 19 项集成",
+    "expected_output": {
+      "total_integrations": 19,
+      "available_min": 10
+    },
+    "rubrics": "注册表 >= 19 项；可用 >= 10 项",
+    "tags": [
+      "integration",
+      "registry"
+    ]
+  },
+  {
+    "id": "integration_002",
+    "task_type": "integration_check",
+    "input": "验证 DCTL 预设适配器扫描到 >= 50 个 .dctl 文件",
+    "expected_output": {
+      "dctl_file_count_min": 50,
+      "collections": 3
+    },
+    "rubrics": "DCTL 扫描结果 >= 50 文件，覆盖 3 个集合",
+    "tags": [
+      "integration",
+      "dctl",
+      "preset"
+    ]
+  }
+]

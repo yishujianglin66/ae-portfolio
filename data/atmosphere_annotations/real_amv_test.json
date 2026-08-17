@@ -1,0 +1,408 @@
+{
+  "annotator": "torii_gate_v0.4_2b",
+  "generated_at": "2026-08-14 16:03:48",
+  "n_videos": 58,
+  "n_annotated": 41,
+  "elapsed_sec": 2486.3,
+  "results": {
+    "BV1554y117q3_PR教程快速自制RGB分离效果Zoom缩放冲击转场.mp4": {
+      "atmosphere": "治愈",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 33.95
+    },
+    "BV16J411Q7sP_裸眼3D终结之谷 佐鸣大战.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 43.81
+    },
+    "BV16o3M6xER6_2026剪辑入门必看100种剪辑手法从入门到精通共10.mp4": {
+      "atmosphere": "治愈",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 33.81
+    },
+    "BV17G3w6AE9H_𝘿𝙞𝙚 𝙁𝙤𝙧 𝙔𝙖𝙣.mp4": null,
+    "BV18W4y1J7gb_.mp4": null,
+    "BV1A64y1u78E.mp4": {
+      "atmosphere": "悬疑",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 37.29
+    },
+    "BV1Am4y1J7PF_时光代理人2插曲Flash无损完整版配上原片简直不要太.mp4": {
+      "atmosphere": "抒情",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 40.39
+    },
+    "BV1cr421L7wa_Ƭ Ӱлɫϰ.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 46.76
+    },
+    "BV1D4411k7UE_海贼王极致踩点燃爆点燃你的腺上激素爽就完事了.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 57.93
+    },
+    "BV1DM4y1s79m_AEGlitchЧһѧ.mp4": null,
+    "BV1DM4y1s79m_AE教程Glitch故障效果一分钟学会.mp4": null,
+    "BV1eKBmYZE4x_ӳ30ѧĵӰƵЧ.mp4": {
+      "atmosphere": "治愈",
+      "emotion": "The overall mood is emotional and heartfelt, with a sense of longing and connection.",
+      "energy": 5,
+      "scene_type": "The scene is a close-up, focusing on the hand reaching out, creating a sense of intimacy.",
+      "shot_scale": "The shot is a close-up, emphasizing the hand and the emotional connection.",
+      "confidence": 0.5,
+      "latency_sec": 17.8
+    },
+    "BV1gB4y1A7zt_PR教程救命RGB分离残影效果燃炸了.mp4": null,
+    "BV1Hf4y1r7qT_塿ǰȼ.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 47.21
+    },
+    "BV1Hf4y1r7qT_无限滑板前方高燃.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 41.82
+    },
+    "BV1J1336hE3V_赛博故障072504.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 42.25
+    },
+    "BV1mR4y1m7k7_疯狂踩点  超燃bgmLock Me Up 动.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 43.9
+    },
+    "BV1mxmMBWEzG_RGBЧ.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 49.28
+    },
+    "BV1Nm4y187Vg_九喇嘛鸣人裸眼3D效果炸裂战斗混剪热血沸腾.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 44.76
+    },
+    "BV1nV411a7jr_սBվǿȵ㣡108ȼ.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 45.66
+    },
+    "BV1nV411a7jr_挑战B站最强踩点108部动画超燃混剪.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 42.12
+    },
+    "BV1nz42167W2_一个舒服的拉镜.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 19.13
+    },
+    "BV1os411Z7jg_AMVBlazing.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 41.01
+    },
+    "BV1os411Z7jg_闪现流AMVBlazing.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 50.21
+    },
+    "BV1PW411H7yb_黑岩燃向MAD黑岩超燃剪辑.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 22.53
+    },
+    "BV1qGTR6MEBf_这样的雷霆运镜豪到你了吗.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 49.44
+    },
+    "BV1RNh9zqEnC_韩国十大禁播MV居然全都听过太难以置信了.mp4": null,
+    "BV1RU3E6rEYp_AMV.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 43.9
+    },
+    "BV1SiNZzrEMG_灵笼踩点4k前方核能B站98分纵享丝滑的踩点视觉.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 48.21
+    },
+    "BV1uQgb64EST_曾经统治整个AMV圈之一的Wyrux退网作.mp4": null,
+    "BV1v7411B7eb_K超燃踩点0202了我做8年前的K还有人看吗.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 53.0
+    },
+    "BV1WUN269EDS_五分鐘教你搞燃剪.mp4": {
+      "atmosphere": "治愈",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 24.12
+    },
+    "BV1wW4y1E774_Ai小技巧221分钟学会故障风文字效果的制作.mp4": {
+      "atmosphere": "暗黑",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 40.51
+    },
+    "BV1x441187u5_ǰܣⳡӾʢɣ.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 52.48
+    },
+    "BV1ys411e7zE_FATE震撼高燃AMV救赎命运战斗通向正义理想之路.mp4": null,
+    "BV1ZqKL69EK3_将这极致的踩点与节奏共同绘制成一副精彩绝伦酣畅淋漓的视觉.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 42.78
+    },
+    "BV1Zw411k77P_MINEFIELDS - I want to eat you.mp4": null,
+    "DL_FATE_0_BV1MB84eoEtP.mp4": {
+      "atmosphere": "悬疑",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 34.6
+    },
+    "DL_FATE_r978_BV154411E7by.mp4": null,
+    "DL_FATE_r978_BV1Cx411c7m6.mp4": null,
+    "DL_FATE_r978_BV1qb411C79B_p1.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 40.58
+    },
+    "DL_FATE_r978_BV1qb411C79B_p2.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 20.16
+    },
+    "DL_Move_r749_BV13wUDYxE2t_p1.mp4": null,
+    "DL_Move_r749_BV13wUDYxE2t_p2.mp4": null,
+    "DL_Move_r749_BV13wUDYxE2t_p3.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 33.96
+    },
+    "DL_Move_r749_BV1KYqoYMEE5.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 34.72
+    },
+    "DL_地缚少年花子君_1_BV1n7411C7oC.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 52.6
+    },
+    "DL_地缚少年花子君_r230_BV1pCJyzhEEY.mp4": {
+      "atmosphere": "悬疑",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 18.85
+    },
+    "DL_地缚少年花子君_r230_BV1tqoLBaE8V.mp4": null,
+    "DL_时光代理人_r107_BV1Aw411Z7dH.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 35.24
+    },
+    "DL_时光代理人_r107_BV1cCC8YMEDw.mp4": null,
+    "DL_时光代理人_r107_BV1toeBztE8b.mp4": null,
+    "DL_海贼王_0_BV1D4411k7UE.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 41.26
+    },
+    "DL_海贼王_r84_BV14tZNYGEuV.mp4": {
+      "atmosphere": "悬疑",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 35.03
+    },
+    "DL_灵笼_1_BV1DdrdB2Ev5.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 42.04
+    },
+    "DL_黑岩射手_r924_BV1fx411C74e.mp4": {
+      "atmosphere": "治愈",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 17.95
+    },
+    "DL_黑岩射手_r924_BV1JW411s7GV.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 23.38
+    },
+    "DL_黑岩射手_r924_BV1NL4y1H7u7.mp4": null
+  },
+  "distribution": {
+    "atmosphere": {
+      "治愈": 5,
+      "燃向": 30,
+      "悬疑": 4,
+      "抒情": 1,
+      "暗黑": 1
+    },
+    "energy": {
+      "5": 17,
+      "9": 24
+    }
+  }
+}

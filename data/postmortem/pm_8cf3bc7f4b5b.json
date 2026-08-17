@@ -1,0 +1,123 @@
+{
+  "report_id": "pm_8cf3bc7f4b5b",
+  "run_id": "run_20260730_182317_deb92e",
+  "signature": {
+    "signature": "09e1bbc3d5a39a8e",
+    "error_type": "TypeError",
+    "stage": "execute",
+    "keywords": [
+      "operand",
+      "type"
+    ]
+  },
+  "failure": {
+    "run_id": "run_20260730_182317_deb92e",
+    "stage": "execute",
+    "error_type": "TypeError",
+    "error_message": "bad operand type for abs(): 'str'",
+    "traceback_str": "Traceback (most recent call last):\n  File \"C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\pipeline\\unified_pipeline.py\", line 1303, in _run_stage\n    data = handler()\n           ^^^^^^^^^\n  File \"C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\pipeline\\unified_pipeline.py\", line 2577, in _run_execute\n    result = self._ensure_real_mix_output(result)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\pipeline\\unified_pipeline.py\", line 2608, in _ensure_real_mix_output\n    mix_result = self._run_execute_real_mix()\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\pipeline\\unified_pipeline.py\", line 2745, in _run_execute_real_mix\n    applied = self._apply_effect_to_filter_builder(fb, eff, seg_dur)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\pipeline\\unified_pipeline.py\", line 2957, in _apply_effect_to_filter_builder\n    fb.color_grade(ColorGradeParams(\n  File \"C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\pipeline\\ffmpeg_edit_engine.py\", line 137, in color_grade\n    if abs(p.temperature) > 0.01 or abs(p.tint) > 0.01:\n       ^^^^^^^^^^^^^^^^^^\nTypeError: bad operand type for abs(): 'str'\n",
+    "timestamp": 0.0,
+    "context": {
+      "mode": "mixed",
+      "iteration": 0,
+      "topic": "赛博朋克故障艺术高燃踩点混剪 视觉冲击 霓虹色彩 故障抖动 节奏卡点"
+    },
+    "trace_id": "987650d0ee0d4392"
+  },
+  "root_causes": [],
+  "recommendations": [
+    {
+      "title": "重试失败阶段",
+      "description": "阶段 execute 因 TypeError 失败；建议检查错误信息并重试",
+      "confidence": 0.3,
+      "source": "heuristic",
+      "action": "retry_with_logs"
+    }
+  ],
+  "distilled_rules": [],
+  "similar_failures": [],
+  "created_at": 1785407050.6531565,
+  "trace_spans": [
+    {
+      "trace_id": "987650d0ee0d4392",
+      "span_id": "802d3016",
+      "parent_span_id": null,
+      "stage_name": "run_20260730_182317_deb92e",
+      "start_time": 1785406997.3720686,
+      "end_time": 0.0,
+      "duration": 53.27149176597595,
+      "status": "running",
+      "error": null,
+      "attributes": {
+        "trace_name": "run_20260730_182317_deb92e"
+      }
+    },
+    {
+      "trace_id": "987650d0ee0d4392",
+      "span_id": "086539cf",
+      "parent_span_id": "802d3016",
+      "stage_name": "perceive",
+      "start_time": 1785406998.9090934,
+      "end_time": 1785407017.3958702,
+      "duration": 18.48677682876587,
+      "status": "success",
+      "error": null,
+      "attributes": {
+        "iteration": 0,
+        "retries": 1,
+        "attempts": 1,
+        "duration_sec": 18.48677682876587
+      }
+    },
+    {
+      "trace_id": "987650d0ee0d4392",
+      "span_id": "ca83ba7b",
+      "parent_span_id": "802d3016",
+      "stage_name": "analyze",
+      "start_time": 1785407017.3973715,
+      "end_time": 1785407026.6300993,
+      "duration": 9.232727766036987,
+      "status": "success",
+      "error": null,
+      "attributes": {
+        "iteration": 0,
+        "retries": 1,
+        "attempts": 1,
+        "duration_sec": 9.232727766036987
+      }
+    },
+    {
+      "trace_id": "987650d0ee0d4392",
+      "span_id": "e1e73a8b",
+      "parent_span_id": "802d3016",
+      "stage_name": "plan",
+      "start_time": 1785407026.6315877,
+      "end_time": 1785407043.122511,
+      "duration": 16.490923166275024,
+      "status": "success",
+      "error": null,
+      "attributes": {
+        "iteration": 0,
+        "retries": 1,
+        "attempts": 1,
+        "duration_sec": 16.490923166275024
+      }
+    },
+    {
+      "trace_id": "987650d0ee0d4392",
+      "span_id": "eb0b8bb4",
+      "parent_span_id": "802d3016",
+      "stage_name": "execute",
+      "start_time": 1785407043.123508,
+      "end_time": 0.0,
+      "duration": 7.520052433013916,
+      "status": "running",
+      "error": null,
+      "attributes": {
+        "iteration": 0,
+        "retries": 2
+      }
+    }
+  ],
+  "artifacts": []
+}

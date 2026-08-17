@@ -1,0 +1,65 @@
+{
+  "annotator": "torii_gate_v0.4_2b",
+  "generated_at": "2026-08-14 14:32:37",
+  "n_videos": 7,
+  "n_annotated": 7,
+  "elapsed_sec": 301.6,
+  "results": {
+    "猫1.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 56.01
+    },
+    "猫2.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 38.49
+    },
+    "alya-05.mp4": null,
+    "Hatsune Miku Twixtor 4K.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "热血",
+      "energy": 9,
+      "scene_type": "战斗",
+      "shot_scale": "中景",
+      "confidence": 0.9,
+      "latency_sec": 31.41
+    },
+    "五条悟第二季.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 30.58
+    },
+    "独自升级2.mp4": {
+      "atmosphere": "燃向",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 14.11
+    },
+    "独自升级5.mp4": {
+      "atmosphere": "悬疑",
+      "emotion": "",
+      "energy": 5,
+      "scene_type": "",
+      "shot_scale": "",
+      "confidence": 0.5,
+      "latency_sec": 16.95
+    }
+  },
+  "regenerated_at": "2026-08-14 14:49:09"
+}

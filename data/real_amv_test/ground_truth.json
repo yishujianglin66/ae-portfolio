@@ -1,0 +1,217 @@
+{
+  "description": "真实B站AMV/MAD视频 ground truth 标注 (扩展版)",
+  "created": "2026-07-27 23:38:16",
+  "total_videos": 28,
+  "style_distribution": {
+    "amv_beat_sync": 6,
+    "amv_pull_zoom": 2,
+    "amv_fast_cut": 2,
+    "amv_cinematic": 2,
+    "amv_glitch": 6,
+    "amv_korean_flash": 4,
+    "amv_high_burn": 4,
+    "amv_3d_spatial": 2
+  },
+  "videos": [
+    {
+      "bv_id": "BV1Hf4y1r7qT",
+      "title": "【无限滑板】前方高燃",
+      "duration": 158.219,
+      "expected_style": "amv_beat_sync",
+      "search_query": "AMV踩点混剪"
+    },
+    {
+      "bv_id": "BV1nV411a7jr",
+      "title": "挑战B站最强踩点！108部动画超燃混剪！！！",
+      "duration": 150.228,
+      "expected_style": "amv_beat_sync",
+      "search_query": "AMV踩点混剪"
+    },
+    {
+      "bv_id": "BV1v7411B7eb",
+      "title": "【K】超燃踩点！0202了，我做8年前的K还有人看吗？",
+      "duration": 184.725,
+      "expected_style": "amv_beat_sync",
+      "search_query": "MAD踩点燃向"
+    },
+    {
+      "bv_id": "BV1PW411H7yb",
+      "title": "【黑岩/燃向/MAD】黑岩超燃剪辑",
+      "duration": 180.0,
+      "expected_style": "amv_beat_sync",
+      "search_query": "MAD踩点燃向"
+    },
+    {
+      "bv_id": "BV1ZqKL69EK3",
+      "title": "将这极致的踩点与节奏，共同绘制成一副精彩绝伦、酣畅淋漓的视觉盛宴 [猫和老鼠手游S皮超燃卡点混剪&无缝衔接·重制版]",
+      "duration": 86.8,
+      "expected_style": "amv_beat_sync",
+      "search_query": "动漫节奏踩点"
+    },
+    {
+      "bv_id": "BV1mR4y1m7k7",
+      "title": "【疯狂踩点 | 超燃bgm】|《Lock Me Up》| 动态歌词排版",
+      "duration": 207.214,
+      "expected_style": "amv_beat_sync",
+      "search_query": "动漫节奏踩点"
+    },
+    {
+      "bv_id": "BV1nz42167W2",
+      "title": "一个舒服的拉镜",
+      "duration": 36.266,
+      "expected_style": "amv_pull_zoom",
+      "search_query": "动漫拉镜混剪"
+    },
+    {
+      "bv_id": "BV1qGTR6MEBf",
+      "title": "“这样的雷霆运镜豪到你了吗”",
+      "duration": 36.92,
+      "expected_style": "amv_pull_zoom",
+      "search_query": "动漫拉镜混剪"
+    },
+    {
+      "bv_id": "BV16o3M6xER6",
+      "title": "2026剪辑入门必看——100种剪辑手法，从入门到精通共100集拿走不谢！今天要学的是超燃卡点效果",
+      "duration": 206.309,
+      "expected_style": "amv_beat_sync",
+      "search_query": "动漫快切燃",
+      "note": "教程视频但演示的是踩点卡点效果"
+    },
+    {
+      "bv_id": "BV1WUN269EDS",
+      "title": "五分鐘教你搞燃剪",
+      "duration": 287.533,
+      "expected_style": "amv_high_burn",
+      "search_query": "动漫快切燃",
+      "note": "燃剪教学,实际演示效果为高燃风"
+    },
+    {
+      "bv_id": "BV1uQgb64EST",
+      "title": "曾经统治整个AMV圈之一的Wyrux退网作",
+      "duration": 50.133,
+      "expected_style": "amv_cinematic",
+      "search_query": "AMV cinematic"
+    },
+    {
+      "bv_id": "BV1RU3E6rEYp",
+      "title": "AMV",
+      "duration": 43.166,
+      "expected_style": "amv_cinematic",
+      "search_query": "AMV cinematic"
+    },
+    {
+      "bv_id": "BV1DM4y1s79m",
+      "title": "【AE教程】Glitch故障效果一分钟学会",
+      "duration": 52.991,
+      "expected_style": "amv_glitch",
+      "search_query": "AMV故障风glitch"
+    },
+    {
+      "bv_id": "BV1wW4y1E774",
+      "title": "Ai小技巧22｜1分钟学会故障风文字效果的制作",
+      "duration": 71.423,
+      "expected_style": "amv_glitch",
+      "search_query": "AMV故障风glitch"
+    },
+    {
+      "bv_id": "BV1gB4y1A7zt",
+      "title": "【PR教程】救命！RGB分离+残影效果燃炸了！",
+      "duration": 261.887,
+      "expected_style": "amv_glitch",
+      "search_query": "动漫RGB分离特效"
+    },
+    {
+      "bv_id": "BV1554y117q3",
+      "title": "【PR教程】快速自制RGB分离效果+Zoom缩放冲击转场",
+      "duration": 195.605,
+      "expected_style": "amv_glitch",
+      "search_query": "动漫RGB分离特效"
+    },
+    {
+      "bv_id": "BV1J1336hE3V",
+      "title": "赛博故障/072504",
+      "duration": 179.954,
+      "expected_style": "amv_glitch",
+      "search_query": "AMV赛博故障"
+    },
+    {
+      "bv_id": "BV18W4y1J7gb",
+      "title": "🌕",
+      "duration": 36.074,
+      "expected_style": "amv_glitch",
+      "search_query": "AMV赛博故障"
+    },
+    {
+      "bv_id": "BV1os411Z7jg",
+      "title": "【闪现流AMV】Blazing",
+      "duration": 270.733,
+      "expected_style": "amv_korean_flash",
+      "search_query": "韩闪AMV"
+    },
+    {
+      "bv_id": "BV1Zw411k77P",
+      "title": "MINEFIELDS - I want to eat your pancreas - [AMV_Edit]",
+      "duration": 41.783,
+      "expected_style": "amv_korean_flash",
+      "search_query": "韩闪AMV"
+    },
+    {
+      "bv_id": "BV1RNh9zqEnC",
+      "title": "韩国十大禁播MV，居然全都听过？太难以置信了！",
+      "duration": 248.81,
+      "expected_style": "amv_beat_sync",
+      "search_query": "korean flash AMV",
+      "note": "韩国MV合集,节奏踩点为主"
+    },
+    {
+      "bv_id": "BV1Am4y1J7PF",
+      "title": "时光代理人2插曲«Flash»无损完整版，配上原片简直不要太妙",
+      "duration": 200.712,
+      "expected_style": "amv_high_burn",
+      "search_query": "korean flash AMV",
+      "note": "动漫插曲配合原片,高燃节奏为主"
+    },
+    {
+      "bv_id": "BV17G3w6AE9H",
+      "title": "𝘿𝙞𝙚 𝙁𝙤𝙧 𝙔𝙖𝙣",
+      "duration": 87.6,
+      "expected_style": "amv_high_burn",
+      "search_query": "AMV高燃"
+    },
+    {
+      "bv_id": "BV1ys411e7zE",
+      "title": "【FATE震撼高燃AMV】救赎、命运、战斗、通向正义理想之路",
+      "duration": 295.76,
+      "expected_style": "amv_high_burn",
+      "search_query": "AMV高燃"
+    },
+    {
+      "bv_id": "BV1D4411k7UE",
+      "title": "【海贼王/极致踩点/燃爆】点燃你的腺上激素，爽就完事了！！！",
+      "duration": 180.416,
+      "expected_style": "amv_high_burn",
+      "search_query": "动漫高燃混剪"
+    },
+    {
+      "bv_id": "BV1SiNZzrEMG",
+      "title": "【灵笼/踩点/4k】前方核能！B站9.8分纵享丝滑的踩点视觉盛宴！",
+      "duration": 230.02,
+      "expected_style": "amv_high_burn",
+      "search_query": "动漫高燃混剪"
+    },
+    {
+      "bv_id": "BV16J411Q7sP",
+      "title": "【裸眼3D】终结之谷 佐鸣大战",
+      "duration": 145.666,
+      "expected_style": "amv_3d_spatial",
+      "search_query": "动漫3D空间特效"
+    },
+    {
+      "bv_id": "BV1Nm4y187Vg",
+      "title": "九喇嘛鸣人裸眼3D效果炸裂，战斗混剪热血沸腾！",
+      "duration": 113.776,
+      "expected_style": "amv_3d_spatial",
+      "search_query": "动漫3D空间特效"
+    }
+  ]
+}
