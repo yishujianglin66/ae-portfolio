@@ -44,11 +44,24 @@ from knowledge_base.adapters.effect_adapter import EffectAdapter
 from knowledge_base.adapters.transition_adapter import TransitionAdapter
 
 
-# 默认知识库路径
+# 默认知识库路径 —— 支持多目录聚合（10/11/12/14/15/13 六大知识库）
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
-_DEFAULT_KB_DIR = str(_PROJECT_ROOT / "10-风格化剪辑知识库")
+_DEFAULT_KB_DIRS = [
+    str(_PROJECT_ROOT / "10-风格化剪辑知识库"),
+    str(_PROJECT_ROOT / "11-大师知识库"),
+    str(_PROJECT_ROOT / "12-漫剪拉镜大师"),
+    str(_PROJECT_ROOT / "14-Silhouette知识库"),
+    str(_PROJECT_ROOT / "15-3D模型与骨骼动画知识库"),
+    str(_PROJECT_ROOT / "13-素材获取与搜索"),
+]
 _DEFAULT_CACHE_DIR = str(_PROJECT_ROOT / "data" / "kb_cache")
 _DEFAULT_EFFECT_CATALOG = str(_PROJECT_ROOT / "knowledge_base" / "effect_catalog.json")
+
+
+def _iter_kb_dirs(kb_dirs: Optional[List[str]] = None) -> List[str]:
+    """过滤实际存在的知识库目录列表。"""
+    dirs = kb_dirs if kb_dirs is not None else _DEFAULT_KB_DIRS
+    return [d for d in dirs if os.path.isdir(d)]
 
 
 @dataclass
@@ -199,15 +212,25 @@ class KnowledgeBaseLoader:
     def __init__(
         self,
         kb_dir: str = "",
+        kb_dirs: Optional[List[str]] = None,
         cache_dir: str = "",
     ) -> None:
-        """初始化加载器。
+        """初始化加载器（支持多目录聚合）。
 
         Args:
-            kb_dir: 知识库目录路径（默认 10-风格化剪辑知识库/）
+            kb_dir: 单个知识库目录路径（向后兼容，将作为单元素插入 kb_dirs 列表）
+            kb_dirs: 多个知识库目录路径列表（推荐；不填时使用 _DEFAULT_KB_DIRS 全量）
             cache_dir: 缓存目录路径（默认 data/kb_cache/）
         """
-        self._kb_dir = kb_dir or _DEFAULT_KB_DIR
+        # 多目录：向后兼容 + 默认全量聚合
+        if kb_dirs:
+            self._kb_dirs: List[str] = list(kb_dirs)
+        elif kb_dir:
+            self._kb_dirs = [kb_dir]
+        else:
+            self._kb_dirs = _iter_kb_dirs()
+
+        self._kb_dir = self._kb_dirs[0] if self._kb_dirs else ""
         self._cache_dir = cache_dir or _DEFAULT_CACHE_DIR
 
         self._parser = MdParser()
@@ -218,60 +241,68 @@ class KnowledgeBaseLoader:
         self._cache = KbCache(cache_dir=self._cache_dir)
 
         # 缓存解析结果
+        # key = "<目录名>/<文件名>"，避免跨目录同名文件互相覆盖
         self._file_blocks: Dict[str, List[MdBlock]] = {}
         self._effect_map: Optional[Dict[str, str]] = None
         self._transition_map: Optional[Dict[str, Dict[str, Any]]] = None
         self._color_presets: Optional[List[ColorPreset]] = None
         self._style_recipes: Optional[List[StyleRecipe]] = None
 
+
     @classmethod
     def get_instance(
         cls,
         kb_dir: str = "",
+        kb_dirs: Optional[List[str]] = None,
         cache_dir: str = "",
     ) -> "KnowledgeBaseLoader":
-        """获取单例实例。
-
-        Args:
-            kb_dir: 知识库目录路径
-            cache_dir: 缓存目录路径
-
-        Returns:
-            KnowledgeBaseLoader 实例
-        """
+        """获取单例实例。"""
         if cls._instance is None:
-            cls._instance = cls(kb_dir=kb_dir, cache_dir=cache_dir)
+            cls._instance = cls(kb_dir=kb_dir, kb_dirs=kb_dirs, cache_dir=cache_dir)
         return cls._instance
 
     def list_files(self) -> List[str]:
-        """列出知识库中所有 md 文件名。
-
-        Returns:
-            文件名列表
-        """
-        if not os.path.isdir(self._kb_dir):
-            return []
-
+        """列出所有知识库目录中的 md 文件（返回 "<目录名>/<文件名>" 复合键）。"""
         files: List[str] = []
-        for name in sorted(os.listdir(self._kb_dir)):
-            if name.endswith(".md"):
-                files.append(name)
+        for kb_dir in self._kb_dirs:
+            if not os.path.isdir(kb_dir):
+                continue
+            dir_tag = os.path.basename(kb_dir.rstrip(os.sep)) or "kb"
+            for name in sorted(os.listdir(kb_dir)):
+                if name.endswith(".md"):
+                    files.append(f"{dir_tag}/{name}")
         return files
 
-    def parse_file(self, filename: str) -> List[MdBlock]:
-        """解析单个知识库文件。
+    def _resolve_file(self, key: str) -> str:
+        """将 list_files 产生的复合键解析为绝对路径。
 
-        Args:
-            filename: 文件名（相对于 kb_dir）
-
-        Returns:
-            MdBlock 列表
+        策略：
+        1. 若 key 为 "dir/file.md"，则从 self._kb_dirs 里找到 basename==dir 的目录并拼接。
+        2. 否则按向后兼容处理：在 self._kb_dirs[0] 下直接查找。
         """
+        if "/" in key or "\\" in key:
+            parts = key.replace("\\", "/").split("/", 1)
+            if len(parts) == 2:
+                dir_tag, fname = parts
+                for kb_dir in self._kb_dirs:
+                    if os.path.basename(kb_dir.rstrip(os.sep)) == dir_tag:
+                        candidate = os.path.join(kb_dir, fname)
+                        if os.path.isfile(candidate):
+                            return candidate
+        # 向后兼容：单目录直查
+        for kb_dir in self._kb_dirs:
+            candidate = os.path.join(kb_dir, key)
+            if os.path.isfile(candidate):
+                return candidate
+        return ""
+
+    def parse_file(self, filename: str) -> List[MdBlock]:
+        """解析单个知识库文件（filename 可为复合键 dir/file.md 或纯文件名）。"""
         if filename in self._file_blocks:
             return self._file_blocks[filename]
 
-        file_path = os.path.join(self._kb_dir, filename)
-        if not os.path.isfile(file_path):
+        file_path = self._resolve_file(filename)
+        if not file_path or not os.path.isfile(file_path):
             return []
 
         # 检查缓存
@@ -282,7 +313,6 @@ class KnowledgeBaseLoader:
 
         cached = self._cache.get(file_path, mtime=mtime)
         if cached is not None:
-            # 从缓存恢复 MdBlock
             blocks = self._blocks_from_cache(cached)
             self._file_blocks[filename] = blocks
             return blocks

@@ -875,6 +875,30 @@ class ProductionDirector:
                 import asyncio
 
                 engine = get_evolution_engine()
+                # 从 RenderResult 已知信息推导初始质量基线，避免永远 0.0
+                # — success(+40) + content_verified(+35) + duration合理性(+25)
+                _base = 0.0
+                if result.success:
+                    _base += 40.0
+                    if result.duration and result.duration > 0:
+                        # duration 正常区间: 目标±30% → 满分25；越短越线性衰减
+                        if target_duration and target_duration > 0:
+                            _ratio = result.duration / target_duration
+                            if 0.7 <= _ratio <= 1.3:
+                                _base += 25.0
+                            elif 0.4 <= _ratio <= 1.6:
+                                _base += 15.0
+                            else:
+                                _base += 5.0
+                        else:
+                            _base += 20.0
+                    if result.content_verified is True:
+                        _base += 35.0
+                    elif result.content_verified is None:
+                        _base += 15.0
+                    # False -> +0
+                output_quality_initial = max(0.0, min(100.0, _base)) / 100.0
+
                 record = ExecutionRecord(
                     run_id=f"director_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
                     timestamp=time.time(),
@@ -890,13 +914,14 @@ class ProductionDirector:
                         "resolution": list(result.resolution),
                         "fps": result.fps,
                         "has_audio": result.has_audio,
+                        "target_duration": target_duration,
                     },
                     config={
                         "auto_captured": True,
                         "output_path": output_path,
                     },
                     output_path=output_path,
-                    output_quality=0.0,  # 由 engine 自动评估
+                    output_quality=output_quality_initial,
                     success=result.success,
                     total_duration=result.duration,
                     strategy_id="production_director",
@@ -907,9 +932,28 @@ class ProductionDirector:
                     review = loop.run_until_complete(
                         engine.post_execution_review(record)
                     )
+                    # —— 关键修复：review 计算出 overall_score 后，回填 record.output_quality
+                    #    否则日志里永远保留的是初始值，导致 causal_engine 看到的全是 0.0
+                    try:
+                        final_score = float(getattr(getattr(review, "quality", None), "overall_score", 0.0))
+                        if 0.0 <= final_score <= 1.0:
+                            record.output_quality = final_score
+                        elif final_score > 1.0:
+                            # 百分制 → 归一化
+                            record.output_quality = final_score / 100.0
+                    except (TypeError, ValueError):
+                        pass
+                    # 尝试显式持久化（兼容：如果 engine 提供 record.save）
+                    try:
+                        persist = getattr(record, "persist", None) or getattr(engine, "_persist_record", None)
+                        if callable(persist):
+                            persist(record)
+                    except Exception:
+                        pass
                     print(
                         f"[自进化] 自动采集完成: "
-                        f"quality={review.quality.overall_score:.1f}, "
+                        f"quality_init={output_quality_initial:.2f} → "
+                        f"quality_final={record.output_quality:.2f}, "
                         f"deviation={review.prediction_deviation:.3f}"
                     )
                     # D2 修复: 导演真实参数反馈写入

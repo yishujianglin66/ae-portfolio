@@ -33,9 +33,18 @@ from dataclasses import dataclass, field
 from loguru import logger
 
 
-# 项目根目录
+# 项目根目录 + 多知识库目录支持
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
-_DEFAULT_KB_DIR = _PROJECT_ROOT / "10-风格化剪辑知识库"
+_DEFAULT_KB_DIRS = [
+    _PROJECT_ROOT / "10-风格化剪辑知识库",
+    _PROJECT_ROOT / "11-大师知识库",
+    _PROJECT_ROOT / "12-漫剪拉镜大师",
+    _PROJECT_ROOT / "14-Silhouette知识库",
+    _PROJECT_ROOT / "15-3D模型与骨骼动画知识库",
+    _PROJECT_ROOT / "13-素材获取与搜索",
+]
+_DEFAULT_KB_DIR = _DEFAULT_KB_DIRS[0]  # 兼容：取第一个存在的目录作为"默认单目录"
+
 
 
 # ============================================================================
@@ -210,28 +219,39 @@ _DEFAULT_PLUGIN_PATHS: List[Path] = [
 # ============================================================================
 
 class KBScanner:
-    """增强版知识库效果扫描器。"""
+    """增强版知识库效果扫描器（多目录聚合版）。"""
 
     def __init__(
         self,
         kb_dir: Optional[Path] = None,
+        kb_dirs: Optional[List[Path]] = None,
         plugin_paths: Optional[List[Path]] = None,
     ) -> None:
-        """初始化扫描器。
+        """初始化扫描器（支持多目录聚合）。
 
         Args:
-            kb_dir: 知识库目录路径
+            kb_dir: 单个知识库目录路径（向后兼容，将作为单元素插入 kb_dirs）
+            kb_dirs: 多个知识库目录路径列表（推荐；不填时使用 _DEFAULT_KB_DIRS 全量）
             plugin_paths: 插件搜索路径列表
         """
-        self._kb_dir = kb_dir or _DEFAULT_KB_DIR
+        # 多目录聚合：向后兼容 + 默认全量
+        if kb_dirs:
+            self._kb_dirs: List[Path] = [Path(d) for d in kb_dirs]
+        elif kb_dir is not None:
+            self._kb_dirs = [Path(kb_dir)]
+        else:
+            # 默认：过滤存在的目录（_DEFAULT_KB_DIRS 中包含 10/11/12/14/15/13 共6个知识库）
+            self._kb_dirs = [d for d in _DEFAULT_KB_DIRS if d.exists()]
+
+        self._kb_dir = self._kb_dirs[0] if self._kb_dirs else _DEFAULT_KB_DIRS[0]
         self._plugin_paths = plugin_paths or _DEFAULT_PLUGIN_PATHS
 
         self._effects: Dict[str, EffectInfo] = {}
         self._plugin_packages: Dict[str, PluginPackage] = {}
         self._kb_files: List[Path] = []
 
-        logger.info(f"KBScanner 初始化完成")
-        logger.debug(f"  知识库目录: {self._kb_dir}")
+        logger.info(f"KBScanner 初始化完成（多目录模式，{len(self._kb_dirs)}个知识库）")
+        logger.debug(f"  知识库目录: {[str(d) for d in self._kb_dirs]}")
         logger.debug(f"  插件路径数: {len(self._plugin_paths)}")
 
     # ========================================================================
@@ -270,19 +290,23 @@ class KBScanner:
     # ========================================================================
 
     def scan_knowledge_base(self) -> Dict[str, EffectInfo]:
-        """扫描知识库 Markdown 文件提取效果信息。
+        """扫描所有知识库目录中的 Markdown 文件提取效果信息（多目录聚合）。
 
         Returns:
             效果名称 -> EffectInfo 字典
         """
-        logger.info("开始扫描知识库...")
+        logger.info(f"开始扫描知识库（{len(self._kb_dirs)}个目录）...")
 
-        if not self._kb_dir.exists():
-            logger.warning(f"知识库目录不存在: {self._kb_dir}")
-            return {}
+        self._kb_files = []
+        for kb_dir in self._kb_dirs:
+            if not kb_dir.exists():
+                logger.warning(f"知识库目录不存在，跳过: {kb_dir}")
+                continue
+            files = list(kb_dir.rglob("*.md"))
+            self._kb_files.extend(files)
+            logger.debug(f"  目录 {kb_dir.name}: 发现 {len(files)} 个 md 文件")
 
-        self._kb_files = list(self._kb_dir.rglob("*.md"))
-        logger.info(f"发现 {len(self._kb_files)} 个知识库文件")
+        logger.info(f"共发现 {len(self._kb_files)} 个知识库文件")
 
         effects_count = 0
         for md_file in self._kb_files:
@@ -306,7 +330,7 @@ class KBScanner:
             except Exception as e:
                 logger.warning(f"扫描文件失败 {md_file.name}: {e}")
 
-        logger.info(f"知识库扫描完成，提取到 {effects_count} 个新效果")
+        logger.info(f"知识库扫描完成，提取到 {effects_count} 个新效果（累计 {len(self._effects)}）")
         return dict(self._effects)
 
     def _extract_effects_from_md(self, md_file: Path) -> List[EffectInfo]:
