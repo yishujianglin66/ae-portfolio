@@ -1,0 +1,58 @@
+{
+  "style_id": "ambient_calm",
+  "name": "氛围舒缓",
+  "description": "低对比冷调, 缓慢运镜, 长镜头呼吸感。信息密度低, 一帧一意, 留白优先。",
+  "visual_variance": 3,
+  "motion_intensity": 2,
+  "information_density": 2,
+  "target_beat_alignment": 0.4,
+  "target_camera_diversity": 0.3,
+  "max_material_reuse": 0.4,
+  "min_temporal_energy": 0.1,
+  "preferred_cameras": [
+    "static",
+    "zoom_out",
+    "zoom_in"
+  ],
+  "forbidden_cameras": [
+    "push",
+    "orbit"
+  ],
+  "anti_patterns": [
+    {
+      "rule": "fast_cuts",
+      "detail": "平均镜头时长 < 2s → 破坏舒缓节奏"
+    },
+    {
+      "rule": "high_motion",
+      "detail": "motion_intensity > 4 → 与风格矛盾"
+    },
+    {
+      "rule": "overcrowded",
+      "detail": "information_density > 4 → 留白不足"
+    }
+  ],
+  "color_grade_params": [
+    {
+      "effect": "ADBE Lumetri",
+      "params": {
+        "ADBE Lumetri-0012": 15,
+        "ADBE Lumetri-0031": 95,
+        "ADBE Lumetri-0007": -5,
+        "ADBE Lumetri-0014": 5
+      }
+    }
+  ],
+  "particle_presets": [],
+  "text_fx": [
+    {
+      "engine": "textImpactMaster",
+      "action": "fade",
+      "startScale": 100
+    }
+  ],
+  "lut": {
+    "theme": "寂静 _ Silence",
+    "strength": 0.4
+  }
+}

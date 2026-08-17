@@ -1,0 +1,68 @@
+{
+  "style_id": "hardcore_battle",
+  "name": "硬核战斗",
+  "description": "战斗番高燃: 快切脉冲推进、闪白硬切卡点、火花粒子爆点、对比度拉满。镜头短促有力, 禁静态镜头。",
+  "visual_variance": 9,
+  "motion_intensity": 9,
+  "information_density": 6,
+  "target_beat_alignment": 0.85,
+  "target_camera_diversity": 0.8,
+  "max_material_reuse": 0.15,
+  "min_temporal_energy": 0.7,
+  "preferred_cameras": [
+    "push",
+    "zoom_in",
+    "diag_pan",
+    "pan_left",
+    "zoom_back"
+  ],
+  "forbidden_cameras": [
+    "static",
+    "zoom_out"
+  ],
+  "anti_patterns": [
+    {
+      "rule": "static_shot",
+      "detail": "战斗段出现 static 运镜 → 能量塌陷"
+    },
+    {
+      "rule": "slow_motion",
+      "detail": "爆发段变速 < 0.9x → 冲击力稀释"
+    },
+    {
+      "rule": "low_beat_align",
+      "detail": "卡点对齐 < 0.7 → 战斗节奏失控"
+    },
+    {
+      "rule": "long_shot",
+      "detail": "爆发段镜头 > 1.5s → 拖沓"
+    }
+  ],
+  "color_grade_params": [
+    {
+      "effect": "ADBE Lumetri",
+      "params": {
+        "ADBE Lumetri-0012": 32,
+        "ADBE Lumetri-0031": 120,
+        "ADBE Lumetri-0007": -5,
+        "ADBE Lumetri-0014": 0
+      }
+    }
+  ],
+  "particle_presets": [
+    "beat_burst",
+    "fire_sparks"
+  ],
+  "text_fx": [
+    {
+      "engine": "textImpactMaster",
+      "action": "impact",
+      "startScale": 180,
+      "flash": true
+    }
+  ],
+  "lut": {
+    "theme": "戏剧性 _ Dramatic",
+    "strength": 0.7
+  }
+}

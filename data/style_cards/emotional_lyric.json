@@ -1,0 +1,60 @@
+{
+  "style_id": "emotional_lyric",
+  "name": "抒情文艺",
+  "description": "抒情叙事: 低对比暖调、慢速叠化、长镜头凝视感。镜头跟随歌词情绪起伏, 爆发点用缓慢推近而非快切。",
+  "visual_variance": 3,
+  "motion_intensity": 3,
+  "information_density": 3,
+  "target_beat_alignment": 0.4,
+  "target_camera_diversity": 0.3,
+  "max_material_reuse": 0.35,
+  "min_temporal_energy": 0.1,
+  "preferred_cameras": [
+    "zoom_in",
+    "static",
+    "pan_left",
+    "zoom_out"
+  ],
+  "forbidden_cameras": [
+    "push",
+    "orbit",
+    "diag_pan"
+  ],
+  "anti_patterns": [
+    {
+      "rule": "hard_cut_chain",
+      "detail": "抒情段连续硬切 → 破坏情绪连续感 (应用叠化)"
+    },
+    {
+      "rule": "high_motion",
+      "detail": "motion_intensity > 5 → 与抒情基调矛盾"
+    },
+    {
+      "rule": "impact_text",
+      "detail": "使用冲击型文字入场 → 破坏柔和语境"
+    }
+  ],
+  "color_grade_params": [
+    {
+      "effect": "ADBE Lumetri",
+      "params": {
+        "ADBE Lumetri-0012": 14,
+        "ADBE Lumetri-0031": 96,
+        "ADBE Lumetri-0007": 6,
+        "ADBE Lumetri-0014": 3
+      }
+    }
+  ],
+  "particle_presets": [],
+  "text_fx": [
+    {
+      "engine": "textImpactMaster",
+      "action": "fade",
+      "startScale": 100
+    }
+  ],
+  "lut": {
+    "theme": "回忆 _ Memories",
+    "strength": 0.5
+  }
+}

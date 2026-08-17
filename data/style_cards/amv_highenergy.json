@@ -1,0 +1,63 @@
+{
+  "style_id": "amv_highenergy",
+  "name": "高燃混剪",
+  "description": "高对比暖高光, 火花粒子随 beat 爆发, 文字打击感入场。快切节奏驱动, 运镜丰富避免单调。",
+  "visual_variance": 7,
+  "motion_intensity": 8,
+  "information_density": 4,
+  "target_beat_alignment": 0.8,
+  "target_camera_diversity": 0.7,
+  "max_material_reuse": 0.2,
+  "min_temporal_energy": 0.6,
+  "preferred_cameras": [
+    "zoom_in",
+    "zoom_back",
+    "push",
+    "pan_left",
+    "diag_pan"
+  ],
+  "forbidden_cameras": [
+    "static"
+  ],
+  "anti_patterns": [
+    {
+      "rule": "same_camera_3x",
+      "detail": "连续 3 个镜头使用相同运镜 → 运镜同质化"
+    },
+    {
+      "rule": "low_beat_align",
+      "detail": "卡点对齐 < 0.6 → 节奏感丧失"
+    },
+    {
+      "rule": "static_during_drop",
+      "detail": "drop 段使用 static 运镜 → 能量塌陷"
+    }
+  ],
+  "color_grade_params": [
+    {
+      "effect": "ADBE Lumetri",
+      "params": {
+        "ADBE Lumetri-0012": 25,
+        "ADBE Lumetri-0031": 115,
+        "ADBE Lumetri-0011": 5,
+        "ADBE Lumetri-0007": 8
+      }
+    }
+  ],
+  "particle_presets": [
+    "amv_highenergy",
+    "beat_burst"
+  ],
+  "text_fx": [
+    {
+      "engine": "textImpactMaster",
+      "action": "impact",
+      "startScale": 170,
+      "flash": true
+    }
+  ],
+  "lut": {
+    "theme": "HDR _ HDR",
+    "strength": 0.6
+  }
+}

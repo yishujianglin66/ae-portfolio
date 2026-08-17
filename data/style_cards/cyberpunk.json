@@ -1,0 +1,62 @@
+{
+  "style_id": "cyberpunk",
+  "name": "赛博朋克",
+  "description": "青品霓虹+雨夜, 能量粒子+雨层, 故障字点缀。中高速运镜配合闪烁切换, 信息密度偏高。",
+  "visual_variance": 8,
+  "motion_intensity": 7,
+  "information_density": 6,
+  "target_beat_alignment": 0.7,
+  "target_camera_diversity": 0.8,
+  "max_material_reuse": 0.25,
+  "min_temporal_energy": 0.5,
+  "preferred_cameras": [
+    "pan_left",
+    "pan_right",
+    "diag_pan",
+    "zoom_in",
+    "orbit"
+  ],
+  "forbidden_cameras": [
+    "static"
+  ],
+  "anti_patterns": [
+    {
+      "rule": "warm_palette",
+      "detail": "使用暖色调色温 > 6500K → 破坏赛博冷色基调"
+    },
+    {
+      "rule": "no_rain_layer",
+      "detail": "缺少雨层/粒子层 → 赛博氛围缺失"
+    },
+    {
+      "rule": "low_variance",
+      "detail": "visual_variance < 6 → 赛博朋克需要高视觉变化"
+    }
+  ],
+  "color_grade_params": [
+    {
+      "effect": "ADBE Lumetri",
+      "params": {
+        "ADBE Lumetri-0012": 30,
+        "ADBE Lumetri-0031": 125,
+        "ADBE Lumetri-0007": -15,
+        "ADBE Lumetri-0014": -10
+      }
+    }
+  ],
+  "particle_presets": [
+    "cyberpunk_rain",
+    "neon_spark"
+  ],
+  "text_fx": [
+    {
+      "engine": "textImpactMaster",
+      "action": "glitch",
+      "flash": true
+    }
+  ],
+  "lut": {
+    "theme": "冷色调 _ Cool_Look",
+    "strength": 0.6
+  }
+}

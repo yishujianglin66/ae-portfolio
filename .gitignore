@@ -17,15 +17,35 @@ bridge.log
 fix_order_log.txt
 *.log
 logs/
+# 大文件上传包 (云端训练一次性打包, 严禁入库 — 2026-08-16 680MB tar 事故)
+*.tar
+
+# ============================================================
+# 例外白名单: 有意版本化的工具脚本/测试资源
+# (*.ps1/*.png 全局规则误伤项, 2026-08-16 tracked-but-ignored 清理时定)
+# ============================================================
+!install_adobe_bridges.ps1
+!close_dialog.ps1
+!D盘AE脚本管理器.ps1
+!puppet-automation/scripts/*.ps1
+!mcp-extension/install.ps1
+!05-测试套件/test_resources/*.png
+
+# 根目录调试垃圾归档区 (本地留存, 不版本化)
+archive/root-cleanup-*/
 
 # ============================================================
 # MCP Bridge 临时文件（AE/PR/PS/AU）
 # ============================================================
 .ae-mcp-bridge/
 .pr-mcp-bridge/
+.premiere-mcp-bridge/
 .ps-mcp-bridge/
 .au-mcp-bridge/
+.media_encoder-mcp-bridge/
+bridges/.ae-mcp-bridge/
 .pr_mcp_secret
+.premiere_mcp_secret
 .ps_mcp_secret
 .au_mcp_secret
 
@@ -45,7 +65,10 @@ build/
 venv/
 .venv/
 env/
+ENV/
 puppet-automation/venv/
+puppet-automation/.venv/
+puppet_automation/
 
 # ============================================================
 # Node 依赖与构建
@@ -54,9 +77,11 @@ node_modules/
 dist/
 ae-dashboard/dist/
 ae-dashboard/node_modules/
+ae-dashboard/.cache/
 compiler/node_modules/
 compiler/build/
 phase7-media-tools/node_modules/
+integrator_web/node_modules/
 
 # ============================================================
 # 缓存目录
@@ -65,11 +90,23 @@ phase7-media-tools/node_modules/
 .kb_cache/
 temp_user_data/
 tmp/
+temp/
+# 运行时嵌入/索引缓存（可重新计算，禁止提交）
+cache/
+!cache/.gitkeep
+data/cache/
+models/.cache/
+core/__pycache__/
+ai/__pycache__/
+puppet-automation/src/__pycache__/
+scripts/__pycache__/
+tests/__pycache__/
 
 # ============================================================
 # 第三方脚本 / 插件 / 资源（不纳入版本控制）
 # ============================================================
 AE-Scripts/
+external/
 
 # ============================================================
 # 媒体与输出文件
@@ -100,6 +137,23 @@ data/render_jobs.db-*
 data/*.db
 data/*.db-wal
 data/*.db-shm
+# 运行时观测/日志类数据（含本机绝对路径，可重建，禁止提交）
+data/execution_records/
+data/pipeline_runs/
+data/versions/
+data/observability/
+data/pipeline_feedback/
+data/performance_baseline/
+data/evolution/
+data/engine_feedback/
+# 自进化运行时产物（2026-08-14 迁移至 <AE_WORK_DIR>/self_evolution，历史文件停止跟踪）
+data/self_evolution/
+data/benchmark/results/
+data/multi_ip_training/
+data/stock_footage/
+data/artifacts/
+data/llm_key_status.json
+data/last_run_stats.json
 
 # ============================================================
 # Python 类型检查缓存
@@ -110,9 +164,11 @@ data/*.db-shm
 # 编辑器与工作台
 # ============================================================
 .obsidian/
-.trae/
+.trae/*
+!.trae/rules/
 .vscode/
 .idea/
+.zcode/
 *.swp
 *.swo
 *~
@@ -129,6 +185,7 @@ performance/
 test-projects/
 test_output_v17/
 test_output_v17_full/
+test_outputs/
 output_production/
 output_final/
 output_kb_scan/
@@ -139,6 +196,15 @@ cookies/
 ps*.tmp
 
 # ============================================================
+# 临时/备份/诊断脚本（非生产代码）
+# ============================================================
+temp/
+ae_backup/
+diagnostic_scripts/
+eval_output/
+test_reports/
+
+# ============================================================
 # SQLite 数据库文件（运行时产物，禁止提交）
 # ============================================================
 puppet-automation/data/render_jobs.db
@@ -147,3 +213,41 @@ puppet-automation/data/render_jobs.db-shm
 puppet-automation/data/*.db
 puppet-automation/data/*.db-wal
 puppet-automation/data/*.db-shm
+
+# ============================================================
+# 大模型权重（可重新训练/下载，禁止提交避免仓库膨胀）
+# ============================================================
+# LoRA 微调权重（2.7GB，训练产物）
+models/clip_lora_aot.pt
+models/clip_lora_aot_vitl14.pt
+models/clip_lora_balanced_best.pt
+# ModelScope 预训练权重缓存（578MB，可重新下载）
+models/ms_cache/
+# YOLOv8 官方预训练权重（ultralytics 自动下载）
+yolov8n.pt
+puppet-automation/yolov8n.pt
+
+# ============================================================
+# 根级调试产物（AE 界面调试截图/窗口枚举/临时辅助脚本）
+# ============================================================
+*.png
+*.ps1
+*.vbs
+!scripts/*.ps1
+!*.bat
+data/training/ip_frames/
+media/data/
+VinlandSkills
+uia_out.txt
+wins_out.txt
+tmp_t1.txt
+.photoshop-mcp-bridge/
+.media_encoder-mcp-bridge/
+
+# ============================================================
+# Qoder IDE 技能目录 / DSH 备份 / 大权重 / 临时诊断
+# ============================================================
+.qoder/
+scripts/dsh_backup_*/
+models/yolov8x.pt
+help_out.txt

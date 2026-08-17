@@ -1,0 +1,58 @@
+{
+  "style_id": "cinematic_film",
+  "name": "电影感",
+  "description": "好莱坞青橙调色(阴影偏青/高光偏暖), 稳定推拉运镜, 中低变速, 段落感叙事。参考 integrations/color_presets 的 cinematic_teal_orange 预设参数。",
+  "visual_variance": 4,
+  "motion_intensity": 4,
+  "information_density": 5,
+  "target_beat_alignment": 0.5,
+  "target_camera_diversity": 0.4,
+  "max_material_reuse": 0.3,
+  "min_temporal_energy": 0.25,
+  "preferred_cameras": [
+    "zoom_in",
+    "pan_left",
+    "static",
+    "zoom_out"
+  ],
+  "forbidden_cameras": [
+    "orbit"
+  ],
+  "anti_patterns": [
+    {
+      "rule": "oversaturated",
+      "detail": "饱和度 > 1.2 → 破坏电影感色彩克制"
+    },
+    {
+      "rule": "shaky_handheld",
+      "detail": "大量手持抖动镜头 → 与稳定电影运镜矛盾"
+    },
+    {
+      "rule": "no_color_contrast",
+      "detail": "阴影与高光同色调 → 缺失青橙对比层次"
+    }
+  ],
+  "color_grade_params": [
+    {
+      "effect": "ADBE Lumetri",
+      "params": {
+        "ADBE Lumetri-0012": 18,
+        "ADBE Lumetri-0031": 110,
+        "ADBE Lumetri-0007": -8,
+        "ADBE Lumetri-0014": -6
+      }
+    }
+  ],
+  "particle_presets": [],
+  "text_fx": [
+    {
+      "engine": "textImpactMaster",
+      "action": "fade",
+      "startScale": 100
+    }
+  ],
+  "lut": {
+    "theme": "好莱坞 _ Hollywood",
+    "strength": 0.7
+  }
+}

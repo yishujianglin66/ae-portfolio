@@ -1,0 +1,62 @@
+{
+  "style_id": "vintage_film",
+  "name": "复古胶片",
+  "description": "70年代胶片感: 暖黄偏褐阴影、低对比柔和、轻微颗粒。缓推慢摇, 长镜头呼吸。参考 integrations/color_presets 的 vintage_film 预设。",
+  "visual_variance": 3,
+  "motion_intensity": 2,
+  "information_density": 4,
+  "target_beat_alignment": 0.35,
+  "target_camera_diversity": 0.25,
+  "max_material_reuse": 0.4,
+  "min_temporal_energy": 0.1,
+  "preferred_cameras": [
+    "static",
+    "zoom_out",
+    "pan_left",
+    "zoom_in"
+  ],
+  "forbidden_cameras": [
+    "push",
+    "orbit",
+    "zoom_back"
+  ],
+  "anti_patterns": [
+    {
+      "rule": "modern_glitch",
+      "detail": "使用故障/像素化转场 → 破坏复古胶片语境"
+    },
+    {
+      "rule": "high_saturation",
+      "detail": "饱和度 > 1.0 → 与胶片褪色质感矛盾"
+    },
+    {
+      "rule": "fast_cuts",
+      "detail": "平均镜头 < 1.5s → 破坏慢节奏叙事"
+    }
+  ],
+  "color_grade_params": [
+    {
+      "effect": "ADBE Lumetri",
+      "params": {
+        "ADBE Lumetri-0012": 12,
+        "ADBE Lumetri-0031": 85,
+        "ADBE Lumetri-0007": 12,
+        "ADBE Lumetri-0014": 4
+      }
+    }
+  ],
+  "particle_presets": [
+    "film_grain"
+  ],
+  "text_fx": [
+    {
+      "engine": "textImpactMaster",
+      "action": "fade",
+      "startScale": 100
+    }
+  ],
+  "lut": {
+    "theme": "复古电影 _ Vintage Film",
+    "strength": 0.8
+  }
+}

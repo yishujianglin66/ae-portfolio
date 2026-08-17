@@ -1,0 +1,55 @@
+{
+  "style_id": "high_key_bright",
+  "name": "高调明亮",
+  "description": "高调明亮风格: 提升曝光、降低对比、中性色调, 适合时尚/美妆/清新题材。固定与轻推运镜, 信息密度低。参考 integrations/color_presets 的 high_key_bright 预设。",
+  "visual_variance": 2,
+  "motion_intensity": 2,
+  "information_density": 2,
+  "target_beat_alignment": 0.3,
+  "target_camera_diversity": 0.2,
+  "max_material_reuse": 0.45,
+  "min_temporal_energy": 0.05,
+  "preferred_cameras": [
+    "static",
+    "zoom_in"
+  ],
+  "forbidden_cameras": [
+    "push",
+    "orbit",
+    "diag_pan",
+    "zoom_back"
+  ],
+  "anti_patterns": [
+    {
+      "rule": "dark_shadows",
+      "detail": "阴影压得过深 (对比度 > 1.0) → 破坏高调通透感"
+    },
+    {
+      "rule": "high_motion",
+      "detail": "motion_intensity > 4 → 与清新题材矛盾"
+    }
+  ],
+  "color_grade_params": [
+    {
+      "effect": "ADBE Lumetri",
+      "params": {
+        "ADBE Lumetri-0012": 8,
+        "ADBE Lumetri-0031": 102,
+        "ADBE Lumetri-0007": 3,
+        "ADBE Lumetri-0014": 0
+      }
+    }
+  ],
+  "particle_presets": [],
+  "text_fx": [
+    {
+      "engine": "textImpactMaster",
+      "action": "fade",
+      "startScale": 100
+    }
+  ],
+  "lut": {
+    "theme": "夏日光辉 _ Summer Glow",
+    "strength": 0.6
+  }
+}
