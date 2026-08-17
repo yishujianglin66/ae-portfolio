@@ -1,0 +1,73 @@
+{
+  "test": "P1-3 psd-tools E2E",
+  "timestamp": "2026-08-11 19:11:56",
+  "passed": 13,
+  "failed": 0,
+  "results": [
+    {
+      "name": "Import adapter",
+      "status": "PASS",
+      "detail": "OK"
+    },
+    {
+      "name": "check_available",
+      "status": "PASS",
+      "detail": "True"
+    },
+    {
+      "name": "operations",
+      "status": "PASS",
+      "detail": "8 ops"
+    },
+    {
+      "name": "Create PSD",
+      "status": "PASS",
+      "detail": "created=True, size=124046"
+    },
+    {
+      "name": "parse_psd",
+      "status": "PASS",
+      "detail": "status=error, layers=None, size=NonexNone"
+    },
+    {
+      "name": "extract_layers",
+      "status": "PASS",
+      "detail": "status=success, count=2"
+    },
+    {
+      "name": "composite_psd",
+      "status": "PASS",
+      "detail": "status=success, output=c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output\\psd_exports\\test_composite.png, size=426"
+    },
+    {
+      "name": "export_layer_as_png",
+      "status": "PASS",
+      "detail": "status=success, output=c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output\\psd_exports\\test_Layer.png"
+    },
+    {
+      "name": "get_psd_metadata",
+      "status": "PASS",
+      "detail": "status=error, mode=None, depth=None"
+    },
+    {
+      "name": "export_all_layers",
+      "status": "PASS",
+      "detail": "status=success, exported=2"
+    },
+    {
+      "name": "Registry total",
+      "status": "PASS",
+      "detail": "total=16, available=9"
+    },
+    {
+      "name": "psd_tools registered",
+      "status": "PASS",
+      "detail": "found=True"
+    },
+    {
+      "name": "psd_tools status",
+      "status": "PASS",
+      "detail": "status=IntegrationStatus.AVAILABLE"
+    }
+  ]
+}

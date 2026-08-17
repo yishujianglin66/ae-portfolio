@@ -1,0 +1,209 @@
+{
+  "test": "P0-1 DaVinci Resolve MCP Adapter E2E",
+  "timestamp": "2026-08-11 18:52:59",
+  "channel": "fuscript_lua",
+  "fuscript_path": "D:\\app\\fuscript.exe",
+  "fuscript_exists": true,
+  "tools_count": 31,
+  "registry_total": 13,
+  "registry_available": 7,
+  "passed": 39,
+  "failed": 0,
+  "results": [
+    {
+      "name": "Import adapter",
+      "status": "PASS",
+      "detail": "OK"
+    },
+    {
+      "name": "Channel detected",
+      "status": "PASS",
+      "detail": "fuscript_lua"
+    },
+    {
+      "name": "Fuscript exists",
+      "status": "PASS",
+      "detail": "path=D:\\app\\fuscript.exe, exists=True"
+    },
+    {
+      "name": "Tools count = 31",
+      "status": "PASS",
+      "detail": "31 tools"
+    },
+    {
+      "name": "check_available",
+      "status": "PASS",
+      "detail": "available=True"
+    },
+    {
+      "name": "summary",
+      "status": "PASS",
+      "detail": "{\"channel\": \"fuscript_lua\", \"tools\": 31, \"python_api\": false, \"fuscript_lua\": true, \"fuscript_path\": \"D:\\\\app\\\\fuscript.exe\", \"fuscript_exists\": true}"
+    },
+    {
+      "name": "refresh",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='refresh', status='success', channel='fuscript_lua', result={'status': 'refreshed'}, error=None, duration_ms=0.0)"
+    },
+    {
+      "name": "get_system_status",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='get_system_status', status='success', channel='fuscript_lua', result={'channel': 'fuscript_lua', 'fuscript_path': 'D:\\\\app\\\\fuscript.exe', 'fuscript_available': True, 'resolve_"
+    },
+    {
+      "name": "create_project",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='create_project', status='failed', channel='fuscript_lua', result=None, error=\"...Local\\\\Temp\\\\resolve_engine_gmryq0hn\\\\cmd_1786445554199.lua:56: attempt to index local 'resolve"
+    },
+    {
+      "name": "load_project",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='load_project', status='failed', channel='fuscript_lua', result=None, error=\"...Local\\\\Temp\\\\resolve_engine_gmryq0hn\\\\cmd_1786445559628.lua:56: attempt to index local 'resolve' "
+    },
+    {
+      "name": "save_project",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='save_project', status='success', channel='fuscript_lua', result={'saved': True}, error=None, duration_ms=1.4612674713134766)"
+    },
+    {
+      "name": "open_page",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='open_page', status='success', channel='fuscript_lua', result={'page': 'edit'}, error=None, duration_ms=1326.2224197387695)"
+    },
+    {
+      "name": "create_timeline",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='create_timeline', status='success', channel='fuscript_lua', result={'timeline': 'E2E_Timeline'}, error=None, duration_ms=1340.233564376831)"
+    },
+    {
+      "name": "set_current_timeline",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='set_current_timeline', status='success', channel='fuscript_lua', result={'tool': 'set_current_timeline', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, durati"
+    },
+    {
+      "name": "play_timeline",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='play_timeline', status='success', channel='fuscript_lua', result={'playing': True}, error=None, duration_ms=1390.1739120483398)"
+    },
+    {
+      "name": "stop_timeline",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='stop_timeline', status='success', channel='fuscript_lua', result={'stopped': True}, error=None, duration_ms=1376.4052391052246)"
+    },
+    {
+      "name": "set_playhead_position",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='set_playhead_position', status='success', channel='fuscript_lua', result={'tool': 'set_playhead_position', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, dura"
+    },
+    {
+      "name": "import_media",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='import_media', status='success', channel='fuscript_lua', result={'imported': 1}, error=None, duration_ms=1432.1680068969727)"
+    },
+    {
+      "name": "add_sub_folder",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='add_sub_folder', status='success', channel='fuscript_lua', result={'tool': 'add_sub_folder', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration_ms=0.0)"
+    },
+    {
+      "name": "append_to_timeline",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='append_to_timeline', status='success', channel='fuscript_lua', result={'tool': 'append_to_timeline', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration_m"
+    },
+    {
+      "name": "create_timeline_from_clips",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='create_timeline_from_clips', status='success', channel='fuscript_lua', result={'tool': 'create_timeline_from_clips', 'channel': 'fuscript_lua', 'note': 'basic support'}, error="
+    },
+    {
+      "name": "set_clip_property",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='set_clip_property', status='success', channel='fuscript_lua', result={'tool': 'set_clip_property', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration_ms="
+    },
+    {
+      "name": "set_audio_volume",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='set_audio_volume', status='success', channel='fuscript_lua', result={'tool': 'set_audio_volume', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration_ms=0."
+    },
+    {
+      "name": "set_current_version",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='set_current_version', status='success', channel='fuscript_lua', result={'tool': 'set_current_version', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration"
+    },
+    {
+      "name": "add_color_node",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='add_color_node', status='success', channel='fuscript_lua', result={'node': 'Corrector'}, error=None, duration_ms=1329.0927410125732)"
+    },
+    {
+      "name": "save_still",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='save_still', status='success', channel='fuscript_lua', result={'tool': 'save_still', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration_ms=0.0)"
+    },
+    {
+      "name": "apply_still",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='apply_still', status='success', channel='fuscript_lua', result={'tool': 'apply_still', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration_ms=0.0)"
+    },
+    {
+      "name": "add_track",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='add_track', status='success', channel='fuscript_lua', result={'tool': 'add_track', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration_ms=0.0)"
+    },
+    {
+      "name": "set_track_name",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='set_track_name', status='success', channel='fuscript_lua', result={'tool': 'set_track_name', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration_ms=0.0)"
+    },
+    {
+      "name": "enable_track",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='enable_track', status='success', channel='fuscript_lua', result={'tool': 'enable_track', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration_ms=0.0)"
+    },
+    {
+      "name": "set_track_volume",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='set_track_volume', status='success', channel='fuscript_lua', result={'tool': 'set_track_volume', 'channel': 'fuscript_lua', 'note': 'basic support'}, error=None, duration_ms=0."
+    },
+    {
+      "name": "add_timeline_marker",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='add_timeline_marker', status='success', channel='fuscript_lua', result={'frame': 0}, error=None, duration_ms=1337.5039100646973)"
+    },
+    {
+      "name": "start_project_render",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='start_project_render', status='success', channel='fuscript_lua', result={'render': 'started'}, error=None, duration_ms=1412.3101234436035)"
+    },
+    {
+      "name": "execute_lua",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='execute_lua', status='success', channel='fuscript_lua', result={'raw': 'DaVinci Resolve Script Interpreter\\nCopyright (C) 2005 - 2026 Blackmagic Design Pty. Ltd.', 'returncode'"
+    },
+    {
+      "name": "unknown_tool",
+      "status": "PASS",
+      "detail": "ResolveToolResult(tool='nonexistent_tool', status='failed', channel='none', result=None, error='Unknown tool: nonexistent_tool', duration_ms=0.0)"
+    },
+    {
+      "name": "Registry discover_all",
+      "status": "PASS",
+      "detail": "total=13, available=7"
+    },
+    {
+      "name": "resolve_mcp registered",
+      "status": "PASS",
+      "detail": "found=True"
+    },
+    {
+      "name": "resolve_mcp status",
+      "status": "PASS",
+      "detail": "status=IntegrationStatus.AVAILABLE"
+    },
+    {
+      "name": "resolve_mcp adapter_class",
+      "status": "PASS",
+      "detail": "class=ResolveMCPAdapter"
+    }
+  ]
+}

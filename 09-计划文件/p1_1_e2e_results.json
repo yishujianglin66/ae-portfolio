@@ -1,0 +1,93 @@
+{
+  "test": "P1-1 PR MCP E2E",
+  "timestamp": "2026-08-11 19:21:15",
+  "passed": 17,
+  "failed": 0,
+  "results": [
+    {
+      "name": "Import adapter",
+      "status": "PASS",
+      "detail": "OK"
+    },
+    {
+      "name": "check_available",
+      "status": "PASS",
+      "detail": "True"
+    },
+    {
+      "name": "operations count",
+      "status": "PASS",
+      "detail": "38 ops"
+    },
+    {
+      "name": "summary",
+      "status": "PASS",
+      "detail": "{\"total_operations\": 38, \"bridge_available\": true, \"adobe_mcp_available\": true, \"channels\": [\"bridge_file_polling\", \"adobe_mcp_com\", \"jsx_template\"], \"source_repos\": [\"hetpatel-11/AdobePremiereProMCP "
+    },
+    {
+      "name": "list_operations",
+      "status": "PASS",
+      "detail": "count=38"
+    },
+    {
+      "name": "get_pr_status",
+      "status": "PASS",
+      "detail": "pr_running=False, bridge=True"
+    },
+    {
+      "name": "get_bridge_status",
+      "status": "PASS",
+      "detail": "bridge_dir_exists=True"
+    },
+    {
+      "name": "get_export_presets",
+      "status": "PASS",
+      "detail": "count=9"
+    },
+    {
+      "name": "get_project_info (degraded)",
+      "status": "PASS",
+      "detail": "status=degraded, channel=bridge_timeout"
+    },
+    {
+      "name": "list_sequences (degraded)",
+      "status": "PASS",
+      "detail": "status=degraded, channel=bridge_timeout"
+    },
+    {
+      "name": "get_active_sequence (degraded)",
+      "status": "PASS",
+      "detail": "status=degraded, channel=bridge_timeout"
+    },
+    {
+      "name": "get_timeline_info (degraded)",
+      "status": "PASS",
+      "detail": "status=degraded, channel=bridge_timeout"
+    },
+    {
+      "name": "coverage categories",
+      "status": "PASS",
+      "detail": "8 categories, 39 total mapped"
+    },
+    {
+      "name": "PR tool enhancement",
+      "status": "PASS",
+      "detail": "pr_mcp=38 ops vs adobe_mcp_pr=6 ops, enhancement=32x"
+    },
+    {
+      "name": "Registry total",
+      "status": "PASS",
+      "detail": "total=17, available=11"
+    },
+    {
+      "name": "pr_mcp registered",
+      "status": "PASS",
+      "detail": "found=True"
+    },
+    {
+      "name": "pr_mcp status",
+      "status": "PASS",
+      "detail": "status=IntegrationStatus.AVAILABLE"
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+// AE-Knowledge-Vault — 容器/模块视图 (L2-L3)
+// 技能: system-modeler + graphviz
+// 日期: 2026-08-17
+// 问题: "系统内部的主要模块是什么？它们之间如何交互？"
+
+digraph container_view {
+    rankdir=TB;
+    fontname="Segoe UI";
+    node [fontname="Segoe UI", fontsize=10, style=filled, penwidth=1.0];
+    edge [fontname="Segoe UI", fontsize=8, color="#64748B"];
+    splines=true;
+    nodesep=0.5;
+    ranksep=0.7;
+
+    // ===== 用户入口层 =====
+    subgraph cluster_entry {
+        label="用户入口层";
+        labeljust="l";
+        style="rounded,filled";
+        color="#16A34A";
+        fontcolor="#16A34A";
+        bgcolor="#F0FDF4";
+
+        dashboard   [label="Web Dashboard\n(React SPA)", shape=component, fillcolor="#BBF7D0", color="#16A34A"];
+        mcp_servers [label="MCP 服务器集群\n(6 个 MCP Server)", shape=component, fillcolor="#BBF7D0", color="#16A34A"];
+        web_api     [label="FastAPI 后端\n(REST + WS + JWT)", shape=component, fillcolor="#BBF7D0", color="#16A34A"];
+    }
+
+    // ===== 五层架构核心 =====
+    subgraph cluster_five_layers {
+        label="五层架构核心 (感知→理解→规划→执行→反馈)";
+        labeljust="l";
+        style="rounded,filled";
+        color="#2563EB";
+        fontcolor="#2563EB";
+        bgcolor="#EFF6FF";
+
+        subgraph cluster_perception {
+            label="感知层";
+            style="rounded,dashed";
+            color="#6366F1";
+            fontcolor="#6366F1";
+            bgcolor="#EEF2FF";
+
+            audio_proc   [label="音频处理\n(audio/)", shape=component, fillcolor="#C7D2FE"];
+            video_proc   [label="视频处理\n(video/)", shape=component, fillcolor="#C7D2FE"];
+            scene_detect [label="场景检测\n(scene/)", shape=component, fillcolor="#C7D2FE"];
+            analysis     [label="分析引擎\n(analysis/)", shape=component, fillcolor="#C7D2FE"];
+        }
+
+        subgraph cluster_understanding {
+            label="理解层";
+            style="rounded,dashed";
+            color="#7C3AED";
+            fontcolor="#7C3AED";
+            bgcolor="#F5F3FF";
+
+            beat_engine  [label="节拍引擎\nbeat_strength_engine", shape=component, fillcolor="#DDD6FE"];
+            camera_cls   [label="运镜分类器\ncamera_movement_classifier", shape=component, fillcolor="#DDD6FE"];
+            av_correl    [label="视听关联\naudiovisual_correlator", shape=component, fillcolor="#DDD6FE"];
+            content_met  [label="内容指标\ncontent_metrics", shape=component, fillcolor="#DDD6FE"];
+        }
+
+        subgraph cluster_planning {
+            label="规划层";
+            style="rounded,dashed";
+            color="#2563EB";
+            fontcolor="#2563EB";
+            bgcolor="#DBEAFE";
+
+            director     [label="导演评分器\ndirector_scorer", shape=component, fillcolor="#BFDBFE"];
+            comp_tree    [label="合成树\ncomposition_tree", shape=component, fillcolor="#BFDBFE"];
+            bayes_opt    [label="贝叶斯优化\nbayesian_optimizer", shape=component, fillcolor="#BFDBFE"];
+            ai_planner   [label="AI 创意规划\nai_creative_planner", shape=component, fillcolor="#BFDBFE"];
+        }
+
+        subgraph cluster_execution {
+            label="执行层";
+            style="rounded,dashed";
+            color="#0891B2";
+            fontcolor="#0891B2";
+            bgcolor="#ECFEFF";
+
+            ae_orch      [label="AE 智能编排\nae_smart_orchestrator", shape=component, fillcolor="#A5F3FC"];
+            pipe_orch    [label="管线编排器\npipeline_orchestrator", shape=component, fillcolor="#A5F3FC"];
+            flagship     [label="旗舰执行器\nflagship_runner", shape=component, fillcolor="#A5F3FC"];
+            manga_pipe   [label="漫画管线\nmanga_pipeline", shape=component, fillcolor="#A5F3FC"];
+            ffmpeg_edit  [label="FFmpeg剪辑\nffmpeg_edit_engine", shape=component, fillcolor="#A5F3FC"];
+        }
+
+        subgraph cluster_feedback {
+            label="反馈层";
+            style="rounded,dashed";
+            color="#DC2626";
+            fontcolor="#DC2626";
+            bgcolor="#FEF2F2";
+
+            feedback_loop [label="反馈闭环\nfeedback_loop", shape=component, fillcolor="#FECACA"];
+            midstep_critic [label="中间步评审\nmidstep_critic", shape=component, fillcolor="#FECACA"];
+            adaptive_fb   [label="自适应回退\nadaptive_fallback", shape=component, fillcolor="#FECACA"];
+        }
+    }
+
+    // ===== 基础设施层 =====
+    subgraph cluster_infra {
+        label="基础设施层";
+        labeljust="l";
+        style="rounded,filled";
+        color="#D97706";
+        fontcolor="#D97706";
+        bgcolor="#FFFBEB";
+
+        kb_system   [label="知识库系统\n(MD扫描/解析/风格匹配)", shape=component, fillcolor="#FDE68A"];
+        ml_models   [label="ML 模型\n(训练/评估/推理)", shape=component, fillcolor="#FDE68A"];
+        config_sys  [label="配置管理\n(config/ + .env)", shape=component, fillcolor="#FDE68A"];
+        render_mgr  [label="渲染管理\n(rendering/)", shape=component, fillcolor="#FDE68A"];
+        obs_stack   [label="可观测性\n(Prometheus + Grafana)", shape=component, fillcolor="#FDE68A"];
+        redis       [label="Redis\n(限流/缓存)", shape=cylinder, fillcolor="#FDE68A"];
+    }
+
+    // ===== 适配器层 =====
+    subgraph cluster_adapters {
+        label="软件 SDK 适配器层";
+        labeljust="l";
+        style="rounded,filled";
+        color="#BE185D";
+        fontcolor="#BE185D";
+        bgcolor="#FDF2F8";
+
+        sdk_ae      [label="AE 适配器", shape=component, fillcolor="#FBCFE8"];
+        sdk_pr      [label="PR 适配器", shape=component, fillcolor="#FBCFE8"];
+        sdk_davinci [label="DaVinci 适配器", shape=component, fillcolor="#FBCFE8"];
+        sdk_blender [label="Blender 适配器", shape=component, fillcolor="#FBCFE8"];
+        sdk_ffmpeg  [label="FFmpeg 适配器", shape=component, fillcolor="#FBCFE8"];
+        sdk_topaz   [label="Topaz 适配器", shape=component, fillcolor="#FBCFE8"];
+        sdk_sil     [label="Silhouette 适配器", shape=component, fillcolor="#FBCFE8"];
+        sdk_comfy   [label="ComfyUI 适配器", shape=component, fillcolor="#FBCFE8"];
+    }
+
+    // ===== 关键数据流 =====
+    // 入口→核心
+    dashboard  -> web_api     [label="HTTP/WS"];
+    mcp_servers -> web_api    [label="MCP"];
+    web_api    -> audio_proc  [label="触发感知"];
+    web_api    -> ae_orch     [label="触发执行"];
+
+    // 感知→理解
+    audio_proc  -> beat_engine  [label="音频特征"];
+    video_proc  -> camera_cls   [label="视觉特征"];
+    scene_detect -> av_correl   [label="场景边界"];
+    analysis    -> content_met  [label="内容分析"];
+
+    // 理解→规划
+    beat_engine  -> director    [label="节拍数据"];
+    camera_cls   -> director    [label="运镜标签"];
+    av_correl    -> comp_tree   [label="视听关联"];
+    content_met  -> bayes_opt   [label="质量指标"];
+
+    // 规划→执行
+    director    -> flagship     [label="编排决策"];
+    comp_tree   -> manga_pipe   [label="合成序列"];
+    ai_planner  -> flagship     [label="创意方案"];
+
+    // 执行→适配器
+    flagship    -> sdk_ae       [label="AE任务"];
+    flagship    -> sdk_ffmpeg   [label="编码任务"];
+    manga_pipe  -> sdk_ae       [label="漫画合成"];
+    ffmpeg_edit -> sdk_ffmpeg   [label="剪辑任务"];
+    ae_orch     -> sdk_ae       [label="AE编排"];
+
+    // 反馈闭环
+    flagship     -> feedback_loop [label="执行结果"];
+    feedback_loop -> midstep_critic [label="中间评审"];
+    feedback_loop -> adaptive_fb   [label="回退策略"];
+    feedback_loop -> director      [label="反馈信号", style=dashed];
+
+    // 基础设施支撑
+    kb_system   -> director     [label="风格知识", style=dashed];
+    kb_system   -> manga_pipe   [label="漫画知识", style=dashed];
+    ml_models   -> camera_cls   [label="模型权重", style=dashed];
+    ml_models   -> beat_engine  [label="节拍模型", style=dashed];
+    render_mgr  -> sdk_ae       [label="渲染队列", style=dashed];
+    obs_stack   -> web_api      [label="指标采集", style=dashed];
+}

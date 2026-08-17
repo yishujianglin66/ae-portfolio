@@ -1,0 +1,104 @@
+{
+  "test": "P0-2 AutoSubs Adapter E2E",
+  "timestamp": "2026-08-11 19:08:58",
+  "backend": "faster_whisper",
+  "passed": 19,
+  "failed": 0,
+  "results": [
+    {
+      "name": "Import adapter",
+      "status": "PASS",
+      "detail": "OK"
+    },
+    {
+      "name": "Backend detected",
+      "status": "PASS",
+      "detail": "faster_whisper"
+    },
+    {
+      "name": "check_available",
+      "status": "PASS",
+      "detail": "True"
+    },
+    {
+      "name": "list_operations",
+      "status": "PASS",
+      "detail": "7 ops: ['transcribe', 'generate_srt', 'generate_vtt', 'generate_txt', 'generate_json', 'translate_subtitle', 'batch_transcribe']"
+    },
+    {
+      "name": "summary",
+      "status": "PASS",
+      "detail": "{\"backend\": \"faster_whisper\", \"model_loaded\": false, \"model_name\": null, \"operations\": 7, \"formats\": [\"srt\", \"vtt\", \"txt\", \"json\"], \"models_available\": [\"tiny\", \"base\", \"small\", \"medium\", \"large\", \"la"
+    },
+    {
+      "name": "ffmpeg test tone",
+      "status": "PASS",
+      "detail": "created=True, size=96078"
+    },
+    {
+      "name": "transcribe",
+      "status": "PASS",
+      "detail": "status=success, segments=0, backend=faster_whisper, duration=2105ms"
+    },
+    {
+      "name": "generate_srt",
+      "status": "PASS",
+      "detail": "status=success, output=c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output\\subtitles\\test_tone.srt, size=0"
+    },
+    {
+      "name": "srt file content",
+      "status": "PASS",
+      "detail": "length=0, preview="
+    },
+    {
+      "name": "generate_vtt",
+      "status": "PASS",
+      "detail": "status=success, output=c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output\\subtitles\\test_tone.vtt"
+    },
+    {
+      "name": "generate_json",
+      "status": "PASS",
+      "detail": "status=success, output=c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output\\subtitles\\test_tone.json"
+    },
+    {
+      "name": "SRT format",
+      "status": "PASS",
+      "detail": "lines=11, has_header=True, has_timestamp=True"
+    },
+    {
+      "name": "VTT format",
+      "status": "PASS",
+      "detail": "starts_WEBVTT=1, has_WEBVTT_header=True"
+    },
+    {
+      "name": "TXT format",
+      "status": "PASS",
+      "detail": "lines=3, text=Hello world\nThis is a test\nSubtitle generation wor"
+    },
+    {
+      "name": "JSON format",
+      "status": "PASS",
+      "detail": "parsed=3 segments"
+    },
+    {
+      "name": "Registry total",
+      "status": "PASS",
+      "detail": "total=14, available=8"
+    },
+    {
+      "name": "auto_subs registered",
+      "status": "PASS",
+      "detail": "found=True"
+    },
+    {
+      "name": "auto_subs status",
+      "status": "PASS",
+      "detail": "status=IntegrationStatus.AVAILABLE"
+    },
+    {
+      "name": "SUBTITLE_GENERATION TaskType",
+      "status": "PASS",
+      "detail": "exists=True"
+    }
+  ]
+}

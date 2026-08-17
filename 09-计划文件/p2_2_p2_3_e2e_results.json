@@ -1,0 +1,93 @@
+{
+  "test": "P2-2+P2-3 E2E",
+  "timestamp": "2026-08-11 19:29:20",
+  "passed": 15,
+  "failed": 0,
+  "results": [
+    {
+      "name": "Source cloned",
+      "status": "PASS",
+      "detail": "exists=True"
+    },
+    {
+      "name": "Package info",
+      "status": "PASS",
+      "detail": "name=premiere-pro-mcp, v=1.9.2, tools=Adobe Premiere Pro MCP server with 280 core AI video editing"
+    },
+    {
+      "name": "Tool modules",
+      "status": "PASS",
+      "detail": "33 modules: advanced, audio, av-settings, captions, clipboard, discovery, edit-plans, effects, export, health"
+    },
+    {
+      "name": "CEP plugin",
+      "status": "PASS",
+      "detail": "exists=True"
+    },
+    {
+      "name": "Core files",
+      "status": "PASS",
+      "detail": "9 files: advanced-feature-support.ts, diagnostics.ts, http-security.ts, http-server.ts, index.ts, platform-capabilities.ts, server.ts, telemetry.ts"
+    },
+    {
+      "name": "Our PR adapter",
+      "status": "PASS",
+      "detail": "38 operations"
+    },
+    {
+      "name": "premiere-pro-mcp advantage",
+      "status": "PASS",
+      "detail": "280 tools vs our 38 = 7.4x more"
+    },
+    {
+      "name": "Source cloned",
+      "status": "PASS",
+      "detail": "exists=True"
+    },
+    {
+      "name": "Source files",
+      "status": "PASS",
+      "detail": "4 modules: connection, resolve_utils, server, transcription"
+    },
+    {
+      "name": "Features extracted",
+      "status": "PASS",
+      "detail": "58 features from README"
+    },
+    {
+      "name": "Patterns found",
+      "status": "PASS",
+      "detail": "5 patterns: Model Context Protocol (MCP) server, Color Grading (Node graph + CDL + LUT), Fusion Compositing integration, AI/Neural Engine (Magic Mask, Smart Reframe, etc.)"
+    },
+    {
+      "name": "Our Resolve adapter",
+      "status": "PASS",
+      "detail": "31 tools (dual-channel)"
+    },
+    {
+      "name": "resolve-claude-mcp tools",
+      "status": "PASS",
+      "detail": "48 tools (Python API direct)"
+    },
+    {
+      "name": "Reusable patterns",
+      "status": "PASS",
+      "detail": "5 patterns extracted"
+    },
+    {
+      "name": "Registry total",
+      "status": "PASS",
+      "detail": "total=19, available=13"
+    }
+  ],
+  "p2_2": {
+    "repo": "leancoderkavy/premiere-pro-mcp",
+    "tools": 280,
+    "modules": 33
+  },
+  "p2_3": {
+    "repo": "barckley75/resolve-claude-mcp",
+    "tools": 48,
+    "patterns": 5
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "test": "P2-1 OpenMontage E2E",
+  "timestamp": "2026-08-11 19:26:59",
+  "passed": 13,
+  "failed": 0,
+  "results": [
+    {
+      "name": "Import adapter",
+      "status": "PASS",
+      "detail": "OK"
+    },
+    {
+      "name": "check_available",
+      "status": "PASS",
+      "detail": "True"
+    },
+    {
+      "name": "operations",
+      "status": "PASS",
+      "detail": "10 ops"
+    },
+    {
+      "name": "summary",
+      "status": "PASS",
+      "detail": "{\"source_available\": true, \"pipelines\": 13, \"styles\": 5, \"node_ok\": true, \"remotion_installed\": false}"
+    },
+    {
+      "name": "list_pipelines",
+      "status": "PASS",
+      "detail": "count=13"
+    },
+    {
+      "name": "list_styles",
+      "status": "PASS",
+      "detail": "count=5"
+    },
+    {
+      "name": "list_tools",
+      "status": "PASS",
+      "detail": "categories=10, tools=98"
+    },
+    {
+      "name": "get_pipeline_info (cinematic)",
+      "status": "PASS",
+      "detail": "name=cinematic, keys=['name', 'version', 'description', 'category', 'stability']"
+    },
+    {
+      "name": "check_environment",
+      "status": "PASS",
+      "detail": "node=v22.22.3, remotion=False"
+    },
+    {
+      "name": "get_architecture",
+      "status": "PASS",
+      "detail": "project=OpenMontage, components=7"
+    },
+    {
+      "name": "Registry total",
+      "status": "PASS",
+      "detail": "total=19, available=13"
+    },
+    {
+      "name": "openmontage registered",
+      "status": "PASS",
+      "detail": "found=True"
+    },
+    {
+      "name": "openmontage status",
+      "status": "PASS",
+      "detail": "status=IntegrationStatus.AVAILABLE"
+    }
+  ]
+}

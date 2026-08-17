@@ -1,0 +1,46 @@
+{
+  "emotional_lyric": {
+    "ok": true,
+    "elapsed_min": 8.3,
+    "taste": [
+      3,
+      3,
+      3
+    ],
+    "n_camera_types": 3,
+    "violations": 0
+  },
+  "vintage_film": {
+    "ok": true,
+    "elapsed_min": 6.6,
+    "taste": [
+      3,
+      2,
+      4
+    ],
+    "n_camera_types": 3,
+    "violations": 0
+  },
+  "cinematic_film": {
+    "ok": true,
+    "elapsed_min": 6.8,
+    "taste": [
+      4,
+      4,
+      5
+    ],
+    "n_camera_types": 5,
+    "violations": 0
+  },
+  "high_key_bright": {
+    "ok": true,
+    "elapsed_min": 8.0,
+    "taste": [
+      2,
+      2,
+      2
+    ],
+    "n_camera_types": 3,
+    "violations": 0
+  }
+}

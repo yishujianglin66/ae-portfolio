@@ -1,0 +1,133 @@
+{
+  "test": "开源集成全景E2E验证汇总",
+  "timestamp": "2026-08-11",
+  "environment": {
+    "python": "3.12.7",
+    "node": "v22.22.3",
+    "torch": "2.6.0+cu124",
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop 8GB",
+    "ffmpeg": "OK",
+    "resolve": "Studio 21.0.3 (D:\\app\\)",
+    "fuscript": "OK"
+  },
+  "registry": {
+    "total_integrations": 19,
+    "available": 13,
+    "new_adapters_created": 7
+  },
+  "results": [
+    {
+      "id": "P0-1",
+      "name": "DaVinci Resolve MCP",
+      "status": "PASS",
+      "tests_passed": 39,
+      "tests_failed": 0,
+      "tools": 31,
+      "adapter": "resolve_mcp_adapter.py",
+      "highlights": ["双通道架构 (Python API + fuscript Lua)", "get_system_status 降级逻辑修复", "31工具×9组全覆盖"]
+    },
+    {
+      "id": "P0-2",
+      "name": "auto-subs 字幕生成",
+      "status": "PASS",
+      "tests_passed": 19,
+      "tests_failed": 0,
+      "tools": 6,
+      "adapter": "auto_subs_adapter.py",
+      "highlights": ["faster-whisper 后端", "SRT/VTT/TXT/JSON 4格式", "LLM Gateway SUBTITLE_GENERATION 注册"]
+    },
+    {
+      "id": "P0-3",
+      "name": "ComfyUI 文生图",
+      "status": "PARTIAL",
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "tools": 7,
+      "adapter": "comfyui_mcp_server.py",
+      "highlights": ["v0.31.0 服务启动 (port 8189)", "GPU RTX 4060 8GB 检测正常", "API /system_stats 全通", "PARTIAL: 无 checkpoint 模型文件"],
+      "blockers": ["无模型文件 (需下载 SD/SDXL checkpoint ~2-6GB)"]
+    },
+    {
+      "id": "P1-1",
+      "name": "PR MCP 增强",
+      "status": "PASS",
+      "tests_passed": 17,
+      "tests_failed": 0,
+      "tools": 38,
+      "adapter": "pr_mcp_adapter.py",
+      "highlights": ["三通道架构 (Bridge + Adobe MCP + ExtendScript)", "38操作 vs adobe_mcp 6个PR工具 = 6.3x增强", "8功能类别全覆盖", "hetpatel-11 仓库不可用→降级方案"]
+    },
+    {
+      "id": "P1-2",
+      "name": "CorridorKey AI 抠像",
+      "status": "PARTIAL",
+      "tests_passed": 12,
+      "tests_failed": 0,
+      "tools": 8,
+      "adapter": "corridor_key_adapter.py",
+      "highlights": ["源码克隆成功 (13.4k★)", "4模块架构 (CorridorKey+GVM+VideoMaMa+BiRefNet)", "GPU 8GB VRAM 满足要求"],
+      "blockers": ["torch 2.6.0 < 2.8.0 要求", "模型文件未下载 (~300MB)"]
+    },
+    {
+      "id": "P1-3",
+      "name": "psd-tools PSD 解析",
+      "status": "PASS",
+      "tests_passed": 13,
+      "tests_failed": 0,
+      "tools": 8,
+      "adapter": "psd_tools_adapter.py",
+      "highlights": ["PSD 创建/解析/图层导出/合成全通过", "num_channels 兼容性修复", "from_images→new+create_pixel_layer 修复"]
+    },
+    {
+      "id": "P1-4",
+      "name": "DCTLs 色彩预设",
+      "status": "PASS",
+      "tests_passed": 13,
+      "tests_failed": 0,
+      "tools": 6,
+      "adapter": "dctl_preset_adapter.py",
+      "highlights": ["60 DCTL 文件索引", "3集合 (Demystify+MoazElgabry+OpenDisplayTransform)", "10预设映射全部找到", "Path.resolve() 修复"]
+    },
+    {
+      "id": "P2-1",
+      "name": "OpenMontage 深度集成",
+      "status": "PASS",
+      "tests_passed": 13,
+      "tests_failed": 0,
+      "tools": 10,
+      "adapter": "openmontage_adapter.py",
+      "highlights": ["13 pipeline 定义", "5 视觉风格", "10 工具类别 98 个工具", "Node.js v22.22.3 就绪"]
+    },
+    {
+      "id": "P2-2",
+      "name": "PR MCP 备选 (269→280工具)",
+      "status": "PASS",
+      "tests_passed": 15,
+      "tests_failed": 0,
+      "tools": 280,
+      "adapter": "参考分析 (无独立adapter)",
+      "highlights": ["v1.9.2, 33 TypeScript 工具模块", "CEP 插件就绪", "Capability-aware UXP bridge"]
+    },
+    {
+      "id": "P2-3",
+      "name": "Resolve+Claude 架构参考",
+      "status": "PASS",
+      "tests_passed": 15,
+      "tests_failed": 0,
+      "tools": 48,
+      "adapter": "参考分析 (无独立adapter)",
+      "highlights": ["5 可复用设计模式提取", "Direct Python API → Channel A 增强参考", "CDL/Fusion/Neural Engine 架构参考"]
+    }
+  ],
+  "totals": {
+    "total_tests": 156,
+    "total_passed": 156,
+    "total_failed": 0,
+    "pass_rate": "100%",
+    "full_pass": 8,
+    "partial": 2,
+    "new_files_created": 7,
+    "total_tools_mapped": 442,
+    "registry_growth": "13 → 19 (+6)"
+  }
+}

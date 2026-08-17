@@ -1,0 +1,89 @@
+// AE-Knowledge-Vault — 系统上下文图
+// 技能: system-modeler + graphviz
+// 日期: 2026-08-17
+// 问题: "系统与外部世界之间的边界是什么？"
+
+digraph system_context {
+    rankdir=TB;
+    fontname="Segoe UI";
+    node [fontname="Segoe UI", fontsize=11, style=filled, penwidth=1.2];
+    edge [fontname="Segoe UI", fontsize=9, color="#555555"];
+    splines=true;
+    nodesep=0.6;
+    ranksep=0.8;
+
+    // ===== 系统边界 =====
+    subgraph cluster_system {
+        label="AE-Knowledge-Vault 系统边界";
+        labeljust="l";
+        style="dashed,rounded";
+        color="#2563EB";
+        fontcolor="#2563EB";
+        fontsize=13;
+        bgcolor="#F8FAFC";
+
+        node [shape=component, fillcolor="#DBEAFE", color="#2563EB"];
+
+        ae_core     [label="AE 自动化核心\n(ae/)", tooltip="合成编排、Bridge命令、进程管理"];
+        core_engine [label="核心引擎\n(core/)", tooltip="效果注册表、运镜分类、节拍检测、导演评分"];
+        bridges     [label="Bridge 通信层\n(bridges/)", tooltip="Adobe MCP、通用Bridge、管线编排"];
+        pipeline    [label="管线编排层\n(pipeline/)", tooltip="统一管线、旗舰执行、漫画管线、反馈闭环"];
+        compiler    [label="IR 编译器\n(compiler/)", tooltip="意图→参数→操作码→JSX"];
+        sdk         [label="软件SDK适配器\n(software_sdk/)", tooltip="统一适配器模式 — 8个引擎适配器"];
+        integrations [label="外部集成层\n(integrations/)", tooltip="DaVinci、Blender、ComfyUI、调色"];
+        dashboard   [label="Web Dashboard\n(ae-dashboard/)", tooltip="前端SPA — 任务管理、效果预览"];
+        web_backend [label="FastAPI 后端\n(web/ + run.py)", tooltip="REST API + WebSocket + JWT认证"];
+        kb          [label="知识库系统\n(knowledge_base/)", tooltip="MD扫描、风格匹配、LLM提取"];
+        ml_models   [label="ML 模型训练\n(models/)", tooltip="运镜分类器、节拍模型、训练管线"];
+    }
+
+    // ===== 外部系统 =====
+    node [shape=box3d, fillcolor="#FEF3C7", color="#D97706", fontsize=11];
+
+    ext_ae     [label="Adobe\nAfter Effects\n2025/2026"];
+    ext_pr     [label="Adobe\nPremiere Pro\n2026"];
+    ext_adobe  [label="Adobe\nPS / AI / ME"];
+    ext_davinci [label="DaVinci\nResolve"];
+    ext_blender [label="Blender\n5.1.0"];
+    ext_ffmpeg  [label="FFmpeg\n8.1.1"];
+    ext_topaz   [label="Topaz\nVideo AI Pro"];
+    ext_sil     [label="Silhouette\n2026"];
+
+    node [shape=ellipse, fillcolor="#E0E7FF", color="#4F46E5"];
+
+    ext_ai     [label="AI 平台 API\n(ModelScope /\nDashScope / OpenAI)"];
+    ext_stock  [label="素材源\n(Pexels / Pixabay\n/ yt-dlp)"];
+
+    node [shape=note, fillcolor="#F0FDF4", color="#16A34A"];
+
+    user_dev  [label="开发者 / 剪辑师"];
+    user_ai   [label="AI 助手\n(Claude / Qoder\n/ DeepSeek)"];
+
+    // ===== 用户关系 =====
+    user_dev  -> dashboard  [label="操作", color="#16A34A"];
+    user_ai   -> web_backend [label="MCP / REST", color="#4F46E5"];
+
+    // ===== 系统→外部 =====
+    bridges    -> ext_ae     [label="ExtendScript /\naerender CLI", color="#D97706"];
+    bridges    -> ext_pr     [label="CEP / ExtendScript", color="#D97706"];
+    bridges    -> ext_adobe  [label="MCP Bridge", color="#D97706"];
+    integrations -> ext_davinci [label="Scripting API /\nLua", color="#D97706"];
+    sdk        -> ext_blender [label="Python API", color="#D97706"];
+    sdk        -> ext_ffmpeg  [label="CLI / ffmpeg-python", color="#D97706"];
+    sdk        -> ext_topaz   [label="CLI", color="#D97706"];
+    sdk        -> ext_sil     [label="Scripting API", color="#D97706"];
+    web_backend -> ext_ai     [label="HTTP / MCP", color="#4F46E5"];
+    pipeline   -> ext_stock   [label="API / 下载", color="#4F46E5"];
+
+    // ===== 内部关键流 =====
+    dashboard   -> web_backend [label="HTTP/WS", color="#2563EB"];
+    web_backend -> ae_core     [color="#2563EB"];
+    web_backend -> pipeline    [color="#2563EB"];
+    web_backend -> kb          [label="读取知识", color="#2563EB"];
+    ae_core     -> bridges     [color="#2563EB"];
+    pipeline    -> sdk         [color="#2563EB"];
+    pipeline    -> compiler    [color="#2563EB"];
+    compiler    -> ae_core     [label="JSX 生成", color="#2563EB"];
+    core_engine -> ml_models   [label="模型推理", style=dashed, color="#94A3B8"];
+    kb          -> pipeline    [label="领域知识", style=dashed, color="#94A3B8"];
+}

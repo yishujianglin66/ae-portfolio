@@ -1,0 +1,73 @@
+{
+  "test": "P1-4 DCTL Presets E2E",
+  "timestamp": "2026-08-11 19:16:26",
+  "passed": 13,
+  "failed": 0,
+  "results": [
+    {
+      "name": "Import adapter",
+      "status": "PASS",
+      "detail": "OK"
+    },
+    {
+      "name": "check_available",
+      "status": "PASS",
+      "detail": "True"
+    },
+    {
+      "name": "operations",
+      "status": "PASS",
+      "detail": "6 ops"
+    },
+    {
+      "name": "summary",
+      "status": "PASS",
+      "detail": "{\"total_dctl_files\": 60, \"presets_mapped\": 10, \"collections\": [\"Demystify-Color\", \"MoazElgabry\", \"OpenDisplayTransform\"]}"
+    },
+    {
+      "name": "scan_dctl_dirs",
+      "status": "PASS",
+      "detail": "status=success, total=60"
+    },
+    {
+      "name": "list_dctl_files",
+      "status": "PASS",
+      "detail": "status=success, count=60"
+    },
+    {
+      "name": "list_presets",
+      "status": "PASS",
+      "detail": "status=success, count=10"
+    },
+    {
+      "name": "find_dctl (filmic)",
+      "status": "PASS",
+      "detail": "status=success, matches=1"
+    },
+    {
+      "name": "find_dctl (contrast)",
+      "status": "PASS",
+      "detail": "status=success, matches=7"
+    },
+    {
+      "name": "get_preset_info (filmic)",
+      "status": "PASS",
+      "detail": "status=success, found=True, lines=1571"
+    },
+    {
+      "name": "Registry total",
+      "status": "PASS",
+      "detail": "total=16, available=10"
+    },
+    {
+      "name": "dctl_presets registered",
+      "status": "PASS",
+      "detail": "found=True"
+    },
+    {
+      "name": "dctl_presets status",
+      "status": "PASS",
+      "detail": "status=IntegrationStatus.AVAILABLE"
+    }
+  ]
+}

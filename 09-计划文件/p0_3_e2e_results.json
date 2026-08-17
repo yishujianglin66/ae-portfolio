@@ -1,0 +1,17 @@
+{
+  "test": "P0-3 ComfyUI API Verification",
+  "server_url": "http://127.0.0.1:8189",
+  "comfyui_version": "0.31.0",
+  "gpu": {
+    "devices": [
+      {
+        "name": "cuda:0 NVIDIA GeForce RTX 4060 Laptop GPU : cudaMallocAsync",
+        "vram_total_gb": 8.0,
+        "vram_free_gb": 6.9
+      }
+    ]
+  },
+  "models": [],
+  "available": true,
+  "status": "PASS"
+}

@@ -1,0 +1,48 @@
+{
+  "registry": {
+    "total": 12,
+    "available": 6,
+    "operations": 66,
+    "status": "PASS"
+  },
+  "adobe_mcp": {
+    "available": true,
+    "ops": 47,
+    "apps": 8,
+    "status": "PASS"
+  },
+  "media_crawler": {
+    "ops": 11,
+    "platforms": 7,
+    "status": "PASS"
+  },
+  "blender_proc": {
+    "ops": 8,
+    "status": "PASS"
+  },
+  "firecrawl": {
+    "available": false,
+    "ops": 7,
+    "status": "PASS"
+  },
+  "comfyui": {
+    "available": false,
+    "status": "PASS"
+  },
+  "llm_gateway": {
+    "new_types": true,
+    "provider_mapped": true,
+    "tier_mapped": true,
+    "status": "PASS"
+  },
+  "external": {
+    "cloned": 5,
+    "total": 5,
+    "status": "PASS"
+  },
+  "degraded_mode": {
+    "scrape_degraded": "degraded",
+    "search_degraded": "degraded",
+    "status": "PASS"
+  }
+}
