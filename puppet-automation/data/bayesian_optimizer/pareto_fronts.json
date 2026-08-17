@@ -1,0 +1,15 @@
+{
+  "Glow": [
+    {
+      "params": {
+        "glow_threshold": 30,
+        "glow_radius": 40
+      },
+      "objectives": [
+        72.0,
+        -11.0,
+        -24.0
+      ]
+    }
+  ]
+}

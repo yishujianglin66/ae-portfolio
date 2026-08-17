@@ -1,0 +1,15 @@
+{
+  "Glow": [
+    {
+      "params": {
+        "glow_threshold": 30,
+        "glow_radius": 40
+      },
+      "quality": 72.0,
+      "render_time": 11.0,
+      "file_size": 24.0,
+      "timestamp": 1785379169.0320854,
+      "success": true
+    }
+  ]
+}

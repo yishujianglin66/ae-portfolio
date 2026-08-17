@@ -1,0 +1,13 @@
+﻿py : Traceback (most recent call last):
+所在位置 行:1 字符: 73
++ ... automation; py -3.12 -c "from src.api.main import app; print('Import  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "<string>", line 1, in <module>
+  File "C:\Users\Administrator\Desktop\AE-Knowledge-Vault\puppet-automation\src\api\__init__.py", line 2, in <module>
+    from .main import app
+  File "C:\Users\Administrator\Desktop\AE-Knowledge-Vault\puppet-automation\src\api\main.py", line 9, in <module>
+    from fastapi import FastAPI, Depends, HTTPException, status
+ModuleNotFoundError: No module named 'fastapi'
