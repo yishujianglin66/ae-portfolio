@@ -1,0 +1,482 @@
+[
+  {
+    "name": "wooden_puppet",
+    "category": "puppet_style",
+    "subcategory": "wooden",
+    "description": "木质木偶风格 - 木纹纹理叠加、木榫关节、暖棕黄调色、12fps定格动画，模拟传统木偶定格动画质感",
+    "tags": [
+      "木偶",
+      "木质",
+      "puppet",
+      "wooden",
+      "stop_motion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "compName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Puppet Comp"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameRate": {
+            "type": "number",
+            "min": 8,
+            "max": 30,
+            "default": 12
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.7
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 12,
+      "intensity": 0.7
+    }
+  },
+  {
+    "name": "ceramic_puppet",
+    "category": "puppet_style",
+    "subcategory": "ceramic",
+    "description": "陶瓷木偶风格 - 釉面光泽、清晰接缝、冷白调色、18fps定格动画，模拟陶瓷工艺品质感",
+    "tags": [
+      "木偶",
+      "陶瓷",
+      "puppet",
+      "ceramic",
+      "glossy"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "compName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Puppet Comp"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameRate": {
+            "type": "number",
+            "min": 8,
+            "max": 30,
+            "default": 18
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.7
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 18,
+      "intensity": 0.7
+    }
+  },
+  {
+    "name": "cloth_puppet",
+    "category": "puppet_style",
+    "subcategory": "cloth",
+    "description": "布偶风格 - 布料缝线、低饱和度、8fps强烈定格动画，模拟手工布偶质感",
+    "tags": [
+      "木偶",
+      "布偶",
+      "puppet",
+      "cloth",
+      "stitch"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "compName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Puppet Comp"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameRate": {
+            "type": "number",
+            "min": 8,
+            "max": 30,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.7
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 8,
+      "intensity": 0.7
+    }
+  },
+  {
+    "name": "clay_puppet",
+    "category": "puppet_style",
+    "subcategory": "clay",
+    "description": "黏土木偶风格 - 橡皮泥质感、软形变、高饱和度、8fps定格动画，模拟黏土动画质感",
+    "tags": [
+      "木偶",
+      "黏土",
+      "puppet",
+      "clay",
+      "stop_motion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "compName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Puppet Comp"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameRate": {
+            "type": "number",
+            "min": 8,
+            "max": 30,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.7
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 8,
+      "intensity": 0.7
+    }
+  },
+  {
+    "name": "metal_puppet",
+    "category": "puppet_style",
+    "subcategory": "metal",
+    "description": "金属木偶风格 - 金属反光、机械接缝、冷灰银调色、12fps定格动画，模拟机械金属木偶质感",
+    "tags": [
+      "木偶",
+      "金属",
+      "puppet",
+      "metal",
+      "mechanical"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "compName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Puppet Comp"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameRate": {
+            "type": "number",
+            "min": 8,
+            "max": 30,
+            "default": 12
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.7
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 12,
+      "intensity": 0.7
+    }
+  },
+  {
+    "name": "stone_puppet",
+    "category": "puppet_style",
+    "subcategory": "stone",
+    "description": "石头木偶风格 - 岩石质感、石缝接缝、灰棕调色、18fps定格动画，模拟石雕木偶质感",
+    "tags": [
+      "木偶",
+      "石头",
+      "puppet",
+      "stone",
+      "rock"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "compName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Puppet Comp"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameRate": {
+            "type": "number",
+            "min": 8,
+            "max": 30,
+            "default": 18
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.7
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 18,
+      "intensity": 0.7
+    }
+  },
+  {
+    "name": "glass_puppet",
+    "category": "puppet_style",
+    "subcategory": "glass",
+    "description": "玻璃木偶风格 - 透明折射、极高对比度、淡色调色、20fps定格动画，模拟玻璃艺术品质感",
+    "tags": [
+      "木偶",
+      "玻璃",
+      "puppet",
+      "glass",
+      "transparent"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "compName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Puppet Comp"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameRate": {
+            "type": "number",
+            "min": 8,
+            "max": 30,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.7
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 20,
+      "intensity": 0.7
+    }
+  },
+  {
+    "name": "plush_puppet",
+    "category": "puppet_style",
+    "subcategory": "plush",
+    "description": "毛绒木偶风格 - 毛绒质感、软接缝、暖色调、12fps定格动画，模拟毛绒玩具质感",
+    "tags": [
+      "木偶",
+      "毛绒",
+      "puppet",
+      "plush",
+      "fur"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "compName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Puppet Comp"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameRate": {
+            "type": "number",
+            "min": 8,
+            "max": 30,
+            "default": 12
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.7
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 12,
+      "intensity": 0.7
+    }
+  }
+]

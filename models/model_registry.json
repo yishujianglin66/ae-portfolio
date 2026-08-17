@@ -1,0 +1,164 @@
+{
+  "timestamp": "2026-08-14 15:30:00",
+  "n_models": 13,
+  "models": [
+    {
+      "id": "student_ip_classifier",
+      "task": "IP识别(学生)",
+      "type": "distillation_student",
+      "path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\student_ip_classifier.pt",
+      "size_mb": 42.76,
+      "source": "T21蒸馏",
+      "status": "trained",
+      "val_acc": 0.4926,
+      "epochs": 30
+    },
+    {
+      "id": "clip_lora_aot",
+      "task": "IP识别(LoRA微调)",
+      "type": "lora_finetune",
+      "path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\clip_lora_aot.pt",
+      "size_mb": 341.99,
+      "source": "T7 LoRA对比学习",
+      "status": "trained",
+      "final_loss": 2.2829
+    },
+    {
+      "id": "t12_mood_scene_classifier",
+      "task": "mood/scene_type分类",
+      "type": "mlp_head",
+      "path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\t12_mood_scene_classifier.pt",
+      "size_mb": 0.29,
+      "source": "T12 MLP兜底",
+      "status": "trained",
+      "val_acc": 0.6596
+    },
+    {
+      "id": "ensemble_kb",
+      "task": "IP识别(集成)",
+      "type": "ensemble_knn",
+      "path": "memory(BackboneRegistry)",
+      "source": "T5/T6双底座集成",
+      "status": "active",
+      "config": {
+        "laion_weight": 0.3,
+        "cclip_weight": 0.7
+      }
+    },
+    {
+      "id": "bge_m3_index",
+      "task": "语义检索",
+      "type": "vector_index",
+      "path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\cache\\bge_m3_index\\bge_m3_embeddings.npy",
+      "size_mb": 0.14,
+      "source": "T11 BGE-M3",
+      "status": "active",
+      "config": {
+        "dim": 1024,
+        "model": "BAAI/bge-m3"
+      },
+      "avg_recall": 0.4
+    },
+    {
+      "id": "golden_v1_knn",
+      "task": "IP识别(基线)",
+      "type": "knn_baseline",
+      "path": "ip_proto_classifier",
+      "source": "P2.2基线",
+      "status": "active",
+      "config": {
+        "K": 5,
+        "TXT_WEIGHT": 0.92
+      },
+      "accept_result": "12/12(legacy)"
+    },
+    {
+      "id": "movieshots_camera_clf",
+      "task": "运镜分类(光流MLP)",
+      "type": "camera_movement_classifier",
+      "path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\output\\movieshots_smoke.pt",
+      "size_mb": 0.02,
+      "val_acc": null,
+      "n_train": 320,
+      "labels": [
+        "static",
+        "pan_left",
+        "zoom_in",
+        "zoom_out",
+        "complex"
+      ],
+      "feature_keys": [
+        "mean_dx",
+        "mean_dy",
+        "mean_radial",
+        "h_consistency",
+        "v_consistency",
+        "radial_consistency",
+        "total_disp",
+        "direction_entropy"
+      ],
+      "registered_at": "2026-08-14 01:37:11",
+      "source": "MovieShots (ECCV2020, 47,463 annotations)",
+      "status": "smoke_artifact",
+      "note": "smoke 产物(20KB, val_acc=1.0 为冒烟伪值, 已置 null)。正式路径: videomae_movieshots_movement (见下), 或跑 models/train_movieshots_camera.py extract+train 得真实 MLP"
+    },
+    {
+      "id": "videomae_movieshots_movement",
+      "task": "运镜分类(VideoMAE, 5类)",
+      "type": "videomae_finetuned",
+      "path": "D:\\AE-Data\\Models\\VideoMAE-MovieShots\\movement\\model.safetensors",
+      "size_mb": 328.96,
+      "source": "gullalc/videomae-base-finetuned-kinetics-movieshots-movement (HF, MIT)",
+      "status": "active",
+      "val_acc": 0.9135,
+      "labels": ["Static", "Motion", "Pull", "Push", "Multi_movement"],
+      "consumer": "models/camera/videomae_camera.py -> ai/camera_decision.SourceCameraInventory.inject()",
+      "verified": "models/output/videomae_verify.json (61 素材实测, CPU 0.18-0.4s/镜)"
+    },
+    {
+      "id": "ip_classifier",
+      "task": "IP识别(主)",
+      "type": "classifier",
+      "path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\ip_classifier.pt",
+      "size_mb": 42.76,
+      "source": "T5 主分类器",
+      "status": "trained"
+    },
+    {
+      "id": "scene_classifier_v1",
+      "task": "场景分类",
+      "type": "classifier",
+      "path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\scene_classifier_v1.pt",
+      "size_mb": 42.73,
+      "source": "场景分类 v1",
+      "status": "trained"
+    },
+    {
+      "id": "camera_primitive_clf",
+      "task": "运镜原语分类(光流特征)",
+      "type": "sklearn_classifier",
+      "path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\camera_primitive_clf.pkl",
+      "size_mb": 3.73,
+      "source": "T3 光流运镜原语",
+      "status": "trained"
+    },
+    {
+      "id": "rhythm_reward_v2",
+      "task": "节奏奖励(卡点质量)",
+      "type": "reward_model",
+      "path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\rhythm_reward_v2.pkl",
+      "size_mb": 0.37,
+      "source": "卡点对齐奖励",
+      "status": "active"
+    },
+    {
+      "id": "yolov8x_det",
+      "task": "目标检测(通用)",
+      "type": "yolo_detector",
+      "path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\yolov8x.pt",
+      "size_mb": 130.55,
+      "source": "ultralytics yolov8x",
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AE Knowledge Vault - 智能视频自动化制作平台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00d4ff;
+            --secondary-color: #7c3aed;
+            --accent-color: #f59e0b;
+            --bg-dark: #0a0e1a;
+            --bg-card: #111827;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --gradient-1: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+            --gradient-2: linear-gradient(135deg, #7c3aed 0%, #f59e0b 100%);
+            --gradient-bg: linear-gradient(180deg, #0a0e1a 0%, #1a1f2e 50%, #0a0e1a 100%);
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 背景动画 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: var(--gradient-bg);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(245, 158, 11, 0.05) 0%, transparent 30%);
+            animation: bgAnimation 20s ease-in-out infinite;
+        }
+
+        @keyframes bgAnimation {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(-20px, -30px); }
+            66% { transform: translate(20px, 20px); }
+        }
+
+        /* 导航栏 */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero 区域 */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 3rem auto;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 主要按钮 */
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: var(--gradient-1);
+            color: var(--bg-dark);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease 0.8s both;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        /* 章节标题 */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 功能卡片网格 */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-1);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.1);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list li::before {
+            content: '→';
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* 技术栈 */
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .tech-category {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .tech-category h3 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tech-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .tech-tag {
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .tech-tag:hover {
+            background: rgba(124, 58, 237, 0.2);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        /* 项目截图 */
+        .screenshots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .screenshot-card {
+            background: rgba(17, 24, 39, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .screenshot-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 212, 255, 0.15);
+        }
+
+        .screenshot-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .screenshot-info {
+            padding: 1.5rem;
+        }
+
+        .screenshot-info h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .screenshot-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* 资源展示 */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .resource-card {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(0, 212, 255, 0.1));
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        .resource-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .resource-label {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        /* 联系信息 */
+        .contact {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(124, 58, 237, 0.05));
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .contact h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .contact-item strong {
+            color: var(--primary-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .features-grid,
+            .screenshots {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gradient-1);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- 导航栏 -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">AE KNOWLEDGE VAULT</div>
+            <ul class="nav-links">
+                <li><a href="#features">核心功能</a></li>
+                <li><a href="#architecture">技术架构</a></li>
+                <li><a href="#screenshots">界面展示</a></li>
+                <li><a href="#resources">资源库</a></li>
+                <li><a href="#contact">联系方式</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero 区域 -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">🚀 智能视频制作流水线</div>
+            <h1>AE Knowledge Vault</h1>
+            <p>基于多引擎协同编排的木偶风格视频自动化制作平台，集成 AI 规划、风格化合成、多软件协同的全流程解决方案</p>
+
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">9+</div>
+                    <div class="stat-label">专业引擎集成</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">170+</div>
+                    <div class="stat-label">风格化预设</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">阶段流水线</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">效果素材资源</div>
+                </div>
+            </div>
+
+            <a href="#features" class="btn">探索项目详情</a>
+        </div>
+    </section>
+
+    <!-- 核心功能 -->
+    <section id="features" class="section">
+        <div class="section-header">
+            <h2 class="section-title">核心功能</h2>
+            <p class="section-subtitle">覆盖从素材获取、音频分析、AE 合成到渲染交付的完整视频制作链路</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎬</div>
+                <h3>多引擎协同编排</h3>
+                <p>统一调度 AE、Photoshop、DaVinci、Topaz、FFmpeg 等 9+ 专业软件，实现跨软件自动化协作</p>
+                <ul class="feature-list">
+                    <li>After Effects 2026 合成引擎</li>
+                    <li>DaVinci Resolve 调色引擎</li>
+                    <li>Topaz Video AI 画质增强</li>
+                    <li>FFmpeg 全流程转码</li>
+                    <li>Blender 3D 舞台渲染</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI 智能规划</h3>
+                <p>集成 DeepSeek V4、豆包、通义等多 LLM API，实现智能场景分析、风格推理与参数生成</p>
+                <ul class="feature-list">
+                    <li>意图识别与任务路由</li>
+                    <li>风格分析与效果推演</li>
+                    <li>参数智能映射</li>
+                    <li>自动化 JSX 脚本生成</li>
+                    <li>学习反馈闭环系统</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>风格化预设库</h3>
+                <p>170+ 木偶风格预设，覆盖漫剪拉镜大师风格，支持一键应用与参数调优</p>
+                <ul class="feature-list">
+                    <li>Xenoz 推拉鼻祖风格</li>
+                    <li>Molob 电影感大师风格</li>
+                    <li>Donya 三维空间风格</li>
+                    <li>Floby 韩式快剪风格</li>
+                    <li>YashFX 高燃插件流</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🎵</div>
+                <h3>音画同步系统</h3>
+                <p>基于 BPM 分析的节拍映射，实现音效与画面的精密同步</p>
+                <ul class="feature-list">
+                    <li>音乐结构原子分析</li>
+                    <li>节拍-关键帧精密映射</li>
+                    <li>音效体系与图层操作</li>
+                    <li>片段元数据与能量图谱</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔧</div>
+                <h3>MCP 统一网关</h3>
+                <p>Model Context Protocol 协议实现，打通 Adobe 全家桶与第三方软件的自动化通信</p>
+                <ul class="feature-list">
+                    <li>ExtendScript MCP 扩展</li>
+                    <li>Adobe Bridge 统一适配</li>
+                    <li>实时双向通信</li>
+                    <li>跨软件任务编排</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>可视化控制面板</h3>
+                <p>React + TypeScript 构建的专业控制面板，实时监控渲染进度与项目管理</p>
+                <ul class="feature-list">
+                    <li>项目工作流可视化</li>
+                    <li>实时渲染进度追踪</li>
+                    <li>风格库浏览器</li>
+                    <li>批量任务队列管理</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技术架构 -->
+    <section id="architecture" class="section">
+        <div class="section-header">
+            <h2 class="section-title">技术架构</h2>
+            <p class="section-subtitle">企业级架构设计，支持分布式渲染与高可用部署</p>
+        </div>
+
+        <div class="tech-stack">
+            <div class="tech-category">
+                <h3>⚙️ 后端核心</h3>
+                <div class="tech-items">
+                    <span class="tech-tag">FastAPI</span>
+                    <span class="tech-tag">Celery</span>
+                    <span class="tech-tag">Redis</span>
+                    <span class="tech-tag">SQLAlchemy</span>
+                    <span class="tech-tag">Pydantic</span>
+                </div>
+            </div>
+
+            <div class="tech-category">
+                <h3>🤖 AI/ML</h3>
+                <div class="tech-items">
+                    <span class="tech-tag">PyTorch 2.3</span>
+                    <span class="tech-tag">MediaPipe</span>
+                    <span class="tech-tag">Ultralytics</span>
+                    <span class="tech-tag">ONNX Runtime</span>
+                    <span class="tech-tag">LangChain</span>
+                </div>
+            </div>
+
+            <div class="tech-category">
+                <h3>🎨 前端界面</h3>
+                <div class="tech-items">
+                    <span class="tech-tag">React 18</span>
+                    <span class="tech-tag">TypeScript</span>
+                    <span class="tech-tag">Vite</span>
+                    <span class="tech-tag">TailwindCSS</span>
+                    <span class="tech-tag">Zustand</span>
+                </div>
+            </div>
+
+            <div class="tech-category">
+                <h3>🎬 视频处理</h3>
+                <div class="tech-items">
+                    <span class="tech-tag">OpenCV</span>
+                    <span class="tech-tag">FFmpeg</span>
+                    <span class="tech-tag">MoviePy</span>
+                    <span class="tech-tag">Librosa</span>
+                    <span class="tech-tag">Whisper</span>
+                </div>
+            </div>
+
+            <div class="tech-category">
+                <h3>🖥️ 3D 渲染</h3>
+                <div class="tech-items">
+                    <span class="tech-tag">Blender (bpy)</span>
+                    <span class="tech-tag">Omniverse</span>
+                    <span class="tech-tag">NVIDIA USD</span>
+                </div>
+            </div>
+
+            <div class="tech-category">
+                <h3>🔧 自动化工具</h3>
+                <div class="tech-items">
+                    <span class="tech-tag">ExtendScript</span>
+                    <span class="tech-tag">nexrender</span>
+                    <span class="tech-tag">Docker</span>
+                    <span class="tech-tag">Nginx</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 界面展示 -->
+    <section id="screenshots" class="section">
+        <div class="section-header">
+            <h2 class="section-title">界面展示</h2>
+            <p class="section-subtitle">专业级控制面板，实时监控与可视化管理</p>
+        </div>
+
+        <div class="screenshots">
+            <div class="screenshot-card">
+                <img src="ae-dashboard/shot_01_dashboard.png" alt="Dashboard" class="screenshot-img">
+                <div class="screenshot-info">
+                    <h3>Dashboard 主控面板</h3>
+                    <p>项目总览、实时统计数据、资源监控</p>
+                </div>
+            </div>
+
+            <div class="screenshot-card">
+                <img src="ae-dashboard/shot_02_effects.png" alt="Effects Panel" class="screenshot-img">
+                <div class="screenshot-info">
+                    <h3>Effects 效果库</h3>
+                    <p>1000+ 效果素材分类管理、实时预览</p>
+                </div>
+            </div>
+
+            <div class="screenshot-card">
+                <img src="ae-dashboard/shot_03_execute.png" alt="Execute Panel" class="screenshot-img">
+                <div class="screenshot-info">
+                    <h3>Execute 执行面板</h3>
+                    <p>自动化脚本生成、参数配置、一键执行</p>
+                </div>
+            </div>
+
+            <div class="screenshot-card">
+                <img src="ae-dashboard/shot_05_styles.png" alt="Styles Panel" class="screenshot-img">
+                <div class="screenshot-info">
+                    <h3>Styles 风格库</h3>
+                    <p>170+ 木偶风格预设、大师风格库</p>
+                </div>
+            </div>
+
+            <div class="screenshot-card">
+                <img src="ae-dashboard/shot_06_projects.png" alt="Projects Panel" class="screenshot-img">
+                <div class="screenshot-info">
+                    <h3>Projects 项目管理</h3>
+                    <p>多项目管理、工作流可视化、版本控制</p>
+                </div>
+            </div>
+
+            <div class="screenshot-card">
+                <img src="ae-dashboard/shot_07_history.png" alt="History Panel" class="screenshot-img">
+                <div class="screenshot-info">
+                    <h3>History 历史记录</h3>
+                    <p>执行日志、版本回溯、数据追踪</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 资源库 -->
+    <section id="resources" class="section">
+        <div class="section-header">
+            <h2 class="section-title">资源库统计</h2>
+            <p class="section-subtitle">丰富的素材库与知识体系支撑自动化生产</p>
+        </div>
+
+        <div class="resources-grid">
+            <div class="resource-card">
+                <div class="resource-number">1000+</div>
+                <div class="resource-label">效果素材资源</div>
+            </div>
+
+            <div class="resource-card">
+                <div class="resource-number">170+</div>
+                <div class="resource-label">风格化预设</div>
+            </div>
+
+            <div class="resource-card">
+                <div class="resource-number">50+</div>
+                <div class="resource-label">知识库文档</div>
+            </div>
+
+            <div class="resource-card">
+                <div class="resource-number">100+</div>
+                <div class="resource-label">字体预设</div>
+            </div>
+
+            <div class="resource-card">
+                <div class="resource-number">12</div>
+                <div class="resource-label">漫剪大师风格</div>
+            </div>
+
+            <div class="resource-card">
+                <div class="resource-number">4</div>
+                <div class="resource-label">完整流水线阶段</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系方式 -->
+    <section id="contact" class="contact">
+        <h2>项目信息</h2>
+        <p style="color: var(--text-secondary); margin-top: 1rem;">基于 Windows 11 + NVIDIA RTX 4060 开发环境，企业级架构设计</p>
+
+        <div class="contact-info">
+            <div class="contact-item">
+                <strong>项目路径:</strong>
+                <span>C:\Users\Administrator\Desktop\AE-Knowledge-Vault</span>
+            </div>
+            <div class="contact-item">
+                <strong>技术栈:</strong>
+                <span>Python 3.11 + React 18 + TypeScript</span>
+            </div>
+            <div class="contact-item">
+                <strong>开发环境:</strong>
+                <span>Visual Studio Code + PyCharm</span>
+            </div>
+            <div class="contact-item">
+                <strong>GPU:</strong>
+                <span>NVIDIA RTX 4060 8GB</span>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 滚动动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card, .tech-category, .screenshot-card, .resource-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

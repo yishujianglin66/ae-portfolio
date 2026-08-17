@@ -1,0 +1,1434 @@
+[
+  {
+    "name": "cyberpunk_grade",
+    "category": "color_grading",
+    "subcategory": "cyberpunk",
+    "description": "赛博朋克调色预设 - 高对比度、青色和品红色调、暗角效果，营造科幻氛围",
+    "tags": [
+      "赛博朋克",
+      "cyberpunk",
+      "调色",
+      "color_grading",
+      "scifi"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 30,
+      "saturation": 20
+    },
+    "default_values": {
+      "contrast": 30,
+      "saturation": 20
+    }
+  },
+  {
+    "name": "cinematic_grade",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "电影感调色预设 - 降低饱和度、暖色调、胶片颗粒，模拟电影胶片效果",
+    "tags": [
+      "电影感",
+      "cinematic",
+      "胶片",
+      "film",
+      "color_grading"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 15,
+      "saturation": -20
+    },
+    "default_values": {
+      "contrast": 15,
+      "saturation": -20
+    }
+  },
+  {
+    "name": "retro_vintage",
+    "category": "color_grading",
+    "subcategory": "retro",
+    "description": "复古怀旧调色预设 - 模拟老照片效果，偏黄色调、低对比度、轻微褪色",
+    "tags": [
+      "复古",
+      "vintage",
+      "怀旧",
+      "retro",
+      "old_photo"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "exposure": -0.05,
+      "contrast": -20,
+      "saturation": -30
+    },
+    "default_values": {
+      "exposure": -0.05,
+      "contrast": -20,
+      "saturation": -30
+    }
+  },
+  {
+    "name": "dreamy_soft",
+    "category": "color_grading",
+    "subcategory": "dreamy",
+    "description": "梦幻柔和调色预设 - 柔和模糊、低对比度、淡粉色调，营造梦幻氛围",
+    "tags": [
+      "梦幻",
+      "dreamy",
+      "柔和",
+      "soft",
+      "romantic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "exposure": 0.15,
+      "contrast": -15,
+      "saturation": -10
+    },
+    "default_values": {
+      "exposure": 0.15,
+      "contrast": -15,
+      "saturation": -10
+    }
+  },
+  {
+    "name": "high_contrast_bw",
+    "category": "color_grading",
+    "subcategory": "black_and_white",
+    "description": "高对比度黑白调色预设 - 强烈的黑白对比，去除灰度，营造戏剧性效果",
+    "tags": [
+      "黑白",
+      "black_and_white",
+      "高对比",
+      "contrast",
+      "dramatic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "exposure": 0.0,
+      "contrast": 50,
+      "saturation": -100
+    },
+    "default_values": {
+      "exposure": 0.0,
+      "contrast": 50,
+      "saturation": -100
+    }
+  },
+  {
+    "name": "teal_orange",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "橙青调色预设 - 阴影偏青色、高光偏橙色，经典好莱坞橙青对比调色",
+    "tags": [
+      "橙青",
+      "teal_orange",
+      "电影",
+      "cinematic",
+      "调色"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 20,
+      "saturation": -10
+    },
+    "default_values": {
+      "contrast": 20,
+      "saturation": -10
+    }
+  },
+  {
+    "name": "hollywood_blockbuster",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "好莱坞大片调色预设 - 强S曲线对比、橙青色调、暗角，营造大片质感",
+    "tags": [
+      "好莱坞",
+      "hollywood",
+      "大片",
+      "blockbuster",
+      "电影"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 30,
+      "saturation": -15
+    },
+    "default_values": {
+      "contrast": 30,
+      "saturation": -15
+    }
+  },
+  {
+    "name": "netflix_style",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "Netflix风格调色预设 - 冷色调、高对比、低饱和，模拟流媒体平台剧集质感",
+    "tags": [
+      "Netflix",
+      "流媒体",
+      "冷调",
+      "剧集",
+      "cinematic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 25,
+      "saturation": -20
+    },
+    "default_values": {
+      "contrast": 25,
+      "saturation": -20
+    }
+  },
+  {
+    "name": "action_movie",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "动作片调色预设 - 高对比度、微增饱和、胶片颗粒，营造紧张刺激的动作片氛围",
+    "tags": [
+      "动作片",
+      "action",
+      "高对比",
+      "颗粒",
+      "cinematic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 40,
+      "saturation": 10
+    },
+    "default_values": {
+      "contrast": 40,
+      "saturation": 10
+    }
+  },
+  {
+    "name": "mystery_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "悬疑片调色预设 - 冷暗色调、压暗阴影、强暗角，营造神秘悬疑氛围",
+    "tags": [
+      "悬疑",
+      "mystery",
+      "暗调",
+      "冷色",
+      "cinematic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 30,
+      "saturation": -40
+    },
+    "default_values": {
+      "contrast": 30,
+      "saturation": -40
+    }
+  },
+  {
+    "name": "sci_fi_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "科幻片调色预设 - 蓝青色调、高对比、饱和度提升，营造未来科幻氛围",
+    "tags": [
+      "科幻",
+      "sci_fi",
+      "蓝色",
+      "未来",
+      "cinematic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 25,
+      "saturation": 15
+    },
+    "default_values": {
+      "contrast": 25,
+      "saturation": 15
+    }
+  },
+  {
+    "name": "art_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "文艺片调色预设 - 柔和对比、暖色低饱和、细腻色调，营造文艺气质",
+    "tags": [
+      "文艺",
+      "art_film",
+      "柔和",
+      "低饱和",
+      "cinematic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -10,
+      "saturation": -25
+    },
+    "default_values": {
+      "contrast": -10,
+      "saturation": -25
+    }
+  },
+  {
+    "name": "war_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "战争片调色预设 - 低饱和、偏绿调、高对比，模拟战争片的去色质感",
+    "tags": [
+      "战争",
+      "war_film",
+      "去色",
+      "绿调",
+      "cinematic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 20,
+      "saturation": -50
+    },
+    "default_values": {
+      "contrast": 20,
+      "saturation": -50
+    }
+  },
+  {
+    "name": "western_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "西部片调色预设 - 暖橙色调、高对比、轻微去饱和，模拟西部荒野质感",
+    "tags": [
+      "西部",
+      "western",
+      "暖橙",
+      "荒野",
+      "cinematic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 30,
+      "saturation": 5
+    },
+    "default_values": {
+      "contrast": 30,
+      "saturation": 5
+    }
+  },
+  {
+    "name": "noir_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "黑色电影调色预设 - 完全去色、极端对比、强暗角，营造经典黑色电影氛围",
+    "tags": [
+      "黑色电影",
+      "noir",
+      "黑白",
+      "高对比",
+      "cinematic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 60,
+      "saturation": -100
+    },
+    "default_values": {
+      "contrast": 60,
+      "saturation": -100
+    }
+  },
+  {
+    "name": "vintage_film",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "复古胶片调色预设 - 暖黄调、低饱和、胶片颗粒，模拟老胶片质感",
+    "tags": [
+      "复古",
+      "胶片",
+      "vintage",
+      "film",
+      "颗粒"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": -25
+    },
+    "default_values": {
+      "saturation": -25
+    }
+  },
+  {
+    "name": "old_photo",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "老照片调色预设 - 棕褐色调、去色、噪点、暗角，模拟泛黄老照片效果",
+    "tags": [
+      "老照片",
+      "old_photo",
+      "棕褐",
+      "sepia",
+      "vintage"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": -50
+    },
+    "default_values": {
+      "saturation": -50
+    }
+  },
+  {
+    "name": "bw_movie",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "黑白电影调色预设 - 完全去色、高对比、胶片颗粒，模拟经典黑白电影",
+    "tags": [
+      "黑白电影",
+      "bw_movie",
+      "黑白",
+      "颗粒",
+      "vintage"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 40,
+      "saturation": -100
+    },
+    "default_values": {
+      "contrast": 40,
+      "saturation": -100
+    }
+  },
+  {
+    "name": "warm_vintage",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "暖色调复古调色预设 - 偏暖黄色调、轻微去饱和，模拟温暖复古质感",
+    "tags": [
+      "暖色",
+      "复古",
+      "warm_vintage",
+      "vintage",
+      "retro"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": -10
+    },
+    "default_values": {
+      "saturation": -10
+    }
+  },
+  {
+    "name": "cold_vintage",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "冷色调复古调色预设 - 偏冷蓝色调、去饱和，模拟冷调复古质感",
+    "tags": [
+      "冷色",
+      "复古",
+      "cold_vintage",
+      "vintage",
+      "retro"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": -15
+    },
+    "default_values": {
+      "saturation": -15
+    }
+  },
+  {
+    "name": "film_grain",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "胶片颗粒感调色预设 - 重颗粒、微调对比度和饱和度，模拟胶片颗粒质感",
+    "tags": [
+      "胶片",
+      "颗粒",
+      "film_grain",
+      "grain",
+      "vintage"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 10,
+      "saturation": -10
+    },
+    "default_values": {
+      "contrast": 10,
+      "saturation": -10
+    }
+  },
+  {
+    "name": "70s_style",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "70年代风格调色预设 - 暖橙调、低对比、橙青渐变，模拟70年代复古风格",
+    "tags": [
+      "70年代",
+      "70s",
+      "复古",
+      "vintage",
+      "retro"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -10,
+      "saturation": 5
+    },
+    "default_values": {
+      "contrast": -10,
+      "saturation": 5
+    }
+  },
+  {
+    "name": "90s_hk",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "90年代港风调色预设 - 暖调增饱和、低对比，模拟90年代港片胶片质感",
+    "tags": [
+      "90年代",
+      "港风",
+      "90s_hk",
+      "香港",
+      "vintage"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -10,
+      "saturation": 20
+    },
+    "default_values": {
+      "contrast": -10,
+      "saturation": 20
+    }
+  },
+  {
+    "name": "japanese_fresh",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "日系清新调色预设 - 提阴影、降高光、低饱和冷调，营造日系清新氛围",
+    "tags": [
+      "日系",
+      "清新",
+      "japanese",
+      "fresh",
+      "modern"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": -15
+    },
+    "default_values": {
+      "saturation": -15
+    }
+  },
+  {
+    "name": "ins_style",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "Instagram风调色预设 - 轻微增对比和饱和、柔和暗角，社交媒体风格",
+    "tags": [
+      "Instagram",
+      "ins",
+      "社交媒体",
+      "modern",
+      "调色"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 10,
+      "saturation": 15
+    },
+    "default_values": {
+      "contrast": 10,
+      "saturation": 15
+    }
+  },
+  {
+    "name": "healing",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "治愈系调色预设 - 微暖调、提阴影、柔和饱和，营造温暖治愈氛围",
+    "tags": [
+      "治愈",
+      "healing",
+      "温暖",
+      "柔和",
+      "modern"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": 8
+    },
+    "default_values": {
+      "saturation": 8
+    }
+  },
+  {
+    "name": "candy_color",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "糖果色调色预设 - 高饱和、低对比、暖调，营造甜美糖果色彩",
+    "tags": [
+      "糖果色",
+      "candy",
+      "甜美",
+      "高饱和",
+      "modern"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -10,
+      "saturation": 30
+    },
+    "default_values": {
+      "contrast": -10,
+      "saturation": 30
+    }
+  },
+  {
+    "name": "creamy",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "奶油肌调色预设 - 大幅提阴影、暖调、柔和高光，营造奶油般柔滑肤质",
+    "tags": [
+      "奶油",
+      "creamy",
+      "柔和",
+      "暖调",
+      "modern"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": 8
+    },
+    "default_values": {
+      "saturation": 8
+    }
+  },
+  {
+    "name": "oxygen",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "氧气感调色预设 - 低对比、提阴影、微增饱和，营造通透氧气感",
+    "tags": [
+      "氧气感",
+      "oxygen",
+      "通透",
+      "清新",
+      "modern"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -15,
+      "saturation": 8
+    },
+    "default_values": {
+      "contrast": -15,
+      "saturation": 8
+    }
+  },
+  {
+    "name": "bright_clear",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "透亮感调色预设 - 提高光和阴影、降对比，营造明亮通透的视觉效果",
+    "tags": [
+      "透亮",
+      "bright",
+      "clear",
+      "明亮",
+      "modern"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -10
+    },
+    "default_values": {
+      "contrast": -10
+    }
+  },
+  {
+    "name": "mint_green",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "薄荷绿调色预设 - 冷绿调、微去饱和，营造清新薄荷绿氛围",
+    "tags": [
+      "薄荷绿",
+      "mint",
+      "green",
+      "清新",
+      "modern"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": -8
+    },
+    "default_values": {
+      "saturation": -8
+    }
+  },
+  {
+    "name": "melancholy_blue",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "忧郁蓝调色预设 - 深蓝色调、去饱和、低对比，营造忧郁沉静氛围",
+    "tags": [
+      "忧郁",
+      "蓝色",
+      "melancholy",
+      "blue",
+      "mood"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -10,
+      "saturation": -20
+    },
+    "default_values": {
+      "contrast": -10,
+      "saturation": -20
+    }
+  },
+  {
+    "name": "warm_orange",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "温暖橙调色预设 - 强暖橙色调、柔和对比，营造温暖舒适的氛围",
+    "tags": [
+      "温暖",
+      "橙色",
+      "warm",
+      "orange",
+      "mood"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -10,
+      "saturation": 8
+    },
+    "default_values": {
+      "contrast": -10,
+      "saturation": 8
+    }
+  },
+  {
+    "name": "dreamy_purple",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "梦幻紫调色预设 - 紫色调、增饱和、轻微模糊，营造梦幻紫色氛围",
+    "tags": [
+      "梦幻",
+      "紫色",
+      "dreamy",
+      "purple",
+      "mood"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": 20
+    },
+    "default_values": {
+      "saturation": 20
+    }
+  },
+  {
+    "name": "fresh_green",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "清新绿调色预设 - 绿色调、增饱和、柔对比，营造清新自然氛围",
+    "tags": [
+      "清新",
+      "绿色",
+      "fresh",
+      "green",
+      "mood"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -5,
+      "saturation": 15
+    },
+    "default_values": {
+      "contrast": -5,
+      "saturation": 15
+    }
+  },
+  {
+    "name": "golden_hour",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "黄昏金调色预设 - 金黄暖调、增饱和、柔对比，模拟黄金时刻光线",
+    "tags": [
+      "黄昏",
+      "金色",
+      "golden_hour",
+      "warm",
+      "mood"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 5,
+      "saturation": 15
+    },
+    "default_values": {
+      "contrast": 5,
+      "saturation": 15
+    }
+  },
+  {
+    "name": "midnight_blue",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "深夜蓝调色预设 - 深蓝色调、去饱和、高对比暗角，营造深夜静谧氛围",
+    "tags": [
+      "深夜",
+      "蓝色",
+      "midnight",
+      "blue",
+      "mood"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 20,
+      "saturation": -30
+    },
+    "default_values": {
+      "contrast": 20,
+      "saturation": -30
+    }
+  },
+  {
+    "name": "dawn_pink",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "晨曦粉调色预设 - 粉橙暖调、增饱和、柔对比，模拟晨曦柔美光线",
+    "tags": [
+      "晨曦",
+      "粉色",
+      "dawn",
+      "pink",
+      "mood"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -5,
+      "saturation": 20
+    },
+    "default_values": {
+      "contrast": -5,
+      "saturation": 20
+    }
+  },
+  {
+    "name": "aurora_green",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "极光绿调色预设 - 电光绿色调、高饱和、高对比，模拟极光绚烂色彩",
+    "tags": [
+      "极光",
+      "绿色",
+      "aurora",
+      "green",
+      "mood"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 15,
+      "saturation": 30
+    },
+    "default_values": {
+      "contrast": 15,
+      "saturation": 30
+    }
+  },
+  {
+    "name": "anime_style",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "动漫风格调色预设 - 高对比、高饱和、锐利色彩，模拟动画风格",
+    "tags": [
+      "动漫",
+      "anime",
+      "高对比",
+      "高饱和",
+      "anime"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 35,
+      "saturation": 30
+    },
+    "default_values": {
+      "contrast": 35,
+      "saturation": 30
+    }
+  },
+  {
+    "name": "ghibli_style",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "吉卜力风调色预设 - 温暖大地色、柔和对比、低饱和，模拟吉卜力动画质感",
+    "tags": [
+      "吉卜力",
+      "ghibli",
+      "温暖",
+      "柔和",
+      "anime"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -8,
+      "saturation": 10
+    },
+    "default_values": {
+      "contrast": -8,
+      "saturation": 10
+    }
+  },
+  {
+    "name": "shinkai_style",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "新海诚风调色预设 - 鲜艳色彩、高饱和、柔光晕，模拟新海诚动画风格",
+    "tags": [
+      "新海诚",
+      "shinkai",
+      "鲜艳",
+      "高饱和",
+      "anime"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 15,
+      "saturation": 35
+    },
+    "default_values": {
+      "contrast": 15,
+      "saturation": 35
+    }
+  },
+  {
+    "name": "dark_anime",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "暗黑动漫调色预设 - 深阴影、冷调、去饱和，营造暗黑动画氛围",
+    "tags": [
+      "暗黑",
+      "动漫",
+      "dark_anime",
+      "冷调",
+      "anime"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 45,
+      "saturation": -25
+    },
+    "default_values": {
+      "contrast": 45,
+      "saturation": -25
+    }
+  },
+  {
+    "name": "hot_blood_anime",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "热血动漫调色预设 - 高对比、高饱和、暖调，营造热血激昂氛围",
+    "tags": [
+      "热血",
+      "动漫",
+      "hot_blood",
+      "高对比",
+      "anime"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 40,
+      "saturation": 35
+    },
+    "default_values": {
+      "contrast": 40,
+      "saturation": 35
+    }
+  },
+  {
+    "name": "school_daily_anime",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "校园日常动漫调色预设 - 柔和对比、暖色粉彩、轻微饱和，营造温馨校园氛围",
+    "tags": [
+      "校园",
+      "日常",
+      "动漫",
+      "school",
+      "anime"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -5,
+      "saturation": 18
+    },
+    "default_values": {
+      "contrast": -5,
+      "saturation": 18
+    }
+  },
+  {
+    "name": "pastel_soft",
+    "category": "color_grading",
+    "subcategory": "creative",
+    "description": "柔和粉彩调色预设 - 粉彩色调、低对比、轻微去饱和，营造柔和粉彩画效果",
+    "tags": [
+      "粉彩",
+      "柔和",
+      "pastel",
+      "soft",
+      "creative"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": -20,
+      "saturation": -15
+    },
+    "default_values": {
+      "contrast": -20,
+      "saturation": -15
+    }
+  },
+  {
+    "name": "vibrant_pop",
+    "category": "color_grading",
+    "subcategory": "creative",
+    "description": "鲜艳波普调色预设 - 高饱和、高对比、鲜艳色彩，营造波普艺术视觉冲击",
+    "tags": [
+      "波普",
+      "鲜艳",
+      "vibrant",
+      "pop",
+      "creative"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 30,
+      "saturation": 40
+    },
+    "default_values": {
+      "contrast": 30,
+      "saturation": 40
+    }
+  },
+  {
+    "name": "vhs_retro",
+    "category": "color_grading",
+    "subcategory": "creative",
+    "description": "VHS复古调色预设 - 色偏、噪点、轻微去饱和，模拟VHS录像带画质",
+    "tags": [
+      "VHS",
+      "复古",
+      "录像带",
+      "vhs_retro",
+      "creative"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": -15
+    },
+    "default_values": {
+      "saturation": -15
+    }
+  },
+  {
+    "name": "glitch_color",
+    "category": "color_grading",
+    "subcategory": "creative",
+    "description": "故障色彩调色预设 - RGB通道偏移、色偏、噪点，模拟数字故障艺术效果",
+    "tags": [
+      "故障",
+      "glitch",
+      "RGB偏移",
+      "色彩",
+      "creative"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "saturation": 10
+    },
+    "default_values": {
+      "saturation": 10
+    }
+  },
+  {
+    "name": "infrared",
+    "category": "color_grading",
+    "subcategory": "creative",
+    "description": "红外摄影调色预设 - 通道反转、极端色偏、高对比，模拟红外摄影效果",
+    "tags": [
+      "红外",
+      "infrared",
+      "通道反转",
+      "创意",
+      "creative"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effect_name": "Lumetri Color",
+    "parameters": {
+      "contrast": 30,
+      "saturation": 30
+    },
+    "default_values": {
+      "contrast": 30,
+      "saturation": 30
+    }
+  }
+]

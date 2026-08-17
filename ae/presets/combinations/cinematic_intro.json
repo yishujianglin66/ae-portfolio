@@ -1,0 +1,10 @@
+{
+  "name": "cinematic_intro",
+  "description": "电影感开场 - 打字机效果 + 电影感调色 + 光扫特效",
+  "presets": [
+    "typewriter_effect",
+    "cinematic_grade",
+    "light_sweep"
+  ],
+  "parameters": {}
+}

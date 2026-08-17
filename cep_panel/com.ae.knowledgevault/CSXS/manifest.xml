@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.ae.knowledgevault" ExtensionBundleVersion="1.0.0"
+    ExtensionBundleName="AE Knowledge Vault" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ExtensionList>
+        <Extension Id="com.ae.knowledgevault.panel" Version="1.0.0" />
+    </ExtensionList>
+    <ExecutionEnvironment>
+        <HostList>
+            <!-- CEP 仅 AE 2024(v24) 及以下支持; AE 2025+ 已移除 CEP,
+                 迁移评估见 docs/research/2026-08-14-cep-uxp-migration.md -->
+            <Host Name="AEFT" Version="[15.0,24.9]" />
+        </HostList>
+        <LocaleList>
+            <Locale Code="All" />
+        </LocaleList>
+        <RequiredRuntimeList>
+            <RequiredRuntime Name="CSXS" Version="11.0" />
+        </RequiredRuntimeList>
+    </ExecutionEnvironment>
+    <DispatchInfoList>
+        <Extension Id="com.ae.knowledgevault.panel">
+            <DispatchInfo>
+                <Resources>
+                    <MainPath>./client/index.html</MainPath>
+                    <ScriptPath>./host/host.jsx</ScriptPath>
+                    <CEFCommandLine>
+                        <Parameter>--enable-nodejs</Parameter>
+                        <Parameter>--mixed-context</Parameter>
+                    </CEFCommandLine>
+                </Resources>
+                <Lifecycle>
+                    <AutoVisible>true</AutoVisible>
+                </Lifecycle>
+                <UI>
+                    <Type>Panel</Type>
+                    <Menu>AE Knowledge Vault</Menu>
+                    <Geometry>
+                        <Size>
+                            <Height>500</Height>
+                            <Width>350</Width>
+                        </Size>
+                        <MinSize>
+                            <Height>300</Height>
+                            <Width>280</Width>
+                        </MinSize>
+                    </Geometry>
+                    <Icons>
+                        <Icon Type="Normal">./icons/icon_normal.png</Icon>
+                        <Icon Type="RollOver">./icons/icon_rollover.png</Icon>
+                        <Icon Type="Disabled">./icons/icon_disabled.png</Icon>
+                        <Icon Type="DarkNormal">./icons/icon_dark.png</Icon>
+                        <Icon Type="DarkRollOver">./icons/icon_dark_hover.png</Icon>
+                    </Icons>
+                </UI>
+            </DispatchInfo>
+        </Extension>
+    </DispatchInfoList>
+</ExtensionManifest>

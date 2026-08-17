@@ -1,0 +1,4839 @@
+[
+  {
+    "name": "energy_rings",
+    "category": "effect",
+    "subcategory": "motion",
+    "description": "能量环特效 - 从中心点向外扩散的环形波纹，模拟能量爆发效果",
+    "tags": [
+      "能量环",
+      "energy",
+      "rings",
+      "ripple",
+      "motion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "ringCount": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "ringSpeed": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "ringColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              0.8,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "ringWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 50,
+            "default": 10
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "fadeDistance": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 200
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "ringCount": 5,
+      "ringSpeed": 2.0,
+      "ringColor": [
+        0,
+        0.8,
+        1
+      ],
+      "ringWidth": 10,
+      "fadeDistance": 200
+    }
+  },
+  {
+    "name": "light_sweep",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "光扫特效 - 光线从一侧扫过画面，模拟探照灯效果",
+    "tags": [
+      "光扫",
+      "light_sweep",
+      "探照灯",
+      "spotlight",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "sweepDirection": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "left"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "beamWidth": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "beamColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              0.8
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Find Edges",
+        "parameters": {
+          "edgeSoftness": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 50
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "duration": 2.0,
+      "sweepDirection": "left",
+      "beamWidth": 200,
+      "beamColor": [
+        1,
+        1,
+        0.8
+      ],
+      "edgeSoftness": 50
+    }
+  },
+  {
+    "name": "particle_fountain",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "粒子喷泉特效 - 从底部向上喷射的粒子效果，模拟火花或魔法粒子",
+    "tags": [
+      "粒子",
+      "particle",
+      "喷泉",
+      "fountain",
+      "sparkle"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 10,
+            "max": 500,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 5
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "particleColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.5,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lifetime": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "particleCount": 100,
+      "particleSize": 5,
+      "particleColor": [
+        1,
+        0.5,
+        0
+      ],
+      "speed": 100,
+      "lifetime": 2.0
+    }
+  },
+  {
+    "name": "scanline_effect",
+    "category": "effect",
+    "subcategory": "retro",
+    "description": "扫描线特效 - 模拟老式CRT显示器的扫描线效果",
+    "tags": [
+      "扫描线",
+      "scanline",
+      "CRT",
+      "retro",
+      "old_tv"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lineCount": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lineOpacity": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "lineColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "flickerRate": {
+            "type": "number",
+            "min": 0,
+            "max": 10,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "lineCount": 100,
+      "lineOpacity": 20,
+      "lineColor": [
+        0,
+        0,
+        0
+      ],
+      "flickerRate": 0
+    }
+  },
+  {
+    "name": "chromatic_aberration",
+    "category": "effect",
+    "subcategory": "glitch",
+    "description": "色差特效 - 模拟镜头色差，RGB三通道分离产生色边效果",
+    "tags": [
+      "色差",
+      "chromatic_aberration",
+      "RGB",
+      "lens",
+      "distortion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Channel Mixer",
+        "parameters": {
+          "redShift": {
+            "type": "number",
+            "min": -50,
+            "max": 50,
+            "default": 10
+          }
+        }
+      },
+      {
+        "effect_name": "Channel Mixer",
+        "parameters": {
+          "greenShift": {
+            "type": "number",
+            "min": -50,
+            "max": 50,
+            "default": 0
+          }
+        }
+      },
+      {
+        "effect_name": "Channel Mixer",
+        "parameters": {
+          "blueShift": {
+            "type": "number",
+            "min": -50,
+            "max": 50,
+            "default": -10
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "animate": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": false
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "animationSpeed": {
+            "type": "number",
+            "min": 0.1,
+            "max": 5.0,
+            "default": 1.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "redShift": 10,
+      "greenShift": 0,
+      "blueShift": -10,
+      "animate": false,
+      "animationSpeed": 1.0
+    }
+  },
+  {
+    "name": "glow_pulse",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "发光脉冲特效 - 周期性发光脉冲效果，模拟能量脉动",
+    "tags": [
+      "发光",
+      "脉冲",
+      "glow",
+      "pulse",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowThreshold": {
+            "type": "number",
+            "min": 0,
+            "max": 255,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowIntensity": {
+            "type": "number",
+            "min": 0,
+            "max": 5,
+            "default": 1.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "pulseSpeed": {
+            "type": "number",
+            "min": 0.1,
+            "max": 10,
+            "default": 2
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "glowThreshold": 100,
+      "glowRadius": 30,
+      "glowIntensity": 1.5,
+      "pulseSpeed": 2
+    }
+  },
+  {
+    "name": "light_beam",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "光束特效 - 从一点发出锥形光束，模拟聚光灯效果",
+    "tags": [
+      "光束",
+      "light_beam",
+      "聚光灯",
+      "beam",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startPoint": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "endPoint": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              960,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "beamColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              0.8
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "beamIntensity": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 50
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "startPoint": [
+        0,
+        0
+      ],
+      "endPoint": [
+        960,
+        540
+      ],
+      "beamColor": [
+        1,
+        1,
+        0.8
+      ],
+      "beamIntensity": 50
+    }
+  },
+  {
+    "name": "lens_flare_effect",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "镜头光晕特效 - 模拟相机镜头光晕，包含光环和光斑",
+    "tags": [
+      "镜头光晕",
+      "lens_flare",
+      "光晕",
+      "flare",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "flareCenter": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              960,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "flareBrightness": {
+            "type": "number",
+            "min": 0,
+            "max": 300,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lensType": {
+            "type": "number",
+            "min": 1,
+            "max": 3,
+            "default": 2
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "flareCenter": [
+        960,
+        540
+      ],
+      "flareBrightness": 150,
+      "lensType": 2
+    }
+  },
+  {
+    "name": "volumetric_light",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "体积光特效 - 模拟体积光线穿透效果，营造光雾弥漫感",
+    "tags": [
+      "体积光",
+      "volumetric",
+      "light",
+      "光雾",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 200,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "Center": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              960,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 10,
+            "max": 500,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.95,
+              0.8
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 100,
+      "center": [
+        960,
+        540
+      ],
+      "radius": 200,
+      "color": [
+        1,
+        0.95,
+        0.8
+      ]
+    }
+  },
+  {
+    "name": "god_rays",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "上帝光线特效 - 模拟云层间穿透的光线，营造神圣氛围",
+    "tags": [
+      "上帝光线",
+      "god_rays",
+      "丁达尔",
+      "光束",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 60
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "Center": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              960,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rayLength": {
+            "type": "number",
+            "min": 50,
+            "max": 1000,
+            "default": 400
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.9,
+              0.7
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 60,
+      "center": [
+        960,
+        540
+      ],
+      "rayLength": 400,
+      "color": [
+        1,
+        0.9,
+        0.7
+      ]
+    }
+  },
+  {
+    "name": "neon_glow",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "霓虹发光特效 - 强烈发光效果配合色彩调整，模拟霓虹灯管发光",
+    "tags": [
+      "霓虹",
+      "发光",
+      "neon",
+      "glow",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowThreshold": {
+            "type": "number",
+            "min": 0,
+            "max": 255,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 40
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowIntensity": {
+            "type": "number",
+            "min": 0,
+            "max": 5,
+            "default": 2.5
+          }
+        }
+      },
+      {
+        "effect_name": "Channel Mixer",
+        "parameters": {
+          "colorShift": {
+            "type": "number",
+            "min": -50,
+            "max": 50,
+            "default": 20
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "glowThreshold": 80,
+      "glowRadius": 40,
+      "glowIntensity": 2.5,
+      "colorShift": 20
+    }
+  },
+  {
+    "name": "bloom_soft",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "柔光绽放特效 - 柔和的泛光效果，模拟相机过曝的柔美光晕",
+    "tags": [
+      "柔光",
+      "绽放",
+      "bloom",
+      "soft",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "blurAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 30,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowThreshold": {
+            "type": "number",
+            "min": 0,
+            "max": 255,
+            "default": 120
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowIntensity": {
+            "type": "number",
+            "min": 0,
+            "max": 3,
+            "default": 1.2
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 0,
+            "max": 80,
+            "default": 25
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 8,
+      "glowThreshold": 120,
+      "glowIntensity": 1.2,
+      "glowRadius": 25
+    }
+  },
+  {
+    "name": "light_trail",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "光迹特效 - 光线运动轨迹效果，模拟光迹拖尾",
+    "tags": [
+      "光迹",
+      "light_trail",
+      "轨迹",
+      "拖尾",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 70
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "Center": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              480,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rayLength": {
+            "type": "number",
+            "min": 50,
+            "max": 800,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.8,
+              0.3
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "direction": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 70,
+      "center": [
+        480,
+        540
+      ],
+      "rayLength": 300,
+      "color": [
+        1,
+        0.8,
+        0.3
+      ],
+      "direction": 0
+    }
+  },
+  {
+    "name": "sparkle",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "闪烁星光特效 - 随机分布的星光闪烁效果，模拟星光粒子",
+    "tags": [
+      "闪烁",
+      "星光",
+      "sparkle",
+      "star",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "count": {
+            "type": "number",
+            "min": 5,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 1,
+            "max": 30,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 0.5,
+            "max": 10,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              0.8
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "count": 30,
+      "size": 8,
+      "speed": 3,
+      "color": [
+        1,
+        1,
+        0.8
+      ]
+    }
+  },
+  {
+    "name": "hologram_glow",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "全息发光特效 - 青色全息光效配合扫描线，模拟全息投影效果",
+    "tags": [
+      "全息",
+      "发光",
+      "hologram",
+      "scanline",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowThreshold": {
+            "type": "number",
+            "min": 0,
+            "max": 255,
+            "default": 90
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowIntensity": {
+            "type": "number",
+            "min": 0,
+            "max": 4,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Channel Mixer",
+        "parameters": {
+          "colorShift": {
+            "type": "number",
+            "min": -30,
+            "max": 30,
+            "default": -15
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Saturation": {
+            "type": "number",
+            "min": -30,
+            "max": 50,
+            "default": 20
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "glowThreshold": 90,
+      "glowIntensity": 2,
+      "colorShift": -15,
+      "saturation": 20
+    }
+  },
+  {
+    "name": "depth_blur",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "景深模糊特效 - 模拟相机景深效果，聚焦区域清晰、背景虚化",
+    "tags": [
+      "景深",
+      "模糊",
+      "depth_blur",
+      "bokeh",
+      "blur"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "blurAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "irisRadius": {
+            "type": "number",
+            "min": 0,
+            "max": 200,
+            "default": 50
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "irisShape": {
+            "type": "number",
+            "min": 1,
+            "max": 6,
+            "default": 3
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 30,
+      "irisRadius": 50,
+      "irisShape": 3
+    }
+  },
+  {
+    "name": "motion_blur_effect",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "运动模糊特效 - 方向性模糊模拟运动拖影",
+    "tags": [
+      "运动模糊",
+      "motion_blur",
+      "方向模糊",
+      "拖影",
+      "blur"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "direction": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 0
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "Blur Length": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 40
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "direction": 0,
+      "blurLength": 40
+    }
+  },
+  {
+    "name": "radial_blur_effect",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "径向模糊特效 - 从中心点向外辐射的模糊效果",
+    "tags": [
+      "径向模糊",
+      "radial_blur",
+      "辐射",
+      "blur"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "Center": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              960,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "amount": {
+            "type": "number",
+            "min": 0,
+            "max": 200,
+            "default": 50
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "type": {
+            "type": "number",
+            "min": 1,
+            "max": 2,
+            "default": 2
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "center": [
+        960,
+        540
+      ],
+      "amount": 50,
+      "type": 2
+    }
+  },
+  {
+    "name": "zoom_blur_effect",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "缩放模糊特效 - 从中心向外缩放的模糊效果，模拟快速推拉镜头",
+    "tags": [
+      "缩放模糊",
+      "zoom_blur",
+      "推拉",
+      "blur"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "Center": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              960,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "amount": {
+            "type": "number",
+            "min": 0,
+            "max": 200,
+            "default": 60
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "center": [
+        960,
+        540
+      ],
+      "amount": 60
+    }
+  },
+  {
+    "name": "tilt_shift",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "移轴模糊特效 - 模拟移轴摄影效果，微缩景观风格",
+    "tags": [
+      "移轴",
+      "tilt_shift",
+      "微缩",
+      "blur"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "blurAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 25
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "focusWidth": {
+            "type": "number",
+            "min": 10,
+            "max": 80,
+            "default": 40
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 25,
+      "focusWidth": 40
+    }
+  },
+  {
+    "name": "edge_blur",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "边缘模糊特效 - 仅模糊画面边缘，中心区域保持清晰",
+    "tags": [
+      "边缘模糊",
+      "edge_blur",
+      "vignette_blur",
+      "blur"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "blurAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Find Edges",
+        "parameters": {
+          "edgeWidth": {
+            "type": "number",
+            "min": 10,
+            "max": 80,
+            "default": 50
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 20,
+      "edgeWidth": 50
+    }
+  },
+  {
+    "name": "prism_blur",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "棱镜模糊特效 - 配合通道偏移的模糊效果，模拟棱镜分光",
+    "tags": [
+      "棱镜",
+      "prism",
+      "模糊",
+      "分光",
+      "blur"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "blurAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 30,
+            "default": 10
+          }
+        }
+      },
+      {
+        "effect_name": "Channel Mixer",
+        "parameters": {
+          "redShift": {
+            "type": "number",
+            "min": 0,
+            "max": 30,
+            "default": 10
+          }
+        }
+      },
+      {
+        "effect_name": "Channel Mixer",
+        "parameters": {
+          "blueShift": {
+            "type": "number",
+            "min": 0,
+            "max": 30,
+            "default": 8
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 10,
+      "redShift": 10,
+      "blueShift": 8
+    }
+  },
+  {
+    "name": "freeze_frame_blur",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "定格模糊特效 - 运动模糊配合定格帧率，模拟定格动画质感",
+    "tags": [
+      "定格",
+      "模糊",
+      "freeze_frame",
+      "stop_motion",
+      "blur"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "blurAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 30,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameRate": {
+            "type": "number",
+            "min": 5,
+            "max": 30,
+            "default": 12
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "direction": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 8,
+      "frameRate": 12,
+      "direction": 0
+    }
+  },
+  {
+    "name": "wave_warp",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "波浪扭曲特效 - 画面产生波浪形扭曲变形",
+    "tags": [
+      "波浪",
+      "扭曲",
+      "wave_warp",
+      "warp",
+      "distortion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "waveHeight": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "waveWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 500,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "direction": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 90
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 0,
+            "max": 10,
+            "default": 2
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "waveHeight": 30,
+      "waveWidth": 100,
+      "direction": 90,
+      "speed": 2
+    }
+  },
+  {
+    "name": "mesh_warp",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "网格扭曲特效 - 通过网格控制点对画面进行自由扭曲变形",
+    "tags": [
+      "网格",
+      "扭曲",
+      "mesh_warp",
+      "warp",
+      "distortion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rows": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "columns": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "distortion": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 30
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "rows": 5,
+      "columns": 5,
+      "distortion": 30
+    }
+  },
+  {
+    "name": "polar_coordinates",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "极坐标特效 - 直角坐标与极坐标之间的转换变形",
+    "tags": [
+      "极坐标",
+      "polar",
+      "坐标转换",
+      "distortion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "interpolation": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 50
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "type": {
+            "type": "number",
+            "min": 1,
+            "max": 4,
+            "default": 1
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "interpolation": 50,
+      "type": 1
+    }
+  },
+  {
+    "name": "twirl",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "螺旋扭曲特效 - 以中心为轴的螺旋形扭曲变形",
+    "tags": [
+      "螺旋",
+      "扭曲",
+      "twirl",
+      "swirl",
+      "distortion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "angle": {
+            "type": "number",
+            "min": -360,
+            "max": 360,
+            "default": 180
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 10,
+            "max": 500,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "Center": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              960,
+              540
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "angle": 180,
+      "radius": 150,
+      "center": [
+        960,
+        540
+      ]
+    }
+  },
+  {
+    "name": "ripple_warp",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "涟漪特效 - 水面波纹涟漪效果，模拟水波荡漾",
+    "tags": [
+      "涟漪",
+      "波纹",
+      "ripple",
+      "水面",
+      "distortion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 0,
+            "max": 500,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "waveSpeed": {
+            "type": "number",
+            "min": 0,
+            "max": 10,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "amplitude": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 15
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frequency": {
+            "type": "number",
+            "min": 0,
+            "max": 30,
+            "default": 10
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "radius": 200,
+      "waveSpeed": 3,
+      "amplitude": 15,
+      "frequency": 10
+    }
+  },
+  {
+    "name": "lens_distortion",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "镜头畸变特效 - 模拟广角镜头的桶形或枕形畸变",
+    "tags": [
+      "镜头畸变",
+      "lens_distortion",
+      "桶形",
+      "枕形",
+      "distortion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "curvature": {
+            "type": "number",
+            "min": -100,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "aberration": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 15
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "curvature": 30,
+      "aberration": 15
+    }
+  },
+  {
+    "name": "optics_compensation",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "光学补偿特效 - 反向镜头畸变补偿，常用于VR和合成",
+    "tags": [
+      "光学补偿",
+      "optics_compensation",
+      "畸变补偿",
+      "VR",
+      "distortion"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "fieldOfView": {
+            "type": "number",
+            "min": 0,
+            "max": 180,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "reverseLens": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": false
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "fieldOfView": 80,
+      "reverseLens": false
+    }
+  },
+  {
+    "name": "particle_system",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "粒子系统特效 - 通用CC粒子系统，可配置多种粒子效果",
+    "tags": [
+      "粒子系统",
+      "particle_system",
+      "CC",
+      "particle"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 1,
+            "max": 500,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 1,
+            "max": 30,
+            "default": 5
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "particleColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.8,
+              0.3
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 0,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lifetime": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 80,
+      "particleSize": 5,
+      "particleColor": [
+        1,
+        0.8,
+        0.3
+      ],
+      "speed": 80,
+      "lifetime": 2.0
+    }
+  },
+  {
+    "name": "dust_burst",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "尘埃爆发特效 - 从中心扩散的尘埃粒子，模拟爆炸烟尘",
+    "tags": [
+      "尘埃",
+      "爆发",
+      "dust",
+      "burst",
+      "particle"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 10,
+            "max": 300,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 0.5,
+            "max": 10,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "particleColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.8,
+              0.7,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "spread": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 360
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 150,
+      "particleSize": 2,
+      "particleColor": [
+        0.8,
+        0.7,
+        0.5
+      ],
+      "speed": 80,
+      "spread": 360
+    }
+  },
+  {
+    "name": "ember_rise",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "余烬上升特效 - 向上飘散的余烬粒子，模拟火星飞溅",
+    "tags": [
+      "余烬",
+      "火星",
+      "ember",
+      "rise",
+      "particle"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5,
+            "default": 1.5
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "particleColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.4,
+              0.1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 40
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "wind": {
+            "type": "number",
+            "min": -50,
+            "max": 50,
+            "default": 5
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 80,
+      "particleSize": 1.5,
+      "particleColor": [
+        1,
+        0.4,
+        0.1
+      ],
+      "speed": 40,
+      "wind": 5
+    }
+  },
+  {
+    "name": "magic_trail",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "魔法尾迹特效 - 魔法光效粒子尾迹，适合魔法特效场景",
+    "tags": [
+      "魔法",
+      "尾迹",
+      "magic",
+      "trail",
+      "particle"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 60
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 1,
+            "max": 10,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "particleColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.5,
+              0.3,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glow": {
+            "type": "number",
+            "min": 0,
+            "max": 5,
+            "default": 2
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 60,
+      "particleSize": 3,
+      "particleColor": [
+        0.5,
+        0.3,
+        1
+      ],
+      "speed": 30,
+      "glow": 2
+    }
+  },
+  {
+    "name": "bubble_burst",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "气泡爆发特效 - 向上飘升的气泡粒子，适合梦幻水底场景",
+    "tags": [
+      "气泡",
+      "爆发",
+      "bubble",
+      "burst",
+      "particle"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 50
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "particleColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.7,
+              0.9,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 10,
+            "max": 80,
+            "default": 25
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 50,
+      "particleSize": 8,
+      "particleColor": [
+        0.7,
+        0.9,
+        1
+      ],
+      "speed": 25
+    }
+  },
+  {
+    "name": "snow_fall",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "降雪特效 - 模拟雪花飘落的粒子效果",
+    "tags": [
+      "降雪",
+      "雪花",
+      "snow",
+      "fall",
+      "particle"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "flakeCount": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "flakeSize": {
+            "type": "number",
+            "min": 1,
+            "max": 10,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 5,
+            "max": 50,
+            "default": 15
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "wind": {
+            "type": "number",
+            "min": -30,
+            "max": 30,
+            "default": 5
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "flakeCount": 200,
+      "flakeSize": 3,
+      "speed": 15,
+      "wind": 5
+    }
+  },
+  {
+    "name": "firework_spark",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "烟花火花特效 - 爆发散开的烟花粒子效果",
+    "tags": [
+      "烟花",
+      "火花",
+      "firework",
+      "spark",
+      "particle"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 1,
+            "max": 8,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "particleColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.5,
+              0.2
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 20,
+            "max": 200,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "spread": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 360
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 200,
+      "particleSize": 3,
+      "particleColor": [
+        1,
+        0.5,
+        0.2
+      ],
+      "speed": 100,
+      "spread": 360
+    }
+  },
+  {
+    "name": "electric_arc",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "电弧特效 - 闪电电弧效果，模拟电流放电",
+    "tags": [
+      "电弧",
+      "闪电",
+      "electric",
+      "arc",
+      "lightning"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startPoint": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              200,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "endPoint": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1720,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "segments": {
+            "type": "number",
+            "min": 1,
+            "max": 30,
+            "default": 10
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "amplitude": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 15
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "startPoint": [
+        200,
+        540
+      ],
+      "endPoint": [
+        1720,
+        540
+      ],
+      "segments": 10,
+      "amplitude": 15
+    }
+  },
+  {
+    "name": "posterize",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "色调分离特效 - 减少色阶数量，产生色块化效果",
+    "tags": [
+      "色调分离",
+      "posterize",
+      "色阶",
+      "stylize"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "levels": {
+            "type": "number",
+            "min": 2,
+            "max": 32,
+            "default": 8
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "levels": 8
+    }
+  },
+  {
+    "name": "threshold",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "阈值特效 - 将画面转换为黑白二值化效果",
+    "tags": [
+      "阈值",
+      "threshold",
+      "二值化",
+      "黑白",
+      "stylize"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "level": {
+            "type": "number",
+            "min": 0,
+            "max": 255,
+            "default": 128
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "level": 128
+    }
+  },
+  {
+    "name": "find_edges",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "查找边缘特效 - 检测画面边缘，产生线稿效果",
+    "tags": [
+      "边缘",
+      "查找边缘",
+      "find_edges",
+      "线稿",
+      "stylize"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Channel Mixer",
+        "parameters": {
+          "invert": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": false
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "blend": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "invert": false,
+      "blend": 0
+    }
+  },
+  {
+    "name": "emboss",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "浮雕特效 - 将画面转换为浮雕效果，产生立体凸起感",
+    "tags": [
+      "浮雕",
+      "emboss",
+      "立体",
+      "stylize"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "direction": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 135
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "relief": {
+            "type": "number",
+            "min": 1,
+            "max": 10,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Contrast": {
+            "type": "number",
+            "min": 0,
+            "max": 200,
+            "default": 100
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "direction": 135,
+      "relief": 3,
+      "contrast": 100
+    }
+  },
+  {
+    "name": "mosaic_effect",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "马赛克特效 - 将画面分割为色块网格，产生像素化效果",
+    "tags": [
+      "马赛克",
+      "mosaic",
+      "像素化",
+      "色块",
+      "stylize"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "horizontalBlocks": {
+            "type": "number",
+            "min": 2,
+            "max": 200,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "verticalBlocks": {
+            "type": "number",
+            "min": 2,
+            "max": 200,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "sharpColors": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": false
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "horizontalBlocks": 30,
+      "verticalBlocks": 30,
+      "sharpColors": false
+    }
+  },
+  {
+    "name": "oil_paint",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "油画效果特效 - 将画面转换为油画风格，产生笔触感",
+    "tags": [
+      "油画",
+      "oil_paint",
+      "笔触",
+      "艺术",
+      "stylize"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "brushSize": {
+            "type": "number",
+            "min": 1,
+            "max": 10,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "brushDetail": {
+            "type": "number",
+            "min": 1,
+            "max": 10,
+            "default": 5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "softness": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 30
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "brushSize": 4,
+      "brushDetail": 5,
+      "softness": 30
+    }
+  },
+  {
+    "name": "pencil_sketch",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "铅笔素描特效 - 将画面转换为黑白铅笔素描风格",
+    "tags": [
+      "铅笔",
+      "素描",
+      "pencil",
+      "sketch",
+      "stylize"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Find Edges",
+        "parameters": {
+          "Edge Intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 50
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "blurAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 20,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Channel Mixer",
+        "parameters": {
+          "invert": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": false
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "edgeIntensity": 50,
+      "blurAmount": 3,
+      "invert": false
+    }
+  },
+  {
+    "name": "time_freeze",
+    "category": "effect",
+    "subcategory": "time",
+    "description": "时间冻结特效 - 降低帧率产生定格动画效果",
+    "tags": [
+      "时间",
+      "冻结",
+      "time_freeze",
+      "定格",
+      "time"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameRate": {
+            "type": "number",
+            "min": 1,
+            "max": 30,
+            "default": 8
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "frameRate": 8
+    }
+  },
+  {
+    "name": "time_remap",
+    "category": "effect",
+    "subcategory": "time",
+    "description": "时间重映射特效 - 启用时间重映射并设置变速关键帧",
+    "tags": [
+      "时间",
+      "重映射",
+      "time_remap",
+      "变速",
+      "time"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speedFactor": {
+            "type": "number",
+            "min": 0.1,
+            "max": 5.0,
+            "default": 0.5
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "speedFactor": 0.5
+    }
+  },
+  {
+    "name": "echo_trail",
+    "category": "effect",
+    "subcategory": "time",
+    "description": "回声拖尾特效 - 画面残影叠加，模拟运动拖尾效果",
+    "tags": [
+      "回声",
+      "拖尾",
+      "echo",
+      "trail",
+      "time"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "echoTime": {
+            "type": "number",
+            "min": -1,
+            "max": -0.01,
+            "default": -0.1
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "numEchoes": {
+            "type": "number",
+            "min": 1,
+            "max": 50,
+            "default": 10
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "decay": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.9
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.8,
+      "echoTime": -0.1,
+      "numEchoes": 10,
+      "decay": 0.9
+    }
+  },
+  {
+    "name": "time_warp",
+    "category": "effect",
+    "subcategory": "time",
+    "description": "时间扭曲特效 - 像素级时间变速，产生流畅慢动作效果",
+    "tags": [
+      "时间",
+      "扭曲",
+      "time_warp",
+      "变速",
+      "time"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 1,
+            "max": 200,
+            "default": 25
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "tolerance": {
+            "type": "number",
+            "min": 1,
+            "max": 100,
+            "default": 50
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "motionBlur": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 50
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "speed": 25,
+      "tolerance": 50,
+      "motionBlur": 50
+    }
+  },
+  {
+    "name": "slow_motion",
+    "category": "effect",
+    "subcategory": "time",
+    "description": "慢动作特效 - 降低播放速度配合运动模糊，产生电影慢动作",
+    "tags": [
+      "慢动作",
+      "slow_motion",
+      "变速",
+      "time"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 1,
+            "max": 100,
+            "default": 40
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "motionBlurAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frameBlend": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": true
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "speed": 40,
+      "motionBlurAmount": 30,
+      "frameBlend": true
+    }
+  },
+  {
+    "name": "cp_rgb_split_glitch",
+    "category": "effect",
+    "subcategory": "cyberpunk",
+    "description": "RGB分离故障 - 现代风格预设",
+    "tags": [
+      "cyberpunk",
+      "neon",
+      "glitch"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "标题文字"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "splitAmount": {
+            "type": "number",
+            "min": 2,
+            "max": 80,
+            "default": 15.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "frequency": {
+            "type": "number",
+            "min": 0.2,
+            "max": 10.0,
+            "default": 5.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "textLayerName": "标题文字",
+      "splitAmount": 15.0,
+      "frequency": 5.0
+    }
+  },
+  {
+    "name": "cp_neon_pulse",
+    "category": "effect",
+    "subcategory": "cyberpunk",
+    "description": "霓虹脉冲 - 现代风格预设",
+    "tags": [
+      "cyberpunk",
+      "neon",
+      "glitch"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "标题文字"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "neonColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1.0,
+              0.0,
+              1.0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "pulseSpeed": {
+            "type": "number",
+            "min": 0.2,
+            "max": 10.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 5,
+            "max": 100,
+            "default": 25.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "textLayerName": "标题文字",
+      "neonColor": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "pulseSpeed": 2.0,
+      "glowRadius": 25.0
+    }
+  },
+  {
+    "name": "cp_hologram_scan",
+    "category": "effect",
+    "subcategory": "cyberpunk",
+    "description": "全息扫描 - 现代风格预设",
+    "tags": [
+      "cyberpunk",
+      "neon",
+      "glitch"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "标题文字"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "scanSpeed": {
+            "type": "integer",
+            "min": 0.2,
+            "max": 10.0,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lineSpacing": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 4.0
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "holoColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.0,
+              1.0,
+              0.5
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "textLayerName": "标题文字",
+      "scanSpeed": 2,
+      "lineSpacing": 4.0,
+      "holoColor": [
+        0.0,
+        1.0,
+        0.5
+      ]
+    }
+  },
+  {
+    "name": "cp_matrix_rain",
+    "category": "effect",
+    "subcategory": "cyberpunk",
+    "description": "矩阵雨 - 现代风格预设",
+    "tags": [
+      "cyberpunk",
+      "neon",
+      "matrix",
+      "glitch"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "标题文字"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "fallSpeed": {
+            "type": "string",
+            "min": 50,
+            "max": 800,
+            "default": "200px/s"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "matrixColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.0,
+              1.0,
+              0.0
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "textLayerName": "标题文字",
+      "fallSpeed": "200px/s",
+      "matrixColor": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  {
+    "name": "cp_data_stream",
+    "category": "effect",
+    "subcategory": "cyberpunk",
+    "description": "数据流文字 - 现代风格预设",
+    "tags": [
+      "cyberpunk",
+      "neon",
+      "text",
+      "glitch"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "标题文字"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "waveSpeed": {
+            "type": "integer",
+            "min": 0.1,
+            "max": 5.0,
+            "default": 10
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "charRange": {
+            "type": "integer",
+            "min": 10,
+            "max": 100,
+            "default": 50
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "textLayerName": "标题文字",
+      "waveSpeed": 10,
+      "charRange": 50
+    }
+  }
+]

@@ -1,0 +1,17 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # 容器内用绝对路径；四个斜杠 = 文件系统绝对路径 /data/app.db
+      APP_DATABASE_URL: "sqlite+aiosqlite:////data/app.db"
+      APP_DEBUG: "false"
+      APP_CORS_ORIGINS: "*"
+    volumes:
+      # 用命名卷持久化 SQLite 文件，容器重建不致数据丢失
+      - api_data:/data
+    restart: unless-stopped
+
+volumes:
+  api_data:

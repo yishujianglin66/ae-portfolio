@@ -1,0 +1,108 @@
+{
+  "classes": {
+    "FATE": 0,
+    "K": 1,
+    "Move": 2,
+    "原神": 3,
+    "咒术回战": 4,
+    "地缚少年花子君": 5,
+    "抽烟猫": 6,
+    "斩·赤红之瞳": 7,
+    "无限滑板": 8,
+    "时光代理人": 9,
+    "某科学的超电磁炮": 10,
+    "浪客行": 11,
+    "海贼王": 12,
+    "火影忍者": 13,
+    "灵笼": 14,
+    "灼眼的夏娜": 15,
+    "猫和老鼠": 16,
+    "赛博朋克：边缘行者": 17,
+    "链锯人": 18,
+    "鬼灭之刃": 19,
+    "黑岩射手": 20,
+    "龙族": 21,
+    "other": 22
+  },
+  "num_classes": 23,
+  "img_size": 224,
+  "backbone": "resnet18_imagenet",
+  "best_val_acc": 0.34770114942528735,
+  "history": [
+    {
+      "epoch": 1,
+      "loss": 1.6919,
+      "val_acc": 0.3391
+    },
+    {
+      "epoch": 2,
+      "loss": 0.4798,
+      "val_acc": 0.342
+    },
+    {
+      "epoch": 3,
+      "loss": 0.2401,
+      "val_acc": 0.3477
+    },
+    {
+      "epoch": 4,
+      "loss": 0.1619,
+      "val_acc": 0.3448
+    },
+    {
+      "epoch": 5,
+      "loss": 0.1129,
+      "val_acc": 0.3448
+    },
+    {
+      "epoch": 6,
+      "loss": 0.094,
+      "val_acc": 0.3448
+    },
+    {
+      "epoch": 7,
+      "loss": 0.0716,
+      "val_acc": 0.3448
+    },
+    {
+      "epoch": 8,
+      "loss": 0.0818,
+      "val_acc": 0.3448
+    }
+  ],
+  "train_videos": [
+    "BV16o3M6xER6_2026剪辑入门必看100种剪辑手法从入门到精通共10.mp4",
+    "BV17G3w6AE9H_𝘿𝙞𝙚 𝙁𝙤𝙧 𝙔𝙖𝙣.mp4",
+    "BV18W4y1J7gb_.mp4",
+    "BV1DM4y1s79m_AEGlitchЧһѧ.mp4",
+    "BV1Hf4y1r7qT_塿ǰȼ.mp4",
+    "BV1Nm4y187Vg_九喇嘛鸣人裸眼3D效果炸裂战斗混剪热血沸腾.mp4",
+    "BV1WUN269EDS_五分鐘教你搞燃剪.mp4",
+    "BV1nV411a7jr_սBվǿȵ㣡108ȼ.mp4",
+    "BV1nz42167W2_一个舒服的拉镜.mp4",
+    "BV1os411Z7jg_闪现流AMVBlazing.mp4",
+    "BV1qGTR6MEBf_这样的雷霆运镜豪到你了吗.mp4",
+    "BV1uQgb64EST_曾经统治整个AMV圈之一的Wyrux退网作.mp4",
+    "BV1v7411B7eb_K超燃踩点0202了我做8年前的K还有人看吗.mp4",
+    "BV1x441187u5_ǰܣⳡӾʢɣ.mp4"
+  ],
+  "val_videos": [
+    "BV1ZqKL69EK3_将这极致的踩点与节奏共同绘制成一副精彩绝伦酣畅淋漓的视觉.mp4",
+    "BV1RU3E6rEYp_AMV.mp4",
+    "BV1os411Z7jg_AMVBlazing.mp4"
+  ],
+  "accept_videos": [
+    "BV16J411Q7sP_裸眼3D终结之谷 佐鸣大战.mp4",
+    "BV1A64y1u78E.mp4",
+    "BV1Am4y1J7PF_时光代理人2插曲Flash无损完整版配上原片简直不要太.mp4",
+    "BV1D4411k7UE_海贼王极致踩点燃爆点燃你的腺上激素爽就完事了.mp4",
+    "BV1Hf4y1r7qT_无限滑板前方高燃.mp4",
+    "BV1PW411H7yb_黑岩燃向MAD黑岩超燃剪辑.mp4",
+    "BV1RNh9zqEnC_韩国十大禁播MV居然全都听过太难以置信了.mp4",
+    "BV1SiNZzrEMG_灵笼踩点4k前方核能B站98分纵享丝滑的踩点视觉.mp4",
+    "BV1nV411a7jr_挑战B站最强踩点108部动画超燃混剪.mp4",
+    "BV1ys411e7zE_FATE震撼高燃AMV救赎命运战斗通向正义理想之路.mp4"
+  ],
+  "trained_at": "2026-08-06 22:00:03",
+  "min_class_frames": 30
+}

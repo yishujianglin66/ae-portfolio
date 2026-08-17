@@ -28,13 +28,17 @@ import threading
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
-KB_ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\10-风格化剪辑知识库")
+_PROJECT_ROOT = Path(__file__).resolve().parent
+KB_ROOT = _PROJECT_ROOT / "10-风格化剪辑知识库"
 KB_ROOTS = [
-    Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\10-风格化剪辑知识库"),
-    Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\11-大师知识库"),
-    Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\14-Silhouette知识库"),
+    _PROJECT_ROOT / "10-风格化剪辑知识库",
+    _PROJECT_ROOT / "11-大师知识库",
+    _PROJECT_ROOT / "12-漫剪拉镜大师",
+    _PROJECT_ROOT / "14-Silhouette 知识库",
+    _PROJECT_ROOT / "15-3D模型与骨骼动画知识库",
+    _PROJECT_ROOT / "13-素材获取与搜索",
 ]
-CACHE_DIR = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\.kb_cache")
+CACHE_DIR = _PROJECT_ROOT / ".kb_cache"
 CACHE_FILE = CACHE_DIR / "kb_cache.json"
 CACHE_TIMEOUT = 3600  # 缓存有效期(秒)
 

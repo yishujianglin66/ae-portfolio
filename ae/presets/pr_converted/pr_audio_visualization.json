@@ -1,0 +1,1934 @@
+[
+  {
+    "name": "linear_waveform",
+    "category": "audio_visualization",
+    "subcategory": "waveform",
+    "description": "Linear waveform visualization - classic left/right channel display",
+    "tags": [
+      "waveform",
+      "audio",
+      "linear"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barCount": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 50
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barGap": {
+            "type": "number",
+            "min": 0,
+            "max": 10,
+            "default": 1
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "colorLeft": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              0.8,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "colorRight": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.2,
+              0.8
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "amplitude": {
+            "type": "number",
+            "min": 0.1,
+            "max": 3.0,
+            "default": 1.5
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "barCount": 50,
+      "barWidth": 3,
+      "barGap": 1,
+      "colorLeft": [
+        0,
+        0.8,
+        1
+      ],
+      "colorRight": [
+        1,
+        0.2,
+        0.8
+      ],
+      "amplitude": 1.5
+    }
+  },
+  {
+    "name": "circular_waveform",
+    "category": "audio_visualization",
+    "subcategory": "waveform",
+    "description": "Circular waveform visualization - circular wave display",
+    "tags": [
+      "circular",
+      "waveform",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barCount": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 50,
+            "max": 300,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 10,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.5,
+              1,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startAngle": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "barCount": 80,
+      "radius": 150,
+      "barWidth": 4,
+      "color": [
+        0.5,
+        1,
+        0.5
+      ],
+      "startAngle": 0
+    }
+  },
+  {
+    "name": "bar_spectrum",
+    "category": "audio_visualization",
+    "subcategory": "spectrum",
+    "description": "Bar spectrum visualization - frequency bar display",
+    "tags": [
+      "bar",
+      "spectrum",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barCount": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 32
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 10
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barGap": {
+            "type": "number",
+            "min": 0,
+            "max": 10,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              1,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "gradientEnabled": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": true
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "amplitude": {
+            "type": "number",
+            "min": 0.1,
+            "max": 3.0,
+            "default": 1.8
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "barCount": 32,
+      "barWidth": 10,
+      "barGap": 2,
+      "color": [
+        0,
+        1,
+        0.5
+      ],
+      "gradientEnabled": true,
+      "amplitude": 1.8
+    }
+  },
+  {
+    "name": "circular_spectrum",
+    "category": "audio_visualization",
+    "subcategory": "spectrum",
+    "description": "Circular spectrum visualization - ring frequency display",
+    "tags": [
+      "circular",
+      "spectrum",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barCount": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 64
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 50,
+            "max": 300,
+            "default": 120
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 10,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.8,
+              0.2,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startAngle": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 180
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "endAngle": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 360
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "barCount": 64,
+      "radius": 120,
+      "barWidth": 3,
+      "color": [
+        0.8,
+        0.2,
+        1
+      ],
+      "startAngle": 180,
+      "endAngle": 360
+    }
+  },
+  {
+    "name": "3d_spectrum",
+    "category": "audio_visualization",
+    "subcategory": "spectrum",
+    "description": "3D spectrum visualization - 3D bar chart",
+    "tags": [
+      "3d",
+      "spectrum",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barCount": {
+            "type": "number",
+            "min": 10,
+            "max": 50,
+            "default": 24
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barWidth": {
+            "type": "number",
+            "min": 5,
+            "max": 30,
+            "default": 15
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.3,
+              0.6
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "depth": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 50
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "amplitude": {
+            "type": "number",
+            "min": 0.1,
+            "max": 3.0,
+            "default": 2.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "barCount": 24,
+      "barWidth": 15,
+      "color": [
+        1,
+        0.3,
+        0.6
+      ],
+      "depth": 50,
+      "amplitude": 2.0
+    }
+  },
+  {
+    "name": "particle_jump",
+    "category": "audio_visualization",
+    "subcategory": "particle",
+    "description": "Particle jump response - particles bounce with audio",
+    "tags": [
+      "particle",
+      "jump",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 5,
+            "max": 30,
+            "default": 15
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "jumpHeight": {
+            "type": "number",
+            "min": 50,
+            "max": 300,
+            "default": 150
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "particleCount": 30,
+      "particleSize": 15,
+      "color": [
+        1,
+        1,
+        0
+      ],
+      "jumpHeight": 150
+    }
+  },
+  {
+    "name": "particle_scatter",
+    "category": "audio_visualization",
+    "subcategory": "particle",
+    "description": "Particle scatter response - particles scatter with audio",
+    "tags": [
+      "particle",
+      "scatter",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 1,
+            "max": 5,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.8,
+              0.8,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "scatterRadius": {
+            "type": "number",
+            "min": 50,
+            "max": 300,
+            "default": 200
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "particleCount": 150,
+      "particleSize": 3,
+      "color": [
+        0.8,
+        0.8,
+        1
+      ],
+      "scatterRadius": 200
+    }
+  },
+  {
+    "name": "particle_converge",
+    "category": "audio_visualization",
+    "subcategory": "particle",
+    "description": "Particle converge response - particles converge to center",
+    "tags": [
+      "particle",
+      "converge",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 1,
+            "max": 5,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              1,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "baseRadius": {
+            "type": "number",
+            "min": 100,
+            "max": 400,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "convergeSpeed": {
+            "type": "number",
+            "min": 0.1,
+            "max": 2.0,
+            "default": 0.8
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "particleCount": 200,
+      "particleSize": 2,
+      "color": [
+        0.2,
+        1,
+        0.5
+      ],
+      "baseRadius": 300,
+      "convergeSpeed": 0.8
+    }
+  },
+  {
+    "name": "light_bands_jump",
+    "category": "audio_visualization",
+    "subcategory": "light",
+    "description": "Light bands jump response - horizontal bands jump with audio",
+    "tags": [
+      "light_bands",
+      "jump",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "bandCount": {
+            "type": "number",
+            "min": 5,
+            "max": 30,
+            "default": 15
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "bandHeight": {
+            "type": "number",
+            "min": 10,
+            "max": 50,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              1,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "jumpHeight": {
+            "type": "number",
+            "min": 50,
+            "max": 300,
+            "default": 100
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "bandCount": 15,
+      "bandHeight": 20,
+      "color": [
+        0,
+        1,
+        1
+      ],
+      "jumpHeight": 100
+    }
+  },
+  {
+    "name": "halo_pulse",
+    "category": "audio_visualization",
+    "subcategory": "light",
+    "description": "Halo pulse response - rings pulse with audio",
+    "tags": [
+      "halo",
+      "pulse",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "ringCount": {
+            "type": "number",
+            "min": 1,
+            "max": 10,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "baseRadius": {
+            "type": "number",
+            "min": 50,
+            "max": 200,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.5,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "pulseIntensity": {
+            "type": "number",
+            "min": 0.5,
+            "max": 3.0,
+            "default": 1.5
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "ringCount": 3,
+      "baseRadius": 100,
+      "color": [
+        1,
+        0.5,
+        0
+      ],
+      "pulseIntensity": 1.5
+    }
+  },
+  {
+    "name": "light_rays",
+    "category": "audio_visualization",
+    "subcategory": "light",
+    "description": "Light rays response - rays emit from center",
+    "tags": [
+      "light_rays",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rayCount": {
+            "type": "number",
+            "min": 5,
+            "max": 50,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rayLength": {
+            "type": "number",
+            "min": 100,
+            "max": 500,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "spreadAngle": {
+            "type": "number",
+            "min": 30,
+            "max": 360,
+            "default": 360
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "rayCount": 20,
+      "rayLength": 300,
+      "color": [
+        1,
+        1,
+        0.5
+      ],
+      "spreadAngle": 360
+    }
+  },
+  {
+    "name": "text_scale_audio",
+    "category": "audio_visualization",
+    "subcategory": "text",
+    "description": "Text scale response - text scales with audio",
+    "tags": [
+      "text",
+      "scale",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Audio Text"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "baseScale": {
+            "type": "number",
+            "min": 50,
+            "max": 200,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "scaleMultiplier": {
+            "type": "number",
+            "min": 0.5,
+            "max": 3.0,
+            "default": 1.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "text": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "AUDIO"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "textLayerName": "Audio Text",
+      "baseScale": 100,
+      "scaleMultiplier": 1.5,
+      "text": "AUDIO"
+    }
+  },
+  {
+    "name": "text_pulse_audio",
+    "category": "audio_visualization",
+    "subcategory": "text",
+    "description": "Text pulse response - text pulses with audio",
+    "tags": [
+      "text",
+      "pulse",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Pulse Text"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "baseOpacity": {
+            "type": "number",
+            "min": 30,
+            "max": 100,
+            "default": 70
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "pulseMultiplier": {
+            "type": "number",
+            "min": 0.5,
+            "max": 2.0,
+            "default": 1.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "text": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "BEAT"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "textLayerName": "Pulse Text",
+      "baseOpacity": 70,
+      "pulseMultiplier": 1.5,
+      "text": "BEAT"
+    }
+  },
+  {
+    "name": "mirror_waveform",
+    "category": "audio_visualization",
+    "subcategory": "waveform",
+    "description": "Mirror waveform - symmetrical up/down display",
+    "tags": [
+      "mirror",
+      "waveform",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barCount": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 60
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "colorTop": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.5,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "colorBottom": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              0.5,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "amplitude": {
+            "type": "number",
+            "min": 0.1,
+            "max": 3.0,
+            "default": 2.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "barCount": 60,
+      "barWidth": 4,
+      "colorTop": [
+        1,
+        0.5,
+        0
+      ],
+      "colorBottom": [
+        0,
+        0.5,
+        1
+      ],
+      "amplitude": 2.0
+    }
+  },
+  {
+    "name": "spiral_spectrum",
+    "category": "audio_visualization",
+    "subcategory": "spectrum",
+    "description": "Spiral spectrum - spiral frequency display",
+    "tags": [
+      "spiral",
+      "spectrum",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barCount": {
+            "type": "number",
+            "min": 50,
+            "max": 300,
+            "default": 120
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 30,
+            "max": 200,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 8,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.8,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rotationSpeed": {
+            "type": "number",
+            "min": 0.1,
+            "max": 5.0,
+            "default": 0.5
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "barCount": 120,
+      "radius": 100,
+      "barWidth": 2,
+      "color": [
+        0.2,
+        0.8,
+        1
+      ],
+      "rotationSpeed": 0.5
+    }
+  },
+  {
+    "name": "particle_waterfall",
+    "category": "audio_visualization",
+    "subcategory": "particle",
+    "description": "Particle waterfall - particles flow down",
+    "tags": [
+      "particle",
+      "waterfall",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "number",
+            "min": 100,
+            "max": 500,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 1,
+            "max": 5,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              0.6,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 50,
+            "max": 200,
+            "default": 100
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "particleCount": 300,
+      "particleSize": 2,
+      "color": [
+        0.3,
+        0.6,
+        1
+      ],
+      "speed": 100
+    }
+  },
+  {
+    "name": "light_spots_flash",
+    "category": "audio_visualization",
+    "subcategory": "light",
+    "description": "Light spots flash - spots flash with audio",
+    "tags": [
+      "light_spots",
+      "flash",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "spotCount": {
+            "type": "number",
+            "min": 5,
+            "max": 50,
+            "default": 25
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "spotSize": {
+            "type": "number",
+            "min": 10,
+            "max": 50,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.8,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "flashThreshold": {
+            "type": "number",
+            "min": 0.1,
+            "max": 0.9,
+            "default": 0.3
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "spotCount": 25,
+      "spotSize": 20,
+      "color": [
+        1,
+        0.8,
+        0
+      ],
+      "flashThreshold": 0.3
+    }
+  },
+  {
+    "name": "wave_amplitude",
+    "category": "audio_visualization",
+    "subcategory": "waveform",
+    "description": "Wave amplitude - continuous wave display",
+    "tags": [
+      "wave",
+      "amplitude",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "waveCount": {
+            "type": "number",
+            "min": 1,
+            "max": 10,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "waveHeight": {
+            "type": "number",
+            "min": 50,
+            "max": 300,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.5,
+              0.8,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "waveCount": 3,
+      "waveHeight": 150,
+      "color": [
+        0.5,
+        0.8,
+        1
+      ],
+      "speed": 2.0
+    }
+  },
+  {
+    "name": "energy_rings",
+    "category": "audio_visualization",
+    "subcategory": "light",
+    "description": "Energy rings - expanding rings with audio",
+    "tags": [
+      "energy",
+      "rings",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "ringCount": {
+            "type": "number",
+            "min": 2,
+            "max": 8,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "baseRadius": {
+            "type": "number",
+            "min": 50,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.2,
+              0.6
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "expansionSpeed": {
+            "type": "number",
+            "min": 50,
+            "max": 300,
+            "default": 150
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "ringCount": 4,
+      "baseRadius": 80,
+      "color": [
+        1,
+        0.2,
+        0.6
+      ],
+      "expansionSpeed": 150
+    }
+  },
+  {
+    "name": "frequency_bars_3d",
+    "category": "audio_visualization",
+    "subcategory": "spectrum",
+    "description": "3D frequency bars - 3D rotating spectrum",
+    "tags": [
+      "3d",
+      "frequency",
+      "bars",
+      "audio"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "audioLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": ""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barCount": {
+            "type": "number",
+            "min": 10,
+            "max": 50,
+            "default": 18
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barWidth": {
+            "type": "number",
+            "min": 5,
+            "max": 30,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.8,
+              0.8,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rotationSpeed": {
+            "type": "number",
+            "min": 0.1,
+            "max": 2.0,
+            "default": 0.3
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "audioLayerName": "",
+      "barCount": 18,
+      "barWidth": 20,
+      "color": [
+        0.8,
+        0.8,
+        1
+      ],
+      "rotationSpeed": 0.3
+    }
+  }
+]

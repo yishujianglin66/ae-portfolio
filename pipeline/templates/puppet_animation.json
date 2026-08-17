@@ -1,0 +1,116 @@
+{
+  "template_id": "puppet_animation",
+  "name": "木偶风格化视频 (Puppet-style Animation)",
+  "version": "1.0.0",
+  "description": "角色骨骼绑定 + Puppet Pin 物理模拟 + 呼吸/待机动画",
+  "input_requirements": {
+    "character_image": {"min": 1, "max": 1, "formats": ["png"], "note": "已抠图的角色 PNG（透明背景）"},
+    "background": {"min": 0, "max": 1, "formats": ["png", "jpg"]},
+    "audio": {"min": 0, "max": 1, "formats": ["mp3", "wav"]}
+  },
+  "output": {
+    "master": {"format": "ProRes 422 HQ", "resolution": "1920x1080", "fps": 24, "container": "mov"},
+    "publish": {"format": "H.264", "resolution": "1920x1080", "fps": 24, "container": "mp4", "bitrate": "10M"}
+  },
+  "stages": {
+    "S3_ae_rig": {
+      "engine": "after_effects",
+      "mode": "native_bridge",
+      "fallback": "manual",
+      "steps": [
+        {
+          "id": "auto_rig",
+          "name": "自动骨骼绑定",
+          "jsx_template": "ae/scripts/puppet/auto_rig.jsx",
+          "params": {
+            "pin_count": 6,
+            "pin_layout": "biped_standard",
+            "pin_positions": {
+              "head": [0.5, 0.15],
+              "chest": [0.5, 0.35],
+              "hip": [0.5, 0.55],
+              "left_hand": [0.3, 0.45],
+              "right_hand": [0.7, 0.45],
+              "left_foot": [0.4, 0.9],
+              "right_foot": [0.6, 0.9]
+            },
+            "mesh_expansion": 8,
+            "mesh_triangle_count": 150
+          }
+        },
+        {
+          "id": "spring_physics",
+          "name": "弹性物理表达式",
+          "jsx_template": "ae/scripts/puppet/spring_expression.jsx",
+          "params": {
+            "frequency": 3.0,
+            "decay": 5.0,
+            "apply_to": ["left_hand", "right_hand", "head"],
+            "overshoot_factor": 1.2
+          }
+        },
+        {
+          "id": "breathing_idle",
+          "name": "呼吸待机动画",
+          "jsx_template": "ae/scripts/puppet/breathing_idle.jsx",
+          "params": {
+            "breath_rate": 0.25,
+            "breath_amplitude": 3.0,
+            "sway_amplitude": 2.0,
+            "sway_rate": 0.15,
+            "apply_to_chest": true,
+            "apply_to_hair": true
+          }
+        }
+      ],
+      "render": {
+        "engine": "aerender",
+        "format": "Lossless",
+        "codec": "ProRes 4444",
+        "resolution": "1920x1080",
+        "fps": 24,
+        "duration_s": 5
+      }
+    },
+    "S4_pr_assembly": {
+      "engine": "premiere",
+      "mode": "native_bridge",
+      "fallback": "fcp_xml",
+      "params": {
+        "dynamic_link_comps": true,
+        "audio_sync": true,
+        "loop_idle_animation": true,
+        "scene_count": 3
+      }
+    },
+    "S5_color_grade": {
+      "engine": "davinci",
+      "mode": "native_cli",
+      "fallback": "ffmpeg_equiv",
+      "preset": "warm_soft",
+      "node_graph": {
+        "node_count": 4,
+        "nodes": [
+          {"id": 1, "type": "base_correction", "params": {"warmth": 0.1, "exposure": 0.05}},
+          {"id": 2, "type": "soft_glow", "params": {"intensity": 0.3, "threshold": 0.7}},
+          {"id": 3, "type": "porcelain_skin", "params": {"smooth": 0.4, "detail": 0.6}},
+          {"id": 4, "type": "sharpen", "params": {"amount": 0.5}}
+        ]
+      }
+    },
+    "S6_export": {
+      "engine": "ame",
+      "mode": "native_bridge",
+      "fallback": "ffmpeg",
+      "presets": [
+        {"name": "master_prores", "codec": "ProRes 422 HQ", "container": "mov"},
+        {"name": "publish_h264", "codec": "H.264", "container": "mp4", "bitrate": "10M"}
+      ]
+    }
+  },
+  "quality_gates": {
+    "QG_rig": {"min_pin_count": 4, "mesh_coverage": 0.8},
+    "QG_animation": {"no_static_frames": true, "loop_seamless": true},
+    "QG_export": {"alpha_channel_preserved": true}
+  }
+}

@@ -1,0 +1,2021 @@
+[
+  {
+    "name": "circle_expand",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "圆形扩展动画 - 圆形从无到有扩展出现，带有弹性回弹效果，适用于强调和标记",
+    "tags": [
+      "圆形",
+      "扩展",
+      "弹性",
+      "emphasis",
+      "scale"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0,
+        "description": "动画时长(秒)"
+      },
+      "size": {
+        "type": "number",
+        "min": 50,
+        "max": 800,
+        "description": "圆形直径(像素)"
+      },
+      "fillColor": {
+        "type": "array",
+        "description": "填充色 [R,G,B] 0-1"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "描边宽度"
+      },
+      "strokeColor": {
+        "type": "array",
+        "description": "描边色 [R,G,B] 0-1"
+      },
+      "bounce": {
+        "type": "boolean",
+        "description": "是否启用弹性回弹"
+      }
+    },
+    "default_values": {
+      "layerName": "圆形扩展",
+      "duration": 1.0,
+      "size": 200,
+      "fillColor": [
+        0.2,
+        0.6,
+        1
+      ],
+      "strokeWidth": 4,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ],
+      "bounce": true
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      fillColor: ${fillColor},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      bounce: ${bounce}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Circle\";\n    var ellipse = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n    ellipse.property(\"ADBE Vector Ellipse Size\").setValue([p.size, p.size]);\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    if (p.strokeWidth > 0) {\n      var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n      stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    }\n    var transform = group.property(\"ADBE Vector Transform Group\");\n    var scale = transform.property(\"ADBE Vector Scale\");\n    var t0 = layer.inPoint;\n    scale.setValueAtTime(t0, [0, 0]);\n    if (p.bounce) {\n      scale.setValueAtTime(t0 + p.duration * 0.6, [120, 120]);\n      scale.setValueAtTime(t0 + p.duration, [100, 100]);\n    } else {\n      scale.setValueAtTime(t0 + p.duration, [100, 100]);\n    }\n    for (var k = 1; k <= scale.numKeys; k++) {\n      scale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"圆形扩展动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "rect_slide_in",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "矩形滑入动画 - 矩形从屏幕边缘滑入，带有减速缓冲效果",
+    "tags": [
+      "矩形",
+      "滑入",
+      "slide",
+      "入场",
+      "transform"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "width": {
+        "type": "number",
+        "min": 50,
+        "max": 1000
+      },
+      "height": {
+        "type": "number",
+        "min": 50,
+        "max": 1000
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "direction": {
+        "type": "string",
+        "description": "滑入方向: left/right/top/bottom"
+      },
+      "cornerRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 200
+      }
+    },
+    "default_values": {
+      "layerName": "矩形滑入",
+      "duration": 1.0,
+      "width": 400,
+      "height": 200,
+      "fillColor": [
+        0.9,
+        0.3,
+        0.5
+      ],
+      "strokeWidth": 0,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ],
+      "direction": "left",
+      "cornerRadius": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      width: ${width},\n      height: ${height},\n      fillColor: ${fillColor},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      direction: ${direction},\n      cornerRadius: ${cornerRadius}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Rect\";\n    var rect = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Rect\");\n    rect.property(\"ADBE Vector Rect Size\").setValue([p.width, p.height]);\n    rect.property(\"ADBE Vector Rect Roundness\").setValue(p.cornerRadius);\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    if (p.strokeWidth > 0) {\n      var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n      stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    }\n    var transform = layer.property(\"ADBE Transform Group\");\n    var pos = transform.property(\"ADBE Position\");\n    var t0 = layer.inPoint;\n    var startPos = [comp.width/2, comp.height/2];\n    var endPos = [comp.width/2, comp.height/2];\n    if (p.direction === \"left\") startPos = [comp.width + p.width/2, comp.height/2];\n    else if (p.direction === \"right\") startPos = [-p.width/2, comp.height/2];\n    else if (p.direction === \"top\") startPos = [comp.width/2, comp.height + p.height/2];\n    else if (p.direction === \"bottom\") startPos = [comp.width/2, -p.height/2];\n    pos.setValueAtTime(t0, startPos);\n    pos.setValueAtTime(t0 + p.duration, endPos);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"矩形滑入动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "triangle_rotate",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "三角形旋转动画 - 三角形边旋转边缩放入场，配合重复器创建万花筒效果",
+    "tags": [
+      "三角形",
+      "旋转",
+      "旋转",
+      "repeater",
+      "万花筒"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "size": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 30
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "repeaterCount": {
+        "type": "integer",
+        "min": 1,
+        "max": 12
+      },
+      "rotationCount": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      }
+    },
+    "default_values": {
+      "layerName": "三角形旋转",
+      "duration": 2.0,
+      "size": 150,
+      "fillColor": [
+        0.3,
+        0.8,
+        0.5
+      ],
+      "strokeWidth": 2,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ],
+      "repeaterCount": 6,
+      "rotationCount": 2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      fillColor: ${fillColor},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      repeaterCount: ${repeaterCount},\n      rotationCount: ${rotationCount}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Triangle\";\n    var polystar = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Star\");\n    polystar.property(\"ADBE Vector Star Type\").setValue(2);\n    polystar.property(\"ADBE Vector Star Points\").setValue(3);\n    polystar.property(\"ADBE Vector Star Outer Radius\").setValue(p.size / 2);\n    polystar.property(\"ADBE Vector Star Inner Radius\").setValue(p.size / 4);\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    if (p.strokeWidth > 0) {\n      var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n      stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    }\n    if (p.repeaterCount > 1) {\n      var repeater = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Repeater\");\n      repeater.property(\"ADBE Vector Repeater Copies\").setValue(p.repeaterCount);\n      repeater.property(\"ADBE Vector Repeater Rotation\").setValue(360 / p.repeaterCount);\n    }\n    var transform = group.property(\"ADBE Vector Transform Group\");\n    var rot = transform.property(\"ADBE Vector Rotation\");\n    var scale = transform.property(\"ADBE Vector Scale\");\n    var t0 = layer.inPoint;\n    rot.setValueAtTime(t0, 0);\n    rot.setValueAtTime(t0 + p.duration, 360 * p.rotationCount);\n    scale.setValueAtTime(t0, [0, 0]);\n    scale.setValueAtTime(t0 + p.duration * 0.7, [110, 110]);\n    scale.setValueAtTime(t0 + p.duration, [100, 100]);\n    for (var k = 1; k <= rot.numKeys; k++) {\n      rot.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    for (var k = 1; k <= scale.numKeys; k++) {\n      scale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"三角形旋转动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "star_scale",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "星形缩放动画 - 星形弹性缩放并带有描边绘制效果，使用 Trim Paths 实现描边生长",
+    "tags": [
+      "星形",
+      "缩放",
+      "描边绘制",
+      "trim_paths",
+      "bounce"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "outerRadius": {
+        "type": "number",
+        "min": 30,
+        "max": 400
+      },
+      "innerRadius": {
+        "type": "number",
+        "min": 10,
+        "max": 200
+      },
+      "points": {
+        "type": "integer",
+        "min": 3,
+        "max": 20
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 30
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "enableTrim": {
+        "type": "boolean"
+      }
+    },
+    "default_values": {
+      "layerName": "星形缩放",
+      "duration": 1.5,
+      "outerRadius": 120,
+      "innerRadius": 60,
+      "points": 5,
+      "fillColor": [
+        1,
+        0.8,
+        0.2
+      ],
+      "strokeWidth": 4,
+      "strokeColor": [
+        1,
+        0.5,
+        0
+      ],
+      "enableTrim": true
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      outerRadius: ${outerRadius},\n      innerRadius: ${innerRadius},\n      points: ${points},\n      fillColor: ${fillColor},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      enableTrim: ${enableTrim}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Star\";\n    var star = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Star\");\n    star.property(\"ADBE Vector Star Type\").setValue(1);\n    star.property(\"ADBE Vector Star Points\").setValue(p.points);\n    star.property(\"ADBE Vector Star Outer Radius\").setValue(p.outerRadius);\n    star.property(\"ADBE Vector Star Inner Radius\").setValue(p.innerRadius);\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    if (p.enableTrim) {\n      var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n      var t0 = layer.inPoint;\n      trim.property(\"ADBE Vector Trim Start\").setValueAtTime(t0, 0);\n      trim.property(\"ADBE Vector Trim Start\").setValueAtTime(t0 + p.duration, 100);\n      trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 0);\n      trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    }\n    var transform = group.property(\"ADBE Vector Transform Group\");\n    var scale = transform.property(\"ADBE Vector Scale\");\n    var t0 = layer.inPoint;\n    scale.setValueAtTime(t0, [0, 0]);\n    scale.setValueAtTime(t0 + p.duration * 0.5, [130, 130]);\n    scale.setValueAtTime(t0 + p.duration, [100, 100]);\n    for (var k = 1; k <= scale.numKeys; k++) {\n      scale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"星形缩放动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "heart_beat",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "心形跳动动画 - 心形缩放模拟心跳节奏，带有连续脉冲效果",
+    "tags": [
+      "心形",
+      "心跳",
+      "pulse",
+      "缩放",
+      "循环"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "size": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 20
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "beatCount": {
+        "type": "integer",
+        "min": 1,
+        "max": 10
+      }
+    },
+    "default_values": {
+      "layerName": "心形跳动",
+      "duration": 2.0,
+      "size": 150,
+      "fillColor": [
+        1,
+        0.2,
+        0.4
+      ],
+      "strokeWidth": 2,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ],
+      "beatCount": 3
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      fillColor: ${fillColor},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      beatCount: ${beatCount}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Heart\";\n    var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var s = p.size / 2;\n    var heartPath = new Shape();\n    heartPath.vertices = [[0, -s*0.3], [s*0.5, -s*0.8], [s, -s*0.3], [s, s*0.2], [0, s], [-s, s*0.2], [-s, -s*0.3], [-s*0.5, -s*0.8]];\n    heartPath.inTangents = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];\n    heartPath.outTangents = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];\n    heartPath.closed = true;\n    path.setValue(heartPath);\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    if (p.strokeWidth > 0) {\n      var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n      stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    }\n    var transform = group.property(\"ADBE Vector Transform Group\");\n    var scale = transform.property(\"ADBE Vector Scale\");\n    var t0 = layer.inPoint;\n    var dt = p.duration / p.beatCount;\n    for (var i = 0; i < p.beatCount; i++) {\n      scale.setValueAtTime(t0 + dt * i, [100, 100]);\n      scale.setValueAtTime(t0 + dt * i + dt * 0.15, [130, 130]);\n      scale.setValueAtTime(t0 + dt * i + dt * 0.3, [100, 100]);\n      scale.setValueAtTime(t0 + dt * i + dt * 0.45, [115, 115]);\n      scale.setValueAtTime(t0 + dt * i + dt * 0.6, [100, 100]);\n    }\n    for (var k = 1; k <= scale.numKeys; k++) {\n      scale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"心形跳动动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "polygon_morph",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "多边形变形动画 - 圆形与星形之间变形，使用 Wiggle Paths 增加动态感",
+    "tags": [
+      "多边形",
+      "变形",
+      "morph",
+      "wiggle_paths",
+      "shape"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "size": {
+        "type": "number",
+        "min": 50,
+        "max": 400
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 20
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "wiggleIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "layerName": "多边形变形",
+      "duration": 3.0,
+      "size": 200,
+      "fillColor": [
+        0.4,
+        0.7,
+        1
+      ],
+      "strokeWidth": 3,
+      "strokeColor": [
+        0.2,
+        0.4,
+        0.8
+      ],
+      "wiggleIntensity": 10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      fillColor: ${fillColor},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      wiggleIntensity: ${wiggleIntensity}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Polygon\";\n    var polystar = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Star\");\n    polystar.property(\"ADBE Vector Star Type\").setValue(1);\n    polystar.property(\"ADBE Vector Star Points\").setValue(5);\n    polystar.property(\"ADBE Vector Star Outer Radius\").setValue(p.size / 2);\n    polystar.property(\"ADBE Vector Star Inner Radius\").setValue(p.size / 4);\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    if (p.wiggleIntensity > 0) {\n      var wiggle = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Wiggle\");\n      wiggle.property(\"ADBE Vector Wiggle Size\").setValue(p.wiggleIntensity);\n      wiggle.property(\"ADBE Vector Wiggle Detail\").setValue(6);\n    }\n    var t0 = layer.inPoint;\n    polystar.property(\"ADBE Vector Star Points\").setValueAtTime(t0, 3);\n    polystar.property(\"ADBE Vector Star Points\").setValueAtTime(t0 + p.duration * 0.5, 8);\n    polystar.property(\"ADBE Vector Star Points\").setValueAtTime(t0 + p.duration, 3);\n    polystar.property(\"ADBE Vector Star Outer Radius\").setValueAtTime(t0, p.size / 2);\n    polystar.property(\"ADBE Vector Star Outer Radius\").setValueAtTime(t0 + p.duration * 0.5, p.size / 3);\n    polystar.property(\"ADBE Vector Star Outer Radius\").setValueAtTime(t0 + p.duration, p.size / 2);\n    for (var k = 1; k <= polystar.property(\"ADBE Vector Star Points\").numKeys; k++) {\n      polystar.property(\"ADBE Vector Star Points\").setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"多边形变形动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "line_draw",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "线条绘制动画 - 使用 Trim Paths 让线条从起点生长到终点，模拟手写绘制效果",
+    "tags": [
+      "线条",
+      "绘制",
+      "trim_paths",
+      "手写",
+      "path"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 30
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "startPoint": {
+        "type": "array",
+        "description": "起点 [x, y]"
+      },
+      "endPoint": {
+        "type": "array",
+        "description": "终点 [x, y]"
+      },
+      "curved": {
+        "type": "boolean",
+        "description": "是否使用曲线"
+      }
+    },
+    "default_values": {
+      "layerName": "线条绘制",
+      "duration": 2.0,
+      "strokeWidth": 5,
+      "strokeColor": [
+        0.2,
+        0.8,
+        0.4
+      ],
+      "startPoint": [
+        200,
+        540
+      ],
+      "endPoint": [
+        1720,
+        540
+      ],
+      "curved": false
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      startPoint: ${startPoint},\n      endPoint: ${endPoint},\n      curved: ${curved}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Line\";\n    var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var linePath = new Shape();\n    linePath.vertices = [p.startPoint, p.endPoint];\n    if (p.curved) {\n      var midX = (p.startPoint[0] + p.endPoint[0]) / 2;\n      var midY = (p.startPoint[1] + p.endPoint[1]) / 2 - 100;\n      linePath.vertices = [p.startPoint, [midX, midY], p.endPoint];\n      linePath.inTangents = [[0,0], [-50,0], [0,0]];\n      linePath.outTangents = [[0,0], [50,0], [0,0]];\n    } else {\n      linePath.inTangents = [[0,0],[0,0]];\n      linePath.outTangents = [[0,0],[0,0]];\n    }\n    linePath.closed = false;\n    path.setValue(linePath);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    stroke.property(\"ADBE Vector Stroke Line Cap\").setValue(2);\n    var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    trim.property(\"ADBE Vector Trim Start\").setValue(0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    for (var k = 1; k <= trim.property(\"ADBE Vector Trim End\").numKeys; k++) {\n      trim.property(\"ADBE Vector Trim End\").setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"线条绘制动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "path_follow",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "路径跟随动画 - 小圆点沿自定义贝塞尔曲线路径运动，使用 Trim Paths 控制进度",
+    "tags": [
+      "路径",
+      "跟随",
+      "motion_path",
+      "trim_paths",
+      "dot"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "pathColor": {
+        "type": "array"
+      },
+      "dotColor": {
+        "type": "array"
+      },
+      "pathWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "dotSize": {
+        "type": "number",
+        "min": 5,
+        "max": 50
+      },
+      "repeaterCount": {
+        "type": "integer",
+        "min": 1,
+        "max": 10
+      }
+    },
+    "default_values": {
+      "layerName": "路径跟随",
+      "duration": 3.0,
+      "pathColor": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "dotColor": [
+        1,
+        0.3,
+        0.3
+      ],
+      "pathWidth": 3,
+      "dotSize": 15,
+      "repeaterCount": 1
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      pathColor: ${pathColor},\n      dotColor: ${dotColor},\n      pathWidth: ${pathWidth},\n      dotSize: ${dotSize},\n      repeaterCount: ${repeaterCount}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Path\";\n    var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var curvePath = new Shape();\n    curvePath.vertices = [[200, 540], [600, 200], [1000, 800], [1400, 300], [1720, 540]];\n    curvePath.inTangents = [[0,0], [-100,0], [100,0], [-100,0], [0,0]];\n    curvePath.outTangents = [[0,0], [100,0], [-100,0], [100,0], [0,0]];\n    curvePath.closed = false;\n    path.setValue(curvePath);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.pathColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.pathWidth);\n    var dotGroup = contents.addProperty(\"ADBE Vector Group\");\n    dotGroup.name = \"Dot\";\n    var dotEllipse = dotGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n    dotEllipse.property(\"ADBE Vector Ellipse Size\").setValue([p.dotSize, p.dotSize]);\n    var dotFill = dotGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    dotFill.property(\"ADBE Vector Fill Color\").setValue(p.dotColor);\n    var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    trim.property(\"ADBE Vector Trim Start\").setValueAtTime(t0, 0);\n    trim.property(\"ADBE Vector Trim Start\").setValueAtTime(t0 + p.duration, 100);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    if (p.repeaterCount > 1) {\n      var repeater = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Repeater\");\n      repeater.property(\"ADBE Vector Repeater Copies\").setValue(p.repeaterCount);\n      repeater.property(\"ADBE Vector Repeater Offset\").setValueAtTime(t0, 0);\n      repeater.property(\"ADBE Vector Repeater Offset\").setValueAtTime(t0 + p.duration, -5);\n    }\n    _result = {status:\"success\", message:\"路径跟随动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "shape_morph",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "形状变形动画 - 圆形到方形再到三角形的平滑变形，展示路径插值动画",
+    "tags": [
+      "形状",
+      "变形",
+      "morph",
+      "path",
+      "插值"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "size": {
+        "type": "number",
+        "min": 50,
+        "max": 400
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 20
+      },
+      "strokeColor": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "layerName": "形状变形",
+      "duration": 3.0,
+      "size": 200,
+      "fillColor": [
+        0.6,
+        0.3,
+        0.9
+      ],
+      "strokeWidth": 3,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      fillColor: ${fillColor},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Morph\";\n    var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var s = p.size / 2;\n    var circlePath = new Shape();\n    circlePath.vertices = [[0, -s], [s, 0], [0, s], [-s, 0]];\n    circlePath.inTangents = [[-s*0.55, 0], [0, -s*0.55], [s*0.55, 0], [0, s*0.55]];\n    circlePath.outTangents = [[s*0.55, 0], [0, s*0.55], [-s*0.55, 0], [0, -s*0.55]];\n    circlePath.closed = true;\n    path.setValueAtTime(layer.inPoint, circlePath);\n    var squarePath = new Shape();\n    squarePath.vertices = [[-s, -s], [s, -s], [s, s], [-s, s]];\n    squarePath.inTangents = [[0,0],[0,0],[0,0],[0,0]];\n    squarePath.outTangents = [[0,0],[0,0],[0,0],[0,0]];\n    squarePath.closed = true;\n    path.setValueAtTime(layer.inPoint + p.duration * 0.5, squarePath);\n    var triPath = new Shape();\n    triPath.vertices = [[0, -s], [s*0.866, s*0.5], [-s*0.866, s*0.5]];\n    triPath.inTangents = [[0,0],[0,0],[0,0]];\n    triPath.outTangents = [[0,0],[0,0],[0,0]];\n    triPath.closed = true;\n    path.setValueAtTime(layer.inPoint + p.duration, triPath);\n    for (var k = 1; k <= path.numKeys; k++) {\n      path.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    if (p.strokeWidth > 0) {\n      var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n      stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    }\n    _result = {status:\"success\", message:\"形状变形动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "icon_stroke",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "图标描边动画 - 通用图标描边绘制效果，使用 Trim Paths 配合虚线实现动态描边",
+    "tags": [
+      "图标",
+      "描边",
+      "stroke",
+      "trim_paths",
+      "draw"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "pathPoints": {
+        "type": "array",
+        "description": "路径点数组 [[x,y], ...]"
+      },
+      "dashEnabled": {
+        "type": "boolean"
+      }
+    },
+    "default_values": {
+      "layerName": "图标描边",
+      "duration": 2.0,
+      "strokeWidth": 6,
+      "strokeColor": [
+        0.2,
+        0.6,
+        1
+      ],
+      "pathPoints": [
+        [
+          960,
+          340
+        ],
+        [
+          960,
+          540
+        ],
+        [
+          860,
+          640
+        ],
+        [
+          960,
+          540
+        ],
+        [
+          1060,
+          640
+        ]
+      ],
+      "dashEnabled": true
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      pathPoints: ${pathPoints},\n      dashEnabled: ${dashEnabled}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"IconStroke\";\n    var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var iconPath = new Shape();\n    iconPath.vertices = p.pathPoints;\n    var tangents = [];\n    for (var i = 0; i < p.pathPoints.length; i++) {\n      tangents.push([0, 0]);\n    }\n    iconPath.inTangents = tangents;\n    iconPath.outTangents = tangents;\n    iconPath.closed = false;\n    path.setValue(iconPath);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    stroke.property(\"ADBE Vector Stroke Line Cap\").setValue(2);\n    stroke.property(\"ADBE Vector Stroke Line Join\").setValue(2);\n    if (p.dashEnabled) {\n      stroke.property(\"ADBE Vector Stroke Dashes\").addProperty(\"ADBE Vector Stroke Dash 1\").setValue(10);\n      stroke.property(\"ADBE Vector Stroke Dashes\").addProperty(\"ADBE Vector Stroke Gap 1\").setValue(5);\n      stroke.property(\"ADBE Vector Stroke Dashes\").addProperty(\"ADBE Vector Stroke Offset\").expression = \"time * 50\";\n    }\n    var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    for (var k = 1; k <= trim.property(\"ADBE Vector Trim End\").numKeys; k++) {\n      trim.property(\"ADBE Vector Trim End\").setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"图标描边动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "signature_effect",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "签名效果动画 - 模拟手写签名过程，使用 Trim Paths 和速度曲线控制绘制节奏",
+    "tags": [
+      "签名",
+      "手写",
+      "signature",
+      "draw",
+      "trim_paths"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 1.0,
+        "max": 10.0
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 15
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "speedVariation": {
+        "type": "number",
+        "min": 0,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "layerName": "签名效果",
+      "duration": 4.0,
+      "strokeWidth": 4,
+      "strokeColor": [
+        0.1,
+        0.1,
+        0.1
+      ],
+      "speedVariation": 0.3
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      speedVariation: ${speedVariation}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Signature\";\n    var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var sigPath = new Shape();\n    sigPath.vertices = [[660, 640], [760, 440], [860, 540], [960, 440], [1060, 640], [1160, 540], [1260, 640]];\n    sigPath.inTangents = [[0,0],[-30,-50],[30,-50],[-30,-50],[30,50],[-30,-20],[0,0]];\n    sigPath.outTangents = [[0,0],[30,-50],[-30,-50],[30,-50],[-30,50],[30,-20],[0,0]];\n    sigPath.closed = false;\n    path.setValue(sigPath);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    stroke.property(\"ADBE Vector Stroke Line Cap\").setValue(2);\n    stroke.property(\"ADBE Vector Stroke Line Join\").setValue(2);\n    var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    var steps = 5;\n    for (var i = 0; i <= steps; i++) {\n      var t = t0 + (p.duration / steps) * i;\n      var v = (100 / steps) * i;\n      if (p.speedVariation > 0) {\n        v = v + Math.sin(i * 1.5) * p.speedVariation * 10;\n      }\n      trim.property(\"ADBE Vector Trim End\").setValueAtTime(t, Math.min(100, Math.max(0, v)));\n    }\n    for (var k = 1; k <= trim.property(\"ADBE Vector Trim End\").numKeys; k++) {\n      trim.property(\"ADBE Vector Trim End\").setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"签名效果动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "wave_path",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "波浪路径动画 - 正弦波浪形状配合 Wiggle Paths 产生流动效果，使用 Repeater 创建多层波浪",
+    "tags": [
+      "波浪",
+      "路径",
+      "wave",
+      "wiggle_paths",
+      "flow"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "waveCount": {
+        "type": "integer",
+        "min": 1,
+        "max": 10
+      },
+      "amplitude": {
+        "type": "number",
+        "min": 10,
+        "max": 200
+      },
+      "wiggleIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 30
+      }
+    },
+    "default_values": {
+      "layerName": "波浪路径",
+      "duration": 3.0,
+      "strokeWidth": 4,
+      "strokeColor": [
+        0.3,
+        0.7,
+        0.9
+      ],
+      "waveCount": 3,
+      "amplitude": 80,
+      "wiggleIntensity": 5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      waveCount: ${waveCount},\n      amplitude: ${amplitude},\n      wiggleIntensity: ${wiggleIntensity}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Wave\";\n    var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var wavePath = new Shape();\n    var points = [];\n    var inTans = [];\n    var outTans = [];\n    for (var i = 0; i <= 8; i++) {\n      var x = 200 + i * 190;\n      var y = 540 + Math.sin(i * 0.8) * p.amplitude;\n      points.push([x, y]);\n      inTans.push([0, 0]);\n      outTans.push([0, 0]);\n    }\n    wavePath.vertices = points;\n    wavePath.inTangents = inTans;\n    wavePath.outTangents = outTans;\n    wavePath.closed = false;\n    path.setValue(wavePath);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    stroke.property(\"ADBE Vector Stroke Line Cap\").setValue(2);\n    if (p.wiggleIntensity > 0) {\n      var wiggle = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Wiggle\");\n      wiggle.property(\"ADBE Vector Wiggle Size\").setValue(p.wiggleIntensity);\n      wiggle.property(\"ADBE Vector Wiggle Detail\").setValue(8);\n    }\n    if (p.waveCount > 1) {\n      var repeater = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Repeater\");\n      repeater.property(\"ADBE Vector Repeater Copies\").setValue(p.waveCount);\n      repeater.property(\"ADBE Vector Repeater Offset\").setValue([0, 30]);\n      repeater.property(\"ADBE Vector Repeater Transform\").property(\"ADBE Vector Repeater Position\").setValue([0, 25]);\n    }\n    var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    _result = {status:\"success\", message:\"波浪路径动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "play_button",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "播放按钮动画 - 圆形背景配合三角形播放图标，点击时带有缩放脉冲反馈",
+    "tags": [
+      "播放",
+      "按钮",
+      "play",
+      "icon",
+      "pulse"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "size": {
+        "type": "number",
+        "min": 50,
+        "max": 300
+      },
+      "bgColor": {
+        "type": "array"
+      },
+      "iconColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 20
+      }
+    },
+    "default_values": {
+      "layerName": "播放按钮",
+      "duration": 1.0,
+      "size": 120,
+      "bgColor": [
+        1,
+        0.3,
+        0.3
+      ],
+      "iconColor": [
+        1,
+        1,
+        1
+      ],
+      "strokeWidth": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      bgColor: ${bgColor},\n      iconColor: ${iconColor},\n      strokeWidth: ${strokeWidth}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var bgGroup = contents.addProperty(\"ADBE Vector Group\");\n    bgGroup.name = \"Bg\";\n    var ellipse = bgGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n    ellipse.property(\"ADBE Vector Ellipse Size\").setValue([p.size, p.size]);\n    var bgFill = bgGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    bgFill.property(\"ADBE Vector Fill Color\").setValue(p.bgColor);\n    if (p.strokeWidth > 0) {\n      var bgStroke = bgGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      bgStroke.property(\"ADBE Vector Stroke Color\").setValue([1,1,1]);\n      bgStroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    }\n    var iconGroup = contents.addProperty(\"ADBE Vector Group\");\n    iconGroup.name = \"PlayIcon\";\n    var pathGroup = iconGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var s = p.size * 0.25;\n    var playPath = new Shape();\n    playPath.vertices = [[-s*0.5, -s*0.866], [s, 0], [-s*0.5, s*0.866]];\n    playPath.inTangents = [[0,0],[0,0],[0,0]];\n    playPath.outTangents = [[0,0],[0,0],[0,0]];\n    playPath.closed = true;\n    path.setValue(playPath);\n    var iconFill = iconGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    iconFill.property(\"ADBE Vector Fill Color\").setValue(p.iconColor);\n    var transform = layer.property(\"ADBE Transform Group\");\n    var scale = transform.property(\"ADBE Scale\");\n    var t0 = layer.inPoint;\n    scale.setValueAtTime(t0, [0, 0]);\n    scale.setValueAtTime(t0 + p.duration * 0.5, [115, 115]);\n    scale.setValueAtTime(t0 + p.duration, [100, 100]);\n    for (var k = 1; k <= scale.numKeys; k++) {\n      scale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"播放按钮动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "loading_circle",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "加载圆圈动画 - 旋转的圆弧使用 Trim Paths 和 Repeater 创建多层加载指示器",
+    "tags": [
+      "加载",
+      "圆圈",
+      "loading",
+      "spinner",
+      "trim_paths"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "radius": {
+        "type": "number",
+        "min": 20,
+        "max": 300
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 2,
+        "max": 30
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "arcLength": {
+        "type": "number",
+        "min": 10,
+        "max": 90
+      },
+      "rotationSpeed": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      }
+    },
+    "default_values": {
+      "layerName": "加载圆圈",
+      "duration": 2.0,
+      "radius": 60,
+      "strokeWidth": 8,
+      "strokeColor": [
+        0.2,
+        0.6,
+        1
+      ],
+      "arcLength": 75,
+      "rotationSpeed": 2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      radius: ${radius},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      arcLength: ${arcLength},\n      rotationSpeed: ${rotationSpeed}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Loader\";\n    var ellipse = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n    ellipse.property(\"ADBE Vector Ellipse Size\").setValue([p.radius * 2, p.radius * 2]);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    stroke.property(\"ADBE Vector Stroke Line Cap\").setValue(2);\n    var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    trim.property(\"ADBE Vector Trim Start\").setValueAtTime(t0, 0);\n    trim.property(\"ADBE Vector Trim Start\").setValueAtTime(t0 + p.duration, 100 - p.arcLength);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, p.arcLength);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    var transform = group.property(\"ADBE Vector Transform Group\");\n    var rot = transform.property(\"ADBE Vector Rotation\");\n    rot.setValueAtTime(t0, 0);\n    rot.setValueAtTime(t0 + p.duration, 360 * p.rotationSpeed);\n    var repeater = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Repeater\");\n    repeater.property(\"ADBE Vector Repeater Copies\").setValue(3);\n    repeater.property(\"ADBE Vector Repeater Rotation\").setValue(120);\n    repeater.property(\"ADBE Vector Repeater Transform\").property(\"ADBE Vector Repeater Opacity\").setValue(60);\n    _result = {status:\"success\", message:\"加载圆圈动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "check_mark",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "勾选标记动画 - 对勾符号使用 Trim Paths 逐笔绘制，配合圆形背景缩放出现",
+    "tags": [
+      "勾选",
+      "对勾",
+      "check",
+      "success",
+      "trim_paths"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "size": {
+        "type": "number",
+        "min": 30,
+        "max": 300
+      },
+      "bgColor": {
+        "type": "array"
+      },
+      "checkColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 2,
+        "max": 20
+      }
+    },
+    "default_values": {
+      "layerName": "勾选标记",
+      "duration": 1.2,
+      "size": 100,
+      "bgColor": [
+        0.2,
+        0.8,
+        0.4
+      ],
+      "checkColor": [
+        1,
+        1,
+        1
+      ],
+      "strokeWidth": 6
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      bgColor: ${bgColor},\n      checkColor: ${checkColor},\n      strokeWidth: ${strokeWidth}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var bgGroup = contents.addProperty(\"ADBE Vector Group\");\n    bgGroup.name = \"Bg\";\n    var ellipse = bgGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n    ellipse.property(\"ADBE Vector Ellipse Size\").setValue([p.size, p.size]);\n    var bgFill = bgGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    bgFill.property(\"ADBE Vector Fill Color\").setValue(p.bgColor);\n    var bgTransform = bgGroup.property(\"ADBE Vector Transform Group\");\n    var bgScale = bgTransform.property(\"ADBE Vector Scale\");\n    var checkGroup = contents.addProperty(\"ADBE Vector Group\");\n    checkGroup.name = \"Check\";\n    var pathGroup = checkGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var s = p.size * 0.35;\n    var checkPath = new Shape();\n    checkPath.vertices = [[-s, 0], [-s*0.2, s*0.8], [s*0.9, -s*0.7]];\n    checkPath.inTangents = [[0,0],[0,0],[0,0]];\n    checkPath.outTangents = [[0,0],[0,0],[0,0]];\n    checkPath.closed = false;\n    path.setValue(checkPath);\n    var checkStroke = checkGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    checkStroke.property(\"ADBE Vector Stroke Color\").setValue(p.checkColor);\n    checkStroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    checkStroke.property(\"ADBE Vector Stroke Line Cap\").setValue(2);\n    checkStroke.property(\"ADBE Vector Stroke Line Join\").setValue(2);\n    var trim = checkGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    bgScale.setValueAtTime(t0, [0, 0]);\n    bgScale.setValueAtTime(t0 + p.duration * 0.4, [110, 110]);\n    bgScale.setValueAtTime(t0 + p.duration * 0.6, [100, 100]);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration * 0.4, 0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    for (var k = 1; k <= bgScale.numKeys; k++) {\n      bgScale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"勾选标记动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "search_icon",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "搜索图标动画 - 放大镜图标使用 Trim Paths 绘制圆圈和手柄，带有弹性摆动",
+    "tags": [
+      "搜索",
+      "放大镜",
+      "search",
+      "icon",
+      "draw"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "size": {
+        "type": "number",
+        "min": 30,
+        "max": 300
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 2,
+        "max": 20
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "bounce": {
+        "type": "boolean"
+      }
+    },
+    "default_values": {
+      "layerName": "搜索图标",
+      "duration": 1.5,
+      "size": 100,
+      "strokeWidth": 6,
+      "strokeColor": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "bounce": true
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      bounce: ${bounce}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Search\";\n    var ellipse = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n    ellipse.property(\"ADBE Vector Ellipse Size\").setValue([p.size, p.size]);\n    var handlePath = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = handlePath.property(\"ADBE Vector Shape\");\n    var s = p.size / 2;\n    var hPath = new Shape();\n    hPath.vertices = [[s*0.7, s*0.7], [s*1.3, s*1.3]];\n    hPath.inTangents = [[0,0],[0,0]];\n    hPath.outTangents = [[0,0],[0,0]];\n    hPath.closed = false;\n    path.setValue(hPath);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    stroke.property(\"ADBE Vector Stroke Line Cap\").setValue(2);\n    stroke.property(\"ADBE Vector Stroke Line Join\").setValue(2);\n    var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    var transform = layer.property(\"ADBE Transform Group\");\n    var rot = transform.property(\"ADBE Rotation\");\n    if (p.bounce) {\n      rot.setValueAtTime(t0, -30);\n      rot.setValueAtTime(t0 + p.duration * 0.5, 10);\n      rot.setValueAtTime(t0 + p.duration, 0);\n      for (var k = 1; k <= rot.numKeys; k++) {\n        rot.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n      }\n    }\n    _result = {status:\"success\", message:\"搜索图标动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "menu_icon",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "菜单图标动画 - 三条横线变换为关闭叉号，使用 Trim Paths 和旋转实现汉堡菜单动画",
+    "tags": [
+      "菜单",
+      "汉堡",
+      "menu",
+      "hamburger",
+      "transform"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "size": {
+        "type": "number",
+        "min": 30,
+        "max": 300
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 2,
+        "max": 20
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "lineSpacing": {
+        "type": "number",
+        "min": 5,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "layerName": "菜单图标",
+      "duration": 1.0,
+      "size": 80,
+      "strokeWidth": 8,
+      "strokeColor": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "lineSpacing": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      lineSpacing: ${lineSpacing}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    for (var i = -1; i <= 1; i++) {\n      var group = contents.addProperty(\"ADBE Vector Group\");\n      group.name = \"Line\" + (i+2);\n      var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n      var path = pathGroup.property(\"ADBE Vector Shape\");\n      var linePath = new Shape();\n      var y = i * p.lineSpacing;\n      linePath.vertices = [[-p.size/2, y], [p.size/2, y]];\n      linePath.inTangents = [[0,0],[0,0]];\n      linePath.outTangents = [[0,0],[0,0]];\n      linePath.closed = false;\n      path.setValue(linePath);\n      var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n      stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n      stroke.property(\"ADBE Vector Stroke Line Cap\").setValue(2);\n      var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n      var t0 = layer.inPoint;\n      trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 0);\n      trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration * 0.3, 100);\n      var transform = group.property(\"ADBE Vector Transform Group\");\n      var rot = transform.property(\"ADBE Vector Rotation\");\n      rot.setValueAtTime(t0 + p.duration * 0.3, 0);\n      if (i === 0) {\n        rot.setValueAtTime(t0 + p.duration, 0);\n      } else {\n        rot.setValueAtTime(t0 + p.duration, i * 45);\n      }\n    }\n    _result = {status:\"success\", message:\"菜单图标动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "bell_notification",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "铃铛通知动画 - 铃铛图标摇晃并带有通知圆点弹出效果，适合消息提醒场景",
+    "tags": [
+      "铃铛",
+      "通知",
+      "bell",
+      "notification",
+      "shake"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "size": {
+        "type": "number",
+        "min": 30,
+        "max": 300
+      },
+      "bellColor": {
+        "type": "array"
+      },
+      "dotColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 20
+      }
+    },
+    "default_values": {
+      "layerName": "铃铛通知",
+      "duration": 1.5,
+      "size": 100,
+      "bellColor": [
+        0.9,
+        0.7,
+        0.2
+      ],
+      "dotColor": [
+        1,
+        0.2,
+        0.2
+      ],
+      "strokeWidth": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      bellColor: ${bellColor},\n      dotColor: ${dotColor},\n      strokeWidth: ${strokeWidth}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var bellGroup = contents.addProperty(\"ADBE Vector Group\");\n    bellGroup.name = \"Bell\";\n    var bellPath = bellGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = bellPath.property(\"ADBE Vector Shape\");\n    var s = p.size / 2;\n    var bPath = new Shape();\n    bPath.vertices = [[-s*0.6, s*0.3], [-s*0.6, -s*0.3], [-s*0.3, -s*0.7], [s*0.3, -s*0.7], [s*0.6, -s*0.3], [s*0.6, s*0.3], [0, s*0.5]];\n    bPath.inTangents = [[0,0],[0,0],[-20,-20],[20,-20],[0,0],[0,0],[0,0]];\n    bPath.outTangents = [[0,0],[0,0],[20,-20],[-20,-20],[0,0],[0,0],[0,0]];\n    bPath.closed = true;\n    path.setValue(bPath);\n    var bellFill = bellGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    bellFill.property(\"ADBE Vector Fill Color\").setValue(p.bellColor);\n    if (p.strokeWidth > 0) {\n      var bellStroke = bellGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      bellStroke.property(\"ADBE Vector Stroke Color\").setValue([0.3,0.3,0.3]);\n      bellStroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    }\n    var dotGroup = contents.addProperty(\"ADBE Vector Group\");\n    dotGroup.name = \"Dot\";\n    var dotEllipse = dotGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n    dotEllipse.property(\"ADBE Vector Ellipse Size\").setValue([p.size * 0.25, p.size * 0.25]);\n    var dotFill = dotGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    dotFill.property(\"ADBE Vector Fill Color\").setValue(p.dotColor);\n    var dotTransform = dotGroup.property(\"ADBE Vector Transform Group\");\n    dotTransform.property(\"ADBE Vector Position\").setValue([p.size * 0.35, -p.size * 0.35]);\n    var t0 = layer.inPoint;\n    var rot = bellGroup.property(\"ADBE Vector Transform Group\").property(\"ADBE Vector Rotation\");\n    rot.setValueAtTime(t0, -20);\n    rot.setValueAtTime(t0 + p.duration * 0.15, 20);\n    rot.setValueAtTime(t0 + p.duration * 0.3, -15);\n    rot.setValueAtTime(t0 + p.duration * 0.45, 15);\n    rot.setValueAtTime(t0 + p.duration * 0.6, -10);\n    rot.setValueAtTime(t0 + p.duration * 0.75, 10);\n    rot.setValueAtTime(t0 + p.duration, 0);\n    var dotScale = dotTransform.property(\"ADBE Vector Scale\");\n    dotScale.setValueAtTime(t0 + p.duration * 0.5, [0, 0]);\n    dotScale.setValueAtTime(t0 + p.duration * 0.7, [130, 130]);\n    dotScale.setValueAtTime(t0 + p.duration, [100, 100]);\n    for (var k = 1; k <= dotScale.numKeys; k++) {\n      dotScale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"铃铛通知动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "bar_chart_grow",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "柱状图增长动画 - 多根柱子依次从底部生长，使用 Trim Paths 和延迟错开效果",
+    "tags": [
+      "柱状图",
+      "数据",
+      "bar_chart",
+      "grow",
+      "data_viz"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "barCount": {
+        "type": "integer",
+        "min": 2,
+        "max": 12
+      },
+      "barWidth": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "maxHeight": {
+        "type": "number",
+        "min": 50,
+        "max": 800
+      },
+      "barColor": {
+        "type": "array"
+      },
+      "stagger": {
+        "type": "number",
+        "min": 0,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "layerName": "柱状图增长",
+      "duration": 2.0,
+      "barCount": 5,
+      "barWidth": 60,
+      "maxHeight": 400,
+      "barColor": [
+        0.3,
+        0.6,
+        1
+      ],
+      "stagger": 0.1
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      barCount: ${barCount},\n      barWidth: ${barWidth},\n      maxHeight: ${maxHeight},\n      barColor: ${barColor},\n      stagger: ${stagger}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var totalWidth = p.barCount * p.barWidth * 1.5;\n    var startX = (comp.width - totalWidth) / 2 + p.barWidth * 0.75;\n    for (var i = 0; i < p.barCount; i++) {\n      var group = contents.addProperty(\"ADBE Vector Group\");\n      group.name = \"Bar\" + (i + 1);\n      var rect = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Rect\");\n      var h = p.maxHeight * (0.3 + 0.7 * Math.random());\n      rect.property(\"ADBE Vector Rect Size\").setValue([p.barWidth, h]);\n      rect.property(\"ADBE Vector Rect Position\").setValue([0, -h/2]);\n      var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n      var shade = 0.6 + 0.4 * (i / p.barCount);\n      fill.property(\"ADBE Vector Fill Color\").setValue([p.barColor[0]*shade, p.barColor[1]*shade, p.barColor[2]*shade]);\n      var transform = group.property(\"ADBE Vector Transform Group\");\n      transform.property(\"ADBE Vector Position\").setValue([startX + i * p.barWidth * 1.5, comp.height - 100]);\n      var scale = transform.property(\"ADBE Vector Scale\");\n      var t0 = layer.inPoint;\n      var delay = i * p.stagger;\n      scale.setValueAtTime(t0 + delay, [100, 0]);\n      scale.setValueAtTime(t0 + delay + p.duration * 0.6, [100, 110]);\n      scale.setValueAtTime(t0 + delay + p.duration, [100, 100]);\n      for (var k = 1; k <= scale.numKeys; k++) {\n        scale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n      }\n    }\n    _result = {status:\"success\", message:\"柱状图增长动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "pie_chart_fill",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "饼图填充动画 - 扇形区域使用 Trim Paths 和旋转逐步填充，支持多段不同颜色",
+    "tags": [
+      "饼图",
+      "数据",
+      "pie_chart",
+      "fill",
+      "data_viz"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "radius": {
+        "type": "number",
+        "min": 50,
+        "max": 400
+      },
+      "segments": {
+        "type": "array",
+        "description": "各段占比 [0.3, 0.5, 0.2]"
+      },
+      "colors": {
+        "type": "array",
+        "description": "各段颜色 [[R,G,B], ...]"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 20
+      }
+    },
+    "default_values": {
+      "layerName": "饼图填充",
+      "duration": 2.5,
+      "radius": 150,
+      "segments": [
+        0.4,
+        0.35,
+        0.25
+      ],
+      "colors": [
+        [
+          0.3,
+          0.6,
+          1
+        ],
+        [
+          0.4,
+          0.8,
+          0.4
+        ],
+        [
+          1,
+          0.6,
+          0.2
+        ]
+      ],
+      "strokeWidth": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      radius: ${radius},\n      segments: ${segments},\n      colors: ${colors},\n      strokeWidth: ${strokeWidth}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var currentAngle = 0;\n    for (var i = 0; i < p.segments.length; i++) {\n      var group = contents.addProperty(\"ADBE Vector Group\");\n      group.name = \"Segment\" + (i + 1);\n      var ellipse = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n      ellipse.property(\"ADBE Vector Ellipse Size\").setValue([p.radius * 2, p.radius * 2]);\n      var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n      fill.property(\"ADBE Vector Fill Color\").setValue(p.colors[i % p.colors.length]);\n      if (p.strokeWidth > 0) {\n        var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n        stroke.property(\"ADBE Vector Stroke Color\").setValue([1,1,1]);\n        stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n      }\n      var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n      var t0 = layer.inPoint;\n      var startPct = currentAngle / 360 * 100;\n      var endPct = (currentAngle + p.segments[i] * 360) / 360 * 100;\n      trim.property(\"ADBE Vector Trim Start\").setValue(startPct);\n      trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, startPct);\n      trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, endPct);\n      var transform = group.property(\"ADBE Vector Transform Group\");\n      transform.property(\"ADBE Vector Rotation\").setValue(-90);\n      currentAngle += p.segments[i] * 360;\n    }\n    _result = {status:\"success\", message:\"饼图填充动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "line_chart_draw",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "折线图绘制动画 - 数据点连线使用 Trim Paths 生长，配合圆点依次弹出",
+    "tags": [
+      "折线图",
+      "数据",
+      "line_chart",
+      "draw",
+      "data_viz"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "pointCount": {
+        "type": "integer",
+        "min": 2,
+        "max": 15
+      },
+      "lineWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "lineColor": {
+        "type": "array"
+      },
+      "dotColor": {
+        "type": "array"
+      },
+      "dotSize": {
+        "type": "number",
+        "min": 5,
+        "max": 40
+      }
+    },
+    "default_values": {
+      "layerName": "折线图绘制",
+      "duration": 3.0,
+      "pointCount": 6,
+      "lineWidth": 4,
+      "lineColor": [
+        0.2,
+        0.7,
+        0.3
+      ],
+      "dotColor": [
+        0.1,
+        0.5,
+        0.2
+      ],
+      "dotSize": 12
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      pointCount: ${pointCount},\n      lineWidth: ${lineWidth},\n      lineColor: ${lineColor},\n      dotColor: ${dotColor},\n      dotSize: ${dotSize}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var lineGroup = contents.addProperty(\"ADBE Vector Group\");\n    lineGroup.name = \"Line\";\n    var pathGroup = lineGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var points = [];\n    var inTans = [];\n    var outTans = [];\n    var margin = 200;\n    var stepX = (comp.width - margin * 2) / (p.pointCount - 1);\n    for (var i = 0; i < p.pointCount; i++) {\n      var x = margin + i * stepX;\n      var y = comp.height / 2 + (Math.random() - 0.5) * 300;\n      points.push([x, y]);\n      inTans.push([0, 0]);\n      outTans.push([0, 0]);\n    }\n    var linePath = new Shape();\n    linePath.vertices = points;\n    linePath.inTangents = inTans;\n    linePath.outTangents = outTans;\n    linePath.closed = false;\n    path.setValue(linePath);\n    var stroke = lineGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.lineColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.lineWidth);\n    stroke.property(\"ADBE Vector Stroke Line Cap\").setValue(2);\n    stroke.property(\"ADBE Vector Stroke Line Join\").setValue(2);\n    var trim = lineGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration * 0.7, 100);\n    for (var i = 0; i < p.pointCount; i++) {\n      var dotGroup = contents.addProperty(\"ADBE Vector Group\");\n      dotGroup.name = \"Dot\" + (i + 1);\n      var ellipse = dotGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n      ellipse.property(\"ADBE Vector Ellipse Size\").setValue([p.dotSize, p.dotSize]);\n      var dotFill = dotGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n      dotFill.property(\"ADBE Vector Fill Color\").setValue(p.dotColor);\n      var dotTransform = dotGroup.property(\"ADBE Vector Transform Group\");\n      dotTransform.property(\"ADBE Vector Position\").setValue(points[i]);\n      var dotScale = dotTransform.property(\"ADBE Vector Scale\");\n      var delay = (i / (p.pointCount - 1)) * p.duration * 0.7;\n      dotScale.setValueAtTime(t0 + delay, [0, 0]);\n      dotScale.setValueAtTime(t0 + delay + 0.3, [130, 130]);\n      dotScale.setValueAtTime(t0 + delay + 0.5, [100, 100]);\n      for (var k = 1; k <= dotScale.numKeys; k++) {\n        dotScale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n      }\n    }\n    _result = {status:\"success\", message:\"折线图绘制动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "counter_number",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "计数器动画 - 数字从0滚动增长到目标值，使用 Text Layer 和表达式实现",
+    "tags": [
+      "计数器",
+      "数字",
+      "counter",
+      "number",
+      "data_viz"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "targetValue": {
+        "type": "integer",
+        "min": 1,
+        "max": 999999
+      },
+      "prefix": {
+        "type": "string"
+      },
+      "suffix": {
+        "type": "string"
+      },
+      "fontSize": {
+        "type": "number",
+        "min": 20,
+        "max": 200
+      },
+      "textColor": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "layerName": "计数器",
+      "duration": 3.0,
+      "targetValue": 1000,
+      "prefix": "\"\"",
+      "suffix": "\"+\"",
+      "fontSize": 80,
+      "textColor": [
+        0.2,
+        0.2,
+        0.2
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      targetValue: ${targetValue},\n      prefix: ${prefix},\n      suffix: ${suffix},\n      fontSize: ${fontSize},\n      textColor: ${textColor}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addText(p.layerName);\n      layer.name = p.layerName;\n    }\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fontSize = p.fontSize;\n    td.fillColor = p.textColor;\n    td.justification = ParagraphJustification.CENTER;\n    td.font = \"Arial-BoldMT\";\n    src.setValue(td);\n    var t0 = layer.inPoint;\n    var textProp = layer.property(\"ADBE Text Properties\");\n    var animator = textProp.property(\"ADBE Text Animators\").addProperty(\"ADBE Text Animator\");\n    var rangeSel = animator.property(\"ADBE Text Selectors\").addProperty(\"ADBE Text Selector\");\n    var t = layer;\n    var exp = 'var start = 0; var end = ' + p.targetValue + '; var dur = ' + p.duration + '; var t0 = ' + t0 + '; var progress = Math.min((time - t0) / dur, 1); var val = Math.floor(start + (end - start) * progress); \"' + p.prefix + '\" + val + \"' + p.suffix + '\"';\n    src.expression = exp;\n    _result = {status:\"success\", message:\"计数器动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "progress_bar",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "进度条动画 - 水平进度条填充配合百分比文字，使用 Trim Paths 和圆角矩形",
+    "tags": [
+      "进度条",
+      "进度",
+      "progress",
+      "bar",
+      "data_viz"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "width": {
+        "type": "number",
+        "min": 100,
+        "max": 1600
+      },
+      "height": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "trackColor": {
+        "type": "array"
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "cornerRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "layerName": "进度条",
+      "duration": 2.5,
+      "width": 600,
+      "height": 30,
+      "trackColor": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "fillColor": [
+        0.3,
+        0.7,
+        0.4
+      ],
+      "cornerRadius": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      width: ${width},\n      height: ${height},\n      trackColor: ${trackColor},\n      fillColor: ${fillColor},\n      cornerRadius: ${cornerRadius}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var trackGroup = contents.addProperty(\"ADBE Vector Group\");\n    trackGroup.name = \"Track\";\n    var trackRect = trackGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Rect\");\n    trackRect.property(\"ADBE Vector Rect Size\").setValue([p.width, p.height]);\n    trackRect.property(\"ADBE Vector Rect Roundness\").setValue(p.cornerRadius);\n    var trackFill = trackGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    trackFill.property(\"ADBE Vector Fill Color\").setValue(p.trackColor);\n    var fillGroup = contents.addProperty(\"ADBE Vector Group\");\n    fillGroup.name = \"Fill\";\n    var fillRect = fillGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Rect\");\n    fillRect.property(\"ADBE Vector Rect Size\").setValue([p.width, p.height]);\n    fillRect.property(\"ADBE Vector Rect Roundness\").setValue(p.cornerRadius);\n    var fillFill = fillGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fillFill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    var t0 = layer.inPoint;\n    var fillTransform = fillGroup.property(\"ADBE Vector Transform Group\");\n    var fillScale = fillTransform.property(\"ADBE Vector Scale\");\n    fillScale.setValueAtTime(t0, [0, 100]);\n    fillScale.setValueAtTime(t0 + p.duration, [100, 100]);\n    for (var k = 1; k <= fillScale.numKeys; k++) {\n      fillScale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    var pos = fillTransform.property(\"ADBE Vector Position\");\n    pos.setValue([-p.width/2, 0]);\n    fillRect.property(\"ADBE Vector Rect Position\").setValue([p.width/2, 0]);\n    _result = {status:\"success\", message:\"进度条动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "radar_chart",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "雷达图动画 - 多边形雷达图使用 Trim Paths 和路径变形逐步绘制数据区域",
+    "tags": [
+      "雷达图",
+      "数据",
+      "radar",
+      "spider",
+      "data_viz"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "radius": {
+        "type": "number",
+        "min": 50,
+        "max": 400
+      },
+      "sides": {
+        "type": "integer",
+        "min": 3,
+        "max": 12
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 15
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "fillColor": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "layerName": "雷达图",
+      "duration": 2.5,
+      "radius": 150,
+      "sides": 6,
+      "strokeWidth": 3,
+      "strokeColor": [
+        0.4,
+        0.7,
+        1
+      ],
+      "fillColor": [
+        0.4,
+        0.7,
+        1,
+        0.3
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      radius: ${radius},\n      sides: ${sides},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      fillColor: ${fillColor}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Radar\";\n    var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var points = [];\n    var inTans = [];\n    var outTans = [];\n    for (var i = 0; i < p.sides; i++) {\n      var angle = (Math.PI * 2 / p.sides) * i - Math.PI / 2;\n      var r = p.radius * (0.5 + 0.5 * Math.random());\n      points.push([Math.cos(angle) * r, Math.sin(angle) * r]);\n      inTans.push([0, 0]);\n      outTans.push([0, 0]);\n    }\n    var radarPath = new Shape();\n    radarPath.vertices = points;\n    radarPath.inTangents = inTans;\n    radarPath.outTangents = outTans;\n    radarPath.closed = true;\n    path.setValue(radarPath);\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    var gridGroup = contents.addProperty(\"ADBE Vector Group\");\n    gridGroup.name = \"Grid\";\n    for (var ring = 1; ring <= 3; ring++) {\n      var ringPath = gridGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n      var rp = ringPath.property(\"ADBE Vector Shape\");\n      var rPoints = [];\n      var rTans = [];\n      for (var i = 0; i < p.sides; i++) {\n        var angle = (Math.PI * 2 / p.sides) * i - Math.PI / 2;\n        var r = p.radius * (ring / 3);\n        rPoints.push([Math.cos(angle) * r, Math.sin(angle) * r]);\n        rTans.push([0, 0]);\n      }\n      var rShape = new Shape();\n      rShape.vertices = rPoints;\n      rShape.inTangents = rTans;\n      rShape.outTangents = rTans;\n      rShape.closed = true;\n      rp.setValue(rShape);\n    }\n    var gridStroke = gridGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    gridStroke.property(\"ADBE Vector Stroke Color\").setValue([0.8, 0.8, 0.8]);\n    gridStroke.property(\"ADBE Vector Stroke Width\").setValue(1);\n    _result = {status:\"success\", message:\"雷达图动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "border_animation",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "边框动画 - 矩形边框使用 Trim Paths 逐边绘制，配合虚线流动效果",
+    "tags": [
+      "边框",
+      "矩形",
+      "border",
+      "frame",
+      "trim_paths"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "width": {
+        "type": "number",
+        "min": 100,
+        "max": 1800
+      },
+      "height": {
+        "type": "number",
+        "min": 100,
+        "max": 1000
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "dashEnabled": {
+        "type": "boolean"
+      }
+    },
+    "default_values": {
+      "layerName": "边框动画",
+      "duration": 2.0,
+      "width": 800,
+      "height": 450,
+      "strokeWidth": 4,
+      "strokeColor": [
+        0.3,
+        0.8,
+        0.9
+      ],
+      "dashEnabled": false
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      width: ${width},\n      height: ${height},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      dashEnabled: ${dashEnabled}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Border\";\n    var rect = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Rect\");\n    rect.property(\"ADBE Vector Rect Size\").setValue([p.width, p.height]);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    if (p.dashEnabled) {\n      stroke.property(\"ADBE Vector Stroke Dashes\").addProperty(\"ADBE Vector Stroke Dash 1\").setValue(15);\n      stroke.property(\"ADBE Vector Stroke Dashes\").addProperty(\"ADBE Vector Stroke Gap 1\").setValue(10);\n      stroke.property(\"ADBE Vector Stroke Dashes\").addProperty(\"ADBE Vector Stroke Offset\").expression = \"time * 30\";\n    }\n    var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    for (var k = 1; k <= trim.property(\"ADBE Vector Trim End\").numKeys; k++) {\n      trim.property(\"ADBE Vector Trim End\").setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"边框动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "corner_badge",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "角标动画 - 三角形角标从角落弹出，带有颜色填充和文字区域",
+    "tags": [
+      "角标",
+      "badge",
+      "corner",
+      "label",
+      "popup"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "size": {
+        "type": "number",
+        "min": 50,
+        "max": 400
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 20
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "corner": {
+        "type": "string",
+        "description": "角落位置: top-left/top-right/bottom-left/bottom-right"
+      }
+    },
+    "default_values": {
+      "layerName": "角标",
+      "duration": 1.0,
+      "size": 150,
+      "fillColor": [
+        1,
+        0.4,
+        0.4
+      ],
+      "strokeWidth": 0,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ],
+      "corner": "top-right"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      fillColor: ${fillColor},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      corner: ${corner}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Badge\";\n    var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var badgePath = new Shape();\n    if (p.corner === \"top-right\") {\n      badgePath.vertices = [[0, 0], [p.size, p.size], [0, p.size]];\n    } else if (p.corner === \"top-left\") {\n      badgePath.vertices = [[0, 0], [p.size, 0], [p.size, p.size]];\n    } else if (p.corner === \"bottom-right\") {\n      badgePath.vertices = [[0, 0], [p.size, 0], [0, p.size]];\n    } else {\n      badgePath.vertices = [[p.size, 0], [p.size, p.size], [0, p.size]];\n    }\n    badgePath.inTangents = [[0,0],[0,0],[0,0]];\n    badgePath.outTangents = [[0,0],[0,0],[0,0]];\n    badgePath.closed = true;\n    path.setValue(badgePath);\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    if (p.strokeWidth > 0) {\n      var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n      stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    }\n    var transform = group.property(\"ADBE Vector Transform Group\");\n    var scale = transform.property(\"ADBE Vector Scale\");\n    var t0 = layer.inPoint;\n    scale.setValueAtTime(t0, [0, 0]);\n    scale.setValueAtTime(t0 + p.duration * 0.5, [110, 110]);\n    scale.setValueAtTime(t0 + p.duration, [100, 100]);\n    for (var k = 1; k <= scale.numKeys; k++) {\n      scale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"角标动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "separator_line",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "分隔线动画 - 线条从中心向两端扩展，配合虚线流动和颜色渐变",
+    "tags": [
+      "分隔线",
+      "线条",
+      "separator",
+      "divider",
+      "expand"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "width": {
+        "type": "number",
+        "min": 50,
+        "max": 1800
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "dashEnabled": {
+        "type": "boolean"
+      }
+    },
+    "default_values": {
+      "layerName": "分隔线",
+      "duration": 1.2,
+      "width": 600,
+      "strokeWidth": 3,
+      "strokeColor": [
+        0.7,
+        0.7,
+        0.7
+      ],
+      "dashEnabled": true
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      width: ${width},\n      strokeWidth: ${strokeWidth},\n      strokeColor: ${strokeColor},\n      dashEnabled: ${dashEnabled}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Separator\";\n    var pathGroup = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pathGroup.property(\"ADBE Vector Shape\");\n    var linePath = new Shape();\n    linePath.vertices = [[-p.width/2, 0], [p.width/2, 0]];\n    linePath.inTangents = [[0,0],[0,0]];\n    linePath.outTangents = [[0,0],[0,0]];\n    linePath.closed = false;\n    path.setValue(linePath);\n    var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n    stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n    stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    stroke.property(\"ADBE Vector Stroke Line Cap\").setValue(2);\n    if (p.dashEnabled) {\n      stroke.property(\"ADBE Vector Stroke Dashes\").addProperty(\"ADBE Vector Stroke Dash 1\").setValue(10);\n      stroke.property(\"ADBE Vector Stroke Dashes\").addProperty(\"ADBE Vector Stroke Gap 1\").setValue(5);\n      stroke.property(\"ADBE Vector Stroke Dashes\").addProperty(\"ADBE Vector Stroke Offset\").expression = \"time * 20\";\n    }\n    var trim = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Trim\");\n    var t0 = layer.inPoint;\n    trim.property(\"ADBE Vector Trim Start\").setValueAtTime(t0, 50);\n    trim.property(\"ADBE Vector Trim Start\").setValueAtTime(t0 + p.duration, 0);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0, 50);\n    trim.property(\"ADBE Vector Trim End\").setValueAtTime(t0 + p.duration, 100);\n    for (var k = 1; k <= trim.property(\"ADBE Vector Trim Start\").numKeys; k++) {\n      trim.property(\"ADBE Vector Trim Start\").setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"分隔线动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "bubble_pop",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "气泡弹出动画 - 圆形气泡从底部飘出并破裂，使用 Repeater 创建多个气泡",
+    "tags": [
+      "气泡",
+      "弹出",
+      "bubble",
+      "pop",
+      "float"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "bubbleCount": {
+        "type": "integer",
+        "min": 1,
+        "max": 20
+      },
+      "maxSize": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 10
+      }
+    },
+    "default_values": {
+      "layerName": "气泡弹出",
+      "duration": 3.0,
+      "bubbleCount": 8,
+      "maxSize": 40,
+      "fillColor": [
+        0.5,
+        0.8,
+        1,
+        0.5
+      ],
+      "strokeWidth": 2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      bubbleCount: ${bubbleCount},\n      maxSize: ${maxSize},\n      fillColor: ${fillColor},\n      strokeWidth: ${strokeWidth}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    for (var i = 0; i < p.bubbleCount; i++) {\n      var group = contents.addProperty(\"ADBE Vector Group\");\n      group.name = \"Bubble\" + (i + 1);\n      var size = p.maxSize * (0.4 + 0.6 * Math.random());\n      var ellipse = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n      ellipse.property(\"ADBE Vector Ellipse Size\").setValue([size, size]);\n      var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n      fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n      if (p.strokeWidth > 0) {\n        var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n        stroke.property(\"ADBE Vector Stroke Color\").setValue([1,1,1]);\n        stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n      }\n      var transform = group.property(\"ADBE Vector Transform Group\");\n      var startX = (Math.random() - 0.5) * comp.width * 0.8;\n      var endX = startX + (Math.random() - 0.5) * 200;\n      var startY = comp.height / 2 + 200;\n      var endY = comp.height / 2 - 200;\n      transform.property(\"ADBE Vector Position\").setValueAtTime(layer.inPoint, [startX, startY]);\n      transform.property(\"ADBE Vector Position\").setValueAtTime(layer.inPoint + p.duration, [endX, endY]);\n      var scale = transform.property(\"ADBE Vector Scale\");\n      var t0 = layer.inPoint;\n      var delay = i * 0.15;\n      scale.setValueAtTime(t0 + delay, [0, 0]);\n      scale.setValueAtTime(t0 + delay + 0.3, [100, 100]);\n      scale.setValueAtTime(t0 + p.duration * 0.8, [100, 100]);\n      scale.setValueAtTime(t0 + p.duration, [0, 0]);\n      for (var k = 1; k <= scale.numKeys; k++) {\n        scale.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n      }\n    }\n    _result = {status:\"success\", message:\"气泡弹出动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "badge_pin",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "徽章图钉动画 - 圆形徽章带有图钉掉落效果，使用 Trim Paths 绘制外圈",
+    "tags": [
+      "徽章",
+      "图钉",
+      "badge",
+      "pin",
+      "drop"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "size": {
+        "type": "number",
+        "min": 30,
+        "max": 200
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "strokeColor": {
+        "type": "array"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "min": 0,
+        "max": 15
+      }
+    },
+    "default_values": {
+      "layerName": "徽章图钉",
+      "duration": 1.0,
+      "size": 80,
+      "fillColor": [
+        0.9,
+        0.3,
+        0.3
+      ],
+      "strokeColor": [
+        0.7,
+        0.1,
+        0.1
+      ],
+      "strokeWidth": 4
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      size: ${size},\n      fillColor: ${fillColor},\n      strokeColor: ${strokeColor},\n      strokeWidth: ${strokeWidth}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Badge\";\n    var ellipse = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n    ellipse.property(\"ADBE Vector Ellipse Size\").setValue([p.size, p.size]);\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    if (p.strokeWidth > 0) {\n      var stroke = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      stroke.property(\"ADBE Vector Stroke Color\").setValue(p.strokeColor);\n      stroke.property(\"ADBE Vector Stroke Width\").setValue(p.strokeWidth);\n    }\n    var pinGroup = contents.addProperty(\"ADBE Vector Group\");\n    pinGroup.name = \"Pin\";\n    var pinPath = pinGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Group\");\n    var path = pinPath.property(\"ADBE Vector Shape\");\n    var s = p.size * 0.15;\n    var pShape = new Shape();\n    pShape.vertices = [[0, -s], [s*0.5, 0], [0, s*2], [-s*0.5, 0]];\n    pShape.inTangents = [[0,0],[0,0],[0,0],[0,0]];\n    pShape.outTangents = [[0,0],[0,0],[0,0],[0,0]];\n    pShape.closed = true;\n    path.setValue(pShape);\n    var pinFill = pinGroup.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    pinFill.property(\"ADBE Vector Fill Color\").setValue([0.3, 0.3, 0.3]);\n    var pinTransform = pinGroup.property(\"ADBE Vector Transform Group\");\n    pinTransform.property(\"ADBE Vector Position\").setValue([0, -p.size/2]);\n    var t0 = layer.inPoint;\n    var pos = layer.property(\"ADBE Transform Group\").property(\"ADBE Position\");\n    pos.setValueAtTime(t0, [comp.width/2, -p.size]);\n    pos.setValueAtTime(t0 + p.duration * 0.5, [comp.width/2, comp.height/2 + 50]);\n    pos.setValueAtTime(t0 + p.duration * 0.7, [comp.width/2, comp.height/2 - 20]);\n    pos.setValueAtTime(t0 + p.duration, [comp.width/2, comp.height/2]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    var rot = layer.property(\"ADBE Transform Group\").property(\"ADBE Rotation\");\n    rot.setValueAtTime(t0, -20);\n    rot.setValueAtTime(t0 + p.duration * 0.5, 10);\n    rot.setValueAtTime(t0 + p.duration, 0);\n    _result = {status:\"success\", message:\"徽章图钉动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "particle_background",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "粒子背景动画 - 多个小圆点随机分布并缓慢浮动，使用 Repeater 和 Wiggle Paths 增加变化",
+    "tags": [
+      "粒子",
+      "背景",
+      "particle",
+      "background",
+      "float"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 1.0,
+        "max": 10.0
+      },
+      "particleCount": {
+        "type": "integer",
+        "min": 5,
+        "max": 50
+      },
+      "particleSize": {
+        "type": "number",
+        "min": 2,
+        "max": 30
+      },
+      "fillColor": {
+        "type": "array"
+      },
+      "wiggleIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "layerName": "粒子背景",
+      "duration": 5.0,
+      "particleCount": 20,
+      "particleSize": 8,
+      "fillColor": [
+        0.8,
+        0.9,
+        1,
+        0.6
+      ],
+      "wiggleIntensity": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      particleCount: ${particleCount},\n      particleSize: ${particleSize},\n      fillColor: ${fillColor},\n      wiggleIntensity: ${wiggleIntensity}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addShape();\n      layer.name = p.layerName;\n    }\n    var contents = layer.property(\"ADBE Root Vectors Group\");\n    var group = contents.addProperty(\"ADBE Vector Group\");\n    group.name = \"Particles\";\n    var ellipse = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Shape - Ellipse\");\n    ellipse.property(\"ADBE Vector Ellipse Size\").setValue([p.particleSize, p.particleSize]);\n    var fill = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Graphic - Fill\");\n    fill.property(\"ADBE Vector Fill Color\").setValue(p.fillColor);\n    if (p.wiggleIntensity > 0) {\n      var wiggle = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Wiggle\");\n      wiggle.property(\"ADBE Vector Wiggle Size\").setValue(p.wiggleIntensity);\n      wiggle.property(\"ADBE Vector Wiggle Detail\").setValue(4);\n    }\n    var repeater = group.property(\"ADBE Vectors Group\").addProperty(\"ADBE Vector Filter - Repeater\");\n    repeater.property(\"ADBE Vector Repeater Copies\").setValue(p.particleCount);\n    repeater.property(\"ADBE Vector Repeater Transform\").property(\"ADBE Vector Repeater Position\").expression = \"[random(-960, 960), random(-540, 540)]\";\n    var transform = group.property(\"ADBE Vector Transform Group\");\n    var pos = transform.property(\"ADBE Vector Position\");\n    var t0 = layer.inPoint;\n    pos.setValueAtTime(t0, [0, 0]);\n    pos.setValueAtTime(t0 + p.duration, [0, -50]);\n    var opacity = layer.property(\"ADBE Transform Group\").property(\"ADBE Opacity\");\n    opacity.setValueAtTime(t0, 0);\n    opacity.setValueAtTime(t0 + 0.5, 100);\n    opacity.setValueAtTime(t0 + p.duration - 0.5, 100);\n    opacity.setValueAtTime(t0 + p.duration, 0);\n    _result = {status:\"success\", message:\"粒子背景动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "trained_at": "2026-08-11 01:22:27",
+  "n_samples": 305,
+  "pairwise_accuracy_5fold": 0.9529,
+  "ref_real_rank": 3,
+  "feature_keys": [
+    "n_cuts",
+    "cut_rate",
+    "phase_entropy",
+    "phase_conc",
+    "shot_dur_mean",
+    "shot_dur_std",
+    "shot_dur_cv",
+    "short_shot_ratio",
+    "beat_coverage",
+    "grid_regularity",
+    "phase_mean_sin",
+    "phase_mean_cos",
+    "frac_near_015",
+    "frac_near_030",
+    "frac_offbeat",
+    "frac_near_onset",
+    "onset_claim",
+    "frac_near_beat_or_onset"
+  ],
+  "label_formula": "0.6*soft_beat + 0.4*soft_onset",
+  "upgrade_notes": "新增onset三特征; 参考片专家样本; onset标签分量"
+}

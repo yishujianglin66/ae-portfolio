@@ -1,0 +1,9 @@
+{
+  "name": "test_combo",
+  "description": "测试组合",
+  "presets": [
+    "douyin_bounce_title",
+    "cyberpunk_grade"
+  ],
+  "parameters": {}
+}

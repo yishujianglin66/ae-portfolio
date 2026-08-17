@@ -30,9 +30,14 @@ class TransitionAdapter:
 
     # 常见列名变体（仅匹配转场专用列名，避免误匹配通用表格）
     _TYPE_COLS = {"转场类型", "transition_type", "transition"}
-    _NAME_COLS = {"显示名", "display_name", "中文名"}
+    # 类型列子串匹配：列名包含 '转场' 且包含分类/类型关键词之一
+    _TYPE_SUBSTR_PRIMARY = "转场"
+    _TYPE_SUBSTR_SECONDARY = ("类型", "分类", "type")
+    _NAME_COLS = {"显示名", "display_name", "中文名", "场景转场"}
     _EFFECT_COLS = {"效果match", "effect_match"}
-    _PARAMS_COLS = {"参数", "params", "parameters"}
+    # 效果列子串匹配：列名同时包含 'ae' 和以下关键词之一
+    _EFFECT_SUBSTR_KEYWORDS = ("效果", "原子", "原生", "工程方案", "对应", "match", "名称")
+    _PARAMS_COLS = {"参数", "params", "parameters", "参数与动画描述", "动画描述", "参数描述"}
 
     def __init__(self) -> None:
         self._table_extractor = TableExtractor()
@@ -64,9 +69,9 @@ class TransitionAdapter:
                 continue
 
             headers = list(rows[0].columns.keys())
-            type_col = self._find_column(headers, self._TYPE_COLS)
+            type_col = self._find_type_column(headers)
             name_col = self._find_column(headers, self._NAME_COLS)
-            effect_col = self._find_column(headers, self._EFFECT_COLS)
+            effect_col = self._find_effect_column(headers)
             params_col = self._find_column(headers, self._PARAMS_COLS)
 
             # 必须同时有类型列和效果列才视为转场配方表
@@ -246,5 +251,44 @@ class TransitionAdapter:
         """在表头中查找匹配候选名称的列。"""
         for h in headers:
             if h.lower().strip() in candidates:
+                return h
+        return None
+
+    def _find_effect_column(self, headers: List[str]) -> Optional[str]:
+        """查找效果列：先精确匹配，再子串匹配（ae + 关键词），最后宽松匹配任何AE列。"""
+        # 精确匹配
+        exact = self._find_column(headers, self._EFFECT_COLS)
+        if exact:
+            return exact
+        # 子串匹配：列名包含 'ae' 且包含关键词之一
+        for h in headers:
+            low = h.lower().strip()
+            if 'ae' in low and any(kw in low for kw in self._EFFECT_SUBSTR_KEYWORDS):
+                return h
+        # 宽松匹配：任何包含 'ae' 的列（排除“AE实现脚本”等纯代码列）
+        for h in headers:
+            low = h.lower().strip()
+            if 'ae' in low and '脚本' not in low and 'script' not in low:
+                return h
+        return None
+
+    def _find_type_column(self, headers: List[str]) -> Optional[str]:
+        """查找类型列：先精确匹配，再子串匹配（包含转场 + 分类/类型）。"""
+        exact = self._find_column(headers, self._TYPE_COLS)
+        if exact:
+            return exact
+        # 子串匹配：列名包含 '转场' 且包含分类/类型关键词
+        for h in headers:
+            low = h.lower().strip()
+            if self._TYPE_SUBSTR_PRIMARY in low and any(
+                kw in low for kw in self._TYPE_SUBSTR_SECONDARY
+            ):
+                return h
+        # 宽松匹配：列名包含 '转场' 且不是纯描述列（排除“转场描述”“转场场景”等）
+        for h in headers:
+            low = h.lower().strip()
+            if self._TYPE_SUBSTR_PRIMARY in low and not any(
+                skip in low for skip in ("描述", "场景", "时长", "特点")
+            ):
                 return h
         return None

@@ -1,0 +1,2799 @@
+[
+  {
+    "name": "cyber_glitch_transition",
+    "category": "transition",
+    "subcategory": "cyberpunk",
+    "description": "赛博朋克故障转场 - 模拟数字信号干扰，包含RGB分离、像素化、扫描线抖动",
+    "tags": [
+      "赛博朋克",
+      "故障",
+      "glitch",
+      "transition",
+      "cyberpunk"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "glitchIntensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      },
+      "rgbShiftAmount": {
+        "type": "number",
+        "min": 1,
+        "max": 50
+      },
+      "scanlineCount": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "glitchIntensity": 0.7,
+      "rgbShiftAmount": 20,
+      "scanlineCount": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      glitchIntensity: ${glitchIntensity},\n      rgbShiftAmount: ${rgbShiftAmount},\n      scanlineCount: ${scanlineCount}\n    };\n    var transitionLayer = comp.layers.addSolid([0, 0, 0], \"Glitch Transition\", comp.width, comp.height, 1);\n    transitionLayer.inPoint = comp.time;\n    transitionLayer.outPoint = comp.time + p.duration;\n    transitionLayer.opacity.setValueAtTime(comp.time, 100);\n    transitionLayer.opacity.setValueAtTime(comp.time + p.duration, 0);\n    var shift = transitionLayer.Effects.addProperty(\"ADBE Shift Channels\");\n    shift.property(\"ADBE Shift Channels-0001\").setValue(\"Red\");\n    shift.property(\"ADBE Shift Channels-0002\").setValue(\"Green\");\n    shift.property(\"ADBE Shift Channels-0003\").setValue(\"Blue\");\n    var cc = transitionLayer.Effects.addProperty(\"ADBE Channel Combiner\");\n    _result = {status:\"success\", message:\"赛博朋克故障转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "film_fade_transition",
+    "category": "transition",
+    "subcategory": "cinematic",
+    "description": "电影淡入淡出转场 - 平滑的淡入淡出效果，模拟电影胶片切换",
+    "tags": [
+      "电影",
+      "fade",
+      "transition",
+      "cinematic",
+      "smooth"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "fadeColor": {
+        "type": "array"
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 1.5,
+      "fadeColor": [
+        0,
+        0,
+        0
+      ],
+      "easing": "easeInOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      fadeColor: ${fadeColor},\n      easing: ${easing}\n    };\n    var fadeLayer = comp.layers.addSolid(p.fadeColor, \"Film Fade\", comp.width, comp.height, 1);\n    fadeLayer.inPoint = comp.time;\n    fadeLayer.outPoint = comp.time + p.duration;\n    fadeLayer.opacity.setValueAtTime(comp.time, 0);\n    fadeLayer.opacity.setValueAtTime(comp.time + p.duration / 2, 100);\n    fadeLayer.opacity.setValueAtTime(comp.time + p.duration, 0);\n    for (var k = 1; k <= fadeLayer.opacity.numKeys; k++) {\n      fadeLayer.opacity.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"电影淡入淡出转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "zoom_blur_transition",
+    "category": "transition",
+    "subcategory": "dynamic",
+    "description": "缩放模糊转场 - 从中心点向外缩放并模糊，模拟快速移动效果",
+    "tags": [
+      "缩放",
+      "zoom",
+      "模糊",
+      "blur",
+      "transition",
+      "dynamic"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "zoomAmount": {
+        "type": "number",
+        "min": 100,
+        "max": 500
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "centerX": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "centerY": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "zoomAmount": 300,
+      "blurAmount": 50,
+      "centerX": 50,
+      "centerY": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      zoomAmount: ${zoomAmount},\n      blurAmount: ${blurAmount},\n      centerX: ${centerX},\n      centerY: ${centerY}\n    };\n    var adjustmentLayer = comp.layers.addAdjustmentLayer();\n    adjustmentLayer.inPoint = comp.time;\n    adjustmentLayer.outPoint = comp.time + p.duration;\n    var zoomBlur = adjustmentLayer.Effects.addProperty(\"ADBE Zoom Blur\");\n    zoomBlur.property(\"ADBE Zoom Blur-0001\").setValueAtTime(comp.time, p.blurAmount);\n    zoomBlur.property(\"ADBE Zoom Blur-0001\").setValueAtTime(comp.time + p.duration, 0);\n    zoomBlur.property(\"ADBE Zoom Blur-0002\").setValue([comp.width * p.centerX / 100, comp.height * p.centerY / 100]);\n    _result = {status:\"success\", message:\"缩放模糊转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "slide_transition",
+    "category": "transition",
+    "subcategory": "classic",
+    "description": "滑动转场 - 新画面从一侧滑入，覆盖旧画面",
+    "tags": [
+      "滑动",
+      "slide",
+      "transition",
+      "classic",
+      "simple"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "direction": {
+        "type": "string"
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 0.6,
+      "direction": "right",
+      "easing": "easeOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      direction: ${direction},\n      easing: ${easing}\n    };\n    var slideLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Slide Transition\", comp.width, comp.height, 1);\n    slideLayer.inPoint = comp.time;\n    slideLayer.outPoint = comp.time + p.duration;\n    var pos = slideLayer.property(\"Position\");\n    var startX = p.direction === \"right\" ? -comp.width : (p.direction === \"left\" ? comp.width * 2 : comp.width / 2);\n    var startY = p.direction === \"up\" ? comp.height * 2 : (p.direction === \"down\" ? -comp.height : comp.height / 2);\n    pos.setValueAtTime(comp.time, [startX, comp.height / 2]);\n    pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"滑动转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "page_flip_transition",
+    "category": "transition",
+    "subcategory": "3d",
+    "description": "翻页转场 - 模拟翻书效果，3D翻转动画",
+    "tags": [
+      "翻页",
+      "page_flip",
+      "3d",
+      "transition",
+      "book"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "flipAxis": {
+        "type": "string"
+      },
+      "perspective": {
+        "type": "number",
+        "min": 100,
+        "max": 2000
+      }
+    },
+    "default_values": {
+      "duration": 1.2,
+      "flipAxis": "horizontal",
+      "perspective": 500
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      flipAxis: ${flipAxis},\n      perspective: ${perspective}\n    };\n    var flipLayer = comp.layers.addSolid([1, 1, 1], \"Page Flip\", comp.width, comp.height, 1);\n    flipLayer.inPoint = comp.time;\n    flipLayer.outPoint = comp.time + p.duration;\n    flipLayer.threeDLayer = true;\n    comp.activeCamera.pointOfInterest.setValue([comp.width / 2, comp.height / 2, 0]);\n    comp.activeCamera.position.setValue([comp.width / 2, comp.height / 2, p.perspective]);\n    var rotation = flipLayer.property(\"Rotation\");\n    rotation.setValueAtTime(comp.time, p.flipAxis === \"horizontal\" ? [0, 0, 0] : [0, 0, 0]);\n    rotation.setValueAtTime(comp.time + p.duration, p.flipAxis === \"horizontal\" ? [0, 360, 0] : [360, 0, 0]);\n    _result = {status:\"success\", message:\"翻页转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "light_sweep_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "光斑扫过转场 - 一道明亮的光带从画面一侧扫过，揭示新场景",
+    "tags": [
+      "光效",
+      "光斑",
+      "sweep",
+      "light",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "sweepAngle": {
+        "type": "number",
+        "min": 0,
+        "max": 360
+      },
+      "sweepWidth": {
+        "type": "number",
+        "min": 10,
+        "max": 500
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      },
+      "color": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "sweepAngle": 0,
+      "sweepWidth": 200,
+      "intensity": 0.8,
+      "color": [
+        1,
+        1,
+        1
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      sweepAngle: ${sweepAngle},\n      sweepWidth: ${sweepWidth},\n      intensity: ${intensity},\n      color: ${color}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var sweep = adj.Effects.addProperty(\"ADBE Light Sweep\");\n    sweep.property(\"ADBE Light Sweep-0001\").setValue([comp.width / 2, comp.height / 2]);\n    sweep.property(\"ADBE Light Sweep-0002\").setValue(p.sweepAngle);\n    sweep.property(\"ADBE Light Sweep-0003\").setValue(p.sweepWidth);\n    sweep.property(\"ADBE Light Sweep-0005\").setValue(p.intensity);\n    sweep.property(\"ADBE Light Sweep-0006\").setValue(p.color);\n    sweep.property(\"ADBE Light Sweep-0001\").expression = \"[thisComp.width/2 + (time-inPoint)/\" + p.duration + \" * thisComp.width, thisComp.height/2]\";\n    _result = {status:\"success\", message:\"光斑扫过转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "halo_expand_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "光晕扩散转场 - 光晕从中心点向外扩散，逐渐覆盖整个画面",
+    "tags": [
+      "光效",
+      "光晕",
+      "halo",
+      "expand",
+      "light",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "centerX": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "centerY": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "maxRadius": {
+        "type": "number",
+        "min": 100,
+        "max": 2000
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "duration": 1.2,
+      "centerX": 50,
+      "centerY": 50,
+      "maxRadius": 800,
+      "intensity": 0.9
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      centerX: ${centerX},\n      centerY: ${centerY},\n      maxRadius: ${maxRadius},\n      intensity: ${intensity}\n    };\n    var haloLayer = comp.layers.addSolid([1, 1, 1], \"Halo Expand\", comp.width, comp.height, 1);\n    haloLayer.inPoint = comp.time;\n    haloLayer.outPoint = comp.time + p.duration;\n    haloLayer.opacity.setValueAtTime(comp.time, 0);\n    haloLayer.opacity.setValueAtTime(comp.time + p.duration * 0.5, p.intensity * 100);\n    haloLayer.opacity.setValueAtTime(comp.time + p.duration, 0);\n    var glow = haloLayer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0001\").setValue([1, 0.9, 0.7]);\n    glow.property(\"ADBE Glow Radius-0001\").setValueAtTime(comp.time, 10);\n    glow.property(\"ADBE Glow Radius-0001\").setValueAtTime(comp.time + p.duration, p.maxRadius);\n    var mask = haloLayer.Masks.addProperty(\"ADBE Mask Atom\");\n    mask.maskShape.setValueAtTime(comp.time, [0, 0]);\n    _result = {status:\"success\", message:\"光晕扩散转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "light_pierce_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "光线穿透转场 - 强烈光线穿透画面，模拟阳光穿过云层的丁达尔效应",
+    "tags": [
+      "光效",
+      "穿透",
+      "pierce",
+      "light",
+      "transition",
+      "god_ray"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "rayLength": {
+        "type": "number",
+        "min": 100,
+        "max": 2000
+      },
+      "rayIntensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      },
+      "rayCount": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "color": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "rayLength": 800,
+      "rayIntensity": 0.7,
+      "rayCount": 5,
+      "color": [
+        1,
+        0.95,
+        0.8
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      rayLength: ${rayLength},\n      rayIntensity: ${rayIntensity},\n      rayCount: ${rayCount},\n      color: ${color}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Light Pierce\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    adj.opacity.setValueAtTime(comp.time, 0);\n    adj.opacity.setValueAtTime(comp.time + p.duration * 0.5, p.rayIntensity * 100);\n    adj.opacity.setValueAtTime(comp.time + p.duration, 0);\n    var ccRays = adj.Effects.addProperty(\"ADBE CC Light Rays\");\n    ccRays.property(\"ADBE CC Light Rays-0001\").setValue([comp.width / 2, comp.height / 2]);\n    ccRays.property(\"ADBE CC Light Rays-0002\").setValue(p.rayLength);\n    ccRays.property(\"ADBE CC Light Rays-0003\").setValue(p.rayIntensity * 100);\n    ccRays.property(\"ADBE CC Light Rays-0004\").setValue(p.color);\n    _result = {status:\"success\", message:\"光线穿透转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "lens_flare_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "镜头光晕转场 - 模拟镜头光晕扫过画面，从一侧移动到另一侧",
+    "tags": [
+      "光效",
+      "镜头光晕",
+      "lens_flare",
+      "light",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "flareBrightness": {
+        "type": "number",
+        "min": 10,
+        "max": 300
+      },
+      "flareType": {
+        "type": "number",
+        "min": 50,
+        "max": 105
+      },
+      "startX": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "endX": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 1.5,
+      "flareBrightness": 100,
+      "flareType": 105,
+      "startX": 0,
+      "endX": 100
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      flareBrightness: ${flareBrightness},\n      flareType: ${flareType},\n      startX: ${startX},\n      endX: ${endX}\n    };\n    var flareLayer = comp.layers.addSolid([0, 0, 0], \"Lens Flare\", comp.width, comp.height, 1);\n    flareLayer.inPoint = comp.time;\n    flareLayer.outPoint = comp.time + p.duration;\n    var flare = flareLayer.Effects.addProperty(\"ADBE Lens Flare\");\n    flare.property(\"ADBE Lens Flare-0001\").setValueAtTime(comp.time, [comp.width * p.startX / 100, comp.height / 2]);\n    flare.property(\"ADBE Lens Flare-0001\").setValueAtTime(comp.time + p.duration, [comp.width * p.endX / 100, comp.height / 2]);\n    flare.property(\"ADBE Lens Flare-0002\").setValue(p.flareBrightness);\n    flare.property(\"ADBE Lens Flare-0003\").setValue(p.flareType);\n    flareLayer.blendingMode = BlendingMode.ADD;\n    _result = {status:\"success\", message:\"镜头光晕转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "tyndall_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "丁达尔效应转场 - 模拟光线穿过雾气产生的丁达尔光束效果",
+    "tags": [
+      "光效",
+      "丁达尔",
+      "tyndall",
+      "god_ray",
+      "fog",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.8,
+        "max": 4.0
+      },
+      "beamIntensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      },
+      "beamAngle": {
+        "type": "number",
+        "min": 0,
+        "max": 360
+      },
+      "fogDensity": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "color": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "duration": 2.0,
+      "beamIntensity": 0.6,
+      "beamAngle": 45,
+      "fogDensity": 40,
+      "color": [
+        1,
+        0.9,
+        0.6
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      beamIntensity: ${beamIntensity},\n      beamAngle: ${beamAngle},\n      fogDensity: ${fogDensity},\n      color: ${color}\n    };\n    var fogLayer = comp.layers.addSolid(p.color, \"Tyndall Fog\", comp.width, comp.height, 1);\n    fogLayer.inPoint = comp.time;\n    fogLayer.outPoint = comp.time + p.duration;\n    fogLayer.opacity.setValueAtTime(comp.time, 0);\n    fogLayer.opacity.setValueAtTime(comp.time + p.duration * 0.5, p.beamIntensity * 80);\n    fogLayer.opacity.setValueAtTime(comp.time + p.duration, 0);\n    fogLayer.blendingMode = BlendingMode.ADD;\n    var rays = fogLayer.Effects.addProperty(\"ADBE CC Light Rays\");\n    rays.property(\"ADBE CC Light Rays-0001\").setValue([comp.width / 2, comp.height / 2]);\n    rays.property(\"ADBE CC Light Rays-0002\").setValue(p.beamAngle);\n    rays.property(\"ADBE CC Light Rays-0003\").setValue(p.beamIntensity * 100);\n    rays.property(\"ADBE CC Light Rays-0004\").setValue(p.color);\n    var noise = fogLayer.Effects.addProperty(\"ADBE Fractal Noise\");\n    noise.property(\"ADBE Fractal Noise-0001\").setValue(p.fogDensity);\n    _result = {status:\"success\", message:\"丁达尔效应转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "flash_cut_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "闪光切换转场 - 强烈白光闪现后切换到新场景，模拟相机闪光灯",
+    "tags": [
+      "光效",
+      "闪光",
+      "flash",
+      "cut",
+      "light",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.2,
+        "max": 1.5
+      },
+      "flashColor": {
+        "type": "array"
+      },
+      "peakIntensity": {
+        "type": "number",
+        "min": 50,
+        "max": 100
+      },
+      "flashCount": {
+        "type": "number",
+        "min": 1,
+        "max": 5
+      },
+      "fadeSpeed": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "duration": 0.5,
+      "flashColor": [
+        1,
+        1,
+        1
+      ],
+      "peakIntensity": 100,
+      "flashCount": 1,
+      "fadeSpeed": 0.5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      flashColor: ${flashColor},\n      peakIntensity: ${peakIntensity},\n      flashCount: ${flashCount},\n      fadeSpeed: ${fadeSpeed}\n    };\n    var flashLayer = comp.layers.addSolid(p.flashColor, \"Flash Cut\", comp.width, comp.height, 1);\n    flashLayer.inPoint = comp.time;\n    flashLayer.outPoint = comp.time + p.duration;\n    var segDur = p.duration / p.flashCount;\n    for (var i = 0; i < p.flashCount; i++) {\n      var t0 = comp.time + i * segDur;\n      var t1 = t0 + segDur * p.fadeSpeed;\n      flashLayer.opacity.setValueAtTime(t0, 0);\n      flashLayer.opacity.setValueAtTime(t0 + segDur * 0.1, p.peakIntensity);\n      flashLayer.opacity.setValueAtTime(t1, 0);\n    }\n    for (var k = 1; k <= flashLayer.opacity.numKeys; k++) {\n      flashLayer.opacity.setInterpolationTypeAtKey(k, KeyframeInterpolationType.LINEAR, KeyframeInterpolationType.LINEAR);\n    }\n    flashLayer.blendingMode = BlendingMode.ADD;\n    _result = {status:\"success\", message:\"闪光切换转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "light_leak_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "漏光转场 - 模拟胶片漏光效果，柔和的彩色光晕从边缘渗入",
+    "tags": [
+      "光效",
+      "漏光",
+      "light_leak",
+      "vintage",
+      "film",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "leakColor": {
+        "type": "array"
+      },
+      "leakSize": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "leakPosition": {
+        "type": "string"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "duration": 1.5,
+      "leakColor": [
+        1,
+        0.6,
+        0.3
+      ],
+      "leakSize": 200,
+      "leakPosition": "top",
+      "intensity": 0.6
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      leakColor: ${leakColor},\n      leakSize: ${leakSize},\n      leakPosition: ${leakPosition},\n      intensity: ${intensity}\n    };\n    var leakLayer = comp.layers.addSolid(p.leakColor, \"Light Leak\", comp.width, comp.height, 1);\n    leakLayer.inPoint = comp.time;\n    leakLayer.outPoint = comp.time + p.duration;\n    leakLayer.opacity.setValueAtTime(comp.time, 0);\n    leakLayer.opacity.setValueAtTime(comp.time + p.duration * 0.4, p.intensity * 100);\n    leakLayer.opacity.setValueAtTime(comp.time + p.duration, 0);\n    leakLayer.blendingMode = BlendingMode.SCREEN;\n    var glow = leakLayer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0001\").setValue(p.leakColor);\n    glow.property(\"ADBE Glow Radius-0001\").setValue(p.leakSize);\n    glow.property(\"ADBE Glow Intensity-0001\").setValue(p.intensity * 2);\n    var pos = p.leakPosition === \"top\" ? [comp.width / 2, 0] : (p.leakPosition === \"bottom\" ? [comp.width / 2, comp.height] : (p.leakPosition === \"left\" ? [0, comp.height / 2] : [comp.width, comp.height / 2]));\n    leakLayer.property(\"Position\").setValue(pos);\n    _result = {status:\"success\", message:\"漏光转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "aurora_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "极光转场 - 模拟极光波动的彩色光带流动效果，梦幻神秘",
+    "tags": [
+      "光效",
+      "极光",
+      "aurora",
+      "dreamy",
+      "colorful",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 1.0,
+        "max": 5.0
+      },
+      "waveSpeed": {
+        "type": "number",
+        "min": 0.1,
+        "max": 5.0
+      },
+      "colorA": {
+        "type": "array"
+      },
+      "colorB": {
+        "type": "array"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "duration": 2.5,
+      "waveSpeed": 1.5,
+      "colorA": [
+        0.2,
+        0.8,
+        0.6
+      ],
+      "colorB": [
+        0.5,
+        0.3,
+        0.9
+      ],
+      "intensity": 0.7
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      waveSpeed: ${waveSpeed},\n      colorA: ${colorA},\n      colorB: ${colorB},\n      intensity: ${intensity}\n    };\n    var auroraLayer = comp.layers.addSolid(p.colorA, \"Aurora\", comp.width, comp.height, 1);\n    auroraLayer.inPoint = comp.time;\n    auroraLayer.outPoint = comp.time + p.duration;\n    auroraLayer.opacity.setValueAtTime(comp.time, 0);\n    auroraLayer.opacity.setValueAtTime(comp.time + p.duration * 0.5, p.intensity * 90);\n    auroraLayer.opacity.setValueAtTime(comp.time + p.duration, 0);\n    auroraLayer.blendingMode = BlendingMode.SCREEN;\n    var noise = auroraLayer.Effects.addProperty(\"ADBE Fractal Noise\");\n    noise.property(\"ADBE Fractal Noise-0001\").setValue(80);\n    noise.property(\"ADBE Fractal Noise-0010\").expression = \"time * \" + p.waveSpeed;\n    noise.property(\"ADBE Fractal Noise-0008\").setValue(p.intensity);\n    var cc = auroraLayer.Effects.addProperty(\"ADBE Color Balance (HLS)\");\n    cc.property(\"ADBE Color Balance (HLS)-0002\").expression = \"Math.sin(time * \" + p.waveSpeed + \") * 60\";\n    _result = {status:\"success\", message:\"极光转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "star_diffuse_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "星光扩散转场 - 星形光芒从中心扩散，伴随闪烁效果",
+    "tags": [
+      "光效",
+      "星光",
+      "star",
+      "diffuse",
+      "twinkle",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "starPoints": {
+        "type": "number",
+        "min": 4,
+        "max": 12
+      },
+      "rayLength": {
+        "type": "number",
+        "min": 50,
+        "max": 1000
+      },
+      "twinkleSpeed": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "duration": 1.2,
+      "starPoints": 6,
+      "rayLength": 400,
+      "twinkleSpeed": 8,
+      "intensity": 0.8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      starPoints: ${starPoints},\n      rayLength: ${rayLength},\n      twinkleSpeed: ${twinkleSpeed},\n      intensity: ${intensity}\n    };\n    var starLayer = comp.layers.addSolid([1, 1, 1], \"Star Diffuse\", comp.width, comp.height, 1);\n    starLayer.inPoint = comp.time;\n    starLayer.outPoint = comp.time + p.duration;\n    starLayer.opacity.setValueAtTime(comp.time, 0);\n    starLayer.opacity.setValueAtTime(comp.time + p.duration * 0.5, p.intensity * 100);\n    starLayer.opacity.setValueAtTime(comp.time + p.duration, 0);\n    starLayer.blendingMode = BlendingMode.ADD;\n    var glow = starLayer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0001\").setValue([1, 1, 0.9]);\n    glow.property(\"ADBE Glow Radius-0001\").setValue(p.rayLength / 4);\n    glow.property(\"ADBE Glow Intensity-0001\").expression = \"Math.sin(time * \" + p.twinkleSpeed + \") * 0.3 + 0.7\";\n    var sc = starLayer.property(\"Scale\");\n    sc.setValueAtTime(comp.time, [10, 10]);\n    sc.setValueAtTime(comp.time + p.duration, [p.rayLength / 4, p.rayLength / 4]);\n    _result = {status:\"success\", message:\"星光扩散转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "neon_sweep_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "霓虹扫光转场 - 霓虹色光带横扫画面，带有强烈发光和色彩",
+    "tags": [
+      "光效",
+      "霓虹",
+      "neon",
+      "sweep",
+      "glow",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "neonColor": {
+        "type": "array"
+      },
+      "sweepWidth": {
+        "type": "number",
+        "min": 20,
+        "max": 300
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "direction": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "neonColor": [
+        1,
+        0.2,
+        0.8
+      ],
+      "sweepWidth": 100,
+      "glowRadius": 40,
+      "direction": "horizontal"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      neonColor: ${neonColor},\n      sweepWidth: ${sweepWidth},\n      glowRadius: ${glowRadius},\n      direction: ${direction}\n    };\n    var neonLayer = comp.layers.addSolid(p.neonColor, \"Neon Sweep\", comp.width, comp.height, 1);\n    neonLayer.inPoint = comp.time;\n    neonLayer.outPoint = comp.time + p.duration;\n    neonLayer.blendingMode = BlendingMode.ADD;\n    var pos = neonLayer.property(\"Position\");\n    if (p.direction === \"horizontal\") {\n      pos.setValueAtTime(comp.time, [-p.sweepWidth, comp.height / 2]);\n      pos.setValueAtTime(comp.time + p.duration, [comp.width + p.sweepWidth, comp.height / 2]);\n    } else {\n      pos.setValueAtTime(comp.time, [comp.width / 2, -p.sweepWidth]);\n      pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height + p.sweepWidth]);\n    }\n    var glow = neonLayer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0001\").setValue(p.neonColor);\n    glow.property(\"ADBE Glow Radius-0001\").setValue(p.glowRadius);\n    glow.property(\"ADBE Glow Intensity-0001\").setValue(2.5);\n    _result = {status:\"success\", message:\"霓虹扫光转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "directional_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "方向模糊转场 - 沿指定方向产生强烈模糊，模拟高速移动",
+    "tags": [
+      "模糊",
+      "方向",
+      "directional",
+      "blur",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "blurLength": {
+        "type": "number",
+        "min": 0,
+        "max": 200
+      },
+      "angle": {
+        "type": "number",
+        "min": 0,
+        "max": 360
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 0.6,
+      "blurLength": 100,
+      "angle": 0,
+      "easing": "easeInOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      blurLength: ${blurLength},\n      angle: ${angle},\n      easing: ${easing}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Directional Blur\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var blur = adj.Effects.addProperty(\"ADBE Directional Blur\");\n    blur.property(\"ADBE Directional Blur-0001\").setValueAtTime(comp.time, 0);\n    blur.property(\"ADBE Directional Blur-0001\").setValueAtTime(comp.time + p.duration * 0.5, p.blurLength);\n    blur.property(\"ADBE Directional Blur-0001\").setValueAtTime(comp.time + p.duration, 0);\n    blur.property(\"ADBE Directional Blur-0002\").setValue(p.angle);\n    for (var k = 1; k <= blur.property(\"ADBE Directional Blur-0001\").numKeys; k++) {\n      blur.property(\"ADBE Directional Blur-0001\").setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"方向模糊转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "radial_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "径向模糊转场 - 从中心点向外辐射的模糊效果，模拟旋转或缩放",
+    "tags": [
+      "模糊",
+      "径向",
+      "radial",
+      "blur",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "blurType": {
+        "type": "string"
+      },
+      "centerX": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "centerY": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 0.7,
+      "blurAmount": 60,
+      "blurType": "spin",
+      "centerX": 50,
+      "centerY": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      blurAmount: ${blurAmount},\n      blurType: ${blurType},\n      centerX: ${centerX},\n      centerY: ${centerY}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Radial Blur\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var blur = adj.Effects.addProperty(\"ADBE Radial Blur\");\n    blur.property(\"ADBE Radial Blur-0001\").setValue([comp.width * p.centerX / 100, comp.height * p.centerY / 100]);\n    blur.property(\"ADBE Radial Blur-0002\").setValueAtTime(comp.time, 0);\n    blur.property(\"ADBE Radial Blur-0002\").setValueAtTime(comp.time + p.duration * 0.5, p.blurAmount);\n    blur.property(\"ADBE Radial Blur-0002\").setValueAtTime(comp.time + p.duration, 0);\n    blur.property(\"ADBE Radial Blur-0003\").setValue(p.blurType === \"spin\" ? 1 : 2);\n    _result = {status:\"success\", message:\"径向模糊转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "gaussian_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "高斯模糊转场 - 平滑的高斯模糊过渡，经典柔和切换效果",
+    "tags": [
+      "模糊",
+      "高斯",
+      "gaussian",
+      "blur",
+      "smooth",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 200
+      },
+      "repeatEdgePixels": {
+        "type": "boolean"
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "blurAmount": 80,
+      "repeatEdgePixels": true
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      blurAmount: ${blurAmount},\n      repeatEdgePixels: ${repeatEdgePixels}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Gaussian Blur\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var blur = adj.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValueAtTime(comp.time, 0);\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValueAtTime(comp.time + p.duration * 0.5, p.blurAmount);\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValueAtTime(comp.time + p.duration, 0);\n    blur.property(\"ADBE Gaussian Blur 2-0002\").setValue(p.repeatEdgePixels ? 1 : 0);\n    for (var k = 1; k <= blur.property(\"ADBE Gaussian Blur 2-0001\").numKeys; k++) {\n      blur.property(\"ADBE Gaussian Blur 2-0001\").setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"高斯模糊转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "motion_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "运动模糊转场 - 模拟高速运动产生的方向性模糊，动感强烈",
+    "tags": [
+      "模糊",
+      "运动",
+      "motion",
+      "blur",
+      "dynamic",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "shutterAngle": {
+        "type": "number",
+        "min": 0,
+        "max": 720
+      },
+      "direction": {
+        "type": "string"
+      },
+      "distance": {
+        "type": "number",
+        "min": 0,
+        "max": 500
+      }
+    },
+    "default_values": {
+      "duration": 0.5,
+      "shutterAngle": 360,
+      "direction": "horizontal",
+      "distance": 200
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      shutterAngle: ${shutterAngle},\n      direction: ${direction},\n      distance: ${distance}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Motion Blur\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    comp.motionBlurEnabled = true;\n    comp.shutterAngle = p.shutterAngle;\n    adj.motionBlur = true;\n    var pos = adj.property(\"Position\");\n    if (p.direction === \"horizontal\") {\n      pos.setValueAtTime(comp.time, [comp.width / 2 - p.distance, comp.height / 2]);\n      pos.setValueAtTime(comp.time + p.duration * 0.5, [comp.width / 2, comp.height / 2]);\n      pos.setValueAtTime(comp.time + p.duration, [comp.width / 2 + p.distance, comp.height / 2]);\n    } else {\n      pos.setValueAtTime(comp.time, [comp.width / 2, comp.height / 2 - p.distance]);\n      pos.setValueAtTime(comp.time + p.duration * 0.5, [comp.width / 2, comp.height / 2]);\n      pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2 + p.distance]);\n    }\n    _result = {status:\"success\", message:\"运动模糊转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "channel_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "通道模糊转场 - 对RGB各通道独立施加不同模糊量，产生色彩偏移效果",
+    "tags": [
+      "模糊",
+      "通道",
+      "channel",
+      "blur",
+      "rgb",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "redBlur": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "greenBlur": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "blueBlur": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "edgeBehavior": {
+        "type": "boolean"
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "redBlur": 30,
+      "greenBlur": 50,
+      "blueBlur": 70,
+      "edgeBehavior": true
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      redBlur: ${redBlur},\n      greenBlur: ${greenBlur},\n      blueBlur: ${blueBlur},\n      edgeBehavior: ${edgeBehavior}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Channel Blur\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var blur = adj.Effects.addProperty(\"ADBE Channel Blur\");\n    blur.property(\"ADBE Channel Blur-0001\").setValueAtTime(comp.time, 0);\n    blur.property(\"ADBE Channel Blur-0001\").setValueAtTime(comp.time + p.duration * 0.5, p.redBlur);\n    blur.property(\"ADBE Channel Blur-0001\").setValueAtTime(comp.time + p.duration, 0);\n    blur.property(\"ADBE Channel Blur-0002\").setValueAtTime(comp.time, 0);\n    blur.property(\"ADBE Channel Blur-0002\").setValueAtTime(comp.time + p.duration * 0.5, p.greenBlur);\n    blur.property(\"ADBE Channel Blur-0002\").setValueAtTime(comp.time + p.duration, 0);\n    blur.property(\"ADBE Channel Blur-0003\").setValueAtTime(comp.time, 0);\n    blur.property(\"ADBE Channel Blur-0003\").setValueAtTime(comp.time + p.duration * 0.5, p.blueBlur);\n    blur.property(\"ADBE Channel Blur-0003\").setValueAtTime(comp.time + p.duration, 0);\n    blur.property(\"ADBE Channel Blur-0005\").setValue(p.edgeBehavior ? 1 : 0);\n    _result = {status:\"success\", message:\"通道模糊转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "lens_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "镜头模糊转场 - 模拟真实相机镜头的景深模糊效果，散景柔和自然",
+    "tags": [
+      "模糊",
+      "镜头",
+      "lens",
+      "blur",
+      "bokeh",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "blurRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "irisShape": {
+        "type": "number",
+        "min": 1,
+        "max": 8
+      },
+      "irisRadius": {
+        "type": "number",
+        "min": 1,
+        "max": 50
+      },
+      "specularBrightness": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 1.2,
+      "blurRadius": 50,
+      "irisShape": 4,
+      "irisRadius": 20,
+      "specularBrightness": 30
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      blurRadius: ${blurRadius},\n      irisShape: ${irisShape},\n      irisRadius: ${irisRadius},\n      specularBrightness: ${specularBrightness}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Lens Blur\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var blur = adj.Effects.addProperty(\"ADBE Lens Blur\");\n    blur.property(\"ADBE Lens Blur-0001\").setValueAtTime(comp.time, 0);\n    blur.property(\"ADBE Lens Blur-0001\").setValueAtTime(comp.time + p.duration * 0.5, p.blurRadius);\n    blur.property(\"ADBE Lens Blur-0001\").setValueAtTime(comp.time + p.duration, 0);\n    blur.property(\"ADBE Lens Blur-0002\").setValue(p.irisShape);\n    blur.property(\"ADBE Lens Blur-0003\").setValue(p.irisRadius);\n    blur.property(\"ADBE Lens Blur-0010\").setValue(p.specularBrightness);\n    _result = {status:\"success\", message:\"镜头模糊转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "tilt_shift_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "倾斜偏移转场 - 移轴模糊效果，模拟微缩景观视觉",
+    "tags": [
+      "模糊",
+      "移轴",
+      "tilt_shift",
+      "blur",
+      "miniature",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "blurCenter": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "blurWidth": {
+        "type": "number",
+        "min": 10,
+        "max": 500
+      },
+      "angle": {
+        "type": "number",
+        "min": 0,
+        "max": 360
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "blurAmount": 40,
+      "blurCenter": 50,
+      "blurWidth": 100,
+      "angle": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      blurAmount: ${blurAmount},\n      blurCenter: ${blurCenter},\n      blurWidth: ${blurWidth},\n      angle: ${angle}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Tilt Shift\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var blur = adj.Effects.addProperty(\"ADBE Tilt-Shift\");\n    blur.property(\"ADBE Tilt-Shift-0001\").setValueAtTime(comp.time, 0);\n    blur.property(\"ADBE Tilt-Shift-0001\").setValueAtTime(comp.time + p.duration * 0.5, p.blurAmount);\n    blur.property(\"ADBE Tilt-Shift-0001\").setValueAtTime(comp.time + p.duration, 0);\n    blur.property(\"ADBE Tilt-Shift-0002\").setValue(p.blurCenter);\n    blur.property(\"ADBE Tilt-Shift-0003\").setValue(p.blurWidth);\n    blur.property(\"ADBE Tilt-Shift-0004\").setValue(p.angle);\n    _result = {status:\"success\", message:\"倾斜偏移转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "compound_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "复合模糊转场 - 基于亮度或遮罩图层控制模糊强度，产生非均匀模糊",
+    "tags": [
+      "模糊",
+      "复合",
+      "compound",
+      "blur",
+      "mask",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "maxBlur": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "blurLayer": {
+        "type": "string"
+      },
+      "invertBlur": {
+        "type": "boolean"
+      },
+      "stretchMap": {
+        "type": "boolean"
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "maxBlur": 60,
+      "blurLayer": "",
+      "invertBlur": false,
+      "stretchMap": true
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      maxBlur: ${maxBlur},\n      blurLayer: ${blurLayer},\n      invertBlur: ${invertBlur},\n      stretchMap: ${stretchMap}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Compound Blur\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var blur = adj.Effects.addProperty(\"ADBE Compound Blur\");\n    blur.property(\"ADBE Compound Blur-0001\").setValueAtTime(comp.time, 0);\n    blur.property(\"ADBE Compound Blur-0001\").setValueAtTime(comp.time + p.duration * 0.5, p.maxBlur);\n    blur.property(\"ADBE Compound Blur-0001\").setValueAtTime(comp.time + p.duration, 0);\n    blur.property(\"ADBE Compound Blur-0002\").setValue(p.invertBlur ? 1 : 0);\n    blur.property(\"ADBE Compound Blur-0003\").setValue(p.stretchMap ? 1 : 0);\n    _result = {status:\"success\", message:\"复合模糊转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "left_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "左滑转场 - 画面从右侧向左滑入，新内容从右边进入",
+    "tags": [
+      "位移",
+      "左滑",
+      "left",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "easing": {
+        "type": "string"
+      },
+      "distance": {
+        "type": "number",
+        "min": 50,
+        "max": 200
+      }
+    },
+    "default_values": {
+      "duration": 0.6,
+      "easing": "easeOut",
+      "distance": 100
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      easing: ${easing},\n      distance: ${distance}\n    };\n    var slideLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Left Slide\", comp.width, comp.height, 1);\n    slideLayer.inPoint = comp.time;\n    slideLayer.outPoint = comp.time + p.duration;\n    var pos = slideLayer.property(\"Position\");\n    pos.setValueAtTime(comp.time, [comp.width + p.distance, comp.height / 2]);\n    pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"左滑转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "right_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "右滑转场 - 画面从左侧向右滑入，新内容从左边进入",
+    "tags": [
+      "位移",
+      "右滑",
+      "right",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "easing": {
+        "type": "string"
+      },
+      "distance": {
+        "type": "number",
+        "min": 50,
+        "max": 200
+      }
+    },
+    "default_values": {
+      "duration": 0.6,
+      "easing": "easeOut",
+      "distance": 100
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      easing: ${easing},\n      distance: ${distance}\n    };\n    var slideLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Right Slide\", comp.width, comp.height, 1);\n    slideLayer.inPoint = comp.time;\n    slideLayer.outPoint = comp.time + p.duration;\n    var pos = slideLayer.property(\"Position\");\n    pos.setValueAtTime(comp.time, [-p.distance, comp.height / 2]);\n    pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"右滑转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "up_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "上滑转场 - 画面从下方向上滑入，新内容从底部进入",
+    "tags": [
+      "位移",
+      "上滑",
+      "up",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "easing": {
+        "type": "string"
+      },
+      "distance": {
+        "type": "number",
+        "min": 50,
+        "max": 200
+      }
+    },
+    "default_values": {
+      "duration": 0.6,
+      "easing": "easeOut",
+      "distance": 100
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      easing: ${easing},\n      distance: ${distance}\n    };\n    var slideLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Up Slide\", comp.width, comp.height, 1);\n    slideLayer.inPoint = comp.time;\n    slideLayer.outPoint = comp.time + p.duration;\n    var pos = slideLayer.property(\"Position\");\n    pos.setValueAtTime(comp.time, [comp.width / 2, comp.height + p.distance]);\n    pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"上滑转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "down_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "下滑转场 - 画面从上方向下滑入，新内容从顶部进入",
+    "tags": [
+      "位移",
+      "下滑",
+      "down",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "easing": {
+        "type": "string"
+      },
+      "distance": {
+        "type": "number",
+        "min": 50,
+        "max": 200
+      }
+    },
+    "default_values": {
+      "duration": 0.6,
+      "easing": "easeOut",
+      "distance": 100
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      easing: ${easing},\n      distance: ${distance}\n    };\n    var slideLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Down Slide\", comp.width, comp.height, 1);\n    slideLayer.inPoint = comp.time;\n    slideLayer.outPoint = comp.time + p.duration;\n    var pos = slideLayer.property(\"Position\");\n    pos.setValueAtTime(comp.time, [comp.width / 2, -p.distance]);\n    pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"下滑转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "diagonal_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "对角滑转场 - 画面沿对角线方向滑入，动态感强",
+    "tags": [
+      "位移",
+      "对角",
+      "diagonal",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "angle": {
+        "type": "number",
+        "min": 0,
+        "max": 360
+      },
+      "distance": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "angle": 45,
+      "distance": 200,
+      "easing": "easeInOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      angle: ${angle},\n      distance: ${distance},\n      easing: ${easing}\n    };\n    var slideLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Diagonal Slide\", comp.width, comp.height, 1);\n    slideLayer.inPoint = comp.time;\n    slideLayer.outPoint = comp.time + p.duration;\n    var rad = p.angle * Math.PI / 180;\n    var dx = Math.cos(rad) * p.distance;\n    var dy = Math.sin(rad) * p.distance;\n    var pos = slideLayer.property(\"Position\");\n    pos.setValueAtTime(comp.time, [comp.width / 2 - dx, comp.height / 2 - dy]);\n    pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"对角滑转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "zoom_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "缩放滑转场 - 画面缩放的同时滑动，结合缩放和位移效果",
+    "tags": [
+      "位移",
+      "缩放滑",
+      "zoom",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "startScale": {
+        "type": "number",
+        "min": 10,
+        "max": 200
+      },
+      "endScale": {
+        "type": "number",
+        "min": 10,
+        "max": 200
+      },
+      "direction": {
+        "type": "string"
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "startScale": 50,
+      "endScale": 100,
+      "direction": "right",
+      "easing": "easeOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      startScale: ${startScale},\n      endScale: ${endScale},\n      direction: ${direction},\n      easing: ${easing}\n    };\n    var slideLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Zoom Slide\", comp.width, comp.height, 1);\n    slideLayer.inPoint = comp.time;\n    slideLayer.outPoint = comp.time + p.duration;\n    var pos = slideLayer.property(\"Position\");\n    var startX = p.direction === \"right\" ? -comp.width : (p.direction === \"left\" ? comp.width * 2 : comp.width / 2);\n    pos.setValueAtTime(comp.time, [startX, comp.height / 2]);\n    pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    var sc = slideLayer.property(\"Scale\");\n    sc.setValueAtTime(comp.time, [p.startScale, p.startScale]);\n    sc.setValueAtTime(comp.time + p.duration, [p.endScale, p.endScale]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    for (var j = 1; j <= sc.numKeys; j++) {\n      sc.setInterpolationTypeAtKey(j, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"缩放滑转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "rotation_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "旋转滑转场 - 画面在滑动的同时旋转，动感十足",
+    "tags": [
+      "位移",
+      "旋转滑",
+      "rotation",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 2.5
+      },
+      "rotationAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 720
+      },
+      "direction": {
+        "type": "string"
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "rotationAmount": 180,
+      "direction": "right",
+      "easing": "easeInOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      rotationAmount: ${rotationAmount},\n      direction: ${direction},\n      easing: ${easing}\n    };\n    var slideLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Rotation Slide\", comp.width, comp.height, 1);\n    slideLayer.inPoint = comp.time;\n    slideLayer.outPoint = comp.time + p.duration;\n    var pos = slideLayer.property(\"Position\");\n    var startX = p.direction === \"right\" ? -comp.width : comp.width * 2;\n    pos.setValueAtTime(comp.time, [startX, comp.height / 2]);\n    pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    var rot = slideLayer.property(\"Rotation\");\n    rot.setValueAtTime(comp.time, -p.rotationAmount);\n    rot.setValueAtTime(comp.time + p.duration, 0);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"旋转滑转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "elastic_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "弹性滑转场 - 画面滑动到位后有弹性回弹效果，生动活泼",
+    "tags": [
+      "位移",
+      "弹性滑",
+      "elastic",
+      "slide",
+      "bounce",
+      "position",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "elasticity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      },
+      "bounceCount": {
+        "type": "number",
+        "min": 1,
+        "max": 5
+      },
+      "direction": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 1.2,
+      "elasticity": 0.5,
+      "bounceCount": 3,
+      "direction": "right"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      elasticity: ${elasticity},\n      bounceCount: ${bounceCount},\n      direction: ${direction}\n    };\n    var slideLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Elastic Slide\", comp.width, comp.height, 1);\n    slideLayer.inPoint = comp.time;\n    slideLayer.outPoint = comp.time + p.duration;\n    var pos = slideLayer.property(\"Position\");\n    var startX = p.direction === \"right\" ? -comp.width : comp.width * 2;\n    pos.setValueAtTime(comp.time, [startX, comp.height / 2]);\n    var dt = p.duration / (p.bounceCount + 1);\n    for (var i = 1; i <= p.bounceCount; i++) {\n      var overshoot = comp.width / 2 + (i % 2 === 0 ? 1 : -1) * p.elasticity * comp.width * 0.1 / i;\n      pos.setValueAtTime(comp.time + dt * i, [overshoot, comp.height / 2]);\n    }\n    pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"弹性滑转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "push_in_transition",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "推入转场 - 新画面从画面外推入，将旧画面推出视野",
+    "tags": [
+      "位移",
+      "推入",
+      "push",
+      "in",
+      "position",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "direction": {
+        "type": "string"
+      },
+      "pushDistance": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "direction": "right",
+      "pushDistance": 200,
+      "easing": "easeInOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      direction: ${direction},\n      pushDistance: ${pushDistance},\n      easing: ${easing}\n    };\n    var pushLayer = comp.layers.addSolid([0.6, 0.6, 0.6], \"Push In\", comp.width, comp.height, 1);\n    pushLayer.inPoint = comp.time;\n    pushLayer.outPoint = comp.time + p.duration;\n    var pos = pushLayer.property(\"Position\");\n    if (p.direction === \"right\") {\n      pos.setValueAtTime(comp.time, [-comp.width, comp.height / 2]);\n      pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    } else if (p.direction === \"left\") {\n      pos.setValueAtTime(comp.time, [comp.width * 2, comp.height / 2]);\n      pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    } else if (p.direction === \"up\") {\n      pos.setValueAtTime(comp.time, [comp.width / 2, comp.height * 2]);\n      pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    } else {\n      pos.setValueAtTime(comp.time, [comp.width / 2, -comp.height]);\n      pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    }\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"推入转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "bounce_transition",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "弹性弹跳转场 - 画面弹跳进入，模拟物理弹跳效果",
+    "tags": [
+      "位移",
+      "弹跳",
+      "bounce",
+      "elastic",
+      "position",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "bounceHeight": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "bounceCount": {
+        "type": "number",
+        "min": 1,
+        "max": 6
+      },
+      "damping": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "duration": 1.5,
+      "bounceHeight": 200,
+      "bounceCount": 3,
+      "damping": 0.6
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      bounceHeight: ${bounceHeight},\n      bounceCount: ${bounceCount},\n      damping: ${damping}\n    };\n    var bounceLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Bounce\", comp.width, comp.height, 1);\n    bounceLayer.inPoint = comp.time;\n    bounceLayer.outPoint = comp.time + p.duration;\n    var pos = bounceLayer.property(\"Position\");\n    var dt = p.duration / (p.bounceCount + 1);\n    var currentHeight = p.bounceHeight;\n    pos.setValueAtTime(comp.time, [comp.width / 2, comp.height / 2 + currentHeight]);\n    for (var i = 1; i <= p.bounceCount; i++) {\n      pos.setValueAtTime(comp.time + dt * i - dt * 0.5, [comp.width / 2, comp.height / 2 - currentHeight * 0.5]);\n      pos.setValueAtTime(comp.time + dt * i, [comp.width / 2, comp.height / 2 + currentHeight * 0.1]);\n      currentHeight = currentHeight * p.damping;\n    }\n    pos.setValueAtTime(comp.time + p.duration, [comp.width / 2, comp.height / 2]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"弹性弹跳转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "liquid_morph_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "液态变形转场 - 模拟液体流动的变形效果，画面如液体般融化变形",
+    "tags": [
+      "变形",
+      "液态",
+      "liquid",
+      "morph",
+      "deform",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "waveHeight": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "waveWidth": {
+        "type": "number",
+        "min": 10,
+        "max": 500
+      },
+      "waveSpeed": {
+        "type": "number",
+        "min": 0.1,
+        "max": 5.0
+      },
+      "fluidity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "duration": 1.5,
+      "waveHeight": 50,
+      "waveWidth": 100,
+      "waveSpeed": 1.5,
+      "fluidity": 0.7
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      waveHeight: ${waveHeight},\n      waveWidth: ${waveWidth},\n      waveSpeed: ${waveSpeed},\n      fluidity: ${fluidity}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Liquid Morph\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var wave = adj.Effects.addProperty(\"ADBE Wave Warp\");\n    wave.property(\"ADBE Wave Warp-0001\").setValueAtTime(comp.time, 0);\n    wave.property(\"ADBE Wave Warp-0001\").setValueAtTime(comp.time + p.duration * 0.5, p.waveHeight * p.fluidity);\n    wave.property(\"ADBE Wave Warp-0001\").setValueAtTime(comp.time + p.duration, 0);\n    wave.property(\"ADBE Wave Warp-0002\").setValue(p.waveWidth);\n    wave.property(\"ADBE Wave Warp-0003\").setValue(p.waveSpeed);\n    wave.property(\"ADBE Wave Warp-0005\").setValue(1);\n    _result = {status:\"success\", message:\"液态变形转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "mesh_warp_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "网格变形转场 - 通过网格点变形产生扭曲切换效果",
+    "tags": [
+      "变形",
+      "网格",
+      "mesh",
+      "warp",
+      "deform",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "meshRows": {
+        "type": "number",
+        "min": 2,
+        "max": 20
+      },
+      "meshCols": {
+        "type": "number",
+        "min": 2,
+        "max": 20
+      },
+      "distortion": {
+        "type": "number",
+        "min": 0,
+        "max": 200
+      },
+      "elasticity": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 1.2,
+      "meshRows": 8,
+      "meshCols": 8,
+      "distortion": 80,
+      "elasticity": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      meshRows: ${meshRows},\n      meshCols: ${meshCols},\n      distortion: ${distortion},\n      elasticity: ${elasticity}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Mesh Warp\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var mesh = adj.Effects.addProperty(\"ADBE Mesh Warp\");\n    mesh.property(\"ADBE Mesh Warp-0001\").setValue([p.meshRows, p.meshCols]);\n    mesh.property(\"ADBE Mesh Warp-0002\").setValueAtTime(comp.time, 0);\n    mesh.property(\"ADBE Mesh Warp-0002\").setValueAtTime(comp.time + p.duration * 0.5, p.distortion);\n    mesh.property(\"ADBE Mesh Warp-0002\").setValueAtTime(comp.time + p.duration, 0);\n    mesh.property(\"ADBE Mesh Warp-0003\").setValue(p.elasticity);\n    _result = {status:\"success\", message:\"网格变形转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "squash_stretch_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "挤压拉伸转场 - 经典动画原理，画面被挤压后拉伸切换",
+    "tags": [
+      "变形",
+      "挤压",
+      "拉伸",
+      "squash",
+      "stretch",
+      "deform",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "squashAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 80
+      },
+      "stretchAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 80
+      },
+      "axis": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 0.6,
+      "squashAmount": 40,
+      "stretchAmount": 30,
+      "axis": "horizontal"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      squashAmount: ${squashAmount},\n      stretchAmount: ${stretchAmount},\n      axis: ${axis}\n    };\n    var deformLayer = comp.layers.addSolid([0.5, 0.5, 0.5], \"Squash Stretch\", comp.width, comp.height, 1);\n    deformLayer.inPoint = comp.time;\n    deformLayer.outPoint = comp.time + p.duration;\n    var sc = deformLayer.property(\"Scale\");\n    var t3 = comp.time + p.duration * 0.33;\n    var t6 = comp.time + p.duration * 0.67;\n    if (p.axis === \"horizontal\") {\n      sc.setValueAtTime(comp.time, [100, 100]);\n      sc.setValueAtTime(t3, [100 + p.squashAmount, 100 - p.squashAmount * 0.5]);\n      sc.setValueAtTime(t6, [100 - p.stretchAmount, 100 + p.stretchAmount * 0.5]);\n      sc.setValueAtTime(comp.time + p.duration, [100, 100]);\n    } else {\n      sc.setValueAtTime(comp.time, [100, 100]);\n      sc.setValueAtTime(t3, [100 - p.squashAmount * 0.5, 100 + p.squashAmount]);\n      sc.setValueAtTime(t6, [100 + p.stretchAmount * 0.5, 100 - p.stretchAmount]);\n      sc.setValueAtTime(comp.time + p.duration, [100, 100]);\n    }\n    for (var k = 1; k <= sc.numKeys; k++) {\n      sc.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"挤压拉伸转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "elastic_deform_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "弹性变形转场 - 画面产生弹性扭曲后恢复，橡皮质感",
+    "tags": [
+      "变形",
+      "弹性",
+      "elastic",
+      "deform",
+      "rubber",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 2.5
+      },
+      "deformAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "elasticity": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "frequency": {
+        "type": "number",
+        "min": 1,
+        "max": 10
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "deformAmount": 50,
+      "elasticity": 70,
+      "frequency": 3
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      deformAmount: ${deformAmount},\n      elasticity: ${elasticity},\n      frequency: ${frequency}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Elastic Deform\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var deform = adj.Effects.addProperty(\"ADBE Elastic\");\n    deform.property(\"ADBE Elastic-0001\").setValueAtTime(comp.time, 0);\n    deform.property(\"ADBE Elastic-0001\").setValueAtTime(comp.time + p.duration * 0.5, p.deformAmount);\n    deform.property(\"ADBE Elastic-0001\").setValueAtTime(comp.time + p.duration, 0);\n    deform.property(\"ADBE Elastic-0002\").setValue(p.elasticity);\n    deform.property(\"ADBE Elastic-0003\").setValue(p.frequency);\n    _result = {status:\"success\", message:\"弹性变形转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "twist_deform_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "扭曲变形转场 - 画面产生螺旋扭曲效果，旋涡式切换",
+    "tags": [
+      "变形",
+      "扭曲",
+      "twist",
+      "spiral",
+      "deform",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "twistAngle": {
+        "type": "number",
+        "min": 0,
+        "max": 720
+      },
+      "twistCenter": {
+        "type": "array"
+      },
+      "radius": {
+        "type": "number",
+        "min": 50,
+        "max": 1000
+      }
+    },
+    "default_values": {
+      "duration": 1.2,
+      "twistAngle": 180,
+      "twistCenter": [
+        50,
+        50
+      ],
+      "radius": 400
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      twistAngle: ${twistAngle},\n      twistCenter: ${twistCenter},\n      radius: ${radius}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Twist Deform\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var polar = adj.Effects.addProperty(\"ADBE Polar Coordinates\");\n    polar.property(\"ADBE Polar Coordinates-0001\").setValueAtTime(comp.time, 0);\n    polar.property(\"ADBE Polar Coordinates-0001\").setValueAtTime(comp.time + p.duration * 0.5, 100);\n    polar.property(\"ADBE Polar Coordinates-0001\").setValueAtTime(comp.time + p.duration, 0);\n    var rot = adj.property(\"Rotation\");\n    rot.setValueAtTime(comp.time, 0);\n    rot.setValueAtTime(comp.time + p.duration * 0.5, p.twistAngle);\n    rot.setValueAtTime(comp.time + p.duration, 0);\n    _result = {status:\"success\", message:\"扭曲变形转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "wave_deform_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "波浪变形转场 - 画面产生波浪状扭曲，如水波荡漾",
+    "tags": [
+      "变形",
+      "波浪",
+      "wave",
+      "deform",
+      "water",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "waveHeight": {
+        "type": "number",
+        "min": 0,
+        "max": 200
+      },
+      "waveWidth": {
+        "type": "number",
+        "min": 10,
+        "max": 500
+      },
+      "waveSpeed": {
+        "type": "number",
+        "min": 0.1,
+        "max": 5.0
+      },
+      "direction": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "waveHeight": 80,
+      "waveWidth": 150,
+      "waveSpeed": 2.0,
+      "direction": "horizontal"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      waveHeight: ${waveHeight},\n      waveWidth: ${waveWidth},\n      waveSpeed: ${waveSpeed},\n      direction: ${direction}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Wave Deform\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var wave = adj.Effects.addProperty(\"ADBE Wave Warp\");\n    wave.property(\"ADBE Wave Warp-0001\").setValueAtTime(comp.time, 0);\n    wave.property(\"ADBE Wave Warp-0001\").setValueAtTime(comp.time + p.duration * 0.5, p.waveHeight);\n    wave.property(\"ADBE Wave Warp-0001\").setValueAtTime(comp.time + p.duration, 0);\n    wave.property(\"ADBE Wave Warp-0002\").setValue(p.waveWidth);\n    wave.property(\"ADBE Wave Warp-0003\").setValue(p.waveSpeed);\n    wave.property(\"ADBE Wave Warp-0004\").setValue(p.direction === \"horizontal\" ? 0 : 90);\n    wave.property(\"ADBE Wave Warp-0005\").setValue(1);\n    _result = {status:\"success\", message:\"波浪变形转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "ripple_deform_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "涟漪变形转场 - 水波纹从中心向外扩散，产生水滴落入水面的效果",
+    "tags": [
+      "变形",
+      "涟漪",
+      "ripple",
+      "deform",
+      "water",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "rippleRadius": {
+        "type": "number",
+        "min": 10,
+        "max": 1000
+      },
+      "waveHeight": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "frequency": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "centerX": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 1.5,
+      "rippleRadius": 500,
+      "waveHeight": 30,
+      "frequency": 5,
+      "centerX": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      rippleRadius: ${rippleRadius},\n      waveHeight: ${waveHeight},\n      frequency: ${frequency},\n      centerX: ${centerX}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Ripple Deform\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var ripple = adj.Effects.addProperty(\"ADBE Ripple\");\n    ripple.property(\"ADBE Ripple-0001\").setValue(1);\n    ripple.property(\"ADBE Ripple-0002\").setValue([comp.width * p.centerX / 100, comp.height / 2]);\n    ripple.property(\"ADBE Ripple-0003\").setValueAtTime(comp.time, 0);\n    ripple.property(\"ADBE Ripple-0003\").setValueAtTime(comp.time + p.duration, p.rippleRadius);\n    ripple.property(\"ADBE Ripple-0004\").setValue(p.waveHeight);\n    ripple.property(\"ADBE Ripple-0005\").setValue(p.frequency);\n    ripple.property(\"ADBE Ripple-0006\").setValue(0);\n    _result = {status:\"success\", message:\"涟漪变形转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "spherize_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "球面变形转场 - 画面产生球面凸起或凹陷效果，鱼眼透视感",
+    "tags": [
+      "变形",
+      "球面",
+      "spherize",
+      "fisheye",
+      "deform",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 2.5
+      },
+      "radius": {
+        "type": "number",
+        "min": 10,
+        "max": 500
+      },
+      "centerX": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "centerY": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "distortionType": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "radius": 200,
+      "centerX": 50,
+      "centerY": 50,
+      "distortionType": "convex"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      radius: ${radius},\n      centerX: ${centerX},\n      centerY: ${centerY},\n      distortionType: ${distortionType}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Spherize\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var sphere = adj.Effects.addProperty(\"ADBE Spherize\");\n    sphere.property(\"ADBE Spherize-0001\").setValue([comp.width * p.centerX / 100, comp.height * p.centerY / 100]);\n    sphere.property(\"ADBE Spherize-0002\").setValueAtTime(comp.time, 0);\n    sphere.property(\"ADBE Spherize-0002\").setValueAtTime(comp.time + p.duration * 0.5, p.radius);\n    sphere.property(\"ADBE Spherize-0002\").setValueAtTime(comp.time + p.duration, 0);\n    sphere.property(\"ADBE Spherize-0003\").setValue(p.distortionType === \"convex\" ? 1 : 2);\n    _result = {status:\"success\", message:\"球面变形转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "pixelate_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "像素化转场 - 画面逐渐像素化后切换，复古游戏风格",
+    "tags": [
+      "像素",
+      "像素化",
+      "pixelate",
+      "retro",
+      "pixel",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "maxPixelSize": {
+        "type": "number",
+        "min": 2,
+        "max": 100
+      },
+      "pixelShape": {
+        "type": "string"
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "maxPixelSize": 50,
+      "pixelShape": "square",
+      "easing": "easeInOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      maxPixelSize: ${maxPixelSize},\n      pixelShape: ${pixelShape},\n      easing: ${easing}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Pixelate\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var mosaic = adj.Effects.addProperty(\"ADBE Mosaic\");\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time, [1, 1]);\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time + p.duration * 0.5, [p.maxPixelSize, p.maxPixelSize]);\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time + p.duration, [1, 1]);\n    mosaic.property(\"ADBE Mosaic-0002\").setValue(p.pixelShape === \"circle\" ? 2 : 1);\n    _result = {status:\"success\", message:\"像素化转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "mosaic_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "马赛克转场 - 画面分解为马赛克方块后重组，网格化切换",
+    "tags": [
+      "像素",
+      "马赛克",
+      "mosaic",
+      "grid",
+      "pixel",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "blockSize": {
+        "type": "number",
+        "min": 5,
+        "max": 100
+      },
+      "blocksHorizontal": {
+        "type": "number",
+        "min": 2,
+        "max": 50
+      },
+      "blocksVertical": {
+        "type": "number",
+        "min": 2,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "blockSize": 30,
+      "blocksHorizontal": 20,
+      "blocksVertical": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      blockSize: ${blockSize},\n      blocksHorizontal: ${blocksHorizontal},\n      blocksVertical: ${blocksVertical}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Mosaic\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var mosaic = adj.Effects.addProperty(\"ADBE Mosaic\");\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time, [1, 1]);\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time + p.duration * 0.5, [p.blockSize, p.blockSize]);\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time + p.duration, [1, 1]);\n    mosaic.property(\"ADBE Mosaic-0002\").setValue(1);\n    _result = {status:\"success\", message:\"马赛克转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "rgb_split_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "RGB分离转场 - 红绿蓝三通道分离偏移，赛博朋克风格",
+    "tags": [
+      "像素",
+      "RGB分离",
+      "rgb_split",
+      "glitch",
+      "pixel",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "redOffset": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "greenOffset": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "blueOffset": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "angle": {
+        "type": "number",
+        "min": 0,
+        "max": 360
+      }
+    },
+    "default_values": {
+      "duration": 0.6,
+      "redOffset": 20,
+      "greenOffset": 0,
+      "blueOffset": 20,
+      "angle": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      redOffset: ${redOffset},\n      greenOffset: ${greenOffset},\n      blueOffset: ${blueOffset},\n      angle: ${angle}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"RGB Split\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var shift = adj.Effects.addProperty(\"ADBE Shift Channels\");\n    shift.property(\"ADBE Shift Channels-0001\").setValue(\"Red\");\n    shift.property(\"ADBE Shift Channels-0002\").setValue(\"Green\");\n    shift.property(\"ADBE Shift Channels-0003\").setValue(\"Blue\");\n    var cc = adj.Effects.addProperty(\"ADBE Channel Combiner\");\n    var offR = adj.Effects.addProperty(\"ADBE Offset\");\n    offR.property(\"ADBE Offset-0001\").expression = \"[time * 0, 0]\";\n    var offB = adj.Effects.addProperty(\"ADBE Offset\");\n    var rad = p.angle * Math.PI / 180;\n    offR.property(\"ADBE Offset-0001\").setValueAtTime(comp.time, [0, 0]);\n    offR.property(\"ADBE Offset-0001\").setValueAtTime(comp.time + p.duration * 0.5, [Math.cos(rad) * p.redOffset, Math.sin(rad) * p.redOffset]);\n    offR.property(\"ADBE Offset-0001\").setValueAtTime(comp.time + p.duration, [0, 0]);\n    offB.property(\"ADBE Offset-0001\").setValueAtTime(comp.time, [0, 0]);\n    offB.property(\"ADBE Offset-0001\").setValueAtTime(comp.time + p.duration * 0.5, [-Math.cos(rad) * p.blueOffset, -Math.sin(rad) * p.blueOffset]);\n    offB.property(\"ADBE Offset-0001\").setValueAtTime(comp.time + p.duration, [0, 0]);\n    _result = {status:\"success\", message:\"RGB分离转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "glitch_pixel_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "故障像素转场 - 数字故障效果，包含像素错位、扫描线和色彩偏移",
+    "tags": [
+      "像素",
+      "故障",
+      "glitch",
+      "pixel",
+      "digital",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "glitchIntensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      },
+      "blockSize": {
+        "type": "number",
+        "min": 5,
+        "max": 100
+      },
+      "scanlineOpacity": {
+        "type": "number",
+        "min": 0,
+        "max": 1.0
+      },
+      "colorShift": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "duration": 0.7,
+      "glitchIntensity": 0.6,
+      "blockSize": 20,
+      "scanlineOpacity": 0.3,
+      "colorShift": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      glitchIntensity: ${glitchIntensity},\n      blockSize: ${blockSize},\n      scanlineOpacity: ${scanlineOpacity},\n      colorShift: ${colorShift}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Glitch Pixel\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var mosaic = adj.Effects.addProperty(\"ADBE Mosaic\");\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time, [1, 1]);\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time + p.duration * 0.5, [p.blockSize, p.blockSize]);\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time + p.duration, [1, 1]);\n    mosaic.property(\"ADBE Mosaic-0002\").setValue(1);\n    var offset = adj.Effects.addProperty(\"ADBE Offset\");\n    offset.property(\"ADBE Offset-0001\").expression = \"wiggle(15, \" + p.glitchIntensity + \" * 50)\";\n    var wave = adj.Effects.addProperty(\"ADBE Wave Warp\");\n    wave.property(\"ADBE Wave Warp-0001\").setValue(p.glitchIntensity * 20);\n    wave.property(\"ADBE Wave Warp-0002\").setValue(5);\n    wave.property(\"ADBE Wave Warp-0003\").setValue(10);\n    _result = {status:\"success\", message:\"故障像素转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "digital_shatter_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "数字破碎转场 - 画面破碎为数字碎片飞散，科幻破碎效果",
+    "tags": [
+      "像素",
+      "数字破碎",
+      "digital",
+      "shatter",
+      "pixel",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "shatterRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "shardCount": {
+        "type": "number",
+        "min": 5,
+        "max": 100
+      },
+      "gravity": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "repetition": {
+        "type": "number",
+        "min": 1,
+        "max": 10
+      }
+    },
+    "default_values": {
+      "duration": 1.2,
+      "shatterRadius": 50,
+      "shardCount": 30,
+      "gravity": 50,
+      "repetition": 3
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      shatterRadius: ${shatterRadius},\n      shardCount: ${shardCount},\n      gravity: ${gravity},\n      repetition: ${repetition}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Digital Shatter\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var shatter = adj.Effects.addProperty(\"ADBE Shatter\");\n    shatter.property(\"ADBE Shatter-0001\").setValue(\"Glass\");\n    shatter.property(\"ADBE Shatter-0003\").setValue(p.shatterRadius / 100);\n    shatter.property(\"ADBE Shatter-0004\").setValue([comp.width / 2, comp.height / 2]);\n    shatter.property(\"ADBE Shatter-0005\").setValue(p.shardCount);\n    shatter.property(\"ADBE Shatter-0010\").setValue([0, p.gravity / 10, 0]);\n    shatter.property(\"ADBE Shatter-0008\").setValueAtTime(comp.time, 0);\n    shatter.property(\"ADBE Shatter-0008\").setValueAtTime(comp.time + p.duration, 1);\n    _result = {status:\"success\", message:\"数字破碎转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "data_stream_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "数据流转场 - 模拟数据流瀑布效果，数字雨风格切换",
+    "tags": [
+      "像素",
+      "数据流",
+      "data_stream",
+      "matrix",
+      "digital",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "streamDensity": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "streamSpeed": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "charSet": {
+        "type": "string"
+      },
+      "glowIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "duration": 1.5,
+      "streamDensity": 50,
+      "streamSpeed": 8,
+      "charSet": "0123456789",
+      "glowIntensity": 0.5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      streamDensity: ${streamDensity},\n      streamSpeed: ${streamSpeed},\n      charSet: ${charSet},\n      glowIntensity: ${glowIntensity}\n    };\n    var streamLayer = comp.layers.addSolid([0, 0, 0], \"Data Stream\", comp.width, comp.height, 1);\n    streamLayer.inPoint = comp.time;\n    streamLayer.outPoint = comp.time + p.duration;\n    streamLayer.opacity.setValueAtTime(comp.time, 0);\n    streamLayer.opacity.setValueAtTime(comp.time + p.duration * 0.5, p.streamDensity);\n    streamLayer.opacity.setValueAtTime(comp.time + p.duration, 0);\n    streamLayer.blendingMode = BlendingMode.SCREEN;\n    var noise = streamLayer.Effects.addProperty(\"ADBE Fractal Noise\");\n    noise.property(\"ADBE Fractal Noise-0001\").setValue(50);\n    noise.property(\"ADBE Fractal Noise-0010\").expression = \"time * \" + p.streamSpeed;\n    noise.property(\"ADBE Fractal Noise-0008\").setValue(p.streamDensity / 100);\n    var glow = streamLayer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0001\").setValue([0, 1, 0.3]);\n    glow.property(\"ADBE Glow Intensity-0001\").setValue(p.glowIntensity * 2);\n    var cc = streamLayer.Effects.addProperty(\"ADBE Colorama\");\n    cc.property(\"ADBE Colorama-0001\").setValue(0);\n    _result = {status:\"success\", message:\"数据流转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "pixel_dissolve_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "像素溶解转场 - 画面以像素为单位逐渐溶解消失",
+    "tags": [
+      "像素",
+      "溶解",
+      "pixel",
+      "dissolve",
+      "pixel",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "dissolveAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "pixelSize": {
+        "type": "number",
+        "min": 2,
+        "max": 50
+      },
+      "scatterRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 200
+      },
+      "randomSeed": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "dissolveAmount": 50,
+      "pixelSize": 10,
+      "scatterRadius": 100,
+      "randomSeed": 42
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      dissolveAmount: ${dissolveAmount},\n      pixelSize: ${pixelSize},\n      scatterRadius: ${scatterRadius},\n      randomSeed: ${randomSeed}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Pixel Dissolve\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var scatter = adj.Effects.addProperty(\"ADBE Scatter\");\n    scatter.property(\"ADBE Scatter-0001\").setValueAtTime(comp.time, 0);\n    scatter.property(\"ADBE Scatter-0001\").setValueAtTime(comp.time + p.duration * 0.5, p.scatterRadius);\n    scatter.property(\"ADBE Scatter-0001\").setValueAtTime(comp.time + p.duration, 0);\n    scatter.property(\"ADBE Scatter-0002\").setValue(1);\n    scatter.property(\"ADBE Scatter-0003\").setValue(p.randomSeed);\n    var mosaic = adj.Effects.addProperty(\"ADBE Mosaic\");\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time, [1, 1]);\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time + p.duration * 0.5, [p.pixelSize, p.pixelSize]);\n    mosaic.property(\"ADBE Mosaic-0001\").setValueAtTime(comp.time + p.duration, [1, 1]);\n    _result = {status:\"success\", message:\"像素溶解转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "linear_wipe_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "线性擦除转场 - 一条直线从一侧扫过，擦除显示新画面",
+    "tags": [
+      "遮罩",
+      "线性擦除",
+      "linear_wipe",
+      "mask",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "transitionAngle": {
+        "type": "number",
+        "min": 0,
+        "max": 360
+      },
+      "feather": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "transitionAngle": 0,
+      "feather": 10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      transitionAngle: ${transitionAngle},\n      feather: ${feather}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Linear Wipe\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var wipe = adj.Effects.addProperty(\"ADBE Linear Wipe\");\n    wipe.property(\"ADBE Linear Wipe-0001\").setValueAtTime(comp.time, 0);\n    wipe.property(\"ADBE Linear Wipe-0001\").setValueAtTime(comp.time + p.duration, 100);\n    wipe.property(\"ADBE Linear Wipe-0002\").setValue(p.transitionAngle);\n    wipe.property(\"ADBE Linear Wipe-0003\").setValue(p.feather);\n    _result = {status:\"success\", message:\"线性擦除转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "circle_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "圆形遮罩转场 - 圆形遮罩从中心向外扩展或收缩揭示画面",
+    "tags": [
+      "遮罩",
+      "圆形",
+      "circle",
+      "mask",
+      "iris",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "centerX": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "centerY": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "feather": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "invert": {
+        "type": "boolean"
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "centerX": 50,
+      "centerY": 50,
+      "feather": 20,
+      "invert": false
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      centerX: ${centerX},\n      centerY: ${centerY},\n      feather: ${feather},\n      invert: ${invert}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Circle Mask\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var mask = adj.Masks.addProperty(\"ADBE Mask Atom\");\n    mask.maskMode = MaskMode.ADD;\n    mask.maskFeather.setValue([p.feather, p.feather]);\n    mask.maskInverted = p.invert;\n    var cx = comp.width * p.centerX / 100;\n    var cy = comp.height * p.centerY / 100;\n    mask.maskShape.setValueAtTime(comp.time, [cx, cy]);\n    _result = {status:\"success\", message:\"圆形遮罩转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "rect_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "矩形遮罩转场 - 矩形遮罩从中心扩展，简洁明了的揭示效果",
+    "tags": [
+      "遮罩",
+      "矩形",
+      "rect",
+      "mask",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "feather": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "startScale": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "endScale": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 0.7,
+      "feather": 5,
+      "startScale": 0,
+      "endScale": 100
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      feather: ${feather},\n      startScale: ${startScale},\n      endScale: ${endScale}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Rect Mask\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var sc = adj.property(\"Scale\");\n    sc.setValueAtTime(comp.time, [p.startScale, p.startScale]);\n    sc.setValueAtTime(comp.time + p.duration, [p.endScale, p.endScale]);\n    var mask = adj.Masks.addProperty(\"ADBE Mask Atom\");\n    mask.maskMode = MaskMode.ADD;\n    mask.maskFeather.setValue([p.feather, p.feather]);\n    _result = {status:\"success\", message:\"矩形遮罩转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "gradient_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "渐变遮罩转场 - 基于渐变的柔和遮罩过渡，平滑自然",
+    "tags": [
+      "遮罩",
+      "渐变",
+      "gradient",
+      "mask",
+      "soft",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "gradientDirection": {
+        "type": "string"
+      },
+      "softness": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "gradientDirection": "horizontal",
+      "softness": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      gradientDirection: ${gradientDirection},\n      softness: ${softness}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Gradient Mask\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var ramp = adj.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0001\").setValue([0, comp.height / 2]);\n    ramp.property(\"ADBE Ramp-0002\").setValue([comp.width, comp.height / 2]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([0, 0, 0]);\n    ramp.property(\"ADBE Ramp-0004\").setValue([1, 1, 1]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(p.gradientDirection === \"horizontal\" ? 1 : 2);\n    ramp.property(\"ADBE Ramp-0006\").setValue(p.softness / 100);\n    _result = {status:\"success\", message:\"渐变遮罩转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "path_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "路径遮罩转场 - 沿自定义路径揭示画面，灵活多变",
+    "tags": [
+      "遮罩",
+      "路径",
+      "path",
+      "mask",
+      "custom",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "feather": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "pathOffset": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "duration": 1.0,
+      "feather": 15,
+      "pathOffset": 50,
+      "easing": "easeInOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      feather: ${feather},\n      pathOffset: ${pathOffset},\n      easing: ${easing}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Path Mask\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var mask = adj.Masks.addProperty(\"ADBE Mask Atom\");\n    mask.maskMode = MaskMode.ADD;\n    mask.maskFeather.setValue([p.feather, p.feather]);\n    mask.maskExpansion.setValueAtTime(comp.time, -comp.width);\n    mask.maskExpansion.setValueAtTime(comp.time + p.duration, comp.width);\n    _result = {status:\"success\", message:\"路径遮罩转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "text_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "文字遮罩转场 - 以文字形状作为遮罩揭示画面",
+    "tags": [
+      "遮罩",
+      "文字",
+      "text",
+      "mask",
+      "typography",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "textLayerName": {
+        "type": "string"
+      },
+      "feather": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      },
+      "expandAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 200
+      }
+    },
+    "default_values": {
+      "duration": 1.5,
+      "textLayerName": "TRANSITION",
+      "feather": 5,
+      "expandAmount": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      textLayerName: ${textLayerName},\n      feather: ${feather},\n      expandAmount: ${expandAmount}\n    };\n    var textLayer = comp.layers.addText(p.textLayerName);\n    textLayer.name = p.textLayerName;\n    textLayer.inPoint = comp.time;\n    textLayer.outPoint = comp.time + p.duration;\n    var src = textLayer.property(\"Source Text\");\n    var td = src.value;\n    td.fontSize = 200;\n    td.fauxBold = true;\n    td.justification = ParagraphJustification.CENTER;\n    src.setValue(td);\n    textLayer.trackMatteType = TrackMatteType.ALPHA;\n    textLayer.property(\"Opacity\").setValueAtTime(comp.time, 0);\n    textLayer.property(\"Opacity\").setValueAtTime(comp.time + p.duration * 0.5, 100);\n    textLayer.property(\"Opacity\").setValueAtTime(comp.time + p.duration, 0);\n    _result = {status:\"success\", message:\"文字遮罩转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "polygon_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "多边形遮罩转场 - 多边形形状遮罩从中心扩展揭示画面",
+    "tags": [
+      "遮罩",
+      "多边形",
+      "polygon",
+      "mask",
+      "geometric",
+      "transition"
+    ],
+    "parameters": {
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "sides": {
+        "type": "number",
+        "min": 3,
+        "max": 12
+      },
+      "feather": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "rotation": {
+        "type": "number",
+        "min": 0,
+        "max": 360
+      }
+    },
+    "default_values": {
+      "duration": 0.8,
+      "sides": 6,
+      "feather": 10,
+      "rotation": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      duration: ${duration},\n      sides: ${sides},\n      feather: ${feather},\n      rotation: ${rotation}\n    };\n    var adj = comp.layers.addAdjustmentLayer();\n    adj.name = \"Polygon Mask\";\n    adj.inPoint = comp.time;\n    adj.outPoint = comp.time + p.duration;\n    var poly = adj.Effects.addProperty(\"ADBE Polygon\");\n    poly.property(\"ADBE Polygon-0001\").setValue([comp.width / 2, comp.height / 2]);\n    poly.property(\"ADBE Polygon-0002\").setValueAtTime(comp.time, 0);\n    poly.property(\"ADBE Polygon-0002\").setValueAtTime(comp.time + p.duration, comp.width / 2);\n    poly.property(\"ADBE Polygon-0003\").setValue(p.sides);\n    poly.property(\"ADBE Polygon-0004\").setValue(p.rotation);\n    poly.property(\"ADBE Polygon-0005\").setValue(p.feather);\n    _result = {status:\"success\", message:\"多边形遮罩转场已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  }
+]

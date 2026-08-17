@@ -1,0 +1,2652 @@
+[
+  {
+    "name": "linear_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "线性渐变背景 - 从起点到终点的平滑颜色过渡，适用于简洁现代的设计风格",
+    "tags": [
+      "渐变",
+      "linear",
+      "gradient",
+      "背景",
+      "简约"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "线性渐变背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "startColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.1,
+              0.3,
+              0.8
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "endColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.2,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startPoint": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "endPoint": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1920,
+              1080
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "scatter": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "线性渐变背景",
+      "startColor": [
+        0.1,
+        0.3,
+        0.8
+      ],
+      "endColor": [
+        0.9,
+        0.2,
+        0.5
+      ],
+      "startPoint": [
+        0,
+        0
+      ],
+      "endPoint": [
+        1920,
+        1080
+      ],
+      "scatter": 0
+    }
+  },
+  {
+    "name": "radial_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "径向渐变背景 - 从中心向外辐射的圆形渐变，适合聚焦视觉中心",
+    "tags": [
+      "渐变",
+      "radial",
+      "gradient",
+      "背景",
+      "辐射"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "径向渐变背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "startColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.9,
+              0.9
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "endColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.1,
+              0.1,
+              0.3
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "centerPoint": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              960,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 100,
+            "max": 4000,
+            "default": 1000
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "scatter": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "径向渐变背景",
+      "startColor": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "endColor": [
+        0.1,
+        0.1,
+        0.3
+      ],
+      "centerPoint": [
+        960,
+        540
+      ],
+      "radius": 1000,
+      "scatter": 0
+    }
+  },
+  {
+    "name": "rainbow_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "彩虹渐变背景 - 四色渐变构成彩虹光谱，色彩丰富绚丽",
+    "tags": [
+      "渐变",
+      "rainbow",
+      "gradient",
+      "背景",
+      "彩虹"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "彩虹渐变背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color1": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color2": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color3": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              1,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color4": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              0,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "blend": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.5
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "彩虹渐变背景",
+      "color1": [
+        1,
+        0,
+        0
+      ],
+      "color2": [
+        1,
+        1,
+        0
+      ],
+      "color3": [
+        0,
+        1,
+        0
+      ],
+      "color4": [
+        0,
+        0,
+        1
+      ],
+      "blend": 0.5
+    }
+  },
+  {
+    "name": "sunset_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "日落渐变背景 - 模拟黄昏天空的暖色调渐变，橙红到紫罗兰",
+    "tags": [
+      "渐变",
+      "sunset",
+      "gradient",
+      "背景",
+      "黄昏"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "日落渐变背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "topColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.4,
+              0.1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "bottomColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              0.1,
+              0.4
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "scatter": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.2
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "日落渐变背景",
+      "topColor": [
+        0.9,
+        0.4,
+        0.1
+      ],
+      "bottomColor": [
+        0.3,
+        0.1,
+        0.4
+      ],
+      "scatter": 0.2
+    }
+  },
+  {
+    "name": "deep_sea_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "深海渐变背景 - 模拟深海环境的蓝青色渐变，宁静深邃",
+    "tags": [
+      "渐变",
+      "deep_sea",
+      "gradient",
+      "背景",
+      "海洋"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "深海渐变背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "topColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.0,
+              0.3,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "bottomColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.0,
+              0.05,
+              0.15
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "scatter": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.15
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "深海渐变背景",
+      "topColor": [
+        0.0,
+        0.3,
+        0.5
+      ],
+      "bottomColor": [
+        0.0,
+        0.05,
+        0.15
+      ],
+      "scatter": 0.15
+    }
+  },
+  {
+    "name": "fire_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "火焰渐变背景 - 模拟火焰燃烧的红橙黄渐变，热烈动感",
+    "tags": [
+      "渐变",
+      "fire",
+      "gradient",
+      "背景",
+      "火焰"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "火焰渐变背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "topColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.9,
+              0.2
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "midColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.4,
+              0.0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "bottomColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.4,
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "scatter": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.3
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "火焰渐变背景",
+      "topColor": [
+        0.9,
+        0.9,
+        0.2
+      ],
+      "midColor": [
+        0.9,
+        0.4,
+        0.0
+      ],
+      "bottomColor": [
+        0.4,
+        0.0,
+        0.0
+      ],
+      "scatter": 0.3
+    }
+  },
+  {
+    "name": "starry_sky",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "星空背景 - 模拟夜空中繁星点点的效果，带有微弱发光",
+    "tags": [
+      "粒子",
+      "particle",
+      "星空",
+      "stars",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "星空背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "density": {
+            "type": "number",
+            "min": 50,
+            "max": 800,
+            "default": 400
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Brightness": {
+            "type": "number",
+            "min": -100,
+            "max": 100,
+            "default": -20
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowIntensity": {
+            "type": "number",
+            "min": 0,
+            "max": 5,
+            "default": 0.8
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "星空背景",
+      "density": 400,
+      "brightness": -20,
+      "glowRadius": 8,
+      "glowIntensity": 0.8
+    }
+  },
+  {
+    "name": "snowflakes",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "雪花飘落背景 - 白色粒子模拟雪花缓缓飘落，冬日氛围",
+    "tags": [
+      "粒子",
+      "particle",
+      "雪花",
+      "snow",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "雪花背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "density": {
+            "type": "number",
+            "min": 50,
+            "max": 600,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "blurAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 20,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Brightness": {
+            "type": "number",
+            "min": -50,
+            "max": 100,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "雪花背景",
+      "density": 300,
+      "blurAmount": 2,
+      "brightness": 0
+    }
+  },
+  {
+    "name": "dust_particles",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "尘埃粒子背景 - 细微的漂浮尘埃，增加画面质感和空气感",
+    "tags": [
+      "粒子",
+      "particle",
+      "尘埃",
+      "dust",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "尘埃背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "density": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Brightness": {
+            "type": "number",
+            "min": -100,
+            "max": 100,
+            "default": -40
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 5
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "尘埃背景",
+      "density": 200,
+      "brightness": -40,
+      "glowRadius": 5
+    }
+  },
+  {
+    "name": "fireflies",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "萤火虫背景 - 模拟夏夜萤火虫飞舞，暖黄色光点闪烁",
+    "tags": [
+      "粒子",
+      "particle",
+      "萤火虫",
+      "fireflies",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "萤火虫背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "density": {
+            "type": "number",
+            "min": 50,
+            "max": 400,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 5,
+            "max": 80,
+            "default": 25
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 1,
+            "max": 100,
+            "default": 20
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "萤火虫背景",
+      "density": 200,
+      "glowRadius": 25,
+      "speed": 20
+    }
+  },
+  {
+    "name": "light_spots",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "光点粒子背景 - 柔和的光斑粒子，梦幻朦胧的视觉效果",
+    "tags": [
+      "粒子",
+      "particle",
+      "光点",
+      "light",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "光点背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "density": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 250
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 40
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.6,
+              0.8,
+              1.0
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "光点背景",
+      "density": 250,
+      "glowRadius": 40,
+      "color": [
+        0.6,
+        0.8,
+        1.0
+      ]
+    }
+  },
+  {
+    "name": "bubbles",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "气泡背景 - 半透明气泡缓缓上升，清新梦幻",
+    "tags": [
+      "粒子",
+      "particle",
+      "气泡",
+      "bubbles",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "气泡背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Contrast": {
+            "type": "number",
+            "min": 100,
+            "max": 800,
+            "default": 400
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Brightness": {
+            "type": "number",
+            "min": -100,
+            "max": 100,
+            "default": -20
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "气泡背景",
+      "size": 80,
+      "contrast": 400,
+      "brightness": -20
+    }
+  },
+  {
+    "name": "noise_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "噪点纹理背景 - 模拟胶片噪点或颗粒质感，增加画面粗糙度",
+    "tags": [
+      "纹理",
+      "texture",
+      "噪点",
+      "noise",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "噪点纹理背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Noise",
+        "parameters": {
+          "noiseAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 50
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Brightness": {
+            "type": "number",
+            "min": -100,
+            "max": 100,
+            "default": 0
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Contrast": {
+            "type": "number",
+            "min": 0,
+            "max": 200,
+            "default": 100
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "噪点纹理背景",
+      "noiseAmount": 50,
+      "brightness": 0,
+      "contrast": 100
+    }
+  },
+  {
+    "name": "grid_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "网格纹理背景 - 规则的网格线条，科技感与秩序感",
+    "tags": [
+      "纹理",
+      "texture",
+      "网格",
+      "grid",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "网格纹理背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "width": {
+            "type": "number",
+            "min": 2,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "height": {
+            "type": "number",
+            "min": 2,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "border": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              0.8,
+              1.0
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "网格纹理背景",
+      "width": 80,
+      "height": 80,
+      "border": 2,
+      "color": [
+        0.3,
+        0.8,
+        1.0
+      ]
+    }
+  },
+  {
+    "name": "stripes_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "条纹纹理背景 - 等距条纹排列，经典几何图案",
+    "tags": [
+      "纹理",
+      "texture",
+      "条纹",
+      "stripes",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "条纹纹理背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "stripeWidth": {
+            "type": "number",
+            "min": 2,
+            "max": 100,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "direction": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 45
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color1": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.2,
+              0.2
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color2": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.8,
+              0.8,
+              0.8
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "条纹纹理背景",
+      "stripeWidth": 20,
+      "direction": 45,
+      "color1": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "color2": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    }
+  },
+  {
+    "name": "waves_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "波浪纹理背景 - 模拟水面波纹或声波线条的起伏效果",
+    "tags": [
+      "纹理",
+      "texture",
+      "波浪",
+      "waves",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "波浪纹理背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "waveHeight": {
+            "type": "number",
+            "min": 5,
+            "max": 200,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "waveWidth": {
+            "type": "number",
+            "min": 10,
+            "max": 500,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "direction": {
+            "type": "number",
+            "min": 0,
+            "max": 360,
+            "default": 0
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.5,
+              0.8
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "波浪纹理背景",
+      "waveHeight": 30,
+      "waveWidth": 100,
+      "direction": 0,
+      "color": [
+        0.2,
+        0.5,
+        0.8
+      ]
+    }
+  },
+  {
+    "name": "honeycomb_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "蜂窝纹理背景 - 六边形蜂窝结构，自然与科技结合的图案",
+    "tags": [
+      "纹理",
+      "texture",
+      "蜂窝",
+      "honeycomb",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "蜂窝纹理背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 60
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Contrast": {
+            "type": "number",
+            "min": 100,
+            "max": 800,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.7,
+              0.2
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "蜂窝纹理背景",
+      "size": 60,
+      "contrast": 300,
+      "color": [
+        0.9,
+        0.7,
+        0.2
+      ]
+    }
+  },
+  {
+    "name": "dots_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "点阵纹理背景 - 规则排列的圆点矩阵，波普艺术与数字风格",
+    "tags": [
+      "纹理",
+      "texture",
+      "点阵",
+      "dots",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "点阵纹理背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 10,
+            "max": 150,
+            "default": 40
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Contrast": {
+            "type": "number",
+            "min": 100,
+            "max": 800,
+            "default": 400
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1.0,
+              0.2,
+              0.4
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "点阵纹理背景",
+      "size": 40,
+      "contrast": 400,
+      "color": [
+        1.0,
+        0.2,
+        0.4
+      ]
+    }
+  },
+  {
+    "name": "flowing_light_bands",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "流动光带背景 - 光带如水流般持续流动，充满动感与未来感",
+    "tags": [
+      "动态",
+      "dynamic",
+      "光带",
+      "flowing",
+      "背景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "流动光带背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 1,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 35
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.8,
+              1.0
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "流动光带背景",
+      "speed": 30,
+      "glowRadius": 35,
+      "color": [
+        0.2,
+        0.8,
+        1.0
+      ]
+    }
+  },
+  {
+    "name": "pulsing_halo",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "脉冲光环背景 - 从中心向外扩散的光环脉冲，节奏感强烈",
+    "tags": [
+      "动态",
+      "dynamic",
+      "光环",
+      "halo",
+      "脉冲"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "脉冲光环背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "centerColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1.0,
+              0.9,
+              0.6
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Find Edges",
+        "parameters": {
+          "edgeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.1,
+              0.05,
+              0.3
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "pulseSpeed": {
+            "type": "number",
+            "min": 0.2,
+            "max": 5,
+            "default": 1.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowIntensity": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5,
+            "default": 2.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "脉冲光环背景",
+      "centerColor": [
+        1.0,
+        0.9,
+        0.6
+      ],
+      "edgeColor": [
+        0.1,
+        0.05,
+        0.3
+      ],
+      "pulseSpeed": 1.5,
+      "glowIntensity": 2.0
+    }
+  },
+  {
+    "name": "rotating_nebula",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "旋转星云背景 - 模拟宇宙星云的缓慢旋转，神秘浩瀚",
+    "tags": [
+      "动态",
+      "dynamic",
+      "星云",
+      "nebula",
+      "旋转"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "旋转星云背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 1,
+            "max": 100,
+            "default": 15
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.5,
+              0.2,
+              0.8
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 50
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "旋转星云背景",
+      "speed": 15,
+      "color": [
+        0.5,
+        0.2,
+        0.8
+      ],
+      "glowRadius": 50
+    }
+  },
+  {
+    "name": "breathing_gradient",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "呼吸渐变背景 - 颜色与亮度如呼吸般缓慢变化，舒缓平静",
+    "tags": [
+      "动态",
+      "dynamic",
+      "呼吸",
+      "breathing",
+      "渐变"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "呼吸渐变背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color1": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.1,
+              0.4,
+              0.6
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color2": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.6,
+              0.2,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "breatheSpeed": {
+            "type": "number",
+            "min": 0.2,
+            "max": 3,
+            "default": 0.8
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "呼吸渐变背景",
+      "color1": [
+        0.1,
+        0.4,
+        0.6
+      ],
+      "color2": [
+        0.6,
+        0.2,
+        0.5
+      ],
+      "breatheSpeed": 0.8
+    }
+  },
+  {
+    "name": "energy_field",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "能量场背景 - 类似电磁场或能量护盾的波动效果，科幻感强",
+    "tags": [
+      "动态",
+      "dynamic",
+      "能量",
+      "energy",
+      "科幻"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "能量场背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 1,
+            "max": 100,
+            "default": 40
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.0,
+              0.8,
+              0.4
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "glowRadius": {
+            "type": "number",
+            "min": 10,
+            "max": 80,
+            "default": 30
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "能量场背景",
+      "speed": 40,
+      "color": [
+        0.0,
+        0.8,
+        0.4
+      ],
+      "glowRadius": 30
+    }
+  },
+  {
+    "name": "swirl_vortex",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "漩涡动态背景 - 中心漩涡不断旋转吸入，强烈的视觉引导",
+    "tags": [
+      "动态",
+      "dynamic",
+      "漩涡",
+      "swirl",
+      "vortex"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "漩涡动态背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speed": {
+            "type": "number",
+            "min": 1,
+            "max": 100,
+            "default": 25
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              0.1,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 80
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "漩涡动态背景",
+      "speed": 25,
+      "color": [
+        0.3,
+        0.1,
+        0.5
+      ],
+      "intensity": 80
+    }
+  },
+  {
+    "name": "city_night",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "城市夜景背景 - 模拟夜晚城市灯光网格，霓虹与黑暗的对比",
+    "tags": [
+      "场景",
+      "scene",
+      "城市",
+      "city",
+      "夜景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "城市夜景背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "gridWidth": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 60
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "gridHeight": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 40
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "lightColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.7,
+              1.0
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "城市夜景背景",
+      "gridWidth": 60,
+      "gridHeight": 40,
+      "lightColor": [
+        0.2,
+        0.7,
+        1.0
+      ]
+    }
+  },
+  {
+    "name": "forest",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "森林场景背景 - 深绿色调的森林氛围，自然静谧",
+    "tags": [
+      "场景",
+      "scene",
+      "森林",
+      "forest",
+      "自然"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "森林场景背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "density": {
+            "type": "number",
+            "min": 100,
+            "max": 600,
+            "default": 350
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "darkGreen": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.05,
+              0.15,
+              0.05
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lightGreen": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.5,
+              0.2
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "森林场景背景",
+      "density": 350,
+      "darkGreen": [
+        0.05,
+        0.15,
+        0.05
+      ],
+      "lightGreen": [
+        0.2,
+        0.5,
+        0.2
+      ]
+    }
+  },
+  {
+    "name": "desert",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "沙漠场景背景 - 暖黄色调的沙漠氛围，辽阔干燥",
+    "tags": [
+      "场景",
+      "scene",
+      "沙漠",
+      "desert",
+      "自然"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "沙漠场景背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "density": {
+            "type": "number",
+            "min": 100,
+            "max": 600,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "sandColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.8,
+              0.6,
+              0.3
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "skyColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.7,
+              0.4
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "沙漠场景背景",
+      "density": 300,
+      "sandColor": [
+        0.8,
+        0.6,
+        0.3
+      ],
+      "skyColor": [
+        0.9,
+        0.7,
+        0.4
+      ]
+    }
+  },
+  {
+    "name": "ocean",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "海洋场景背景 - 深蓝色调的海浪与天空，广阔宁静",
+    "tags": [
+      "场景",
+      "scene",
+      "海洋",
+      "ocean",
+      "自然"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "海洋场景背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "waveHeight": {
+            "type": "number",
+            "min": 5,
+            "max": 100,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "deepColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.0,
+              0.1,
+              0.3
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "surfaceColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.5,
+              0.8
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "海洋场景背景",
+      "waveHeight": 20,
+      "deepColor": [
+        0.0,
+        0.1,
+        0.3
+      ],
+      "surfaceColor": [
+        0.2,
+        0.5,
+        0.8
+      ]
+    }
+  },
+  {
+    "name": "snow_mountain",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "雪山场景背景 - 冷白色调的雪山与天空，纯净寒冷",
+    "tags": [
+      "场景",
+      "scene",
+      "雪山",
+      "snow",
+      "自然"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "雪山场景背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "density": {
+            "type": "number",
+            "min": 100,
+            "max": 600,
+            "default": 400
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "skyColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.5,
+              0.6,
+              0.8
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "snowColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.95,
+              1.0
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "雪山场景背景",
+      "density": 400,
+      "skyColor": [
+        0.5,
+        0.6,
+        0.8
+      ],
+      "snowColor": [
+        0.9,
+        0.95,
+        1.0
+      ]
+    }
+  },
+  {
+    "name": "grassland",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "草原场景背景 - 黄绿色调的草原与天空，开阔生机",
+    "tags": [
+      "场景",
+      "scene",
+      "草原",
+      "grassland",
+      "自然"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "草原场景背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "density": {
+            "type": "number",
+            "min": 100,
+            "max": 600,
+            "default": 350
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "skyColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.4,
+              0.7,
+              0.9
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "grassColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              0.6,
+              0.2
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "草原场景背景",
+      "density": 350,
+      "skyColor": [
+        0.4,
+        0.7,
+        0.9
+      ],
+      "grassColor": [
+        0.3,
+        0.6,
+        0.2
+      ]
+    }
+  }
+]

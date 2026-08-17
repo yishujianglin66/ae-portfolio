@@ -1,0 +1,109 @@
+{
+  "models": {
+    "jsx-code-generator": {
+      "1.0.0": {
+        "model_name": "jsx-code-generator",
+        "model_version": "1.0.0",
+        "model_type": "jsx_code",
+        "model_path": "./output/models\\jsx-code-generator\\final",
+        "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "training_method": "lora",
+        "params_million": 12.61568,
+        "train_samples": 128,
+        "eval_metrics": {
+          "bleu": 1.0,
+          "code_bleu": 1.0,
+          "syntax_accuracy": 0.4117647058823529,
+          "functional_accuracy": 1.0
+        },
+        "cost_effectiveness": 1.0,
+        "training_time_hours": 0.068582757446501,
+        "training_cost_usd": 0.1028741361697515,
+        "created_at": "2026-07-27 11:59:08",
+        "status": "artifact_missing",
+        "description": "AE JSX代码生成小模型，基于TinyLlama-1.1B + LoRA微调，约50M可训练参数，支持输入风格描述输出AE JSX代码。注意: model_path指向的./output/models/jsx-code-generator/final在磁盘不存在，权重从未持久化，本条目仅存历史训练记录",
+        "tags": [
+          "jsx",
+          "code-generation",
+          "after-effects",
+          "lora",
+          "tinyllama"
+        ],
+        "metadata": {}
+      }
+    },
+    "scene-classifier-v1": {
+      "1.0.0": {
+        "model_name": "scene-classifier-v1",
+        "model_version": "1.0.0",
+        "model_type": "vision_classification",
+        "model_path": "./models/scene_classifier_v1.pt",
+        "base_model": "ResNet18",
+        "training_method": "supervised",
+        "params_million": 11.7,
+        "train_samples": 0,
+        "eval_metrics": {
+          "n_classes": 7,
+          "classes": ["landscape", "battle", "emotional", "dialog", "daily", "ceremony", "comedy"]
+        },
+        "cost_effectiveness": 1.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-10 00:00:00",
+        "status": "production",
+        "description": "场景分类器(ResNet18, 7类)，基于VLM全量标注数据训练。由 ai/local_model_hub.py 加载，接入 production_director 素材打标链路，增强 MaterialIntelTag.content.scene_type 供情绪/场景匹配消费",
+        "tags": [
+          "scene-classification",
+          "resnet18",
+          "material-tagging",
+          "vlm-distillation"
+        ],
+        "metadata": {
+          "consumer": "ai/local_model_hub.py::classify_video_scene"
+        }
+      }
+    },
+    "rhythm-reward-v1": {
+      "1.0.0": {
+        "model_name": "rhythm-reward-v1",
+        "model_version": "1.0.0",
+        "model_type": "edit_quality_scoring",
+        "model_path": "./models/rhythm_reward.pkl",
+        "base_model": "GradientBoostingRegressor+IsotonicRegression",
+        "training_method": "supervised_regression",
+        "params_million": 0.001,
+        "train_samples": 308,
+        "eval_metrics": {
+          "cv_mae": 0.0351,
+          "cv_r2": 0.826,
+          "cv_pairwise_acc": 0.9519,
+          "cv_spearman": 0.864,
+          "top1_selection_acc": "15/22",
+          "top2_selection_acc": "20/22"
+        },
+        "cost_effectiveness": 1.0,
+        "training_time_hours": 0.0,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-08-06 21:51:16",
+        "status": "production",
+        "description": "节奏匹配奖励模型，预测剪辑方案的踩拍质量(soft_beat_score)，用于导演系统多切点方案择优。视频级GroupKFold 5折验证: 成对排序准确率95.2%。由 ai/local_model_hub.py 加载，接入 production_director 切点方案择优链路",
+        "tags": [
+          "rhythm",
+          "beat-alignment",
+          "reward-model",
+          "cut-planning"
+        ],
+        "metadata": {
+          "consumer": "ai/local_model_hub.py::score_cut_plan",
+          "meta_file": "./models/rhythm_reward_meta.json"
+        }
+      }
+    }
+  },
+  "production_models": {
+    "vision_classification": "scene-classifier-v1",
+    "edit_quality_scoring": "rhythm-reward-v1"
+  },
+  "ab_tests": {},
+  "updated_at": "2026-08-10 00:00:00"
+}

@@ -1,0 +1,26 @@
+{
+  "trained_at": "2026-08-11 01:29:14",
+  "n_synth": 3600,
+  "cv_accuracy": 0.845,
+  "ref_anchor_accuracy": 0.697,
+  "v1_rule_ref_accuracy": 1.0,
+  "feature_keys": [
+    "net_zoom",
+    "pos_ratio",
+    "neg_ratio",
+    "zoom_vel_std",
+    "dup_ratio",
+    "mean_framediff",
+    "dur"
+  ],
+  "labels": [
+    "static",
+    "zoom_in",
+    "zoom_out",
+    "zoom_in_then_back",
+    "mixed_shake",
+    "pan_other"
+  ],
+  "decision": "保留v1规则(锚点100%),分类器仅作候选;超越规则需时序形状特征(DTW/小模型),留待AE工程真值到位后再训",
+  "error_pattern": "大幅值shake带净位移时被误判为zoom_in_then_back"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "hologram_display",
+  "description": "全息显示效果 - 全息文字 + 扫描线 + 色差特效",
+  "presets": [
+    "hologram_text",
+    "scanline_effect",
+    "chromatic_aberration"
+  ],
+  "parameters": {}
+}

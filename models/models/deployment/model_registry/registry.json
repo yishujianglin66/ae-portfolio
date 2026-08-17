@@ -1,0 +1,123 @@
+{
+  "models": {
+    "style-classifier": {
+      "v1.0.0": {
+        "model_name": "style-classifier",
+        "model_version": "v1.0.0",
+        "model_type": "style_classify",
+        "model_path": "models/output/style-classifier/model.json",
+        "base_model": "custom_mlp",
+        "training_method": "full_finetune",
+        "params_million": 0.02,
+        "train_samples": 205,
+        "eval_metrics": {
+          "accuracy": 0.5122,
+          "val_accuracy": 0.4878,
+          "loss": 1.5885
+        },
+        "cost_effectiveness": 95.0,
+        "training_time_hours": 0.1,
+        "training_cost_usd": 0.0,
+        "created_at": "2026-07-27 11:25:18",
+        "status": "staging",
+        "description": "轻量级风格分类模型 - 支持21种风格标签（含8种漫剪标签），14维特征输入，纯CPU可用",
+        "tags": [
+          "style_classify",
+          "amv",
+          "cpu",
+          "lightweight",
+          "production-ready"
+        ],
+        "metadata": {
+          "feature_dim": 14,
+          "num_classes": 21,
+          "hidden_dim": 128,
+          "hidden_layers": 2,
+          "dropout": 0.3,
+          "style_labels": [
+            "cinematic",
+            "anime_puppet",
+            "fast_cut",
+            "slow_cut",
+            "glitch_digital",
+            "audio_visual",
+            "particle_ambient",
+            "text_animation",
+            "3d_spatial",
+            "realistic_color",
+            "high_dynamic",
+            "dark_tone",
+            "low_saturation",
+            "高饱和",
+            "长镜头",
+            "amv_pull_zoom",
+            "amv_fast_cut",
+            "amv_beat_sync",
+            "amv_korean_flash",
+            "amv_glitch",
+            "amv_cinematic",
+            "amv_3d_spatial",
+            "amv_high_burn"
+          ]
+        }
+      }
+    },
+    "param-optimizer": {
+      "1.0.0": {
+        "model_name": "param-optimizer",
+        "model_version": "1.0.0",
+        "model_type": "param_optim",
+        "model_path": "C:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\models\\output\\param-optimizer\\deploy",
+        "base_model": "mlp-10m",
+        "training_method": "full_finetune",
+        "params_million": 16.641296,
+        "train_samples": 6761,
+        "eval_metrics": {
+          "mse": 0.0016755179967731237,
+          "mae": 0.013948850333690643,
+          "r2": 0.44875603914260864,
+          "rmse": 0.040933091707970506
+        },
+        "cost_effectiveness": 30.75844995713043,
+        "training_time_hours": 0.0816392692592409,
+        "training_cost_usd": 0.12210580796003341,
+        "created_at": "2026-07-27 14:09:59",
+        "status": "staging",
+        "description": "AE effect parameter optimization model",
+        "tags": [
+          "parameter-optimization",
+          "AE",
+          "regression",
+          "mlp",
+          "10m-params"
+        ],
+        "metadata": {
+          "input_dim": 82,
+          "output_dim": 16,
+          "num_styles": 20,
+          "param_names": [
+            "Flare Brightness",
+            "Blend With Original",
+            "Glow Threshold",
+            "Glow Radius",
+            "Glow Intensity",
+            "Blurriness",
+            "Red Shadow Level",
+            "Green Shadow Level",
+            "Blue Shadow Level",
+            "Red Midtone Level",
+            "Green Midtone Level",
+            "Blue Midtone Level",
+            "Red Highlight Level",
+            "Green Highlight Level",
+            "Blue Highlight Level",
+            "Red Input Black"
+          ]
+        }
+      }
+    }
+  },
+  "production_models": {},
+  "ab_tests": {},
+  "updated_at": "2026-07-27 14:09:59"
+}

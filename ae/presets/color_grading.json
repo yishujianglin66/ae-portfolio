@@ -1,0 +1,3019 @@
+[
+  {
+    "name": "cyberpunk_grade",
+    "category": "color_grading",
+    "subcategory": "cyberpunk",
+    "description": "赛博朋克调色预设 - 高对比度、青色和品红色调、暗角效果，营造科幻氛围",
+    "tags": [
+      "赛博朋克",
+      "cyberpunk",
+      "调色",
+      "color_grading",
+      "scifi"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -100,
+        "max": 100,
+        "description": "对比度调整"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -100,
+        "max": 100,
+        "description": "饱和度调整"
+      },
+      "cyanTint": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "青色色调强度"
+      },
+      "magentaTint": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "品红色调强度"
+      },
+      "vignetteAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "暗角强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "contrast": 30,
+      "saturation": 20,
+      "cyanTint": 30,
+      "magentaTint": 25,
+      "vignetteAmount": 60
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      cyanTint: ${cyanTint},\n      magentaTint: ${magentaTint},\n      vignetteAmount: ${vignetteAmount}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(p.contrast / 100 + 1);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation);\n    var cc = layer.Effects.addProperty(\"ADBE Channel Mixer\");\n    cc.property(\"ADBE Channel Mixer-0004\").setValue(100 + p.cyanTint);\n    cc.property(\"ADBE Channel Mixer-0005\").setValue(100 + p.cyanTint);\n    cc.property(\"ADBE Channel Mixer-0007\").setValue(100 + p.magentaTint);\n    cc.property(\"ADBE Channel Mixer-0009\").setValue(100 + p.magentaTint);\n    var vignette = layer.Effects.addProperty(\"ADBE Vignette\");\n    vignette.property(\"ADBE Vignette-0001\").setValue(p.vignetteAmount / 100);\n    _result = {status:\"success\", message:\"赛博朋克调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "cinematic_grade",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "电影感调色预设 - 降低饱和度、暖色调、胶片颗粒，模拟电影胶片效果",
+    "tags": [
+      "电影感",
+      "cinematic",
+      "胶片",
+      "film",
+      "color_grading"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -100,
+        "max": 0
+      },
+      "warmth": {
+        "type": "number",
+        "min": -50,
+        "max": 50
+      },
+      "contrast": {
+        "type": "number",
+        "min": -50,
+        "max": 50
+      },
+      "grainAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "blackLevel": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "saturation": -20,
+      "warmth": 20,
+      "contrast": 15,
+      "grainAmount": 30,
+      "blackLevel": 10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      saturation: ${saturation},\n      warmth: ${warmth},\n      contrast: ${contrast},\n      grainAmount: ${grainAmount},\n      blackLevel: ${blackLevel}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation);\n    var cc = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cc.property(\"ADBE Color Balance-0001\").setValue(p.warmth);\n    cc.property(\"ADBE Color Balance-0002\").setValue(p.warmth * 0.5);\n    cc.property(\"ADBE Color Balance-0003\").setValue(-p.warmth * 0.3);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0001\").setValue(p.blackLevel);\n    levels.property(\"ADBE Levels-0003\").setValue(p.contrast / 100 + 1);\n    _result = {status:\"success\", message:\"电影感调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "retro_vintage",
+    "category": "color_grading",
+    "subcategory": "retro",
+    "description": "复古怀旧调色预设 - 模拟老照片效果，偏黄色调、低对比度、轻微褪色",
+    "tags": [
+      "复古",
+      "vintage",
+      "怀旧",
+      "retro",
+      "old_photo"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "yellowTint": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      },
+      "contrast": {
+        "type": "number",
+        "min": -50,
+        "max": 0
+      },
+      "brightness": {
+        "type": "number",
+        "min": -30,
+        "max": 10
+      },
+      "saturation": {
+        "type": "number",
+        "min": -50,
+        "max": 0
+      },
+      "fadeAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "yellowTint": 30,
+      "contrast": -20,
+      "brightness": -5,
+      "saturation": -30,
+      "fadeAmount": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      yellowTint: ${yellowTint},\n      contrast: ${contrast},\n      brightness: ${brightness},\n      saturation: ${saturation},\n      fadeAmount: ${fadeAmount}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cc = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cc.property(\"ADBE Color Balance-0001\").setValue(p.yellowTint);\n    cc.property(\"ADBE Color Balance-0002\").setValue(p.yellowTint * 0.8);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(p.contrast / 100 + 1);\n    levels.property(\"ADBE Levels-0004\").setValue(p.brightness / 100);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation);\n    var fade = layer.Effects.addProperty(\"ADBE Fast Blur\");\n    fade.property(\"ADBE Fast Blur-0001\").setValue(p.fadeAmount * 0.5);\n    _result = {status:\"success\", message:\"复古怀旧调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "dreamy_soft",
+    "category": "color_grading",
+    "subcategory": "dreamy",
+    "description": "梦幻柔和调色预设 - 柔和模糊、低对比度、淡粉色调，营造梦幻氛围",
+    "tags": [
+      "梦幻",
+      "dreamy",
+      "柔和",
+      "soft",
+      "romantic"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      },
+      "contrast": {
+        "type": "number",
+        "min": -50,
+        "max": 0
+      },
+      "brightness": {
+        "type": "number",
+        "min": 0,
+        "max": 30
+      },
+      "pinkTint": {
+        "type": "number",
+        "min": 0,
+        "max": 40
+      },
+      "saturation": {
+        "type": "number",
+        "min": -30,
+        "max": 0
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "blurAmount": 8,
+      "contrast": -15,
+      "brightness": 15,
+      "pinkTint": 20,
+      "saturation": -10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      blurAmount: ${blurAmount},\n      contrast: ${contrast},\n      brightness: ${brightness},\n      pinkTint: ${pinkTint},\n      saturation: ${saturation}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var blur = layer.Effects.addProperty(\"ADBE Fast Blur\");\n    blur.property(\"ADBE Fast Blur-0001\").setValue(p.blurAmount);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(p.contrast / 100 + 1);\n    levels.property(\"ADBE Levels-0004\").setValue(p.brightness / 100);\n    var cc = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cc.property(\"ADBE Color Balance-0001\").setValue(p.pinkTint);\n    cc.property(\"ADBE Color Balance-0003\").setValue(p.pinkTint * 0.5);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation);\n    _result = {status:\"success\", message:\"梦幻柔和调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "high_contrast_bw",
+    "category": "color_grading",
+    "subcategory": "black_and_white",
+    "description": "高对比度黑白调色预设 - 强烈的黑白对比，去除灰度，营造戏剧性效果",
+    "tags": [
+      "黑白",
+      "black_and_white",
+      "高对比",
+      "contrast",
+      "dramatic"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "threshold": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "brightness": {
+        "type": "number",
+        "min": -50,
+        "max": 50
+      },
+      "saturation": {
+        "type": "number",
+        "min": -100,
+        "max": -100
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "contrast": 50,
+      "threshold": 50,
+      "brightness": 0,
+      "saturation": -100
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      contrast: ${contrast},\n      threshold: ${threshold},\n      brightness: ${brightness},\n      saturation: ${saturation}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(p.contrast / 50 + 1);\n    levels.property(\"ADBE Levels-0004\").setValue(p.brightness / 100);\n    var threshold = layer.Effects.addProperty(\"ADBE Threshold\");\n    threshold.property(\"ADBE Threshold-0001\").setValue(p.threshold);\n    _result = {status:\"success\", message:\"高对比度黑白调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "teal_orange",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "橙青调色预设 - 阴影偏青色、高光偏橙色，经典好莱坞橙青对比调色",
+    "tags": [
+      "橙青",
+      "teal_orange",
+      "电影",
+      "cinematic",
+      "调色"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -50,
+        "max": 100,
+        "description": "对比度调整"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -100,
+        "max": 100,
+        "description": "饱和度调整"
+      },
+      "tealShadow": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "青色阴影强度"
+      },
+      "orangeHighlight": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "橙色高光强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 20,
+      "saturation": -10,
+      "tealShadow": 30,
+      "orangeHighlight": 35
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      tealShadow: ${tealShadow},\n      orangeHighlight: ${orangeHighlight}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.tealShadow * 0.3 * p.intensity);\n    cb.property(\"ADBE Color Balance-0003\").setValue(-p.tealShadow * p.intensity);\n    cb.property(\"ADBE Color Balance-0007\").setValue(p.orangeHighlight * p.intensity);\n    cb.property(\"ADBE Color Balance-0009\").setValue(-p.orangeHighlight * 0.3 * p.intensity);\n    _result = {status:\"success\", message:\"橙青调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "hollywood_blockbuster",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "好莱坞大片调色预设 - 强S曲线对比、橙青色调、暗角，营造大片质感",
+    "tags": [
+      "好莱坞",
+      "hollywood",
+      "大片",
+      "blockbuster",
+      "电影"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -100,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "暖色调"
+      },
+      "vignette": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "暗角强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 30,
+      "saturation": -15,
+      "warmth": 20,
+      "vignette": 40
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      warmth: ${warmth},\n      vignette: ${vignette}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0001\").setValue(5 * p.intensity);\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 80);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(-p.warmth * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(-p.warmth * 0.3 * p.intensity);\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.warmth * 0.3 * p.intensity);\n    var vig = layer.Effects.addProperty(\"ADBE Vignette\");\n    vig.property(\"ADBE Vignette-0001\").setValue(p.vignette * p.intensity / 100);\n    _result = {status:\"success\", message:\"好莱坞大片调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "netflix_style",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "Netflix风格调色预设 - 冷色调、高对比、低饱和，模拟流媒体平台剧集质感",
+    "tags": [
+      "Netflix",
+      "流媒体",
+      "冷调",
+      "剧集",
+      "cinematic"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -50,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "coolTint": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "冷色调强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 25,
+      "saturation": -20,
+      "coolTint": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      coolTint: ${coolTint}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    levels.property(\"ADBE Levels-0001\").setValue(3 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.coolTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.coolTint * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.coolTint * 0.3 * p.intensity);\n    _result = {status:\"success\", message:\"Netflix风格调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "action_movie",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "动作片调色预设 - 高对比度、微增饱和、胶片颗粒，营造紧张刺激的动作片氛围",
+    "tags": [
+      "动作片",
+      "action",
+      "高对比",
+      "颗粒",
+      "cinematic"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 80,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -50,
+        "max": 50,
+        "description": "饱和度"
+      },
+      "grain": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "颗粒强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 40,
+      "saturation": 10,
+      "grain": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      grain: ${grain}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 80);\n    levels.property(\"ADBE Levels-0001\").setValue(3 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var noise = layer.Effects.addProperty(\"ADBE Noise\");\n    noise.property(\"ADBE Noise-0001\").setValue(p.grain * p.intensity / 3);\n    _result = {status:\"success\", message:\"动作片调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "mystery_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "悬疑片调色预设 - 冷暗色调、压暗阴影、强暗角，营造神秘悬疑氛围",
+    "tags": [
+      "悬疑",
+      "mystery",
+      "暗调",
+      "冷色",
+      "cinematic"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 60,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -80,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "coolTint": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "冷色调"
+      },
+      "vignette": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "暗角强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 30,
+      "saturation": -40,
+      "coolTint": 25,
+      "vignette": 60
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      coolTint: ${coolTint},\n      vignette: ${vignette}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0001\").setValue(10 * p.intensity);\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.coolTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.coolTint * 0.5 * p.intensity);\n    var vig = layer.Effects.addProperty(\"ADBE Vignette\");\n    vig.property(\"ADBE Vignette-0001\").setValue(p.vignette * p.intensity / 100);\n    _result = {status:\"success\", message:\"悬疑片调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "sci_fi_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "科幻片调色预设 - 蓝青色调、高对比、饱和度提升，营造未来科幻氛围",
+    "tags": [
+      "科幻",
+      "sci_fi",
+      "蓝色",
+      "未来",
+      "cinematic"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 60,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "饱和度"
+      },
+      "blueTint": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "蓝色调强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 25,
+      "saturation": 15,
+      "blueTint": 35
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      blueTint: ${blueTint}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(-10 * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.blueTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.blueTint * 0.7 * p.intensity);\n    cb.property(\"ADBE Color Balance-0009\").setValue(p.blueTint * 0.5 * p.intensity);\n    _result = {status:\"success\", message:\"科幻片调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "art_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "文艺片调色预设 - 柔和对比、暖色低饱和、细腻色调，营造文艺气质",
+    "tags": [
+      "文艺",
+      "art_film",
+      "柔和",
+      "低饱和",
+      "cinematic"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -30,
+        "max": 30,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -50,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "暖色调"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": -10,
+      "saturation": -25,
+      "warmth": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      warmth: ${warmth}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.3 * p.intensity);\n    _result = {status:\"success\", message:\"文艺片调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "war_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "战争片调色预设 - 低饱和、偏绿调、高对比，模拟战争片的去色质感",
+    "tags": [
+      "战争",
+      "war_film",
+      "去色",
+      "绿调",
+      "cinematic"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -80,
+        "max": -20,
+        "description": "饱和度"
+      },
+      "greenTint": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "绿色调"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 20,
+      "saturation": -50,
+      "greenTint": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      greenTint: ${greenTint}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0002\").setValue(p.greenTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0005\").setValue(p.greenTint * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(-p.greenTint * 0.3 * p.intensity);\n    _result = {status:\"success\", message:\"战争片调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "western_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "西部片调色预设 - 暖橙色调、高对比、轻微去饱和，模拟西部荒野质感",
+    "tags": [
+      "西部",
+      "western",
+      "暖橙",
+      "荒野",
+      "cinematic"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -30,
+        "max": 30,
+        "description": "饱和度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "暖色调"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 30,
+      "saturation": 5,
+      "warmth": 35
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      warmth: ${warmth}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 80);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0007\").setValue(p.warmth * 0.8 * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(-p.warmth * 0.4 * p.intensity);\n    _result = {status:\"success\", message:\"西部片调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "noir_film",
+    "category": "color_grading",
+    "subcategory": "cinematic",
+    "description": "黑色电影调色预设 - 完全去色、极端对比、强暗角，营造经典黑色电影氛围",
+    "tags": [
+      "黑色电影",
+      "noir",
+      "黑白",
+      "高对比",
+      "cinematic"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -100,
+        "max": -100,
+        "description": "饱和度"
+      },
+      "vignette": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "暗角强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 60,
+      "saturation": -100,
+      "vignette": 70
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      vignette: ${vignette}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0001\").setValue(8 * p.intensity);\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 60);\n    var vig = layer.Effects.addProperty(\"ADBE Vignette\");\n    vig.property(\"ADBE Vignette-0001\").setValue(p.vignette * p.intensity / 100);\n    _result = {status:\"success\", message:\"黑色电影调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "vintage_film",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "复古胶片调色预设 - 暖黄调、低饱和、胶片颗粒，模拟老胶片质感",
+    "tags": [
+      "复古",
+      "胶片",
+      "vintage",
+      "film",
+      "颗粒"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "暖色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -60,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "grain": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "颗粒强度"
+      },
+      "fade": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "褪色程度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "warmth": 30,
+      "saturation": -25,
+      "grain": 30,
+      "fade": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      warmth: ${warmth},\n      saturation: ${saturation},\n      grain: ${grain},\n      fade: ${fade}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.5 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var noise = layer.Effects.addProperty(\"ADBE Noise\");\n    noise.property(\"ADBE Noise-0001\").setValue(p.grain * p.intensity / 4);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0004\").setValue(p.fade * p.intensity / 200);\n    levels.property(\"ADBE Levels-0005\").setValue(1 - p.fade * p.intensity / 200);\n    _result = {status:\"success\", message:\"复古胶片调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "old_photo",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "老照片调色预设 - 棕褐色调、去色、噪点、暗角，模拟泛黄老照片效果",
+    "tags": [
+      "老照片",
+      "old_photo",
+      "棕褐",
+      "sepia",
+      "vintage"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "sepia": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "棕褐色强度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -100,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "noise": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "噪点强度"
+      },
+      "vignette": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "暗角强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "sepia": 60,
+      "saturation": -50,
+      "noise": 15,
+      "vignette": 35
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      sepia: ${sepia},\n      saturation: ${saturation},\n      noise: ${noise},\n      vignette: ${vignette}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var fill = layer.Effects.addProperty(\"ADBE Fill\");\n    fill.property(\"ADBE Fill-0001\").setValue(1);\n    fill.property(\"ADBE Fill-0002\").setValue([0.75, 0.65, 0.5, 1]);\n    fill.property(\"ADBE Fill-0003\").setValue(p.sepia * p.intensity / 100);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var noise = layer.Effects.addProperty(\"ADBE Noise\");\n    noise.property(\"ADBE Noise-0001\").setValue(p.noise * p.intensity / 4);\n    var vig = layer.Effects.addProperty(\"ADBE Vignette\");\n    vig.property(\"ADBE Vignette-0001\").setValue(p.vignette * p.intensity / 100);\n    _result = {status:\"success\", message:\"老照片调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "bw_movie",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "黑白电影调色预设 - 完全去色、高对比、胶片颗粒，模拟经典黑白电影",
+    "tags": [
+      "黑白电影",
+      "bw_movie",
+      "黑白",
+      "颗粒",
+      "vintage"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 80,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -100,
+        "max": -100,
+        "description": "饱和度"
+      },
+      "grain": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "颗粒强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 40,
+      "saturation": -100,
+      "grain": 25
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      grain: ${grain}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 80);\n    var noise = layer.Effects.addProperty(\"ADBE Noise\");\n    noise.property(\"ADBE Noise-0001\").setValue(p.grain * p.intensity / 4);\n    _result = {status:\"success\", message:\"黑白电影调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "warm_vintage",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "暖色调复古调色预设 - 偏暖黄色调、轻微去饱和，模拟温暖复古质感",
+    "tags": [
+      "暖色",
+      "复古",
+      "warm_vintage",
+      "vintage",
+      "retro"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "暖色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -40,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "tint": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "色调偏移"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "warmth": 35,
+      "saturation": -10,
+      "tint": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      warmth: ${warmth},\n      saturation: ${saturation},\n      tint: ${tint}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * 0.8 * p.intensity);\n    cb.property(\"ADBE Color Balance-0003\").setValue(-p.warmth * 0.3 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.tint * p.intensity);\n    _result = {status:\"success\", message:\"暖色调复古调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "cold_vintage",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "冷色调复古调色预设 - 偏冷蓝色调、去饱和，模拟冷调复古质感",
+    "tags": [
+      "冷色",
+      "复古",
+      "cold_vintage",
+      "vintage",
+      "retro"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "coolTint": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "冷色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -40,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "tint": {
+        "type": "number",
+        "min": -30,
+        "max": 0,
+        "description": "色调偏移"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "coolTint": 25,
+      "saturation": -15,
+      "tint": -10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      coolTint: ${coolTint},\n      saturation: ${saturation},\n      tint: ${tint}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.coolTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.coolTint * 0.7 * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(-p.coolTint * 0.3 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.tint * p.intensity);\n    _result = {status:\"success\", message:\"冷色调复古调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "film_grain",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "胶片颗粒感调色预设 - 重颗粒、微调对比度和饱和度，模拟胶片颗粒质感",
+    "tags": [
+      "胶片",
+      "颗粒",
+      "film_grain",
+      "grain",
+      "vintage"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "grain": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "颗粒强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -20,
+        "max": 30,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -30,
+        "max": 0,
+        "description": "饱和度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "grain": 50,
+      "contrast": 10,
+      "saturation": -10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      grain: ${grain},\n      contrast: ${contrast},\n      saturation: ${saturation}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var noise = layer.Effects.addProperty(\"ADBE Noise\");\n    noise.property(\"ADBE Noise-0001\").setValue(p.grain * p.intensity / 2.5);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    _result = {status:\"success\", message:\"胶片颗粒感调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "70s_style",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "70年代风格调色预设 - 暖橙调、低对比、橙青渐变，模拟70年代复古风格",
+    "tags": [
+      "70年代",
+      "70s",
+      "复古",
+      "vintage",
+      "retro"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "暖色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -20,
+        "max": 20,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -30,
+        "max": 20,
+        "description": "对比度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "warmth": 40,
+      "saturation": 5,
+      "contrast": -10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      warmth: ${warmth},\n      saturation: ${saturation},\n      contrast: ${contrast}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0007\").setValue(p.warmth * 0.8 * p.intensity);\n    cb.property(\"ADBE Color Balance-0003\").setValue(-p.warmth * 0.3 * p.intensity);\n    cb.property(\"ADBE Color Balance-0009\").setValue(-p.warmth * 0.3 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    _result = {status:\"success\", message:\"70年代风格调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "90s_hk",
+    "category": "color_grading",
+    "subcategory": "vintage",
+    "description": "90年代港风调色预设 - 暖调增饱和、低对比，模拟90年代港片胶片质感",
+    "tags": [
+      "90年代",
+      "港风",
+      "90s_hk",
+      "香港",
+      "vintage"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "暖色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -30,
+        "max": 10,
+        "description": "对比度"
+      },
+      "tint": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "色调偏移"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "warmth": 20,
+      "saturation": 20,
+      "contrast": -10,
+      "tint": 10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      warmth: ${warmth},\n      saturation: ${saturation},\n      contrast: ${contrast},\n      tint: ${tint}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * 0.8 * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.5 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.tint * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    _result = {status:\"success\", message:\"90年代港风调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "japanese_fresh",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "日系清新调色预设 - 提阴影、降高光、低饱和冷调，营造日系清新氛围",
+    "tags": [
+      "日系",
+      "清新",
+      "japanese",
+      "fresh",
+      "modern"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "shadow": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "阴影提亮"
+      },
+      "highlight": {
+        "type": "number",
+        "min": -30,
+        "max": 0,
+        "description": "高光降低"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -40,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "coolTint": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "冷色调"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "shadow": 20,
+      "highlight": -10,
+      "saturation": -15,
+      "coolTint": 10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      shadow: ${shadow},\n      highlight: ${highlight},\n      saturation: ${saturation},\n      coolTint: ${coolTint}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0004\").setValue(p.shadow * p.intensity / 200);\n    levels.property(\"ADBE Levels-0005\").setValue(1 + p.highlight * p.intensity / 200);\n    levels.property(\"ADBE Levels-0003\").setValue(0.95);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.coolTint * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.coolTint * p.intensity);\n    _result = {status:\"success\", message:\"日系清新调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "ins_style",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "Instagram风调色预设 - 轻微增对比和饱和、柔和暗角，社交媒体风格",
+    "tags": [
+      "Instagram",
+      "ins",
+      "社交媒体",
+      "modern",
+      "调色"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -20,
+        "max": 30,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "饱和度"
+      },
+      "vignette": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "暗角强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 10,
+      "saturation": 15,
+      "vignette": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      vignette: ${vignette}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 120);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var vig = layer.Effects.addProperty(\"ADBE Vignette\");\n    vig.property(\"ADBE Vignette-0001\").setValue(p.vignette * p.intensity / 150);\n    _result = {status:\"success\", message:\"Instagram风调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "healing",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "治愈系调色预设 - 微暖调、提阴影、柔和饱和，营造温暖治愈氛围",
+    "tags": [
+      "治愈",
+      "healing",
+      "温暖",
+      "柔和",
+      "modern"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "暖色调"
+      },
+      "shadow": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "阴影提亮"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "饱和度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "warmth": 10,
+      "shadow": 15,
+      "saturation": 8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      warmth: ${warmth},\n      shadow: ${shadow},\n      saturation: ${saturation}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.5 * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0004\").setValue(p.shadow * p.intensity / 200);\n    levels.property(\"ADBE Levels-0003\").setValue(0.95);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    _result = {status:\"success\", message:\"治愈系调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "candy_color",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "糖果色调色预设 - 高饱和、低对比、暖调，营造甜美糖果色彩",
+    "tags": [
+      "糖果色",
+      "candy",
+      "甜美",
+      "高饱和",
+      "modern"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -30,
+        "max": 10,
+        "description": "对比度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "暖色调"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "saturation": 30,
+      "contrast": -10,
+      "warmth": 10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      saturation: ${saturation},\n      contrast: ${contrast},\n      warmth: ${warmth}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    levels.property(\"ADBE Levels-0004\").setValue(0.03 * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0007\").setValue(p.warmth * 0.5 * p.intensity);\n    _result = {status:\"success\", message:\"糖果色调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "creamy",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "奶油肌调色预设 - 大幅提阴影、暖调、柔和高光，营造奶油般柔滑肤质",
+    "tags": [
+      "奶油",
+      "creamy",
+      "柔和",
+      "暖调",
+      "modern"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "shadow": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "阴影提亮"
+      },
+      "highlight": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "高光提亮"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 25,
+        "description": "暖色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 15,
+        "description": "饱和度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "shadow": 25,
+      "highlight": 15,
+      "warmth": 15,
+      "saturation": 8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      shadow: ${shadow},\n      highlight: ${highlight},\n      warmth: ${warmth},\n      saturation: ${saturation}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0004\").setValue(p.shadow * p.intensity / 150);\n    levels.property(\"ADBE Levels-0005\").setValue(p.highlight * p.intensity / 200);\n    levels.property(\"ADBE Levels-0003\").setValue(0.92);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.4 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    _result = {status:\"success\", message:\"奶油肌调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "oxygen",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "氧气感调色预设 - 低对比、提阴影、微增饱和，营造通透氧气感",
+    "tags": [
+      "氧气感",
+      "oxygen",
+      "通透",
+      "清新",
+      "modern"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -30,
+        "max": 0,
+        "description": "对比度"
+      },
+      "shadow": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "阴影提亮"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "饱和度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": -15,
+      "shadow": 30,
+      "saturation": 8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      shadow: ${shadow},\n      saturation: ${saturation}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    levels.property(\"ADBE Levels-0004\").setValue(p.shadow * p.intensity / 150);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    _result = {status:\"success\", message:\"氧气感调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "bright_clear",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "透亮感调色预设 - 提高光和阴影、降对比，营造明亮通透的视觉效果",
+    "tags": [
+      "透亮",
+      "bright",
+      "clear",
+      "明亮",
+      "modern"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "highlight": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "高光提亮"
+      },
+      "shadow": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "阴影提亮"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -30,
+        "max": 0,
+        "description": "对比度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "highlight": 20,
+      "shadow": 15,
+      "contrast": -10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      highlight: ${highlight},\n      shadow: ${shadow},\n      contrast: ${contrast}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0005\").setValue(p.highlight * p.intensity / 200);\n    levels.property(\"ADBE Levels-0004\").setValue(p.shadow * p.intensity / 200);\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    _result = {status:\"success\", message:\"透亮感调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "mint_green",
+    "category": "color_grading",
+    "subcategory": "modern",
+    "description": "薄荷绿调色预设 - 冷绿调、微去饱和，营造清新薄荷绿氛围",
+    "tags": [
+      "薄荷绿",
+      "mint",
+      "green",
+      "清新",
+      "modern"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "greenTint": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "绿色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -20,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "coolTint": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "冷色调"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "greenTint": 25,
+      "saturation": -8,
+      "coolTint": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      greenTint: ${greenTint},\n      saturation: ${saturation},\n      coolTint: ${coolTint}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0002\").setValue(p.greenTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0005\").setValue(p.greenTint * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.coolTint * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.coolTint * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.greenTint * 0.3 * p.intensity);\n    _result = {status:\"success\", message:\"薄荷绿调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "melancholy_blue",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "忧郁蓝调色预设 - 深蓝色调、去饱和、低对比，营造忧郁沉静氛围",
+    "tags": [
+      "忧郁",
+      "蓝色",
+      "melancholy",
+      "blue",
+      "mood"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "blueTint": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "蓝色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -50,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -30,
+        "max": 20,
+        "description": "对比度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blueTint": 35,
+      "saturation": -20,
+      "contrast": -10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      blueTint: ${blueTint},\n      saturation: ${saturation},\n      contrast: ${contrast}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.blueTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.blueTint * 0.7 * p.intensity);\n    cb.property(\"ADBE Color Balance-0009\").setValue(p.blueTint * 0.5 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    _result = {status:\"success\", message:\"忧郁蓝调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "warm_orange",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "温暖橙调色预设 - 强暖橙色调、柔和对比，营造温暖舒适的氛围",
+    "tags": [
+      "温暖",
+      "橙色",
+      "warm",
+      "orange",
+      "mood"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "暖色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -30,
+        "max": 10,
+        "description": "对比度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "warmth": 40,
+      "saturation": 8,
+      "contrast": -10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      warmth: ${warmth},\n      saturation: ${saturation},\n      contrast: ${contrast}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0007\").setValue(p.warmth * 0.8 * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.5 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    _result = {status:\"success\", message:\"温暖橙调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "dreamy_purple",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "梦幻紫调色预设 - 紫色调、增饱和、轻微模糊，营造梦幻紫色氛围",
+    "tags": [
+      "梦幻",
+      "紫色",
+      "dreamy",
+      "purple",
+      "mood"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "purpleTint": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "紫色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "饱和度"
+      },
+      "blur": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "柔光模糊"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "purpleTint": 35,
+      "saturation": 20,
+      "blur": 5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      purpleTint: ${purpleTint},\n      saturation: ${saturation},\n      blur: ${blur}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.purpleTint * 0.7 * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.purpleTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.purpleTint * 0.5 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.purpleTint * 0.2 * p.intensity);\n    if (p.blur > 0) {\n      var blur = layer.Effects.addProperty(\"ADBE Fast Blur\");\n      blur.property(\"ADBE Fast Blur-0001\").setValue(p.blur * p.intensity);\n    }\n    _result = {status:\"success\", message:\"梦幻紫调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "fresh_green",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "清新绿调色预设 - 绿色调、增饱和、柔对比，营造清新自然氛围",
+    "tags": [
+      "清新",
+      "绿色",
+      "fresh",
+      "green",
+      "mood"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "greenTint": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "绿色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -20,
+        "max": 20,
+        "description": "对比度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "greenTint": 25,
+      "saturation": 15,
+      "contrast": -5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      greenTint: ${greenTint},\n      saturation: ${saturation},\n      contrast: ${contrast}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0002\").setValue(p.greenTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0005\").setValue(p.greenTint * 0.6 * p.intensity);\n    cb.property(\"ADBE Color Balance-0008\").setValue(p.greenTint * 0.4 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.greenTint * 0.2 * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    _result = {status:\"success\", message:\"清新绿调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "golden_hour",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "黄昏金调色预设 - 金黄暖调、增饱和、柔对比，模拟黄金时刻光线",
+    "tags": [
+      "黄昏",
+      "金色",
+      "golden_hour",
+      "warm",
+      "mood"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "暖色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -20,
+        "max": 20,
+        "description": "对比度"
+      },
+      "glow": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "光晕强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "warmth": 45,
+      "saturation": 15,
+      "contrast": 5,
+      "glow": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      warmth: ${warmth},\n      saturation: ${saturation},\n      contrast: ${contrast},\n      glow: ${glow}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0007\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.5 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    if (p.glow > 0) {\n      var glow = layer.Effects.addProperty(\"ADBE Glow\");\n      glow.property(\"ADBE Glow-0001\").setValue(80);\n      glow.property(\"ADBE Glow-0002\").setValue(p.glow * p.intensity);\n      glow.property(\"ADBE Glow-0003\").setValue(0.5 + p.glow * p.intensity / 100);\n    }\n    _result = {status:\"success\", message:\"黄昏金调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "midnight_blue",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "深夜蓝调色预设 - 深蓝色调、去饱和、高对比暗角，营造深夜静谧氛围",
+    "tags": [
+      "深夜",
+      "蓝色",
+      "midnight",
+      "blue",
+      "mood"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "blueTint": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "蓝色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -50,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "对比度"
+      },
+      "vignette": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "暗角强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blueTint": 40,
+      "saturation": -30,
+      "contrast": 20,
+      "vignette": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      blueTint: ${blueTint},\n      saturation: ${saturation},\n      contrast: ${contrast},\n      vignette: ${vignette}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.blueTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.blueTint * 0.8 * p.intensity);\n    cb.property(\"ADBE Color Balance-0009\").setValue(p.blueTint * 0.5 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0001\").setValue(5 * p.intensity);\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 80);\n    var vig = layer.Effects.addProperty(\"ADBE Vignette\");\n    vig.property(\"ADBE Vignette-0001\").setValue(p.vignette * p.intensity / 100);\n    _result = {status:\"success\", message:\"深夜蓝调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "dawn_pink",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "晨曦粉调色预设 - 粉橙暖调、增饱和、柔对比，模拟晨曦柔美光线",
+    "tags": [
+      "晨曦",
+      "粉色",
+      "dawn",
+      "pink",
+      "mood"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "pinkTint": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "粉色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -20,
+        "max": 20,
+        "description": "对比度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "pinkTint": 30,
+      "saturation": 20,
+      "contrast": -5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      pinkTint: ${pinkTint},\n      saturation: ${saturation},\n      contrast: ${contrast}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.pinkTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.pinkTint * 0.7 * p.intensity);\n    cb.property(\"ADBE Color Balance-0007\").setValue(p.pinkTint * 0.5 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.pinkTint * 0.3 * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    _result = {status:\"success\", message:\"晨曦粉调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "aurora_green",
+    "category": "color_grading",
+    "subcategory": "mood",
+    "description": "极光绿调色预设 - 电光绿色调、高饱和、高对比，模拟极光绚烂色彩",
+    "tags": [
+      "极光",
+      "绿色",
+      "aurora",
+      "green",
+      "mood"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "greenTint": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "绿色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "对比度"
+      },
+      "glow": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "光晕强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "greenTint": 40,
+      "saturation": 30,
+      "contrast": 15,
+      "glow": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      greenTint: ${greenTint},\n      saturation: ${saturation},\n      contrast: ${contrast},\n      glow: ${glow}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0002\").setValue(p.greenTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.greenTint * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0005\").setValue(p.greenTint * 0.7 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.greenTint * 0.4 * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 80);\n    if (p.glow > 0) {\n      var glow = layer.Effects.addProperty(\"ADBE Glow\");\n      glow.property(\"ADBE Glow-0001\").setValue(70);\n      glow.property(\"ADBE Glow-0002\").setValue(p.glow * p.intensity);\n      glow.property(\"ADBE Glow-0003\").setValue(0.8 + p.glow * p.intensity / 100);\n    }\n    _result = {status:\"success\", message:\"极光绿调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "anime_style",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "动漫风格调色预设 - 高对比、高饱和、锐利色彩，模拟动画风格",
+    "tags": [
+      "动漫",
+      "anime",
+      "高对比",
+      "高饱和",
+      "anime"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 60,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "饱和度"
+      },
+      "sharpness": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "锐利度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 35,
+      "saturation": 30,
+      "sharpness": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      sharpness: ${sharpness}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 80);\n    levels.property(\"ADBE Levels-0001\").setValue(3 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    _result = {status:\"success\", message:\"动漫风格调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "ghibli_style",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "吉卜力风调色预设 - 温暖大地色、柔和对比、低饱和，模拟吉卜力动画质感",
+    "tags": [
+      "吉卜力",
+      "ghibli",
+      "温暖",
+      "柔和",
+      "anime"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "暖色调"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -20,
+        "max": 10,
+        "description": "对比度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "warmth": 20,
+      "saturation": 10,
+      "contrast": -8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      warmth: ${warmth},\n      saturation: ${saturation},\n      contrast: ${contrast}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.6 * p.intensity);\n    cb.property(\"ADBE Color Balance-0002\").setValue(p.warmth * 0.3 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    levels.property(\"ADBE Levels-0004\").setValue(0.02 * p.intensity);\n    _result = {status:\"success\", message:\"吉卜力风调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "shinkai_style",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "新海诚风调色预设 - 鲜艳色彩、高饱和、柔光晕，模拟新海诚动画风格",
+    "tags": [
+      "新海诚",
+      "shinkai",
+      "鲜艳",
+      "高饱和",
+      "anime"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "对比度"
+      },
+      "glow": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "光晕强度"
+      },
+      "blueTint": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "蓝色调"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "saturation": 35,
+      "contrast": 15,
+      "glow": 15,
+      "blueTint": 10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      saturation: ${saturation},\n      contrast: ${contrast},\n      glow: ${glow},\n      blueTint: ${blueTint}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.blueTint * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.blueTint * p.intensity);\n    if (p.glow > 0) {\n      var glow = layer.Effects.addProperty(\"ADBE Glow\");\n      glow.property(\"ADBE Glow-0001\").setValue(85);\n      glow.property(\"ADBE Glow-0002\").setValue(p.glow * p.intensity * 0.8);\n      glow.property(\"ADBE Glow-0003\").setValue(0.6);\n    }\n    _result = {status:\"success\", message:\"新海诚风调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "dark_anime",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "暗黑动漫调色预设 - 深阴影、冷调、去饱和，营造暗黑动画氛围",
+    "tags": [
+      "暗黑",
+      "动漫",
+      "dark_anime",
+      "冷调",
+      "anime"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 60,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -50,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "coolTint": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "冷色调"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 45,
+      "saturation": -25,
+      "coolTint": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      coolTint: ${coolTint}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0001\").setValue(8 * p.intensity);\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 70);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.coolTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.coolTint * 0.6 * p.intensity);\n    _result = {status:\"success\", message:\"暗黑动漫调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "hot_blood_anime",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "热血动漫调色预设 - 高对比、高饱和、暖调，营造热血激昂氛围",
+    "tags": [
+      "热血",
+      "动漫",
+      "hot_blood",
+      "高对比",
+      "anime"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "饱和度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "暖色调"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": 40,
+      "saturation": 35,
+      "warmth": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      warmth: ${warmth}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 70);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * p.intensity);\n    cb.property(\"ADBE Color Balance-0007\").setValue(p.warmth * 0.8 * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.4 * p.intensity);\n    _result = {status:\"success\", message:\"热血动漫调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "school_daily_anime",
+    "category": "color_grading",
+    "subcategory": "anime",
+    "description": "校园日常动漫调色预设 - 柔和对比、暖色粉彩、轻微饱和，营造温馨校园氛围",
+    "tags": [
+      "校园",
+      "日常",
+      "动漫",
+      "school",
+      "anime"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -20,
+        "max": 10,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 25,
+        "description": "饱和度"
+      },
+      "warmth": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "暖色调"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "contrast": -5,
+      "saturation": 18,
+      "warmth": 10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      contrast: ${contrast},\n      saturation: ${saturation},\n      warmth: ${warmth}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    levels.property(\"ADBE Levels-0004\").setValue(0.02 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.warmth * 0.8 * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.warmth * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0007\").setValue(p.warmth * 0.3 * p.intensity);\n    _result = {status:\"success\", message:\"校园日常动漫调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "pastel_soft",
+    "category": "color_grading",
+    "subcategory": "creative",
+    "description": "柔和粉彩调色预设 - 粉彩色调、低对比、轻微去饱和，营造柔和粉彩画效果",
+    "tags": [
+      "粉彩",
+      "柔和",
+      "pastel",
+      "soft",
+      "creative"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "pinkTint": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "粉色调"
+      },
+      "blueTint": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "蓝色调"
+      },
+      "contrast": {
+        "type": "number",
+        "min": -40,
+        "max": 0,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -30,
+        "max": 0,
+        "description": "饱和度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "pinkTint": 20,
+      "blueTint": 10,
+      "contrast": -20,
+      "saturation": -15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      pinkTint: ${pinkTint},\n      blueTint: ${blueTint},\n      contrast: ${contrast},\n      saturation: ${saturation}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.pinkTint * p.intensity);\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.pinkTint * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.blueTint * 0.5 * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(p.blueTint * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 100);\n    levels.property(\"ADBE Levels-0004\").setValue(0.04 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    _result = {status:\"success\", message:\"柔和粉彩调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "vibrant_pop",
+    "category": "color_grading",
+    "subcategory": "creative",
+    "description": "鲜艳波普调色预设 - 高饱和、高对比、鲜艳色彩，营造波普艺术视觉冲击",
+    "tags": [
+      "波普",
+      "鲜艳",
+      "vibrant",
+      "pop",
+      "creative"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 60,
+        "description": "饱和度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "对比度"
+      },
+      "vibrance": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "鲜艳度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "saturation": 40,
+      "contrast": 30,
+      "vibrance": 25
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      saturation: ${saturation},\n      contrast: ${contrast},\n      vibrance: ${vibrance}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 70);\n    levels.property(\"ADBE Levels-0001\").setValue(2 * p.intensity);\n    levels.property(\"ADBE Levels-0002\").setValue(253 - p.vibrance * p.intensity / 5);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0004\").setValue(p.vibrance * 0.2 * p.intensity);\n    cb.property(\"ADBE Color Balance-0007\").setValue(p.vibrance * 0.2 * p.intensity);\n    _result = {status:\"success\", message:\"鲜艳波普调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "vhs_retro",
+    "category": "color_grading",
+    "subcategory": "creative",
+    "description": "VHS复古调色预设 - 色偏、噪点、轻微去饱和，模拟VHS录像带画质",
+    "tags": [
+      "VHS",
+      "复古",
+      "录像带",
+      "vhs_retro",
+      "creative"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "colorShift": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "色彩偏移"
+      },
+      "noise": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "噪点强度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -40,
+        "max": 0,
+        "description": "饱和度"
+      },
+      "blur": {
+        "type": "number",
+        "min": 0,
+        "max": 10,
+        "description": "模糊量"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "colorShift": 15,
+      "noise": 20,
+      "saturation": -15,
+      "blur": 2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      colorShift: ${colorShift},\n      noise: ${noise},\n      saturation: ${saturation},\n      blur: ${blur}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.colorShift * p.intensity);\n    var noise = layer.Effects.addProperty(\"ADBE Noise\");\n    noise.property(\"ADBE Noise-0001\").setValue(p.noise * p.intensity / 4);\n    if (p.blur > 0) {\n      var blur = layer.Effects.addProperty(\"ADBE Fast Blur\");\n      blur.property(\"ADBE Fast Blur-0001\").setValue(p.blur * p.intensity);\n    }\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(p.colorShift * 0.3 * p.intensity);\n    cb.property(\"ADBE Color Balance-0001\").setValue(p.colorShift * 0.2 * p.intensity);\n    _result = {status:\"success\", message:\"VHS复古调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "glitch_color",
+    "category": "color_grading",
+    "subcategory": "creative",
+    "description": "故障色彩调色预设 - RGB通道偏移、色偏、噪点，模拟数字故障艺术效果",
+    "tags": [
+      "故障",
+      "glitch",
+      "RGB偏移",
+      "色彩",
+      "creative"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "redShift": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "红色偏移"
+      },
+      "blueShift": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "蓝色偏移"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -20,
+        "max": 30,
+        "description": "饱和度"
+      },
+      "noise": {
+        "type": "number",
+        "min": 0,
+        "max": 40,
+        "description": "噪点强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "redShift": 20,
+      "blueShift": 15,
+      "saturation": 10,
+      "noise": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      redShift: ${redShift},\n      blueShift: ${blueShift},\n      saturation: ${saturation},\n      noise: ${noise}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cm = layer.Effects.addProperty(\"ADBE Channel Mixer\");\n    cm.property(\"ADBE Channel Mixer-0001\").setValue(100 + p.redShift * p.intensity);\n    cm.property(\"ADBE Channel Mixer-0007\").setValue(100 - p.redShift * 0.5 * p.intensity);\n    cm.property(\"ADBE Channel Mixer-0009\").setValue(100 + p.blueShift * p.intensity);\n    cm.property(\"ADBE Channel Mixer-0003\").setValue(100 - p.blueShift * 0.5 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var noise = layer.Effects.addProperty(\"ADBE Noise\");\n    noise.property(\"ADBE Noise-0001\").setValue(p.noise * p.intensity / 4);\n    _result = {status:\"success\", message:\"故障色彩调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "infrared",
+    "category": "color_grading",
+    "subcategory": "creative",
+    "description": "红外摄影调色预设 - 通道反转、极端色偏、高对比，模拟红外摄影效果",
+    "tags": [
+      "红外",
+      "infrared",
+      "通道反转",
+      "创意",
+      "creative"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "redShift": {
+        "type": "number",
+        "min": 0,
+        "max": 80,
+        "description": "红色增强"
+      },
+      "blueShift": {
+        "type": "number",
+        "min": -80,
+        "max": 0,
+        "description": "蓝色减弱"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 60,
+        "description": "对比度"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -30,
+        "max": 50,
+        "description": "饱和度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "redShift": 60,
+      "blueShift": -50,
+      "contrast": 30,
+      "saturation": 30
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      redShift: ${redShift},\n      blueShift: ${blueShift},\n      contrast: ${contrast},\n      saturation: ${saturation}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var cm = layer.Effects.addProperty(\"ADBE Channel Mixer\");\n    cm.property(\"ADBE Channel Mixer-0001\").setValue(100 + p.redShift * p.intensity);\n    cm.property(\"ADBE Channel Mixer-0004\").setValue(p.redShift * 0.3 * p.intensity);\n    cm.property(\"ADBE Channel Mixer-0009\").setValue(100 + p.blueShift * p.intensity);\n    cm.property(\"ADBE Channel Mixer-0007\").setValue(-p.blueShift * 0.3 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + p.contrast * p.intensity / 80);\n    _result = {status:\"success\", message:\"红外摄影调色已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  }
+]

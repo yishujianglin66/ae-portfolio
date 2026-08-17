@@ -1,0 +1,1321 @@
+[
+  {
+    "name": "cyber_glitch_transition",
+    "category": "transition",
+    "subcategory": "cyberpunk",
+    "description": "赛博朋克故障转场 - 模拟数字信号干扰，包含RGB分离、像素化、扫描线抖动",
+    "tags": [
+      "赛博朋克",
+      "故障",
+      "glitch",
+      "transition",
+      "cyberpunk"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Glitch",
+    "duration": 1.0,
+    "parameters": {
+      "glitch_amount": 0.7,
+      "rgb_shift": 20
+    }
+  },
+  {
+    "name": "film_fade_transition",
+    "category": "transition",
+    "subcategory": "cinematic",
+    "description": "电影淡入淡出转场 - 平滑的淡入淡出效果，模拟电影胶片切换",
+    "tags": [
+      "电影",
+      "fade",
+      "transition",
+      "cinematic",
+      "smooth"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.5,
+    "parameters": {}
+  },
+  {
+    "name": "zoom_blur_transition",
+    "category": "transition",
+    "subcategory": "dynamic",
+    "description": "缩放模糊转场 - 从中心点向外缩放并模糊，模拟快速移动效果",
+    "tags": [
+      "缩放",
+      "zoom",
+      "模糊",
+      "blur",
+      "transition",
+      "dynamic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {
+      "zoom_amount": 300
+    }
+  },
+  {
+    "name": "slide_transition",
+    "category": "transition",
+    "subcategory": "classic",
+    "description": "滑动转场 - 新画面从一侧滑入，覆盖旧画面",
+    "tags": [
+      "滑动",
+      "slide",
+      "transition",
+      "classic",
+      "simple"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.6,
+    "parameters": {}
+  },
+  {
+    "name": "page_flip_transition",
+    "category": "transition",
+    "subcategory": "3d",
+    "description": "翻页转场 - 模拟翻书效果，3D翻转动画",
+    "tags": [
+      "翻页",
+      "page_flip",
+      "3d",
+      "transition",
+      "book"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.2,
+    "parameters": {}
+  },
+  {
+    "name": "light_sweep_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "光斑扫过转场 - 一道明亮的光带从画面一侧扫过，揭示新场景",
+    "tags": [
+      "光效",
+      "光斑",
+      "sweep",
+      "light",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "halo_expand_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "光晕扩散转场 - 光晕从中心点向外扩散，逐渐覆盖整个画面",
+    "tags": [
+      "光效",
+      "光晕",
+      "halo",
+      "expand",
+      "light",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.2,
+    "parameters": {}
+  },
+  {
+    "name": "light_pierce_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "光线穿透转场 - 强烈光线穿透画面，模拟阳光穿过云层的丁达尔效应",
+    "tags": [
+      "光效",
+      "穿透",
+      "pierce",
+      "light",
+      "transition",
+      "god_ray"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "lens_flare_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "镜头光晕转场 - 模拟镜头光晕扫过画面，从一侧移动到另一侧",
+    "tags": [
+      "光效",
+      "镜头光晕",
+      "lens_flare",
+      "light",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.5,
+    "parameters": {}
+  },
+  {
+    "name": "tyndall_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "丁达尔效应转场 - 模拟光线穿过雾气产生的丁达尔光束效果",
+    "tags": [
+      "光效",
+      "丁达尔",
+      "tyndall",
+      "god_ray",
+      "fog",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 2.0,
+    "parameters": {}
+  },
+  {
+    "name": "flash_cut_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "闪光切换转场 - 强烈白光闪现后切换到新场景，模拟相机闪光灯",
+    "tags": [
+      "光效",
+      "闪光",
+      "flash",
+      "cut",
+      "light",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.5,
+    "parameters": {}
+  },
+  {
+    "name": "light_leak_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "漏光转场 - 模拟胶片漏光效果，柔和的彩色光晕从边缘渗入",
+    "tags": [
+      "光效",
+      "漏光",
+      "light_leak",
+      "vintage",
+      "film",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.5,
+    "parameters": {}
+  },
+  {
+    "name": "aurora_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "极光转场 - 模拟极光波动的彩色光带流动效果，梦幻神秘",
+    "tags": [
+      "光效",
+      "极光",
+      "aurora",
+      "dreamy",
+      "colorful",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 2.5,
+    "parameters": {}
+  },
+  {
+    "name": "star_diffuse_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "星光扩散转场 - 星形光芒从中心扩散，伴随闪烁效果",
+    "tags": [
+      "光效",
+      "星光",
+      "star",
+      "diffuse",
+      "twinkle",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.2,
+    "parameters": {}
+  },
+  {
+    "name": "neon_sweep_transition",
+    "category": "transition",
+    "subcategory": "light",
+    "description": "霓虹扫光转场 - 霓虹色光带横扫画面，带有强烈发光和色彩",
+    "tags": [
+      "光效",
+      "霓虹",
+      "neon",
+      "sweep",
+      "glow",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {}
+  },
+  {
+    "name": "directional_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "方向模糊转场 - 沿指定方向产生强烈模糊，模拟高速移动",
+    "tags": [
+      "模糊",
+      "方向",
+      "directional",
+      "blur",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.6,
+    "parameters": {}
+  },
+  {
+    "name": "radial_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "径向模糊转场 - 从中心点向外辐射的模糊效果，模拟旋转或缩放",
+    "tags": [
+      "模糊",
+      "径向",
+      "radial",
+      "blur",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.7,
+    "parameters": {}
+  },
+  {
+    "name": "gaussian_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "高斯模糊转场 - 平滑的高斯模糊过渡，经典柔和切换效果",
+    "tags": [
+      "模糊",
+      "高斯",
+      "gaussian",
+      "blur",
+      "smooth",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "motion_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "运动模糊转场 - 模拟高速运动产生的方向性模糊，动感强烈",
+    "tags": [
+      "模糊",
+      "运动",
+      "motion",
+      "blur",
+      "dynamic",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.5,
+    "parameters": {}
+  },
+  {
+    "name": "channel_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "通道模糊转场 - 对RGB各通道独立施加不同模糊量，产生色彩偏移效果",
+    "tags": [
+      "模糊",
+      "通道",
+      "channel",
+      "blur",
+      "rgb",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {}
+  },
+  {
+    "name": "lens_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "镜头模糊转场 - 模拟真实相机镜头的景深模糊效果，散景柔和自然",
+    "tags": [
+      "模糊",
+      "镜头",
+      "lens",
+      "blur",
+      "bokeh",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.2,
+    "parameters": {}
+  },
+  {
+    "name": "tilt_shift_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "倾斜偏移转场 - 移轴模糊效果，模拟微缩景观视觉",
+    "tags": [
+      "模糊",
+      "移轴",
+      "tilt_shift",
+      "blur",
+      "miniature",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "compound_blur_transition",
+    "category": "transition",
+    "subcategory": "blur",
+    "description": "复合模糊转场 - 基于亮度或遮罩图层控制模糊强度，产生非均匀模糊",
+    "tags": [
+      "模糊",
+      "复合",
+      "compound",
+      "blur",
+      "mask",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "left_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "左滑转场 - 画面从右侧向左滑入，新内容从右边进入",
+    "tags": [
+      "位移",
+      "左滑",
+      "left",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.6,
+    "parameters": {}
+  },
+  {
+    "name": "right_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "右滑转场 - 画面从左侧向右滑入，新内容从左边进入",
+    "tags": [
+      "位移",
+      "右滑",
+      "right",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.6,
+    "parameters": {}
+  },
+  {
+    "name": "up_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "上滑转场 - 画面从下方向上滑入，新内容从底部进入",
+    "tags": [
+      "位移",
+      "上滑",
+      "up",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.6,
+    "parameters": {}
+  },
+  {
+    "name": "down_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "下滑转场 - 画面从上方向下滑入，新内容从顶部进入",
+    "tags": [
+      "位移",
+      "下滑",
+      "down",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.6,
+    "parameters": {}
+  },
+  {
+    "name": "diagonal_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "对角滑转场 - 画面沿对角线方向滑入，动态感强",
+    "tags": [
+      "位移",
+      "对角",
+      "diagonal",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {}
+  },
+  {
+    "name": "zoom_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "缩放滑转场 - 画面缩放的同时滑动，结合缩放和位移效果",
+    "tags": [
+      "位移",
+      "缩放滑",
+      "zoom",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {}
+  },
+  {
+    "name": "rotation_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "旋转滑转场 - 画面在滑动的同时旋转，动感十足",
+    "tags": [
+      "位移",
+      "旋转滑",
+      "rotation",
+      "slide",
+      "position",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "elastic_slide",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "弹性滑转场 - 画面滑动到位后有弹性回弹效果，生动活泼",
+    "tags": [
+      "位移",
+      "弹性滑",
+      "elastic",
+      "slide",
+      "bounce",
+      "position",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.2,
+    "parameters": {}
+  },
+  {
+    "name": "push_in_transition",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "推入转场 - 新画面从画面外推入，将旧画面推出视野",
+    "tags": [
+      "位移",
+      "推入",
+      "push",
+      "in",
+      "position",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {}
+  },
+  {
+    "name": "bounce_transition",
+    "category": "transition",
+    "subcategory": "position",
+    "description": "弹性弹跳转场 - 画面弹跳进入，模拟物理弹跳效果",
+    "tags": [
+      "位移",
+      "弹跳",
+      "bounce",
+      "elastic",
+      "position",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.5,
+    "parameters": {}
+  },
+  {
+    "name": "liquid_morph_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "液态变形转场 - 模拟液体流动的变形效果，画面如液体般融化变形",
+    "tags": [
+      "变形",
+      "液态",
+      "liquid",
+      "morph",
+      "deform",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.5,
+    "parameters": {}
+  },
+  {
+    "name": "mesh_warp_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "网格变形转场 - 通过网格点变形产生扭曲切换效果",
+    "tags": [
+      "变形",
+      "网格",
+      "mesh",
+      "warp",
+      "deform",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.2,
+    "parameters": {}
+  },
+  {
+    "name": "squash_stretch_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "挤压拉伸转场 - 经典动画原理，画面被挤压后拉伸切换",
+    "tags": [
+      "变形",
+      "挤压",
+      "拉伸",
+      "squash",
+      "stretch",
+      "deform",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Stretch",
+    "duration": 0.6,
+    "parameters": {}
+  },
+  {
+    "name": "elastic_deform_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "弹性变形转场 - 画面产生弹性扭曲后恢复，橡皮质感",
+    "tags": [
+      "变形",
+      "弹性",
+      "elastic",
+      "deform",
+      "rubber",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "twist_deform_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "扭曲变形转场 - 画面产生螺旋扭曲效果，旋涡式切换",
+    "tags": [
+      "变形",
+      "扭曲",
+      "twist",
+      "spiral",
+      "deform",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.2,
+    "parameters": {}
+  },
+  {
+    "name": "wave_deform_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "波浪变形转场 - 画面产生波浪状扭曲，如水波荡漾",
+    "tags": [
+      "变形",
+      "波浪",
+      "wave",
+      "deform",
+      "water",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "ripple_deform_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "涟漪变形转场 - 水波纹从中心向外扩散，产生水滴落入水面的效果",
+    "tags": [
+      "变形",
+      "涟漪",
+      "ripple",
+      "deform",
+      "water",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.5,
+    "parameters": {}
+  },
+  {
+    "name": "spherize_transition",
+    "category": "transition",
+    "subcategory": "deform",
+    "description": "球面变形转场 - 画面产生球面凸起或凹陷效果，鱼眼透视感",
+    "tags": [
+      "变形",
+      "球面",
+      "spherize",
+      "fisheye",
+      "deform",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "pixelate_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "像素化转场 - 画面逐渐像素化后切换，复古游戏风格",
+    "tags": [
+      "像素",
+      "像素化",
+      "pixelate",
+      "retro",
+      "pixel",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {}
+  },
+  {
+    "name": "mosaic_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "马赛克转场 - 画面分解为马赛克方块后重组，网格化切换",
+    "tags": [
+      "像素",
+      "马赛克",
+      "mosaic",
+      "grid",
+      "pixel",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {}
+  },
+  {
+    "name": "rgb_split_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "RGB分离转场 - 红绿蓝三通道分离偏移，赛博朋克风格",
+    "tags": [
+      "像素",
+      "RGB分离",
+      "rgb_split",
+      "glitch",
+      "pixel",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.6,
+    "parameters": {}
+  },
+  {
+    "name": "glitch_pixel_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "故障像素转场 - 数字故障效果，包含像素错位、扫描线和色彩偏移",
+    "tags": [
+      "像素",
+      "故障",
+      "glitch",
+      "pixel",
+      "digital",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Glitch",
+    "duration": 0.7,
+    "parameters": {
+      "glitch_amount": 0.6
+    }
+  },
+  {
+    "name": "digital_shatter_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "数字破碎转场 - 画面破碎为数字碎片飞散，科幻破碎效果",
+    "tags": [
+      "像素",
+      "数字破碎",
+      "digital",
+      "shatter",
+      "pixel",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.2,
+    "parameters": {}
+  },
+  {
+    "name": "data_stream_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "数据流转场 - 模拟数据流瀑布效果，数字雨风格切换",
+    "tags": [
+      "像素",
+      "数据流",
+      "data_stream",
+      "matrix",
+      "digital",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.5,
+    "parameters": {}
+  },
+  {
+    "name": "pixel_dissolve_transition",
+    "category": "transition",
+    "subcategory": "pixel",
+    "description": "像素溶解转场 - 画面以像素为单位逐渐溶解消失",
+    "tags": [
+      "像素",
+      "溶解",
+      "pixel",
+      "dissolve",
+      "pixel",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "linear_wipe_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "线性擦除转场 - 一条直线从一侧扫过，擦除显示新画面",
+    "tags": [
+      "遮罩",
+      "线性擦除",
+      "linear_wipe",
+      "mask",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {}
+  },
+  {
+    "name": "circle_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "圆形遮罩转场 - 圆形遮罩从中心向外扩展或收缩揭示画面",
+    "tags": [
+      "遮罩",
+      "圆形",
+      "circle",
+      "mask",
+      "iris",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {}
+  },
+  {
+    "name": "rect_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "矩形遮罩转场 - 矩形遮罩从中心扩展，简洁明了的揭示效果",
+    "tags": [
+      "遮罩",
+      "矩形",
+      "rect",
+      "mask",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.7,
+    "parameters": {}
+  },
+  {
+    "name": "gradient_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "渐变遮罩转场 - 基于渐变的柔和遮罩过渡，平滑自然",
+    "tags": [
+      "遮罩",
+      "渐变",
+      "gradient",
+      "mask",
+      "soft",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "path_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "路径遮罩转场 - 沿自定义路径揭示画面，灵活多变",
+    "tags": [
+      "遮罩",
+      "路径",
+      "path",
+      "mask",
+      "custom",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.0,
+    "parameters": {}
+  },
+  {
+    "name": "text_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "文字遮罩转场 - 以文字形状作为遮罩揭示画面",
+    "tags": [
+      "遮罩",
+      "文字",
+      "text",
+      "mask",
+      "typography",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 1.5,
+    "parameters": {}
+  },
+  {
+    "name": "polygon_mask_transition",
+    "category": "transition",
+    "subcategory": "mask",
+    "description": "多边形遮罩转场 - 多边形形状遮罩从中心扩展揭示画面",
+    "tags": [
+      "遮罩",
+      "多边形",
+      "polygon",
+      "mask",
+      "geometric",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "transition_name": "Cross Dissolve",
+    "duration": 0.8,
+    "parameters": {}
+  }
+]

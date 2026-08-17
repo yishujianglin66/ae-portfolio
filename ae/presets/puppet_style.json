@@ -1,0 +1,354 @@
+[
+  {
+    "name": "wooden_puppet",
+    "category": "puppet_style",
+    "subcategory": "wooden",
+    "description": "木质木偶风格 - 木纹纹理叠加、木榫关节、暖棕黄调色、12fps定格动画，模拟传统木偶定格动画质感",
+    "tags": [
+      "木偶",
+      "木质",
+      "puppet",
+      "wooden",
+      "stop_motion"
+    ],
+    "parameters": {
+      "compName": {
+        "type": "string",
+        "description": "目标合成名称，空则使用当前活动合成"
+      },
+      "frameRate": {
+        "type": "number",
+        "min": 8,
+        "max": 30,
+        "description": "定格动画目标帧率"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      }
+    },
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 12,
+      "intensity": 0.7
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {compName: ${compName}, frameRate: ${frameRate}, intensity: ${intensity}};\n    var tc = comp;\n    if (p.compName) {\n      for (var i = 1; i <= app.project.items.length; i++) {\n        var it = app.project.items[i];\n        if (it instanceof CompItem && it.name === p.compName) { tc = it; break; }\n      }\n    }\n    var layer = tc.layer(1);\n    if (!layer) { _result = {status:\"error\", message:\"Layer not found\"}; return JSON.stringify(_result); }\n    var inten = p.intensity;\n    // Phase1: Color Grading - warm brown-yellow tone\n    var curves = layer.Effects.addProperty(\"ADBE Curves\");\n    curves.property(\"ADBE Curves Channel\").setValue(\"RGB\");\n    var hue = layer.Effects.addProperty(\"ADBE Hue2\");\n    hue.property(\"ADBE Hue Hue\").setValue(-10 * inten);\n    var levels = layer.Effects.addProperty(\"ADBE Levels2\");\n    levels.property(\"Input Black\").setValue(8);\n    levels.property(\"Input White\").setValue(235);\n    levels.property(\"Gamma\").setValue(1.1);\n    // Phase2: Material Texture - wood grain\n    var noise = layer.Effects.addProperty(\"ADBE Noise2\");\n    noise.property(\"ADBE Noise2 Amount\").setValue(8 * inten);\n    noise.property(\"ADBE Noise2 Use Color Noise\").setValue(true);\n    noise.property(\"ADBE Noise2 Seed\").setValue(123);\n    var vig = layer.Effects.addProperty(\"ADBE Vignette\");\n    vig.property(\"ADBE Vignette Amount\").setValue(0.2 * inten);\n    vig.property(\"ADBE Vignette Midpoint\").setValue(0.75);\n    // Phase3: Joint Seams - wooden pegs\n    var jl = tc.layers.addShape();\n    jl.name = \"Wooden_Joints\";\n    var jp = [[0.5,0.28],[0.32,0.35],[0.68,0.35],[0.5,0.55],[0.4,0.58],[0.6,0.58],[0.38,0.72],[0.62,0.72]];\n    var c = jl.property(\"Contents\");\n    for (var j = 0; j < jp.length; j++) {\n      var g = c.addProperty(\"ADBE Vector Group\");\n      g.name = \"Joint_\" + j;\n      var e = g.property(\"Contents\").addProperty(\"ADBE Vector Shape - Ellipse\");\n      e.property(\"ADBE Ellipse Path Size\").setValue([25, 20]);\n      e.property(\"ADBE Ellipse Path Position\").setValue([jp[j][0] * tc.width, jp[j][1] * tc.height]);\n      var s = g.property(\"Contents\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      s.property(\"ADBE Stroke Color\").setValue([0.15, 0.08, 0.02, 1]);\n      s.property(\"ADBE Stroke Width\").setValue(3);\n      var f = g.property(\"Contents\").addProperty(\"ADBE Vector Graphic - Fill\");\n      f.property(\"ADBE Fill Color\").setValue([0.25, 0.15, 0.05, 1]);\n    }\n    // Phase4: Stop Motion - Time Remap expression\n    var sfps = tc.frameRate;\n    var tfps = p.frameRate;\n    try {\n      layer.timeRemapEnabled = true;\n      layer.property(\"ADBE Time Remapping\").expression = \"frame = Math.floor(time * \" + sfps + \") / \" + sfps + \"; stepped = Math.floor(frame * \" + tfps + \") / \" + tfps + \"; stepped;\";\n    } catch(e3) {}\n    var fl = tc.layers.addSolid([1, 1, 1], \"StopMotion_Wooden\", tc.width, tc.height, tc.frameRate);\n    fl.adjustmentLayer = true;\n    var bc = fl.Effects.addProperty(\"ADBE Brightness & Contrast\");\n    bc.property(\"ADBE Brightness-Contrast Brightness\").expression = \"random(-3, 3)\";\n    // Phase5: Miniature Scene - tilt-shift + vignette\n    var ts = tc.layers.addSolid([1, 1, 1], \"TiltShift_Wooden\", tc.width, tc.height, tc.frameRate);\n    ts.adjustmentLayer = true;\n    var tv = ts.Effects.addProperty(\"ADBE Vignette\");\n    tv.property(\"ADBE Vignette Amount\").setValue(0.25 * inten);\n    tv.property(\"ADBE Vignette Midpoint\").setValue(0.6);\n    var tb = ts.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    tb.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(3);\n    _result = {status:\"success\", message:\"wooden_puppet style applied\", frameRate: p.frameRate, phases: 5};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "ceramic_puppet",
+    "category": "puppet_style",
+    "subcategory": "ceramic",
+    "description": "陶瓷木偶风格 - 釉面光泽、清晰接缝、冷白调色、18fps定格动画，模拟陶瓷工艺品质感",
+    "tags": [
+      "木偶",
+      "陶瓷",
+      "puppet",
+      "ceramic",
+      "glossy"
+    ],
+    "parameters": {
+      "compName": {
+        "type": "string",
+        "description": "目标合成名称，空则使用当前活动合成"
+      },
+      "frameRate": {
+        "type": "number",
+        "min": 8,
+        "max": 30,
+        "description": "定格动画目标帧率"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      }
+    },
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 18,
+      "intensity": 0.7
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {compName: ${compName}, frameRate: ${frameRate}, intensity: ${intensity}};\n    var tc = comp;\n    if (p.compName) {\n      for (var i = 1; i <= app.project.items.length; i++) {\n        var it = app.project.items[i];\n        if (it instanceof CompItem && it.name === p.compName) { tc = it; break; }\n      }\n    }\n    var layer = tc.layer(1);\n    if (!layer) { _result = {status:\"error\", message:\"Layer not found\"}; return JSON.stringify(_result); }\n    var inten = p.intensity;\n    // Phase1: Color Grading - cold white tone\n    var curves = layer.Effects.addProperty(\"ADBE Curves\");\n    curves.property(\"ADBE Curves Channel\").setValue(\"RGB\");\n    var hue = layer.Effects.addProperty(\"ADBE Hue2\");\n    hue.property(\"ADBE Hue Hue\").setValue(5 * inten);\n    var levels = layer.Effects.addProperty(\"ADBE Levels2\");\n    levels.property(\"Input Black\").setValue(5);\n    levels.property(\"Input White\").setValue(240);\n    levels.property(\"Gamma\").setValue(1.05);\n    // Phase2: Material Texture - glaze gloss\n    var glow = layer.Effects.addProperty(\"ADBE Glow\");\n    glow.property(\"ADBE Glow Glow Threshold\").setValue(70);\n    glow.property(\"ADBE Glow Glow Radius\").setValue(15);\n    glow.property(\"ADBE Glow Glow Intensity\").setValue(0.3 * inten);\n    glow.property(\"ADBE Glow Glow Color\").setValue([0.95, 0.98, 1]);\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp Start of Ramp\").setValue([tc.width / 2, 0]);\n    ramp.property(\"ADBE Ramp End of Ramp\").setValue([tc.width / 2, tc.height]);\n    ramp.property(\"ADBE Ramp Start Color\").setValue([1, 1, 1]);\n    ramp.property(\"ADBE Ramp End Color\").setValue([0.95, 0.95, 0.95]);\n    ramp.property(\"ADBE Ramp Ramp Scatter\").setValue(20 * inten);\n    // Phase3: Joint Seams - clear seam lines\n    var jl = tc.layers.addShape();\n    jl.name = \"Ceramic_Joints\";\n    var jp = [[0.5,0.28],[0.32,0.35],[0.68,0.35],[0.5,0.55],[0.4,0.58],[0.6,0.58]];\n    var c = jl.property(\"Contents\");\n    for (var j = 0; j < jp.length; j++) {\n      var g = c.addProperty(\"ADBE Vector Group\");\n      g.name = \"Seam_\" + j;\n      var r = g.property(\"Contents\").addProperty(\"ADBE Vector Shape - Rectangle\");\n      r.property(\"ADBE Rectangle Path Size\").setValue([30, 3]);\n      r.property(\"ADBE Rectangle Path Position\").setValue([jp[j][0] * tc.width, jp[j][1] * tc.height]);\n      var f = g.property(\"Contents\").addProperty(\"ADBE Vector Graphic - Fill\");\n      f.property(\"ADBE Fill Color\").setValue([0.2, 0.25, 0.3, 1]);\n    }\n    // Phase4: Stop Motion\n    var sfps = tc.frameRate;\n    var tfps = p.frameRate;\n    try {\n      layer.timeRemapEnabled = true;\n      layer.property(\"ADBE Time Remapping\").expression = \"frame = Math.floor(time * \" + sfps + \") / \" + sfps + \"; stepped = Math.floor(frame * \" + tfps + \") / \" + tfps + \"; stepped;\";\n    } catch(e3) {}\n    var fl = tc.layers.addSolid([1, 1, 1], \"StopMotion_Ceramic\", tc.width, tc.height, tc.frameRate);\n    fl.adjustmentLayer = true;\n    var bc = fl.Effects.addProperty(\"ADBE Brightness & Contrast\");\n    bc.property(\"ADBE Brightness-Contrast Brightness\").expression = \"random(-1, 1)\";\n    // Phase5: Miniature Scene\n    var ts = tc.layers.addSolid([1, 1, 1], \"TiltShift_Ceramic\", tc.width, tc.height, tc.frameRate);\n    ts.adjustmentLayer = true;\n    var tv = ts.Effects.addProperty(\"ADBE Vignette\");\n    tv.property(\"ADBE Vignette Amount\").setValue(0.15 * inten);\n    tv.property(\"ADBE Vignette Midpoint\").setValue(0.7);\n    var tb = ts.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    tb.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(1);\n    _result = {status:\"success\", message:\"ceramic_puppet style applied\", frameRate: p.frameRate, phases: 5};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "cloth_puppet",
+    "category": "puppet_style",
+    "subcategory": "cloth",
+    "description": "布偶风格 - 布料缝线、低饱和度、8fps强烈定格动画，模拟手工布偶质感",
+    "tags": [
+      "木偶",
+      "布偶",
+      "puppet",
+      "cloth",
+      "stitch"
+    ],
+    "parameters": {
+      "compName": {
+        "type": "string",
+        "description": "目标合成名称，空则使用当前活动合成"
+      },
+      "frameRate": {
+        "type": "number",
+        "min": 8,
+        "max": 30,
+        "description": "定格动画目标帧率"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      }
+    },
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 8,
+      "intensity": 0.7
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {compName: ${compName}, frameRate: ${frameRate}, intensity: ${intensity}};\n    var tc = comp;\n    if (p.compName) {\n      for (var i = 1; i <= app.project.items.length; i++) {\n        var it = app.project.items[i];\n        if (it instanceof CompItem && it.name === p.compName) { tc = it; break; }\n      }\n    }\n    var layer = tc.layer(1);\n    if (!layer) { _result = {status:\"error\", message:\"Layer not found\"}; return JSON.stringify(_result); }\n    var inten = p.intensity;\n    // Phase1: Color Grading - low saturation soft contrast\n    var curves = layer.Effects.addProperty(\"ADBE Curves\");\n    curves.property(\"ADBE Curves Channel\").setValue(\"RGB\");\n    var hue = layer.Effects.addProperty(\"ADBE Hue2\");\n    hue.property(\"ADBE Hue Hue\").setValue(0);\n    var levels = layer.Effects.addProperty(\"ADBE Levels2\");\n    levels.property(\"Input Black\").setValue(10);\n    levels.property(\"Input White\").setValue(230);\n    levels.property(\"Gamma\").setValue(1.0);\n    // Phase2: Material Texture - cloth fabric\n    var noise = layer.Effects.addProperty(\"ADBE Noise2\");\n    noise.property(\"ADBE Noise2 Amount\").setValue(12 * inten);\n    noise.property(\"ADBE Noise2 Use Color Noise\").setValue(false);\n    var blur = layer.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    blur.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(0.5 * inten);\n    // Phase3: Joint Seams - stitch dots\n    var jl = tc.layers.addShape();\n    jl.name = \"Cloth_Stitches\";\n    var jp = [[0.5,0.28],[0.32,0.35],[0.68,0.35],[0.5,0.55],[0.4,0.58],[0.6,0.58]];\n    var c = jl.property(\"Contents\");\n    for (var j = 0; j < jp.length; j++) {\n      var g = c.addProperty(\"ADBE Vector Group\");\n      g.name = \"Stitch_\" + j;\n      for (var d = 0; d < 8; d++) {\n        var dot = g.property(\"Contents\").addProperty(\"ADBE Vector Shape - Ellipse\");\n        var angle = (d / 8) * Math.PI * 2;\n        var radius = 12;\n        dot.property(\"ADBE Ellipse Path Size\").setValue([4, 4]);\n        dot.property(\"ADBE Ellipse Path Position\").setValue([jp[j][0] * tc.width + Math.cos(angle) * radius, jp[j][1] * tc.height + Math.sin(angle) * radius]);\n        var df = g.property(\"Contents\").addProperty(\"ADBE Vector Graphic - Fill\");\n        df.property(\"ADBE Fill Color\").setValue([0.3, 0.3, 0.3, 1]);\n      }\n    }\n    // Phase4: Stop Motion - strong 8fps\n    var sfps = tc.frameRate;\n    var tfps = p.frameRate;\n    try {\n      layer.timeRemapEnabled = true;\n      layer.property(\"ADBE Time Remapping\").expression = \"frame = Math.floor(time * \" + sfps + \") / \" + sfps + \"; stepped = Math.floor(frame * \" + tfps + \") / \" + tfps + \"; stepped;\";\n    } catch(e3) {}\n    var fl = tc.layers.addSolid([1, 1, 1], \"StopMotion_Cloth\", tc.width, tc.height, tc.frameRate);\n    fl.adjustmentLayer = true;\n    var bc = fl.Effects.addProperty(\"ADBE Brightness & Contrast\");\n    bc.property(\"ADBE Brightness-Contrast Brightness\").expression = \"random(-5, 5)\";\n    // Phase5: Miniature Scene\n    var ts = tc.layers.addSolid([1, 1, 1], \"TiltShift_Cloth\", tc.width, tc.height, tc.frameRate);\n    ts.adjustmentLayer = true;\n    var tv = ts.Effects.addProperty(\"ADBE Vignette\");\n    tv.property(\"ADBE Vignette Amount\").setValue(0.2 * inten);\n    tv.property(\"ADBE Vignette Midpoint\").setValue(0.6);\n    var tb = ts.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    tb.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(2);\n    _result = {status:\"success\", message:\"cloth_puppet style applied\", frameRate: p.frameRate, phases: 5};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "clay_puppet",
+    "category": "puppet_style",
+    "subcategory": "clay",
+    "description": "黏土木偶风格 - 橡皮泥质感、软形变、高饱和度、8fps定格动画，模拟黏土动画质感",
+    "tags": [
+      "木偶",
+      "黏土",
+      "puppet",
+      "clay",
+      "stop_motion"
+    ],
+    "parameters": {
+      "compName": {
+        "type": "string",
+        "description": "目标合成名称，空则使用当前活动合成"
+      },
+      "frameRate": {
+        "type": "number",
+        "min": 8,
+        "max": 30,
+        "description": "定格动画目标帧率"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      }
+    },
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 8,
+      "intensity": 0.7
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {compName: ${compName}, frameRate: ${frameRate}, intensity: ${intensity}};\n    var tc = comp;\n    if (p.compName) {\n      for (var i = 1; i <= app.project.items.length; i++) {\n        var it = app.project.items[i];\n        if (it instanceof CompItem && it.name === p.compName) { tc = it; break; }\n      }\n    }\n    var layer = tc.layer(1);\n    if (!layer) { _result = {status:\"error\", message:\"Layer not found\"}; return JSON.stringify(_result); }\n    var inten = p.intensity;\n    // Phase1: Color Grading - high saturation vibrant\n    var curves = layer.Effects.addProperty(\"ADBE Curves\");\n    curves.property(\"ADBE Curves Channel\").setValue(\"RGB\");\n    var hue = layer.Effects.addProperty(\"ADBE Hue2\");\n    hue.property(\"ADBE Hue Hue\").setValue(5 * inten);\n    var levels = layer.Effects.addProperty(\"ADBE Levels2\");\n    levels.property(\"Input Black\").setValue(5);\n    levels.property(\"Input White\").setValue(235);\n    levels.property(\"Gamma\").setValue(0.95);\n    // Phase2: Material Texture - clay grain\n    var noise = layer.Effects.addProperty(\"ADBE Noise2\");\n    noise.property(\"ADBE Noise2 Amount\").setValue(15 * inten);\n    noise.property(\"ADBE Noise2 Use Color Noise\").setValue(true);\n    noise.property(\"ADBE Noise2 Seed\").setValue(456);\n    var blur = layer.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    blur.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(0.8 * inten);\n    var choker = layer.Effects.addProperty(\"ADBE Simple Choker\");\n    choker.property(\"ADBE Simple Choker Choke Matte\").setValue(-2 * inten);\n    // Phase3: Joint Seams - soft edges\n    var jl = tc.layers.addShape();\n    jl.name = \"Clay_Joints\";\n    var jp = [[0.5,0.28],[0.32,0.35],[0.68,0.35],[0.5,0.55],[0.4,0.58],[0.6,0.58],[0.38,0.72],[0.62,0.72]];\n    var c = jl.property(\"Contents\");\n    for (var j = 0; j < jp.length; j++) {\n      var g = c.addProperty(\"ADBE Vector Group\");\n      g.name = \"SoftJoint_\" + j;\n      var e = g.property(\"Contents\").addProperty(\"ADBE Vector Shape - Ellipse\");\n      e.property(\"ADBE Ellipse Path Size\").setValue([20, 18]);\n      e.property(\"ADBE Ellipse Path Position\").setValue([jp[j][0] * tc.width, jp[j][1] * tc.height]);\n      var f = g.property(\"Contents\").addProperty(\"ADBE Vector Graphic - Fill\");\n      f.property(\"ADBE Fill Color\").setValue([0.5, 0.35, 0.2, 1]);\n    }\n    // Phase4: Stop Motion - strong 8fps\n    var sfps = tc.frameRate;\n    var tfps = p.frameRate;\n    try {\n      layer.timeRemapEnabled = true;\n      layer.property(\"ADBE Time Remapping\").expression = \"frame = Math.floor(time * \" + sfps + \") / \" + sfps + \"; stepped = Math.floor(frame * \" + tfps + \") / \" + tfps + \"; stepped;\";\n    } catch(e3) {}\n    var fl = tc.layers.addSolid([1, 1, 1], \"StopMotion_Clay\", tc.width, tc.height, tc.frameRate);\n    fl.adjustmentLayer = true;\n    var bc = fl.Effects.addProperty(\"ADBE Brightness & Contrast\");\n    bc.property(\"ADBE Brightness-Contrast Brightness\").expression = \"random(-4, 4)\";\n    // Phase5: Miniature Scene\n    var ts = tc.layers.addSolid([1, 1, 1], \"TiltShift_Clay\", tc.width, tc.height, tc.frameRate);\n    ts.adjustmentLayer = true;\n    var tv = ts.Effects.addProperty(\"ADBE Vignette\");\n    tv.property(\"ADBE Vignette Amount\").setValue(0.2 * inten);\n    tv.property(\"ADBE Vignette Midpoint\").setValue(0.6);\n    var tb = ts.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    tb.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(2);\n    _result = {status:\"success\", message:\"clay_puppet style applied\", frameRate: p.frameRate, phases: 5};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "metal_puppet",
+    "category": "puppet_style",
+    "subcategory": "metal",
+    "description": "金属木偶风格 - 金属反光、机械接缝、冷灰银调色、12fps定格动画，模拟机械金属木偶质感",
+    "tags": [
+      "木偶",
+      "金属",
+      "puppet",
+      "metal",
+      "mechanical"
+    ],
+    "parameters": {
+      "compName": {
+        "type": "string",
+        "description": "目标合成名称，空则使用当前活动合成"
+      },
+      "frameRate": {
+        "type": "number",
+        "min": 8,
+        "max": 30,
+        "description": "定格动画目标帧率"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      }
+    },
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 12,
+      "intensity": 0.7
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {compName: ${compName}, frameRate: ${frameRate}, intensity: ${intensity}};\n    var tc = comp;\n    if (p.compName) {\n      for (var i = 1; i <= app.project.items.length; i++) {\n        var it = app.project.items[i];\n        if (it instanceof CompItem && it.name === p.compName) { tc = it; break; }\n      }\n    }\n    var layer = tc.layer(1);\n    if (!layer) { _result = {status:\"error\", message:\"Layer not found\"}; return JSON.stringify(_result); }\n    var inten = p.intensity;\n    // Phase1: Color Grading - cold gray-silver high contrast\n    var curves = layer.Effects.addProperty(\"ADBE Curves\");\n    curves.property(\"ADBE Curves Channel\").setValue(\"RGB\");\n    var hue = layer.Effects.addProperty(\"ADBE Hue2\");\n    hue.property(\"ADBE Hue Hue\").setValue(-5 * inten);\n    var levels = layer.Effects.addProperty(\"ADBE Levels2\");\n    levels.property(\"Input Black\").setValue(5);\n    levels.property(\"Input White\").setValue(240);\n    levels.property(\"Gamma\").setValue(1.2);\n    // Phase2: Material Texture - metal shine\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp Start of Ramp\").setValue([0, tc.height / 2]);\n    ramp.property(\"ADBE Ramp End of Ramp\").setValue([tc.width, tc.height / 2]);\n    ramp.property(\"ADBE Ramp Start Color\").setValue([1, 1, 1]);\n    ramp.property(\"ADBE Ramp End Color\").setValue([0.7, 0.75, 0.8]);\n    ramp.property(\"ADBE Ramp Ramp Scatter\").setValue(30 * inten);\n    var glow = layer.Effects.addProperty(\"ADBE Glow\");\n    glow.property(\"ADBE Glow Glow Threshold\").setValue(60);\n    glow.property(\"ADBE Glow Glow Radius\").setValue(20);\n    glow.property(\"ADBE Glow Glow Intensity\").setValue(0.5 * inten);\n    // Phase3: Joint Seams - mechanical\n    var jl = tc.layers.addShape();\n    jl.name = \"Metal_Joints\";\n    var jp = [[0.5,0.28],[0.32,0.35],[0.68,0.35],[0.5,0.55],[0.4,0.58],[0.6,0.58],[0.38,0.72],[0.62,0.72]];\n    var c = jl.property(\"Contents\");\n    for (var j = 0; j < jp.length; j++) {\n      var g = c.addProperty(\"ADBE Vector Group\");\n      g.name = \"MechJoint_\" + j;\n      var r = g.property(\"Contents\").addProperty(\"ADBE Vector Shape - Rectangle\");\n      r.property(\"ADBE Rectangle Path Size\").setValue([25, 4]);\n      r.property(\"ADBE Rectangle Path Position\").setValue([jp[j][0] * tc.width, jp[j][1] * tc.height]);\n      var f = g.property(\"Contents\").addProperty(\"ADBE Vector Graphic - Fill\");\n      f.property(\"ADBE Fill Color\").setValue([0.4, 0.45, 0.5, 1]);\n      var s = g.property(\"Contents\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      s.property(\"ADBE Stroke Color\").setValue([0.6, 0.65, 0.7, 1]);\n      s.property(\"ADBE Stroke Width\").setValue(1);\n    }\n    // Phase4: Stop Motion\n    var sfps = tc.frameRate;\n    var tfps = p.frameRate;\n    try {\n      layer.timeRemapEnabled = true;\n      layer.property(\"ADBE Time Remapping\").expression = \"frame = Math.floor(time * \" + sfps + \") / \" + sfps + \"; stepped = Math.floor(frame * \" + tfps + \") / \" + tfps + \"; stepped;\";\n    } catch(e3) {}\n    var fl = tc.layers.addSolid([1, 1, 1], \"StopMotion_Metal\", tc.width, tc.height, tc.frameRate);\n    fl.adjustmentLayer = true;\n    var bc = fl.Effects.addProperty(\"ADBE Brightness & Contrast\");\n    bc.property(\"ADBE Brightness-Contrast Brightness\").expression = \"random(-2, 2)\";\n    // Phase5: Miniature Scene\n    var ts = tc.layers.addSolid([1, 1, 1], \"TiltShift_Metal\", tc.width, tc.height, tc.frameRate);\n    ts.adjustmentLayer = true;\n    var tv = ts.Effects.addProperty(\"ADBE Vignette\");\n    tv.property(\"ADBE Vignette Amount\").setValue(0.3 * inten);\n    tv.property(\"ADBE Vignette Midpoint\").setValue(0.55);\n    var tb = ts.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    tb.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(2);\n    _result = {status:\"success\", message:\"metal_puppet style applied\", frameRate: p.frameRate, phases: 5};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "stone_puppet",
+    "category": "puppet_style",
+    "subcategory": "stone",
+    "description": "石头木偶风格 - 岩石质感、石缝接缝、灰棕调色、18fps定格动画，模拟石雕木偶质感",
+    "tags": [
+      "木偶",
+      "石头",
+      "puppet",
+      "stone",
+      "rock"
+    ],
+    "parameters": {
+      "compName": {
+        "type": "string",
+        "description": "目标合成名称，空则使用当前活动合成"
+      },
+      "frameRate": {
+        "type": "number",
+        "min": 8,
+        "max": 30,
+        "description": "定格动画目标帧率"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      }
+    },
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 18,
+      "intensity": 0.7
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {compName: ${compName}, frameRate: ${frameRate}, intensity: ${intensity}};\n    var tc = comp;\n    if (p.compName) {\n      for (var i = 1; i <= app.project.items.length; i++) {\n        var it = app.project.items[i];\n        if (it instanceof CompItem && it.name === p.compName) { tc = it; break; }\n      }\n    }\n    var layer = tc.layer(1);\n    if (!layer) { _result = {status:\"error\", message:\"Layer not found\"}; return JSON.stringify(_result); }\n    var inten = p.intensity;\n    // Phase1: Color Grading - gray-brown high contrast\n    var curves = layer.Effects.addProperty(\"ADBE Curves\");\n    curves.property(\"ADBE Curves Channel\").setValue(\"RGB\");\n    var hue = layer.Effects.addProperty(\"ADBE Hue2\");\n    hue.property(\"ADBE Hue Hue\").setValue(-5 * inten);\n    var levels = layer.Effects.addProperty(\"ADBE Levels2\");\n    levels.property(\"Input Black\").setValue(10);\n    levels.property(\"Input White\").setValue(230);\n    levels.property(\"Gamma\").setValue(1.15);\n    // Phase2: Material Texture - rock stone\n    var noise = layer.Effects.addProperty(\"ADBE Noise2\");\n    noise.property(\"ADBE Noise2 Amount\").setValue(10 * inten);\n    noise.property(\"ADBE Noise2 Use Color Noise\").setValue(true);\n    noise.property(\"ADBE Noise2 Seed\").setValue(789);\n    var edges = layer.Effects.addProperty(\"ADBE Find Edges\");\n    edges.property(\"ADBE Find Edges Blend With Original\").setValue(30 * inten);\n    var vig = layer.Effects.addProperty(\"ADBE Vignette\");\n    vig.property(\"ADBE Vignette Amount\").setValue(0.15 * inten);\n    vig.property(\"ADBE Vignette Midpoint\").setValue(0.7);\n    // Phase3: Joint Seams - stone cracks\n    var jl = tc.layers.addShape();\n    jl.name = \"Stone_Joints\";\n    var jp = [[0.5,0.28],[0.32,0.35],[0.68,0.35],[0.5,0.55],[0.4,0.58],[0.6,0.58],[0.38,0.72],[0.62,0.72]];\n    var c = jl.property(\"Contents\");\n    for (var j = 0; j < jp.length; j++) {\n      var g = c.addProperty(\"ADBE Vector Group\");\n      g.name = \"Crack_\" + j;\n      var e = g.property(\"Contents\").addProperty(\"ADBE Vector Shape - Ellipse\");\n      e.property(\"ADBE Ellipse Path Size\").setValue([22, 18]);\n      e.property(\"ADBE Ellipse Path Position\").setValue([jp[j][0] * tc.width, jp[j][1] * tc.height]);\n      var s = g.property(\"Contents\").addProperty(\"ADBE Vector Graphic - Stroke\");\n      s.property(\"ADBE Stroke Color\").setValue([0.15, 0.12, 0.08, 1]);\n      s.property(\"ADBE Stroke Width\").setValue(2);\n      var f = g.property(\"Contents\").addProperty(\"ADBE Vector Graphic - Fill\");\n      f.property(\"ADBE Fill Color\").setValue([0.3, 0.25, 0.2, 1]);\n    }\n    // Phase4: Stop Motion\n    var sfps = tc.frameRate;\n    var tfps = p.frameRate;\n    try {\n      layer.timeRemapEnabled = true;\n      layer.property(\"ADBE Time Remapping\").expression = \"frame = Math.floor(time * \" + sfps + \") / \" + sfps + \"; stepped = Math.floor(frame * \" + tfps + \") / \" + tfps + \"; stepped;\";\n    } catch(e3) {}\n    var fl = tc.layers.addSolid([1, 1, 1], \"StopMotion_Stone\", tc.width, tc.height, tc.frameRate);\n    fl.adjustmentLayer = true;\n    var bc = fl.Effects.addProperty(\"ADBE Brightness & Contrast\");\n    bc.property(\"ADBE Brightness-Contrast Brightness\").expression = \"random(-2, 2)\";\n    // Phase5: Miniature Scene\n    var ts = tc.layers.addSolid([1, 1, 1], \"TiltShift_Stone\", tc.width, tc.height, tc.frameRate);\n    ts.adjustmentLayer = true;\n    var tv = ts.Effects.addProperty(\"ADBE Vignette\");\n    tv.property(\"ADBE Vignette Amount\").setValue(0.3 * inten);\n    tv.property(\"ADBE Vignette Midpoint\").setValue(0.55);\n    var tb = ts.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    tb.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(2);\n    _result = {status:\"success\", message:\"stone_puppet style applied\", frameRate: p.frameRate, phases: 5};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "glass_puppet",
+    "category": "puppet_style",
+    "subcategory": "glass",
+    "description": "玻璃木偶风格 - 透明折射、极高对比度、淡色调色、20fps定格动画，模拟玻璃艺术品质感",
+    "tags": [
+      "木偶",
+      "玻璃",
+      "puppet",
+      "glass",
+      "transparent"
+    ],
+    "parameters": {
+      "compName": {
+        "type": "string",
+        "description": "目标合成名称，空则使用当前活动合成"
+      },
+      "frameRate": {
+        "type": "number",
+        "min": 8,
+        "max": 30,
+        "description": "定格动画目标帧率"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      }
+    },
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 20,
+      "intensity": 0.7
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {compName: ${compName}, frameRate: ${frameRate}, intensity: ${intensity}};\n    var tc = comp;\n    if (p.compName) {\n      for (var i = 1; i <= app.project.items.length; i++) {\n        var it = app.project.items[i];\n        if (it instanceof CompItem && it.name === p.compName) { tc = it; break; }\n      }\n    }\n    var layer = tc.layer(1);\n    if (!layer) { _result = {status:\"error\", message:\"Layer not found\"}; return JSON.stringify(_result); }\n    var inten = p.intensity;\n    // Phase1: Color Grading - transparent high contrast low saturation\n    var curves = layer.Effects.addProperty(\"ADBE Curves\");\n    curves.property(\"ADBE Curves Channel\").setValue(\"RGB\");\n    var hue = layer.Effects.addProperty(\"ADBE Hue2\");\n    hue.property(\"ADBE Hue Hue\").setValue(5 * inten);\n    var levels = layer.Effects.addProperty(\"ADBE Levels2\");\n    levels.property(\"Input Black\").setValue(3);\n    levels.property(\"Input White\").setValue(245);\n    levels.property(\"Gamma\").setValue(1.2);\n    // Phase2: Material Texture - glass refraction\n    var blur = layer.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    blur.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(2 * inten);\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp Start of Ramp\").setValue([tc.width / 2, 0]);\n    ramp.property(\"ADBE Ramp End of Ramp\").setValue([tc.width / 2, tc.height]);\n    ramp.property(\"ADBE Ramp Start Color\").setValue([1, 1, 1]);\n    ramp.property(\"ADBE Ramp End Color\").setValue([0.9, 0.95, 1]);\n    ramp.property(\"ADBE Ramp Ramp Scatter\").setValue(40 * inten);\n    var glow = layer.Effects.addProperty(\"ADBE Glow\");\n    glow.property(\"ADBE Glow Glow Threshold\").setValue(50);\n    glow.property(\"ADBE Glow Glow Radius\").setValue(25);\n    glow.property(\"ADBE Glow Glow Intensity\").setValue(0.6 * inten);\n    glow.property(\"ADBE Glow Glow Color\").setValue([0.85, 0.95, 1]);\n    // Phase3: Joint Seams - none (glass has no seams)\n    // Skipped: glass puppet has no joint seams per knowledge base\n    // Phase4: Stop Motion - light 20fps\n    var sfps = tc.frameRate;\n    var tfps = p.frameRate;\n    try {\n      layer.timeRemapEnabled = true;\n      layer.property(\"ADBE Time Remapping\").expression = \"frame = Math.floor(time * \" + sfps + \") / \" + sfps + \"; stepped = Math.floor(frame * \" + tfps + \") / \" + tfps + \"; stepped;\";\n    } catch(e3) {}\n    var fl = tc.layers.addSolid([1, 1, 1], \"StopMotion_Glass\", tc.width, tc.height, tc.frameRate);\n    fl.adjustmentLayer = true;\n    var bc = fl.Effects.addProperty(\"ADBE Brightness & Contrast\");\n    bc.property(\"ADBE Brightness-Contrast Brightness\").expression = \"random(-1, 1)\";\n    // Phase5: Miniature Scene\n    var ts = tc.layers.addSolid([1, 1, 1], \"TiltShift_Glass\", tc.width, tc.height, tc.frameRate);\n    ts.adjustmentLayer = true;\n    var tv = ts.Effects.addProperty(\"ADBE Vignette\");\n    tv.property(\"ADBE Vignette Amount\").setValue(0.1 * inten);\n    tv.property(\"ADBE Vignette Midpoint\").setValue(0.75);\n    var tb = ts.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    tb.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(1);\n    _result = {status:\"success\", message:\"glass_puppet style applied\", frameRate: p.frameRate, phases: 5, joints: false};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "plush_puppet",
+    "category": "puppet_style",
+    "subcategory": "plush",
+    "description": "毛绒木偶风格 - 毛绒质感、软接缝、暖色调、12fps定格动画，模拟毛绒玩具质感",
+    "tags": [
+      "木偶",
+      "毛绒",
+      "puppet",
+      "plush",
+      "fur"
+    ],
+    "parameters": {
+      "compName": {
+        "type": "string",
+        "description": "目标合成名称，空则使用当前活动合成"
+      },
+      "frameRate": {
+        "type": "number",
+        "min": 8,
+        "max": 30,
+        "description": "定格动画目标帧率"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      }
+    },
+    "default_values": {
+      "compName": "Puppet Comp",
+      "frameRate": 12,
+      "intensity": 0.7
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {compName: ${compName}, frameRate: ${frameRate}, intensity: ${intensity}};\n    var tc = comp;\n    if (p.compName) {\n      for (var i = 1; i <= app.project.items.length; i++) {\n        var it = app.project.items[i];\n        if (it instanceof CompItem && it.name === p.compName) { tc = it; break; }\n      }\n    }\n    var layer = tc.layer(1);\n    if (!layer) { _result = {status:\"error\", message:\"Layer not found\"}; return JSON.stringify(_result); }\n    var inten = p.intensity;\n    // Phase1: Color Grading - warm soft tone\n    var curves = layer.Effects.addProperty(\"ADBE Curves\");\n    curves.property(\"ADBE Curves Channel\").setValue(\"RGB\");\n    var hue = layer.Effects.addProperty(\"ADBE Hue2\");\n    hue.property(\"ADBE Hue Hue\").setValue(3 * inten);\n    var levels = layer.Effects.addProperty(\"ADBE Levels2\");\n    levels.property(\"Input Black\").setValue(8);\n    levels.property(\"Input White\").setValue(235);\n    levels.property(\"Gamma\").setValue(1.0);\n    // Phase2: Material Texture - plush fur\n    var noise = layer.Effects.addProperty(\"ADBE Noise2\");\n    noise.property(\"ADBE Noise2 Amount\").setValue(15 * inten);\n    noise.property(\"ADBE Noise2 Use Color Noise\").setValue(true);\n    noise.property(\"ADBE Noise2 Seed\").setValue(321);\n    var blur = layer.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    blur.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(1 * inten);\n    // Phase3: Joint Seams - soft seams\n    var jl = tc.layers.addShape();\n    jl.name = \"Plush_Joints\";\n    var jp = [[0.5,0.28],[0.32,0.35],[0.68,0.35],[0.5,0.55],[0.4,0.58],[0.6,0.58],[0.38,0.72],[0.62,0.72]];\n    var c = jl.property(\"Contents\");\n    for (var j = 0; j < jp.length; j++) {\n      var g = c.addProperty(\"ADBE Vector Group\");\n      g.name = \"SoftSeam_\" + j;\n      var e = g.property(\"Contents\").addProperty(\"ADBE Vector Shape - Ellipse\");\n      e.property(\"ADBE Ellipse Path Size\").setValue([18, 15]);\n      e.property(\"ADBE Ellipse Path Position\").setValue([jp[j][0] * tc.width, jp[j][1] * tc.height]);\n      var f = g.property(\"Contents\").addProperty(\"ADBE Vector Graphic - Fill\");\n      f.property(\"ADBE Fill Color\").setValue([0.4, 0.3, 0.25, 1]);\n    }\n    // Phase4: Stop Motion\n    var sfps = tc.frameRate;\n    var tfps = p.frameRate;\n    try {\n      layer.timeRemapEnabled = true;\n      layer.property(\"ADBE Time Remapping\").expression = \"frame = Math.floor(time * \" + sfps + \") / \" + sfps + \"; stepped = Math.floor(frame * \" + tfps + \") / \" + tfps + \"; stepped;\";\n    } catch(e3) {}\n    var fl = tc.layers.addSolid([1, 1, 1], \"StopMotion_Plush\", tc.width, tc.height, tc.frameRate);\n    fl.adjustmentLayer = true;\n    var bc = fl.Effects.addProperty(\"ADBE Brightness & Contrast\");\n    bc.property(\"ADBE Brightness-Contrast Brightness\").expression = \"random(-3, 3)\";\n    // Phase5: Miniature Scene\n    var ts = tc.layers.addSolid([1, 1, 1], \"TiltShift_Plush\", tc.width, tc.height, tc.frameRate);\n    ts.adjustmentLayer = true;\n    var tv = ts.Effects.addProperty(\"ADBE Vignette\");\n    tv.property(\"ADBE Vignette Amount\").setValue(0.15 * inten);\n    tv.property(\"ADBE Vignette Midpoint\").setValue(0.65);\n    var tb = ts.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    tb.property(\"ADBE Gaussian Blur 2 Blurriness\").setValue(2);\n    _result = {status:\"success\", message:\"plush_puppet style applied\", frameRate: p.frameRate, phases: 5};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  }
+]

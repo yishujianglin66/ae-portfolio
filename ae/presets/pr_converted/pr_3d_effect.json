@@ -1,0 +1,1944 @@
+[
+  {
+    "name": "3d_extruded_text",
+    "category": "3d_effect",
+    "subcategory": "3d_text",
+    "description": "立体文字 - 通过多层叠加模拟3D挤出效果，配合摄像机与聚光灯呈现立体文字质感",
+    "tags": [
+      "3D",
+      "立体文字",
+      "extruded",
+      "text",
+      "lighting"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "立体文字"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 3.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "extrusionDepth": {
+            "type": "number",
+            "min": 10,
+            "max": 300,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerCount": {
+            "type": "integer",
+            "min": 5,
+            "max": 50,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.6,
+              1.0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "lightIntensity": {
+            "type": "number",
+            "min": 50,
+            "max": 200,
+            "default": 100
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "textLayerName": "立体文字",
+      "duration": 3.0,
+      "extrusionDepth": 100,
+      "layerCount": 20,
+      "color": [
+        0.2,
+        0.6,
+        1.0
+      ],
+      "lightIntensity": 100
+    }
+  },
+  {
+    "name": "text_rotation",
+    "category": "3d_effect",
+    "subcategory": "3d_text",
+    "description": "文字旋转 - 3D文字沿Y轴旋转，配合摄像机展示立体文字侧面",
+    "tags": [
+      "3D",
+      "文字旋转",
+      "rotation",
+      "text",
+      "camera"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "旋转文字"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 4.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rotationY": {
+            "type": "number",
+            "min": -720,
+            "max": 720,
+            "default": 360
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1.0,
+              0.3,
+              0.3
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "textLayerName": "旋转文字",
+      "duration": 4.0,
+      "rotationY": 360,
+      "color": [
+        1.0,
+        0.3,
+        0.3
+      ]
+    }
+  },
+  {
+    "name": "text_flip",
+    "category": "3d_effect",
+    "subcategory": "3d_text",
+    "description": "文字翻转 - 3D文字沿X轴或Y轴做180度翻转动画，适合标题转场",
+    "tags": [
+      "3D",
+      "文字翻转",
+      "flip",
+      "text",
+      "transition"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "翻转文字"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "flipAxis": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Y"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              1.0,
+              0.5
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "textLayerName": "翻转文字",
+      "duration": 2.0,
+      "flipAxis": "Y",
+      "color": [
+        0.3,
+        1.0,
+        0.5
+      ]
+    }
+  },
+  {
+    "name": "text_stacking",
+    "category": "3d_effect",
+    "subcategory": "3d_text",
+    "description": "文字层叠 - 多层文字在Z轴上堆叠排列，形成景深层次感，摄像机穿越而过",
+    "tags": [
+      "3D",
+      "文字层叠",
+      "stacking",
+      "depth",
+      "text"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "层叠文字"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerCount": {
+            "type": "integer",
+            "min": 3,
+            "max": 20,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "zSpacing": {
+            "type": "number",
+            "min": 20,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1.0,
+              0.8,
+              0.2
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 5.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "textLayerName": "层叠文字",
+      "layerCount": 8,
+      "zSpacing": 80,
+      "color": [
+        1.0,
+        0.8,
+        0.2
+      ],
+      "duration": 5.0
+    }
+  },
+  {
+    "name": "text_depth_of_field",
+    "category": "3d_effect",
+    "subcategory": "3d_text",
+    "description": "文字景深 - 开启摄像机景深模糊，文字从模糊到清晰或由近及远呈现电影级焦外效果",
+    "tags": [
+      "3D",
+      "景深",
+      "depth_of_field",
+      "blur",
+      "cinematic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "textLayerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "景深文字"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 4.0
+          }
+        }
+      },
+      {
+        "effect_name": "Gaussian Blur",
+        "parameters": {
+          "blurAmount": {
+            "type": "number",
+            "min": 0,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "focusDistance": {
+            "type": "number",
+            "min": 100,
+            "max": 2000,
+            "default": 800
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "aperture": {
+            "type": "number",
+            "min": 0,
+            "max": 20,
+            "default": 8
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "textLayerName": "景深文字",
+      "duration": 4.0,
+      "blurAmount": 80,
+      "focusDistance": 800,
+      "aperture": 8
+    }
+  },
+  {
+    "name": "camera_dolly_in",
+    "category": "3d_effect",
+    "subcategory": "camera_movement",
+    "description": "推镜头 - 摄像机沿Z轴向前推进，从远景平滑推向主体，营造聚焦与紧张感",
+    "tags": [
+      "3D",
+      "推镜头",
+      "dolly_in",
+      "camera",
+      "zoom"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 3.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startZ": {
+            "type": "number",
+            "min": -5000,
+            "max": -500,
+            "default": -2000
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "endZ": {
+            "type": "number",
+            "min": -800,
+            "max": 0,
+            "default": -600
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "duration": 3.0,
+      "startZ": -2000,
+      "endZ": -600
+    }
+  },
+  {
+    "name": "camera_dolly_out",
+    "category": "3d_effect",
+    "subcategory": "camera_movement",
+    "description": "拉镜头 - 摄像机沿Z轴向后拉远，从近景退向全景，营造开阔与疏离感",
+    "tags": [
+      "3D",
+      "拉镜头",
+      "dolly_out",
+      "camera",
+      "wide"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 3.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startZ": {
+            "type": "number",
+            "min": -800,
+            "max": 0,
+            "default": -600
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "endZ": {
+            "type": "number",
+            "min": -5000,
+            "max": -500,
+            "default": -2500
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "duration": 3.0,
+      "startZ": -600,
+      "endZ": -2500
+    }
+  },
+  {
+    "name": "camera_orbit",
+    "category": "3d_effect",
+    "subcategory": "camera_movement",
+    "description": "环绕镜头 - 摄像机围绕中心目标做圆形轨道运动，360度展示3D场景",
+    "tags": [
+      "3D",
+      "环绕",
+      "orbit",
+      "camera",
+      "360"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 2.0,
+            "max": 20.0,
+            "default": 6.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 200,
+            "max": 2000,
+            "default": 800
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "centerX": {
+            "type": "number",
+            "min": null,
+            "max": null,
+            "default": 960
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "centerY": {
+            "type": "number",
+            "min": null,
+            "max": null,
+            "default": 540
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "heightZ": {
+            "type": "number",
+            "min": null,
+            "max": null,
+            "default": 0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "revolutions": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 1.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "duration": 6.0,
+      "radius": 800,
+      "centerX": 960,
+      "centerY": 540,
+      "heightZ": 0,
+      "revolutions": 1.0
+    }
+  },
+  {
+    "name": "camera_pan",
+    "category": "3d_effect",
+    "subcategory": "camera_movement",
+    "description": "平移镜头 - 摄像机在X/Y轴上平滑平移，用于横向或纵向扫视3D场景",
+    "tags": [
+      "3D",
+      "平移",
+      "pan",
+      "camera",
+      "slide"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 4.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startX": {
+            "type": "number",
+            "min": null,
+            "max": null,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "endX": {
+            "type": "number",
+            "min": null,
+            "max": null,
+            "default": 1720
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startY": {
+            "type": "number",
+            "min": null,
+            "max": null,
+            "default": 540
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "endY": {
+            "type": "number",
+            "min": null,
+            "max": null,
+            "default": 540
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "duration": 4.0,
+      "startX": 200,
+      "endX": 1720,
+      "startY": 540,
+      "endY": 540
+    }
+  },
+  {
+    "name": "camera_crane",
+    "category": "3d_effect",
+    "subcategory": "camera_movement",
+    "description": "升降镜头 - 摄像机在Y轴上垂直升降，模拟摇臂效果，营造宏大或俯瞰视角",
+    "tags": [
+      "3D",
+      "升降",
+      "crane",
+      "camera",
+      "vertical"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 4.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startY": {
+            "type": "number",
+            "min": null,
+            "max": null,
+            "default": 900
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "endY": {
+            "type": "number",
+            "min": null,
+            "max": null,
+            "default": 180
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "duration": 4.0,
+      "startY": 900,
+      "endY": 180
+    }
+  },
+  {
+    "name": "card_flip",
+    "category": "3d_effect",
+    "subcategory": "3d_layer",
+    "description": "卡片翻转 - 3D图层沿Y轴做180度翻转，模拟卡片正反面切换效果",
+    "tags": [
+      "3D",
+      "卡片翻转",
+      "flip",
+      "card",
+      "layer"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "翻转卡片"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 1.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "flipAxis": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Y"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "cardWidth": {
+            "type": "number",
+            "min": 100,
+            "max": 800,
+            "default": 400
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "cardHeight": {
+            "type": "number",
+            "min": 100,
+            "max": 800,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.5,
+              0.9
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "翻转卡片",
+      "duration": 1.5,
+      "flipAxis": "Y",
+      "cardWidth": 400,
+      "cardHeight": 300,
+      "color": [
+        0.2,
+        0.5,
+        0.9
+      ]
+    }
+  },
+  {
+    "name": "cube",
+    "category": "3d_effect",
+    "subcategory": "3d_layer",
+    "description": "立方体 - 由6个面组成的3D立方体，可旋转展示各面，适合产品展示与魔方效果",
+    "tags": [
+      "3D",
+      "立方体",
+      "cube",
+      "layer",
+      "rotation"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 100,
+            "max": 800,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.4,
+              0.6,
+              0.8
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 5.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rotationSpeed": {
+            "type": "number",
+            "min": 0.1,
+            "max": 5.0,
+            "default": 1.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "size": 300,
+      "color": [
+        0.4,
+        0.6,
+        0.8
+      ],
+      "duration": 5.0,
+      "rotationSpeed": 1.0
+    }
+  },
+  {
+    "name": "photo_wall",
+    "category": "3d_effect",
+    "subcategory": "3d_layer",
+    "description": "照片墙 - 多张3D图层在空间中排列成墙状矩阵，带有Z轴随机错位与呼吸动画",
+    "tags": [
+      "3D",
+      "照片墙",
+      "photo_wall",
+      "gallery",
+      "layer"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "photoCount": {
+            "type": "integer",
+            "min": 4,
+            "max": 50,
+            "default": 12
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rows": {
+            "type": "integer",
+            "min": 1,
+            "max": 10,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "cols": {
+            "type": "integer",
+            "min": 1,
+            "max": 10,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "spacing": {
+            "type": "number",
+            "min": 100,
+            "max": 600,
+            "default": 350
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 5.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "photoCount": 12,
+      "rows": 3,
+      "cols": 4,
+      "spacing": 350,
+      "duration": 5.0
+    }
+  },
+  {
+    "name": "carousel",
+    "category": "3d_effect",
+    "subcategory": "3d_layer",
+    "description": "轮播 - 多个3D图层围绕中心点圆形排列，整体旋转形成3D转盘效果",
+    "tags": [
+      "3D",
+      "轮播",
+      "carousel",
+      "layer",
+      "circular"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "itemCount": {
+            "type": "integer",
+            "min": 3,
+            "max": 20,
+            "default": 6
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 200,
+            "max": 1500,
+            "default": 600
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 2.0,
+            "max": 15.0,
+            "default": 6.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rotationSpeed": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 1.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "itemCount": 6,
+      "radius": 600,
+      "duration": 6.0,
+      "rotationSpeed": 1.0
+    }
+  },
+  {
+    "name": "bookshelf",
+    "category": "3d_effect",
+    "subcategory": "3d_layer",
+    "description": "书架 - 多个3D图层像书本一样紧密排列在书架上，带有随机倾斜与高度变化",
+    "tags": [
+      "3D",
+      "书架",
+      "bookshelf",
+      "layer",
+      "arrange"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "bookCount": {
+            "type": "integer",
+            "min": 5,
+            "max": 30,
+            "default": 10
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "shelfWidth": {
+            "type": "number",
+            "min": 500,
+            "max": 2000,
+            "default": 1200
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "bookHeight": {
+            "type": "number",
+            "min": 150,
+            "max": 500,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "depth": {
+            "type": "number",
+            "min": 20,
+            "max": 100,
+            "default": 40
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "bookCount": 10,
+      "shelfWidth": 1200,
+      "bookHeight": 300,
+      "depth": 40
+    }
+  },
+  {
+    "name": "spotlight",
+    "category": "3d_effect",
+    "subcategory": "lighting",
+    "description": "聚光灯 - 添加3D聚光灯并设置锥角与羽化，可动画照射目标，突出主体",
+    "tags": [
+      "3D",
+      "聚光灯",
+      "spotlight",
+      "light",
+      "dramatic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lightName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "聚光灯"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 20,
+            "max": 300,
+            "default": 120
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "coneAngle": {
+            "type": "number",
+            "min": 5,
+            "max": 120,
+            "default": 45
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "coneFeather": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "color": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1.0,
+              0.95,
+              0.8
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 4.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lightName": "聚光灯",
+      "intensity": 120,
+      "coneAngle": 45,
+      "coneFeather": 30,
+      "color": [
+        1.0,
+        0.95,
+        0.8
+      ],
+      "duration": 4.0
+    }
+  },
+  {
+    "name": "volumetric_light",
+    "category": "3d_effect",
+    "subcategory": "lighting",
+    "description": "体积光 - 使用分形噪波与模糊模拟光束穿过介质的丁达尔效应",
+    "tags": [
+      "3D",
+      "体积光",
+      "volumetric",
+      "light",
+      "god_ray"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lightName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "体积光"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 50,
+            "max": 300,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Noise",
+        "parameters": {
+          "fractalAmount": {
+            "type": "number",
+            "min": 100,
+            "max": 800,
+            "default": 400
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 5.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lightName": "体积光",
+      "intensity": 150,
+      "fractalAmount": 400,
+      "duration": 5.0
+    }
+  },
+  {
+    "name": "lens_flare",
+    "category": "3d_effect",
+    "subcategory": "lighting",
+    "description": "光晕 - 使用镜头光晕效果模拟强光进入镜头产生的炫光与光斑",
+    "tags": [
+      "3D",
+      "光晕",
+      "lens_flare",
+      "glow",
+      "light"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "光晕层"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "flareCenter": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              960,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "Brightness": {
+            "type": "number",
+            "min": 0,
+            "max": 300,
+            "default": 120
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 4.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "光晕层",
+      "flareCenter": [
+        960,
+        540
+      ],
+      "brightness": 120,
+      "duration": 4.0
+    }
+  },
+  {
+    "name": "drop_shadow_3d",
+    "category": "3d_effect",
+    "subcategory": "lighting",
+    "description": "3D阴影 - 启用3D图层的材质阴影属性，添加平行光产生真实投影",
+    "tags": [
+      "3D",
+      "阴影",
+      "shadow",
+      "light",
+      "realistic"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "阴影主体"
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "shadowColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "shadowOpacity": {
+            "type": "number",
+            "min": 0,
+            "max": 100,
+            "default": 70
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lightName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "Shadow Light"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "阴影主体",
+      "shadowColor": [
+        0,
+        0,
+        0
+      ],
+      "shadowOpacity": 70,
+      "lightName": "Shadow Light"
+    }
+  },
+  {
+    "name": "reflection",
+    "category": "3d_effect",
+    "subcategory": "lighting",
+    "description": "反射 - 复制3D图层并垂直翻转，降低透明度与模糊处理，模拟镜面反射",
+    "tags": [
+      "3D",
+      "反射",
+      "reflection",
+      "mirror",
+      "layer"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "反射主体"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "reflectOpacity": {
+            "type": "number",
+            "min": 10,
+            "max": 80,
+            "default": 35
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "reflectDistance": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 300
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "反射主体",
+      "reflectOpacity": 35,
+      "reflectDistance": 300
+    }
+  },
+  {
+    "name": "particle_cloud",
+    "category": "3d_effect",
+    "subcategory": "particle_3d",
+    "description": "粒子云 - 大量小固态层在3D空间中随机分布形成云雾状效果",
+    "tags": [
+      "3D",
+      "粒子云",
+      "particle_cloud",
+      "volumetric",
+      "scatter"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "integer",
+            "min": 20,
+            "max": 200,
+            "default": 60
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "cloudRadius": {
+            "type": "number",
+            "min": 200,
+            "max": 1500,
+            "default": 500
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 5.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "particleCount": 60,
+      "cloudRadius": 500,
+      "duration": 5.0
+    }
+  },
+  {
+    "name": "particle_explosion",
+    "category": "3d_effect",
+    "subcategory": "particle_3d",
+    "description": "粒子爆炸 - 粒子从中心点向四周高速飞散，模拟爆炸冲击波效果",
+    "tags": [
+      "3D",
+      "粒子爆炸",
+      "explosion",
+      "particle",
+      "impact"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "integer",
+            "min": 20,
+            "max": 300,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "explosionForce": {
+            "type": "number",
+            "min": 200,
+            "max": 2000,
+            "default": 800
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "particleCount": 80,
+      "explosionForce": 800,
+      "duration": 2.0
+    }
+  },
+  {
+    "name": "particle_tornado",
+    "category": "3d_effect",
+    "subcategory": "particle_3d",
+    "description": "粒子龙卷风 - 粒子围绕中心轴螺旋上升，模拟龙卷风旋转卷起效果",
+    "tags": [
+      "3D",
+      "粒子龙卷风",
+      "tornado",
+      "particle",
+      "swirl"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "integer",
+            "min": 30,
+            "max": 200,
+            "default": 60
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "tornadoHeight": {
+            "type": "number",
+            "min": 300,
+            "max": 1500,
+            "default": 800
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "tornadoRadius": {
+            "type": "number",
+            "min": 100,
+            "max": 600,
+            "default": 250
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 2.0,
+            "max": 10.0,
+            "default": 5.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "particleCount": 60,
+      "tornadoHeight": 800,
+      "tornadoRadius": 250,
+      "duration": 5.0
+    }
+  },
+  {
+    "name": "particle_spiral",
+    "category": "3d_effect",
+    "subcategory": "particle_3d",
+    "description": "粒子螺旋 - 粒子沿3D螺旋路径分布并运动，形成DNA双螺旋或星系旋臂效果",
+    "tags": [
+      "3D",
+      "粒子螺旋",
+      "spiral",
+      "particle",
+      "helix"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "integer",
+            "min": 30,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "spiralRadius": {
+            "type": "number",
+            "min": 100,
+            "max": 800,
+            "default": 300
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "spiralHeight": {
+            "type": "number",
+            "min": 200,
+            "max": 1200,
+            "default": 600
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 2.0,
+            "max": 10.0,
+            "default": 6.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "turns": {
+            "type": "number",
+            "min": 1,
+            "max": 10,
+            "default": 2.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "particleCount": 80,
+      "spiralRadius": 300,
+      "spiralHeight": 600,
+      "duration": 6.0,
+      "turns": 2.0
+    }
+  },
+  {
+    "name": "particle_rain",
+    "category": "3d_effect",
+    "subcategory": "particle_3d",
+    "description": "粒子雨 - 细长粒子从上方落下，模拟3D空间中的降雨效果",
+    "tags": [
+      "3D",
+      "粒子雨",
+      "rain",
+      "particle",
+      "weather"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "integer",
+            "min": 30,
+            "max": 300,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rainSpeed": {
+            "type": "number",
+            "min": 200,
+            "max": 1500,
+            "default": 600
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 4.0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "particleCount": 100,
+      "rainSpeed": 600,
+      "duration": 4.0
+    }
+  }
+]

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>AE Knowledge Vault</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+            font-size: 12px;
+            color: #e0e0e0;
+            background: #2b2b2b;
+            overflow-x: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 12px 16px;
+            border-bottom: 1px solid #3a3a3a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header h1 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            flex: 1;
+        }
+        .status {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #555;
+            transition: background 0.3s;
+        }
+        .status.connected { background: #4caf50; }
+        .status.error { background: #f44336; }
+        .tabs {
+            display: flex;
+            background: #1e1e1e;
+            border-bottom: 1px solid #3a3a3a;
+        }
+        .tab {
+            flex: 1;
+            padding: 8px 4px;
+            text-align: center;
+            cursor: pointer;
+            color: #888;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-size: 11px;
+        }
+        .tab:hover { color: #ccc; }
+        .tab.active { color: #4fc3f7; border-bottom-color: #4fc3f7; }
+        .content { padding: 12px; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            background: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            font-size: 12px;
+        }
+        .btn:hover { background: #4a4a4a; border-color: #4fc3f7; }
+        .btn:active { background: #555; }
+        .btn.primary { background: #1565c0; border-color: #1976d2; }
+        .btn.primary:hover { background: #1976d2; }
+        .btn .icon { margin-right: 8px; }
+        .btn .desc { display: block; font-size: 10px; color: #888; margin-top: 2px; }
+        .log {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 8px;
+            margin-top: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: "Consolas", monospace;
+            font-size: 10px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .log .info { color: #4fc3f7; }
+        .log .success { color: #4caf50; }
+        .log .error { color: #f44336; }
+        .log .warn { color: #ff9800; }
+        .info-card {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+        .info-card h3 {
+            font-size: 11px;
+            color: #4fc3f7;
+            margin-bottom: 6px;
+        }
+        .info-card .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .info-card .row:last-child { border-bottom: none; }
+        .info-card .label { color: #888; }
+        .info-card .value { color: #e0e0e0; font-weight: 500; }
+        .progress {
+            height: 3px;
+            background: #333;
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress.active { display: block; }
+        .progress-bar {
+            height: 100%;
+            background: #4fc3f7;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .section-title {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 12px 0 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AE Knowledge Vault</h1>
+        <div class="status" id="status" title="未连接"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-panel="main">主控</div>
+        <div class="tab" data-panel="inspect">工程分析</div>
+        <div class="tab" data-panel="knowledge">知识库</div>
+    </div>
+
+    <div class="content">
+        <!-- 主控面板 -->
+        <div class="panel active" id="panel-main">
+            <div class="section-title">Bridge 控制</div>
+            <button class="btn primary" id="btn-ping">
+                <span class="icon">📡</span>检测连接
+                <span class="desc">Ping AE Bridge, 确认 listener 存活</span>
+            </button>
+            <button class="btn" id="btn-list">
+                <span class="icon">📋</span>列出工程
+                <span class="desc">列出当前 AE 项目中所有合成</span>
+            </button>
+            <button class="btn" id="btn-start-listener">
+                <span class="icon">🚀</span>启动 Listener
+                <span class="desc">通过脚本启动 MCP listener (如未运行)</span>
+            </button>
+
+            <div class="section-title">快捷操作</div>
+            <button class="btn" id="btn-screenshot">
+                <span class="icon">📸</span>截取当前帧
+                <span class="desc">导出当前时间码的帧为 PNG</span>
+            </button>
+            <button class="btn" id="btn-render">
+                <span class="icon">🎬</span>添加到渲染队列
+                <span class="desc">将当前合成添加到渲染队列</span>
+            </button>
+
+            <div class="progress" id="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="log" id="log-main"></div>
+        </div>
+
+        <!-- 工程分析面板 -->
+        <div class="panel" id="panel-inspect">
+            <div class="section-title">工程提取</div>
+            <button class="btn primary" id="btn-manga-inspect">
+                <span class="icon">🔍</span>深度提取工程
+                <span class="desc">提取所有合成的层结构/效果/关键帧</span>
+            </button>
+            <button class="btn" id="btn-extract-expressions">
+                <span class="icon">📝</span>提取表达式
+                <span class="desc">提取所有层的表达式代码</span>
+            </button>
+            <button class="btn" id="btn-extract-plugins">
+                <span class="icon">🔌</span>插件清单
+                <span class="desc">列出工程中使用的所有插件及参数</span>
+            </button>
+
+            <div class="section-title">分析结果</div>
+            <div class="info-card" id="project-info" style="display:none;">
+                <h3>项目概览</h3>
+                <div class="row"><span class="label">项目名</span><span class="value" id="info-name">-</span></div>
+                <div class="row"><span class="label">合成数</span><span class="value" id="info-comps">-</span></div>
+                <div class="row"><span class="label">总层数</span><span class="value" id="info-layers">-</span></div>
+                <div class="row"><span class="label">时间重映射层</span><span class="value" id="info-tr">-</span></div>
+                <div class="row"><span class="label">插件实例</span><span class="value" id="info-fx">-</span></div>
+            </div>
+            <div class="log" id="log-inspect"></div>
+        </div>
+
+        <!-- 知识库面板 -->
+        <div class="panel" id="panel-knowledge">
+            <div class="section-title">知识沉淀</div>
+            <button class="btn" id="btn-save-knowledge">
+                <span class="icon">💾</span>保存工程知识
+                <span class="desc">将当前工程的结构/技法沉淀为知识库文档</span>
+            </button>
+            <button class="btn" id="btn-view-knowledge">
+                <span class="icon">📖</span>查看已有知识
+                <span class="desc">浏览已沉淀的 AE 工程知识</span>
+            </button>
+            <button class="btn" id="btn-export-report">
+                <span class="icon">📊</span>导出分析报告
+                <span class="desc">生成 Markdown 格式工程分析报告</span>
+            </button>
+
+            <div class="section-title">工程技法识别</div>
+            <div class="info-card" id="techniques-card" style="display:none;">
+                <h3>识别到的技法</h3>
+                <div id="techniques-list"></div>
+            </div>
+            <div class="log" id="log-knowledge"></div>
+        </div>
+    </div>
+
+    <script src="CSInterface.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

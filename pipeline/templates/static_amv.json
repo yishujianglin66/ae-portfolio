@@ -1,0 +1,123 @@
+{
+  "template_id": "static_amv",
+  "name": "静止系 AMV (Static-image AMV)",
+  "version": "1.0.0",
+  "description": "静态插画 → 2.5D 视差 + 摄像机运动 + 粒子氛围 + 光影动画",
+  "input_requirements": {
+    "illustration": {"min": 1, "max": 1, "formats": ["png", "psd"], "note": "高分辨率插画（建议 ≥ 2560px 宽）"},
+    "layer_psd": {"min": 0, "max": 1, "formats": ["psd"], "note": "分层 PSD（前景/中景/背景已分离）"},
+    "audio": {"min": 0, "max": 1, "formats": ["mp3", "wav", "flac"]}
+  },
+  "output": {
+    "format": "H.264",
+    "resolution": "1920x1080",
+    "fps": 24,
+    "container": "mp4",
+    "bitrate_target_mbps": 15,
+    "duration_s": 30
+  },
+  "stages": {
+    "S3_ae_parallax": {
+      "engine": "after_effects",
+      "mode": "native_bridge",
+      "fallback": "manual",
+      "steps": [
+        {
+          "id": "parallax_setup",
+          "name": "2.5D 视差初始化",
+          "jsx_template": "ae/scripts/amv/parallax_setup.jsx",
+          "params": {
+            "layer_depths": {
+              "background": -200,
+              "midground": 0,
+              "foreground": 150
+            },
+            "scale_compensation": true,
+            "edge_padding_px": 100
+          }
+        },
+        {
+          "id": "camera_move",
+          "name": "摄像机运动路径",
+          "jsx_template": "ae/scripts/amv/camera_move.jsx",
+          "params": {
+            "camera_type": "one_node",
+            "start_position": [960, 540, -800],
+            "end_position": [960, 500, -600],
+            "duration_s": 10,
+            "easing": "bezier",
+            "ease_influence": 75,
+            "add_null_controller": true,
+            "drift_amplitude": 20
+          }
+        },
+        {
+          "id": "particles",
+          "name": "粒子氛围",
+          "jsx_template": "ae/scripts/amv/particles.jsx",
+          "params": {
+            "particle_type": "dust_motes",
+            "count": 200,
+            "size_range": [1, 4],
+            "speed_range": [10, 40],
+            "opacity_range": [20, 60],
+            "gravity": -5,
+            "wind_x": 15,
+            "color": [1.0, 0.95, 0.8],
+            "emitter_size": [1920, 1080]
+          }
+        },
+        {
+          "id": "light_rays",
+          "name": "光影动画",
+          "jsx_template": "ae/scripts/amv/light_rays.jsx",
+          "params": {
+            "light_type": "god_rays",
+            "angle_deg": 35,
+            "intensity": 0.6,
+            "ray_count": 5,
+            "animation_speed": 0.1,
+            "lens_flare": true,
+            "flare_brightness": 80,
+            "volumetric_scatter": true
+          }
+        }
+      ],
+      "render": {
+        "engine": "aerender",
+        "format": "Lossless",
+        "resolution": "1920x1080",
+        "fps": 24,
+        "duration_s": 30
+      }
+    },
+    "S5_color_grade": {
+      "engine": "davinci",
+      "mode": "native_cli",
+      "fallback": "ffmpeg_equiv",
+      "preset": "cinematic",
+      "node_graph": {
+        "node_count": 4,
+        "nodes": [
+          {"id": 1, "type": "base_correction", "params": {"exposure": 0.05, "contrast": 1.1}},
+          {"id": 2, "type": "film_look", "params": {"highlight_roll": 0.3, "shadow_tint": [0.02, 0.01, -0.03]}},
+          {"id": 3, "type": "soft_focus", "params": {"intensity": 0.2, "threshold": 0.6}},
+          {"id": 4, "type": "bloom", "params": {"threshold": 0.8, "radius": 20, "intensity": 0.4}}
+        ]
+      }
+    },
+    "S6_export": {
+      "engine": "ame",
+      "mode": "native_bridge",
+      "fallback": "ffmpeg",
+      "presets": [
+        {"name": "publish_1080p24", "codec": "H.264", "fps": 24, "bitrate": "15M"}
+      ]
+    }
+  },
+  "quality_gates": {
+    "QG_depth": {"min_parallax_layers": 3, "z_separation_min": 100},
+    "QG_motion": {"camera_path_smooth": true, "no_jitter": true},
+    "QG_atmosphere": {"particles_visible": true, "light_rays_present": true}
+  }
+}

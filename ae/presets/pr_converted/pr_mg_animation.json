@@ -1,0 +1,3594 @@
+[
+  {
+    "name": "circle_expand",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "圆形扩展动画 - 圆形从无到有扩展出现，带有弹性回弹效果，适用于强调和标记",
+    "tags": [
+      "圆形",
+      "扩展",
+      "弹性",
+      "emphasis",
+      "scale"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "圆形扩展"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.3,
+            "max": 3.0,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 50,
+            "max": 800,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.6,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "bounce": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": true
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "圆形扩展",
+      "duration": 1.0,
+      "size": 200,
+      "fillColor": [
+        0.2,
+        0.6,
+        1
+      ],
+      "strokeWidth": 4,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ],
+      "bounce": true
+    }
+  },
+  {
+    "name": "rect_slide_in",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "矩形滑入动画 - 矩形从屏幕边缘滑入，带有减速缓冲效果",
+    "tags": [
+      "矩形",
+      "滑入",
+      "slide",
+      "入场",
+      "transform"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "矩形滑入"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.3,
+            "max": 3.0,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "width": {
+            "type": "number",
+            "min": 50,
+            "max": 1000,
+            "default": 400
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "height": {
+            "type": "number",
+            "min": 50,
+            "max": 1000,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.3,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 0
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "direction": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "left"
+          }
+        }
+      },
+      {
+        "effect_name": "Corner Pin",
+        "parameters": {
+          "cornerRadius": {
+            "type": "number",
+            "min": 0,
+            "max": 200,
+            "default": 20
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "矩形滑入",
+      "duration": 1.0,
+      "width": 400,
+      "height": 200,
+      "fillColor": [
+        0.9,
+        0.3,
+        0.5
+      ],
+      "strokeWidth": 0,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ],
+      "direction": "left",
+      "cornerRadius": 20
+    }
+  },
+  {
+    "name": "triangle_rotate",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "三角形旋转动画 - 三角形边旋转边缩放入场，配合重复器创建万花筒效果",
+    "tags": [
+      "三角形",
+      "旋转",
+      "旋转",
+      "repeater",
+      "万花筒"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "三角形旋转"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              0.8,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 30,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "repeaterCount": {
+            "type": "integer",
+            "min": 1,
+            "max": 12,
+            "default": 6
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rotationCount": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "三角形旋转",
+      "duration": 2.0,
+      "size": 150,
+      "fillColor": [
+        0.3,
+        0.8,
+        0.5
+      ],
+      "strokeWidth": 2,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ],
+      "repeaterCount": 6,
+      "rotationCount": 2
+    }
+  },
+  {
+    "name": "star_scale",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "星形缩放动画 - 星形弹性缩放并带有描边绘制效果，使用 Trim Paths 实现描边生长",
+    "tags": [
+      "星形",
+      "缩放",
+      "描边绘制",
+      "trim_paths",
+      "bounce"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "星形缩放"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 1.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "outerRadius": {
+            "type": "number",
+            "min": 30,
+            "max": 400,
+            "default": 120
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "innerRadius": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 60
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "points": {
+            "type": "integer",
+            "min": 3,
+            "max": 20,
+            "default": 5
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.8,
+              0.2
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 30,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.5,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "enableTrim": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": true
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "星形缩放",
+      "duration": 1.5,
+      "outerRadius": 120,
+      "innerRadius": 60,
+      "points": 5,
+      "fillColor": [
+        1,
+        0.8,
+        0.2
+      ],
+      "strokeWidth": 4,
+      "strokeColor": [
+        1,
+        0.5,
+        0
+      ],
+      "enableTrim": true
+    }
+  },
+  {
+    "name": "heart_beat",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "心形跳动动画 - 心形缩放模拟心跳节奏，带有连续脉冲效果",
+    "tags": [
+      "心形",
+      "心跳",
+      "pulse",
+      "缩放",
+      "循环"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "心形跳动"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 50,
+            "max": 500,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.2,
+              0.4
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 20,
+            "default": 2
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "beatCount": {
+            "type": "integer",
+            "min": 1,
+            "max": 10,
+            "default": 3
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "心形跳动",
+      "duration": 2.0,
+      "size": 150,
+      "fillColor": [
+        1,
+        0.2,
+        0.4
+      ],
+      "strokeWidth": 2,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ],
+      "beatCount": 3
+    }
+  },
+  {
+    "name": "polygon_morph",
+    "category": "mg_animation",
+    "subcategory": "shape",
+    "description": "多边形变形动画 - 圆形与星形之间变形，使用 Wiggle Paths 增加动态感",
+    "tags": [
+      "多边形",
+      "变形",
+      "morph",
+      "wiggle_paths",
+      "shape"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "多边形变形"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 3.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 50,
+            "max": 400,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.4,
+              0.7,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 20,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.4,
+              0.8
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "wiggleIntensity": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 10
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "多边形变形",
+      "duration": 3.0,
+      "size": 200,
+      "fillColor": [
+        0.4,
+        0.7,
+        1
+      ],
+      "strokeWidth": 3,
+      "strokeColor": [
+        0.2,
+        0.4,
+        0.8
+      ],
+      "wiggleIntensity": 10
+    }
+  },
+  {
+    "name": "line_draw",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "线条绘制动画 - 使用 Trim Paths 让线条从起点生长到终点，模拟手写绘制效果",
+    "tags": [
+      "线条",
+      "绘制",
+      "trim_paths",
+      "手写",
+      "path"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "线条绘制"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 30,
+            "default": 5
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.8,
+              0.4
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "startPoint": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              200,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "endPoint": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1720,
+              540
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "curved": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": false
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "线条绘制",
+      "duration": 2.0,
+      "strokeWidth": 5,
+      "strokeColor": [
+        0.2,
+        0.8,
+        0.4
+      ],
+      "startPoint": [
+        200,
+        540
+      ],
+      "endPoint": [
+        1720,
+        540
+      ],
+      "curved": false
+    }
+  },
+  {
+    "name": "path_follow",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "路径跟随动画 - 小圆点沿自定义贝塞尔曲线路径运动，使用 Trim Paths 控制进度",
+    "tags": [
+      "路径",
+      "跟随",
+      "motion_path",
+      "trim_paths",
+      "dot"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "路径跟随"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 3.0
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "pathColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.5,
+              0.5,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "dotColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.3,
+              0.3
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "pathWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "dotSize": {
+            "type": "number",
+            "min": 5,
+            "max": 50,
+            "default": 15
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "repeaterCount": {
+            "type": "integer",
+            "min": 1,
+            "max": 10,
+            "default": 1
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "路径跟随",
+      "duration": 3.0,
+      "pathColor": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "dotColor": [
+        1,
+        0.3,
+        0.3
+      ],
+      "pathWidth": 3,
+      "dotSize": 15,
+      "repeaterCount": 1
+    }
+  },
+  {
+    "name": "shape_morph",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "形状变形动画 - 圆形到方形再到三角形的平滑变形，展示路径插值动画",
+    "tags": [
+      "形状",
+      "变形",
+      "morph",
+      "path",
+      "插值"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "形状变形"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 3.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 50,
+            "max": 400,
+            "default": 200
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.6,
+              0.3,
+              0.9
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 20,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "形状变形",
+      "duration": 3.0,
+      "size": 200,
+      "fillColor": [
+        0.6,
+        0.3,
+        0.9
+      ],
+      "strokeWidth": 3,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  {
+    "name": "icon_stroke",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "图标描边动画 - 通用图标描边绘制效果，使用 Trim Paths 配合虚线实现动态描边",
+    "tags": [
+      "图标",
+      "描边",
+      "stroke",
+      "trim_paths",
+      "draw"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "图标描边"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 6
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.6,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "pathPoints": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              [
+                960,
+                340
+              ],
+              [
+                960,
+                540
+              ],
+              [
+                860,
+                640
+              ],
+              [
+                960,
+                540
+              ],
+              [
+                1060,
+                640
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "dashEnabled": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": true
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "图标描边",
+      "duration": 2.0,
+      "strokeWidth": 6,
+      "strokeColor": [
+        0.2,
+        0.6,
+        1
+      ],
+      "pathPoints": [
+        [
+          960,
+          340
+        ],
+        [
+          960,
+          540
+        ],
+        [
+          860,
+          640
+        ],
+        [
+          960,
+          540
+        ],
+        [
+          1060,
+          640
+        ]
+      ],
+      "dashEnabled": true
+    }
+  },
+  {
+    "name": "signature_effect",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "签名效果动画 - 模拟手写签名过程，使用 Trim Paths 和速度曲线控制绘制节奏",
+    "tags": [
+      "签名",
+      "手写",
+      "signature",
+      "draw",
+      "trim_paths"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "签名效果"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 4.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 15,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.1,
+              0.1,
+              0.1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "speedVariation": {
+            "type": "number",
+            "min": 0,
+            "max": 1.0,
+            "default": 0.3
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "签名效果",
+      "duration": 4.0,
+      "strokeWidth": 4,
+      "strokeColor": [
+        0.1,
+        0.1,
+        0.1
+      ],
+      "speedVariation": 0.3
+    }
+  },
+  {
+    "name": "wave_path",
+    "category": "mg_animation",
+    "subcategory": "path",
+    "description": "波浪路径动画 - 正弦波浪形状配合 Wiggle Paths 产生流动效果，使用 Repeater 创建多层波浪",
+    "tags": [
+      "波浪",
+      "路径",
+      "wave",
+      "wiggle_paths",
+      "flow"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "波浪路径"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 3.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              0.7,
+              0.9
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "waveCount": {
+            "type": "integer",
+            "min": 1,
+            "max": 10,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "amplitude": {
+            "type": "number",
+            "min": 10,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "wiggleIntensity": {
+            "type": "number",
+            "min": 0,
+            "max": 30,
+            "default": 5
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "波浪路径",
+      "duration": 3.0,
+      "strokeWidth": 4,
+      "strokeColor": [
+        0.3,
+        0.7,
+        0.9
+      ],
+      "waveCount": 3,
+      "amplitude": 80,
+      "wiggleIntensity": 5
+    }
+  },
+  {
+    "name": "play_button",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "播放按钮动画 - 圆形背景配合三角形播放图标，点击时带有缩放脉冲反馈",
+    "tags": [
+      "播放",
+      "按钮",
+      "play",
+      "icon",
+      "pulse"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "播放按钮"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.3,
+            "max": 3.0,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 50,
+            "max": 300,
+            "default": 120
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "bgColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.3,
+              0.3
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "iconColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 20,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "播放按钮",
+      "duration": 1.0,
+      "size": 120,
+      "bgColor": [
+        1,
+        0.3,
+        0.3
+      ],
+      "iconColor": [
+        1,
+        1,
+        1
+      ],
+      "strokeWidth": 0
+    }
+  },
+  {
+    "name": "loading_circle",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "加载圆圈动画 - 旋转的圆弧使用 Trim Paths 和 Repeater 创建多层加载指示器",
+    "tags": [
+      "加载",
+      "圆圈",
+      "loading",
+      "spinner",
+      "trim_paths"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "加载圆圈"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 20,
+            "max": 300,
+            "default": 60
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 2,
+            "max": 30,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.6,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "arcLength": {
+            "type": "number",
+            "min": 10,
+            "max": 90,
+            "default": 75
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "rotationSpeed": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "加载圆圈",
+      "duration": 2.0,
+      "radius": 60,
+      "strokeWidth": 8,
+      "strokeColor": [
+        0.2,
+        0.6,
+        1
+      ],
+      "arcLength": 75,
+      "rotationSpeed": 2
+    }
+  },
+  {
+    "name": "check_mark",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "勾选标记动画 - 对勾符号使用 Trim Paths 逐笔绘制，配合圆形背景缩放出现",
+    "tags": [
+      "勾选",
+      "对勾",
+      "check",
+      "success",
+      "trim_paths"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "勾选标记"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.3,
+            "max": 3.0,
+            "default": 1.2
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 30,
+            "max": 300,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "bgColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.8,
+              0.4
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "checkColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 2,
+            "max": 20,
+            "default": 6
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "勾选标记",
+      "duration": 1.2,
+      "size": 100,
+      "bgColor": [
+        0.2,
+        0.8,
+        0.4
+      ],
+      "checkColor": [
+        1,
+        1,
+        1
+      ],
+      "strokeWidth": 6
+    }
+  },
+  {
+    "name": "search_icon",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "搜索图标动画 - 放大镜图标使用 Trim Paths 绘制圆圈和手柄，带有弹性摆动",
+    "tags": [
+      "搜索",
+      "放大镜",
+      "search",
+      "icon",
+      "draw"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "搜索图标"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.3,
+            "max": 3.0,
+            "default": 1.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 30,
+            "max": 300,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 2,
+            "max": 20,
+            "default": 6
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.4,
+              0.4,
+              0.4
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "bounce": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": true
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "搜索图标",
+      "duration": 1.5,
+      "size": 100,
+      "strokeWidth": 6,
+      "strokeColor": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "bounce": true
+    }
+  },
+  {
+    "name": "menu_icon",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "菜单图标动画 - 三条横线变换为关闭叉号，使用 Trim Paths 和旋转实现汉堡菜单动画",
+    "tags": [
+      "菜单",
+      "汉堡",
+      "menu",
+      "hamburger",
+      "transform"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "菜单图标"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.3,
+            "max": 3.0,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 30,
+            "max": 300,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 2,
+            "max": 20,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.2,
+              0.2
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lineSpacing": {
+            "type": "number",
+            "min": 5,
+            "max": 50,
+            "default": 20
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "菜单图标",
+      "duration": 1.0,
+      "size": 80,
+      "strokeWidth": 8,
+      "strokeColor": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "lineSpacing": 20
+    }
+  },
+  {
+    "name": "bell_notification",
+    "category": "mg_animation",
+    "subcategory": "icon",
+    "description": "铃铛通知动画 - 铃铛图标摇晃并带有通知圆点弹出效果，适合消息提醒场景",
+    "tags": [
+      "铃铛",
+      "通知",
+      "bell",
+      "notification",
+      "shake"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "铃铛通知"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.3,
+            "max": 3.0,
+            "default": 1.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 30,
+            "max": 300,
+            "default": 100
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "bellColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.7,
+              0.2
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "dotColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.2,
+              0.2
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 20,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "铃铛通知",
+      "duration": 1.5,
+      "size": 100,
+      "bellColor": [
+        0.9,
+        0.7,
+        0.2
+      ],
+      "dotColor": [
+        1,
+        0.2,
+        0.2
+      ],
+      "strokeWidth": 0
+    }
+  },
+  {
+    "name": "bar_chart_grow",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "柱状图增长动画 - 多根柱子依次从底部生长，使用 Trim Paths 和延迟错开效果",
+    "tags": [
+      "柱状图",
+      "数据",
+      "bar_chart",
+      "grow",
+      "data_viz"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "柱状图增长"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barCount": {
+            "type": "integer",
+            "min": 2,
+            "max": 12,
+            "default": 5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "barWidth": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 60
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "maxHeight": {
+            "type": "number",
+            "min": 50,
+            "max": 800,
+            "default": 400
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "barColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              0.6,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "stagger": {
+            "type": "number",
+            "min": 0,
+            "max": 1.0,
+            "default": 0.1
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "柱状图增长",
+      "duration": 2.0,
+      "barCount": 5,
+      "barWidth": 60,
+      "maxHeight": 400,
+      "barColor": [
+        0.3,
+        0.6,
+        1
+      ],
+      "stagger": 0.1
+    }
+  },
+  {
+    "name": "pie_chart_fill",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "饼图填充动画 - 扇形区域使用 Trim Paths 和旋转逐步填充，支持多段不同颜色",
+    "tags": [
+      "饼图",
+      "数据",
+      "pie_chart",
+      "fill",
+      "data_viz"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "饼图填充"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 50,
+            "max": 400,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "segments": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.4,
+              0.35,
+              0.25
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "colors": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              [
+                0.3,
+                0.6,
+                1
+              ],
+              [
+                0.4,
+                0.8,
+                0.4
+              ],
+              [
+                1,
+                0.6,
+                0.2
+              ]
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 20,
+            "default": 0
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "饼图填充",
+      "duration": 2.5,
+      "radius": 150,
+      "segments": [
+        0.4,
+        0.35,
+        0.25
+      ],
+      "colors": [
+        [
+          0.3,
+          0.6,
+          1
+        ],
+        [
+          0.4,
+          0.8,
+          0.4
+        ],
+        [
+          1,
+          0.6,
+          0.2
+        ]
+      ],
+      "strokeWidth": 0
+    }
+  },
+  {
+    "name": "line_chart_draw",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "折线图绘制动画 - 数据点连线使用 Trim Paths 生长，配合圆点依次弹出",
+    "tags": [
+      "折线图",
+      "数据",
+      "line_chart",
+      "draw",
+      "data_viz"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "折线图绘制"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 3.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "pointCount": {
+            "type": "integer",
+            "min": 2,
+            "max": 15,
+            "default": 6
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lineWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "lineColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.7,
+              0.3
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "dotColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.1,
+              0.5,
+              0.2
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "dotSize": {
+            "type": "number",
+            "min": 5,
+            "max": 40,
+            "default": 12
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "折线图绘制",
+      "duration": 3.0,
+      "pointCount": 6,
+      "lineWidth": 4,
+      "lineColor": [
+        0.2,
+        0.7,
+        0.3
+      ],
+      "dotColor": [
+        0.1,
+        0.5,
+        0.2
+      ],
+      "dotSize": 12
+    }
+  },
+  {
+    "name": "counter_number",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "计数器动画 - 数字从0滚动增长到目标值，使用 Text Layer 和表达式实现",
+    "tags": [
+      "计数器",
+      "数字",
+      "counter",
+      "number",
+      "data_viz"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "计数器"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 10.0,
+            "default": 3.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "targetValue": {
+            "type": "integer",
+            "min": 1,
+            "max": 999999,
+            "default": 1000
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "prefix": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "\"\""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "suffix": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "\"+\""
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "fontSize": {
+            "type": "number",
+            "min": 20,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "textColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.2,
+              0.2,
+              0.2
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "计数器",
+      "duration": 3.0,
+      "targetValue": 1000,
+      "prefix": "\"\"",
+      "suffix": "\"+\"",
+      "fontSize": 80,
+      "textColor": [
+        0.2,
+        0.2,
+        0.2
+      ]
+    }
+  },
+  {
+    "name": "progress_bar",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "进度条动画 - 水平进度条填充配合百分比文字，使用 Trim Paths 和圆角矩形",
+    "tags": [
+      "进度条",
+      "进度",
+      "progress",
+      "bar",
+      "data_viz"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "进度条"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "width": {
+            "type": "number",
+            "min": 100,
+            "max": 1600,
+            "default": 600
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "height": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 30
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "trackColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.9,
+              0.9
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              0.7,
+              0.4
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Corner Pin",
+        "parameters": {
+          "cornerRadius": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 15
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "进度条",
+      "duration": 2.5,
+      "width": 600,
+      "height": 30,
+      "trackColor": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "fillColor": [
+        0.3,
+        0.7,
+        0.4
+      ],
+      "cornerRadius": 15
+    }
+  },
+  {
+    "name": "radar_chart",
+    "category": "mg_animation",
+    "subcategory": "data",
+    "description": "雷达图动画 - 多边形雷达图使用 Trim Paths 和路径变形逐步绘制数据区域",
+    "tags": [
+      "雷达图",
+      "数据",
+      "radar",
+      "spider",
+      "data_viz"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "雷达图"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.5
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "radius": {
+            "type": "number",
+            "min": 50,
+            "max": 400,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "sides": {
+            "type": "integer",
+            "min": 3,
+            "max": 12,
+            "default": 6
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 15,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.4,
+              0.7,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.4,
+              0.7,
+              1,
+              0.3
+            ]
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "雷达图",
+      "duration": 2.5,
+      "radius": 150,
+      "sides": 6,
+      "strokeWidth": 3,
+      "strokeColor": [
+        0.4,
+        0.7,
+        1
+      ],
+      "fillColor": [
+        0.4,
+        0.7,
+        1,
+        0.3
+      ]
+    }
+  },
+  {
+    "name": "border_animation",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "边框动画 - 矩形边框使用 Trim Paths 逐边绘制，配合虚线流动效果",
+    "tags": [
+      "边框",
+      "矩形",
+      "border",
+      "frame",
+      "trim_paths"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "边框动画"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 2.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "width": {
+            "type": "number",
+            "min": 100,
+            "max": 1800,
+            "default": 800
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "height": {
+            "type": "number",
+            "min": 100,
+            "max": 1000,
+            "default": 450
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 4
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.3,
+              0.8,
+              0.9
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "dashEnabled": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": false
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "边框动画",
+      "duration": 2.0,
+      "width": 800,
+      "height": 450,
+      "strokeWidth": 4,
+      "strokeColor": [
+        0.3,
+        0.8,
+        0.9
+      ],
+      "dashEnabled": false
+    }
+  },
+  {
+    "name": "corner_badge",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "角标动画 - 三角形角标从角落弹出，带有颜色填充和文字区域",
+    "tags": [
+      "角标",
+      "badge",
+      "corner",
+      "label",
+      "popup"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "角标"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.3,
+            "max": 3.0,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 50,
+            "max": 400,
+            "default": 150
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              0.4,
+              0.4
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 20,
+            "default": 0
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              1,
+              1,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Corner Pin",
+        "parameters": {
+          "corner": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "top-right"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "角标",
+      "duration": 1.0,
+      "size": 150,
+      "fillColor": [
+        1,
+        0.4,
+        0.4
+      ],
+      "strokeWidth": 0,
+      "strokeColor": [
+        1,
+        1,
+        1
+      ],
+      "corner": "top-right"
+    }
+  },
+  {
+    "name": "separator_line",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "分隔线动画 - 线条从中心向两端扩展，配合虚线流动和颜色渐变",
+    "tags": [
+      "分隔线",
+      "线条",
+      "separator",
+      "divider",
+      "expand"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "分隔线"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.3,
+            "max": 3.0,
+            "default": 1.2
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "width": {
+            "type": "number",
+            "min": 50,
+            "max": 1800,
+            "default": 600
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 1,
+            "max": 20,
+            "default": 3
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.7,
+              0.7,
+              0.7
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "dashEnabled": {
+            "type": "boolean",
+            "min": null,
+            "max": null,
+            "default": true
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "分隔线",
+      "duration": 1.2,
+      "width": 600,
+      "strokeWidth": 3,
+      "strokeColor": [
+        0.7,
+        0.7,
+        0.7
+      ],
+      "dashEnabled": true
+    }
+  },
+  {
+    "name": "bubble_pop",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "气泡弹出动画 - 圆形气泡从底部飘出并破裂，使用 Repeater 创建多个气泡",
+    "tags": [
+      "气泡",
+      "弹出",
+      "bubble",
+      "pop",
+      "float"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "气泡弹出"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.5,
+            "max": 5.0,
+            "default": 3.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "bubbleCount": {
+            "type": "integer",
+            "min": 1,
+            "max": 20,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "maxSize": {
+            "type": "number",
+            "min": 10,
+            "max": 100,
+            "default": 40
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.5,
+              0.8,
+              1,
+              0.5
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 10,
+            "default": 2
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "气泡弹出",
+      "duration": 3.0,
+      "bubbleCount": 8,
+      "maxSize": 40,
+      "fillColor": [
+        0.5,
+        0.8,
+        1,
+        0.5
+      ],
+      "strokeWidth": 2
+    }
+  },
+  {
+    "name": "badge_pin",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "徽章图钉动画 - 圆形徽章带有图钉掉落效果，使用 Trim Paths 绘制外圈",
+    "tags": [
+      "徽章",
+      "图钉",
+      "badge",
+      "pin",
+      "drop"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "徽章图钉"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 0.3,
+            "max": 3.0,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "size": {
+            "type": "number",
+            "min": 30,
+            "max": 200,
+            "default": 80
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.9,
+              0.3,
+              0.3
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "strokeColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.7,
+              0.1,
+              0.1
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "strokeWidth": {
+            "type": "number",
+            "min": 0,
+            "max": 15,
+            "default": 4
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "徽章图钉",
+      "duration": 1.0,
+      "size": 80,
+      "fillColor": [
+        0.9,
+        0.3,
+        0.3
+      ],
+      "strokeColor": [
+        0.7,
+        0.1,
+        0.1
+      ],
+      "strokeWidth": 4
+    }
+  },
+  {
+    "name": "particle_background",
+    "category": "mg_animation",
+    "subcategory": "decoration",
+    "description": "粒子背景动画 - 多个小圆点随机分布并缓慢浮动，使用 Repeater 和 Wiggle Paths 增加变化",
+    "tags": [
+      "粒子",
+      "背景",
+      "particle",
+      "background",
+      "float"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "layerName": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "粒子背景"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "duration": {
+            "type": "number",
+            "min": 1.0,
+            "max": 10.0,
+            "default": 5.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleCount": {
+            "type": "integer",
+            "min": 5,
+            "max": 50,
+            "default": 20
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "particleSize": {
+            "type": "number",
+            "min": 2,
+            "max": 30,
+            "default": 8
+          }
+        }
+      },
+      {
+        "effect_name": "Lumetri Color",
+        "parameters": {
+          "fillColor": {
+            "type": "array",
+            "min": null,
+            "max": null,
+            "default": [
+              0.8,
+              0.9,
+              1,
+              0.6
+            ]
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "wiggleIntensity": {
+            "type": "number",
+            "min": 0,
+            "max": 50,
+            "default": 15
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "layerName": "粒子背景",
+      "duration": 5.0,
+      "particleCount": 20,
+      "particleSize": 8,
+      "fillColor": [
+        0.8,
+        0.9,
+        1,
+        0.6
+      ],
+      "wiggleIntensity": 15
+    }
+  }
+]

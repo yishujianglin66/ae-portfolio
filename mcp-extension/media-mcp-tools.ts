@@ -1,79 +1,106 @@
 import { z } from "zod";
 import { spawn } from "child_process";
 import * as path from "path";
+import * as fs from "fs";
 
-const PYTHON = "python";
-const PROJECT_ROOT = path.resolve(__dirname, "..");
+const PYTHON = process.env.AEKV_PYTHON || "python";
+const SPAWN_TIMEOUT_MS = 120_000;
+
+// ============================================================================
+// 进程沙箱：子进程执行安全包装（脚本白名单 + 根目录包含 + 固定 cwd + 超时）
+// 用于阻断：路径穿越执行任意脚本、工作目录逃逸、进程无限挂起
+// ============================================================================
+
+// 可执行脚本白名单（相对项目根的固定路径）。不在白名单内的脚本一律拒绝执行。
+const PY_SCRIPT_ALLOWLIST: Record<string, string> = {
+  "media-search": "scripts/media-search.py",
+  "media-fetcher": "scripts/media-fetcher.py",
+  "ffmpeg-toolkit": "scripts/ffmpeg-toolkit.py",
+  "media-manager": "scripts/media-manager.py",
+  "audio-analyzer": "audio-analyzer.py",
+  "video-effect-analyzer": "vrs/video-effect-analyzer.py",
+};
+
+// 从当前模块位置向上探测项目根（以 scripts/media-search.py 存在为锚点）
+function resolveProjectRoot(fromDir: string): string {
+  let dir = path.resolve(fromDir);
+  for (;;) {
+    if (fs.existsSync(path.join(dir, "scripts", "media-search.py"))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) return path.resolve(fromDir, "..");
+    dir = parent;
+  }
+}
+
+const PROJECT_ROOT = resolveProjectRoot(__dirname);
+
+function resolveScriptPath(scriptName: string): string | null {
+  const rel = PY_SCRIPT_ALLOWLIST[scriptName];
+  if (!rel) return null;
+  const abs = path.resolve(PROJECT_ROOT, rel);
+  // 解析后的真实路径必须落在项目根内，防止目录穿越
+  if (abs !== PROJECT_ROOT && !abs.startsWith(PROJECT_ROOT + path.sep)) return null;
+  return fs.existsSync(abs) ? abs : null;
+}
+
+/**
+ * 沙箱化的 Python 子进程执行：
+ * - 脚本名必须在白名单内且真实路径位于项目根内
+ * - 固定 cwd 为项目根，不继承调用方工作目录
+ * - 统一超时，超时即 kill，防止子进程无限挂起
+ * - 不使用 shell，避免命令注入
+ */
+function safeSpawnPython(
+  scriptName: string,
+  args: string[] = [],
+  opts: { jsonInput?: string; timeoutMs?: number } = {},
+): Promise<string> {
+  const scriptPath = resolveScriptPath(scriptName);
+  if (!scriptPath) {
+    return Promise.reject(new Error(`[sandbox] 脚本不在白名单或不存在: ${scriptName}`));
+  }
+  return new Promise((resolve, reject) => {
+    const child = spawn(PYTHON, [scriptPath, ...args], {
+      cwd: PROJECT_ROOT,
+      env: { ...process.env, PYTHONIOENCODING: "utf-8" },
+      windowsHide: true,
+    });
+    let stdout = "";
+    let stderr = "";
+    const timer = setTimeout(() => {
+      child.kill();
+      reject(new Error(`[sandbox] ${scriptName} 执行超时 (${opts.timeoutMs ?? SPAWN_TIMEOUT_MS}ms)`));
+    }, opts.timeoutMs ?? SPAWN_TIMEOUT_MS);
+    child.stdout.on("data", (data) => { stdout += data.toString(); });
+    child.stderr.on("data", (data) => { stderr += data.toString(); });
+    child.on("error", (err) => { clearTimeout(timer); reject(err); });
+    child.on("exit", (code) => {
+      clearTimeout(timer);
+      if (code === 0) {
+        resolve(stdout);
+      } else {
+        reject(new Error(`Python script failed (code ${code}): ${stderr || stdout}`));
+      }
+    });
+    if (opts.jsonInput) {
+      child.stdin.write(opts.jsonInput);
+      child.stdin.end();
+    }
+  });
+}
 
 async function runPythonScript(scriptName: string, args: string[] = []): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const scriptPath = path.join(PROJECT_ROOT, `${scriptName}.py`);
-        
-        const python = spawn(PYTHON, [scriptPath, ...args]);
-        
-        let stdout = "";
-        let stderr = "";
-        
-        python.stdout.on("data", (data) => {
-            stdout += data.toString();
-        });
-        
-        python.stderr.on("data", (data) => {
-            stderr += data.toString();
-        });
-        
-        python.on("exit", (code) => {
-            if (code === 0) {
-                resolve(stdout);
-            } else {
-                reject(new Error(`Python script failed (code ${code}): ${stderr || stdout}`));
-            }
-        });
-        
-        python.on("error", (err) => {
-            reject(err);
-        });
-    });
+  return safeSpawnPython(scriptName, args);
 }
 
 async function runPythonWithJSON(scriptName: string, funcName: string, params: Record<string, any>): Promise<any> {
-    const input = JSON.stringify({ func: funcName, params });
-    const scriptPath = path.join(PROJECT_ROOT, `${scriptName}.py`);
-    
-    return new Promise((resolve, reject) => {
-        const python = spawn(PYTHON, [scriptPath, "--json-input"]);
-        
-        let stdout = "";
-        let stderr = "";
-        
-        python.stdout.on("data", (data) => {
-            stdout += data.toString();
-        });
-        
-        python.stderr.on("data", (data) => {
-            stderr += data.toString();
-        });
-        
-        python.stdin.write(input);
-        python.stdin.end();
-        
-        python.on("exit", (code) => {
-            if (code === 0) {
-                try {
-                    const result = JSON.parse(stdout);
-                    resolve(result);
-                } catch (e) {
-                    reject(new Error(`JSON parse error: ${stdout}`));
-                }
-            } else {
-                reject(new Error(`Python script failed: ${stderr || stdout}`));
-            }
-        });
-        
-        python.on("error", (err) => {
-            reject(err);
-        });
-    });
+  const input = JSON.stringify({ func: funcName, params });
+  try {
+    const stdout = await safeSpawnPython(scriptName, ["--json-input"], { jsonInput: input });
+    return JSON.parse(stdout);
+  } catch (e) {
+    throw e;
+  }
 }
 
 export function registerMediaTools(server: any) {

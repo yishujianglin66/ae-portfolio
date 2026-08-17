@@ -1,0 +1,2424 @@
+[
+  {
+    "name": "kodak_2383",
+    "category": "lut_preset",
+    "subcategory": "cinematic_film",
+    "description": "Kodak 2383 D55 LUT - 经典电影胶片 emulation，暖色调胶片质感，模拟柯达2383印片胶片",
+    "tags": [
+      "LUT",
+      "kodak",
+      "cinematic",
+      "film",
+      "胶片"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/kodak_2383.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/kodak_2383.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "fuji_3513",
+    "category": "lut_preset",
+    "subcategory": "cinematic_film",
+    "description": "Fuji 3513 LUT - 富士胶片 emulation，冷色调胶片质感，模拟富士3513印片胶片",
+    "tags": [
+      "LUT",
+      "fuji",
+      "cinematic",
+      "film",
+      "胶片"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/fuji_3513.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/fuji_3513.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "cinestill_800t",
+    "category": "lut_preset",
+    "subcategory": "cinematic_film",
+    "description": "CineStill 800T LUT - 夜间电影胶片 emulation，钨丝灯白平衡，模拟CineStill 800T胶片夜景效果",
+    "tags": [
+      "LUT",
+      "cinestill",
+      "cinematic",
+      "film",
+      "night",
+      "夜景"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/cinestill_800t.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/cinestill_800t.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "kodachrome_64",
+    "category": "lut_preset",
+    "subcategory": "cinematic_film",
+    "description": "Kodachrome 64 LUT - 经典柯达反转片 emulation，高饱和暖色，模拟Kodachrome 64反转片色彩",
+    "tags": [
+      "LUT",
+      "kodachrome",
+      "cinematic",
+      "film",
+      "反转片"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/kodachrome_64.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/kodachrome_64.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "ektachrome_100",
+    "category": "lut_preset",
+    "subcategory": "cinematic_film",
+    "description": "Ektachrome 100 LUT - 柯达反转片 emulation，鲜艳色彩高对比度，模拟Ektachrome 100反转片",
+    "tags": [
+      "LUT",
+      "ektachrome",
+      "cinematic",
+      "film",
+      "反转片"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/ektachrome_100.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/ektachrome_100.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "portra_400",
+    "category": "lut_preset",
+    "subcategory": "cinematic_film",
+    "description": "Portra 400 LUT - 人像胶片 emulation，柔和肤色还原，模拟Kodak Portra 400人像胶片",
+    "tags": [
+      "LUT",
+      "portra",
+      "cinematic",
+      "film",
+      "人像",
+      "portrait"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/portra_400.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/portra_400.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "velvia_50",
+    "category": "lut_preset",
+    "subcategory": "cinematic_film",
+    "description": "Velvia 50 LUT - 富士反转片 emulation，极高饱和度鲜艳色彩，模拟Fuji Velvia 50风光反转片",
+    "tags": [
+      "LUT",
+      "velvia",
+      "cinematic",
+      "film",
+      "风光",
+      "反转片"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/velvia_50.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/velvia_50.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "provia_100",
+    "category": "lut_preset",
+    "subcategory": "cinematic_film",
+    "description": "Provia 100 LUT - 富士通用反转片 emulation，自然色彩还原，模拟Fuji Provia 100反转片",
+    "tags": [
+      "LUT",
+      "provia",
+      "cinematic",
+      "film",
+      "反转片"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/provia_100.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/provia_100.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "agfa_vista",
+    "category": "lut_preset",
+    "subcategory": "cinematic_film",
+    "description": "Agfa Vista LUT - 阿克发胶片 emulation，暖红色调胶片质感，模拟Agfa Vista胶片",
+    "tags": [
+      "LUT",
+      "agfa",
+      "cinematic",
+      "film",
+      "胶片"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/agfa_vista.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/agfa_vista.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "lomography",
+    "category": "lut_preset",
+    "subcategory": "cinematic_film",
+    "description": "Lomography LUT - 暗角胶片 emulation，高饱和度暗角效果，模拟Lomo胶片相机质感",
+    "tags": [
+      "LUT",
+      "lomography",
+      "cinematic",
+      "film",
+      "lomo",
+      "暗角"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/lomography.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/lomography.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "teal_orange_lut",
+    "category": "lut_preset",
+    "subcategory": "modern_cinematic",
+    "description": "Teal & Orange LUT - 青橙调色经典电影风格，阴影偏青色高光偏橙色，现代电影标准调色",
+    "tags": [
+      "LUT",
+      "teal_orange",
+      "cinematic",
+      "modern",
+      "青橙"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/teal_orange.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/teal_orange.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "hollywood_lut",
+    "category": "lut_preset",
+    "subcategory": "modern_cinematic",
+    "description": "Hollywood LUT - 好莱坞大片风格，高对比度深色阴影，模拟好莱坞电影工业标准调色",
+    "tags": [
+      "LUT",
+      "hollywood",
+      "cinematic",
+      "modern",
+      "大片"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/hollywood.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/hollywood.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "netflix_lut",
+    "category": "lut_preset",
+    "subcategory": "modern_cinematic",
+    "description": "Netflix LUT - Netflix原创剧集风格，深沉暗部细节丰富，模拟流媒体平台电影调色标准",
+    "tags": [
+      "LUT",
+      "netflix",
+      "cinematic",
+      "modern",
+      "流媒体"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/netflix.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/netflix.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "blockbuster_lut",
+    "category": "lut_preset",
+    "subcategory": "modern_cinematic",
+    "description": "Blockbuster LUT - 大片风格调色，高饱和高对比度，模拟商业大片视觉冲击力调色",
+    "tags": [
+      "LUT",
+      "blockbuster",
+      "cinematic",
+      "modern",
+      "大片"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/blockbuster.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/blockbuster.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "Streaming_lut",
+    "category": "lut_preset",
+    "subcategory": "modern_cinematic",
+    "description": "Streaming LUT - 流媒体平台通用调色，Rec.709优化，适合YouTube/Vimeo等流媒体平台发布",
+    "tags": [
+      "LUT",
+      "streaming",
+      "cinematic",
+      "modern",
+      "流媒体",
+      "rec709"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/streaming.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/streaming.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "dci_p3_lut",
+    "category": "lut_preset",
+    "subcategory": "modern_cinematic",
+    "description": "DCI-P3 LUT - 数字电影DCI-P3色彩空间转换LUT，适合数字影院放映标准",
+    "tags": [
+      "LUT",
+      "dci_p3",
+      "cinematic",
+      "modern",
+      "色彩空间",
+      "影院"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/dci_p3.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/dci_p3.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "alexa_lut",
+    "category": "lut_preset",
+    "subcategory": "modern_cinematic",
+    "description": "ARRI Alexa LUT - ARRI Alexa LogC转Rec.709 LUT，专业摄影机Log素材还原调色",
+    "tags": [
+      "LUT",
+      "alexa",
+      " arri",
+      "cinematic",
+      "modern",
+      "logc",
+      "摄影机"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/alexa_logc2rec709.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/alexa_logc2rec709.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "red_lut",
+    "category": "lut_preset",
+    "subcategory": "modern_cinematic",
+    "description": "RED LUT - RED摄影机Log3G10转Rec.709 LUT，RED摄影机素材还原调色",
+    "tags": [
+      "LUT",
+      "red",
+      "cinematic",
+      "modern",
+      "log3g10",
+      "摄影机"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/red_log3g10.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/red_log3g10.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "instagram_v1",
+    "category": "lut_preset",
+    "subcategory": "social_media",
+    "description": "Instagram V1 LUT - Instagram经典滤镜风格，暖色调高饱和度，模拟早期Instagram滤镜效果",
+    "tags": [
+      "LUT",
+      "instagram",
+      "social_media",
+      "filter",
+      "滤镜"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/instagram_v1.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/instagram_v1.cube",
+      "intensity": 0.8,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "instagram_v2",
+    "category": "lut_preset",
+    "subcategory": "social_media",
+    "description": "Instagram V2 LUT - Instagram新版滤镜风格，冷色调清晰锐利，模拟新版Instagram滤镜效果",
+    "tags": [
+      "LUT",
+      "instagram",
+      "social_media",
+      "filter",
+      "滤镜"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/instagram_v2.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/instagram_v2.cube",
+      "intensity": 0.8,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "vsco_a6",
+    "category": "lut_preset",
+    "subcategory": "social_media",
+    "description": "VSCO A6 LUT - VSCO A6滤镜风格，柔和复古胶片质感，模拟VSCO A6预设效果",
+    "tags": [
+      "LUT",
+      "vsco",
+      "social_media",
+      "filter",
+      "a6",
+      "滤镜"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/vsco_a6.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.85
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/vsco_a6.cube",
+      "intensity": 0.85,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "lark_filter",
+    "category": "lut_preset",
+    "subcategory": "social_media",
+    "description": "Lark Filter LUT - Lark滤镜风格，明亮清新自然色调，模拟Instagram Lark滤镜效果",
+    "tags": [
+      "LUT",
+      "lark",
+      "social_media",
+      "filter",
+      "滤镜",
+      "清新"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/lark_filter.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.85
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/lark_filter.cube",
+      "intensity": 0.85,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "gingham",
+    "category": "lut_preset",
+    "subcategory": "social_media",
+    "description": "Gingham LUT - Gingham滤镜风格，柔和暖黄色调复古感，模拟Instagram Gingham滤镜效果",
+    "tags": [
+      "LUT",
+      "gingham",
+      "social_media",
+      "filter",
+      "滤镜",
+      "复古"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/gingham.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.85
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/gingham.cube",
+      "intensity": 0.85,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "clarendon",
+    "category": "lut_preset",
+    "subcategory": "social_media",
+    "description": "Clarendon LUT - Clarendon滤镜风格，高对比度冷色调，模拟Instagram Clarendon滤镜效果",
+    "tags": [
+      "LUT",
+      "clarendon",
+      "social_media",
+      "filter",
+      "滤镜"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/clarendon.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.85
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/clarendon.cube",
+      "intensity": 0.85,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "juno",
+    "category": "lut_preset",
+    "subcategory": "social_media",
+    "description": "Juno LUT - Juno滤镜风格，暖色调高饱和度，模拟Instagram Juno滤镜效果",
+    "tags": [
+      "LUT",
+      "juno",
+      "social_media",
+      "filter",
+      "滤镜"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/juno.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.85
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/juno.cube",
+      "intensity": 0.85,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "moonlight",
+    "category": "lut_preset",
+    "subcategory": "social_media",
+    "description": "Moonlight LUT - Moonlight滤镜风格，冷蓝色调月光氛围，模拟Instagram Moonlight滤镜效果",
+    "tags": [
+      "LUT",
+      "moonlight",
+      "social_media",
+      "filter",
+      "滤镜",
+      "冷色"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/moonlight.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.85
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/moonlight.cube",
+      "intensity": 0.85,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "cyberpunk_lut",
+    "category": "lut_preset",
+    "subcategory": "stylized",
+    "description": "Cyberpunk LUT - 赛博朋克风格LUT，霓虹青品红高对比度，营造科幻赛博朋克氛围",
+    "tags": [
+      "LUT",
+      "cyberpunk",
+      "stylized",
+      "neon",
+      "赛博朋克",
+      "科幻"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/cyberpunk.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/cyberpunk.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "vhs_retro_lut",
+    "category": "lut_preset",
+    "subcategory": "stylized",
+    "description": "VHS Retro LUT - VHS复古风格LUT，色彩偏移降饱和度，模拟VHS录像带复古质感",
+    "tags": [
+      "LUT",
+      "vhs",
+      "retro",
+      "stylized",
+      "复古",
+      "录像带"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/vhs_retro.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.9
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/vhs_retro.cube",
+      "intensity": 0.9,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "bw_high_contrast_lut",
+    "category": "lut_preset",
+    "subcategory": "stylized",
+    "description": "B&W High Contrast LUT - 黑白高对比度LUT，去除色彩增强对比度，经典黑白电影质感",
+    "tags": [
+      "LUT",
+      "black_white",
+      "stylized",
+      "high_contrast",
+      "黑白",
+      "高对比"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/bw_high_contrast.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/bw_high_contrast.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "sepia_lut",
+    "category": "lut_preset",
+    "subcategory": "stylized",
+    "description": "Sepia LUT - 棕褐色LUT，暖棕色调复古老照片效果，模拟早期摄影棕褐色工艺",
+    "tags": [
+      "LUT",
+      "sepia",
+      "stylized",
+      "vintage",
+      "棕褐",
+      "复古"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/sepia.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/sepia.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "cyanotype_lut",
+    "category": "lut_preset",
+    "subcategory": "stylized",
+    "description": "Cyanotype LUT - 蓝晒法LUT，青蓝色调单色效果，模拟传统蓝晒法印刷工艺",
+    "tags": [
+      "LUT",
+      "cyanotype",
+      "stylized",
+      "blue",
+      "蓝晒",
+      "单色"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/cyanotype.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 1.0
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/cyanotype.cube",
+      "intensity": 1.0,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "cross_process_lut",
+    "category": "lut_preset",
+    "subcategory": "stylized",
+    "description": "Cross Process LUT - 交叉冲洗LUT，高对比度色彩偏移，模拟胶片交叉冲洗工艺效果",
+    "tags": [
+      "LUT",
+      "cross_process",
+      "stylized",
+      "色彩偏移",
+      "交叉冲洗"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/cross_process.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.9
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/cross_process.cube",
+      "intensity": 0.9,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "infrared_lut",
+    "category": "lut_preset",
+    "subcategory": "stylized",
+    "description": "Infrared LUT - 红外摄影LUT，色彩反转超现实效果，模拟红外胶片摄影风格",
+    "tags": [
+      "LUT",
+      "infrared",
+      "stylized",
+      "surreal",
+      "红外",
+      "超现实"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/infrared.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.9
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/infrared.cube",
+      "intensity": 0.9,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "double_exposure_lut",
+    "category": "lut_preset",
+    "subcategory": "stylized",
+    "description": "Double Exposure LUT - 双重曝光LUT，叠加色彩层次感，模拟双重曝光胶片效果",
+    "tags": [
+      "LUT",
+      "double_exposure",
+      "stylized",
+      "surreal",
+      "双重曝光"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/double_exposure.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.8
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/double_exposure.cube",
+      "intensity": 0.8,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "wedding_lut",
+    "category": "lut_preset",
+    "subcategory": "industry",
+    "description": "Wedding LUT - 婚礼视频LUT，柔和暖色调肤色优化，适合婚礼视频调色",
+    "tags": [
+      "LUT",
+      "wedding",
+      "industry",
+      "婚礼",
+      "肤色"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/wedding.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.9
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/wedding.cube",
+      "intensity": 0.9,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "real_estate_lut",
+    "category": "lut_preset",
+    "subcategory": "industry",
+    "description": "Real Estate LUT - 房地产LUT，明亮通透色彩还原，适合房地产室内外拍摄调色",
+    "tags": [
+      "LUT",
+      "real_estate",
+      "industry",
+      "房地产",
+      "室内"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/real_estate.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.9
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/real_estate.cube",
+      "intensity": 0.9,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "food_lut",
+    "category": "lut_preset",
+    "subcategory": "industry",
+    "description": "Food LUT - 美食摄影LUT，暖色调高饱和度，增强食物诱人质感",
+    "tags": [
+      "LUT",
+      "food",
+      "industry",
+      "美食",
+      "暖色"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/food.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.9
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/food.cube",
+      "intensity": 0.9,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "product_lut",
+    "category": "lut_preset",
+    "subcategory": "industry",
+    "description": "Product LUT - 产品广告LUT，中性色彩高清晰度，适合产品商业摄影调色",
+    "tags": [
+      "LUT",
+      "product",
+      "industry",
+      "产品",
+      "商业",
+      "广告"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/product.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.85
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/product.cube",
+      "intensity": 0.85,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "beauty_lut",
+    "category": "lut_preset",
+    "subcategory": "industry",
+    "description": "Beauty LUT - 美容人像LUT，柔肤美化暖色调，适合美妆人像摄影调色",
+    "tags": [
+      "LUT",
+      "beauty",
+      "industry",
+      "美容",
+      "人像",
+      "美妆"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/beauty.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.85
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/beauty.cube",
+      "intensity": 0.85,
+      "lutFormat": "cube"
+    }
+  },
+  {
+    "name": "landscape_lut",
+    "category": "lut_preset",
+    "subcategory": "industry",
+    "description": "Landscape LUT - 风景摄影LUT，高饱和度增强天空绿地，适合自然风光摄影调色",
+    "tags": [
+      "LUT",
+      "landscape",
+      "industry",
+      "风景",
+      "风光",
+      "自然"
+    ],
+    "compatibility": {
+      "pr": [
+        "2024",
+        "2025"
+      ]
+    },
+    "source": "ae_converted",
+    "effects": [
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutPath": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "D:/AE-Work/resources/luts/landscape.cube"
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "intensity": {
+            "type": "number",
+            "min": 0,
+            "max": 1,
+            "default": 0.9
+          }
+        }
+      },
+      {
+        "effect_name": "Transform",
+        "parameters": {
+          "lutFormat": {
+            "type": "string",
+            "min": null,
+            "max": null,
+            "default": "cube"
+          }
+        }
+      }
+    ],
+    "default_values": {
+      "lutPath": "D:/AE-Work/resources/luts/landscape.cube",
+      "intensity": 0.9,
+      "lutFormat": "cube"
+    }
+  }
+]

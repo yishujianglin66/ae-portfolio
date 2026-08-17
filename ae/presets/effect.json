@@ -1,0 +1,3214 @@
+[
+  {
+    "name": "energy_rings",
+    "category": "effect",
+    "subcategory": "motion",
+    "description": "能量环特效 - 从中心点向外扩散的环形波纹，模拟能量爆发效果",
+    "tags": [
+      "能量环",
+      "energy",
+      "rings",
+      "ripple",
+      "motion"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "ringCount": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "ringSpeed": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "ringColor": {
+        "type": "array"
+      },
+      "ringWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 50
+      },
+      "fadeDistance": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.1,
+        "max": 10.0
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "ringCount": 5,
+      "ringSpeed": 2.0,
+      "ringColor": [
+        0,
+        0.8,
+        1
+      ],
+      "ringWidth": 10,
+      "fadeDistance": 200,
+      "duration": 2.0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      ringCount: ${ringCount},\n      ringSpeed: ${ringSpeed},\n      ringColor: ${ringColor},\n      ringWidth: ${ringWidth},\n      fadeDistance: ${fadeDistance}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var circle = comp.layers.addShape();\n    circle.name = \"Energy Rings\";\n    var grp = circle.property(\"Contents\").addProperty(\"ADBE Group\");\n    var ellipse = grp.property(\"Contents\").addProperty(\"ADBE Ellipse\");\n    ellipse.property(\"ADBE Ellipse-0001\").setValue([comp.width / 2, comp.height / 2]);\n    ellipse.property(\"ADBE Ellipse-0002\").setValue([p.fadeDistance, p.fadeDistance]);\n    var stroke = grp.property(\"Contents\").addProperty(\"ADBE Stroke\");\n    stroke.property(\"ADBE Stroke-0001\").setValue(p.ringColor);\n    stroke.property(\"ADBE Stroke-0002\").setValue(p.ringWidth);\n    stroke.property(\"ADBE Stroke-0003\").setValue(100);\n    var trim = grp.property(\"Contents\").addProperty(\"ADBE Trim Paths\");\n    trim.property(\"ADBE Trim Paths-0001\").setValueAtTime(comp.time, 0);\n    trim.property(\"ADBE Trim Paths-0001\").setValueAtTime(comp.time + p.duration, 100);\n    trim.property(\"ADBE Trim Paths-0002\").setValueAtTime(comp.time, 100);\n    trim.property(\"ADBE Trim Paths-0002\").setValueAtTime(comp.time + p.duration, 100);\n    _result = {status:\"success\", message:\"能量环特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "light_sweep",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "光扫特效 - 光线从一侧扫过画面，模拟探照灯效果",
+    "tags": [
+      "光扫",
+      "light_sweep",
+      "探照灯",
+      "spotlight",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "sweepDirection": {
+        "type": "string"
+      },
+      "beamWidth": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "beamColor": {
+        "type": "array"
+      },
+      "edgeSoftness": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "duration": 2.0,
+      "sweepDirection": "left",
+      "beamWidth": 200,
+      "beamColor": [
+        1,
+        1,
+        0.8
+      ],
+      "edgeSoftness": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      duration: ${duration},\n      sweepDirection: ${sweepDirection},\n      beamWidth: ${beamWidth},\n      beamColor: ${beamColor},\n      edgeSoftness: ${edgeSoftness}\n    };\n    var adjustmentLayer = comp.layers.addAdjustmentLayer();\n    adjustmentLayer.name = \"Light Sweep\";\n    adjustmentLayer.inPoint = comp.time;\n    adjustmentLayer.outPoint = comp.time + p.duration;\n    var gradient = adjustmentLayer.Effects.addProperty(\"ADBE Ramp\");\n    gradient.property(\"ADBE Ramp-0001\").setValue(\"Linear Ramp\");\n    gradient.property(\"ADBE Ramp-0002\").setValue(p.beamColor);\n    gradient.property(\"ADBE Ramp-0003\").setValue([0, 0, 0]);\n    gradient.property(\"ADBE Ramp-0004\").setValueAtTime(comp.time, p.sweepDirection === \"left\" ? [-p.beamWidth, comp.height / 2] : [comp.width + p.beamWidth, comp.height / 2]);\n    gradient.property(\"ADBE Ramp-0004\").setValueAtTime(comp.time + p.duration, p.sweepDirection === \"left\" ? [comp.width + p.beamWidth, comp.height / 2] : [-p.beamWidth, comp.height / 2]);\n    gradient.property(\"ADBE Ramp-0006\").setValue(p.beamWidth);\n    _result = {status:\"success\", message:\"光扫特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "particle_fountain",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "粒子喷泉特效 - 从底部向上喷射的粒子效果，模拟火花或魔法粒子",
+    "tags": [
+      "粒子",
+      "particle",
+      "喷泉",
+      "fountain",
+      "sparkle"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "particleCount": {
+        "type": "number",
+        "min": 10,
+        "max": 500
+      },
+      "particleSize": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "particleColor": {
+        "type": "array"
+      },
+      "speed": {
+        "type": "number",
+        "min": 10,
+        "max": 200
+      },
+      "lifetime": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "particleCount": 100,
+      "particleSize": 5,
+      "particleColor": [
+        1,
+        0.5,
+        0
+      ],
+      "speed": 100,
+      "lifetime": 2.0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      particleCount: ${particleCount},\n      particleSize: ${particleSize},\n      particleColor: ${particleColor},\n      speed: ${speed},\n      lifetime: ${lifetime}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var particleLayer = comp.layers.addSolid([0, 0, 0], \"Particle Fountain\", comp.width, comp.height, 1);\n    particleLayer.inPoint = comp.time;\n    particleLayer.outPoint = comp.time + p.lifetime + 1;\n    var ccParticle = particleLayer.Effects.addProperty(\"ADBE CC Particle Systems II\");\n    ccParticle.property(\"ADBE CC Particle Systems II-0002\").setValue(p.particleCount);\n    ccParticle.property(\"ADBE CC Particle Systems II-0003\").setValue(p.particleSize);\n    ccParticle.property(\"ADBE CC Particle Systems II-0004\").setValue(p.particleColor);\n    ccParticle.property(\"ADBE CC Particle Systems II-0005\").setValue([comp.width / 2, comp.height + 50, 0]);\n    ccParticle.property(\"ADBE CC Particle Systems II-0008\").setValue(p.speed);\n    ccParticle.property(\"ADBE CC Particle Systems II-0009\").setValue(p.lifetime);\n    _result = {status:\"success\", message:\"粒子喷泉特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "scanline_effect",
+    "category": "effect",
+    "subcategory": "retro",
+    "description": "扫描线特效 - 模拟老式CRT显示器的扫描线效果",
+    "tags": [
+      "扫描线",
+      "scanline",
+      "CRT",
+      "retro",
+      "old_tv"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "lineCount": {
+        "type": "number",
+        "min": 10,
+        "max": 200
+      },
+      "lineOpacity": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      },
+      "lineColor": {
+        "type": "array"
+      },
+      "flickerRate": {
+        "type": "number",
+        "min": 0,
+        "max": 10
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "lineCount": 100,
+      "lineOpacity": 20,
+      "lineColor": [
+        0,
+        0,
+        0
+      ],
+      "flickerRate": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      lineCount: ${lineCount},\n      lineOpacity: ${lineOpacity},\n      lineColor: ${lineColor},\n      flickerRate: ${flickerRate}\n    };\n    var adjustmentLayer = comp.layers.addAdjustmentLayer();\n    adjustmentLayer.name = \"Scanline Effect\";\n    var pattern = adjustmentLayer.Effects.addProperty(\"ADBE Grid\");\n    pattern.property(\"ADBE Grid-0001\").setValue([comp.width, comp.height / p.lineCount]);\n    pattern.property(\"ADBE Grid-0002\").setValue([0, 0]);\n    pattern.property(\"ADBE Grid-0003\").setValue(p.lineColor);\n    pattern.property(\"ADBE Grid-0005\").setValue([1, 0, 0]);\n    pattern.property(\"ADBE Grid-0006\").setValue(0);\n    adjustmentLayer.opacity.setValue(p.lineOpacity);\n    if (p.flickerRate > 0) {\n      adjustmentLayer.opacity.expression = \"wiggle(${flickerRate}, 5)\";\n    }\n    _result = {status:\"success\", message:\"扫描线特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "chromatic_aberration",
+    "category": "effect",
+    "subcategory": "glitch",
+    "description": "色差特效 - 模拟镜头色差，RGB三通道分离产生色边效果",
+    "tags": [
+      "色差",
+      "chromatic_aberration",
+      "RGB",
+      "lens",
+      "distortion"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string"
+      },
+      "redShift": {
+        "type": "number",
+        "min": -50,
+        "max": 50
+      },
+      "greenShift": {
+        "type": "number",
+        "min": -50,
+        "max": 50
+      },
+      "blueShift": {
+        "type": "number",
+        "min": -50,
+        "max": 50
+      },
+      "animate": {
+        "type": "boolean"
+      },
+      "animationSpeed": {
+        "type": "number",
+        "min": 0.1,
+        "max": 5.0
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "redShift": 10,
+      "greenShift": 0,
+      "blueShift": -10,
+      "animate": false,
+      "animationSpeed": 1.0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      redShift: ${redShift},\n      greenShift: ${greenShift},\n      blueShift: ${blueShift},\n      animate: ${animate},\n      animationSpeed: ${animationSpeed}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var shift = layer.Effects.addProperty(\"ADBE Shift Channels\");\n    shift.property(\"ADBE Shift Channels-0001\").setValue(\"Red\");\n    shift.property(\"ADBE Shift Channels-0002\").setValue(\"Green\");\n    shift.property(\"ADBE Shift Channels-0003\").setValue(\"Blue\");\n    var cc = layer.Effects.addProperty(\"ADBE Channel Combiner\");\n    cc.property(\"ADBE Channel Combiner-0004\").setValue(100);\n    cc.property(\"ADBE Channel Combiner-0005\").setValue(100);\n    cc.property(\"ADBE Channel Combiner-0007\").setValue(100);\n    cc.property(\"ADBE Channel Combiner-0009\").setValue(100);\n    _result = {status:\"success\", message:\"色差特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "glow_pulse",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "发光脉冲特效 - 周期性发光脉冲效果，模拟能量脉动",
+    "tags": [
+      "发光",
+      "脉冲",
+      "glow",
+      "pulse",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "glowThreshold": {
+        "type": "number",
+        "min": 0,
+        "max": 255,
+        "description": "发光阈值"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "发光半径"
+      },
+      "glowIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 5,
+        "description": "发光强度"
+      },
+      "pulseSpeed": {
+        "type": "number",
+        "min": 0.1,
+        "max": 10,
+        "description": "脉冲速度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "glowThreshold": 100,
+      "glowRadius": 30,
+      "glowIntensity": 1.5,
+      "pulseSpeed": 2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      glowThreshold: ${glowThreshold},\n      glowRadius: ${glowRadius},\n      glowIntensity: ${glowIntensity},\n      pulseSpeed: ${pulseSpeed}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var glow = layer.Effects.addProperty(\"ADBE Glow\");\n    glow.property(\"ADBE Glow-0001\").setValue(p.glowThreshold);\n    glow.property(\"ADBE Glow-0002\").setValue(p.glowRadius * p.intensity);\n    glow.property(\"ADBE Glow-0003\").setValue(p.glowIntensity * p.intensity);\n    glow.property(\"ADBE Glow-0003\").expression = p.glowIntensity + \" * (0.5 + 0.5 * Math.sin(time * \" + p.pulseSpeed + \"))\";\n    _result = {status:\"success\", message:\"发光脉冲特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "light_beam",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "光束特效 - 从一点发出锥形光束，模拟聚光灯效果",
+    "tags": [
+      "光束",
+      "light_beam",
+      "聚光灯",
+      "beam",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "startPoint": {
+        "type": "array",
+        "description": "起点坐标[x,y]"
+      },
+      "endPoint": {
+        "type": "array",
+        "description": "终点坐标[x,y]"
+      },
+      "beamColor": {
+        "type": "array",
+        "description": "光束颜色[r,g,b]"
+      },
+      "beamIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "光束强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "startPoint": [
+        0,
+        0
+      ],
+      "endPoint": [
+        960,
+        540
+      ],
+      "beamColor": [
+        1,
+        1,
+        0.8
+      ],
+      "beamIntensity": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      startPoint: ${startPoint},\n      endPoint: ${endPoint},\n      beamColor: ${beamColor},\n      beamIntensity: ${beamIntensity}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var beam = layer.Effects.addProperty(\"ADBE CC Beam\");\n    beam.property(\"ADBE CC Beam-0001\").setValue(p.startPoint);\n    beam.property(\"ADBE CC Beam-0002\").setValue(p.endPoint);\n    beam.property(\"ADBE CC Beam-0004\").setValue(p.beamColor);\n    beam.property(\"ADBE CC Beam-0005\").setValue(p.beamIntensity * p.intensity);\n    beam.property(\"ADBE CC Beam-0006\").setValue(50);\n    beam.property(\"ADBE CC Beam-0007\").setValue(50);\n    _result = {status:\"success\", message:\"光束特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "lens_flare_effect",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "镜头光晕特效 - 模拟相机镜头光晕，包含光环和光斑",
+    "tags": [
+      "镜头光晕",
+      "lens_flare",
+      "光晕",
+      "flare",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "flareCenter": {
+        "type": "array",
+        "description": "光晕中心[x,y]"
+      },
+      "flareBrightness": {
+        "type": "number",
+        "min": 0,
+        "max": 300,
+        "description": "光晕亮度"
+      },
+      "lensType": {
+        "type": "number",
+        "min": 1,
+        "max": 3,
+        "description": "镜头类型(1-3)"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "flareCenter": [
+        960,
+        540
+      ],
+      "flareBrightness": 150,
+      "lensType": 2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      flareCenter: ${flareCenter},\n      flareBrightness: ${flareBrightness},\n      lensType: ${lensType}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var flare = layer.Effects.addProperty(\"ADBE Lens Flare\");\n    flare.property(\"ADBE Lens Flare-0001\").setValue(p.flareCenter);\n    flare.property(\"ADBE Lens Flare-0002\").setValue(p.flareBrightness * p.intensity);\n    flare.property(\"ADBE Lens Flare-0003\").setValue(Math.floor(p.lensType));\n    _result = {status:\"success\", message:\"镜头光晕特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "volumetric_light",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "体积光特效 - 模拟体积光线穿透效果，营造光雾弥漫感",
+    "tags": [
+      "体积光",
+      "volumetric",
+      "light",
+      "光雾",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 200,
+        "description": "光强度"
+      },
+      "center": {
+        "type": "array",
+        "description": "光中心[x,y]"
+      },
+      "radius": {
+        "type": "number",
+        "min": 10,
+        "max": 500,
+        "description": "光半径"
+      },
+      "color": {
+        "type": "array",
+        "description": "光颜色[r,g,b]"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 100,
+      "center": [
+        960,
+        540
+      ],
+      "radius": 200,
+      "color": [
+        1,
+        0.95,
+        0.8
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      center: ${center},\n      intensity: ${intensity},\n      radius: ${radius},\n      color: ${color}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var rays = layer.Effects.addProperty(\"ADBE CC Light Rays\");\n    rays.property(\"ADBE CC Light Rays-0001\").setValue(p.center);\n    rays.property(\"ADBE CC Light Rays-0002\").setValue(p.intensity * p.intensity);\n    rays.property(\"ADBE CC Light Rays-0003\").setValue(p.radius);\n    rays.property(\"ADBE CC Light Rays-0004\").setValue(50);\n    rays.property(\"ADBE CC Light Rays-0005\").setValue(p.color);\n    _result = {status:\"success\", message:\"体积光特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "god_rays",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "上帝光线特效 - 模拟云层间穿透的光线，营造神圣氛围",
+    "tags": [
+      "上帝光线",
+      "god_rays",
+      "丁达尔",
+      "光束",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "光线强度"
+      },
+      "center": {
+        "type": "array",
+        "description": "光中心[x,y]"
+      },
+      "rayLength": {
+        "type": "number",
+        "min": 50,
+        "max": 1000,
+        "description": "光线长度"
+      },
+      "color": {
+        "type": "array",
+        "description": "光线颜色[r,g,b]"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 60,
+      "center": [
+        960,
+        540
+      ],
+      "rayLength": 400,
+      "color": [
+        1,
+        0.9,
+        0.7
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      center: ${center},\n      intensity: ${intensity},\n      rayLength: ${rayLength},\n      color: ${color}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var burst = layer.Effects.addProperty(\"ADBE CC Light Burst 2.5\");\n    burst.property(\"ADBE CC Light Burst 2.5-0001\").setValue(p.center);\n    burst.property(\"ADBE CC Light Burst 2.5-0002\").setValue(p.intensity * p.intensity);\n    burst.property(\"ADBE CC Light Burst 2.5-0003\").setValue(p.rayLength);\n    burst.property(\"ADBE CC Light Burst 2.5-0004\").setValue(p.color);\n    _result = {status:\"success\", message:\"上帝光线特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "neon_glow",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "霓虹发光特效 - 强烈发光效果配合色彩调整，模拟霓虹灯管发光",
+    "tags": [
+      "霓虹",
+      "发光",
+      "neon",
+      "glow",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "glowThreshold": {
+        "type": "number",
+        "min": 0,
+        "max": 255,
+        "description": "发光阈值"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "发光半径"
+      },
+      "glowIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 5,
+        "description": "发光强度"
+      },
+      "colorShift": {
+        "type": "number",
+        "min": -50,
+        "max": 50,
+        "description": "色彩偏移"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "glowThreshold": 80,
+      "glowRadius": 40,
+      "glowIntensity": 2.5,
+      "colorShift": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      glowThreshold: ${glowThreshold},\n      glowRadius: ${glowRadius},\n      glowIntensity: ${glowIntensity},\n      colorShift: ${colorShift}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var glow = layer.Effects.addProperty(\"ADBE Glow\");\n    glow.property(\"ADBE Glow-0001\").setValue(p.glowThreshold);\n    glow.property(\"ADBE Glow-0002\").setValue(p.glowRadius * p.intensity);\n    glow.property(\"ADBE Glow-0003\").setValue(p.glowIntensity * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.colorShift * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(20 * p.intensity);\n    _result = {status:\"success\", message:\"霓虹发光特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "bloom_soft",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "柔光绽放特效 - 柔和的泛光效果，模拟相机过曝的柔美光晕",
+    "tags": [
+      "柔光",
+      "绽放",
+      "bloom",
+      "soft",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "模糊量"
+      },
+      "glowThreshold": {
+        "type": "number",
+        "min": 0,
+        "max": 255,
+        "description": "发光阈值"
+      },
+      "glowIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 3,
+        "description": "发光强度"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 80,
+        "description": "发光半径"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 8,
+      "glowThreshold": 120,
+      "glowIntensity": 1.2,
+      "glowRadius": 25
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      blurAmount: ${blurAmount},\n      glowThreshold: ${glowThreshold},\n      glowIntensity: ${glowIntensity},\n      glowRadius: ${glowRadius}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var blur = layer.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValue(p.blurAmount * p.intensity);\n    var glow = layer.Effects.addProperty(\"ADBE Glow\");\n    glow.property(\"ADBE Glow-0001\").setValue(p.glowThreshold);\n    glow.property(\"ADBE Glow-0002\").setValue(p.glowRadius * p.intensity);\n    glow.property(\"ADBE Glow-0003\").setValue(p.glowIntensity * p.intensity);\n    _result = {status:\"success\", message:\"柔光绽放特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "light_trail",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "光迹特效 - 光线运动轨迹效果，模拟光迹拖尾",
+    "tags": [
+      "光迹",
+      "light_trail",
+      "轨迹",
+      "拖尾",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "光强度"
+      },
+      "center": {
+        "type": "array",
+        "description": "光中心[x,y]"
+      },
+      "rayLength": {
+        "type": "number",
+        "min": 50,
+        "max": 800,
+        "description": "光线长度"
+      },
+      "color": {
+        "type": "array",
+        "description": "光颜色[r,g,b]"
+      },
+      "direction": {
+        "type": "number",
+        "min": 0,
+        "max": 360,
+        "description": "方向(度)"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 70,
+      "center": [
+        480,
+        540
+      ],
+      "rayLength": 300,
+      "color": [
+        1,
+        0.8,
+        0.3
+      ],
+      "direction": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      center: ${center},\n      intensity: ${intensity},\n      rayLength: ${rayLength},\n      color: ${color},\n      direction: ${direction}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var burst = layer.Effects.addProperty(\"ADBE CC Light Burst 2.5\");\n    burst.property(\"ADBE CC Light Burst 2.5-0001\").setValue(p.center);\n    burst.property(\"ADBE CC Light Burst 2.5-0002\").setValue(p.intensity * p.intensity);\n    burst.property(\"ADBE CC Light Burst 2.5-0003\").setValue(p.rayLength);\n    burst.property(\"ADBE CC Light Burst 2.5-0004\").setValue(p.color);\n    var motion = layer.Effects.addProperty(\"ADBE Directional Blur\");\n    motion.property(\"ADBE Directional Blur-0001\").setValue(p.direction);\n    motion.property(\"ADBE Directional Blur-0002\").setValue(20 * p.intensity);\n    _result = {status:\"success\", message:\"光迹特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "sparkle",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "闪烁星光特效 - 随机分布的星光闪烁效果，模拟星光粒子",
+    "tags": [
+      "闪烁",
+      "星光",
+      "sparkle",
+      "star",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "count": {
+        "type": "number",
+        "min": 5,
+        "max": 100,
+        "description": "星光数量"
+      },
+      "size": {
+        "type": "number",
+        "min": 1,
+        "max": 30,
+        "description": "星光大小"
+      },
+      "speed": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10,
+        "description": "闪烁速度"
+      },
+      "color": {
+        "type": "array",
+        "description": "星光颜色[r,g,b]"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "count": 30,
+      "size": 8,
+      "speed": 3,
+      "color": [
+        1,
+        1,
+        0.8
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      count: ${count},\n      size: ${size},\n      speed: ${speed},\n      color: ${color}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var sparkle = layer.Effects.addProperty(\"ADBE CC Sparkle\");\n    sparkle.property(\"ADBE CC Sparkle-0001\").setValue(p.count);\n    sparkle.property(\"ADBE CC Sparkle-0002\").setValue(p.size * p.intensity);\n    sparkle.property(\"ADBE CC Sparkle-0003\").setValue(p.speed);\n    sparkle.property(\"ADBE CC Sparkle-0004\").setValue(p.color);\n    sparkle.property(\"ADBE CC Sparkle-0005\").setValue(50 * p.intensity);\n    _result = {status:\"success\", message:\"闪烁星光特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "hologram_glow",
+    "category": "effect",
+    "subcategory": "light",
+    "description": "全息发光特效 - 青色全息光效配合扫描线，模拟全息投影效果",
+    "tags": [
+      "全息",
+      "发光",
+      "hologram",
+      "scanline",
+      "light"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "glowThreshold": {
+        "type": "number",
+        "min": 0,
+        "max": 255,
+        "description": "发光阈值"
+      },
+      "glowIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 4,
+        "description": "发光强度"
+      },
+      "colorShift": {
+        "type": "number",
+        "min": -30,
+        "max": 30,
+        "description": "色相偏移"
+      },
+      "saturation": {
+        "type": "number",
+        "min": -30,
+        "max": 50,
+        "description": "饱和度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "glowThreshold": 90,
+      "glowIntensity": 2,
+      "colorShift": -15,
+      "saturation": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      glowThreshold: ${glowThreshold},\n      glowIntensity: ${glowIntensity},\n      colorShift: ${colorShift},\n      saturation: ${saturation}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var glow = layer.Effects.addProperty(\"ADBE Glow\");\n    glow.property(\"ADBE Glow-0001\").setValue(p.glowThreshold);\n    glow.property(\"ADBE Glow-0002\").setValue(30 * p.intensity);\n    glow.property(\"ADBE Glow-0003\").setValue(p.glowIntensity * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0004\").setValue(p.colorShift * p.intensity);\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(p.saturation * p.intensity);\n    var cb = layer.Effects.addProperty(\"ADBE Color Balance\");\n    cb.property(\"ADBE Color Balance-0003\").setValue(15 * p.intensity);\n    cb.property(\"ADBE Color Balance-0006\").setValue(20 * p.intensity);\n    _result = {status:\"success\", message:\"全息发光特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "depth_blur",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "景深模糊特效 - 模拟相机景深效果，聚焦区域清晰、背景虚化",
+    "tags": [
+      "景深",
+      "模糊",
+      "depth_blur",
+      "bokeh",
+      "blur"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "模糊量"
+      },
+      "irisRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 200,
+        "description": "光圈半径"
+      },
+      "irisShape": {
+        "type": "number",
+        "min": 1,
+        "max": 6,
+        "description": "光圈形状(1-6)"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 30,
+      "irisRadius": 50,
+      "irisShape": 3
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      blurAmount: ${blurAmount},\n      irisRadius: ${irisRadius},\n      irisShape: ${irisShape}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var blur = layer.Effects.addProperty(\"ADBE Camera Lens Blur\");\n    blur.property(\"ADBE Camera Lens Blur-0001\").setValue(p.blurAmount * p.intensity / 100);\n    blur.property(\"ADBE Camera Lens Blur-0002\").setValue(p.irisRadius);\n    blur.property(\"ADBE Camera Lens Blur-0003\").setValue(Math.floor(p.irisShape));\n    _result = {status:\"success\", message:\"景深模糊特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "motion_blur_effect",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "运动模糊特效 - 方向性模糊模拟运动拖影",
+    "tags": [
+      "运动模糊",
+      "motion_blur",
+      "方向模糊",
+      "拖影",
+      "blur"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "direction": {
+        "type": "number",
+        "min": 0,
+        "max": 360,
+        "description": "方向(度)"
+      },
+      "blurLength": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "模糊长度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "direction": 0,
+      "blurLength": 40
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      direction: ${direction},\n      blurLength: ${blurLength}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var blur = layer.Effects.addProperty(\"ADBE Directional Blur\");\n    blur.property(\"ADBE Directional Blur-0001\").setValue(p.direction);\n    blur.property(\"ADBE Directional Blur-0002\").setValue(p.blurLength * p.intensity);\n    _result = {status:\"success\", message:\"运动模糊特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "radial_blur_effect",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "径向模糊特效 - 从中心点向外辐射的模糊效果",
+    "tags": [
+      "径向模糊",
+      "radial_blur",
+      "辐射",
+      "blur"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "center": {
+        "type": "array",
+        "description": "模糊中心[x,y]"
+      },
+      "amount": {
+        "type": "number",
+        "min": 0,
+        "max": 200,
+        "description": "模糊量"
+      },
+      "type": {
+        "type": "number",
+        "min": 1,
+        "max": 2,
+        "description": "模糊类型(1=Spin,2=Zoom)"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "center": [
+        960,
+        540
+      ],
+      "amount": 50,
+      "type": 2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      center: ${center},\n      amount: ${amount},\n      type: ${type}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var blur = layer.Effects.addProperty(\"ADBE CC Radial Blur\");\n    blur.property(\"ADBE CC Radial Blur-0001\").setValue(p.center);\n    blur.property(\"ADBE CC Radial Blur-0002\").setValue(p.amount * p.intensity);\n    blur.property(\"ADBE CC Radial Blur-0003\").setValue(Math.floor(p.type));\n    blur.property(\"ADBE CC Radial Blur-0004\").setValue(0);\n    _result = {status:\"success\", message:\"径向模糊特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "zoom_blur_effect",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "缩放模糊特效 - 从中心向外缩放的模糊效果，模拟快速推拉镜头",
+    "tags": [
+      "缩放模糊",
+      "zoom_blur",
+      "推拉",
+      "blur"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "center": {
+        "type": "array",
+        "description": "模糊中心[x,y]"
+      },
+      "amount": {
+        "type": "number",
+        "min": 0,
+        "max": 200,
+        "description": "模糊量"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "center": [
+        960,
+        540
+      ],
+      "amount": 60
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      center: ${center},\n      amount: ${amount}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var blur = layer.Effects.addProperty(\"ADBE CC Radial Fast Blur\");\n    blur.property(\"ADBE CC Radial Fast Blur-0001\").setValue(p.center);\n    blur.property(\"ADBE CC Radial Fast Blur-0002\").setValue(p.amount * p.intensity);\n    _result = {status:\"success\", message:\"缩放模糊特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "tilt_shift",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "移轴模糊特效 - 模拟移轴摄影效果，微缩景观风格",
+    "tags": [
+      "移轴",
+      "tilt_shift",
+      "微缩",
+      "blur"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "模糊量"
+      },
+      "focusWidth": {
+        "type": "number",
+        "min": 10,
+        "max": 80,
+        "description": "聚焦宽度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 25,
+      "focusWidth": 40
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      blurAmount: ${blurAmount},\n      focusWidth: ${focusWidth}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var blur = layer.Effects.addProperty(\"ADBE Camera Lens Blur\");\n    blur.property(\"ADBE Camera Lens Blur-0001\").setValue(p.blurAmount * p.intensity / 100);\n    blur.property(\"ADBE Camera Lens Blur-0002\").setValue(30);\n    blur.property(\"ADBE Camera Lens Blur-0003\").setValue(3);\n    var levels = layer.Effects.addProperty(\"ADBE Levels\");\n    levels.property(\"ADBE Levels-0003\").setValue(1 + 0.15 * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(15 * p.intensity);\n    _result = {status:\"success\", message:\"移轴模糊特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "edge_blur",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "边缘模糊特效 - 仅模糊画面边缘，中心区域保持清晰",
+    "tags": [
+      "边缘模糊",
+      "edge_blur",
+      "vignette_blur",
+      "blur"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "模糊量"
+      },
+      "edgeWidth": {
+        "type": "number",
+        "min": 10,
+        "max": 80,
+        "description": "边缘宽度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 20,
+      "edgeWidth": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      blurAmount: ${blurAmount},\n      edgeWidth: ${edgeWidth}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var blur = layer.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValue(p.blurAmount * p.intensity);\n    var vig = layer.Effects.addProperty(\"ADBE Vignette\");\n    vig.property(\"ADBE Vignette-0001\").setValue(p.edgeWidth * p.intensity / 100);\n    _result = {status:\"success\", message:\"边缘模糊特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "prism_blur",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "棱镜模糊特效 - 配合通道偏移的模糊效果，模拟棱镜分光",
+    "tags": [
+      "棱镜",
+      "prism",
+      "模糊",
+      "分光",
+      "blur"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "模糊量"
+      },
+      "redShift": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "红色偏移"
+      },
+      "blueShift": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "蓝色偏移"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 10,
+      "redShift": 10,
+      "blueShift": 8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      blurAmount: ${blurAmount},\n      redShift: ${redShift},\n      blueShift: ${blueShift}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var blur = layer.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValue(p.blurAmount * p.intensity);\n    var cm = layer.Effects.addProperty(\"ADBE Channel Mixer\");\n    cm.property(\"ADBE Channel Mixer-0001\").setValue(100 + p.redShift * p.intensity);\n    cm.property(\"ADBE Channel Mixer-0007\").setValue(100 - p.redShift * 0.3 * p.intensity);\n    cm.property(\"ADBE Channel Mixer-0009\").setValue(100 + p.blueShift * p.intensity);\n    cm.property(\"ADBE Channel Mixer-0003\").setValue(100 - p.blueShift * 0.3 * p.intensity);\n    _result = {status:\"success\", message:\"棱镜模糊特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "freeze_frame_blur",
+    "category": "effect",
+    "subcategory": "blur",
+    "description": "定格模糊特效 - 运动模糊配合定格帧率，模拟定格动画质感",
+    "tags": [
+      "定格",
+      "模糊",
+      "freeze_frame",
+      "stop_motion",
+      "blur"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "模糊量"
+      },
+      "frameRate": {
+        "type": "number",
+        "min": 5,
+        "max": 30,
+        "description": "帧率"
+      },
+      "direction": {
+        "type": "number",
+        "min": 0,
+        "max": 360,
+        "description": "方向(度)"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "blurAmount": 8,
+      "frameRate": 12,
+      "direction": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      blurAmount: ${blurAmount},\n      frameRate: ${frameRate},\n      direction: ${direction}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var blur = layer.Effects.addProperty(\"ADBE Directional Blur\");\n    blur.property(\"ADBE Directional Blur-0001\").setValue(p.direction);\n    blur.property(\"ADBE Directional Blur-0002\").setValue(p.blurAmount * p.intensity);\n    var pt = layer.Effects.addProperty(\"ADBE Posterize Time\");\n    pt.property(\"ADBE Posterize Time-0001\").setValue(Math.floor(p.frameRate));\n    _result = {status:\"success\", message:\"定格模糊特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "wave_warp",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "波浪扭曲特效 - 画面产生波浪形扭曲变形",
+    "tags": [
+      "波浪",
+      "扭曲",
+      "wave_warp",
+      "warp",
+      "distortion"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "waveHeight": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "波高"
+      },
+      "waveWidth": {
+        "type": "number",
+        "min": 1,
+        "max": 500,
+        "description": "波宽"
+      },
+      "direction": {
+        "type": "number",
+        "min": 0,
+        "max": 360,
+        "description": "方向(度)"
+      },
+      "speed": {
+        "type": "number",
+        "min": 0,
+        "max": 10,
+        "description": "速度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "waveHeight": 30,
+      "waveWidth": 100,
+      "direction": 90,
+      "speed": 2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      waveHeight: ${waveHeight},\n      waveWidth: ${waveWidth},\n      direction: ${direction},\n      speed: ${speed}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var warp = layer.Effects.addProperty(\"ADBE Wave Warp\");\n    warp.property(\"ADBE Wave Warp-0001\").setValue(p.waveHeight * p.intensity);\n    warp.property(\"ADBE Wave Warp-0002\").setValue(p.waveWidth);\n    warp.property(\"ADBE Wave Warp-0003\").setValue(p.direction);\n    warp.property(\"ADBE Wave Warp-0005\").setValue(p.speed);\n    warp.property(\"ADBE Wave Warp-0006\").setValue(1);\n    _result = {status:\"success\", message:\"波浪扭曲特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "mesh_warp",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "网格扭曲特效 - 通过网格控制点对画面进行自由扭曲变形",
+    "tags": [
+      "网格",
+      "扭曲",
+      "mesh_warp",
+      "warp",
+      "distortion"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "rows": {
+        "type": "number",
+        "min": 1,
+        "max": 20,
+        "description": "行数"
+      },
+      "columns": {
+        "type": "number",
+        "min": 1,
+        "max": 20,
+        "description": "列数"
+      },
+      "distortion": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "扭曲量"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "rows": 5,
+      "columns": 5,
+      "distortion": 30
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      rows: ${rows},\n      columns: ${columns},\n      distortion: ${distortion}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var warp = layer.Effects.addProperty(\"ADBE Mesh Warp\");\n    warp.property(\"ADBE Mesh Warp-0001\").setValue(Math.floor(p.rows));\n    warp.property(\"ADBE Mesh Warp-0002\").setValue(Math.floor(p.columns));\n    warp.property(\"ADBE Mesh Warp-0003\").setValue(p.distortion * p.intensity / 100);\n    _result = {status:\"success\", message:\"网格扭曲特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "polar_coordinates",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "极坐标特效 - 直角坐标与极坐标之间的转换变形",
+    "tags": [
+      "极坐标",
+      "polar",
+      "坐标转换",
+      "distortion"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "interpolation": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "插值量"
+      },
+      "type": {
+        "type": "number",
+        "min": 1,
+        "max": 4,
+        "description": "转换类型(1-4)"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "interpolation": 50,
+      "type": 1
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      interpolation: ${interpolation},\n      type: ${type}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var polar = layer.Effects.addProperty(\"ADBE Polar Coordinates\");\n    polar.property(\"ADBE Polar Coordinates-0001\").setValue(p.interpolation * p.intensity);\n    polar.property(\"ADBE Polar Coordinates-0002\").setValue(Math.floor(p.type));\n    _result = {status:\"success\", message:\"极坐标特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "twirl",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "螺旋扭曲特效 - 以中心为轴的螺旋形扭曲变形",
+    "tags": [
+      "螺旋",
+      "扭曲",
+      "twirl",
+      "swirl",
+      "distortion"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "angle": {
+        "type": "number",
+        "min": -360,
+        "max": 360,
+        "description": "角度(度)"
+      },
+      "radius": {
+        "type": "number",
+        "min": 10,
+        "max": 500,
+        "description": "半径"
+      },
+      "center": {
+        "type": "array",
+        "description": "中心点[x,y]"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "angle": 180,
+      "radius": 150,
+      "center": [
+        960,
+        540
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      angle: ${angle},\n      radius: ${radius},\n      center: ${center}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var twirl = layer.Effects.addProperty(\"ADBE CC Twirl\");\n    twirl.property(\"ADBE CC Twirl-0001\").setValue(p.center);\n    twirl.property(\"ADBE CC Twirl-0002\").setValue(p.angle * p.intensity);\n    twirl.property(\"ADBE CC Twirl-0003\").setValue(p.radius);\n    twirl.property(\"ADBE CC Twirl-0004\").setValue(50);\n    _result = {status:\"success\", message:\"螺旋扭曲特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "ripple_warp",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "涟漪特效 - 水面波纹涟漪效果，模拟水波荡漾",
+    "tags": [
+      "涟漪",
+      "波纹",
+      "ripple",
+      "水面",
+      "distortion"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "radius": {
+        "type": "number",
+        "min": 0,
+        "max": 500,
+        "description": "半径"
+      },
+      "waveSpeed": {
+        "type": "number",
+        "min": 0,
+        "max": 10,
+        "description": "波速"
+      },
+      "amplitude": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "振幅"
+      },
+      "frequency": {
+        "type": "number",
+        "min": 0,
+        "max": 30,
+        "description": "频率"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "radius": 200,
+      "waveSpeed": 3,
+      "amplitude": 15,
+      "frequency": 10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      radius: ${radius},\n      waveSpeed: ${waveSpeed},\n      amplitude: ${amplitude},\n      frequency: ${frequency}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var ripple = layer.Effects.addProperty(\"ADBE Ripple\");\n    ripple.property(\"ADBE Ripple-0001\").setValue(p.radius);\n    ripple.property(\"ADBE Ripple-0002\").setValue(p.waveSpeed * p.intensity);\n    ripple.property(\"ADBE Ripple-0003\").setValue(p.amplitude * p.intensity);\n    ripple.property(\"ADBE Ripple-0004\").setValue(p.frequency);\n    _result = {status:\"success\", message:\"涟漪特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "lens_distortion",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "镜头畸变特效 - 模拟广角镜头的桶形或枕形畸变",
+    "tags": [
+      "镜头畸变",
+      "lens_distortion",
+      "桶形",
+      "枕形",
+      "distortion"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "curvature": {
+        "type": "number",
+        "min": -100,
+        "max": 100,
+        "description": "曲率"
+      },
+      "aberration": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "色差"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "curvature": 30,
+      "aberration": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      curvature: ${curvature},\n      aberration: ${aberration}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var lens = layer.Effects.addProperty(\"ADBE Lens Distortion\");\n    lens.property(\"ADBE Lens Distortion-0001\").setValue(p.curvature * p.intensity);\n    lens.property(\"ADBE Lens Distortion-0002\").setValue(p.aberration * p.intensity);\n    _result = {status:\"success\", message:\"镜头畸变特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "optics_compensation",
+    "category": "effect",
+    "subcategory": "distortion",
+    "description": "光学补偿特效 - 反向镜头畸变补偿，常用于VR和合成",
+    "tags": [
+      "光学补偿",
+      "optics_compensation",
+      "畸变补偿",
+      "VR",
+      "distortion"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "fieldOfView": {
+        "type": "number",
+        "min": 0,
+        "max": 180,
+        "description": "视场角"
+      },
+      "reverseLens": {
+        "type": "boolean",
+        "description": "是否反向镜头"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "fieldOfView": 80,
+      "reverseLens": false
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      fieldOfView: ${fieldOfView},\n      reverseLens: ${reverseLens}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var optics = layer.Effects.addProperty(\"ADBE Optics Compensation\");\n    optics.property(\"ADBE Optics Compensation-0001\").setValue(p.fieldOfView * p.intensity);\n    optics.property(\"ADBE Optics Compensation-0002\").setValue(p.reverseLens ? 1 : 0);\n    _result = {status:\"success\", message:\"光学补偿特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "particle_system",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "粒子系统特效 - 通用CC粒子系统，可配置多种粒子效果",
+    "tags": [
+      "粒子系统",
+      "particle_system",
+      "CC",
+      "particle"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "particleCount": {
+        "type": "number",
+        "min": 1,
+        "max": 500,
+        "description": "粒子数量"
+      },
+      "particleSize": {
+        "type": "number",
+        "min": 1,
+        "max": 30,
+        "description": "粒子大小"
+      },
+      "particleColor": {
+        "type": "array",
+        "description": "粒子颜色[r,g,b]"
+      },
+      "speed": {
+        "type": "number",
+        "min": 0,
+        "max": 200,
+        "description": "速度"
+      },
+      "lifetime": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0,
+        "description": "生命周期"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 80,
+      "particleSize": 5,
+      "particleColor": [
+        1,
+        0.8,
+        0.3
+      ],
+      "speed": 80,
+      "lifetime": 2.0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      particleCount: ${particleCount},\n      particleSize: ${particleSize},\n      particleColor: ${particleColor},\n      speed: ${speed},\n      lifetime: ${lifetime}\n    };\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Particle System\", comp.width, comp.height, 1);\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Particle System\", comp.width, comp.height, 1);\n    var p2d = solidLayer.Effects.addProperty(\"ADBE CC Particle Systems II\");\n    p2d.property(\"ADBE CC Particle Systems II-0002\").setValue(p.particleCount);\n    p2d.property(\"ADBE CC Particle Systems II-0003\").setValue(p.particleSize * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0004\").setValue(p.particleColor);\n    p2d.property(\"ADBE CC Particle Systems II-0005\").setValue([comp.width / 2, comp.height / 2, 0]);\n    p2d.property(\"ADBE CC Particle Systems II-0008\").setValue(p.speed * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0009\").setValue(p.lifetime);\n    _result = {status:\"success\", message:\"粒子系统特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "dust_burst",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "尘埃爆发特效 - 从中心扩散的尘埃粒子，模拟爆炸烟尘",
+    "tags": [
+      "尘埃",
+      "爆发",
+      "dust",
+      "burst",
+      "particle"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "particleCount": {
+        "type": "number",
+        "min": 10,
+        "max": 300,
+        "description": "粒子数量"
+      },
+      "particleSize": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10,
+        "description": "粒子大小"
+      },
+      "particleColor": {
+        "type": "array",
+        "description": "粒子颜色[r,g,b]"
+      },
+      "speed": {
+        "type": "number",
+        "min": 10,
+        "max": 200,
+        "description": "速度"
+      },
+      "spread": {
+        "type": "number",
+        "min": 0,
+        "max": 360,
+        "description": "扩散角度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 150,
+      "particleSize": 2,
+      "particleColor": [
+        0.8,
+        0.7,
+        0.5
+      ],
+      "speed": 80,
+      "spread": 360
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      particleCount: ${particleCount},\n      particleSize: ${particleSize},\n      particleColor: ${particleColor},\n      speed: ${speed},\n      spread: ${spread}\n    };\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Dust Burst\", comp.width, comp.height, 1);\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Dust Burst\", comp.width, comp.height, 1);\n    var p2d = solidLayer.Effects.addProperty(\"ADBE CC Particle Systems II\");\n    p2d.property(\"ADBE CC Particle Systems II-0002\").setValue(p.particleCount);\n    p2d.property(\"ADBE CC Particle Systems II-0003\").setValue(p.particleSize * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0004\").setValue(p.particleColor);\n    p2d.property(\"ADBE CC Particle Systems II-0005\").setValue([comp.width / 2, comp.height / 2, 0]);\n    p2d.property(\"ADBE CC Particle Systems II-0008\").setValue(p.speed * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0009\").setValue(1.5);\n    p2d.property(\"ADBE CC Particle Systems II-0007\").setValue(p.spread);\n    _result = {status:\"success\", message:\"尘埃爆发特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "ember_rise",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "余烬上升特效 - 向上飘散的余烬粒子，模拟火星飞溅",
+    "tags": [
+      "余烬",
+      "火星",
+      "ember",
+      "rise",
+      "particle"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "particleCount": {
+        "type": "number",
+        "min": 10,
+        "max": 200,
+        "description": "粒子数量"
+      },
+      "particleSize": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5,
+        "description": "粒子大小"
+      },
+      "particleColor": {
+        "type": "array",
+        "description": "粒子颜色[r,g,b]"
+      },
+      "speed": {
+        "type": "number",
+        "min": 10,
+        "max": 100,
+        "description": "上升速度"
+      },
+      "wind": {
+        "type": "number",
+        "min": -50,
+        "max": 50,
+        "description": "风力"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 80,
+      "particleSize": 1.5,
+      "particleColor": [
+        1,
+        0.4,
+        0.1
+      ],
+      "speed": 40,
+      "wind": 5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      particleCount: ${particleCount},\n      particleSize: ${particleSize},\n      particleColor: ${particleColor},\n      speed: ${speed},\n      wind: ${wind}\n    };\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Ember Rise\", comp.width, comp.height, 1);\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Ember Rise\", comp.width, comp.height, 1);\n    var p2d = solidLayer.Effects.addProperty(\"ADBE CC Particle Systems II\");\n    p2d.property(\"ADBE CC Particle Systems II-0002\").setValue(p.particleCount);\n    p2d.property(\"ADBE CC Particle Systems II-0003\").setValue(p.particleSize * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0004\").setValue(p.particleColor);\n    p2d.property(\"ADBE CC Particle Systems II-0005\").setValue([comp.width / 2, 0, 0]);\n    p2d.property(\"ADBE CC Particle Systems II-0006\").setValue(1);\n    p2d.property(\"ADBE CC Particle Systems II-0008\").setValue(-p.speed * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0009\").setValue(3);\n    p2d.property(\"ADBE CC Particle Systems II-0007\").setValue(20);\n    p2d.property(\"ADBE CC Particle Systems II-0010\").setValue([p.wind * p.intensity, 0, 0]);\n    _result = {status:\"success\", message:\"余烬上升特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "magic_trail",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "魔法尾迹特效 - 魔法光效粒子尾迹，适合魔法特效场景",
+    "tags": [
+      "魔法",
+      "尾迹",
+      "magic",
+      "trail",
+      "particle"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "particleCount": {
+        "type": "number",
+        "min": 10,
+        "max": 200,
+        "description": "粒子数量"
+      },
+      "particleSize": {
+        "type": "number",
+        "min": 1,
+        "max": 10,
+        "description": "粒子大小"
+      },
+      "particleColor": {
+        "type": "array",
+        "description": "粒子颜色[r,g,b]"
+      },
+      "speed": {
+        "type": "number",
+        "min": 10,
+        "max": 100,
+        "description": "速度"
+      },
+      "glow": {
+        "type": "number",
+        "min": 0,
+        "max": 5,
+        "description": "发光强度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 60,
+      "particleSize": 3,
+      "particleColor": [
+        0.5,
+        0.3,
+        1
+      ],
+      "speed": 30,
+      "glow": 2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      particleCount: ${particleCount},\n      particleSize: ${particleSize},\n      particleColor: ${particleColor},\n      speed: ${speed},\n      glow: ${glow}\n    };\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Magic Trail\", comp.width, comp.height, 1);\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Magic Trail\", comp.width, comp.height, 1);\n    var p2d = solidLayer.Effects.addProperty(\"ADBE CC Particle Systems II\");\n    p2d.property(\"ADBE CC Particle Systems II-0002\").setValue(p.particleCount);\n    p2d.property(\"ADBE CC Particle Systems II-0003\").setValue(p.particleSize * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0004\").setValue(p.particleColor);\n    p2d.property(\"ADBE CC Particle Systems II-0005\").setValue([comp.width / 2, comp.height / 2, 0]);\n    p2d.property(\"ADBE CC Particle Systems II-0008\").setValue(p.speed * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0009\").setValue(2);\n    var glow = solidLayer.Effects.addProperty(\"ADBE Glow\");\n    glow.property(\"ADBE Glow-0001\").setValue(80);\n    glow.property(\"ADBE Glow-0002\").setValue(20 * p.intensity);\n    glow.property(\"ADBE Glow-0003\").setValue(p.glow * p.intensity);\n    _result = {status:\"success\", message:\"魔法尾迹特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "bubble_burst",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "气泡爆发特效 - 向上飘升的气泡粒子，适合梦幻水底场景",
+    "tags": [
+      "气泡",
+      "爆发",
+      "bubble",
+      "burst",
+      "particle"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "particleCount": {
+        "type": "number",
+        "min": 10,
+        "max": 200,
+        "description": "粒子数量"
+      },
+      "particleSize": {
+        "type": "number",
+        "min": 1,
+        "max": 20,
+        "description": "粒子大小"
+      },
+      "particleColor": {
+        "type": "array",
+        "description": "粒子颜色[r,g,b]"
+      },
+      "speed": {
+        "type": "number",
+        "min": 10,
+        "max": 80,
+        "description": "速度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 50,
+      "particleSize": 8,
+      "particleColor": [
+        0.7,
+        0.9,
+        1
+      ],
+      "speed": 25
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      particleCount: ${particleCount},\n      particleSize: ${particleSize},\n      particleColor: ${particleColor},\n      speed: ${speed}\n    };\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Bubble Burst\", comp.width, comp.height, 1);\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Bubble Burst\", comp.width, comp.height, 1);\n    var p2d = solidLayer.Effects.addProperty(\"ADBE CC Particle Systems II\");\n    p2d.property(\"ADBE CC Particle Systems II-0002\").setValue(p.particleCount);\n    p2d.property(\"ADBE CC Particle Systems II-0003\").setValue(p.particleSize * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0004\").setValue(p.particleColor);\n    p2d.property(\"ADBE CC Particle Systems II-0005\").setValue([comp.width / 2, 0, 0]);\n    p2d.property(\"ADBE CC Particle Systems II-0006\").setValue(1);\n    p2d.property(\"ADBE CC Particle Systems II-0008\").setValue(-p.speed * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0009\").setValue(4);\n    p2d.property(\"ADBE CC Particle Systems II-0007\").setValue(30);\n    _result = {status:\"success\", message:\"气泡爆发特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "snow_fall",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "降雪特效 - 模拟雪花飘落的粒子效果",
+    "tags": [
+      "降雪",
+      "雪花",
+      "snow",
+      "fall",
+      "particle"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "flakeCount": {
+        "type": "number",
+        "min": 50,
+        "max": 500,
+        "description": "雪花数量"
+      },
+      "flakeSize": {
+        "type": "number",
+        "min": 1,
+        "max": 10,
+        "description": "雪花大小"
+      },
+      "speed": {
+        "type": "number",
+        "min": 5,
+        "max": 50,
+        "description": "下落速度"
+      },
+      "wind": {
+        "type": "number",
+        "min": -30,
+        "max": 30,
+        "description": "风力"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "flakeCount": 200,
+      "flakeSize": 3,
+      "speed": 15,
+      "wind": 5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      flakeCount: ${flakeCount},\n      flakeSize: ${flakeSize},\n      speed: ${speed},\n      wind: ${wind}\n    };\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Snow Fall\", comp.width, comp.height, 1);\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Snow Fall\", comp.width, comp.height, 1);\n    var snow = solidLayer.Effects.addProperty(\"ADBE CC Snowfall\");\n    snow.property(\"ADBE CC Snowfall-0001\").setValue(p.flakeCount);\n    snow.property(\"ADBE CC Snowfall-0002\").setValue(p.flakeSize * p.intensity);\n    snow.property(\"ADBE CC Snowfall-0003\").setValue(p.speed * p.intensity);\n    snow.property(\"ADBE CC Snowfall-0004\").setValue(p.wind * p.intensity);\n    snow.property(\"ADBE CC Snowfall-0005\").setValue(50);\n    snow.property(\"ADBE CC Snowfall-0006\").setValue(0);\n    _result = {status:\"success\", message:\"降雪特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "firework_spark",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "烟花火花特效 - 爆发散开的烟花粒子效果",
+    "tags": [
+      "烟花",
+      "火花",
+      "firework",
+      "spark",
+      "particle"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "particleCount": {
+        "type": "number",
+        "min": 50,
+        "max": 500,
+        "description": "粒子数量"
+      },
+      "particleSize": {
+        "type": "number",
+        "min": 1,
+        "max": 8,
+        "description": "粒子大小"
+      },
+      "particleColor": {
+        "type": "array",
+        "description": "粒子颜色[r,g,b]"
+      },
+      "speed": {
+        "type": "number",
+        "min": 20,
+        "max": 200,
+        "description": "速度"
+      },
+      "spread": {
+        "type": "number",
+        "min": 0,
+        "max": 360,
+        "description": "扩散角度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "particleCount": 200,
+      "particleSize": 3,
+      "particleColor": [
+        1,
+        0.5,
+        0.2
+      ],
+      "speed": 100,
+      "spread": 360
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      particleCount: ${particleCount},\n      particleSize: ${particleSize},\n      particleColor: ${particleColor},\n      speed: ${speed},\n      spread: ${spread}\n    };\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Firework Spark\", comp.width, comp.height, 1);\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Firework Spark\", comp.width, comp.height, 1);\n    var p2d = solidLayer.Effects.addProperty(\"ADBE CC Particle Systems II\");\n    p2d.property(\"ADBE CC Particle Systems II-0002\").setValue(p.particleCount);\n    p2d.property(\"ADBE CC Particle Systems II-0003\").setValue(p.particleSize * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0004\").setValue(p.particleColor);\n    p2d.property(\"ADBE CC Particle Systems II-0005\").setValue([comp.width / 2, comp.height / 2, 0]);\n    p2d.property(\"ADBE CC Particle Systems II-0006\").setValue(2);\n    p2d.property(\"ADBE CC Particle Systems II-0008\").setValue(p.speed * p.intensity);\n    p2d.property(\"ADBE CC Particle Systems II-0009\").setValue(1.5);\n    p2d.property(\"ADBE CC Particle Systems II-0007\").setValue(p.spread);\n    var glow = solidLayer.Effects.addProperty(\"ADBE Glow\");\n    glow.property(\"ADBE Glow-0001\").setValue(100);\n    glow.property(\"ADBE Glow-0002\").setValue(15 * p.intensity);\n    glow.property(\"ADBE Glow-0003\").setValue(1.5 * p.intensity);\n    _result = {status:\"success\", message:\"烟花火花特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "electric_arc",
+    "category": "effect",
+    "subcategory": "particle",
+    "description": "电弧特效 - 闪电电弧效果，模拟电流放电",
+    "tags": [
+      "电弧",
+      "闪电",
+      "electric",
+      "arc",
+      "lightning"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "startPoint": {
+        "type": "array",
+        "description": "起点[x,y]"
+      },
+      "endPoint": {
+        "type": "array",
+        "description": "终点[x,y]"
+      },
+      "segments": {
+        "type": "number",
+        "min": 1,
+        "max": 30,
+        "description": "分段数"
+      },
+      "amplitude": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "振幅"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "startPoint": [
+        200,
+        540
+      ],
+      "endPoint": [
+        1720,
+        540
+      ],
+      "segments": 10,
+      "amplitude": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      startPoint: ${startPoint},\n      endPoint: ${endPoint},\n      segments: ${segments},\n      amplitude: ${amplitude}\n    };\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Electric Arc\", comp.width, comp.height, 1);\n    var solidLayer = comp.layers.addSolid([0,0,0], \"Electric Arc\", comp.width, comp.height, 1);\n    var lightning = solidLayer.Effects.addProperty(\"ADBE CC Lightning\");\n    lightning.property(\"ADBE CC Lightning-0001\").setValue(p.startPoint);\n    lightning.property(\"ADBE CC Lightning-0002\").setValue(p.endPoint);\n    lightning.property(\"ADBE CC Lightning-0003\").setValue(Math.floor(p.segments));\n    lightning.property(\"ADBE CC Lightning-0004\").setValue(p.amplitude * p.intensity);\n    lightning.property(\"ADBE CC Lightning-0006\").setValue(0.5);\n    lightning.property(\"ADBE CC Lightning-0007\").setValue(1);\n    _result = {status:\"success\", message:\"电弧特效已创建\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "posterize",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "色调分离特效 - 减少色阶数量，产生色块化效果",
+    "tags": [
+      "色调分离",
+      "posterize",
+      "色阶",
+      "stylize"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "levels": {
+        "type": "number",
+        "min": 2,
+        "max": 32,
+        "description": "色阶数"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "levels": 8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      levels: ${levels}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var posterize = layer.Effects.addProperty(\"ADBE Posterize\");\n    posterize.property(\"ADBE Posterize-0001\").setValue(Math.floor(p.levels));\n    _result = {status:\"success\", message:\"色调分离特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "threshold",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "阈值特效 - 将画面转换为黑白二值化效果",
+    "tags": [
+      "阈值",
+      "threshold",
+      "二值化",
+      "黑白",
+      "stylize"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "level": {
+        "type": "number",
+        "min": 0,
+        "max": 255,
+        "description": "阈值级别"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "level": 128
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      level: ${level}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var threshold = layer.Effects.addProperty(\"ADBE Threshold\");\n    threshold.property(\"ADBE Threshold-0001\").setValue(p.level);\n    _result = {status:\"success\", message:\"阈值特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "find_edges",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "查找边缘特效 - 检测画面边缘，产生线稿效果",
+    "tags": [
+      "边缘",
+      "查找边缘",
+      "find_edges",
+      "线稿",
+      "stylize"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "invert": {
+        "type": "boolean",
+        "description": "是否反转"
+      },
+      "blend": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "混合度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "invert": false,
+      "blend": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      invert: ${invert},\n      blend: ${blend}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var edges = layer.Effects.addProperty(\"ADBE Find Edges\");\n    edges.property(\"ADBE Find Edges-0001\").setValue(p.invert ? 1 : 0);\n    edges.property(\"ADBE Find Edges-0002\").setValue(p.blend * p.intensity / 100);\n    _result = {status:\"success\", message:\"查找边缘特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "emboss",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "浮雕特效 - 将画面转换为浮雕效果，产生立体凸起感",
+    "tags": [
+      "浮雕",
+      "emboss",
+      "立体",
+      "stylize"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "direction": {
+        "type": "number",
+        "min": 0,
+        "max": 360,
+        "description": "方向(度)"
+      },
+      "relief": {
+        "type": "number",
+        "min": 1,
+        "max": 10,
+        "description": "浮雕高度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 200,
+        "description": "对比度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "direction": 135,
+      "relief": 3,
+      "contrast": 100
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      direction: ${direction},\n      relief: ${relief},\n      contrast: ${contrast}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var emboss = layer.Effects.addProperty(\"ADBE Emboss\");\n    emboss.property(\"ADBE Emboss-0001\").setValue(p.direction);\n    emboss.property(\"ADBE Emboss-0002\").setValue(p.relief);\n    emboss.property(\"ADBE Emboss-0003\").setValue(p.contrast * p.intensity);\n    _result = {status:\"success\", message:\"浮雕特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "mosaic_effect",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "马赛克特效 - 将画面分割为色块网格，产生像素化效果",
+    "tags": [
+      "马赛克",
+      "mosaic",
+      "像素化",
+      "色块",
+      "stylize"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "horizontalBlocks": {
+        "type": "number",
+        "min": 2,
+        "max": 200,
+        "description": "水平块数"
+      },
+      "verticalBlocks": {
+        "type": "number",
+        "min": 2,
+        "max": 200,
+        "description": "垂直块数"
+      },
+      "sharpColors": {
+        "type": "boolean",
+        "description": "锐化颜色"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "horizontalBlocks": 30,
+      "verticalBlocks": 30,
+      "sharpColors": false
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      horizontalBlocks: ${horizontalBlocks},\n      verticalBlocks: ${verticalBlocks},\n      sharpColors: ${sharpColors}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var mosaic = layer.Effects.addProperty(\"ADBE Mosaic\");\n    mosaic.property(\"ADBE Mosaic-0001\").setValue(Math.floor(p.horizontalBlocks));\n    mosaic.property(\"ADBE Mosaic-0002\").setValue(Math.floor(p.verticalBlocks));\n    mosaic.property(\"ADBE Mosaic-0003\").setValue(p.sharpColors ? 1 : 0);\n    _result = {status:\"success\", message:\"马赛克特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "oil_paint",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "油画效果特效 - 将画面转换为油画风格，产生笔触感",
+    "tags": [
+      "油画",
+      "oil_paint",
+      "笔触",
+      "艺术",
+      "stylize"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "brushSize": {
+        "type": "number",
+        "min": 1,
+        "max": 10,
+        "description": "笔触大小"
+      },
+      "brushDetail": {
+        "type": "number",
+        "min": 1,
+        "max": 10,
+        "description": "笔触细节"
+      },
+      "softness": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "柔和度"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "brushSize": 4,
+      "brushDetail": 5,
+      "softness": 30
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      brushSize: ${brushSize},\n      brushDetail: ${brushDetail},\n      softness: ${softness}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var oil = layer.Effects.addProperty(\"ADBE Oil Paint\");\n    oil.property(\"ADBE Oil Paint-0001\").setValue(p.brushSize * p.intensity);\n    oil.property(\"ADBE Oil Paint-0002\").setValue(p.brushDetail);\n    oil.property(\"ADBE Oil Paint-0003\").setValue(p.softness * p.intensity / 100);\n    _result = {status:\"success\", message:\"油画效果特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "pencil_sketch",
+    "category": "effect",
+    "subcategory": "stylize",
+    "description": "铅笔素描特效 - 将画面转换为黑白铅笔素描风格",
+    "tags": [
+      "铅笔",
+      "素描",
+      "pencil",
+      "sketch",
+      "stylize"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "edgeIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "边缘强度"
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "模糊量"
+      },
+      "invert": {
+        "type": "boolean",
+        "description": "是否反转"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "edgeIntensity": 50,
+      "blurAmount": 3,
+      "invert": false
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      edgeIntensity: ${edgeIntensity},\n      blurAmount: ${blurAmount},\n      invert: ${invert}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var edges = layer.Effects.addProperty(\"ADBE Find Edges\");\n    edges.property(\"ADBE Find Edges-0001\").setValue(p.invert ? 1 : 0);\n    edges.property(\"ADBE Find Edges-0002\").setValue(p.edgeIntensity * p.intensity / 100);\n    var blur = layer.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValue(p.blurAmount * p.intensity);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(-100);\n    _result = {status:\"success\", message:\"铅笔素描特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "time_freeze",
+    "category": "effect",
+    "subcategory": "time",
+    "description": "时间冻结特效 - 降低帧率产生定格动画效果",
+    "tags": [
+      "时间",
+      "冻结",
+      "time_freeze",
+      "定格",
+      "time"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "frameRate": {
+        "type": "number",
+        "min": 1,
+        "max": 30,
+        "description": "帧率"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "frameRate": 8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      frameRate: ${frameRate}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var pt = layer.Effects.addProperty(\"ADBE Posterize Time\");\n    pt.property(\"ADBE Posterize Time-0001\").setValue(Math.floor(p.frameRate));\n    _result = {status:\"success\", message:\"时间冻结特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "time_remap",
+    "category": "effect",
+    "subcategory": "time",
+    "description": "时间重映射特效 - 启用时间重映射并设置变速关键帧",
+    "tags": [
+      "时间",
+      "重映射",
+      "time_remap",
+      "变速",
+      "time"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "speedFactor": {
+        "type": "number",
+        "min": 0.1,
+        "max": 5.0,
+        "description": "速度倍率"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "speedFactor": 0.5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      speedFactor: ${speedFactor}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    layer.timeRemapEnabled = true;\n    var tr = layer.property(\"ADBE Time Remapping\");\n    if (tr) {\n      var t0 = layer.inPoint;\n      var t1 = layer.outPoint;\n      tr.setValueAtTime(t0, t0);\n      tr.setValueAtTime(t1, t0 + (t1 - t0) / p.speedFactor);\n    }\n    _result = {status:\"success\", message:\"时间重映射特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "echo_trail",
+    "category": "effect",
+    "subcategory": "time",
+    "description": "回声拖尾特效 - 画面残影叠加，模拟运动拖尾效果",
+    "tags": [
+      "回声",
+      "拖尾",
+      "echo",
+      "trail",
+      "time"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "起始强度"
+      },
+      "echoTime": {
+        "type": "number",
+        "min": -1,
+        "max": -0.01,
+        "description": "回声间隔(秒)"
+      },
+      "numEchoes": {
+        "type": "number",
+        "min": 1,
+        "max": 50,
+        "description": "回声数量"
+      },
+      "decay": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "衰减"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.8,
+      "echoTime": -0.1,
+      "numEchoes": 10,
+      "decay": 0.9
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      echoTime: ${echoTime},\n      numEchoes: ${numEchoes},\n      intensity: ${intensity},\n      decay: ${decay}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var adjLayer = comp.layers.addAdjustmentLayer();\n    adjLayer.name = \"Echo Trail\";\n    var echo = adjLayer.Effects.addProperty(\"ADBE Echo\");\n    echo.property(\"ADBE Echo-0001\").setValue(p.echoTime);\n    echo.property(\"ADBE Echo-0002\").setValue(Math.floor(p.numEchoes));\n    echo.property(\"ADBE Echo-0003\").setValue(p.intensity);\n    echo.property(\"ADBE Echo-0004\").setValue(p.decay);\n    echo.property(\"ADBE Echo-0005\").setValue(1);\n    _result = {status:\"success\", message:\"回声拖尾特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "time_warp",
+    "category": "effect",
+    "subcategory": "time",
+    "description": "时间扭曲特效 - 像素级时间变速，产生流畅慢动作效果",
+    "tags": [
+      "时间",
+      "扭曲",
+      "time_warp",
+      "变速",
+      "time"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "speed": {
+        "type": "number",
+        "min": 1,
+        "max": 200,
+        "description": "速度(%)"
+      },
+      "tolerance": {
+        "type": "number",
+        "min": 1,
+        "max": 100,
+        "description": "容差"
+      },
+      "motionBlur": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "运动模糊"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "speed": 25,
+      "tolerance": 50,
+      "motionBlur": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      speed: ${speed},\n      tolerance: ${tolerance},\n      motionBlur: ${motionBlur}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    var adjLayer = comp.layers.addAdjustmentLayer();\n    adjLayer.name = \"Time Warp\";\n    var tw = adjLayer.Effects.addProperty(\"ADBE Time Warp\");\n    tw.property(\"ADBE Time Warp-0001\").setValue(p.speed * p.intensity);\n    tw.property(\"ADBE Time Warp-0003\").setValue(p.tolerance);\n    tw.property(\"ADBE Time Warp-0007\").setValue(p.motionBlur * p.intensity / 100);\n    _result = {status:\"success\", message:\"时间扭曲特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "slow_motion",
+    "category": "effect",
+    "subcategory": "time",
+    "description": "慢动作特效 - 降低播放速度配合运动模糊，产生电影慢动作",
+    "tags": [
+      "慢动作",
+      "slow_motion",
+      "变速",
+      "time"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "目标图层名"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "效果强度"
+      },
+      "speed": {
+        "type": "number",
+        "min": 1,
+        "max": 100,
+        "description": "速度(%)"
+      },
+      "motionBlurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "运动模糊量"
+      },
+      "frameBlend": {
+        "type": "boolean",
+        "description": "帧混合"
+      }
+    },
+    "default_values": {
+      "layerName": "",
+      "intensity": 0.5,
+      "speed": 40,
+      "motionBlurAmount": 30,
+      "frameBlend": true
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      intensity: ${intensity},\n      speed: ${speed},\n      motionBlurAmount: ${motionBlurAmount},\n      frameBlend: ${frameBlend}\n    };\n    var layer = p.layerName ? comp.layers.byName(p.layerName) : comp.layer(1);\n    if (!layer) {\n      _result = {status:\"error\", message:\"Layer not found\"};\n      return JSON.stringify(_result);\n    }\n    layer.timeRemapEnabled = true;\n    var tr = layer.property(\"ADBE Time Remapping\");\n    if (tr) {\n      var t0 = layer.inPoint;\n      var t1 = layer.outPoint;\n      tr.setValueAtTime(t0, t0);\n      tr.setValueAtTime(t0 + (t1 - t0), t0 + (t1 - t0) * 100 / p.speed);\n    }\n    if (p.frameBlend) {\n      layer.frameBlending = true;\n    }\n    if (p.motionBlurAmount > 0) {\n      var motion = layer.Effects.addProperty(\"ADBE Directional Blur\");\n      motion.property(\"ADBE Directional Blur-0001\").setValue(180);\n      motion.property(\"ADBE Directional Blur-0002\").setValue(p.motionBlurAmount * p.intensity / 10);\n    }\n    _result = {status:\"success\", message:\"慢动作特效已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "cp_rgb_split_glitch",
+    "category": "effect",
+    "subcategory": "cyberpunk",
+    "description": "RGB分离故障 - 现代风格预设",
+    "tags": [
+      "cyberpunk",
+      "neon",
+      "glitch"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "splitAmount": {
+        "type": "number",
+        "description": "通道分离量 (px)",
+        "min": 2,
+        "max": 80
+      },
+      "frequency": {
+        "type": "number",
+        "description": "频率 (Hz)",
+        "min": 0.2,
+        "max": 10.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "splitAmount": 15.0,
+      "frequency": 5.0
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar sa=${splitAmount};var f=${frequency};\nvar e=L.property('ADBE Effect Parade');\nvar off=e.addProperty('ADBE Offset');\noff.property('ADBE Offset Center').expression=\n'[wiggle('+f+','+sa+')[0],0]';\nvar sh=e.addProperty('ADBE Shift Channels');\nsh.property('ADBE Shift Channels-0002').setValue(2);\n_r={status:'success',preset:'cp_rgb_split',layer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "cp_neon_pulse",
+    "category": "effect",
+    "subcategory": "cyberpunk",
+    "description": "霓虹脉冲 - 现代风格预设",
+    "tags": [
+      "cyberpunk",
+      "neon",
+      "glitch"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "neonColor": {
+        "type": "array",
+        "description": "霓虹颜色 [R,G,B]"
+      },
+      "pulseSpeed": {
+        "type": "number",
+        "description": "脉冲频率 (Hz)",
+        "min": 0.2,
+        "max": 10.0
+      },
+      "glowRadius": {
+        "type": "number",
+        "description": "辉光范围 (px)",
+        "min": 5,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "neonColor": [
+        1.0,
+        0.0,
+        1.0
+      ],
+      "pulseSpeed": 2.0,
+      "glowRadius": 25.0
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar nc=${neonColor};var ps=${pulseSpeed};\nvar gr=${glowRadius};\nvar e=L.property('ADBE Effect Parade');\nvar g=e.addProperty('ADBE Glo2');\ng.property('ADBE Glo2-0001').setValue(gr);\ng.property('ADBE Glo2-0002').expression=\n'0.5+Math.abs(Math.sin(time*'+ps+\n'*2*Math.PI))*1.5';\ng.property('ADBE Glo2-0004').setValue(nc);\ng.property('ADBE Glo2-0005').setValue(nc);\n_r={status:'success',preset:'cp_neon_pulse',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "cp_hologram_scan",
+    "category": "effect",
+    "subcategory": "cyberpunk",
+    "description": "全息扫描 - 现代风格预设",
+    "tags": [
+      "cyberpunk",
+      "neon",
+      "glitch"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "scanSpeed": {
+        "type": "integer",
+        "description": "扫描频率",
+        "min": 0.2,
+        "max": 10.0
+      },
+      "lineSpacing": {
+        "type": "number",
+        "description": "线条间距 (px)",
+        "min": 1,
+        "max": 20
+      },
+      "holoColor": {
+        "type": "array",
+        "description": "全息颜色 [R,G,B]"
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "scanSpeed": 2,
+      "lineSpacing": 4.0,
+      "holoColor": [
+        0.0,
+        1.0,
+        0.5
+      ]
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar ss=${scanSpeed};var ls=${lineSpacing};\nvar hc=${holoColor};\nvar e=L.property('ADBE Effect Parade');\nvar grid=e.addProperty('ADBE Grid');\ngrid.property('ADBE Grid-0002').setValue(ls);\ngrid.property('ADBE Grid-0004').setValue(50);\nvar t=e.addProperty('ADBE Tint');\nt.property('ADBE Tint-0001').setValue(hc);\nt.property('ADBE Tint-0002').setValue([1,1,1]);\nvar op=L.property('ADBE Transform Group')\n.property('ADBE Opacity');\nop.expression=\n'60+Math.abs(Math.sin(time*'+ss+\n'*2*Math.PI))*40';\n_r={status:'success',preset:'cp_hologram_scan',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "cp_matrix_rain",
+    "category": "effect",
+    "subcategory": "cyberpunk",
+    "description": "矩阵雨 - 现代风格预设",
+    "tags": [
+      "cyberpunk",
+      "neon",
+      "matrix",
+      "glitch"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "fallSpeed": {
+        "type": "string",
+        "description": "下落速度 (px/s)",
+        "min": 50,
+        "max": 800
+      },
+      "matrixColor": {
+        "type": "array",
+        "description": "矩阵颜色 [R,G,B]"
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "fallSpeed": "200px/s",
+      "matrixColor": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L||!(L instanceof TextLayer)){\n_r={status:'error',message:'Text layer not found'};\nreturn JSON.stringify(_r);}\nvar fs=${fallSpeed};var mc=${matrixColor};\nvar tp=L.property('ADBE Text Properties');\nvar a=tp.property('ADBE Text Animators')\n.addProperty('ADBE Text Animator');\na.name='CP_Matrix';\nvar pos=a.addProperty('ADBE Text Position');\npos.expression='[0,time*'+fs+']';\nvar co=a.addProperty('ADBE Text Character Offset');\nco.setValue(100);\nvar s=a.property('ADBE Text Selectors')\n.addProperty('ADBE Wiggly Selector');\ns.property('ADBE Text Selector Wiggles')\n.setValue(10);\nvar fc=L.property('ADBE Text Properties')\n.property('ADBE Text Options')\n.property('ADBE Text Fill Color');\nfc.setValue(mc);\n_r={status:'success',preset:'cp_matrix_rain',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "cp_data_stream",
+    "category": "effect",
+    "subcategory": "cyberpunk",
+    "description": "数据流文字 - 现代风格预设",
+    "tags": [
+      "cyberpunk",
+      "neon",
+      "text",
+      "glitch"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "waveSpeed": {
+        "type": "integer",
+        "description": "流动快慢",
+        "min": 0.1,
+        "max": 5.0
+      },
+      "charRange": {
+        "type": "integer",
+        "description": "字符偏移范围",
+        "min": 10,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "waveSpeed": 10,
+      "charRange": 50
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L||!(L instanceof TextLayer)){\n_r={status:'error',message:'Text layer not found'};\nreturn JSON.stringify(_r);}\nvar ss=${streamSpeed};var cr=${charRange};\nvar tp=L.property('ADBE Text Properties');\nvar a=tp.property('ADBE Text Animators')\n.addProperty('ADBE Text Animator');\na.name='CP_DataStream';\nvar co=a.addProperty('ADBE Text Character Offset');\nco.expression=\n'Math.sin(time*'+ss+'+textIndex)*'+cr;\nvar s=a.property('ADBE Text Selectors')\n.addProperty('ADBE Wiggly Selector');\ns.property('ADBE Text Selector Wiggles')\n.setValue(ss);\ns.property('ADBE Text Selector Correlation')\n.setValue(0);\n_r={status:'success',preset:'cp_data_stream',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  }
+]

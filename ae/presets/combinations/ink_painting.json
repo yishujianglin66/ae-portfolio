@@ -1,0 +1,10 @@
+{
+  "name": "ink_painting",
+  "description": "水墨画卷效果 - 水墨文字 + 梦幻柔和调色 + 翻页转场",
+  "presets": [
+    "ink_spread_text",
+    "dreamy_soft",
+    "page_flip_transition"
+  ],
+  "parameters": {}
+}

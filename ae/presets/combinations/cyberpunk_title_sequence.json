@@ -1,0 +1,10 @@
+{
+  "name": "cyberpunk_title_sequence",
+  "description": "赛博朋克标题序列 - 故障文字 + 赛博朋克调色 + 能量环特效",
+  "presets": [
+    "cyberpunk_glitch_text",
+    "cyberpunk_grade",
+    "energy_rings"
+  ],
+  "parameters": {}
+}

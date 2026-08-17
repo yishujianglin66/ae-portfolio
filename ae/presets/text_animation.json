@@ -1,0 +1,5042 @@
+[
+  {
+    "name": "douyin_bounce_title",
+    "category": "text_animation",
+    "subcategory": "social_media",
+    "description": "抖音弹跳标题 - 标题以缩放回弹方式入场，连续多次弹跳逐渐收敛，模拟抖音流行标题的Q弹质感",
+    "tags": [
+      "抖音",
+      "弹跳",
+      "标题",
+      "social_media",
+      "bounce"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0,
+        "description": "弹跳动画总时长"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 1.1,
+        "max": 2.0,
+        "description": "峰值缩放倍率"
+      },
+      "bounceCount": {
+        "type": "integer",
+        "min": 1,
+        "max": 8,
+        "description": "弹跳次数"
+      },
+      "baseScale": {
+        "type": "number",
+        "min": 50,
+        "max": 200,
+        "description": "基础缩放百分比"
+      },
+      "color": {
+        "type": "array",
+        "description": "文字填充色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "textLayerName": "抖音弹跳标题",
+      "duration": 2.0,
+      "intensity": 1.3,
+      "bounceCount": 3,
+      "baseScale": 100,
+      "color": [
+        1,
+        0.2,
+        0.4
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      intensity: ${intensity},\n      bounceCount: ${bounceCount},\n      baseScale: ${baseScale},\n      color: ${color}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var sc = layer.property(\"Scale\");\n    var t0 = layer.inPoint;\n    var dt = p.duration / (p.bounceCount + 1);\n    sc.setValueAtTime(t0, [p.baseScale * 0.3, p.baseScale * 0.3]);\n    for (var i = 0; i < p.bounceCount; i++) {\n      var peak = p.baseScale * p.intensity;\n      sc.setValueAtTime(t0 + dt * (i + 0.5), [peak, peak]);\n      sc.setValueAtTime(t0 + dt * (i + 1), [p.baseScale, p.baseScale]);\n    }\n    for (var k = 1; k <= sc.numKeys; k++) {\n      sc.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = p.color;\n    td.fontSize = 120;\n    td.fauxBold = true;\n    td.justification = ParagraphJustification.CENTER;\n    src.setValue(td);\n    _result = {status:\"success\", message:\"抖音弹跳标题动画已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "cyberpunk_glitch_text",
+    "category": "text_animation",
+    "subcategory": "cyberpunk",
+    "description": "赛博朋克故障文字 - 模拟数字故障效果，包含RGB分离、像素化、扫描线等元素",
+    "tags": [
+      "赛博朋克",
+      "故障",
+      "glitch",
+      "cyberpunk",
+      "digital"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "glitchIntensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      },
+      "rgbShift": {
+        "type": "number",
+        "min": 1,
+        "max": 30
+      },
+      "scanlineOpacity": {
+        "type": "number",
+        "min": 0,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "故障文字",
+      "duration": 3.0,
+      "glitchIntensity": 0.6,
+      "rgbShift": 15,
+      "scanlineOpacity": 0.3
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      glitchIntensity: ${glitchIntensity},\n      rgbShift: ${rgbShift},\n      scanlineOpacity: ${scanlineOpacity}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var textProp = layer.property(\"ADBE Text Properties\");\n    var animator = textProp.property(\"ADBE Text Animators\").addProperty(\"ADBE Text Animator\");\n    var rangeSel = animator.property(\"ADBE Text Selectors\").addProperty(\"ADBE Text Selector\");\n    var posProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Position\");\n    var opacityProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Opacity\");\n    var t0 = layer.inPoint;\n    var t1 = t0 + p.duration;\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(t0, 0);\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(t1, 100);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(t0, 100);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(t1, 100);\n    posProp.setValueAtTime(t0, [0, 0]);\n    posProp.setValueAtTime(t1, [0, 0]);\n    opacityProp.setValueAtTime(t0, 0);\n    opacityProp.setValueAtTime(t1, 100);\n    var exp = \"var glitch = wiggle(10, ${glitchIntensity} * 50); [glitch[0], glitch[1]]\";\n    posProp.expression = exp;\n    _result = {status:\"success\", message:\"赛博朋克故障文字已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "hologram_text",
+    "category": "text_animation",
+    "subcategory": "scifi",
+    "description": "全息投影文字 - 模拟科幻电影中的全息显示效果，包含蓝绿色调、扫描线、轻微闪烁",
+    "tags": [
+      "全息",
+      "hologram",
+      "科幻",
+      "scifi",
+      "futuristic"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 1.0,
+        "max": 15.0
+      },
+      "hueShiftSpeed": {
+        "type": "number",
+        "min": 1,
+        "max": 30
+      },
+      "scanlineFrequency": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "flickerRate": {
+        "type": "number",
+        "min": 0.1,
+        "max": 2.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "全息文字",
+      "duration": 5.0,
+      "hueShiftSpeed": 15,
+      "scanlineFrequency": 50,
+      "flickerRate": 0.5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      hueShiftSpeed: ${hueShiftSpeed},\n      scanlineFrequency: ${scanlineFrequency},\n      flickerRate: ${flickerRate}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = [0.3, 0.8, 1];\n    td.fontSize = 80;\n    td.justification = ParagraphJustification.CENTER;\n    src.setValue(td);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0001\").setValue([0.3, 0.8, 1]);\n    glow.property(\"ADBE Glo2i-0002\").setValue(30);\n    glow.property(\"ADBE Glo2i-0003\").setValue(2);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0001\").setValue(100);\n    hs.property(\"ADBE Hue/Saturation-0002\").setValueAtTime(comp.time, 0);\n    hs.property(\"ADBE Hue/Saturation-0002\").setValueAtTime(comp.time + p.duration, p.hueShiftSpeed);\n    _result = {status:\"success\", message:\"全息投影文字已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "ink_spread_text",
+    "category": "text_animation",
+    "subcategory": "traditional",
+    "description": "水墨扩散文字 - 模拟中国传统水墨画风格，文字从中心向外扩散，边缘模糊",
+    "tags": [
+      "水墨",
+      "ink",
+      "书法",
+      "calligraphy",
+      "traditional"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 2.0,
+        "max": 10.0
+      },
+      "spreadSpeed": {
+        "type": "number",
+        "min": 0.1,
+        "max": 2.0
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      },
+      "inkColor": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "textLayerName": "水墨文字",
+      "duration": 4.0,
+      "spreadSpeed": 0.8,
+      "blurAmount": 15,
+      "inkColor": [
+        0,
+        0,
+        0
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      spreadSpeed: ${spreadSpeed},\n      blurAmount: ${blurAmount},\n      inkColor: ${inkColor}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = p.inkColor;\n    td.fontSize = 100;\n    td.justification = ParagraphJustification.CENTER;\n    src.setValue(td);\n    var blur = layer.Effects.addProperty(\"ADBE Fast Blur\");\n    blur.property(\"ADBE Fast Blur-0001\").setValueAtTime(comp.time, p.blurAmount);\n    blur.property(\"ADBE Fast Blur-0001\").setValueAtTime(comp.time + p.duration, 0);\n    var textProp = layer.property(\"ADBE Text Properties\");\n    var animator = textProp.property(\"ADBE Text Animators\").addProperty(\"ADBE Text Animator\");\n    var rangeSel = animator.property(\"ADBE Text Selectors\").addProperty(\"ADBE Text Selector\");\n    var scaleProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Scale\");\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(comp.time, 50);\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(comp.time + p.duration, 0);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(comp.time, 50);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(comp.time + p.duration, 100);\n    scaleProp.setValueAtTime(comp.time, [50, 50]);\n    scaleProp.setValueAtTime(comp.time + p.duration, [100, 100]);\n    _result = {status:\"success\", message:\"水墨扩散文字已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "neon_pulse_text",
+    "category": "text_animation",
+    "subcategory": "neon",
+    "description": "霓虹脉冲文字 - 模拟霓虹灯效果，文字发光并带有呼吸脉冲动画",
+    "tags": [
+      "霓虹",
+      "neon",
+      "发光",
+      "glow",
+      "pulse"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 1.0,
+        "max": 20.0
+      },
+      "pulseFrequency": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "glowColor": {
+        "type": "array"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "glowIntensity": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "霓虹文字",
+      "duration": 5.0,
+      "pulseFrequency": 2.0,
+      "glowColor": [
+        1,
+        0.5,
+        1
+      ],
+      "glowRadius": 40,
+      "glowIntensity": 2.0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      pulseFrequency: ${pulseFrequency},\n      glowColor: ${glowColor},\n      glowRadius: ${glowRadius},\n      glowIntensity: ${glowIntensity}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = [1, 1, 1];\n    td.fontSize = 90;\n    td.justification = ParagraphJustification.CENTER;\n    src.setValue(td);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0001\").setValue(p.glowColor);\n    glow.property(\"ADBE Glo2i-0002\").setValue(p.glowRadius);\n    glow.property(\"ADBE Glo2i-0003\").expression = \"Math.sin(time * ${pulseFrequency} * Math.PI * 2) * 0.5 + 0.5\";\n    _result = {status:\"success\", message:\"霓虹脉冲文字已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "typewriter_effect",
+    "category": "text_animation",
+    "subcategory": "classic",
+    "description": "打字机效果 - 文字逐字显示，模拟打字机打字过程",
+    "tags": [
+      "打字机",
+      "typewriter",
+      "逐字",
+      "typing",
+      "classic"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 1.0,
+        "max": 30.0
+      },
+      "charDelay": {
+        "type": "number",
+        "min": 0.01,
+        "max": 0.5
+      },
+      "cursorEnabled": {
+        "type": "boolean"
+      },
+      "cursorBlinkRate": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "打字机文字",
+      "duration": 3.0,
+      "charDelay": 0.08,
+      "cursorEnabled": true,
+      "cursorBlinkRate": 1.0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      charDelay: ${charDelay},\n      cursorEnabled: ${cursorEnabled},\n      cursorBlinkRate: ${cursorBlinkRate}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var textProp = layer.property(\"ADBE Text Properties\");\n    var animator = textProp.property(\"ADBE Text Animators\").addProperty(\"ADBE Text Animator\");\n    var rangeSel = animator.property(\"ADBE Text Selectors\").addProperty(\"ADBE Text Selector\");\n    var opacityProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Opacity\");\n    var t0 = layer.inPoint;\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(t0, 0);\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(t0 + p.duration, 100);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(t0, 0);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(t0 + p.duration, 0);\n    opacityProp.setValueAtTime(t0, 0);\n    opacityProp.setValueAtTime(t0 + p.duration, 100);\n    _result = {status:\"success\", message:\"打字机效果已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "fade_rise_up",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "淡入上升入场 - 文字透明度从0到100的同时向上位移，优雅的入场效果",
+    "tags": [
+      "入场",
+      "淡入",
+      "上升",
+      "fade",
+      "rise",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "riseDistance": {
+        "type": "number",
+        "min": 20,
+        "max": 300
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "淡入上升文字",
+      "duration": 1.0,
+      "riseDistance": 80,
+      "easing": "easeOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      riseDistance: ${riseDistance},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var pos = layer.property(\"Position\");\n    var startY = layer.property(\"Position\").value[1] + p.riseDistance;\n    pos.setValueAtTime(comp.time, [layer.property(\"Position\").value[0], startY]);\n    pos.setValueAtTime(comp.time + p.duration, [layer.property(\"Position\").value[0], startY - p.riseDistance]);\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(comp.time, 0);\n    op.setValueAtTime(comp.time + p.duration, 100);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"淡入上升入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "zoom_bounce_in",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "缩放弹跳入场 - 文字从大缩放弹跳到正常大小，带有弹性回弹效果",
+    "tags": [
+      "入场",
+      "缩放",
+      "弹跳",
+      "zoom",
+      "bounce",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "startScale": {
+        "type": "number",
+        "min": 100,
+        "max": 500
+      },
+      "bounceCount": {
+        "type": "number",
+        "min": 1,
+        "max": 4
+      },
+      "elasticity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 0.5
+      }
+    },
+    "default_values": {
+      "textLayerName": "缩放弹跳文字",
+      "duration": 0.8,
+      "startScale": 200,
+      "bounceCount": 2,
+      "elasticity": 0.2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      startScale: ${startScale},\n      bounceCount: ${bounceCount},\n      elasticity: ${elasticity}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var sc = layer.property(\"Scale\");\n    sc.setValueAtTime(comp.time, [p.startScale, p.startScale]);\n    var dt = p.duration / (p.bounceCount + 1);\n    for (var i = 1; i <= p.bounceCount; i++) {\n      var undershoot = 100 - p.elasticity * 100 / i;\n      sc.setValueAtTime(comp.time + dt * i, [undershoot, undershoot]);\n    }\n    sc.setValueAtTime(comp.time + p.duration, [100, 100]);\n    for (var k = 1; k <= sc.numKeys; k++) {\n      sc.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"缩放弹跳入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "rotation_enter",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "旋转入场 - 文字旋转进入画面，从倾斜到正向",
+    "tags": [
+      "入场",
+      "旋转",
+      "rotation",
+      "entrance",
+      "spin"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "rotationAmount": {
+        "type": "number",
+        "min": 90,
+        "max": 720
+      },
+      "startScale": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "旋转入场文字",
+      "duration": 0.8,
+      "rotationAmount": 180,
+      "startScale": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      rotationAmount: ${rotationAmount},\n      startScale: ${startScale}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var rot = layer.property(\"Rotation\");\n    rot.setValueAtTime(comp.time, -p.rotationAmount);\n    rot.setValueAtTime(comp.time + p.duration, 0);\n    var sc = layer.property(\"Scale\");\n    sc.setValueAtTime(comp.time, [p.startScale, p.startScale]);\n    sc.setValueAtTime(comp.time + p.duration, [100, 100]);\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(comp.time, 0);\n    op.setValueAtTime(comp.time + p.duration, 100);\n    for (var k = 1; k <= rot.numKeys; k++) {\n      rot.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"旋转入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "character_scatter_converge",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "字符散开汇聚 - 字符从随机位置散开状态汇聚到正确位置",
+    "tags": [
+      "入场",
+      "字符",
+      "散开",
+      "汇聚",
+      "scatter",
+      "converge",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "scatterRadius": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "randomSeed": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "字符汇聚文字",
+      "duration": 1.5,
+      "scatterRadius": 200,
+      "randomSeed": 42
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      scatterRadius: ${scatterRadius},\n      randomSeed: ${randomSeed}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var textProp = layer.property(\"ADBE Text Properties\");\n    var animator = textProp.property(\"ADBE Text Animators\").addProperty(\"ADBE Text Animator\");\n    var rangeSel = animator.property(\"ADBE Text Selectors\").addProperty(\"ADBE Text Wiggly Selector\");\n    var posProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Position\");\n    var t0 = layer.inPoint;\n    rangeSel.property(\"ADBE Text Wiggly Selector-0001\").setValue(p.scatterRadius);\n    rangeSel.property(\"ADBE Text Wiggly Selector-0002\").setValue(p.randomSeed);\n    posProp.expression = \"[wiggle(5, \" + p.scatterRadius + \")[0] * (1 - (time - \" + t0 + \") / \" + p.duration + \"), wiggle(5, \" + p.scatterRadius + \")[1] * (1 - (time - \" + t0 + \") / \" + p.duration + \")]\";\n    _result = {status:\"success\", message:\"字符散开汇聚已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "blur_focus_in",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "模糊聚焦入场 - 文字从模糊状态逐渐变清晰，模拟对焦过程",
+    "tags": [
+      "入场",
+      "模糊",
+      "聚焦",
+      "blur",
+      "focus",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "模糊聚焦文字",
+      "duration": 1.0,
+      "blurAmount": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      blurAmount: ${blurAmount}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var blur = layer.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValueAtTime(comp.time, p.blurAmount);\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValueAtTime(comp.time + p.duration, 0);\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(comp.time, 0);\n    op.setValueAtTime(comp.time + p.duration, 100);\n    for (var k = 1; k <= blur.property(\"ADBE Gaussian Blur 2-0001\").numKeys; k++) {\n      blur.property(\"ADBE Gaussian Blur 2-0001\").setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"模糊聚焦入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "3d_flip_enter",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "3D翻转入场 - 文字在3D空间中翻转进入，Y轴或X轴旋转",
+    "tags": [
+      "入场",
+      "3D",
+      "翻转",
+      "flip",
+      "3d",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 2.0
+      },
+      "flipAxis": {
+        "type": "string"
+      },
+      "flipAngle": {
+        "type": "number",
+        "min": 90,
+        "max": 360
+      }
+    },
+    "default_values": {
+      "textLayerName": "3D翻转文字",
+      "duration": 1.0,
+      "flipAxis": "y",
+      "flipAngle": 180
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      flipAxis: ${flipAxis},\n      flipAngle: ${flipAngle}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    layer.threeDLayer = true;\n    var rotProp = p.flipAxis === \"y\" ? layer.property(\"ADBE Transform Group\").property(\"ADBE Y Rotation\") : layer.property(\"ADBE Transform Group\").property(\"ADBE X Rotation\");\n    rotProp.setValueAtTime(comp.time, -p.flipAngle);\n    rotProp.setValueAtTime(comp.time + p.duration, 0);\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(comp.time, 0);\n    op.setValueAtTime(comp.time + p.duration, 100);\n    for (var k = 1; k <= rotProp.numKeys; k++) {\n      rotProp.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"3D翻转入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "path_enter",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "路径进入 - 文字沿指定路径运动入场",
+    "tags": [
+      "入场",
+      "路径",
+      "path",
+      "motion",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "pathLength": {
+        "type": "number",
+        "min": 100,
+        "max": 1000
+      },
+      "curveType": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "路径进入文字",
+      "duration": 1.5,
+      "pathLength": 400,
+      "curveType": "linear"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      pathLength: ${pathLength},\n      curveType: ${curveType}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var pos = layer.property(\"Position\");\n    var cx = comp.width / 2;\n    var cy = comp.height / 2;\n    pos.setValueAtTime(comp.time, [cx - p.pathLength, cy]);\n    pos.setValueAtTime(comp.time + p.duration, [cx, cy]);\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(comp.time, 0);\n    op.setValueAtTime(comp.time + p.duration, 100);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"路径进入已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "char_bounce_in",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "逐字弹跳入场 - 每个字符依次弹跳进入，波浪式入场效果",
+    "tags": [
+      "入场",
+      "逐字",
+      "弹跳",
+      "char",
+      "bounce",
+      "wave",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "charDelay": {
+        "type": "number",
+        "min": 0.01,
+        "max": 0.3
+      },
+      "bounceHeight": {
+        "type": "number",
+        "min": 20,
+        "max": 200
+      }
+    },
+    "default_values": {
+      "textLayerName": "逐字弹跳文字",
+      "duration": 1.5,
+      "charDelay": 0.05,
+      "bounceHeight": 60
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      charDelay: ${charDelay},\n      bounceHeight: ${bounceHeight}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var textProp = layer.property(\"ADBE Text Properties\");\n    var animator = textProp.property(\"ADBE Text Animators\").addProperty(\"ADBE Text Animator\");\n    var rangeSel = animator.property(\"ADBE Text Selectors\").addProperty(\"ADBE Text Selector\");\n    var posProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Position\");\n    var opProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Opacity\");\n    var t0 = layer.inPoint;\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(t0, 0);\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(t0 + p.duration, 100);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(t0, 5);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(t0 + p.duration, 5);\n    posProp.setValueAtTime(t0, [0, p.bounceHeight]);\n    posProp.setValueAtTime(t0 + p.duration * 0.5, [0, -p.bounceHeight * 0.3]);\n    posProp.setValueAtTime(t0 + p.duration, [0, 0]);\n    opProp.setValueAtTime(t0, 0);\n    opProp.setValueAtTime(t0 + p.duration, 100);\n    _result = {status:\"success\", message:\"逐字弹跳入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "wave_enter",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "波浪入场 - 字符以波浪状依次起伏进入画面",
+    "tags": [
+      "入场",
+      "波浪",
+      "wave",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "waveHeight": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "waveSpeed": {
+        "type": "number",
+        "min": 1,
+        "max": 10
+      }
+    },
+    "default_values": {
+      "textLayerName": "波浪入场文字",
+      "duration": 1.5,
+      "waveHeight": 40,
+      "waveSpeed": 3
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      waveHeight: ${waveHeight},\n      waveSpeed: ${waveSpeed}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var textProp = layer.property(\"ADBE Text Properties\");\n    var animator = textProp.property(\"ADBE Text Animators\").addProperty(\"ADBE Text Animator\");\n    var rangeSel = animator.property(\"ADBE Text Selectors\").addProperty(\"ADBE Text Selector\");\n    var posProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Position\");\n    var opProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Opacity\");\n    var t0 = layer.inPoint;\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(t0, 0);\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(t0 + p.duration, 100);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(t0, 10);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(t0 + p.duration, 10);\n    posProp.expression = \"[0, Math.sin(textIndex * \" + p.waveSpeed + \" - (time - \" + t0 + \") * \" + p.waveSpeed + \") * \" + p.waveHeight + \"]\";\n    opProp.setValueAtTime(t0, 0);\n    opProp.setValueAtTime(t0 + p.duration, 100);\n    _result = {status:\"success\", message:\"波浪入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "split_enter",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "分裂入场 - 文字从中间分裂开来再合并，戏剧性入场",
+    "tags": [
+      "入场",
+      "分裂",
+      "split",
+      "dramatic",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 2.0
+      },
+      "splitDistance": {
+        "type": "number",
+        "min": 20,
+        "max": 300
+      },
+      "axis": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "分裂入场文字",
+      "duration": 0.8,
+      "splitDistance": 100,
+      "axis": "horizontal"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      splitDistance: ${splitDistance},\n      axis: ${axis}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var sc = layer.property(\"Scale\");\n    sc.setValueAtTime(comp.time, [100, 100]);\n    sc.setValueAtTime(comp.time + p.duration * 0.3, [100 + p.splitDistance / 5, 100]);\n    sc.setValueAtTime(comp.time + p.duration, [100, 100]);\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(comp.time, 0);\n    op.setValueAtTime(comp.time + p.duration * 0.2, 100);\n    op.setValueAtTime(comp.time + p.duration, 100);\n    _result = {status:\"success\", message:\"分裂入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "inflate_enter",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "膨胀入场 - 文字从扁平膨胀到正常大小，气球充气效果",
+    "tags": [
+      "入场",
+      "膨胀",
+      "inflate",
+      "balloon",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 2.0
+      },
+      "inflateAmount": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "膨胀入场文字",
+      "duration": 0.8,
+      "inflateAmount": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      inflateAmount: ${inflateAmount}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var sc = layer.property(\"Scale\");\n    sc.setValueAtTime(comp.time, [100 - p.inflateAmount, 100 - p.inflateAmount * 0.5]);\n    sc.setValueAtTime(comp.time + p.duration * 0.7, [100 + p.inflateAmount * 0.1, 100 + p.inflateAmount * 0.05]);\n    sc.setValueAtTime(comp.time + p.duration, [100, 100]);\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(comp.time, 0);\n    op.setValueAtTime(comp.time + p.duration * 0.3, 100);\n    for (var k = 1; k <= sc.numKeys; k++) {\n      sc.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"膨胀入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "slide_bounce_back",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "滑入弹回入场 - 文字滑入后弹回，带有过冲和回弹",
+    "tags": [
+      "入场",
+      "滑入",
+      "弹回",
+      "slide",
+      "bounce",
+      "back",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 2.0
+      },
+      "slideDistance": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "overshoot": {
+        "type": "number",
+        "min": 0.05,
+        "max": 0.5
+      },
+      "direction": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "滑入弹回文字",
+      "duration": 0.8,
+      "slideDistance": 200,
+      "overshoot": 0.2,
+      "direction": "right"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      slideDistance: ${slideDistance},\n      overshoot: ${overshoot},\n      direction: ${direction}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var pos = layer.property(\"Position\");\n    var cx = comp.width / 2;\n    var cy = comp.height / 2;\n    if (p.direction === \"right\") {\n      pos.setValueAtTime(comp.time, [cx - p.slideDistance, cy]);\n      pos.setValueAtTime(comp.time + p.duration * 0.6, [cx + p.slideDistance * p.overshoot, cy]);\n      pos.setValueAtTime(comp.time + p.duration, [cx, cy]);\n    } else {\n      pos.setValueAtTime(comp.time, [cx, cy + p.slideDistance]);\n      pos.setValueAtTime(comp.time + p.duration * 0.6, [cx, cy - p.slideDistance * p.overshoot]);\n      pos.setValueAtTime(comp.time + p.duration, [cx, cy]);\n    }\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"滑入弹回入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "mask_reveal_enter",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "掩膜展开入场 - 通过遮罩从左到右逐步揭示文字",
+    "tags": [
+      "入场",
+      "掩膜",
+      "遮罩",
+      "reveal",
+      "mask",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "revealDirection": {
+        "type": "string"
+      },
+      "feather": {
+        "type": "number",
+        "min": 0,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "textLayerName": "掩膜展开文字",
+      "duration": 1.0,
+      "revealDirection": "left",
+      "feather": 5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      revealDirection: ${revealDirection},\n      feather: ${feather}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var mask = layer.Masks.addProperty(\"ADBE Mask Atom\");\n    mask.maskMode = MaskMode.ADD;\n    mask.maskFeather.setValue([p.feather, p.feather]);\n    mask.maskExpansion.setValueAtTime(comp.time, -comp.width / 2);\n    mask.maskExpansion.setValueAtTime(comp.time + p.duration, comp.width / 2);\n    _result = {status:\"success\", message:\"掩膜展开入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "shake_enter",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "抖动入场 - 文字以抖动方式出现，带有随机震动效果",
+    "tags": [
+      "入场",
+      "抖动",
+      "shake",
+      "jitter",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "shakeIntensity": {
+        "type": "number",
+        "min": 5,
+        "max": 50
+      },
+      "shakeFrequency": {
+        "type": "number",
+        "min": 5,
+        "max": 30
+      }
+    },
+    "default_values": {
+      "textLayerName": "抖动入场文字",
+      "duration": 0.5,
+      "shakeIntensity": 20,
+      "shakeFrequency": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      shakeIntensity: ${shakeIntensity},\n      shakeFrequency: ${shakeFrequency}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var pos = layer.property(\"Position\");\n    pos.expression = \"var decay = 1 - (time - inPoint) / \" + p.duration + \"; decay = decay > 0 ? decay : 0; [value[0] + wiggle(\" + p.shakeFrequency + \", \" + p.shakeIntensity + \" * decay)[0], value[1] + wiggle(\" + p.shakeFrequency + \", \" + p.shakeIntensity + \" * decay)[1]]\";\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(comp.time, 0);\n    op.setValueAtTime(comp.time + p.duration * 0.2, 100);\n    _result = {status:\"success\", message:\"抖动入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "flip_enter",
+    "category": "text_animation",
+    "subcategory": "entrance",
+    "description": "翻转入场 - 文字卡片翻转效果入场，2D翻转动画",
+    "tags": [
+      "入场",
+      "翻转",
+      "flip",
+      "card",
+      "entrance"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "flipDirection": {
+        "type": "string"
+      },
+      "flipAngle": {
+        "type": "number",
+        "min": 90,
+        "max": 360
+      }
+    },
+    "default_values": {
+      "textLayerName": "翻转入场文字",
+      "duration": 0.6,
+      "flipDirection": "horizontal",
+      "flipAngle": 90
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      flipDirection: ${flipDirection},\n      flipAngle: ${flipAngle}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var sc = layer.property(\"Scale\");\n    if (p.flipDirection === \"horizontal\") {\n      sc.setValueAtTime(comp.time, [0, 100]);\n      sc.setValueAtTime(comp.time + p.duration * 0.5, [100 + p.flipAngle / 5, 100]);\n      sc.setValueAtTime(comp.time + p.duration, [100, 100]);\n    } else {\n      sc.setValueAtTime(comp.time, [100, 0]);\n      sc.setValueAtTime(comp.time + p.duration * 0.5, [100, 100 + p.flipAngle / 5]);\n      sc.setValueAtTime(comp.time + p.duration, [100, 100]);\n    }\n    for (var k = 1; k <= sc.numKeys; k++) {\n      sc.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"翻转入场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "pulse_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "脉冲强调 - 文字周期性缩放脉冲，模拟心跳节奏的视觉强调效果",
+    "tags": [
+      "强调",
+      "脉冲",
+      "pulse",
+      "emphasis",
+      "heartbeat"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "pulseRate": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "scaleAmount": {
+        "type": "number",
+        "min": 1.0,
+        "max": 1.5
+      }
+    },
+    "default_values": {
+      "textLayerName": "脉冲强调文字",
+      "duration": 3.0,
+      "pulseRate": 1.5,
+      "scaleAmount": 1.15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      pulseRate: ${pulseRate},\n      scaleAmount: ${scaleAmount}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var sc = layer.property(\"Scale\");\n    var amt = (p.scaleAmount - 1) * 100;\n    sc.expression = \"var t = time - inPoint; var pulse = Math.sin(t * \" + p.pulseRate + \" * 2 * Math.PI); var s = 100 + pulse * \" + amt + \"; [s, s]\";\n    _result = {status:\"success\", message:\"脉冲强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "flicker_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "闪烁强调 - 文字透明度周期性闪烁，模拟霓虹灯或信号干扰效果",
+    "tags": [
+      "强调",
+      "闪烁",
+      "flicker",
+      "emphasis",
+      "neon"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "flickerRate": {
+        "type": "number",
+        "min": 2,
+        "max": 30
+      },
+      "minOpacity": {
+        "type": "number",
+        "min": 0,
+        "max": 80
+      }
+    },
+    "default_values": {
+      "textLayerName": "闪烁强调文字",
+      "duration": 3.0,
+      "flickerRate": 10,
+      "minOpacity": 30
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      flickerRate: ${flickerRate},\n      minOpacity: ${minOpacity}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var op = layer.property(\"Opacity\");\n    op.expression = \"var t = time - inPoint; var f = Math.sin(t * \" + p.flickerRate + \" * 2 * Math.PI); var noise = random(0, 1); var v = \" + p.minOpacity + \" + (100 - \" + p.minOpacity + \") * (0.5 + 0.5 * f) * (0.7 + 0.3 * noise); clamp(v, 0, 100)\";\n    _result = {status:\"success\", message:\"闪烁强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "shake_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "晃动强调 - 文字位置周期性抖动，模拟地震或紧张情绪的视觉表达",
+    "tags": [
+      "强调",
+      "晃动",
+      "shake",
+      "emphasis",
+      "earthquake"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "shakeFrequency": {
+        "type": "number",
+        "min": 1,
+        "max": 30
+      },
+      "shakeAmplitude": {
+        "type": "number",
+        "min": 1,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "textLayerName": "晃动强调文字",
+      "duration": 3.0,
+      "shakeFrequency": 15,
+      "shakeAmplitude": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      shakeFrequency: ${shakeFrequency},\n      shakeAmplitude: ${shakeAmplitude}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var pos = layer.property(\"Position\");\n    pos.expression = \"var t = time - inPoint; var sx = Math.sin(t * \" + p.shakeFrequency + \") * \" + p.shakeAmplitude + \"; var sy = Math.cos(t * \" + p.shakeFrequency + \" * 1.3) * \" + p.shakeAmplitude + \"; value + [sx, sy]\";\n    _result = {status:\"success\", message:\"晃动强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "bounce_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "弹跳强调 - 文字Y轴周期性弹跳，模拟球体弹跳的物理效果",
+    "tags": [
+      "强调",
+      "弹跳",
+      "bounce",
+      "emphasis",
+      "physics"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "bounceRate": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "bounceHeight": {
+        "type": "number",
+        "min": 5,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "弹跳强调文字",
+      "duration": 3.0,
+      "bounceRate": 2.0,
+      "bounceHeight": 40
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      bounceRate: ${bounceRate},\n      bounceHeight: ${bounceHeight}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var pos = layer.property(\"Position\");\n    pos.expression = \"var t = time - inPoint; var bounce = Math.abs(Math.sin(t * \" + p.bounceRate + \" * Math.PI)); var y = -bounce * \" + p.bounceHeight + \"; value + [0, y]\";\n    _result = {status:\"success\", message:\"弹跳强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "rotate_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "旋转强调 - 文字Z轴周期性旋转摆动，模拟指针或钟摆运动",
+    "tags": [
+      "强调",
+      "旋转",
+      "rotate",
+      "emphasis",
+      "pendulum"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "rotateRate": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "rotateAmount": {
+        "type": "number",
+        "min": 5,
+        "max": 180
+      }
+    },
+    "default_values": {
+      "textLayerName": "旋转强调文字",
+      "duration": 3.0,
+      "rotateRate": 1.0,
+      "rotateAmount": 15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      rotateRate: ${rotateRate},\n      rotateAmount: ${rotateAmount}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var rot = layer.property(\"Rotation\");\n    rot.expression = \"var t = time - inPoint; var r = Math.sin(t * \" + p.rotateRate + \" * 2 * Math.PI) * \" + p.rotateAmount + \"; r\";\n    _result = {status:\"success\", message:\"旋转强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "glow_pulse_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "发光脉冲强调 - 文字发光强度周期性脉冲，模拟呼吸灯或能量充能效果",
+    "tags": [
+      "强调",
+      "发光",
+      "glow",
+      "pulse",
+      "emphasis",
+      "energy"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "glowRate": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "maxGlowRadius": {
+        "type": "number",
+        "min": 10,
+        "max": 200
+      },
+      "glowColor": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "textLayerName": "发光脉冲文字",
+      "duration": 3.0,
+      "glowRate": 1.5,
+      "maxGlowRadius": 80,
+      "glowColor": [
+        0.2,
+        0.8,
+        1
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      glowRate: ${glowRate},\n      maxGlowRadius: ${maxGlowRadius},\n      glowColor: ${glowColor}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0001\").setValue(p.glowColor);\n    glow.property(\"ADBE Glow Radius-0001\").expression = \"var t = time - inPoint; var pulse = 0.5 + 0.5 * Math.sin(t * \" + p.glowRate + \" * 2 * Math.PI); pulse * \" + p.maxGlowRadius + \"\";\n    glow.property(\"ADBE Glo2i-0003\").setValue(2);\n    _result = {status:\"success\", message:\"发光脉冲强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "color_shift_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "颜色变化强调 - 文字色相循环变化，模拟彩虹或光谱流动效果",
+    "tags": [
+      "强调",
+      "颜色",
+      "color",
+      "shift",
+      "emphasis",
+      "rainbow"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "shiftSpeed": {
+        "type": "number",
+        "min": 1,
+        "max": 100
+      },
+      "saturation": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "颜色变化文字",
+      "duration": 3.0,
+      "shiftSpeed": 30,
+      "saturation": 80
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      shiftSpeed: ${shiftSpeed},\n      saturation: ${saturation}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0001\").expression = \"var t = time - inPoint; (t * \" + p.shiftSpeed + \") % 360\";\n    hs.property(\"ADBE Hue/Saturation-0002\").setValue(p.saturation);\n    _result = {status:\"success\", message:\"颜色变化强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "tracking_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "字间距强调 - 文字字间距周期性变化，模拟呼吸或节奏感",
+    "tags": [
+      "强调",
+      "字间距",
+      "tracking",
+      "emphasis",
+      "spacing"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "trackingRate": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "maxTracking": {
+        "type": "number",
+        "min": 1,
+        "max": 30
+      }
+    },
+    "default_values": {
+      "textLayerName": "字间距文字",
+      "duration": 3.0,
+      "trackingRate": 1.0,
+      "maxTracking": 10
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      trackingRate: ${trackingRate},\n      maxTracking: ${maxTracking}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.trackingAmount = 0;\n    src.setValue(td);\n    src.expression = \"var t = time - inPoint; var track = Math.sin(t * \" + p.trackingRate + \" * 2 * Math.PI) * \" + p.maxTracking + \"; textSource.trackingAmount = track; value\";\n    _result = {status:\"success\", message:\"字间距强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "3d_flip_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "3D翻转强调 - 文字Y轴周期性3D翻转，模拟硬币翻转效果",
+    "tags": [
+      "强调",
+      "3D",
+      "翻转",
+      "flip",
+      "emphasis",
+      "coin"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "flipRate": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "flipAngle": {
+        "type": "number",
+        "min": 45,
+        "max": 360
+      }
+    },
+    "default_values": {
+      "textLayerName": "3D翻转文字",
+      "duration": 3.0,
+      "flipRate": 1.0,
+      "flipAngle": 180
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      flipRate: ${flipRate},\n      flipAngle: ${flipAngle}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    layer.threeDLayer = true;\n    var ry = layer.property(\"ADBE Transform Group\").property(\"ADBE Rotate Y\");\n    ry.expression = \"var t = time - inPoint; Math.sin(t * \" + p.flipRate + \" * 2 * Math.PI) * \" + p.flipAngle + \"\";\n    _result = {status:\"success\", message:\"3D翻转强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "wave_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "波浪强调 - 文字逐字波浪起伏，模拟水面波纹或飘动效果",
+    "tags": [
+      "强调",
+      "波浪",
+      "wave",
+      "emphasis",
+      "ripple"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "waveSpeed": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "waveAmplitude": {
+        "type": "number",
+        "min": 5,
+        "max": 80
+      },
+      "waveFrequency": {
+        "type": "number",
+        "min": 1,
+        "max": 10
+      }
+    },
+    "default_values": {
+      "textLayerName": "波浪文字",
+      "duration": 3.0,
+      "waveSpeed": 2.0,
+      "waveAmplitude": 30,
+      "waveFrequency": 3
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      waveSpeed: ${waveSpeed},\n      waveAmplitude: ${waveAmplitude},\n      waveFrequency: ${waveFrequency}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var textProp = layer.property(\"ADBE Text Properties\");\n    var animator = textProp.property(\"ADBE Text Animators\").addProperty(\"ADBE Text Animator\");\n    animator.name = \"WaveAnimator\";\n    var rangeSel = animator.property(\"ADBE Text Selectors\").addProperty(\"ADBE Text Selector\");\n    var posProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Position\");\n    rangeSel.property(\"ADBE Text Selector-0001\").setValue(0);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValue(100);\n    posProp.expression = \"var t = time - inPoint; var phase = textIndex / \" + p.waveFrequency + \" * 2 * Math.PI; var y = Math.sin(t * \" + p.waveSpeed + \" + phase) * \" + p.waveAmplitude + \"; [0, -y]\";\n    _result = {status:\"success\", message:\"波浪强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "jitter_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "抖动强调 - 文字高频随机抖动，模拟紧张或电磁干扰效果",
+    "tags": [
+      "强调",
+      "抖动",
+      "jitter",
+      "emphasis",
+      "nervous"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "jitterFrequency": {
+        "type": "number",
+        "min": 10,
+        "max": 50
+      },
+      "jitterAmount": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      }
+    },
+    "default_values": {
+      "textLayerName": "抖动文字",
+      "duration": 3.0,
+      "jitterFrequency": 25,
+      "jitterAmount": 8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      jitterFrequency: ${jitterFrequency},\n      jitterAmount: ${jitterAmount}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var pos = layer.property(\"Position\");\n    pos.expression = \"wiggle(\" + p.jitterFrequency + \", \" + p.jitterAmount + \")\";\n    var rot = layer.property(\"Rotation\");\n    rot.expression = \"wiggle(\" + p.jitterFrequency + \", \" + (p.jitterAmount * 0.5) + \")\";\n    _result = {status:\"success\", message:\"抖动强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "scanline_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "扫描线强调 - 文字叠加移动扫描线效果，模拟CRT显示器或全息投影",
+    "tags": [
+      "强调",
+      "扫描线",
+      "scanline",
+      "emphasis",
+      "CRT"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "scanlineSpeed": {
+        "type": "number",
+        "min": 0.5,
+        "max": 10.0
+      },
+      "scanlineSpacing": {
+        "type": "number",
+        "min": 2,
+        "max": 20
+      },
+      "scanlineOpacity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "扫描线文字",
+      "duration": 3.0,
+      "scanlineSpeed": 2.0,
+      "scanlineSpacing": 8,
+      "scanlineOpacity": 0.4
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      scanlineSpeed: ${scanlineSpeed},\n      scanlineSpacing: ${scanlineSpacing},\n      scanlineOpacity: ${scanlineOpacity}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var scanLayer = comp.layers.addSolid([0, 0, 0], \"Scanline Overlay\", comp.width, comp.height, 1);\n    scanLayer.moveToEnd();\n    scanLayer.inPoint = layer.inPoint;\n    scanLayer.outPoint = layer.inPoint + p.duration;\n    scanLayer.blendingMode = BlendingMode.MULTIPLY;\n    scanLayer.opacity.setValue(p.scanlineOpacity * 100);\n    var stripes = scanLayer.Effects.addProperty(\"ADBE Venetian Blinds\");\n    stripes.property(\"ADBE Venetian Blinds-0001\").setValue(p.scanlineSpacing);\n    stripes.property(\"ADBE Venetian Blinds-0002\").expression = \"var t = time - inPoint; (t * \" + p.scanlineSpeed + \" * 100) % 360\";\n    scanLayer.trackMatteType = TrackMatteType.NO_TRACK_MATTE;\n    scanLayer.parent = layer;\n    _result = {status:\"success\", message:\"扫描线强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "shatter_reform_emphasis",
+    "category": "text_animation",
+    "subcategory": "emphasis",
+    "description": "破碎重组强调 - 文字周期性破碎后重组，模拟能量消散与凝聚效果",
+    "tags": [
+      "强调",
+      "破碎",
+      "重组",
+      "shatter",
+      "reform",
+      "emphasis"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 1.0,
+        "max": 10.0
+      },
+      "shatterRate": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "shatterForce": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "particleCount": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "破碎重组文字",
+      "duration": 4.0,
+      "shatterRate": 1.0,
+      "shatterForce": 50,
+      "particleCount": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      shatterRate: ${shatterRate},\n      shatterForce: ${shatterForce},\n      particleCount: ${particleCount}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var shatter = layer.Effects.addProperty(\"ADBE Shatter\");\n    shatter.property(\"ADBE Shatter-0001\").setValue(\"Glass\");\n    shatter.property(\"ADBE Shatter-0003\").expression = \"var t = time - inPoint; var cycle = (t * \" + p.shatterRate + \") % 1; var force = Math.sin(cycle * 2 * Math.PI) * \" + p.shatterForce + \"; force\";\n    shatter.property(\"ADBE Shatter-0005\").expression = \"var t = time - inPoint; var cycle = (t * \" + p.shatterRate + \") % 1; var repel = (cycle > 0.5) ? \" + p.shatterForce + \" : -\" + p.shatterForce + \"; repel\";\n    shatter.property(\"ADBE Shatter-0011\").setValue(p.particleCount);\n    _result = {status:\"success\", message:\"破碎重组强调已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "fade_out_exit",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "淡出出场 - 文字透明度从100渐变为0，经典的出场效果",
+    "tags": [
+      "出场",
+      "淡出",
+      "fade",
+      "exit",
+      "classic"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "淡出文字",
+      "duration": 1.0,
+      "easing": "easeOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var op = layer.property(\"Opacity\");\n    var exitStart = layer.outPoint - p.duration;\n    op.setValueAtTime(exitStart, 100);\n    op.setValueAtTime(layer.outPoint, 0);\n    for (var k = 1; k <= op.numKeys; k++) {\n      op.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"淡出出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "zoom_fade_out",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "缩放淡出出场 - 文字放大同时淡出，模拟远离或消散效果",
+    "tags": [
+      "出场",
+      "缩放",
+      "淡出",
+      "zoom",
+      "fade",
+      "exit"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "zoomScale": {
+        "type": "number",
+        "min": 120,
+        "max": 300
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "缩放淡出文字",
+      "duration": 1.0,
+      "zoomScale": 200,
+      "easing": "easeInOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      zoomScale: ${zoomScale},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var op = layer.property(\"Opacity\");\n    var sc = layer.property(\"Scale\");\n    var exitStart = layer.outPoint - p.duration;\n    op.setValueAtTime(exitStart, 100);\n    op.setValueAtTime(layer.outPoint, 0);\n    sc.setValueAtTime(exitStart, [100, 100]);\n    sc.setValueAtTime(layer.outPoint, [p.zoomScale, p.zoomScale]);\n    for (var k = 1; k <= op.numKeys; k++) {\n      op.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    for (var k = 1; k <= sc.numKeys; k++) {\n      sc.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"缩放淡出出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "slide_out_exit",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "滑动出场 - 文字向指定方向滑出画面，简洁有力的出场效果",
+    "tags": [
+      "出场",
+      "滑动",
+      "slide",
+      "exit",
+      "direction"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "direction": {
+        "type": "string"
+      },
+      "distance": {
+        "type": "number",
+        "min": 100,
+        "max": 2000
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "滑出文字",
+      "duration": 0.6,
+      "direction": "right",
+      "distance": 500,
+      "easing": "easeIn"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      direction: ${direction},\n      distance: ${distance},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var pos = layer.property(\"Position\");\n    var exitStart = layer.outPoint - p.duration;\n    var origPos = pos.valueAtTime(exitStart);\n    var dx = (p.direction === \"left\" || p.direction === \"right\") ? p.distance : 0;\n    var dy = (p.direction === \"up\" || p.direction === \"down\") ? p.distance : 0;\n    if (p.direction === \"left\") dx = -dx;\n    if (p.direction === \"up\") dy = -dy;\n    pos.setValueAtTime(exitStart, origPos);\n    pos.setValueAtTime(layer.outPoint, [origPos[0] + dx, origPos[1] + dy]);\n    for (var k = 1; k <= pos.numKeys; k++) {\n      pos.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"滑动出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "blur_fade_out",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "模糊淡出出场 - 文字逐渐模糊并淡出，营造梦幻或回忆消散效果",
+    "tags": [
+      "出场",
+      "模糊",
+      "淡出",
+      "blur",
+      "fade",
+      "exit",
+      "dreamy"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 3.0
+      },
+      "maxBlur": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "模糊淡出文字",
+      "duration": 1.2,
+      "maxBlur": 60,
+      "easing": "easeInOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      maxBlur: ${maxBlur},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var op = layer.property(\"Opacity\");\n    var blur = layer.Effects.addProperty(\"ADBE Gaussian Blur 2\");\n    var exitStart = layer.outPoint - p.duration;\n    op.setValueAtTime(exitStart, 100);\n    op.setValueAtTime(layer.outPoint, 0);\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValueAtTime(exitStart, 0);\n    blur.property(\"ADBE Gaussian Blur 2-0001\").setValueAtTime(layer.outPoint, p.maxBlur);\n    for (var k = 1; k <= op.numKeys; k++) {\n      op.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    var bp = blur.property(\"ADBE Gaussian Blur 2-0001\");\n    for (var k = 1; k <= bp.numKeys; k++) {\n      bp.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"模糊淡出出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "char_fade_out",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "逐字淡出出场 - 文字逐字透明度归零，模拟打字机逆效果",
+    "tags": [
+      "出场",
+      "逐字",
+      "淡出",
+      "character",
+      "fade",
+      "exit",
+      "typewriter"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "charDelay": {
+        "type": "number",
+        "min": 0.02,
+        "max": 0.3
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "逐字淡出文字",
+      "duration": 2.0,
+      "charDelay": 0.08,
+      "easing": "easeOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      charDelay: ${charDelay},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var textProp = layer.property(\"ADBE Text Properties\");\n    var animator = textProp.property(\"ADBE Text Animators\").addProperty(\"ADBE Text Animator\");\n    animator.name = \"CharFadeOut\";\n    var rangeSel = animator.property(\"ADBE Text Selectors\").addProperty(\"ADBE Text Selector\");\n    var opacityProp = animator.property(\"ADBE Text Animator Properties\").addProperty(\"ADBE Opacity\");\n    var exitStart = layer.outPoint - p.duration;\n    opacityProp.setValue(0);\n    rangeSel.property(\"ADBE Text Selector-0001\").setValueAtTime(exitStart, 0);\n    rangeSel.property(\"ADBE Text Selector-0002\").setValueAtTime(exitStart, 0);\n    rangeSel.property(\"ADBE Text Selector-0001\").expression = \"var t = time - \" + exitStart + \"; var start = textIndex * \" + p.charDelay + \"; var dur = \" + p.duration + \" - start; clamp((t - start) / dur * 100, 0, 100)\";\n    rangeSel.property(\"ADBE Text Selector-0002\").expression = \"100\";\n    _result = {status:\"success\", message:\"逐字淡出出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "zoom_disappear",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "缩放消失出场 - 文字从100%缩小到0%，模拟被吸入或消失效果",
+    "tags": [
+      "出场",
+      "缩放",
+      "消失",
+      "zoom",
+      "disappear",
+      "exit"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "缩放消失文字",
+      "duration": 0.8,
+      "easing": "easeIn"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var sc = layer.property(\"Scale\");\n    var exitStart = layer.outPoint - p.duration;\n    sc.setValueAtTime(exitStart, [100, 100]);\n    sc.setValueAtTime(layer.outPoint, [0, 0]);\n    for (var k = 1; k <= sc.numKeys; k++) {\n      sc.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"缩放消失出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "particle_dissolve_exit",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "粒子溶解出场 - 文字以粒子形式飞散消失，模拟能量消散效果",
+    "tags": [
+      "出场",
+      "粒子",
+      "溶解",
+      "particle",
+      "dissolve",
+      "exit"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "particleForce": {
+        "type": "number",
+        "min": 20,
+        "max": 200
+      },
+      "particleDirection": {
+        "type": "number",
+        "min": 0,
+        "max": 360
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "粒子溶解文字",
+      "duration": 1.5,
+      "particleForce": 80,
+      "particleDirection": 90,
+      "easing": "easeOut"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      particleForce: ${particleForce},\n      particleDirection: ${particleDirection},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var scatter = layer.Effects.addProperty(\"ADBE Scatter\");\n    var op = layer.property(\"Opacity\");\n    var exitStart = layer.outPoint - p.duration;\n    scatter.property(\"ADBE Scatter-0001\").setValueAtTime(exitStart, 0);\n    scatter.property(\"ADBE Scatter-0001\").setValueAtTime(layer.outPoint, p.particleForce);\n    scatter.property(\"ADBE Scatter-0002\").setValueAtTime(exitStart, 0);\n    scatter.property(\"ADBE Scatter-0002\").setValueAtTime(layer.outPoint, p.particleDirection);\n    op.setValueAtTime(exitStart, 100);\n    op.setValueAtTime(layer.outPoint, 0);\n    for (var k = 1; k <= op.numKeys; k++) {\n      op.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"粒子溶解出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "tear_apart_exit",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "撕裂出场 - 文字左右两半向两侧分离撕裂，模拟撕扯破坏效果",
+    "tags": [
+      "出场",
+      "撕裂",
+      "tear",
+      "apart",
+      "exit",
+      "rip"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 2.0
+      },
+      "tearDistance": {
+        "type": "number",
+        "min": 50,
+        "max": 500
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "撕裂出场文字",
+      "duration": 0.8,
+      "tearDistance": 200,
+      "easing": "easeIn"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      tearDistance: ${tearDistance},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var exitStart = layer.outPoint - p.duration;\n    var offset = layer.Effects.addProperty(\"ADBE Offset\");\n    offset.property(\"ADBE Offset-0001\").setValueAtTime(exitStart, [0, 0]);\n    offset.property(\"ADBE Offset-0001\").setValueAtTime(layer.outPoint, [-p.tearDistance, 0]);\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(exitStart, 100);\n    op.setValueAtTime(layer.outPoint, 0);\n    for (var k = 1; k <= op.numKeys; k++) {\n      op.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    var op2 = offset.property(\"ADBE Offset-0001\");\n    for (var k = 1; k <= op2.numKeys; k++) {\n      op2.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"撕裂出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "shatter_exit",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "破碎出场 - 文字以碎片形式崩裂飞散，模拟玻璃破碎效果",
+    "tags": [
+      "出场",
+      "破碎",
+      "shatter",
+      "exit",
+      "glass",
+      "break"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "shatterForce": {
+        "type": "number",
+        "min": 20,
+        "max": 200
+      },
+      "gravity": {
+        "type": "number",
+        "min": 0,
+        "max": 10
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "破碎出场文字",
+      "duration": 1.0,
+      "shatterForce": 80,
+      "gravity": 3,
+      "easing": "easeIn"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      shatterForce: ${shatterForce},\n      gravity: ${gravity},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var shatter = layer.Effects.addProperty(\"ADBE Shatter\");\n    shatter.property(\"ADBE Shatter-0001\").setValue(\"Glass\");\n    var exitStart = layer.outPoint - p.duration;\n    shatter.property(\"ADBE Shatter-0003\").setValueAtTime(exitStart, 0);\n    shatter.property(\"ADBE Shatter-0003\").setValueAtTime(exitStart + 0.1, p.shatterForce);\n    shatter.property(\"ADBE Shatter-0003\").setValueAtTime(layer.outPoint, p.shatterForce * 2);\n    shatter.property(\"ADBE Shatter-0005\").setValue(p.gravity);\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(exitStart, 100);\n    op.setValueAtTime(layer.outPoint, 0);\n    for (var k = 1; k <= op.numKeys; k++) {\n      op.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"破碎出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "melt_exit",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "融化出场 - 文字向下融化滴落，模拟蜡烛融化或液体效果",
+    "tags": [
+      "出场",
+      "融化",
+      "melt",
+      "exit",
+      "liquid",
+      "drip"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.5,
+        "max": 3.0
+      },
+      "meltAmount": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "dripSpeed": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "融化出场文字",
+      "duration": 1.5,
+      "meltAmount": 50,
+      "dripSpeed": 50,
+      "easing": "easeIn"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      meltAmount: ${meltAmount},\n      dripSpeed: ${dripSpeed},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var displace = layer.Effects.addProperty(\"ADBE Turbulent Displace\");\n    displace.property(\"ADBE Turbulent Displace-0001\").setValue(\"Turbulent\");\n    var exitStart = layer.outPoint - p.duration;\n    displace.property(\"ADBE Turbulent Displace-0002\").setValueAtTime(exitStart, 0);\n    displace.property(\"ADBE Turbulent Displace-0002\").setValueAtTime(layer.outPoint, p.meltAmount);\n    displace.property(\"ADBE Turbulent Displace-0005\").expression = \"var t = time - \" + exitStart + \"; t * \" + p.dripSpeed + \"\";\n    var sc = layer.property(\"Scale\");\n    sc.setValueAtTime(exitStart, [100, 100]);\n    sc.setValueAtTime(layer.outPoint, [100, 100 + p.meltAmount * 0.5]);\n    var op = layer.property(\"Opacity\");\n    op.setValueAtTime(exitStart, 100);\n    op.setValueAtTime(layer.outPoint, 0);\n    for (var k = 1; k <= op.numKeys; k++) {\n      op.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"融化出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "shrink_exit",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "收缩出场 - 文字从100%缩小到极小并淡出，模拟远去或被压缩效果",
+    "tags": [
+      "出场",
+      "收缩",
+      "shrink",
+      "exit",
+      "compress"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "minScale": {
+        "type": "number",
+        "min": 0,
+        "max": 30
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "收缩出场文字",
+      "duration": 0.8,
+      "minScale": 10,
+      "easing": "easeIn"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      minScale: ${minScale},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var sc = layer.property(\"Scale\");\n    var op = layer.property(\"Opacity\");\n    var exitStart = layer.outPoint - p.duration;\n    sc.setValueAtTime(exitStart, [100, 100]);\n    sc.setValueAtTime(layer.outPoint, [p.minScale, p.minScale]);\n    op.setValueAtTime(exitStart, 100);\n    op.setValueAtTime(layer.outPoint, 0);\n    for (var k = 1; k <= sc.numKeys; k++) {\n      sc.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    for (var k = 1; k <= op.numKeys; k++) {\n      op.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"收缩出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "rotation_exit",
+    "category": "text_animation",
+    "subcategory": "exit",
+    "description": "旋转出场 - 文字旋转同时缩小并淡出，模拟螺旋消失效果",
+    "tags": [
+      "出场",
+      "旋转",
+      "rotation",
+      "exit",
+      "spiral"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "number",
+        "min": 0.3,
+        "max": 2.0
+      },
+      "rotationAmount": {
+        "type": "number",
+        "min": 90,
+        "max": 720
+      },
+      "easing": {
+        "type": "string"
+      }
+    },
+    "default_values": {
+      "textLayerName": "旋转出场文字",
+      "duration": 0.8,
+      "rotationAmount": 360,
+      "easing": "easeIn"
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      rotationAmount: ${rotationAmount},\n      easing: ${easing}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var rot = layer.property(\"Rotation\");\n    var sc = layer.property(\"Scale\");\n    var op = layer.property(\"Opacity\");\n    var exitStart = layer.outPoint - p.duration;\n    rot.setValueAtTime(exitStart, 0);\n    rot.setValueAtTime(layer.outPoint, p.rotationAmount);\n    sc.setValueAtTime(exitStart, [100, 100]);\n    sc.setValueAtTime(layer.outPoint, [0, 0]);\n    op.setValueAtTime(exitStart, 100);\n    op.setValueAtTime(layer.outPoint, 0);\n    for (var k = 1; k <= rot.numKeys; k++) {\n      rot.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    for (var k = 1; k <= sc.numKeys; k++) {\n      sc.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    for (var k = 1; k <= op.numKeys; k++) {\n      op.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"旋转出场已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "fire_text",
+    "category": "text_animation",
+    "subcategory": "effects",
+    "description": "火焰文字 - 文字呈现燃烧火焰效果，包含橙红色渐变、热浪扭曲和发光",
+    "tags": [
+      "特效",
+      "火焰",
+      "fire",
+      "burn",
+      "effects",
+      "heat"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      },
+      "flameHeight": {
+        "type": "number",
+        "min": 10,
+        "max": 100
+      },
+      "flameSpeed": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "glowColor": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "textLayerName": "火焰文字",
+      "intensity": 0.8,
+      "flameHeight": 50,
+      "flameSpeed": 2.0,
+      "glowColor": [
+        1,
+        0.3,
+        0
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      intensity: ${intensity},\n      flameHeight: ${flameHeight},\n      flameSpeed: ${flameSpeed},\n      glowColor: ${glowColor}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = [1, 0.5, 0];\n    td.strokeColor = [1, 0.2, 0];\n    td.strokeWidth = 2;\n    td.applyStroke = true;\n    td.applyFill = true;\n    src.setValue(td);\n    var displace = layer.Effects.addProperty(\"ADBE Turbulent Displace\");\n    displace.property(\"ADBE Turbulent Displace-0001\").setValue(\"Turbulent\");\n    displace.property(\"ADBE Turbulent Displace-0002\").expression = \"Math.sin(time * \" + p.flameSpeed + \") * \" + p.flameHeight * p.intensity + \"\";\n    displace.property(\"ADBE Turbulent Displace-0003\").expression = \"100 + Math.sin(time * \" + p.flameSpeed * 1.5 + \") * 50\";\n    displace.property(\"ADBE Turbulent Displace-0005\").expression = \"time * \" + p.flameSpeed + \" * 50\";\n    displace.property(\"ADBE Turbulent Displace-0009\").setValue(\"Repeat\");\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0001\").setValue(p.glowColor);\n    glow.property(\"ADBE Glow Radius-0001\").setValue(40);\n    glow.property(\"ADBE Glo2i-0003\").setValue(3);\n    layer.blendingMode = BlendingMode.ADD;\n    _result = {status:\"success\", message:\"火焰文字已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "electric_text",
+    "category": "text_animation",
+    "subcategory": "effects",
+    "description": "闪电文字 - 文字周围环绕电弧和闪电效果，蓝白色调高能量",
+    "tags": [
+      "特效",
+      "闪电",
+      "electric",
+      "lightning",
+      "effects",
+      "energy"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "electricIntensity": {
+        "type": "number",
+        "min": 0.1,
+        "max": 1.0
+      },
+      "sparkCount": {
+        "type": "number",
+        "min": 1,
+        "max": 10
+      },
+      "sparkSpeed": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "glowColor": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "textLayerName": "闪电文字",
+      "electricIntensity": 0.7,
+      "sparkCount": 5,
+      "sparkSpeed": 10,
+      "glowColor": [
+        0.3,
+        0.6,
+        1
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      electricIntensity: ${electricIntensity},\n      sparkCount: ${sparkCount},\n      sparkSpeed: ${sparkSpeed},\n      glowColor: ${glowColor}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = [0.7, 0.9, 1];\n    td.strokeColor = [0.3, 0.6, 1];\n    td.strokeWidth = 1;\n    td.applyStroke = true;\n    src.setValue(td);\n    var lightning = layer.Effects.addProperty(\"ADBE Lightning\");\n    lightning.property(\"ADBE Lightning-0001\").expression = \"value + [Math.random() * 20 - 10, Math.random() * 20 - 10]\";\n    lightning.property(\"ADBE Lightning-0002\").expression = \"value + [Math.random() * 20 - 10, Math.random() * 20 - 10]\";\n    lightning.property(\"ADBE Lightning-0003\").setValue(p.sparkCount);\n    lightning.property(\"ADBE Lightning-0006\").setValue(0.5 + p.electricIntensity * 0.5);\n    lightning.property(\"ADBE Lightning-0010\").expression = \"time * \" + p.sparkSpeed + \" % 1000\";\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0001\").setValue(p.glowColor);\n    glow.property(\"ADBE Glow Radius-0001\").setValue(25);\n    glow.property(\"ADBE Glo2i-0003\").setValue(4);\n    layer.blendingMode = BlendingMode.SCREEN;\n    _result = {status:\"success\", message:\"闪电文字已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "liquid_text",
+    "category": "text_animation",
+    "subcategory": "effects",
+    "description": "液态文字 - 文字呈现液态金属流动效果，包含波纹扭曲和金属反光",
+    "tags": [
+      "特效",
+      "液态",
+      "liquid",
+      "metal",
+      "effects",
+      "flow"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "liquidAmount": {
+        "type": "number",
+        "min": 5,
+        "max": 50
+      },
+      "flowSpeed": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5.0
+      },
+      "metalColor": {
+        "type": "array"
+      },
+      "highlightColor": {
+        "type": "array"
+      }
+    },
+    "default_values": {
+      "textLayerName": "液态文字",
+      "liquidAmount": 20,
+      "flowSpeed": 1.5,
+      "metalColor": [
+        0.5,
+        0.5,
+        0.6
+      ],
+      "highlightColor": [
+        0.9,
+        0.9,
+        1
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      liquidAmount: ${liquidAmount},\n      flowSpeed: ${flowSpeed},\n      metalColor: ${metalColor},\n      highlightColor: ${highlightColor}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = p.metalColor;\n    src.setValue(td);\n    var displace = layer.Effects.addProperty(\"ADBE Turbulent Displace\");\n    displace.property(\"ADBE Turbulent Displace-0001\").setValue(\"Bulge\");\n    displace.property(\"ADBE Turbulent Displace-0002\").expression = \"Math.sin(time * \" + p.flowSpeed + \") * \" + p.liquidAmount + \"\";\n    displace.property(\"ADBE Turbulent Displace-0003\").expression = \"200 + Math.sin(time * \" + p.flowSpeed * 0.7 + \") * 100\";\n    displace.property(\"ADBE Turbulent Displace-0005\").expression = \"time * \" + p.flowSpeed + \" * 30\";\n    displace.property(\"ADBE Turbulent Displace-0009\").setValue(\"Mirror\");\n    var bevel = layer.Effects.addProperty(\"ADBE Bevel Alpha\");\n    bevel.property(\"ADBE Bevel Alpha-0002\").setValue(5);\n    bevel.property(\"ADBE Bevel Alpha-0003\").setValue(45);\n    bevel.property(\"ADBE Bevel Alpha-0005\").setValue(p.highlightColor);\n    bevel.property(\"ADBE Bevel Alpha-0006\").setValue([0.1, 0.1, 0.2]);\n    _result = {status:\"success\", message:\"液态文字已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "metal_text",
+    "category": "text_animation",
+    "subcategory": "effects",
+    "description": "金属文字 - 文字呈现拉丝金属质感，包含斜面、光泽和反射效果",
+    "tags": [
+      "特效",
+      "金属",
+      "metal",
+      "brushed",
+      "effects",
+      "steel"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string"
+      },
+      "bevelDepth": {
+        "type": "number",
+        "min": 1,
+        "max": 20
+      },
+      "metalColor": {
+        "type": "array"
+      },
+      "highlightColor": {
+        "type": "array"
+      },
+      "shadowColor": {
+        "type": "array"
+      },
+      "shineAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "金属文字",
+      "bevelDepth": 8,
+      "metalColor": [
+        0.6,
+        0.6,
+        0.65
+      ],
+      "highlightColor": [
+        0.95,
+        0.95,
+        1
+      ],
+      "shadowColor": [
+        0.2,
+        0.2,
+        0.25
+      ],
+      "shineAmount": 60
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      bevelDepth: ${bevelDepth},\n      metalColor: ${metalColor},\n      highlightColor: ${highlightColor},\n      shadowColor: ${shadowColor},\n      shineAmount: ${shineAmount}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = p.metalColor;\n    td.strokeColor = p.shadowColor;\n    td.strokeWidth = 1;\n    td.applyStroke = true;\n    td.applyFill = true;\n    src.setValue(td);\n    var bevel = layer.Effects.addProperty(\"ADBE Bevel Alpha\");\n    bevel.property(\"ADBE Bevel Alpha-0002\").setValue(p.bevelDepth);\n    bevel.property(\"ADBE Bevel Alpha-0003\").setValue(45);\n    bevel.property(\"ADBE Bevel Alpha-0005\").setValue(p.highlightColor);\n    bevel.property(\"ADBE Bevel Alpha-0006\").setValue(p.shadowColor);\n    var curve = layer.Effects.addProperty(\"ADBE Curves\");\n    var curveProp = curve.property(\"ADBE Curves-0005\");\n    curveProp.setValue([0, 0, 255, 255]);\n    var shine = layer.Effects.addProperty(\"ADBE Glo2i\");\n    shine.property(\"ADBE Glo2i-0001\").setValue(p.highlightColor);\n    shine.property(\"ADBE Glow Radius-0001\").setValue(p.shineAmount * 0.3);\n    shine.property(\"ADBE Glo2i-0003\").setValue(2);\n    var hs = layer.Effects.addProperty(\"ADBE Hue/Saturation\");\n    hs.property(\"ADBE Hue/Saturation-0002\").setValue(-20);\n    hs.property(\"ADBE Hue/Saturation-0003\").setValue(-10);\n    _result = {status:\"success\", message:\"金属文字已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "kt_char_waterfall",
+    "category": "text_animation",
+    "subcategory": "kinetic_typography",
+    "description": "字符瀑布流 - 现代风格预设",
+    "tags": [
+      "kinetic",
+      "modern",
+      "typography",
+      "text"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "fallHeight": {
+        "type": "number",
+        "description": "下落距离 (px)",
+        "min": 50,
+        "max": 1000
+      },
+      "charDelay": {
+        "type": "string",
+        "description": "字间错开帧数",
+        "min": 0,
+        "max": 15
+      },
+      "duration": {
+        "type": "number",
+        "description": "动画总时长 (秒)",
+        "min": 0.3,
+        "max": 5.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "fallHeight": 200.0,
+      "charDelay": "3f",
+      "duration": 1.5
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L||!(L instanceof TextLayer)){\n_r={status:'error',message:'Text layer not found'};\nreturn JSON.stringify(_r);}\nvar tp=L.property('ADBE Text Properties');\nvar a=tp.property('ADBE Text Animators')\n.addProperty('ADBE Text Animator');\na.name='KT_Waterfall';\na.addProperty('ADBE Text Position')\n.setValue([0,${fallHeight}]);\na.addProperty('ADBE Text Opacity').setValue(0);\na.addProperty('ADBE Text Rotation').setValue(-15);\nvar s=a.property('ADBE Text Selectors').property(1);\ns.property('ADBE Text Selector Shape').setValue(3);\nvar fh=${fallHeight};var cd=${charDelay};\nvar d=${duration};\ns.property('ADBE Text Selector Offset')\n.setValueAtTime(0,-100);\ns.property('ADBE Text Selector Offset')\n.setValueAtTime(d,100);\ns.property('ADBE Text Selector Ease High')\n.setValue(80);\ns.property('ADBE Text Selector Ease Low')\n.setValue(20);\n_r={status:'success',preset:'kt_char_waterfall',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "kt_tracking_breathe",
+    "category": "text_animation",
+    "subcategory": "kinetic_typography",
+    "description": "字距呼吸 - 现代风格预设",
+    "tags": [
+      "kinetic",
+      "modern",
+      "typography"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "trackingAmount": {
+        "type": "number",
+        "description": "字距变化量 (px)",
+        "min": 1,
+        "max": 50
+      },
+      "frequency": {
+        "type": "number",
+        "description": "频率 (Hz)",
+        "min": 0.2,
+        "max": 10.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "trackingAmount": 15.0,
+      "frequency": 1.0
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L||!(L instanceof TextLayer)){\n_r={status:'error',message:'Text layer not found'};\nreturn JSON.stringify(_r);}\nvar tp=L.property('ADBE Text Properties');\nvar a=tp.property('ADBE Text Animators')\n.addProperty('ADBE Text Animator');\na.name='KT_TrackingBreathe';\nvar trk=a.addProperty('ADBE Text Tracking');\ntrk.setValue(${trackingAmount});\nvar ta=${trackingAmount};var f=${frequency};\ntrk.expression=\n'Math.sin(time*'+f+'*2*Math.PI)*'+ta;\n_r={status:'success',preset:'kt_tracking_breathe',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "kt_text_dance",
+    "category": "text_animation",
+    "subcategory": "kinetic_typography",
+    "description": "文字舞蹈 - 现代风格预设",
+    "tags": [
+      "kinetic",
+      "modern",
+      "typography",
+      "text"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "danceHeight": {
+        "type": "number",
+        "description": "跳跃距离 (px)",
+        "min": 5,
+        "max": 100
+      },
+      "frequency": {
+        "type": "number",
+        "description": "频率 (Hz)",
+        "min": 0.2,
+        "max": 10.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "danceHeight": 20.0,
+      "frequency": 2.0
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L||!(L instanceof TextLayer)){\n_r={status:'error',message:'Text layer not found'};\nreturn JSON.stringify(_r);}\nvar tp=L.property('ADBE Text Properties');\nvar a=tp.property('ADBE Text Animators')\n.addProperty('ADBE Text Animator');\na.name='KT_Dance';\nvar pos=a.addProperty('ADBE Text Position');\nvar dh=${danceHeight};var f=${frequency};\npos.expression=\n'[0,Math.abs(Math.sin(time*'+f+\n'*2*Math.PI))*'+dh+']';\nvar s=a.property('ADBE Text Selectors')\n.addProperty('ADBE Wiggly Selector');\ns.property('ADBE Text Selector Wiggles')\n.setValue(2);\n_r={status:'success',preset:'kt_text_dance',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "kt_beat_bounce",
+    "category": "text_animation",
+    "subcategory": "kinetic_typography",
+    "description": "节拍弹跳 - 现代风格预设",
+    "tags": [
+      "kinetic",
+      "modern",
+      "typography"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "bounceHeight": {
+        "type": "number",
+        "description": "弹跳距离 (px)",
+        "min": 5,
+        "max": 150
+      },
+      "bpm": {
+        "type": "integer",
+        "description": "节拍速度 (BPM)",
+        "min": 60,
+        "max": 200
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "bounceHeight": 30.0,
+      "bpm": 120
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L||!(L instanceof TextLayer)){\n_r={status:'error',message:'Text layer not found'};\nreturn JSON.stringify(_r);}\nvar tp=L.property('ADBE Text Properties');\nvar a=tp.property('ADBE Text Animators')\n.addProperty('ADBE Text Animator');\na.name='KT_BeatBounce';\nvar pos=a.addProperty('ADBE Text Position');\nvar bh=${bounceHeight};var bpm=${bpm};\nvar bp=60/bpm;\npos.expression=\n'[0,-Math.abs(Math.sin(time*Math.PI/'+\nbp+'))*'+bh+']';\n_r={status:'success',preset:'kt_beat_bounce',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "kt_char_wave",
+    "category": "text_animation",
+    "subcategory": "kinetic_typography",
+    "description": "字符波浪 - 现代风格预设",
+    "tags": [
+      "kinetic",
+      "modern",
+      "typography",
+      "text"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "waveAmplitude": {
+        "type": "number",
+        "description": "波浪高度 (px)",
+        "min": 5,
+        "max": 100
+      },
+      "waveFrequency": {
+        "type": "number",
+        "description": "波浪密度 (Hz)",
+        "min": 0.5,
+        "max": 8.0
+      },
+      "waveSpeed": {
+        "type": "number",
+        "description": "流动快慢",
+        "min": 0.1,
+        "max": 5.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "waveAmplitude": 25.0,
+      "waveFrequency": 2.0,
+      "waveSpeed": 1.0
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L||!(L instanceof TextLayer)){\n_r={status:'error',message:'Text layer not found'};\nreturn JSON.stringify(_r);}\nvar tp=L.property('ADBE Text Properties');\nvar a=tp.property('ADBE Text Animators')\n.addProperty('ADBE Text Animator');\na.name='KT_Wave';\nvar pos=a.addProperty('ADBE Text Position');\nvar wa=${waveAmplitude};var wf=${waveFrequency};\nvar ws=${waveSpeed};\npos.expression='[0,Math.sin((textIndex*'+wf+\n'+time*'+ws+') *2*Math.PI)*'+wa+']';\n_r={status:'success',preset:'kt_char_wave',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "ci_epic_opener",
+    "category": "text_animation",
+    "subcategory": "cinematic",
+    "description": "史诗开场 - 现代风格预设",
+    "tags": [
+      "cinematic",
+      "film",
+      "title"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "duration": {
+        "type": "number",
+        "description": "动画总时长 (秒)",
+        "min": 0.3,
+        "max": 5.0
+      },
+      "lightIntensity": {
+        "type": "integer",
+        "description": "光爆亮度",
+        "min": 50,
+        "max": 300
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "duration": 2.5,
+      "lightIntensity": 150
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar d=${duration};var li=${lightIntensity};\nvar tr=L.property('ADBE Transform Group');\nvar sc=tr.property('ADBE Scale');\nsc.setValueAtTime(0,[300,300]);\nsc.setValueAtTime(d,[100,100]);\nsc.setInterpolationTypeAtKey(1,\nKeyframeInterpolationType.BEZIER);\nsc.setInterpolationTypeAtKey(2,\nKeyframeInterpolationType.BEZIER);\nvar op=tr.property('ADBE Opacity');\nop.setValueAtTime(0,0);\nop.setValueAtTime(d*0.3,100);\nvar e=L.property('ADBE Effect Parade');\nvar lb=e.addProperty('ADBE Light Burst');\nlb.property('ADBE Light Burst-0001').setValue(li);\nlb.property('ADBE Light Burst-0002').expression=\n'time<'+d+'?time/'+d+':1';\nvar bl=e.addProperty('ADBE Gaussian Blur');\nbl.property('ADBE Gaussian Blur-0001').expression=\n'time<'+d+'?('+(1-time/d)+')*50:0';\n_r={status:'success',preset:'ci_epic_opener',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "ci_metallic_text",
+    "category": "text_animation",
+    "subcategory": "cinematic",
+    "description": "金属质感 - 现代风格预设",
+    "tags": [
+      "cinematic",
+      "film",
+      "title"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "metalColor": {
+        "type": "array",
+        "description": "金属颜色 [R,G,B]"
+      },
+      "shineAngle": {
+        "type": "string",
+        "description": "光泽方向 (度)",
+        "min": 0,
+        "max": 360
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "metalColor": [
+        0.8,
+        0.7,
+        0.5
+      ],
+      "shineAngle": "45°"
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar mc=${metalColor};var sa=${shineAngle};\nvar e=L.property('ADBE Effect Parade');\nvar glass=e.addProperty('ADBE CC Glass');\nglass.property('ADBE CC Glass-0001').setValue(10);\nglass.property('ADBE CC Glass-0004').setValue(50);\nvar ls=e.addProperty('ADBE CC Light Sweep');\nls.property('ADBE CC Light Sweep-0002').setValue(sa);\nls.property('ADBE CC Light Sweep-0004').expression=\n'time*45%360';\nls.property('ADBE CC Light Sweep-0005')\n.setValue(100);\nvar rp=e.addProperty('ADBE Ramp');\nrp.property('ADBE Ramp-0001').setValue([0,0]);\nrp.property('ADBE Ramp-0002').setValue([1920,0]);\nrp.property('ADBE Ramp-0003')\n.setValue([0.2,0.2,0.2]);\nrp.property('ADBE Ramp-0004').setValue(mc);\n_r={status:'success',preset:'ci_metallic_text',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "ci_light_rays_text",
+    "category": "text_animation",
+    "subcategory": "cinematic",
+    "description": "光线穿透 - 现代风格预设",
+    "tags": [
+      "cinematic",
+      "film",
+      "title"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "rayIntensity": {
+        "type": "integer",
+        "description": "光线亮度",
+        "min": 20,
+        "max": 300
+      },
+      "rayColor": {
+        "type": "array",
+        "description": "光线颜色 [R,G,B]"
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "rayIntensity": 100,
+      "rayColor": [
+        1.0,
+        0.9,
+        0.7
+      ]
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar ri=${rayIntensity};var rc=${rayColor};\nvar e=L.property('ADBE Effect Parade');\nvar lr=e.addProperty('ADBE CC Light Rays');\nlr.property('ADBE CC Light Rays-0001').setValue(ri);\nlr.property('ADBE CC Light Rays-0003').expression=\n'960+Math.sin(time)*100';\nlr.property('ADBE CC Light Rays-0004').expression=\n'540+Math.cos(time)*50';\nlr.property('ADBE CC Light Rays-0006').setValue(rc);\n_r={status:'success',preset:'ci_light_rays',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "ci_lens_flare_text",
+    "category": "text_animation",
+    "subcategory": "cinematic",
+    "description": "镜头光晕 - 现代风格预设",
+    "tags": [
+      "cinematic",
+      "film",
+      "title"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "flareBrightness": {
+        "type": "integer",
+        "description": "光晕强度",
+        "min": 50,
+        "max": 300
+      },
+      "flareColor": {
+        "type": "array",
+        "description": "光晕颜色 [R,G,B]"
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "flareBrightness": 150,
+      "flareColor": [
+        1.0,
+        0.9,
+        0.8
+      ]
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar fb=${flareBrightness};\nvar fc=${flareColor};\nvar e=L.property('ADBE Effect Parade');\nvar lf=e.addProperty('ADBE Lens Flare');\nlf.property('ADBE Lens Flare-0001').expression=\n'[960+Math.sin(time*0.5)*400,540]';\nlf.property('ADBE Lens Flare-0002').expression=\nfb+'+Math.sin(time*2)*50';\nlf.property('ADBE Lens Flare-0003').setValue(2);\nL.blendingMode=BlendingMode.ADD;\n_r={status:'success',preset:'ci_lens_flare',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "ci_trailer_title",
+    "category": "text_animation",
+    "subcategory": "cinematic",
+    "description": "大片预告 - 现代风格预设",
+    "tags": [
+      "cinematic",
+      "film",
+      "title"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "duration": {
+        "type": "number",
+        "description": "动画总时长 (秒)",
+        "min": 0.3,
+        "max": 5.0
+      },
+      "shakeIntensity": {
+        "type": "number",
+        "description": "震动幅度 (px)",
+        "min": 0,
+        "max": 50
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "duration": 1.0,
+      "shakeIntensity": 15.0
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar d=${duration};var si=${shakeIntensity};\nvar tr=L.property('ADBE Transform Group');\nvar op=tr.property('ADBE Opacity');\nop.setValueAtTime(0,0);\nop.setValueAtTime(0.05,100);\nop.setValueAtTime(d,100);\nvar pos=tr.property('ADBE Position');\npos.expression='[wiggle(20,'+si+')[0]+960,'+\n'wiggle(20,'+si+')[1]+540]';\nvar e=L.property('ADBE Effect Parade');\nvar cc=e.addProperty('ADBE Curve Control');\nvar lvl=e.addProperty('ADBE Levels');\nlvl.property('ADBE Levels-0006').expression=\n'time<'+d+'?1+(1-time/'+d+')*(2-1):1';\n_r={status:'success',preset:'ci_trailer_title',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "sm_douyin_bounce",
+    "category": "text_animation",
+    "subcategory": "social_media",
+    "description": "抖音弹跳标题 - 现代风格预设",
+    "tags": [
+      "media",
+      "social",
+      "modern"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "bounceScale": {
+        "type": "number",
+        "description": "回弹峰值缩放 (%)",
+        "min": 110,
+        "max": 200
+      },
+      "duration": {
+        "type": "number",
+        "description": "动画总时长 (秒)",
+        "min": 0.3,
+        "max": 5.0
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "bounceScale": 1.3,
+      "duration": 0.8
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar bs=${bounceScale};var d=${duration};\nvar tr=L.property('ADBE Transform Group');\nvar sc=tr.property('ADBE Scale');\nsc.setValueAtTime(0,[0,0]);\nsc.setValueAtTime(d*0.4,[bs,bs]);\nsc.setValueAtTime(d*0.7,[95,95]);\nsc.setValueAtTime(d,[100,100]);\nsc.setInterpolationTypeAtKey(2,\nKeyframeInterpolationType.BEZIER);\nsc.setInterpolationTypeAtKey(3,\nKeyframeInterpolationType.BEZIER);\nvar op=tr.property('ADBE Opacity');\nop.setValueAtTime(0,0);\nop.setValueAtTime(d*0.1,100);\n_r={status:'success',preset:'sm_douyin_bounce',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "sm_danmaku_scroll",
+    "category": "text_animation",
+    "subcategory": "social_media",
+    "description": "弹幕滚动 - 现代风格预设",
+    "tags": [
+      "media",
+      "social",
+      "modern"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "scrollSpeed": {
+        "type": "string",
+        "description": "滚动快慢 (px/s)",
+        "min": 50,
+        "max": 1000
+      },
+      "yPosition": {
+        "type": "number",
+        "description": "垂直位置 (px)",
+        "min": 0,
+        "max": 1080
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "scrollSpeed": "300px/s",
+      "yPosition": 540.0
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar ss=${scrollSpeed};var yp=${yPosition};\nvar tr=L.property('ADBE Transform Group');\nvar pos=tr.property('ADBE Position');\npos.expression=\n'[c.width+200-time*'+ss+','+yp+']';\n_r={status:'success',preset:'sm_danmaku_scroll',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "sm_emoji_text",
+    "category": "text_animation",
+    "subcategory": "social_media",
+    "description": "表情包文字 - 现代风格预设",
+    "tags": [
+      "media",
+      "social",
+      "modern",
+      "text"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "description": "描边粗细 (px)",
+        "min": 5,
+        "max": 40
+      },
+      "jitterAmount": {
+        "type": "number",
+        "description": "抖动幅度 (px)",
+        "min": 0,
+        "max": 30
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "strokeWidth": 15.0,
+      "jitterAmount": 8.0
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L||!(L instanceof TextLayer)){\n_r={status:'error',message:'Text layer not found'};\nreturn JSON.stringify(_r);}\nvar sw=${strokeWidth};var ja=${jitterAmount};\nvar tp=L.property('ADBE Text Properties');\nvar so=tp.property('ADBE Text Options')\n.property('ADBE Text Stroke Option');\nso.setValue(3);\ntp.property('ADBE Text Options')\n.property('ADBE Text Stroke Width').setValue(sw);\ntp.property('ADBE Text Options')\n.property('ADBE Text Stroke Color')\n.setValue([0,0,0]);\nvar tr=L.property('ADBE Transform Group');\nvar pos=tr.property('ADBE Position');\npos.expression='[wiggle(15,'+ja+')[0]+value[0],'+\n'wiggle(15,'+ja+')[1]+value[1]]';\n_r={status:'success',preset:'sm_emoji_text',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "sm_rainbow_gradient",
+    "category": "text_animation",
+    "subcategory": "social_media",
+    "description": "彩虹渐变标题 - 现代风格预设",
+    "tags": [
+      "media",
+      "social",
+      "modern"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "cycleSpeed": {
+        "type": "number",
+        "description": "色相旋转速度",
+        "min": 0.1,
+        "max": 5.0
+      },
+      "saturation": {
+        "type": "number",
+        "description": "颜色饱和度 (%)",
+        "min": 0,
+        "max": 100
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "cycleSpeed": 1.0,
+      "saturation": 1.0
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L||!(L instanceof TextLayer)){\n_r={status:'error',message:'Text layer not found'};\nreturn JSON.stringify(_r);}\nvar cs=${cycleSpeed};\nvar sa=${saturation}/100;\nvar tp=L.property('ADBE Text Properties');\nvar fc=tp.property('ADBE Text Options')\n.property('ADBE Text Fill Color');\nfc.expression=\n'hslToRgb((time*'+cs+')%1,'+sa+',0.5,1)';\n_r={status:'success',preset:'sm_rainbow_gradient',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  },
+  {
+    "name": "sm_quick_flash",
+    "category": "text_animation",
+    "subcategory": "social_media",
+    "description": "快闪文字 - 现代风格预设",
+    "tags": [
+      "media",
+      "social",
+      "modern",
+      "text"
+    ],
+    "parameters": {
+      "textLayerName": {
+        "type": "string",
+        "description": "目标文字图层名"
+      },
+      "flashCount": {
+        "type": "integer",
+        "description": "闪烁次数",
+        "min": 2,
+        "max": 20
+      },
+      "duration": {
+        "type": "number",
+        "description": "动画总时长 (秒)",
+        "min": 0.3,
+        "max": 5.0
+      },
+      "阴影色相": {
+        "type": "string",
+        "description": "阴影色相"
+      },
+      "高光色相": {
+        "type": "string",
+        "description": "高光色相"
+      },
+      "阴影饱和度": {
+        "type": "number",
+        "description": "阴影饱和度"
+      },
+      "高光饱和度": {
+        "type": "number",
+        "description": "高光饱和度"
+      },
+      "对比度": {
+        "type": "number",
+        "description": "对比度"
+      },
+      "亮度": {
+        "type": "number",
+        "description": "亮度"
+      },
+      "saturation": {
+        "type": "number",
+        "description": "颜色饱和度 (%)",
+        "min": 0,
+        "max": 100
+      },
+      "黑场": {
+        "type": "number",
+        "description": "黑场"
+      },
+      "白场": {
+        "type": "integer",
+        "description": "白场"
+      },
+      "色温": {
+        "type": "string",
+        "description": "色温"
+      },
+      "蓝色偏移": {
+        "type": "number",
+        "description": "蓝色偏移"
+      },
+      "黄色加强": {
+        "type": "number",
+        "description": "黄色加强"
+      },
+      "绿色偏移": {
+        "type": "number",
+        "description": "绿色偏移"
+      },
+      "柔光": {
+        "type": "number",
+        "description": "柔光"
+      },
+      "粉色偏移": {
+        "type": "number",
+        "description": "粉色偏移"
+      },
+      "颗粒": {
+        "type": "number",
+        "description": "颗粒"
+      },
+      "青色加强": {
+        "type": "number",
+        "description": "青色加强"
+      },
+      "绿色加强": {
+        "type": "number",
+        "description": "绿色加强"
+      },
+      "阴影提亮": {
+        "type": "number",
+        "description": "阴影提亮"
+      },
+      "色相偏移": {
+        "type": "string",
+        "description": "色相偏移"
+      },
+      "故障强度": {
+        "type": "number",
+        "description": "故障强度"
+      },
+      "蓝色加强": {
+        "type": "number",
+        "description": "蓝色加强"
+      },
+      "紫色加强": {
+        "type": "number",
+        "description": "紫色加强"
+      },
+      "色相": {
+        "type": "string",
+        "description": "色相"
+      },
+      "透明度": {
+        "type": "number",
+        "description": "透明度"
+      },
+      "扫描线": {
+        "type": "number",
+        "description": "扫描线"
+      },
+      "粉色加强": {
+        "type": "number",
+        "description": "粉色加强"
+      },
+      "划痕": {
+        "type": "number",
+        "description": "划痕"
+      },
+      "噪点": {
+        "type": "number",
+        "description": "噪点"
+      },
+      "抖动": {
+        "type": "number",
+        "description": "抖动"
+      },
+      "红色加强": {
+        "type": "number",
+        "description": "红色加强"
+      },
+      "锐化": {
+        "type": "number",
+        "description": "锐化"
+      },
+      "橙色加强": {
+        "type": "number",
+        "description": "橙色加强"
+      },
+      "红色滤镜": {
+        "type": "number",
+        "description": "红色滤镜"
+      },
+      "高光压暗": {
+        "type": "integer",
+        "description": "高光压暗"
+      },
+      "光斑数量": {
+        "type": "integer",
+        "description": "光斑数量"
+      },
+      "光斑大小": {
+        "type": "number",
+        "description": "光斑大小"
+      },
+      "光斑颜色": {
+        "type": "string",
+        "description": "光斑颜色"
+      },
+      "闪烁频率": {
+        "type": "number",
+        "description": "闪烁频率"
+      },
+      "移动速度": {
+        "type": "string",
+        "description": "移动速度"
+      },
+      "光晕半径": {
+        "type": "number",
+        "description": "光晕半径"
+      },
+      "光晕强度": {
+        "type": "number",
+        "description": "光晕强度"
+      },
+      "光晕颜色": {
+        "type": "string",
+        "description": "光晕颜色"
+      },
+      "衰减": {
+        "type": "number",
+        "description": "衰减"
+      },
+      "光线数量": {
+        "type": "integer",
+        "description": "光线数量"
+      },
+      "光线长度": {
+        "type": "number",
+        "description": "光线长度"
+      },
+      "光线宽度": {
+        "type": "number",
+        "description": "光线宽度"
+      },
+      "光源位置": {
+        "type": "string",
+        "description": "光源位置"
+      },
+      "光晕类型": {
+        "type": "string",
+        "description": "光晕类型"
+      },
+      "flareBrightness": {
+        "type": "number",
+        "description": "光晕强度",
+        "min": 50,
+        "max": 300
+      },
+      "光晕位置": {
+        "type": "string",
+        "description": "光晕位置"
+      },
+      "元素数量": {
+        "type": "integer",
+        "description": "元素数量"
+      },
+      "光束密度": {
+        "type": "number",
+        "description": "光束密度"
+      },
+      "散射角": {
+        "type": "string",
+        "description": "散射角"
+      },
+      "雾浓度": {
+        "type": "number",
+        "description": "雾浓度"
+      },
+      "极光色 1": {
+        "type": "string",
+        "description": "极光色 1"
+      },
+      "极光色 2": {
+        "type": "string",
+        "description": "极光色 2"
+      },
+      "流动方向": {
+        "type": "string",
+        "description": "流动方向"
+      },
+      "波动幅度": {
+        "type": "number",
+        "description": "波动幅度"
+      },
+      "星光数量": {
+        "type": "integer",
+        "description": "星光数量"
+      },
+      "星光颜色": {
+        "type": "string",
+        "description": "星光颜色"
+      },
+      "光芒长度": {
+        "type": "number",
+        "description": "光芒长度"
+      },
+      "neonColor": {
+        "type": "string",
+        "description": "霓虹颜色 [R,G,B]"
+      },
+      "发光半径": {
+        "type": "number",
+        "description": "发光半径"
+      },
+      "内核亮度": {
+        "type": "number",
+        "description": "内核亮度"
+      },
+      "闪烁": {
+        "type": "string",
+        "description": "闪烁"
+      },
+      "漏光色": {
+        "type": "string",
+        "description": "漏光色"
+      },
+      "waveSpeed": {
+        "type": "string",
+        "description": "流动快慢",
+        "min": 0.1,
+        "max": 5.0
+      },
+      "光剑色": {
+        "type": "string",
+        "description": "光剑色"
+      },
+      "光剑宽度": {
+        "type": "number",
+        "description": "光剑宽度"
+      },
+      "发光强度": {
+        "type": "number",
+        "description": "发光强度"
+      },
+      "粒子数量": {
+        "type": "integer",
+        "description": "粒子数量"
+      },
+      "粒子大小": {
+        "type": "number",
+        "description": "粒子大小"
+      },
+      "汇聚目标": {
+        "type": "string",
+        "description": "汇聚目标"
+      },
+      "飞散方向": {
+        "type": "string",
+        "description": "飞散方向"
+      },
+      "飞散速度": {
+        "type": "string",
+        "description": "飞散速度"
+      },
+      "流动路径": {
+        "type": "string",
+        "description": "流动路径"
+      },
+      "爆炸强度": {
+        "type": "string",
+        "description": "爆炸强度"
+      },
+      "重力": {
+        "type": "number",
+        "description": "重力"
+      },
+      "上升速度": {
+        "type": "string",
+        "description": "上升速度"
+      },
+      "扩散": {
+        "type": "number",
+        "description": "扩散"
+      },
+      "颜色": {
+        "type": "string",
+        "description": "颜色"
+      },
+      "火焰高度": {
+        "type": "number",
+        "description": "火焰高度"
+      },
+      "颜色 1": {
+        "type": "string",
+        "description": "颜色 1"
+      },
+      "颜色 2": {
+        "type": "string",
+        "description": "颜色 2"
+      },
+      "雪花大小": {
+        "type": "number",
+        "description": "雪花大小"
+      },
+      "fallSpeed": {
+        "type": "string",
+        "description": "下落速度 (px/s)",
+        "min": 50,
+        "max": 800
+      },
+      "飘移": {
+        "type": "number",
+        "description": "飘移"
+      },
+      "星辰大小": {
+        "type": "number",
+        "description": "星辰大小"
+      },
+      "R 偏移": {
+        "type": "number",
+        "description": "R 偏移"
+      },
+      "G 偏移": {
+        "type": "number",
+        "description": "G 偏移"
+      },
+      "B 偏移": {
+        "type": "number",
+        "description": "B 偏移"
+      },
+      "撕裂数量": {
+        "type": "integer",
+        "description": "撕裂数量"
+      },
+      "撕裂宽度": {
+        "type": "number",
+        "description": "撕裂宽度"
+      },
+      "错位量": {
+        "type": "number",
+        "description": "错位量"
+      },
+      "干扰强度": {
+        "type": "number",
+        "description": "干扰强度"
+      },
+      "干扰频率": {
+        "type": "number",
+        "description": "干扰频率"
+      },
+      "噪点量": {
+        "type": "number",
+        "description": "噪点量"
+      },
+      "损坏区域": {
+        "type": "number",
+        "description": "损坏区域"
+      },
+      "损坏强度": {
+        "type": "number",
+        "description": "损坏强度"
+      },
+      "频率": {
+        "type": "number",
+        "description": "频率"
+      },
+      "强度": {
+        "type": "number",
+        "description": "强度"
+      },
+      "颜色偏移": {
+        "type": "string",
+        "description": "颜色偏移"
+      },
+      "扫描线间距": {
+        "type": "number",
+        "description": "扫描线间距"
+      },
+      "扫描线强度": {
+        "type": "number",
+        "description": "扫描线强度"
+      },
+      "噪点大小": {
+        "type": "number",
+        "description": "噪点大小"
+      },
+      "饱和度异常": {
+        "type": "number",
+        "description": "饱和度异常"
+      },
+      "焦点距离": {
+        "type": "number",
+        "description": "焦点距离"
+      },
+      "模糊度": {
+        "type": "integer",
+        "description": "模糊度"
+      },
+      "光圈形状": {
+        "type": "string",
+        "description": "光圈形状"
+      },
+      "快门角度": {
+        "type": "string",
+        "description": "快门角度"
+      },
+      "快门相位": {
+        "type": "string",
+        "description": "快门相位"
+      },
+      "采样数": {
+        "type": "integer",
+        "description": "采样数"
+      },
+      "视角": {
+        "type": "string",
+        "description": "视角"
+      },
+      "模糊中心": {
+        "type": "string",
+        "description": "模糊中心"
+      },
+      "模糊类型": {
+        "type": "string",
+        "description": "模糊类型"
+      },
+      "模糊量": {
+        "type": "integer",
+        "description": "模糊量"
+      },
+      "R 模糊": {
+        "type": "number",
+        "description": "R 模糊"
+      },
+      "G 模糊": {
+        "type": "number",
+        "description": "G 模糊"
+      },
+      "B 模糊": {
+        "type": "number",
+        "description": "B 模糊"
+      },
+      "模糊图层": {
+        "type": "string",
+        "description": "模糊图层"
+      },
+      "最大模糊": {
+        "type": "integer",
+        "description": "最大模糊"
+      },
+      "黏度": {
+        "type": "number",
+        "description": "黏度"
+      },
+      "表面张力": {
+        "type": "number",
+        "description": "表面张力"
+      },
+      "网格密度": {
+        "type": "integer",
+        "description": "网格密度"
+      },
+      "变形强度": {
+        "type": "number",
+        "description": "变形强度"
+      },
+      "变形模式": {
+        "type": "string",
+        "description": "变形模式"
+      },
+      "畸变量": {
+        "type": "number",
+        "description": "畸变量"
+      },
+      "畸变中心": {
+        "type": "string",
+        "description": "畸变中心"
+      },
+      "色差": {
+        "type": "number",
+        "description": "色差"
+      },
+      "波长": {
+        "type": "number",
+        "description": "波长"
+      },
+      "振幅": {
+        "type": "number",
+        "description": "振幅"
+      },
+      "相位速度": {
+        "type": "number",
+        "description": "相位速度"
+      },
+      "漩涡中心": {
+        "type": "string",
+        "description": "漩涡中心"
+      },
+      "漩涡角度": {
+        "type": "string",
+        "description": "漩涡角度"
+      },
+      "半径": {
+        "type": "number",
+        "description": "半径"
+      },
+      "球面半径": {
+        "type": "number",
+        "description": "球面半径"
+      },
+      "球面中心": {
+        "type": "string",
+        "description": "球面中心"
+      },
+      "颜色噪点": {
+        "type": "string",
+        "description": "颜色噪点"
+      },
+      "颗粒量": {
+        "type": "number",
+        "description": "颗粒量"
+      },
+      "颗粒大小": {
+        "type": "number",
+        "description": "颗粒大小"
+      },
+      "颗粒类型": {
+        "type": "string",
+        "description": "颗粒类型"
+      },
+      "划痕数量": {
+        "type": "integer",
+        "description": "划痕数量"
+      },
+      "划痕长度": {
+        "type": "number",
+        "description": "划痕长度"
+      },
+      "划痕宽度": {
+        "type": "number",
+        "description": "划痕宽度"
+      },
+      "灰尘数量": {
+        "type": "integer",
+        "description": "灰尘数量"
+      },
+      "灰尘大小": {
+        "type": "number",
+        "description": "灰尘大小"
+      },
+      "纹理强度": {
+        "type": "number",
+        "description": "纹理强度"
+      },
+      "纹理类型": {
+        "type": "string",
+        "description": "纹理类型"
+      },
+      "混合模式": {
+        "type": "string",
+        "description": "混合模式"
+      },
+      "边缘扩散": {
+        "type": "number",
+        "description": "边缘扩散"
+      },
+      "颜色 bleeding": {
+        "type": "number",
+        "description": "颜色 bleeding"
+      },
+      "边框宽度": {
+        "type": "number",
+        "description": "边框宽度"
+      },
+      "光色": {
+        "type": "string",
+        "description": "光色"
+      },
+      "故障量": {
+        "type": "number",
+        "description": "故障量"
+      },
+      "RGB 偏移": {
+        "type": "number",
+        "description": "RGB 偏移"
+      },
+      "边框颜色": {
+        "type": "string",
+        "description": "边框颜色"
+      },
+      "圆角": {
+        "type": "number",
+        "description": "圆角"
+      },
+      "花纹类型": {
+        "type": "string",
+        "description": "花纹类型"
+      },
+      "渐变方向": {
+        "type": "string",
+        "description": "渐变方向"
+      },
+      "角度": {
+        "type": "string",
+        "description": "角度"
+      },
+      "过渡位置": {
+        "type": "number",
+        "description": "过渡位置"
+      },
+      "中心色": {
+        "type": "string",
+        "description": "中心色"
+      },
+      "边缘色": {
+        "type": "string",
+        "description": "边缘色"
+      },
+      "中心位置": {
+        "type": "string",
+        "description": "中心位置"
+      },
+      "颜色 3": {
+        "type": "string",
+        "description": "颜色 3"
+      },
+      "颜色数": {
+        "type": "integer",
+        "description": "颜色数"
+      },
+      "颜色组": {
+        "type": "string",
+        "description": "颜色组"
+      },
+      "星星数量": {
+        "type": "integer",
+        "description": "星星数量"
+      },
+      "星星大小": {
+        "type": "number",
+        "description": "星星大小"
+      },
+      "粒子颜色": {
+        "type": "string",
+        "description": "粒子颜色"
+      },
+      "雪花数量": {
+        "type": "integer",
+        "description": "雪花数量"
+      },
+      "花瓣数量": {
+        "type": "integer",
+        "description": "花瓣数量"
+      },
+      "花瓣颜色": {
+        "type": "string",
+        "description": "花瓣颜色"
+      },
+      "旋转": {
+        "type": "string",
+        "description": "旋转"
+      },
+      "气泡数量": {
+        "type": "integer",
+        "description": "气泡数量"
+      },
+      "气泡大小": {
+        "type": "number",
+        "description": "气泡大小"
+      },
+      "光晕数量": {
+        "type": "integer",
+        "description": "光晕数量"
+      },
+      "扩散速度": {
+        "type": "string",
+        "description": "扩散速度"
+      },
+      "旋转速度": {
+        "type": "string",
+        "description": "旋转速度"
+      },
+      "网格线宽": {
+        "type": "number",
+        "description": "网格线宽"
+      },
+      "网格颜色": {
+        "type": "string",
+        "description": "网格颜色"
+      },
+      "三角形大小": {
+        "type": "number",
+        "description": "三角形大小"
+      },
+      "三角形颜色": {
+        "type": "string",
+        "description": "三角形颜色"
+      },
+      "六边形大小": {
+        "type": "number",
+        "description": "六边形大小"
+      },
+      "六边形颜色": {
+        "type": "string",
+        "description": "六边形颜色"
+      },
+      "strokeWidth": {
+        "type": "number",
+        "description": "描边粗细 (px)",
+        "min": 5,
+        "max": 40
+      },
+      "圆点大小": {
+        "type": "number",
+        "description": "圆点大小"
+      },
+      "圆点间距": {
+        "type": "number",
+        "description": "圆点间距"
+      },
+      "圆点颜色": {
+        "type": "string",
+        "description": "圆点颜色"
+      },
+      "线条数量": {
+        "type": "integer",
+        "description": "线条数量"
+      },
+      "线条角度": {
+        "type": "string",
+        "description": "线条角度"
+      },
+      "线条颜色": {
+        "type": "string",
+        "description": "线条颜色"
+      },
+      "线宽": {
+        "type": "number",
+        "description": "线宽"
+      },
+      "动画": {
+        "type": "string",
+        "description": "动画"
+      },
+      "纸张类型": {
+        "type": "string",
+        "description": "纸张类型"
+      },
+      "扩散程度": {
+        "type": "number",
+        "description": "扩散程度"
+      },
+      "木纹类型": {
+        "type": "string",
+        "description": "木纹类型"
+      },
+      "木纹方向": {
+        "type": "string",
+        "description": "木纹方向"
+      },
+      "频段数": {
+        "type": "integer",
+        "description": "频段数"
+      },
+      "柱宽": {
+        "type": "number",
+        "description": "柱宽"
+      },
+      "柱间距": {
+        "type": "number",
+        "description": "柱间距"
+      },
+      "最大高度": {
+        "type": "number",
+        "description": "最大高度"
+      },
+      "平滑": {
+        "type": "number",
+        "description": "平滑"
+      },
+      "最大长度": {
+        "type": "number",
+        "description": "最大长度"
+      },
+      "波形宽度": {
+        "type": "number",
+        "description": "波形宽度"
+      },
+      "波形高度": {
+        "type": "number",
+        "description": "波形高度"
+      },
+      "镜像": {
+        "type": "string",
+        "description": "镜像"
+      },
+      "网格行数": {
+        "type": "integer",
+        "description": "网格行数"
+      },
+      "网格列数": {
+        "type": "integer",
+        "description": "网格列数"
+      },
+      "单元大小": {
+        "type": "number",
+        "description": "单元大小"
+      },
+      "深度层数": {
+        "type": "integer",
+        "description": "深度层数"
+      },
+      "透视": {
+        "type": "number",
+        "description": "透视"
+      },
+      "跳动幅度": {
+        "type": "number",
+        "description": "跳动幅度"
+      },
+      "频段响应": {
+        "type": "string",
+        "description": "频段响应"
+      },
+      "扩散半径": {
+        "type": "number",
+        "description": "扩散半径"
+      },
+      "汇聚速度": {
+        "type": "string",
+        "description": "汇聚速度"
+      },
+      "触发阈值": {
+        "type": "number",
+        "description": "触发阈值"
+      },
+      "填充颜色": {
+        "type": "string",
+        "description": "填充颜色"
+      },
+      "字符联动": {
+        "type": "string",
+        "description": "字符联动"
+      },
+      "缩放幅度": {
+        "type": "number",
+        "description": "缩放幅度"
+      },
+      "最大强度": {
+        "type": "number",
+        "description": "最大强度"
+      },
+      "变形量": {
+        "type": "number",
+        "description": "变形量"
+      },
+      "变形类型": {
+        "type": "string",
+        "description": "变形类型"
+      },
+      "过渡时长": {
+        "type": "number",
+        "description": "过渡时长"
+      },
+      "缓动曲线": {
+        "type": "string",
+        "description": "缓动曲线"
+      },
+      "中间形状": {
+        "type": "string",
+        "description": "中间形状"
+      },
+      "圆角值": {
+        "type": "string",
+        "description": "圆角值"
+      },
+      "圆化顺序": {
+        "type": "string",
+        "description": "圆化顺序"
+      },
+      "起始角数": {
+        "type": "integer",
+        "description": "起始角数"
+      },
+      "终止角数": {
+        "type": "integer",
+        "description": "终止角数"
+      },
+      "内凹比例": {
+        "type": "number",
+        "description": "内凹比例"
+      },
+      "起始边数": {
+        "type": "integer",
+        "description": "起始边数"
+      },
+      "终止边数": {
+        "type": "integer",
+        "description": "终止边数"
+      },
+      "心形比例": {
+        "type": "number",
+        "description": "心形比例"
+      },
+      "月牙弧度": {
+        "type": "string",
+        "description": "月牙弧度"
+      },
+      "月牙方向": {
+        "type": "string",
+        "description": "月牙方向"
+      },
+      "锯齿数": {
+        "type": "integer",
+        "description": "锯齿数"
+      },
+      "锯齿幅度": {
+        "type": "number",
+        "description": "锯齿幅度"
+      },
+      "波浪数": {
+        "type": "integer",
+        "description": "波浪数"
+      },
+      "waveAmplitude": {
+        "type": "number",
+        "description": "波浪高度 (px)",
+        "min": 5,
+        "max": 100
+      },
+      "螺旋圈数": {
+        "type": "integer",
+        "description": "螺旋圈数"
+      },
+      "螺旋半径": {
+        "type": "number",
+        "description": "螺旋半径"
+      },
+      "碎片数": {
+        "type": "integer",
+        "description": "碎片数"
+      },
+      "飞散距离": {
+        "type": "number",
+        "description": "飞散距离"
+      },
+      "旋转量": {
+        "type": "string",
+        "description": "旋转量"
+      },
+      "路径类型": {
+        "type": "string",
+        "description": "路径类型"
+      },
+      "绘制速度": {
+        "type": "string",
+        "description": "绘制速度"
+      },
+      "描边颜色": {
+        "type": "string",
+        "description": "描边颜色"
+      },
+      "端点样式": {
+        "type": "string",
+        "description": "端点样式"
+      },
+      "自动旋转": {
+        "type": "string",
+        "description": "自动旋转"
+      },
+      "循环": {
+        "type": "string",
+        "description": "循环"
+      },
+      "起始路径": {
+        "type": "string",
+        "description": "起始路径"
+      },
+      "终止路径": {
+        "type": "string",
+        "description": "终止路径"
+      },
+      "修剪起始": {
+        "type": "number",
+        "description": "修剪起始"
+      },
+      "修剪结束": {
+        "type": "number",
+        "description": "修剪结束"
+      },
+      "修剪速度": {
+        "type": "string",
+        "description": "修剪速度"
+      },
+      "偏移": {
+        "type": "number",
+        "description": "偏移"
+      },
+      "波纹幅度": {
+        "type": "number",
+        "description": "波纹幅度"
+      },
+      "波纹频率": {
+        "type": "number",
+        "description": "波纹频率"
+      },
+      "波纹方向": {
+        "type": "string",
+        "description": "波纹方向"
+      },
+      "起始大小": {
+        "type": "number",
+        "description": "起始大小"
+      },
+      "终止大小": {
+        "type": "number",
+        "description": "终止大小"
+      },
+      "起始角度": {
+        "type": "string",
+        "description": "起始角度"
+      },
+      "终止角度": {
+        "type": "string",
+        "description": "终止角度"
+      },
+      "旋转轴": {
+        "type": "string",
+        "description": "旋转轴"
+      },
+      "起始颜色": {
+        "type": "string",
+        "description": "起始颜色"
+      },
+      "终止颜色": {
+        "type": "string",
+        "description": "终止颜色"
+      },
+      "起始透明度": {
+        "type": "number",
+        "description": "起始透明度"
+      },
+      "终止透明度": {
+        "type": "number",
+        "description": "终止透明度"
+      },
+      "起始宽度": {
+        "type": "number",
+        "description": "起始宽度"
+      },
+      "终止宽度": {
+        "type": "number",
+        "description": "终止宽度"
+      },
+      "对齐方式": {
+        "type": "string",
+        "description": "对齐方式"
+      },
+      "间距": {
+        "type": "number",
+        "description": "间距"
+      },
+      "分布方向": {
+        "type": "string",
+        "description": "分布方向"
+      },
+      "分布范围": {
+        "type": "number",
+        "description": "分布范围"
+      },
+      "图形数量": {
+        "type": "integer",
+        "description": "图形数量"
+      },
+      "行数": {
+        "type": "integer",
+        "description": "行数"
+      },
+      "列数": {
+        "type": "integer",
+        "description": "列数"
+      },
+      "行间距": {
+        "type": "number",
+        "description": "行间距"
+      },
+      "列间距": {
+        "type": "number",
+        "description": "列间距"
+      },
+      "出现顺序": {
+        "type": "string",
+        "description": "出现顺序"
+      },
+      "图形数": {
+        "type": "integer",
+        "description": "图形数"
+      },
+      "组合方式": {
+        "type": "string",
+        "description": "组合方式"
+      },
+      "拆分数": {
+        "type": "integer",
+        "description": "拆分数"
+      },
+      "拆分方向": {
+        "type": "string",
+        "description": "拆分方向"
+      },
+      "方向": {
+        "type": "string",
+        "description": "方向"
+      },
+      "脉冲幅度": {
+        "type": "number",
+        "description": "脉冲幅度"
+      },
+      "漂浮幅度": {
+        "type": "number",
+        "description": "漂浮幅度"
+      },
+      "变形形状": {
+        "type": "string",
+        "description": "变形形状"
+      },
+      "凸起深度": {
+        "type": "number",
+        "description": "凸起深度"
+      },
+      "凸起方向": {
+        "type": "string",
+        "description": "凸起方向"
+      },
+      "侧面颜色": {
+        "type": "string",
+        "description": "侧面颜色"
+      },
+      "光照角度": {
+        "type": "string",
+        "description": "光照角度"
+      },
+      "旋转角度": {
+        "type": "string",
+        "description": "旋转角度"
+      },
+      "metalColor": {
+        "type": "string",
+        "description": "金属颜色 [R,G,B]"
+      },
+      "反光强度": {
+        "type": "number",
+        "description": "反光强度"
+      },
+      "凹凸强度": {
+        "type": "number",
+        "description": "凹凸强度"
+      },
+      "玻璃色": {
+        "type": "string",
+        "description": "玻璃色"
+      },
+      "折射率": {
+        "type": "number",
+        "description": "折射率"
+      },
+      "球半径": {
+        "type": "number",
+        "description": "球半径"
+      },
+      "边长": {
+        "type": "number",
+        "description": "边长"
+      },
+      "螺旋高度": {
+        "type": "number",
+        "description": "螺旋高度"
+      },
+      "光束方向": {
+        "type": "string",
+        "description": "光束方向"
+      },
+      "光斑位置": {
+        "type": "string",
+        "description": "光斑位置"
+      },
+      "3D 深度": {
+        "type": "number",
+        "description": "3D 深度"
+      },
+      "空间深度": {
+        "type": "number",
+        "description": "空间深度"
+      },
+      "漂浮速度": {
+        "type": "string",
+        "description": "漂浮速度"
+      },
+      "隧道长度": {
+        "type": "number",
+        "description": "隧道长度"
+      },
+      "隧道半径": {
+        "type": "number",
+        "description": "隧道半径"
+      },
+      "面颜色": {
+        "type": "string",
+        "description": "面颜色"
+      },
+      "边颜色": {
+        "type": "string",
+        "description": "边颜色"
+      },
+      "控制类型": {
+        "type": "string",
+        "description": "控制类型"
+      },
+      "----------": {
+        "type": "string",
+        "description": "----------"
+      },
+      "预设": {
+        "type": "string",
+        "description": "预设"
+      },
+      "光斑扫过转场 v1": {
+        "type": "string",
+        "description": "光斑扫过转场 v1"
+      },
+      "青橙调色 v2": {
+        "type": "string",
+        "description": "青橙调色 v2"
+      },
+      "弹跳入场 v1": {
+        "type": "string",
+        "description": "弹跳入场 v1"
+      },
+      "粒子汇聚 v1": {
+        "type": "string",
+        "description": "粒子汇聚 v1"
+      },
+      "工具": {
+        "type": "string",
+        "description": "工具"
+      },
+      "**aescripts aescripts Manager**": {
+        "type": "string",
+        "description": "**aescripts aescripts Manager**"
+      },
+      "**FX Console**": {
+        "type": "string",
+        "description": "**FX Console**"
+      },
+      "**Kbar**": {
+        "type": "string",
+        "description": "**Kbar**"
+      },
+      "**Preset Browser**": {
+        "type": "string",
+        "description": "**Preset Browser**"
+      },
+      "**Adobe Bridge**": {
+        "type": "string",
+        "description": "**Adobe Bridge**"
+      },
+      "类型": {
+        "type": "string",
+        "description": "类型"
+      },
+      "光效转场": {
+        "type": "integer",
+        "description": "光效转场"
+      },
+      "模糊转场": {
+        "type": "integer",
+        "description": "模糊转场"
+      },
+      "位移转场": {
+        "type": "integer",
+        "description": "位移转场"
+      },
+      "变形转场": {
+        "type": "integer",
+        "description": "变形转场"
+      },
+      "像素转场": {
+        "type": "integer",
+        "description": "像素转场"
+      },
+      "遮罩转场": {
+        "type": "integer",
+        "description": "遮罩转场"
+      },
+      "风格": {
+        "type": "string",
+        "description": "风格"
+      },
+      "电影感": {
+        "type": "integer",
+        "description": "电影感"
+      },
+      "日系": {
+        "type": "integer",
+        "description": "日系"
+      },
+      "赛博朋克": {
+        "type": "integer",
+        "description": "赛博朋克"
+      },
+      "复古": {
+        "type": "integer",
+        "description": "复古"
+      },
+      "美食": {
+        "type": "integer",
+        "description": "美食"
+      },
+      "人像": {
+        "type": "integer",
+        "description": "人像"
+      },
+      "风景": {
+        "type": "integer",
+        "description": "风景"
+      },
+      "扩展名": {
+        "type": "string",
+        "description": "扩展名"
+      },
+      "--------": {
+        "type": "string",
+        "description": "--------"
+      },
+      "`.ffx`": {
+        "type": "string",
+        "description": "`.ffx`"
+      },
+      "`.aex`": {
+        "type": "string",
+        "description": "`.aex`"
+      },
+      "`.jsx`": {
+        "type": "string",
+        "description": "`.jsx`"
+      },
+      "`.json`": {
+        "type": "string",
+        "description": "`.json`"
+      },
+      "`.cube`": {
+        "type": "string",
+        "description": "`.cube`"
+      },
+      "`.3dl`": {
+        "type": "string",
+        "description": "`.3dl`"
+      },
+      "表达式": {
+        "type": "string",
+        "description": "表达式"
+      },
+      "`wiggle(f, a)`": {
+        "type": "string",
+        "description": "`wiggle(f, a)`"
+      },
+      "`loopOut()`": {
+        "type": "string",
+        "description": "`loopOut()`"
+      },
+      "`loopIn()`": {
+        "type": "string",
+        "description": "`loopIn()`"
+      },
+      "`time`": {
+        "type": "string",
+        "description": "`time`"
+      },
+      "`random()`": {
+        "type": "string",
+        "description": "`random()`"
+      },
+      "`ease()`": {
+        "type": "string",
+        "description": "`ease()`"
+      },
+      "`linear()`": {
+        "type": "string",
+        "description": "`linear()`"
+      },
+      "`clamp()`": {
+        "type": "string",
+        "description": "`clamp()`"
+      },
+      "`length()`": {
+        "type": "string",
+        "description": "`length()`"
+      },
+      "`valueAtTime()`": {
+        "type": "string",
+        "description": "`valueAtTime()`"
+      },
+      "快捷键": {
+        "type": "string",
+        "description": "快捷键"
+      },
+      "`F9`": {
+        "type": "string",
+        "description": "`F9`"
+      },
+      "`Shift+F9`": {
+        "type": "string",
+        "description": "`Shift+F9`"
+      },
+      "`Ctrl+Shift+F9`": {
+        "type": "string",
+        "description": "`Ctrl+Shift+F9`"
+      },
+      "`Alt+点击秒表`": {
+        "type": "string",
+        "description": "`Alt+点击秒表`"
+      },
+      "`Ctrl+Alt+Y`": {
+        "type": "string",
+        "description": "`Ctrl+Alt+Y`"
+      },
+      "`Ctrl+D`": {
+        "type": "string",
+        "description": "`Ctrl+D`"
+      },
+      "`Ctrl+Shift+D`": {
+        "type": "string",
+        "description": "`Ctrl+Shift+D`"
+      },
+      "`Ctrl+Shift+C`": {
+        "type": "string",
+        "description": "`Ctrl+Shift+C`"
+      },
+      "`Ctrl+Alt+Home`": {
+        "type": "string",
+        "description": "`Ctrl+Alt+Home`"
+      },
+      "`Ctrl+Home`": {
+        "type": "string",
+        "description": "`Ctrl+Home`"
+      }
+    },
+    "default_values": {
+      "textLayerName": "标题文字",
+      "flashCount": 8,
+      "duration": 2.0,
+      "阴影色相": "200°",
+      "高光色相": "30°",
+      "阴影饱和度": 35,
+      "高光饱和度": 40,
+      "对比度": 15,
+      "亮度": 10,
+      "saturation": 15,
+      "黑场": 20,
+      "白场": -10,
+      "色温": "5500K",
+      "蓝色偏移": 20,
+      "黄色加强": 15,
+      "绿色偏移": 10,
+      "柔光": 0.25,
+      "粉色偏移": 15,
+      "颗粒": 0.2,
+      "青色加强": 25,
+      "绿色加强": 10,
+      "阴影提亮": 20,
+      "色相偏移": "20°",
+      "故障强度": 0.3,
+      "蓝色加强": 20,
+      "紫色加强": 20,
+      "色相": "35°",
+      "透明度": 0.8,
+      "扫描线": 0.3,
+      "粉色加强": 10,
+      "划痕": 0.1,
+      "噪点": 0.2,
+      "抖动": 0.15,
+      "红色加强": 10,
+      "锐化": 20,
+      "橙色加强": 30,
+      "红色滤镜": 20,
+      "高光压暗": -15,
+      "光斑数量": 20,
+      "光斑大小": 30.0,
+      "光斑颜色": "#FFFFFF",
+      "闪烁频率": 1.0,
+      "移动速度": "1.0x",
+      "光晕半径": 200.0,
+      "光晕强度": 0.7,
+      "光晕颜色": "#FFFFFF",
+      "衰减": 0.5,
+      "光线数量": 12,
+      "光线长度": 500.0,
+      "光线宽度": 5.0,
+      "光源位置": "3D",
+      "光晕类型": "105mm",
+      "flareBrightness": 1.0,
+      "光晕位置": "50%,50%,0",
+      "元素数量": 7,
+      "光束密度": 0.6,
+      "散射角": "30°",
+      "雾浓度": 0.4,
+      "极光色 1": "#00FF88",
+      "极光色 2": "#8800FF",
+      "流动方向": "上→下",
+      "波动幅度": 50.0,
+      "星光数量": 50,
+      "星光颜色": "#FFFFFF",
+      "光芒长度": 20.0,
+      "neonColor": "#FF00FF",
+      "发光半径": 30.0,
+      "内核亮度": 1.0,
+      "闪烁": "关",
+      "漏光色": "#FF6B35",
+      "waveSpeed": "1.0x",
+      "光剑色": "#00FF00",
+      "光剑宽度": 10.0,
+      "发光强度": 0.9,
+      "粒子数量": 500,
+      "粒子大小": 3.0,
+      "汇聚目标": "中心",
+      "飞散方向": "任意",
+      "飞散速度": "1.0x",
+      "流动路径": "直线",
+      "爆炸强度": "1.0x",
+      "重力": 0.3,
+      "上升速度": "1.0x",
+      "扩散": 0.5,
+      "颜色": "#FFFFFF",
+      "火焰高度": 200.0,
+      "颜色 1": "#FFFFFF",
+      "颜色 2": "#FF0000",
+      "雪花大小": 5.0,
+      "fallSpeed": "0.5x",
+      "飘移": 0.3,
+      "星辰大小": 2.0,
+      "R 偏移": 20.0,
+      "G 偏移": 5.0,
+      "B 偏移": -20.0,
+      "撕裂数量": 5,
+      "撕裂宽度": 20.0,
+      "错位量": 50.0,
+      "干扰强度": 0.5,
+      "干扰频率": 8.0,
+      "噪点量": 0.3,
+      "损坏区域": 0.2,
+      "损坏强度": 0.6,
+      "频率": 0.5,
+      "强度": 0.8,
+      "颜色偏移": "10°",
+      "扫描线间距": 4.0,
+      "扫描线强度": 0.5,
+      "噪点大小": 1.0,
+      "饱和度异常": 50,
+      "焦点距离": 1000.0,
+      "模糊度": 30,
+      "光圈形状": "五边形",
+      "快门角度": "180°",
+      "快门相位": "0°",
+      "采样数": 8,
+      "视角": "0°",
+      "模糊中心": "50%,50%",
+      "模糊类型": "Zoom",
+      "模糊量": 50,
+      "R 模糊": 20.0,
+      "G 模糊": 10.0,
+      "B 模糊": 30.0,
+      "模糊图层": "自身",
+      "最大模糊": 50,
+      "黏度": 0.5,
+      "表面张力": 0.6,
+      "网格密度": 20,
+      "变形强度": 0.5,
+      "变形模式": "波浪",
+      "畸变量": 0.3,
+      "畸变中心": "50%,50%",
+      "色差": 0.1,
+      "波长": 200.0,
+      "振幅": 50.0,
+      "相位速度": 2.0,
+      "漩涡中心": "50%,50%",
+      "漩涡角度": "90°",
+      "半径": 200.0,
+      "球面半径": 1.0,
+      "球面中心": "50%,50%",
+      "颜色噪点": "关",
+      "颗粒量": 0.4,
+      "颗粒大小": 2.0,
+      "颗粒类型": "黑白",
+      "划痕数量": 5,
+      "划痕长度": 0.8,
+      "划痕宽度": 1.0,
+      "灰尘数量": 30,
+      "灰尘大小": 2.0,
+      "纹理强度": 0.7,
+      "纹理类型": "牛皮纸",
+      "混合模式": "叠加",
+      "边缘扩散": 0.3,
+      "颜色 bleeding": 0.2,
+      "边框宽度": 5.0,
+      "光色": "#FFFFFF",
+      "故障量": 0.5,
+      "RGB 偏移": 10.0,
+      "边框颜色": "#FFFFFF",
+      "圆角": 0.0,
+      "花纹类型": "蕾丝",
+      "渐变方向": "线性",
+      "角度": "90°",
+      "过渡位置": 0.5,
+      "中心色": "#FFFFFF",
+      "边缘色": "#000000",
+      "中心位置": "50%,50%",
+      "颜色 3": "#00FFFF",
+      "颜色数": 5,
+      "颜色组": "彩虹",
+      "星星数量": 1000,
+      "星星大小": 2.0,
+      "粒子颜色": "#FFFF99",
+      "雪花数量": 200,
+      "花瓣数量": 30,
+      "花瓣颜色": "#FFB7C5",
+      "旋转": "0.2x",
+      "气泡数量": 30,
+      "气泡大小": 20.0,
+      "光晕数量": 3,
+      "扩散速度": "1.0x",
+      "旋转速度": "0.5x",
+      "网格线宽": 1.0,
+      "网格颜色": "#FFFFFF",
+      "三角形大小": 50.0,
+      "三角形颜色": "#4ECDC4",
+      "六边形大小": 60.0,
+      "六边形颜色": "#FF6B6B",
+      "strokeWidth": 3.0,
+      "圆点大小": 10.0,
+      "圆点间距": 30.0,
+      "圆点颜色": "#FFFFFF",
+      "线条数量": 20,
+      "线条角度": "45°",
+      "线条颜色": "#45B7D1",
+      "线宽": 2.0,
+      "动画": "关",
+      "纸张类型": "牛皮纸",
+      "扩散程度": 0.6,
+      "木纹类型": "橡木",
+      "木纹方向": "水平",
+      "频段数": 32,
+      "柱宽": 8.0,
+      "柱间距": 5.0,
+      "最大高度": 300.0,
+      "平滑": 0.3,
+      "最大长度": 100.0,
+      "波形宽度": 1.0,
+      "波形高度": 100.0,
+      "镜像": "开",
+      "网格行数": 10,
+      "网格列数": 20,
+      "单元大小": 10.0,
+      "深度层数": 5,
+      "透视": 1000.0,
+      "跳动幅度": 20.0,
+      "频段响应": "中频",
+      "扩散半径": 500.0,
+      "汇聚速度": "1.0x",
+      "触发阈值": 0.5,
+      "填充颜色": "#00FF88",
+      "字符联动": "开",
+      "缩放幅度": 0.2,
+      "最大强度": 1.0,
+      "变形量": 0.3,
+      "变形类型": "缩放",
+      "过渡时长": 1.2,
+      "缓动曲线": "Ease Out",
+      "中间形状": "菱形",
+      "圆角值": "0→100",
+      "圆化顺序": "顶点优先",
+      "起始角数": 5,
+      "终止角数": 8,
+      "内凹比例": 0.5,
+      "起始边数": 3,
+      "终止边数": 12,
+      "心形比例": 1.0,
+      "月牙弧度": "180°",
+      "月牙方向": "右",
+      "锯齿数": 5,
+      "锯齿幅度": 30.0,
+      "波浪数": 3,
+      "waveAmplitude": 50.0,
+      "螺旋圈数": 5,
+      "螺旋半径": 150.0,
+      "碎片数": 8,
+      "飞散距离": 200.0,
+      "旋转量": "180°",
+      "路径类型": "贝塞尔",
+      "绘制速度": "1.0x",
+      "描边颜色": "#FFFFFF",
+      "端点样式": "圆头",
+      "自动旋转": "开",
+      "循环": "关",
+      "起始路径": "圆形",
+      "终止路径": "星形",
+      "修剪起始": 0.0,
+      "修剪结束": 1.0,
+      "修剪速度": "1.0x",
+      "偏移": 0.0,
+      "波纹幅度": 20.0,
+      "波纹频率": 3.0,
+      "波纹方向": "垂直",
+      "起始大小": 1.0,
+      "终止大小": 2.0,
+      "起始角度": "0°",
+      "终止角度": "360°",
+      "旋转轴": "Y",
+      "起始颜色": "#FF0000",
+      "终止颜色": "#0000FF",
+      "起始透明度": 1.0,
+      "终止透明度": 0.0,
+      "起始宽度": 0.0,
+      "终止宽度": 10.0,
+      "对齐方式": "左对齐",
+      "间距": 20.0,
+      "分布方向": "水平",
+      "分布范围": 1.0,
+      "图形数量": 5,
+      "行数": 3,
+      "列数": 5,
+      "行间距": 50.0,
+      "列间距": 50.0,
+      "出现顺序": "从左到右",
+      "图形数": 3,
+      "组合方式": "重叠",
+      "拆分数": 4,
+      "拆分方向": "任意",
+      "方向": "顺时针",
+      "脉冲幅度": 0.15,
+      "漂浮幅度": 20.0,
+      "变形形状": "圆→方",
+      "凸起深度": 30.0,
+      "凸起方向": "45°",
+      "侧面颜色": "#666666",
+      "光照角度": "45°",
+      "旋转角度": "360°",
+      "metalColor": "#C0C0C0",
+      "反光强度": 0.7,
+      "凹凸强度": 0.6,
+      "玻璃色": "#FFFFFF",
+      "折射率": 1.5,
+      "球半径": 200.0,
+      "边长": 300.0,
+      "螺旋高度": 400.0,
+      "光束方向": "任意",
+      "光斑位置": "3D 随机",
+      "3D 深度": 1000.0,
+      "空间深度": 2000.0,
+      "漂浮速度": "1.0x",
+      "隧道长度": 2000.0,
+      "隧道半径": 300.0,
+      "面颜色": "#FFFFFF",
+      "边颜色": "#000000",
+      "控制类型": "用途",
+      "----------": "------",
+      "预设": "命名",
+      "光斑扫过转场 v1": "`TR_Light_Sweep_v01_AE.ffx`",
+      "青橙调色 v2": "`CG_Cinematic_TealOrange_v02_AE.ffx`",
+      "弹跳入场 v1": "`TA_In_Bounce_v01_AE.ffx`",
+      "粒子汇聚 v1": "`FX_Particle_Converge_v01_AE.ffx`",
+      "工具": "类型",
+      "**aescripts aescripts Manager**": "商业",
+      "**FX Console**": "免费",
+      "**Kbar**": "商业",
+      "**Preset Browser**": "内置",
+      "**Adobe Bridge**": "免费",
+      "类型": "数量",
+      "光效转场": 10,
+      "模糊转场": 8,
+      "位移转场": 10,
+      "变形转场": 8,
+      "像素转场": 7,
+      "遮罩转场": 7,
+      "风格": "数量",
+      "电影感": 10,
+      "日系": 8,
+      "赛博朋克": 7,
+      "复古": 8,
+      "美食": 5,
+      "人像": 6,
+      "风景": 6,
+      "扩展名": "类型",
+      "--------": "------",
+      "`.ffx`": "动画预设",
+      "`.aex`": "效果插件",
+      "`.jsx`": "脚本",
+      "`.json`": "配置",
+      "`.cube`": "LUT",
+      "`.3dl`": "LUT",
+      "表达式": "功能",
+      "`wiggle(f, a)`": "抖动",
+      "`loopOut()`": "循环",
+      "`loopIn()`": "入场循环",
+      "`time`": "时间",
+      "`random()`": "随机",
+      "`ease()`": "缓动",
+      "`linear()`": "线性映射",
+      "`clamp()`": "限制",
+      "`length()`": "长度",
+      "`valueAtTime()`": "时间取值",
+      "快捷键": "功能",
+      "`F9`": "关键帧缓动",
+      "`Shift+F9`": "缓动入",
+      "`Ctrl+Shift+F9`": "缓动出",
+      "`Alt+点击秒表`": "添加表达式",
+      "`Ctrl+Alt+Y`": "新建调整图层",
+      "`Ctrl+D`": "复制图层",
+      "`Ctrl+Shift+D`": "分割图层",
+      "`Ctrl+Shift+C`": "预合成",
+      "`Ctrl+Alt+Home`": "锚点居中",
+      "`Ctrl+Home`": "图层居中"
+    },
+    "script_template": "(function(){var _r={};try{\nvar c=app.project.activeItem;\nif(!c||!(c instanceof CompItem)){\n_r={status:'error',message:'No active comp'};\nreturn JSON.stringify(_r);}\nvar n=${textLayerName};var L=null;\nfor(var i=1;i<=c.numLayers;i++){\nif(c.layer(i).name==n){L=c.layer(i);break;}}\nif(!L){_r={status:'error',message:'Layer not found'};\nreturn JSON.stringify(_r);}\nvar fc=${flashCount};var d=${duration};\nvar itv=d/fc;\nvar tr=L.property('ADBE Transform Group');\nvar op=tr.property('ADBE Opacity');\nop.setValueAtTime(0,0);\nfor(var k=0;k<fc;k++){\nop.setValueAtTime(k*itv,100);\nop.setValueAtTime(k*itv+itv*0.5,0);}\nvar sc=tr.property('ADBE Scale');\nsc.expression=\n'100+Math.sin(time*'+fc+'*Math.PI)*30';\n_r={status:'success',preset:'sm_quick_flash',\nlayer:n};\n}catch(e){_r={status:'error',message:e.toString()};}\nreturn JSON.stringify(_r);})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025"
+      ],
+      "platform": [
+        "windows",
+        "macos"
+      ]
+    }
+  }
+]

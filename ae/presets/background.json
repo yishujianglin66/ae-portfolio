@@ -1,0 +1,1701 @@
+[
+  {
+    "name": "linear_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "线性渐变背景 - 从起点到终点的平滑颜色过渡，适用于简洁现代的设计风格",
+    "tags": [
+      "渐变",
+      "linear",
+      "gradient",
+      "背景",
+      "简约"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "startColor": {
+        "type": "array",
+        "description": "起始颜色 [R,G,B] 0-1"
+      },
+      "endColor": {
+        "type": "array",
+        "description": "结束颜色 [R,G,B] 0-1"
+      },
+      "startPoint": {
+        "type": "array",
+        "description": "渐变起点 [x,y]"
+      },
+      "endPoint": {
+        "type": "array",
+        "description": "渐变终点 [x,y]"
+      },
+      "scatter": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "渐变散射程度"
+      }
+    },
+    "default_values": {
+      "layerName": "线性渐变背景",
+      "startColor": [
+        0.1,
+        0.3,
+        0.8
+      ],
+      "endColor": [
+        0.9,
+        0.2,
+        0.5
+      ],
+      "startPoint": [
+        0,
+        0
+      ],
+      "endPoint": [
+        1920,
+        1080
+      ],
+      "scatter": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      startColor: ${startColor},\n      endColor: ${endColor},\n      startPoint: ${startPoint},\n      endPoint: ${endPoint},\n      scatter: ${scatter}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.5,0.5,0.5], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.startColor);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.endColor);\n    ramp.property(\"ADBE Ramp-0001\").setValue(p.startPoint);\n    ramp.property(\"ADBE Ramp-0003\").setValue(p.endPoint);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    ramp.property(\"ADBE Ramp-0006\").setValue(p.scatter);\n    _result = {status:\"success\", message:\"线性渐变背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "radial_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "径向渐变背景 - 从中心向外辐射的圆形渐变，适合聚焦视觉中心",
+    "tags": [
+      "渐变",
+      "radial",
+      "gradient",
+      "背景",
+      "辐射"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "startColor": {
+        "type": "array",
+        "description": "中心颜色 [R,G,B] 0-1"
+      },
+      "endColor": {
+        "type": "array",
+        "description": "边缘颜色 [R,G,B] 0-1"
+      },
+      "centerPoint": {
+        "type": "array",
+        "description": "渐变中心 [x,y]"
+      },
+      "radius": {
+        "type": "number",
+        "min": 100,
+        "max": 4000,
+        "description": "渐变半径"
+      },
+      "scatter": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "渐变散射程度"
+      }
+    },
+    "default_values": {
+      "layerName": "径向渐变背景",
+      "startColor": [
+        0.9,
+        0.9,
+        0.9
+      ],
+      "endColor": [
+        0.1,
+        0.1,
+        0.3
+      ],
+      "centerPoint": [
+        960,
+        540
+      ],
+      "radius": 1000,
+      "scatter": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      startColor: ${startColor},\n      endColor: ${endColor},\n      centerPoint: ${centerPoint},\n      radius: ${radius},\n      scatter: ${scatter}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.5,0.5,0.5], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.startColor);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.endColor);\n    ramp.property(\"ADBE Ramp-0001\").setValue(p.centerPoint);\n    ramp.property(\"ADBE Ramp-0003\").setValue([p.centerPoint[0]+p.radius, p.centerPoint[1]]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(2);\n    ramp.property(\"ADBE Ramp-0006\").setValue(p.scatter);\n    _result = {status:\"success\", message:\"径向渐变背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "rainbow_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "彩虹渐变背景 - 四色渐变构成彩虹光谱，色彩丰富绚丽",
+    "tags": [
+      "渐变",
+      "rainbow",
+      "gradient",
+      "背景",
+      "彩虹"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "color1": {
+        "type": "array",
+        "description": "颜色1 [R,G,B] 0-1"
+      },
+      "color2": {
+        "type": "array",
+        "description": "颜色2 [R,G,B] 0-1"
+      },
+      "color3": {
+        "type": "array",
+        "description": "颜色3 [R,G,B] 0-1"
+      },
+      "color4": {
+        "type": "array",
+        "description": "颜色4 [R,G,B] 0-1"
+      },
+      "blend": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "颜色混合程度"
+      }
+    },
+    "default_values": {
+      "layerName": "彩虹渐变背景",
+      "color1": [
+        1,
+        0,
+        0
+      ],
+      "color2": [
+        1,
+        1,
+        0
+      ],
+      "color3": [
+        0,
+        1,
+        0
+      ],
+      "color4": [
+        0,
+        0,
+        1
+      ],
+      "blend": 0.5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      color1: ${color1},\n      color2: ${color2},\n      color3: ${color3},\n      color4: ${color4},\n      blend: ${blend}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.5,0.5,0.5], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var grad = layer.Effects.addProperty(\"ADBE 4ColorGradient\");\n    grad.property(\"ADBE 4ColorGradient-0002\").setValue(p.color1);\n    grad.property(\"ADBE 4ColorGradient-0004\").setValue(p.color2);\n    grad.property(\"ADBE 4ColorGradient-0006\").setValue(p.color3);\n    grad.property(\"ADBE 4ColorGradient-0008\").setValue(p.color4);\n    grad.property(\"ADBE 4ColorGradient-0009\").setValue(p.blend);\n    _result = {status:\"success\", message:\"彩虹渐变背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "sunset_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "日落渐变背景 - 模拟黄昏天空的暖色调渐变，橙红到紫罗兰",
+    "tags": [
+      "渐变",
+      "sunset",
+      "gradient",
+      "背景",
+      "黄昏"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "topColor": {
+        "type": "array",
+        "description": "顶部颜色 [R,G,B] 0-1"
+      },
+      "bottomColor": {
+        "type": "array",
+        "description": "底部颜色 [R,G,B] 0-1"
+      },
+      "scatter": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "渐变散射程度"
+      }
+    },
+    "default_values": {
+      "layerName": "日落渐变背景",
+      "topColor": [
+        0.9,
+        0.4,
+        0.1
+      ],
+      "bottomColor": [
+        0.3,
+        0.1,
+        0.4
+      ],
+      "scatter": 0.2
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      topColor: ${topColor},\n      bottomColor: ${bottomColor},\n      scatter: ${scatter}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.5,0.5,0.5], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.topColor);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.bottomColor);\n    ramp.property(\"ADBE Ramp-0001\").setValue([comp.width/2, 0]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width/2, comp.height]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    ramp.property(\"ADBE Ramp-0006\").setValue(p.scatter);\n    _result = {status:\"success\", message:\"日落渐变背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "deep_sea_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "深海渐变背景 - 模拟深海环境的蓝青色渐变，宁静深邃",
+    "tags": [
+      "渐变",
+      "deep_sea",
+      "gradient",
+      "背景",
+      "海洋"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "topColor": {
+        "type": "array",
+        "description": "顶部颜色 [R,G,B] 0-1"
+      },
+      "bottomColor": {
+        "type": "array",
+        "description": "底部颜色 [R,G,B] 0-1"
+      },
+      "scatter": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "渐变散射程度"
+      }
+    },
+    "default_values": {
+      "layerName": "深海渐变背景",
+      "topColor": [
+        0.0,
+        0.3,
+        0.5
+      ],
+      "bottomColor": [
+        0.0,
+        0.05,
+        0.15
+      ],
+      "scatter": 0.15
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      topColor: ${topColor},\n      bottomColor: ${bottomColor},\n      scatter: ${scatter}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.5,0.5,0.5], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.topColor);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.bottomColor);\n    ramp.property(\"ADBE Ramp-0001\").setValue([comp.width/2, 0]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width/2, comp.height]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    ramp.property(\"ADBE Ramp-0006\").setValue(p.scatter);\n    _result = {status:\"success\", message:\"深海渐变背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "fire_gradient",
+    "category": "background",
+    "subcategory": "gradient",
+    "description": "火焰渐变背景 - 模拟火焰燃烧的红橙黄渐变，热烈动感",
+    "tags": [
+      "渐变",
+      "fire",
+      "gradient",
+      "背景",
+      "火焰"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "topColor": {
+        "type": "array",
+        "description": "顶部颜色 [R,G,B] 0-1"
+      },
+      "midColor": {
+        "type": "array",
+        "description": "中间颜色 [R,G,B] 0-1"
+      },
+      "bottomColor": {
+        "type": "array",
+        "description": "底部颜色 [R,G,B] 0-1"
+      },
+      "scatter": {
+        "type": "number",
+        "min": 0,
+        "max": 1,
+        "description": "渐变散射程度"
+      }
+    },
+    "default_values": {
+      "layerName": "火焰渐变背景",
+      "topColor": [
+        0.9,
+        0.9,
+        0.2
+      ],
+      "midColor": [
+        0.9,
+        0.4,
+        0.0
+      ],
+      "bottomColor": [
+        0.4,
+        0.0,
+        0.0
+      ],
+      "scatter": 0.3
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      topColor: ${topColor},\n      midColor: ${midColor},\n      bottomColor: ${bottomColor},\n      scatter: ${scatter}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.5,0.5,0.5], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.topColor);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.bottomColor);\n    ramp.property(\"ADBE Ramp-0001\").setValue([comp.width/2, 0]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width/2, comp.height]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    ramp.property(\"ADBE Ramp-0006\").setValue(p.scatter);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.midColor);\n    _result = {status:\"success\", message:\"火焰渐变背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "starry_sky",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "星空背景 - 模拟夜空中繁星点点的效果，带有微弱发光",
+    "tags": [
+      "粒子",
+      "particle",
+      "星空",
+      "stars",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "density": {
+        "type": "number",
+        "min": 50,
+        "max": 800,
+        "description": "星星密度（对应对比度）"
+      },
+      "brightness": {
+        "type": "number",
+        "min": -100,
+        "max": 100,
+        "description": "整体亮度"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "发光半径"
+      },
+      "glowIntensity": {
+        "type": "number",
+        "min": 0,
+        "max": 5,
+        "description": "发光强度"
+      }
+    },
+    "default_values": {
+      "layerName": "星空背景",
+      "density": 400,
+      "brightness": -20,
+      "glowRadius": 8,
+      "glowIntensity": 0.8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      density: ${density},\n      brightness: ${brightness},\n      glowRadius: ${glowRadius},\n      glowIntensity: ${glowIntensity}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0,0,0], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(12);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(1);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(p.density);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(p.brightness);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").setValue(p.glowRadius);\n    glow.property(\"ADBE Glo2i-0003\").setValue(p.glowIntensity);\n    _result = {status:\"success\", message:\"星空背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "snowflakes",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "雪花飘落背景 - 白色粒子模拟雪花缓缓飘落，冬日氛围",
+    "tags": [
+      "粒子",
+      "particle",
+      "雪花",
+      "snow",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "density": {
+        "type": "number",
+        "min": 50,
+        "max": 600,
+        "description": "雪花密度"
+      },
+      "blurAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 20,
+        "description": "模糊程度"
+      },
+      "brightness": {
+        "type": "number",
+        "min": -50,
+        "max": 100,
+        "description": "整体亮度"
+      }
+    },
+    "default_values": {
+      "layerName": "雪花背景",
+      "density": 300,
+      "blurAmount": 2,
+      "brightness": 0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      density: ${density},\n      blurAmount: ${blurAmount},\n      brightness: ${brightness}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.1,0.15,0.25], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(12);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(6);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(p.density);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(p.brightness);\n    fn.property(\"ADBE Fractal Noise-0008\").expression = \"time * 30\";\n    var blur = layer.Effects.addProperty(\"ADBE Fast Blur\");\n    blur.property(\"ADBE Fast Blur-0001\").setValue(p.blurAmount);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue([0.8,0.9,1]);\n    _result = {status:\"success\", message:\"雪花背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "dust_particles",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "尘埃粒子背景 - 细微的漂浮尘埃，增加画面质感和空气感",
+    "tags": [
+      "粒子",
+      "particle",
+      "尘埃",
+      "dust",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "density": {
+        "type": "number",
+        "min": 50,
+        "max": 500,
+        "description": "尘埃密度"
+      },
+      "brightness": {
+        "type": "number",
+        "min": -100,
+        "max": 100,
+        "description": "整体亮度"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "柔光半径"
+      }
+    },
+    "default_values": {
+      "layerName": "尘埃背景",
+      "density": 200,
+      "brightness": -40,
+      "glowRadius": 5
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      density: ${density},\n      brightness: ${brightness},\n      glowRadius: ${glowRadius}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.1,0.1,0.1], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(9);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(2);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(p.density);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(p.brightness);\n    fn.property(\"ADBE Fractal Noise-0008\").expression = \"time * 10\";\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").setValue(p.glowRadius);\n    glow.property(\"ADBE Glo2i-0003\").setValue(0.5);\n    _result = {status:\"success\", message:\"尘埃粒子背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "fireflies",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "萤火虫背景 - 模拟夏夜萤火虫飞舞，暖黄色光点闪烁",
+    "tags": [
+      "粒子",
+      "particle",
+      "萤火虫",
+      "fireflies",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "density": {
+        "type": "number",
+        "min": 50,
+        "max": 400,
+        "description": "萤火虫密度"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 5,
+        "max": 80,
+        "description": "发光半径"
+      },
+      "speed": {
+        "type": "number",
+        "min": 1,
+        "max": 100,
+        "description": "飞舞速度"
+      }
+    },
+    "default_values": {
+      "layerName": "萤火虫背景",
+      "density": 200,
+      "glowRadius": 25,
+      "speed": 20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      density: ${density},\n      glowRadius: ${glowRadius},\n      speed: ${speed}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.05,0.08,0.05], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(9);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(7);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(p.density);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(-30);\n    fn.property(\"ADBE Fractal Noise-0008\").expression = \"time * \" + p.speed;\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue([0.9,0.8,0.2]);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").setValue(p.glowRadius);\n    glow.property(\"ADBE Glo2i-0003\").setValue(1.2);\n    _result = {status:\"success\", message:\"萤火虫背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "light_spots",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "光点粒子背景 - 柔和的光斑粒子，梦幻朦胧的视觉效果",
+    "tags": [
+      "粒子",
+      "particle",
+      "光点",
+      "light",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "density": {
+        "type": "number",
+        "min": 50,
+        "max": 500,
+        "description": "光点密度"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 10,
+        "max": 100,
+        "description": "发光半径"
+      },
+      "color": {
+        "type": "array",
+        "description": "光点颜色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "光点背景",
+      "density": 250,
+      "glowRadius": 40,
+      "color": [
+        0.6,
+        0.8,
+        1.0
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      density: ${density},\n      glowRadius: ${glowRadius},\n      color: ${color}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0,0,0], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(9);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(3);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(p.density);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(-50);\n    fn.property(\"ADBE Fractal Noise-0008\").expression = \"time * 15\";\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.color);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").setValue(p.glowRadius);\n    glow.property(\"ADBE Glo2i-0003\").setValue(1.5);\n    _result = {status:\"success\", message:\"光点粒子背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "bubbles",
+    "category": "background",
+    "subcategory": "particle",
+    "description": "气泡背景 - 半透明气泡缓缓上升，清新梦幻",
+    "tags": [
+      "粒子",
+      "particle",
+      "气泡",
+      "bubbles",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "size": {
+        "type": "number",
+        "min": 10,
+        "max": 200,
+        "description": "气泡大小"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 100,
+        "max": 800,
+        "description": "对比度"
+      },
+      "brightness": {
+        "type": "number",
+        "min": -100,
+        "max": 100,
+        "description": "整体亮度"
+      }
+    },
+    "default_values": {
+      "layerName": "气泡背景",
+      "size": 80,
+      "contrast": 400,
+      "brightness": -20
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      size: ${size},\n      contrast: ${contrast},\n      brightness: ${brightness}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.2,0.4,0.6], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var cp = layer.Effects.addProperty(\"ADBE Cell Pattern\");\n    cp.property(\"ADBE Cell Pattern-0001\").setValue(0);\n    cp.property(\"ADBE Cell Pattern-0003\").setValue(p.contrast);\n    cp.property(\"ADBE Cell Pattern-0004\").setValue(p.brightness);\n    cp.property(\"ADBE Cell Pattern-0006\").setValue(p.size);\n    var blur = layer.Effects.addProperty(\"ADBE Fast Blur\");\n    blur.property(\"ADBE Fast Blur-0001\").setValue(3);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").setValue(15);\n    glow.property(\"ADBE Glo2i-0003\").setValue(0.6);\n    _result = {status:\"success\", message:\"气泡背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "noise_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "噪点纹理背景 - 模拟胶片噪点或颗粒质感，增加画面粗糙度",
+    "tags": [
+      "纹理",
+      "texture",
+      "噪点",
+      "noise",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "noiseAmount": {
+        "type": "number",
+        "min": 0,
+        "max": 100,
+        "description": "噪点强度"
+      },
+      "brightness": {
+        "type": "number",
+        "min": -100,
+        "max": 100,
+        "description": "整体亮度"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 0,
+        "max": 200,
+        "description": "对比度"
+      }
+    },
+    "default_values": {
+      "layerName": "噪点纹理背景",
+      "noiseAmount": 50,
+      "brightness": 0,
+      "contrast": 100
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      noiseAmount: ${noiseAmount},\n      brightness: ${brightness},\n      contrast: ${contrast}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.5,0.5,0.5], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(0);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(1);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(p.contrast);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(p.brightness);\n    var bc = layer.Effects.addProperty(\"ADBE Brightness & Contrast\");\n    bc.property(\"ADBE Brightness & Contrast-0001\").setValue(p.brightness);\n    bc.property(\"ADBE Brightness & Contrast-0002\").setValue(p.contrast);\n    _result = {status:\"success\", message:\"噪点纹理背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "grid_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "网格纹理背景 - 规则的网格线条，科技感与秩序感",
+    "tags": [
+      "纹理",
+      "texture",
+      "网格",
+      "grid",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "width": {
+        "type": "number",
+        "min": 2,
+        "max": 200,
+        "description": "网格宽度"
+      },
+      "height": {
+        "type": "number",
+        "min": 2,
+        "max": 200,
+        "description": "网格高度"
+      },
+      "border": {
+        "type": "number",
+        "min": 0,
+        "max": 50,
+        "description": "边框粗细"
+      },
+      "color": {
+        "type": "array",
+        "description": "网格颜色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "网格纹理背景",
+      "width": 80,
+      "height": 80,
+      "border": 2,
+      "color": [
+        0.3,
+        0.8,
+        1.0
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      width: ${width},\n      height: ${height},\n      border: ${border},\n      color: ${color}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0,0,0], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var grid = layer.Effects.addProperty(\"ADBE Grid\");\n    grid.property(\"ADBE Grid-0002\").setValue(2);\n    grid.property(\"ADBE Grid-0004\").setValue(p.width);\n    grid.property(\"ADBE Grid-0005\").setValue(p.height);\n    grid.property(\"ADBE Grid-0006\").setValue(p.border);\n    grid.property(\"ADBE Grid-0009\").setValue(100);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.color);\n    _result = {status:\"success\", message:\"网格纹理背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "stripes_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "条纹纹理背景 - 等距条纹排列，经典几何图案",
+    "tags": [
+      "纹理",
+      "texture",
+      "条纹",
+      "stripes",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "stripeWidth": {
+        "type": "number",
+        "min": 2,
+        "max": 100,
+        "description": "条纹宽度"
+      },
+      "direction": {
+        "type": "number",
+        "min": 0,
+        "max": 360,
+        "description": "条纹方向角度"
+      },
+      "color1": {
+        "type": "array",
+        "description": "颜色1 [R,G,B] 0-1"
+      },
+      "color2": {
+        "type": "array",
+        "description": "颜色2 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "条纹纹理背景",
+      "stripeWidth": 20,
+      "direction": 45,
+      "color1": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "color2": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      stripeWidth: ${stripeWidth},\n      direction: ${direction},\n      color1: ${color1},\n      color2: ${color2}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.5,0.5,0.5], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var vb = layer.Effects.addProperty(\"ADBE Venetian Blinds\");\n    vb.property(\"ADBE Venetian Blinds-0001\").setValue(50);\n    vb.property(\"ADBE Venetian Blinds-0002\").setValue(p.direction);\n    vb.property(\"ADBE Venetian Blinds-0003\").setValue(p.stripeWidth);\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.color1);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.color2);\n    ramp.property(\"ADBE Ramp-0001\").setValue([0, comp.height/2]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width, comp.height/2]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    _result = {status:\"success\", message:\"条纹纹理背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "waves_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "波浪纹理背景 - 模拟水面波纹或声波线条的起伏效果",
+    "tags": [
+      "纹理",
+      "texture",
+      "波浪",
+      "waves",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "waveHeight": {
+        "type": "number",
+        "min": 5,
+        "max": 200,
+        "description": "波浪高度"
+      },
+      "waveWidth": {
+        "type": "number",
+        "min": 10,
+        "max": 500,
+        "description": "波浪宽度"
+      },
+      "direction": {
+        "type": "number",
+        "min": 0,
+        "max": 360,
+        "description": "波浪方向"
+      },
+      "color": {
+        "type": "array",
+        "description": "波浪颜色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "波浪纹理背景",
+      "waveHeight": 30,
+      "waveWidth": 100,
+      "direction": 0,
+      "color": [
+        0.2,
+        0.5,
+        0.8
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      waveHeight: ${waveHeight},\n      waveWidth: ${waveWidth},\n      direction: ${direction},\n      color: ${color}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.1,0.1,0.1], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var ww = layer.Effects.addProperty(\"ADBE Wave Warp\");\n    ww.property(\"ADBE Wave Warp-0001\").setValue(1);\n    ww.property(\"ADBE Wave Warp-0002\").setValue(p.waveHeight);\n    ww.property(\"ADBE Wave Warp-0003\").setValue(p.waveWidth);\n    ww.property(\"ADBE Wave Warp-0004\").setValue(p.direction);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.color);\n    _result = {status:\"success\", message:\"波浪纹理背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "honeycomb_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "蜂窝纹理背景 - 六边形蜂窝结构，自然与科技结合的图案",
+    "tags": [
+      "纹理",
+      "texture",
+      "蜂窝",
+      "honeycomb",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "size": {
+        "type": "number",
+        "min": 10,
+        "max": 200,
+        "description": "蜂窝大小"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 100,
+        "max": 800,
+        "description": "对比度"
+      },
+      "color": {
+        "type": "array",
+        "description": "蜂窝颜色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "蜂窝纹理背景",
+      "size": 60,
+      "contrast": 300,
+      "color": [
+        0.9,
+        0.7,
+        0.2
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      size: ${size},\n      contrast: ${contrast},\n      color: ${color}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.1,0.1,0.1], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var cp = layer.Effects.addProperty(\"ADBE Cell Pattern\");\n    cp.property(\"ADBE Cell Pattern-0001\").setValue(16);\n    cp.property(\"ADBE Cell Pattern-0003\").setValue(p.contrast);\n    cp.property(\"ADBE Cell Pattern-0006\").setValue(p.size);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.color);\n    _result = {status:\"success\", message:\"蜂窝纹理背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "dots_texture",
+    "category": "background",
+    "subcategory": "texture",
+    "description": "点阵纹理背景 - 规则排列的圆点矩阵，波普艺术与数字风格",
+    "tags": [
+      "纹理",
+      "texture",
+      "点阵",
+      "dots",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "size": {
+        "type": "number",
+        "min": 10,
+        "max": 150,
+        "description": "点阵大小"
+      },
+      "contrast": {
+        "type": "number",
+        "min": 100,
+        "max": 800,
+        "description": "对比度"
+      },
+      "color": {
+        "type": "array",
+        "description": "点阵颜色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "点阵纹理背景",
+      "size": 40,
+      "contrast": 400,
+      "color": [
+        1.0,
+        0.2,
+        0.4
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      size: ${size},\n      contrast: ${contrast},\n      color: ${color}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.05,0.05,0.05], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var cp = layer.Effects.addProperty(\"ADBE Cell Pattern\");\n    cp.property(\"ADBE Cell Pattern-0001\").setValue(5);\n    cp.property(\"ADBE Cell Pattern-0003\").setValue(p.contrast);\n    cp.property(\"ADBE Cell Pattern-0006\").setValue(p.size);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.color);\n    _result = {status:\"success\", message:\"点阵纹理背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "flowing_light_bands",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "流动光带背景 - 光带如水流般持续流动，充满动感与未来感",
+    "tags": [
+      "动态",
+      "dynamic",
+      "光带",
+      "flowing",
+      "背景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "speed": {
+        "type": "number",
+        "min": 1,
+        "max": 100,
+        "description": "流动速度"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 10,
+        "max": 100,
+        "description": "发光半径"
+      },
+      "color": {
+        "type": "array",
+        "description": "光带颜色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "流动光带背景",
+      "speed": 30,
+      "glowRadius": 35,
+      "color": [
+        0.2,
+        0.8,
+        1.0
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      speed: ${speed},\n      glowRadius: ${glowRadius},\n      color: ${color}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0,0,0], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(13);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(1);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(300);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(-50);\n    var t0 = comp.time;\n    var t1 = t0 + comp.duration;\n    fn.property(\"ADBE Fractal Noise-0008\").setValueAtTime(t0, 0);\n    fn.property(\"ADBE Fractal Noise-0008\").setValueAtTime(t1, p.speed * 10);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.color);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").setValue(p.glowRadius);\n    glow.property(\"ADBE Glo2i-0003\").setValue(1.5);\n    _result = {status:\"success\", message:\"流动光带背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "pulsing_halo",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "脉冲光环背景 - 从中心向外扩散的光环脉冲，节奏感强烈",
+    "tags": [
+      "动态",
+      "dynamic",
+      "光环",
+      "halo",
+      "脉冲"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "centerColor": {
+        "type": "array",
+        "description": "中心颜色 [R,G,B] 0-1"
+      },
+      "edgeColor": {
+        "type": "array",
+        "description": "边缘颜色 [R,G,B] 0-1"
+      },
+      "pulseSpeed": {
+        "type": "number",
+        "min": 0.2,
+        "max": 5,
+        "description": "脉冲频率"
+      },
+      "glowIntensity": {
+        "type": "number",
+        "min": 0.5,
+        "max": 5,
+        "description": "发光强度"
+      }
+    },
+    "default_values": {
+      "layerName": "脉冲光环背景",
+      "centerColor": [
+        1.0,
+        0.9,
+        0.6
+      ],
+      "edgeColor": [
+        0.1,
+        0.05,
+        0.3
+      ],
+      "pulseSpeed": 1.5,
+      "glowIntensity": 2.0
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      centerColor: ${centerColor},\n      edgeColor: ${edgeColor},\n      pulseSpeed: ${pulseSpeed},\n      glowIntensity: ${glowIntensity}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0,0,0], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.centerColor);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.edgeColor);\n    ramp.property(\"ADBE Ramp-0001\").setValue([comp.width/2, comp.height/2]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width, comp.height/2]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(2);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").expression = \"50 + Math.sin(time * \" + p.pulseSpeed + \" * Math.PI * 2) * 30\";\n    glow.property(\"ADBE Glo2i-0003\").expression = \"\" + p.glowIntensity + \" + Math.sin(time * \" + p.pulseSpeed + \" * Math.PI * 2) * 1\";\n    _result = {status:\"success\", message:\"脉冲光环背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "rotating_nebula",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "旋转星云背景 - 模拟宇宙星云的缓慢旋转，神秘浩瀚",
+    "tags": [
+      "动态",
+      "dynamic",
+      "星云",
+      "nebula",
+      "旋转"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "speed": {
+        "type": "number",
+        "min": 1,
+        "max": 100,
+        "description": "旋转速度"
+      },
+      "color": {
+        "type": "array",
+        "description": "星云主色 [R,G,B] 0-1"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 10,
+        "max": 100,
+        "description": "发光半径"
+      }
+    },
+    "default_values": {
+      "layerName": "旋转星云背景",
+      "speed": 15,
+      "color": [
+        0.5,
+        0.2,
+        0.8
+      ],
+      "glowRadius": 50
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      speed: ${speed},\n      color: ${color},\n      glowRadius: ${glowRadius}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0,0,0], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(9);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(7);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(350);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(-60);\n    var t0 = comp.time;\n    var t1 = t0 + comp.duration;\n    fn.property(\"ADBE Fractal Noise-0008\").setValueAtTime(t0, 0);\n    fn.property(\"ADBE Fractal Noise-0008\").setValueAtTime(t1, p.speed * 20);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.color);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").setValue(p.glowRadius);\n    glow.property(\"ADBE Glo2i-0003\").setValue(1.8);\n    _result = {status:\"success\", message:\"旋转星云背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "breathing_gradient",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "呼吸渐变背景 - 颜色与亮度如呼吸般缓慢变化，舒缓平静",
+    "tags": [
+      "动态",
+      "dynamic",
+      "呼吸",
+      "breathing",
+      "渐变"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "color1": {
+        "type": "array",
+        "description": "颜色1 [R,G,B] 0-1"
+      },
+      "color2": {
+        "type": "array",
+        "description": "颜色2 [R,G,B] 0-1"
+      },
+      "breatheSpeed": {
+        "type": "number",
+        "min": 0.2,
+        "max": 3,
+        "description": "呼吸频率"
+      }
+    },
+    "default_values": {
+      "layerName": "呼吸渐变背景",
+      "color1": [
+        0.1,
+        0.4,
+        0.6
+      ],
+      "color2": [
+        0.6,
+        0.2,
+        0.5
+      ],
+      "breatheSpeed": 0.8
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      color1: ${color1},\n      color2: ${color2},\n      breatheSpeed: ${breatheSpeed}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.5,0.5,0.5], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0001\").setValue([comp.width/2, 0]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width/2, comp.height]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    ramp.property(\"ADBE Ramp-0002\").expression = \"[\"\n      + p.color1[0] + \" + Math.sin(time * \" + p.breatheSpeed + \" * Math.PI * 2) * 0.1, \"\n      + p.color1[1] + \" + Math.sin(time * \" + p.breatheSpeed + \" * Math.PI * 2) * 0.05, \"\n      + p.color1[2] + \" + Math.cos(time * \" + p.breatheSpeed + \" * Math.PI * 2) * 0.1]\";\n    ramp.property(\"ADBE Ramp-0004\").expression = \"[\"\n      + p.color2[0] + \" + Math.cos(time * \" + p.breatheSpeed + \" * Math.PI * 2) * 0.1, \"\n      + p.color2[1] + \" + Math.sin(time * \" + p.breatheSpeed + \" * Math.PI * 2) * 0.1, \"\n      + p.color2[2] + \" + Math.sin(time * \" + p.breatheSpeed + \" * Math.PI * 2) * 0.05]\";\n    _result = {status:\"success\", message:\"呼吸渐变背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "energy_field",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "能量场背景 - 类似电磁场或能量护盾的波动效果，科幻感强",
+    "tags": [
+      "动态",
+      "dynamic",
+      "能量",
+      "energy",
+      "科幻"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "speed": {
+        "type": "number",
+        "min": 1,
+        "max": 100,
+        "description": "能量波动速度"
+      },
+      "color": {
+        "type": "array",
+        "description": "能量颜色 [R,G,B] 0-1"
+      },
+      "glowRadius": {
+        "type": "number",
+        "min": 10,
+        "max": 80,
+        "description": "发光半径"
+      }
+    },
+    "default_values": {
+      "layerName": "能量场背景",
+      "speed": 40,
+      "color": [
+        0.0,
+        0.8,
+        0.4
+      ],
+      "glowRadius": 30
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      speed: ${speed},\n      color: ${color},\n      glowRadius: ${glowRadius}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0,0,0], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(14);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(1);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(400);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(-40);\n    var t0 = comp.time;\n    var t1 = t0 + comp.duration;\n    fn.property(\"ADBE Fractal Noise-0008\").setValueAtTime(t0, 0);\n    fn.property(\"ADBE Fractal Noise-0008\").setValueAtTime(t1, p.speed * 15);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.color);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").setValue(p.glowRadius);\n    glow.property(\"ADBE Glo2i-0003\").setValue(2.0);\n    _result = {status:\"success\", message:\"能量场背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "swirl_vortex",
+    "category": "background",
+    "subcategory": "dynamic",
+    "description": "漩涡动态背景 - 中心漩涡不断旋转吸入，强烈的视觉引导",
+    "tags": [
+      "动态",
+      "dynamic",
+      "漩涡",
+      "swirl",
+      "vortex"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "speed": {
+        "type": "number",
+        "min": 1,
+        "max": 100,
+        "description": "旋转速度"
+      },
+      "color": {
+        "type": "array",
+        "description": "漩涡颜色 [R,G,B] 0-1"
+      },
+      "intensity": {
+        "type": "number",
+        "min": 10,
+        "max": 200,
+        "description": "漩涡强度"
+      }
+    },
+    "default_values": {
+      "layerName": "漩涡动态背景",
+      "speed": 25,
+      "color": [
+        0.3,
+        0.1,
+        0.5
+      ],
+      "intensity": 80
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      speed: ${speed},\n      color: ${color},\n      intensity: ${intensity}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0,0,0], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(15);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(1);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(300);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(-30);\n    var t0 = comp.time;\n    var t1 = t0 + comp.duration;\n    fn.property(\"ADBE Fractal Noise-0008\").setValueAtTime(t0, 0);\n    fn.property(\"ADBE Fractal Noise-0008\").setValueAtTime(t1, p.speed * 20);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.color);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").setValue(p.intensity);\n    glow.property(\"ADBE Glo2i-0003\").setValue(1.2);\n    _result = {status:\"success\", message:\"漩涡动态背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "city_night",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "城市夜景背景 - 模拟夜晚城市灯光网格，霓虹与黑暗的对比",
+    "tags": [
+      "场景",
+      "scene",
+      "城市",
+      "city",
+      "夜景"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "gridWidth": {
+        "type": "number",
+        "min": 10,
+        "max": 200,
+        "description": "网格宽度"
+      },
+      "gridHeight": {
+        "type": "number",
+        "min": 10,
+        "max": 200,
+        "description": "网格高度"
+      },
+      "lightColor": {
+        "type": "array",
+        "description": "灯光颜色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "城市夜景背景",
+      "gridWidth": 60,
+      "gridHeight": 40,
+      "lightColor": [
+        0.2,
+        0.7,
+        1.0
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      gridWidth: ${gridWidth},\n      gridHeight: ${gridHeight},\n      lightColor: ${lightColor}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.02,0.02,0.05], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var grid = layer.Effects.addProperty(\"ADBE Grid\");\n    grid.property(\"ADBE Grid-0002\").setValue(2);\n    grid.property(\"ADBE Grid-0004\").setValue(p.gridWidth);\n    grid.property(\"ADBE Grid-0005\").setValue(p.gridHeight);\n    grid.property(\"ADBE Grid-0006\").setValue(1);\n    grid.property(\"ADBE Grid-0009\").setValue(60);\n    var tint = layer.Effects.addProperty(\"ADBE Tint\");\n    tint.property(\"ADBE Tint-0001\").setValue(p.lightColor);\n    var glow = layer.Effects.addProperty(\"ADBE Glo2i\");\n    glow.property(\"ADBE Glo2i-0002\").setValue(12);\n    glow.property(\"ADBE Glo2i-0003\").setValue(1.0);\n    _result = {status:\"success\", message:\"城市夜景背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "forest",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "森林场景背景 - 深绿色调的森林氛围，自然静谧",
+    "tags": [
+      "场景",
+      "scene",
+      "森林",
+      "forest",
+      "自然"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "density": {
+        "type": "number",
+        "min": 100,
+        "max": 600,
+        "description": "植被密度"
+      },
+      "darkGreen": {
+        "type": "array",
+        "description": "深绿颜色 [R,G,B] 0-1"
+      },
+      "lightGreen": {
+        "type": "array",
+        "description": "浅绿颜色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "森林场景背景",
+      "density": 350,
+      "darkGreen": [
+        0.05,
+        0.15,
+        0.05
+      ],
+      "lightGreen": [
+        0.2,
+        0.5,
+        0.2
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      density: ${density},\n      darkGreen: ${darkGreen},\n      lightGreen: ${lightGreen}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.05,0.15,0.05], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(12);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(1);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(p.density);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(-40);\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.darkGreen);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.lightGreen);\n    ramp.property(\"ADBE Ramp-0001\").setValue([comp.width/2, 0]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width/2, comp.height]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    _result = {status:\"success\", message:\"森林场景背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "desert",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "沙漠场景背景 - 暖黄色调的沙漠氛围，辽阔干燥",
+    "tags": [
+      "场景",
+      "scene",
+      "沙漠",
+      "desert",
+      "自然"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "density": {
+        "type": "number",
+        "min": 100,
+        "max": 600,
+        "description": "沙砾密度"
+      },
+      "sandColor": {
+        "type": "array",
+        "description": "沙色 [R,G,B] 0-1"
+      },
+      "skyColor": {
+        "type": "array",
+        "description": "天空色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "沙漠场景背景",
+      "density": 300,
+      "sandColor": [
+        0.8,
+        0.6,
+        0.3
+      ],
+      "skyColor": [
+        0.9,
+        0.7,
+        0.4
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      density: ${density},\n      sandColor: ${sandColor},\n      skyColor: ${skyColor}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.8,0.6,0.3], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(12);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(6);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(p.density);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(-30);\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.skyColor);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.sandColor);\n    ramp.property(\"ADBE Ramp-0001\").setValue([comp.width/2, 0]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width/2, comp.height]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    _result = {status:\"success\", message:\"沙漠场景背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "ocean",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "海洋场景背景 - 深蓝色调的海浪与天空，广阔宁静",
+    "tags": [
+      "场景",
+      "scene",
+      "海洋",
+      "ocean",
+      "自然"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "waveHeight": {
+        "type": "number",
+        "min": 5,
+        "max": 100,
+        "description": "波浪高度"
+      },
+      "deepColor": {
+        "type": "array",
+        "description": "深海色 [R,G,B] 0-1"
+      },
+      "surfaceColor": {
+        "type": "array",
+        "description": "海面色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "海洋场景背景",
+      "waveHeight": 20,
+      "deepColor": [
+        0.0,
+        0.1,
+        0.3
+      ],
+      "surfaceColor": [
+        0.2,
+        0.5,
+        0.8
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      waveHeight: ${waveHeight},\n      deepColor: ${deepColor},\n      surfaceColor: ${surfaceColor}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.1,0.3,0.5], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.surfaceColor);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.deepColor);\n    ramp.property(\"ADBE Ramp-0001\").setValue([comp.width/2, 0]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width/2, comp.height]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    var ww = layer.Effects.addProperty(\"ADBE Wave Warp\");\n    ww.property(\"ADBE Wave Warp-0001\").setValue(1);\n    ww.property(\"ADBE Wave Warp-0002\").setValue(p.waveHeight);\n    ww.property(\"ADBE Wave Warp-0003\").setValue(80);\n    ww.property(\"ADBE Wave Warp-0004\").setValue(0);\n    _result = {status:\"success\", message:\"海洋场景背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "snow_mountain",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "雪山场景背景 - 冷白色调的雪山与天空，纯净寒冷",
+    "tags": [
+      "场景",
+      "scene",
+      "雪山",
+      "snow",
+      "自然"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "density": {
+        "type": "number",
+        "min": 100,
+        "max": 600,
+        "description": "山体纹理密度"
+      },
+      "skyColor": {
+        "type": "array",
+        "description": "天空色 [R,G,B] 0-1"
+      },
+      "snowColor": {
+        "type": "array",
+        "description": "雪色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "雪山场景背景",
+      "density": 400,
+      "skyColor": [
+        0.5,
+        0.6,
+        0.8
+      ],
+      "snowColor": [
+        0.9,
+        0.95,
+        1.0
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      density: ${density},\n      skyColor: ${skyColor},\n      snowColor: ${snowColor}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.5,0.6,0.8], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(12);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(1);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(p.density);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(-20);\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.skyColor);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.snowColor);\n    ramp.property(\"ADBE Ramp-0001\").setValue([comp.width/2, 0]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width/2, comp.height]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    _result = {status:\"success\", message:\"雪山场景背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  },
+  {
+    "name": "grassland",
+    "category": "background",
+    "subcategory": "scene",
+    "description": "草原场景背景 - 黄绿色调的草原与天空，开阔生机",
+    "tags": [
+      "场景",
+      "scene",
+      "草原",
+      "grassland",
+      "自然"
+    ],
+    "parameters": {
+      "layerName": {
+        "type": "string",
+        "description": "背景图层名称"
+      },
+      "density": {
+        "type": "number",
+        "min": 100,
+        "max": 600,
+        "description": "草地纹理密度"
+      },
+      "skyColor": {
+        "type": "array",
+        "description": "天空色 [R,G,B] 0-1"
+      },
+      "grassColor": {
+        "type": "array",
+        "description": "草色 [R,G,B] 0-1"
+      }
+    },
+    "default_values": {
+      "layerName": "草原场景背景",
+      "density": 350,
+      "skyColor": [
+        0.4,
+        0.7,
+        0.9
+      ],
+      "grassColor": [
+        0.3,
+        0.6,
+        0.2
+      ]
+    },
+    "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      layerName: ${layerName},\n      density: ${density},\n      skyColor: ${skyColor},\n      grassColor: ${grassColor}\n    };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid([0.4,0.7,0.9], p.layerName, comp.width, comp.height, comp.pixelAspect, comp.duration);\n    }\n    var fn = layer.Effects.addProperty(\"ADBE Fractal Noise\");\n    fn.property(\"ADBE Fractal Noise-0001\").setValue(12);\n    fn.property(\"ADBE Fractal Noise-0002\").setValue(2);\n    fn.property(\"ADBE Fractal Noise-0004\").setValue(p.density);\n    fn.property(\"ADBE Fractal Noise-0005\").setValue(-30);\n    var ramp = layer.Effects.addProperty(\"ADBE Ramp\");\n    ramp.property(\"ADBE Ramp-0002\").setValue(p.skyColor);\n    ramp.property(\"ADBE Ramp-0004\").setValue(p.grassColor);\n    ramp.property(\"ADBE Ramp-0001\").setValue([comp.width/2, 0]);\n    ramp.property(\"ADBE Ramp-0003\").setValue([comp.width/2, comp.height]);\n    ramp.property(\"ADBE Ramp-0005\").setValue(1);\n    _result = {status:\"success\", message:\"草原场景背景已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
+    "compatibility": {
+      "ae": [
+        "2024",
+        "2025",
+        "2026"
+      ]
+    }
+  }
+]

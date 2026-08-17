@@ -1,0 +1,10 @@
+{
+  "name": "neon_sign",
+  "description": "霓虹灯效果 - 霓虹脉冲文字 + 霓虹发光效果 + 光扫",
+  "presets": [
+    "neon_pulse_text",
+    "neon_glow",
+    "light_sweep"
+  ],
+  "parameters": {}
+}

@@ -1,0 +1,30 @@
+{
+  "feature_keys": [
+    "n_cuts",
+    "cut_rate",
+    "phase_entropy",
+    "phase_conc",
+    "shot_dur_mean",
+    "shot_dur_std",
+    "shot_dur_cv",
+    "short_shot_ratio",
+    "beat_coverage",
+    "grid_regularity",
+    "phase_mean_sin",
+    "phase_mean_cos",
+    "frac_near_015",
+    "frac_near_030",
+    "frac_offbeat"
+  ],
+  "tolerance_ms": 120.0,
+  "label": "soft_beat_score(onset校准节拍)",
+  "cv_mae": 0.0351,
+  "cv_r2": 0.826,
+  "cv_pairwise_acc": 0.9519,
+  "cv_pairwise_pairs": 1267,
+  "cv_spearman": 0.864,
+  "top1_selection_acc": "15/22",
+  "top2_selection_acc": "20/22",
+  "n_samples": 308,
+  "trained_at": "2026-08-06 21:51:16"
+}

@@ -1,0 +1,124 @@
+{
+  "template_id": "manga_edit",
+  "name": "漫剪 (Manga/Anime Edit)",
+  "version": "1.0.0",
+  "description": "动漫/漫画素材卡点剪辑 + AE特效 + 电影调色",
+  "input_requirements": {
+    "images": {"min": 3, "max": 50, "formats": ["png", "jpg", "webp"]},
+    "audio": {"min": 1, "max": 1, "formats": ["mp3", "wav", "flac"]},
+    "video_clips": {"min": 0, "max": 20, "formats": ["mp4", "mov"]}
+  },
+  "output": {
+    "format": "H.264",
+    "resolution": "1920x1080",
+    "fps": 60,
+    "container": "mp4",
+    "bitrate_target_mbps": 12
+  },
+  "stages": {
+    "S2_beat_analysis": {
+      "engine": "librosa",
+      "params": {
+        "bpm_range": [120, 180],
+        "detect_drops": true,
+        "detect_energy_peaks": true,
+        "beat_subdivision": 4
+      }
+    },
+    "S3_ae_effects": {
+      "engine": "after_effects",
+      "mode": "native_bridge",
+      "fallback": "ffmpeg_equiv",
+      "compositions": [
+        {
+          "id": "flash_drop",
+          "name": "FlashDrop_{index}",
+          "trigger": "drop",
+          "duration_frames": 6,
+          "effects": ["flash", "shake"],
+          "jsx_template": "ae/scripts/manga/flash_shake.jsx",
+          "params": {
+            "flash_intensity": 1.0,
+            "flash_duration_frames": 2,
+            "shake_amplitude": 15,
+            "shake_frequency": 30
+          }
+        },
+        {
+          "id": "chromatic_hit",
+          "name": "ChromaticHit_{index}",
+          "trigger": "energy_peak",
+          "duration_frames": 8,
+          "effects": ["chromatic_aberration"],
+          "jsx_template": "ae/scripts/manga/chromatic_aberration.jsx",
+          "params": {
+            "offset_pixels": 4,
+            "direction": "horizontal",
+            "decay_frames": 6
+          }
+        },
+        {
+          "id": "speed_lines_transition",
+          "name": "SpeedLines_{index}",
+          "trigger": "section_change",
+          "duration_frames": 12,
+          "effects": ["speed_lines"],
+          "jsx_template": "ae/scripts/manga/speed_lines.jsx",
+          "params": {
+            "line_count": 80,
+            "line_width_range": [1, 4],
+            "radial_center": [0.5, 0.5],
+            "speed": 2.0
+          }
+        }
+      ]
+    },
+    "S4_pr_edit": {
+      "engine": "premiere",
+      "mode": "native_bridge",
+      "fallback": "fcp_xml",
+      "edit_style": "beat_sync",
+      "params": {
+        "cut_on_beat": true,
+        "cut_on_drop": true,
+        "speed_ramp_before_drop": {
+          "enabled": true,
+          "slow_factor": 0.25,
+          "ramp_frames": 12
+        },
+        "transition_type": "hard_cut",
+        "transition_on_section": "cross_dissolve",
+        "transition_duration_frames": 6
+      }
+    },
+    "S5_color_grade": {
+      "engine": "davinci",
+      "mode": "native_cli",
+      "fallback": "ffmpeg_equiv",
+      "preset": "teal_orange",
+      "node_graph": {
+        "node_count": 4,
+        "nodes": [
+          {"id": 1, "type": "base_correction", "params": {"contrast": 1.2, "saturation": 1.1}},
+          {"id": 2, "type": "color_split", "params": {"shadows_hue": 180, "highlights_hue": 30}},
+          {"id": 3, "type": "vignette", "params": {"size": 0.8, "softness": 0.5}},
+          {"id": 4, "type": "sharpen_grain", "params": {"sharpen": 0.6, "grain": 0.3}}
+        ]
+      }
+    },
+    "S6_export": {
+      "engine": "ame",
+      "mode": "native_bridge",
+      "fallback": "ffmpeg",
+      "presets": [
+        {"name": "publish_1080p60", "codec": "H.264", "fps": 60, "bitrate": "12M"},
+        {"name": "publish_4k30", "codec": "H.264", "fps": 30, "resolution": "3840x2160", "bitrate": "35M"}
+      ]
+    }
+  },
+  "quality_gates": {
+    "QG_visual": {"min_contrast": 0.15, "no_black_frames": true},
+    "QG_sync": {"beat_alignment_tolerance_ms": 50},
+    "QG_export": {"min_bitrate_mbps": 8, "no_audio_clipping": true}
+  }
+}
