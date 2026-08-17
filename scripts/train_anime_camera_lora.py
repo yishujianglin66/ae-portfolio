@@ -59,6 +59,21 @@ COARSE_LABELS = ["Static", "Motion", "Pull", "Push"]
 FINE_LABELS = ["static", "pan_left", "pan_right", "tilt_up", "tilt_down",
                "zoom_in", "zoom_out", "push", "zoom_back", "orbit"]
 
+# v3c 六类合并 schema (2026-08-18 P0#2 B6 决策, 基于真实分布根因修复):
+#   根因1 语义重叠(~50%): push↔zoom_in 前推语义不可分 (push 仅15条 vs zoom_in 2125条)
+#   根因2 极稀缺类无法学习: orbit 7条 / zoom_back 0条 / push 15条
+#   合并: push_in=zoom_in+push | pull_out=zoom_out+zoom_back
+#         tilt_orbit=tilt_up+tilt_down+orbit (垂直/环绕运动语义近邻)
+SIX_MAP = {
+    "static": "static",
+    "pan_left": "pan_left", "pan_right": "pan_right",
+    "tilt_up": "tilt_orbit", "tilt_down": "tilt_orbit", "orbit": "tilt_orbit",
+    "zoom_in": "push_in", "push": "push_in",
+    "zoom_out": "pull_out", "zoom_back": "pull_out",
+    "complex": None,
+}
+SIX_LABELS = ["static", "pan_left", "pan_right", "tilt_orbit", "push_in", "pull_out"]
+
 # 时间反转增强: 运镜可逆性 (倒放 pan_left = pan_right 等), 补齐方向对不均衡
 REVERSE_PAIR = {
     "pan_left": "pan_right", "pan_right": "pan_left",
@@ -87,6 +102,14 @@ def load_trainable(labels_path: str, min_conf: float = 0.7,
                 skipped["bad_dir"] += 1
                 continue
             label = d
+        elif schema == "six":
+            if d not in SIX_MAP:
+                skipped["bad_dir"] += 1
+                continue
+            label = SIX_MAP[d]
+            if label is None:
+                skipped["complex"] += 1
+                continue
         else:
             if d not in COARSE_MAP:
                 skipped["bad_dir"] += 1
@@ -109,6 +132,8 @@ def load_trainable(labels_path: str, min_conf: float = 0.7,
             mirrored_fine = REVERSE_PAIR[d]
             if schema == "fine":
                 mirrored = mirrored_fine
+            elif schema == "six":
+                mirrored = SIX_MAP[mirrored_fine]
             else:
                 mirrored = COARSE_MAP[mirrored_fine]
             out.append({"clip": r["clip_path"], "coarse": mirrored,
@@ -201,8 +226,8 @@ def main() -> int:
     parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--limit", type=int, default=0, help="最多用 N 样本 (0=全部)")
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--label-schema", default="coarse", choices=["coarse", "fine"],
-                        help="coarse=粗4类 / fine=细10类方向 (v3 直接训细头)")
+    parser.add_argument("--label-schema", default="coarse", choices=["coarse", "fine", "six"],
+                        help="coarse=粗4类 / fine=细10类方向 (v3) / six=合并6类 (v3c 根因修复)")
     parser.add_argument("--weight-cap", type=float, default=5.0,
                         help="类权重上限 (v2 用 20x 崩了, 默认温和 5x)")
     parser.add_argument("--use-sampler", action="store_true",
@@ -223,7 +248,7 @@ def main() -> int:
     # 1. 数据
     samples = load_trainable(args.labels, schema=args.label_schema,
                              time_reverse=args.time_reverse)
-    LABELS = FINE_LABELS if args.label_schema == "fine" else COARSE_LABELS
+    LABELS = {"fine": FINE_LABELS, "six": SIX_LABELS}.get(args.label_schema, COARSE_LABELS)
     if args.limit > 0:
         samples = samples[:args.limit]
     if len(samples) < 50:
@@ -266,9 +291,9 @@ def main() -> int:
     from peft import LoraConfig, get_peft_model
     targets = _discover_lora_targets(model)
     logger.info("LoRA 目标模块: %d 个 (示例 %s)", len(targets), targets[:3])
-    # fine schema 时把 classifier 头纳入保存 (modules_to_save): 分类头是 num_labels
+    # fine/six schema 时把 classifier 头纳入保存 (modules_to_save): 分类头是 num_labels
     # 重建的随机初始化层, 不在 ckpt 里, 若不保存 adapter 回传后本地无法恢复 (v3 坑)
-    modules_to_save = ["classifier"] if args.label_schema == "fine" else None
+    modules_to_save = ["classifier"] if args.label_schema in ("fine", "six") else None
     lora_config = LoraConfig(
         r=8, lora_alpha=16, lora_dropout=0.1,
         target_modules=targets,
