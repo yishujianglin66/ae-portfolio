@@ -10,6 +10,7 @@ from loguru import logger
 
 from ...config import settings
 from ..base import BaseEngine, EngineResult
+from .cel_shading import CEL_SHADING_SCRIPT_TEMPLATE, get_style_preset
 
 
 class BlenderEngine(BaseEngine):
@@ -101,6 +102,15 @@ scene.frame_start = 0
 scene.frame_end = 1
 
 # ============================================================
+# Color management (AgX - fixed for consistent cross-machine output)
+# ============================================================
+scene.view_settings.view_transform = 'AgX'
+scene.view_settings.look = 'AgX - Medium High Contrast'
+scene.view_settings.exposure = 0.0
+scene.view_settings.gamma = 1.0
+scene.display_settings.display_device = 'sRGB'
+
+# ============================================================
 # Save + render
 # ============================================================
 bpy.ops.wm.save_mainfile(filepath=r"{blend_output}")
@@ -176,6 +186,14 @@ os.makedirs(frames_dir, exist_ok=True)
 scene.frame_start = {ae_frame_start}
 scene.frame_end = {ae_frame_end}
 scene.render.image_settings.file_format = 'PNG'
+
+# Color management (AgX - fixed for consistent cross-machine output)
+scene.view_settings.view_transform = 'AgX'
+scene.view_settings.look = 'AgX - Medium High Contrast'
+scene.view_settings.exposure = 0.0
+scene.view_settings.gamma = 1.0
+scene.display_settings.display_device = 'sRGB'
+
 scene.render.filepath = os.path.join(frames_dir, "")
 bpy.ops.render.render(animation=True)
 
@@ -197,6 +215,15 @@ with open(r"{marker_path}", "w") as f:
         g = int(hex_color[2:4], 16) / 255.0
         b = int(hex_color[4:6], 16) / 255.0
         return f"({r:.3f}, {g:.3f}, {b:.3f}, 1.0)"
+
+    @staticmethod
+    def _py_escape(value: Any) -> str:
+        """将字符串安全转义为 Python 字符串字面量（防御脚本注入）。
+
+        生成的 Blender 脚本中所有用户可控字符串必须经此函数，
+        防止 API 传入 text_content 等参数注入任意 Python 代码。
+        """
+        return json.dumps(str(value), ensure_ascii=False)
 
     async def create_puppet_stage(
         self,
@@ -225,6 +252,15 @@ with open(r"{marker_path}", "w") as f:
         blend_output = output_dir / "stage.blend"
         render_output = output_dir / "stage_preview.png"
         marker_path = Path(tempfile.gettempdir()) / f"bl_stage_{output_dir.name}.mark"
+
+        # 渲染引擎白名单校验（防止注入任意代码到生成的 Blender 脚本）
+        _ALLOWED_ENGINES = {"BLENDER_EEVEE", "CYCLES"}
+        if render_engine not in _ALLOWED_ENGINES:
+            return EngineResult(
+                success=False,
+                error=f"非法渲染引擎: {render_engine}，允许值: {sorted(_ALLOWED_ENGINES)}",
+                error_code="INVALID_RENDER_ENGINE",
+            )
 
         # AE 资产导出路径（仅 export_ae=True 时使用）
         fbx_output = output_dir / "stage_export.fbx"
@@ -310,7 +346,7 @@ with open(r"{marker_path}", "w") as f:
         script_file.write_text(script_content, encoding="utf-8")
 
         cmd = [str(self.executable_path), "--background", "--python", str(script_file)]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _ = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=3600
         )
 
@@ -363,7 +399,7 @@ with open(r"{marker_path}", "w") as f:
             cmd.append(str(Path(blend_file)))
         cmd.extend(["--python", str(script_file)])
 
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _ = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=14400
         )
 
@@ -400,7 +436,7 @@ with open(r"{marker_path}", "w") as f:
             "--render-anim",
             "--render-output", str(output_dir) + "/",
         ]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _ = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=86400
         )
 
@@ -477,7 +513,7 @@ with open(r"{marker_path}", "w") as f:
         script_file.write_text(script_content, encoding="utf-8")
 
         cmd = [str(self.executable_path), "--background", "--python", str(script_file)]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _ = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=3600
         )
 
@@ -505,77 +541,6 @@ with open(r"{marker_path}", "w") as f:
                 "stdout_tail": stdout[-500:] if stdout else "",
             },
             error=stderr[:1000] if not success and stderr else None,
-        )
-
-    async def export_camera_data(
-        self,
-        blend_file: Path | str,
-        output_path: Path | str,
-    ) -> EngineResult:
-        """导出相机数据供 AE 使用。
-
-        从 .blend 文件中提取相机位置、旋转、焦距等数据，
-        输出为 JSON 格式，可在 AE 中通过脚本重建相机运动。
-
-        Args:
-            blend_file: Blender 场景文件路径
-            output_path: 输出 JSON 文件路径
-
-        Returns:
-            EngineResult 包含相机数据
-        """
-        import json
-
-        blend_file = Path(blend_file)
-        output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        if not blend_file.exists():
-            return EngineResult(
-                success=False,
-                error=f"Blend file not found: {blend_file}",
-            )
-
-        blend_path_esc = str(blend_file).replace("\\", "\\\\")
-        output_path_esc = str(output_path).replace("\\", "\\\\")
-        script_content = f"""
-import bpy
-import json
-
-bpy.ops.wm.open_mainfile(filepath=r"{blend_path_esc}")
-
-cameras = []
-for obj in bpy.data.objects:
-    if obj.type == 'CAMERA':
-        scene = bpy.context.scene
-        frames = []
-        for frame in range(scene.frame_start, scene.frame_end + 1):
-            scene.frame_set(frame)
-            loc = obj.location
-            rot = obj.rotation_euler
-            cameras.append({{
-                "name": obj.name,
-                "frame": frame,
-                "location": [loc.x, loc.y, loc.z],
-                "rotation": [rot.x, rot.y, rot.z],
-                "focal_length": obj.data.lens,
-                "sensor_width": obj.data.sensor_width,
-            }})
-
-with open(r"{output_path_esc}", "w") as f:
-    json.dump({{"cameras": cameras}}, f, indent=2)
-"""
-        result = await self.run_script(script_content)
-        if result.success and output_path.exists():
-            return EngineResult(
-                success=True,
-                output_path=output_path,
-                metadata={"camera_data_path": str(output_path)},
-            )
-        return EngineResult(
-            success=False,
-            error="Camera export failed",
-            metadata=result.metadata,
         )
 
     async def render_foreground_element(
@@ -616,6 +581,22 @@ with open(r"{output_path_esc}", "w") as f:
         frames_output.mkdir(parents=True, exist_ok=True)
         marker_path = Path(tempfile.gettempdir()) / f"bl_fg_{output_dir.name}.mark"
 
+        # 白名单校验：渲染引擎与元素类型（防止注入任意代码）
+        _ALLOWED_ENGINES = {"BLENDER_EEVEE", "CYCLES"}
+        if engine not in _ALLOWED_ENGINES:
+            return EngineResult(
+                success=False,
+                error=f"非法渲染引擎: {engine}，允许值: {sorted(_ALLOWED_ENGINES)}",
+                error_code="INVALID_RENDER_ENGINE",
+            )
+        _ALLOWED_TYPES = {"text", "logo", "particles", "decoration"}
+        if element_type not in _ALLOWED_TYPES:
+            return EngineResult(
+                success=False,
+                error=f"非法元素类型: {element_type}，允许值: {sorted(_ALLOWED_TYPES)}",
+                error_code="INVALID_ELEMENT_TYPE",
+            )
+
         element_params = element_params or {}
         color = self._color_tuple(element_params.get("color", "#FFFFFF"))
         text_content = element_params.get("text", "3D TEXT")
@@ -627,6 +608,11 @@ with open(r"{output_path_esc}", "w") as f:
         frames_path_escaped = str(frames_output).replace("\\", "\\\\")
         marker_path_escaped = str(marker_path).replace("\\", "\\\\")
 
+        # 脚本注入防护：用户可控字符串经 json.dumps 转义为 Python 字面量
+        _text_esc = self._py_escape(text_content)
+        _engine_esc = self._py_escape(engine)
+        _etype_esc = self._py_escape(element_type)
+
         script_content = f"""
 import bpy
 import math
@@ -636,7 +622,7 @@ bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete()
 
 scene = bpy.context.scene
-scene.render.engine = '{engine}'
+scene.render.engine = {_engine_esc}
 scene.render.resolution_x = {resolution[0]}
 scene.render.resolution_y = {resolution[1]}
 scene.render.resolution_percentage = 100
@@ -645,13 +631,20 @@ scene.render.image_settings.color_mode = 'RGBA'
 scene.frame_start = {frame_start}
 scene.frame_end = {frame_end}
 
+# Color management (AgX - fixed for consistent cross-machine output)
+scene.view_settings.view_transform = 'AgX'
+scene.view_settings.look = 'AgX - Medium High Contrast'
+scene.view_settings.exposure = 0.0
+scene.view_settings.gamma = 1.0
+scene.display_settings.display_device = 'sRGB'
+
 if {transparent_background}:
     scene.render.film_transparent = True
 
-if '{element_type}' == 'text':
+if {_etype_esc} == 'text':
     bpy.ops.object.text_add(location=(0, 0, 0))
     text_obj = bpy.context.active_object
-    text_obj.data.body = "{text_content}"
+    text_obj.data.body = {_text_esc}
     text_obj.data.size = 1.0
     text_obj.data.align_x = 'CENTER'
     text_obj.data.align_y = 'CENTER'
@@ -681,7 +674,7 @@ if '{element_type}' == 'text':
     text_obj.location.z = 0
     text_obj.keyframe_insert(data_path="location", frame={frame_end})
 
-elif '{element_type}' == 'logo':
+elif {_etype_esc} == 'logo':
     bpy.ops.mesh.primitive_cube_add(size=1)
     cube = bpy.context.active_object
     cube.scale = (1.5, 0.1, 1.0)
@@ -701,7 +694,7 @@ elif '{element_type}' == 'logo':
     cube.rotation_euler.y = 2 * math.pi * {rotation_speed}
     cube.keyframe_insert(data_path="rotation_euler", frame={frame_end})
 
-elif '{element_type}' == 'particles':
+elif {_etype_esc} == 'particles':
     bpy.ops.mesh.primitive_ico_sphere_add(radius=0.05, location=(0, 0, 0))
     particle_obj = bpy.context.active_object
 
@@ -774,7 +767,7 @@ with open(r"{marker_path_escaped}", "w") as f:
         script_file.write_text(script_content, encoding="utf-8")
 
         cmd = [str(self.executable_path), "--background", "--python", str(script_file)]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _ = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=7200
         )
 
@@ -927,7 +920,7 @@ with open(r"{marker_path_escaped}", "w") as f:
         script_file.write_text(script_content, encoding="utf-8")
 
         cmd = [str(self.executable_path), "--background", "--python", str(script_file)]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _ = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=3600
         )
 
@@ -953,7 +946,171 @@ with open(r"{marker_path_escaped}", "w") as f:
             error=stderr[:1000] if not success and stderr else None,
         )
 
-    async def execute(self, **kwargs) -> EngineResult:
+    async def render_cel_animation(
+        self,
+        output_dir: Path | str,
+        style: str = "anime",
+        model_path: Optional[Path | str] = None,
+        resolution: tuple[int, int] = (1920, 1080),
+        frame_start: int = 1,
+        frame_end: int = 60,
+        outline_mode: str = "lineart",
+        export_fbx: bool = False,
+    ) -> EngineResult:
+        """执行 Cel-Shading (3渲2) 动画渲染.
+
+        基于 Blender 内置 NPR 管线,通过 EEVEE + Shader to RGB + Color Ramp
+        实现风格化渲染,支持 Line Art 或 Freestyle 轮廓输出.
+
+        Args:
+            output_dir: 输出目录,用于存放 PNG 序列帧、.blend 文件、FBX 等
+            style: 风格预设,支持 "anime" | "cartoon" | "cyberpunk" | "ink" | "lowpoly"
+            model_path: 可选的外部模型路径(FBX/OBJ/GLB/.blend),
+                未提供时使用默认 Suzanne 猴头模型
+            resolution: 输出分辨率 (width, height)
+            frame_start: 渲染起始帧
+            frame_end: 渲染结束帧
+            outline_mode: 轮廓模式 "lineart" | "freestyle" | "none"
+            export_fbx: 是否同时导出 FBX 文件供 AE 使用
+
+        Returns:
+            EngineResult, metadata 包含 frames_dir、frame_count、style、fbx_path 等
+        """
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        preset = get_style_preset(style)
+
+        # 轮廓模式与预设的 freestyle 标志进行协商
+        use_freestyle = preset.get("use_freestyle", False)
+        if outline_mode == "freestyle":
+            use_freestyle = True
+        elif outline_mode == "none":
+            use_freestyle = False
+        elif outline_mode == "lineart":
+            use_freestyle = False
+        else:
+            use_freestyle = preset.get("use_freestyle", False)
+
+        # 输出路径
+        frames_dir = output_dir / "frames"
+        blend_output = output_dir / "cel_shading_scene.blend"
+        fbx_output = output_dir / "cel_export.fbx"
+        marker_path = Path(tempfile.gettempdir()) / f"bl_cel_{output_dir.name}.mark"
+
+        params = {
+            # 基础参数
+            "style_name": style,
+            "model_path": str(Path(model_path)) if model_path else "",
+            "resolution_x": resolution[0],
+            "resolution_y": resolution[1],
+            "frame_start": frame_start,
+            "frame_end": frame_end,
+            "render_output": str(frames_dir / "frame_"),
+            "blend_output": str(blend_output),
+            "marker_path": str(marker_path),
+            "export_fbx": export_fbx,
+            "fbx_output": str(fbx_output),
+            # 轮廓线参数
+            "use_freestyle": use_freestyle,
+            "use_inner_lines": preset.get("use_inner_lines", False),
+            "outline_color": preset["outline_color"],
+            "outline_thickness": preset["outline_thickness"],
+            "inner_line_thickness": preset.get("inner_line_thickness", 1.0),
+            # 色阶参数（v2 双层色块 + 高光 + 边缘光）
+            "ramp_stops": preset["ramp_stops"],
+            "specular_stops": preset.get("specular_stops", [
+                (0.0, "(0.0, 0.0, 0.0, 1.0)"),
+                (0.9, "(0.0, 0.0, 0.0, 1.0)"),
+                (1.0, "(1.0, 1.0, 1.0, 1.0)"),
+            ]),
+            "rim_stops": preset.get("rim_stops", [
+                (0.0, "(0.0, 0.0, 0.0, 1.0)"),
+                (0.8, "(0.0, 0.0, 0.0, 1.0)"),
+                (1.0, "(1.0, 1.0, 1.0, 1.0)"),
+            ]),
+            # 渲染参数
+            "film_transparent": preset.get("film_transparent", True),
+            "render_samples": preset.get("render_samples", 64),
+            "use_bloom": preset.get("use_bloom", False),
+            "bloom_intensity": preset.get("bloom_intensity", 0.1),
+            "use_ssr": preset.get("use_ssr", False),
+            "use_ao": preset.get("use_ao", True),
+            "ao_factor": preset.get("ao_factor", 0.5),
+            "use_dof": preset.get("use_dof", False),
+            "dof_aperture": preset.get("dof_aperture", 0.15),
+            # 后处理参数
+            "hue_shift": preset.get("hue_shift", 0.0),
+            "saturation": preset.get("saturation", 1.0),
+            "value_mult": preset.get("value_mult", 1.0),
+            # 灯光参数（v2 四点布光）
+            "key_light": preset["key_light"],
+            "fill_light": preset["fill_light"],
+            "rim_light": preset["rim_light"],
+            "top_light": preset.get("top_light", {
+                "color": "(1.0, 1.0, 1.0, 1.0)",
+                "energy": 300,
+                "size": 6.0,
+            }),
+            # 背景参数（v2 渐变背景）
+            "background_top": preset.get("background_top", "(0.85, 0.88, 0.95, 1.0)"),
+            "background_bottom": preset.get("background_bottom", "(0.45, 0.50, 0.70, 1.0)"),
+        }
+
+        import json
+        params_file = Path(tempfile.gettempdir()) / f"bl_cel_{output_dir.name}_params.json"
+        params_file.write_text(json.dumps(params, ensure_ascii=False), encoding="utf-8")
+
+        script_content = CEL_SHADING_SCRIPT_TEMPLATE.replace("{params_file}", str(params_file).replace("\\", "\\\\"))
+
+        script_file = Path(tempfile.gettempdir()) / f"bl_cel_{output_dir.name}.py"
+        script_file.write_text(script_content, encoding="utf-8")
+
+        logger.info(
+            f"[Blender] Starting cel-shading render: style={style}, "
+            f"frames={frame_start}-{frame_end}, outline={outline_mode}"
+        )
+
+        cmd = [str(self.executable_path), "--background", "--python", str(script_file)]
+        code, stdout, stderr, _ = await asyncio.to_thread(
+            self._run_subprocess, cmd, timeout=7200
+        )
+
+        success = code == 0 and marker_path.exists()
+        script_file.unlink(missing_ok=True)
+        marker_path.unlink(missing_ok=True)
+
+        frames_list = sorted(frames_dir.glob("*.png")) if frames_dir.exists() else []
+
+        metadata: dict[str, Any] = {
+            "style": style,
+            "display_name": preset.get("display_name", style),
+            "resolution": resolution,
+            "frame_range": [frame_start, frame_end],
+            "frames_dir": str(frames_dir) if frames_dir.exists() else None,
+            "frame_count": len(frames_list),
+            "outline_mode": outline_mode,
+            "render_samples": preset.get("render_samples", 64),
+            "stdout_tail": stdout[-50000:] if stdout else "",
+        }
+        if export_fbx:
+            metadata["fbx_path"] = str(fbx_output) if fbx_output.exists() else None
+        if blend_output.exists():
+            metadata["blend_path"] = str(blend_output)
+
+        logger.info(
+            f"[Blender] Cel-shading done: success={success}, "
+            f"frames={len(frames_list)}, style={style}"
+        )
+
+        return EngineResult(
+            success=success,
+            output_path=frames_dir if success else None,
+            metadata=metadata,
+            error=stderr[:1000] if not success and stderr else None,
+        )
+
+    async def _execute_impl(self, **kwargs) -> EngineResult:
         action = kwargs.pop("action", "create_puppet_stage")
         handlers = {
             "create_puppet_stage": self.create_puppet_stage,
@@ -962,6 +1119,7 @@ with open(r"{marker_path_escaped}", "w") as f:
             "export_for_ae": self.export_for_ae,
             "render_foreground_element": self.render_foreground_element,
             "export_camera_data": self.export_camera_data,
+            "render_cel_animation": self.render_cel_animation,
         }
         handler = handlers.get(action)
         if handler is None:
