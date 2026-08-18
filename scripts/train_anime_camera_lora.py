@@ -253,6 +253,14 @@ def main() -> int:
                         help="关闭时间反转增强 (默认开: 补齐方向对不均衡)")
     parser.add_argument("--grad-checkpoint", action="store_true",
                         help="启用梯度检查点 (小显存卡用; 默认关, 实测开反而拖慢2x)")
+    parser.add_argument("--lora-rank", type=int, default=8,
+                        help="LoRA rank (v3c=8 仅0.52%%可训练; 云端大训练用 64)")
+    parser.add_argument("--unfreeze", type=int, default=0,
+                        help="额外解冻 encoder 最后 N 层 (0=纯LoRA; 云端推荐 2)")
+    parser.add_argument("--amp", action="store_true",
+                        help="混合精度训练 (云端 4090/A100 加速 ~1.8x)")
+    parser.add_argument("--early-stop", type=int, default=0,
+                        help="早停耐心轮数 (0=关闭; 云端 20 epochs 配 4)")
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -312,18 +320,39 @@ def main() -> int:
     # 重建的随机初始化层, 不在 ckpt 里, 若不保存 adapter 回传后本地无法恢复 (v3 坑)
     modules_to_save = ["classifier"] if args.label_schema in ("fine", "six") else None
     lora_config = LoraConfig(
-        r=8, lora_alpha=16, lora_dropout=0.1,
+        r=args.lora_rank, lora_alpha=args.lora_rank * 2, lora_dropout=0.1,
         target_modules=targets,
         bias="none",
         modules_to_save=modules_to_save,
     )
     model = get_peft_model(model, lora_config)
+
+    # 云端大训练: 额外解冻 encoder 最后 N 层 (peft 默认全冻结)
+    if args.unfreeze > 0:
+        import re as _re
+        layer_ids = sorted({
+            int(m.group(1))
+            for name, _ in model.base_model.named_parameters()
+            for m in [_re.search(r"encoder\.layer\.(\d+)\.", name)] if m
+        })
+        unfreeze_ids = set(layer_ids[-args.unfreeze:]) if layer_ids else set()
+        n_unfroze = 0
+        for name, p in model.base_model.named_parameters():
+            m = _re.search(r"encoder\.layer\.(\d+)\.", name)
+            if m and int(m.group(1)) in unfreeze_ids:
+                p.requires_grad = True
+                n_unfroze += 1
+        logger.info("解冻 encoder 最后 %d 层 (layer ids %s): %d 个参数张量",
+                    args.unfreeze, sorted(unfreeze_ids), n_unfroze)
+
     model.print_trainable_parameters()
 
     # 4. 训练 (按类加权重采样: 稀缺类 Pull/Static 出现频率放大)
     from torch.utils.data import DataLoader, WeightedRandomSampler
     loss_fn = torch.nn.CrossEntropyLoss(weight=weights)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=max(1, args.epochs))
+    scaler = torch.cuda.amp.GradScaler(enabled=args.amp and device == "cuda")
 
     # 注: collate 必须是模块级 _collate_batch — Windows spawn 模式无法 pickle 局部函数
     collate = _collate_batch
@@ -346,6 +375,7 @@ def main() -> int:
                             persistent_workers=(args.num_workers > 0))
 
     best_acc = 0.0
+    best_epoch = 0
     t0 = time.time()
     for epoch in range(args.epochs):
         model.train()
@@ -353,14 +383,23 @@ def main() -> int:
         for bi, batch in enumerate(train_loader):
             batch = {k: v.to(device) for k, v in batch.items()}
             opt.zero_grad()
-            out = model(**batch)
-            loss = loss_fn(out.logits, batch["labels"])
-            loss.backward()
-            opt.step()
+            if scaler.is_enabled():
+                with torch.cuda.amp.autocast():
+                    out = model(**batch)
+                    loss = loss_fn(out.logits, batch["labels"])
+                scaler.scale(loss).backward()
+                scaler.step(opt)
+                scaler.update()
+            else:
+                out = model(**batch)
+                loss = loss_fn(out.logits, batch["labels"])
+                loss.backward()
+                opt.step()
             total_loss += loss.item()
             if (bi + 1) % 20 == 0:
                 logger.info("  epoch %d step %d/%d loss=%.4f",
                             epoch + 1, bi + 1, len(train_loader), loss.item())
+        sched.step()
         # 验证
         model.eval()
         correct = 0
@@ -377,6 +416,7 @@ def main() -> int:
                     epoch + 1, total_loss / max(1, len(train_loader)), acc, best_acc)
         if acc > best_acc:
             best_acc = acc
+            best_epoch = epoch + 1
             out_dir = Path(args.out)
             out_dir.mkdir(parents=True, exist_ok=True)
             model.save_pretrained(str(out_dir))
@@ -389,11 +429,22 @@ def main() -> int:
                 "val_acc": round(acc, 4),
                 "weight_cap": args.weight_cap,
                 "epochs": args.epochs,
+                "lora_rank": args.lora_rank,
+                "unfreeze": args.unfreeze,
+                "amp": args.amp,
+                "best_epoch": best_epoch,
                 "trained_at": time.strftime("%Y-%m-%d %H:%M:%S"),
             }, ensure_ascii=False, indent=2), encoding="utf-8")
             logger.info("已保存最佳 -> %s", out_dir)
 
-    logger.info("完成: best val_acc=%.4f, 耗时 %.0fs", best_acc, time.time() - t0)
+        # 早停 (云端 20 epochs 防过拟合浪费)
+        if args.early_stop > 0 and (epoch + 1) - best_epoch >= args.early_stop:
+            logger.info("早停触发: 连续 %d 轮无提升 (best=%.4f @epoch %d)",
+                        args.early_stop, best_acc, best_epoch)
+            break
+
+    logger.info("完成: best val_acc=%.4f (epoch %d), 耗时 %.0fs",
+                best_acc, best_epoch, time.time() - t0)
     return 0
 
 
