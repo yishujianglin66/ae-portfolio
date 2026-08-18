@@ -92,14 +92,30 @@ class AnimeCameraClassifier:
         return {"Static": 0.5, "Motion": 0.45, "Pull": 0.15, "Push": 0.45}
 
     def _ensure_model(self) -> bool:
-        """懒加载 LoRA 模型 (GPU 可用时), 失败返回 False 走降级。"""
+        """懒加载模型 (GPU 可用时), 失败返回 False 走降级。
+
+        支持两种权重形态:
+        - full-ft (v4+): 目录内 model.safetensors 即完整模型, 直接加载
+        - LoRA (v1~v3c): 目录内 adapter_model.safetensors, 基座+adapter 合成
+        """
         if self._model is not None:
             return True
         try:
             import torch
             from transformers import VideoMAEForVideoClassification
-            from peft import PeftModel
             self._device = "cuda" if torch.cuda.is_available() else "cpu"
+
+            if not (Path(self.lora_dir) / "adapter_model.safetensors").exists():
+                # 全参微调形态: save_pretrained 直接产出完整模型目录
+                self._model = VideoMAEForVideoClassification.from_pretrained(
+                    self.lora_dir, local_files_only=True)
+                self._model.to(self._device)
+                self._model.eval()
+                logger.info("AnimeCameraClassifier 就绪 [full-ft] (device=%s, %d 类)",
+                            self._device, self._model.config.num_labels)
+                return True
+
+            from peft import PeftModel
             # fine schema: 分类头是训练时 num_labels 重建的 (不在基座 ckpt),
             # 训练脚本用 modules_to_save=["classifier"] 存进 adapter;
             # 这里必须同样以 num_labels 重建 base, 否则 4 类头与 10 类 adapter 不匹配
