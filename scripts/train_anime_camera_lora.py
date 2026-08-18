@@ -85,13 +85,20 @@ REVERSE_PAIR = {
 
 def load_trainable(labels_path: str, min_conf: float = 0.7,
                    schema: str = "coarse",
-                   time_reverse: bool = True) -> List[Dict[str, Any]]:
+                   time_reverse: bool = True,
+                   data_root: str = "") -> List[Dict[str, Any]]:
     """加载 VLM 标注, 按 schema 映射标签, 过滤 complex/低置信。
 
     time_reverse=True: 对可逆方向对 (zoom_in↔zoom_out 等) 增加倒放样本,
     零标注成本补齐方向对不均衡 (v3 关键增强)。
+    data_root 非空: clip_path 按文件名重映射到该目录 (跨机训练包)。
     """
     rows = [json.loads(l) for l in Path(labels_path).read_text(encoding="utf-8").splitlines() if l.strip()]
+    if data_root:
+        for r in rows:
+            cp = r.get("clip_path", "")
+            if cp:
+                r["clip_path"] = str(Path(data_root) / Path(cp).name)
     out = []
     skipped = {"complex": 0, "low_conf": 0, "missing_clip": 0, "bad_dir": 0}
     n_reversed = 0
@@ -235,6 +242,8 @@ def main() -> int:
 
     parser = argparse.ArgumentParser(description="Step 4 A4: VideoMAE 动漫 LoRA 微调")
     parser.add_argument("--labels", default=r"D:\AE-Data\AnimeCamera\vlm_labels.jsonl")
+    parser.add_argument("--data-root", default="",
+                        help="clips 重映射目录 (跨机训练: 用包内 shots/ 替换标签里的绝对路径前缀)")
     parser.add_argument("--model-dir", default=MODEL_DIR, help="基座模型目录 (云训练时改路径)")
     parser.add_argument("--out", default=str(PROJECT_ROOT / "models" / "output" / "anime_camera_lora"))
     parser.add_argument("--epochs", type=int, default=4)
@@ -272,7 +281,8 @@ def main() -> int:
 
     # 1. 数据
     samples = load_trainable(args.labels, schema=args.label_schema,
-                             time_reverse=args.time_reverse)
+                             time_reverse=args.time_reverse,
+                             data_root=args.data_root)
     LABELS = {"fine": FINE_LABELS, "six": SIX_LABELS}.get(args.label_schema, COARSE_LABELS)
     if args.limit > 0:
         samples = samples[:args.limit]
