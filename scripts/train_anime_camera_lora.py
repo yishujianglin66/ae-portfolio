@@ -160,7 +160,9 @@ class ClipDataset:
     def _load_frames(self, clip: str) -> Optional[np.ndarray]:
         from decord import VideoReader, cpu
         try:
-            vr = VideoReader(clip, ctx=cpu(0))
+            # 解码器原生缩放: 直接出 224x224, 比全尺寸解码+Resize 快数倍
+            # (与后续 Resize((224,224)) 同为拉伸语义, 视觉等价)
+            vr = VideoReader(clip, ctx=cpu(0), width=IMG_SIZE, height=IMG_SIZE)
         except Exception:  # noqa: BLE001
             return None
         n = len(vr)
@@ -210,6 +212,21 @@ def _discover_lora_targets(model) -> List[str]:
             if "Linear" in type(mod).__name__:
                 targets.append(name)
     return targets
+
+
+def _collate_batch(batch: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """模块级 collate (Windows spawn 多进程可 pickle)。
+
+    手动归一化 (VideoMAE 预训练: ImageNet mean/std), 不依赖 processor 版本。
+    """
+    import torch
+    videos = torch.stack([b["pixel_values"] for b in batch])  # (B,T,3,224,224) uint8
+    videos = videos.float() / 255.0
+    mean = torch.tensor([0.485, 0.456, 0.406], dtype=torch.float32).view(1, 1, 3, 1, 1)
+    std = torch.tensor([0.229, 0.224, 0.225], dtype=torch.float32).view(1, 1, 3, 1, 1)
+    videos = (videos - mean) / std
+    lab = torch.tensor([b["labels"] for b in batch], dtype=torch.long)
+    return {"pixel_values": videos, "labels": lab}
 
 
 def main() -> int:
@@ -308,15 +325,8 @@ def main() -> int:
     loss_fn = torch.nn.CrossEntropyLoss(weight=weights)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
 
-    def collate(batch: List[Dict[str, Any]]) -> Dict[str, Any]:
-        # 手动归一化 (VideoMAE 预训练: ImageNet mean/std), 不依赖 processor 版本
-        videos = torch.stack([b["pixel_values"] for b in batch])  # (B,T,3,224,224) uint8
-        videos = videos.float() / 255.0
-        mean = torch.tensor([0.485, 0.456, 0.406], dtype=torch.float32).view(1, 1, 3, 1, 1)
-        std = torch.tensor([0.229, 0.224, 0.225], dtype=torch.float32).view(1, 1, 3, 1, 1)
-        videos = (videos - mean) / std
-        lab = torch.tensor([b["labels"] for b in batch], dtype=torch.long)
-        return {"pixel_values": videos, "labels": lab}
+    # 注: collate 必须是模块级 _collate_batch — Windows spawn 模式无法 pickle 局部函数
+    collate = _collate_batch
 
     # 加权重采样: v2 教训 (num_samples=2x + replacement 导致崩), v3 默认关
     if args.use_sampler:
