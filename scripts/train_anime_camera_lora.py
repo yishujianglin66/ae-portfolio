@@ -268,6 +268,9 @@ def main() -> int:
                         help="额外解冻 encoder 最后 N 层 (0=纯LoRA; 云端推荐 2)")
     parser.add_argument("--amp", action="store_true",
                         help="混合精度训练 (云端 4090/A100 加速 ~1.8x)")
+    parser.add_argument("--full-ft", action="store_true",
+                        help="全参微调: 解冻全部参数 (LoRA 有效秩不足难追平全参, 见 arXiv:2410.21228; "
+                             "86M 模型 24GB 显存无压力; 与 --lora-rank/--unfreeze 互斥, 后者被忽略)")
     parser.add_argument("--early-stop", type=int, default=0,
                         help="早停耐心轮数 (0=关闭; 云端 20 epochs 配 4)")
     args = parser.parse_args()
@@ -322,40 +325,54 @@ def main() -> int:
     logger.info("类分布: %s | 权重(上限%.0fx): %s", dict(dist),
                 args.weight_cap, weights.tolist())
 
-    # 3. LoRA
-    from peft import LoraConfig, get_peft_model
-    targets = _discover_lora_targets(model)
-    logger.info("LoRA 目标模块: %d 个 (示例 %s)", len(targets), targets[:3])
-    # fine/six schema 时把 classifier 头纳入保存 (modules_to_save): 分类头是 num_labels
-    # 重建的随机初始化层, 不在 ckpt 里, 若不保存 adapter 回传后本地无法恢复 (v3 坑)
-    modules_to_save = ["classifier"] if args.label_schema in ("fine", "six") else None
-    lora_config = LoraConfig(
-        r=args.lora_rank, lora_alpha=args.lora_rank * 2, lora_dropout=0.1,
-        target_modules=targets,
-        bias="none",
-        modules_to_save=modules_to_save,
-    )
-    model = get_peft_model(model, lora_config)
+    # 3. 微调模式: --full-ft 全参 | 默认 LoRA
+    if args.full_ft:
+        # 全参微调: LoRA 有效秩不足难任务追不平全参 (MIT CSAIL, arXiv:2410.21228);
+        # VideoMAE-base 86M 参数, AdamW 全参约 2GB 显存, 24GB 卡无压力
+        for p in model.parameters():
+            p.requires_grad = True
+        n_train = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        n_total = sum(p.numel() for p in model.parameters())
+        logger.info("全参微调模式: 可训练 %d / %d (%.2f%%)",
+                    n_train, n_total, 100 * n_train / max(1, n_total))
+        if args.lr >= 1e-4:
+            logger.info("全参微调 lr 自动下调 %.1e -> 3e-5 (全参对学习率敏感, 2e-4 会发散)",
+                        args.lr)
+            args.lr = 3e-5
+    else:
+        from peft import LoraConfig, get_peft_model
+        targets = _discover_lora_targets(model)
+        logger.info("LoRA 目标模块: %d 个 (示例 %s)", len(targets), targets[:3])
+        # fine/six schema 时把 classifier 头纳入保存 (modules_to_save): 分类头是 num_labels
+        # 重建的随机初始化层, 不在 ckpt 里, 若不保存 adapter 回传后本地无法恢复 (v3 坑)
+        modules_to_save = ["classifier"] if args.label_schema in ("fine", "six") else None
+        lora_config = LoraConfig(
+            r=args.lora_rank, lora_alpha=args.lora_rank * 2, lora_dropout=0.1,
+            target_modules=targets,
+            bias="none",
+            modules_to_save=modules_to_save,
+        )
+        model = get_peft_model(model, lora_config)
 
-    # 云端大训练: 额外解冻 encoder 最后 N 层 (peft 默认全冻结)
-    if args.unfreeze > 0:
-        import re as _re
-        layer_ids = sorted({
-            int(m.group(1))
-            for name, _ in model.base_model.named_parameters()
-            for m in [_re.search(r"encoder\.layer\.(\d+)\.", name)] if m
-        })
-        unfreeze_ids = set(layer_ids[-args.unfreeze:]) if layer_ids else set()
-        n_unfroze = 0
-        for name, p in model.base_model.named_parameters():
-            m = _re.search(r"encoder\.layer\.(\d+)\.", name)
-            if m and int(m.group(1)) in unfreeze_ids:
-                p.requires_grad = True
-                n_unfroze += 1
-        logger.info("解冻 encoder 最后 %d 层 (layer ids %s): %d 个参数张量",
-                    args.unfreeze, sorted(unfreeze_ids), n_unfroze)
+        # 云端大训练: 额外解冻 encoder 最后 N 层 (peft 默认全冻结)
+        if args.unfreeze > 0:
+            import re as _re
+            layer_ids = sorted({
+                int(m.group(1))
+                for name, _ in model.base_model.named_parameters()
+                for m in [_re.search(r"encoder\.layer\.(\d+)\.", name)] if m
+            })
+            unfreeze_ids = set(layer_ids[-args.unfreeze:]) if layer_ids else set()
+            n_unfroze = 0
+            for name, p in model.base_model.named_parameters():
+                m = _re.search(r"encoder\.layer\.(\d+)\.", name)
+                if m and int(m.group(1)) in unfreeze_ids:
+                    p.requires_grad = True
+                    n_unfroze += 1
+            logger.info("解冻 encoder 最后 %d 层 (layer ids %s): %d 个参数张量",
+                        args.unfreeze, sorted(unfreeze_ids), n_unfroze)
 
-    model.print_trainable_parameters()
+        model.print_trainable_parameters()
 
     # 4. 训练 (按类加权重采样: 稀缺类 Pull/Static 出现频率放大)
     from torch.utils.data import DataLoader, WeightedRandomSampler
@@ -439,8 +456,9 @@ def main() -> int:
                 "val_acc": round(acc, 4),
                 "weight_cap": args.weight_cap,
                 "epochs": args.epochs,
-                "lora_rank": args.lora_rank,
-                "unfreeze": args.unfreeze,
+                "mode": "full_ft" if args.full_ft else "lora",
+                "lora_rank": 0 if args.full_ft else args.lora_rank,
+                "unfreeze": 0 if args.full_ft else args.unfreeze,
                 "amp": args.amp,
                 "best_epoch": best_epoch,
                 "trained_at": time.strftime("%Y-%m-%d %H:%M:%S"),

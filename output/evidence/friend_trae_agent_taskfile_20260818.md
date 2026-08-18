@@ -10,7 +10,7 @@
 ## 你（智能体）的身份与总目标
 
 你是训练执行智能体。你的任务：在本机 RTX 5090 上完成 AE 视频自动化项目的模型训练，
-产出 adapter 权重并打包回传。训练命令全部由包内 bat/文档给出，你的职责是：
+产出完整微调模型并打包回传。训练命令全部由包内 bat/文档给出，你的职责是：
 **装环境 → 验包 → 冒烟 → 训练 → 验收 → 打包**，每步过闸门才进下一步。
 
 ## 阶段 0 · 环境搭建（红线，不可跳过）
@@ -51,25 +51,30 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available(), tor
 
 ```powershell
 .\RUN_SMOKE.bat
-# 等价: python scripts/train_anime_camera_lora.py --label-schema six --epochs 1 --limit 200 --batch-size 4 --lora-rank 64 --unfreeze 2 --amp --early-stop 3 --out models/output/smoke_test
+# 等价: python scripts/train_anime_camera_lora.py --label-schema six --epochs 1 --limit 200 --batch-size 4 --full-ft --amp --early-stop 3 --out models/output/smoke_test
 ```
 
 **闸门 2 验收**：日志同时满足：
-1. 出现 `trainable params` 且比例 ≈19%（r=64+解冻2层的特征）
-2. 跑完输出 `best val_acc=`（数值不限，跑完即环境 OK）
-3. `models/output/smoke_test/` 下有 `adapter_model.safetensors` + `meta.json`
+1. 出现 `全参微调模式: 可训练 86241030 / 86241030 (100.00%)`（全参特征）
+2. 出现 `lr 自动下调`（自动学习率保护生效）
+3. 跑完输出 `best val_acc=`（数值不限，跑完即环境 OK）
+4. `models/output/smoke_test/` 下有 `model.safetensors` + `meta.json`（全参保存的是完整模型，不再是 adapter）
 
 ## 阶段 3 · 正式训练（主任务，约 6-9 小时，建议过夜）
 
 ```powershell
 .\RUN_TRAIN.bat
-# 等价: python scripts/train_anime_camera_lora.py --label-schema six --epochs 20 --batch-size 16 --lora-rank 64 --unfreeze 2 --amp --early-stop 4 --lr 3e-4 --out models/output/anime_camera_lora_v4_5090
+# 等价: python scripts/train_anime_camera_lora.py --label-schema six --epochs 20 --batch-size 16 --full-ft --amp --early-stop 4 --lr 3e-5 --grad-checkpoint --out models/output/anime_camera_lora_v4_5090
 ```
+
+> **为什么是全参微调（--full-ft）**：MIT CSAIL 论文 (arXiv:2410.21228) 实证
+> LoRA 有效秩不足全参一半，运镜识别属公认难任务 (CAPability 基准)；
+> 本模型仅 86M 参数，24GB 显存全参绰绰有余。**不要改回 LoRA 模式。**
 
 **你的监控职责**：
 - 每 epoch 末有 `val acc` 打印，最佳自动保存
 - 连续 4 轮不提升自动早停（正常，防过拟合）
-- 若 CUDA OOM：把 `--batch-size 16` 改 `8`，再加 `--grad-checkpoint`，重跑
+- 若 CUDA OOM：把 `--batch-size 16` 改 `8` 重跑（grad-checkpoint 已默认开）
 - 若速度 <1 it/s：`nvidia-smi` 确认 python 进程在 5090 上而非核显/CPU
 
 ## 阶段 4 · 验收（不许跳过，数值原样上报禁止美化）
@@ -99,7 +104,7 @@ type models\output\anime_camera_lora_v4_5090\meta.json
 【v4训练完成】
 val_acc = <meta.json 原值，禁止修饰>
 MD5 = <Get-FileHash 输出>
-文件 = v4_5090_result.zip (约10-15MB)
+文件 = v4_5090_result.zip (约330MB, 全参完整模型)
 ```
 
 ### 5.3 回传通道（按可用性自动降级，智能体探测后执行）
@@ -112,7 +117,7 @@ MD5 = <Get-FileHash 输出>
 
 ### 5.4 回传物清单（仅这些，训练数据不回传）
 
-- `v4_5090_result.zip`（adapter + meta.json + config，10-15MB）【必需】
+- `v4_5090_result.zip`（完整模型 model.safetensors + meta.json + config，约330MB）【必需】
 - `train_log.zip`（训练日志）【建议】
 - 5.2 的成绩草稿【必需，数字原样】
 
