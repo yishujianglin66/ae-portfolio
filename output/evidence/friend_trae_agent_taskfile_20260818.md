@@ -80,34 +80,44 @@ type models\output\anime_camera_lora_v4_5090\meta.json
 读取 `val_acc` 字段并原样记录。成功分级：≥0.70 保底 / ≥0.75 达标 / ≥0.80 理想。
 **无论多少分都如实打包回传，禁止任何"加工"。**
 
-## 阶段 5 · 打包回传（三种方式任选其一，推荐方式A）
+## 阶段 5 · 打包与回传（智能体执行，人只需最后点一下发送）
+
+### 5.1 打包（命令直接跑）
 
 ```powershell
 Compress-Archive -Path models\output\anime_camera_lora_v4_5090 -DestinationPath v4_5090_result.zip
-# 生成 MD5 清单供对方校验
+Compress-Archive -Path train_log.txt -DestinationPath train_log.zip -ErrorAction SilentlyContinue
 Get-FileHash v4_5090_result.zip -Algorithm MD5
+type models\output\anime_camera_lora_v4_5090\meta.json
 ```
-回传物只有这个 zip（约 10-15MB）+ train_log.txt（训练日志，可选但建议）。
-**训练数据不用回传。**
 
-### 方式A · 微信直发（推荐，10MB 毫无压力）
-1. 微信 PC 版登录 → 找到和项目Owner的聊天（或让他发一条消息过来）
-2. 把 `v4_5090_result.zip` 直接拖入聊天窗口 → 发送
-3. 同时文字告知：`val_acc=X.XXXX`（meta.json 里的原值）+ MD5 值
+### 5.2 生成回传消息草稿（智能体替人写好）
 
-### 方式B · 网盘中转（文件多或微信不便时）
-1. 上传 `v4_5090_result.zip` 到百度网盘/阿里云盘
-2. 分享 → 生成链接（建议提取码简单些）→ 微信把链接发给项目Owner
+智能体把以下内容整理成一条消息**展示在屏幕上让用户复制/确认发送**：
 
-### 方式C · 局域网直传（两台电脑同一路由器时最快）
-1. 朋友机：右键 v4_5090_result.zip → 属性 → 共享 → 共享给指定用户
-2. 或 PowerShell 临时开 HTTP：`python -m http.server 8000`（在zip所在目录）
-3. 项目Owner 机器浏览器访问 `http://朋友机IP:8000` 直接下载
-4. 传完 Ctrl+C 关闭
+```
+【v4训练完成】
+val_acc = <meta.json 原值，禁止修饰>
+MD5 = <Get-FileHash 输出>
+文件 = v4_5090_result.zip (约10-15MB)
+```
+
+### 5.3 回传通道（按可用性自动降级，智能体探测后执行）
+
+| 优先级 | 通道 | 智能体操作 |
+|---|---|---|
+| 1 | **本机微信已登录** | 用自动化把 zip 拖入与项目Owner的会话发送；不可自动化时把 5.2 草稿+zip路径展示给用户，提示「微信里把这个文件发给对方」（用户只需这一个动作） |
+| 2 | 网盘客户端在跑 | 打开网盘共享目录，把 zip 复制进去，生成链接放入草稿 |
+| 3 | 以上都不可用 | 起临时HTTP：`python -m http.server 8000`（zip目录），把 `http://<本机IP>:8000/v4_5090_result.zip` 写入草稿发给Owner，对方下载后 Ctrl+C 关闭 |
+
+### 5.4 回传物清单（仅这些，训练数据不回传）
+
+- `v4_5090_result.zip`（adapter + meta.json + config，10-15MB）【必需】
+- `train_log.zip`（训练日志）【建议】
+- 5.2 的成绩草稿【必需，数字原样】
 
 ### 回传后的等待
-项目Owner 侧会做三步校验（MD5对照 → val_acc对账 → 权重加载测试），
-通过后他会发下一个训练包。**校验不过他会告知具体原因。**
+Owner 侧三步校验（MD5对照 → val_acc对账 → 权重加载测试）通过后发下一包。
 
 ## 阶段 6 · 后续准备（主任务成功后的扩展队列，按序执行）
 
