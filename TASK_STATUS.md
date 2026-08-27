@@ -359,17 +359,25 @@
 
 闸门已反向验证：把默认值临时改回缺陷版，`test_default_data_dir_is_not_inside_repo` 以 AssertionError 指名缺陷路径检出（1/1），还原后 67 passed。验收方式：跑完测试比对仓库内画像文件 sha256 不变。
 
-**端到端验收通过（2026-08-27 21:23，全量）**：`5310 passed, 33 skipped, 0 failed in 626.88s`（较修复前 5308 多出的 2 项即新增常驻闸门），pytest exit code 0；同一轮内 `git status --porcelain -uall` 脏项 **0 → 0 条**；旧画像文件指纹全程未变（size 25165、mtime 1787826878、sha256 前缀 `3ae92bebfaf9a2ac`）。验收脚本固化为 `scripts/verify_no_test_pollution.py`，结论落盘 `tmp/verify_no_test_pollution.log`。判据特意做成**双通道**（git status 一致性 + 旧目录逐文件 mtime/内容哈希）：旧路径现已受 `.gitignore:259` 覆盖，代码若退回缺陷行为，单看 `git status` 会静默判"通过"。
+**端到端验收通过（2026-08-27 21:23，全量）**：`5310 passed, 33 skipped, 0 failed in 626.88s`（较修复前 5308 多出的 2 项即新增常驻闸门），pytest exit code 0；同一轮内 `git status --porcelain -uall` 脏项 **0 → 0 条**；旧画像文件指纹全程未变（size 25165、mtime 1787826878、sha256 前缀 `3ae92bebfaf9a2ac`）。验收脚本固化为 `scripts/verify_no_test_pollution.py`，结论落盘 `tmp/verify_no_test_pollution.log`。判据特意做成**双通道**（git status 一致性 + 旧目录逐文件 mtime/内容哈希）：旧路径现已受 `.gitignore` 中 `13-素材获取与搜索/03-AI语义搜索/user_data/` 规则覆盖，代码若退回缺陷行为，单看 `git status` 会静默判"通过"。
 
-**新发现缺陷（待处置）：`.gitignore` 白名单被后写全局规则静默作废**。盘查 144 个"已跟踪但被忽略"文件时发现，`2026-08-16` 那次 tracked-but-ignored 清理专门补写的误伤白名单（`.gitignore:26-32`，含 `!05-测试套件/test_resources/*.png`、`!puppet-automation/scripts/*.ps1`、`!install_adobe_bridges.ps1` 等）**全部失效**——后来在行 233-234 新增的全局 `*.png` / `*.ps1` 位置更靠后，而 git 采用"最后匹配规则生效"。以假想新文件实测：
+**缺陷已闭合：`.gitignore` 白名单被后写全局规则静默作废**。提升为常驻闸门 `scripts/audit_gitignore_negations.py` 后机器枚举出 **7 条死白名单**（我手工只发现 2 条），根因是两条互不相干的 git 语义：
 
-```
-05-测试套件/test_resources/probe_new.png   → IGNORED by .gitignore:233:*.png
-puppet-automation/scripts/probe_new.ps1    → IGNORED by .gitignore:234:*.ps1
-scripts/probe_new.ps1                      → 正常（!scripts/*.ps1 在行 236，位于全局规则之后）
-```
+| 死规则 | 被谁作废 | 语义 |
+|---|---|---|
+| `!install_adobe_bridges.ps1`、`!close_dialog.ps1`、`!D盘AE脚本管理器.ps1`、`!puppet-automation/scripts/*.ps1`、`!mcp-extension/install.ps1` | 全局 `*.ps1` | 最后匹配生效，白名单写在前面 |
+| `!05-测试套件/test_resources/*.png` | 全局 `*.png` + `resources/` | 同上，且其父目录另被排除 |
+| `!cache/.gitkeep` | `cache/` | **父目录被排除时文件级 `!` 永远无效**，git 不进入被排除目录匹配 |
 
-后果：已跟踪文件本身不受 ignore 影响（改动仍能提交），但 `git clean -Xdf` 会把这些白名单误判为垃圾清除——包括测试夹具 `test_image.png` 与 6 个安装脚本；此后往这些目录补新资源一律静默不入库。修法是把 26-32 那段整体移到 233-234 之后，属机械改动。另两项需人定夺：① `output/evidence/` 13 份历史证据（被 `.trae/rules/evidence-gate-rules.md` 与 10 个脚本按路径引用）是否继续留库；② `external/OpenMontage`、`external/rife` 两个无 `.gitmodules` 映射的 gitlink 是补正规 submodule 还是撤索引。
+修复三处：① 2026-08-16 那段白名单整体下移到文件末尾新增的"误伤白名单"段，并在原位置留注释写明"白名单只能写在末尾"，防止后人再往前追加；② `test_resources` 额外补 `!05-测试套件/test_resources/` 先重新纳入被 `resources/` 排除的目录，文件级白名单才可能生效；③ 直接删除 `!cache/.gitkeep`——全库无任何被跟踪的 `.gitkeep`，将来确需占位须写成三行式 `!cache/` + `cache/*` + `!cache/.gitkeep`（已在注释注明）。
+
+**闸门反向验证**：同一个 gate 跑 `HEAD` 版缺陷配置 → 7 条全检出、exit 1，并逐条指名作废它的具体规则；跑修复后配置 → 有效 11 / 失效 0、exit 0。不是笼统报"配置有问题"。
+
+**顺带补上的功能缺口**：`close_dialog.ps1` 此前**从未进过版本库**——磁盘上存在但被自己的死白名单挡在库外，而它是 `core/pipeline_fault_policy.py:47`（`LICENCE_POPUP_BLOCKING` 的标准处置动作）与 `docs/superpowers/specs/2026-07-31-flagship-pipeline-design.md:143`（"AE 许可证弹窗阻塞｜高风险｜S3 一直挂"的缓解手段）点名的脚本。即任何 clean checkout / 第二台机器都缺这份脚本，而 `git clean -Xdf` 会删掉唯一副本。本次已 `git add` 入库。内容经人工审查：UTF-16 LE 编码，仅对 Premiere Pro 的 CEF 子窗口 `PostMessage` 一次 Enter（WM_KEYDOWN/KEYUP + VK_RETURN），**不含进程终止逻辑**，不触碰"禁止强杀 AE 进程"红线，无凭据字符串。
+
+**修掉 `scripts/secret_scan.py` 一个真实盲区**：PowerShell 默认写 UTF-16，正文每个 ASCII 字符后跟 NUL，被原有"含 NUL 即二进制"启发式直接跳过——即此前所有 `.ps1` 从未真正被扫过。改为先按 BOM 识别 UTF-16 再解码；正向对照验证通过：UTF-16 编码的伪凭据现能被检出（旧逻辑下 `NUL in head: True` 会跳过）。修复后本批扫描 5/5 文件 0 命中。
+
+**仍需人定夺**：① `output/evidence/` 13 份历史证据（被 `.trae/rules/evidence-gate-rules.md` 与 10 个脚本按路径引用）是否继续留库；② `external/OpenMontage`、`external/rife` 两个无 `.gitmodules` 映射的 gitlink（磁盘上是完整克隆，114 / 52 文件 + 各自 `.git`）是补正规 submodule 还是撤索引。另记一笔：`git branch -a` 显示存在一个名为 `origin` 的**本地分支**（指向 `9b956eb`），与远端跟踪引用同名易混，疑似误建，未动。
 
 
 ## 2026-08-26 里程碑

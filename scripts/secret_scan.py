@@ -38,9 +38,14 @@ for rel in payload:
         hits.append((rel, "read_error", str(exc)))
         continue
     scanned += 1
-    if b"\x00" in data[:4096]:
+    if data[:2] in (b"\xff\xfe", b"\xfe\xff"):
+        # PowerShell 等工具默认写 UTF-16：每个 ASCII 字符后跟 NUL，
+        # 不能按"含 NUL 即二进制"跳过，否则这类文件永远没被扫过。
+        text = data.decode("utf-16", "replace")
+    elif b"\x00" in data[:4096]:
         continue
-    text = data.decode("utf-8", "replace")
+    else:
+        text = data.decode("utf-8", "replace")
     for name, rx in PATTERNS.items():
         for match in rx.finditer(text):
             lineno = text[:match.start()].count("\n") + 1
