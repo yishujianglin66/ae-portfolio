@@ -253,3 +253,7 @@ models/yolov8x.pt
 help_out.txt
 # VLM 基座权重（Qwen3-VL-4B/8B，共 26.5 GB），由 modelscope 客户端按需重新拉取，不入库
 models/weights/
+
+# 用户画像运行期状态已移至 ~/.ae-knowledge-vault/user_preference/；
+# 旧路径唯一的文件是测试残留（每次运行追加记录，无界增长），禁止再次入库
+13-素材获取与搜索/03-AI语义搜索/user_data/

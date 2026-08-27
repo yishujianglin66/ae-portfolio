@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "13-素材获取与搜索" / "03-AI语义搜索"))
 
-from user_preference import UserPreferenceLearner, UserAction
+from user_preference import UserPreferenceLearner, UserAction, _default_data_dir
 
 
 class TestUserPreferenceBasic(unittest.TestCase):
@@ -389,6 +389,31 @@ class TestRecentActionsLimit(unittest.TestCase):
         
         preferences = self.learner.get_preferences("test_user")
         self.assertEqual(preferences["action_count"], 100)
+
+
+class TestDefaultDataDirOutsideRepo(unittest.TestCase):
+    """默认画像目录必须落在仓库外。
+
+    历史缺陷：默认值曾是源码同级 user_data/，任何用默认目录构造 learner 的测试
+    都会往被跟踪文件追加记录（recent_actions 无界增长），跑一次测试仓库就脏一次。
+    这里盯根因（默认值本身），不盯某个用例的后果。
+    """
+
+    def test_default_data_dir_is_not_inside_repo(self):
+        repo_root = Path(__file__).resolve().parent.parent
+        default_dir = Path(_default_data_dir()).resolve()
+        self.assertFalse(
+            str(default_dir).startswith(str(repo_root) + os.sep),
+            f"默认画像目录落在仓库内，测试运行会污染 git 工作区: {default_dir}",
+        )
+
+    def test_explicit_data_dir_still_wins(self):
+        tmp = tempfile.mkdtemp()
+        try:
+            self.assertEqual(UserPreferenceLearner(data_dir=tmp).data_dir, tmp)
+        finally:
+            import shutil
+            shutil.rmtree(tmp, ignore_errors=True)
 
 
 if __name__ == "__main__":

@@ -47,6 +47,15 @@ class UserProfile:
     updated_at: str = ""
 
 
+def _default_data_dir() -> str:
+    """默认画像目录。
+
+    不能落在源码同级目录：recent_actions 按 user_id 无界累积，落仓库内会让每次运行都污染 git 工作区。
+    与 core/config.py 的 ~/.ae-knowledge-vault/ 约定保持一致。
+    """
+    return str(Path.home() / ".ae-knowledge-vault" / "user_preference")
+
+
 class UserPreferenceLearner:
     """用户偏好学习器"""
     
@@ -64,7 +73,7 @@ class UserPreferenceLearner:
     TIME_DECAY = 0.9
     
     def __init__(self, data_dir: Optional[str] = None):
-        self.data_dir = data_dir or str(Path(__file__).resolve().parent / "user_data")
+        self.data_dir = data_dir or _default_data_dir()
         os.makedirs(self.data_dir, exist_ok=True)
         
         self.user_profiles: Dict[str, UserProfile] = {}

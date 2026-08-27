@@ -347,7 +347,17 @@
 
 **新发现的技术债（供 P1-E）**：全量运行后 `sys.path` 膨胀至约 **300 条**（大量 `tests/`、仓库根、`13-素材获取与搜索/*` 重复条目），源于几乎每个测试文件模块级 `sys.path.insert(0, ...)`；未命中的导入需扫描 300 个目录，是全量耗时 14:55 的因素之一。
 
-**新发现的技术债（测试污染被跟踪数据文件）**：全量运行会写入 `13-素材获取与搜索/03-AI语义搜索/user_data/user_test_user.json`——本次实测 +254 行行为日志、`happy` 计数 275→365，导致跑完测试工作区必然变脏（本次提交只能把它排除在外）。现有 autouse 闸门 `_no_learning_persist` 只拦学习持久化，未覆盖该路径。建议随 P1-E 收敛：要么把该文件加入 `.gitignore`，要么让相关测试注入临时目录。
+**技术债已闭合（测试污染被跟踪数据文件）**：全量运行会写入 `13-素材获取与搜索/03-AI语义搜索/user_data/user_test_user.json`（本次实测 +254 行、`happy` 275→365，累计已膨胀至 1038 行 / 25 KB）。根因是 `smart_matcher.py:77` 构造 `UserPreferenceLearner()` 不传 `data_dir`，而 `user_preference.py:67` 的默认值指向**源码同级目录**——`recent_actions` 按 user_id 无界累积，于是每跑一次测试仓库就脏一次，`git status` 干净这一前提永久失效。修复：
+
+| 改动 | 内容 |
+|---|---|
+| `user_preference.py` | 新增 `_default_data_dir()`，默认目录移至 `~/.ae-knowledge-vault/user_preference/`（沿用 `core/config.py` 已有的 `~/.ae-knowledge-vault/` 约定）；显式传 `data_dir` 的调用方行为不变 |
+| `smart_matcher.py` | `SmartMatcher.__init__` 新增 `preference_data_dir` 并透传给 learner，与既有 `index_path` 注入风格一致 |
+| `tests/test_smart_matcher.py` | `TestSmartMatcher.setUp` 注入 `tempfile.mkdtemp()`，与同文件 `TestUserPreference` 一致 |
+| 入库处置 | `user_test_user.json` 属误提交的测试残留（该目录仅此一个文件、user_id 固定 `test_user`），`git rm --cached` 取消跟踪并忽略旧路径，本地文件保留不删 |
+| 常驻闸门 | `tests/test_user_preference.py::TestDefaultDataDirOutsideRepo` 断言默认目录不在仓库内——盯根因（默认值本身）而非某个用例的后果 |
+
+闸门已反向验证：把默认值临时改回缺陷版，`test_default_data_dir_is_not_inside_repo` 以 AssertionError 指名缺陷路径检出（1/1），还原后 67 passed。验收方式：跑完测试比对仓库内画像文件 sha256 不变。
 
 
 ## 2026-08-26 里程碑

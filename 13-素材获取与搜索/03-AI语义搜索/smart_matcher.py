@@ -54,7 +54,12 @@ class SmartMatcher:
                     └──────────────┘   └─────────────────┘
     """
     
-    def __init__(self, index_path: Optional[str] = None, offline_mode: Optional[bool] = None):
+    def __init__(
+        self,
+        index_path: Optional[str] = None,
+        offline_mode: Optional[bool] = None,
+        preference_data_dir: Optional[str] = None,
+    ):
         self.index_path = index_path or str(Path(__file__).resolve().parent / "index.json")
         self.offline_mode = offline_mode
         
@@ -74,7 +79,7 @@ class SmartMatcher:
         self.audio_extractor = AudioFeatureExtractor()
         self.searcher = CrossPlatformSearcher()
         self.ranker = SmartRanker()
-        self.preference_learner = UserPreferenceLearner()
+        self.preference_learner = UserPreferenceLearner(data_dir=preference_data_dir)
     
     def match(
         self,

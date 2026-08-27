@@ -371,7 +371,11 @@ class TestSmartMatcher(unittest.TestCase):
     """智能匹配器端到端测试"""
     
     def setUp(self):
-        self.matcher = SmartMatcher(index_path="nonexistent_index.json")
+        self.temp_dir = tempfile.mkdtemp()
+        self.matcher = SmartMatcher(
+            index_path="nonexistent_index.json",
+            preference_data_dir=self.temp_dir,
+        )
     
     def test_match_no_index(self):
         result = self.matcher.match("开心的音乐", include_remote=False)
