@@ -359,6 +359,18 @@
 
 闸门已反向验证：把默认值临时改回缺陷版，`test_default_data_dir_is_not_inside_repo` 以 AssertionError 指名缺陷路径检出（1/1），还原后 67 passed。验收方式：跑完测试比对仓库内画像文件 sha256 不变。
 
+**端到端验收通过（2026-08-27 21:23，全量）**：`5310 passed, 33 skipped, 0 failed in 626.88s`（较修复前 5308 多出的 2 项即新增常驻闸门），pytest exit code 0；同一轮内 `git status --porcelain -uall` 脏项 **0 → 0 条**；旧画像文件指纹全程未变（size 25165、mtime 1787826878、sha256 前缀 `3ae92bebfaf9a2ac`）。验收脚本固化为 `scripts/verify_no_test_pollution.py`，结论落盘 `tmp/verify_no_test_pollution.log`。判据特意做成**双通道**（git status 一致性 + 旧目录逐文件 mtime/内容哈希）：旧路径现已受 `.gitignore:259` 覆盖，代码若退回缺陷行为，单看 `git status` 会静默判"通过"。
+
+**新发现缺陷（待处置）：`.gitignore` 白名单被后写全局规则静默作废**。盘查 144 个"已跟踪但被忽略"文件时发现，`2026-08-16` 那次 tracked-but-ignored 清理专门补写的误伤白名单（`.gitignore:26-32`，含 `!05-测试套件/test_resources/*.png`、`!puppet-automation/scripts/*.ps1`、`!install_adobe_bridges.ps1` 等）**全部失效**——后来在行 233-234 新增的全局 `*.png` / `*.ps1` 位置更靠后，而 git 采用"最后匹配规则生效"。以假想新文件实测：
+
+```
+05-测试套件/test_resources/probe_new.png   → IGNORED by .gitignore:233:*.png
+puppet-automation/scripts/probe_new.ps1    → IGNORED by .gitignore:234:*.ps1
+scripts/probe_new.ps1                      → 正常（!scripts/*.ps1 在行 236，位于全局规则之后）
+```
+
+后果：已跟踪文件本身不受 ignore 影响（改动仍能提交），但 `git clean -Xdf` 会把这些白名单误判为垃圾清除——包括测试夹具 `test_image.png` 与 6 个安装脚本；此后往这些目录补新资源一律静默不入库。修法是把 26-32 那段整体移到 233-234 之后，属机械改动。另两项需人定夺：① `output/evidence/` 13 份历史证据（被 `.trae/rules/evidence-gate-rules.md` 与 10 个脚本按路径引用）是否继续留库；② `external/OpenMontage`、`external/rife` 两个无 `.gitmodules` 映射的 gitlink 是补正规 submodule 还是撤索引。
+
 
 ## 2026-08-26 里程碑
 
