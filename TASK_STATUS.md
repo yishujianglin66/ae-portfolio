@@ -334,9 +334,20 @@
 最终验证：`5308 passed / 33 skipped / 0 failed / 0 errors in 973.98s`（较复验前 +3，即新增的常驻竞态闸门）。
 详见 `00-每日记录/2026-08-27_16-测试套件竞态缺陷修复-开发进度.md`；取证工具已固化为 `scripts/diag_import_guard.py`（导入污染诊断插件）与 `tests/test_batch_queue.py::TestCallbackRaceContract`（竞态闸门，替代原 `tmp/` 一次性压测脚本）。
 
-**提交受阻事实（待用户定夺）**：本批改动无法单独入库——根目录治理批次尚未提交，`_import_redirect.py` 与 132 条重定向规则中的 **116 个目标模块全部处于未跟踪状态**（索引里 0 条）。单独提交 `pipeline/batch_queue.py` + 新闸门会得到一个 clean checkout 下**必然失败**的提交（`from batch_queue import ...` 会解析到 HEAD 里未修复的根模块）。要落盘就必须连同整个迁移批次一起提交（`git status --porcelain` 实测 **598** 条：216 未跟踪 / 160 删除 / 101 修改 / 60 已暂存新增 / 52 已暂存重命名 / 9 条暂存后又有改动），且建议落在 `feat/project-consolidation-v1` 而非 master。
+**提交已落盘（2026-08-27，master 本地两提交，未推送）**：阻塞成因经确认成立——治理批次未入库时，`_import_redirect.py` 的 132 条规则里有 **116 个目标模块既不在 HEAD 也不在索引**，单独提交 `pipeline/batch_queue.py` + 新闸门会得到一个 clean checkout 下**必然失败**的提交（裸名 `from batch_queue import ...` 会解析到未修复的根模块）。故按方案 A 连迁移批次一并入库：
+
+| 提交 | 内容 | 规模 |
+|---|---|---|
+| `116fa20` `refactor(root)` | 118 处根级 `.py` 按功能域分包 + 59 处 `tests/` 手工脚本移入 `scripts/`（git 识别 rename 共 177）、`_import_redirect.py`、清除 18 个误跟踪 `__pycache__/*.pyc`、`.gitignore` 补 `models/weights/` | 584 files, +113132 / −26257 |
+| `648d18d` `fix(pipeline)` | batch_queue 两处竞态修复 + `TestCallbackRaceContract` 闸门 + llm_gateway 撤防 + `scripts/diag_import_guard.py` 转正 + 08-27 三份文档 | 8 files, +5053 / −736 |
+
+原"建议落 `feat/project-consolidation-v1`"**已被否证**：该分支与 master 分叉且相差 1117 个文件，搬运 598 条脏改动风险远高于收益，最终留在 master。强制排除三项：`models/weights/`（32 文件 / **26.5 GB** Qwen3-VL 基座权重，此前未被忽略，`git add -A` 会直接吞入）、无 `.gitmodules` 映射的嵌套仓库 `OpenSpace` 与 `external/OpenMontage`、测试运行期写入的 `user_data/user_test_user.json`。密钥面扫描 332 个未跟踪文件仅 1 处命中，为 `auth/auth_system.py:943` `_run_tests()` 内的测试夹具常量，非真实凭据。
+
+提交后自洽性校验（`scripts/verify_tree_coherence.py`，与 `scripts/secret_scan.py` 同已转正为长期设施）：HEAD 跟踪 3606 文件，131 条重定向规则目标 **131/131 全在库内**，生产代码与测试的项目模块引用缺失 **0**（唯一告警 `style_copy` 为隐式命名空间包，校验脚本误报）；全量收集 `5341 collected in 15.36s` 0 errors，受影响面复跑 `230 passed, 1 skipped`。
 
 **新发现的技术债（供 P1-E）**：全量运行后 `sys.path` 膨胀至约 **300 条**（大量 `tests/`、仓库根、`13-素材获取与搜索/*` 重复条目），源于几乎每个测试文件模块级 `sys.path.insert(0, ...)`；未命中的导入需扫描 300 个目录，是全量耗时 14:55 的因素之一。
+
+**新发现的技术债（测试污染被跟踪数据文件）**：全量运行会写入 `13-素材获取与搜索/03-AI语义搜索/user_data/user_test_user.json`——本次实测 +254 行行为日志、`happy` 计数 275→365，导致跑完测试工作区必然变脏（本次提交只能把它排除在外）。现有 autouse 闸门 `_no_learning_persist` 只拦学习持久化，未覆盖该路径。建议随 P1-E 收敛：要么把该文件加入 `.gitignore`，要么让相关测试注入临时目录。
 
 
 ## 2026-08-26 里程碑
