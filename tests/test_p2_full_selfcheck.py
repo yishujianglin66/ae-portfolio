@@ -20,6 +20,8 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "bridges"))
+# puppet-automation 目录名含连字符，按仓库标准口径加入路径后用 src.engines.* 导入
+sys.path.insert(0, str(PROJECT_ROOT / "puppet-automation"))
 
 
 class TestP0PhotoshopExecuteFix:
@@ -27,14 +29,14 @@ class TestP0PhotoshopExecuteFix:
 
     def test_ps_does_not_override_execute(self):
         """确认 PhotoshopEngine 没有覆盖 execute() 方法。"""
-        from puppet_automation.src.engines.photoshop import PhotoshopEngine
+        from src.engines.photoshop import PhotoshopEngine
         # 获取类自身的属性（不继承）
         own_execute = "execute" in PhotoshopEngine.__dict__
         assert not own_execute, "PhotoshopEngine 仍然覆盖了 execute() — BaseEngine 保护机制失效!"
 
     def test_ps_execute_impl_uses_handlers(self):
         """确认 _execute_impl 使用 handlers dict 模式。"""
-        from puppet_automation.src.engines.photoshop import PhotoshopEngine
+        from src.engines.photoshop import PhotoshopEngine
         engine = PhotoshopEngine()
         assert hasattr(engine, "_execute_impl")
         # 确认 _execute_impl 不再委托给 self.execute()
@@ -49,7 +51,7 @@ class TestP1HandlerCompleteness:
 
     @pytest.mark.asyncio
     async def test_premiere_handlers_include_export_via_ffmpeg(self):
-        from puppet_automation.src.engines.premiere import PremiereEngine
+        from src.engines.premiere import PremiereEngine
         engine = PremiereEngine()
         # 尝试通过 execute 调用 export_via_ffmpeg
         result = await engine.execute(action="export_via_ffmpeg")
@@ -62,7 +64,7 @@ class TestP1HandlerCompleteness:
 
     @pytest.mark.asyncio
     async def test_photoshop_handlers_include_all_actions(self):
-        from puppet_automation.src.engines.photoshop import PhotoshopEngine
+        from src.engines.photoshop import PhotoshopEngine
         engine = PhotoshopEngine()
         # 测试各 action 都能被分发
         for action in ["export_layers", "smart_object_export", "lut", "generate_lut", "batch"]:
@@ -74,7 +76,7 @@ class TestP1HandlerCompleteness:
 
     @pytest.mark.asyncio
     async def test_ffmpeg_handlers_include_image_sequence_to_video(self):
-        from puppet_automation.src.engines.ffmpeg import FFmpegEngine
+        from src.engines.ffmpeg import FFmpegEngine
         engine = FFmpegEngine()
         result = await engine.execute(action="image_sequence_to_video")
         assert result is not None
@@ -88,7 +90,7 @@ class TestP2BlenderNoDuplicate:
 
     def test_blender_single_export_camera_data(self):
         """确认 export_camera_data 只有一个定义。"""
-        from puppet_automation.src.engines.blender import BlenderEngine
+        from src.engines.blender import BlenderEngine
         # 检查方法签名包含 camera_name 参数（L808版本的签名）
         import inspect
         sig = inspect.signature(BlenderEngine.export_camera_data)
@@ -104,14 +106,14 @@ class TestAMEEngine:
 
     def test_ame_available(self):
         """确认 AME 引擎正确初始化且可用。"""
-        from puppet_automation.src.engines.media_encoder import MediaEncoderEngine
+        from src.engines.media_encoder import MediaEncoderEngine
         engine = MediaEncoderEngine()
         assert engine.available, "AME 2025 应该已安装且可用"
         assert engine.name == "media_encoder"
 
     def test_ame_no_dead_cli_path(self):
         """确认不再有指向不存在文件的 cli_path 字段。"""
-        from puppet_automation.src.engines.media_encoder import MediaEncoderEngine
+        from src.engines.media_encoder import MediaEncoderEngine
         engine = MediaEncoderEngine()
         assert not hasattr(engine, "cli_path"), \
             "cli_path 字段应已删除（AME 无 AMETemplateFile.dll）"
@@ -208,16 +210,16 @@ class TestEngineAvailableFlags:
     """验证所有引擎的 available 标志正确设置。"""
 
     def test_all_engines_have_available(self):
-        from puppet_automation.src.engines.ae import AEEngine
-        from puppet_automation.src.engines.premiere import PremiereEngine
-        from puppet_automation.src.engines.photoshop import PhotoshopEngine
-        from puppet_automation.src.engines.ffmpeg import FFmpegEngine
-        from puppet_automation.src.engines.davinci import DavinciEngine
-        from puppet_automation.src.engines.blender import BlenderEngine
-        from puppet_automation.src.engines.topaz import TopazEngine
-        from puppet_automation.src.engines.silhouette import SilhouetteEngine
-        from puppet_automation.src.engines.cinema4d import Cinema4DEngine
-        from puppet_automation.src.engines.media_encoder import MediaEncoderEngine
+        from src.engines.ae import AEEngine
+        from src.engines.premiere import PremiereEngine
+        from src.engines.photoshop import PhotoshopEngine
+        from src.engines.ffmpeg import FFmpegEngine
+        from src.engines.davinci import DavinciEngine
+        from src.engines.blender import BlenderEngine
+        from src.engines.topaz import TopazEngine
+        from src.engines.silhouette import SilhouetteEngine
+        from src.engines.cinema4d import Cinema4DEngine
+        from src.engines.media_encoder import MediaEncoderEngine
 
         engines = [
             AEEngine, PremiereEngine, PhotoshopEngine, FFmpegEngine,

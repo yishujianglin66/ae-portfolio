@@ -1031,7 +1031,10 @@ async def list_pipeline_jobs(
 
 
 @app.get("/api/v1/pipeline/jobs/{job_id}")
-async def get_pipeline_job(job_id: str):
+async def get_pipeline_job(
+    job_id: str,
+    _auth: bool = Depends(require_mcp_auth),
+):
     """Get status of a specific pipeline job."""
     from fastapi import HTTPException
 

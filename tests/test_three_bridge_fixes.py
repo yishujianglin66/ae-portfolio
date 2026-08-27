@@ -119,7 +119,8 @@ class TestPRBridgeTimeoutFixes:
 
     def test_pr_client_default_timeout_increased(self):
         """验证 premiere_mcp_client.py 中 timeout 默认值从 30s 提升到 60s"""
-        pr_client_path = Path(__file__).parent.parent / "premiere_mcp_client.py"
+        # 根目录治理后 premiere_mcp_client.py 已迁入 bridges/ 包
+        pr_client_path = Path(__file__).parent.parent / "bridges" / "premiere_mcp_client.py"
         content = pr_client_path.read_text(encoding="utf-8")
 
         # 验证默认 timeout 值
@@ -132,7 +133,7 @@ class TestPRBridgeTimeoutFixes:
 
     def test_pr_client_send_command_has_keepalive(self):
         """验证 _send_command 方法创建和删除 .keepalive_ 标记文件"""
-        pr_client_path = Path(__file__).parent.parent / "premiere_mcp_client.py"
+        pr_client_path = Path(__file__).parent.parent / "bridges" / "premiere_mcp_client.py"
         content = pr_client_path.read_text(encoding="utf-8")
 
         assert "keepalive_file" in content, "缺少 keepalive_file 变量"
@@ -153,7 +154,7 @@ class TestPRBridgeTimeoutFixes:
 
     def test_pr_keepalive_file_creation_cleanup(self, tmp_project_dir):
         """实际运行 PR MCP 客户端 keepalive 机制验证"""
-        pr_client_path = Path(__file__).parent.parent
+        pr_client_path = Path(__file__).parent.parent / "bridges"
         if str(pr_client_path) not in sys.path:
             sys.path.insert(0, str(pr_client_path))
         try:
@@ -417,7 +418,7 @@ class TestOverallBridgeFixQuality:
         files_to_check = [
             Path(__file__).parent.parent / "pipeline" / "flagship_runner.py",
             Path(__file__).parent.parent / "rendering" / "ae_render_engine.py",
-            Path(__file__).parent.parent / "premiere_mcp_client.py",
+            Path(__file__).parent.parent / "bridges" / "premiere_mcp_client.py",
             Path(__file__).parent.parent / "ae" / "pr_process_manager.py",
             Path(__file__).parent.parent / "integrations" / "davinci_resolve_integration.py",
         ]
@@ -437,7 +438,7 @@ class TestOverallBridgeFixQuality:
         import py_compile
         files_to_compile = [
             Path(__file__).parent.parent / "rendering" / "ae_render_engine.py",
-            Path(__file__).parent.parent / "premiere_mcp_client.py",
+            Path(__file__).parent.parent / "bridges" / "premiere_mcp_client.py",
             Path(__file__).parent.parent / "ae" / "pr_process_manager.py",
             Path(__file__).parent.parent / "integrations" / "davinci_resolve_integration.py",
         ]
@@ -453,7 +454,7 @@ class TestOverallBridgeFixQuality:
             # (文件, 降级标记关键词, 描述)
             ("pipeline/flagship_runner.py", "om_candidates",
              "AE Bridge: Bridge创建 → aerender CLI（多模板候选fallback） → 错误码重试"),
-            ("premiere_mcp_client.py", "Timeout",
+            ("bridges/premiere_mcp_client.py", "Timeout",
              "PR Bridge: 超时 → keepalive 清理"),
             ("integrations/davinci_resolve_integration.py", "python_get_resolve",
              "DaVinci: DaVinciResolveScript → python_get_resolve → fuscript 三级"),

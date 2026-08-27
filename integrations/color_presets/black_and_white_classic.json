@@ -1,0 +1,35 @@
+{
+  "name": "Black & White Classic",
+  "description": "黑白经典风格，去除饱和、提升对比、保留丰富灰阶过渡，致敬经典胶片。",
+  "lift": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 0.0,
+    "master": 0.0
+  },
+  "gamma": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 0.0,
+    "master": 0.0
+  },
+  "gain": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 0.0,
+    "master": 0.0
+  },
+  "offset": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 0.0,
+    "master": 0.0
+  },
+  "saturation": 0.0,
+  "contrast": 1.15,
+  "pivot": 0.435,
+  "highlight_saturation": 1.0,
+  "shadow_saturation": 1.0,
+  "blend_opacity": 1.0,
+  "tags": ["black-and-white", "bw", "classic", "monochrome", "noir"]
+}

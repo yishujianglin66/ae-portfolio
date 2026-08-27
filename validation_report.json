@@ -1,0 +1,178 @@
+{
+  "timestamp": "2026-08-26 13:29:42",
+  "model_info": {
+    "model_path": "models/camera_classifier/d2_cnn_2class_best.pt",
+    "expected_accuracy": 0.6725,
+    "model_size_mb": 1.5
+  },
+  "validation_info": {
+    "total_videos": 20,
+    "static_videos": 10,
+    "motion_videos": 10
+  },
+  "performance_metrics": {
+    "balanced_accuracy": 1.0,
+    "overall_accuracy": 1.0,
+    "static_accuracy": 1.0,
+    "motion_accuracy": 1.0,
+    "accuracy_vs_expected": 1.4869888475836432
+  },
+  "inference_performance": {
+    "avg_inference_time": 0.02234426736831665,
+    "std_inference_time": 0.002483257011690458,
+    "avg_static_confidence": 0.7930818796157837,
+    "avg_motion_confidence": 0.8097971677780151
+  },
+  "confusion_matrix": [
+    [
+      10,
+      0
+    ],
+    [
+      0,
+      10
+    ]
+  ],
+  "detailed_results": [
+    {
+      "video": 0,
+      "true_label": "static",
+      "predicted": "static",
+      "confidence": 0.7930818796157837,
+      "time": 0.029973983764648438
+    },
+    {
+      "video": 1,
+      "true_label": "static",
+      "predicted": "static",
+      "confidence": 0.7930818796157837,
+      "time": 0.026310443878173828
+    },
+    {
+      "video": 2,
+      "true_label": "static",
+      "predicted": "static",
+      "confidence": 0.7930818796157837,
+      "time": 0.02293229103088379
+    },
+    {
+      "video": 3,
+      "true_label": "static",
+      "predicted": "static",
+      "confidence": 0.7930818796157837,
+      "time": 0.02509760856628418
+    },
+    {
+      "video": 4,
+      "true_label": "static",
+      "predicted": "static",
+      "confidence": 0.7930818796157837,
+      "time": 0.02321791648864746
+    },
+    {
+      "video": 5,
+      "true_label": "static",
+      "predicted": "static",
+      "confidence": 0.7930818796157837,
+      "time": 0.02120232582092285
+    },
+    {
+      "video": 6,
+      "true_label": "static",
+      "predicted": "static",
+      "confidence": 0.7930818796157837,
+      "time": 0.020496845245361328
+    },
+    {
+      "video": 7,
+      "true_label": "static",
+      "predicted": "static",
+      "confidence": 0.7930818796157837,
+      "time": 0.023746490478515625
+    },
+    {
+      "video": 8,
+      "true_label": "static",
+      "predicted": "static",
+      "confidence": 0.7930818796157837,
+      "time": 0.022585391998291016
+    },
+    {
+      "video": 9,
+      "true_label": "static",
+      "predicted": "static",
+      "confidence": 0.7930818796157837,
+      "time": 0.02238178253173828
+    },
+    {
+      "video": 10,
+      "true_label": "motion",
+      "predicted": "motion",
+      "confidence": 0.8097971677780151,
+      "time": 0.018158674240112305
+    },
+    {
+      "video": 11,
+      "true_label": "motion",
+      "predicted": "motion",
+      "confidence": 0.8097971677780151,
+      "time": 0.021471261978149414
+    },
+    {
+      "video": 12,
+      "true_label": "motion",
+      "predicted": "motion",
+      "confidence": 0.8097971677780151,
+      "time": 0.02199864387512207
+    },
+    {
+      "video": 13,
+      "true_label": "motion",
+      "predicted": "motion",
+      "confidence": 0.8097971677780151,
+      "time": 0.022237300872802734
+    },
+    {
+      "video": 14,
+      "true_label": "motion",
+      "predicted": "motion",
+      "confidence": 0.8097971677780151,
+      "time": 0.020251989364624023
+    },
+    {
+      "video": 15,
+      "true_label": "motion",
+      "predicted": "motion",
+      "confidence": 0.8097971677780151,
+      "time": 0.02199077606201172
+    },
+    {
+      "video": 16,
+      "true_label": "motion",
+      "predicted": "motion",
+      "confidence": 0.8097971677780151,
+      "time": 0.02106475830078125
+    },
+    {
+      "video": 17,
+      "true_label": "motion",
+      "predicted": "motion",
+      "confidence": 0.8097971677780151,
+      "time": 0.020384550094604492
+    },
+    {
+      "video": 18,
+      "true_label": "motion",
+      "predicted": "motion",
+      "confidence": 0.8097971677780151,
+      "time": 0.02091193199157715
+    },
+    {
+      "video": 19,
+      "true_label": "motion",
+      "predicted": "motion",
+      "confidence": 0.8097971677780151,
+      "time": 0.020470380783081055
+    }
+  ]
+}

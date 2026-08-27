@@ -1,10 +1,8 @@
-"""core.config 单元测试 - ConfigManager 核心逻辑（与 config.config_manager 区分）"""
+"""core.config 单元测试 - ConfigSource / ConfigValidator / ConfigManager / 全局便捷函数"""
 import json
 import os
 import sys
-import tempfile
 import pytest
-from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -13,6 +11,7 @@ from core.config import (
     ConfigValidator,
     ConfigManager,
     config_manager,
+    load_config,
     get_config,
     get_str,
     get_int,
@@ -25,213 +24,266 @@ from core.config import (
 )
 
 
+# ============================================================================
+# Fixtures
+# ============================================================================
+
 @pytest.fixture
 def fresh_manager():
-    """提供全新初始化的 ConfigManager"""
+    """提供全新初始化的 ConfigManager，避免全局状态污染"""
     mgr = ConfigManager()
+    mgr.load_config([])
     return mgr
 
 
 @pytest.fixture
-def temp_config_file():
-    """提供临时配置文件"""
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
-        json.dump({
-            "server": {"port": 9090, "debug": True},
-            "output": {"default_dir": "./custom_output"},
-            "custom": {"nested": {"value": 42}}
-        }, f)
-        path = f.name
-    yield path
-    os.remove(path)
+def sample_config_file(tmp_path):
+    """创建临时配置文件并返回路径"""
+    config_data = {
+        "server": {
+            "port": 9090,
+            "debug": True,
+        },
+        "output": {
+            "default_dir": "./custom_output",
+        },
+        "custom": {
+            "nested": {
+                "value": 42,
+            },
+        },
+        "pipeline": {
+            "max_concurrent_tasks": 8,
+        },
+    }
+    config_file = tmp_path / "config.json"
+    config_file.write_text(json.dumps(config_data, ensure_ascii=False, indent=2), encoding="utf-8")
+    return str(config_file)
 
+
+# ============================================================================
+# ConfigSource 数据类
+# ============================================================================
 
 class TestConfigSource:
-    def test_source_creation(self):
-        src = ConfigSource(name="test", priority=5, data={"key": "value"})
-        assert src.name == "test"
+    def test_initialization_with_data(self):
+        src = ConfigSource(name="test_source", priority=5, data={"key": "value", "num": 42})
+        assert src.name == "test_source"
         assert src.priority == 5
-        assert src.data == {"key": "value"}
+        assert src.data == {"key": "value", "num": 42}
 
-    def test_source_default_data(self):
-        src = ConfigSource(name="test", priority=1)
+    def test_initialization_default_data(self):
+        src = ConfigSource(name="empty_source", priority=1)
+        assert src.name == "empty_source"
+        assert src.priority == 1
         assert src.data == {}
 
+    def test_mutation_independence(self):
+        data = {"a": 1}
+        src = ConfigSource(name="t", priority=1, data=data)
+        data["b"] = 2
+        assert src.data == {"a": 1, "b": 2}
+
+
+# ============================================================================
+# ConfigValidator 配置验证器
+# ============================================================================
 
 class TestConfigValidator:
-    def test_validate_output_dir_relative_becomes_absolute(self):
+    """ConfigValidator 测试——validate() 返回 (errors, warnings) 元组"""
+
+    @staticmethod
+    def _base(output_dir="C:/tmp/test_output"):
+        return {"output": {"default_dir": output_dir}}
+
+    def test_port_range_valid(self):
         validator = ConfigValidator()
-        config = {"output": {"default_dir": "./relative"}}
-        errors = validator.validate(config)
-        assert os.path.isabs(config["output"]["default_dir"])
+        config = {**self._base(), "server": {"port": 8080}}
+        errors, _ = validator.validate(config)
         assert len(errors) == 0
 
-    def test_validate_ae_path_not_exists(self):
+    def test_port_below_1024(self):
         validator = ConfigValidator()
-        config = {"ae": {"install_path": "C:/nonexistent/ae.exe"}}
-        errors = validator.validate(config)
-        assert len(errors) == 1
-        assert "AE 安装路径不存在" in errors[0]
-
-    def test_validate_silhouette_path_not_exists(self):
-        validator = ConfigValidator()
-        config = {"silhouette": {"install_path": "C:/nonexistent/sil.exe"}}
-        errors = validator.validate(config)
-        assert len(errors) == 1
-        assert "Silhouette 安装路径不存在" in errors[0]
-
-    def test_validate_port_too_low(self):
-        validator = ConfigValidator()
-        config = {"server": {"port": 80}}
-        errors = validator.validate(config)
+        config = {**self._base(), "server": {"port": 80}}
+        errors, _ = validator.validate(config)
         assert len(errors) == 1
         assert "1024-65535" in errors[0]
 
-    def test_validate_port_too_high(self):
+    def test_port_above_65535(self):
         validator = ConfigValidator()
-        config = {"server": {"port": 70000}}
-        errors = validator.validate(config)
+        config = {**self._base(), "server": {"port": 70000}}
+        errors, _ = validator.validate(config)
         assert len(errors) == 1
+        assert "1024-65535" in errors[0]
 
-    def test_validate_port_valid(self):
+    def test_concurrency_valid(self):
         validator = ConfigValidator()
-        config = {"server": {"port": 8080}}
-        errors = validator.validate(config)
+        config = {**self._base(), "pipeline": {"max_concurrent_tasks": 5}}
+        errors, _ = validator.validate(config)
         assert len(errors) == 0
 
-    def test_validate_concurrency_zero(self):
+    def test_concurrency_less_than_one(self):
         validator = ConfigValidator()
-        config = {"pipeline": {"max_concurrent_tasks": 0}}
-        errors = validator.validate(config)
+        config = {**self._base(), "pipeline": {"max_concurrent_tasks": 0}}
+        errors, _ = validator.validate(config)
         assert len(errors) == 1
         assert "必须 >= 1" in errors[0]
 
-    def test_validate_concurrency_negative(self):
+    def test_concurrency_zero(self):
         validator = ConfigValidator()
-        config = {"pipeline": {"max_concurrent_tasks": -5}}
-        errors = validator.validate(config)
+        config = {**self._base(), "pipeline": {"max_concurrent_tasks": 0}}
+        errors, _ = validator.validate(config)
         assert len(errors) == 1
 
-    def test_validate_concurrency_valid(self):
+    def test_concurrency_negative(self):
         validator = ConfigValidator()
-        config = {"pipeline": {"max_concurrent_tasks": 10}}
-        errors = validator.validate(config)
+        config = {**self._base(), "pipeline": {"max_concurrent_tasks": -3}}
+        errors, _ = validator.validate(config)
+        assert len(errors) == 1
+        assert "必须 >= 1" in errors[0]
+
+    def test_output_dir_relative_to_absolute(self):
+        validator = ConfigValidator()
+        config = {"output": {"default_dir": "./relative_path"}}
+        errors, _ = validator.validate(config)
+        assert os.path.isabs(config["output"]["default_dir"])
+        assert "relative_path" in config["output"]["default_dir"]
         assert len(errors) == 0
 
-    def test_validate_empty_config(self):
+    def test_output_dir_absolute_stays_absolute(self):
         validator = ConfigValidator()
-        errors = validator.validate({})
+        abs_path = os.path.abspath("/some/absolute/path")
+        config = {"output": {"default_dir": abs_path}}
+        errors, _ = validator.validate(config)
+        assert config["output"]["default_dir"] == abs_path
         assert len(errors) == 0
 
+    def test_ae_path_not_exists(self):
+        validator = ConfigValidator()
+        config = {**self._base(), "ae": {"install_path": "C:/nonexistent_path_xyz/ae.exe"}}
+        errors, _ = validator.validate(config)
+        assert len(errors) == 1
+        assert "AE 安装路径不存在" in errors[0]
 
-class TestConfigManagerConvertValue:
-    def test_convert_true(self, fresh_manager):
-        assert fresh_manager._convert_value("true") is True
-        assert fresh_manager._convert_value("TRUE") is True
-        assert fresh_manager._convert_value("True") is True
+    def test_silhouette_path_not_exists(self):
+        validator = ConfigValidator()
+        config = {**self._base(), "silhouette": {"install_path": "C:/nonexistent_path_xyz/sil.exe"}}
+        errors, _ = validator.validate(config)
+        assert len(errors) == 1
+        assert "Silhouette 安装路径不存在" in errors[0]
 
-    def test_convert_false(self, fresh_manager):
-        assert fresh_manager._convert_value("false") is False
-        assert fresh_manager._convert_value("FALSE") is False
+    def test_multiple_validation_errors(self):
+        validator = ConfigValidator()
+        config = {
+            **self._base(),
+            "server": {"port": 80},
+            "pipeline": {"max_concurrent_tasks": 0},
+            "ae": {"install_path": "C:/nonexistent/ae.exe"},
+            "silhouette": {"install_path": "C:/nonexistent/sil.exe"},
+        }
+        errors, _ = validator.validate(config)
+        assert len(errors) == 4
+        error_texts = " ".join(errors)
+        assert "1024-65535" in error_texts
+        assert "必须 >= 1" in error_texts
+        assert "AE 安装路径不存在" in error_texts
+        assert "Silhouette 安装路径不存在" in error_texts
 
-    def test_convert_int(self, fresh_manager):
-        assert fresh_manager._convert_value("42") == 42
-        assert fresh_manager._convert_value("-7") == -7
-
-    def test_convert_float(self, fresh_manager):
-        assert fresh_manager._convert_value("3.14") == 3.14
-        assert fresh_manager._convert_value("-0.5") == -0.5
-
-    def test_convert_list(self, fresh_manager):
-        assert fresh_manager._convert_value('[1, 2, 3]') == [1, 2, 3]
-
-    def test_convert_dict(self, fresh_manager):
-        assert fresh_manager._convert_value('{"a": 1}') == {"a": 1}
-
-    def test_convert_invalid_json_returns_string(self, fresh_manager):
-        assert fresh_manager._convert_value('[1, 2') == '[1, 2'
-        assert fresh_manager._convert_value('{"a"') == '{"a"'
-
-    def test_convert_string(self, fresh_manager):
-        assert fresh_manager._convert_value("hello") == "hello"
-
-
-class TestConfigManagerDeepMerge:
-    def test_simple_merge(self, fresh_manager):
-        base = {"a": 1, "b": 2}
-        overlay = {"b": 3, "c": 4}
-        result = fresh_manager._deep_merge(base, overlay)
-        assert result == {"a": 1, "b": 3, "c": 4}
-
-    def test_nested_merge(self, fresh_manager):
-        base = {"a": {"x": 1, "y": 2}, "b": 3}
-        overlay = {"a": {"y": 20, "z": 30}}
-        result = fresh_manager._deep_merge(base, overlay)
-        assert result["a"]["x"] == 1
-        assert result["a"]["y"] == 20
-        assert result["a"]["z"] == 30
-        assert result["b"] == 3
-
-    def test_override_with_non_dict(self, fresh_manager):
-        base = {"a": {"x": 1}}
-        overlay = {"a": "string"}
-        result = fresh_manager._deep_merge(base, overlay)
-        assert result["a"] == "string"
-
-    def test_empty_overlay(self, fresh_manager):
-        base = {"a": 1}
-        result = fresh_manager._deep_merge(base, {})
-        assert result == {"a": 1}
-
-    def test_empty_base(self, fresh_manager):
-        overlay = {"a": 1}
-        result = fresh_manager._deep_merge({}, overlay)
-        assert result == {"a": 1}
+    def test_empty_config_no_errors(self):
+        """empty config 缺少 output.default_dir，应返回 1 个错误"""
+        validator = ConfigValidator()
+        errors, _ = validator.validate({})
+        assert len(errors) == 1
+        assert "output.default_dir" in errors[0]
 
 
-class TestConfigManagerGet:
-    def test_get_existing(self, fresh_manager):
-        fresh_manager._config = {"server": {"port": 8080}}
+# ============================================================================
+# ConfigManager 配置管理器
+# ============================================================================
+
+class TestConfigManagerDefaultConfig:
+    def test_default_config_loaded_after_init(self, fresh_manager):
+        assert fresh_manager.get("server.port") == 8000
+        assert fresh_manager.get("server.host") == "localhost"
+        assert fresh_manager.get("pipeline.max_concurrent_tasks") == 5
+        assert fresh_manager.get("memory.enabled") is True
+
+    def test_default_config_has_all_sections(self, fresh_manager):
+        sections = [
+            "output", "ae", "silhouette", "topaz", "runway", "pika",
+            "blender", "ffmpeg", "server", "pipeline", "logging",
+            "media_library", "mcp_bridge", "model", "doubao", "vision", "memory"
+        ]
+        for section in sections:
+            assert fresh_manager.get(section) is not None, f"缺少默认配置节: {section}"
+
+
+class TestConfigManagerGetters:
+    def test_get_existing_path(self, fresh_manager):
+        fresh_manager._config = {"server": {"port": 8080, "host": "localhost"}}
         assert fresh_manager.get("server.port") == 8080
+        assert fresh_manager.get("server.host") == "localhost"
 
-    def test_get_missing_with_default(self, fresh_manager):
-        assert fresh_manager.get("nonexistent", "default") == "default"
+    def test_get_missing_path_returns_default(self, fresh_manager):
+        assert fresh_manager.get("nonexistent.path", "fallback") == "fallback"
+        assert fresh_manager.get("nonexistent.path") is None
 
-    def test_get_missing_without_default(self, fresh_manager):
-        assert fresh_manager.get("nonexistent") is None
-
-    def test_get_nested_missing(self, fresh_manager):
-        fresh_manager._config = {"server": 8080}
-        assert fresh_manager.get("server.port") is None
+    def test_get_deeply_nested_missing(self, fresh_manager):
+        fresh_manager._config = {"a": {"b": 1}}
+        assert fresh_manager.get("a.b.c.d", "default") == "default"
 
     def test_get_str(self, fresh_manager):
-        fresh_manager._config = {"val": 123}
+        fresh_manager._config = {"val": 123, "name": "test"}
         assert fresh_manager.get_str("val") == "123"
+        assert fresh_manager.get_str("name") == "test"
         assert fresh_manager.get_str("missing", "def") == "def"
 
     def test_get_int(self, fresh_manager):
-        fresh_manager._config = {"val": "42", "bad": "abc"}
+        fresh_manager._config = {"val": "42", "num": 100, "bad": "abc"}
         assert fresh_manager.get_int("val") == 42
+        assert fresh_manager.get_int("num") == 100
         assert fresh_manager.get_int("missing", 7) == 7
-        assert fresh_manager.get_int("bad", 0) == 0  # 转换失败返回默认值
+        assert fresh_manager.get_int("bad", 0) == 0
 
     def test_get_float(self, fresh_manager):
-        fresh_manager._config = {"val": "3.14", "bad": "abc"}
+        fresh_manager._config = {"val": "3.14", "num": 2.5, "bad": "abc"}
         assert fresh_manager.get_float("val") == 3.14
+        assert fresh_manager.get_float("num") == 2.5
         assert fresh_manager.get_float("missing", 1.0) == 1.0
         assert fresh_manager.get_float("bad", 0.0) == 0.0
 
     def test_get_bool_true(self, fresh_manager):
-        fresh_manager._config = {"val": True, "str_true": "true", "str_yes": "TRUE"}
-        assert fresh_manager.get_bool("val") is True
-        assert fresh_manager.get_bool("str_true") is True
-        assert fresh_manager.get_bool("str_yes") is True
+        fresh_manager._config = {
+            "b1": True,
+            "b2": "true",
+            "b3": "TRUE",
+            "b4": "True",
+            "b5": 1,
+        }
+        assert fresh_manager.get_bool("b1") is True
+        assert fresh_manager.get_bool("b2") is True
+        assert fresh_manager.get_bool("b3") is True
+        assert fresh_manager.get_bool("b4") is True
+        assert fresh_manager.get_bool("b5") is True
 
     def test_get_bool_false(self, fresh_manager):
-        fresh_manager._config = {"val": False, "str_false": "false", "zero": 0}
-        assert fresh_manager.get_bool("val") is False
-        assert fresh_manager.get_bool("str_false") is False
-        assert fresh_manager.get_bool("zero") is False
+        fresh_manager._config = {
+            "b1": False,
+            "b2": "false",
+            "b3": "FALSE",
+            "b4": 0,
+            "b5": "",
+        }
+        assert fresh_manager.get_bool("b1") is False
+        assert fresh_manager.get_bool("b2") is False
+        assert fresh_manager.get_bool("b3") is False
+        assert fresh_manager.get_bool("b4") is False
+        assert fresh_manager.get_bool("b5") is False
+
+    def test_get_bool_default(self, fresh_manager):
+        assert fresh_manager.get_bool("missing", True) is True
+        assert fresh_manager.get_bool("missing", False) is False
+        assert fresh_manager.get_bool("missing") is False
 
     def test_get_list(self, fresh_manager):
         fresh_manager._config = {"items": [1, 2, 3], "str": "not list"}
@@ -246,48 +298,147 @@ class TestConfigManagerGet:
         assert fresh_manager.get_dict("missing", {"def": 1}) == {"def": 1}
 
 
-class TestConfigManagerSet:
-    def test_set_simple(self, fresh_manager):
+class TestConfigManagerSetters:
+    def test_set_simple_value(self, fresh_manager):
         fresh_manager.set("key", "value")
-        assert fresh_manager._config["key"] == "value"
+        assert fresh_manager.get("key") == "value"
 
-    def test_set_nested_create(self, fresh_manager):
+    def test_set_nested_creates_intermediate(self, fresh_manager):
         fresh_manager.set("a.b.c", 123)
-        assert fresh_manager._config["a"]["b"]["c"] == 123
+        assert fresh_manager.get("a.b.c") == 123
+        assert isinstance(fresh_manager.get("a.b"), dict)
+        assert isinstance(fresh_manager.get("a"), dict)
 
-    def test_set_override(self, fresh_manager):
+    def test_set_override_existing(self, fresh_manager):
         fresh_manager._config = {"a": {"b": 1}}
         fresh_manager.set("a.b", 2)
-        assert fresh_manager._config["a"]["b"] == 2
+        assert fresh_manager.get("a.b") == 2
 
-    def test_update(self, fresh_manager):
-        fresh_manager._config = {"a": 1}
-        fresh_manager.update({"b": 2})
-        assert fresh_manager._config == {"a": 1, "b": 2}
+    def test_update_deep_merge_simple(self, fresh_manager):
+        fresh_manager._config = {"a": 1, "b": 2}
+        fresh_manager.update({"b": 3, "c": 4})
+        assert fresh_manager.get("a") == 1
+        assert fresh_manager.get("b") == 3
+        assert fresh_manager.get("c") == 4
+
+    def test_update_deep_merge_nested(self, fresh_manager):
+        fresh_manager._config = {"server": {"port": 8080, "host": "localhost"}}
+        fresh_manager.update({"server": {"port": 9090, "debug": True}})
+        assert fresh_manager.get("server.port") == 9090
+        assert fresh_manager.get("server.host") == "localhost"
+        assert fresh_manager.get("server.debug") is True
+
+    def test_update_override_non_dict(self, fresh_manager):
+        fresh_manager._config = {"a": {"x": 1}}
+        fresh_manager.update({"a": "string"})
+        assert fresh_manager.get("a") == "string"
 
 
-class TestConfigManagerLoad:
-    def test_load_config_file(self, fresh_manager, temp_config_file):
-        fresh_manager.load_config([temp_config_file])
+class TestConfigManagerConvertValue:
+    def test_convert_bool_true(self, fresh_manager):
+        fresh_manager._config = {"t": "placeholder"}
+        fresh_manager.set("test", "true")
+        assert isinstance(fresh_manager._config["test"], str)
+
+    def test_convert_int(self, fresh_manager, monkeypatch):
+        monkeypatch.setenv("AEKV_TEST_INT", "42")
+        fresh_manager.load_config()
+        assert fresh_manager.get("test.int") == 42
+        assert isinstance(fresh_manager.get("test.int"), int)
+
+    def test_convert_float(self, fresh_manager, monkeypatch):
+        monkeypatch.setenv("AEKV_TEST_FLOAT", "3.14")
+        fresh_manager.load_config()
+        assert fresh_manager.get("test.float") == 3.14
+        assert isinstance(fresh_manager.get("test.float"), float)
+
+    def test_convert_bool_via_env(self, fresh_manager, monkeypatch):
+        monkeypatch.setenv("AEKV_TEST_BOOL", "true")
+        monkeypatch.setenv("AEKV_TEST_BOOL2", "false")
+        fresh_manager.load_config()
+        assert fresh_manager.get("test.bool") is True
+        assert fresh_manager.get("test.bool2") is False
+
+    def test_convert_list_via_env(self, fresh_manager, monkeypatch):
+        monkeypatch.setenv("AEKV_TEST_LIST", "[1, 2, 3]")
+        fresh_manager.load_config()
+        assert fresh_manager.get("test.list") == [1, 2, 3]
+
+    def test_convert_dict_via_env(self, fresh_manager, monkeypatch):
+        monkeypatch.setenv("AEKV_TEST_DICT", '{"key": "value"}')
+        fresh_manager.load_config()
+        assert fresh_manager.get("test.dict") == {"key": "value"}
+
+    def test_convert_invalid_json_keeps_string(self, fresh_manager, monkeypatch):
+        monkeypatch.setenv("AEKV_TEST_BAD", "[1, 2")
+        fresh_manager.load_config()
+        assert fresh_manager.get_str("test.bad") == "[1, 2"
+
+    def test_convert_plain_string(self, fresh_manager, monkeypatch):
+        monkeypatch.setenv("AEKV_TEST_STR", "hello_world")
+        fresh_manager.load_config()
+        assert fresh_manager.get("test.str") == "hello_world"
+
+
+class TestConfigManagerDeepMerge:
+    def test_nested_dict_merge(self, fresh_manager):
+        fresh_manager._config = {"a": {"x": 1, "y": 2}}
+        fresh_manager.update({"a": {"y": 20, "z": 30}})
+        assert fresh_manager.get("a.x") == 1
+        assert fresh_manager.get("a.y") == 20
+        assert fresh_manager.get("a.z") == 30
+
+    def test_value_override(self, fresh_manager):
+        fresh_manager._config = {"key": "old"}
+        fresh_manager.update({"key": "new"})
+        assert fresh_manager.get("key") == "new"
+
+    def test_non_dict_replaces_dict(self, fresh_manager):
+        fresh_manager._config = {"a": {"x": 1}}
+        fresh_manager.update({"a": "not_dict"})
+        assert fresh_manager.get("a") == "not_dict"
+
+    def test_empty_overlay(self, fresh_manager):
+        original = {"a": 1, "b": 2}
+        fresh_manager._config = original.copy()
+        fresh_manager.update({})
+        assert fresh_manager._config == original
+
+
+class TestConfigManagerLoadConfigFile:
+    def test_load_from_config_file(self, fresh_manager, sample_config_file):
+        fresh_manager.load_config([sample_config_file])
         assert fresh_manager.get_int("server.port") == 9090
         assert fresh_manager.get_bool("server.debug") is True
-        # validate_output_dir 会将相对路径转换为绝对路径
-        assert os.path.isabs(fresh_manager.get_str("output.default_dir"))
-        assert "custom_output" in fresh_manager.get_str("output.default_dir")
         assert fresh_manager.get_int("custom.nested.value") == 42
+        assert fresh_manager.get_int("pipeline.max_concurrent_tasks") == 8
 
-    def test_load_env_vars(self, fresh_manager, monkeypatch):
+    def test_config_file_overrides_default(self, fresh_manager, sample_config_file):
+        default_port = fresh_manager.get("server.port")
+        fresh_manager.load_config([sample_config_file])
+        assert fresh_manager.get("server.port") != default_port
+        assert fresh_manager.get("server.port") == 9090
+
+    def test_missing_config_file_silently_skipped(self, fresh_manager):
+        fresh_manager.load_config(["C:/nonexistent_config_xyz123.json"])
+        assert fresh_manager.get("nonexistent") is None
+
+    def test_invalid_json_config_file(self, fresh_manager, tmp_path):
+        bad_file = tmp_path / "bad_config.json"
+        bad_file.write_text("not valid json {{{", encoding="utf-8")
+        fresh_manager.load_config([str(bad_file)])
+        assert fresh_manager.get("nonexistent") is None
+
+
+class TestConfigManagerLoadEnvVars:
+    def test_load_from_env_vars(self, fresh_manager, monkeypatch):
         monkeypatch.setenv("AEKV_SERVER_PORT", "7777")
-        monkeypatch.setenv("AEKV_OUTPUT_DEFAULT_DIR", "/env/path")
         monkeypatch.setenv("AEKV_SERVER_DEBUG", "true")
-
         fresh_manager.load_config()
         assert fresh_manager.get_int("server.port") == 7777
-        # validate_output_dir 会将环境变量中的相对路径也转换为绝对路径
-        assert os.path.isabs(fresh_manager.get_str("output.default_dir"))
         assert fresh_manager.get_bool("server.debug") is True
 
-    def test_load_env_nested_path(self, fresh_manager, monkeypatch):
+    def test_env_var_nested_path(self, fresh_manager, monkeypatch):
         monkeypatch.setenv("AEKV_CUSTOM_NESTED_VALUE", "99")
         fresh_manager.load_config()
         assert fresh_manager.get_int("custom.nested.value") == 99
@@ -297,85 +448,202 @@ class TestConfigManagerLoad:
         fresh_manager.load_config()
         assert fresh_manager.get_int("server.port") == 9999
 
-    def test_reload_clears_previous(self, fresh_manager, temp_config_file):
-        fresh_manager.load_config([temp_config_file])
+    def test_env_priority_over_config_file(self, fresh_manager, sample_config_file, monkeypatch):
+        monkeypatch.setenv("AEKV_SERVER_PORT", "5555")
+        fresh_manager.load_config([sample_config_file])
+        assert fresh_manager.get_int("server.port") == 5555
+
+    def test_no_aekv_prefix_ignored(self, fresh_manager, monkeypatch):
+        monkeypatch.setenv("NOT_AEKV_SERVER_PORT", "1234")
+        fresh_manager.load_config()
+        assert fresh_manager.get("not.aekv.server.port") is None
+
+
+class TestConfigManagerReload:
+    def test_reload_hot_reload(self, fresh_manager, sample_config_file):
+        fresh_manager.load_config([sample_config_file])
         assert fresh_manager.get_int("server.port") == 9090
+        fresh_manager.set("server.port", 11111)
+        assert fresh_manager.get_int("server.port") == 11111
         fresh_manager.reload()
-        # reload 会重新合并所有 source，但不会清除已加载的文件源
         assert fresh_manager.get_int("server.port") == 9090
+
+    def test_reload_keeps_config_files(self, fresh_manager, sample_config_file):
+        fresh_manager.load_config([sample_config_file])
+        fresh_manager.reload()
+        assert fresh_manager.get_int("server.port") == 9090
+
+    def test_reload_refreshes_env_vars(self, fresh_manager, monkeypatch):
+        monkeypatch.setenv("AEKV_SERVER_PORT", "8888")
+        fresh_manager.load_config()
+        assert fresh_manager.get_int("server.port") == 8888
+        monkeypatch.setenv("AEKV_SERVER_PORT", "7777")
+        fresh_manager.reload()
+        assert fresh_manager.get_int("server.port") == 7777
 
 
 class TestConfigManagerSave:
-    def test_save_and_load(self, fresh_manager, temp_config_file):
-        fresh_manager.load_config([temp_config_file])
-        fresh_manager.set("extra.key", "saved")
+    def test_save_to_file(self, fresh_manager, tmp_path):
+        save_path = str(tmp_path / "saved_config.json")
+        fresh_manager.set("test.name", "saved_value")
+        fresh_manager.set("test.num", 42)
+        fresh_manager.save(save_path)
+        assert os.path.exists(save_path)
+        with open(save_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        assert data["test"]["name"] == "saved_value"
+        assert data["test"]["num"] == 42
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as f:
-            save_path = f.name
+    def test_save_creates_directory(self, fresh_manager, tmp_path):
+        save_path = str(tmp_path / "subdir" / "config.json")
+        fresh_manager.save(save_path)
+        assert os.path.exists(save_path)
 
-        try:
-            fresh_manager.save(save_path)
-            with open(save_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            assert data["server"]["port"] == 9090
-            assert data["extra"]["key"] == "saved"
-        finally:
-            os.remove(save_path)
+    def test_save_json_format_correct(self, fresh_manager, tmp_path):
+        save_path = str(tmp_path / "config.json")
+        fresh_manager._config = {"a": 1, "b": {"c": 2}}
+        fresh_manager.save(save_path)
+        with open(save_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        data = json.loads(content)
+        assert data == {"a": 1, "b": {"c": 2}}
 
 
-class TestConfigManagerCheckDependencies:
-    def test_check_dependencies_structure(self, fresh_manager):
-        deps = fresh_manager.check_dependencies()
-        assert isinstance(deps, dict)
-        assert "ae_installed" in deps
-        assert "silhouette_installed" in deps
-        assert "output_dir_writable" in deps
-        assert "tmp_dir_writable" in deps
+class TestConfigManagerValidate:
+    def test_validate_returns_errors(self, fresh_manager):
+        fresh_manager.set("server.port", 80)
+        fresh_manager.set("pipeline.max_concurrent_tasks", 0)
+        errors = fresh_manager.validate()
+        assert len(errors) >= 2
 
-    def test_output_dir_writable(self, fresh_manager):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            fresh_manager.set("output.default_dir", tmpdir)
-            deps = fresh_manager.check_dependencies()
-            assert deps["output_dir_writable"] is True
+    def test_validate_default_config(self, fresh_manager):
+        fresh_manager.load_config()
+        errors = fresh_manager.validate()
+        assert isinstance(errors, list)
 
-    def test_nonexistent_dir_not_writable(self, fresh_manager):
-        fresh_manager.set("output.default_dir", "C:/nonexistent_path_for_test")
-        deps = fresh_manager.check_dependencies()
-        # 在 Windows 上可能因权限不同而有差异，但通常不可写
-        assert isinstance(deps["output_dir_writable"], bool)
+    def test_validate_after_fixing_errors(self, fresh_manager):
+        fresh_manager.set("server.port", 80)
+        errors = fresh_manager.validate()
+        assert any("1024-65535" in e for e in errors)
+        fresh_manager.set("server.port", 8080)
+        errors = fresh_manager.validate()
+        assert not any("1024-65535" in e for e in errors)
 
 
 class TestConfigManagerGetConfigSummary:
-    def test_summary_excludes_secrets(self, fresh_manager):
-        fresh_manager.load_config()
-        summary = fresh_manager.get_config_summary()
-        assert "model" in summary
-        assert "api_key" not in str(summary)  # 摘要不应包含敏感信息
-
     def test_summary_structure(self, fresh_manager):
         fresh_manager.load_config()
         summary = fresh_manager.get_config_summary()
         assert "sources" in summary
+        assert "last_reload_time" in summary
         assert "output" in summary
         assert "ae" in summary
+        assert "silhouette" in summary
         assert "server" in summary
         assert "pipeline" in summary
+        assert "model" in summary
+        assert "memory" in summary
 
+    def test_summary_excludes_sensitive_fields(self, fresh_manager):
+        fresh_manager.set("model.api_key", "sk-secret-12345")
+        fresh_manager.set("runway.api_key", "runway-secret")
+        fresh_manager.set("pika.api_key", "pika-secret")
+        summary = fresh_manager.get_config_summary()
+        summary_str = json.dumps(summary, ensure_ascii=False)
+        assert "sk-secret-12345" not in summary_str
+        assert "runway-secret" not in summary_str
+        assert "pika-secret" not in summary_str
+
+    def test_summary_has_correct_values(self, fresh_manager):
+        fresh_manager.load_config()
+        summary = fresh_manager.get_config_summary()
+        assert summary["server"]["port"] == 8000
+        assert summary["server"]["host"] == "localhost"
+        assert summary["pipeline"]["max_concurrent_tasks"] == 5
+
+
+class TestConfigManagerGetFullConfig:
+    def test_returns_complete_config(self, fresh_manager):
+        full = fresh_manager.get_full_config()
+        assert isinstance(full, dict)
+        assert "server" in full
+        assert "ae" in full
+        assert "model" in full
+
+    def test_returns_copy_not_reference(self, fresh_manager):
+        full = fresh_manager.get_full_config()
+        full["injected"] = "should_not_appear"
+        full2 = fresh_manager.get_full_config()
+        assert "injected" not in full2
+
+    def test_contains_sensitive_data(self, fresh_manager):
+        """get_full_config 返回未掩码原值（对外展示应使用 get_config_summary）"""
+        fresh_manager.set("model.api_key", "sk-test-12345")
+        full = fresh_manager.get_full_config()
+        val = full.get("model", {}).get("api_key", "")
+        assert val == "sk-test-12345"
+
+
+class TestConfigManagerCheckDependencies:
+    def test_returns_dependency_dict(self, fresh_manager):
+        deps = fresh_manager.check_dependencies()
+        assert isinstance(deps, dict)
+        expected_keys = [
+            "ae_installed", "silhouette_installed", "topaz_installed",
+            "blender_installed", "ffmpeg_available", "runway_configured",
+            "pika_configured", "output_dir_writable", "tmp_dir_writable",
+            "bridge_dir_writable",
+        ]
+        for key in expected_keys:
+            assert key in deps, f"缺少依赖检查项: {key}"
+            assert isinstance(deps[key], bool)
+
+    def test_output_dir_writable(self, fresh_manager, tmp_path):
+        fresh_manager.set("output.default_dir", str(tmp_path))
+        deps = fresh_manager.check_dependencies()
+        assert deps["output_dir_writable"] is True
+
+    def test_tmp_dir_writable(self, fresh_manager, tmp_path):
+        fresh_manager.set("output.tmp_dir", str(tmp_path))
+        deps = fresh_manager.check_dependencies()
+        assert deps["tmp_dir_writable"] is True
+
+
+class TestConfigManagerIsWritable:
+    def test_existing_dir_is_writable(self, fresh_manager, tmp_path):
+        result = fresh_manager._is_writable(str(tmp_path))
+        assert result is True
+
+    def test_nonexistent_dir_creates_and_writable(self, fresh_manager, tmp_path):
+        nested_dir = str(tmp_path / "deep" / "nested" / "dir")
+        result = fresh_manager._is_writable(nested_dir)
+        assert result is True
+        assert os.path.exists(nested_dir)
+
+    def test_invalid_path_returns_false(self, fresh_manager):
+        result = fresh_manager._is_writable("")
+        assert result is False
+
+
+# ============================================================================
+# 全局便捷函数
+# ============================================================================
 
 class TestGlobalFunctions:
-    def test_global_config_manager_exists(self):
+    def test_config_manager_global_instance(self):
         assert config_manager is not None
         assert isinstance(config_manager, ConfigManager)
 
+    def test_load_config_function(self):
+        load_config()
+        assert config_manager.get("server.port") is not None
+
     def test_get_config_function(self):
         result = get_config("server.port")
-        # 全局 config_manager 应已加载默认配置；若因环境差异返回 None 也属正常行为边界
         assert isinstance(result, (int, type(None)))
-        if isinstance(result, int):
-            assert result >= 0
 
     def test_get_str_function(self):
-        result = get_str("output.default_dir")
+        result = get_str("server.host")
         assert isinstance(result, str)
 
     def test_get_int_function(self):
@@ -395,20 +663,20 @@ class TestGlobalFunctions:
         assert isinstance(result, list)
 
     def test_get_dict_function(self):
-        result = get_dict("ae")
+        result = get_dict("server")
         assert isinstance(result, dict)
 
-    def test_set_and_get_config(self):
-        original = get_str("test_temp_key", "none")
-        set_config("test_temp_key", "test_value")
-        assert get_str("test_temp_key") == "test_value"
-        # 清理
-        if original != "none":
-            set_config("test_temp_key", original)
-        else:
-            # 删除临时键
-            if "test_temp_key" in config_manager._config:
-                del config_manager._config["test_temp_key"]
+    def test_set_config_function(self):
+        original = get_str("test_global_temp_key", "__not_set__")
+        try:
+            set_config("test_global_temp_key", "test_value_123")
+            assert get_str("test_global_temp_key") == "test_value_123"
+        finally:
+            if original == "__not_set__":
+                if "test_global_temp_key" in config_manager._config:
+                    del config_manager._config["test_global_temp_key"]
+            else:
+                set_config("test_global_temp_key", original)
 
     def test_check_dependencies_function(self):
         result = check_dependencies()

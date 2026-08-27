@@ -1,0 +1,84 @@
+{
+  "category": "3d_title_extended",
+  "display_name": "3D Title Extended 3D画风扩展",
+  "presets": [
+    {
+      "id": "td_glass_refract",
+      "name": "玻璃折射文字",
+      "name_en": "Glass Refraction Title",
+      "description": "透明玻璃质感3D文字，带折射高光+边缘发光+环境反射。对标Apple产品发布会标题风格",
+      "tags": ["玻璃","折射","透明","3D","Apple","高级"],
+      "difficulty": 5,
+      "duration_default": 3.5,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.5,"min":1.5,"max":6.0,"description":"总时长(秒)"},
+        {"name":"glassOpacity","type":"number","default":60,"min":20,"max":90,"description":"玻璃透明度"},
+        {"name":"refractionOffset","type":"number","default":5,"min":1,"max":15,"description":"折射偏移"},
+        {"name":"edgeGlow","type":"number","default":20,"min":5,"max":50,"description":"边缘发光强度"},
+        {"name":"fontSize","type":"number","default":160,"min":60,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[0.85,0.92,1.0];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.threeDLayer=true;L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540,0]);L.property('ADBE Transform Group').property('ADBE Opacity').setValue({{glassOpacity}});var cam=null;try{cam=c.layers.addCamera('GlassCam',[960,540]);cam.property('ADBE Camera Options Group').property('ADBE Camera Zoom').setValue(900);cam.property('ADBE Transform Group').property('ADBE Position').setValue([960,540,-700]);cam.property('ADBE Transform Group').property('ADBE X Rotation').setValueAtTime(0,-5);cam.property('ADBE Transform Group').property('ADBE X Rotation').setValueAtTime(d,5);}catch(ce){}var highlight=L.duplicate();highlight.name=n+'_highlight';highlight.property('ADBE Transform Group').property('ADBE Position').setValue([960-{{refractionOffset}},540-{{refractionOffset}},10]);highlight.property('ADBE Transform Group').property('ADBE Opacity').setValue(30);highlight.blendingMode=BlendingMode.ADD;try{var htd=highlight.property('ADBE Text Properties').property('ADBE Text Document');var htv=htd.value;htv.fillColor=[1,1,1];htd.setValue(htv);}catch(he){}var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.2);glow.property('ADBE Glo2-0003').setValue({{edgeGlow}});glow.property('ADBE Glo2-0004').setValue(1.5);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([0.7,0.85,1,1]);glow.property('ADBE Glo2-0007').setValue([0.4,0.6,0.9,1]);}catch(ge){}L.property('ADBE Transform Group').property('ADBE Y Rotation').setValueAtTime(0,-15);L.property('ADBE Transform Group').property('ADBE Y Rotation').setValueAtTime(d,15);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.5,{{glassOpacity}});_r={status:'success',preset:'td_glass_refract',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":10,"leading":1.1,"fauxBold":false},
+      "easing": {"profile":"elegant","influence":6,"curve":"easeInOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"td_glass_refract_frost","name":"磨砂玻璃","overrides":{"glassOpacity":40,"edgeGlow":10}},
+        {"id":"td_glass_refract_crystal","name":"水晶折射","overrides":{"glassOpacity":75,"refractionOffset":10}},
+        {"id":"td_glass_refract_diamond","name":"钻石切割","overrides":{"glassOpacity":85,"refractionOffset":12,"edgeGlow":40}}
+      ]
+    },
+    {
+      "id": "td_lava_flow",
+      "name": "熔岩流动文字",
+      "name_en": "Lava Flow Title",
+      "description": "文字表面呈现熔岩流动效果，裂纹中透出橙红光芒+热变形+烟雾。对标暗黑破坏神/艾尔登法环风格",
+      "tags": ["熔岩","流动","裂纹","暗黑","3D","游戏"],
+      "difficulty": 5,
+      "duration_default": 3.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.0,"min":1.5,"max":6.0,"description":"总时长(秒)"},
+        {"name":"heatDistortion","type":"number","default":8,"min":2,"max":20,"description":"热变形强度"},
+        {"name":"crackGlow","type":"number","default":30,"min":10,"max":60,"description":"裂纹发光"},
+        {"name":"flowSpeed","type":"number","default":10,"min":3,"max":30,"description":"流动速度"},
+        {"name":"fontSize","type":"number","default":180,"min":60,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[0.15,0.05,0.02];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.threeDLayer=true;L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540,0]);var turb=L.property('Effects').addProperty('ADBE Turbulent Displace');turb.property('ADBE Turbulent Displace-0001').setValue({{heatDistortion}});turb.property('ADBE Turbulent Displace-0002').setValue({{flowSpeed}});turb.property('ADBE Turbulent Displace-0003').setValue(3);var ramp=L.property('Effects').addProperty('ADBE Ramp');ramp.property('Start Color').setValue([1,0.4,0,1]);ramp.property('Start Point').setValue([960,1080]);ramp.property('End Color').setValue([0.1,0.02,0,1]);ramp.property('End Point').setValue([960,0]);ramp.property('Ramp Shape').setValue(1);var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.1);glow.property('ADBE Glo2-0003').setValue({{crackGlow}});glow.property('ADBE Glo2-0004').setValue(2.5);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([1,0.3,0,1]);glow.property('ADBE Glo2-0007').setValue([1,0.6,0,1]);}catch(ge){}var ember=c.layers.addSolid([1,0.4,0],'Embers',1920,1080,1);ember.blendingMode=BlendingMode.ADD;try{var fn=ember.property('Effects').addProperty('ADBE Fractal Noise');fn.property('ADBE Fractal Noise-0001').setValue(2);fn.property('Contrast').setValue(150);fn.property('Brightness').setValue(-60);}catch(ee){}ember.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);ember.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.5,40);ember.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);ember.property('ADBE Transform Group').property('ADBE Position').expression='[value[0],value[1]-time*30];';L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.4,100);_r={status:'success',preset:'td_lava_flow',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":-10,"leading":1,"fauxBold":true},
+      "easing": {"profile":"menacing","influence":5,"curve":"linear","drivenBy":"expression"},
+      "variants": [
+        {"id":"td_lava_flow_volcanic","name":"火山喷发","overrides":{"heatDistortion":15,"crackGlow":50}},
+        {"id":"td_lava_flow_magma","name":"岩浆缓流","overrides":{"heatDistortion":4,"flowSpeed":5}},
+        {"id":"td_lava_flow_inferno","name":"地狱烈焰","overrides":{"heatDistortion":12,"crackGlow":60,"flowSpeed":20}}
+      ]
+    },
+    {
+      "id": "td_hologram_flicker",
+      "name": "全息投影闪烁",
+      "name_en": "Hologram Flicker Title",
+      "description": "全息投影风格3D文字，带扫描线+闪烁+色散+半透明。对标赛博朋克2077/攻壳机动队UI",
+      "tags": ["全息","投影","赛博朋克","扫描线","科幻"],
+      "difficulty": 4,
+      "duration_default": 3.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.0,"min":1.5,"max":6.0,"description":"总时长(秒)"},
+        {"name":"scanlineSpeed","type":"number","default":3,"min":1,"max":10,"description":"扫描线速度"},
+        {"name":"flickerRate","type":"number","default":15,"min":5,"max":30,"description":"闪烁频率"},
+        {"name":"chromaShift","type":"number","default":4,"min":1,"max":12,"description":"色散偏移"},
+        {"name":"fontSize","type":"number","default":150,"min":60,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};var flick={{flickerRate}};var chroma={{chromaShift}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[0.2,0.9,1.0];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.threeDLayer=true;L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540,0]);L.property('ADBE Transform Group').property('ADBE Opacity').setValue(75);L.property('ADBE Transform Group').property('ADBE Opacity').expression='seedRandom(Math.floor(time*'+flick+'),true);var base=75;var fl=random(0,1);if(fl>0.85){base*0.3;}else if(fl>0.7){base*0.7;}else{base;}';var ghostR=L.duplicate();ghostR.name=n+'_chromaR';ghostR.property('ADBE Transform Group').property('ADBE Position').setValue([960+chroma,540,5]);ghostR.property('ADBE Transform Group').property('ADBE Opacity').setValue(25);ghostR.blendingMode=BlendingMode.ADD;try{var rtd=ghostR.property('ADBE Text Properties').property('ADBE Text Document');var rtv=rtd.value;rtv.fillColor=[1,0,0.3];rtd.setValue(rtv);}catch(re){}var scan=c.layers.addSolid([0,1,1],'Scanline',1920,4,1);scan.blendingMode=BlendingMode.ADD;scan.property('ADBE Transform Group').property('ADBE Opacity').setValue(40);scan.property('ADBE Transform Group').property('ADBE Position').expression='[960,((time*{{scanlineSpeed}}*100)%1080)];';var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.2);glow.property('ADBE Glo2-0003').setValue(20);glow.property('ADBE Glo2-0004').setValue(2.0);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([0.2,0.9,1,1]);glow.property('ADBE Glo2-0007').setValue([0,0.5,0.8,1]);}catch(ge){}L.property('ADBE Transform Group').property('ADBE Y Rotation').setValueAtTime(0,-8);L.property('ADBE Transform Group').property('ADBE Y Rotation').setValueAtTime(d,8);_r={status:'success',preset:'td_hologram_flicker',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":20,"leading":1.2,"fauxBold":false},
+      "easing": {"profile":"digital","influence":3,"curve":"steps","drivenBy":"expression"},
+      "variants": [
+        {"id":"td_hologram_flicker_ghost","name":"攻壳全息","overrides":{"flickerRate":8,"chromaShift":6}},
+        {"id":"td_hologram_flicker_neon","name":"霓虹全息","overrides":{"flickerRate":20,"chromaShift":3}},
+        {"id":"td_hologram_flicker_corrupt","name":"数据损坏全息","overrides":{"flickerRate":30,"chromaShift":10}}
+      ]
+    }
+  ]
+}

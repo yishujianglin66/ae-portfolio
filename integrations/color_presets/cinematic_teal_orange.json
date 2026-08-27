@@ -1,0 +1,35 @@
+{
+  "name": "Cinematic Teal & Orange",
+  "description": "经典电影感青橙调色，阴影偏青、高光偏暖，对应好莱坞主流调色。",
+  "lift": {
+    "red": -0.02,
+    "green": 0.01,
+    "blue": 0.04,
+    "master": -0.02
+  },
+  "gamma": {
+    "red": 0.05,
+    "green": -0.01,
+    "blue": -0.04,
+    "master": 0.0
+  },
+  "gain": {
+    "red": 0.08,
+    "green": 0.02,
+    "blue": -0.05,
+    "master": 0.02
+  },
+  "offset": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 0.0,
+    "master": 0.0
+  },
+  "saturation": 1.15,
+  "contrast": 1.1,
+  "pivot": 0.435,
+  "highlight_saturation": 1.1,
+  "shadow_saturation": 1.2,
+  "blend_opacity": 1.0,
+  "tags": ["cinematic", "warm-cool", "teal-orange", "hollywood", "popular"]
+}

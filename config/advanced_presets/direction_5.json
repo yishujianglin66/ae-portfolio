@@ -1,0 +1,84 @@
+{
+  "category": "cinema_titles",
+  "display_name": "Cinema Titles 电影级标题序列",
+  "presets": [
+    {
+      "id": "ct_netflix_opening",
+      "name": "Netflix式开场",
+      "name_en": "Netflix Style Opening",
+      "description": "电影级开场标题：黑幕渐显+字距展开+微光扫描+低频呼吸。对标Netflix Originals片头动画",
+      "tags": ["Netflix","开场","电影级","字距","呼吸感"],
+      "difficulty": 4,
+      "duration_default": 4.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":4.0,"min":2.0,"max":8.0,"description":"总时长(秒)"},
+        {"name":"trackingStart","type":"number","default":200,"min":50,"max":500,"description":"初始字距"},
+        {"name":"glowSweep","type":"boolean","default":true,"description":"是否启用光扫描"},
+        {"name":"breathScale","type":"number","default":2,"min":0,"max":5,"description":"呼吸缩放幅度"},
+        {"name":"fontSize","type":"number","default":100,"min":40,"max":250,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[0.9,0.9,0.9];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);var tp=L.property('ADBE Text Properties');var a1=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a1.name='TrackingExpand';var ap=a1.property('ADBE Text Animator Properties');ap.addProperty('ADBE Text Tracking Amount').setValue({{trackingStart}});ap.addProperty('ADBE Text Opacity').setValue(0);var s1=a1.property('ADBE Text Selectors').addProperty('ADBE Text Selector');s1.property('ADBE Text Percent Start').setValueAtTime(0,0);s1.property('ADBE Text Percent Start').setValueAtTime(d*0.6,100);try{s1.property('ADBE Text Percent Start').setTemporalEaseAtKey(2,[new KeyframeEase(0,60)],[new KeyframeEase(0,60)]);}catch(ee){}L.property('ADBE Transform Group').property('ADBE Scale').expression='var b={{breathScale}};[100+Math.sin(time*1.5)*b*0.3,100+Math.sin(time*1.5)*b*0.3];';var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.3);glow.property('ADBE Glo2-0003').setValue(10);glow.property('ADBE Glo2-0004').setValue(1.2);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([1,1,1,1]);glow.property('ADBE Glo2-0007').setValue([0.8,0.8,0.8,1]);}catch(ge){}L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d*0.3,100);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d-0.5,100);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);_r={status:'success',preset:'ct_netflix_opening',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-45-Light","tracking":200,"leading":1.5,"fauxBold":false},
+      "easing": {"profile":"cinematic","influence":5,"curve":"easeInOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"ct_netflix_opening_dark","name":"暗黑开场","overrides":{"trackingStart":300,"breathScale":1}},
+        {"id":"ct_netflix_opening_gold","name":"金色开场","overrides":{"trackingStart":150,"breathScale":3}},
+        {"id":"ct_netflix_opening_minimal","name":"极简开场","overrides":{"trackingStart":100,"breathScale":0}}
+      ]
+    },
+    {
+      "id": "ct_credits_roll",
+      "name": "片尾字幕滚动",
+      "name_en": "Credits Roll",
+      "description": "电影片尾滚动字幕：从下向上匀速滚动+淡入淡出边缘+可选居中/左对齐。对标HBO/漫威片尾",
+      "tags": ["片尾","滚动","字幕","Credits","HBO"],
+      "difficulty": 3,
+      "duration_default": 6.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":6.0,"min":3.0,"max":15.0,"description":"滚动总时长(秒)"},
+        {"name":"rollSpeed","type":"number","default":100,"min":30,"max":300,"description":"滚动速度(px/s)"},
+        {"name":"fadeEdge","type":"number","default":100,"min":30,"max":300,"description":"边缘淡出区域"},
+        {"name":"alignment","type":"string","default":"center","description":"对齐(center/left)"},
+        {"name":"fontSize","type":"number","default":48,"min":24,"max":120,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};var speed={{rollSpeed}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[0.95,0.95,0.95];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}var startY=1080+200;var endY=-400;L.property('ADBE Transform Group').property('ADBE Position').setValueAtTime(0,[960,startY]);L.property('ADBE Transform Group').property('ADBE Position').setValueAtTime(d,[960,endY]);try{L.property('ADBE Transform Group').property('ADBE Position').setTemporalEaseAtKey(1,[new KeyframeEase(0,0)],[new KeyframeEase(0,0)]);L.property('ADBE Transform Group').property('ADBE Position').setTemporalEaseAtKey(2,[new KeyframeEase(0,0)],[new KeyframeEase(0,0)]);}catch(le){}L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.5,100);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d-0.5,100);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);var vig=c.layers.addSolid([0,0,0],'CreditsVignette',1920,1080,1);try{var ramp=vig.property('Effects').addProperty('ADBE Ramp');ramp.property('Start Color').setValue([0,0,0,1]);ramp.property('Start Point').setValue([960,0]);ramp.property('End Color').setValue([0,0,0,0]);ramp.property('End Point').setValue([960,{{fadeEdge}}]);ramp.property('Ramp Shape').setValue(1);}catch(ve){}vig.blendingMode=BlendingMode.MULTIPLY;_r={status:'success',preset:'ct_credits_roll',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-45-Light","tracking":5,"leading":1.8,"fauxBold":false},
+      "easing": {"profile":"linear","influence":0,"curve":"linear","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"ct_credits_roll_marvel","name":"漫威片尾","overrides":{"rollSpeed":120,"fontSize":42}},
+        {"id":"ct_credits_roll_hbo","name":"HBO片尾","overrides":{"rollSpeed":80,"fontSize":36}},
+        {"id":"ct_credits_roll_fast","name":"快速滚动","overrides":{"rollSpeed":200,"fontSize":56}}
+      ]
+    },
+    {
+      "id": "ct_chapter_transition",
+      "name": "章节过渡标题",
+      "name_en": "Chapter Transition Title",
+      "description": "电影章节切换标题：黑幕+编号+标题分步入场+横线展开。对标昆汀/韦斯安德森章节叙事风格",
+      "tags": ["章节","过渡","叙事","昆汀","韦斯安德森"],
+      "difficulty": 4,
+      "duration_default": 3.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.0,"min":1.5,"max":6.0,"description":"总时长(秒)"},
+        {"name":"chapterNumber","type":"string","default":"01","description":"章节编号"},
+        {"name":"lineWidth","type":"number","default":400,"min":100,"max":800,"description":"装饰线宽度"},
+        {"name":"style","type":"string","default":"tarantino","description":"风格(tarantino/wes/sci-fi)"},
+        {"name":"fontSize","type":"number","default":80,"min":30,"max":200,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[1,1,1];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,560]);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.4,100);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d-0.4,100);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);var numL=c.layers.addText('CHAPTER {{chapterNumber}}');try{var ntd=numL.property('ADBE Text Properties').property('ADBE Text Document');var ntv=ntd.value;ntv.fontSize=36;ntv.fillColor=[0.7,0.7,0.7];ntv.justification=ParagraphJustification.CENTER_JUSTIFY;ntd.setValue(ntv);}catch(ne){}numL.property('ADBE Transform Group').property('ADBE Position').setValue([960,460]);numL.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);numL.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.2,100);numL.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d-0.3,100);numL.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);var lineW={{lineWidth}};var line=c.layers.addSolid([1,1,1],'ChapterLine',lineW,2,1);line.property('ADBE Transform Group').property('ADBE Position').setValue([960,510]);line.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.2,[0,100]);line.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.6,[100,100]);line.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d-0.3,100);line.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);_r={status:'success',preset:'ct_chapter_transition',layer:n,chapter:'{{chapterNumber}}'};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-55-Regular","tracking":30,"leading":1.5,"fauxBold":false},
+      "easing": {"profile":"narrative","influence":8,"curve":"easeOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"ct_chapter_transition_tarantino","name":"昆汀风格","overrides":{"style":"tarantino","lineWidth":500}},
+        {"id":"ct_chapter_transition_wes","name":"韦斯安德森风格","overrides":{"style":"wes","lineWidth":300}},
+        {"id":"ct_chapter_transition_scifi","name":"科幻章节","overrides":{"style":"sci-fi","lineWidth":600}}
+      ]
+    }
+  ]
+}

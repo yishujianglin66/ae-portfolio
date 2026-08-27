@@ -141,4 +141,5 @@ print(f"\n[9] Result persisted: {result_file.exists()}")
 print("\n" + "=" * 70)
 print("RESULT:", "ALL MODULES DETECTED" if all_pass else "SOME MODULES MISSING")
 print("=" * 70)
-sys.exit(0 if all_pass else 1)
+if __name__ == "__main__":
+    sys.exit(0 if all_pass else 1)

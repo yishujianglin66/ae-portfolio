@@ -251,3 +251,5 @@ tmp_t1.txt
 scripts/dsh_backup_*/
 models/yolov8x.pt
 help_out.txt
+# VLM 基座权重（Qwen3-VL-4B/8B，共 26.5 GB），由 modelscope 客户端按需重新拉取，不入库
+models/weights/

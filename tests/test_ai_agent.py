@@ -30,16 +30,23 @@ class TestV4AgentInit(unittest.TestCase):
     def test_init_from_env(self):
         """应从环境变量读取 API Key"""
         from ai_agent import V4Agent
-        agent = V4Agent()
+        # 2026-08-15 起 V4Agent 初始化会做真实提供方探测，
+        # 单测中 mock 探测通过，锁定 deepseek 原生路径。
+        with patch.object(V4Agent, "_provider_alive", return_value=True):
+            agent = V4Agent()
         self.assertEqual(agent.api_key, "env-key")
+        self.assertEqual(agent.provider, "deepseek")
 
     def test_init_missing_api_key(self):
         """缺少 API Key 应抛出 ValueError"""
         from ai_agent import V4Agent
+        # 需同时屏蔽 ARK/DuckMiss 备选（其密钥来自 .env，模块加载时读入）
         with patch.dict(os.environ, {"DEEPSEEK_API_KEY": ""}):
-            with self.assertRaises(ValueError) as ctx:
-                V4Agent()
-            self.assertIn("DEEPSEEK_API_KEY", str(ctx.exception))
+            with patch("ai_agent.ARK_AVAILABLE", False), \
+                 patch("ai_agent.DUCK_MISS_AVAILABLE", False):
+                with self.assertRaises(ValueError) as ctx:
+                    V4Agent()
+                self.assertIn("DEEPSEEK_API_KEY", str(ctx.exception))
 
 
 class TestV4AgentModelSelection(unittest.TestCase):
@@ -152,7 +159,9 @@ class TestV4AgentToolExecution(unittest.TestCase):
 
     def test_execute_tool_import_error(self):
         """tool_executor 不可用时应返回错误"""
-        with patch.dict('sys.modules', {'tool_executor': None}):
+        # 生产代码先试 tools.tool_executor 包，再降级裸名，两者都需屏蔽
+        with patch.dict('sys.modules', {'tool_executor': None,
+                                        'tools.tool_executor': None}):
             result = self.agent.execute_tool("ffmpeg", input="test.mp4")
             
             self.assertFalse(result["success"])
@@ -160,7 +169,8 @@ class TestV4AgentToolExecution(unittest.TestCase):
 
     def test_orchestrate_import_error(self):
         """tool_executor 不可用时应返回错误"""
-        with patch.dict('sys.modules', {'tool_executor': None}):
+        with patch.dict('sys.modules', {'tool_executor': None,
+                                        'tools.tool_executor': None}):
             result = self.agent.orchestrate("处理视频")
             
             self.assertFalse(result["success"])
@@ -212,11 +222,9 @@ class TestV4AgentCostCalculation(unittest.TestCase):
         usage = {"prompt_tokens": 1000, "completion_tokens": 500}
         cost = self.agent._calc_cost(usage, "deepseek-v4-pro")
 
-        # Pro: input ¥4/M, output ¥8/M
-        # 注意：生产代码 _calc_cost 中 "4" in model 的检查过于宽泛，
-        # 任何包含 "4" 的模型名都会命中 pro 定价分支，这是已知 bug，
-        # 测试需匹配实际实现行为。
-        expected = (1000 / 1_000_000 * 4) + (500 / 1_000_000 * 8)
+        # 2026-08-18 起 _calc_cost 改为显式 MODEL_PRICING 映射表（per 1k tokens），
+        # 修复了旧版 "4" in model 子串误匹配。deepseek-v4-pro: 0.002/0.008。
+        expected = (1000 / 1_000 * 0.002) + (500 / 1_000 * 0.008)
         self.assertAlmostEqual(cost, expected, places=6)
 
     def test_flash_model_pricing(self):
@@ -224,21 +232,18 @@ class TestV4AgentCostCalculation(unittest.TestCase):
         usage = {"prompt_tokens": 1000, "completion_tokens": 500}
         cost = self.agent._calc_cost(usage, "deepseek-v4-flash")
 
-        # 注意：生产代码 _calc_cost 中先检查 "4" in model，"deepseek-v4-flash"
-        # 包含 "4"，因此命中 pro 定价 (4, 8) 而非 flash 定价 (2, 4)。
-        # 这是生产代码的 bug（"4" 检查过于宽泛），测试需匹配实际行为。
-        expected = (1000 / 1_000_000 * 4) + (500 / 1_000_000 * 8)
+        # 精确命中 MODEL_PRICING["deepseek-v4-flash"]: 0.001/0.002 (per 1k)。
+        expected = (1000 / 1_000 * 0.001) + (500 / 1_000 * 0.002)
         self.assertAlmostEqual(cost, expected, places=6)
 
     def test_flash_model_pricing_without_4(self):
-        """不含 "4" 的 Flash 模型费用计算"""
+        """定价表未收录的模型回退默认低价"""
         usage = {"prompt_tokens": 1000, "completion_tokens": 500}
         cost = self.agent._calc_cost(usage, "deepseek-flash")
 
-        # Flash: input ¥2/M, output ¥4/M
-        # "deepseek-flash" 不含 "4" 且不含 "pro"/"72b"/"32b"，
-        # 因此命中 flash 定价分支 (2, 4)。
-        expected = (1000 / 1_000_000 * 2) + (500 / 1_000_000 * 4)
+        # "deepseek-flash" 无精确/前缀命中，回退 __default__ (turbo 级)
+        # 0.001/0.002 (per 1k)。
+        expected = (1000 / 1_000 * 0.001) + (500 / 1_000 * 0.002)
         self.assertAlmostEqual(cost, expected, places=6)
 
 

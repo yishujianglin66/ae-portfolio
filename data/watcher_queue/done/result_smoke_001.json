@@ -1,0 +1,11 @@
+{
+  "task_id": "smoke_001",
+  "started_at": "2026-08-26T21:59:30.804407",
+  "status": "success",
+  "quality_score": 59.7,
+  "iterations": 1,
+  "output_path": "output/watcher_smoke\\pipeline_output.mp4",
+  "duration_sec": 270.4,
+  "errors": [],
+  "finished_at": "2026-08-26T22:04:01.238734"
+}

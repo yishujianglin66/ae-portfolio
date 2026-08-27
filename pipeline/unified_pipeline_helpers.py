@@ -10,7 +10,13 @@
 from __future__ import annotations
 
 import time
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+# 拆分时遗漏的模块级依赖 (本文件仅在 unified_pipeline 方法内延迟导入,
+# 反向引入不会形成循环): 缺它们时 run_learn/run_stage 会在运行期 NameError
+from pipeline.unified_pipeline import StageResult, StageStatus
+from pipeline.adaptive_fallback import get_fallback_selector
 
 
 

@@ -292,7 +292,8 @@ def main() -> int:
     if ms_key and args.channel in ("auto", "modelscope"):
         ms_client = OpenAI(api_key=ms_key, base_url=MS_BASE_URL, timeout=120, max_retries=2)
         channels.append(("modelscope", ms_client, MS_MODEL))
-    if qwen_key and args.channel in ("auto", "bailian"):
+    if qwen_key and args.channel in ("auto", "bailian") \
+            and os.environ.get("BAILIAN_SKIP", "") != "1":  # 额度耗尽时可跳过
         qwen_client = OpenAI(api_key=qwen_key, base_url=QWEN_BASE_URL, timeout=90, max_retries=2)
         channels.append(("bailian", qwen_client, QWEN_MODELS))
     if qwenai_key and args.channel in ("auto", "qwenai"):
@@ -300,7 +301,8 @@ def main() -> int:
                                timeout=90, max_retries=2)
         channels.append(("qwenai", qwenai_client, QWEN_AI_MODEL))
     print(f"[A3] 通道: {[c[0] for c in channels]}")
-    if args.channel != "auto" and len(channels) == 1:
+    # 指定通道不可用 = 请求的通道名不在已构建列表中 (单通道指定是合法的)
+    if args.channel != "auto" and not any(c[0] == args.channel for c in channels):
         print(f"[A3] 指定通道 {args.channel} 不可用")
         return 1
 

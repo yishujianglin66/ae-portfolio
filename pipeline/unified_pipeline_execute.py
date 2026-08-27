@@ -6,7 +6,12 @@ run_execute_real_mix(self), 行为等价。
 """
 from __future__ import annotations
 
-from typing import Any, Dict
+from pathlib import Path
+from typing import Any, Dict, List
+
+# 拆分时遗漏的模块级依赖 (本文件仅在 unified_pipeline 方法内延迟导入,
+# 反向引入不会形成循环): 缺它们时 run_execute_real_mix 运行期 NameError
+from pipeline.unified_pipeline import StageStatus, _paths_ffmpeg
 
 
 

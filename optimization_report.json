@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-08-26 13:32:35",
+  "optimization_targets": {
+    "target_time_per_video": "<1.0s",
+    "target_memory_usage": "<500MB",
+    "batch_throughput_goal": ">10 videos/sec"
+  },
+  "benchmark_results": {
+    "original": {
+      "avg_time_per_video": 0.015412592887878418,
+      "avg_memory_usage_mb": 0.3046875
+    },
+    "optimized": {
+      "avg_time_per_video": 0.013613605499267578,
+      "avg_memory_usage_mb": 0.1203125
+    }
+  },
+  "improvements": {
+    "time_improvement_percent": 11.672191705171777,
+    "memory_improvement_percent": 60.51282051282052,
+    "achieved_targets": {
+      "time_target": true,
+      "memory_target": true,
+      "improvement": true
+    }
+  },
+  "batch_performance": {
+    "1": {
+      "total_time": 0.01682558059692383,
+      "time_per_video": 0.01682558059692383,
+      "throughput": 59.433313117458006
+    },
+    "3": {
+      "total_time": 0.044794464111328126,
+      "time_per_video": 0.014931488037109376,
+      "throughput": 66.9725614429513
+    },
+    "5": {
+      "total_time": 0.08831963539123536,
+      "time_per_video": 0.01766392707824707,
+      "throughput": 56.61255255245527
+    },
+    "8": {
+      "total_time": 0.1162045955657959,
+      "time_per_video": 0.014525574445724488,
+      "throughput": 68.84409313631956
+    }
+  },
+  "recommendations": [
+    "当前已优化：帧提取算法、预处理流程",
+    "进一步优化建议：模型量化(INT8/FP16)、TensorRT加速",
+    "批处理可提升吞吐量，适合大规模数据处理"
+  ]
+}

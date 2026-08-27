@@ -1,0 +1,35 @@
+{
+  "name": "Warm Portrait",
+  "description": "暖色肖像，皮肤友好，暖色调高光、柔和阴影，适合人像写真。",
+  "lift": {
+    "red": 0.03,
+    "green": 0.01,
+    "blue": -0.01,
+    "master": 0.02
+  },
+  "gamma": {
+    "red": 0.04,
+    "green": 0.02,
+    "blue": 0.0,
+    "master": 0.0
+  },
+  "gain": {
+    "red": 0.05,
+    "green": 0.03,
+    "blue": 0.0,
+    "master": 0.02
+  },
+  "offset": {
+    "red": 0.01,
+    "green": 0.0,
+    "blue": 0.0,
+    "master": 0.0
+  },
+  "saturation": 1.05,
+  "contrast": 1.0,
+  "pivot": 0.42,
+  "highlight_saturation": 1.05,
+  "shadow_saturation": 1.1,
+  "blend_opacity": 1.0,
+  "tags": ["portrait", "warm", "skin", "soft", "wedding"]
+}

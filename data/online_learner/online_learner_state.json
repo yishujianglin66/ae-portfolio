@@ -1,12 +1,12 @@
 {
-  "total_observations": 4306,
+  "total_observations": 5454,
   "stages": {
     "verify": {
       "duration": {
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 1152,
+        "count": 1487,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
@@ -15,16 +15,16 @@
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 1152,
+        "count": 1487,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
       },
       "success_rate": {
-        "mean": 0.9678819444444449,
-        "variance": 0.0008146048718815001,
-        "std": 0.028541283641096104,
-        "count": 1152,
+        "mean": 0.9704102219233358,
+        "variance": 0.0006341391004014787,
+        "std": 0.02518211866387494,
+        "count": 1487,
         "min": 0.0,
         "max": 1.0,
         "last": 0.0
@@ -36,7 +36,7 @@
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 719,
+        "count": 916,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
@@ -45,16 +45,16 @@
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 719,
+        "count": 916,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
       },
       "success_rate": {
-        "mean": 0.8414464534075101,
-        "variance": 0.0009888736324571703,
-        "std": 0.031446361195807224,
-        "count": 719,
+        "mean": 0.8504366812227074,
+        "variance": 0.0007921614668824999,
+        "std": 0.028145363150659467,
+        "count": 916,
         "min": 0.0,
         "max": 1.0,
         "last": 0.0
@@ -63,10 +63,10 @@
     },
     "plan": {
       "duration": {
-        "mean": 0.034026465028355386,
-        "variance": 2.2011492981809867e-06,
-        "std": 0.001483627075171179,
-        "count": 529,
+        "mean": 0.04078549848942596,
+        "variance": 2.5242196279530493e-06,
+        "std": 0.001588779288621629,
+        "count": 662,
         "min": 0.0,
         "max": 9.0,
         "last": 0.0
@@ -75,7 +75,7 @@
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 529,
+        "count": 662,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
@@ -84,19 +84,19 @@
         "mean": 1.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 529,
+        "count": 662,
         "min": 1.0,
         "max": 1.0,
         "last": 1.0
       },
-      "drift_counter": 520
+      "drift_counter": 653
     },
     "render": {
       "duration": {
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 816,
+        "count": 1015,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
@@ -105,16 +105,16 @@
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 816,
+        "count": 1015,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
       },
       "success_rate": {
-        "mean": 0.9681372549019616,
-        "variance": 0.0011514630351523636,
-        "std": 0.03393321433569717,
-        "count": 816,
+        "mean": 0.960591133004927,
+        "variance": 0.0009108951533805663,
+        "std": 0.030181039633858976,
+        "count": 1015,
         "min": 0.0,
         "max": 1.0,
         "last": 0.0
@@ -126,7 +126,7 @@
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 553,
+        "count": 700,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
@@ -135,7 +135,7 @@
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 553,
+        "count": 700,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
@@ -144,7 +144,7 @@
         "mean": 1.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 553,
+        "count": 700,
         "min": 1.0,
         "max": 1.0,
         "last": 1.0
@@ -156,7 +156,7 @@
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 537,
+        "count": 674,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
@@ -165,7 +165,7 @@
         "mean": 0.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 537,
+        "count": 674,
         "min": 0.0,
         "max": 0.0,
         "last": 0.0
@@ -174,7 +174,7 @@
         "mean": 1.0,
         "variance": 0.0,
         "std": 0.0,
-        "count": 537,
+        "count": 674,
         "min": 1.0,
         "max": 1.0,
         "last": 1.0

@@ -1,0 +1,9 @@
+﻿{
+    "enable_visual_judge":  true,
+    "max_quality_iterations":  1,
+    "input_topic":  "高燃动漫混剪 赛博暗黑风格",
+    "visual_judge_backend":  "auto",
+    "materials_dir":  "temp/e2e_materials",
+    "visual_judge_quantize":  "4bit",
+    "output_dir":  "output/watcher_smoke"
+}

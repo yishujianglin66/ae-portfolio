@@ -37,8 +37,41 @@ sys.path.insert(0, SRC_DIR)
 # 解决方案：在 sys.modules 中预先注册所有需要的包和模块，
 # 然后通过 importlib 正常导入，让相对导入链能被正确解析。
 import importlib
+import importlib.util
 
 # 1. 注册 src 自身为包
+# 注意(2026-08-27): 注入必须密闭化！本文件在收集期向 sys.modules 注入合成的
+# src/src.engines/src.engines.{ae,blender,ffmpeg} 包，若不恢复，后续测试文件
+# （如 test_p2_cross_engine_pipeline/test_p2_full_selfcheck）导入真实引擎类时会
+# 命中缓存的合成包（无 __init__.py 执行），导致 ImportError: cannot import name。
+# 策略：快照 → 注入加载 → 恢复（含父包属性缓存）。
+_LAYER_INJECTION_KEYS = [
+    "src",
+    "src.config",
+    "src.engines",
+    "src.engines.ae",
+    "src.engines.blender",
+    "src.engines.ffmpeg",
+    "src.engines.base",
+    "src.models",
+    "src.models.layer_pipeline",
+    "src.services",
+    "src.services.layer_render_service",
+    # 裸名别名
+    "engines.base",
+    "config.settings",
+    "models.layer_pipeline",
+]
+_prior_modules = {k: sys.modules[k] for k in _LAYER_INJECTION_KEYS if k in sys.modules}
+_prior_attrs = {}
+for _parent, _attr in [("src", "config"), ("src", "engines"), ("src", "models"),
+                       ("src", "services"), ("src.engines", "ae"),
+                       ("src.engines", "blender"), ("src.engines", "ffmpeg"),
+                       ("src.engines", "base"), ("src.models", "layer_pipeline")]:
+    _pm = sys.modules.get(_parent)
+    if _pm is not None and hasattr(_pm, _attr):
+        _prior_attrs[(_parent, _attr)] = getattr(_pm, _attr)
+
 _src_init = type(sys)("src")
 _src_init.__path__ = [SRC_DIR]
 _src_init.__package__ = "src"
@@ -53,32 +86,58 @@ for _pkg in ("config", "engines", "models", "services",
     sys.modules[f"src.{_pkg}"] = _mod
 
 # 3. 预注册 config.settings 和 engines.base（它们可独立加载）
-from config.settings import Settings, get_settings, settings  # noqa: E402
-sys.modules["src.config.settings"] = sys.modules["config.settings"]
+# 注意(2026-08-26): 不能用裸名 `from config.settings import ...`，
+# 全量收集时项目根 config/ 包已在 sys.modules 中（无 get_settings）会抢先命中，
+# 同理裸名 models/ 会与项目根 models 包冲突。改为按显式文件路径加载，确定性命中 SRC_DIR。
+def _load_from_src(dotted_name, rel_path):
+    spec = importlib.util.spec_from_file_location(
+        dotted_name, os.path.join(SRC_DIR, rel_path)
+    )
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[dotted_name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+_settings_mod = _load_from_src("src.config.settings", os.path.join("config", "settings.py"))
+Settings, get_settings, settings = (
+    _settings_mod.Settings, _settings_mod.get_settings, _settings_mod.settings,
+)
+sys.modules["config.settings"] = _settings_mod
 # 把 src.config.settings 挂到已注册的 src.config 上
 _src_config = sys.modules["src.config"]
 _src_config.settings = settings
 _src_config.Settings = Settings
 _src_config.get_settings = get_settings
 
-from engines.base import EngineResult  # noqa: E402
-sys.modules["src.engines.base"] = sys.modules["engines.base"]
+_base_mod = _load_from_src("src.engines.base", os.path.join("engines", "base.py"))
+EngineResult = _base_mod.EngineResult
+sys.modules["engines.base"] = _base_mod
 
 # 4. 预注册 models.layer_pipeline
-from models.layer_pipeline import (  # noqa: E402
-    BlendMode,
-    LayerConfig,
-    LayerRenderResult,
-    LayerType,
-    OutputFormat,
-    PipelinePreset,
-    RenderPipeline,
-    RendererType,
-)
-sys.modules["src.models.layer_pipeline"] = sys.modules["models.layer_pipeline"]
+_lp_mod = _load_from_src("src.models.layer_pipeline", os.path.join("models", "layer_pipeline.py"))
+BlendMode = _lp_mod.BlendMode
+LayerConfig = _lp_mod.LayerConfig
+LayerRenderResult = _lp_mod.LayerRenderResult
+LayerType = _lp_mod.LayerType
+OutputFormat = _lp_mod.OutputFormat
+PipelinePreset = _lp_mod.PipelinePreset
+RenderPipeline = _lp_mod.RenderPipeline
+RendererType = _lp_mod.RendererType
+sys.modules["models.layer_pipeline"] = _lp_mod
 
 # 5. 现在 import src.services.layer_render_service 可以正常解析相对导入
 from src.services.layer_render_service import LayerRenderService
+
+# 6. 清理合成引擎包，让后续测试能正常导入真实引擎模块
+# 策略：保留 src/src.config/src.models/src.services（供 layer_render_service 延迟导入），
+# 但移除 src.engines 及其子包，让 Python 正常导入真实引擎。
+for _key in list(sys.modules.keys()):
+    if _key == "src.engines" or _key.startswith("src.engines."):
+        del sys.modules[_key]
+# 同时清理父包上的属性缓存
+_src_engines_parent = sys.modules.get("src")
+if _src_engines_parent is not None and hasattr(_src_engines_parent, "engines"):
+    delattr(_src_engines_parent, "engines")
 
 
 # ══════════════════════════════════════════════════════════

@@ -32,14 +32,12 @@ from pipeline.stock_footage import (
 
 
 # ============================================================================
-# pytest hooks: --run-e2e 开关控制真实下载
+# 真实 E2E 开关：通过环境变量 AEKV_RUN_E2E=1 启用（测试文件内的
+# pytest_addoption 不生效，仅 conftest/插件可注册命令行选项）
 # ============================================================================
 
-def pytest_addoption(parser):
-    parser.addoption(
-        "--run-e2e", action="store_true", default=False,
-        help="运行需要真实 Key + 真实下载 + 真实混剪的 E2E （可能慢 + 耗流量）",
-    )
+def run_real_e2e() -> bool:
+    return os.environ.get("AEKV_RUN_E2E", "").strip().lower() in ("1", "true", "yes", "on")
 
 
 def has_real_keys() -> bool:
@@ -218,8 +216,8 @@ class TestPerceiveFallbacksWhenNoKeys:
 # ============================================================================
 
 @pytest.mark.skipif(
-    "not config.getoption('--run-e2e')",
-    reason="没传 --run-e2e；跳过真实下载/混剪（避免耗流量 + 慢）",
+    not run_real_e2e(),
+    reason="未设置 AEKV_RUN_E2E=1；跳过真实下载/混剪（避免耗流量 + 慢）",
 )
 @pytest.mark.skipif(not has_real_keys(), reason="缺少 PEXELS_API_KEY / PIXABAY_API_KEY")
 class TestRealE2E:

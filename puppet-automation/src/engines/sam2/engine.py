@@ -60,8 +60,28 @@ class SAM2Engine(BaseEngine):
                 "Run: pip install -i https://pypi.tuna.tsinghua.edu.cn/simple sam2"
             )
 
-    async def execute(self, *args, **kwargs) -> EngineResult:
-        """Dispatch to specific methods."""
+    def _find_checkpoint(self) -> Optional[Path]:
+        """在 model_dir 下查找 SAM2 权重文件（诚实降级：无权重则拒绝推理）。"""
+        if not self.model_dir.exists():
+            return None
+        for pattern in ("*.pt", "*.pth", "*.ckpt"):
+            hits = sorted(self.model_dir.glob(pattern))
+            if hits:
+                return hits[0]
+        return None
+
+    def _missing_weights_error(self) -> EngineResult:
+        """统一的无权重失败结果：绝不生成假遮罩。"""
+        return EngineResult(
+            success=False,
+            error=(
+                f"SAM2 权重未检测到，拒绝推理（{self.model_dir} 下无 checkpoint）。"
+                "请先下载 sam2_hiera 权重文件后再运行。"
+            ),
+        )
+
+    async def _execute_impl(self, *args, **kwargs) -> EngineResult:
+        """【子类实现】task 调度；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
         task = kwargs.get("task", "mask")
         if task == "mask":
             return await self.auto_mask(*args, **{k: v for k, v in kwargs.items() if k != "task"})
@@ -103,6 +123,10 @@ class SAM2Engine(BaseEngine):
                 error="SAM2 not installed. "
                       "Run: pip install -i https://pypi.tuna.tsinghua.edu.cn/simple sam2",
             )
+
+        # 诚实降级：无真实权重时拒绝推理，绝不生成假遮罩
+        if self._find_checkpoint() is None:
+            return self._missing_weights_error()
 
         try:
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -204,7 +228,7 @@ class SAM2Engine(BaseEngine):
                 str(output_path),
             ]
 
-            rc, stdout, stderr = await asyncio.to_thread(
+            rc, _stdout, stderr, _err_code = await asyncio.to_thread(
                 self._run_subprocess, cmd, timeout=3600,
             )
 
@@ -305,6 +329,10 @@ class SAM2Engine(BaseEngine):
                 error="SAM2 not installed. "
                       "Run: pip install -i https://pypi.tuna.tsinghua.edu.cn/simple sam2",
             )
+
+        # 诚实降级：无真实权重时拒绝导出，绝不生成假遮罩序列
+        if self._find_checkpoint() is None:
+            return self._missing_weights_error()
 
         try:
             output_dir.mkdir(parents=True, exist_ok=True)

@@ -139,9 +139,13 @@ class TestLLMConfig:
         assert config.base_url == "http://localhost:5273/v1"
         assert config.api_key == ""
         assert config.default_model == "auto"
-        assert config.timeout_seconds == 30
+        # 契约变更（2026-08-14）：默认超时已从 30 调整为 90，
+        # 与 test_llm_gateway_provider_config 记载的新契约保持一致。
+        assert config.timeout_seconds == 90
         assert config.max_retries == 3
-        assert config.enable_compression is True
+        # 契约变更（c1e3db1）：默认关闭 token 压缩（避免破坏多模态 content 结构），
+        # 与 test_llm_gateway_failover 的 base_config 口径一致。
+        assert config.enable_compression is False
         assert config.enable_fallback is True
 
     def test_model_routing_defaults(self):
@@ -239,7 +243,11 @@ class TestLLMGatewayConfigureFromEnv:
         assert gw._config.base_url == "http://openai.com/v1"
         assert gw._config.api_key == "openai-key"
 
-    def test_configure_from_env_no_vars(self):
+    def test_configure_from_env_no_vars(self, monkeypatch):
+        # 隔离真实环境与 .env 自动加载：网关初始化会加载 .env，
+        # 其中包含 AEKV_LLM_API_KEY / MODELSCOPE_BASE_URL 等，
+        # 不清空 environ 会导致本用例被环境污染。
+        monkeypatch.setattr(os, "environ", {})
         gw = LLMGateway(LLMConfig(base_url="http://original.com", api_key="orig"))
         gw.configure_from_env()
         # 未设置环境变量时保持原值
@@ -285,7 +293,9 @@ class TestLLMGatewayStats:
         stats = gw.get_stats()
         assert stats["total_requests"] == 10
         assert stats["success_rate"] == "80.0%"
-        assert stats["avg_latency_ms"] == "500"
+        # B5 契约：平均延迟分母为成功请求数（5000 / 8 = 625），
+        # 而非总请求数（旧口径 500 已废弃）。
+        assert stats["avg_latency_ms"] == "625"
         assert stats["total_tokens_input"] == 1000
         assert stats["total_tokens_output"] == 500
 

@@ -42,3 +42,8 @@ soundfile>=0.12
 pytest>=7.4
 pytest-asyncio>=0.23
 httpx>=0.25
+
+# --- MG动画 / 手书动画 (2026-08-21 新增) ---
+# SCAIL-2 / MuseTalk / MatAnyone2 的依赖在各自 external/ 子目录的 requirements.txt 中
+# 以下为 MG 模板引擎 + Lottie 导出 + 手绘风格化的直接依赖
+# (Pillow/numpy/opencv 已在上方核心依赖中)

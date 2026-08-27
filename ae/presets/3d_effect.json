@@ -50,11 +50,7 @@
       "duration": 3.0,
       "extrusionDepth": 100,
       "layerCount": 20,
-      "color": [
-        0.2,
-        0.6,
-        1.0
-      ],
+      "color": "[0.2, 0.6, 1.0]",
       "lightIntensity": 100
     },
     "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      extrusionDepth: ${extrusionDepth},\n      layerCount: ${layerCount},\n      color: ${color},\n      lightIntensity: ${lightIntensity}\n    };\n    var baseLayer = comp.layers.byName(p.textLayerName);\n    if (!baseLayer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      baseLayer = nt;\n    }\n    baseLayer.threeDLayer = true;\n    var src = baseLayer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = p.color;\n    td.fontSize = 120;\n    td.justification = ParagraphJustification.CENTER;\n    src.setValue(td);\n    var step = p.extrusionDepth / p.layerCount;\n    for (var i = 1; i < p.layerCount; i++) {\n      var dup = baseLayer.duplicate();\n      dup.name = p.textLayerName + \"_depth_\" + i;\n      dup.threeDLayer = true;\n      var pos = dup.property(\"Transform\").property(\"Position\").value;\n      pos[2] = i * step;\n      dup.property(\"Transform\").property(\"Position\").setValue(pos);\n      dup.property(\"Transform\").property(\"Opacity\").setValue(100 - (i / p.layerCount) * 60);\n    }\n    var cam = comp.layers.addCamera(\"3D Camera\", [comp.width/2, comp.height/2]);\n    cam.property(\"Transform\").property(\"Position\").setValue([comp.width/2, comp.height/2, -1000]);\n    var light = comp.layers.addLight(\"Spot Light\", LightType.SPOT, [comp.width/2, comp.height/2, -500]);\n    light.property(\"Light Options\").property(\"Intensity\").setValue(p.lightIntensity);\n    _result = {status:\"success\", message:\"立体文字已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
@@ -104,11 +100,7 @@
       "textLayerName": "旋转文字",
       "duration": 4.0,
       "rotationY": 360,
-      "color": [
-        1.0,
-        0.3,
-        0.3
-      ]
+      "color": "[1.0, 0.3, 0.3]"
     },
     "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      rotationY: ${rotationY},\n      color: ${color}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    layer.threeDLayer = true;\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = p.color;\n    td.fontSize = 120;\n    td.justification = ParagraphJustification.CENTER;\n    src.setValue(td);\n    var yRot = layer.property(\"Transform\").property(\"Y Rotation\");\n    yRot.setValueAtTime(comp.time, 0);\n    yRot.setValueAtTime(comp.time + p.duration, p.rotationY);\n    for (var k = 1; k <= yRot.numKeys; k++) {\n      yRot.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    var cam = comp.layers.addCamera(\"Rotation Camera\", [comp.width/2, comp.height/2]);\n    cam.property(\"Transform\").property(\"Position\").setValue([comp.width/2, comp.height/2, -900]);\n    _result = {status:\"success\", message:\"文字旋转已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
     "compatibility": {
@@ -155,11 +147,7 @@
       "textLayerName": "翻转文字",
       "duration": 2.0,
       "flipAxis": "Y",
-      "color": [
-        0.3,
-        1.0,
-        0.5
-      ]
+      "color": "[0.3, 1.0, 0.5]"
     },
     "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      duration: ${duration},\n      flipAxis: ${flipAxis},\n      color: ${color}\n    };\n    var layer = comp.layers.byName(p.textLayerName);\n    if (!layer) {\n      var nt = comp.layers.addText(p.textLayerName);\n      nt.name = p.textLayerName;\n      layer = nt;\n    }\n    layer.threeDLayer = true;\n    var src = layer.property(\"Source Text\");\n    var td = src.value;\n    td.fillColor = p.color;\n    td.fontSize = 120;\n    td.justification = ParagraphJustification.CENTER;\n    src.setValue(td);\n    var rotProp = (p.flipAxis === \"X\") ? layer.property(\"Transform\").property(\"X Rotation\") : layer.property(\"Transform\").property(\"Y Rotation\");\n    rotProp.setValueAtTime(comp.time, 0);\n    rotProp.setValueAtTime(comp.time + p.duration * 0.5, 180);\n    rotProp.setValueAtTime(comp.time + p.duration, 360);\n    for (var k = 1; k <= rotProp.numKeys; k++) {\n      rotProp.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    var cam = comp.layers.addCamera(\"Flip Camera\", [comp.width/2, comp.height/2]);\n    _result = {status:\"success\", message:\"文字翻转已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
     "compatibility": {
@@ -214,11 +202,7 @@
       "textLayerName": "层叠文字",
       "layerCount": 8,
       "zSpacing": 80,
-      "color": [
-        1.0,
-        0.8,
-        0.2
-      ],
+      "color": "[1.0, 0.8, 0.2]",
       "duration": 5.0
     },
     "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = {\n      textLayerName: ${textLayerName},\n      layerCount: ${layerCount},\n      zSpacing: ${zSpacing},\n      color: ${color},\n      duration: ${duration}\n    };\n    for (var i = 0; i < p.layerCount; i++) {\n      var layer = comp.layers.byName(p.textLayerName + \"_\" + i);\n      if (!layer) {\n        var nt = comp.layers.addText(p.textLayerName + \" \" + (i+1));\n        nt.name = p.textLayerName + \"_\" + i;\n        layer = nt;\n      }\n      layer.threeDLayer = true;\n      var src = layer.property(\"Source Text\");\n      var td = src.value;\n      td.fillColor = p.color;\n      td.fontSize = 80 + i * 4;\n      td.justification = ParagraphJustification.CENTER;\n      src.setValue(td);\n      layer.property(\"Transform\").property(\"Position\").setValue([comp.width/2, comp.height/2, i * p.zSpacing]);\n      layer.property(\"Transform\").property(\"Opacity\").setValue(100 - i * 8);\n    }\n    var cam = comp.layers.addCamera(\"Stack Camera\", [comp.width/2, comp.height/2]);\n    cam.property(\"Transform\").property(\"Position\").setValueAtTime(comp.time, [comp.width/2, comp.height/2, -600]);\n    cam.property(\"Transform\").property(\"Position\").setValueAtTime(comp.time + p.duration, [comp.width/2, comp.height/2, p.layerCount * p.zSpacing + 400]);\n    _result = {status:\"success\", message:\"文字层叠已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
@@ -585,11 +569,7 @@
       "flipAxis": "Y",
       "cardWidth": 400,
       "cardHeight": 300,
-      "color": [
-        0.2,
-        0.5,
-        0.9
-      ]
+      "color": "[0.2, 0.5, 0.9]"
     },
     "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = { layerName: ${layerName}, duration: ${duration}, flipAxis: ${flipAxis}, cardWidth: ${cardWidth}, cardHeight: ${cardHeight}, color: ${color} };\n    var layer = comp.layers.byName(p.layerName);\n    if (!layer) {\n      layer = comp.layers.addSolid(p.color, p.layerName, p.cardWidth, p.cardHeight, 1);\n    }\n    layer.threeDLayer = true;\n    var rotProp = (p.flipAxis === \"X\") ? layer.property(\"Transform\").property(\"X Rotation\") : layer.property(\"Transform\").property(\"Y Rotation\");\n    rotProp.setValueAtTime(comp.time, 0);\n    rotProp.setValueAtTime(comp.time + p.duration * 0.5, 90);\n    rotProp.setValueAtTime(comp.time + p.duration, 180);\n    for (var k = 1; k <= rotProp.numKeys; k++) {\n      rotProp.setInterpolationTypeAtKey(k, KeyframeInterpolationType.BEZIER, KeyframeInterpolationType.BEZIER);\n    }\n    _result = {status:\"success\", message:\"卡片翻转已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
     "compatibility": {
@@ -638,11 +618,7 @@
     },
     "default_values": {
       "size": 300,
-      "color": [
-        0.4,
-        0.6,
-        0.8
-      ],
+      "color": "[0.4, 0.6, 0.8]",
       "duration": 5.0,
       "rotationSpeed": 1.0
     },
@@ -872,11 +848,7 @@
       "intensity": 120,
       "coneAngle": 45,
       "coneFeather": 30,
-      "color": [
-        1.0,
-        0.95,
-        0.8
-      ],
+      "color": "[1.0, 0.95, 0.8]",
       "duration": 4.0
     },
     "script_template": "(function() {\n  var _result = {};\n  try {\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n      _result = {status:\"error\", message:\"No active comp\"};\n      return JSON.stringify(_result);\n    }\n    var p = { lightName: ${lightName}, intensity: ${intensity}, coneAngle: ${coneAngle}, coneFeather: ${coneFeather}, color: ${color}, duration: ${duration} };\n    var light = comp.layers.addLight(p.lightName, LightType.SPOT, [comp.width/2, comp.height/2, -300]);\n    var opts = light.property(\"Light Options\");\n    opts.property(\"Intensity\").setValue(p.intensity);\n    opts.property(\"Color\").setValue(p.color);\n    opts.property(\"Cone Angle\").setValue(p.coneAngle);\n    opts.property(\"Cone Feather\").setValue(p.coneFeather);\n    var pos = light.property(\"Transform\").property(\"Position\");\n    pos.setValueAtTime(comp.time, [comp.width/2, comp.height/2, -300]);\n    pos.setValueAtTime(comp.time + p.duration, [comp.width*0.7, comp.height*0.3, -400]);\n    _result = {status:\"success\", message:\"聚光灯已应用\"};\n  } catch(e) {\n    _result = {status:\"error\", message:\"Error: \" + e.toString()};\n  }\n  return JSON.stringify(_result);\n})();",
@@ -975,10 +947,7 @@
     },
     "default_values": {
       "layerName": "光晕层",
-      "flareCenter": [
-        960,
-        540
-      ],
+      "flareCenter": "[960, 540]",
       "brightness": 120,
       "duration": 4.0
     },
@@ -1025,11 +994,7 @@
     },
     "default_values": {
       "layerName": "阴影主体",
-      "shadowColor": [
-        0,
-        0,
-        0
-      ],
+      "shadowColor": "[0, 0, 0]",
       "shadowOpacity": 70,
       "lightName": "Shadow Light"
     },

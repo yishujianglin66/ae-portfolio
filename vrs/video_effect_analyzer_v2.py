@@ -1395,6 +1395,11 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
         def _collect(fr: Dict[str, Any]) -> None:
             for m in fr.get("blend_modes_detected", []) or []:
+                # 兼容新格式：元素可能是 {"mode": "SCREEN"} 字典
+                if isinstance(m, dict):
+                    m = m.get("mode")
+                if not m:
+                    continue
                 if m not in seen:
                     seen.add(m)
                     modes.append(m)

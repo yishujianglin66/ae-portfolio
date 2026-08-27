@@ -3,7 +3,7 @@ import json
 import shutil
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-from training_state_manager import TrainingStateManager
+from learning.training_state_manager import TrainingStateManager
 
 MEMORY_DIR = r"D:\AE-Work\训练归档\记忆存储"
 MEMORY_FILE = os.path.join(MEMORY_DIR, "system_memory.json")

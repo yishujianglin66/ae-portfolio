@@ -17,7 +17,7 @@ import asyncio
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.multi_agent_orchestrator import (
+from core.style_transfer_agents import (
     AgentRole,
     AgentStatus,
     AgentConfig,

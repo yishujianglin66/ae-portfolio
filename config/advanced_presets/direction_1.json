@@ -1,0 +1,84 @@
+{
+  "category": "advanced_kinetic",
+  "display_name": "Advanced Kinetic Typography 高级动态文字",
+  "presets": [
+    {
+      "id": "ak_liquid_metal",
+      "name": "液态金属流动",
+      "name_en": "Liquid Metal Flow",
+      "description": "文字表面呈现液态金属流动效果，结合湍流置换+金属渐变+高光扫描，对标Vimeo顶级motion graphics",
+      "tags": ["液态金属","流动","高级","Vimeo","motion graphics"],
+      "difficulty": 5,
+      "duration_default": 3.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.0,"min":1.0,"max":6.0,"description":"总时长(秒)"},
+        {"name":"flowSpeed","type":"number","default":15,"min":5,"max":40,"description":"流动速度"},
+        {"name":"metalHue","type":"number","default":45,"min":0,"max":360,"description":"金属色相(度)"},
+        {"name":"turbAmount","type":"number","default":12,"min":3,"max":30,"description":"湍流强度"},
+        {"name":"fontSize","type":"number","default":180,"min":60,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found: '+n};return JSON.stringify(_r);}var d={{duration}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[0.85,0.75,0.5];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);var turb=L.property('Effects').addProperty('ADBE Turbulent Displace');turb.property('ADBE Turbulent Displace-0001').setValue({{turbAmount}});turb.property('ADBE Turbulent Displace-0002').setValue({{flowSpeed}});turb.property('ADBE Turbulent Displace-0003').setValue(3);var ramp=L.property('Effects').addProperty('ADBE Ramp');ramp.property('Start Color').setValue([0.95,0.85,0.4,1]);ramp.property('Start Point').setValue([0,0]);ramp.property('End Color').setValue([0.4,0.35,0.2,1]);ramp.property('End Point').setValue([1920,1080]);ramp.property('Ramp Shape').setValue(1);var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.15);glow.property('ADBE Glo2-0003').setValue(25);glow.property('ADBE Glo2-0004').setValue(2.0);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([1,0.9,0.5,1]);glow.property('ADBE Glo2-0007').setValue([0.8,0.6,0.2,1]);}catch(ge){}L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0,[80,80]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.4,[105,105]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.6,[100,100]);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.3,100);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d-0.3,100);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);var tp=L.property('ADBE Text Properties');var a1=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a1.name='LiquidWave';var s1=a1.property('ADBE Text Selectors').addProperty('ADBE Text Wiggly Selector');s1.property('ADBE Text Wiggly Max Amount').setValue(15);s1.property('ADBE Text Temporal Freq').setValue(2);var ap=a1.property('ADBE Text Animator Properties');ap.addProperty('ADBE Text Position 3D').setValue([0,8,0]);_r={status:'success',preset:'ak_liquid_metal',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":-20,"leading":1,"fauxBold":true},
+      "easing": {"profile":"smooth","influence":8,"curve":"easeInOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"ak_liquid_metal_chrome","name":"铬银液态","overrides":{"metalHue":210,"turbAmount":8,"flowSpeed":20}},
+        {"id":"ak_liquid_metal_copper","name":"紫铜液态","overrides":{"metalHue":25,"turbAmount":15,"flowSpeed":10}},
+        {"id":"ak_liquid_metal_obsidian","name":"黑曜石液态","overrides":{"metalHue":270,"turbAmount":20,"flowSpeed":25}}
+      ]
+    },
+    {
+      "id": "ak_particle_scatter",
+      "name": "粒子爆散聚合",
+      "name_en": "Particle Scatter Assemble",
+      "description": "文字从粒子状态爆散后聚合成型，或从完整状态爆散消失。使用CC Particle World模拟粒子场+逐字延迟",
+      "tags": ["粒子","爆散","聚合","高级","入场"],
+      "difficulty": 5,
+      "duration_default": 2.5,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":2.5,"min":1.0,"max":5.0,"description":"总时长(秒)"},
+        {"name":"scatterRadius","type":"number","default":300,"min":100,"max":800,"description":"爆散半径(px)"},
+        {"name":"charDelay","type":"number","default":2,"min":0,"max":10,"description":"字间延迟(帧)"},
+        {"name":"particleSize","type":"number","default":4,"min":1,"max":15,"description":"粒子大小"},
+        {"name":"fontSize","type":"number","default":160,"min":60,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};var radius={{scatterRadius}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[1,1,1];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);var tp=L.property('ADBE Text Properties');var a1=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a1.name='ScatterAssemble';var ap=a1.property('ADBE Text Animator Properties');ap.addProperty('ADBE Text Position 3D').setValue([0,0,-500]);ap.addProperty('ADBE Text Opacity').setValue(0);ap.addProperty('ADBE Text Scale 3D').setValue([200,200,0]);var s1=a1.property('ADBE Text Selectors').addProperty('ADBE Text Selector');s1.property('ADBE Text Range Advanced').property('ADBE Text Range Shape').setValue(2);s1.property('ADBE Text Percent Start').setValueAtTime(0,100);s1.property('ADBE Text Percent Start').setValueAtTime(d*0.6,0);try{s1.property('ADBE Text Percent Start').setTemporalEaseAtKey(1,[new KeyframeEase(0,5)],[new KeyframeEase(0,5)]);s1.property('ADBE Text Percent Start').setTemporalEaseAtKey(2,[new KeyframeEase(0,80)],[new KeyframeEase(0,80)]);}catch(ee){}var a2=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a2.name='MicroJitter';var s2=a2.property('ADBE Text Selectors').addProperty('ADBE Text Wiggly Selector');s2.property('ADBE Text Wiggly Max Amount').setValue(30);s2.property('ADBE Text Temporal Freq').setValue(4);var ap2=a2.property('ADBE Text Animator Properties');ap2.addProperty('ADBE Text Position 3D').setValue([3,3,0]);var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.2);glow.property('ADBE Glo2-0003').setValue(15);glow.property('ADBE Glo2-0004').setValue(1.5);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([0.5,0.8,1,1]);}catch(ge){}L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.2,100);_r={status:'success',preset:'ak_particle_scatter',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":-15,"leading":1,"fauxBold":false},
+      "easing": {"profile":"snap","influence":15,"curve":"exponentialOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"ak_particle_scatter_fire","name":"火焰粒子聚合","overrides":{"scatterRadius":200,"particleSize":6}},
+        {"id":"ak_particle_scatter_ice","name":"冰晶粒子聚合","overrides":{"scatterRadius":400,"particleSize":3}},
+        {"id":"ak_particle_scatter_galaxy","name":"星河粒子聚合","overrides":{"scatterRadius":600,"particleSize":2}}
+      ]
+    },
+    {
+      "id": "ak_dimension_fold",
+      "name": "维度折叠展开",
+      "name_en": "Dimension Fold Unfold",
+      "description": "文字从2D平面折叠状态展开为3D立体，模拟纸张折叠/空间扭曲效果。使用3D旋转+摄像机+逐字Z轴偏移",
+      "tags": ["3D","折叠","维度","空间","高级"],
+      "difficulty": 5,
+      "duration_default": 3.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.0,"min":1.5,"max":6.0,"description":"总时长(秒)"},
+        {"name":"foldAngle","type":"number","default":90,"min":30,"max":180,"description":"折叠角度"},
+        {"name":"zDepth","type":"number","default":200,"min":50,"max":500,"description":"Z轴深度"},
+        {"name":"cameraZoom","type":"number","default":800,"min":400,"max":2000,"description":"摄像机焦距"},
+        {"name":"fontSize","type":"number","default":150,"min":60,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};var fold={{foldAngle}};var zd={{zDepth}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[0.95,0.95,0.95];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.threeDLayer=true;L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540,0]);var cam=null;try{cam=c.layers.addCamera('FoldCam',[960,540]);cam.property('ADBE Camera Options Group').property('ADBE Camera Zoom').setValue({{cameraZoom}});cam.property('ADBE Transform Group').property('ADBE Position').setValue([960,540,-800]);}catch(ce){}var tp=L.property('ADBE Text Properties');var a1=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a1.name='DimensionFold';var ap=a1.property('ADBE Text Animator Properties');ap.addProperty('ADBE Text Rotation X').setValue(fold);ap.addProperty('ADBE Text Position 3D').setValue([0,0,-zd]);ap.addProperty('ADBE Text Opacity').setValue(0);var s1=a1.property('ADBE Text Selectors').addProperty('ADBE Text Selector');s1.property('ADBE Text Range Advanced').property('ADBE Text Range Shape').setValue(2);s1.property('ADBE Text Percent Start').setValueAtTime(0,100);s1.property('ADBE Text Percent Start').setValueAtTime(d*0.7,0);try{s1.property('ADBE Text Percent Start').setTemporalEaseAtKey(2,[new KeyframeEase(0,70)],[new KeyframeEase(0,70)]);}catch(ee){}var a2=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a2.name='DepthWave';var s2=a2.property('ADBE Text Selectors').addProperty('ADBE Text Wiggly Selector');s2.property('ADBE Text Wiggly Max Amount').setValue(20);s2.property('ADBE Text Temporal Freq').setValue(1.5);var ap2=a2.property('ADBE Text Animator Properties');ap2.addProperty('ADBE Text Position 3D').setValue([0,0,30]);var shadow=L.property('Effects').addProperty('ADBE Drop Shadow');shadow.property('ADBE Drop Shadow-0004').setValue(8);shadow.property('ADBE Drop Shadow-0003').setValue(135);shadow.property('ADBE Drop Shadow-0005').setValue(12);shadow.property('ADBE Drop Shadow-0002').setValue(50);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.3,100);_r={status:'success',preset:'ak_dimension_fold',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":-10,"leading":1.1,"fauxBold":false},
+      "easing": {"profile":"cinematic","influence":10,"curve":"cubicBezier","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"ak_dimension_fold_paper","name":"纸折展开","overrides":{"foldAngle":120,"zDepth":100}},
+        {"id":"ak_dimension_fold_portal","name":"传送门折叠","overrides":{"foldAngle":180,"zDepth":400}},
+        {"id":"ak_dimension_fold_origami","name":"千纸鹤折叠","overrides":{"foldAngle":60,"zDepth":150}}
+      ]
+    }
+  ]
+}

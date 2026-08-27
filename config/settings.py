@@ -30,11 +30,14 @@ class Settings:
         self.access_token_ttl: int = int(os.environ.get("ACCESS_TOKEN_TTL", "3600"))
         self.refresh_token_ttl: int = int(os.environ.get("REFRESH_TOKEN_TTL", "604800"))
         if not self.jwt_secret:
-            self.jwt_secret = "ae-knowledge-vault-secret-key-please-change-in-production"
             if self.is_production:
                 raise RuntimeError(
                     "生产环境必须设置 AE_VAULT_SECRET_KEY 环境变量"
                 )
+            # VULN-004: 非生产环境随机化，避免使用公开硬编码字符串；
+            # 每次实例化生成不同值，防止会话固定/伪造攻击。
+            import secrets
+            self.jwt_secret = secrets.token_urlsafe(32)
 
         # --- 数据库 ---
         self.db_path: str = os.environ.get(
@@ -56,6 +59,10 @@ class Settings:
         # --- 路径 ---
         self.data_dir: Path = PROJECT_ROOT / "data"
         self.logs_dir: Path = PROJECT_ROOT / "logs"
+        # 管线实战反馈隔离目录 (feedback_loop / KnowledgeInjector 回读写历史经验)
+        self.feedback_dir: str = os.environ.get(
+            "FEEDBACK_DIR", str(PROJECT_ROOT / "data" / "engine_feedback")
+        )
         self._ensure_dirs()
 
         # --- 日志 ---
@@ -65,10 +72,23 @@ class Settings:
     def _ensure_dirs(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.logs_dir.mkdir(parents=True, exist_ok=True)
+        Path(self.feedback_dir).mkdir(parents=True, exist_ok=True)
 
     @property
     def cors_origin_list(self) -> list:
         if self.cors_origins == "*":
+            # 缺口A：生产环境禁止 CORS 通配符，拒绝启动消费方继续运行
+            if self.is_production:
+                raise RuntimeError(
+                    "生产环境禁止 CORS_ORIGINS=*，请设置显式域名白名单"
+                )
+            # 缺口B：开发环境允许通配符但必须警告（仅限本地调试）
+            import warnings
+            warnings.warn(
+                "开发环境正在使用 CORS_ORIGINS=*，仅限本地调试；上线前必须设置显式域名",
+                RuntimeWarning,
+                stacklevel=2,
+            )
             return ["*"]
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 

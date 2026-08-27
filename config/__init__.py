@@ -5,4 +5,8 @@
 
 from .settings import settings, Settings
 
-__all__ = ["settings", "Settings"]
+# 兼容别名：新代码/测试用 app_settings 指代单例实例，
+# 避免与 Settings 类产生命名混淆（回归防护见 test_regression_guards）
+app_settings = settings
+
+__all__ = ["settings", "app_settings", "Settings"]

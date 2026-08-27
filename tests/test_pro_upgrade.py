@@ -241,4 +241,5 @@ if FAILURES:
     print("失败项:")
     for f_ in FAILURES:
         print(f"  - {f_}")
-sys.exit(1 if FAIL else 0)
+if __name__ == "__main__":
+    sys.exit(1 if FAIL else 0)

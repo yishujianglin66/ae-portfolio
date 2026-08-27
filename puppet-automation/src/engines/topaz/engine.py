@@ -67,7 +67,8 @@ class TopazEngine(BaseEngine):
         if extra_args:
             cmd.extend(extra_args)
 
-        code, stdout, stderr = await asyncio.to_thread(
+        # 注意：_run_subprocess 返回 4 元组 (code, stdout, stderr, error_code)
+        code, _stdout, stderr, _err_code = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=14400
         )
         return EngineResult(
@@ -82,7 +83,8 @@ class TopazEngine(BaseEngine):
             error=stderr if code != 0 else None,
         )
 
-    async def execute(self, **kwargs) -> EngineResult:
+    async def _execute_impl(self, *args, **kwargs) -> EngineResult:
+        """【子类实现】action 调度；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
         action = kwargs.pop("action", "enhance")
         if action == "enhance":
             return await self.enhance(**kwargs)

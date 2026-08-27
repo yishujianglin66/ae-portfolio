@@ -12,9 +12,12 @@
 #     sentence-transformers + open-clip-torch  → CLIP 图文语义检索
 #     laion-clap                                → 音频-文本跨模态检索
 #     essentia                                 → BPM / 调性 / 情绪等音频特征
+#     transformers + bitsandbytes               → verify 阶段 VLM 语义评判 (Qwen3-VL-8B 4bit)
 # ============================================================================
 
 torch>=2.1
+transformers>=5.0
+bitsandbytes>=0.50
 sentence-transformers>=2.3
 open-clip-torch>=2.0
 laion-clap>=1.0

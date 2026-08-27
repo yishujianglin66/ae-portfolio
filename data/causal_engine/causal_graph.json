@@ -1,26 +1,5 @@
 {
   "nodes": {
-    "ae_output_format": {
-      "id": "ae_output_format",
-      "node_type": "OUTPUT_QUALITY",
-      "engine": "ae",
-      "name": "ae_output_format",
-      "metadata": {}
-    },
-    "ae_execute": {
-      "id": "ae_execute",
-      "node_type": "ENGINE_STAGE",
-      "engine": "ae",
-      "name": "ae_execute",
-      "metadata": {}
-    },
-    "davinci_color": {
-      "id": "davinci_color",
-      "node_type": "ENGINE_STAGE",
-      "engine": "davinci",
-      "name": "davinci_color",
-      "metadata": {}
-    },
     "ffmpeg_cpu": {
       "id": "ffmpeg_cpu",
       "node_type": "ENGINE_STATE",
@@ -28,18 +7,11 @@
       "name": "ffmpeg_cpu",
       "metadata": {}
     },
-    "effect_params": {
-      "id": "effect_params",
-      "node_type": "PARAMETER",
-      "engine": "pipeline",
-      "name": "effect_params",
-      "metadata": {}
-    },
-    "davinci_db_state": {
-      "id": "davinci_db_state",
-      "node_type": "ENGINE_STATE",
-      "engine": "davinci",
-      "name": "davinci_db_state",
+    "ae_output_format": {
+      "id": "ae_output_format",
+      "node_type": "OUTPUT_QUALITY",
+      "engine": "ae",
+      "name": "ae_output_format",
       "metadata": {}
     },
     "ffmpeg_transcode": {
@@ -49,11 +21,18 @@
       "name": "ffmpeg_transcode",
       "metadata": {}
     },
-    "input_resolution": {
-      "id": "input_resolution",
+    "davinci_color": {
+      "id": "davinci_color",
       "node_type": "ENGINE_STAGE",
-      "engine": "pipeline",
-      "name": "input_resolution",
+      "engine": "davinci",
+      "name": "davinci_color",
+      "metadata": {}
+    },
+    "davinci_db_state": {
+      "id": "davinci_db_state",
+      "node_type": "ENGINE_STATE",
+      "engine": "davinci",
+      "name": "davinci_db_state",
       "metadata": {}
     },
     "ae_memory": {
@@ -61,6 +40,27 @@
       "node_type": "ENGINE_STATE",
       "engine": "ae",
       "name": "ae_memory",
+      "metadata": {}
+    },
+    "ae_execute": {
+      "id": "ae_execute",
+      "node_type": "ENGINE_STAGE",
+      "engine": "ae",
+      "name": "ae_execute",
+      "metadata": {}
+    },
+    "input_resolution": {
+      "id": "input_resolution",
+      "node_type": "ENGINE_STAGE",
+      "engine": "pipeline",
+      "name": "input_resolution",
+      "metadata": {}
+    },
+    "effect_params": {
+      "id": "effect_params",
+      "node_type": "PARAMETER",
+      "engine": "pipeline",
+      "name": "effect_params",
       "metadata": {}
     },
     "input_codec": {
@@ -240,7 +240,7 @@
       "confidence": 0.8,
       "is_expert": true,
       "sample_count": 0,
-      "last_updated": 1786766232.7578163
+      "last_updated": 1787753035.8530436
     },
     {
       "source": "ae_execute",
@@ -249,7 +249,7 @@
       "confidence": 0.9,
       "is_expert": true,
       "sample_count": 0,
-      "last_updated": 1786766232.7578163
+      "last_updated": 1787753035.8530436
     },
     {
       "source": "davinci_color",
@@ -258,7 +258,7 @@
       "confidence": 0.7,
       "is_expert": true,
       "sample_count": 0,
-      "last_updated": 1786766232.7578163
+      "last_updated": 1787753035.8530436
     },
     {
       "source": "ae_memory",
@@ -267,7 +267,7 @@
       "confidence": 0.7,
       "is_expert": true,
       "sample_count": 0,
-      "last_updated": 1786766232.7578163
+      "last_updated": 1787753035.8530436
     },
     {
       "source": "ffmpeg_cpu",
@@ -276,7 +276,7 @@
       "confidence": 0.6,
       "is_expert": true,
       "sample_count": 0,
-      "last_updated": 1786766232.7578163
+      "last_updated": 1787753035.8530436
     },
     {
       "source": "effect_params",
@@ -285,7 +285,7 @@
       "confidence": 0.6,
       "is_expert": true,
       "sample_count": 0,
-      "last_updated": 1786766232.7578163
+      "last_updated": 1787753035.8530436
     },
     {
       "source": "ae_output_format",
@@ -294,7 +294,7 @@
       "confidence": 0.7,
       "is_expert": true,
       "sample_count": 0,
-      "last_updated": 1786766232.7578163
+      "last_updated": 1787753035.8530436
     },
     {
       "source": "davinci_db_state",
@@ -303,7 +303,7 @@
       "confidence": 0.6,
       "is_expert": true,
       "sample_count": 0,
-      "last_updated": 1786766232.7578163
+      "last_updated": 1787753035.8530436
     },
     {
       "source": "input_resolution",
@@ -312,7 +312,7 @@
       "confidence": 0.8,
       "is_expert": true,
       "sample_count": 0,
-      "last_updated": 1786766232.7578163
+      "last_updated": 1787753035.8530436
     },
     {
       "source": "input_codec",
@@ -321,169 +321,7 @@
       "confidence": 0.6,
       "is_expert": true,
       "sample_count": 0,
-      "last_updated": 1786766232.7578163
-    },
-    {
-      "source": "plan_duration",
-      "target": "plan_success",
-      "weight": 0.5136716903786369,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "analyze_success",
-      "target": "output_quality",
-      "weight": 0.5220720301879263,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "analyze_success",
-      "target": "plan_success",
-      "weight": 0.6902566867686306,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "analyze_duration",
-      "target": "perceive_duration",
-      "weight": 0.9850121670885451,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "analyze_duration",
-      "target": "verify_duration",
-      "weight": 0.7306137932668841,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "execute_duration",
-      "target": "render_duration",
-      "weight": 0.833745264761367,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "execute_duration",
-      "target": "output_quality",
-      "weight": 0.8827319273647867,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "execute_duration",
-      "target": "perceive_duration",
-      "weight": 0.9571657434592337,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 15,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "execute_success",
-      "target": "render_success",
-      "weight": 0.6872573699739443,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "execute_success",
-      "target": "plan_success",
-      "weight": 0.5252257314388896,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "execute_success",
-      "target": "verify_success",
-      "weight": 0.4824865199497815,
-      "confidence": 0.7500000000000002,
-      "is_expert": false,
-      "sample_count": 6,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "perceive_success",
-      "target": "plan_success",
-      "weight": 0.5129891760425774,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "perceive_success",
-      "target": "verify_success",
-      "weight": -0.3468909530866045,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "render_duration",
-      "target": "verify_duration",
-      "weight": 0.7900172891374628,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "output_quality",
-      "target": "plan_duration",
-      "weight": 0.6994917537471961,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "output_quality",
-      "target": "perceive_duration",
-      "weight": 0.8879870895495666,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "plan_success",
-      "target": "render_duration",
-      "weight": 0.5233457388651894,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
-    },
-    {
-      "source": "render_success",
-      "target": "verify_success",
-      "weight": 0.6121585998321992,
-      "confidence": 1.0,
-      "is_expert": false,
-      "sample_count": 19,
-      "last_updated": 1786766237.9885094
+      "last_updated": 1787753035.8530436
     }
   ]
 }

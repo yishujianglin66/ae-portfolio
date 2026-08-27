@@ -155,6 +155,161 @@ class StyleAnalyzer:
             return {"success": False, "error": f"JSON解析失败: {e}", "raw": result}
 
 
+class LocalStyleAnalyzer:
+    """离线风格分析器（不依赖外部 V4 API）
+
+    通过关键词启发式将提示词 / 本地视频特征映射为符合 STYLE_JSON_SCHEMA 的结构化风格。
+    作为 V4 不可用时的降级分析器，保证风格复制管线可离线端到端运行。
+    """
+
+    # 关键词 -> 风格字段映射
+    _COLOR_TEMP = {
+        "warm": ["暖", "暖色", "夕阳", "橙", "金黄", "warm", "橙色"],
+        "cool": ["冷", "冷色", "蓝", "科技", "cool", "青", "蓝调"],
+    }
+    _CONTRAST = {
+        "high": ["高对比", "强烈", "硬", "high", "强烈对比"],
+        "low": ["柔和", "低对比", "柔", "low"],
+    }
+    _PACE = {
+        "very_fast": ["极快", "极速", "very_fast"],
+        "fast": ["快", "快节奏", "动感", "卡点", "快剪", "fast", "节奏快"],
+        "slow": ["慢", "慢节奏", "舒缓", "慢镜", "slow", "节奏慢"],
+    }
+    _EFFECTS = {
+        "glow": ["光晕", "发光", "glow"],
+        "film_grain": ["胶片", "颗粒", "胶片感", "film", "grain"],
+        "vintage": ["复古", "怀旧", "vintage", "老"],
+        "cinematic": ["电影感", "电影", "cinematic", "影院"],
+        "dreamy": ["梦幻", "dreamy", "朦胧"],
+        "dramatic": ["戏剧", "强烈", "dramatic"],
+        "lens_flare": ["镜头光晕", "光斑", "lens", "flare"],
+    }
+    _TRANSITIONS = {
+        "dissolve": ["溶解", "淡入淡出", "渐变", "dissolve"],
+        "fade": ["淡入", "淡出", "fade"],
+        "zoom": ["缩放", "推近", "zoom"],
+        "whip_pan": ["甩镜", "横移", "快速移动", "whip"],
+        "slide": ["滑动", "slide"],
+    }
+
+    def analyze_from_prompt(self, prompt: str) -> Dict:
+        """从提示词生成风格描述（离线）"""
+        text = (prompt or "").lower()
+
+        color_temperature = self._match_first(text, self._COLOR_TEMP, "neutral")
+        contrast = self._match_first(text, self._CONTRAST, "medium")
+        pace = self._match_first(text, self._PACE, "medium")
+
+        effects = self._match_all(text, self._EFFECTS)
+        if not effects:
+            effects = ["cinematic"]
+
+        transitions = self._match_all(text, self._TRANSITIONS)
+        if not transitions:
+            transitions = ["hard_cut", "dissolve"]
+
+        text_style = {"font": "粗体无衬线", "color": "#FFFFFF",
+                      "position": "底部居中", "animation": "typewriter"}
+        if any(k in text for k in ["字幕", "标题", "text", "caption"]):
+            text_style["animation"] = "typewriter"
+        else:
+            text_style["animation"] = "none"
+
+        if color_temperature == "warm":
+            color_palette = "暖色调，橙黄为主"
+        elif color_temperature == "cool":
+            color_palette = "冷色调，青蓝为主"
+        else:
+            color_palette = "中性色调，平衡对比"
+
+        mood_keywords = [color_temperature, pace, "cinematic"]
+        audio_mood = "energetic" if pace in ("fast", "very_fast") else "calm"
+
+        style = {
+            "color_palette": color_palette,
+            "color_temperature": color_temperature,
+            "contrast": contrast,
+            "pace": pace,
+            "avg_shot_duration": 1.5 if pace in ("fast", "very_fast") else 3.0,
+            "bpm": 128 if pace in ("fast", "very_fast") else 90,
+            "transitions": transitions,
+            "effects": effects,
+            "camera_movements": ["push_in"] if "推" in text or "push" in text else ["static"],
+            "text_style": text_style,
+            "audio_mood": audio_mood,
+            "mood_keywords": mood_keywords,
+        }
+        return {"success": True, "style": style, "source": "local_heuristic"}
+
+    def analyze_from_video(self, video_path: str, keyframe_paths: List[str] = None) -> Dict:
+        """从本地视频生成风格描述（离线，基于 ffprobe 特征启发式）"""
+        features = self._probe_video(video_path)
+        fps = features.get("fps", 0)
+        pace = "fast" if fps >= 30 else "medium"
+        style = {
+            "color_palette": "中性色调（基于源视频）",
+            "color_temperature": "neutral",
+            "contrast": "medium",
+            "pace": pace,
+            "avg_shot_duration": round(1.0 / fps, 2) if fps else 2.0,
+            "bpm": 120 if pace == "fast" else 90,
+            "transitions": ["hard_cut"],
+            "effects": ["cinematic"],
+            "camera_movements": ["static"],
+            "text_style": {"font": "粗体无衬线", "color": "#FFFFFF",
+                           "position": "底部居中", "animation": "none"},
+            "audio_mood": "calm",
+            "mood_keywords": ["source-based", pace],
+            "_probe": features,
+        }
+        return {"success": True, "style": style, "source": "local_probe"}
+
+    @staticmethod
+    def _probe_video(path: str) -> Dict:
+        """用 ffprobe 探测视频基础特征（失败则返回空）"""
+        try:
+            import shutil, subprocess, json as _json
+            ffprobe = shutil.which("ffprobe") or shutil.which("ffprobe.exe")
+            if not ffprobe or not path:
+                return {}
+            out = subprocess.run(
+                [ffprobe, "-v", "error", "-select_streams", "v:0",
+                 "-show_entries", "stream=width,height,r_frame_rate",
+                 "-of", "json", path],
+                capture_output=True, text=True, timeout=30,
+            )
+            data = _json.loads(out.stdout or "{}")
+            st = (data.get("streams") or [{}])[0]
+            fr = st.get("r_frame_rate", "0/1")
+            num, den = (fr.split("/") + ["1", "1"])[:2]
+            fps = float(num) / float(den) if float(den) else 0
+            return {"width": st.get("width"), "height": st.get("height"), "fps": round(fps, 2)}
+        except Exception:
+            return {}
+
+    @staticmethod
+    def _match_first(text: str, mapping: Dict[str, List[str]], default: str) -> str:
+        for key, kws in mapping.items():
+            if any(kw in text for kw in kws):
+                return key
+        return default
+
+    @staticmethod
+    def _match_all(text: str, mapping: Dict[str, List[str]]) -> List[str]:
+        return [key for key, kws in mapping.items() if any(kw in text for kw in kws)]
+
+
+def get_analyzer(api_key: Optional[str] = None):
+    """分析器工厂：优先 V4，不可用则降级到本地离线分析器"""
+    if V4_AVAILABLE:
+        try:
+            return StyleAnalyzer(api_key=api_key)
+        except Exception:
+            pass
+    return LocalStyleAnalyzer()
+
+
 def main():
     import sys
     

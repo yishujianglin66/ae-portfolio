@@ -204,10 +204,10 @@ class TestPremiereEnginePathResolution(_EngineModuleIsolationMixin, unittest.Tes
             # Mock 无法参与路径运算，需提供真实 Path。
             mock_settings.pr_bridge_dir = Path(tmpdir) / "pr_bridge"
 
-            # 引擎通过模块级单例 `from ...config import settings` 取配置，
-            # 并不存在 `get_settings` 函数，因此需 patch 该 settings 对象本身。
+            # 引擎构造时调用 `get_settings()` 获取配置单例，
+            # patch 该函数使其返回 mock_settings。
             from src.engines.premiere.engine import PremiereEngine
-            with patch('src.engines.premiere.engine.settings', mock_settings):
+            with patch('src.engines.premiere.engine.get_settings', return_value=mock_settings):
                 engine = PremiereEngine(executable_path=explicit_exe)
 
                 # 显式参数胜出

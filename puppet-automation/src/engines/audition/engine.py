@@ -90,8 +90,8 @@ class AuditionEngine(BaseEngine):
                 return path
         return None
 
-    async def execute(self, *args, **kwargs) -> EngineResult:
-        """Dispatch to specific methods."""
+    async def _execute_impl(self, *args, **kwargs) -> EngineResult:
+        """【子类实现】task 调度；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
         task = kwargs.get("task", "denoise")
         if task == "denoise":
             return await self.noise_reduction(**{k: v for k, v in kwargs.items() if k != "task"})

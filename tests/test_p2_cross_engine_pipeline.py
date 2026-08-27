@@ -20,6 +20,9 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "bridges"))
+# puppet-automation 目录名含连字符，无法作为包导入，按仓库标准口径
+# （同 test_all_engines.py）加入路径后用 src.engines.* 导入
+sys.path.insert(0, str(PROJECT_ROOT / "puppet-automation"))
 
 
 # ============================================================================
@@ -110,37 +113,37 @@ class TestBridgeEngineInterface:
     """验证桥接器调用的引擎方法确实存在。"""
 
     def test_blender_engine_has_required_methods(self):
-        from puppet_automation.src.engines.blender import BlenderEngine
+        from src.engines.blender import BlenderEngine
         engine = BlenderEngine()
         assert hasattr(engine, "create_puppet_stage")
         assert hasattr(engine, "render_cel_animation")
         assert hasattr(engine, "render_foreground_element")
 
     def test_topaz_engine_has_enhance(self):
-        from puppet_automation.src.engines.topaz import TopazEngine
+        from src.engines.topaz import TopazEngine
         engine = TopazEngine()
         assert hasattr(engine, "enhance")
 
     def test_silhouette_engine_has_export_shapes(self):
-        from puppet_automation.src.engines.silhouette import SilhouetteEngine
+        from src.engines.silhouette import SilhouetteEngine
         engine = SilhouetteEngine()
         assert hasattr(engine, "export_shapes")
         assert hasattr(engine, "create_roto_session")
         assert hasattr(engine, "run_tracker")
 
     def test_davinci_engine_has_timeline_methods(self):
-        from puppet_automation.src.engines.davinci import DavinciEngine
+        from src.engines.davinci import DavinciEngine
         engine = DavinciEngine()
         assert hasattr(engine, "import_media_and_create_timeline")
 
     def test_ae_engine_has_required_methods(self):
-        from puppet_automation.src.engines.ae import AEEngine
+        from src.engines.ae import AEEngine
         engine = AEEngine()
         assert hasattr(engine, "create_project")
         assert hasattr(engine, "import_footage")
 
     def test_c4d_engine_has_required_methods(self):
-        from puppet_automation.src.engines.cinema4d import Cinema4DEngine
+        from src.engines.cinema4d import Cinema4DEngine
         engine = Cinema4DEngine()
         assert hasattr(engine, "render_scene")
         assert hasattr(engine, "render_motion_graphics")
@@ -161,7 +164,7 @@ class TestEngineDispatch:
 
     @pytest.mark.asyncio
     async def test_silhouette_dispatch_export_shapes(self):
-        from puppet_automation.src.engines.silhouette import SilhouetteEngine
+        from src.engines.silhouette import SilhouetteEngine
         engine = SilhouetteEngine()
         if not engine.available:
             pytest.skip("Silhouette not available")
@@ -174,7 +177,7 @@ class TestEngineDispatch:
 
     @pytest.mark.asyncio
     async def test_silhouette_dispatch_roto(self):
-        from puppet_automation.src.engines.silhouette import SilhouetteEngine
+        from src.engines.silhouette import SilhouetteEngine
         engine = SilhouetteEngine()
         if not engine.available:
             pytest.skip("Silhouette not available")
@@ -188,7 +191,7 @@ class TestEngineDispatch:
 
     @pytest.mark.asyncio
     async def test_davinci_dispatch_timeline(self):
-        from puppet_automation.src.engines.davinci import DavinciEngine
+        from src.engines.davinci import DavinciEngine
         engine = DavinciEngine()
         if not engine.available:
             pytest.skip("DaVinci not available")
@@ -236,6 +239,7 @@ class TestDataFlowSimulation:
     """
 
     @pytest.mark.asyncio
+    @pytest.mark.real_render
     async def test_full_3d_pipeline_structure(self):
         from bridges.pipeline_orchestrator import PipelineOrchestrator
         orchestrator = PipelineOrchestrator()
@@ -257,6 +261,7 @@ class TestDataFlowSimulation:
         assert "errors" in result
 
     @pytest.mark.asyncio
+    @pytest.mark.real_render
     async def test_animation_pipeline_structure(self):
         from bridges.pipeline_orchestrator import PipelineOrchestrator
         orchestrator = PipelineOrchestrator()
@@ -275,6 +280,7 @@ class TestDataFlowSimulation:
         assert "step_results" in result
 
     @pytest.mark.asyncio
+    @pytest.mark.real_render
     async def test_mograph_pipeline_structure(self):
         from bridges.pipeline_orchestrator import PipelineOrchestrator
         orchestrator = PipelineOrchestrator()

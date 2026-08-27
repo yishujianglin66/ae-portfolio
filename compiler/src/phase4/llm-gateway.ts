@@ -205,10 +205,12 @@ export class LLMGateway {
 
   configureFromEnv(env: Record<string, string> = {}): void {
     const baseUrl =
-      env.AEKV_LLM_BASE_URL || env.OPENAI_BASE_URL || this.config.baseUrl;
+      env.AEKV_LLM_BASE_URL || env.OPENAI_BASE_URL ||
+      env.MODELSCOPE_BASE_URL || this.config.baseUrl;
     const apiKey =
-      env.AEKV_LLM_API_KEY || env.OPENAI_API_KEY || this.config.apiKey;
-    const model = env.AEKV_LLM_MODEL || this.config.defaultModel;
+      env.AEKV_LLM_API_KEY || env.OPENAI_API_KEY ||
+      env.MODELSCOPE_API_KEY || this.config.apiKey;
+    const model = env.AEKV_LLM_MODEL || env.MODELSCOPE_MODEL || this.config.defaultModel;
 
     this.config.baseUrl = baseUrl;
     this.config.apiKey = apiKey;

@@ -282,7 +282,8 @@ class TestErrorHandling:
     def test_fallback_returns_ae_native(self, pipeline):
         result = pipeline._execute_fallback("test error")
         assert result["status"] == "fallback"
-        assert result["method"] == "ae_native"
+        # 实现契约：method = f"ae_native_{task_type}"，默认 task_type="roto"（见 test_e2e_integration.py）
+        assert result["method"] == "ae_native_roto"
 
     def test_exception_in_fn_triggers_retry(self, pipeline):
         call_count = {"n": 0}

@@ -88,16 +88,24 @@ class PhotoshopEngine(BaseEngine):
                 return path
         return None
 
-    async def execute(self, *args, **kwargs) -> EngineResult:
-        """Dispatch to specific methods."""
-        task = kwargs.get("task", "export_layers")
-        if task == "export_layers":
-            return await self.smart_object_export(**{k: v for k, v in kwargs.items() if k != "task"})
-        if task == "lut":
-            return await self.generate_lut(**{k: v for k, v in kwargs.items() if k != "task"})
-        if task == "batch":
-            return await self.batch_process(**{k: v for k, v in kwargs.items() if k != "task"})
-        return EngineResult(success=False, error=f"Unknown task: {task}")
+    async def _execute_impl(self, *args, **kwargs) -> EngineResult:
+        """【子类实现】handlers dict 分发；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
+        action = kwargs.pop("action", None) or kwargs.pop("task", "export_layers")
+        handlers = {
+            "export_layers": self.smart_object_export,
+            "smart_object_export": self.smart_object_export,
+            "lut": self.generate_lut,
+            "generate_lut": self.generate_lut,
+            "batch": self.batch_process,
+            "batch_process": self.batch_process,
+        }
+        handler = handlers.get(action)
+        if handler is None:
+            return EngineResult(
+                success=False,
+                error=f"Unknown action: {action}. Available: {list(handlers.keys())}",
+            )
+        return await handler(**kwargs)
 
     async def smart_object_export(
         self,

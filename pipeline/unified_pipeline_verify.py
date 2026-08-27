@@ -6,7 +6,10 @@ run_verify(self), 行为等价。
 """
 from __future__ import annotations
 
-from typing import Any, Dict
+from pathlib import Path
+from typing import Any, Dict, List
+
+from pipeline.unified_pipeline import StageResult, StageStatus, _paths_ffmpeg
 
 
 
@@ -92,10 +95,73 @@ def run_verify(self) -> Dict:
         initial_score = 0.0
 
     threshold = float(self.config.min_quality_score)
+
+    # 【Loop Engineering】语义级视觉评判: VLM/规则双后端 (黑帧陷阱/特效缺失/转场突兀/风格跑偏)
+    # 融合后写入 qa_result["score"]; 硬性否决时强制 verified=False 并把问题追加进
+    # recommendations, 由既有 _check_quality_gate + _adjust_params_for_retry 触发重跑。
+    # 异常样本不进语义评判 (与多轮优化同策略), 避免污染学习数据。
+    semantic_hard_veto = False
+    if (
+        getattr(self.config, "enable_visual_judge", False)
+        and not qa_result.get("is_error_sample", False)
+    ):
+        try:
+            from pipeline.visual_semantic_judge import VisualSemanticJudge
+            judge = VisualSemanticJudge(
+                backend=getattr(self.config, "visual_judge_backend", "auto"),
+                model_path=getattr(self.config, "visual_judge_model_path", ""),
+                min_score=float(getattr(self.config, "visual_judge_min_score", 60.0)),
+                ffmpeg_bin=self._cfg("ffmpeg_bin", "") or _paths_ffmpeg(),
+                quantize=getattr(self.config, "visual_judge_quantize", "auto"),
+            )
+            plan_data = {}
+            prev_plan = self._results.get("plan")
+            if prev_plan and prev_plan.status == StageStatus.DONE:
+                plan_data = prev_plan.data or {}
+            sj = judge.judge(
+                output_path,
+                context={
+                    "effect_stack": plan_data.get("effect_stack", []),
+                    "style_params": plan_data.get("style_params", {}),
+                },
+            )
+            semantic_hard_veto = sj.hard_veto
+            qa_result["semantic_judge"] = sj.to_dict()
+
+            # 分数融合: final = (1-w)*信号分 + w*语义分 (信号分缺失时仅用语义分)
+            raw_signal = qa_result.get("score")
+            try:
+                signal_score = 0.0 if raw_signal is None else float(raw_signal)
+            except (TypeError, ValueError):
+                signal_score = 0.0
+            weight = float(getattr(self.config, "semantic_score_weight", 0.6))
+            fused = round((1.0 - weight) * signal_score + weight * float(sj.score), 1)
+            qa_result["score"] = fused
+
+            # 硬性否决 / 语义不达标 → 强制 verified=False + 建议追加 (供重试调参消费)
+            if sj.hard_veto or not sj.passed:
+                qa_result["verified"] = False
+                recs = list(qa_result.get("recommendations") or [])
+                recs.extend(sj.recommendations)
+                qa_result["recommendations"] = recs
+            if sj.hard_veto:
+                # 灾难性问题: 分数压到阈值以下, 确保质量门禁触发重试
+                qa_result["score"] = min(fused, max(0.0, threshold - 10.0))
+
+            self._log(
+                f"[VERIFY] SemanticJudge({sj.backend}) score={sj.score:.1f} "
+                f"fused={qa_result['score']:.1f} hard_veto={sj.hard_veto} "
+                f"issues={sj.issues[:2]}"
+            )
+        except Exception as sj_e:
+            # 语义评判失败不阻塞管线, 保留信号级评分继续运行 (graceful degrade)
+            self._log(f"[VERIFY] SemanticJudge skipped (degraded): {sj_e}", "WARN")
+
     # 异常样本 (VQA 失败) 不进入多轮优化，避免在不可评分视频上反复 FFmpeg
     should_optimize = (
         self.config.enable_feedback_loop
         and not qa_result.get("is_error_sample", False)
+        and not semantic_hard_veto  # 黑帧/文件过小类灾难问题FFmpeg增强救不回, 直接走重试链路
         and initial_score < threshold
     )
     if should_optimize:

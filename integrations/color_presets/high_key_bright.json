@@ -1,0 +1,35 @@
+{
+  "name": "High Key Bright",
+  "description": "高调明亮风格，提升整体曝光、降低对比、保持中性色调，适合时尚/美容。",
+  "lift": {
+    "red": 0.03,
+    "green": 0.03,
+    "blue": 0.03,
+    "master": 0.03
+  },
+  "gamma": {
+    "red": 0.02,
+    "green": 0.02,
+    "blue": 0.02,
+    "master": 0.0
+  },
+  "gain": {
+    "red": 0.04,
+    "green": 0.04,
+    "blue": 0.04,
+    "master": 0.03
+  },
+  "offset": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 0.0,
+    "master": 0.0
+  },
+  "saturation": 1.05,
+  "contrast": 0.9,
+  "pivot": 0.4,
+  "highlight_saturation": 1.0,
+  "shadow_saturation": 1.0,
+  "blend_opacity": 1.0,
+  "tags": ["high-key", "bright", "fashion", "beauty", "clean"]
+}

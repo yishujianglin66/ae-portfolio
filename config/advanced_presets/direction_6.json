@@ -1,0 +1,84 @@
+{
+  "category": "art_typography",
+  "display_name": "Art Typography 高级艺术字设计",
+  "presets": [
+    {
+      "id": "at_ink_wash",
+      "name": "水墨晕染艺术字",
+      "name_en": "Ink Wash Art Typography",
+      "description": "中国风水墨晕染文字：墨迹从笔触中心向外扩散+飞白+宣纸纹理。对标国风MAD/武侠片头",
+      "tags": ["水墨","国风","晕染","武侠","宣纸"],
+      "difficulty": 5,
+      "duration_default": 3.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.0,"min":1.5,"max":6.0,"description":"总时长(秒)"},
+        {"name":"inkSpread","type":"number","default":15,"min":5,"max":40,"description":"墨迹扩散量"},
+        {"name":"paperTexture","type":"boolean","default":true,"description":"是否添加宣纸纹理"},
+        {"name":"brushDryness","type":"number","default":60,"min":20,"max":100,"description":"飞白干燥度"},
+        {"name":"fontSize","type":"number","default":200,"min":80,"max":500,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[0.08,0.06,0.04];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);var turb=L.property('Effects').addProperty('ADBE Turbulent Displace');turb.property('ADBE Turbulent Displace-0001').setValue({{inkSpread}});turb.property('ADBE Turbulent Displace-0002').setValue(8);turb.property('ADBE Turbulent Displace-0003').setValue(2);var tp=L.property('ADBE Text Properties');var a1=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a1.name='InkReveal';var ap=a1.property('ADBE Text Animator Properties');ap.addProperty('ADBE Text Opacity').setValue(0);ap.addProperty('ADBE Text Blur').setValue([30,30]);var s1=a1.property('ADBE Text Selectors').addProperty('ADBE Text Selector');s1.property('ADBE Text Range Advanced').property('ADBE Text Range Shape').setValue(2);s1.property('ADBE Text Percent Start').setValueAtTime(0,0);s1.property('ADBE Text Percent Start').setValueAtTime(d*0.7,100);var paper=c.layers.addSolid([0.95,0.92,0.85],'RicePaper',1920,1080,1);try{var fn=paper.property('Effects').addProperty('ADBE Fractal Noise');fn.property('ADBE Fractal Noise-0001').setValue(1);fn.property('Contrast').setValue(20);fn.property('Brightness').setValue(10);}catch(pe){}paper.moveToEnd();var inkDrop=c.layers.addSolid([0.05,0.04,0.03],'InkDrop',1920,1080,1);inkDrop.blendingMode=BlendingMode.MULTIPLY;try{var ifn=inkDrop.property('Effects').addProperty('ADBE Fractal Noise');ifn.property('ADBE Fractal Noise-0001').setValue(2);ifn.property('Contrast').setValue(100);ifn.property('Brightness').setValue(-40);}catch(ie){}inkDrop.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0,[20,20]);inkDrop.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(d*0.5,[100,100]);inkDrop.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);inkDrop.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.2,30);inkDrop.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.3,100);_r={status:'success',preset:'at_ink_wash',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"MaShanZheng","tracking":10,"leading":1.3,"fauxBold":false},
+      "easing": {"profile":"organic","influence":6,"curve":"easeOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"at_ink_wash_splash","name":"泼墨","overrides":{"inkSpread":35,"brushDryness":80}},
+        {"id":"at_ink_wash_gentle","name":"淡墨","overrides":{"inkSpread":8,"brushDryness":30}},
+        {"id":"at_ink_wash_calligraphy","name":"书法","overrides":{"inkSpread":12,"brushDryness":90}}
+      ]
+    },
+    {
+      "id": "at_neon_tube",
+      "name": "霓虹灯管艺术字",
+      "name_en": "Neon Tube Art Typography",
+      "description": "真实霓虹灯管效果：灯管逐段点亮+闪烁+光晕扩散+玻璃管反光。对标赛博朋克城市招牌/酒吧霓虹",
+      "tags": ["霓虹","灯管","赛博朋克","夜景","招牌"],
+      "difficulty": 4,
+      "duration_default": 3.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.0,"min":1.5,"max":6.0,"description":"总时长(秒)"},
+        {"name":"tubeColor","type":"string","default":"pink","description":"灯管颜色(pink/blue/green/red)"},
+        {"name":"flickerIntensity","type":"number","default":20,"min":5,"max":50,"description":"闪烁强度"},
+        {"name":"glowRadius","type":"number","default":40,"min":15,"max":80,"description":"光晕半径"},
+        {"name":"fontSize","type":"number","default":140,"min":60,"max":350,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};var flick={{flickerIntensity}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[1,0.3,0.6];tv.applyFill=true;tv.applyStroke=true;tv.strokeColor=[1,0.5,0.7];tv.strokeWidth=2;tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);var tp=L.property('ADBE Text Properties');var a1=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a1.name='NeonIgnite';var ap=a1.property('ADBE Text Animator Properties');ap.addProperty('ADBE Text Opacity').setValue(0);var s1=a1.property('ADBE Text Selectors').addProperty('ADBE Text Selector');s1.property('ADBE Text Range Advanced').property('ADBE Text Range Shape').setValue(2);s1.property('ADBE Text Percent Start').setValueAtTime(0,0);s1.property('ADBE Text Percent Start').setValueAtTime(d*0.5,100);L.property('ADBE Transform Group').property('ADBE Opacity').expression='var f='+flick+';seedRandom(Math.floor(time*12),true);var base=100;var r=random(0,1);if(r>0.9){base-f;}else if(r>0.8){base-f*0.5;}else{base;}';var glow1=L.property('Effects').addProperty('ADBE Glo2');glow1.property('ADBE Glo2-0002').setValue(0.05);glow1.property('ADBE Glo2-0003').setValue({{glowRadius}});glow1.property('ADBE Glo2-0004').setValue(3.0);try{glow1.property('ADBE Glo2-0005').setValue(3);glow1.property('ADBE Glo2-0006').setValue([1,0.3,0.6,1]);glow1.property('ADBE Glo2-0007').setValue([1,0.1,0.4,1]);}catch(ge){}var glow2=L.property('Effects').addProperty('ADBE Glo2');glow2.property('ADBE Glo2-0002').setValue(0.2);glow2.property('ADBE Glo2-0003').setValue({{glowRadius}}*2);glow2.property('ADBE Glo2-0004').setValue(1.5);try{glow2.property('ADBE Glo2-0005').setValue(3);glow2.property('ADBE Glo2-0006').setValue([1,0.3,0.6,1]);}catch(ge2){}var bg=c.layers.addSolid([0.02,0.02,0.04],'DarkBG',1920,1080,1);bg.moveToEnd();_r={status:'success',preset:'at_neon_tube',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":5,"leading":1,"fauxBold":false},
+      "easing": {"profile":"electric","influence":12,"curve":"steps","drivenBy":"expression"},
+      "variants": [
+        {"id":"at_neon_tube_cyberpunk","name":"赛博霓虹","overrides":{"tubeColor":"blue","flickerIntensity":30}},
+        {"id":"at_neon_tube_bar","name":"酒吧霓虹","overrides":{"tubeColor":"red","flickerIntensity":15}},
+        {"id":"at_neon_tube_broken","name":"损坏霓虹","overrides":{"tubeColor":"green","flickerIntensity":45}}
+      ]
+    },
+    {
+      "id": "at_metal_cast",
+      "name": "金属铸造艺术字",
+      "name_en": "Metal Cast Art Typography",
+      "description": "金属铸造过程动画：从模具中浇铸成型+冷却+打磨发光。配合金属渐变+环境反射+锤击震动",
+      "tags": ["金属","铸造","工业","质感","重量感"],
+      "difficulty": 5,
+      "duration_default": 3.5,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.5,"min":1.5,"max":6.0,"description":"总时长(秒)"},
+        {"name":"metalType","type":"string","default":"gold","description":"金属类型(gold/silver/bronze/iron)"},
+        {"name":"castTemperature","type":"number","default":80,"min":30,"max":100,"description":"浇铸温度(影响发光)"},
+        {"name":"hammerShake","type":"number","default":8,"min":0,"max":20,"description":"锤击震动"},
+        {"name":"fontSize","type":"number","default":180,"min":60,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};var shake={{hammerShake}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[0.85,0.7,0.3];tv.applyFill=true;tv.applyStroke=true;tv.strokeColor=[0.4,0.35,0.15];tv.strokeWidth=3;tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);var ramp=L.property('Effects').addProperty('ADBE Ramp');ramp.property('Start Color').setValue([1,0.9,0.5,1]);ramp.property('Start Point').setValue([0,0]);ramp.property('End Color').setValue([0.4,0.3,0.1,1]);ramp.property('End Point').setValue([1920,1080]);ramp.property('Ramp Shape').setValue(1);var shadow=L.property('Effects').addProperty('ADBE Drop Shadow');shadow.property('ADBE Drop Shadow-0004').setValue(6);shadow.property('ADBE Drop Shadow-0003').setValue(135);shadow.property('ADBE Drop Shadow-0005').setValue(10);shadow.property('ADBE Drop Shadow-0002').setValue(70);var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.15);glow.property('ADBE Glo2-0003').setValue(15);glow.property('ADBE Glo2-0004').setValue(1.5);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([1,0.8,0.3,1]);glow.property('ADBE Glo2-0007').setValue([0.8,0.5,0.1,1]);}catch(ge){}L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0,[100,0]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.3,[100,105]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.4,[100,100]);if(shake>0){L.property('ADBE Transform Group').property('ADBE Position').expression='var t=0.4;if(time<t+0.3){seedRandom(Math.floor(time*20),true);[value[0]+random(-'+shake+','+shake+'),value[1]+random(-'+shake*0.5+','+shake*0.5+')];}else{value;}';}L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.1,100);var heatGlow=c.layers.addSolid([1,0.5,0],'CastHeat',1920,1080,1);heatGlow.blendingMode=BlendingMode.ADD;heatGlow.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,{{castTemperature}}*0.5);heatGlow.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d*0.4,0);_r={status:'success',preset:'at_metal_cast',layer:n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":-15,"leading":1,"fauxBold":true},
+      "easing": {"profile":"heavy","influence":15,"curve":"bounceOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"at_metal_cast_gold","name":"黄金铸造","overrides":{"metalType":"gold","castTemperature":90}},
+        {"id":"at_metal_cast_iron","name":"铸铁锻造","overrides":{"metalType":"iron","castTemperature":60,"hammerShake":15}},
+        {"id":"at_metal_cast_bronze","name":"青铜古铸","overrides":{"metalType":"bronze","castTemperature":40,"hammerShake":5}}
+      ]
+    }
+  ]
+}

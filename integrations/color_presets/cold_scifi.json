@@ -1,0 +1,35 @@
+{
+  "name": "Cold Sci-Fi",
+  "description": "冷色科幻，整体偏青蓝、对比强烈、饱和度略降，未来感强烈。",
+  "lift": {
+    "red": -0.02,
+    "green": 0.0,
+    "blue": 0.04,
+    "master": -0.02
+  },
+  "gamma": {
+    "red": -0.03,
+    "green": 0.0,
+    "blue": 0.04,
+    "master": 0.0
+  },
+  "gain": {
+    "red": -0.02,
+    "green": 0.02,
+    "blue": 0.06,
+    "master": 0.02
+  },
+  "offset": {
+    "red": 0.0,
+    "green": 0.0,
+    "blue": 0.01,
+    "master": 0.0
+  },
+  "saturation": 0.9,
+  "contrast": 1.15,
+  "pivot": 0.45,
+  "highlight_saturation": 0.85,
+  "shadow_saturation": 1.2,
+  "blend_opacity": 1.0,
+  "tags": ["sci-fi", "cold", "blue", "future", "tech"]
+}

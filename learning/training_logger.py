@@ -9,7 +9,7 @@ from pathlib import Path
 _PROJECT_ROOT = Path(__file__).resolve().parent
 
 try:
-    from config.config_manager import MediaConfigManager as _ConfigManager
+    from config.config_manager import ConfigManager as _ConfigManager
     _cfg = _ConfigManager()
     LOG_DIR = _cfg.get_directory("logs") or str(_PROJECT_ROOT / "data" / "logs")
     ARCHIVE_DIR = _cfg.get_directory("training_archive") or str(_PROJECT_ROOT / "data" / "training_archive")

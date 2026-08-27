@@ -24,7 +24,7 @@ from typing import Dict, Optional
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from style_copy.input_parser import InputParser
-from style_copy.style_analyzer import StyleAnalyzer
+from style_copy.style_analyzer import StyleAnalyzer, get_analyzer
 from style_copy.tool_orchestrator import ToolOrchestrator
 from style_copy.ffmpeg_generator import FFmpegCommandGenerator
 
@@ -37,7 +37,7 @@ class StyleCopyWorkflow:
         self.work_dir.mkdir(parents=True, exist_ok=True)
         
         self.parser = InputParser(str(self.work_dir))
-        self.analyzer = StyleAnalyzer()
+        self.analyzer = get_analyzer()
         self.orchestrator = ToolOrchestrator()
         self.ffmpeg_generator = FFmpegCommandGenerator()
         
@@ -89,7 +89,10 @@ class StyleCopyWorkflow:
                 return {"success": False, "step": "orchestrating", "error": tool_sequence.get("error")}
             
             self.state["data"]["tool_sequence"] = tool_sequence["steps"]
-            
+            # 编排成功即视为流程成功：prompt 类型以 DAG 计划为产物；
+            # url 类型会在下方 FFmpeg 执行后按真实出片结果覆盖 success。
+            self.state["success"] = True
+
             # Step 4: 执行（简化版：先用FFmpeg执行）
             self.state["step"] = "executing"
             if parse_result["type"] == "url":
@@ -113,10 +116,14 @@ class StyleCopyWorkflow:
                         self.state["success"] = True
                     else:
                         self.state["data"]["ffmpeg_error"] = result.stderr[:500] if result.stderr else "未知错误"
-                        self.state["success"] = True  # 即使FFmpeg失败，风格分析仍然成功
+                        # fail-closed：FFmpeg 执行失败时不得标记整体成功（修复 fail-open 缺陷）
+                        self.state["success"] = False
+                        self.state["error"] = f"FFmpeg执行失败: {self.state['data']['ffmpeg_error']}"
                 except Exception as e:
                     self.state["data"]["ffmpeg_error"] = str(e)
-                    self.state["success"] = True  # 即使FFmpeg失败，风格分析仍然成功
+                    # fail-closed：同上
+                    self.state["success"] = False
+                    self.state["error"] = f"FFmpeg执行异常: {e}"
             
             self.state["step"] = "completed"
             return self.state

@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "engine": "rife_local",
+  "rife_multiplier": 2,
+  "upscale": 1,
+  "video2x_path": "",
+  "rife_ncnn_path": "",
+  "rife_repo": "external/rife",
+  "ffmpeg": "C:\\ffmpeg\\bin\\ffmpeg.exe"
+}

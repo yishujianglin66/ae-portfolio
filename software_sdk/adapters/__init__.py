@@ -8,6 +8,7 @@ from software_sdk.adapters.silhouette_adapter import SilhouetteAdapter
 from software_sdk.adapters.blender_adapter import BlenderAdapter
 from software_sdk.adapters.topaz_adapter import TopazAdapter
 from software_sdk.adapters.davinci_adapter import DaVinciAdapter
+from software_sdk.adapters.ffmpeg_adapter import FFmpegAdapter
 
 __all__ = [
     "AfterEffectsAdapter",
@@ -15,4 +16,5 @@ __all__ = [
     "BlenderAdapter",
     "TopazAdapter",
     "DaVinciAdapter",
+    "FFmpegAdapter",
 ]

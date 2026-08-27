@@ -60,7 +60,7 @@ class TestBridgesEngineImportRegression:
                 _ = getattr(b, attr)
             except ModuleNotFoundError as e:
                 if _import_error_is_old_path(e):
-                    pytest.fail(f"SilhouetteAEBridge.{attr} 使用了旧下划线导入路径: {e}")
+                    pytest.fail(f"SilhouetteAEBridge.{attr} 使用了旧下划线路径: {e}")
                 raise
 
     def test_c4d_ae_bridge_engine_getter_no_old_module_path(self):
@@ -72,7 +72,7 @@ class TestBridgesEngineImportRegression:
                 _ = getattr(b, attr)
             except ModuleNotFoundError as e:
                 if _import_error_is_old_path(e):
-                    pytest.fail(f"C4DAEBridge.{attr} 使用了旧下划线导入路径: {e}")
+                    pytest.fail(f"C4DAEBridge.{attr} 使用了旧下划线路径: {e}")
                 raise
 
     def test_topaz_davinci_bridge_engine_getter_no_old_module_path(self):
@@ -84,7 +84,7 @@ class TestBridgesEngineImportRegression:
                 _ = getattr(b, attr)
             except ModuleNotFoundError as e:
                 if _import_error_is_old_path(e):
-                    pytest.fail(f"TopazDaVinciBridge.{attr} 使用了旧下划线导入路径: {e}")
+                    pytest.fail(f"TopazDaVinciBridge.{attr} 使用了旧下划线路径: {e}")
                 raise
 
 

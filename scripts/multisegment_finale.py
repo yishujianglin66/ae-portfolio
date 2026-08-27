@@ -480,7 +480,8 @@ def main() -> int:
     # ── ③ AE 真机渲染 (含 LUT) ──────────────────────────────────
     print(f"\n[2/4] AE 真机渲染 ({n_shots} 镜头 + LUT)...")
     base = out / "base.mp4"
-    if not render_tree(tree, str(base), "multisegment_finale.aep", lut=lut_render):
+    aep_name = f"multisegment_{args.tag}.aep"   # 2026-08-27: avi 路径随 tag 唯一, 绕开损坏残留 AVI 的系统锁
+    if not render_tree(tree, str(base), aep_name, lut=lut_render):
         print("  渲染失败 (AE 桥接不可用?) — 建议 --no-render 验证合成树结构")
         # 仍然导出合成树供后续渲染复用
         _export_tree_json(tree, out / "tree.json")

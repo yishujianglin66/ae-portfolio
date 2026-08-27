@@ -140,10 +140,36 @@ class ToolOrchestrator:
 
         return "，".join(parts)
 
-    def execute_tool_sequence(self, steps: List[Dict]) -> Dict:
-        """执行工具序列"""
+    @staticmethod
+    def _has_toolchain() -> bool:
+        """Phase1 ToolchainManager 是否可导入（兼容两条候选路径）"""
+        try:
+            from toolchain_manager import ToolchainManager  # noqa: F401
+            return True
+        except ImportError:
+            try:
+                from tools.toolchain_manager import ToolchainManager  # noqa: F401
+                return True
+            except ImportError:
+                return False
+
+    def execute_tool_sequence(self, steps: List[Dict], input_video: str = "") -> Dict:
+        """执行工具序列
+
+        收口：优先走 Phase1 已验证的 ToolchainManager（ffmpeg 真实出片，
+        Topaz/AE 无 CLI/工程时诚实降级），unified_tool_integrator 仅作回退。
+        返回字典同时携带 status/success 双字段以兼容旧调用方。
+        """
+        # 优先：Phase1 引擎（统一执行出口，消除三引擎碎片化）
+        if self._has_toolchain():
+            res = self.execute_via_toolchain(steps, input_video, mode=self.mode)
+            res["status"] = "success" if res.get("success") else "failed"
+            return res
+
+        # 回退：旧 unified_tool_integrator 路径（仅 ToolchainManager 不可用时）
         if not self.integrator:
-            return {"success": False, "error": "工具集成器不可用"}
+            return {"success": False, "status": "failed",
+                    "error": "ToolchainManager 与 Integrator 均不可用"}
 
         # 将步骤转换为工作流预设
         preset_id = "style_copy_custom"
@@ -191,14 +217,27 @@ class ToolOrchestrator:
                 "workflow": seq_result.get("workflow", {}),
             }
 
-        # Step 2: 执行工具序列
-        exec_result = self.execute_tool_sequence(steps)
+        # Step 2: 执行工具序列（收口到 Phase1 ToolchainManager）
+        exec_result = self.execute_tool_sequence(steps, input_video)
 
         return {
-            "success": exec_result.get("status") == "success",
+            "success": exec_result.get("status") == "success" or bool(exec_result.get("success")),
             "steps": steps,
             "result": exec_result,
         }
+
+    def run_style_copy_via_toolchain(self, style: Dict, input_video: str = "",
+                                     mode: str = None) -> Dict:
+        """统一入口：风格 → 规则编排 → Phase1 ToolchainManager 真实执行
+
+        将 analyze + orchestrate + execute 三步收口为单一出口，避免分散调用
+        造成执行引擎碎片化。mode 缺省继承实例 mode。
+        """
+        mode = mode or self.mode
+        seq = self.generate_tool_sequence(style, input_video)
+        if not seq.get("success"):
+            return seq
+        return self.execute_via_toolchain(seq["steps"], input_video, mode=mode)
 
     def _generate_with_rules(self, style: Dict, input_video: str) -> Dict:
         """使用规则生成工具序列"""
@@ -294,6 +333,85 @@ class ToolOrchestrator:
             filters.append("setpts=1.4*PTS")
 
         return filters
+
+    def execute_via_toolchain(self, steps: List[Dict], input_video: str = "",
+                              mode: str = "auto") -> Dict:
+        """将规则编排步骤经 Phase1 已验证的 ToolchainManager 执行（ffmpeg 真实出片）
+
+        步骤参数名映射: input_file->input_path, output_file->output_path。
+        支持: ffmpeg(transcode 带风格滤镜, 真实执行),
+              topaz_video_ai/after_effects(无 CLI 或缺少工程时诚实降级 simulate)。
+        """
+        try:
+            from toolchain_manager import ToolchainManager
+        except ImportError:
+            try:
+                from tools.toolchain_manager import ToolchainManager
+            except ImportError:
+                return {"success": False, "error": "ToolchainManager 不可用（Phase1 引擎缺失）"}
+
+        mgr = ToolchainManager()
+        results = []
+        output_files = []
+        step_map = {
+            ("topaz_video_ai", "enhance"): ("topaz_video_ai", "enhance"),
+            ("ffmpeg", "transcode"): ("ffmpeg", "transcode"),
+            ("after_effects", "add_text_layer"): ("after_effects", "render_comp"),
+        }
+        for step in steps:
+            tool = step.get("tool", "")
+            op = step.get("operation", "")
+            p = step.get("params", {}) or {}
+            t_tool, t_op = step_map.get((tool, op), (tool, op))
+            params = {}
+            params["input_path"] = p.get("input_file") or p.get("input_path") or ""
+            params["output_path"] = p.get("output_file") or p.get("output_path") or ""
+            if p.get("filters"):
+                params["filters"] = p["filters"]
+            if p.get("codec"):
+                params["codec"] = p["codec"]
+            # after_effects 真实渲染需工程文件；无则提供占位以触发诚实降级 simulate
+            if t_tool == "after_effects":
+                params["project_path"] = input_video or "dummy.aep"
+                params["comp_name"] = p.get("text", "main")
+            try:
+                res = mgr.execute_tool(t_tool, t_op, params, mode=mode)
+                results.append({
+                    "step": step.get("step_id"), "tool": t_tool, "operation": t_op,
+                    "success": res.success, "mode": res.mode_used,
+                    "output": res.output_path, "error": res.error,
+                })
+                if res.success and res.output_path:
+                    output_files.append(res.output_path)
+            except Exception as e:
+                results.append({
+                    "step": step.get("step_id"), "tool": t_tool, "operation": t_op,
+                    "success": False, "mode": "error", "output": None, "error": str(e),
+                })
+
+        # 写运行清单（非致命）
+        try:
+            from pathlib import Path as _P
+            import time as _t, json as _j
+            out_dir = _P("output/workflow_runs")
+            out_dir.mkdir(parents=True, exist_ok=True)
+            manifest = {
+                "engine": "toolchain_manager", "mode": mode,
+                "steps": results, "output_files": output_files,
+                "generated_at": _t.strftime("%Y-%m-%dT%H:%M:%S", _t.localtime()),
+            }
+            path = out_dir / f"style_copy_{int(_t.time())}.json"
+            path.write_text(_j.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+            output_files.append(str(path))
+        except Exception:
+            pass
+
+        return {
+            "success": all(r["success"] for r in results) if results else False,
+            "engine": "toolchain_manager",
+            "steps": results,
+            "output_files": output_files,
+        }
 
     def list_available_tools(self) -> Dict[str, Any]:
         """列出可用工具"""

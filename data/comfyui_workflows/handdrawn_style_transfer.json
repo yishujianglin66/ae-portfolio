@@ -1,0 +1,73 @@
+{
+  "_meta": {
+    "title": "手书动画风格化 (img2img)",
+    "description": "输入图像 → 手绘风格化重绘，由 HanddrawnComfyUIAdapter 动态注入 prompt/denoise/输入图像",
+    "version": "1.0",
+    "created": "2026-08-24",
+    "pipeline": "MG动画/手书动画集成 (P1-4)"
+  },
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "{{CHECKPOINT}}"
+    }
+  },
+  "2": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "{{INPUT_IMAGE}}"
+    }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "风格正向提示词" },
+    "inputs": {
+      "text": "{{STYLE_PROMPT}}",
+      "clip": ["1", 1]
+    }
+  },
+  "4": {
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "负向提示词" },
+    "inputs": {
+      "text": "{{NEGATIVE_PROMPT}}",
+      "clip": ["1", 1]
+    }
+  },
+  "5": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": ["2", 0],
+      "vae": ["1", 2]
+    }
+  },
+  "6": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": "{{SEED}}",
+      "steps": "{{STEPS}}",
+      "cfg": "{{CFG}}",
+      "sampler_name": "euler",
+      "scheduler": "normal",
+      "denoise": "{{DENOISE}}",
+      "model": ["1", 0],
+      "positive": ["3", 0],
+      "negative": ["4", 0],
+      "latent_image": ["5", 0]
+    }
+  },
+  "7": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["6", 0],
+      "vae": ["1", 2]
+    }
+  },
+  "8": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "{{OUTPUT_PREFIX}}",
+      "images": ["7", 0]
+    }
+  }
+}

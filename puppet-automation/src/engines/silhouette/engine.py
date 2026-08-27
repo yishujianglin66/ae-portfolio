@@ -170,6 +170,73 @@ def main():
 main()
 '''
 
+    EXPORT_SHAPES_TEMPLATE = '''
+"""Auto-generated Silhouette export shapes script."""
+from fx import *
+import json
+import sys
+
+_PARAMS = json.loads(r"""%PARAMS_JSON%""")
+
+def main():
+    params = _PARAMS
+    input_path = params["input_path"]
+    output_path = params["output_path"]
+    marker_path = params["marker_path"]
+    session_path = params.get("session_path", "")
+
+    if session_path and os.path.exists(session_path):
+        session = loadSession(session_path)
+    else:
+        session = createObject("Session")
+        session.property("mediaPath").setValue(input_path, 0)
+
+    shapes_data = {"version": "1.0", "frames": [], "name": "silhouette_export"}
+
+    start_frame = int(session.property("startFrame").getValue(0))
+    end_frame = int(session.property("endFrame").getValue(0))
+
+    nodes = session.getNodes()
+    for node in nodes:
+        if node.type() == "RotoNode":
+            shapes_prop = node.property("shapes")
+            if shapes_prop:
+                for shape_idx in range(shapes_prop.getNumSubProperties()):
+                    shape = shapes_prop.getSubProperty(shape_idx)
+                    shape_name = shape.name
+                    total_frames = end_frame - start_frame + 1
+
+                    for frame in range(start_frame, end_frame + 1):
+                        frame_data = {"frame": frame, "contours": []}
+                        paths_prop = shape.property("paths")
+                        if paths_prop:
+                            for path_idx in range(paths_prop.getNumSubProperties()):
+                                path_prop = paths_prop.getSubProperty(path_idx)
+                                points_prop = path_prop.property("points")
+                                if points_prop:
+                                    contour = {"points": []}
+                                    for pt_idx in range(points_prop.getNumSubProperties()):
+                                        pt = points_prop.getSubProperty(pt_idx)
+                                        x = pt.property("x").getValue(frame)
+                                        y = pt.property("y").getValue(frame)
+                                        contour["points"].append({"x": x, "y": y})
+                                    if len(contour["points"]) >= 3:
+                                        frame_data["contours"].append(contour)
+                        if frame_data["contours"]:
+                            shapes_data["frames"].append(frame_data)
+                            break
+
+    with open(output_path, "w") as f:
+        json.dump(shapes_data, f, indent=2)
+
+    with open(marker_path, "w") as f:
+        f.write("SUCCESS\\n")
+        f.write("output: " + output_path + "\\n")
+        f.write("frames_exported: " + str(len(shapes_data["frames"])) + "\\n")
+
+main()
+'''
+
     def __init__(self, executable_path: Optional[Path | str] = None):
         path = Path(executable_path) if executable_path else settings.silhouette_path
         # Silhouette.exe is the main executable
@@ -223,7 +290,7 @@ main()
             "-script", str(script_file),
             "-headless",
         ]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _err_code = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=14400
         )
 
@@ -278,7 +345,7 @@ main()
         script_file.write_text(script_content, encoding="utf-8")
 
         cmd = [str(self.executable_path), "-script", str(script_file), "-headless"]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, _stdout, stderr, _err_code = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=7200
         )
 
@@ -292,6 +359,63 @@ main()
                 "points_count": len(track_points),
             },
             error=stderr[:1000] if code != 0 else None,
+        )
+
+    async def export_shapes(
+        self,
+        output_path: Path | str,
+        input_path: Optional[Path | str] = None,
+        session_path: Optional[Path | str] = None,
+    ) -> EngineResult:
+        """导出 Silhouette Roto 形状数据为 JSON。
+
+        将 Silhouette 会话中的 RotoNode 形状数据导出为标准 JSON 格式，
+        供 AE 桥接器创建 Mask 路径图层使用。
+
+        Args:
+            output_path: 导出的形状 JSON 文件路径
+            input_path: 关联的输入视频路径
+            session_path: Silhouette 会话文件路径（可选）
+
+        Returns:
+            EngineResult 包含导出结果
+        """
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        input_path = Path(input_path) if input_path else ""
+        session_path = Path(session_path) if session_path else ""
+
+        marker_path = Path(tempfile.gettempdir()) / f"sil_export_{output_path.stem}.mark"
+
+        params = {
+            "input_path": str(input_path),
+            "output_path": str(output_path),
+            "marker_path": str(marker_path),
+            "session_path": str(session_path),
+        }
+        params_json = json.dumps(params, ensure_ascii=False)
+
+        script_content = self.EXPORT_SHAPES_TEMPLATE.replace("%PARAMS_JSON%", params_json)
+        script_file = Path(tempfile.gettempdir()) / f"sil_export_{output_path.stem}.py"
+        script_file.write_text(script_content, encoding="utf-8")
+
+        cmd = [str(self.executable_path), "-script", str(script_file), "-headless"]
+        code, stdout, stderr, _ = await asyncio.to_thread(
+            self._run_subprocess, cmd, timeout=14400
+        )
+
+        success = code == 0 and marker_path.exists()
+        script_file.unlink(missing_ok=True)
+        marker_path.unlink(missing_ok=True)
+
+        return EngineResult(
+            success=success,
+            output_path=output_path if success else None,
+            metadata={
+                "output_path": str(output_path),
+                "stdout_tail": stdout[-500:] if stdout else "",
+            },
+            error=stderr[:1000] if not success and stderr else None,
         )
 
     IMPORT_SHAPES_TEMPLATE = '''
@@ -512,7 +636,7 @@ main()
         script_file.write_text(script_content, encoding="utf-8")
 
         cmd = [str(self.executable_path), "-script", str(script_file), "-headless"]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _err_code = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=14400
         )
 
@@ -591,7 +715,7 @@ main()
         script_file.write_text(script_content, encoding="utf-8")
 
         cmd = [str(self.executable_path), "-script", str(script_file), "-headless"]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _err_code = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=14400
         )
 
@@ -652,7 +776,7 @@ main()
         script_file.write_text(script_content, encoding="utf-8")
 
         cmd = [str(self.executable_path), "-script", str(script_file), "-headless"]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _err_code = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=14400
         )
 
@@ -671,8 +795,8 @@ main()
             error=stderr[:1000] if not success and stderr else None,
         )
 
-    async def execute(self, **kwargs) -> EngineResult:
-        """Dispatch engine actions."""
+    async def _execute_impl(self, **kwargs) -> EngineResult:
+        """【子类实现】action 调度；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
         action = kwargs.pop("action", "create_roto_session")
         handlers = {
             "create_roto_session": self.create_roto_session,

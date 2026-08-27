@@ -1,0 +1,168 @@
+{
+  "version": "1.0",
+  "source": "11-大师知识库 + 12-漫剪拉镜大师 方法论结构化",
+  "bpm_frame_table": {
+    "_doc": "30fps下每拍帧数 = 1800/bpm; 用于切点对齐BPM网格",
+    "fps": 30,
+    "entries": {
+      "90": 20, "100": 18, "110": 16, "120": 15, "128": 14,
+      "140": 13, "150": 12, "160": 11, "170": 11, "180": 10
+    },
+    "half_beat_rule": "重音处允许半拍切点(drop段高潮)",
+    "tolerance_frames": 1
+  },
+  "camera_templates": {
+    "_doc": "8种基础运镜参数模板, 供 CameraLanguageLibrary 生成带Ease的JSX",
+    "push": {
+      "cn": "推", "prop": "scale", "from": [100, 100], "to": [120, 120],
+      "max_scale": 150, "ease": "easeOut", "segments": ["intro", "drop"]
+    },
+    "pull": {
+      "cn": "拉", "prop": "scale", "from": [118, 118], "to": [100, 100],
+      "max_scale": 150, "ease": "easeIn", "segments": ["break", "outro"]
+    },
+    "pan": {
+      "cn": "摇", "prop": "position", "from": [-0.06, 0], "to": [0.06, 0],
+      "unit": "percent_of_w", "ease": "easeInOut", "segments": ["intro", "build"]
+    },
+    "truck": {
+      "cn": "移", "prop": "position", "from": [0.04, 0.02], "to": [-0.04, -0.02],
+      "unit": "percent_of_w", "ease": "linear_smooth", "segments": ["build", "outro"]
+    },
+    "follow": {
+      "cn": "跟", "prop": "position", "from": [0.0, 0.03], "to": [0.0, -0.03],
+      "unit": "percent_of_w", "ease": "easeInOut", "segments": ["build", "drop"]
+    },
+    "orbit": {
+      "cn": "环绕", "prop": "rotation", "from": -6, "to": 6,
+      "ease": "easeInOut", "segments": ["drop", "break"]
+    },
+    "whip": {
+      "cn": "甩镜", "prop": "rotation", "from": -12, "to": 12,
+      "motion_blur": true, "shutter_angle": 360,
+      "ease": "easeInHard", "segments": ["drop"],
+      "note": "切点处甩镜, 下一镜反向入场"
+    },
+    "dutch": {
+      "cn": "斜切", "prop": "rotation", "from": 0, "to": -8,
+      "ease": "easeOut", "segments": ["build", "drop"]
+    }
+  },
+  "camera3d_templates": {
+    "_doc": "4种真实3D摄像机运镜: null控制器+camera+父子链(camera→null→layer), 关键帧全部打在null上",
+    "dolly_zoom": {
+      "cn": "推拉变焦", "segments": ["drop"], "ease": "easeInOut",
+      "cam_z_from": -1400, "cam_z_to": -700,
+      "null_scale_from": [140, 140], "null_scale_to": [100, 100],
+      "max_scale": 150,
+      "note": "眩晕变焦: 相机推进同时null缩放补偿, 背景透视剧变而主体尺寸不变"
+    },
+    "crane": {
+      "cn": "摇臂升降", "segments": ["intro", "outro"], "ease": "easeInOut",
+      "null_y_from": 0.35, "null_y_to": 0.0, "unit": "percent_of_h",
+      "cam_z": -900,
+      "note": "null Y轴升降带动子级图层, 模拟摇臂俯冲开场"
+    },
+    "orbit_3d": {
+      "cn": "三维环绕", "segments": ["drop", "break"], "ease": "easeInOut",
+      "null_y_rot_from": -24, "null_y_rot_to": 24,
+      "layer_z": 200, "cam_z": -1100,
+      "note": "图层置3D+Z深度, null Y旋转实现真三维环绕, 摄像机固定看POI"
+    },
+    "shake": {
+      "cn": "手持震动", "segments": ["drop"], "ease": "linear_smooth",
+      "amplitude": 18, "cam_z": -900,
+      "note": "6关键帧不规则位移模拟手持抖动, 关键帧在null上"
+    }
+  },
+  "z_depth_profile": {
+    "_doc": "段落Z纵深控制: drop段Z推进(纵深冲击), break段Z回拉(呼吸感)",
+    "intro": 0, "build": 80, "drop": 260, "breath_break": 60,
+    "break": -200, "outro": -120
+  },
+  "master_presets": {
+    "_doc": "外网大师标志性技法预设",
+    "Xenoz": {
+      "signature": "动态拼贴",
+      "techniques": ["多层错位叠加", "快速闪切", "材质纹理前景"],
+      "cut_density": "2拍/切",
+      "preferred_cameras": ["whip", "push", "dutch"]
+    },
+    "DxshNova": {
+      "signature": "对角滑镜",
+      "techniques": ["对角线位移转场", "速度渐变"],
+      "cut_density": "2拍/切",
+      "preferred_cameras": ["truck", "follow"]
+    },
+    "Floby": {
+      "signature": "旋转+Glitch",
+      "techniques": ["旋转入场", "故障闪烁切点", "色彩分离"],
+      "cut_density": "1拍/切",
+      "preferred_cameras": ["orbit", "whip"]
+    },
+    "Molob": {
+      "signature": "七步流程",
+      "techniques": ["选曲定调", "粗剪节拍", "动效分层", "转场打磨",
+                     "调色统一", "音效铺设", "整体微调"],
+      "cut_density": "1拍/切",
+      "preferred_cameras": ["push", "orbit", "pull"]
+    },
+    "YashFX": {
+      "signature": "径向模糊冲击",
+      "techniques": ["径向模糊入点", "冲击帧", "缩放卡点"],
+      "cut_density": "1拍/切(重音半拍)",
+      "preferred_cameras": ["push", "whip"]
+    },
+    "YUNG_DAGGER": {
+      "signature": "卡点+冲击帧",
+      "techniques": ["重音硬切", "1-2帧冲击帧放大", "低频震动"],
+      "cut_density": "1拍/切",
+      "preferred_cameras": ["push", "dutch", "whip"]
+    }
+  },
+  "anti_patterns": {
+    "_doc": "新手反模式清单 — DirectorQualityScorer 扣分项",
+    "linear_easing_everywhere": {
+      "desc": "全片线性缓动无Ease曲线",
+      "penalty": 20,
+      "check": "jsx中 setValueAtTime 无 temporalEase/KeyframeEase 配套"
+    },
+    "oversized_zoom": {
+      "desc": "缩放超过150%导致画面模糊",
+      "penalty": 15,
+      "check": "scale关键帧最大值 > 150"
+    },
+    "no_beat_alignment": {
+      "desc": "切点不与BPM网格对齐",
+      "penalty": 25,
+      "check": "切点帧 % 每拍帧数 偏差 > tolerance_frames"
+    },
+    "uniform_segments": {
+      "desc": "段落均分时长无能量曲线",
+      "penalty": 20,
+      "check": "所有segment时长相同且无energy_target"
+    },
+    "camera_monotony": {
+      "desc": "运镜种类<3或连续3镜头同景别",
+      "penalty": 20,
+      "check": "unique(camera_movement) < 3 或 连续3段同movement"
+    }
+  },
+  "energy_envelope": {
+    "_doc": "五段式叙事能量包络 (NarrativeArcPlanner消费)",
+    "segments": {
+      "intro": {"ratio": 0.12, "energy": [0.2, 0.35], "cut_beats": 2},
+      "build": {"ratio": 0.24, "energy": [0.35, 0.7], "cut_beats": 2},
+      "drop":  {"ratio": 0.34, "energy": [0.9, 1.0], "cut_beats": 1,
+                "half_beat_on_accent": true, "second_drop_at": 0.7,
+                "breath_break_beats": [2, 4]},
+      "break": {"ratio": 0.12, "energy": [1.0, 0.15], "cut_beats": 8},
+      "outro": {"ratio": 0.18, "energy": [0.15, 0.05], "cut_beats": 4}
+    },
+    "iron_rules": [
+      "drop段70%处插入2-4拍breath break(喘息点)",
+      "build段能量必须阶梯上升不得回落",
+      "break段急降后outro保持低位沉淀"
+    ]
+  }
+}

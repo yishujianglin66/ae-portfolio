@@ -20,19 +20,17 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field, asdict
 
-from .learning_loop import (
+from learning_loop import (
     LearningLoop,
     CaseStore,
     DefaultValueStore,
     ParameterTemplate,
     ExpectedParameters,
-    ExpectedProperty,
     ExecutionResult as LRExecutionResult,
     VerificationResult as LRVerificationResult,
     UserFeedback,
     ExecutionRecord,
     ConfidenceAdjustment,
-    FinalParam,
 )
 
 
@@ -69,15 +67,11 @@ class FileSystemStorage:
             return default_value
 
     def save(self, file_path: str, data: Any) -> None:
-        """原子写入：先写到临时文件，再 rename 覆盖，避免半截文件"""
         dir_path = os.path.dirname(file_path)
         if not os.path.exists(dir_path):
             os.makedirs(dir_path, exist_ok=True)
-        # 写入失败应抛出，由调用方决定如何记录；原子 rename 保证不会留下半截文件
-        tmp_path = file_path + ".tmp"
-        with open(tmp_path, "w", encoding="utf-8") as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        os.replace(tmp_path, file_path)
 
 
 class PersistentCaseStore(CaseStore):
@@ -229,19 +223,13 @@ class PersistentLearningLoop(LearningLoop):
         self._confidence_adjustments = []
         for a_data in saved:
             try:
-                # ConfidenceAdjustment.reason 是必填字段，旧数据可能缺失，提供默认值
                 self._confidence_adjustments.append(ConfidenceAdjustment(
                     reasoning_path=a_data.get("reasoningPath", []),
                     direction=a_data.get("direction", "boost"),
                     delta=a_data.get("delta", 0.05),
-                    reason=a_data.get("reason", "loaded from persisted state"),
                     timestamp=a_data.get("timestamp", ""),
                 ))
-            except Exception as e:
-                # 不再静默吞掉，记录到 stderr 便于排查
-                import sys
-                print(f"[PersistentLearningLoop] confidence_adjustments load failed: {e}",
-                      file=sys.stderr)
+            except Exception:
                 continue
 
     def _save_confidence_adjustments(self) -> None:
@@ -251,70 +239,31 @@ class PersistentLearningLoop(LearningLoop):
                 "reasoningPath": a.reasoning_path,
                 "direction": a.direction,
                 "delta": a.delta,
-                "reason": a.reason,  # 修复：保存 reason 字段
                 "timestamp": a.timestamp,
             })
         self._pstorage.save(CONFIDENCE_ADJUSTMENTS_FILE, data)
 
     def _dict_to_record(self, data: Dict[str, Any]) -> ExecutionRecord:
-        # 反序列化 expected
-        expected_data = data.get("expected", {})
         expected = ExpectedParameters(
-            comp_name=expected_data.get("compName", ""),
-            layer_index=expected_data.get("layerIndex", 0),
-            effect_match_name=expected_data.get("effectMatchName", ""),
-            effect_name=expected_data.get("effectName", ""),
-            properties=[
-                ExpectedProperty(
-                    name=p.get("name", ""),
-                    value=p.get("value"),
-                    tolerance=p.get("tolerance"),
-                )
-                for p in expected_data.get("properties", [])
-                if isinstance(p, dict)
-            ],
+            comp_name=data.get("expected", {}).get("compName", ""),
+            layer_index=data.get("expected", {}).get("layerIndex", 0),
+            effect_match_name=data.get("expected", {}).get("effectMatchName", ""),
+            effect_name=data.get("expected", {}).get("effectName", ""),
+            properties=[],
         )
-
-        # 反序列化 execution（修复字段名错误：executionTime → execution_time_ms）
-        exec_data = data.get("execution", {})
         execution = LRExecutionResult(
-            success=exec_data.get("success", False),
-            error_code=exec_data.get("errorCode", "") or None,
-            error_message=exec_data.get("errorMessage", "") or None,
-            effect_index=exec_data.get("effectIndex"),
-            effect_name=exec_data.get("effectName", "") or None,
-            execution_time_ms=exec_data.get("executionTime")
-            or exec_data.get("executionTimeMs"),
+            success=data.get("execution", {}).get("success", False),
+            error_code=data.get("execution", {}).get("errorCode", ""),
+            error_message=data.get("execution", {}).get("errorMessage", ""),
+            effect_name=data.get("execution", {}).get("effectName", ""),
+            execution_time=data.get("execution", {}).get("executionTime", 0),
         )
-
-        # 反序列化 verification（移除不存在的 verified_at 字段）
-        verify_data = data.get("verification", {})
         verification = LRVerificationResult(
-            passed=verify_data.get("passed", False),
-            deviation_score=verify_data.get("deviationScore", 0.0),
-            reason=verify_data.get("reason") or verify_data.get("mismatchReason"),
+            passed=data.get("verification", {}).get("passed", False),
+            deviation_score=data.get("verification", {}).get("deviationScore"),
+            mismatched_properties=data.get("verification", {}).get("mismatchedProperties", []),
+            verified_at=data.get("verification", {}).get("verifiedAt", ""),
         )
-        # mismatchedProperties 不是 VerificationResult 的字段（mismatches 才是），
-        # 但可保留为 reason 文本提示
-        mismatched_props = verify_data.get("mismatchedProperties", [])
-        if mismatched_props and not verification.reason:
-            verification.reason = f"mismatched: {mismatched_props}"
-        # finalParams 反序列化为 FinalParam 对象（与 dataclass 对齐）
-        raw_final_params = data.get("finalParams")
-        final_params: Optional[List[FinalParam]] = None
-        if isinstance(raw_final_params, list):
-            final_params = []
-            for fp in raw_final_params:
-                if isinstance(fp, dict):
-                    final_params.append(FinalParam(
-                        name=fp.get("name", ""),
-                        value=fp.get("value"),
-                    ))
-                elif isinstance(fp, FinalParam):
-                    final_params.append(fp)
-            if not final_params:
-                final_params = None
-
         return ExecutionRecord(
             id=data.get("id", ""),
             timestamp=data.get("timestamp", ""),
@@ -326,7 +275,7 @@ class PersistentLearningLoop(LearningLoop):
             user_satisfied=data.get("userSatisfied"),
             user_adjusted=data.get("userAdjusted"),
             user_undone=data.get("userUndone"),
-            final_params=final_params,
+            final_params=data.get("finalParams"),
             reasoning_path=data.get("reasoningPath"),
         )
 
@@ -360,16 +309,6 @@ class PersistentLearningLoop(LearningLoop):
             "verifiedAt": getattr(verification, "verified_at", ""),
         }
 
-        # finalParams 序列化为 dict 列表（避免 dataclass 不可 JSON 序列化）
-        final_params_list: Optional[List[Dict[str, Any]]] = None
-        if record.final_params:
-            final_params_list = []
-            for fp in record.final_params:
-                if isinstance(fp, FinalParam):
-                    final_params_list.append({"name": fp.name, "value": fp.value})
-                elif isinstance(fp, dict):
-                    final_params_list.append(fp)
-
         return {
             "id": record.id,
             "userInput": record.user_input,
@@ -381,7 +320,7 @@ class PersistentLearningLoop(LearningLoop):
             "userSatisfied": record.user_satisfied,
             "userAdjusted": record.user_adjusted,
             "userUndone": record.user_undone,
-            "finalParams": final_params_list,
+            "finalParams": record.final_params,
             "reasoningPath": record.reasoning_path,
         }
 
@@ -427,19 +366,9 @@ class PersistentLearningLoop(LearningLoop):
         with self._lock:
             try:
                 self._save_execution_records()
-            except Exception as e:
-                # 保存失败必须可见，避免半截文件被误读为完整数据
-                import logging
-                logging.getLogger(__name__).warning(
-                    "[PersistentLearningLoop] save execution_records failed: %s", e
-                )
-            try:
                 self._save_confidence_adjustments()
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning(
-                    "[PersistentLearningLoop] save confidence_adjustments failed: %s", e
-                )
+            except Exception:
+                pass
             self._maybe_save_checkpoint()
 
     # ========== 覆盖父类方法 ==========
@@ -510,7 +439,7 @@ class PersistentLearningLoop(LearningLoop):
 
     def get_stats(self) -> Dict[str, Any]:
         """获取持久化统计信息"""
-        from .learning_loop import LearningMetrics
+        from learning_loop import LearningMetrics
 
         metrics: Dict[str, Any] = {
             "persistent": True,

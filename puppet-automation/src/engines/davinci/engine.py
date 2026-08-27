@@ -211,7 +211,7 @@ else:
 
         # 使用当前 Python 解释器执行脚本（脚本内通过 DaVinciResolveScript 连接 Resolve）
         cmd = [sys.executable, str(script_file)]
-        code, stdout, stderr = await asyncio.to_thread(
+        code, stdout, stderr, _err_code = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=7200
         )
 
@@ -267,7 +267,98 @@ else:
             metadata={"lut_size": lut_size, "type": "cube"},
         )
 
-    async def execute(self, **kwargs) -> EngineResult:
+    async def import_media_and_create_timeline(
+        self,
+        media_paths: list[Path | str],
+        project_path: Optional[Path | str] = None,
+        timeline_name: str = "Timeline 1",
+        fps: float = 30.0,
+        width: int = 1920,
+        height: int = 1080,
+    ) -> EngineResult:
+        """导入媒体文件到 DaVinci 并创建时间线。
+
+        使用 DaVinciTimelineManager 完成项目创建、素材导入和时间线搭建。
+
+        Args:
+            media_paths: 媒体文件路径列表
+            project_path: 项目路径（可选）
+            timeline_name: 时间线名称
+            fps: 时间线帧率
+            width: 时间线宽度
+            height: 时间线高度
+
+        Returns:
+            EngineResult 包含操作结果
+        """
+        if not media_paths:
+            return EngineResult(
+                success=False,
+                error="No media paths provided",
+            )
+
+        import time
+        t0 = time.time()
+
+        try:
+            from integrations.davinci_timeline import DaVinciTimelineManager
+
+            tm = DaVinciTimelineManager()
+
+            project_name = Path(project_path).stem if project_path else f"Puppet_{int(t0)}"
+            project_created = tm.create_project(project_name)
+            if not project_created:
+                logger.warning(f"[{self.name}] Project creation returned False, using simulate mode")
+
+            timeline_created = tm.create_timeline(
+                timeline_name, fps=fps, width=width, height=height
+            )
+            if not timeline_created:
+                logger.warning(f"[{self.name}] Timeline creation returned False, may be simulated")
+
+            str_paths = [str(Path(p).resolve()) for p in media_paths]
+            clips = tm.import_to_mediapool(str_paths, bin_name=timeline_name)
+
+            clips_added = 0
+            for clip in clips:
+                try:
+                    tm.append_to_timeline(clip.clip_id, track=0)
+                    clips_added += 1
+                except Exception as e:
+                    logger.warning(f"[{self.name}] Failed to add clip to timeline: {e}")
+
+            project_info = tm.get_project_info()
+            duration = time.time() - t0
+
+            return EngineResult(
+                success=True,
+                metadata={
+                    "project_name": project_info.name,
+                    "timeline_name": timeline_name,
+                    "clips_imported": len(clips),
+                    "clips_added_to_timeline": clips_added,
+                    "fps": fps,
+                    "resolution": f"{width}x{height}",
+                    "simulated": tm.is_simulated,
+                },
+                duration_seconds=duration,
+            )
+        except ImportError as e:
+            logger.warning(f"[{self.name}] DaVinciTimelineManager not available: {e}")
+            return EngineResult(
+                success=False,
+                error=f"DaVinciTimelineManager import failed: {e}",
+            )
+        except Exception as e:
+            logger.exception(f"[{self.name}] import_media_and_create_timeline failed")
+            return EngineResult(
+                success=False,
+                error=str(e),
+                duration_seconds=time.time() - t0,
+            )
+
+    async def _execute_impl(self, **kwargs) -> EngineResult:
+        """【子类实现】action 调度；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
         action = kwargs.pop("action", "apply_color_grade")
         handlers = {
             "apply_color_grade": self.apply_color_grade,

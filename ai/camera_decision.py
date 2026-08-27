@@ -67,6 +67,7 @@ class SourceCameraInventory:
     def __init__(self) -> None:
         self._cache: Dict[str, Dict[str, Any]] = {}
         self._lora_clf = None  # 懒加载 LoRA 分类器 (A5)
+        self._hier_clf = None  # 懒加载分层 CNN+VLM (L0.5, 2026-08-27 接入)
 
     def _get_lora_clf(self):
         """懒加载动漫运镜 LoRA 分类器 (GPU 可用时优先, 失败返回 None 走规则)。"""
@@ -82,6 +83,30 @@ class SourceCameraInventory:
         except Exception as exc:  # noqa: BLE001
             logger.warning("LoRA 分类器不可用, 降级光流规则: %s", exc)
             self._lora_clf = False
+            return None
+
+    def _get_hier_clf(self):
+        """懒加载分层 CNN+VLM 分类器 (2026-08-27 生产接入)。
+
+        CNN 2 分类 (动/静, 秒级) → 动作类交给 VLM 专家 (zoom/tilt-orbit,
+        4bit 5.82GB 本地)。AEKV_HIER_CAM=0 可关闭。三角验证表明 AMV 域
+        3 类标签置信度有限 → confidence 透传下游自行取舍。
+        """
+        import os as _os
+        if _os.environ.get("AEKV_HIER_CAM", "1") != "1":
+            return None
+        if self._hier_clf is False:
+            return None
+        if self._hier_clf is not None:
+            return self._hier_clf
+        try:
+            from models.camera_classifier.camera_classifier_hierarchical                 import HierarchicalCameraClassifier
+            self._hier_clf = HierarchicalCameraClassifier()
+            logger.info("分层 CNN+VLM 运镜分类器就绪 (L0.5)")
+            return self._hier_clf
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("分层分类器不可用, 走光流规则: %s", exc)
+            self._hier_clf = False
             return None
 
     def analyze(self, video_path: str) -> Dict[str, Any]:
@@ -105,6 +130,33 @@ class SourceCameraInventory:
                 return _entry
         except (OSError, ValueError, json.JSONDecodeError):
             pass
+
+        # L0.5: 分层 CNN+VLM (LoRA 不可用时的升级路径; 2026-08-27)
+        if os.environ.get("AEKV_NO_LORA", "0") == "1":
+            _lora_bypass = True
+        else:
+            _lora_bypass = False
+        clf = None if _lora_bypass else self._get_lora_clf()
+        if clf is None:
+            hier = self._get_hier_clf()
+            if hier is not None:
+                try:
+                    _COARSE2FINE = {"zoom": "zoom_in", "tilt-orbit": "orbit",
+                                    "static": "static", "motion": "complex"}
+                    pred, conf, method, desc = hier.predict(video_path, use_vlm=True)
+                    entry = {
+                        "label": _COARSE2FINE.get(pred, "complex"),
+                        "confidence": round(float(conf), 3),
+                        "source": f"hier_{method}",
+                        "coarse": pred,
+                        "description": desc,
+                        "flow_stats": {},
+                        "per_segment": [],
+                    }
+                    self._cache[video_path] = entry
+                    return self._disk_cache_put(video_path, entry)
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("分层分类失败, 降级光流规则: %s", exc)
 
         # L0: LoRA 分类器优先 (A5 接入点)
         clf = self._get_lora_clf()
@@ -158,6 +210,22 @@ class SourceCameraInventory:
             with open(_cache_file, "w", encoding="utf-8") as _f:
                 json.dump(entry, _f, ensure_ascii=False)
         except (OSError, UnboundLocalError):
+            pass
+        return entry
+
+
+    def _disk_cache_put(self, video_path: str, entry: Dict[str, Any]) -> Dict[str, Any]:
+        """L0.5 分层分类结果的磁盘缓存 (键与 L1 读侧一致, 失败不阻断)。"""
+        try:
+            _st = os.stat(video_path)
+            _h = hashlib.md5(
+                (video_path + "|" + str(int(_st.st_mtime)) + "|" + str(_st.st_size))
+                .encode()).hexdigest()[:12]
+            os.makedirs(_CAM_INV_CACHE_DIR, exist_ok=True)
+            with open(os.path.join(_CAM_INV_CACHE_DIR, f"{_h}.json"), "w",
+                      encoding="utf-8") as _f:
+                json.dump(entry, _f, ensure_ascii=False)
+        except (OSError, ValueError):
             pass
         return entry
 

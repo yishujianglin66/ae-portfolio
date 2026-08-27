@@ -1,0 +1,124 @@
+{
+    "schema_version":  "1.0",
+    "generated_at":  "2026-08-21",
+    "policy":  "P0-D: register SHA-256 + backup path for critical weights/data; lost-but-reproducible artifacts carry reproduce command",
+    "backup_root":  "D:\\\\AE-Data\\\\Models",
+    "artifacts":  [
+                      {
+                          "name":  "matting_prod_mixed",
+                          "path":  "external\\\\birefnet\\\\finetuned_anime_mixed.pth",
+                          "role":  "matting_prod_mixed",
+                          "exists":  true,
+                          "size_bytes":  885087422,
+                          "size_mb":  844.1,
+                          "sha256":  "8a3a6c8451c6270d81ba75dd96b702e8537d4c6f45798707aafa6f32209d3e4d",
+                          "last_modified":  "2026-08-16T01:45:26",
+                          "backup":  {
+                                         "location":  "D:\\AE-Data\\Models\\finetuned_anime_mixed.pth",
+                                         "status":  "not_backed_up"
+                                     },
+                          "reproduce":  "commit d2608f7",
+                          "can_reproduce":  true,
+                          "desc":  "BiRefNet mixed-ft (anime IoU 0.9756 / COCO +1.12%)"
+                      },
+                      {
+                          "name":  "matting_prod_fp16",
+                          "path":  "external\\\\birefnet\\\\finetuned_anime_fp16.pth",
+                          "role":  "matting_prod_fp16",
+                          "exists":  true,
+                          "size_bytes":  441649676,
+                          "size_mb":  421.2,
+                          "sha256":  "87e875c63d7668681d44c62417c8c9536670aabc9ef0a072a8936e7cb702611c",
+                          "last_modified":  "2026-08-15T11:00:49",
+                          "backup":  {
+                                         "location":  "D:\\AE-Data\\Models\\finetuned_anime_fp16.pth",
+                                         "status":  "not_backed_up"
+                                     },
+                          "reproduce":  "convert from mixed",
+                          "can_reproduce":  true,
+                          "desc":  "BiRefNet mixed-ft fp16 (lite, 421MB)"
+                      },
+                      {
+                          "name":  "matting_base",
+                          "path":  "external\\\\birefnet\\\\model.safetensors",
+                          "role":  "matting_base",
+                          "exists":  true,
+                          "size_bytes":  444473596,
+                          "size_mb":  423.9,
+                          "sha256":  "9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154",
+                          "last_modified":  "2026-08-14T20:43:46",
+                          "backup":  {
+                                         "location":  "D:\\AE-Data\\Models\\model.safetensors",
+                                         "status":  "not_backed_up"
+                                     },
+                          "reproduce":  "HuggingFace birefnet",
+                          "can_reproduce":  true,
+                          "desc":  "BiRefNet base checkpoint"
+                      },
+                      {
+                          "name":  "camera_lora_v3b_prod",
+                          "path":  "models\\\\output\\\\anime_camera_lora_v3\\\\adapter_model.safetensors",
+                          "role":  "camera_lora_v3b_prod",
+                          "exists":  true,
+                          "size_bytes":  1811064,
+                          "size_mb":  1.7,
+                          "sha256":  "8295a321b9b20261c8ba7439f799ebcf8fdf7bca0bbe04933b0ceb05542c887e",
+                          "last_modified":  "2026-08-15T15:55:18",
+                          "backup":  {
+                                         "location":  "D:\\AE-Data\\Models\\adapter_model.safetensors",
+                                         "status":  "not_backed_up"
+                                     },
+                          "reproduce":  "train commit 6251551",
+                          "can_reproduce":  true,
+                          "desc":  "anime_camera_lora v3b (acc 0.7729 production)"
+                      },
+                      {
+                          "name":  "camera_lora_v3b_thresholds",
+                          "path":  "models\\\\output\\\\anime_camera_lora_v3\\\\thresholds_tuned.json",
+                          "role":  "camera_lora_v3b_thresholds",
+                          "exists":  true,
+                          "size_bytes":  513,
+                          "size_mb":  0,
+                          "sha256":  "f67384df8939ad36585d338440c2b9fc5665ce4a8b2a64326b5e78ea8af4a526",
+                          "last_modified":  "2026-08-15T23:52:54",
+                          "backup":  {
+                                         "location":  "D:\\AE-Data\\Models\\thresholds_tuned.json",
+                                         "status":  "not_backed_up"
+                                     },
+                          "reproduce":  "tuned",
+                          "can_reproduce":  true,
+                          "desc":  "v3b tuned thresholds (0.30/0.85 split)"
+                      },
+                      {
+                          "name":  "fate_source_input",
+                          "path":  "data\\\\real_amv_test\\\\DL_FATE_r978_BV1qb411C79B_p1.mp4",
+                          "role":  "fate_source_input",
+                          "exists":  true,
+                          "size_bytes":  3340592,
+                          "size_mb":  3.2,
+                          "sha256":  "2746866345002292577af6eaf1a01e1cd9464dd29126f5f4aac43e308078b19f",
+                          "last_modified":  "2026-08-07T00:38:49",
+                          "backup":  {
+                                         "location":  "D:\\AE-Data\\Models\\DL_FATE_r978_BV1qb411C79B_p1.mp4",
+                                         "status":  "not_backed_up"
+                                     },
+                          "reproduce":  "downloaded BV1qb411C79B",
+                          "can_reproduce":  true,
+                          "desc":  "FATE v17 source clip (MOV reproducible, ~31s)"
+                      },
+                      {
+                          "name":  "fate_alpha_mov_v17",
+                          "path":  "output\\\\one_pipeline\\\\DL_DL_FATE_r978_BV1qb411C79B_p1_v17\\\\DL_DL_FATE_r978_BV1qb411C79B_p1_alpha.mov",
+                          "role":  "fate_alpha_mov_lost",
+                          "exists":  false,
+                          "size_mb":  365,
+                          "note":  "MISSING_ON_DISK (08-21 search: repo + D:\\\\AE-Work\\\\娓叉煋妗ｆ only pipeline_report JSON remains; report QC_PASS finished_at 2026-08-16 01:41)",
+                          "reproduce":  "python scripts/make_one_mov_pipeline.py --input data/real_amv_test/DL_FATE_r978_BV1qb411C79B_p1.mp4 --variant large (params in pipeline_report JSON; ~31s)",
+                          "can_reproduce":  true,
+                          "backup":  {
+                                         "status":  "lost_reproducible",
+                                         "location":  "none"
+                                     }
+                      }
+                  ]
+}

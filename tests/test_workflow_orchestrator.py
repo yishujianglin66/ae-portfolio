@@ -916,7 +916,7 @@ class TestDefaultPipeline:
         }
 
         orch.build_default_pipeline(funcs)
-        assert len(orch._tasks_def) == 12
+        assert len(orch._tasks_def) == 19
 
         perception = orch.get_task_def("perception")
         assert perception is not None
@@ -967,7 +967,7 @@ class TestDefaultPipeline:
         }
 
         orch.build_default_pipeline(funcs)
-        ctx = await orch.run(workflow_id="wf-default")
+        ctx = await asyncio.wait_for(orch.run(workflow_id="wf-default"), timeout=10)
 
         assert ctx.status == WorkflowStatus.COMPLETED
         assert "perceive" in called

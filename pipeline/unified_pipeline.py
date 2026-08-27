@@ -239,6 +239,13 @@ class PipelineConfig:
     ffmpeg_bin: str = ""                   # FFmpeg 可执行文件路径 (空=自动搜索)
     use_compiler: bool = False              # 使用 compiler 确定性管线替代 LLM
     enable_evolution: bool = True           # 启用自进化闭环 (P0: 评测+版本对比+回退)
+    # Loop Engineering 语义评判闭环 (verify 阶段 VLM/规则双后端)
+    enable_visual_judge: bool = True        # 启用语义级视觉评判 (黑帧/特效缺失/风格跑偏)
+    visual_judge_backend: str = "auto"      # vlm / rule / auto (vlm不可用时自动降级rule)
+    visual_judge_min_score: float = 60.0    # 语义分达标阈值 (0-100)
+    visual_judge_model_path: str = "models/weights/Qwen3-VL-8B-Instruct"  # 本地VLM权重目录 (空=仅规则后端)
+    visual_judge_quantize: str = "4bit"     # none=bf16 / 4bit=nf4量化 / auto=先bf16后降级 (8B在8GB显存必须4bit)
+    semantic_score_weight: float = 0.6      # 融合权重: final = (1-w)*信号分 + w*语义分
 
     def detect_mode(self) -> PipelineMode:
         """自动检测管线模式"""
@@ -290,6 +297,30 @@ class PipelineConfig:
         if score > 100.0:
             score = 100.0
         self.min_quality_score = score
+
+        # 语义评判配置钳制: 权重 [0,1], 阈值 [0,100], backend 白名单
+        try:
+            if isinstance(self.semantic_score_weight, bool):
+                weight = 0.6
+            else:
+                weight = float(self.semantic_score_weight)
+        except (TypeError, ValueError):
+            weight = 0.6
+        self.semantic_score_weight = max(0.0, min(1.0, weight))
+
+        try:
+            if isinstance(self.visual_judge_min_score, bool):
+                vj_score = 60.0
+            else:
+                vj_score = float(self.visual_judge_min_score)
+        except (TypeError, ValueError):
+            vj_score = 60.0
+        self.visual_judge_min_score = max(0.0, min(100.0, vj_score))
+
+        if str(self.visual_judge_backend).lower() not in ("auto", "vlm", "rule"):
+            self.visual_judge_backend = "auto"
+        if str(self.visual_judge_quantize).lower() not in ("none", "4bit", "auto"):
+            self.visual_judge_quantize = "auto"
 
     def to_dict(self) -> Dict:
         return {k: v for k, v in self.__dict__.items()}
@@ -3312,6 +3343,9 @@ class UnifiedPipeline:
             return False
 
         # 需要迭代 — 先应用 FeedbackExecutor 增强当前视频
+        # 【Loop Engineering】语义硬否决/语义不达标也走调参, 确保下轮 execute 换策略;
+        # 硬否决类灾难问题 (黑帧/文件过小) FFmpeg 增强救不回, 只能靠重跑 execute/render
+        self._adjust_params_for_retry(verify.data)
         recs = verify.data.get("recommendations", [])
         self._log(f"Quality gate: RETRY needed. Recommendations: {recs}")
         self._apply_quality_enhancement(verify.data)
@@ -3665,34 +3699,38 @@ def _attach_stage_invariant_data(
 def _run_stage_with_invariants(self, stage_name: str) -> StageResult:
     result = _UnifiedPipeline_legacy_run_stage(self, stage_name)
     try:
+        # 先导入再进入校验: 模块缺失时在 try 外抛 ModuleNotFoundError,
+        # 由下方外层处理器降级 (旧写法把 import 放 try 内, 失败后
+        # `except InvariantViolation` 因名字未定义反而抛 UnboundLocalError)
         from core.formal_spec import InvariantViolation, check_invariants
-        self._attach_stage_invariant_data(stage_name, result)
-        context = self._formal_spec_context(stage_name, result)
-        check_invariants(
-            context,
-            skip=bool(getattr(self.config, "debug_skip_invariants", False)),
-        )
-    except InvariantViolation as e:
-        # C2: 违规不裸抛 — 包装为 FAILED StageResult，保留阶段数据
-        logger.error("Stage [%s] invariant violation: %s", stage_name, e)
-        return StageResult(
-            stage=stage_name,
-            status=StageStatus.FAILED,
-            data=result.data,
-            error=f"[invariants] {e}",
-        )
+        try:
+            self._attach_stage_invariant_data(stage_name, result)
+            context = self._formal_spec_context(stage_name, result)
+            check_invariants(
+                context,
+                skip=bool(getattr(self.config, "debug_skip_invariants", False)),
+            )
+        except InvariantViolation as e:
+            # C2: 违规不裸抛 — 包装为 FAILED StageResult，保留阶段数据
+            logger.error("Stage [%s] invariant violation: %s", stage_name, e)
+            return StageResult(
+                stage=stage_name,
+                status=StageStatus.FAILED,
+                data=result.data,
+                error=f"[invariants] {e}",
+            )
+        except (TypeError, ValueError) as e:
+            # C2/H1: 数据形态异常 → 包装为 FAILED StageResult，不裸抛
+            logger.error("Stage [%s] invariant data error: %s", stage_name, e)
+            return StageResult(
+                stage=stage_name,
+                status=StageStatus.FAILED,
+                data=result.data,
+                error=f"[invariants] data error: {e}",
+            )
     except ModuleNotFoundError:
         # L2(b): 仅 formal_spec 模块缺失时降级；其他异常（语法错误等）向上传播
         logger.warning("FormalSpec 模块不可用，跳过不变量校验")
-    except (TypeError, ValueError) as e:
-        # C2/H1: 数据形态异常 → 包装为 FAILED StageResult，不裸抛
-        logger.error("Stage [%s] invariant data error: %s", stage_name, e)
-        return StageResult(
-            stage=stage_name,
-            status=StageStatus.FAILED,
-            data=result.data,
-            error=f"[invariants] data error: {e}",
-        )
     return result
 
 

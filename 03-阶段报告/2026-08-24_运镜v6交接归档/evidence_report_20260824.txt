@@ -1,0 +1,30 @@
+===== EVIDENCE GATE 1: EXISTENCE CHECK (2026-08-24 09:12 session) =====
+OK       7801109 bytes 18229 lines   vlm_labels_v2new.jsonl
+OK       3292215 bytes 7691 lines   v5_6_labels_washed.jsonl
+OK         78653 bytes 462 lines   suspect_review.jsonl
+OK         18550 bytes   recheck_suspects.py
+OK        166404 bytes 460 lines   suspect_rechecked.jsonl
+OK          3137 bytes 2 lines   suspect_errors.jsonl
+OK       3461907 bytes 7690 lines   v5_6_labels_final.jsonl
+OK       3666204 bytes 7690 lines   v6_meta_4class.jsonl
+OK          5337 bytes   _F1_meta_4class.py
+OK         44242 bytes   train_anime_camera_v5.py
+
+===== EVIDENCE GATE 2: FIRST-LINE + DISTRIBUTION (v6_meta_4class.jsonl, READY) =====
+Total rows: 7690
+字段清单: ['shot_id', 'video_id', 'shot_idx', 'start_sec', 'end_sec', 'duration_sec', 'source_type', 'anime', 'clip_path', 'movement_label', 'speed', 'stability', 'confidence', 'vlm_model', 'annotated_at', 'label', 'raw_label']
+首行样本 (真实JSON, 字段核验): {"shot_id": "BV1144y1B7dm_000", "video_id": "BV1144y1B7dm", "shot_idx": 0, "start_sec": 0.267, "end_sec": 0.8, "duration_sec": 0.533, "source_type": "amv", "anime": "通用燃向", "clip_path": "D:\\AE-Data\\AnimeCamera\\shots\\BV1144y1B7dm_000.mp4", "movement_label": "static", "speed": "regular-speed", "stability": "no-shaking", "confidence": 0.95, "vlm_model": "qwenai", "annotated_at": "2026-08-18 20:42
+4 元类真实分布 (Counter实测):
+  meta-zoom               :  4694  61.04%
+  meta-static             :  1394  18.13%
+  meta-pan                :  1149  14.94%
+  meta-tilt-orbit         :   453   5.89%
+Gini 系数 (越小越均匀): 0.5688  [v5_6 6类 Gini=0.7123, arrow-down 20.2%]
+
+===== EVIDENCE GATE 3: 任务签名三对齐 (模型签名 x 数据签名 x 类名清单) =====
+预期类名清单 (Trainer num_classes=4): ['meta-pan', 'meta-static', 'meta-tilt-orbit', 'meta-zoom']
+实际 JSONL label 值 (Counter 键):    ['meta-pan', 'meta-static', 'meta-tilt-orbit', 'meta-zoom']
+交集: ['meta-pan', 'meta-static', 'meta-tilt-orbit', 'meta-zoom']
+对齐状态: CHECK 三签名完全一致 (可启动训练)
+
+===== 闸门1 全局: CHECK 全部 READY 文件存在 =====

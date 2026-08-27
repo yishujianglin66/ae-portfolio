@@ -160,11 +160,12 @@ class TestCookieResolution(unittest.TestCase):
             os.unlink(temp_path)
 
     def test_resolve_cookie_nonexistent_file(self):
-        """不存在的cookie文件应回退到空结果（mock模块级常量避免读取默认路径）"""
+        """不存在的cookie文件应回退到空结果（密闭隔离：环境变量/默认路径/项目内cookies回退全部失效）"""
         import unittest.mock as mock
         import douyin_downloader_pro as ddp
-        with mock.patch.object(ddp, 'ENV_COOKIE', ''), \
-             mock.patch.object(ddp, 'DEFAULT_COOKIE_PATH', '/nonexistent/default.txt'):
+        with mock.patch.dict(os.environ, {"DOUYIN_COOKIE": "", "DOUYIN_COOKIE_PATH": ""}), \
+             mock.patch.object(ddp, 'DEFAULT_COOKIE_PATH', '/nonexistent/default.txt'), \
+             mock.patch('os.path.exists', return_value=False):
             cookies, path = _resolve_cookie_source(cookie_path="/nonexistent/file.txt")
             self.assertEqual(cookies, {})
             self.assertIsNone(path)

@@ -1,0 +1,191 @@
+{
+  "version": "1.0",
+  "_doc": "风格参数化配置 — 风格名 → SmartMatcher场景标签/强度/运镜偏好 精确映射 (T3)",
+  "_scene_tags_must_be_in": ["battle", "cyberpunk", "cinematic", "anime", "ink_wash",
+    "neon", "social", "horror", "tech", "elegant", "sport", "retro", "magic",
+    "industrial", "cute", "data", "brand", "comic", "title_kit", "lyric"],
+  "profiles": {
+    "热血战斗": {
+      "aliases": ["热血", "燃向", "battle"],
+      "scene_tags": {"intro": "battle", "build": "battle", "drop": "battle",
+                     "break": "cinematic", "outro": "cinematic"},
+      "intensity_map": {"intro": "moderate", "build": "moderate", "drop": "intense",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["push"], "build": ["follow", "truck"],
+                      "drop": ["whip", "push", "dutch"], "break": ["pull"],
+                      "outro": ["pull"]}
+    },
+    "赛博朋克": {
+      "aliases": ["赛博", "科幻霓虹", "cyberpunk"],
+      "scene_tags": {"intro": "tech", "build": "cyberpunk", "drop": "cyberpunk",
+                     "break": "tech", "outro": "tech"},
+      "intensity_map": {"intro": "moderate", "build": "moderate", "drop": "intense",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["truck"], "build": ["truck", "dutch"],
+                      "drop": ["whip", "dutch"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "水墨国风": {
+      "aliases": ["国风", "水墨", "古风", "ink_wash"],
+      "scene_tags": {"intro": "ink_wash", "build": "ink_wash", "drop": "magic",
+                     "break": "ink_wash", "outro": "ink_wash"},
+      "intensity_map": {"intro": "gentle", "build": "moderate", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["pan"], "build": ["pan", "follow"],
+                      "drop": ["orbit", "push"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "电影史诗": {
+      "aliases": ["史诗", "电影感", "cinematic"],
+      "scene_tags": {"intro": "cinematic", "build": "cinematic", "drop": "cinematic",
+                     "break": "elegant", "outro": "elegant"},
+      "intensity_map": {"intro": "gentle", "build": "moderate", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["push"], "build": ["pan", "truck"],
+                      "drop": ["push", "orbit"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "霓虹潮流": {
+      "aliases": ["霓虹", "潮流", "夜店", "neon"],
+      "scene_tags": {"intro": "neon", "build": "neon", "drop": "neon",
+                     "break": "elegant", "outro": "neon"},
+      "intensity_map": {"intro": "moderate", "build": "moderate", "drop": "intense",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["truck"], "build": ["dutch", "follow"],
+                      "drop": ["whip", "push"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "恐怖悬疑": {
+      "aliases": ["恐怖", "悬疑", "惊悚", "horror"],
+      "scene_tags": {"intro": "horror", "build": "horror", "drop": "horror",
+                     "break": "elegant", "outro": "horror"},
+      "intensity_map": {"intro": "gentle", "build": "moderate", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["push"], "build": ["dutch"],
+                      "drop": ["whip", "dutch"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "可爱萌系": {
+      "aliases": ["可爱", "童趣", "萌", "cute"],
+      "scene_tags": {"intro": "cute", "build": "cute", "drop": "cute",
+                     "break": "social", "outro": "cute"},
+      "intensity_map": {"intro": "gentle", "build": "gentle", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["pan"], "build": ["follow"],
+                      "drop": ["push", "orbit"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "复古怀旧": {
+      "aliases": ["复古", "怀旧", "VHS", "retro"],
+      "scene_tags": {"intro": "retro", "build": "retro", "drop": "retro",
+                     "break": "lyric", "outro": "retro"},
+      "intensity_map": {"intro": "gentle", "build": "moderate", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["pan"], "build": ["truck"],
+                      "drop": ["push", "whip"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "魔法奇幻": {
+      "aliases": ["魔法", "奇幻", "玄幻", "magic"],
+      "scene_tags": {"intro": "magic", "build": "magic", "drop": "magic",
+                     "break": "elegant", "outro": "magic"},
+      "intensity_map": {"intro": "gentle", "build": "moderate", "drop": "intense",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["orbit"], "build": ["orbit", "follow"],
+                      "drop": ["push", "orbit"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "工业机甲": {
+      "aliases": ["机甲", "重工业", "industrial"],
+      "scene_tags": {"intro": "industrial", "build": "industrial", "drop": "industrial",
+                     "break": "tech", "outro": "industrial"},
+      "intensity_map": {"intro": "moderate", "build": "moderate", "drop": "intense",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["truck"], "build": ["truck", "dutch"],
+                      "drop": ["whip", "push"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "运动竞技": {
+      "aliases": ["运动", "体育", "电竞", "sport"],
+      "scene_tags": {"intro": "sport", "build": "sport", "drop": "sport",
+                     "break": "social", "outro": "sport"},
+      "intensity_map": {"intro": "moderate", "build": "moderate", "drop": "intense",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["follow"], "build": ["follow", "whip"],
+                      "drop": ["whip", "push"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "数据科技": {
+      "aliases": ["科技", "数据", "极客", "tech"],
+      "scene_tags": {"intro": "tech", "build": "data", "drop": "data",
+                     "break": "tech", "outro": "tech"},
+      "intensity_map": {"intro": "gentle", "build": "moderate", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["truck"], "build": ["truck"],
+                      "drop": ["push", "dutch"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "品牌商务": {
+      "aliases": ["品牌", "商务", "企业", "brand"],
+      "scene_tags": {"intro": "brand", "build": "brand", "drop": "brand",
+                     "break": "elegant", "outro": "brand"},
+      "intensity_map": {"intro": "gentle", "build": "moderate", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["push"], "build": ["pan"],
+                      "drop": ["push"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "动漫燃剪": {
+      "aliases": ["动漫", "二次元", "AMV", "anime"],
+      "scene_tags": {"intro": "anime", "build": "anime", "drop": "anime",
+                     "break": "cinematic", "outro": "anime"},
+      "intensity_map": {"intro": "moderate", "build": "moderate", "drop": "intense",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["push"], "build": ["follow", "dutch"],
+                      "drop": ["whip", "push", "dutch"], "break": ["pull"],
+                      "outro": ["pull"]}
+    },
+    "漫画分镜": {
+      "aliases": ["漫画", "分镜", "comic"],
+      "scene_tags": {"intro": "comic", "build": "comic", "drop": "comic",
+                     "break": "comic", "outro": "comic"},
+      "intensity_map": {"intro": "moderate", "build": "moderate", "drop": "intense",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["dutch"], "build": ["dutch", "whip"],
+                      "drop": ["whip", "push"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "歌词字幕": {
+      "aliases": ["歌词", "MV", "lyric"],
+      "scene_tags": {"intro": "lyric", "build": "lyric", "drop": "lyric",
+                     "break": "lyric", "outro": "lyric"},
+      "intensity_map": {"intro": "gentle", "build": "gentle", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["pan"], "build": ["pan"],
+                      "drop": ["push"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "社交媒体": {
+      "aliases": ["社交", "短视频", "vlog", "social"],
+      "scene_tags": {"intro": "social", "build": "social", "drop": "social",
+                     "break": "social", "outro": "social"},
+      "intensity_map": {"intro": "gentle", "build": "moderate", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["follow"], "build": ["follow", "pan"],
+                      "drop": ["push"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "优雅极简": {
+      "aliases": ["优雅", "极简", "高级感", "elegant"],
+      "scene_tags": {"intro": "elegant", "build": "elegant", "drop": "elegant",
+                     "break": "elegant", "outro": "elegant"},
+      "intensity_map": {"intro": "gentle", "build": "gentle", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["push"], "build": ["pan"],
+                      "drop": ["push"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "标题包装": {
+      "aliases": ["片头", "标题", "title_kit"],
+      "scene_tags": {"intro": "title_kit", "build": "title_kit", "drop": "title_kit",
+                     "break": "title_kit", "outro": "title_kit"},
+      "intensity_map": {"intro": "gentle", "build": "gentle", "drop": "moderate",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["push"], "build": ["pan"],
+                      "drop": ["push"], "break": ["pull"], "outro": ["pull"]}
+    },
+    "黑客帝国": {
+      "aliases": ["矩阵", "帝国风格", "matrix"],
+      "scene_tags": {"intro": "data", "build": "cyberpunk", "drop": "cyberpunk",
+                     "break": "tech", "outro": "data"},
+      "intensity_map": {"intro": "moderate", "build": "moderate", "drop": "intense",
+                        "break": "gentle", "outro": "gentle"},
+      "camera_bias": {"intro": ["truck"], "build": ["dutch", "truck"],
+                      "drop": ["whip", "dutch"], "break": ["pull"], "outro": ["pull"]}
+    }
+  }
+}

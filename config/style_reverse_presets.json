@@ -1,0 +1,180 @@
+{
+  "version": "1.0",
+  "description": "逆向工程提取的风格预设 (5 个)",
+  "generated_at": "2026-08-26T12:48:57.308593",
+  "source": "aep_analyzer/preset_generator.py",
+  "category": {
+    "style_reverse": {
+      "display_name": "逆向提取风格预设",
+      "count": 5,
+      "presets": [
+        {
+          "id": "cyberpunk_neon",
+          "name": "赛博朋克/霓虹风格",
+          "name_en": "赛博朋克/霓虹风格",
+          "description": "Exposure + Lumetri调色 + Fractal Noise纹理 + Glow发光 + Turbulent Displace扭曲",
+          "tags": [
+            "赛博朋克",
+            "霓虹",
+            "暗调",
+            "发光",
+            "MV"
+          ],
+          "difficulty": 5,
+          "duration_default": 2.0,
+          "parameters": [
+            {
+              "name": "targetLayerName",
+              "type": "string",
+              "default": "目标图层",
+              "description": "目标图层名称"
+            }
+          ],
+          "applies": [
+            "AnyLayer"
+          ],
+          "jsx_template": "(function(){\nvar _r = {};\ntry {\n  var c = app.project.activeItem;\n  if (!c || !(c instanceof CompItem)) {\n    _r = {status: 'error', message: 'No active composition'};\n    return JSON.stringify(_r);\n  }\n  var layerName = '{{targetLayerName}}';\n  var L = null;\n  for (var i = 1; i <= c.numLayers; i++) {\n    if (c.layer(i).name === layerName) { L = c.layer(i); break; }\n  }\n  if (!L) {\n    _r = {status: 'error', message: 'Layer not found: ' + layerName};\n    return JSON.stringify(_r);\n  }\n  // === Style: 赛博朋克/霓虹风格 ===\n  // Effect: Exposure (ADBE Exposure2)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Exposure2');\n_ef.property('ADBE Exposure2-0002').setValue(0.8);\n// Effect: Lumetri Color (ADBE Lumetri)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Lumetri');\n_ef.property('ADBE Lumetri-0002').setValue(20);\n_ef.property('ADBE Lumetri-0004').setValue(15);\n// Effect: Fractal Noise (ADBE Fractal Noise)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Fractal Noise');\n_ef.property('ADBE Fractal Noise-0005').setValue(30);\n_ef.property('ADBE Fractal Noise-0008').setValue(4);\n_ef.property('ADBE Fractal Noise-0006').setValue(-20);\nL.blendingMode = 22; // Overlay\nL.opacity.setValue(35);\n// Effect: Glow (ADBE Glo2)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Glo2');\n_ef.property('ADBE Glo2-0001').setValue(40);\n_ef.property('ADBE Glo2-0002').setValue(35);\n_ef.property('ADBE Glo2-0004').setValue([0, 200, 255]);\n_ef.property('ADBE Glo2-0005').setValue([255, 0, 200]);\n// Effect: Turbulent Displace (ADBE Turbulent Displace)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Turbulent Displace');\n_ef.property('ADBE Turbulent Displace-0001').setValue(15);\n_ef.property('ADBE Turbulent Displace-0002').setValue(25);\n  _r = {status: 'success', preset: 'cyberpunk_neon', layer: layerName};\n} catch(e) {\n  _r = {status: 'error', message: e.toString()};\n}\nreturn JSON.stringify(_r);\n})();",
+          "source": "reverse_engineered",
+          "effect_chain": [
+            "ADBE Exposure2",
+            "ADBE Lumetri",
+            "ADBE Fractal Noise",
+            "ADBE Glo2",
+            "ADBE Turbulent Displace"
+          ]
+        },
+        {
+          "id": "anime_mashup",
+          "name": "动漫混剪风格",
+          "name_en": "动漫混剪风格",
+          "description": "CrackedTiles碎裂转场 + Mocha跟踪 + Sapphire纹理叠加",
+          "tags": [
+            "动漫",
+            "混剪",
+            "转场",
+            "跟踪"
+          ],
+          "difficulty": 4,
+          "duration_default": 2.0,
+          "parameters": [
+            {
+              "name": "targetLayerName",
+              "type": "string",
+              "default": "目标图层",
+              "description": "目标图层名称"
+            }
+          ],
+          "applies": [
+            "AnyLayer"
+          ],
+          "jsx_template": "(function(){\nvar _r = {};\ntry {\n  var c = app.project.activeItem;\n  if (!c || !(c instanceof CompItem)) {\n    _r = {status: 'error', message: 'No active composition'};\n    return JSON.stringify(_r);\n  }\n  var layerName = '{{targetLayerName}}';\n  var L = null;\n  for (var i = 1; i <= c.numLayers; i++) {\n    if (c.layer(i).name === layerName) { L = c.layer(i); break; }\n  }\n  if (!L) {\n    _r = {status: 'error', message: 'Layer not found: ' + layerName};\n    return JSON.stringify(_r);\n  }\n  // === Style: 动漫混剪风格 ===\n  // Effect: Cracked Tiles (ADBE CM CrackedTiles)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE CM CrackedTiles');\n_ef.property('ADBE CM CrackedTiles-0001').setValue(15);\n_ef.property('ADBE CM CrackedTiles-0003').setValue(20);\n// Effect: Fractal Noise (ADBE Fractal Noise)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Fractal Noise');\n_ef.property('ADBE Fractal Noise-0005').setValue(15);\n_ef.property('ADBE Fractal Noise-0008').setValue(2);\nL.blendingMode = 22; // Overlay\nL.opacity.setValue(25);\n// Effect: Noise (ADBE Noise)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Noise');\n_ef.property('ADBE Noise-0001').setValue(8);\n// Effect: Glow (ADBE Glo2)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Glo2');\n_ef.property('ADBE Glo2-0001').setValue(55);\n_ef.property('ADBE Glo2-0002').setValue(20);\n  _r = {status: 'success', preset: 'anime_mashup', layer: layerName};\n} catch(e) {\n  _r = {status: 'error', message: e.toString()};\n}\nreturn JSON.stringify(_r);\n})();",
+          "source": "reverse_engineered",
+          "effect_chain": [
+            "ADBE CM CrackedTiles",
+            "ADBE Fractal Noise",
+            "ADBE Noise",
+            "ADBE Glo2"
+          ]
+        },
+        {
+          "id": "retro_film",
+          "name": "复古胶片风格",
+          "name_en": "复古胶片风格",
+          "description": "黑白 + 模糊 + 噪点 + 色调滤镜 + 柔光",
+          "tags": [
+            "复古",
+            "胶片",
+            "黑白",
+            "噪点",
+            "怀旧"
+          ],
+          "difficulty": 5,
+          "duration_default": 2.0,
+          "parameters": [
+            {
+              "name": "targetLayerName",
+              "type": "string",
+              "default": "目标图层",
+              "description": "目标图层名称"
+            }
+          ],
+          "applies": [
+            "AnyLayer"
+          ],
+          "jsx_template": "(function(){\nvar _r = {};\ntry {\n  var c = app.project.activeItem;\n  if (!c || !(c instanceof CompItem)) {\n    _r = {status: 'error', message: 'No active composition'};\n    return JSON.stringify(_r);\n  }\n  var layerName = '{{targetLayerName}}';\n  var L = null;\n  for (var i = 1; i <= c.numLayers; i++) {\n    if (c.layer(i).name === layerName) { L = c.layer(i); break; }\n  }\n  if (!L) {\n    _r = {status: 'error', message: 'Layer not found: ' + layerName};\n    return JSON.stringify(_r);\n  }\n  // === Style: 复古胶片风格 ===\n  // Effect: Black & White (Color Suite) (CSL BlackAndWhite)\nvar _ef = L.property('ADBE Effect Parade').addProperty('CSL BlackAndWhite');\n// Effect: Box Blur (ADBE BoxBlur2)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE BoxBlur2');\n_ef.property('ADBE BoxBlur2-0001').setValue(3);\n// Effect: Noise (ADBE Noise)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Noise');\n_ef.property('ADBE Noise-0001').setValue(12);\n// Effect: Photo Filter (ADBE PhotoFilter)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE PhotoFilter');\n_ef.property('ADBE PhotoFilter-0001').setValue([255, 180, 80]);\n_ef.property('ADBE PhotoFilter-0002').setValue(30);\n// Effect: Glow (ADBE Glo2)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Glo2');\n_ef.property('ADBE Glo2-0001').setValue(60);\n_ef.property('ADBE Glo2-0002').setValue(15);\n  _r = {status: 'success', preset: 'retro_film', layer: layerName};\n} catch(e) {\n  _r = {status: 'error', message: e.toString()};\n}\nreturn JSON.stringify(_r);\n})();",
+          "source": "reverse_engineered",
+          "effect_chain": [
+            "CSL BlackAndWhite",
+            "ADBE BoxBlur2",
+            "ADBE Noise",
+            "ADBE PhotoFilter",
+            "ADBE Glo2"
+          ]
+        },
+        {
+          "id": "fresh_clean",
+          "name": "清新文艺风格",
+          "name_en": "清新文艺风格",
+          "description": "柔和曝光 + 轻微噪点 + 暖色调 + 柔光",
+          "tags": [
+            "清新",
+            "文艺",
+            "柔和",
+            "暖色"
+          ],
+          "difficulty": 4,
+          "duration_default": 2.0,
+          "parameters": [
+            {
+              "name": "targetLayerName",
+              "type": "string",
+              "default": "目标图层",
+              "description": "目标图层名称"
+            }
+          ],
+          "applies": [
+            "AnyLayer"
+          ],
+          "jsx_template": "(function(){\nvar _r = {};\ntry {\n  var c = app.project.activeItem;\n  if (!c || !(c instanceof CompItem)) {\n    _r = {status: 'error', message: 'No active composition'};\n    return JSON.stringify(_r);\n  }\n  var layerName = '{{targetLayerName}}';\n  var L = null;\n  for (var i = 1; i <= c.numLayers; i++) {\n    if (c.layer(i).name === layerName) { L = c.layer(i); break; }\n  }\n  if (!L) {\n    _r = {status: 'error', message: 'Layer not found: ' + layerName};\n    return JSON.stringify(_r);\n  }\n  // === Style: 清新文艺风格 ===\n  // Effect: Exposure (ADBE Exposure2)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Exposure2');\n_ef.property('ADBE Exposure2-0002').setValue(0.3);\n_ef.property('ADBE Exposure2-0004').setValue(1.1);\n// Effect: Noise (ADBE Noise)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Noise');\n_ef.property('ADBE Noise-0001').setValue(5);\n// Effect: Photo Filter (ADBE PhotoFilter)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE PhotoFilter');\n_ef.property('ADBE PhotoFilter-0001').setValue([255, 220, 180]);\n_ef.property('ADBE PhotoFilter-0002').setValue(15);\n// Effect: Glow (ADBE Glo2)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Glo2');\n_ef.property('ADBE Glo2-0001').setValue(65);\n_ef.property('ADBE Glo2-0002').setValue(12);\n  _r = {status: 'success', preset: 'fresh_clean', layer: layerName};\n} catch(e) {\n  _r = {status: 'error', message: e.toString()};\n}\nreturn JSON.stringify(_r);\n})();",
+          "source": "reverse_engineered",
+          "effect_chain": [
+            "ADBE Exposure2",
+            "ADBE Noise",
+            "ADBE PhotoFilter",
+            "ADBE Glo2"
+          ]
+        },
+        {
+          "id": "audio_reactive",
+          "name": "音频响应风格",
+          "name_en": "音频响应风格",
+          "description": "Audio Spectrum频谱 + LED点阵 + 光学变速",
+          "tags": [
+            "音频响应",
+            "频谱",
+            "可视化",
+            "LED"
+          ],
+          "difficulty": 1,
+          "duration_default": 2.0,
+          "parameters": [
+            {
+              "name": "targetLayerName",
+              "type": "string",
+              "default": "目标图层",
+              "description": "目标图层名称"
+            }
+          ],
+          "applies": [
+            "AnyLayer"
+          ],
+          "jsx_template": "(function(){\nvar _r = {};\ntry {\n  var c = app.project.activeItem;\n  if (!c || !(c instanceof CompItem)) {\n    _r = {status: 'error', message: 'No active composition'};\n    return JSON.stringify(_r);\n  }\n  var layerName = '{{targetLayerName}}';\n  var L = null;\n  for (var i = 1; i <= c.numLayers; i++) {\n    if (c.layer(i).name === layerName) { L = c.layer(i); break; }\n  }\n  if (!L) {\n    _r = {status: 'error', message: 'Layer not found: ' + layerName};\n    return JSON.stringify(_r);\n  }\n  // === Style: 音频响应风格 ===\n  // Effect: Audiospectrum (ADBE Audiospectrum)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Audiospectrum');\n  _r = {status: 'success', preset: 'audio_reactive', layer: layerName};\n} catch(e) {\n  _r = {status: 'error', message: e.toString()};\n}\nreturn JSON.stringify(_r);\n})();",
+          "source": "reverse_engineered",
+          "effect_chain": [
+            "ADBE Audiospectrum"
+          ]
+        }
+      ]
+    }
+  }
+}

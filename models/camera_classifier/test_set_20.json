@@ -1,0 +1,147 @@
+{
+  "n_total": 7690,
+  "n_static": 1394,
+  "n_motion": 6296,
+  "test_set": [
+    {
+      "shot_id": "BV1144y1B7dm_000",
+      "vlm_label_4class": "meta-static",
+      "expert_label_4class": "meta-static",
+      "vlm_label_2class": "static",
+      "expert_label_2class": "static"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_001",
+      "vlm_label_4class": "meta-static",
+      "expert_label_4class": "meta-tilt-orbit",
+      "vlm_label_2class": "static",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_062",
+      "vlm_label_4class": "meta-static",
+      "expert_label_4class": "meta-zoom",
+      "vlm_label_2class": "static",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_103",
+      "vlm_label_4class": "meta-static",
+      "expert_label_4class": "meta-zoom",
+      "vlm_label_2class": "static",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_109",
+      "vlm_label_4class": "meta-static",
+      "expert_label_4class": "meta-zoom",
+      "vlm_label_2class": "static",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_144",
+      "vlm_label_4class": "meta-static",
+      "expert_label_4class": "meta-static",
+      "vlm_label_2class": "static",
+      "expert_label_2class": "static"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_148",
+      "vlm_label_4class": "meta-static",
+      "expert_label_4class": "meta-zoom",
+      "vlm_label_2class": "static",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV13A41147mP_007",
+      "vlm_label_4class": "meta-static",
+      "expert_label_4class": "meta-static",
+      "vlm_label_2class": "static",
+      "expert_label_2class": "static"
+    },
+    {
+      "shot_id": "BV13A41147mP_008",
+      "vlm_label_4class": "meta-static",
+      "expert_label_4class": "meta-pan",
+      "vlm_label_2class": "static",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV13A41147mP_012",
+      "vlm_label_4class": "meta-static",
+      "expert_label_4class": "meta-zoom",
+      "vlm_label_2class": "static",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_023",
+      "vlm_label_4class": "meta-zoom",
+      "expert_label_4class": "meta-tilt-orbit",
+      "vlm_label_2class": "motion",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_028",
+      "vlm_label_4class": "meta-pan",
+      "expert_label_4class": "meta-tilt-orbit",
+      "vlm_label_2class": "motion",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_030",
+      "vlm_label_4class": "meta-zoom",
+      "expert_label_4class": "meta-tilt-orbit",
+      "vlm_label_2class": "motion",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_034",
+      "vlm_label_4class": "meta-zoom",
+      "expert_label_4class": "meta-tilt-orbit",
+      "vlm_label_2class": "motion",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_035",
+      "vlm_label_4class": "meta-zoom",
+      "expert_label_4class": "meta-tilt-orbit",
+      "vlm_label_2class": "motion",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_037",
+      "vlm_label_4class": "meta-zoom",
+      "expert_label_4class": "meta-tilt-orbit",
+      "vlm_label_2class": "motion",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_042",
+      "vlm_label_4class": "meta-pan",
+      "expert_label_4class": "meta-tilt-orbit",
+      "vlm_label_2class": "motion",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_048",
+      "vlm_label_4class": "meta-pan",
+      "expert_label_4class": "meta-static",
+      "vlm_label_2class": "motion",
+      "expert_label_2class": "static"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_050",
+      "vlm_label_4class": "meta-zoom",
+      "expert_label_4class": "meta-tilt-orbit",
+      "vlm_label_2class": "motion",
+      "expert_label_2class": "motion"
+    },
+    {
+      "shot_id": "BV1144y1B7dm_055",
+      "vlm_label_4class": "meta-zoom",
+      "expert_label_4class": "meta-tilt-orbit",
+      "vlm_label_2class": "motion",
+      "expert_label_2class": "motion"
+    }
+  ]
+}

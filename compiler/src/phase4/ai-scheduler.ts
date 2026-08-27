@@ -27,6 +27,13 @@ import { buildIR } from "../ir-builder";
 import { generateCode } from "../codegen";
 import { CompileResult } from "../types";
 import { IntentRouter, intentRouter, TaskRoute } from "./intent-router";
+import { getLLMGateway } from "./llm-gateway";
+import { persistentLearningLoop } from "../phase5/persistent-learning-loop";
+import {
+    ExpectedParameters as LearningExpectedParams,
+    ExecutionResult as LearningExecutionResult,
+    VerificationResult as LearningVerificationResult,
+} from "../phase5/types";
 
 export interface SchedulerOptions {
     projectContext?: ProjectContext;
@@ -451,6 +458,104 @@ export class AIScheduler {
         };
     }
 
+    /**
+     * P0-1 修复: 回读 phase5 学习机器的历史学习成果，应用到生成参数上
+     * - 查询 DefaultValueStore 获取学习到的默认值
+     * - 查询 CaseStore 获取成功模板
+     * 将学习成果混合进 generatedEffects 的 settings 中
+     */
+    private applyLearnedDefaults(effects: EffectParams[]): EffectParams[] {
+        return effects.map(effect => {
+            const learnedDefaults = persistentLearningLoop.getDefaultValueStore().getAll(effect.matchName);
+            const templates = persistentLearningLoop.getCaseStore().findTemplates(effect.matchName);
+
+            if (Object.keys(learnedDefaults).length === 0 && templates.length === 0) {
+                return effect;
+            }
+
+            const mergedSettings = { ...effect.settings };
+            let adjusted = false;
+
+            // 1. 应用学习到的默认值（加权混合 80% 原始 + 20% 学习值）
+            for (const [param, learnedValue] of Object.entries(learnedDefaults)) {
+                if (param in mergedSettings && typeof mergedSettings[param] === "number" && typeof learnedValue === "number") {
+                    mergedSettings[param] = (mergedSettings[param] as number) * 0.8 + learnedValue * 0.2;
+                    adjusted = true;
+                }
+            }
+
+            // 2. 如果有高使用率模板（usageCount >= 3），以 10% 权重混合模板参数
+            const bestTemplate = templates.find(t => t.usageCount >= 3);
+            if (bestTemplate) {
+                for (const [param, tplValue] of Object.entries(bestTemplate.parameters)) {
+                    if (param in mergedSettings && typeof mergedSettings[param] === "number" && typeof tplValue === "number") {
+                        mergedSettings[param] = (mergedSettings[param] as number) * 0.9 + tplValue * 0.1;
+                        adjusted = true;
+                    }
+                }
+                persistentLearningLoop.getCaseStore().incrementUsage(bestTemplate.id);
+            }
+
+            if (!adjusted) return effect;
+            return { ...effect, settings: mergedSettings };
+        });
+    }
+
+    /**
+     * P0-1 修复: 将执行结果写入 phase5 持久化学习循环
+     * 使学习机器真正接收到生产反馈，闭合"复用"腿
+     */
+    private recordToLearningLoop(
+        input: string,
+        intentType: string,
+        effects: EffectParams[],
+        compileSuccess: boolean,
+    ): void {
+        try {
+            for (const effect of effects) {
+                const expected: LearningExpectedParams = {
+                    compName: "AI生成合成",
+                    layerIndex: 1,
+                    effectMatchName: effect.matchName,
+                    effectName: effect.displayName,
+                    properties: Object.entries(effect.settings).map(([name, value]) => ({
+                        name,
+                        value: value as number | string | number[],
+                    })),
+                };
+
+                const execution: LearningExecutionResult = {
+                    success: compileSuccess,
+                    effectName: effect.displayName,
+                    errorCode: compileSuccess ? undefined : "COMPILE_FAILED",
+                    errorMessage: compileSuccess ? undefined : "JSX compilation failed",
+                };
+
+                const verification: LearningVerificationResult = {
+                    passed: compileSuccess,
+                    mismatches: [],
+                    deviationScore: compileSuccess ? 0 : 1,
+                };
+
+                persistentLearningLoop.recordExecution(
+                    input,
+                    intentType,
+                    expected,
+                    execution,
+                    verification,
+                    undefined, // userFeedback - 后续由上层 UI 补充
+                    ["nlu_parse", "param_generate", "optimize", "compile"],
+                );
+            }
+        } catch {
+            // 学习记录失败不应影响主流程
+        }
+    }
+
+    /**
+     * @deprecated 同步纯规则路径。生产环境请使用 executeAsync()（LLM 增强 + 自动降级）。
+     * 保留仅为向后兼容测试和 demo 脚本。
+     */
     execute(input: string, options: SchedulerOptions = {}): SchedulerResult {
         const context = options.projectContext;
         const layerRef = options.targetLayerRef || "selected";
@@ -487,8 +592,14 @@ export class AIScheduler {
                     optimizedEffects = optimizations.map(o => o.optimizedParams);
                 }
 
+                // P0-1: 应用历史学习成果
+                optimizedEffects = this.applyLearnedDefaults(optimizedEffects);
+
                 const operations = this.buildOperations(optimizedEffects, layerRef);
                 const compileResult = this.compileToJSX(operations);
+
+                // P0-1: 记录执行到学习循环
+                this.recordToLearningLoop(input, nluResult.intent.type, optimizedEffects, compileResult.success);
 
                 return {
                     success: silhouetteOps.length > 0 && compileResult.success,
@@ -532,6 +643,9 @@ export class AIScheduler {
             optimizedEffects = optimizations.map(o => o.optimizedParams);
         }
 
+        // P0-1: 应用历史学习成果（回读 getDefaultValues / findTemplates）
+        optimizedEffects = this.applyLearnedDefaults(optimizedEffects);
+
         const operations = this.buildOperations(optimizedEffects, layerRef);
 
         if (operations.length === 0) {
@@ -551,6 +665,9 @@ export class AIScheduler {
 
         const compileResult = this.compileToJSX(operations);
 
+        // P0-1: 记录执行到持久化学习循环（闭合复用腿）
+        this.recordToLearningLoop(input, nluResult.intent.type, optimizedEffects, compileResult.success);
+
         return {
             success: compileResult.success,
             intent: nluResult.intent,
@@ -564,6 +681,110 @@ export class AIScheduler {
             jsxCode: compileResult.script,
             route,
             confidence: nluResult.intent.confidence,
+            needsClarification: false,
+        };
+    }
+
+    /**
+     * 自动配置 LLM Gateway：从 process.env 检测 ModelScope/OpenAI 等环境变量。
+     * 仅在 Gateway 未配置时执行一次（幂等）。
+     */
+    private _llmConfigured = false;
+    private ensureLLMConfigured(): void {
+        if (this._llmConfigured) return;
+        this._llmConfigured = true;
+        try {
+            const gw = getLLMGateway();
+            if (!gw.isAvailable()) {
+                // 从 process.env 自动配置（Node.js 环境）
+                const env = typeof process !== "undefined" ? (process.env as Record<string, string>) : {};
+                gw.configureFromEnv(env);
+            }
+        } catch {
+            // 配置失败不影响主流程（降级为规则路径）
+        }
+    }
+
+    /**
+     * LLM 增强版执行入口 — 生产路径默认使用此方法。
+     *
+     * 与 execute() 的区别：
+     * - NLU 解析使用 parseEnhanced()（记忆回读 + LLM 增强 + 规则兖底）
+     * - 路由决策使用 routeEnhanced()（记忆回读 + LLM 增强 + 规则兖底）
+     * - 自动从 process.env 配置 LLM Gateway（无需手动调用 configureFromEnv）
+     * - 当 LLM 不可用时自动降级为纯规则路径（等价于 execute()）
+     */
+    async executeAsync(input: string, options: SchedulerOptions = {}): Promise<SchedulerResult> {
+        // 自动配置 LLM Gateway（从环境变量检测 ModelScope/OpenAI 等）
+        this.ensureLLMConfigured();
+    
+        const context = options.projectContext;
+        const layerRef = options.targetLayerRef || "selected";
+
+        // LLM 增强 NLU 解析（内含记忆回读 + 规则兜底）
+        const intent = await this.nluParser.parseEnhanced(input, context);
+        const effectDescription = this.descriptionParser.parse(input, intent.type);
+        const needsClarification = this.nluParser.needsClarification(intent);
+
+        if (needsClarification || intent.confidence < 0.4) {
+            return {
+                success: false,
+                intent,
+                effectDescription,
+                confidence: intent.confidence,
+                needsClarification,
+                clarificationQuestion: this.generateClarificationQuestion(intent, effectDescription),
+                clarificationOptions: this.generateClarificationOptions(intent),
+            };
+        }
+
+        const nluResult: NLUPipelineResult = {
+            intent,
+            effectDescription,
+            understood: true,
+            needsClarification: false,
+        };
+
+        // LLM 增强路由决策（内含记忆回读 + 规则兜底）
+        const route = await intentRouter.routeEnhanced(intent, context);
+
+        // 纯 AE 任务（最常见路径）
+        const { mappings, generatedEffects } = this.generateParameters(nluResult);
+        let optimizations: OptimizationResult[] = [];
+        let optimizedEffects = generatedEffects;
+
+        if (options.enableOptimization !== false) {
+            optimizations = this.optimizeParameters(generatedEffects);
+            optimizedEffects = optimizations.map(o => o.optimizedParams);
+        }
+
+        // P0-1: 应用历史学习成果
+        optimizedEffects = this.applyLearnedDefaults(optimizedEffects);
+
+        const operations = this.buildOperations(optimizedEffects, layerRef);
+        if (operations.length === 0) {
+            return {
+                success: false, intent, effectDescription, mappings,
+                generatedEffects, optimizations, route,
+                confidence: intent.confidence, needsClarification: false,
+                error: "未能生成任何操作",
+            };
+        }
+
+        const compileResult = this.compileToJSX(operations);
+
+        // P0-1: 记录执行到学习循环
+        this.recordToLearningLoop(input, intent.type, optimizedEffects, compileResult.success);
+
+        return {
+            success: compileResult.success,
+            intent, effectDescription, mappings,
+            generatedEffects, optimizations, operations,
+            compilerInput: { operations },
+            compileResult,
+            jsxCode: compileResult.script,
+            route,
+            confidence: intent.confidence,
             needsClarification: false,
         };
     }

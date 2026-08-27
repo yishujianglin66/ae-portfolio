@@ -106,9 +106,12 @@ class KnowledgeExtractor:
         ease_speeds: List[float] = []
         animated_properties: List[str] = []
         total_keyframes = 0
+        bezier_curves: List[Dict[str, Any]] = []
+        property_timelines: Dict[str, List[Dict[str, Any]]] = {}
 
         for comp in report.get("compositions", []):
             for layer in comp.get("layers", []):
+                layer_name = layer.get("name", "unknown")
                 # Transform keyframes
                 transform = layer.get("transform", {})
                 for prop_name, prop_data in transform.items():
@@ -117,6 +120,7 @@ class KnowledgeExtractor:
                         total_keyframes += len(kfs)
                         if kfs:
                             animated_properties.append(prop_name)
+                        timeline: List[Dict[str, Any]] = []
                         for kf in kfs:
                             interp = kf.get("interpolation", {})
                             for direction in ["in", "out"]:
@@ -127,12 +131,58 @@ class KnowledgeExtractor:
                             in_ease = kf.get("inEase", {})
                             if in_ease and "speed" in in_ease:
                                 ease_speeds.append(abs(in_ease["speed"]))
+                            # Bezier control points extraction
+                            bezier_in = kf.get("inBezier", kf.get("bezierIn"))
+                            bezier_out = kf.get("outBezier", kf.get("bezierOut"))
+                            if bezier_in or bezier_out:
+                                curve_info: Dict[str, Any] = {
+                                    "layer": layer_name,
+                                    "property": prop_name,
+                                    "time": kf.get("time", 0),
+                                    "value": kf.get("value"),
+                                }
+                                if bezier_in:
+                                    curve_info["bezier_in"] = bezier_in
+                                if bezier_out:
+                                    curve_info["bezier_out"] = bezier_out
+                                # Spatial tangents
+                                spatial_in = kf.get("spatialInBezier", kf.get("inSpatial"))
+                                spatial_out = kf.get("spatialOutBezier", kf.get("outSpatial"))
+                                if spatial_in:
+                                    curve_info["spatial_in"] = spatial_in
+                                if spatial_out:
+                                    curve_info["spatial_out"] = spatial_out
+                                bezier_curves.append(curve_info)
+                            # Build timeline
+                            timeline.append({
+                                "time": kf.get("time", 0),
+                                "value": kf.get("value"),
+                                "interpolation": interp,
+                                "ease_in_speed": in_ease.get("speed", 0) if in_ease else 0,
+                            })
+                        if timeline:
+                            prop_key = f"{layer_name}.{prop_name}"
+                            property_timelines[prop_key] = timeline
 
                 # Effect parameter keyframes
                 for effect in layer.get("effects", []):
                     for param in effect.get("params", []):
                         kfs = param.get("keyframes", [])
                         total_keyframes += len(kfs)
+
+        # Compute curve statistics
+        curve_type_summary: Counter = Counter()
+        for curve in bezier_curves:
+            bi = curve.get("bezier_in", [])
+            if bi and len(bi) >= 2:
+                # Classify: ease-in (control point close to keyframe)
+                magnitude = (bi[0] ** 2 + bi[1] ** 2) ** 0.5 if len(bi) >= 2 else 0
+                if magnitude < 0.3:
+                    curve_type_summary["ease_in_sharp"] += 1
+                elif magnitude < 0.7:
+                    curve_type_summary["ease_in_smooth"] += 1
+                else:
+                    curve_type_summary["ease_in_gentle"] += 1
 
         return {
             "total_keyframes": total_keyframes,
@@ -148,6 +198,10 @@ class KnowledgeExtractor:
                 sum(ease_speeds) / len(ease_speeds)
                 if ease_speeds else 0.0
             ),
+            "bezier_curve_count": len(bezier_curves),
+            "bezier_curves_sample": bezier_curves[:50],
+            "curve_type_distribution": dict(curve_type_summary),
+            "animated_property_timelines": property_timelines,
         }
 
     def extract_layer_organization(
@@ -167,22 +221,22 @@ class KnowledgeExtractor:
 
         for comp in report.get("compositions", []):
             for layer in comp.get("layers", []):
-                name = layer.get("name", "")
+                name = layer.get("name") or ""
                 layer_names.append(name)
                 layer_type = layer.get("type", "unknown")
                 type_distribution[layer_type] += 1
 
                 # Detect naming patterns
-                if "_" in name:
+                if name and "_" in name:
                     prefix = name.split("_")[0]
                     naming_patterns[f"prefix:{prefix}"] += 1
-                if " " in name:
+                if name and " " in name:
                     first_word = name.split(" ")[0].lower()
                     naming_patterns[f"word:{first_word}"] += 1
 
                 # Parent relationships
                 parent = layer.get("parent")
-                if parent:
+                if parent and name:
                     parent_relationships.append({
                         "child": name,
                         "parent_name": parent.get("name", ""),

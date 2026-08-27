@@ -58,8 +58,8 @@ class MoviePyEngine(BaseEngine):
                 "Run: pip install -i https://pypi.tuna.tsinghua.edu.cn/simple moviepy"
             )
 
-    async def execute(self, *args, **kwargs) -> EngineResult:
-        """Dispatch to specific methods."""
+    async def _execute_impl(self, *args, **kwargs) -> EngineResult:
+        """【子类实现】task 调度；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
         task = kwargs.get("task", "compose")
         if task == "compose":
             return await self.quick_compose(*args, **{k: v for k, v in kwargs.items() if k != "task"})
@@ -375,7 +375,7 @@ class MoviePyEngine(BaseEngine):
                 str(output_path),
             ]
 
-            rc, stdout, stderr = await asyncio.to_thread(
+            rc, _stdout, stderr, _err_code = await asyncio.to_thread(
                 self._run_subprocess, cmd, timeout=300,
             )
 

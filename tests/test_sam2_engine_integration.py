@@ -42,14 +42,19 @@ class TestSAM2EngineModuleDetection(unittest.TestCase):
             self.assertIsNotNone(engine)
 
     def test_not_installed_sam2_module(self):
-        """venv-sam2 不可用时降级处理（引擎通过子进程检测 venv，非当前进程 sys.modules）"""
+        """sam2 不可用时降级处理（引擎约定: 未安装时 _sam2 为 None）
+
+        密闭化：引擎在当前进程 `import sam2` 检测；本环境 venv 可能已安装 sam2，
+        因此用 sys.modules["sam2"]=None 模拟未安装（Python 标准行为：抛 ImportError）。
+        """
         from engines.sam2.engine import SAM2Engine
         # 传入不存在的 venv Python 路径，模拟 SAM2 环境未安装
         missing_py = Path(tempfile.gettempdir()) / "no_such_venv" / "python.exe"
-        with patch.dict("os.environ", {"AEKV_SAM2_PYTHON": str(missing_py)}):
+        with patch.dict("os.environ", {"AEKV_SAM2_PYTHON": str(missing_py)}), \
+             patch.dict(sys.modules, {"sam2": None}):
             engine = SAM2Engine(executable_path=missing_py)
-        # 应记录警告但不应崩溃，且标记为不可用
-        self.assertIs(engine._sam2, False)
+        # 应记录警告但不应崩溃，且标记为不可用（引擎约定: 未安装时 _sam2 为 None）
+        self.assertIsNone(engine._sam2)
 
     def test_model_dir_auto_creation(self):
         """模型目录自动创建"""

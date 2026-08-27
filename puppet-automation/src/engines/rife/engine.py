@@ -63,8 +63,8 @@ class RifeEngine(BaseEngine):
                 "Please download pretrained weights."
             )
 
-    async def execute(self, *args, **kwargs) -> EngineResult:
-        """Dispatch to specific methods based on kwargs."""
+    async def _execute_impl(self, *args, **kwargs) -> EngineResult:
+        """【子类实现】参数推断分发；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
         if "multiplier" in kwargs or "fps" in kwargs:
             return await self.interpolate(*args, **kwargs)
         if "slow_factor" in kwargs:
@@ -128,8 +128,8 @@ class RifeEngine(BaseEngine):
 
         logger.info(f"[RIFE] Interpolating {input_path} -> {output_path} ({multiplier}x)")
 
-        # 使用 asyncio.to_thread 避免阻塞事件循环
-        rc, stdout, stderr = await asyncio.to_thread(
+        # 使用 asyncio.to_thread 避免阻塞事件循环（_run_subprocess 返回 4 元组）
+        rc, _stdout, stderr, _err_code = await asyncio.to_thread(
             self._run_subprocess, cmd, timeout=7200, cwd=self.rife_root
         )
 

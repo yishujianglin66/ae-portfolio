@@ -15,7 +15,8 @@ from pipeline.unified_pipeline import (
     PipelineMode, StageStatus, StageResult, KnowledgeInjector,
 )
 from pipeline.presets import apply_preset, list_presets, get_preset, get_preset_context, PRESETS
-from pipeline.batch_queue import BatchQueue, BatchTask, TaskStatus
+# batch_queue 中任务类名为 Task (旧名 BatchTask 已重命名, 此处保留别名兼容历史引用)
+from pipeline.batch_queue import BatchQueue, Task as BatchTask, TaskStatus
 from pipeline.multi_thread_executor import (
     MultiThreadExecutor, ExecutionResult, StageDAG, PipelineMonitor,
     create_video_pipeline_executor,

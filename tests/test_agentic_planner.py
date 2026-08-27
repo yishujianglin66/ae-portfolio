@@ -10,7 +10,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from core.multi_agent_orchestrator import (
+from core.style_transfer_agents import (
     AgenticPlanner,
     AgentRole,
     PlannerParseError,
@@ -82,7 +82,7 @@ class DummyResponse:
 
 class TestPlannerParse:
     @pytest.mark.asyncio
-    @patch('core.multi_agent_orchestrator.LLMGateway')
+    @patch('core.style_transfer_agents.LLMGateway')
     async def test_plan_parses_valid_json(self, MockLLM):
         mock_llm = MagicMock()
         mock_llm.chat_with_routing = AsyncMock(return_value=DummyResponse(GOOD_PLAN_JSON))
@@ -107,7 +107,7 @@ class TestPlannerParse:
 
 class TestPlannerParseBadJSON:
     @pytest.mark.asyncio
-    @patch('core.multi_agent_orchestrator.LLMGateway')
+    @patch('core.style_transfer_agents.LLMGateway')
     async def test_bad_json_raises(self, MockLLM):
         dirty = '`json\nnot a json\n`'
         mock_llm = MagicMock()
@@ -152,7 +152,7 @@ def _make_orchestrator_mock(fail_first: bool = False):
 
 class TestAutoExecuteHappy:
     @pytest.mark.asyncio
-    @patch('core.multi_agent_orchestrator.LLMGateway')
+    @patch('core.style_transfer_agents.LLMGateway')
     async def test_happy_path_success(self, MockLLM):
         mock_llm = MagicMock()
         mock_llm.chat_with_routing = AsyncMock(return_value=DummyResponse(GOOD_PLAN_JSON))
@@ -174,7 +174,7 @@ class TestAutoExecuteHappy:
 
 class TestAutoExecuteReflect:
     @pytest.mark.asyncio
-    @patch('core.multi_agent_orchestrator.LLMGateway')
+    @patch('core.style_transfer_agents.LLMGateway')
     async def test_reflect_then_success(self, MockLLM):
         plan_resp = DummyResponse(GOOD_PLAN_JSON)
         reflect_resp = DummyResponse(f'反思总结：代码生成失败是因为缺少前置参数\n{REFLECT_PLAN_JSON}')

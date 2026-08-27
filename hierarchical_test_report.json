@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-08-26 13:30:57",
+  "test_info": {
+    "total_videos": 30,
+    "static_videos": 10,
+    "motion_videos": 20,
+    "zoom_videos": 10,
+    "tilt_orbit_videos": 10
+  },
+  "layer1_results": {
+    "balanced_accuracy": 1.0,
+    "average_time": 0.025587582588195802,
+    "std_time": 0.0024443316576369728
+  },
+  "hierarchical_results": {
+    "balanced_accuracy": 1.0,
+    "average_time": 0.01731441020965576,
+    "std_time": 0.0013344140346897091,
+    "confusion_matrix": [
+      [
+        10,
+        0,
+        0
+      ],
+      [
+        0,
+        10,
+        0
+      ],
+      [
+        0,
+        0,
+        10
+      ]
+    ]
+  },
+  "comparison": {
+    "accuracy_improvement": 0.0,
+    "time_increase": -0.008273172378540042
+  },
+  "conclusion": {
+    "meets_expectations": true,
+    "expected_range": "0.50-0.60",
+    "performance_note": "Actual 3-class accuracy: 1.000"
+  }
+}

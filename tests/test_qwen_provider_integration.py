@@ -29,6 +29,9 @@ _QWEN_ENV_KEYS = (
     "QWEN_MODEL", "QWEN_REASONING_MODEL", "QWEN_VISION_MODEL",
     "QWEN_FLASH_MODEL", "QWEN_PRIVATIZED", "QWEN_DATA_ISOLATION",
     "AEKV_QWEN_PRIORITY",
+    # 备用 key 通道（configure_providers_from_env 中 qwen_key 的回退源），
+    # 本地 .env 存在真实值时必须一并清理，否则“无 key 不注册”用例被环境污染
+    "DASHSCOPE_API_KEY", "QWEN_AI_API_KEY", "QWEN_AI_BASE_URL",
 )
 
 
@@ -117,6 +120,9 @@ class TestQwenPriorityRouting:
         from core.llm_gateway import LLMResponse
 
         monkeypatch.setenv("QWEN_API_KEY", "sk-test-qwen")
+        # VISION_UNDERSTANDING 基线 Provider=siliconflow；为避免回退逻辑因
+        # 本机 env 缺 SILICONFLOW_API_KEY 而漂到其它候选，测试显式注册 siliconflow。
+        monkeypatch.setenv("SILICONFLOW_API_KEY", "sk-test-sf")
         if priority:
             monkeypatch.setenv("AEKV_QWEN_PRIORITY", "true")
         gw = _make_gateway()
@@ -126,7 +132,8 @@ class TestQwenPriorityRouting:
 
         async def fake_chat_with_provider(prompt, provider, model_type="default",
                                            system_prompt="", images=None,
-                                           temperature=0.7, max_tokens=4096):
+                                           temperature=0.7, max_tokens=4096,
+                                           allow_tier_fallback=True):
             calls["provider"] = provider
             calls["model_type"] = model_type
             return LLMResponse(success=True, content="ok", provider=provider, model="m")
@@ -185,7 +192,8 @@ class TestQwenPriorityRouting:
 
         async def fake_chat_with_provider(prompt, provider, model_type="default",
                                            system_prompt="", images=None,
-                                           temperature=0.7, max_tokens=4096):
+                                           temperature=0.7, max_tokens=4096,
+                                           allow_tier_fallback=True):
             calls["provider"] = provider
             return LLMResponse(success=True, content="ok", provider=provider)
 

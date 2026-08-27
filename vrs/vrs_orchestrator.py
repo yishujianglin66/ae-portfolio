@@ -140,6 +140,7 @@ class VRSOrchestrator:
         self._audio_sync_analyzer: Optional[Any] = None
         self._iteration_optimizer: Optional[Any] = None
         self._ae_engine: Optional[Any] = None
+        self._davinci_bridge: Optional[Any] = None
 
         # 模块可用性标记
         self._module_available: Dict[str, bool] = {
@@ -150,6 +151,7 @@ class VRSOrchestrator:
             "audio_sync_analyzer": True,
             "iteration_optimizer": True,
             "ae_engine": True,
+            "davinci_bridge": True,
         }
 
         self._logger = logger.bind(module="VRS.Orchestrator")
@@ -258,6 +260,20 @@ class VRSOrchestrator:
                 self._module_available["ae_engine"] = False
                 self._logger.warning(f"AEEngine 不可用，渲染阶段将降级: {e}")
         return self._ae_engine
+
+    def _get_davinci_bridge(self) -> Optional[Any]:
+        """懒加载 VRSDavinciBridge（可能不可用）"""
+        if not self._module_available.get("davinci_bridge", True):
+            return None
+        if self._davinci_bridge is None:
+            try:
+                from vrs.vrs_davinci_bridge import VRSDavinciBridge
+                self._davinci_bridge = VRSDavinciBridge(mode="auto")
+                self._logger.debug("VRSDavinciBridge 加载成功")
+            except Exception as e:
+                self._module_available["davinci_bridge"] = False
+                self._logger.warning(f"VRSDavinciBridge 不可用，将跳过达芬奇调色: {e}")
+        return self._davinci_bridge
 
     # -------------------------------------------------------------------------
     # 工具方法
@@ -410,6 +426,63 @@ class VRSOrchestrator:
 
         self._logger.info(f"端到端逆向分析完成，共 {len(errors)} 个错误")
         return result
+
+    # -------------------------------------------------------------------------
+    # 纯 CV 分析入口（供 unified_pipeline._run_vrs_analysis 调用）
+    # -------------------------------------------------------------------------
+
+    async def analyze(
+        self,
+        video_path: str,
+        options: Optional[dict] = None,
+    ) -> Dict[str, Any]:
+        """纯 CV 视频风格分析（不依赖 LLM，不渲染）。
+
+        供 unified_pipeline._run_vrs_analysis 调用。使用 OpenCV 抽帧 + ffprobe
+        元数据输出结构化风格特征 JSON，包含 color_palette/rhythm/motion/
+        transitions/style_tags/effects/color_grade/style 等字段。
+
+        与 analyze_only 的区别：
+        - analyze_only 依赖 VideoEffectAnalyzerV2 + VISION LLM，可能不可用
+        - analyze 纯 CV 实现，稳定可用，作为 perceive 阶段的真分析入口
+
+        Args:
+            video_path: 视频文件路径
+            options: 可选配置，支持字段：
+                - num_frames: 抽帧数量 (8-32, 默认 18)
+                - detail_level: quick=12帧 / standard=18帧 / full=24帧
+
+        Returns:
+            见 vrs.vrs_real_analyzer.VRSRealAnalyzer.analyze 的输出字段说明。
+            失败时返回 success=False 但不抛异常。
+        """
+        video_path = str(video_path)
+        opts = self._merge_options(options)
+
+        # detail_level → num_frames 映射
+        detail_level = opts.get("detail_level", "standard")
+        num_frames_map = {"quick": 12, "standard": 18, "full": 24}
+        num_frames = int(opts.get("num_frames", num_frames_map.get(detail_level, 18)))
+
+        try:
+            from vrs.vrs_real_analyzer import VRSRealAnalyzer
+            analyzer = VRSRealAnalyzer(num_frames=num_frames)
+            result = await analyzer.analyze(video_path)
+            self._logger.info(
+                f"analyze 完成: source={result.get('source')}, "
+                f"confidence={result.get('confidence')}, "
+                f"tags={result.get('style_tags', [])}"
+            )
+            return result
+        except Exception as e:
+            self._logger.error(f"VRSRealAnalyzer 失败: {e}")
+            return {
+                "success": False,
+                "source": "real_opencv_analysis",
+                "error": f"VRSRealAnalyzer failed: {e}",
+                "video_path": video_path,
+                "confidence": 0.0,
+            }
 
     # -------------------------------------------------------------------------
     # 仅分析模式
@@ -1148,55 +1221,68 @@ class VRSOrchestrator:
         output_dir: Path,
         errors: List[Dict[str, str]],
     ) -> Optional[str]:
-        """阶段 6: 渲染输出"""
+        """阶 6: 渲染输出（支持 AE + DaVinci 双路径）"""
         if not opts.get("render", True):
             self._logger.info("阶段 6: 渲染已禁用，跳过")
             return None
 
         self._logger.info("阶段 6: 渲染输出")
+
+        # --- 路径 A: AE 渲染 ---
         script_path = compile_result.get("script_path")
+        ae_result = None
+        if script_path:
+            ae_engine = self._get_ae_engine()
+            if ae_engine is not None:
+                try:
+                    with open(script_path, "r", encoding="utf-8") as f:
+                        script_content = f.read()
+                    output_video = output_dir / "08_rendered_v1.mp4"
+                    engine_result = await ae_engine.run_script(script_content=script_content)
+                    if engine_result.success:
+                        self._logger.info(f"AE 渲染完成: {output_video}")
+                        ae_result = str(output_video)
+                    else:
+                        err_msg = f"AE 渲染失败: {getattr(engine_result, 'error', 'unknown')}"
+                        self._logger.warning(err_msg)
+                        errors.append({"stage": "rendering", "error": err_msg})
+                except Exception as e:
+                    self._logger.warning(f"AE 渲染异常: {e}")
+                    errors.append({"stage": "rendering", "error": str(e)})
+
+        if ae_result:
+            return ae_result
+
+        # --- 路径 B: DaVinci Resolve 调色 ---
+        davinci_bridge = self._get_davinci_bridge()
+        if davinci_bridge is not None:
+            try:
+                self._logger.info("尝试 DaVinci Resolve 调色路径...")
+                reference_video = opts.get("reference_video", compile_result.get("reference_video", ""))
+                vrs_analysis = compile_result.get("analysis_data", {})
+                if reference_video and Path(reference_video).exists():
+                    output_path = str(output_dir / "08_davinci_graded.mp4")
+                    bridge_result = davinci_bridge.apply_vrs_grade(
+                        reference_video=reference_video,
+                        vrs_analysis=vrs_analysis,
+                        output_path=output_path,
+                    )
+                    if bridge_result.success:
+                        self._logger.info(f"DaVinci 调色完成: {bridge_result.output_path}")
+                        return bridge_result.output_path
+                    else:
+                        self._logger.warning(f"DaVinci 调色失败: {bridge_result.error}")
+                else:
+                    self._logger.info("无参考视频，跳过 DaVinci 调色")
+            except Exception as e:
+                self._logger.warning(f"DaVinci 调色异常: {e}")
+
+        # 两条路径均失败
         if not script_path:
-            err_msg = "渲染跳过：无可用 AE 脚本"
-            self._logger.warning(err_msg)
-            errors.append({"stage": "rendering", "error": err_msg})
-            return None
-
-        ae_engine = self._get_ae_engine()
-        if ae_engine is None:
-            errors.append({
-                "stage": "rendering",
-                "error": "AEEngine 不可用，请手动执行脚本: " + str(script_path),
-            })
-            return None
-
-        try:
-            # 读取脚本内容
-            with open(script_path, "r", encoding="utf-8") as f:
-                script_content = f.read()
-
-            # 通过 AEEngine 执行脚本
-            output_video = output_dir / "08_rendered_v1.mp4"
-            engine_result = await ae_engine.run_script(script_content=script_content)
-
-            if engine_result.success:
-                self._logger.info(f"渲染完成: {output_video}")
-                return str(output_video)
-            else:
-                err_msg = f"渲染失败: {getattr(engine_result, 'error', 'unknown')}"
-                self._logger.error(err_msg)
-                errors.append({
-                    "stage": "rendering",
-                    "error": err_msg + f"，请手动执行脚本: {script_path}",
-                })
-                return None
-        except Exception as e:
-            err_msg = f"渲染阶段失败: {e}"
-            self._logger.error(err_msg)
-            errors.append({
-                "stage": "rendering",
-                "error": f"{err_msg}，请手动执行脚本: {script_path}",
-            })
-            return None
+            errors.append({"stage": "rendering", "error": "渲染跳过：无可用 AE 脚本且无 DaVinci 调色路径"})
+        else:
+            errors.append({"stage": "rendering", "error": f"AE 和 DaVinci 均失败，请手动执行脚本: {script_path}"})
+        return None
 
     async def _stage_iteration_optimization(
         self,

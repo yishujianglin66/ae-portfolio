@@ -1,0 +1,66 @@
+{
+  "ips": {
+    "chainsaw_man": {
+      "name_cn": "电锯人",
+      "name_en": "Chainsaw Man",
+      "video_dirs": [],
+      "style": "dark_fantasy_modern"
+    },
+    "demon_slayer": {
+      "name_cn": "鬼灭之刃",
+      "name_en": "Demon Slayer",
+      "video_dirs": [],
+      "style": "taisho_romantic"
+    },
+    "jujutsu_kaisen": {
+      "name_cn": "咒术回战",
+      "name_en": "Jujutsu Kaisen",
+      "video_dirs": [],
+      "style": "dark_modern"
+    },
+    "spy_family": {
+      "name_cn": "间谍过家家",
+      "name_en": "Spy x Family",
+      "video_dirs": [],
+      "style": "comedy_soft"
+    },
+    "my_hero_academia": {
+      "name_cn": "我的英雄学院",
+      "name_en": "My Hero Academia",
+      "video_dirs": [],
+      "style": "shonen_bright"
+    },
+    "fate_stay_night": {
+      "name_cn": "Fate/stay night",
+      "name_en": "Fate/stay night",
+      "video_dirs": [],
+      "style": "fantasy_ufotable"
+    },
+    "one_piece": {
+      "name_cn": "海贼王",
+      "name_en": "One Piece",
+      "video_dirs": [],
+      "style": "adventure_shonen"
+    },
+    "blue_lock": {
+      "name_cn": "蓝色监狱",
+      "name_en": "Blue Lock",
+      "video_dirs": [],
+      "style": "sports_dynamic"
+    },
+    "oshi_no_ko": {
+      "name_cn": "推しの子",
+      "name_en": "Oshi no Ko",
+      "video_dirs": [],
+      "style": "idol_drama"
+    }
+  },
+  "settings": {
+    "fps_thr": 0.35,
+    "max_width": 640,
+    "jpeg_quality": 82,
+    "vlm_workers": 16,
+    "vlm_model": "Qwen/Qwen3-VL-8B-Instruct",
+    "min_frames_per_ip": 1000
+  }
+}

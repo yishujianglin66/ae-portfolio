@@ -1,0 +1,84 @@
+{
+  "category": "vfx_presets",
+  "display_name": "VFX 特效制作",
+  "presets": [
+    {
+      "id": "vfx_energy_wave",
+      "name": "能量波冲击",
+      "name_en": "Energy Wave Burst",
+      "description": "环形能量波从文字中心向外扩散，配合发光+色散+冲击波变形。对标龙珠/火影能量释放特效",
+      "tags": ["能量波","冲击波","VFX","发光","龙珠"],
+      "difficulty": 4,
+      "duration_default": 2.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":2.0,"min":0.5,"max":4.0,"description":"总时长(秒)"},
+        {"name":"waveRadius","type":"number","default":500,"min":200,"max":1000,"description":"波扩散半径"},
+        {"name":"waveCount","type":"number","default":3,"min":1,"max":6,"description":"波环数量"},
+        {"name":"glowColor","type":"string","default":"cyan","description":"发光颜色(cyan/gold/red/purple)"},
+        {"name":"fontSize","type":"number","default":160,"min":60,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[1,1,1];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);var waveCount={{waveCount}};var maxR={{waveRadius}};for(var wi=0;wi<waveCount;wi++){var ring=c.layers.addSolid([0.3,0.8,1],'Wave_'+wi,1920,1080,1);ring.blendingMode=BlendingMode.ADD;try{var ell=ring.property('Effects').addProperty('ADBE ELLP');ell.property('ADBE ELLP-0003').setValue([960,540]);ell.property('ADBE ELLP-0001').setValue(1);ell.property('ADBE ELLP-0002').setValue([10,10]);}catch(re){}var delay=wi*0.15;ring.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(delay,[10,10]);ring.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(delay+0.5,[maxR/10,maxR/10]);ring.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(delay,80);ring.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(delay+0.5,0);}L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0,[120,120]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.15,[95,95]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.3,[100,100]);var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.1);glow.property('ADBE Glo2-0003').setValue(35);glow.property('ADBE Glo2-0004').setValue(3.0);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([0.3,0.8,1,1]);glow.property('ADBE Glo2-0007').setValue([0.1,0.4,0.8,1]);}catch(ge){}L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.1,100);_r={status:'success',preset:'vfx_energy_wave',layer:n,waves:waveCount};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":-15,"leading":1,"fauxBold":true},
+      "easing": {"profile":"explosive","influence":20,"curve":"exponentialOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"vfx_energy_wave_kamehameha","name":"龟派气功波","overrides":{"waveRadius":800,"waveCount":5,"glowColor":"cyan"}},
+        {"id":"vfx_energy_wave_rasengan","name":"螺旋丸能量","overrides":{"waveRadius":300,"waveCount":2,"glowColor":"purple"}},
+        {"id":"vfx_energy_wave_solar","name":"太阳耀斑","overrides":{"waveRadius":600,"waveCount":4,"glowColor":"gold"}}
+      ]
+    },
+    {
+      "id": "vfx_magic_circle",
+      "name": "魔法阵召唤",
+      "name_en": "Magic Circle Summon",
+      "description": "旋转魔法阵从文字下方浮现，配合符文旋转+光芒发射+逐层展开。对标Fate/Re:Zero召唤阵",
+      "tags": ["魔法阵","召唤","Fate","旋转","符文"],
+      "difficulty": 5,
+      "duration_default": 3.5,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.5,"min":1.5,"max":6.0,"description":"总时长(秒)"},
+        {"name":"circleRadius","type":"number","default":350,"min":150,"max":600,"description":"魔法阵半径"},
+        {"name":"rotationSpeed","type":"number","default":60,"min":20,"max":180,"description":"旋转速度(度/秒)"},
+        {"name":"layerCount","type":"number","default":3,"min":1,"max":5,"description":"阵层数"},
+        {"name":"fontSize","type":"number","default":140,"min":60,"max":300,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};var radius={{circleRadius}};var layers_n={{layerCount}};var rotSpd={{rotationSpeed}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[0.9,0.8,1];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,400]);for(var li=0;li<layers_n;li++){var ring=c.layers.addSolid([0.6,0.3,1],'MagicRing_'+li,1920,1080,1);ring.blendingMode=BlendingMode.ADD;try{var ell=ring.property('Effects').addProperty('ADBE ELLP');ell.property('ADBE ELLP-0003').setValue([960,540]);ell.property('ADBE ELLP-0001').setValue(1);var sz=radius*(1-li*0.25)*2;ell.property('ADBE ELLP-0002').setValue([sz,sz]);}catch(re){}ring.property('ADBE Transform Group').property('ADBE Rotation').setValueAtTime(0,li*30);ring.property('ADBE Transform Group').property('ADBE Rotation').setValueAtTime(d,li*30+(li%2===0?rotSpd*d:-rotSpd*d));ring.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);ring.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.3+li*0.2,60-li*10);ring.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d-0.3,60-li*10);ring.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);}var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.15);glow.property('ADBE Glo2-0003').setValue(30);glow.property('ADBE Glo2-0004').setValue(2.5);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([0.7,0.4,1,1]);glow.property('ADBE Glo2-0007').setValue([0.4,0.2,0.8,1]);}catch(ge){}L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.5,100);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d-0.3,100);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);_r={status:'success',preset:'vfx_magic_circle',layer:n,rings:layers_n};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":0,"leading":1.2,"fauxBold":false},
+      "easing": {"profile":"mystical","influence":8,"curve":"linear","drivenBy":"expression"},
+      "variants": [
+        {"id":"vfx_magic_circle_fate","name":"Fate召唤阵","overrides":{"circleRadius":400,"layerCount":4,"rotationSpeed":45}},
+        {"id":"vfx_magic_circle_dark","name":"暗黑魔法阵","overrides":{"circleRadius":300,"layerCount":3,"rotationSpeed":90}},
+        {"id":"vfx_magic_circle_holy","name":"神圣魔法阵","overrides":{"circleRadius":500,"layerCount":5,"rotationSpeed":30}}
+      ]
+    },
+    {
+      "id": "vfx_particle_explosion",
+      "name": "粒子爆炸扩散",
+      "name_en": "Particle Explosion",
+      "description": "文字在爆炸中碎裂为粒子四散，或从粒子爆炸中凝聚成型。多层粒子+发光+冲击波+余烬",
+      "tags": ["粒子","爆炸","碎裂","VFX","冲击"],
+      "difficulty": 5,
+      "duration_default": 2.5,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":2.5,"min":1.0,"max":5.0,"description":"总时长(秒)"},
+        {"name":"explosionForce","type":"number","default":400,"min":100,"max":800,"description":"爆炸力度"},
+        {"name":"sparkCount","type":"number","default":8,"min":3,"max":20,"description":"火花层数"},
+        {"name":"emberDuration","type":"number","default":1.5,"min":0.5,"max":3.0,"description":"余烬持续(秒)"},
+        {"name":"fontSize","type":"number","default":180,"min":60,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};var force={{explosionForce}};var sparks={{sparkCount}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[1,0.8,0.3];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);var tp=L.property('ADBE Text Properties');var a1=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a1.name='Explode';var ap=a1.property('ADBE Text Animator Properties');ap.addProperty('ADBE Text Position 3D').setValue([0,0,300]);ap.addProperty('ADBE Text Opacity').setValue(0);ap.addProperty('ADBE Text Rotation').setValue(45);var s1=a1.property('ADBE Text Selectors').addProperty('ADBE Text Wiggly Selector');s1.property('ADBE Text Wiggly Max Amount').setValue(force);s1.property('ADBE Text Temporal Freq').setValue(3);for(var si=0;si<sparks;si++){var spark=c.layers.addSolid([1,0.6,0.1],'Spark_'+si,20,20,1);spark.blendingMode=BlendingMode.ADD;var angle=si*(360/sparks)*Math.PI/180;var dist=force*(0.5+Math.random()*0.5);var ex=960+Math.cos(angle)*dist;var ey=540+Math.sin(angle)*dist;spark.property('ADBE Transform Group').property('ADBE Position').setValueAtTime(0,[960,540]);spark.property('ADBE Transform Group').property('ADBE Position').setValueAtTime(0.3,[ex,ey]);spark.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,100);spark.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.5,0);spark.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0,[100,100]);spark.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.3,[20,20]);}var flash=c.layers.addSolid([1,0.9,0.5],'ExplosionFlash',1920,1080,1);flash.blendingMode=BlendingMode.ADD;flash.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,90);flash.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.1,0);var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.1);glow.property('ADBE Glo2-0003').setValue(25);glow.property('ADBE Glo2-0004').setValue(2.5);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([1,0.6,0.1,1]);glow.property('ADBE Glo2-0007').setValue([1,0.3,0,1]);}catch(ge){}L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.15,100);_r={status:'success',preset:'vfx_particle_explosion',layer:n,sparks:sparks};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":-20,"leading":1,"fauxBold":true},
+      "easing": {"profile":"explosive","influence":25,"curve":"exponentialOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"vfx_particle_explosion_nuclear","name":"核爆粒子","overrides":{"explosionForce":700,"sparkCount":15}},
+        {"id":"vfx_particle_explosion_ember","name":"余烬飘散","overrides":{"explosionForce":200,"sparkCount":6}},
+        {"id":"vfx_particle_explosion_ice","name":"冰爆粒子","overrides":{"explosionForce":500,"sparkCount":10}}
+      ]
+    }
+  ]
+}

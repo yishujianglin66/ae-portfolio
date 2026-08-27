@@ -27,8 +27,13 @@ STYLE_TO_FILTER_MAP = {
         "medium": "",
         "high": "eq=contrast=1.3"
     },
+    # 注：本机 ffmpeg 构建不含原生 glow/bloom 滤镜，以下用可用滤镜做近似映射，
+    # 避免生成不可执行的命令（无需依赖外部剪枝）。
     "effects": {
-        "glow": "glow=strength=0.3",
+        # 原生 glow 滤镜本机缺失 -> unsharp 局部对比提升近似"高光溢出/辉光"
+        "glow": "unsharp=9:9:0.6",
+        # 原生 bloom 滤镜本机缺失 -> gblur 柔和模糊近似"光晕扩散"
+        "bloom": "gblur=sigma=6",
         "film_grain": "noise=alls=8:allf=t+u",
         "lens_flare": "lenscorrection=cx=0.5:cy=0.5:k1=0.1:k2=-0.05",
         "vintage": "curves=vintage",

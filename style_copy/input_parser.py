@@ -36,7 +36,12 @@ except (ImportError, ModuleNotFoundError):
     MediaFetcher = None
     MEDIA_FETCHER_AVAILABLE = False
 
-from scene_detector import SceneDetector
+# SceneDetector 采用宽松导入：缺失时不拖垮 style_copy 包导入链，
+# 实例化时才 fail-closed（见 InputParser.__init__）
+try:
+    from scene_detector import SceneDetector
+except ImportError:
+    SceneDetector = None
 
 # 可选配置: media-config.json (ffmpeg路径)
 _CONFIG_PATH = Path(__file__).parent.parent / "config" / "media-config.json"
@@ -57,6 +62,12 @@ class InputParser:
     SUPPORTED_PLATFORMS = {"youtube", "bilibili", "douyin", "kuaishou", "tiktok"}
 
     def __init__(self, work_dir: Optional[str] = None):
+        # fail-closed：SceneDetector 缺失时明确报错（但不在导入期）
+        if SceneDetector is None:
+            raise RuntimeError(
+                "SceneDetector 不可用（scene_detector 缺失或导入失败），"
+                "无法初始化 InputParser"
+            )
         self.work_dir = Path(work_dir) if work_dir else Path(tempfile.mkdtemp(prefix="style_copy_"))
         self.work_dir.mkdir(parents=True, exist_ok=True)
         self.fetcher = MediaFetcher() if MEDIA_FETCHER_AVAILABLE else None

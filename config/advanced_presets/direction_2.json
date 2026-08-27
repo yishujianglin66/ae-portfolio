@@ -1,0 +1,84 @@
+{
+  "category": "anime_fx",
+  "display_name": "Anime FX 动漫特效",
+  "presets": [
+    {
+      "id": "af_speed_impact",
+      "name": "速度线冲击帧",
+      "name_en": "Speed Line Impact Frame",
+      "description": "漫剪核心特效：放射状速度线+画面震动+冲击闪白。模拟一拳超人/鬼灭之刃高燃打击帧",
+      "tags": ["速度线","冲击帧","漫剪","打击感","AMV"],
+      "difficulty": 4,
+      "duration_default": 1.5,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":1.5,"min":0.5,"max":3.0,"description":"总时长(秒)"},
+        {"name":"shakeIntensity","type":"number","default":15,"min":5,"max":40,"description":"震动强度"},
+        {"name":"lineCount","type":"number","default":60,"min":20,"max":120,"description":"速度线数量"},
+        {"name":"flashDuration","type":"number","default":3,"min":1,"max":8,"description":"闪白帧数"},
+        {"name":"fontSize","type":"number","default":200,"min":80,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};var shake={{shakeIntensity}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[1,1,1];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0,[300,300]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.08,[90,90]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.15,[105,105]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.25,[100,100]);L.property('ADBE Transform Group').property('ADBE Position').expression='seedRandom(Math.floor(time*30),true);[value[0]+random(-'+shake+','+shake+'),value[1]+random(-'+shake*0.6+','+shake*0.6+')];';var flash=c.layers.addSolid([1,1,1],'ImpactFlash',1920,1080,1);flash.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,100);flash.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.03,0);flash.blendingMode=BlendingMode.ADD;var lines=c.layers.addSolid([0,0,0],'SpeedLines',1920,1080,1);lines.blendingMode=BlendingMode.SCREEN;try{var cc=lines.property('Effects').addProperty('CC Radial ScaleWave');cc.property('Amount').setValue(80);cc.property('Width').setValue(3);}catch(le){try{var fr=lines.property('Effects').addProperty('ADBE Fractal Noise');fr.property('ADBE Fractal Noise-0001').setValue(1);fr.property('Contrast').setValue(200);fr.property('Brightness').setValue(-80);}catch(le2){}}lines.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);lines.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.05,80);lines.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.4,0);var glow=L.property('Effects').addProperty('ADBE Glo2');glow.property('ADBE Glo2-0002').setValue(0.1);glow.property('ADBE Glo2-0003').setValue(30);glow.property('ADBE Glo2-0004').setValue(3.0);try{glow.property('ADBE Glo2-0005').setValue(3);glow.property('ADBE Glo2-0006').setValue([1,0.3,0.1,1]);}catch(ge){}_r={status:'success',preset:'af_speed_impact',layer:n,layers_added:2};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":-30,"leading":0.9,"fauxBold":true},
+      "easing": {"profile":"impact","influence":20,"curve":"exponentialOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"af_speed_impact_thunder","name":"雷电冲击","overrides":{"shakeIntensity":25,"flashDuration":2}},
+        {"id":"af_speed_impact_heavy","name":"重拳冲击","overrides":{"shakeIntensity":35,"flashDuration":5}},
+        {"id":"af_speed_impact_slash","name":"斩击冲击","overrides":{"shakeIntensity":10,"flashDuration":2}}
+      ]
+    },
+    {
+      "id": "af_focus_lines",
+      "name": "集中线聚焦",
+      "name_en": "Focus Concentration Lines",
+      "description": "漫画集中线效果：从画面四周向中心聚焦的放射线条，用于强调/震惊/觉醒时刻。配合文字缩放+暗角",
+      "tags": ["集中线","聚焦","漫剪","震惊","觉醒"],
+      "difficulty": 4,
+      "duration_default": 2.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":2.0,"min":0.5,"max":4.0,"description":"总时长(秒)"},
+        {"name":"lineDensity","type":"number","default":100,"min":40,"max":200,"description":"线条密度"},
+        {"name":"zoomSpeed","type":"number","default":120,"min":50,"max":300,"description":"聚焦速度"},
+        {"name":"vignetteStrength","type":"number","default":70,"min":30,"max":100,"description":"暗角强度"},
+        {"name":"fontSize","type":"number","default":180,"min":60,"max":400,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[1,1,1];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0,[50,50]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.3,[110,110]);L.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0.5,[100,100]);var lines=c.layers.addSolid([1,1,1],'FocusLines',1920,1080,1);lines.blendingMode=BlendingMode.MULTIPLY;try{var fn=lines.property('Effects').addProperty('ADBE Fractal Noise');fn.property('ADBE Fractal Noise-0001').setValue(1);fn.property('Contrast').setValue(300);fn.property('Brightness').setValue(-100);fn.property('ADBE Fractal Noise-0004').setValue([960,540]);}catch(le){}lines.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(0,[200,200]);lines.property('ADBE Transform Group').property('ADBE Scale').setValueAtTime(d*0.5,[100,100]);lines.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);lines.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.1,90);lines.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d*0.7,90);lines.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(d,0);var vig=c.layers.addSolid([0,0,0],'Vignette',1920,1080,1);try{var ramp=vig.property('Effects').addProperty('ADBE Ramp');ramp.property('Start Color').setValue([0,0,0,0]);ramp.property('Start Point').setValue([960,540]);ramp.property('End Color').setValue([0,0,0,1]);ramp.property('End Point').setValue([0,0]);ramp.property('Ramp Shape').setValue(2);}catch(ve){}vig.property('ADBE Transform Group').property('ADBE Opacity').setValue({{vignetteStrength}});vig.blendingMode=BlendingMode.MULTIPLY;L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.15,100);_r={status:'success',preset:'af_focus_lines',layer:n,layers_added:2};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":-25,"leading":1,"fauxBold":true},
+      "easing": {"profile":"snap","influence":18,"curve":"backOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"af_focus_lines_rage","name":"暴怒集中线","overrides":{"lineDensity":150,"zoomSpeed":200}},
+        {"id":"af_focus_lines_awaken","name":"觉醒集中线","overrides":{"lineDensity":80,"zoomSpeed":80}},
+        {"id":"af_focus_lines_shock","name":"震惊集中线","overrides":{"lineDensity":120,"zoomSpeed":250}}
+      ]
+    },
+    {
+      "id": "af_manga_panel",
+      "name": "漫画分格切换",
+      "name_en": "Manga Panel Split",
+      "description": "漫画分格布局动画：画面分割为多个漫画面板，文字在各格间跳跃出现。模拟MAD/AMV分镜切换",
+      "tags": ["漫画分格","分镜","MAD","AMV","面板"],
+      "difficulty": 5,
+      "duration_default": 3.0,
+      "parameters": [
+        {"name":"textLayerName","type":"string","default":"标题文字","description":"目标文字图层名"},
+        {"name":"duration","type":"number","default":3.0,"min":1.5,"max":6.0,"description":"总时长(秒)"},
+        {"name":"panelCount","type":"number","default":4,"min":2,"max":9,"description":"分格数量"},
+        {"name":"borderWidth","type":"number","default":6,"min":2,"max":15,"description":"格线宽度"},
+        {"name":"staggerDelay","type":"number","default":4,"min":1,"max":12,"description":"格间延迟(帧)"},
+        {"name":"fontSize","type":"number","default":120,"min":40,"max":300,"description":"字号"}
+      ],
+      "applies": ["TextLayer"],
+      "jsx_template": "(function(){var _r={};try{var c=app.project.activeItem;if(!c||!(c instanceof CompItem)){_r={status:'error',message:'No active comp'};return JSON.stringify(_r);}var n='{{textLayerName}}';var L=null;for(var i=1;i<=c.numLayers;i++){if(c.layer(i).name==n){L=c.layer(i);break;}}if(!L||!(L instanceof TextLayer)){_r={status:'error',message:'Text layer not found'};return JSON.stringify(_r);}var d={{duration}};var bw={{borderWidth}};try{var td=L.property('ADBE Text Properties').property('ADBE Text Document');var tv=td.value;tv.fontSize={{fontSize}};tv.fillColor=[1,1,1];tv.justification=ParagraphJustification.CENTER_JUSTIFY;td.setValue(tv);}catch(fe){}L.property('ADBE Transform Group').property('ADBE Position').setValue([960,540]);var tp=L.property('ADBE Text Properties');var a1=tp.property('ADBE Text Animators').addProperty('ADBE Text Animator');a1.name='PanelSlam';var ap=a1.property('ADBE Text Animator Properties');ap.addProperty('ADBE Text Position 3D').setValue([0,-200,0]);ap.addProperty('ADBE Text Opacity').setValue(0);ap.addProperty('ADBE Text Scale 3D').setValue([150,150,0]);var s1=a1.property('ADBE Text Selectors').addProperty('ADBE Text Selector');s1.property('ADBE Text Range Advanced').property('ADBE Text Range Shape').setValue(2);s1.property('ADBE Text Percent Start').setValueAtTime(0,0);s1.property('ADBE Text Percent Start').setValueAtTime(d*0.5,100);var panels={{panelCount}};var cols=Math.ceil(Math.sqrt(panels));var rows=Math.ceil(panels/cols);var pw=Math.floor(1920/cols);var ph=Math.floor(1080/rows);for(var pi=0;pi<panels;pi++){var col=pi%cols;var row=Math.floor(pi/cols);var bx=col*pw;var by=row*ph;var border=c.layers.addSolid([1,1,1],'Panel_'+pi+'_H',pw,bw,1);border.property('ADBE Transform Group').property('ADBE Position').setValue([bx+pw/2,by]);border.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);border.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.1+pi*0.05,100);var bv=c.layers.addSolid([1,1,1],'Panel_'+pi+'_V',bw,ph,1);bv.property('ADBE Transform Group').property('ADBE Position').setValue([bx,by+ph/2]);bv.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);bv.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.1+pi*0.05,100);}L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0,0);L.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.2,100);_r={status:'success',preset:'af_manga_panel',layer:n,panels:panels};}catch(e){_r={status:'error',message:e.toString()};}return JSON.stringify(_r);})();",
+      "typography": {"fontFamily":"AlibabaPuHuiTi-3-85-Heavy","tracking":-20,"leading":1,"fauxBold":true},
+      "easing": {"profile":"impact","influence":15,"curve":"exponentialOut","drivenBy":"keyframe"},
+      "variants": [
+        {"id":"af_manga_panel_4koma","name":"四格漫画","overrides":{"panelCount":4,"borderWidth":8}},
+        {"id":"af_manga_panel_action","name":"动作分格","overrides":{"panelCount":6,"borderWidth":4}},
+        {"id":"af_manga_panel_drama","name":"剧情分格","overrides":{"panelCount":3,"borderWidth":10}}
+      ]
+    }
+  ]
+}

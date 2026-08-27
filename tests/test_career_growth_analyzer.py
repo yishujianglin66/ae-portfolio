@@ -135,12 +135,17 @@ class TestCareerGrowthEngineRecordDay(unittest.TestCase):
     """record_day 方法测试"""
 
     def setUp(self):
+        # 2026-08-27: 关闭 V4 分析，避免 record_day 发起真实 LLM 网络请求
+        # （无超时的 requests 调用会挂死整个测试会话）。
+        self._v4_patcher = patch('career_growth_analyzer.V4_AVAILABLE', False)
+        self._v4_patcher.start()
         self.temp_dir = tempfile.mkdtemp()
         self.engine = CareerGrowthEngine(data_dir=self.temp_dir)
 
     def tearDown(self):
         import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
+        self._v4_patcher.stop()
 
     def test_record_day_creates_record(self):
         """应创建日常记录"""
@@ -179,12 +184,16 @@ class TestCareerGrowthEngineMonthReport(unittest.TestCase):
     """generate_monthly_report 方法测试"""
 
     def setUp(self):
+        # 同上：隔离真实 LLM 调用（record_day 聚合场景）。
+        self._v4_patcher = patch('career_growth_analyzer.V4_AVAILABLE', False)
+        self._v4_patcher.start()
         self.temp_dir = tempfile.mkdtemp()
         self.engine = CareerGrowthEngine(data_dir=self.temp_dir)
 
     def tearDown(self):
         import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
+        self._v4_patcher.stop()
 
     def test_generate_monthly_report_empty(self):
         """无记录时应生成空报告"""
@@ -274,12 +283,16 @@ class TestCareerGrowthEngineEdgeCases(unittest.TestCase):
     """边界条件测试"""
 
     def setUp(self):
+        # 同上：边界用例只验证内容存取，不需真实 LLM 分析。
+        self._v4_patcher = patch('career_growth_analyzer.V4_AVAILABLE', False)
+        self._v4_patcher.start()
         self.temp_dir = tempfile.mkdtemp()
         self.engine = CareerGrowthEngine(data_dir=self.temp_dir)
 
     def tearDown(self):
         import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
+        self._v4_patcher.stop()
 
     def test_empty_content(self):
         """空内容应正确处理"""

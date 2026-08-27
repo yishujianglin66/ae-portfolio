@@ -35,8 +35,15 @@ sys.path.insert(0, os.path.join(PROJECT_ROOT, "puppet-automation"))
 # Mock 引擎依赖（roto_service 通过 from ..engines 导入）
 # 必须在 import roto_service 之前注入 sys.modules
 
+# 注意(2026-08-26): mock 包的 __path__ 不能为空！
+# 空 __path__ 会污染全局：后续测试文件（如 test_topaz_engine）导入
+# src.engines.* 子模块时，Python 会命中这里缓存的 mock 包，
+# 因空路径搜索不到任何子模块而报 ModuleNotFoundError。
+# 指向真实目录后既能继续注入 mock 类，又不阻断其它子模块的正常解析。
+_PA_SRC_ENGINES_DIR = os.path.join(PROJECT_ROOT, "puppet-automation", "src", "engines")
+
 _mock_engines = types.ModuleType("src.engines")
-_mock_engines.__path__ = []
+_mock_engines.__path__ = [_PA_SRC_ENGINES_DIR]
 _mock_engines.__package__ = "src.engines"
 
 _mock_engines_base = types.ModuleType("src.engines.base")
@@ -46,7 +53,7 @@ _mock_engines_base.BaseEngine = type("BaseEngine", (), {})
 _mock_engines_base.EngineResult = type("EngineResult", (), {})
 
 _mock_engines_sam2 = types.ModuleType("src.engines.sam2")
-_mock_engines_sam2.__path__ = []
+_mock_engines_sam2.__path__ = [os.path.join(_PA_SRC_ENGINES_DIR, "sam2")]
 _mock_engines_sam2.__package__ = "src.engines.sam2"
 
 _mock_engines_sam2_engine = types.ModuleType("src.engines.sam2.engine")
@@ -54,7 +61,7 @@ _mock_engines_sam2_engine.__package__ = "src.engines.sam2.engine"
 _mock_engines_sam2_engine.SAM2Engine = type("SAM2Engine", (), {})
 
 _mock_engines_silhouette = types.ModuleType("src.engines.silhouette")
-_mock_engines_silhouette.__path__ = []
+_mock_engines_silhouette.__path__ = [os.path.join(_PA_SRC_ENGINES_DIR, "silhouette")]
 _mock_engines_silhouette.__package__ = "src.engines.silhouette"
 
 _mock_engines_silhouette_engine = types.ModuleType("src.engines.silhouette.engine")
@@ -65,6 +72,29 @@ _mock_engines.base = _mock_engines_base
 _mock_engines.sam2 = _mock_engines_sam2
 _mock_engines_sam2.engine = _mock_engines_sam2_engine
 _mock_engines_silhouette.engine = _mock_engines_silhouette_engine
+
+# 注意(2026-08-27): 注入必须密闭化！本文件在收集期把空壳 BaseEngine
+# （无 __init__）写进 sys.modules["src.engines.base"]，若不恢复，
+# 后续 test_topaz_engine 等文件导入真实 src.engines.* 时会命中缓存的
+# mock，导致 super().__init__(path) 落到 object.__init__ 报 TypeError。
+# 策略：快照 → 注入加载 → 恢复（含父包属性缓存）。
+_MOCK_INJECTION_KEYS = [
+    "src.engines",
+    "src.engines.base",
+    "src.engines.sam2",
+    "src.engines.sam2.engine",
+    "src.engines.silhouette",
+    "src.engines.silhouette.engine",
+    "src.services",
+]
+_prior_modules = {k: sys.modules[k] for k in _MOCK_INJECTION_KEYS if k in sys.modules}
+_prior_attrs = {}
+for _parent, _attr in [("src", "engines"), ("src", "services"),
+                       ("src.engines", "base"), ("src.engines", "sam2"),
+                       ("src.engines", "silhouette")]:
+    _pm = sys.modules.get(_parent)
+    if _pm is not None and hasattr(_pm, _attr):
+        _prior_attrs[(_parent, _attr)] = getattr(_pm, _attr)
 
 for key, mod in [
     ("src.engines", _mock_engines),
@@ -100,7 +130,18 @@ _spec = importlib.util.spec_from_file_location(
 _roto_mod = importlib.util.module_from_spec(_spec)
 _roto_mod.__package__ = "src.services"
 sys.modules["src.services.roto_service"] = _roto_mod
-_spec.loader.exec_module(_roto_mod)
+try:
+    _spec.loader.exec_module(_roto_mod)
+finally:
+    # 恢复被注入覆盖的模块注册，避免污染后续测试文件的真实导入；
+    # roto_service 内部已绑定的 mock 类引用不受影响。
+    for _k in _MOCK_INJECTION_KEYS:
+        sys.modules.pop(_k, None)
+    sys.modules.update(_prior_modules)
+    for (_parent, _attr), _val in _prior_attrs.items():
+        _pm = sys.modules.get(_parent)
+        if _pm is not None:
+            setattr(_pm, _attr, _val)
 
 RotoService = _roto_mod.RotoService
 

@@ -20,18 +20,6 @@ import re
 import time
 from typing import Any, Dict, List, Optional
 
-# 路径引导：确保 ai/、ae/、bridges/ 等子包在任意 cwd 下都可导入，
-# 替代原先依赖 cwd=ae/ 才能 `from ai_agent import V4Agent` 的脆弱裸 import。
-# 统一经 bootstrap 注入 sys.path，与 run.py / 各 server 保持一致。
-import sys
-from pathlib import Path
-_HERE = Path(__file__).resolve().parent  # ae/
-if str(_HERE) not in sys.path:
-    sys.path.insert(0, str(_HERE))
-if str(_HERE.parent) not in sys.path:  # 项目根 AE-Knowledge-Vault
-    sys.path.insert(0, str(_HERE.parent))
-import bootstrap  # 注入所有子目录到 sys.path（幂等）
-
 try:
     from ai_agent import V4Agent
     _V4_AVAILABLE = True

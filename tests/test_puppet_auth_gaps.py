@@ -8,12 +8,21 @@ from __future__ import annotations
 import sys
 import copy
 import hashlib
+import importlib.util
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\puppet-automation\src")
-import auth as puppet_auth
+# 密闭化加载：不能用 sys.path.insert + `import auth`，否则：
+# 1) 顶层名 "auth" 与 OpenSpace 等同名模块冲突（全量运行中被污染为无 _USERS 的模块）；
+# 2) puppet-automation/src 下的 models/ 包会遮蔽项目根 models 包，
+#    导致后续 models.camera 等导入失败（串扰污染源）。
+_AUTH_PATH = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\puppet-automation\src\auth.py")
+_spec = importlib.util.spec_from_file_location("puppet_automation_auth", _AUTH_PATH)
+puppet_auth = importlib.util.module_from_spec(_spec)
+sys.modules[_spec.name] = puppet_auth
+_spec.loader.exec_module(puppet_auth)
 
 
 # ============================================================

@@ -104,16 +104,52 @@ class PremiereEngine(BaseEngine):
 
         return None
 
-    async def execute(self, *args, **kwargs) -> EngineResult:
-        """Dispatch to specific methods."""
-        task = kwargs.get("task", "import_ae")
-        if task == "import_ae":
-            return await self.import_ae_comp(**{k: v for k, v in kwargs.items() if k != "task"})
-        if task == "auto_edit":
-            return await self.auto_edit_sequence(**{k: v for k, v in kwargs.items() if k != "task"})
-        if task == "export":
-            return await self.export_final(**{k: v for k, v in kwargs.items() if k != "task"})
-        return EngineResult(success=False, error=f"Unknown task: {task}")
+    async def _execute_impl(self, *args, **kwargs) -> EngineResult:
+        """【子类实现】handlers dict 分发；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
+        action = kwargs.pop("action", None) or kwargs.pop("task", "import_ae")
+        handlers = {
+            "import_ae": self.import_ae_comp,
+            "import_ae_comp": self.import_ae_comp,
+            "auto_edit": self.auto_edit_sequence,
+            "auto_edit_sequence": self.auto_edit_sequence,
+            "export": self.export_final,
+            "export_final": self.export_final,
+            "export_via_ffmpeg": self.export_via_ffmpeg,
+        }
+        handler = handlers.get(action)
+        if handler is None:
+            return EngineResult(
+                success=False,
+                error=f"Unknown action: {action}. Available: {list(handlers.keys())}",
+            )
+        return await handler(**kwargs)
+
+    async def export_via_ffmpeg(
+        self,
+        frames_dir: Path | str,
+        output_path: Path | str,
+        fps: float = 30.0,
+        codec: str = "libx264",
+        crf: int = 18,
+        audio_path: Optional[Path | str] = None,
+        frame_pattern: str = "frame_%06d.png",
+    ) -> EngineResult:
+        """FFmpeg 拼接 AE 渲染的 PNG 帧序列为视频（绕过 AME 编码）。
+
+        完全规避对 PR/AME 的调用依赖：AE 渲染 PNG 序列 → FFmpeg 合成视频。
+        """
+        from ..ffmpeg.engine import FFmpegEngine
+
+        ff = FFmpegEngine()
+        return await ff.image_sequence_to_video(
+            frames_dir=frames_dir,
+            output_path=output_path,
+            fps=fps,
+            codec=codec,
+            crf=crf,
+            audio_path=audio_path,
+            frame_pattern=frame_pattern,
+        )
 
     async def import_ae_comp(
         self,
@@ -300,6 +336,417 @@ class PremiereEngine(BaseEngine):
         """
 
         return await self._execute_jsx(jsx, "export_final")
+
+    async def ping(self, **kwargs) -> EngineResult:
+        """测试 Premiere Bridge 是否在线。"""
+        jsx = (
+            "JSON.stringify({pong: true, appName: app.appName, "
+            "appVersion: app.version, "
+            "project: app.project ? app.project.name : null})"
+        )
+        return await self._execute_jsx(jsx, "ping")
+
+    async def get_project_info(self, **kwargs) -> EngineResult:
+        """获取当前 Premiere 项目信息。"""
+        jsx = """
+        (function() {
+            var proj = app.project;
+            if (!proj) return JSON.stringify({status: "error", message: "No project open"});
+            var seqs = [];
+            for (var i = 0; i < proj.sequences.numSequences; i++) {
+                seqs.push(proj.sequences[i].name);
+            }
+            var bins = [];
+            for (var j = 0; j < proj.rootItem.children.numItems; j++) {
+                bins.push(proj.rootItem.children[j].name);
+            }
+            return JSON.stringify({
+                name: proj.name,
+                path: proj.path ? proj.path.fsName : "",
+                sequences: seqs,
+                rootItemCount: proj.rootItem.children.numItems
+            });
+        })();
+        """
+        return await self._execute_jsx(jsx, "get_project_info")
+
+    async def list_sequences(self, **kwargs) -> EngineResult:
+        """列出当前项目所有序列。"""
+        jsx = """
+        (function() {
+            var proj = app.project;
+            if (!proj) return JSON.stringify([]);
+            var seqs = [];
+            for (var i = 0; i < proj.sequences.numSequences; i++) {
+                var s = proj.sequences[i];
+                seqs.push({
+                    name: s.name,
+                    videoTracks: s.videoTracks.numTracks,
+                    audioTracks: s.audioTracks.numTracks,
+                    sequenceID: s.sequenceID
+                });
+            }
+            return JSON.stringify(seqs);
+        })();
+        """
+        return await self._execute_jsx(jsx, "list_sequences")
+
+    async def execute_script(
+        self,
+        script_content: str,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ) -> EngineResult:
+        """直接执行任意 ExtendScript 代码（通过 Bridge）。
+
+        注意：script_content 由调用方提供，不做转义（高阶 API 入口）。
+        业务代码应优先使用封装好的方法（import_media/create_sequence 等），
+        而非直接调用此方法。
+        """
+        return await self._execute_jsx(script_content, "execute_script")
+
+    async def import_media(
+        self,
+        media_paths: List[Path | str],
+        bin_name: str = "Imported",
+        **kwargs,
+    ) -> EngineResult:
+        """导入媒体文件到 PR 项目素材箱。
+
+        Args:
+            media_paths: 媒体文件路径列表
+            bin_name: 目标素材箱名称
+        """
+        # 安全转义所有路径和名称
+        posix_paths = [Path(p).as_posix() for p in media_paths]
+        paths_js = self._jsx_escape(posix_paths)
+        bin_name_js = self._jsx_escape(bin_name)
+
+        jsx = f"""
+        (function() {{
+            try {{
+                var paths = {paths_js};
+                var binName = {bin_name_js};
+                var root = app.project.rootItem;
+                var bin = root.createBin(binName);
+                var imported = [];
+                var notFound = [];
+                for (var i = 0; i < paths.length; i++) {{
+                    var file = new File(paths[i]);
+                    if (file.exists) {{
+                        app.project.importFiles([paths[i]], true, bin, false);
+                        imported.push(paths[i]);
+                    }} else {{
+                        notFound.push(paths[i]);
+                    }}
+                }}
+                return JSON.stringify({{
+                    status: "success",
+                    imported: imported,
+                    not_found: notFound,
+                    importCount: imported.length,
+                    bin: binName
+                }});
+            }} catch (e) {{
+                return JSON.stringify({{
+                    status: "error",
+                    message: e.toString()
+                }});
+            }}
+        }})();
+        """
+        return await self._execute_jsx(jsx, "import_media")
+
+    async def create_sequence(
+        self,
+        name: str,
+        preset_name: str = "HD 1080p 30",
+        width: int = 1920,
+        height: int = 1080,
+        fps: float = 30.0,
+        **kwargs,
+    ) -> EngineResult:
+        """创建新序列。
+
+        Args:
+            name: 序列名称
+            preset_name: PR 序列预设名（如 "HD 1080p 30", "4K UHD 29.97"）
+            width: 视频宽度（信息记录用）
+            height: 视频高度（信息记录用）
+            fps: 帧率（信息记录用）
+        """
+        name_js = self._jsx_escape(name)
+        preset_js = self._jsx_escape(preset_name)
+
+        jsx = f"""
+        (function() {{
+            try {{
+                var seqName = {name_js};
+                var preset = {preset_js};
+                var seq = app.project.createNewSequence(seqName, preset);
+                if (seq) {{
+                    return JSON.stringify({{
+                        status: "success",
+                        sequence: seqName,
+                        sequenceID: seq.sequenceID,
+                        preset: preset
+                    }});
+                }}
+                return JSON.stringify({{
+                    status: "error",
+                    message: "createNewSequence returned null"
+                }});
+            }} catch (e) {{
+                return JSON.stringify({{
+                    status: "error",
+                    message: e.toString()
+                }});
+            }}
+        }})();
+        """
+        return await self._execute_jsx(jsx, "create_sequence")
+
+    async def add_clip_to_timeline(
+        self,
+        media_path: Path | str,
+        track_index: int = 0,
+        start_time_ticks: Optional[int] = None,
+        start_time_seconds: float = 0.0,
+        video_track: bool = True,
+        audio_track: bool = True,
+        **kwargs,
+    ) -> EngineResult:
+        """添加剪辑到时间轴。
+
+        Args:
+            media_path: 媒体文件路径（项目中已有或新导入）
+            track_index: 轨道索引（0-based）
+            start_time_ticks: 起始时间（ticks），优先级高于 start_time_seconds
+            start_time_seconds: 起始时间（秒），默认 0
+            video_track: 是否插入视频轨道
+            audio_track: 是否插入音频轨道
+        """
+        path_posix = Path(media_path).as_posix()
+        path_js = self._jsx_escape(path_posix)
+        path_stem_js = self._jsx_escape(Path(media_path).stem)
+        if start_time_ticks is None:
+            start_time_ticks = int(start_time_seconds * self.TICKS_PER_SECOND)
+
+        jsx = f"""
+        (function() {{
+            try {{
+                var seq = app.project.activeSequence;
+                if (!seq) {{
+                    return JSON.stringify({{status: "error", message: "No active sequence"}});
+                }}
+                var filePath = {path_js};
+                var fileStem = {path_stem_js};
+                var file = new File(filePath);
+
+                // 尝试在项目中找已导入的素材，否则导入
+                var importedItem = null;
+                function findItem(root) {{
+                    for (var i = 0; i < root.children.numItems; i++) {{
+                        var child = root.children[i];
+                        if (child.type === ProjectItemType.CLIP && child.name.indexOf(fileStem) >= 0) {{
+                            return child;
+                        }}
+                        if (child.type === ProjectItemType.BIN) {{
+                            var found = findItem(child);
+                            if (found) return found;
+                        }}
+                    }}
+                    return null;
+                }}
+                importedItem = findItem(app.project.rootItem);
+                if (!importedItem && file.exists) {{
+                    app.project.importFiles([filePath], true, app.project.rootItem, false);
+                    importedItem = findItem(app.project.rootItem);
+                }}
+                if (!importedItem) {{
+                    return JSON.stringify({{status: "error", message: "Failed to find or import: " + filePath}});
+                }}
+
+                var vTrack = seq.videoTracks[{track_index}];
+                var aTrack = seq.audioTracks[{track_index}];
+                var t = {start_time_ticks};
+                if (vTrack) {{
+                    vTrack.insertClip(importedItem, t);
+                }}
+                // 音频轨道插入（PR 中视频和音频通常联动，这里保守处理）
+                return JSON.stringify({{
+                    status: "success",
+                    clip: importedItem.name,
+                    trackIndex: {track_index},
+                    startTicks: t,
+                    startSeconds: t / {self.TICKS_PER_SECOND}
+                }});
+            }} catch (e) {{
+                return JSON.stringify({{
+                    status: "error",
+                    message: e.toString()
+                }});
+            }}
+        }})();
+        """
+        return await self._execute_jsx(jsx, "add_clip_to_timeline")
+
+    async def apply_transition(
+        self,
+        track_index: int,
+        clip_index: int,
+        transition_name: str = "Cross Dissolve",
+        duration_seconds: float = 1.0,
+        transition_type: str = "video",  # "video" | "audio"
+        **kwargs,
+    ) -> EngineResult:
+        """在剪辑端点应用转场效果。
+
+        Args:
+            track_index: 轨道索引
+            clip_index: 剪辑索引
+            transition_name: 转场名称（PR 内置："Cross Dissolve", "Dip to Black", "Film Dissolve" 等）
+            duration_seconds: 转场时长（秒）
+            transition_type: "video" 或 "audio"
+        """
+        trans_name_js = self._jsx_escape(transition_name)
+        trans_type_js = self._jsx_escape(transition_type)
+        duration_ticks = int(duration_seconds * self.TICKS_PER_SECOND)
+
+        jsx = f"""
+        (function() {{
+            try {{
+                var seq = app.project.activeSequence;
+                if (!seq) return JSON.stringify({{status: "error", message: "No active sequence"}});
+                var tracks = ({trans_type_js} === "audio") ? seq.audioTracks : seq.videoTracks;
+                var track = tracks[{track_index}];
+                if (!track) return JSON.stringify({{status: "error", message: "Track not found"}});
+                var clip = track.clips[{clip_index}];
+                if (!clip) return JSON.stringify({{status: "error", message: "Clip not found"}});
+
+                var transName = {trans_name_js};
+                var durTicks = {duration_ticks};
+
+                // 在剪辑起点创建转场
+                var trans = null;
+                try {{
+                    trans = clip.createTransition(transName, 0, durTicks, true);
+                }} catch(e1) {{
+                    // 起点失败尝试终点
+                    try {{
+                        trans = clip.createTransition(transName, 1, durTicks, true);
+                    }} catch(e2) {{
+                        return JSON.stringify({{status: "error", message: "createTransition failed: " + e2.toString()}});
+                    }}
+                }}
+                if (trans) {{
+                    return JSON.stringify({{
+                        status: "success",
+                        transition: transName,
+                        durationTicks: durTicks,
+                        durationSeconds: durTicks / {self.TICKS_PER_SECOND},
+                        clipIndex: {clip_index}
+                    }});
+                }}
+                return JSON.stringify({{status: "error", message: "applyTransition returned null"}});
+            }} catch (e) {{
+                return JSON.stringify({{
+                    status: "error",
+                    message: e.toString()
+                }});
+            }}
+        }})();
+        """
+        return await self._execute_jsx(jsx, "apply_transition")
+
+    async def export_sequence(
+        self,
+        output_path: Path | str,
+        sequence_name: Optional[str] = None,
+        preset_name: str = "H.264 Match Source - High bitrate",
+        **kwargs,
+    ) -> EngineResult:
+        """使用 PR 内置 exportAsMediaDirect 导出当前序列或指定序列。
+
+        Args:
+            output_path: 输出文件路径
+            sequence_name: 序列名（None = 当前活动序列）
+            preset_name: 导出预设名
+        """
+        out_posix = Path(output_path).as_posix()
+        out_js = self._jsx_escape(out_posix)
+        preset_js = self._jsx_escape(preset_name)
+        seq_name_js = self._jsx_escape(sequence_name) if sequence_name else None
+
+        if sequence_name:
+            seq_select_js = f"""
+                var targetSeq = null;
+                var sn = {seq_name_js};
+                for (var i = 0; i < proj.sequences.numSequences; i++) {{
+                    if (proj.sequences[i].name === sn) {{ targetSeq = proj.sequences[i]; break; }}
+                }}
+                if (!targetSeq) return JSON.stringify({{status: "error", message: "Sequence not found: " + sn}});
+            """
+            seq_var = "targetSeq"
+        else:
+            seq_select_js = """
+                var targetSeq = app.project.activeSequence;
+                if (!targetSeq) return JSON.stringify({status: "error", message: "No active sequence"});
+            """
+            seq_var = "targetSeq"
+
+        jsx = f"""
+        (function() {{
+            try {{
+                var proj = app.project;
+                {seq_select_js}
+                var outFile = new File({out_js});
+                var preset = {preset_js};
+                try {{
+                    {seq_var}.exportAsMediaDirect(outFile.fsName, preset, 0);
+                    return JSON.stringify({{
+                        status: "success",
+                        output: {out_js},
+                        preset: preset,
+                        sequence: {seq_var}.name
+                    }});
+                }} catch(e1) {{
+                    // 兜底：Match Source
+                    try {{
+                        {seq_var}.exportAsMediaDirect(outFile.fsName, "Match Source - High bitrate", 0);
+                        return JSON.stringify({{
+                            status: "success",
+                            output: {out_js},
+                            preset: "Match Source - High bitrate (fallback)",
+                            sequence: {seq_var}.name,
+                            note: "Requested preset failed, used fallback: " + e1.toString()
+                        }});
+                    }} catch(e2) {{
+                        return JSON.stringify({{status: "error", message: "Export failed: " + e2.toString()}});
+                    }}
+                }}
+            }} catch (e) {{
+                return JSON.stringify({{
+                    status: "error",
+                    message: e.toString()
+                }});
+            }}
+        }})();
+        """
+        return await self._execute_jsx(jsx, "export_sequence")
+
+    # ------------------------------------------------------------------
+    # 高级工作流 API（从原 premiere/engine.py 合并 + 安全转义）
+    # ------------------------------------------------------------------
+
+    def _jsx_escape(self, value: Any) -> str:
+        """将 Python 值安全地序列化为 JSX 字符串字面量。
+
+        字符串经 json.dumps 转义（含引号、反斜杠、换行、Unicode）；
+        数字/布尔/None 直接转换；列表/字典递归序列化为 JS 数组/对象字面量。
+        这是防止 JSX 注入的核心防线，所有用户可控参数必须经过此函数。
+        """
+        return json.dumps(value, ensure_ascii=False)
 
     async def _execute_jsx(self, jsx_code: str, operation: str) -> EngineResult:
         """通过 MCP Bridge 或临时 JSX 文件执行 Premiere ExtendScript。

@@ -212,7 +212,7 @@ def test_evolution_loop_simulation():
 # ============================================================
 def test_planner_evolution_mode():
     print("\n[Test 5: AgenticPlanner evolution mode]")
-    from core.multi_agent_orchestrator import AgenticPlanner
+    from core.style_transfer_agents import AgenticPlanner
 
     check("进化模式指令存在", "进化模式" in AgenticPlanner._EVOLUTION_PROMPT_SUFFIX)
     check("进化模式要求质量验收", "QUALITY_REVIEW" in AgenticPlanner._EVOLUTION_PROMPT_SUFFIX)

@@ -99,13 +99,13 @@ class MediaEncoderEngine(BaseEngine):
     def __init__(self, executable_path: Optional[Path | str] = None):
         path = Path(executable_path) if executable_path else settings.media_encoder_path
         super().__init__(path)
-        # CLI 编码工具路径（在 AME 安装目录下）
-        self.cli_path = self.executable_path.parent / "AMETemplateFile.dll"
+        # 注意：不设 cli_path 字段——AME 无 AMETemplateFile.dll CLI，
+        # 指向不存在文件的路径字段已在 84fb30d 清理（test_ame_no_dead_cli_path 守卫）。
         # Watch Folder 默认路径
         self.watch_folder_path = settings.output_dir / "me_watch_folder"
 
-    async def execute(self, **kwargs) -> EngineResult:
-        """统一执行入口。"""
+    async def _execute_impl(self, **kwargs) -> EngineResult:
+        """【子类实现】action 调度；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
         action = kwargs.pop("action", "encode")
         handlers = {
             "encode": self.encode,
@@ -113,6 +113,8 @@ class MediaEncoderEngine(BaseEngine):
             "add_to_watch_folder": self.add_to_watch_folder,
             "list_presets": self.list_presets,
             "get_preset": self.get_preset,
+            # 旗舰管线 API（从 c1e3db1 移植，2026-08-27）
+            "submit_queue_render": self.submit_queue_render,
         }
         handler = handlers.get(action)
         if handler is None:
@@ -256,7 +258,7 @@ class MediaEncoderEngine(BaseEngine):
         try:
             # 检查 ME 进程
             tasklist_cmd = ["tasklist", "/FI", "IMAGENAME eq Adobe Media Encoder.exe", "/FO", "CSV", "/NH"]
-            code, stdout, _ = await asyncio.to_thread(
+            code, stdout, _, _err_code = await asyncio.to_thread(
                 self._run_subprocess, tasklist_cmd, timeout=10,
             )
 
@@ -462,3 +464,133 @@ class MediaEncoderEngine(BaseEngine):
                 error=f"Unknown platform: {platform}. Available: {list(PLATFORM_PRESETS)}",
             )
         return EngineResult(success=True, metadata={"platform": platform, **preset})
+
+    # ------------------------------------------------------------------
+    # 旗舰管线专用 API（S6 导出，从 c1e3db1 移植，2026-08-27）
+    # ------------------------------------------------------------------
+
+    async def submit_queue_render(
+        self,
+        input_path: Path | str,
+        output_path: Path | str,
+        codec: str = "h264",
+        resolution: str = "1920x1080",
+        fps: float = 24.0,
+        timeout: float = 1800.0,
+    ) -> EngineResult:
+        """旗舰管线 S6：清空旧队列 → 提交渲染任务 → 等待完成。
+
+        流程：
+        1. 清空 AME 旧队列（避免残留任务干扰）
+        2. 提交 H.264 1920×1080 24fps 渲染任务
+        3. 等待完成（超时 1800s）
+        4. 验证产物 + 生成 ffprobe.json
+        """
+        import json as _json
+        import time as _time
+
+        input_path = Path(input_path)
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if not input_path.exists():
+            return EngineResult(
+                success=False,
+                error=f"Input not found: {input_path}",
+                error_code="INPUT_MISSING",
+            )
+
+        t0 = _time.time()
+
+        # Step 1: 清空旧队列（通过 Watch Folder 清理）
+        try:
+            if self.watch_folder_path.exists():
+                for f in self.watch_folder_path.iterdir():
+                    if f.is_file():
+                        f.unlink(missing_ok=True)
+                logger.info(f"[AME] Cleared old watch folder: {self.watch_folder_path}")
+        except OSError as e:
+            logger.warning(f"[AME] Failed to clear watch folder: {e}")
+
+        # Step 2: 提交渲染（优先 CLI，降级 Watch Folder）
+        logger.info(f"[AME] Submitting render: {input_path.name} -> {output_path.name}")
+
+        encode_result = await self.encode(
+            input_path=input_path,
+            output_path=output_path,
+            platform="youtube",  # 使用 YouTube 预设（H.264 1080p）
+            overwrite=True,
+        )
+
+        if not encode_result.success:
+            # CLI 失败，尝试 Watch Folder
+            logger.warning("[AME] CLI encode failed, trying Watch Folder")
+            encode_result = await self._encode_via_watch_folder(
+                input_path, output_path,
+                {"name": "Flagship H.264", "resolution": (1920, 1080), "fps": 24, "bitrate": "20M"},
+            )
+
+        if not encode_result.success:
+            return EngineResult(
+                success=False,
+                error=f"AME render failed: {encode_result.error}",
+                error_code="RENDER_FAILED",
+                duration_seconds=_time.time() - t0,
+            )
+
+        # Step 3: 等待产物出现（Watch Folder 模式可能异步）
+        deadline = t0 + timeout
+        while not output_path.exists() and _time.time() < deadline:
+            await asyncio.sleep(2.0)
+
+        if not output_path.exists():
+            return EngineResult(
+                success=False,
+                error=f"Output not produced within {timeout}s: {output_path}",
+                error_code="TIMEOUT",
+                duration_seconds=_time.time() - t0,
+            )
+
+        # Step 4: 生成 ffprobe.json
+        ffprobe_json = output_path.parent / "ffprobe.json"
+        probe_data = await self._run_ffprobe(output_path)
+        if probe_data:
+            ffprobe_json.write_text(_json.dumps(probe_data, indent=2), encoding="utf-8")
+
+        elapsed = _time.time() - t0
+        file_size = output_path.stat().st_size
+        logger.info(f"[AME] Render complete in {elapsed:.1f}s: {output_path} ({file_size} bytes)")
+
+        return EngineResult(
+            success=True,
+            output_path=output_path,
+            metadata={
+                "codec": codec,
+                "resolution": resolution,
+                "fps": fps,
+                "file_size": file_size,
+                "ffprobe_json": str(ffprobe_json) if ffprobe_json.exists() else None,
+            },
+            duration_seconds=elapsed,
+        )
+
+    async def _run_ffprobe(self, video_path: Path) -> Optional[dict]:
+        """运行 ffprobe 获取视频元数据。"""
+        import subprocess
+        import json as _json
+
+        try:
+            cmd = [
+                "ffprobe", "-v", "quiet",
+                "-print_format", "json",
+                "-show_format", "-show_streams",
+                str(video_path),
+            ]
+            proc = await asyncio.to_thread(
+                subprocess.run, cmd, capture_output=True, text=True, timeout=30
+            )
+            if proc.returncode == 0:
+                return _json.loads(proc.stdout)
+        except (FileNotFoundError, subprocess.TimeoutExpired, ValueError):
+            pass
+        return None
