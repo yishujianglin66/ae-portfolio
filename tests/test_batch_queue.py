@@ -815,3 +815,93 @@ class TestSingletonAndUtils:
             assert t.task_id is not None
         finally:
             q.stop(wait=False)
+
+
+# ============================================================================
+# 回调与终态发布的原子性契约（竞态回归闸门）
+# ============================================================================
+
+class TestCallbackRaceContract:
+    """终态发布与回调触发必须在同一临界区内完成。
+
+    缺陷历史（2026-08-27 复验定位）：
+    1. `_execute_task` 在锁外把 status 置为终态、回调在稍后的锁内才触发。
+       单独跑一个任务时窗口只有微秒级，检不出来；让多个 worker 的回调在
+       队列锁上串行化（回调内 sleep），后完成的任务就会长时间停在
+       "终态已发布、回调未执行"状态，外部通过 wait_for_task 必然读到违规。
+    2. `submit_batch` 在 `submit()` 之后才挂批次回调，任务先跑完时回调永不触发
+       （旧实现在 200 轮 ×6 任务 / 8 worker 压测中 196 轮丢失批次回调）。
+    两个用例都不用 sleep 放宽断言时序，靠契约本身判成败。
+
+    检出能力实测（对修复前实现各跑 3 轮）：
+    - on_complete 变体 3/3 稳定检出缺陷 1；on_failure 变体 0/3——旧实现在锁外
+      先触发 on_failure 再发布终态，不落入同一违规方向，故该变体是契约护栏而非复现器。
+    - 批次回调用例对缺陷 2 为概率性检出（2/3 轮），旧实现压测丢失率 196/200。
+    """
+
+    CALLBACK_HOLD = 0.02   # 回调持锁时长，用于放大缺陷窗口
+    TASKS_PER_ROUND = 4
+    ROUNDS = 15
+
+    @staticmethod
+    def _work():
+        return 1
+
+    @staticmethod
+    def _boom():
+        raise RuntimeError("boom")
+
+    @pytest.mark.parametrize("cb_kind", ["on_complete", "on_failure"])
+    def test_terminal_status_implies_callback_fired(self, cb_kind):
+        """wait_for_task 返回终态时，对应回调必须已经执行"""
+        fn = self._work if cb_kind == "on_complete" else self._boom
+        q = BatchQueue(max_workers=self.TASKS_PER_ROUND,
+                       max_retries=0, retry_delay=0.001)
+        violations = []
+        try:
+            for r in range(self.ROUNDS):
+                fired = set()
+                fired_lock = threading.Lock()
+
+                def cb(task, _fired=fired, _lock=fired_lock):
+                    with _lock:
+                        _fired.add(task.task_id)
+                    # 回调在队列锁内执行：这里停顿让并发任务的缺陷窗口重叠
+                    time.sleep(self.CALLBACK_HOLD)
+
+                batch = [
+                    q.submit(fn, name=f"{cb_kind}_{r}_{i}", **{cb_kind: cb})
+                    for i in range(self.TASKS_PER_ROUND)
+                ]
+                for task in batch:
+                    observed = q.wait_for_task(task.task_id, timeout=10)
+                    if (observed.status in (TaskStatus.COMPLETED, TaskStatus.FAILED)
+                            and observed.task_id not in fired):
+                        violations.append(
+                            f"round {r}: {task.name} status="
+                            f"{observed.status.value} 但 {cb_kind} 未触发")
+                q.wait_all(timeout=10)
+        finally:
+            q.stop(wait=True)
+        assert not violations, violations[:5]
+
+    def test_batch_callback_fires_every_round(self):
+        """每一批任务的 on_batch_complete 必须必达，且结果数与提交数一致"""
+        rounds, per_round = 30, 6
+        fired = []
+        q = BatchQueue(max_workers=8, max_retries=0)
+        try:
+            for r in range(rounds):
+                def on_batch_done(results, _r=r):
+                    fired.append((_r, len(results)))
+
+                q.submit_batch(
+                    [(self._work, (), {}) for _ in range(per_round)],
+                    batch_name=f"race_batch_{r}",
+                    on_batch_complete=on_batch_done,
+                )
+                q.wait_all(timeout=10)
+        finally:
+            q.stop(wait=True)
+        assert len(fired) == rounds, f"批次回调丢失 {rounds - len(fired)}/{rounds}"
+        assert all(n == per_round for _, n in fired), fired[:5]

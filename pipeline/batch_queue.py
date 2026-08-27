@@ -1,255 +1,707 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-pipeline/batch_queue.py - 批量生产队列
-=========================================
-管理多个管线任务的排队、并发执行与状态追踪。
+批处理队列系统
+=============
 
-用法:
-    from pipeline.batch_queue import BatchQueue
+提供异步任务队列、进度跟踪和批量处理能力。
 
-    queue = BatchQueue(max_concurrent=2)
-    queue.add_task(input_topic="高燃混剪", preset="high_energy")
-    queue.add_task(input_topic="电影感Vlog", preset="cinematic")
-    queue.add_task(reference_video="ref.mp4", preset="vlog")
-    results = queue.run_all()
+功能:
+- FIFO 任务队列，支持优先级
+- 并发控制（最大并发数）
+- 进度跟踪与回调
+- 任务状态管理（pending/running/completed/failed/cancelled）
+- 重试机制（失败自动重试）
+- 批量任务提交与结果汇总
+- 任务持久化（可选）
+
+任务状态流转:
+  pending → running → completed
+              ↘ failed → (retry → pending) → ...
+              ↘ cancelled
 """
+
 from __future__ import annotations
 
 import json
-import logging
 import os
+import threading
 import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-
-logger = logging.getLogger(__name__)
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
-class TaskStatus(Enum):
-    PENDING = "pending"
-    RUNNING = "running"
-    DONE = "done"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
+# ============================================================================
+# 任务状态枚举
+# ============================================================================
 
+class TaskStatus(str, Enum):
+    """任务状态"""
+    PENDING = "pending"       # 等待中
+    RUNNING = "running"       # 执行中
+    COMPLETED = "completed"   # 已完成
+    FAILED = "failed"         # 失败
+    CANCELLED = "cancelled"   # 已取消
+
+
+# ============================================================================
+# 任务数据类
+# ============================================================================
 
 @dataclass
-class BatchTask:
-    """单个批量任务"""
-    task_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
-    input_topic: str = ""
-    reference_video: str = ""
-    materials_dir: str = ""
-    preset: str = ""
-    output_dir: str = ""
+class Task:
+    """任务对象"""
+    task_id: str
+    name: str
+    func: Callable[..., Any]
+    args: Tuple[Any, ...] = ()
+    kwargs: Dict[str, Any] = field(default_factory=dict)
+    priority: int = 5  # 1-10，越高优先级越高
     status: TaskStatus = TaskStatus.PENDING
-    result: Optional[Dict] = None
-    error: str = ""
-    start_time: Optional[float] = None
-    end_time: Optional[float] = None
-    created_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    result: Any = None
+    error: Optional[str] = None
+    retries: int = 0
+    max_retries: int = 0
+    progress: float = 0.0  # 0.0 - 1.0
+    progress_message: str = ""
+    created_at: float = field(default_factory=time.time)
+    started_at: Optional[float] = None
+    completed_at: Optional[float] = None
+    duration: float = 0.0
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    on_complete: Optional[Callable[["Task"], None]] = None
+    on_failure: Optional[Callable[["Task"], None]] = None
+    on_progress: Optional[Callable[["Task", float, str], None]] = None
 
-    @property
-    def duration_sec(self) -> float:
-        if self.start_time and self.end_time:
-            return round(self.end_time - self.start_time, 1)
-        return 0.0
-
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "task_id": self.task_id,
-            "input_topic": self.input_topic,
-            "reference_video": self.reference_video,
-            "preset": self.preset,
-            "output_dir": self.output_dir,
+            "name": self.name,
+            "priority": self.priority,
             "status": self.status.value,
+            "progress": self.progress,
+            "progress_message": self.progress_message,
+            "retries": self.retries,
+            "max_retries": self.max_retries,
             "error": self.error,
-            "duration_sec": self.duration_sec,
             "created_at": self.created_at,
+            "started_at": self.started_at,
+            "completed_at": self.completed_at,
+            "duration": self.duration,
+            "metadata": self.metadata,
         }
 
 
+# ============================================================================
+# 进度回调上下文
+# ============================================================================
+
+class ProgressContext:
+    """任务进度回调上下文，在任务函数内部更新进度"""
+
+    def __init__(self, task: Task):
+        self._task = task
+        self._cancelled = False
+
+    def update(self, progress: float, message: str = ""):
+        """更新进度
+
+        Args:
+            progress: 进度 (0.0 - 1.0)
+            message: 进度消息
+        """
+        if self._cancelled:
+            return
+        self._task.progress = max(0.0, min(1.0, progress))
+        self._task.progress_message = message
+        if self._task.on_progress:
+            try:
+                self._task.on_progress(self._task, self._task.progress, message)
+            except Exception:
+                pass
+
+    def check_cancel(self) -> bool:
+        """检查是否被取消"""
+        return self._task.status == TaskStatus.CANCELLED
+
+    @property
+    def is_cancelled(self) -> bool:
+        return self._cancelled or self._task.status == TaskStatus.CANCELLED
+
+
+# ============================================================================
+# 批处理队列
+# ============================================================================
+
 class BatchQueue:
-    """批量生产队列"""
+    """批处理队列系统
+
+    支持:
+    - 多线程并发执行
+    - 优先级调度
+    - 任务重试
+    - 进度跟踪
+    - 批量提交/等待
+    """
 
     def __init__(
         self,
-        max_concurrent: int = 1,
-        output_base_dir: str = "output/batch",
-        auto_retry: bool = False,
-        max_retries: int = 2,
+        max_workers: int = 3,
+        max_retries: int = 0,
+        retry_delay: float = 1.0,
     ):
-        self.max_concurrent = max_concurrent
-        self.output_base_dir = output_base_dir
-        self.auto_retry = auto_retry
-        self.max_retries = max_retries
-        self._tasks: List[BatchTask] = []
-        self._results: Dict[str, Any] = {}
+        """
+        Args:
+            max_workers: 最大并发工作线程数
+            max_retries: 默认最大重试次数
+            retry_delay: 重试延迟（秒）
+        """
+        self._max_workers = max_workers
+        self._max_retries = max_retries
+        self._retry_delay = retry_delay
 
-    def add_task(
+        self._tasks: Dict[str, Task] = {}
+        self._pending: List[Task] = []
+        self._running: List[Task] = []
+        self._lock = threading.RLock()
+
+        self._stop_event = threading.Event()
+        self._workers: List[threading.Thread] = []
+        self._started = False
+
+        # 统计
+        self._total_submitted = 0
+        self._total_completed = 0
+        self._total_failed = 0
+
+    # --------------------------------------------------------------------
+    # 生命周期管理
+    # --------------------------------------------------------------------
+
+    def start(self):
+        """启动工作线程"""
+        with self._lock:
+            if self._started:
+                return
+            self._started = True
+            self._stop_event.clear()
+            for i in range(self._max_workers):
+                t = threading.Thread(
+                    target=self._worker_loop,
+                    name=f"BatchWorker-{i}",
+                    daemon=True,
+                )
+                t.start()
+                self._workers.append(t)
+
+    def stop(self, wait: bool = True):
+        """停止队列
+
+        Args:
+            wait: 是否等待正在运行的任务完成
+        """
+        with self._lock:
+            if not self._started:
+                return
+            self._stop_event.set()
+            self._started = False
+
+        if wait:
+            for t in self._workers:
+                t.join(timeout=30)
+        self._workers = []
+
+    def shutdown(self, wait: bool = True):
+        """关闭队列（同 stop）"""
+        self.stop(wait=wait)
+
+    # --------------------------------------------------------------------
+    # 任务提交
+    # --------------------------------------------------------------------
+
+    def submit(
         self,
-        input_topic: str = "",
-        reference_video: str = "",
-        materials_dir: str = "",
-        preset: str = "",
-        output_dir: str = "",
-    ) -> BatchTask:
-        """添加任务到队列"""
-        if not output_dir:
-            safe_name = (input_topic or reference_video or "task")[:20].replace(" ", "_")
-            output_dir = os.path.join(self.output_base_dir, safe_name)
+        func: Callable[..., Any],
+        *args,
+        name: Optional[str] = None,
+        priority: int = 5,
+        max_retries: Optional[int] = None,
+        on_complete: Optional[Callable[[Task], None]] = None,
+        on_failure: Optional[Callable[[Task], None]] = None,
+        on_progress: Optional[Callable[[Task, float, str], None]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ) -> Task:
+        """提交单个任务
 
-        task = BatchTask(
-            input_topic=input_topic,
-            reference_video=reference_video,
-            materials_dir=materials_dir,
-            preset=preset,
-            output_dir=output_dir,
+        Args:
+            func: 要执行的函数
+            *args: 位置参数
+            name: 任务名称
+            priority: 优先级 (1-10)
+            max_retries: 最大重试次数（None则使用队列默认值）
+            on_complete: 完成回调
+            on_failure: 失败回调
+            on_progress: 进度回调 fn(task, progress, message)
+            metadata: 元数据
+            **kwargs: 关键字参数
+
+        Returns:
+            Task 对象
+        """
+        task_id = f"task_{uuid.uuid4().hex[:12]}"
+        task = Task(
+            task_id=task_id,
+            name=name or func.__name__,
+            func=func,
+            args=args,
+            kwargs=kwargs,
+            priority=max(1, min(10, priority)),
+            max_retries=max_retries if max_retries is not None else self._max_retries,
+            on_complete=on_complete,
+            on_failure=on_failure,
+            on_progress=on_progress,
+            metadata=metadata or {},
         )
-        self._tasks.append(task)
-        logger.info(f"Batch: Added task {task.task_id} ({input_topic or reference_video})")
+
+        with self._lock:
+            self._tasks[task_id] = task
+            self._pending.append(task)
+            # 按优先级排序（高优先级在前）
+            self._pending.sort(key=lambda t: -t.priority)
+            self._total_submitted += 1
+
+        # 确保工作线程已启动
+        self.start()
+
         return task
 
-    def add_tasks_from_list(self, task_specs: List[Dict]) -> List[BatchTask]:
-        """批量添加任务"""
-        return [self.add_task(**spec) for spec in task_specs]
+    def submit_batch(
+        self,
+        tasks: List[Tuple[Callable, Tuple, Dict]],
+        batch_name: str = "batch",
+        priority: int = 5,
+        on_batch_complete: Optional[Callable[[List[Task]], None]] = None,
+    ) -> List[Task]:
+        """批量提交任务
 
-    def get_status(self) -> Dict:
-        """获取队列状态"""
-        status_counts = {}
-        for s in TaskStatus:
-            status_counts[s.value] = sum(1 for t in self._tasks if t.status == s)
+        Args:
+            tasks: 任务列表 [(func, args_tuple, kwargs_dict), ...]
+            batch_name: 任务名前缀
+            priority: 统一优先级
+            on_batch_complete: 整批完成回调，参数为本批全部 Task
 
-        return {
-            "total": len(self._tasks),
-            "status": status_counts,
-            "max_concurrent": self.max_concurrent,
-            "tasks": [t.to_dict() for t in self._tasks],
-        }
+        回调在 submit 时即挂载（否则任务可能先执行完、回调后挂上，整批通知丢失），
+        并同时等待"全部提交完成"与"全部执行完成"两个条件，
+        保证回调看到的结果列表完整。
+        """
+        if not tasks:
+            return []
+        if on_batch_complete is None:
+            return [
+                self.submit(
+                    func, *args,
+                    name=f"{batch_name}-{i}", priority=priority, **kwargs,
+                )
+                for i, (func, args, kwargs) in enumerate(tasks)
+            ]
 
-    def run_all(self) -> List[Dict]:
-        """执行所有任务"""
-        start = time.time()
-        logger.info(f"Batch: Starting {len(self._tasks)} tasks (concurrent={self.max_concurrent})")
+        total = len(tasks)
+        results: List[Task] = []
+        state_lock = threading.Lock()
+        done_count = [0]
+        all_submitted = [False]
 
-        if self.max_concurrent <= 1:
-            # 串行执行
-            for task in self._tasks:
-                if task.status == TaskStatus.CANCELLED:
-                    continue
-                self._run_single(task)
-        else:
-            # 并行执行
-            with ThreadPoolExecutor(max_workers=self.max_concurrent) as executor:
-                futures = {}
-                for task in self._tasks:
-                    if task.status == TaskStatus.CANCELLED:
-                        continue
-                    future = executor.submit(self._run_single, task)
-                    futures[future] = task
+        def fire_if_ready():
+            with state_lock:
+                ready = done_count[0] >= total and all_submitted[0]
+                batch = list(results)
+            if not ready:
+                return
+            try:
+                on_batch_complete(batch)
+            except Exception:
+                pass
 
-                for future in as_completed(futures):
-                    task = futures[future]
+        def make_callback(user_callback: Optional[Callable[[Task], None]]):
+            def callback(task: Task):
+                if user_callback:
                     try:
-                        future.result()
-                    except Exception as e:
-                        logger.error(f"Batch: Task {task.task_id} thread error: {e}")
+                        user_callback(task)
+                    except Exception:
+                        # 用户回调异常不能阻断批次计数
+                        pass
+                with state_lock:
+                    done_count[0] += 1
+                fire_if_ready()
+            return callback
 
-        total = time.time() - start
-        results = [t.to_dict() for t in self._tasks]
-        succeeded = sum(1 for t in self._tasks if t.status == TaskStatus.DONE)
-        logger.info(f"Batch: Complete ({total:.1f}s) - {succeeded}/{len(self._tasks)} succeeded")
+        for func, args, kwargs in tasks:
+            merged = dict(kwargs)
+            merged["on_complete"] = make_callback(merged.get("on_complete"))
+            results.append(
+                self.submit(
+                    func, *args,
+                    name=f"{batch_name}-{len(results)}",
+                    priority=priority, **merged,
+                )
+            )
+
+        with state_lock:
+            all_submitted[0] = True
+        fire_if_ready()
         return results
 
-    def _run_single(self, task: BatchTask):
-        """执行单个任务"""
-        task.status = TaskStatus.RUNNING
-        task.start_time = time.time()
-        logger.info(f"Batch: Task {task.task_id} START ({task.input_topic or task.reference_video})")
+    # --------------------------------------------------------------------
+    # 任务查询
+    # --------------------------------------------------------------------
 
-        retries = self.max_retries if self.auto_retry else 1
-        for attempt in range(1, retries + 1):
-            try:
-                result = self._execute_pipeline(task)
-                task.result = result
-                task.status = TaskStatus.DONE
-                task.end_time = time.time()
-                logger.info(f"Batch: Task {task.task_id} DONE ({task.duration_sec}s)")
-                return
-            except Exception as e:
-                logger.error(f"Batch: Task {task.task_id} attempt {attempt} failed: {e}")
-                if attempt >= retries:
-                    task.status = TaskStatus.FAILED
-                    task.error = str(e)
-                    task.end_time = time.time()
-                    logger.error(f"Batch: Task {task.task_id} FAILED after {retries} attempts")
+    def get_task(self, task_id: str) -> Optional[Task]:
+        """根据ID获取任务"""
+        with self._lock:
+            return self._tasks.get(task_id)
 
-    def _execute_pipeline(self, task: BatchTask) -> Dict:
-        """执行管线"""
-        from pipeline import UnifiedPipeline, PipelineConfig
+    def get_all_tasks(self) -> List[Task]:
+        """获取所有任务"""
+        with self._lock:
+            return list(self._tasks.values())
 
-        # 构建 config
-        config = PipelineConfig(
-            input_topic=task.input_topic,
-            reference_video=task.reference_video,
-            materials_dir=task.materials_dir,
-            output_dir=task.output_dir,
-        )
+    def get_tasks_by_status(self, status: TaskStatus) -> List[Task]:
+        """根据状态获取任务列表"""
+        with self._lock:
+            return [t for t in self._tasks.values() if t.status == status]
 
-        # 应用预设
-        if task.preset:
-            from pipeline.presets import apply_preset
-            config = apply_preset(config, task.preset)
+    @property
+    def pending_count(self) -> int:
+        with self._lock:
+            return len(self._pending)
 
-        # 运行管线
-        pipe = UnifiedPipeline(config)
-        result = pipe.run_all()
+    @property
+    def running_count(self) -> int:
+        with self._lock:
+            return len(self._running)
 
-        return {
-            "run_id": pipe.run_id,
-            "status": result.status.value if hasattr(result.status, 'value') else str(result.status),
-            "stages": {
-                name: {
-                    "status": sr.status.value if hasattr(sr.status, 'value') else str(sr.status),
-                    "duration": sr.duration_sec,
-                }
-                for name, sr in pipe._results.items()
-            },
-        }
+    @property
+    def completed_count(self) -> int:
+        return self._total_completed
+
+    @property
+    def failed_count(self) -> int:
+        return self._total_failed
+
+    def get_stats(self) -> Dict[str, Any]:
+        """获取队列统计信息"""
+        with self._lock:
+            return {
+                "total_submitted": self._total_submitted,
+                "total_completed": self._total_completed,
+                "total_failed": self._total_failed,
+                "pending": len(self._pending),
+                "running": len(self._running),
+                "max_workers": self._max_workers,
+            }
+
+    # --------------------------------------------------------------------
+    # 任务控制
+    # --------------------------------------------------------------------
 
     def cancel_task(self, task_id: str) -> bool:
-        """取消任务"""
-        for task in self._tasks:
-            if task.task_id == task_id and task.status == TaskStatus.PENDING:
+        """取消任务
+
+        Returns:
+            是否成功取消
+        """
+        with self._lock:
+            task = self._tasks.get(task_id)
+            if not task:
+                return False
+            if task.status in (TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED):
+                return False
+            if task.status == TaskStatus.PENDING:
+                # 从待执行列表移除
+                self._pending = [t for t in self._pending if t.task_id != task_id]
                 task.status = TaskStatus.CANCELLED
                 return True
-        return False
+            # 正在运行的任务，设置取消标记（任务需要自行检查）
+            task.status = TaskStatus.CANCELLED
+            return True
 
-    def retry_failed(self) -> int:
-        """重试所有失败的任务"""
-        retried = 0
-        for task in self._tasks:
-            if task.status == TaskStatus.FAILED:
+    def wait_for_task(self, task_id: str, timeout: Optional[float] = None) -> Task:
+        """等待任务完成
+
+        Args:
+            task_id: 任务ID
+            timeout: 超时时间（秒），None表示无限等待
+
+        Returns:
+            Task 对象
+        """
+        start = time.time()
+        while True:
+            with self._lock:
+                task = self._tasks.get(task_id)
+                if not task:
+                    raise ValueError(f"任务不存在: {task_id}")
+                if task.status in (
+                    TaskStatus.COMPLETED,
+                    TaskStatus.FAILED,
+                    TaskStatus.CANCELLED,
+                ):
+                    return task
+            if timeout is not None and time.time() - start > timeout:
+                return task
+            time.sleep(0.1)
+
+    def wait_all(self, timeout: Optional[float] = None) -> bool:
+        """等待所有任务完成
+
+        Returns:
+            是否所有任务都完成
+        """
+        start = time.time()
+        while True:
+            with self._lock:
+                if not self._pending and not self._running:
+                    return True
+            if timeout is not None and time.time() - start > timeout:
+                return False
+            time.sleep(0.1)
+
+    # --------------------------------------------------------------------
+    # 工作线程
+    # --------------------------------------------------------------------
+
+    def _worker_loop(self):
+        """工作线程主循环"""
+        while not self._stop_event.is_set():
+            task = self._pick_next_task()
+            if task is None:
+                # 没有任务，等待一下
+                time.sleep(0.1)
+                continue
+
+            self._execute_task(task)
+
+    def _pick_next_task(self) -> Optional[Task]:
+        """取下一个待执行任务"""
+        with self._lock:
+            if not self._pending:
+                return None
+            # 按优先级排序，取最高的
+            task = self._pending.pop(0)
+            if task.status != TaskStatus.PENDING:
+                # 已被取消或其他状态，跳过
+                return None
+            task.status = TaskStatus.RUNNING
+            task.started_at = time.time()
+            self._running.append(task)
+            return task
+
+    def _execute_task(self, task: Task):
+        """执行任务
+
+        终态与回调在同一临界区内发布：等待方（wait_for_task / wait_all）
+        读到 COMPLETED 或 FAILED 时，对应的 on_complete / on_failure 必然已执行完。
+        """
+        terminal: Optional[TaskStatus] = None
+        try:
+            # 创建进度上下文
+            ctx = ProgressContext(task)
+
+            # 函数第一个参数如果是 ProgressContext，则传入
+            import inspect
+            sig = inspect.signature(task.func)
+            params = list(sig.parameters.keys())
+
+            if params and params[0] in ("progress", "ctx", "progress_ctx"):
+                result = task.func(ctx, *task.args, **task.kwargs)
+            else:
+                result = task.func(*task.args, **task.kwargs)
+
+            task.result = result
+            task.progress = 1.0
+            task.progress_message = "已完成"
+            terminal = TaskStatus.COMPLETED
+
+        except Exception as e:
+            task.error = str(e)
+            task.retries += 1
+
+            if task.retries <= task.max_retries:
                 task.status = TaskStatus.PENDING
-                task.error = ""
-                task.result = None
-                retried += 1
-        return retried
+                task.progress = 0.0
+                task.progress_message = f"重试中 ({task.retries}/{task.max_retries})"
 
-    def save_manifest(self, path: str = None) -> str:
-        """保存任务清单"""
-        if not path:
-            path = os.path.join(self.output_base_dir, "batch_manifest.json")
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        manifest = {
-            "created_at": datetime.now().isoformat(),
-            "max_concurrent": self.max_concurrent,
-            "tasks": [t.to_dict() for t in self._tasks],
+                with self._lock:
+                    self._running = [t for t in self._running if t.task_id != task.task_id]
+
+                time.sleep(self._retry_delay)
+
+                with self._lock:
+                    self._pending.append(task)
+                    self._pending.sort(key=lambda t: -t.priority)
+                return
+            terminal = TaskStatus.FAILED
+
+        finally:
+            task.completed_at = time.time()
+            if task.started_at:
+                task.duration = task.completed_at - task.started_at
+
+            # 无条件摘除：即使 BaseException 穿透（terminal 仍为 None），
+            # 也不能让任务永久占住 _running
+            with self._lock:
+                self._running = [
+                    t for t in self._running if t.task_id != task.task_id
+                ]
+                if terminal is not None:
+                    # 发布终态 + 触发回调，与摘除同一临界区
+                    task.status = terminal
+                    if terminal == TaskStatus.COMPLETED:
+                        self._total_completed += 1
+                        callback = task.on_complete
+                    else:
+                        self._total_failed += 1
+                        callback = task.on_failure
+                    if callback:
+                        try:
+                            callback(task)
+                        except Exception:
+                            pass
+
+
+# ============================================================================
+# 批量处理结果汇总
+# ============================================================================
+
+@dataclass
+class BatchResult:
+    """批量处理结果"""
+    tasks: List[Task] = field(default_factory=list)
+
+    @property
+    def total(self) -> int:
+        return len(self.tasks)
+
+    @property
+    def completed(self) -> int:
+        return sum(1 for t in self.tasks if t.status == TaskStatus.COMPLETED)
+
+    @property
+    def failed(self) -> int:
+        return sum(1 for t in self.tasks if t.status == TaskStatus.FAILED)
+
+    @property
+    def cancelled(self) -> int:
+        return sum(1 for t in self.tasks if t.status == TaskStatus.CANCELLED)
+
+    @property
+    def success_rate(self) -> float:
+        if self.total == 0:
+            return 0.0
+        return self.completed / self.total
+
+    @property
+    def results(self) -> List[Any]:
+        return [t.result for t in self.tasks if t.status == TaskStatus.COMPLETED]
+
+    @property
+    def errors(self) -> List[Tuple[str, str]]:
+        return [(t.name, t.error or "") for t in self.tasks if t.status == TaskStatus.FAILED]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "total": self.total,
+            "completed": self.completed,
+            "failed": self.failed,
+            "cancelled": self.cancelled,
+            "success_rate": round(self.success_rate * 100, 2),
+            "total_duration": sum(t.duration for t in self.tasks),
+            "tasks": [t.to_dict() for t in self.tasks],
         }
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(manifest, f, ensure_ascii=False, indent=2)
-        return path
+
+
+# ============================================================================
+# 模块单例
+# ============================================================================
+
+_default_queue: Optional[BatchQueue] = None
+
+
+def get_default_queue(max_workers: int = 3) -> BatchQueue:
+    """获取默认队列实例"""
+    global _default_queue
+    if _default_queue is None:
+        _default_queue = BatchQueue(max_workers=max_workers)
+        _default_queue.start()
+    return _default_queue
+
+
+# ============================================================================
+# 便捷函数：示例任务函数
+# ============================================================================
+
+def example_task(progress: ProgressContext, total_steps: int = 10, delay: float = 0.1) -> str:
+    """示例任务：模拟带进度的任务"""
+    for i in range(total_steps):
+        if progress.check_cancel():
+            return "已取消"
+        progress.update(
+            (i + 1) / total_steps,
+            f"处理中 {i + 1}/{total_steps}"
+        )
+        time.sleep(delay)
+    return "完成"
+
+
+# ============================================================================
+# 命令行测试入口
+# ============================================================================
+
+if __name__ == "__main__":
+    print("=" * 60)
+    print("批处理队列系统测试")
+    print("=" * 60)
+
+    queue = BatchQueue(max_workers=2, max_retries=1)
+    queue.start()
+
+    # 提交测试任务
+    print("\n提交 5 个测试任务...")
+    tasks = []
+    for i in range(5):
+        task = queue.submit(
+            example_task,
+            total_steps=5,
+            delay=0.2,
+            name=f"测试任务-{i}",
+            priority=5 + i % 3,
+            on_progress=lambda t, p, m: print(f"  [{t.name}] {int(p*100)}% {m}"),
+        )
+        tasks.append(task)
+
+    # 等待完成
+    print("\n等待所有任务完成...")
+    queue.wait_all()
+
+    # 输出结果
+    print("\n" + "=" * 60)
+    print("执行结果")
+    print("=" * 60)
+    stats = queue.get_stats()
+    print(f"总提交: {stats['total_submitted']}")
+    print(f"已完成: {stats['total_completed']}")
+    print(f"失败: {stats['total_failed']}")
+    print(f"成功率: {stats['total_completed']/stats['total_submitted']*100:.1f}%" if stats['total_submitted'] > 0 else "0%")
+
+    for task in tasks:
+        print(f"\n  {task.name}: {task.status.value} ({task.duration:.2f}s)")
+        if task.result:
+            print(f"    结果: {task.result}")
+        if task.error:
+            print(f"    错误: {task.error}")
+
+    queue.stop()
+    print("\n测试完成！")
