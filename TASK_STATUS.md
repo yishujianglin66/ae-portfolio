@@ -419,6 +419,10 @@ git -C external/rife format-patch -1 HEAD --stdout > docs/vendor/external-rife-a
 
 2357 字节，并用 `git -C external/rife apply -R --check <该 patch>` 校验（exit 0）——即补丁内容与当前已应用状态逐字节等价，不是"大概备份了"。
 
+**端到端可重现性验证**：在 `external/rife` 的独立临时 worktree 中检出上游基线 `5d8adbd`，直接跑文档里写的那条命令 `git am docs/vendor/external-rife-audio-fallback-20260814.patch` → `Applying: fix: 音频迁移失败…`，exit 0；还原出的 `inference_video.py` 与在用的那份 sha256 前缀同为 `4e2c54fe1423a505`，逐字节一致。临时 worktree 验毕已 `git worktree remove`，`external/rife` 回到单 worktree、HEAD `a1ad751`、脏项 0。
+
+**顺带堵掉一个会让备份静默失效的配置**：本仓库 `core.autocrlf=true` 且原先没有 `.patch` 规则，补丁在 Windows 签出时会被转成 CRLF，`git am` 随即失败或打出错误行尾——即"备份在库里但换机器用不了"。已在 `.gitattributes` 追加 `*.patch text eol=lf`（`git check-attr` 确认 `text: set / eol: lf`，`git add --renormalize` 无差异，说明库内 blob 本就是 LF）。
+
 **两个 gitlink 都撤索引，不补 `.gitmodules`**。理由是 `.gitignore:103` 的 `external/` 必须保留：该前缀下有 **9212 个未跟踪且被忽略**的文件，一旦取消忽略，`git status` 会永久脏几千行，刚闭合的"仓库干净"前提再次失效。而在一个被忽略的目录里挂 submodule 属对抗性配置，git 各版本行为不一致。故：
 
 ```

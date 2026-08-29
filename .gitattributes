@@ -1,2 +1,4 @@
 *.pt filter=lfs diff=lfs merge=lfs -text
 *.pkl filter=lfs diff=lfs merge=lfs -text
+# 本仓库 core.autocrlf=true：补丁若按平台转换换行，git am 会失败或打出错误行尾
+*.patch text eol=lf
