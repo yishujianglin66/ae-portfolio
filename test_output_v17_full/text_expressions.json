@@ -1,5 +1,0 @@
-{
-  "typewriter": "text.sourceText = \"Typewriter Effect\";",
-  "fade_in": "opacity = linear(time, inPoint, inPoint+1, 0, 100);",
-  "bounce": "value + Math.abs(Math.sin(time*3))*20;"
-}
