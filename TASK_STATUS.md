@@ -433,6 +433,27 @@ git rm --cached external/OpenMontage external/rife   # 仅动索引，磁盘两�
 
 **净效果**：tracked-but-ignored **15 → 13**，剩余 13 项全部是有意保留的 `output/evidence/` 历史记录，`external/` 归零。
 
+## 新增常驻闸门 scripts/audit_vendored_repos.py（2026-08-29）
+
+把"vendored 克隆里的孤本"从一次性排查变成可重复机器判定，三类结论：
+
+| 判定 | 条件 | 致命性 |
+|---|---|---|
+| 孤本 | HEAD 不被任何 `refs/remotes/*` 包含，且 `docs/vendor/` 下没有兜得住的受跟踪 `.patch` | FAIL，exit 1 |
+| 断链 gitlink | 索引里是 mode 160000，但 pin 的 sha 无法从子仓库远端拉到 | FAIL，exit 1 |
+| 未备份本地改动 | 子仓库对已跟踪文件有未提交 diff | WARN（不致命） |
+
+补丁"兜得住"是实质核验而非看名字：索引用 `--error-unmatch` 确认受跟踪、工作树里存在、非空、且首行 `From <sha>` 与该仓库 HEAD 一致。
+
+**闸门自身缺陷由反向验证暴露**：第一版只用 `git ls-files -- docs/vendor` 拿到名字列表做包含匹配——而 `ls-files` 读的是索引，不读工作树，所以我把补丁 `mv` 走后闸门仍输出 exit 0。这是"闸门从未对缺陷版实现失败"的教科书案例，修成实质核验后，三重反证各自以正确理由失败并指名：清空文件 → `候选补丁不可用 —— …: 文件为空`；删工作树文件 → `索引里有但工作树缺文件`；改成 `From 0000…` → `补丁记录的 sha 0000000 与该仓库 HEAD a1ad751 不符`。三次 `git checkout --` 还原后正向复跑 exit 0，补丁与还原前 `cmp` 一致。
+
+**首跑即查出两类新事实**（28 个嵌套仓库，深度上限 3 层）：
+
+- WARN ×4 —— 这四个 vendored 仓库里有**未提交的本地修改**：`OpenSpace`（2 文件：`examples/my-daily-monitor/server/index.ts`、`openspace/grounding/core/search_tools.py`）、`external/premiere-pro-mcp`（`src/bridge/uxp-websocket-bridge.ts`）、`external/BlenderProc`（`RendererUtility.py`）、`external/F-s-PluginsProjects`（72 文件，多为 `_DL_windowsbinary/*.zip`）。其中 `premiere-pro-mcp` 那处正是 AE 桥接链路相关，价值最高、也最容易被一次 `git checkout` 抹掉。
+- 索引里其实有 **3 个** gitlink 而非 2 个：`OpenSpace`、`ae/gl-transitions`、`portfolio`，全都无 `.gitmodules`。三者的 pin 经验证都能从各自远端拉到（与 `external/rife` 不同），但 clean checkout 只会得到三个没有出处的空目录。
+
+**两项待决**：① 上面 4 处未提交改动是否要 `git -C <子仓> diff > docs/vendor/<name>-local-edits.patch` 备份入库（可能属并行会话在做的实验，不擅自处理）；② 剩下 3 个 gitlink 是补 `.gitmodules`（三者 pin 均可公网拉取，技术上可行）还是照 `external/` 的做法撤索引。
+
 
 ## 2026-08-26 里程碑
 
