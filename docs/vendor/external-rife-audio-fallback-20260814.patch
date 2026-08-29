@@ -1,0 +1,51 @@
+From a1ad751a1849bfe851f8c53dd4b4115a2c0ec7e2 Mon Sep 17 00:00:00 2001
+From: AE Knowledge Vault <aekv@local.dev>
+Date: Fri, 14 Aug 2026 12:20:05 +0800
+Subject: [PATCH] =?UTF-8?q?fix:=20=E9=9F=B3=E9=A2=91=E8=BF=81=E7=A7=BB?=
+ =?UTF-8?q?=E5=A4=B1=E8=B4=A5=E6=97=B6=E7=9A=84=E5=81=A5=E5=A3=AE=E6=81=A2?=
+ =?UTF-8?q?=E5=A4=8D=20+=20=E6=B8=85=E7=90=86=E6=AE=8B=E7=95=99=20=5Fnoaud?=
+ =?UTF-8?q?io=20=E6=96=87=E4=BB=B6?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- 裸 except 改为捕获具体异常并打印错误详情
+- 仅在 _noaudio 存在且目标不存在时才 rename 恢复，避免二次报错
+- 清理可能残留的 _noaudio 文件
+---
+ inference_video.py | 21 ++++++++++++++++++---
+ 1 file changed, 18 insertions(+), 3 deletions(-)
+
+diff --git a/inference_video.py b/inference_video.py
+index 68793c0..54d7869 100644
+--- a/inference_video.py
++++ b/inference_video.py
+@@ -291,7 +291,22 @@ if not vid_out is None:
+ if args.png == False and fpsNotAssigned == True and not args.video is None:
+     try:
+         transferAudio(args.video, vid_out_name)
+-    except:
+-        print("Audio transfer failed. Interpolated video will have no audio")
++    except Exception as e:
++        print(f"Audio transfer failed ({type(e).__name__}: {e}). Interpolated video will have no audio")
++        # transferAudio 可能在 rename 之前就失败（如 moviepy 缺失），
++        # 此时 vid_out_name 仍存在，无需恢复；仅当 _noaudio 版本存在时才恢复
+         targetNoAudio = os.path.splitext(vid_out_name)[0] + "_noaudio" + os.path.splitext(vid_out_name)[1]
+-        os.rename(targetNoAudio, vid_out_name)
++        if os.path.exists(targetNoAudio) and not os.path.exists(vid_out_name):
++            try:
++                os.rename(targetNoAudio, vid_out_name)
++                print(f"Restored {vid_out_name} from _noaudio version")
++            except Exception as rename_err:
++                print(f"Failed to restore video: {rename_err}")
++        elif os.path.exists(vid_out_name):
++            print(f"Video {vid_out_name} already exists, no restore needed")
++        # 清理可能残留的 _noaudio 文件
++        if os.path.exists(targetNoAudio):
++            try:
++                os.remove(targetNoAudio)
++            except Exception:
++                pass
+-- 
+2.54.0.windows.1
+

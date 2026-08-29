@@ -377,12 +377,12 @@
 
 **修掉 `scripts/secret_scan.py` 一个真实盲区**：PowerShell 默认写 UTF-16，正文每个 ASCII 字符后跟 NUL，被原有"含 NUL 即二进制"启发式直接跳过——即此前所有 `.ps1` 从未真正被扫过。改为先按 BOM 识别 UTF-16 再解码；正向对照验证通过：UTF-16 编码的伪凭据现能被检出（旧逻辑下 `NUL in head: True` 会跳过）。修复后本批扫描 5/5 文件 0 命中。
 
-**仍需人定夺**：① `output/evidence/` 13 份历史证据（被 `.trae/rules/evidence-gate-rules.md` 与 10 个脚本按路径引用）是否继续留库；② `external/OpenMontage`、`external/rife` 两个无 `.gitmodules` 映射的 gitlink（磁盘上是完整克隆，114 / 52 文件 + 各自 `.git`）是补正规 submodule 还是撤索引。另记一笔：`git branch -a` 显示存在一个名为 `origin` 的**本地分支**（指向 `9b956eb`），与远端跟踪引用同名易混——实测它是 `feat/project-consolidation-v1` 的 head，**不是误建 ref，不可删**。
+**当时的两项待定，现已全部处置**：① `output/evidence/` 13 份历史证据 → 决定维持"已跟踪 + 目录仍忽略"，理由与量化后的真实风险见下方"`output/evidence/` 刻意不加白名单"；② `external/OpenMontage`、`external/rife` 两个无 `.gitmodules` 映射的 gitlink → 撤索引，并把其中一个不可公网拉取的私有补丁转为受跟踪的 `.patch`，见下方"external/ 两个 gitlink 处置"。另记一笔：`git branch -a` 显示存在一个名为 `origin` 的**本地分支**（指向 `9b956eb`），与远端跟踪引用同名易混——实测它是 `feat/project-consolidation-v1` 的 head，**不是误建 ref，不可删**。
 
 
 ## tracked-but-ignored 积压清零完成（2026-08-27 深夜）
 
-**结果**：`git ls-files -ci --exclude-standard` 计数 **144 → 137 → 15**。第一阶段（144→137）由 `.gitignore` 白名单修复自动完成；第二阶段取消跟踪 122 个运行产物（`d61aab0`），剩余 15 项即两项待决：13 份 `output/evidence/` + 2 个 gitlink。
+**结果**：`git ls-files -ci --exclude-standard` 计数 **144 → 137 → 15 → 13**。第一阶段（144→137）由 `.gitignore` 白名单修复自动完成；第二阶段取消跟踪 122 个运行产物（`d61aab0`），当时剩 15 项 = 13 份 `output/evidence/` + 2 个 gitlink；gitlink 处置见下一节，终值 13 项全部为有意保留的历史证据。
 
 **删除前的引用依赖审计**：对清理集逐文件 `git grep -F` 反向搜索（扫 `*.py *.jsx *.json *.ps1 *.sh`）。结论是这些路径全部为**写入目标**或**带存在性守卫的读取**——`tests/test_v17_e2e.py` 只有 `os.makedirs(OUTPUT_DIR, exist_ok=True)` + `open(..., "w")`；`core/experience_harvester.py` 的四处读取均包在 `if not path.exists(): return` 内。唯一看似强引用的 `output/evidence/git_branch_diff_20260818.json` 出现在文档正文里，是**已存证据中记录的路径字符串**，不是代码依赖。
 
@@ -398,7 +398,36 @@
 
 **踩坑记一笔**：`git -C <repo> worktree add ./clean` 的相对路径是相对 `-C` 切换后的目录（仓库根）解析的，不是相对调用时的 shell cwd——结果 worktree 落在了 `AE-Knowledge-Vault/clean`，一个 3488 文件的嵌套检出。已 `git worktree remove` 干净撤除，主仓库脏项未受影响（验证前后 `git status --porcelain -uall` 均为并行会话的 20 项）。**临时 worktree 一律传绝对路径。**
 
-**`output/evidence/` 刻意不加白名单**（推翻上表 ①的默认倾向）：`.trae/rules/evidence-gate-rules.md` 已明确"检查目标是**文件系统**，不是 git 索引"，而证据闸门每跑一次就写入新文件——把该目录纳入跟踪等于重新打开刚闭合的测试污染通道。因此那 13 份历史证据维持跟踪现状不动，同时 `output/evidence/` 的 ignore 规则保留。**残留后果需知悉**：这 13 份文件受 `git clean -Xdf` 威胁，清理前须先备份。
+**`output/evidence/` 刻意不加白名单**（推翻上表 ①的默认倾向）：`.trae/rules/evidence-gate-rules.md` 已明确"检查目标是**文件系统**，不是 git 索引"，而证据闸门每跑一次就写入新文件——把该目录纳入跟踪等于重新打开刚闭合的测试污染通道。因此那 13 份历史证据维持跟踪现状不动，同时 `output/evidence/` 的 ignore 规则保留。
+
+**自我纠错：上一段写的"这 13 份文件受 `git clean -Xdf` 威胁"是错的**。`git clean` 只删**未跟踪**文件，而 tracked-but-ignored 恰恰在索引里，所以 clean 会跳过它们。实测方法：`git clean -Xnd` 全量 dry-run（2186 个待删条目）与 `git ls-files -ci --exclude-standard`（15 项）做集合交集 → **交集 0**，15 项逐个判"安全"。真正的暴露面是同一目录下的**未跟踪且被忽略**文件：`git ls-files -o -i --exclude-standard` 数出 `output/evidence/` 下 **29 个 / 0.50 MB**（全是 2026-08-18 那批，含 `cloud_backup_20260818/logs/*.log` 等），这些不在任何 git 历史里，`git clean -Xdf` 一删就找不回来。结论：风险确实存在但对象和我原先写的不是一批文件，量级 0.5 MB 可接受；若要保守，先把该目录整体备份一次再跑 `git clean`。
+
+## external/ 两个 gitlink 处置（2026-08-29）
+
+`git ls-tree HEAD external/` 只有两条 mode 160000 记录，`git status` 里 `?? external/OpenMontage` 与 ` M external/OpenMontage` 交替出现（后者是嵌套仓库内部脏项的外溢）。逐个取证：
+
+| gitlink | pin | 远端 | pin 性质 |
+|---|---|---|---|
+| `external/OpenMontage` | `c2045ad` | `github.com/calesthio/OpenMontage` | 公开提交，`branch -r --contains HEAD` 命中 `origin/main`，无本地私有提交 |
+| `external/rife` | `a1ad751` | `github.com/hzwer/ECCV2022-RIFE` | **本项目私有提交**：作者 `AE Knowledge Vault <aekv@local.dev>`，2026-08-14，改 `inference_video.py` +18/−3，且该克隆是 **shallow**（`.git/shallow` 存在），`origin/main..HEAD` 恰好就是这一个提交 |
+
+由此暴露出一个比"submodule 还是撤索引"更要紧的问题：**`external/rife` 里那枚音频迁移兜底修复只存在于这台机器的一个浅克隆内，公网拉不到、超级项目的 gitlink 也指向一个别人取不到的 sha**——换机器或误删目录即永久丢失。处置：
+
+```
+git -C external/rife format-patch -1 HEAD --stdout > docs/vendor/external-rife-audio-fallback-20260814.patch
+```
+
+2357 字节，并用 `git -C external/rife apply -R --check <该 patch>` 校验（exit 0）——即补丁内容与当前已应用状态逐字节等价，不是"大概备份了"。
+
+**两个 gitlink 都撤索引，不补 `.gitmodules`**。理由是 `.gitignore:103` 的 `external/` 必须保留：该前缀下有 **9212 个未跟踪且被忽略**的文件，一旦取消忽略，`git status` 会永久脏几千行，刚闭合的"仓库干净"前提再次失效。而在一个被忽略的目录里挂 submodule 属对抗性配置，git 各版本行为不一致。故：
+
+```
+git rm --cached external/OpenMontage external/rife   # 仅动索引，磁盘两个克隆完好
+```
+
+重现方式（写在此处，不另建 README）：`git clone https://github.com/calesthio/OpenMontage.git external/OpenMontage`（对应 `c2045ad`）；`git clone https://github.com/hzwer/ECCV2022-RIFE.git external/rife` 后 `git am docs/vendor/external-rife-audio-fallback-20260814.patch` 复现那枚私有修复。
+
+**净效果**：tracked-but-ignored **15 → 13**，剩余 13 项全部是有意保留的 `output/evidence/` 历史记录，`external/` 归零。
 
 
 ## 2026-08-26 里程碑
