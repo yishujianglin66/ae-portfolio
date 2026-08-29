@@ -377,7 +377,28 @@
 
 **修掉 `scripts/secret_scan.py` 一个真实盲区**：PowerShell 默认写 UTF-16，正文每个 ASCII 字符后跟 NUL，被原有"含 NUL 即二进制"启发式直接跳过——即此前所有 `.ps1` 从未真正被扫过。改为先按 BOM 识别 UTF-16 再解码；正向对照验证通过：UTF-16 编码的伪凭据现能被检出（旧逻辑下 `NUL in head: True` 会跳过）。修复后本批扫描 5/5 文件 0 命中。
 
-**仍需人定夺**：① `output/evidence/` 13 份历史证据（被 `.trae/rules/evidence-gate-rules.md` 与 10 个脚本按路径引用）是否继续留库；② `external/OpenMontage`、`external/rife` 两个无 `.gitmodules` 映射的 gitlink（磁盘上是完整克隆，114 / 52 文件 + 各自 `.git`）是补正规 submodule 还是撤索引。另记一笔：`git branch -a` 显示存在一个名为 `origin` 的**本地分支**（指向 `9b956eb`），与远端跟踪引用同名易混，疑似误建，未动。
+**仍需人定夺**：① `output/evidence/` 13 份历史证据（被 `.trae/rules/evidence-gate-rules.md` 与 10 个脚本按路径引用）是否继续留库；② `external/OpenMontage`、`external/rife` 两个无 `.gitmodules` 映射的 gitlink（磁盘上是完整克隆，114 / 52 文件 + 各自 `.git`）是补正规 submodule 还是撤索引。另记一笔：`git branch -a` 显示存在一个名为 `origin` 的**本地分支**（指向 `9b956eb`），与远端跟踪引用同名易混——实测它是 `feat/project-consolidation-v1` 的 head，**不是误建 ref，不可删**。
+
+
+## tracked-but-ignored 积压清零完成（2026-08-27 深夜）
+
+**结果**：`git ls-files -ci --exclude-standard` 计数 **144 → 137 → 15**。第一阶段（144→137）由 `.gitignore` 白名单修复自动完成；第二阶段取消跟踪 122 个运行产物（`d61aab0`），剩余 15 项即两项待决：13 份 `output/evidence/` + 2 个 gitlink。
+
+**删除前的引用依赖审计**：对清理集逐文件 `git grep -F` 反向搜索（扫 `*.py *.jsx *.json *.ps1 *.sh`）。结论是这些路径全部为**写入目标**或**带存在性守卫的读取**——`tests/test_v17_e2e.py` 只有 `os.makedirs(OUTPUT_DIR, exist_ok=True)` + `open(..., "w")`；`core/experience_harvester.py` 的四处读取均包在 `if not path.exists(): return` 内。唯一看似强引用的 `output/evidence/git_branch_diff_20260818.json` 出现在文档正文里，是**已存证据中记录的路径字符串**，不是代码依赖。
+
+**干净检出三向对照验证**（临时 worktree，验毕即删）：
+
+| 检出点 | `pytest --collect-only -q` |
+|---|---|
+| 主工作树 `d61aab0` | 5343 collected，exit 0 |
+| 清理后 `d61aab0` 干净检出（122 文件已不存在） | 5343 collected in 41.74s，exit 0 |
+| 清理前 `9e639d2` 干净检出（122 文件仍在） | 5343 collected in 33.36s，exit 0 |
+
+三向数字完全一致，说明没有任何测试模块在 import 期依赖被取消跟踪的产物。差异真实性也做了机器核对：清理集中 116/122 在"清理前检出"存在而在"清理后检出"缺失；另外 6 个是 `puppet-automation/src/engines/*/__pycache__/*.pyc`，两侧都在——因为它们**被我这次收集运行自己重新生成了**。这既排除了假阴性，也直接证明这 6 个就是每次运行都会自愈的产物，本就不该进库。
+
+**踩坑记一笔**：`git -C <repo> worktree add ./clean` 的相对路径是相对 `-C` 切换后的目录（仓库根）解析的，不是相对调用时的 shell cwd——结果 worktree 落在了 `AE-Knowledge-Vault/clean`，一个 3488 文件的嵌套检出。已 `git worktree remove` 干净撤除，主仓库脏项未受影响（验证前后 `git status --porcelain -uall` 均为并行会话的 20 项）。**临时 worktree 一律传绝对路径。**
+
+**`output/evidence/` 刻意不加白名单**（推翻上表 ①的默认倾向）：`.trae/rules/evidence-gate-rules.md` 已明确"检查目标是**文件系统**，不是 git 索引"，而证据闸门每跑一次就写入新文件——把该目录纳入跟踪等于重新打开刚闭合的测试污染通道。因此那 13 份历史证据维持跟踪现状不动，同时 `output/evidence/` 的 ignore 规则保留。**残留后果需知悉**：这 13 份文件受 `git clean -Xdf` 威胁，清理前须先备份。
 
 
 ## 2026-08-26 里程碑
