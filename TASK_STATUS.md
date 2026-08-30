@@ -507,6 +507,17 @@ git ls-tree -r dd1ac63 | grep 160000         # 三个完整 OID 仍在历史树�
 bash scripts/verify_worktree_inventory.sh    # RESULT: PASS 且 missing=0（撤索引不动磁盘）
 ```
 
+**执行记录（2026-08-30 当日完成，撤索引提交 634a455）**：
+
+- 撤索引提交：`634a455`，暂存区差异精确等于三条 mode-160000 删除（`OpenSpace` `2c5cc40…`、`ae/gl-transitions` `902218a…`、`portfolio` `45cc0af…`），无任何其他条目混入。
+- 验证 A：`git ls-files -s | grep 160000` 无输出（grep exit 1）——索引中 gitlink 清零。
+- 验证 B：`git ls-tree -r dd1ac63 | grep 160000` 返回三个完整 OID，与上表逐字吻合——证据在撤索引后仍可从历史树取回。
+- 验证 C：`git status --porcelain` 仅剩 `?? .workbuddy/automations/`（并行会话目录，未触碰）；`git log --oneline -3` 为 `634a455 → 6c3ad6b → dd1ac63`。
+- 验证 D：HEAD 树条目 3,488 = dd1ac63 的 3,491 − 3，差值恰为三条 gitlink，无多余变动。
+- 磁盘完整性闸门：`bash scripts/verify_worktree_inventory.sh` 复跑 `RESULT: PASS`、`GATE_EXIT=0`、`missing=0`。其中 `added=6` 全部为并行会话运行期产物（`bridges/.media_encoder-mcp-bridge/mcp_server.log`、`bridges/__pycache__/adobe_universal_bridge.cpython-312.pyc`、`bridges/__pycache__/adobe_mcp_manager.cpython-312.pyc`、`bridges/.premiere-mcp-bridge/mcp_server.log`、`bridges/.photoshop-mcp-bridge/mcp_server.log` 等 6 项），属新增而非丢失；`size_changed=1` 为本文件自身（文档追加），均符合预期。
+
+至此三个 gitlink 撤索引闭环：索引已清、证据双份留存（本节 + 撤索引前全部提交的树）、工作树经闸门验证零丢失。
+
 
 ## 2026-08-26 里程碑
 
