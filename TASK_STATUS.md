@@ -472,6 +472,42 @@ git rm --cached external/OpenMontage external/rife   # 仅动索引，磁盘两�
 **仍可能的恢复途径**：① 提权终端跑 `vssadmin list shadows` / File History 查询（本会话权限不足，未成）；② 并行会话被毁的未提交文件可从其会话转录 `6b126afc-6153-4248-9c64-94a1a246555c.jsonl` 重建。库外锚点（`ae-kv-allrefs-20260829.bundle`、`ae-kv-backup-20260816.bundle`、LFS 对象备份、restore-drill）**均不含 `external/` 内容**。`ae-kv-amtest-20260829/` 是 rife 的 git 历史仅存副本，不得再作为任何破坏性试验的目标。
 
 
+## 三个 gitlink 撤索引：证据落档（2026-08-30，撤索引前写入并提交）
+
+**为何先落档再撤**：这 3 个完整 OID 在本地只以 mode-160000 索引项形式存在；`git rm --cached` 本身不写任何文档。先让本证据块随 TASK_STATUS.md 提交入库，撤索引后 OID 仍有两个永久来源：本节与所有撤索引前提交的历史树（`git ls-tree -r <撤索引前的任意提交>`）。顺序不可颠倒。
+
+**精确完整 OID（2026-08-30 `git ls-files -s` 实时读取，未截断）**：
+
+| 路径 | OID | 磁盘状态 |
+|---|---|---|
+| `OpenSpace` | `2c5cc409b0c14364bc5fce268cd24eaa215c2d92` | 目录全空，无 `.git` |
+| `ae/gl-transitions` | `902218a1b63773ac0d0d9f491951da3392365bfe` | 目录全空，无 `.git` |
+| `portfolio` | `45cc0af6a6c2054b853fde3096586924b5874bf6` | 目录全空，无 `.git` |
+
+三个目录经 `find <dir> -mindepth 1` 清点均为 0 条目（mtime 2026-08-30 08:20）——克隆本体是本次事故牺牲品，其 `.git/config` 里的远端 URL 随之灭失。
+
+**远端 URL 穷尽搜索（负面结果，六类独立来源全部查空）**：
+
+1. `.gitmodules` 在全部历史中从未存在：`git log --all --oneline -- .gitmodules` 为空；`git show 46ca744:.gitmodules` 报 `fatal: path '.gitmodules' does not exist`（exit 128）。
+2. 历史树全量扫描：对 `git rev-list --all` 的每个提交跑 `git ls-tree -r`，全部历史中出现过的 mode-160000 条目只有不变的 5 个（上表 3 个 + 已在 HEAD 撤索引的 `external/rife` `a1ad751a1849bfe851f8c53dd4b4115a2c0ec7e2`、`external/OpenMontage` `c2045ad5f0c952a3d110965abbb874da121f4050`），全是裸 OID，无任何附带出处元数据。
+3. 唯一会话转录 `6b126afc-6153-4248-9c64-94a1a246555c.jsonl` 对 `remote.origin.url`、`git clone` 等探针的定串检索，对这 3 个仓库无可用命中（命中均为 `external/rife` 恢复操作或本会话自身追加文本的自指）。
+4. 早期探针存档 `ae-kv-restored-20260830/gitlink-remote-probe.txt`（29 个唯一 URL）全部属 OpenMontage/RIFE。
+5. 受跟踪文档中仅有 `deploy-portfolio-github.bat` 的占位模板（`GITHUB_USERNAME=你的GitHub用户名`），无实际远端。
+6. 本项目仅一份会话转录，无第二归档。
+
+**结论**：三个远端 URL 在本地不可恢复。唯一出处记录是此前审计时的验证结论：三者 pin 均可从各自 `origin/main` 拉到、克隆私有提交为 0（其中 `OpenSpace` 克隆曾有 2 处未提交本地改动，即上文 WARN ×4 中的 2 文件，已随克隆灭失）。因此本次损失的独有内容为零，丢失的只是三个远端身份本身。
+
+**决定**：撤索引，与 `external/` 两个 gitlink 的处理同理——无 `.gitmodules` 的裸 gitlink 在 clean checkout 只会产出三个无出处空目录，而索引继续指向磁盘上已不存在的克隆没有意义。恢复方式：将来若想起远端地址，凭上表 OID 用 `git ls-remote <url>` 核对包含关系后即可重建克隆。
+
+**可复跑验证**（撤索引后执行，结果应逐条吻合）：
+
+```
+git ls-files -s | grep 160000                # 无输出：索引不再有任何 gitlink
+git ls-tree -r dd1ac63 | grep 160000         # 三个完整 OID 仍在历史树中可查
+bash scripts/verify_worktree_inventory.sh    # RESULT: PASS 且 missing=0（撤索引不动磁盘）
+```
+
+
 ## 2026-08-26 里程碑
 
 - ✅ **topaz 运行期错误修复**：`TopazEngine` 对齐新 `BaseEngine` 模板方法契约（实现 `_execute_impl` + `_run_subprocess` 4 元组解包），`test_topaz_engine.py` 4 errors→5 passed。
