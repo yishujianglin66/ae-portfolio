@@ -519,6 +519,33 @@ bash scripts/verify_worktree_inventory.sh    # RESULT: PASS 且 missing=0（撤�
 至此三个 gitlink 撤索引闭环：索引已清、证据双份留存（本节 + 撤索引前全部提交的树）、工作树经闸门验证零丢失。
 
 
+## 项目全面扫描分析报告.html 恢复调查（2026-08-30，穷尽式负面结果）
+
+并行会话的未提交文件 `项目全面扫描分析报告.html` 在 external/ 删除事故中灭失。对该文件内容执行穷尽式恢复调查，覆盖全部 5 条可用本地通道，结果全部为负面。
+
+### 五条恢复通道与结果
+
+| # | 通道 | 方法 | 结果 |
+|---|------|------|------|
+| 1 | Write/Edit tool_use 重放 | 流式解析会话转录 `6b126afc-…555c.jsonl`（4,993→5,050 行），重放所有 file_path 匹配目标文件的 Write（覆盖 state）与 Edit（`state.replace(old, new, 1)`） | **0 次 Write、0 次 Edit** |
+| 2 | Bash heredoc/重定向创建 | 同上扫描中检查 Bash tool_use 的 command 字段是否含目标文件名 | 3 次命中，全部为存在性探测（`for f in ...项目全面扫描分析报告.html; do if [ -f "$f"`）与 git 历史查询（`git log --all --oneline -- 项目全面扫描分析报告.html`），无创建操作 |
+| 3 | 悬空 blob | `git fsck --dangling --no-reflogs` 查找曾被 `git add` 但从未被任何提交引用的 blob | **0 个悬空 blob**——该文件从未进入过索引 |
+| 4 | stash | `git stash list` | **空**——无任何 stash 记录 |
+| 5 | 全转录 .html Write 分类 | 一行不落地扫描全部 5,050 行，提取所有 Write tool_use 且 file_path 以 `.html` 结尾的操作（覆盖"写到不同文件名再 mv"的模式） | **HTML_WRITES=0**——整个转录中没有任何 .html 文件的 Write 操作 |
+
+### 补充证据
+
+- 该文件在转录中最早出现于第 2,451 行（2026-08-29T12:59:02.754Z），身份为 `git status` tool_result 中的 `?? 项目全面扫描分析报告.html`——即**始终为未跟踪状态**，从未被 `git add`、从未进入任何提交。
+- 52 次关键词命中全部分类为：tool_result（目录列表显示文件名）、text（助手/用户消息中的丢失报告）、Bash（存在性探测与 git 历史查询）。无任何创建或写入操作。
+- `FULL_PROJECT_SCAN_ANALYSIS.md`（5,863 字节）在 HEAD 树、工作树、快照中各存一份，三份完全一致——扫描分析报告的 Markdown 版本完好无损。
+
+### 结论
+
+`项目全面扫描分析报告.html` 的 HTML 渲染内容**在任何可用本地来源中均不可恢复**。该文件是并行会话在工作树中直接生成的未跟踪产物，从未进入 git 索引、从未被任何工具写入会话转录、未被 stash 捕获。Markdown  twin `FULL_PROJECT_SCAN_ANALYSIS.md` 是扫描报告内容的唯一权威存留副本。
+
+唯一剩余恢复可能性为用户侧操作：提权终端执行 `vssadmin list shadows` 查询卷影副本，或检查 File History / 回收站。
+
+
 ## 2026-08-26 里程碑
 
 - ✅ **topaz 运行期错误修复**：`TopazEngine` 对齐新 `BaseEngine` 模板方法契约（实现 `_execute_impl` + `_run_subprocess` 4 元组解包），`test_topaz_engine.py` 4 errors→5 passed。
