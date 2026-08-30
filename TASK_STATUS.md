@@ -377,7 +377,7 @@
 
 **修掉 `scripts/secret_scan.py` 一个真实盲区**：PowerShell 默认写 UTF-16，正文每个 ASCII 字符后跟 NUL，被原有"含 NUL 即二进制"启发式直接跳过——即此前所有 `.ps1` 从未真正被扫过。改为先按 BOM 识别 UTF-16 再解码；正向对照验证通过：UTF-16 编码的伪凭据现能被检出（旧逻辑下 `NUL in head: True` 会跳过）。修复后本批扫描 5/5 文件 0 命中。
 
-**当时的两项待定，现已全部处置**：① `output/evidence/` 13 份历史证据 → 决定维持"已跟踪 + 目录仍忽略"，理由与量化后的真实风险见下方"`output/evidence/` 刻意不加白名单"；② `external/OpenMontage`、`external/rife` 两个无 `.gitmodules` 映射的 gitlink → 撤索引，并把其中一个不可公网拉取的私有补丁转为受跟踪的 `.patch`，见下方"external/ 两个 gitlink 处置"。另记一笔：`git branch -a` 显示存在一个名为 `origin` 的**本地分支**（指向 `9b956eb`），与远端跟踪引用同名易混——实测它是 `feat/project-consolidation-v1` 的 head，**不是误建 ref，不可删**。
+**当时的两项待定，现已全部处置**：① `output/evidence/` 13 份历史证据 → 决定维持"已跟踪 + 目录仍忽略"，理由与量化后的真实风险见下方"`output/evidence/` 刻意不加白名单"；② `external/OpenMontage`、`external/rife` 两个无 `.gitmodules` 映射的 gitlink → 撤索引，并把其中一个不可公网拉取的私有补丁转为受跟踪的 `.patch`，见下方"external/ 两个 gitlink 处置"。另记一笔：此前此处写过"存在一个名为 `origin` 的本地分支（指向 `9b956eb`）"——**该记录有误，2026-08-30 更正**：不存在名为 `origin` 的本地分支（`git rev-parse origin` → fatal: unknown revision）；当时 `git branch -a` 里看到的 `origin/...` 是 `remotes/` 命名空间下的远端跟踪引用，与本地分支列表并排显示造成误读。`9b956eb` 实为本地分支 `feat/project-consolidation-v1` 的 head，是正常特性分支，不可删。
 
 
 ## tracked-but-ignored 积压清零完成（2026-08-27 深夜）
@@ -419,7 +419,7 @@ git -C external/rife format-patch -1 HEAD --stdout > docs/vendor/external-rife-a
 
 2357 字节，并用 `git -C external/rife apply -R --check <该 patch>` 校验（exit 0）——即补丁内容与当前已应用状态逐字节等价，不是"大概备份了"。
 
-**端到端可重现性验证**：在 `external/rife` 的独立临时 worktree 中检出上游基线 `5d8adbd`，直接跑文档里写的那条命令 `git am docs/vendor/external-rife-audio-fallback-20260814.patch` → `Applying: fix: 音频迁移失败…`，exit 0；还原出的 `inference_video.py` 与在用的那份 sha256 前缀同为 `4e2c54fe1423a505`，逐字节一致。临时 worktree 验毕已 `git worktree remove`，`external/rife` 回到单 worktree、HEAD `a1ad751`、脏项 0。
+**端到端可重现性验证**：在 `external/rife` 的独立临时 worktree 中检出上游基线 `5d8adbd`，直接跑文档里写的那条命令 `git am docs/vendor/external-rife-audio-fallback-20260814.patch` → `Applying: fix: 音频迁移失败…`，exit 0；还原出的 `inference_video.py` 与在用的那份**内容寻址三重等值**（2026-08-30 升级判据）：`git -C external/rife rev-parse HEAD:inference_video.py` = `rev-parse a1ad751:inference_video.py` = 工作树 `git hash-object inference_video.py` = `54d786908e5188657df81b394bb7fafb131df04e`，blob OID 相同即逐字节一致——比原先记录的截断 sha256 前缀 `4e2c54fe1423a505` 对比更强、且可机器复跑。临时 worktree 验毕已 `git worktree remove`，`external/rife` 回到单 worktree、HEAD `a1ad751`、脏项 0。
 
 **顺带堵掉一个会让备份静默失效的配置**：本仓库 `core.autocrlf=true` 且原先没有 `.patch` 规则，补丁在 Windows 签出时会被转成 CRLF，`git am` 随即失败或打出错误行尾——即"备份在库里但换机器用不了"。已在 `.gitattributes` 追加 `*.patch text eol=lf`（`git check-attr` 确认 `text: set / eol: lf`，`git add --renormalize` 无差异，说明库内 blob 本就是 LF）。
 
@@ -453,6 +453,23 @@ git rm --cached external/OpenMontage external/rife   # 仅动索引，磁盘两�
 - 索引里其实有 **3 个** gitlink 而非 2 个：`OpenSpace`、`ae/gl-transitions`、`portfolio`，全都无 `.gitmodules`。三者的 pin 经验证都能从各自远端拉到（与 `external/rife` 不同），但 clean checkout 只会得到三个没有出处的空目录。
 
 **两项待决**：① 上面 4 处未提交改动是否要 `git -C <子仓> diff > docs/vendor/<name>-local-edits.patch` 备份入库（可能属并行会话在做的实验，不擅自处理）；② 剩下 3 个 gitlink 是补 `.gitmodules`（三者 pin 均可公网拉取，技术上可行）还是照 `external/` 的做法撤索引。
+
+
+## external/ 删除事故定损与工作树清点闸门（2026-08-30）
+
+**事故定损（全部数字经磁盘重新清点、互相咬合）**：`external/` 下未跟踪且被忽略的内容遭到删除。现存 **72 个文件 / 8,024,036 字节**，此前记录为 **9,212 个文件**——约 9,140 个文件已不在磁盘。嵌套仓库从 `audit_vendored_repos.py` 首跑记录的 **28 个**降为 **1 个**（仅存 `external/rife`，HEAD 仍 `a1ad751`，其私有修复已有 `docs/vendor/` 补丁兜底）。三个仍挂 gitlink 的目录工作树被清空、只剩空壳：`OpenSpace`（pin `2c5cc40`）、`ae/gl-transitions`（pin `902218a`）、`portfolio`（pin `45cc0af`）——索引里 mode 160000 记录还在，指向的目录是空的。上面"两项待决"之①因此**无法从磁盘补做**：4 处未提交改动（含价值最高的 `premiere-pro-mcp` AE 桥接改动）已随仓库灭失，除非快照恢复成功。并行会话的一批未提交文件（`core/synthesis_orchestrator.py`、`core/temporal_analyzer.py`、`core/visual_scorer.py`、`scripts/m2_auto_iterate.py`、`requirements.txt`、`docs/handoff-2026-08-16-m2-tuner.md`、`项目全面扫描分析报告.html` 等）同样在磁盘上消失。
+
+**损失口径纠错与一处撤回**：此前对外口径写的是"4 个 vendored 仓库受影响"，实测远大于此，正确口径是上面的 28→1。另撤回我自己清点日志 `gitlinks.log` 里的总量 1,375,327,448 字节：逐目录复核发现该枚举漏掉顶层文件与点目录，少计 3,957,378 字节，该总数作废，以 `find` 全量求和 **3,566 文件 / 1,379,289,942 字节**为准。
+
+**为什么当时所有 git 完整性检查全绿**：`.gitignore:103` 的 `external/` 使其下全部内容对 `ls-files`、`ls-tree`、`status --porcelain`、`fsck`、bundle、LFS 对象备份统统不可见——删除发生时 `git status` 只有 1–2 行、vendored 闸门报致命 0 / 警告 0，是"真绿"也是"真丢"。教训：**"status 干净"≠"工作树完好"**，被忽略文件的存在性只能由文件系统清点证明。
+
+**新增常驻闸门 `scripts/verify_worktree_inventory.sh`（提交 `b0f17c0`）**：以基线清单对磁盘做存在性清点。基线 `manifest.txt`（3,566 行 `<字节>\t<路径>`，不含 `.git`，sha256 `e78224406b2d944b58c7d5ab316d0cb382d36798d522528ea9882d07d219fdfc`，存于库外 `ae-kv-inventory-20260830/`）；compare 模式输出 `MISSING`/`ADDED`/`SIZE_CHANGED`，基线内文件缺失即 exit 1。反向验证 **PASS=24 FAIL=0**（8 类拒止 + 6 类损失检测，全部在合成仓库与脚本内 dry-run 完成，未触碰真实数据）。闸门自身两个缺陷在反向验证中暴露并修复：① `refuse()` 的告警写 stdout 会被 `$( )` 命令替换吞掉，必须写 stderr 并以 `REFUSING:` 前缀作判定信号；② 路径归一化须折叠 MSYS/Windows 形式、拒绝 `..`、在大小写不敏感文件系统上做大小写折叠的包含判断。标签 `kv-gates-20260830` 只盖到 `d24129c`，不含本闸门。
+
+**清点过程踩的两个坑**：① `core.quotePath=true`（默认）对非 ASCII 路径做八进制转义，`git ls-files` 与 `find` 对比凭空多出 890 个假差异；加 `-c core.quotePath=false` 后真实差集是 79 个未跟踪且被忽略文件，索引独有项恰为上述 3 个 gitlink。**本库任何路径对比必须关 quotePath**。② 索引项与磁盘文件不在同一计数域：gitlink 计入索引，`find -type f` 看不见目录。
+
+**当前状态（提交 `b0f17c0` 后实测）**：工作树 3,566 文件 / 1,379,289,942 字节，与基线、与新跑 `find` 求和三向全等；受跟踪文件 3,491；嵌套 `.git` 仅 2 个（`./.git`、`./external/rife/.git`）；`git fsck` 干净。本地 heads：`master`（`b0f17c0`）、`feat/phase1.1-gateway-consolidation`（`4b8aa81`）、`feat/project-consolidation-v1`（`9b956eb`）；`remotes/origin/master → 446cddc` 已落后，`remotes/origin/feat/*` 与本地 heads 镜像。注意：本地克隆产生的 `refs/remotes/*` 只是克隆时点的镜像，不能当作上游血缘证据。
+
+**仍可能的恢复途径**：① 提权终端跑 `vssadmin list shadows` / File History 查询（本会话权限不足，未成）；② 并行会话被毁的未提交文件可从其会话转录 `6b126afc-6153-4248-9c64-94a1a246555c.jsonl` 重建。库外锚点（`ae-kv-allrefs-20260829.bundle`、`ae-kv-backup-20260816.bundle`、LFS 对象备份、restore-drill）**均不含 `external/` 内容**。`ae-kv-amtest-20260829/` 是 rife 的 git 历史仅存副本，不得再作为任何破坏性试验的目标。
 
 
 ## 2026-08-26 里程碑
