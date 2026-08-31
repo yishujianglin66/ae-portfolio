@@ -463,13 +463,13 @@ git rm --cached external/OpenMontage external/rife   # 仅动索引，磁盘两�
 
 **为什么当时所有 git 完整性检查全绿**：`.gitignore:103` 的 `external/` 使其下全部内容对 `ls-files`、`ls-tree`、`status --porcelain`、`fsck`、bundle、LFS 对象备份统统不可见——删除发生时 `git status` 只有 1–2 行、vendored 闸门报致命 0 / 警告 0，是"真绿"也是"真丢"。教训：**"status 干净"≠"工作树完好"**，被忽略文件的存在性只能由文件系统清点证明。
 
-**新增常驻闸门 `scripts/verify_worktree_inventory.sh`（提交 `b0f17c0`）**：以基线清单对磁盘做存在性清点。基线 `manifest.txt`（3,566 行 `<字节>\t<路径>`，不含 `.git`，sha256 `e78224406b2d944b58c7d5ab316d0cb382d36798d522528ea9882d07d219fdfc`，存于库外 `ae-kv-inventory-20260830/`）；compare 模式输出 `MISSING`/`ADDED`/`SIZE_CHANGED`，基线内文件缺失即 exit 1。反向验证 **PASS=24 FAIL=0**（8 类拒止 + 6 类损失检测，全部在合成仓库与脚本内 dry-run 完成，未触碰真实数据）。闸门自身两个缺陷在反向验证中暴露并修复：① `refuse()` 的告警写 stdout 会被 `$( )` 命令替换吞掉，必须写 stderr 并以 `REFUSING:` 前缀作判定信号；② 路径归一化须折叠 MSYS/Windows 形式、拒绝 `..`、在大小写不敏感文件系统上做大小写折叠的包含判断。标签 `kv-gates-20260830` 只盖到 `d24129c`，不含本闸门。
+**新增常驻闸门 `scripts/verify_worktree_inventory.sh`（提交 `b0f17c0`）**：以基线清单对磁盘做存在性清点。基线 `manifest.txt`（3,566 行 `<字节>\t<路径>`，不含 `.git`，sha256 `e78224406b2d944b58c7d5ab316d0cb382d36798d522528ea9882d07d219fdfc`，存于库外 `Desktop/ae-kv-inventory-20260830/`；该目录在 2026-08-31 桌面归档整理中被特意留在原位、未迁入 `Desktop/AE-KV-Audit-20260830/`——闸门脚本的默认基线路径 `BASE_DEFAULT` 硬编码指向 `manifest.txt`，移走就会静默破坏默认调用（仅 `AE_KV_INV_BASE` 可覆盖））；compare 模式输出 `MISSING`/`ADDED`/`SIZE_CHANGED`，基线内文件缺失即 exit 1。反向验证 **PASS=24 FAIL=0**（8 类拒止 + 6 类损失检测，全部在合成仓库与脚本内 dry-run 完成，未触碰真实数据）。闸门自身两个缺陷在反向验证中暴露并修复：① `refuse()` 的告警写 stdout 会被 `$( )` 命令替换吞掉，必须写 stderr 并以 `REFUSING:` 前缀作判定信号；② 路径归一化须折叠 MSYS/Windows 形式、拒绝 `..`、在大小写不敏感文件系统上做大小写折叠的包含判断。标签 `kv-gates-20260830` 只盖到 `d24129c`，不含本闸门。
 
 **清点过程踩的两个坑**：① `core.quotePath=true`（默认）对非 ASCII 路径做八进制转义，`git ls-files` 与 `find` 对比凭空多出 890 个假差异；加 `-c core.quotePath=false` 后真实差集是 79 个未跟踪且被忽略文件，索引独有项恰为上述 3 个 gitlink。**本库任何路径对比必须关 quotePath**。② 索引项与磁盘文件不在同一计数域：gitlink 计入索引，`find -type f` 看不见目录。
 
 **当前状态（提交 `b0f17c0` 后实测）**：工作树 3,566 文件 / 1,379,289,942 字节，与基线、与新跑 `find` 求和三向全等；受跟踪文件 3,491；嵌套 `.git` 仅 2 个（`./.git`、`./external/rife/.git`）；`git fsck` 干净。本地 heads：`master`（`b0f17c0`）、`feat/phase1.1-gateway-consolidation`（`4b8aa81`）、`feat/project-consolidation-v1`（`9b956eb`）；`remotes/origin/master → 446cddc` 已落后，`remotes/origin/feat/*` 与本地 heads 镜像。注意：本地克隆产生的 `refs/remotes/*` 只是克隆时点的镜像，不能当作上游血缘证据。
 
-**仍可能的恢复途径**：① 提权终端跑 `vssadmin list shadows` / File History 查询（本会话权限不足，未成）；② 并行会话被毁的未提交文件可从其会话转录 `6b126afc-6153-4248-9c64-94a1a246555c.jsonl` 重建。库外锚点（`ae-kv-allrefs-20260829.bundle`、`ae-kv-backup-20260816.bundle`、LFS 对象备份、restore-drill）**均不含 `external/` 内容**。`ae-kv-amtest-20260829/` 是 rife 的 git 历史仅存副本，不得再作为任何破坏性试验的目标。
+**仍可能的恢复途径**：① 提权终端跑 `vssadmin list shadows` / File History 查询（本会话权限不足，未成）；② 并行会话被毁的未提交文件可从其会话转录 `6b126afc-6153-4248-9c64-94a1a246555c.jsonl` 重建。库外锚点（`01-备份-bundles/ae-kv-allrefs-20260829.bundle`、`01-备份-bundles/ae-kv-backup-20260816.bundle`、`01-备份-bundles/ae-kv-lfs-backup-20260829/`、`02-快照-snapshots/ae-kv-restore-drill/`）**均不含 `external/` 内容**。`03-测试副本-testcopies/ae-kv-amtest-20260829/`（HEAD `029320085cbec82d25bbab1b56ce4f439ad6633c`）与 `ae-kv-amtest-20260830/`（HEAD `ce7d7397646be963001f80efc9d10bbf94e39f89`）合起来是 rife 的 git 历史仅存副本：2026-08-31 实测两者体积与文件数完全相同但 HEAD 不同，交叉 `git cat-file -t` 均失败，即各持对方没有的提交，共同祖先才是索引记录的 gitlink OID `a1ad751a1849bfe851f8c53dd4b4115a2c0ec7e2`。**两份都不得再作为任何破坏性试验的目标，也不得"删掉重复的那份"。**
 
 
 ## 三个 gitlink 撤索引：证据落档（2026-08-30，撤索引前写入并提交）
@@ -491,7 +491,7 @@ git rm --cached external/OpenMontage external/rife   # 仅动索引，磁盘两�
 1. `.gitmodules` 在全部历史中从未存在：`git log --all --oneline -- .gitmodules` 为空；`git show 46ca744:.gitmodules` 报 `fatal: path '.gitmodules' does not exist`（exit 128）。
 2. 历史树全量扫描：对 `git rev-list --all` 的每个提交跑 `git ls-tree -r`，全部历史中出现过的 mode-160000 条目只有不变的 5 个（上表 3 个 + 已在 HEAD 撤索引的 `external/rife` `a1ad751a1849bfe851f8c53dd4b4115a2c0ec7e2`、`external/OpenMontage` `c2045ad5f0c952a3d110965abbb874da121f4050`），全是裸 OID，无任何附带出处元数据。
 3. 唯一会话转录 `6b126afc-6153-4248-9c64-94a1a246555c.jsonl` 对 `remote.origin.url`、`git clone` 等探针的定串检索，对这 3 个仓库无可用命中（命中均为 `external/rife` 恢复操作或本会话自身追加文本的自指）。
-4. 早期探针存档 `ae-kv-restored-20260830/gitlink-remote-probe.txt`（29 个唯一 URL）全部属 OpenMontage/RIFE。
+4. 早期探针存档 `Desktop/AE-KV-Audit-20260830/02-快照-snapshots/ae-kv-restored-20260830/gitlink-remote-probe.txt`（29 个唯一 URL）全部属 OpenMontage/RIFE。
 5. 受跟踪文档中仅有 `deploy-portfolio-github.bat` 的占位模板（`GITHUB_USERNAME=你的GitHub用户名`），无实际远端。
 6. 本项目仅一份会话转录，无第二归档。
 
@@ -556,6 +556,29 @@ bash scripts/verify_worktree_inventory.sh    # RESULT: PASS 且 missing=0（撤�
 | 8 | 文件历史（File History） | 检查本地目录 `%LOCALAPPDATA%\Microsoft\Windows\FileHistory` 与注册表 `HKCU\...\FileHistory` | 本地目录**不存在**；注册表键下仅有空的 RestoreUI 子键、无任何配置值——文件历史**从未启用** |
 
 **最终结论（2026-08-31 起生效，八通道全负面）**：`项目全面扫描分析报告.html` 的 HTML 渲染内容在本机一切来源中均确认不可恢复——既不在 git 层（索引/提交/悬空 blob/stash/转录），也不在 OS 层（卷影副本/回收站/文件历史）。该文件的报告内容以 Markdown twin `FULL_PROJECT_SCAN_ANALYSIS.md`（5,863 字节，HEAD/工作树/快照三份一致）为唯一权威存留。若日后可视化呈现有需要，可从该 Markdown 重新渲染生成 HTML，不再追索原文件。
+
+
+## 桌面审计产物归档整理（2026-08-31）
+
+用户反馈桌面散落大量审计产物，要求整理。整理对象是本仓库审计过程产生在**库外**的 `ae-kv-*` 临时产物，不涉及任何被跟踪文件。
+
+**做法与零丢失保证**：全部产物集中移入 `C:\Users\Administrator\Desktop\AE-KV-Audit-20260830\`，按性质分四个带序号的子目录。移动一律用同盘符 `mv`（等于重命名，不产生第二份副本、不删任何字节），移动前后文件数与字节数一致；桌面 `ae-kv-*` 条目从 **33 个降为 2 个**（归档文件夹 + 刻意留下的基线文件夹）。
+
+**实测清点（2026-08-31 复核，与归档内 README 表格逐字吻合）**：
+
+| 目录 | 文件数 | 字节数 | 删除判据 |
+|---|---|---|---|
+| `01-备份-bundles/` | 12 | 805,190,569 | 不可删——唯一的离线 git 历史与 LFS 副本 |
+| `02-快照-snapshots/` | 7,040 | 544,360,150 | 不可删——含事故后唯一恢复证据源 |
+| `03-测试副本-testcopies/` | 173 | 16,084,025 | 不可删——两份 RIFE 副本持有不同提交 |
+| `04-证据日志-logs/` | 24 | 30,549 | 可删——纯文本日志，价值最低，但仅 30 KB |
+| 合计 | **7,249** | **1,365,665,293** | 不含归档根 `README.md` 自身 |
+
+**闸门基线刻意未动**：`Desktop/ae-kv-inventory-20260830/`（15 文件 / 181,990 字节，含 `manifest.txt` 166,779 字节与 14 个 08-30 探针日志）留在桌面原位未归档——`verify_worktree_inventory.sh` 的 `BASE_DEFAULT` 硬编码指向该 `manifest.txt`，移走会静默破坏闸门默认调用。整理后重算 sha256 为 `e78224406b2d944b58c7d5ab316d0cb382d36798d522528ea9882d07d219fdfc`，与本文先前记录一致，基线未损坏。
+
+**两处自查抓到的文档缺陷（已修）**：① 归档根 `README.md` 会被自己的清点命令计数，造成"文档一改数字就失效"——改为只排除顶层 `./README.md`，并给出可复跑的复核命令块。② 复核命令初版写成 `find . -type f ! -name README.md`，实测返回 7,225 文件 / 1,365,565,495 字节，与文档标的 7,249 / 1,365,665,293 不符；逐一列出所有 `README.md` 后发现**归档内部还有 24 个来自被存档仓库的同名 README**，`-name` 把它们一起误排了。改成路径锚定的 `! -path ./README.md` 后命令恰好复现文档数字。教训：**排除"我自己"必须用路径锚定，不能用文件名匹配**——同名文件在被存档的树里很常见。
+
+**一处事实纠正**：本文此前把 `03-测试副本-testcopies/ae-kv-amtest-20260829/` 描述为 rife 的 git 历史"仅存副本"，暗示另一份是冗余。实测两份 `ae-kv-amtest-*` 各有 76 文件 / 8,021,755 字节但 HEAD 不同（`02932008…` 与 `ce7d7397…`），交叉 `git cat-file -t` 双向失败，共同祖先才是 gitlink OID `a1ad751a1849bfe851f8c53dd4b4115a2c0ec7e2`——**两份合起来才是仅存副本，任何一份都不是可删的冗余**。该结论已同步写进归档 README 与本文"仍可能的恢复途径"段。
 
 
 ## 2026-08-26 里程碑
