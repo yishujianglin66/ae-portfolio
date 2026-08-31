@@ -543,7 +543,19 @@ bash scripts/verify_worktree_inventory.sh    # RESULT: PASS 且 missing=0（撤�
 
 `项目全面扫描分析报告.html` 的 HTML 渲染内容**在任何可用本地来源中均不可恢复**。该文件是并行会话在工作树中直接生成的未跟踪产物，从未进入 git 索引、从未被任何工具写入会话转录、未被 stash 捕获。Markdown  twin `FULL_PROJECT_SCAN_ANALYSIS.md` 是扫描报告内容的唯一权威存留副本。
 
-唯一剩余恢复可能性为用户侧操作：提权终端执行 `vssadmin list shadows` 查询卷影副本，或检查 File History / 回收站。
+~~唯一剩余恢复可能性为用户侧操作：提权终端执行 `vssadmin list shadows` 查询卷影副本，或检查 File History / 回收站。~~ → 已于 2026-08-31 全部执行完毕，结果见下方补记：**三条通道全为负面，恢复调查正式闭环，无任何剩余通道**。
+
+### 补记（2026-08-31）：OS 级恢复通道（卷影副本 / 回收站 / 文件历史）穷尽核查——全部负面
+
+前文的五条通道均属 git/会话转录层。2026-08-31 按用户指示对操作系统层的三条剩余通道逐一执行核查，结果全部为负面：
+
+| # | 通道 | 方法 | 结果 |
+|---|------|------|------|
+| 6 | VSS 卷影副本 | 提权运行 `vssadmin list shadows` 与 `vssadmin list shadowstorage`（普通权限被拒后以 UAC 提权子进程写文件回读） | **"找不到满足查询的项目"×2**——本机不存在任何卷影副本，也没有任何卷配置了卷影存储关联 |
+| 7 | 回收站 | Shell.Application COM 枚举回收站全部项目并按文件名匹配 | **4,935 项全量枚举，0 命中**——目标文件不在回收站（与"删除走 shell 命令、绕过回收站"的推断一致） |
+| 8 | 文件历史（File History） | 检查本地目录 `%LOCALAPPDATA%\Microsoft\Windows\FileHistory` 与注册表 `HKCU\...\FileHistory` | 本地目录**不存在**；注册表键下仅有空的 RestoreUI 子键、无任何配置值——文件历史**从未启用** |
+
+**最终结论（2026-08-31 起生效，八通道全负面）**：`项目全面扫描分析报告.html` 的 HTML 渲染内容在本机一切来源中均确认不可恢复——既不在 git 层（索引/提交/悬空 blob/stash/转录），也不在 OS 层（卷影副本/回收站/文件历史）。该文件的报告内容以 Markdown twin `FULL_PROJECT_SCAN_ANALYSIS.md`（5,863 字节，HEAD/工作树/快照三份一致）为唯一权威存留。若日后可视化呈现有需要，可从该 Markdown 重新渲染生成 HTML，不再追索原文件。
 
 
 ## 2026-08-26 里程碑
