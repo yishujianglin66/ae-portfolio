@@ -65,7 +65,7 @@ class AnimeCameraClassifier:
         self.schema = "fine" if len(self.labels) >= 8 else "coarse"
         if thresholds_path is None:
             thresholds_path = str(Path(lora_dir) / "thresholds_tuned.json")
-        self.thresholds = self._load_thresholds(thresholds_path)
+        self.thresholds = self._load_thresholds(thresholds_path, self.labels)
         self._model = None
         self._device = None
 
@@ -81,15 +81,35 @@ class AnimeCameraClassifier:
         return COARSE_LABELS
 
     @staticmethod
-    def _load_thresholds(path: str) -> Dict[str, float]:
+    def _load_thresholds(path: str, labels: List[str]) -> Optional[Dict[str, float]]:
+        """加载逐类阈值; 不可用时返回 None 表示"不做门控", 绝不伪造默认值。
+
+        伪造默认值会静默退化: 粗类键对 fine 10 类是空交集, 十个标签会共用
+        硬编码 0.4, 看起来"已校准"实际什么都没校。
+        """
         p = Path(path)
-        if p.exists():
-            try:
-                data = json.loads(p.read_text(encoding="utf-8"))
-                return {k: float(v) for k, v in data.get("thresholds", {}).items()}
-            except (json.JSONDecodeError, OSError):
-                pass
-        return {"Static": 0.5, "Motion": 0.45, "Pull": 0.15, "Push": 0.45}
+        if not p.exists():
+            logger.warning("阈值侧车缺失, 禁用逐类门控 (退化为 argmax): %s", p)
+            return None
+        try:
+            raw = json.loads(p.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning("阈值侧车不可解析, 禁用逐类门控: %s (%s)", p, exc)
+            return None
+        data = raw.get("thresholds") if isinstance(raw, dict) else None
+        if not isinstance(data, dict):
+            logger.warning("阈值侧车缺少 thresholds 字典, 禁用逐类门控: %s", p)
+            return None
+        try:
+            table = {str(k): float(v) for k, v in data.items()}
+        except (TypeError, ValueError) as exc:
+            logger.warning("阈值侧车取值非数值, 禁用逐类门控: %s (%s)", p, exc)
+            return None
+        missing = [l for l in labels if l not in table]
+        if missing:
+            logger.warning("阈值侧车未覆盖标签 %s, 禁用逐类门控: %s", missing, p)
+            return None
+        return table
 
     def _ensure_model(self) -> bool:
         """懒加载模型 (GPU 可用时), 失败返回 False 走降级。
@@ -171,12 +191,12 @@ class AnimeCameraClassifier:
         probs = torch.softmax(logits, dim=-1).cpu().numpy()
 
         # 阈值化: 高于阈值的类取概率最大者, 全低于 → majority
-        thresh = np.array([self.thresholds.get(l, 0.4) for l in self.labels])
-        above = np.where(probs >= thresh)[0]
-        if len(above) == 0:
+        if self.thresholds is None:
             pred = int(probs.argmax())
         else:
-            pred = int(above[np.argmax(probs[above])])
+            thresh = np.array([self.thresholds[l] for l in self.labels])
+            above = np.where(probs >= thresh)[0]
+            pred = int(probs.argmax()) if len(above) == 0 else int(above[np.argmax(probs[above])])
         return {"label": self.labels[pred],
                 "confidence": float(probs[pred]),
                 "probs": {self.labels[i]: float(probs[i]) for i in range(len(self.labels))}}

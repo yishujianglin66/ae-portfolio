@@ -110,24 +110,38 @@ class TestThresholdLoading:
 
         from models.anime_camera_classifier import AnimeCameraClassifier
 
-        loaded = AnimeCameraClassifier._load_thresholds(str(thresh_file))
+        labels = ["Static", "Motion", "Pull", "Push"]
+        loaded = AnimeCameraClassifier._load_thresholds(str(thresh_file), labels)
 
+        assert loaded is not None
         assert loaded["Static"] == 0.55
         assert loaded["Motion"] == 0.48
         assert loaded["Pull"] == 0.20
         assert loaded["Push"] == 0.42
 
-    def test_thresholds_fallback_on_missing_file(self):
-        """阈值文件缺失时必须使用默认值。"""
+    def test_thresholds_none_on_missing_file(self):
+        """阈值文件缺失时必须返回 None（不做门控），禁止伪造默认值。"""
         from models.anime_camera_classifier import AnimeCameraClassifier
 
-        loaded = AnimeCameraClassifier._load_thresholds("/nonexistent/path/thresholds.json")
+        loaded = AnimeCameraClassifier._load_thresholds(
+            "/nonexistent/path/thresholds.json", ["Static", "Motion", "Pull", "Push"])
 
-        # 验证默认阈值
-        assert loaded["Static"] == 0.5
-        assert loaded["Motion"] == 0.45
-        assert loaded["Pull"] == 0.15
-        assert loaded["Push"] == 0.45
+        assert loaded is None
+
+    def test_thresholds_none_on_incomplete_coverage(self, tmp_path):
+        """侧车未覆盖全部标签时必须返回 None，不得让未覆盖类共用一个阈值。"""
+        thresh_file = tmp_path / "coarse_vs_fine.json"
+        coarse = {"thresholds": {"Static": 0.55, "Motion": 0.48,
+                                 "Pull": 0.20, "Push": 0.42}}
+        thresh_file.write_text(json.dumps(coarse), encoding="utf-8")
+
+        from models.anime_camera_classifier import AnimeCameraClassifier
+
+        fine_labels = ["static", "pan_left", "pan_right", "tilt_up", "tilt_down",
+                       "zoom_in", "zoom_out", "push", "zoom_back", "orbit"]
+        loaded = AnimeCameraClassifier._load_thresholds(str(thresh_file), fine_labels)
+
+        assert loaded is None
 
 
 # ============================================================================
