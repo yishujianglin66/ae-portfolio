@@ -2,8 +2,9 @@
 
 两级架构 (Step 4 最终方案):
   L1: VideoMAE-LoRA 粗分类 (4 类: Static/Motion/Pull/Push) + 逐类调优阈值
-  L2: 粗类为 Motion 时, 用光流规则细分方向 (pan_left/pan_right/tilt/orbit)
-  → 输出项目 CAMERA_LABELS (13 类) 之一 + 置信度
+  L2: 粗类为 Motion 时, 用光流规则细分方向 (pan_left/pan_right/tilt/zoom)
+  → 输出 v2 分类法 7 类: static / zoom_in / zoom_out / pan_left / pan_right / tilt_up / tilt_down
+    (旧 push→zoom_in, zoom_back→zoom_out, orbit 废除按主导方向归类)
 
 接入点: ai/camera_decision.py SourceCameraInventory.inject()
 降级链: LoRA(GPU) → 光流规则(CPU) → unknown
@@ -30,9 +31,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 logger = logging.getLogger(__name__)
 
 MODEL_DIR = r"D:\AE-Data\Models\VideoMAE-MovieShots\movement"
-# 生产默认: v3b (fine 10 类, 粗4类口径 0.7729 > v1 0.7172, 直接输出方向无需光流细分)
+# 生产默认: v3b (fine 10 类 → v2 合并为 7 类口径, 粗4类口径 0.7729 > v1 0.7172, 直接输出方向无需光流细分)
 DEFAULT_LORA_DIR = str(PROJECT_ROOT / "models" / "output" / "anime_camera_lora_v3")
-DEFAULT_THRESHOLDS = str(PROJECT_ROOT / "models" / "output" / "thresholds_tuned.json")
 
 NUM_FRAMES = 16
 IMG_SIZE = 224
@@ -41,15 +41,18 @@ STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
 COARSE_LABELS = ["Static", "Motion", "Pull", "Push"]
 
-# Motion 粗类 → 光流规则方向 → 项目标签
+# Motion 粗类 → 光流规则方向 → v2 项目标签 (7 类)
 RULE_TO_PROJECT = {
     "static": "static",
     "pan_left": "pan_left", "pan_right": "pan_right",
     "tilt_up": "tilt_up", "tilt_down": "tilt_down",
     "zoom_in": "zoom_in", "zoom_out": "zoom_out",
-    "zoom_back": "zoom_back", "diag_pan": "diag_pan",
-    "orbit": "orbit", "push": "push",
-    "complex": "complex", "unknown": "pan_left",
+    "push": "zoom_in",        # v2: push 并入 zoom_in
+    "zoom_back": "zoom_out",  # v2: zoom_back 并入 zoom_out
+    "orbit": "unsure",        # v2: orbit 废除, 无主导方向 → unsure
+    "diag_pan": "pan_left",   # v2: 对角线 pan 按主导方向, 默认 pan_left
+    "complex": "unsure",      # v2: 复合运动无法归一 → unsure
+    "unknown": "pan_left",    # 降级兜底, 保持原行为
 }
 
 
@@ -71,20 +74,24 @@ class AnimeCameraClassifier:
 
     def _load_meta_labels(self) -> List[str]:
         meta = Path(self.lora_dir) / "meta.json"
-        if meta.exists():
-            try:
-                data = json.loads(meta.read_text(encoding="utf-8"))
-                if isinstance(data.get("labels"), list):
-                    return [str(x) for x in data["labels"]]
-            except (json.JSONDecodeError, OSError):
-                pass
-        return COARSE_LABELS
+        if not meta.exists():
+            logger.warning("meta.json not found at %s, falling back to COARSE_LABELS", meta)
+            return COARSE_LABELS
+        try:
+            data = json.loads(meta.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning("Failed to parse meta.json at %s: %s", meta, exc)
+            return COARSE_LABELS
+        if not isinstance(data.get("labels"), list):
+            logger.warning("meta.json at %s missing 'labels' list, falling back to COARSE_LABELS", meta)
+            return COARSE_LABELS
+        return [str(x) for x in data["labels"]]
 
     @staticmethod
     def _load_thresholds(path: str, labels: List[str]) -> Optional[Dict[str, float]]:
         """加载逐类阈值; 不可用时返回 None 表示"不做门控", 绝不伪造默认值。
 
-        伪造默认值会静默退化: 粗类键对 fine 10 类是空交集, 十个标签会共用
+        伪造默认值会静默退化: 粗类键对 v2 7 类是空交集, 七个标签会共用
         硬编码 0.4, 看起来"已校准"实际什么都没校。
         """
         p = Path(path)

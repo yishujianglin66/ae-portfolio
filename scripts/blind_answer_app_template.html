@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>运镜盲测作答（第三轮）· 7 类分类法 v2 · Blind Gold</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --panel: #131722;
+    --panel-2: #1a2030;
+    --line: #232b3d;
+    --text: #e6e9f0;
+    --muted: #8a93a6;
+    --accent: #4f8cff;
+    --gold: #ffd166;
+    --ok: #3ddc84;
+    --warn: #ffb454;
+    --bad: #ff5c5c;
+    --radius: 14px;
+    --font: "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+    --mono: "Cascadia Code", Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(1200px 700px at 50% -10%, #141b2c 0%, var(--bg) 55%) fixed, var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    display: flex; flex-direction: column;
+    min-height: 100vh;
+    user-select: none;
+  }
+  /* ---------- header ---------- */
+  header {
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px 26px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(11,14,20,.72);
+    backdrop-filter: blur(8px);
+    position: sticky; top: 0; z-index: 30;
+  }
+  header h1 { font-size: 17px; font-weight: 700; letter-spacing: .5px; }
+  header h1 span { color: var(--accent); }
+  .blind-badge {
+    font-size: 11px; color: var(--gold);
+    border: 1px solid rgba(255,209,102,.35);
+    background: rgba(255,209,102,.08);
+    padding: 3px 9px; border-radius: 99px; letter-spacing: .4px;
+  }
+  .spacer { flex: 1; }
+  .round-toggle {
+    display: flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+  }
+  .round-toggle button {
+    background: transparent; color: var(--muted); border: 0;
+    padding: 7px 16px; font-size: 13px; cursor: pointer; font-family: var(--font);
+    transition: all .15s ease;
+  }
+  .round-toggle button.active { background: var(--accent); color: #fff; font-weight: 600; }
+  .progress-text { font-size: 13px; color: var(--muted); font-family: var(--mono); min-width: 128px; text-align: right; }
+  .progress-text b { color: var(--text); font-size: 15px; }
+  /* ---------- progress bar ---------- */
+  .progress-bar { height: 3px; background: var(--line); }
+  .progress-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--ok)); transition: width .3s ease; }
+  /* ---------- stage ---------- */
+  main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 26px 20px 12px; gap: 18px; }
+  .stage {
+    position: relative;
+    background: #000;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 22px 60px rgba(0,0,0,.55), 0 0 0 6px rgba(255,255,255,.015);
+    overflow: hidden;
+    line-height: 0;
+  }
+  .stage img { display: block; width: min(720px, 88vw); border-radius: calc(var(--radius) - 1px); }
+  .stage .pos-tag {
+    position: absolute; top: 10px; left: 12px;
+    font-family: var(--mono); font-size: 11px; line-height: 1;
+    color: rgba(230,233,240,.85);
+    background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.12);
+    padding: 5px 8px; border-radius: 7px; letter-spacing: .3px;
+  }
+  .stage .answered-tag {
+    position: absolute; top: 10px; right: 12px;
+    font-size: 11px; line-height: 1;
+    padding: 5px 9px; border-radius: 7px; display: none;
+    background: rgba(61,220,132,.16); color: var(--ok); border: 1px solid rgba(61,220,132,.4);
+  }
+  .stage .answered-tag.unsure { background: rgba(255,180,84,.14); color: var(--warn); border-color: rgba(255,180,84,.4); }
+  /* ---------- label deck ---------- */
+  .deck { width: min(920px, 94vw); }
+  .deck-title { font-size: 12px; color: var(--muted); letter-spacing: 2px; margin-bottom: 10px; text-align: center; }
+  .rules {
+    font-size: 11.5px; color: var(--muted); line-height: 1.75; text-align: left;
+    background: rgba(79,140,255,.05); border: 1px solid var(--line);
+    border-radius: 9px; padding: 8px 13px; margin-bottom: 10px;
+  }
+  .rules b { color: var(--gold); font-weight: 600; }
+  .labels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+  .lbl {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    padding: 9px 8px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: transform .08s ease, border-color .12s ease, background .12s ease;
+    overflow: hidden;
+  }
+  .lbl:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .lbl.selected { border-color: var(--ok); background: rgba(61,220,132,.10); }
+  .lbl.selected-unsure { border-color: var(--warn); background: rgba(255,180,84,.10); }
+  .lbl .dot { position: absolute; top: 8px; left: 9px; width: 7px; height: 7px; border-radius: 50%; }
+  .lbl kbd {
+    position: absolute; top: 6px; right: 8px;
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px;
+  }
+  .lbl .zh { display: block; font-size: 14.5px; font-weight: 600; margin-top: 6px; }
+  .lbl .en { display: block; font-size: 10.5px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+  .lbl.unsure { grid-column: span 4; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 9px; }
+  .lbl.unsure .zh { margin-top: 0; }
+  /* ---------- footer ---------- */
+  footer {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 12px 26px 16px;
+    border-top: 1px solid var(--line);
+    background: rgba(11,14,20,.72);
+  }
+  .btn {
+    background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 9px;
+    padding: 8px 15px; font-size: 13px; cursor: pointer; font-family: var(--font);
+    transition: all .12s ease;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .btn.primary:hover { filter: brightness(1.12); }
+  .btn kbd { font-family: var(--mono); font-size: 10px; opacity: .75; border: 1px solid rgba(255,255,255,.25); border-radius: 4px; padding: 0 4px; margin-left: 5px; }
+  .hint { font-size: 11.5px; color: var(--muted); margin-left: auto; letter-spacing: .2px; }
+  /* ---------- overview overlay ---------- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(6,8,12,.94); backdrop-filter: blur(6px);
+    display: none; flex-direction: column; padding: 26px 30px;
+  }
+  .overlay.open { display: flex; }
+  .overlay h2 { font-size: 15px; margin-bottom: 4px; }
+  .overlay p { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .ov-grid {
+    flex: 1; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;
+    align-content: start;
+  }
+  .ov-cell { position: relative; border-radius: 9px; overflow: hidden; cursor: pointer; border: 2px solid transparent; background: var(--panel); transition: border-color .1s; }
+  .ov-cell:hover { border-color: var(--accent); }
+  .ov-cell.done { border-color: rgba(61,220,132,.65); }
+  .ov-cell.unsure { border-color: rgba(255,180,84,.7); }
+  .ov-cell.current { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,140,255,.25); }
+  .ov-cell img { width: 100%; display: block; }
+  .ov-cell .tag {
+    position: absolute; left: 5px; bottom: 5px;
+    font-family: var(--mono); font-size: 10px; color: #fff;
+    background: rgba(0,0,0,.6); padding: 2px 5px; border-radius: 4px;
+  }
+  /* ---------- toast ---------- */
+  #toast {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    padding: 10px 20px; border-radius: 10px; font-size: 13px;
+    opacity: 0; pointer-events: none; transition: all .22s ease; z-index: 99;
+    box-shadow: 0 10px 30px rgba(0,0,0,.5);
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.ok { border-color: rgba(61,220,132,.5); }
+  #toast.warn { border-color: rgba(255,180,84,.5); }
+  @media (max-width: 720px) {
+    .labels { grid-template-columns: repeat(3, 1fr); }
+    .lbl.unsure { grid-column: span 3; }
+    header { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>运镜盲测作答 <span>Blind Gold · 第三轮</span></h1>
+  <div class="blind-badge">盲测纪律 · 7 类分类法 v2 · 模型预测已完全隐藏</div>
+  <div class="spacer"></div>
+  <div class="round-toggle">
+    <button id="round3" class="active">第三轮</button>
+    <button id="round4">第四轮（复核·可选）</button>
+  </div>
+  <div class="progress-text"><b id="doneCount">0</b>/__TOTAL__ 已答 <span id="unsureCount"></span></div>
+</header>
+<div class="progress-bar"><i id="barFill"></i></div>
+
+<main>
+  <div class="stage">
+    <img id="gif" alt="镜头片段">
+    <div class="pos-tag" id="posTag"></div>
+    <div class="answered-tag" id="answeredTag"></div>
+  </div>
+  <div class="deck">
+    <div class="deck-title">判定该镜头的主摄影机运动（数字键 / 点击）· 拿不准就选「无法确定」</div>
+    <div class="rules">
+      <b>v2 判定规则</b> — ① 画面任何程度的<b>放大</b>（再慢也算）= 推近，任何缩小 = 拉远；完全不动才选静止；
+      ② 旧「推进」并入推近、「后拉」并入拉远；
+      ③ 环绕不再单列：按主导方向归类，纯环绕无明显方向 → 无法确定；
+      ④ 摇镜与缩放并存时，选幅度更强者。
+    </div>
+    <div class="labels" id="labels"></div>
+  </div>
+</main>
+
+<footer>
+  <button class="btn" id="prevBtn">← 上一个 <kbd>←</kbd></button>
+  <button class="btn" id="nextBtn">下一个 → <kbd>→</kbd></button>
+  <button class="btn" id="replayBtn">重播 <kbd>空格</kbd></button>
+  <button class="btn" id="gridBtn">总览 <kbd>G</kbd></button>
+  <button class="btn primary" id="exportBtn">导出本轮答案 <kbd>E</kbd></button>
+  <div class="hint">答案实时保存于浏览器本地（localStorage），导出后交给 score_blind_gold.py 回填评分</div>
+</footer>
+
+<div class="overlay" id="overlay">
+  <h2>总览 · 第 <span id="ovRound">3</span> 轮</h2>
+  <p>绿框=已答 · 橙框=无法确定 · 蓝框=当前 · 点击任意缩略图跳转，G / ESC 关闭</p>
+  <div class="ov-grid" id="ovGrid"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+const MANIFEST = __MANIFEST__;
+const TOTAL = __TOTAL__;
+const BUILD = "__BUILD__";
+
+const LABELS = [
+  { key: "1", id: "static",    zh: "静止",     en: "static",    color: "#8a93a6" },
+  { key: "2", id: "zoom_in",   zh: "推近",     en: "zoom_in",   color: "#4f8cff" },
+  { key: "3", id: "zoom_out",  zh: "拉远",     en: "zoom_out",  color: "#38c4dd" },
+  { key: "4", id: "pan_left",  zh: "左摇",     en: "pan_left",  color: "#3ddc84" },
+  { key: "5", id: "pan_right", zh: "右摇",     en: "pan_right", color: "#9edb4f" },
+  { key: "6", id: "tilt_up",   zh: "上摇",     en: "tilt_up",   color: "#ffd166" },
+  { key: "7", id: "tilt_down", zh: "下摇",     en: "tilt_down", color: "#ff9e64" },
+  { key: "U", id: "unsure",    zh: "无法确定", en: "unsure",    color: "#ff5c5c" }
+];
+const LABEL_IDS = LABELS.map(l => l.id);
+const LS_KEY = "blind_gold_r3_taxonomy2";
+
+const state = { round: 3, idx: 0, answers: { 3: {}, 4: {} }, seeds: {}, orders: {} };
+let memOnly = false;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      Object.assign(state.answers, saved.answers || {});
+      Object.assign(state.seeds, saved.seeds || {});
+      Object.assign(state.orders, saved.orders || {});
+      if (saved.round) state.round = saved.round;
+    }
+  } catch (e) { memOnly = true; }
+}
+function saveState() {
+  if (memOnly) return;
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      answers: state.answers, seeds: state.seeds, orders: state.orders, round: state.round
+    }));
+  } catch (e) { memOnly = true; toast("警告：浏览器禁止本地存储，答案仅在本页内存中，请及时导出！", "warn"); }
+}
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function ensureOrder(round) {
+  if (state.orders[round] && state.orders[round].length === TOTAL) return;
+  if (!state.seeds[round]) state.seeds[round] = (Date.now() ^ (round * 7919)) % 1000000007;
+  const rnd = mulberry32(state.seeds[round]);
+  const order = Array.from({ length: TOTAL }, (_, i) => i);
+  for (let i = TOTAL - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  state.orders[round] = order;
+}
+function current() { return MANIFEST[state.orders[state.round][state.idx]]; }
+function answeredCount(round) { return Object.keys(state.answers[round]).length; }
+function unsureCount(round) { return Object.values(state.answers[round]).filter(v => v === "unsure").length; }
+
+function toast(msg, cls) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "show " + (cls || "");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.className = "", 1900);
+}
+
+function renderDeck() {
+  const wrap = document.getElementById("labels");
+  wrap.innerHTML = "";
+  const cur = current();
+  const sel = state.answers[state.round][cur.shot_id];
+  LABELS.forEach(l => {
+    const d = document.createElement("div");
+    d.className = "lbl" + (l.id === "unsure" ? " unsure" : "");
+    if (sel === l.id) d.className += l.id === "unsure" ? " selected-unsure" : " selected";
+    d.innerHTML =
+      (l.id === "unsure" ? "" : `<i class="dot" style="background:${l.color}"></i>`) +
+      `<kbd>${l.key}</kbd><span class="zh">${l.zh}</span>` +
+      (l.id === "unsure" ? "" : `<span class="en">${l.en}</span>`);
+    d.onclick = () => answer(l.id);
+    wrap.appendChild(d);
+  });
+}
+
+function render() {
+  const cur = current();
+  const img = document.getElementById("gif");
+  img.src = "gifs/" + cur.gif;
+  document.getElementById("posTag").textContent =
+    `#${String(cur.index).padStart(3, "0")} · ${cur.shot_id} · 第 ${state.idx + 1}/${TOTAL} 个（乱序）`;
+  const sel = state.answers[state.round][cur.shot_id];
+  const tag = document.getElementById("answeredTag");
+  if (sel) {
+    const meta = LABELS.find(l => l.id === sel);
+    tag.textContent = "已答：" + meta.zh;
+    tag.className = "answered-tag" + (sel === "unsure" ? " unsure" : "");
+    tag.style.display = "block";
+  } else { tag.style.display = "none"; }
+  document.getElementById("doneCount").textContent = answeredCount(state.round);
+  const uc = unsureCount(state.round);
+  document.getElementById("unsureCount").textContent = uc ? `（含 ${uc} 个无法确定）` : "";
+  document.getElementById("barFill").style.width = (answeredCount(state.round) / TOTAL * 100) + "%";
+  document.getElementById("round3").className = state.round === 3 ? "active" : "";
+  document.getElementById("round4").className = state.round === 4 ? "active" : "";
+  renderDeck();
+}
+
+function replay() {
+  const img = document.getElementById("gif");
+  const src = img.src;
+  img.removeAttribute("src");
+  void img.offsetWidth;
+  img.src = src;
+}
+
+function answer(label) {
+  const cur = current();
+  state.answers[state.round][cur.shot_id] = label;
+  saveState();
+  render();
+  toast(label === "unsure" ? "已记录：无法确定" : "已记录：" + LABELS.find(l => l.id === label).zh, label === "unsure" ? "warn" : "ok");
+  setTimeout(() => {
+    for (let step = 1; step <= TOTAL; step++) {
+      const nextIdx = (state.idx + step) % TOTAL;
+      const item = MANIFEST[state.orders[state.round][nextIdx]];
+      if (!state.answers[state.round][item.shot_id]) {
+        state.idx = nextIdx; render(); replay(); return;
+      }
+    }
+    toast(`第 ${state.round} 轮全部作答完成！点「导出本轮答案」交回评分`, "ok");
+  }, 320);
+}
+
+function move(delta) {
+  state.idx = (state.idx + delta + TOTAL) % TOTAL;
+  render(); replay();
+}
+function jumpTo(orderIdx) {
+  state.idx = orderIdx;
+  closeOverlay(); render(); replay();
+}
+
+function exportRound() {
+  const round = state.round;
+  const ans = state.answers[round];
+  const rows = [["index", "shot_id", "human_direction"]];
+  let n = 0;
+  MANIFEST.forEach(it => {
+    if (ans[it.shot_id]) { rows.push([it.index, it.shot_id, ans[it.shot_id]]); n++; }
+  });
+  if (n === 0) { toast("本轮还没有任何答案", "warn"); return; }
+  const csv = "\uFEFF" + rows.map(r => r.join(",")).join("\r\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `blind_gold_round${round}_answers.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast(`已导出 ${n}/${TOTAL} 条（第 ${round} 轮）→ 交给 score_blind_gold.py import`, "ok");
+}
+
+function openOverlay() {
+  const grid = document.getElementById("ovGrid");
+  grid.innerHTML = "";
+  document.getElementById("ovRound").textContent = state.round;
+  state.orders[state.round].forEach((mi, orderIdx) => {
+    const it = MANIFEST[mi];
+    const cell = document.createElement("div");
+    const ans = state.answers[state.round][it.shot_id];
+    cell.className = "ov-cell" + (ans === "unsure" ? " unsure" : ans ? " done" : "") + (orderIdx === state.idx ? " current" : "");
+    cell.innerHTML = `<img loading="lazy" src="gifs/${it.gif}"><span class="tag">#${String(it.index).padStart(3, "0")}</span>`;
+    cell.onclick = () => jumpTo(orderIdx);
+    grid.appendChild(cell);
+  });
+  document.getElementById("overlay").classList.add("open");
+}
+function closeOverlay() { document.getElementById("overlay").classList.remove("open"); }
+
+function setRound(r) {
+  state.round = r; ensureOrder(r); state.idx = 0; saveState(); render(); replay();
+  toast(`已切换到第 ${r} 轮（独立乱序，答案分开记录）`);
+}
+
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+  const k = e.key.toUpperCase();
+  const hit = LABELS.find(l => l.key === k);
+  if (hit) { e.preventDefault(); answer(hit.id); return; }
+  switch (e.key) {
+    case "ArrowLeft": e.preventDefault(); move(-1); break;
+    case "ArrowRight": e.preventDefault(); move(1); break;
+    case " ": e.preventDefault(); replay(); break;
+    case "e": case "E": exportRound(); break;
+    case "Escape": closeOverlay(); break;
+    case "g": case "G":
+      document.getElementById("overlay").classList.contains("open") ? closeOverlay() : openOverlay();
+      break;
+  }
+});
+
+document.getElementById("prevBtn").onclick = () => move(-1);
+document.getElementById("nextBtn").onclick = () => move(1);
+document.getElementById("replayBtn").onclick = replay;
+document.getElementById("gridBtn").onclick = openOverlay;
+document.getElementById("exportBtn").onclick = exportRound;
+document.getElementById("round3").onclick = () => setRound(3);
+document.getElementById("round4").onclick = () => setRound(4);
+
+loadState();
+ensureOrder(3); ensureOrder(4);
+if (memOnly) toast("警告：本地存储不可用，请作答后立即导出！", "warn");
+render();
+</script>
+</body>
+</html>

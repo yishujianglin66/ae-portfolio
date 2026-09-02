@@ -148,6 +148,7 @@ data/stock_footage/
 data/artifacts/
 data/llm_key_status.json
 data/last_run_stats.json
+data/llm_chain_state.json
 
 # ============================================================
 # Python 类型检查缓存
