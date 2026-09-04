@@ -22,26 +22,26 @@ ROOT = Path(__file__).resolve().parent.parent
 RECIPES = {
     "bloom":    {"m": "ADBE Glo2", "ps": [("ADBE Glo2-0002", 0.80),
                                           ("ADBE Glo2-0003", 6),
-                                          ("ADBE Glo2-0004", 0.22)], "env": False},
+                                          ("ADBE Glo2-0004", 0.38)], "env": False},
     "bloom_soft": {"m": "ADBE Glo2", "ps": [("ADBE Glo2-0002", 0.85),
                                             ("ADBE Glo2-0003", 5),
-                                            ("ADBE Glo2-0004", 0.16)], "env": False},
-    "bokeh":    {"m": "RWB Fast Bokeh", "ps": [("RWB Fast Bokeh-0001", 1.0)], "env": False},
-    "badtv":    {"m": "GUTS BadTV", "ps": [("GUTS BadTV-0001", 2.5)], "env": True},
-    "badtv_light": {"m": "GUTS BadTV", "ps": [("GUTS BadTV-0001", 1.5)], "env": True},
-    "badtv_hard": {"m": "GUTS BadTV", "ps": [("GUTS BadTV-0001", 6.0)], "env": True},
-    "fmb":      {"m": "CC Force Motion Blur", "ps": [("CC Force Motion Blur-0001", 18)], "env": False},
-    "fmb_light": {"m": "CC Force Motion Blur", "ps": [("CC Force Motion Blur-0001", 14)], "env": False},
+                                            ("ADBE Glo2-0004", 0.26)], "env": False},
+    "bokeh":    {"m": "RWB Fast Bokeh", "ps": [("RWB Fast Bokeh-0001", 2.0)], "env": False},
+    "badtv":    {"m": "GUTS BadTV", "ps": [("GUTS BadTV-0001", 9.0)], "env": True},
+    "badtv_light": {"m": "GUTS BadTV", "ps": [("GUTS BadTV-0001", 4.0)], "env": True},
+    "badtv_hard": {"m": "GUTS BadTV", "ps": [("GUTS BadTV-0001", 13.0)], "env": True},
+    "fmb":      {"m": "CC Force Motion Blur", "ps": [("CC Force Motion Blur-0001", 28)], "env": False},
+    "fmb_light": {"m": "CC Force Motion Blur", "ps": [("CC Force Motion Blur-0001", 22)], "env": False},
     "glitch":   {"m": "AESweetsGlitch7in1", "ps": [], "env": False},
-    "radial":   {"m": "CC Radial Fast Blur", "ps": [("CC Radial Fast Blur-0002", 40)], "env": True},
-    "radial_soft": {"m": "CC Radial Fast Blur", "ps": [("CC Radial Fast Blur-0002", 18)], "env": True},
+    "radial":   {"m": "CC Radial Fast Blur", "ps": [("CC Radial Fast Blur-0002", 70)], "env": True},
+    "radial_soft": {"m": "CC Radial Fast Blur", "ps": [("CC Radial Fast Blur-0002", 35)], "env": True},
     # 转场冲击层 (顶层短层)
-    "burst_radial": {"m": "CC Radial Fast Blur", "ps": [("CC Radial Fast Blur-0002", 55)], "env": True},
-    "burst_badtv":  {"m": "GUTS BadTV", "ps": [("GUTS BadTV-0001", 2.0)], "env": True},
+    "burst_radial": {"m": "CC Radial Fast Blur", "ps": [("CC Radial Fast Blur-0002", 90)], "env": True},
+    "burst_badtv":  {"m": "GUTS BadTV", "ps": [("GUTS BadTV-0001", 4.5)], "env": True},
 }
 
-ENV_DECAY_S = 0.12   # 包络衰减时长 (~3帧@24fps)
-ENV_TAIL = 0.30      # 衰减后保持比例
+ENV_DECAY_S = 0.16   # 包络衰减时长 (~3帧@24fps)
+ENV_TAIL = 0.45      # 衰减后保持比例
 
 
 def _load_env():
@@ -101,7 +101,7 @@ def plan_effects(segs):
             elif spd >= 1.1:
                 fast_streak += 1
                 if fast_streak % 2 == 1:
-                    fx = ["fmb"]
+                    fx = ["radial_soft"] if fast_streak % 4 == 1 else ["fmb"]
             if fx and fx != ["fmb"]:
                 fast_streak = 0
         else:  # build
@@ -109,7 +109,7 @@ def plan_effects(segs):
                 build_fx_n += 1
                 cyc = build_fx_n % 4
                 if cyc == 1:
-                    fx = ["fmb_light"]
+                    fx = ["radial_soft"]
                 elif cyc == 3:
                     fx = ["badtv_light"] if en >= max(b_med, d_med * 0.9) else ["radial_soft"]
             elif spd <= 0.55:
@@ -142,7 +142,8 @@ def plan_bursts(plan, strong):
             if len(picked) >= cap:
                 break
         for t in picked:
-            bursts.append({"t0": round(t, 3), "t1": round(t + dur, 3),
+            t_eff = t + 0.13  # 闪帧后起爆 (v4.2: 落在纯色帧上的burst无效)
+            bursts.append({"t0": round(t_eff, 3), "t1": round(t_eff + dur, 3),
                            "fx": [rec], "dose": 1.0, "en": 1, "env": 1})
     return bursts
 
@@ -219,6 +220,13 @@ def main():
     pr = json.loads((run_dir / "production_report.json").read_text(encoding="utf-8"))
     segs = pr["script"]["segments"]
     plan = plan_effects(segs)
+    ov_p = ROOT / "tmp" / "dose_overrides.json"
+    if ov_p.exists():
+        ov = {float(k): v for k, v in json.loads(ov_p.read_text(encoding="utf-8")).items()}
+        for s in plan:
+            for kt, m in ov.items():
+                if abs(s["t0"] - kt) < 0.05:
+                    s["dose"] = round(min(s["dose"] * m, 3.5), 3)
     _, strong = _load_env()
     bursts = plan_bursts(plan, strong)
     from collections import Counter
