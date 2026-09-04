@@ -11,6 +11,10 @@
 run53 (30s 燃向, BGM=1_from10s.mp3) 已完成**第 6 版 AE 精修**并交付给用户预览:
 `output/unified_run53/run53_final.mp4` — 逐镜头分段 + 按镜头上插件 + 拍点包络 +
 光流感知选效果 + 13 个 Twixtor 光流慢镜, 验收闸门 7/7 全过。
+MASTER 合成 **95 层** = BASE 1 + 效果层 68 + TWX 慢镜层 13 + BURST 冲击层 13
+(AE 自报 `saved layers=95`, 证据 `tmp/ae_master_build.txt`)。
+闸门 7/7 证据: `data/evolution/render_history.jsonl` 末条 ts=2026-09-04 21:11:19,
+gate.pass=7/7, accepted=true。
 用户反馈中**未决问题: 有镜头重复使用了同一源片段(洛天依形象重复出现)**。
 
 ---
@@ -38,21 +42,27 @@ run53 (30s 燃向, BGM=1_from10s.mp3) 已完成**第 6 版 AE 精修**并交付�
 
 ```
 output/unified_run53/
-  run53_final.mp4            ← 当前交付版 = v6 镜头级精修 (AE MASTER 103层 + SFX音轨)
+  run53_final.mp4            ← 当前交付版 = v6 镜头级精修 (AE MASTER 95层 + SFX音轨)
   run53_final_v4.mp4         ← 存档: 你说"看不出变化"的那版 (平涂, 剂量低)
   run53_final_v43.mp4        ← 存档: 剂量闭环版
   run53_final_v5flow.mp4     ← 存档: 光流感知版
   run53_lut.mp4              ← 精修输入源 (已烘: 剪辑/变速/闪帧/转场/LUT调色/SFX音轨)
-  polish/master.aep          ← 当前 MASTER 工程 (BASE+76效果层+13冲击层+13 TWX层)
+  polish/master.aep          ← 当前 MASTER 工程 (95 层 = BASE + 68 效果 + 13 TWX + 13 BURST)
   polish/master.mp4          ← 无音轨精修视频 (音轨复用 run53_final.mp4 的)
-  polish/twx_src/*.mp4       ← Twixtor 源预裁件 (00-12)
+  polish/twx_src/*.mp4       ← Twixtor 源预裁件, **按 plan 索引命名**:
+                               当前 13 件 = 26/28/35/41/48/50/54/61/68/75/78/79/80.mp4;
+                               00-12.mp4 是 v6.1 早期命名遗留, 可删
   production_report.json     ← 引擎产出 (116 镜头剧本)
-  unified_report.json        ← 本次渲染报告
+  unified_report.json        ← ⚠ 17:51 时间戳 = v2 时代存档, 其 polish_note 仍写
+                               "AE Glow+Noise 全片叠加"(已废弃方案), **勿当 v6 证据**;
+                               v6 权威状态看 render_history.jsonl 末条 + §0 层数
 scripts/build_master_polish.py   ← ★核心构建器 (v6 版, 映射规则+JSX+桥执行+源预裁一体)
 ai/ae_render_channel.py          ← AE 桥通道 (polish_pass 已修 5 坑)
 tmp/music_envelope.json          ← BGM 谐波RMS包络+强鼓点 (61个)
 tmp/shot_motion.json             ← 116镜光流数据 (幅度+主方向)
-tmp/master_plan.json             ← 当前效果计划 (shots+bursts+twx)
+tmp/master_plan.json             ← 当前效果计划: 顶层仅 shots(81) + bursts(13);
+                                   twx 不是顶层键, 而是内嵌在 13 个 shot 条目里的
+                                   {src, sin, spd, zp} 字段
 tmp/dose_overrides.json          ← 剂量闭环覆盖表
 scripts/render_gate.py           ← 验收闸门 7 项
 scripts/harvest_experience.py    ← 经验收割 (data/evolution/render_history.jsonl)
@@ -67,17 +77,41 @@ render_gate 验收 → harvest 收割。
 ## 3. 未决问题: 镜头源素材重复 (用户最新反馈, 下一步 #1)
 
 **症状**: 用户指出多个镜头重复出现同一角色/画面 (洛天依)。
-**诊断 (已做)**: 116 镜中用到的源片段 (文件+source_start) 109 个, 其中 **6 个片段被复用,
-13 个镜头受影响**:
-- 独自升级5.mp4 @2.0s ×3 次 (落在 0.88s / 25.08s / 29.04s — 隔 24s 重复最明显)
-- 其余 5 片段 ×2 次 (4.46/23.5, 5.17/21.88, 6.58/20.0, 7.46/23.04, 1.92/21.42)
-- 源文件分布: 独自升级5.mp4×35, 猫2×19, 猫1×18, 初音×18, alya-05×10, 五条悟×8, 独自升级2×8
+**诊断 (已重算校正)**: 116 镜按 (同文件, source_start 距离 ≤0.5s) 聚类, 得
+**8 个复用簇、19 个镜头受影响** (前版本文档记的 6 簇/13 镜系漏算, 已纠正):
+
+| 源文件 @source_start | 次数 | 输出时刻(s) |
+|---|---|---|
+| 独自升级5.mp4 @232.01~232.17 | **×4** | 1.92, 21.42, 26.29, 29.67 |
+| 独自升级5.mp4 @2.0 | ×3 | 0.88, 25.08, 29.04 |
+| 独自升级5.mp4 @29.01/29.02 | ×2 | 5.17, 21.88 |
+| 独自升级5.mp4 @116.04/116.07 | ×2 | 2.83, 25.33 |
+| 独自升级5.mp4 @145.06/145.08 | ×2 | 6.58, 20.0 |
+| 独自升级5.mp4 @174.07/174.10 | ×2 | 4.46, 23.5 |
+| 独自升级5.mp4 @203.08/203.11 | ×2 | 7.46, 23.04 |
+| 猫2.mp4 @111.33/111.40 | ×2 | 12.54, 26.96 |
+
+- **最狠的两处**: @232.01 组四次 source_start 跨度仅 0.16s = **几乎逐帧相同的画面在 1.92/21.42/26.29/29.67s 出现 4 次**;
+  @2.0 组则是 0.88 / 25.08 / 29.04s 三次 (隔 24s 复现)。
+- **8 个簇里 7 个来自 独自升级5.mp4** — 该文件被选 35 次 (占 116 镜的 30%), 是重复的主要来源。
+- 源文件分布 (实测与本文档原记一致): 独自升级5×35, 猫2×19, 猫1×18, 初音×18, alya-05×10, 五条悟×8, 独自升级2×8。
+- **阈值口径**: 判重距离取 0.2s 或 0.5s 结果相同 (8 簇/19 镜); 取 1.0s 则 10 簇/23 镜。
+  建议修复采用 **0.5s** 口径 (更严), 便于覆盖"同一镜头轻微起点抖动"。
 **根因**: 素材库仅 7 个源文件要填 116 镜; 引擎 source alternation 只防**相邻**镜头同源,
 不防**全局**同片段复用。
-**技术方案 (供接手程序)**:
-1. 引擎源选择加"全局源片段去重"约束: 同一 (file, source_start±0.2s) 全片只许 1 次;
-   冲突时按 AI 语义相似度 (battle/fighting/closeup 分类) 换语义相近的其他源片段
-   (引擎已有 _get_semantic_windows 可复用)。
+**修复验收判据**: 重跑 unified_edit 后, 用同一 0.5s 口径复扫 production_report.json,
+复用簇数应为 **0**; 且 7 源文件中单文件占比不超过 ~25% (当前 独自升级5 为 30%)。
+**修复状态 (2026-09-04 代码已落地, 待重跑验证)**:
+已在 `ai/production_director.py` 新增 `_enforce_global_source_uniqueness`（`_plan` 末尾兜底调用）:
+① 全局同片段去重 (同 file+source_start≤0.5s 只留一次, 冲突先原位换起点、池耗尽才换源);
+② 单文件占比封顶 25% (超限镜头换到使用最少的其它源)。回归 `tests/test_global_source_dedup.py` 5/5 过;
+用 run53 真实 116 镜合成验证: 起帧调整 7 镜 + 换源 6 镜 → 簇数 0、占比 25.0% (独自升级5 35→29)。
+**仍需**: 重跑 unified_edit 重生成 production_report.json → `scan_source_dupes.py` 复扫确认 0 簇 → 重渲 AE 精修。
+**技术方案 (已实现)**:
+1. 引擎源选择加"全局源片段去重"约束 + 单文件占比封顶 (实现见上), 冲突时优先同文件异起点、
+   池耗尽才换源; 语义相似度换源 (_get_semantic_windows) 留待 #11 语义选效果一并接入。
+   改完用 `python -X utf8 scripts/scan_source_dupes.py output/unified_run53/production_report.json`
+   复扫, 输出须为 0 簇。
 2. 若素材池不够, 扩库 (用户机器有大量素材: D:\AE-Work\resources\video, D:\BaiduNetdiskDownload\AE新手10套\)。
 3. 快速缓解: 重复镜头可替换为同文件异起点 (偏移 >2s 画面通常已不同)。
 
@@ -203,6 +237,24 @@ python -c "from ai.ae_render_channel import AERenderChannel; print(AERenderChann
 5. **层2自进化** (等 20+ 样本): 参数寻优 + rhythm_reward 重训 (正负样本已积累);
    层3: N 变体自动竞争。经验在 data/evolution/render_history.jsonl。
 6. 素材库扩充脚本 (语义检索建档 D:\AE-Work 全部素材) — 缓解源重复的根本。
+
+### 6.1 任务进度快照 (2026-09-04 会话同步)
+
+已闭环 (本会话前 + 本会话):
+- 拍点对齐 / beatgrid 强弱分类 / BGM SFX 污染 → 修完, 已提交 (beatgrid 相关 commit)
+- AE 桥自愈 + polish_pass 五坑 + v2/v3.1/v4/v4.3/v5/v6 六版演进 → run53_final.mp4 交付, 闸门 7/7
+
+待办 (对应任务追踪器 #8–#12):
+| 状态 | 任务 | 备注 |
+|---|---|---|
+| 进行中 | #8 源素材全局去重 | 代码已落地(_enforce_global_source_uniqueness+测试), 待重跑 unified_edit→scan 0 簇→重渲 |
+| 等用户 | #9 验收 run53_final v6 | 否→按 §5.1 调参重渲 |
+| 待办 #3 级 | #10 速度曲线 Twixtor 化 | 复用已验证 Twixtor 链 (§4.5) |
+| 待办 #4 级 | #11 语义选效果 | battle/closeup → 效果映射 |
+| 暂缓 | 层2自进化 | 样本 10/20 未达阈值, 暂不排期 |
+| 依赖 #8 | #12 素材库扩充 | 仅当去重因池不足无法满足时先做 |
+
+> 每完成一项, 用 `git commit` 落盘并回写本表状态。
 
 ## 7. 今日提交 (git)
 374554e v6 Twixtor驯化 | 6219b22 v5 光流感知 | 3b23024 v4.3 剂量闭环 |

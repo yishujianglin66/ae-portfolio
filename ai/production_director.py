@@ -2620,6 +2620,9 @@ class ProductionDirector:
                 covered += gap
                 print(f"  补充 {gap:.1f}s 填充段落")
 
+        # 全局同片段去重 + 单文件占比封顶 (2026-09-04 洛天依/同源重复修复)
+        segments = self._enforce_global_source_uniqueness(segments)
+
         print(f"  生成 {len(segments)} 个段落, 总时长 {duration:.1f}s")
         return script
 
@@ -2951,6 +2954,95 @@ class ProductionDirector:
         except Exception as e:
             print(f"      Onset检测失败: {e}")
             return []
+
+    def _enforce_global_source_uniqueness(self, segments, gap=0.5,
+                                          max_share=0.25):
+        """全局同片段去重 + 单文件占比封顶 (2026-09-04 洛天依/同源重复修复)。
+
+        整场范围内的兜底约束, 不依赖源选择路径的局部去重:
+        1. 同一 (file, source_start 相距<=gap) 全片只保留一次; 冲突时先在原文件
+           内找一个距所有已用点>=0.6s 的新起点, 找不到才换源。
+        2. 单文件镜头占比封顶 max_share (7 源填 116 镜时 独自升级5 曾达 30%),
+           超限镜头换到使用最少的其它源, 缓解"同一角色反复出现"。
+        原地修改 segments (只改 source_file / source_start), 返回 segments。
+        确定性: 无随机, 可复现。
+        """
+        if not segments:
+            return segments
+        from collections import defaultdict
+
+        dur_of = self._source_durations or {}
+        all_src = [f for f in dur_of if dur_of.get(f, 0.0) > 0.0]
+        if not all_src:
+            all_src = sorted({s.source_file for s in segments})
+        used = defaultdict(list)
+        counts = defaultdict(int)
+        max_per_file = max(int(len(segments) * max_share), 1)
+
+        def fresh_start(f, win, min_gap):
+            dur = dur_of.get(f, 60.0)
+            usable = dur - win
+            if usable <= 0:
+                return None
+            lo = min(2.0, max(0.0, usable - 0.5)) if usable > 2.0 else 0.0
+            cands = [lo + k * (usable - lo) / 12.0 for k in range(13)]
+            cands += [lo + k * 0.5 for k in range(int((usable - lo) / 0.5) + 1)]
+            best, best_d = None, -1.0
+            for c in sorted(set(cands)):
+                if c + win > dur + 1e-6:
+                    continue
+                d = min((abs(c - u) for u in used[f]), default=float("inf"))
+                if d >= min_gap and d > best_d:
+                    best_d, best = d, round(c, 2)
+            return best
+
+        n_nudge = n_swap = 0
+        for s in segments:
+            f = s.source_file
+            win = max(float(s.duration), 0.05)
+            over = counts[f] >= max_per_file
+            clash = bool(used[f]) and \
+                min((abs(float(s.source_start) - u) for u in used[f]),
+                    default=float("inf")) <= gap
+            if not clash and not over:
+                used[f].append(float(s.source_start))
+                counts[f] += 1
+                continue
+            # 未超限: 优先在原文件内换一个新鲜起点
+            new_ss = fresh_start(f, win, 0.6)
+            if not over and new_ss is not None:
+                s.source_start = new_ss
+                used[f].append(new_ss)
+                counts[f] += 1
+                n_nudge += 1
+                continue
+            # 换源: 使用最少 + 未超限 + 时长足够的文件, 取新鲜起点
+            swapped = False
+            for cand in sorted(all_src, key=lambda x: (counts[x],)):
+                if cand == f or counts[cand] >= max_per_file:
+                    continue
+                if dur_of.get(cand, 60.0) > win:
+                    ss = fresh_start(cand, win, 0.6)
+                    if ss is not None:
+                        s.source_file = cand
+                        s.source_start = ss
+                        used[cand].append(ss)
+                        counts[cand] += 1
+                        n_swap += 1
+                        swapped = True
+                        break
+            if swapped:
+                continue
+            # 兜底: 同文件硬找一个 (含超限), 保证不崩溃
+            fallback = fresh_start(f, win, 0.0)
+            s.source_start = fallback if fallback is not None else float(s.source_start)
+            used[f].append(float(s.source_start))
+            counts[f] += 1
+
+        if n_nudge or n_swap:
+            print(f"  [去重] 起帧调整 {n_nudge} 镜, 换源 {n_swap} 镜 "
+                  f"(全局同片段去重 + 单文件占比≤{int(max_share * 100)}%)")
+        return segments
 
     def _calc_source_start(self, seg_idx, src_dur, seg_dur, mood, source_key="",
                            role: Optional[str] = None):
