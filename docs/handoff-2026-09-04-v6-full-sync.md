@@ -101,12 +101,10 @@ render_gate 验收 → harvest 收割。
 不防**全局**同片段复用。
 **修复验收判据**: 重跑 unified_edit 后, 用同一 0.5s 口径复扫 production_report.json,
 复用簇数应为 **0**; 且 7 源文件中单文件占比不超过 ~25% (当前 独自升级5 为 30%)。
-**修复状态 (2026-09-04 代码已落地, 待重跑验证)**:
-已在 `ai/production_director.py` 新增 `_enforce_global_source_uniqueness`（`_plan` 末尾兜底调用）:
-① 全局同片段去重 (同 file+source_start≤0.5s 只留一次, 冲突先原位换起点、池耗尽才换源);
-② 单文件占比封顶 25% (超限镜头换到使用最少的其它源)。回归 `tests/test_global_source_dedup.py` 5/5 过;
-用 run53 真实 116 镜合成验证: 起帧调整 7 镜 + 换源 6 镜 → 簇数 0、占比 25.0% (独自升级5 35→29)。
-**仍需**: 重跑 unified_edit 重生成 production_report.json → `scan_source_dupes.py` 复扫确认 0 簇 → 重渲 AE 精修。
+**修复状态 (2026-09-04 已完成, 端到端验证通过)**:
+`_enforce_global_source_uniqueness` + 回归 `tests/test_global_source_dedup.py` 5/5 (commit 440cda8);
+全链路重跑后: `scan_source_dupes.py` → **clusters=0 / max_share=25.0%**; MASTER 重渲 (95 层) → 混流 →
+`render_gate.py` → **7/7 ACCEPT**。交付件 `output/unified_run53/run53_final.mp4` 已更新 (23:25)。
 **技术方案 (已实现)**:
 1. 引擎源选择加"全局源片段去重"约束 + 单文件占比封顶 (实现见上), 冲突时优先同文件异起点、
    池耗尽才换源; 语义相似度换源 (_get_semantic_windows) 留待 #11 语义选效果一并接入。
@@ -211,12 +209,22 @@ aerender -s 0 -e 0 渲 1 帧 → PIL 分格 PSNR vs 原帧 → 剂量 dB 标尺�
 - 引擎产出 116 镜 (intro 1 / build 62 / drop 53), 变速档 0.55/1.1/1.15/1.5/1.55。
 - **洛天依重复 = 引擎源选择缺陷** (见 §3)。
 
-### 5.7 运行手册 (重跑关键命令)
+### 5.7 运行手册 (重跑关键命令, 2026-09-04 实测校正)
 ```
-# 重建+重渲 AE 精修 (跑完整闭环)
+# 全链路重跑 (含去重): 先重生成 production_report.json
+python scripts/unified_edit.py --bgm "D:\AE-Work\音频素材库\BGM\1_from10s.mp3" --duration 30 --tag run53
+# 复扫验收: 须 clusters=0 且 max_share≤25%
+python -X utf8 scripts/scan_source_dupes.py output/unified_run53/production_report.json
+# 重建+重渲 AE 精修
 python scripts/build_master_polish.py output/unified_run53 run53
-aerender -project output/unified_run53/polish/master.aep -comp MASTER -output output/unified_run53/polish/master.mp4
-ffmpeg -y -i .../master.mp4 -i .../run53_final.mp4 -map 0:v -map 1:a -c copy run53_final.mp4   # 混流
+# aerender 必须用【绝对路径】: 相对路径会被解析到自身安装目录而失败 (§4.2 五坑#1)
+"C:/Program Files/Adobe/Adobe After Effects 2025/Support Files/aerender.exe" \
+  -project "C:\Users\Administrator\Desktop\AE-Knowledge-Vault\output\unified_run53\polish\master.aep" \
+  -comp MASTER -output "C:\Users\Administrator\Desktop\AE-Knowledge-Vault\output\unified_run53\polish\master.mp4"
+# 混流: ffmpeg 不能原地覆盖输入, 先写临时名再 mv
+ffmpeg -y -i output/unified_run53/polish/master.mp4 -i output/unified_run53/run53_final.mp4 \
+  -map 0:v -map 1:a -c copy output/unified_run53/run53_final_master.mp4
+mv -f output/unified_run53/run53_final_master.mp4 output/unified_run53/run53_final.mp4
 python scripts/render_gate.py output/unified_run53 run53 --bgm "D:/AE-Work/音频素材库/BGM/1_from10s.mp3"
 python scripts/harvest_experience.py output/unified_run53 run53 --verdict "..." --bgm "..."
 # AE 探活
@@ -227,8 +235,8 @@ python -c "from ai.ae_render_channel import AERenderChannel; print(AERenderChann
 
 ## 6. 下一步 (按优先级, 接手程序从这开始)
 
-1. **[用户未决] 源素材去重**: 修 §3 洛天依重复 — 引擎源选择加全局同片段去重约束 + 语义换源,
-   重跑 unified_edit → 重渲 AE 精修 → 交付 (全链路 ~15 分钟 + 渲染)。
+1. ~~[用户未决] 源素材去重~~ **已完成 (2026-09-04 端到端)**: commit 440cda8 + 全链路重跑,
+   扫描 0 簇 / 占比 25.0% / render_gate 7/7 ACCEPT (详见 §3 修复状态)。
 2. **[待用户验收] run53_final v6**: 若用户否 v6 (慢镜/效果), 按 §5.1 偏好调 build_master_polish.py
    的 RECIPES/plan_effects 参数重渲 (1 分钟/轮)。
 3. **速度曲线 Twixtor 化**: 每镜 2-3 段常数速度 → 连续渐变 (Twixtor Speed 曲线, 变速无痕)。
@@ -247,7 +255,7 @@ python -c "from ai.ae_render_channel import AERenderChannel; print(AERenderChann
 待办 (对应任务追踪器 #8–#12):
 | 状态 | 任务 | 备注 |
 |---|---|---|
-| 进行中 | #8 源素材全局去重 | 代码已落地(_enforce_global_source_uniqueness+测试), 待重跑 unified_edit→scan 0 簇→重渲 |
+| 完成 | #8 源素材全局去重 | 端到端: scan 0簇/占比25%/render_gate 7/7；另修 unified_edit 经验采集 subprocess 缺导入 |
 | 等用户 | #9 验收 run53_final v6 | 否→按 §5.1 调参重渲 |
 | 待办 #3 级 | #10 速度曲线 Twixtor 化 | 复用已验证 Twixtor 链 (§4.5) |
 | 待办 #4 级 | #11 语义选效果 | battle/closeup → 效果映射 |

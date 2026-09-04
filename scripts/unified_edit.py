@@ -364,10 +364,10 @@ def main() -> int:
     # 自进化层1: 自动经验采集 (2026-09-04) — 参数+行为+闸门落历史,
     # 判定槽待用户反馈后回填: python scripts/harvest_experience.py <run_dir> <tag> --verdict "..."
     try:
-        subprocess.run([sys.executable,
-                        str(PROJECT / "scripts" / "harvest_experience.py"),
-                        str(out_dir), args.tag, "--bgm", args.bgm],
-                       timeout=900)
+        _sp.run([sys.executable,
+                 str(PROJECT / "scripts" / "harvest_experience.py"),
+                 str(out_dir), args.tag, "--bgm", args.bgm],
+                timeout=900)
     except Exception as _h_e:
         print(f"    [经验采集跳过] {_h_e}")
 
