@@ -84,3 +84,17 @@ aerender 中文输出是 GBK；`subprocess.run(text=True)` 默认 utf-8 会崩 r
 - 用户验收 run53_final（AE 精修版）
 - 层2: 参数寻优 + rhythm_reward 重训（等 20+ 样本）；层3: N 变体竞争
 - 文法卡更新到 run53 状态（小提琴锚定/36%鼓点跳过/持续音zoom_in/AE精修配方）
+
+## v6 Twixtor 驯化 (2026-09-04 晚, 已交付 run53_final.mp4)
+
+- **Twixtor 无头安全**: 单独添加不崩 (上次批量崩元凶是 Sapphire/BCC 系); matchName="Twixtor 45",
+  速度参数=-0005 (默认100=100%), timing模式=-0004
+- **时间模型 (三公式对照实验确证)**: source_time = (t - startTime) × speed
+  → startTime = t0 - sin/spd (含 t0 项, 试点在 inPoint=0 时恰好掩盖了 t0 项)
+- **AE 钳位坑**: startTime 巨偏移把图层有效窗推出源时长 → in/out 被钳成零长层
+  (症状: in==out=负值) → ffmpeg 预裁源片 [sin-lead, sin+dur×spd+0.1], lead 自适应 (0.5/0.2/0.05,
+  源尾不足时缩), sin 改片内偏移
+- **验证方法论坑**: bloom 高剂量帧 vs 源帧 PSNR 会崩到 6-15dB 但内容正确 —
+  视觉模型确认同场景 + 去效果单帧渲染法 (22.1dB 基线) 才是真验证; 全场像素对比会误判
+- 推镜复刻: TWX 层 Scale 关键帧 [bs→bs×1.09/1.12] (zoom_in 1.12), bs=cover 尺度
+- v6.2: 13/13 慢镜 Twixtor 层存活, 闸门 7/7
