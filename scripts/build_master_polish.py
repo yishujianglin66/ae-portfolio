@@ -131,8 +131,15 @@ def plan_effects(segs):
         if fx:
             last_fx = fx[-1]
             dose = 0.65 + 0.7 * env_at(t0)   # 连续密度曲线
-            plan.append({"t0": t0, "t1": t1, "fx": fx, "dose": round(dose, 3),
-                         "en": round(en, 2), "env": round(env_at(t0), 2)})
+            entry = {"t0": t0, "t1": t1, "fx": fx, "dose": round(dose, 3),
+                     "en": round(en, 2), "env": round(env_at(t0), 2)}
+            # v6: 决斗变速停顿慢镜 → Twixtor 光流重渲 (ffmpeg 重复帧最显瑕疵处)
+            if spd <= 0.55 and 12.7 <= t0 and s.get("source_file"):
+                entry["twx"] = {"src": s["source_file"],
+                                "sin": float(s.get("source_start", 0)),
+                                "spd": spd,
+                                "zp": s.get("zoompan_effect") or "push"}
+            plan.append(entry)
     return plan
 
 
@@ -178,9 +185,13 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
         ps = json.dumps([[p, round(v * dose, 4)] for p, v in r["ps"]],
                         separators=(",", ":"))
         return {"m": r["m"], "ps": json.loads(ps), "env": r["env"]}
-    shots_js = json.dumps(
-        [{"t0": s["t0"], "t1": s["t1"], "r": [_fx_js(f, s["dose"]) for f in s["fx"]]}
-         for s in plan], separators=(",", ":"))
+    def _shot_js(s):
+        d = {"t0": s["t0"], "t1": s["t1"], "r": [_fx_js(f, s["dose"]) for f in s["fx"]]}
+        if "twx" in s:
+            d["twx"] = {"src": s["twx"]["src"].replace(chr(92), "/"),
+                        "sin": s["twx"]["sin"], "spd": s["twx"]["spd"], "zp": s["twx"]["zp"]}
+        return d
+    shots_js = json.dumps([_shot_js(s) for s in plan], separators=(",", ":"))
     bursts_js = json.dumps(
         [{"t0": b["t0"], "t1": b["t1"], "r": [_fx_js(f, b["dose"]) for f in b["fx"]]}
          for b in bursts], separators=(",", ":"))
@@ -212,11 +223,33 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
     var base = comp.layers.add(imp);
     base.name = "BASE";
     var shots = {shots_js};
+    var srcCache = {{}};
     for (var i = 0; i < shots.length; i++) {{
       var sh = shots[i];
-      var ly = comp.layers.add(imp);
-      ly.inPoint = sh.t0; ly.outPoint = sh.t1;
-      ly.name = "S" + i;
+      var ly;
+      if (sh.twx) {{
+        // v6 Twixtor 层: 源素材 + 光流慢动作 + 缩放关键帧复刻推镜
+        if (!srcCache[sh.twx.src]) {{
+          srcCache[sh.twx.src] = app.project.importFile(new ImportOptions(new File(sh.twx.src)));
+        }}
+        var sim = srcCache[sh.twx.src];
+        ly = comp.layers.add(sim);
+        ly.startTime = sh.t0 - (sh.twx.sin / sh.twx.spd);  // (t-startTime)×spd=sin @t0 → 含t0项
+        ly.inPoint = sh.t0; ly.outPoint = sh.t1;
+        var bs = Math.max(comp.width / sim.width, comp.height / sim.height) * 100;
+        var zoomEnd = (sh.twx.zp == "zoom_in") ? 1.12 : 1.09;
+        var sc = ly.property("Scale");
+        sc.setValueAtTime(sh.t0, [bs, bs]);
+        sc.setValueAtTime(sh.t1, [bs * zoomEnd, bs * zoomEnd]);
+        var tfx = ly.property("Effects").addProperty("Twixtor 45");
+        tfx.property("Twixtor 45-0004").setValue(1);
+        tfx.property("Twixtor 45-0005").setValue(sh.twx.spd * 100);
+        ly.name = "TWX" + i;
+      }} else {{
+        ly = comp.layers.add(imp);
+        ly.inPoint = sh.t0; ly.outPoint = sh.t1;
+        ly.name = "S" + i;
+      }}
       for (var j = 0; j < sh.r.length; j++) applyFx(ly, sh.r[j], sh.t0);
     }}
     var bursts = {bursts_js};
@@ -249,6 +282,38 @@ def main():
             for kt, m in ov.items():
                 if abs(s["t0"] - kt) < 0.05:
                     s["dose"] = round(min(s["dose"] * m, 3.5), 3)
+    # v6.1: Twixtor 源预裁 — startTime 巨偏移会把图层窗推出源时长 (AE钳位成零长层),
+    # 预裁 [sin-0.5, sin+dur*spd+0.6] 小片段后 sin=0.5 片内偏移, startTime 偏移极小
+    import subprocess as _sp
+    _twx_dir = run_dir / "polish" / "twx_src"
+    _twx_dir.mkdir(parents=True, exist_ok=True)
+    for _i, _s in enumerate(plan):
+        if "twx" not in _s:
+            continue
+        _t = _s["twx"]
+        _clip = _twx_dir / f"{_i:02d}.mp4"
+        # v6.2: lead 自适应 — 源尾不足时缩前导 (层需跨度 = lead/spd + 镜头长)
+        _need = (_s["t1"] - _s["t0"]) + 0.03
+        for _lead in (0.5, 0.2, 0.05):
+            _have = 0.0
+            if _clip.exists():
+                _pr = _sp.run(["ffprobe", "-v", "error", "-show_entries",
+                               "format=duration", "-of", "csv=p=0", str(_clip)],
+                              capture_output=True, text=True, timeout=60)
+                try:
+                    _have = float(_pr.stdout.strip())
+                except ValueError:
+                    _have = 0.0
+            if _have >= _lead / _t["spd"] + _need:
+                break
+            _ss = max(0.0, _t["sin"] - _lead)
+            _dur = _need * _t["spd"] + _lead + 0.1
+            _sp.run(["ffmpeg", "-y", "-ss", f"{_ss:.3f}", "-t", f"{_dur:.3f}",
+                     "-i", _t["src"], "-c:v", "libx264", "-crf", "16", "-an",
+                     str(_clip)], capture_output=True, timeout=300)
+        if _clip.exists():
+            _t["src"] = str(_clip).replace(chr(92), "/")
+            _t["sin"] = _lead
     _, strong = _load_env()
     bursts = plan_bursts(plan, strong)
     from collections import Counter
@@ -256,6 +321,7 @@ def main():
     print(f"镜头效果: {len(plan)}/{len(segs)} ({len(plan)/len(segs):.0%})")
     for k, v in cnt.most_common():
         print(f"  {k}: {v}")
+    print(f"Twixtor 慢镜: {sum(1 for s in plan if 'twx' in s)}")
     print(f"转场冲击层: {len(bursts)} (drop radial {sum(1 for b in bursts if b['t0']>=12.7)} / build badtv {sum(1 for b in bursts if b['t0']<12.7)})")
     print(f"剂量范围: {min(s['dose'] for s in plan):.2f} - {max(s['dose'] for s in plan):.2f}")
     (ROOT / "tmp").mkdir(exist_ok=True)
