@@ -32,28 +32,49 @@ RECIPES = {
                                   ("ADBE Glo2-0004", 0.16)])],
     "bokeh":    [("RWB Fast Bokeh", [("RWB Fast Bokeh-0001", 1)])],
     "badtv":    [("GUTS BadTV", [("GUTS BadTV-0001", 2.5)])],
+    "badtv_light": [("GUTS BadTV", [("GUTS BadTV-0001", 1.5)])],
     "badtv_hard": [("GUTS BadTV", [("GUTS BadTV-0001", 6)])],
     "fmb":      [("CC Force Motion Blur", [("CC Force Motion Blur-0001", 18)])],
     "fmb_light": [("CC Force Motion Blur", [("CC Force Motion Blur-0001", 14)])],
-    "glitch":   [("AESweetsGlitch7in1", [])],  # 默认即 23.6dB 数字故障
+    "glitch":   [("AESweetsGlitch7in1", [])],   # 默认即 23.6dB 数字故障
+    "radial":   [("CC Radial Fast Blur", [])],  # 默认 22.6dB 放射模糊推镜冲击 (v3)
 }
 
 
 def plan_effects(segs):
-    """按镜头字段 (mood/speed/zoompan/energy) 生成每镜头效果配方"""
+    """v3 (用户反馈 2026-09-04: 13s前无效果 + 效果重复疲劳)
+    - 段落内相对能量: build/drop 各自取中位数, build 不再被全片中位数卡光
+    - 效果轮换: 同一效果禁止连续两镜, 快切冲击位在 badtv/radial 间交替
+    - 留白呼吸: drop 快切 fmb 只上隔镜, 避免拖影连成一片
+    """
     import statistics
-    ens = [s.get("energy", 0.4) for s in segs]
-    e75 = statistics.quantiles(ens, n=4)[2]
-    e_med = statistics.median(ens)
-    drop_n = 0
+    build_en = [float(s.get("energy", 0.4)) for s in segs
+                if s.get("mood") == "build" and float(s["start_time"]) < 27.0]
+    drop_en = [float(s.get("energy", 0.4)) for s in segs if s.get("mood") == "drop"]
+    b_med = statistics.median(build_en) if build_en else 0.4
+    d_med = statistics.median(drop_en) if drop_en else 0.5
+    d_q3 = statistics.quantiles(drop_en, n=4)[2] if len(drop_en) >= 4 else 0.6
+
+    drop_n = 0        # drop 段镜头计数 (glitch 节拍器)
+    build_fx_n = 0    # build 轮换计数
+    fast_streak = 0   # drop 快切连续上效计数 (呼吸留白)
+    hard_used = 0
+    last_fx = None
     plan = []
+
+    def _alt(*cands):
+        """从候选里取第一个 != last_fx 的 (禁连续同款)"""
+        for c in cands:
+            if c != last_fx:
+                return c
+        return cands[0]
+
     for s in segs:
         t0 = round(float(s["start_time"]), 3)
         t1 = round(float(s.get("end_time", t0 + 0.25)), 3)
         spd = float(s.get("speed", 1.0))
         mood = s.get("mood", "build")
         en = float(s.get("energy", 0.4))
-        zp = s.get("zoompan_effect") or ""
         fx = []
         if mood == "intro":
             fx = []  # 克制
@@ -63,24 +84,39 @@ def plan_effects(segs):
         elif mood == "drop":
             drop_n += 1
             if spd <= 0.55:
-                # 变速停顿慢镜: bloom + 微散景
-                fx = ["bloom", "bokeh"] if en >= e_med else ["bloom"]
-            elif spd >= 1.5 and en >= e75:
-                fx = ["badtv"]
-                # 高潮核心 (22.1-24.6) 最强 3 镜上重锤
-                if 22.1 <= t0 <= 24.6 and en >= e75:
-                    fx = ["badtv_hard"]
+                # 变速停顿: bloom 恒上, bokeh 隔镜陪衬 (v3: 不再每镜双效果)
+                fx = ["bloom", "bokeh"] if (drop_n % 2 == 0 and en >= d_med) else ["bloom"]
+            elif en >= d_q3 and spd >= 1.5:
+                # 强拍冲击: badtv/radial 交替 (v3 轮换)
+                if 22.1 <= t0 <= 24.6 and hard_used < 3 and en >= d_q3:
+                    fx = ["badtv_hard"]; hard_used += 1
+                else:
+                    fx = [_alt("badtv", "radial")]
             elif drop_n % 9 == 4:
-                fx = ["glitch"]  # 节制: 每9镜一个数字故障强调
+                fx = ["glitch"]
             elif spd >= 1.1:
-                fx = ["fmb"]
-        else:  # build
-            if spd >= 1.5 and en >= e_med:
-                fx = ["fmb_light"]
+                # 普通快切: fmb 只上隔镜 (v3 呼吸留白)
+                fast_streak += 1
+                if fast_streak % 2 == 1:
+                    fx = ["fmb"]
+            if fx and fx != ["fmb"]:
+                fast_streak = 0
+        else:  # build (v3: 段内相对能量, 不再全片一刀切)
+            if spd >= 1.5 and en >= b_med:
+                build_fx_n += 1
+                # 严格交替+留白: fmb → 空 → radial/badtv → 空 (v3.1)
+                cyc = build_fx_n % 4
+                if cyc == 1:
+                    fx = ["fmb_light"]
+                elif cyc == 3:
+                    fx = ["badtv_light"] if en >= max(b_med, d_med * 0.9) else ["radial"]
+                # cyc 2/4: 留白
             elif spd <= 0.55:
                 fx = ["bloom_soft"]
         if fx:
-            plan.append({"t0": t0, "t1": t1, "fx": fx, "spd": spd, "en": round(en, 2), "zp": zp})
+            last_fx = fx[-1]
+            plan.append({"t0": t0, "t1": t1, "fx": fx, "spd": spd,
+                         "en": round(en, 2), "zp": s.get("zoompan_effect") or ""})
     return plan
 
 
