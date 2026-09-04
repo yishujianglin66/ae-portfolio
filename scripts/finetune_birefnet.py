@@ -14,6 +14,7 @@ import cv2
 import numpy as np
 import torch
 import torch.nn.functional as F
+from core.torch_runtime import infer_ctx, get_device
 from torchvision import transforms
 from transformers import AutoModelForImageSegmentation
 
@@ -140,7 +141,7 @@ def main() -> int:
         model.eval()
         val_loss = 0.0
         nv = 0
-        with torch.no_grad():
+        with infer_ctx(get_device()):
             for i in range(0, len(val_pairs), args.batch):
                 imgs, masks = load_batch(val_pairs[i:i + args.batch])
                 if imgs is None or imgs.shape[0] < 2:  # 跳过单样本 batch（BN 需 batch≥2）

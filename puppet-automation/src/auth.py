@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
@@ -54,44 +55,53 @@ def verify_password(pwd: str, stored: str) -> bool:
 # 用户数据（内存存储，开发环境默认账号）
 # ============================================================
 
-_USERS: Dict[str, Dict[str, Any]] = {
-    "admin": {
-        "user_id": "u-admin",
-        "username": "admin",
-        "email": "admin@ae.local",
-        "password_hash": hash_password("admin123"),
-        "role": "admin",
-        "permissions": ["*"],
-        "is_active": True,
-        "created_at": "2026-01-01T00:00:00",
-    },
-    "operator": {
-        "user_id": "u-operator",
-        "username": "operator",
-        "email": "operator@ae.local",
-        "password_hash": hash_password("operator123"),
-        "role": "operator",
-        "permissions": [
-            "projects:read",
-            "projects:write",
-            "execute",
-            "effects:read",
-            "styles:read",
-        ],
-        "is_active": True,
-        "created_at": "2026-01-01T00:00:00",
-    },
-    "viewer": {
-        "user_id": "u-viewer",
-        "username": "viewer",
-        "email": "viewer@ae.local",
-        "password_hash": hash_password("viewer123"),
-        "role": "viewer",
-        "permissions": ["projects:read", "effects:read", "styles:read"],
-        "is_active": True,
-        "created_at": "2026-01-01T00:00:00",
-    },
-}
+_USERS: Dict[str, Dict[str, Any]] = {}
+
+if os.environ.get("AE_DEV_ACCOUNTS", "").strip() == "1":
+    import warnings
+    warnings.warn(
+        "AE_DEV_ACCOUNTS=1: 已加载硬编码开发账号（admin/admin123 等），"
+        "仅限本地开发，禁止在生产环境启用",
+        stacklevel=2,
+    )
+    _USERS.update({
+        "admin": {
+            "user_id": "u-admin",
+            "username": "admin",
+            "email": "admin@ae.local",
+            "password_hash": hash_password("admin123"),
+            "role": "admin",
+            "permissions": ["*"],
+            "is_active": True,
+            "created_at": "2026-01-01T00:00:00",
+        },
+        "operator": {
+            "user_id": "u-operator",
+            "username": "operator",
+            "email": "operator@ae.local",
+            "password_hash": hash_password("operator123"),
+            "role": "operator",
+            "permissions": [
+                "projects:read",
+                "projects:write",
+                "execute",
+                "effects:read",
+                "styles:read",
+            ],
+            "is_active": True,
+            "created_at": "2026-01-01T00:00:00",
+        },
+        "viewer": {
+            "user_id": "u-viewer",
+            "username": "viewer",
+            "email": "viewer@ae.local",
+            "password_hash": hash_password("viewer123"),
+            "role": "viewer",
+            "permissions": ["projects:read", "effects:read", "styles:read"],
+            "is_active": True,
+            "created_at": "2026-01-01T00:00:00",
+        },
+    })
 
 # Session Token 存储（access_token 和 refresh_token）
 _TOKEN_STORE: Dict[str, Dict[str, Any]] = {}

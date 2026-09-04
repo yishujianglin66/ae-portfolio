@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import torch
+from core.torch_runtime import infer_ctx
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -85,7 +86,7 @@ def classify_video(proc, model, labels, video_path: str) -> Dict[str, Any]:
     inputs = {k: v.to(device) for k, v in inputs.items()}
 
     t0 = time.time()
-    with torch.no_grad():
+    with infer_ctx(device):
         logits = model(**inputs).logits
     probs = torch.softmax(logits, dim=-1)[0]
     top_idx = int(probs.argmax().item())

@@ -35,6 +35,43 @@ except Exception:  # ImportError or any init error
 
 logger = logging.getLogger(__name__)
 
+# ── Score defaults & thresholds ──────────────────────────
+_DEFAULT_SCORE = 50
+_DEFAULT_VQ_SCORE = 70
+_DEFAULT_CC_SCORE = 70
+_VQ_SCORE_THRESHOLD = 60
+_CC_SCORE_THRESHOLD = 60
+_LOW_SCORE_THRESHOLD = 40
+
+# ── Sharpness detection ──────────────────────────────────
+_DEFAULT_SHARPNESS = 30
+_SHARPNESS_EXTREME_THRESHOLD = 10
+_SHARPNESS_LOW_THRESHOLD = 20
+
+# ── Brightness correction ────────────────────────────────
+_DEFAULT_AVG_BRIGHTNESS = 0.5
+_BRIGHTNESS_EXTREME_LOW = 0.15
+_BRIGHTNESS_EXTREME_HIGH = 0.85
+_BRIGHTNESS_MODERATE_LOW = 0.3
+_BRIGHTNESS_MODERATE_HIGH = 0.7
+_BRIGHTNESS_BOOST_EXTREME = 0.25
+_BRIGHTNESS_BOOST_MODERATE = 0.15
+_BRIGHTNESS_REDUCE_MODERATE = -0.1
+_BRIGHTNESS_REDUCE_EXTREME = -0.2
+
+# ── Filter presets ───────────────────────────────────────
+_SHARPEN_EXTREME = {"amount": 3.0, "radius": 2.0}
+_SHARPEN_STRONG = {"amount": 2.0, "radius": 1.0}
+_SHARPEN_MODERATE = {"amount": 1.2, "radius": 0.8}
+_SHARPEN_UPSCALE = {"amount": 1.8, "radius": 1.2}
+
+_COLOR_GRADE_QUALITY = {"contrast": 1.15, "saturation": 1.05, "gamma": 1.05}
+_COLOR_GRADE_CORRECTION = {"contrast": 1.1, "saturation": 1.08, "gamma": 1.05}
+_COLOR_GRADE_CINEMATIC = {"contrast": 1.12, "saturation": 1.1, "gamma": 1.03}
+_COLOR_GRADE_FULL_ENHANCE = {"brightness": 0.05, "contrast": 1.2, "saturation": 1.15, "gamma": 1.08}
+
+_VIGNETTE_DEFAULT = {"angle": 2.5, "x0": 0.5, "y0": 0.5}
+
 
 @dataclass
 class AdjustmentAction:
@@ -75,71 +112,69 @@ class AdjustmentMapper:
                 }
         """
         actions = []
-        score = quality_report.get("score", 50)
+        score = quality_report.get("score", _DEFAULT_SCORE)
         checks = quality_report.get("checks", {})
         suggestions = quality_report.get("suggestions", [])
 
         # === 画质偏低 → 锐化 + 对比度 ===
         vq = checks.get("visual_quality", {})
-        vq_score = vq.get("score", 70)
-        if vq_score < 60:
-            sharpness = vq.get("sharpness", 30)
+        vq_score = vq.get("score", _DEFAULT_VQ_SCORE)
+        if vq_score < _VQ_SCORE_THRESHOLD:
+            sharpness = vq.get("sharpness", _DEFAULT_SHARPNESS)
             # 越模糊，锐化越强
-            if sharpness < 10:
+            if sharpness < _SHARPNESS_EXTREME_THRESHOLD:
                 # 极模糊: 用更大半径和接近上限的 amount, msize=5 能恢复更多细节
                 actions.append(AdjustmentAction(
                     type="sharpen",
-                    params={"amount": 3.0, "radius": 2.0},
+                    params=_SHARPEN_EXTREME,
                     priority=10,
                     reason=f"画质极低(锐度{sharpness:.1f})，应用最大强度锐化"
                 ))
-            elif sharpness < 20:
+            elif sharpness < _SHARPNESS_LOW_THRESHOLD:
                 actions.append(AdjustmentAction(
                     type="sharpen",
-                    params={"amount": 2.0, "radius": 1.0},
+                    params=_SHARPEN_STRONG,
                     priority=10,
                     reason=f"画质偏低(锐度{sharpness:.0f})，应用强锐化"
                 ))
             else:
                 actions.append(AdjustmentAction(
                     type="sharpen",
-                    params={"amount": 1.2, "radius": 0.8},
+                    params=_SHARPEN_MODERATE,
                     priority=10,
                     reason=f"画质偏低(锐度{sharpness:.0f})，应用适度锐化"
                 ))
             # 同时提升对比度
             actions.append(AdjustmentAction(
                 type="color_grade",
-                params={"contrast": 1.15, "saturation": 1.05, "gamma": 1.05},
+                params=_COLOR_GRADE_QUALITY,
                 priority=8,
                 reason="画质偏低，提升对比度和饱和度"
             ))
 
         # === 色彩不一致 → 色彩校正 ===
         cc = checks.get("color_consistency", {})
-        cc_score = cc.get("score", 70)
-        avg_brightness = cc.get("avg_brightness", 0.5)
+        cc_score = cc.get("score", _DEFAULT_CC_SCORE)
+        avg_brightness = cc.get("avg_brightness", _DEFAULT_AVG_BRIGHTNESS)
         # 即使 cc_score 合格, 极端亮度也需要单独修正 (避免画面过暗/过亮)
-        extreme_brightness = avg_brightness < 0.15 or avg_brightness > 0.85
-        if cc_score < 60 or extreme_brightness:
+        extreme_brightness = avg_brightness < _BRIGHTNESS_EXTREME_LOW or avg_brightness > _BRIGHTNESS_EXTREME_HIGH
+        if cc_score < _CC_SCORE_THRESHOLD or extreme_brightness:
             # 根据平均亮度调整
             brightness_adj = 0.0
-            if avg_brightness < 0.15:
-                brightness_adj = 0.25  # 极暗, 强提亮
-            elif avg_brightness < 0.3:
-                brightness_adj = 0.15  # 太暗，提亮
-            elif avg_brightness > 0.85:
-                brightness_adj = -0.2  # 极亮, 强压暗
-            elif avg_brightness > 0.7:
-                brightness_adj = -0.1  # 太亮，压暗
+            if avg_brightness < _BRIGHTNESS_EXTREME_LOW:
+                brightness_adj = _BRIGHTNESS_BOOST_EXTREME  # 极暗, 强提亮
+            elif avg_brightness < _BRIGHTNESS_MODERATE_LOW:
+                brightness_adj = _BRIGHTNESS_BOOST_MODERATE  # 太暗，提亮
+            elif avg_brightness > _BRIGHTNESS_EXTREME_HIGH:
+                brightness_adj = _BRIGHTNESS_REDUCE_EXTREME  # 极亮, 强压暗
+            elif avg_brightness > _BRIGHTNESS_MODERATE_HIGH:
+                brightness_adj = _BRIGHTNESS_REDUCE_MODERATE  # 太亮，压暗
 
             actions.append(AdjustmentAction(
                 type="color_grade",
                 params={
                     "brightness": brightness_adj,
-                    "contrast": 1.1,
-                    "saturation": 1.08,
-                    "gamma": 1.05
+                    **_COLOR_GRADE_CORRECTION,
                 },
                 priority=9,
                 reason=f"色彩不一致(分数{cc_score}, 亮度{avg_brightness:.2f})，自动校正"
@@ -153,7 +188,7 @@ class AdjustmentMapper:
             if not any(a.type == "sharpen" for a in actions):
                 actions.append(AdjustmentAction(
                     type="sharpen",
-                    params={"amount": 1.8, "radius": 1.2},
+                    params=_SHARPEN_UPSCALE,
                     priority=10,
                     reason="质检建议超分，应用强锐化近似"
                 ))
@@ -162,7 +197,7 @@ class AdjustmentMapper:
             if not any(a.type == "color_grade" for a in actions):
                 actions.append(AdjustmentAction(
                     type="color_grade",
-                    params={"contrast": 1.12, "saturation": 1.1, "gamma": 1.03},
+                    params=_COLOR_GRADE_CINEMATIC,
                     priority=8,
                     reason="质检建议调色，自动应用电影感调色"
                 ))
@@ -170,22 +205,22 @@ class AdjustmentMapper:
         if "暗角" in suggestion_text or "vignette" in suggestion_text:
             actions.append(AdjustmentAction(
                 type="vignette",
-                params={"angle": 2.5, "x0": 0.5, "y0": 0.5},
+                params=_VIGNETTE_DEFAULT,
                 priority=5,
                 reason="质检建议添加暗角"
             ))
 
         # === 综合评分过低 → 全面增强 ===
-        if score < 40:
+        if score < _LOW_SCORE_THRESHOLD:
             actions.append(AdjustmentAction(
                 type="color_grade",
-                params={"brightness": 0.05, "contrast": 1.2, "saturation": 1.15, "gamma": 1.08},
+                params=_COLOR_GRADE_FULL_ENHANCE,
                 priority=10,
                 reason=f"综合评分极低({score})，全面增强"
             ))
             actions.append(AdjustmentAction(
                 type="sharpen",
-                params={"amount": 2.0, "radius": 1.0},
+                params=_SHARPEN_STRONG,
                 priority=10,
                 reason="综合评分极低，强锐化"
             ))

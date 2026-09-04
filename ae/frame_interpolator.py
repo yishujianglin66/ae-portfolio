@@ -36,6 +36,8 @@ from enum import Enum
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from core.torch_runtime import infer_ctx
+
 
 # ================================================================
 #  数据结构
@@ -289,7 +291,7 @@ class FrameInterpolator:
                 t = t_idx / factor
                 timestep = torch.tensor([t]).to(self._device)
 
-                with torch.no_grad():
+                with infer_ctx():
                     flow = model(f0_t, f1_t)
                     # 后向扭曲
                     grid_y, grid_x = torch.meshgrid(

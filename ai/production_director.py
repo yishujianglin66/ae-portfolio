@@ -397,10 +397,17 @@ class ProductionDirector:
         bpm_override: Optional[float] = None,
         theme: Optional[str] = None,
         enable_ae_channel: bool = False,
+        clean_bgm_sfx: bool = False,
+        beat_lock_hard_cuts: bool = False,
     ) -> str:
         """端到端渲染。
 
         Args:
+            clean_bgm_sfx: HPSS 激进清理 BGM 打击乐(鼓点压到 5%-20%)。
+                2026-09-02 教训: 无条件清理会削掉鼓点瞬态——"卡点听感"的载体。
+                只在确认 BGM 文件被 SFX 烘入污染时才开(一次性修复用);
+                常规运行 False = 原始 BGM 直通。SFX 只进最终输出音轨
+                (unified_edit 阶段④), 绝不进 BGM 文件。
             theme: 主题/叙事描述 (如 "进击的巨人对抗巨兽的燃向混剪")。
                    传入时 _plan 调用 multimodal_director.direct_from_text 生成
                    分镜(structure: 段落/情绪/镜头意图), 给每段加"叙事角色",
@@ -539,7 +546,8 @@ class ProductionDirector:
             except Exception as _disk_e:  # noqa: BLE001
                 print(f"  [磁盘] 守卫跳过({_disk_e})")
             temp_video = self._execute(script, resolution, fps,
-                                       enable_ae_channel=enable_ae_channel)
+                                       enable_ae_channel=enable_ae_channel,
+                                       beat_lock_hard_cuts=beat_lock_hard_cuts)
 
             # 3.5 时长守卫 (2026-08-16): 帧量化后的最后防线 — 实测成片与
             # 剧本时长差 >0.15s 时重编码裁齐, 杜绝"多出几秒"类交付缺陷
@@ -571,9 +579,18 @@ class ProductionDirector:
             else:
                 text_video = temp_video
 
-            # Phase 5: BGM 混音
-            print("\n[Phase 5] BGM 混音...")
-            self._mix_audio(text_video, bgm_path, str(output_path),
+            # Phase 5: BGM SFX 清理 + 混音
+            # 2026-09-02: 改条件触发 — 默认直通原始 BGM (鼓点=卡点听感载体)。
+            # 只有调用方显式确认 BGM 文件被污染时才 HPSS 清理。
+            if clean_bgm_sfx:
+                print("\n[Phase 5] BGM SFX 清理 (HPSS 激进模式)...")
+                bgm_cleaned = self._clean_bgm_sfx(bgm_path, str(self.work_dir))
+            else:
+                print("\n[Phase 5] BGM 直通 (HPSS 清理关闭, 保留鼓点瞬态)")
+                bgm_cleaned = bgm_path
+
+            print("\n[Phase 5b] BGM 混音...")
+            self._mix_audio(text_video, bgm_cleaned, str(output_path),
                             bgm_start_sec, script.total_duration)
 
             # Phase 6: 质量验证
@@ -1048,6 +1065,89 @@ class ProductionDirector:
         # 1.1b Onset 检测（能量突增点，驱动镜头内脉冲运镜）
         self._onsets = self._detect_onsets(bgm_path)
         print(f"  [1.1b] Onset检测: {len(self._onsets)} 个能量突增点")
+
+        # 鼓点分型 (2026-09-03 用户语法: kick→推进, snare→拉远, hihat→快切)
+        self._onset_types = {}
+        self._onset_energy = {}
+        try:
+            import librosa as _lb4
+            import numpy as _np5
+            _yt, _srt = _lb4.load(bgm_path, sr=22050, mono=True)
+            for _ot in self._onsets:
+                _i0 = max(0, int((_ot - 0.02) * _srt))
+                _i1 = min(len(_yt), int((_ot + 0.08) * _srt))
+                if _i1 <= _i0:
+                    continue
+                _seg = _yt[_i0:_i1]
+                _F = abs(_np5.fft.rfft(_seg))
+                _fr = _np5.fft.rfftfreq(len(_seg), 1.0 / _srt)
+                _lo = _F[(_fr >= 30) & (_fr < 160)].sum()
+                _mid = _F[(_fr >= 160) & (_fr < 2000)].sum()
+                _hi = _F[(_fr >= 2000)].sum()
+                _m = max(_lo, _mid, _hi)
+                self._onset_types[round(float(_ot), 3)] = (
+                    "kick" if (_m == _lo or _lo >= 0.55 * _mid)
+                    else ("snare" if _m == _mid else "hihat"))
+                self._onset_energy[round(float(_ot), 3)] = float(_lo + _mid + _hi)
+            _nt = {}
+            for _v in self._onset_types.values():
+                _nt[_v] = _nt.get(_v, 0) + 1
+            print(f"  鼓点分型: {_nt}")
+            # 律动层密度源 (2026-09-03 用户口径: 快/慢鼓=底鼓军鼓律动,
+            # hi-hat 十六分音符全程铺满会把慢段也测成 6/s)
+            # 2026-09-03 终修 30.75s+ 全慢镜: 鼓点实际存在(实测 5.8/s)但被
+            # 全曲能量百分位误杀 — 该段弦乐垫底、鼓相对弱, 在全曲尺度排不进
+            # 前40%。人耳听相对强度 → 改局部显著性: ±2s 窗内能量 ≥ 中位数
+            # 90% 即入律动层。绝对阈值(全曲)会系统性误杀弱伴奏段。
+            import numpy as _np6
+            _oe = sorted(getattr(self, "_onset_energy", {}).items())
+            _gt = _np6.array([float(k) for k, _ in _oe])
+            _ge = _np6.array([e for _, e in _oe])
+            _gset = {k for k, v in self._onset_types.items()
+                     if v in ("kick", "snare")}
+            for k, e in _oe:
+                _sel = _ge[abs(_gt - float(k)) <= 2.0]
+                _lm = float(_np6.median(_sel)) if len(_sel) else 0.0
+                if e >= _lm * 0.9:
+                    _gset.add(k)
+            self._groove_onsets = sorted(float(g) for g in _gset)
+            print(f"  律动层鼓点(kick+snare): {len(self._groove_onsets)} 个")
+        except Exception as _ot_e:  # noqa: BLE001
+            print(f"  鼓点分型跳过({_ot_e})")
+
+        # 1.1b+ 拍点吸附真实鼓点 (2026-09-02 根因修复):
+        # beat_track 返回的是速度先验下的节拍网格(估计值), 实测切点只有
+        # 34% 落在强鼓点±50ms 内, 54% 偏差>120ms (199BPM 曲目 = 整拍错位),
+        # 用户听感"完全没卡上鼓点"。修复: 每个拍点吸附到最近的**强 onset**
+        # (强度前 50%, ±140ms 容差) — 切点/SFX/运镜全部跟着真鼓点走。
+        try:
+            import librosa as _lb
+            import numpy as _np2
+            _y2, _sr2 = _lb.load(bgm_path, sr=22050, mono=True)
+            _oenv = _lb.onset.onset_strength(y=_y2, sr=_sr2, hop_length=512)
+            _otimes = _lb.times_like(_oenv, sr=_sr2, hop_length=512)
+            _strs = []
+            for _ot in self._onsets:
+                _oi = _np2.searchsorted(_otimes, _ot)
+                _strs.append(float(_oenv[min(_oi, len(_oenv) - 1)]))
+            _strs = _np2.array(_strs) if _strs else _np2.array([])
+            if len(_strs) and self._beats:
+                _thresh = _np2.percentile(_strs, 50)
+                _strong = sorted(
+                    float(t) for t, s in zip(self._onsets, _strs) if s >= _thresh)
+                _snapped = 0
+                for _b in self._beats:
+                    if not _strong:
+                        break
+                    _near = min(_strong, key=lambda o: abs(o - _b.time))
+                    if abs(_near - _b.time) <= 0.140:
+                        if _near != _b.time:
+                            _b.time = round(_near, 4)
+                            _snapped += 1
+                print(f"      拍点吸附: {_snapped}/{len(self._beats)} 个拍点"
+                      f"已吸附到强鼓点 (强 onset {len(_strong)} 个)")
+        except Exception as _snap_e:  # noqa: BLE001
+            print(f"      拍点吸附跳过({_snap_e})")
         # 1.1c 鼓类型/网格语义骨架 (OpenMontage beatgrid, kick优先锚定)
         self._beatgrid = self._load_beatgrid(bgm_path)
         if self._beatgrid:
@@ -1347,21 +1447,30 @@ class ProductionDirector:
         )
         # 保存 v22 细节编排所需实例
         self._dyn = _dyn
+        self._dyn_sections = _dyn_sections
         # 保存 RMS 真实能量 + 时间轴 (v22 e_norm 用 RMS 分位数归一化)
         self._rms_energy = _rms
         self._rms_times = _rms_times
         try:
             from core.beat_strength_engine import BeatStrengthEngine
             _be = BeatStrengthEngine(fps=self._render_fps)
+            _beats_arr = _np.array([b.time for b in self._beats]) if self._beats else _np.array([])
             _dbt = _np.array([b.time for b in self._beats
                               if getattr(b, "is_downbeat", False)]) if self._beats else _np.array([])
+            if len(_beats_arr) == 0:
+                raise RuntimeError("self._beats 为空, 无法分级")
+            _onset_env = _librosa.onset.onset_strength(y=_y, sr=_sr)
             self._beat_class = _be.classify_beats(
-                _np.array([b.time for b in self._beats]) if self._beats else _np.array([]),
-                _dbt,
-                onset_envelope=_librosa.onset.onset_strength(y=_y, sr=_sr),
+                _beats_arr, _dbt,
+                onset_envelope=_onset_env,
                 rms_energy=_rms, times=_rms_times, sr=_sr, hop_length=512)
+            _bc_stats = self._beat_class.statistics()
+            print(f"      [BeatStrength] 分级成功: "
+                  f"强{_bc_stats['strong']}/中{_bc_stats['medium']}/弱{_bc_stats['weak']}")
         except Exception as _e:
-            print(f"      [WARN] BeatStrengthEngine 分级失败(不影响): {_e}")
+            import traceback
+            print(f"      [WARN] BeatStrengthEngine 分级失败: {_e}")
+            traceback.print_exc()
             self._beat_class = None
         try:
             from core.style_presets import StylePresetSystem
@@ -1461,6 +1570,10 @@ class ProductionDirector:
         # 切出该区间，所有弧段按 start 排序，保证时间线单调无重叠
         _bb = [s_ for s_ in arc_segments if s_["type"] == "breath_break"]
         if _bb:
+            # 保存原始弧段边界用于 level 继承
+            _orig_arcs = [(s_["start"], s_["end"],
+                           self._arc_levels.get(round(s_["start"], 3), "mid"))
+                          for s_ in arc_segments]
             _rest = [s_ for s_ in arc_segments if s_["type"] != "breath_break"]
             _new_arcs = []
             for s_ in _rest:
@@ -1481,6 +1594,17 @@ class ProductionDirector:
                                       if p["start"] <= t <= p["end"]]
                 _new_arcs.extend(_pieces)
             arc_segments = sorted(_new_arcs + _bb, key=lambda s_: s_["start"])
+            # 修复(2026-09-02): breath_break 切分后, 新弧段的 start 不在
+            # _arc_levels 中 → 后续查表默认 "mid" → 切点密度错乱。
+            # 正确做法: 用原始弧段的时间范围继承 energy level。
+            self._arc_levels = {}
+            for _seg in arc_segments:
+                _inherited = "mid"
+                for _os, _oe, _ol in _orig_arcs:
+                    if _os <= _seg["start"] + 0.001 and _seg["start"] - 0.001 <= _oe:
+                        _inherited = _ol
+                        break
+                self._arc_levels[round(_seg["start"], 3)] = _inherited
         
         print(f"  叙事弧线: {len(arc_segments)} 段 (BPM={bpm_val:.1f})")
         for arc_seg in arc_segments:
@@ -1515,76 +1639,184 @@ class ProductionDirector:
                 b.time - bgm_start_sec for b in self._beats
                 if getattr(b, "is_downbeat", False)
                 and bgm_start_sec <= b.time <= bgm_start_sec + duration)
+            # 强鼓点集合 (2026-09-02 run3 复盘): 高分段把弱 onset(hi-hat等)
+            # 也当切点 → 切点-强鼓点对齐率仅 33%, 用户听感"没卡上鼓点"。
+            # 切点必须优先强鼓点(强度前 55%), 弱 onset 仅密度不足时补位。
+            _strong_onset_rel: list = []
+            try:
+                import librosa as _lb3
+                import numpy as _np4
+                _yb2, _srb2 = _lb3.load(bgm_path, sr=22050, mono=True)
+                _oe2 = _lb3.onset.onset_strength(y=_yb2, sr=_srb2, hop_length=512)
+                _ot2 = _lb3.times_like(_oe2, sr=_srb2, hop_length=512)
+                _od2 = _lb3.onset.onset_detect(y=_yb2, sr=_srb2, units="time")
+                _ost2 = [float(_oe2[min(_np4.searchsorted(_ot2, t), len(_oe2) - 1)])
+                         for t in _od2]
+                _th2 = _np4.percentile(_ost2, 55)
+                _strong_onset_rel = sorted(
+                    round(float(t - bgm_start_sec), 3)
+                    for t, s in zip(_od2, _ost2)
+                    if s >= _th2
+                    and bgm_start_sec <= t <= bgm_start_sec + duration)
+                _th3 = _np4.percentile(_ost2, 78)
+                _hit_anchor_rel = sorted(
+                    round(float(t - bgm_start_sec), 3)
+                    for t, s in zip(_od2, _ost2)
+                    if s >= _th3
+                    and bgm_start_sec <= t <= bgm_start_sec + duration)
+                print(f"  强鼓点集(切点优先): {len(_strong_onset_rel)} 个 | "
+                      f"撞拍锚(前22%): {len(_hit_anchor_rel)} 个")
+            except Exception as _so_e:  # noqa: BLE001
+                print(f"  强鼓点集跳过({_so_e})")
+
+            def _is_strong_onset(t: float) -> bool:
+                return any(abs(t - s) <= 0.045 for s in _strong_onset_rel)
+
+            def _is_hit_anchor(t: float) -> bool:
+                return any(abs(t - s) <= 0.045 for s in _hit_anchor_rel)
+
+            # 密度自适应间隔 (2026-09-03 用户根因: 23-25s 实测鼓点 4.5/s 的
+            # 爆发段被判 intro 后被 0.9s 固定间隔吞掉 10 个鼓点):
+            # 急速鼓点→0.18s 快切 / 中速→0.35s / 慢段→0.7s, 与段位分级解耦
+            def _adaptive_gap(tt: float) -> float:
+                # 小提琴决斗段 (用户 2026-09-03): 每个音律变换一刀, 允许
+                # 每秒 5-6 切 → 最小间隔降到 0.16s (~4帧)
+                if getattr(self, '_burst_win', (12.8, 30.0))[0] <= tt <= getattr(self, '_burst_win', (12.8, 30.0))[1]:
+                    return 0.16
+                _d = sum(1 for o in onset_rel if abs(o - tt) <= 0.5)
+                if _d >= 3:
+                    return _MIN_SHOT_DUR
+                if _d >= 2:
+                    return 0.35
+                return 0.7
+
+            # 小提琴急速段 (用户定稿 2026-09-03): 1号曲 from-10s 剪辑版,
+            # 原 23-32s 急速小提琴段 = 新轴 13-22s — 该段切点严格跟小提琴
+            # 变换频率(旋律 onset 网格), 其余段落保持鼓点网格
+            _VIOLIN_BURST = getattr(self, "_burst_win", (12.8, 30.0))
+            _mel_rel = sorted(
+                mt - bgm_start_sec
+                for mt in (getattr(self, "_melody_onsets", None) or [])
+                if bgm_start_sec <= mt <= bgm_start_sec + duration)
             for s_ in arc_segments:
                 seg_onsets = [t for t in onset_rel
                               if s_["start"] + 0.05 <= t <= s_["end"] - 0.05]
+                if s_["start"] < _VIOLIN_BURST[1] and s_["end"] > _VIOLIN_BURST[0]:
+                    _vi = [t for t in _mel_rel
+                           if s_["start"] + 0.05 <= t <= s_["end"] - 0.05]
+                    # 决斗段密度保障 (2026-09-03 深度分析结论): 本曲小提琴采样
+                    # 与鼓同网格制作(切点与鼓重合 82%), 且多声部混音里 pyin F0
+                    # 被低音主导 — 检测路线全堵死。用户"一秒五六切"=十六分音符
+                    # 网格 → 旋律网格密度不足 4.5/s 时直接上 0.17s 十六分网格
+                    # 密度调制网格 (2026-09-03 用户终版: 跟小提琴速度变化跳动
+                    # — 急奏→密切, 放慢→疏切, 再提速→再密, 而非恒速十六分)
+                    _t0 = max(s_["start"], _VIOLIN_BURST[0]) + 0.05
+                    _t1 = min(s_["end"], _VIOLIN_BURST[1]) - 0.05
+                    _env = getattr(self, "_melody_env", None)
+                    _p70 = _p40 = _p20 = None
+                    if _env:
+                        import numpy as _npg
+                        _et, _er = _env
+                        _in_w = [e for tt, e in zip(_et, _er)
+                                 if 12.8 <= tt <= 30.0]
+                        if len(_in_w) > 20:
+                            _p70 = float(_npg.percentile(_in_w, 70))
+                            _p40 = float(_npg.percentile(_in_w, 40))
+                            _p20 = float(_npg.percentile(_in_w, 20))
+                    # 用户终极诉求 (2026-09-04): 切点位置=小提琴音符事件本身
+                    # (含反拍音符 — 与跟鼓的可见区别), 包络只定稀疏步长;
+                    # 琴休止(步长内无音符)才回退时间网格点
+                    def _env_step(tt):
+                        if _p70 is not None:
+                            import bisect as _bis2
+                            _i2 = _bis2.bisect_left(_env[0], tt)
+                            _e2 = _env[1][min(_i2, len(_env[1]) - 1)]
+                            if _e2 >= _p70:
+                                return 0.17   # 小提琴强奏
+                            elif _e2 >= _p40:
+                                return 0.26
+                            elif _e2 >= _p20:
+                                return 0.40   # 渐弱
+                            return 0.55       # 持续音/停顿
+                        _md = sum(1 for m in _mel_rel if abs(m - tt) <= 0.5)
+                        return (0.17 if _md >= 5 else 0.26 if _md >= 3
+                                else 0.40 if _md >= 2 else 0.55)
+
+                    _vi, _last, _tc = [], -1e9, _t0
+                    _mels = [x for x in _mel_rel if _t0 <= x <= _t1]
+                    while _tc < _t1:
+                        _stp = _env_step(_tc)
+                        _nxt = next((x for x in _mels
+                                     if _tc + 0.08 <= x <= _tc + _stp + 0.25), None)
+                        _pt = _nxt if _nxt is not None else _tc + _stp
+                        _vi.append(round(_pt, 3))
+                        _last, _tc = _pt, _pt
+                    if _vi:
+                        seg_onsets = _vi
                 seg_beats = [t for t in real_beats_rel
                              if s_["start"] + 0.05 <= t <= s_["end"] - 0.05]
                 _level = self._arc_levels.get(round(s_["start"], 3), "mid")
 
-                # P1a (2026-08-14): onset 双拍子网格吸附 + ~30ms 相位补偿
-                # WS-2 实测(beatdetect_comparison.json): ①拍网格对双鼓点对
-                # 0% 双拍全命中, 而 onset 检测 90%+ 命中 → 鼓点瞬态在 onset 上,
-                # 不在拍网格上; ②拍点领先 onset 系统性 ~30ms(mean -28.8ms)。
-                # → 高/中能量段的切点先吸附到 ±100ms 内最近 onset(鼓点瞬态),
-                #   无近邻 onset 时做 +30ms 相位前移, 让"切"落在鼓点上。
-                def _snap_onset(_t, _grid, _tol=0.10, _phase=0.030):
+                # 根因修复(2026-09-02): onset 检测命中 90%+ 鼓点瞬态,
+                # 而 beat grid 仅 53.6%. 鼓点瞬态在 onset 上, 不在拍网格上.
+                # 之前用 beat 作主切点再吸附 onset 是本末倒置 — 现在直接用 onset 作主切点.
+                # beat grid 仅用于密度参考和 fallback.
+                def _nearest_onset(_t, _grid):
                     import bisect as _bis
                     if not _grid:
-                        return _t + _phase
+                        return None
                     _i = _bis.bisect_left(_grid, _t)
                     _cs = []
                     if _i < len(_grid):
                         _cs.append(_grid[_i])
                     if _i > 0:
                         _cs.append(_grid[_i - 1])
-                    _near = min(_cs, key=lambda x: abs(x - _t))
-                    if abs(_near - _t) <= _tol:
-                        return _near
-                    return _t + _phase
+                    return min(_cs, key=lambda x: abs(x - _t)) if _cs else None
 
                 if _level == "high":
-                    # v23.1 双鼓点编排 (用户 2026-08-14): 爆发段"每拍一镜" —
-                    # 镜头覆盖该拍的鼓点对(kick+snare 双鼓点), 镜头内部用
-                    # _extract_clip 的"双鼓点对模式"做 第一鼓点推进→第二鼓点拉回。
-                    # 此前 onset∪beat 全切 → 0.18s 碎切: ①装不下推进+拉回
-                    # (需 ~11 帧) ②爆发战斗画面一闪而过看不清。
-                    # 参考片实测(2026-08-14): drop 段镜头 ≈0.47s ≈ 1拍/镜。
-                    # P1a: 每拍切点吸附到最近 onset(鼓点瞬态) + 相位补偿。
-                    _pts = sorted(set(_snap_onset(b, seg_onsets) for b in seg_beats))
+                    # 爆发段: 强鼓点优先作主切点(每记重击一刀); 弱 onset 仅在
+                    # 强鼓点密度不足(段长/0.7 以下)时补位。最小间隔 _MIN_SHOT_DUR。
+                    _pts = sorted(set(seg_onsets))
                     new_cuts = []
                     for _p in _pts:
-                        if not new_cuts or _p - new_cuts[-1] >= _MIN_SHOT_DUR:
+                        if not new_cuts or _p - new_cuts[-1] >= _adaptive_gap(_p):
                             new_cuts.append(round(_p, 3))
+                    # 撞拍双切 (2026-09-02 用户语法): 最重鼓点(强度前22%)在爆发段
+                    # 触发双切——重击瞬间一刀 + 0.18s 第二刀, 双击撞击感
+                    # 2026-09-03 决斗段跳过: 十六分网格已是密度权威, 双切会造
+                    # 成 2-3 帧簇 → P1a 半吞 → 净距 0.33 (run42 掉刀根因)
+                    for _a in ([] if getattr(self, '_burst_win', (12.8, 30.0))[0] <= s_["start"] < getattr(self, '_burst_win', (12.8, 30.0))[1]
+                               else [t for t in _pts if _is_hit_anchor(t)]):
+                        _tw = round(_a + 0.18, 3)
+                        if _tw <= s_["end"] - 0.05 and all(
+                                abs(_tw - c) >= _MIN_SHOT_DUR for c in new_cuts):
+                            new_cuts.append(_tw)
+                    new_cuts = sorted(set(new_cuts))
+                    # fallback: 若无 onset 则退回 beat
+                    if not new_cuts and seg_beats:
+                        new_cuts = [round(b, 3) for b in seg_beats]
                 elif _level == "low":
-                    # 低能量段 (对齐 v22 low): 仅 downbeat, 长镜头蓄力 (呼吸感)
-                    # 重拍间隔>4s 时补充普通拍 (防止>5s无切点的死镜头)
-                    _pts = [t for t in _downbeat_rel
-                            if s_["start"] + 0.05 <= t <= s_["end"] - 0.05]
-                    if not _pts:
-                        _pts = [seg_beats[0]] if seg_beats else []
-                    # information_density 缩放: 低信息密度 → 长镜呼吸
-                    _filtered = []
-                    for _p in _pts:
-                        if not _filtered or _p - _filtered[-1] >= _low_gap:
-                            _filtered.append(_p)
-                    _gap_ok = all(
-                        _filtered[i + 1] - _filtered[i] <= 5.0
-                        for i in range(len(_filtered) - 1))
-                    new_cuts = _filtered if _gap_ok else [_filtered[0]]
+                    # 鼓点网格(2026-09-03 用户最终语法): 慢段 onset 间隔天然长
+                    # → 长镜+变速曲线, 跟着鼓点放慢而放慢
+                    new_cuts = []
+                    for _p in sorted(set(seg_onsets)):
+                        if not new_cuts or _p - new_cuts[-1] >= _adaptive_gap(_p):
+                            new_cuts.append(round(_p, 3))
                 else:
-                    # 中能量段 (对齐 v22 mid): beat 逐拍 (中速)
-                    # information_density 缩放: 高密度时逐拍, 低密度时抽稀
-                    # P1a: 每拍切点吸附到最近 onset(鼓点瞬态) + 相位补偿
+                    # 中能量段: 强鼓点按 _mid_gap 过滤优先; 密度不足再补全部 onset
+                    _base = sorted(set(seg_onsets))
                     _new_mid = []
-                    for _t in seg_beats:
-                        _t = _snap_onset(_t, seg_onsets)
-                        if not _new_mid or _t - _new_mid[-1] >= _mid_gap:
+                    for _t in sorted(_base):
+                        if not _new_mid or _t - _new_mid[-1] >= _adaptive_gap(_t):
                             _new_mid.append(round(_t, 3))
                     new_cuts = _new_mid
+                    # fallback: 若无 onset 切点则退回 beat
+                    if not new_cuts and seg_beats:
+                        new_cuts = [round(b, 3) for b in seg_beats]
                 # 强制锚定 kick(低频重音)+强拍 (2026-08-13 漫剪撞拍核心):
                 # 仅 high/mid 段强制 (low 段保持长镜头呼吸, 不塞快切)
-                if self._beatgrid and _level != "low":
+                if self._beatgrid and _level != "low" and not (
+                        getattr(self, '_burst_win', (12.8, 30.0))[0] <= s_["start"] < getattr(self, '_burst_win', (12.8, 30.0))[1]):
                     _mand = sorted(set(
                         self._beatgrid["kick"] + self._beatgrid["strong"]))
                     _mand = [t for t in _mand
@@ -1595,8 +1827,6 @@ class ProductionDirector:
                             _merged.append(round(_m, 3))
                     new_cuts = sorted(set(_merged))
                 s_["cut_times"] = new_cuts
-                print(f"      [{_level:5s}] 切点={len(new_cuts)} "
-                      f"(段长{s_['duration']:.1f}s)")
             print(f"  切点吸附: 真实节拍{len(real_beats_rel)}个 + onset{len(onset_rel)}个 "
                   f"(替代合成BPM网格)")
 
@@ -1652,10 +1882,11 @@ class ProductionDirector:
                 return [c + bgm_start_sec for c in cuts_rel]
 
             plans: Dict[str, List[float]] = {"arc_plan": list(global_cuts)}
-            # 候选变体仅提供结构性替代(半拍偏移=切在弱拍):
-            # 不提供小抖动变体——切点已吸附真实鼓点, 任何拖动都会破坏对齐
-            plans["half_shift"] = sorted(
-                float(c + bi / 2) for c in global_cuts if c + bi / 2 < duration)
+            # 2026-09-02 移除 half_shift 候选: 它把全部切点整体偏移半拍
+            # (切在弱拍/鼓点之间), run2 实测被采纳后切点-鼓点对齐率仅 34%,
+            # 用户听感"完全没卡上鼓点"。0.01 级分差属噪声, 却能整体毁掉
+            # 节奏感 — 此类"结构性破坏"候选一律不得进入择优。
+            # 切点已吸附真实鼓点(见 _analyze 1.1b+), 任何整体拖动都破坏对齐。
             scores = {name: round(self.model_hub.score_cut_plan(
                 _to_abs(cuts), beats_abs, duration), 4)
                 for name, cuts in plans.items()}
@@ -1667,12 +1898,7 @@ class ProductionDirector:
             print("  节奏奖励择优(rhythm_reward.pkl): "
                   + ", ".join(f"{k}={v:.3f}" for k, v in scores.items())
                   + f" → 采用[{best_name}]")
-            if best_name != "arc_plan":
-                # 采纳更优方案：全局最优切点重新映射回各弧段
-                best_cuts = plans[best_name]
-                for s_ in arc_segments:
-                    s_["cut_times"] = [c for c in best_cuts
-                                       if s_["start"] <= c <= s_["end"]]
+            # arc_plan 是唯一候选, 不再重映射切点
         else:
             print("  节奏奖励择优: 跳过(模型缺失或切点/节拍数不足)")
 
@@ -1823,8 +2049,14 @@ class ProductionDirector:
             # (无拍)处保留原边界(长镜头跨越空档 = 正确行为, 非偏移)。
             _snap_grid = sorted(set(
                 [t for t in real_beats_rel if arc_start <= t <= arc_end] +
-                [t for t in onset_rel if arc_start <= t <= arc_end]))
-            if _snap_grid:
+                [t for t in onset_rel if arc_start <= t <= arc_end] +
+                [t for t in ((self._beatgrid.get("kick", []) or []) +
+                             (self._beatgrid.get("strong", []) or []))
+                 if arc_start <= t <= arc_end]))
+            # 2026-09-03 决斗段豁免: 节拍吸附会把十六分网格(0.17s)坍缩到
+            # onset 网格上(多网格点吸到同一拍→0.05去重→密度 5.9→2.5)。
+            # 网格本身已节奏对齐, 无需吸附。
+            if _snap_grid and not (arc_start < getattr(self, '_burst_win', (12.8, 30.0))[1] and arc_end > getattr(self, '_burst_win', (12.8, 30.0))[0]):
                 import bisect as _bisect
                 _snapped = [boundaries[0]]
                 for _b in boundaries[1:-1]:
@@ -1854,9 +2086,13 @@ class ProductionDirector:
             # 导致后续所有切点累积前移
             # P1a(2026-08-14): 阈值 0.15→0.18 对齐 _MIN_SHOT_DUR —
             # onset 吸附后边界收敛可能产生 0.16s 碎切(实测), 一并合并
+            _nb = len(boundaries)
             _merged = [boundaries[0]]
             for _b in boundaries[1:]:
-                if _b - _merged[-1] < 0.18:
+                # 2026-09-03 决斗段密切放行: 0.18 经 24fps 取整=5帧(0.208s)
+                # 正是密切被吞的地板; 决斗段窗口内放宽到 0.15 允许十六分网格
+                _thr = 0.15 if (getattr(self, '_burst_win', (12.8, 30.0))[0] <= _b <= getattr(self, '_burst_win', (12.8, 30.0))[1]) else 0.18
+                if _b - _merged[-1] < _thr:
                     continue
                 _merged.append(_b)
             if _merged[-1] < boundaries[-1]:
@@ -1907,6 +2143,11 @@ class ProductionDirector:
                     seg_idx, src_dur, seg_dur, mood, source_key=source,
                     role=_role if _role else None,
                 )
+                # 片头黑场钳制 (2026-09-03 真凶: 素材首次使用 src_start=0, 连续
+                # 7 个镜头全是黑场/淡入开头 → 鼓点上切了看不见, 开头节奏全死)
+                _min_ss = min(2.0, max(0.0, src_dur - seg_dur - 0.5))
+                if source_start < _min_ss:
+                    source_start = _min_ss
 
                 # 文字叠加
                 text_overlay = None
@@ -2041,15 +2282,18 @@ class ProductionDirector:
                                 (_em - _e10) / max(_e90 - _e10, 1e-6), 0, 1))
                         except Exception:
                             _e_norm = 0.5
-                    _speed, _tech = self._dyn.speed_for_shot(
-                        _level, _bs_val, _e_norm, _is_db)
+                    # 局部鼓点密度 → 速度 (2026-09-03 用户最终语法:
+                    # 急速鼓点→快切, 鼓点放慢→变速慢镜; 段落规则只做中段兜底)
+                    _ons_local = (getattr(self, "_groove_onsets", None)
+                                  or getattr(self, "_onsets", None) or [])
+                    _dens = sum(1 for o in _ons_local
+                                if abs(o - seg_start) <= 0.6) / 1.2
+                    _speed = round(min(1.55, max(0.50, 0.28 + 0.21 * _dens))
+                                   / 0.05) * 0.05
+                    _tech = ("fast_pan" if _dens >= 3.0 else
+                             "slowmo" if _dens <= 1.4 else "pulse")
                     speed = _speed
                     _v22_tech = _tech  # 供运镜决策使用
-                    # 变速稀疏化 (2026-08-14 用户二次反馈): 慢放/变速是强调
-                    # 手段而非全片默认 — 非强拍镜头保持原速 (1.0x)。
-                    if not _is_strong and speed != 1.0:
-                        speed = 1.0
-                        _v22_tech = "normal"
                 else:
                     speed = 1.0
 
@@ -2058,7 +2302,33 @@ class ProductionDirector:
                 if _cam_inv is not None:
                     _source_cam = _src_cam_labels.get(source, "unknown")
 
-                if _cam_inv is not None:
+                # 鼓点分型→镜头语法 (2026-09-03 用户语法, v2: 全镜头生效):
+                # kick(低频重击)→推进 push / snare(中频军鼓)→拉远 zoom_out /
+                # 连击段(律动层密度≥3.5/s)→推拉交替=连续场面切换
+                # v1 根因: 70ms 硬窗+藏在 _cam_inv 分支内 → 89% 镜头掉回 static
+                _groove = getattr(self, "_groove_onsets", None) or []
+                _ot_type = None
+                _best_d = 1e9
+                for _otk, _oty in getattr(self, "_onset_types", {}).items():
+                    _dd = abs(_otk - seg_start)
+                    if _dd < _best_d:
+                        _best_d = _dd
+                        _ot_type = _oty
+                if _best_d > 0.30:
+                    _ot_type = None  # 300ms 内无鼓点 → 非鼓点起始镜头
+                _gdens = (sum(1 for o in _groove if abs(o - seg_start) <= 0.6)
+                          / 1.2 if _groove else 0)
+                if _gdens >= 3.5:
+                    zoompan_effect = ("push" if getattr(self, "_roll_alt", 0) == 0
+                                      else "zoom_out")
+                    self._roll_alt = 1 - getattr(self, "_roll_alt", 0)
+                elif _ot_type == "kick":
+                    zoompan_effect = "push"
+                elif _ot_type == "snare":
+                    zoompan_effect = "zoom_out"
+                elif _ot_type == "hihat" and _gdens >= 1.5:
+                    zoompan_effect = "zoom_in"
+                elif _cam_inv is not None:
                     # T3: 综合决策 (情绪 + 素材运镜 + 前一镜衔接 + 反锁死窗口)
                     zoompan_effect = suggest_camera_for_shot(
                         mood=mood,
@@ -2112,7 +2382,12 @@ class ProductionDirector:
                     _allowed = [c for c in _taste_pool if c not in _forbid]
                     if _allowed:
                         _taste_pool = _allowed
-                if _taste_pool and len(_taste_pool) > 1:
+                # 2026-09-03 鼓点分派豁免: T4 池轮转曾无条件覆盖鼓点分型
+                # (visual_variance>=7 时逐镜轮转) → 89% static、同鼓点不同待遇。
+                # 鼓点是运镜的唯一权威来源, 品味池只管无鼓点依据的镜头。
+                _drum_assigned = (_gdens >= 3.5 or _ot_type in ("kick", "snare")
+                                  or (_ot_type == "hihat" and _gdens >= 1.5))
+                if not _drum_assigned and _taste_pool and len(_taste_pool) > 1:
                     if self.taste.visual_variance >= 7:
                         _pick = _taste_pool[seg_idx % len(_taste_pool)]
                         _guard = 0
@@ -2349,56 +2624,207 @@ class ProductionDirector:
         return script
 
     def _load_beatgrid(self, bgm_path: str) -> Optional[Dict[str, Any]]:
-        """加载 OpenMontage beatgrid 音频骨架 (鼓类型/网格语义)。
+        """自包含 beatgrid 分析：librosa 频段分离 → 鼓点分类 → 节拍网格。
 
-        2026-08-13: 漫剪"跟音乐剪辑"核心——切点锚定 kick(低频重音)+强拍,
-        而非笼统 onset(混入 hihat/切分音)。调 analyze-beatgrid.py 生成
-        audiomap.json (按 BGM 名缓存 tmp/), 解析:
-          kick_times:  低频重音 <150Hz (撞拍核心)
-          strong_times: 强拍 (正拍)
-          weak_times:  弱拍 (排除 hihat, 高密度补充)
-        失败返回 None → 回退现有 onset 逻辑, 不阻断渲染。
+        替代已失效的 OpenMontage analyze-beatgrid.py 外部脚本。
+        频段划分: kick <150Hz / snare 150-5kHz / hihat >5kHz。
+        铁律: strong/weak 排除 hihat（镲片不"撞"）。
+        结果按 BGM 文件名缓存 tmp/audiomap_{hash}.json，同一 BGM 不重复分析。
+        失败返回 None → 回退 onset 逻辑，不阻断渲染。
         """
         try:
-            import hashlib, subprocess, json, os
+            import hashlib
+            import json
+            import os
+
+            import librosa
+            import numpy as np
+
             _h = hashlib.md5(os.path.basename(bgm_path).encode()).hexdigest()[:8]
+            os.makedirs("tmp", exist_ok=True)
             _cache = os.path.join("tmp", f"audiomap_{_h}.json")
-            _script = os.path.join(
-                _PROJECT_ROOT, "external", "OpenMontage", ".agents",
-                "skills", "music-to-video", "scripts", "analyze-beatgrid.py")
-            if not os.path.exists(_script):
-                return None
-            if not os.path.exists(_cache):
-                _r = subprocess.run(
-                    [sys.executable, _script, bgm_path, "-o", _cache],
-                    capture_output=True, timeout=180)
-                if _r.returncode != 0:
-                    return None
-            with open(_cache, encoding="utf-8") as _f:
-                _d = json.load(_f)
-            _events = _d.get("events", [])
-            kicks = [float(e["t"]) for e in _events if e.get("drum") == "kick"]
-            # 修复(2026-08-13): strong 必须排除 hihat——铁律"strong拍强制锚定
-            # (排除 hihat/riser/glitch)"。此前只 weak 排 hihat, strong 混入 5 个
-            # hihat strong(4.9/7.31/12.1/13.26/14.47s), 切在镲片上观感不"撞"。
-            strongs = [float(e["t"]) for e in _events
-                       if e.get("grid") == "strong" and e.get("drum") != "hihat"]
-            weaks = [float(e["t"]) for e in _events
-                     if e.get("grid") == "weak" and e.get("drum") != "hihat"]
-            # 连击段/关键时刻/突然停止 (深度研究文档§3.2/§3.3, 此前被丢弃):
-            # rolls → 连击段内切"连续视觉"而非离散快切; hard_stops/moments →
-            # 关键时刻语义(定格/闪白/变速)。原样透传, 编排层消费。
-            _rolls = _d.get("rolls", []) or []
-            _moments = _d.get("key_moments", []) or []
-            _hard_stops = _d.get("hard_stops", []) or []
-            return {
-                "kick": sorted(set(kicks)),
-                "strong": sorted(set(strongs)),
-                "weak": sorted(set(weaks)),
-                "rolls": _rolls,
-                "moments": _moments,
-                "hard_stops": _hard_stops,
+
+            if os.path.exists(_cache):
+                with open(_cache, encoding="utf-8") as _f:
+                    return json.load(_f)
+
+            print(f"      [beatgrid] 分析 BGM: {os.path.basename(bgm_path)}")
+            y, sr = librosa.load(bgm_path, sr=22050, mono=True)
+            duration = len(y) / sr
+
+            # ── STFT + 频段分离 ──
+            S = np.abs(librosa.stft(y, n_fft=2048, hop_length=512))
+            freqs = librosa.fft_frequencies(sr=sr, n_fft=2048)
+
+            low_mask = freqs < 150
+            mid_mask = (freqs >= 150) & (freqs < 5000)
+            high_mask = freqs >= 5000
+
+            S_low = S.copy()
+            S_low[~low_mask] = 0
+            S_mid = S.copy()
+            S_mid[~mid_mask] = 0
+            S_high = S.copy()
+            S_high[~high_mask] = 0
+
+            y_low = librosa.istft(S_low, hop_length=512, length=len(y))
+            y_mid = librosa.istft(S_mid, hop_length=512, length=len(y))
+            y_high = librosa.istft(S_high, hop_length=512, length=len(y))
+
+            # ── 各频段 onset 检测 ──
+            kick_times = librosa.onset.onset_detect(
+                y=y_low, sr=sr, hop_length=512, units="time",
+                backtrack=True, pre_max=3, post_max=3,
+                delta=0.07, wait=10)
+            snare_times = librosa.onset.onset_detect(
+                y=y_mid, sr=sr, hop_length=512, units="time",
+                backtrack=True, pre_max=3, post_max=3,
+                delta=0.05, wait=10)
+            hihat_times = librosa.onset.onset_detect(
+                y=y_high, sr=sr, hop_length=512, units="time",
+                backtrack=True, pre_max=2, post_max=2,
+                delta=0.05, wait=5)
+
+            kick_times = sorted(set(float(t) for t in kick_times
+                                    if 0.05 <= t <= duration - 0.05))
+            snare_times = sorted(set(float(t) for t in snare_times
+                                     if 0.05 <= t <= duration - 0.05))
+            hihat_times = sorted(set(float(t) for t in hihat_times
+                                     if 0.05 <= t <= duration - 0.05))
+
+            # ── 节拍追踪 → 小节结构 ──
+            tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr, hop_length=512)
+            tempo = float(np.asarray(tempo).flat[0])
+            beat_times_arr = librosa.frames_to_time(beat_frames, sr=sr, hop_length=512)
+            beat_times_arr = sorted(float(t) for t in beat_times_arr
+                                    if 0.05 <= t <= duration - 0.05)
+
+            # 按 4/4 小节分配 strong(拍1) / weak(拍2-4)
+            # 修复(2026-09-02): 旧代码用 _near_hihat 过滤 → 大量 beat 被跳过,
+            # 19s 曲目仅得 1 个 strong beat, 撞拍锚定几乎失效.
+            # 正确做法: 以首个 kick 为小节参考点(kick 通常落在拍1),
+            # 所有 beat 按 bar position 分类, 不过滤 hihat.
+            _beat_period = 60.0 / max(tempo, 60)
+            _bar_period = 4 * _beat_period
+            _ref = kick_times[0] if len(kick_times) > 0 else (
+                beat_times_arr[0] if beat_times_arr else 0.0)
+
+            strong_times = []
+            weak_times = []
+            for bt in beat_times_arr:
+                _pos = (bt - _ref) % _bar_period
+                if _pos < _beat_period * 0.5:
+                    strong_times.append(round(bt, 4))
+                else:
+                    weak_times.append(round(bt, 4))
+
+            # ── 连击段 (rolls)：快速连续 onset 聚类 ──
+            all_drum_times = sorted(set(
+                [round(t, 4) for t in kick_times]
+                + [round(t, 4) for t in snare_times]
+            ))
+            rolls = []
+            if len(all_drum_times) >= 4:
+                _roll_start = None
+                _roll_prev = None
+                _bi = 60.0 / max(tempo, 60)
+                _roll_thresh = _bi * 0.35
+                for dt in all_drum_times:
+                    if _roll_prev is not None and (dt - _roll_prev) < _roll_thresh:
+                        if _roll_start is None:
+                            _roll_start = _roll_prev
+                    else:
+                        if _roll_start is not None and _roll_prev is not None:
+                            _rdur = _roll_prev - _roll_start
+                            if _rdur >= 0.3:
+                                _drum = "kick" if any(
+                                    abs(_roll_start - k) < 0.1 for k in kick_times
+                                ) else "snare"
+                                rolls.append({
+                                    "start": round(_roll_start, 3),
+                                    "end": round(_roll_prev, 3),
+                                    "drum": _drum,
+                                    "t": round(_roll_start, 3),
+                                })
+                        _roll_start = None
+                    _roll_prev = dt
+                if _roll_start is not None and _roll_prev is not None:
+                    _rdur = _roll_prev - _roll_start
+                    if _rdur >= 0.3:
+                        _drum = "kick" if any(
+                            abs(_roll_start - k) < 0.1 for k in kick_times
+                        ) else "snare"
+                        rolls.append({
+                            "start": round(_roll_start, 3),
+                            "end": round(_roll_prev, 3),
+                            "drum": _drum,
+                            "t": round(_roll_start, 3),
+                        })
+
+            # ── 硬停止 (hard_stops)：RMS 能量骤降 ──
+            hard_stops = []
+            rms = librosa.feature.rms(S=S, frame_length=2048, hop_length=512)[0]
+            rms_times = librosa.frames_to_time(np.arange(len(rms)), sr=sr, hop_length=512)
+            if len(rms) > 20:
+                rms_smooth = np.convolve(rms, np.ones(10) / 10, mode="same")
+                rms_diff = np.diff(rms_smooth, prepend=rms_smooth[0])
+                rms_std = np.std(rms_diff) if len(rms_diff) > 0 else 1.0
+                if rms_std > 0:
+                    drop_indices = np.where(rms_diff < -3.0 * rms_std)[0]
+                    for idx in drop_indices:
+                        t_val = float(rms_times[min(idx, len(rms_times) - 1)])
+                        if 0.5 <= t_val <= duration - 0.5:
+                            hard_stops.append(round(t_val, 3))
+                _min_gap = 2.0
+                _filtered_hs = []
+                for hs in sorted(hard_stops):
+                    if not _filtered_hs or hs - _filtered_hs[-1] >= _min_gap:
+                        _filtered_hs.append(hs)
+                hard_stops = _filtered_hs
+
+            # ── 关键时刻 (moments)：kick + strong 密度峰值区 ──
+            moments = []
+            _key_times = sorted(kick_times + [float(t) for t in strong_times])
+            if len(_key_times) >= 6:
+                _window = 4.0
+                _step = 1.0
+                _t = 0.0
+                _best_density = 0
+                _best_t = 0.0
+                while _t < duration - _window:
+                    _count = sum(1 for kt in _key_times
+                                 if _t <= kt < _t + _window)
+                    if _count > _best_density:
+                        _best_density = _count
+                        _best_t = _t
+                    _t += _step
+                if _best_density >= 6:
+                    moments.append({
+                        "t": round(_best_t + _window / 2, 3),
+                        "label": "climax",
+                        "density": _best_density,
+                    })
+
+            result = {
+                "kick": [round(t, 4) for t in kick_times],
+                "strong": strong_times,
+                "weak": weak_times,
+                "rolls": rolls,
+                "moments": moments,
+                "hard_stops": [{"t": t} for t in hard_stops],
+                "bpm": round(float(tempo), 1) if tempo else None,
+                "source": "librosa_self_contained",
             }
+
+            with open(_cache, "w", encoding="utf-8") as _f:
+                json.dump(result, _f, ensure_ascii=False)
+
+            print(f"      [beatgrid] 完成: kick={len(result['kick'])} "
+                  f"strong={len(result['strong'])} weak={len(result['weak'])} "
+                  f"rolls={len(rolls)} hard_stops={len(hard_stops)} "
+                  f"bpm={result.get('bpm')}")
+            return result
+
         except Exception as _e:
             print(f"      [WARN] beatgrid 加载失败(回退onset): {_e}")
             return None
@@ -2424,8 +2850,103 @@ class ProductionDirector:
             y, sr = librosa.load(bgm_path, sr=44100, mono=True)
             onset_env = librosa.onset.onset_strength(y=y, sr=sr)
             frames = librosa.onset.onset_detect(
-                onset_envelope=onset_env, sr=sr, backtrack=False)
-            onsets = [float(t) for t in librosa.frames_to_time(frames, sr=sr)]
+                onset_envelope=onset_env, sr=sr, backtrack=False,
+                hop_length=256, delta=0.03, wait=2)
+            onsets = [float(t) for t in librosa.frames_to_time(
+                frames, sr=sr, hop_length=256)]
+            # 旋律 onset (小提琴/钢琴=谐波分量): 小提琴急速段专用网格
+            _yh2 = None
+            try:
+                _yh2, _ = librosa.effects.hpss(y)
+            except Exception:
+                pass
+            try:
+                _mf = librosa.onset.onset_detect(
+                    y=(_yh2 if _yh2 is not None else y), sr=sr, units="time",
+                    hop_length=256, backtrack=False, delta=0.03, wait=2)
+                _mel = [float(m) for m in _mf]
+                # ══ 音高跟踪切点 (2026-09-03 决斗段终极修复) ══════════════
+                # 深度分析结论: 小提琴音变两类——起弓攻击音(可检测但大多与鼓
+                # 重合, 故历版都"像跟鼓走") + 连奏音变(legato 音高滑动, 无能量
+                # 突变, 能量检测物理不可见)。要真跟小提琴必须检测 F0 变化:
+                # pyin 逐帧基频 → 中值滤波抑制颤音(vibrato ±20-50 cents) →
+                # 平滑曲线上的持续音高变化(≥35音分/帧) = 真实音变点。
+                try:
+                    import numpy as _npf
+                    from scipy.signal import medfilt
+                    _ysrc = (_yh2 if _yh2 is not None else y)
+                    _f0, _, _ = librosa.pyin(
+                        _ysrc, fmin=196, fmax=2000, sr=sr,
+                        frame_length=2048, hop_length=256)
+                    _f0s = medfilt(_npf.nan_to_num(_f0, nan=0.0), 5)
+                    _voiced = _f0s > 150
+                    _cents = _npf.full(len(_f0s), 0.0)
+                    _ok = _voiced[1:] & _voiced[:-1] & (_f0s[:-1] > 150)
+                    _cents[1:][_ok] = 1200 * _npf.log2(
+                        _f0s[1:][_ok] / _f0s[:-1][_ok])
+                    _chg = _npf.where(_npf.abs(_cents) >= 35)[0]
+                    _pt, _last = [], -1.0
+                    for _cf in _chg:
+                        _tt = float(_cf * 256 / sr)
+                        if _tt - _last >= 0.08:  # 同一音变去重
+                            _pt.append(_tt)
+                            _last = _tt
+                    # 攻击音与音变点合并(80ms 内去重)
+                    _allm = sorted(_mel + _pt)
+                    _merged_m, _prev = [], -1.0
+                    for _m3 in _allm:
+                        if _m3 - _prev >= 0.08:
+                            _merged_m.append(round(_m3, 3))
+                            _prev = _m3
+                    self._melody_onsets = _merged_m
+                    print(f"      旋律网格: 攻击{len(_mel)} + 音高变化{len(_pt)}"
+                          f" = {len(_merged_m)} 个")
+                except Exception as _py_e:
+                    self._melody_onsets = _mel
+                    print(f"      音高跟踪跳过({_py_e}), 仅攻击音 {len(_mel)} 个")
+            except Exception:
+                self._melody_onsets = []
+            # 小提琴动态包络 (谐波 RMS): 用户"变速停顿"的调制源 — 急奏强→
+            # 密切, 持续音/休止弱→疏切+慢镜, 再起→再密
+            try:
+                _esrc = (_yh2 if _yh2 is not None else y)
+                import numpy as _npe
+                _rms_m = librosa.feature.rms(y=_esrc, frame_length=1024,
+                                             hop_length=256)[0]
+                _ets_m = librosa.frames_to_time(
+                    _npe.arange(len(_rms_m)), sr=sr, hop_length=256)
+                # 0.4s 滑动平均 (2026-09-04 修 20-30s 速度乱跳): 逐点包络受
+                # 音符起音/释放噪声影响, 同档能量的镜头被随机推入不同速度档
+                # (实测 20-30s 能量全"中"档但速度 0.55/1.1/1.5 逐镜跳)。
+                # 0.6s 平滑 (2026-09-04 三次校准: 无平滑=临界抖动, 1.2s=抹掉
+                # 节奏变化被用户否决; 0.6s 保留音符级响应, 抖动交给迟滞机制)
+                _rms_s = _npe.convolve(_rms_m, _npe.ones(52) / 52, mode="same")
+                self._melody_env = (_ets_m.tolist(), _rms_s.tolist())
+                try:
+                    import numpy as _npw
+                    _er_a = _npw.asarray(_rms_m)
+                    _th55 = float(_npw.percentile(_er_a, 55))
+                    _hot = _er_a >= _th55
+                    _best_s = _best_e = 0
+                    _run_s = None
+                    for _i4, _h4 in enumerate(_hot):
+                        if _h4 and _run_s is None:
+                            _run_s = _i4
+                        elif not _h4 and _run_s is not None:
+                            if (_i4 - _run_s) * 256 / sr >= 4.0:
+                                _best_s, _best_e = _run_s, _i4
+                            _run_s = None
+                    if _run_s is not None and (len(_hot) - _run_s) * 256 / sr >= 4.0:
+                        _best_s, _best_e = _run_s, len(_hot)
+                    if _best_e > _best_s:
+                        self._burst_win = (round(_best_s * 256 / sr, 1),
+                                           round(_best_e * 256 / sr, 1))
+                        print(f"      决斗窗自动检测: {self._burst_win[0]}"
+                              f"-{self._burst_win[1]}s")
+                except Exception:
+                    pass
+            except Exception:
+                self._melody_env = None
             return onsets
         except Exception as e:
             print(f"      Onset检测失败: {e}")
@@ -2730,7 +3251,8 @@ class ProductionDirector:
     #  Phase 3: 渲染执行
     # ================================================================
 
-    def _execute(self, script, resolution, fps, enable_ae_channel: bool = False):
+    def _execute(self, script, resolution, fps, enable_ae_channel: bool = False,
+                 beat_lock_hard_cuts: bool = False):
         """执行渲染 — 变速裁剪素材 + xfade真转场合成（硬切兜底）
 
         enable_ae_channel: 高级运镜镜头(zoom_back/pulse)走 AE 贝塞尔缓动+运动模糊
@@ -2818,10 +3340,148 @@ class ProductionDirector:
         # 1.5 AE高级运镜通道: 识别 zoom_back/pulse 镜头, 批量 AE 预渲染
         # (v22 双通道架构: AE 贝塞尔缓动+运动模糊 替代 FFmpeg 匀速 zoompan)
         ae_clips_map: Dict[int, str] = {}
+        # ══ 重复乐句克隆 (2026-09-03 用户定稿语法) ═══════════════════════
+        # 用户澄清: 不是全片段泛化, 而是"25s 后有几秒音乐与 23-25s 是同一段
+        # (重复乐句)"→只把这些重复段用标杆段同款编导克隆。专业漫剪惯例:
+        # 重复乐句 = 重复视觉语法 (motif repetition)。
+        # 实现: 自动定位律动最密的 2s 标杆窗 → 全曲滑动窗节拍指纹(0.1s 网格
+        # 二值 onset 向量)余弦相似度 → 相似度≥0.75 的窗口合并为重复段 →
+        # 段内镜头克隆标杆的 push/zoom_out 交替; 段外镜头一律保持原分派。
+        _groove = getattr(self, "_groove_onsets", None) or []
+        if len(_groove) >= 8:
+            import numpy as _npq
+
+            def _fp(a, b):
+                _bins = _npq.arange(a, b, 0.1)
+                _v = _npq.zeros(len(_bins))
+                for o in _groove:
+                    if a <= o < b:
+                        _v[min(int((o - a) / 0.1), len(_bins) - 1)] = 1.0
+                return _v
+
+            _dur = max(s.duration + s.start_time for s in segs) if segs else 0
+            # 标杆窗 = 律动最密的 2s
+            _best_t, _best_n = 0.0, -1
+            for _wt in _npq.arange(0, max(_dur - 2, 0.1), 0.5):
+                _n = sum(1 for o in _groove if _wt <= o < _wt + 2.0)
+                if _n > _best_n:
+                    _best_n, _best_t = _n, float(_wt)
+            _ref_fp = _fp(_best_t, _best_t + 2.0)
+            _ref_norm = float(_npq.linalg.norm(_ref_fp)) or 1.0
+            # 重复段检测 (排除标杆自身邻域)
+            _repeats = []
+            for _wt in _npq.arange(0, max(_dur - 2, 0.1), 0.5):
+                if abs(_wt - _best_t) < 2.5:
+                    continue
+                _f = _fp(float(_wt), float(_wt) + 2.0)
+                _fn = float(_npq.linalg.norm(_f)) or 1e-9
+                _sim = float(_f @ _ref_fp) / (_fn * _ref_norm)
+                if _sim >= 0.75:
+                    _repeats.append((float(_wt), float(_wt) + 2.0, round(_sim, 2)))
+            # 合并重叠重复段
+            _merged = []
+            for _a, _b, _s2 in _repeats:
+                if _merged and _a <= _merged[-1][1] + 0.5:
+                    _merged[-1] = (_merged[-1][0], _b, max(_merged[-1][2], _s2))
+                else:
+                    _merged.append((_a, _b, _s2))
+            _VIOLIN_BURST2 = getattr(self, "_burst_win", (12.8, 30.0))
+            _zones = [(_best_t, _best_t + 2.0, 1.0)] + _merged
+            # 用户定稿(对调完成态): 小提琴急速段=推进/放大专属区; 前段(0-12.8s)
+            # 撤掉推进保持沉稳铺垫 — 强技巧集中爆发, 与 run26 的对比美学一致
+            _bw3 = getattr(self, '_burst_win', (12.8, 30.0))
+            _zones = [(_bw3[0], _bw3[1], 1.0)] + [
+                (a, b, s2) for a, b, s2 in _zones
+                if a >= _bw3[1]]
+            print(f"  [重复乐句克隆] 标杆 { _best_t:.1f}-{_best_t+2:.1f}s "
+                  f"(律动{_best_n}) | 重复段: "
+                  + (", ".join(f"{a:.1f}-{b:.1f}s(sim{s2})" for a, b, s2 in _merged)
+                     or "无"))
+            # 段内镜头克隆标杆编导: 相位逐拍对齐 (帧级路线图③)
+            # 旧版按段内位置交替 → 标杆与克隆段相位有半拍错位;
+            # 现按"镜头起始前段内律动拍序号"的奇偶交替 — 每段第一拍
+            # 必为 push, 与标杆逐拍同相。
+            for _s in segs:
+                _st = float(_s.start_time)
+                for _za, _zb, _zs3 in _zones:
+                    if _za - 0.05 <= _st < _zb:
+                        _beat_idx = sum(1 for o in _groove
+                                        if _za - 0.05 <= o < _st - 0.02)
+                        if abs(_za - _bw3[0]) < 0.01:
+                            # 小提琴段专属: 推进/放大 + 速度跟旋律律动(非鼓点)
+                            # 持续音镜头(≥0.38s=琴拉长音)→缓推跟弓, 短镜→交替撞击
+                            if _s.duration >= 0.38:
+                                _s.zoompan_effect = "zoom_in"
+                            else:
+                                _s.zoompan_effect = ("push" if _beat_idx % 2 == 0
+                                                      else "zoom_in")
+                            _env3 = getattr(self, "_melody_env", None)
+                            if _env3:
+                                import bisect as _bis3
+                                _i3 = _bis3.bisect_left(_env3[0], _st)
+                                _e3 = _env3[1][min(_i3, len(_env3[1]) - 1)]
+                                import numpy as _nph
+                                _w3 = [e for tt, e in zip(*_env3)
+                                       if _bw3[0] <= tt <= _bw3[1]]
+                                _p60 = float(_nph.percentile(_w3, 60)) if _w3 else 0
+                                _p30 = float(_nph.percentile(_w3, 30)) if _w3 else 0
+                                # 迟滞换档 (2026-09-04): 能量明确越过阈值±18%带
+                                # 才换档 — 临界抖动被吸收, 真实乐句变化立即响应
+                                _m3 = 0.18 * max(_p60 - _p30, 1e-9)
+                                _tier = getattr(self, "_sp_tier", 1)
+                                if _e3 >= _p60 + _m3:
+                                    _tier = 2
+                                elif _e3 <= _p30 - _m3:
+                                    _tier = 0
+                                elif _tier == 2 and _e3 < _p60 - _m3:
+                                    _tier = 1
+                                elif _tier == 0 and _e3 > _p30 + _m3:
+                                    _tier = 1
+                                self._sp_tier = _tier
+                                _s.speed = (0.55, 1.1, 1.5)[_tier]
+                            else:
+                                _mel_d = sum(
+                                    1 for m in (getattr(self, "_melody_onsets", None)
+                                                or [])
+                                    if abs(m - _st) <= 0.6) / 1.2
+                                _s.speed = round(
+                                    min(1.55, max(0.50, 0.28 + 0.21 * _mel_d))
+                                    / 0.05) * 0.05
+                        else:
+                            _s.zoompan_effect = ("push" if _beat_idx % 2 == 0
+                                                  else "zoom_out")
+                        break
+
+        # ══ 速度终审 (2026-09-03, 与运镜克隆终审同款根治) ═══════════════
+        # 规划层存在多副本速度赋值(第四次发现), 30.75s+ 段的 0.5 来自未收口
+        # 的旧副本。解法同运镜: 渲染前用验证公式统一覆写, 单一权威源。
+        _groove_sp = []  # 回滚: 终审曾把 108 镜压成 1.55 抹平 run26 层次
+        if False:
+            for _s in segs:
+                _st = float(_s.start_time)
+                _d = sum(1 for o in _groove_sp if abs(o - _st) <= 0.6) / 1.2
+                _s.speed = round(min(1.55, max(0.50, 0.28 + 0.21 * _d)) / 0.05) * 0.05
+            from collections import Counter as _CS
+            print("  [速度终审] "
+                  + str(dict(sorted(_CS(round(x.speed, 2) for x in segs).items()))))
+
+        # 全局帧网格对齐 (2026-09-02 踩坑#29 根治): 每片独立量化累计 p50 85ms
+        # 随机漂移(下一片补偿修不了已发生边界的随机量化)。切点吸附全局 fps 帧
+        # 网格 + 逐片精确帧数渲染(-frames:v), concat 累计边界=网格=计划切点。
+        _gp = 0.0
+        for _s in segs:
+            _b = _gp + _s.duration
+            _bg = round(_b * fps) / fps
+            _s.duration = round(_bg - _gp, 6)
+            _s.start_time = round(_gp, 6)
+            _gp = _bg
+
         if enable_ae_channel:
             from ai.ae_render_channel import AERenderChannel, AE_TECHS
             _ae_plan = {}
             for _i, _seg in enumerate(segs):
+                if len(_ae_plan) >= 12:
+                    break  # 2026-09-03 容量上限: aerender 每镜30-60s, 超量防爆
                 _zp = getattr(_seg, 'zoompan_effect', None)
                 _onsets = getattr(_seg, 'onset_times', None) or []
                 if _zp not in AE_TECHS:
@@ -2854,6 +3514,39 @@ class ProductionDirector:
                 if ae_clips_map:
                     print(f"  [AE通道] 成功渲染 {len(ae_clips_map)}/{len(_ae_plan)} 镜头")
 
+        # 节拍锁定硬切模式 (2026-09-02): fade/xfade 的渐变中点天然糊掉切点
+        # (实测实际切点 vs 计划 p50 偏 122ms, 最大 587ms, xfade 链内边界数学
+        # 是漂移主源)。漫剪铁律: 卡点用硬切。全量降级后组边界=concat 累计
+        # 时长, 由 _tl_drift 累加器锁死在计划切点 (±1帧)。
+        if beat_lock_hard_cuts:
+            _demoted = 0
+            for _s in segs:
+                if getattr(_s, "transition", "cut") != "cut":
+                    _s.transition = "cut"
+                    if isinstance(getattr(_s, "transition_params", None), dict):
+                        _s.transition_params.pop("type", None)
+                        _s.transition_params.pop("duration", None)
+                    _demoted += 1
+            if _demoted:
+                print(f"  [节拍锁定] {_demoted} 个转场降级硬切 (切点=concat累计, 漂移累加器锁定)")
+
+        # 累计帧量化漂移反馈 (2026-09-02 根因修复):
+        # 每片段被量化到整帧 (24fps → ±20.8ms), 50 片随机游走累计 ±150ms,
+        # 实测实际切点-强鼓点对齐率仅 13% (报告 42%) — 渲染层把切点漂离鼓点。
+        # 累加器: 每片实测时长(ffprobe)与计划时长之差累加, 反馈进下一片
+        # 目标时长, 把累计时间线锁死在计划切点上 (±1 帧内)。
+        _tl_drift = 0.0
+
+        def _probe_dur(p) -> float:
+            try:
+                _r = subprocess.run(
+                    [FFPROBE, "-v", "quiet", "-show_entries", "format=duration",
+                     "-of", "csv=p=0", str(p)],
+                    capture_output=True, text=True, timeout=30)
+                return float(_r.stdout.strip())
+            except Exception:  # noqa: BLE001
+                return 0.0
+
         for i, seg in enumerate(segs):
             if not Path(seg.source_file).exists():
                 print(f"    [WARN] 素材不存在: {seg.source_file}")
@@ -2861,7 +3554,7 @@ class ProductionDirector:
 
             # 无预补偿渲染: 各 clip 精确 d_i; 链内最后 clip 一次性
             # 补偿本链全部转场时长 (2026-08-16 零泄漏重构)
-            render_dur = seg.duration + chain_last_extra.get(i, 0.0)
+            render_dur = seg.duration + chain_last_extra.get(i, 0.0) + _tl_drift
 
             clip_path = run_dir / f"clip_{seg.index:03d}.mp4"
             preset = self._color_presets.get(seg.color_grade, self._color_presets["climax"])
@@ -2871,7 +3564,102 @@ class ProductionDirector:
             if _ae_path and Path(_ae_path).exists():
                 shutil.copy(_ae_path, str(clip_path))
                 ok = clip_path.exists() and clip_path.stat().st_size > 0
-            else:
+                if ok:
+                    clips.append((str(clip_path), seg))
+                    _ad = _probe_dur(clip_path)
+                    if _ad > 0:
+                        _tl_drift += render_dur - _ad
+                continue
+
+            # ══ 镜内变速曲线 (2026-09-03 外网变速卡点核心) ══════════════
+            # 调研结论: 全管线速度只有每镜常数; 参考片逆向(09-计划文件
+            # 2026-08-11)实测"大量非匀速、缓动曲线、慢放不插帧"。Xenoz 要领
+            # "极陡缓入缓出、几乎无匀速段"。实现: 每镜拆 2-3 个匀速子段拼出
+            # 速度包络, 复用 -frames:v 精确帧数 + concat(同编码无接缝),
+            # 曲线均值=seg.speed 保证节拍跨度不变。
+            _sp = round(float(getattr(seg, "speed", 1.0) or 1.0), 2)
+            _CURVES = {  # (占比, 相对速度) — 均值=1 再按 seg.speed 缩放
+                0.55: [(0.25, 1.80), (0.75, 0.70)],          # 慢放落拍: 快进→急减速停在拍上
+                0.70: [(0.30, 1.55), (0.70, 0.72)],          # 温和慢放
+                0.90: [(0.30, 1.55), (0.50, 0.55), (0.20, 1.30)],  # 推近回落呼吸
+                1.00: [(0.50, 1.35), (0.50, 0.65)],          # pulse: 快→慢 脉冲
+                1.30: [(0.25, 0.55), (0.75, 1.22)],          # 加速弹起: 吸收→弹射离拍
+            }
+            _curve = None
+            if getattr(seg, "zoompan_effect", None) == "pulse" or _sp in (0.55, 0.7, 0.9, 1.3):
+                _curve = _CURVES.get(_sp) or (_CURVES[1.00] if _sp == 1.0 else None)
+
+            if _curve:
+                import copy as _copy
+                _avg = sum(f * v for f, v in _curve)
+                _k = _sp / _avg  # 缩放使曲线均值=seg.speed
+                _src_off = seg.source_start
+                _ok_all = True
+                # 帧级路线图④ (2026-09-04): 子段边界吸附段内律动拍点(±0.12s)
+                # — 变速拐点落在鼓点帧上, 曲线与节拍帧级对齐
+                _bt0 = float(seg.start_time)
+                _gro = getattr(self, "_groove_onsets", None) or []
+                _snapped = []
+                _acc = 0.0
+                for _frac, _v in _curve[:-1]:
+                    _acc += _frac
+                    _bt = _bt0 + _acc * render_dur
+                    _g0 = None
+                    _gd = 0.12
+                    for g in _gro:
+                        if abs(g - _bt) < _gd:
+                            _gd, _g0 = abs(g - _bt), g
+                    _snapped.append(max(_bt0, _g0 if _g0 is not None else _bt))
+                _bounds = _snapped + [_bt0 + render_dur]
+                _prev_b = _bt0
+                for _ci, ((_frac, _v), _sb) in enumerate(zip(_curve, _bounds)):
+                    _sub_dur = max(0.08, _sb - _prev_b)
+                    _prev_b = _sb
+                    _vv = _v * _k
+                    _sub_path = run_dir / f"clip_{seg.index:03d}s{_ci}.mp4"
+                    _sub_ok = self._extract_clip(
+                        source=seg.source_file, output=str(_sub_path),
+                        start_time=_src_off, duration=_sub_dur,
+                        resolution=resolution, fps=fps, color=preset,
+                        speed=_vv, lut_path=getattr(self, '_lut_path', None),
+                        zoompan_effect=None, onset_times=None,
+                        out_frames=max(2, round(_sub_dur * fps)),
+                        flash=(_flash_c if _ci == 0 else ""),
+                        trans=(_trans_c if _ci == 0 else ""),
+                    )
+                    _ok_all = _ok_all and _sub_ok and _sub_path.exists()
+                    if not _sub_ok:
+                        break
+                    _sub_seg = _copy.copy(seg)
+                    _sub_seg.transition = "cut"   # 镜内子段硬接(同编码无接缝)
+                    clips.append((str(_sub_path), _sub_seg))
+                    _ad = _probe_dur(_sub_path)
+                    if _ad > 0:
+                        _tl_drift += _sub_dur - _ad
+                    _src_off += _sub_dur * _vv
+                ok = False  # 已在循环内处理 append
+                if _ok_all:
+                    continue
+                # 曲线渲染失败 → 落到下方单段恒速回退
+            # 撞击帧决策 (2026-09-03): 起始踩律动层强鼓点的镜头 → 头2帧闪,
+            # 白黑轮换, 每3个锚点留1个不闪(呼吸, 防闪帧疲劳)
+            _flash_c, _trans_c = "", ""
+            _st_seg = float(seg.start_time)
+            # 最近律动鼓点分型: kick→白黑闪 / snare→RGB故障 / 其余不处理
+            _ntype, _nd = None, 0.06
+            for _tk, _tv in (getattr(self, "_onset_types", {}) or {}).items():
+                _td = abs(_tk - _st_seg)
+                if _td < _nd:
+                    _nd, _ntype = _td, _tv
+            if _ntype == "kick":
+                self._flash_alt = getattr(self, "_flash_alt", 0) + 1
+                if self._flash_alt % 3 != 0:
+                    _flash_c = ("white" if self._flash_alt % 2 == 0 else "black")
+            elif _ntype == "snare":
+                self._glitch_alt = getattr(self, "_glitch_alt", 0) + 1
+                if self._glitch_alt % 2 == 0:  # 半数 snare 故障, 防过密
+                    _trans_c = "glitch"
+            if True:
                 ok = self._extract_clip(
                     source=seg.source_file,
                     output=str(clip_path),
@@ -2884,9 +3672,15 @@ class ProductionDirector:
                     lut_path=getattr(self, '_lut_path', None),
                     zoompan_effect=getattr(seg, 'zoompan_effect', None),
                     onset_times=getattr(seg, 'onset_times', None),
+                    out_frames=max(2, round(render_dur * fps)),
+                    flash=_flash_c, trans=_trans_c,
                 )
             if ok and clip_path.exists() and clip_path.stat().st_size > 0:
                 clips.append((str(clip_path), seg))
+                # 漂移累加: 计划 - 实测, 反馈给下一片 (负=实际偏长则下片缩短)
+                _ad = _probe_dur(clip_path)
+                if _ad > 0:
+                    _tl_drift += render_dur - _ad
 
         if not clips:
             raise RuntimeError("所有素材裁剪失败，无法生成视频")
@@ -3085,7 +3879,8 @@ class ProductionDirector:
 
     def _extract_clip(self, source, output, start_time, duration, resolution, fps, color,
                       speed: float = 1.0, lut_path: str = None, zoompan_effect: str = None,
-                      onset_times: list = None):
+                      onset_times: list = None, out_frames: int = 0,
+                      flash: str = "", trans: str = ""):
         """裁剪单个素材段，返回是否成功
 
         Args:
@@ -3265,6 +4060,27 @@ class ProductionDirector:
             output,
         ]
 
+        if trans == "whip":
+            # 甩镜转场 (2026-09-04 转场库②): 段落衔接镜头头3帧横向模糊甩动
+            cmd[cmd.index("-vf") + 1] += (
+                ",boxblur=luma_radius=20:luma_power=1:enable='lt(n,3)'")
+        if trans == "glitch":
+            # 故障转场 (2026-09-03 转场库①): snare 起始镜头头3帧 RGB 色散
+            # — 与 kick 白黑闪构成两套打击语言
+            cmd[cmd.index("-vf") + 1] += (
+                ",rgbashift=rh=12:bv=-12:enable='lt(n,3)'")
+        if flash in ("white", "black"):
+            # 撞击帧 (2026-09-03 第一梯队①): 强鼓点起始镜头头 2 帧闪 —
+            # 外网编辑打击感核心武器; fade from color 实现, 无需新资产
+            _vi2 = cmd.index("-vf")
+            cmd[_vi2 + 1] += (f",fade=t=in:st=0:d={2 / fps:.4f}:"
+                              f"color={'white' if flash == 'white' else 'black'}")
+        if out_frames > 0:
+            # 精确帧数输出: -frames:v N 硬于 -t (编码器精确停在第 N 帧,
+            # 消除 ±1 帧的时长→帧数换算误差)
+            _ti = [i for i, a in enumerate(cmd) if a == "-t"]
+            if len(_ti) >= 2:
+                cmd[_ti[1]:_ti[1] + 2] = ["-frames:v", str(out_frames)]
         try:
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=300,
                                encoding="utf-8", errors="ignore")
@@ -3439,43 +4255,151 @@ class ProductionDirector:
         return fallback
 
     # ================================================================
-    #  Phase 5: BGM 混音
+    #  Phase 5a: BGM SFX 污染清理 (librosa HPSS)
+    # ================================================================
+
+    def _clean_bgm_sfx(self, bgm_path: str, work_dir: str) -> str:
+        """HPSS 分离 BGM 中的 percussive SFX 污染
+
+        独自升级.mp3 为动漫 OST, 含嵌入式打击/爆炸/冲击音效:
+          - 82.7% percussive 能量集中在 <300Hz
+          - 冲击类 SFX 在 100-500Hz 有谐波分量
+        用 librosa HPSS 做激进分离, 对 percussive 全频段深度衰减,
+        并对 harmonic 在 SFX 谐波频段做选择性压制.
+        """
+        import hashlib
+        src_hash = hashlib.md5(
+            str(Path(bgm_path).resolve()).encode()
+        ).hexdigest()[:8]
+        stem_name = Path(bgm_path).stem
+        cleaned_path = Path(work_dir) / f"{stem_name}_sfx_cleaned_{src_hash}.wav"
+
+        if cleaned_path.exists():
+            print(f"    [SFX清理] 命中缓存: {cleaned_path.name}")
+            return str(cleaned_path)
+
+        try:
+            import librosa
+            import numpy as np
+            import soundfile as sf
+        except ImportError as e:
+            print(f"    [SFX清理] librosa 未安装({e}), 退回原始 BGM")
+            return bgm_path
+
+        print(f"    [SFX清理] HPSS 音源分离中 (激进模式)...")
+
+        try:
+            y, sr = librosa.load(bgm_path, sr=44100, mono=False)
+            if y.ndim == 1:
+                y = np.stack([y, y])
+
+            n_ch = y.shape[0]
+            y_harmonic = np.zeros_like(y)
+            y_perc = np.zeros_like(y)
+
+            for ch in range(n_ch):
+                y_h, y_p = librosa.effects.hpss(y[ch], margin=(2.0, 8.0))
+                y_harmonic[ch] = y_h
+                y_perc[ch] = y_p
+
+            sfx_gain_low = 0.05
+            sfx_gain_high = 0.20
+            cutoff_hz = 300.0
+            harm_suppress_low = 300.0
+            harm_suppress_high = 800.0
+            harm_gain = 0.7
+
+            n_fft = 2048
+            hop = n_fft // 4
+            freqs = np.fft.rfftfreq(n_fft, d=1.0 / sr)
+            cutoff_bin = int(np.searchsorted(freqs, cutoff_hz))
+            harm_lo_bin = int(np.searchsorted(freqs, harm_suppress_low))
+            harm_hi_bin = int(np.searchsorted(freqs, harm_suppress_high))
+
+            for ch in range(n_ch):
+                stft_p = librosa.stft(y_perc[ch], n_fft=n_fft, hop_length=hop)
+                mag_p, phase_p = np.abs(stft_p), np.exp(1j * np.angle(stft_p))
+
+                mask_p = np.full(mag_p.shape, sfx_gain_high)
+                mask_p[:cutoff_bin, :] = sfx_gain_low
+
+                transition = max(1, cutoff_bin // 4)
+                ramp_start = max(0, cutoff_bin - transition)
+                for b in range(ramp_start, min(cutoff_bin, mag_p.shape[0])):
+                    t = (b - ramp_start) / max(1, cutoff_bin - ramp_start)
+                    mask_p[b, :] = sfx_gain_low + (sfx_gain_high - sfx_gain_low) * t
+
+                stft_clean_p = mag_p * mask_p * phase_p
+                y_perc[ch] = librosa.istft(stft_clean_p, hop_length=hop, length=len(y[ch]))
+
+                stft_h = librosa.stft(y_harmonic[ch], n_fft=n_fft, hop_length=hop)
+                mag_h, phase_h = np.abs(stft_h), np.exp(1j * np.angle(stft_h))
+
+                mask_h = np.ones(mag_h.shape)
+                for b in range(harm_lo_bin, min(harm_hi_bin, mag_h.shape[0])):
+                    mask_h[b, :] = harm_gain
+
+                stft_clean_h = mag_h * mask_h * phase_h
+                y_harmonic[ch] = librosa.istft(stft_clean_h, hop_length=hop, length=len(y[ch]))
+
+            mixed = y_harmonic + y_perc
+            mixed = np.clip(mixed.T, -1.0, 1.0)
+            sf.write(str(cleaned_path), mixed, sr)
+
+            print(f"    [SFX清理] 完成: percussive <{cutoff_hz}Hz->{sfx_gain_low:.0%}, "
+                  f">{cutoff_hz}Hz->{sfx_gain_high:.0%}, "
+                  f"harmonic {harm_suppress_low}-{harm_suppress_high}Hz->{harm_gain:.0%}")
+            return str(cleaned_path)
+
+        except Exception as e:
+            print(f"    [SFX清理] HPSS 失败({e}), 退回原始 BGM")
+            return bgm_path
+
+    # ================================================================
+    #  Phase 5b: BGM 混音
     # ================================================================
 
     def _mix_audio(self, video_path, bgm_path, output_path, bgm_start_sec, duration):
-        """混合 BGM 到视频"""
+        """混合 BGM 到视频 (bgm_path 应为 SFX 清理后的文件)"""
 
         # 先检查视频是否有音频流
         has_audio = self._probe_has_audio(video_path)
 
+        fade_in = 1.0
+        fade_out = 1.5
+        fade_out_start = max(0, duration - fade_out)
+
         if has_audio:
+            # 2026-09-02: 静音原始视频音频(动漫素材自带爆炸/冲击等音效),
+            # 仅使用 HPSS 清理后的 BGM — 之前 30% 原始音频是"音效污染"根因
             filter_complex = (
-                f"[0:a]volume=0.3[orig];"
                 f"[1:a]atrim=start={bgm_start_sec}:end={bgm_start_sec + duration},"
-                f"asetpts=PTS-STARTPTS,volume=0.98[bgm];"
-                f"[orig][bgm]amix=inputs=2:duration=first:dropout_transition=2[aout]"
+                f"asetpts=PTS-STARTPTS,"
+                f"volume=0.8,"
+                f"afade=t=in:st=0:d={fade_in},"
+                f"afade=t=out:st={fade_out_start}:d={fade_out}[bgm]"
             )
             cmd = [
                 self.ffmpeg, "-y",
                 "-i", video_path,
                 "-ss", "0", "-i", bgm_path,
                 "-filter_complex", filter_complex,
-                "-map", "0:v", "-map", "[aout]",
+                "-map", "0:v", "-map", "[bgm]",
                 "-c:v", "copy", "-c:a", "aac", "-b:a", "320k",
                 output_path,
             ]
         else:
-            # 视频无音频，直接用 BGM
-            # (2026-08-15) volume=0.98 (-0.2dB 余量): 该 BGM 峰值 0dB 砖墙
-            # 削波, mp3→AAC 重编码会恶化采样间削波产生"杂音"听感
             cmd = [
                 self.ffmpeg, "-y",
                 "-i", video_path,
                 "-ss", f"{bgm_start_sec}", "-i", bgm_path,
                 "-map", "0:v", "-map", "1:a",
-                "-af", "volume=0.98",
+                "-af", (f"atrim=0:{duration},asetpts=PTS-STARTPTS,"
+                        f"volume=0.8,"
+                        f"afade=t=in:st=0:d={fade_in},"
+                        f"afade=t=out:st={fade_out_start}:d={fade_out}"),
                 "-c:v", "copy", "-c:a", "aac", "-b:a", "320k",
-                "-shortest",
+                "-t", str(duration),
                 output_path,
             ]
 

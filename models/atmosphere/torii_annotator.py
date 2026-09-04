@@ -30,6 +30,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from core.torch_runtime import infer_ctx
 
 logger = logging.getLogger(__name__)
 
@@ -302,7 +303,7 @@ class ToriiAtmosphereAnnotator:
                       for k, v in inputs.items()}
 
             t0 = time.time()
-            with torch.no_grad():
+            with infer_ctx(device):
                 out_ids = self._model.generate(
                     **inputs, max_new_tokens=384, do_sample=False)
             elapsed = time.time() - t0
@@ -368,7 +369,7 @@ class ToriiAtmosphereAnnotator:
             retry_inputs = {k: (v.to(device) if hasattr(v, "to") else v)
                             for k, v in retry_inputs.items()}
             t0 = time.time()
-            with torch.no_grad():
+            with infer_ctx(str(device)):
                 out_ids = self._model.generate(
                     **retry_inputs, max_new_tokens=384, do_sample=False)
             self._n_infer += 1

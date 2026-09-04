@@ -32,6 +32,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
+from core.torch_runtime import infer_ctx, get_device
 
 PROJECT = Path(__file__).resolve().parents[1]
 DEFAULT_VIDEO = PROJECT / "data" / "real_amv_test" / "DL_黑岩射手_r924_BV1NL4y1H7u7.mp4"
@@ -92,7 +93,7 @@ def main() -> int:
     sys.path.insert(0, str(PROJECT / "external" / "rvm"))
     from model import MattingNetwork  # noqa: E402
 
-    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    dev = get_device()
     net = MattingNetwork("mobilenetv3").eval().to(dev)
     net.load_state_dict(torch.load(args.checkpoint, map_location=dev, weights_only=True))
     print(f"[MODEL] MattingNetwork(mobilenetv3) on {dev}; "
@@ -111,7 +112,7 @@ def main() -> int:
         src = src.unsqueeze(0).unsqueeze(0).to(dev)   # 1,1,3,H,W
 
         t0 = time.time()
-        with torch.no_grad():
+        with infer_ctx(dev):
             fgr, pha, *rec = net(src, *rec, downsample_ratio=0.4)
         dt = time.time() - t0
         pha_np = pha[0, 0, 0].cpu().numpy()           # HxW float [0,1]

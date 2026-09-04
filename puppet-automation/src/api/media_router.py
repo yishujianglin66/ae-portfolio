@@ -259,6 +259,12 @@ async def media_download(req: MediaDownloadRequest):
         )
 
     output_dir = req.output_dir or str(DEFAULT_MEDIA_DIR)
+    resolved_out = Path(output_dir).resolve()
+    try:
+        resolved_out.relative_to(PROJECT_ROOT.resolve())
+    except ValueError:
+        raise HTTPException(status_code=403, detail="输出目录不在项目根目录下")
+    output_dir = str(resolved_out)
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     task_id = _register_task(req.url, output_dir=output_dir, audio_only=req.audio_only)
@@ -316,7 +322,12 @@ async def media_list(
     limit: int = Query(200, ge=1, le=1000, description="返回条数上限"),
 ):
     """列出已下载素材（默认素材目录及其子目录下）。"""
-    base_dir = Path(output_dir) if output_dir else DEFAULT_MEDIA_DIR
+    base_dir = Path(output_dir).resolve() if output_dir else DEFAULT_MEDIA_DIR
+    if output_dir:
+        try:
+            base_dir.relative_to(PROJECT_ROOT.resolve())
+        except ValueError:
+            raise HTTPException(status_code=403, detail="素材目录不在项目根目录下")
     if not base_dir.exists():
         return {"success": True, "base_dir": str(base_dir), "total": 0, "files": []}
 

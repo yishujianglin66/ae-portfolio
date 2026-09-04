@@ -16,10 +16,12 @@ from typing import Dict, List
 import numpy as np
 import torch
 
+from core.torch_runtime import get_device, infer_ctx
+
 ROOT = Path(__file__).resolve().parent.parent
 CCLIP_DIR = Path(r"D:\ms_cache\models\AI-ModelScope--chinese-clip-vit-base-patch16\snapshots\master")
 BGE_M3_DIR = Path(r"D:\ms_cache\models\BAAI--bge-m3\snapshots\master")
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = get_device()
 
 # 底座标签映射(缓存键 + 底座切换)
 BB_TAGS = {"laion": "laion-vitb32", "laion-l": "laion-vitl14", "cclip": "cclip-vitb16"}
@@ -62,7 +64,7 @@ class _LaionBackbone:
                 except Exception:
                     ts.append(self.pre(Image.new("RGB", (224, 224))))
             x = torch.stack(ts).to(DEVICE)
-            with torch.no_grad(), torch.autocast(DEVICE, dtype=torch.float16):
+            with infer_ctx(DEVICE):
                 v = self.model.encode_image(x)
             outs.append((v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9))
                         .float().cpu().numpy())
@@ -70,7 +72,7 @@ class _LaionBackbone:
 
     def encode_texts(self, texts: List[str]) -> np.ndarray:
         t = self.tok(texts).to(DEVICE)
-        with torch.no_grad():
+        with infer_ctx(DEVICE):
             v = self.model.encode_text(t)
         return (v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9)).float().cpu().numpy()
 
@@ -109,7 +111,7 @@ class _CnClipBackbone:
                 except Exception:
                     imgs.append(Image.new("RGB", (224, 224)))
             inputs = self.proc(images=imgs, return_tensors="pt").to(DEVICE)
-            with torch.no_grad(), torch.autocast(DEVICE, dtype=torch.float16):
+            with infer_ctx(DEVICE):
                 v = self._as_tensor(self.model.get_image_features(**inputs))
             outs.append((v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9))
                         .float().cpu().numpy())
@@ -120,7 +122,7 @@ class _CnClipBackbone:
         for i in range(0, len(texts), 64):
             inputs = self.proc(text=texts[i:i + 64], return_tensors="pt",
                                padding=True, truncation=True).to(DEVICE)
-            with torch.no_grad(), torch.autocast(DEVICE, dtype=torch.float16):
+            with infer_ctx(DEVICE):
                 v = self._as_tensor(self.model.get_text_features(**inputs))
             outs.append((v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9))
                         .float().cpu().numpy())
@@ -153,7 +155,7 @@ class _LaionLargeBackbone:
                 except Exception:
                     ts.append(self.pre(Image.new("RGB", (224, 224))))
             x = torch.stack(ts).to(DEVICE)
-            with torch.no_grad(), torch.autocast(DEVICE, dtype=torch.float16):
+            with infer_ctx(DEVICE):
                 v = self.model.encode_image(x)
             outs.append((v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9))
                         .float().cpu().numpy())
@@ -161,7 +163,7 @@ class _LaionLargeBackbone:
 
     def encode_texts(self, texts: List[str]) -> np.ndarray:
         t = self.tok(texts).to(DEVICE)
-        with torch.no_grad():
+        with infer_ctx(DEVICE):
             v = self.model.encode_text(t)
         return (v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9)).float().cpu().numpy()
 

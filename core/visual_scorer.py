@@ -23,6 +23,7 @@ import logging
 import os
 import re
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -105,7 +106,11 @@ def _frame_to_b64(path: str, max_side: int = 768) -> str:
 
 
 def _call_qwen_vl(frames_b64: List[str], prompt: str) -> Dict[str, Any]:
-    """直连 DashScope compatible-mode 多模态（OpenAI 兼容格式）。"""
+    """直连 DashScope compatible-mode 多模态（OpenAI 兼容格式）。
+
+    403/429（额度耗尽/限流）自动接入 core.llm_chain 多模型降级链
+    （DashScope→SiliconFlow Qwen3-VL-32B→8B，错误分级拉黑 30min）。
+    """
     _load_env()
     key = os.environ.get("QWEN_API_KEY") or os.environ.get("DASHSCOPE_API_KEY")
     base = os.environ.get("QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
@@ -147,6 +152,19 @@ def _call_qwen_vl(frames_b64: List[str], prompt: str) -> Dict[str, Any]:
                 cache_file.parent.mkdir(parents=True, exist_ok=True)
                 cache_file.write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
             return result
+        except urllib.error.HTTPError as e:
+            last_err = f"HTTP {e.code}"
+            if e.code in (401, 403, 429):
+                # 额度/鉴权错 → 多模型自动降级链（用户指令: 额度用完自动切换，不断层）
+                from core.llm_chain import vision_call
+                fallback = vision_call(frames_b64, prompt)
+                if "error" not in fallback:
+                    fallback["_via_llm_chain"] = True
+                    cache_file.parent.mkdir(parents=True, exist_ok=True)
+                    cache_file.write_text(
+                        json.dumps(fallback, ensure_ascii=False), encoding="utf-8")
+                    return fallback
+                last_err = f"{last_err}; 降级链: {fallback.get('error', '')[:120]}"
         except Exception as e:  # noqa: BLE001
             last_err = str(e)
             if attempt < 2:  # 最后一次失败后不再空等

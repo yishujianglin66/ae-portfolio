@@ -28,6 +28,8 @@ from collections import Counter, defaultdict
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import infer_ctx
+
 # === 路径配置 ===
 TEACHER_LABELS = ROOT / "data" / "training" / "labels.json"
 LORA_VITL14_PATH = ROOT / "models" / "clip_lora_aot_vitl14.pt"
@@ -65,23 +67,20 @@ def extract_features_clip(model, preprocess, dataloader, device, use_lora=False,
     if lora_model:
         lora_model.eval()
     
-    with torch.no_grad():
+    with infer_ctx(device):
         for images, labels in dataloader:
             images = images.to(device)
             
             if use_lora and lora_model:
-                with torch.autocast(device, dtype=torch.float16):
-                    features = lora_model(images)
-                    if isinstance(features, tuple):
-                        features = features[0]
+                features = lora_model(images)
+                if isinstance(features, tuple):
+                    features = features[0]
                 features = features.float()
             else:
-                with torch.autocast(device, dtype=torch.float16):
-                    # 用CLIP visual encoder
-                    visual = model.visual if hasattr(model, 'visual') else model
-                    features = visual(images)
-                    if isinstance(features, tuple):
-                        features = features[0]
+                visual = model.visual if hasattr(model, 'visual') else model
+                features = visual(images)
+                if isinstance(features, tuple):
+                    features = features[0]
                 features = features.float()
             
             features = torch.nn.functional.normalize(features, dim=-1)

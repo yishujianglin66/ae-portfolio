@@ -1,0 +1,70 @@
+{
+  "global": {
+    "punch_budget": 4,
+    "punch_spacing_sec": 20
+  },
+  "arcs": [
+    {
+      "start": 0.0,
+      "end": 0.25,
+      "mood": "intro",
+      "motion_per_10": 0,
+      "cameras": [
+        "static"
+      ],
+      "punch_points": [],
+      "notes": "纯静态定场硬切"
+    },
+    {
+      "start": 0.25,
+      "end": 12.759,
+      "mood": "build",
+      "motion_per_10": 1,
+      "cameras": [
+        "static",
+        "pan_left",
+        "pan_right"
+      ],
+      "punch_points": [],
+      "notes": "偶发缓摇建空间"
+    },
+    {
+      "start": 12.759,
+      "end": 27.27,
+      "mood": "drop",
+      "motion_per_10": 2,
+      "cameras": [
+        "static",
+        "push",
+        "zoom_in"
+      ],
+      "punch_points": [
+        15.0
+      ],
+      "notes": "强拍单次撞击强调"
+    },
+    {
+      "start": 27.27,
+      "end": 30.523,
+      "mood": "build",
+      "motion_per_10": 1,
+      "cameras": [
+        "static",
+        "pan_left"
+      ],
+      "punch_points": [],
+      "notes": "短促过渡缓摇"
+    },
+    {
+      "start": 30.523,
+      "end": 40.53,
+      "mood": "intro",
+      "motion_per_10": 0,
+      "cameras": [
+        "static"
+      ],
+      "punch_points": [],
+      "notes": "纯静态收尾"
+    }
+  ]
+}

@@ -94,6 +94,7 @@ def main() -> int:
     embs = {}
     from core.cnn_scorer import _load_clip
     import torch
+    from core.torch_runtime import infer_ctx, get_device
     model, preprocess = _load_clip()
     from PIL import Image
 
@@ -117,7 +118,7 @@ def main() -> int:
     anchors = {}
     for g, files in groups.items():
         vecs = []
-        with torch.no_grad():
+        with infer_ctx(get_device()):
             for fp in files[:30]:
                 try:
                     t = preprocess(Image.open(fp).convert("RGB")).unsqueeze(0).to(

@@ -286,6 +286,7 @@ def sam_predictor_factory(cfg: dict):
     checkpoint = cfg["sam2_checkpoint"]
     from sam2.build_sam import build_sam2
     import torch
+    from core.torch_runtime import get_device
 
     variant = cfg.get("sam_variant", "large")
     ckpt_name = Path(checkpoint).name.lower()
@@ -329,7 +330,7 @@ def sam_predictor_factory(cfg: dict):
     else:
         config_file = f"{CONFIG_ROOT}/{ver_prefix}/{ver_prefix}_hiera_{suffix}"
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     print(f"[SAM2] ver={ver_prefix} variant={variant} config={config_file} ckpt={checkpoint} device={device}",
           file=sys.stderr)
     sam2_model = build_sam2(

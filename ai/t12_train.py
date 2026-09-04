@@ -22,6 +22,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import get_device, infer_ctx
+
 PSEUDO_LABELS = Path(r"D:\aot_corpus\pseudolabels.json")
 MODEL_DIR = ROOT / "models"
 REPORT_DIR = ROOT / "reports"
@@ -108,7 +110,7 @@ def compute_clip_embeddings():
         "snapshots" / "master" / "open_clip_pytorch_model.bin"
     )
     model, _, preprocess = open_clip.create_model_and_transforms("ViT-B-32", pretrained=ckpt_path)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     model = model.to(device)
     model.eval()
 
@@ -165,7 +167,7 @@ def compute_clip_embeddings():
 
         if len(batch_imgs) >= 64 or i == len(sampled) - 1:
             batch_tensor = torch.stack(batch_imgs).to(device)
-            with torch.no_grad():
+            with infer_ctx(device):
                 features = model.encode_image(batch_tensor)
                 features = features / features.norm(dim=-1, keepdim=True)
             embeddings.extend(features.cpu().numpy())
@@ -234,7 +236,7 @@ def train_t12(embeddings, entries):
     train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE, shuffle=False)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     model = MoodSceneClassifier().to(device)
     n_params = sum(p.numel() for p in model.parameters())
     _log(f"  模型参数: {n_params/1e3:.1f}K")
@@ -278,7 +280,7 @@ def train_t12(embeddings, entries):
         val_mood_correct = 0
         val_scene_correct = 0
         val_total = 0
-        with torch.no_grad():
+        with infer_ctx(device):
             for embs, mood_lbl, scene_lbl in val_loader:
                 embs = embs.to(device)
                 mood_lbl = mood_lbl.to(device)

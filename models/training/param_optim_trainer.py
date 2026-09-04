@@ -15,6 +15,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from core.torch_runtime import infer_ctx
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 from torch.optim.lr_scheduler import CosineAnnealingLR, CosineAnnealingWarmRestarts
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
@@ -246,7 +247,7 @@ class ParamOptimTrainer(BaseTrainer):
         all_targets = []
         all_predictions = []
 
-        with torch.no_grad():
+        with infer_ctx(self._device):
             for inputs, targets in eval_loader:
                 inputs = inputs.to(self._device)
                 targets = targets.to(self._device)
@@ -336,7 +337,7 @@ class ParamOptimTrainer(BaseTrainer):
         if len(tensor_input.shape) == 1:
             tensor_input = tensor_input.unsqueeze(0)
 
-        with torch.no_grad():
+        with infer_ctx(self._device):
             output = self._model(tensor_input)
 
         return output.cpu().numpy().squeeze()

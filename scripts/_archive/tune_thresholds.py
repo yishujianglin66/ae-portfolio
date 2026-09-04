@@ -19,6 +19,9 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # 云上单文件执行
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # repo root: _archive 迁移后 core.* 导入用
+
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 try:
     from scripts.train_anime_camera_lora import COARSE_LABELS, COARSE_MAP, NUM_FRAMES, IMG_SIZE  # noqa: E402
@@ -63,7 +66,7 @@ def get_probs(model, clip: str, device) -> Optional[np.ndarray]:
     std = torch.tensor([0.229, 0.224, 0.225], dtype=torch.float32).view(1, 3, 1, 1)
     x = (x - mean) / std
     x = x.unsqueeze(0).to(device)  # (1,T,3,224,224)
-    with torch.no_grad():
+    with infer_ctx(device):
         out = model(pixel_values=x)
     return torch.softmax(out.logits, dim=-1)[0].cpu().numpy()
 
@@ -80,7 +83,7 @@ def main() -> int:
     args = parser.parse_args()
 
     import torch
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     from transformers import VideoMAEForVideoClassification
     from peft import PeftModel
     base = VideoMAEForVideoClassification.from_pretrained(args.model_dir, local_files_only=True)

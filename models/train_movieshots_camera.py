@@ -33,6 +33,7 @@ import json
 import logging
 import os
 import sys
+from core.torch_runtime import get_device, infer_ctx
 import time
 from collections import Counter
 from pathlib import Path
@@ -210,7 +211,7 @@ def cmd_train(args: argparse.Namespace) -> int:
     X_va, y_va = torch.tensor(X[val_idx]), torch.tensor(y[val_idx])
 
     model = _build_mlp(X.shape[1], hidden=args.hidden, n_classes=len(TRAIN_LABELS))
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     model.to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
     loss_fn = nn.CrossEntropyLoss()
@@ -233,7 +234,7 @@ def cmd_train(args: argparse.Namespace) -> int:
             total_loss += loss.item() * len(idx)
         # eval
         model.eval()
-        with torch.no_grad():
+        with infer_ctx(device):
             pred = model(X_va.to(device)).argmax(dim=1).cpu().numpy()
         acc = float((pred == y_va.numpy()).mean())
         if acc > best_acc:
@@ -263,7 +264,7 @@ def cmd_train(args: argparse.Namespace) -> int:
 
     # 每类准确率 (混淆矩阵)
     model.eval()
-    with torch.no_grad():
+    with infer_ctx(device):
         pred = model(X_va.to(device)).argmax(dim=1).cpu().numpy()
     cm = np.zeros((len(TRAIN_LABELS), len(TRAIN_LABELS)), dtype=int)
     for p, t in zip(pred, y_va.numpy()):
@@ -340,7 +341,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
             continue
         stats = _track_and_analyze(frames)
         feat = np.array([[float(stats[k]) for k in feature_keys]], dtype=np.float32)
-        with torch.no_grad():
+        with infer_ctx(device):
             pred = int(model(torch.tensor(feat)).argmax(dim=1).item())
         results.append({"video": str(vf), "pred": labels[pred],
                         "conf": float(torch.softmax(model(torch.tensor(feat)), dim=1).max().item())})

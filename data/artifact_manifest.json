@@ -1,206 +1,206 @@
 {
-    "schema_version":  "1.0",
-    "generated_at":  "2026-08-21",
-    "last_verified":  "2026-08-31",
-    "policy":  "P0-D: register SHA-256 + backup path for critical weights/data; lost-but-reproducible artifacts carry reproduce command",
-    "backup_root":  "D:\\\\AE-Data\\\\Models",
-    "identity_policy":  "2026-08-31: torch.save is byte-non-deterministic across runs of the same state_dict (64-byte storage alignment padding over zip entries). For .pth files, sha256 is a snapshot of one serialization, NOT an identity - match on content_digest (sorted key|shape|dtype + per-tensor payload hash) plus a size tolerance. safetensors/.onnx are deterministic, so sha256 stays authoritative there.",
-    "artifacts":  [
-                      {
-                          "name":  "matting_prod_mixed",
-                          "path":  "external\\\\birefnet\\\\finetuned_anime_mixed.pth",
-                          "role":  "matting_prod_mixed",
-                          "exists":  true,
-                          "size_bytes":  885087422,
-                          "size_mb":  844.1,
-                          "sha256":  "8a3a6c8451c6270d81ba75dd96b702e8537d4c6f45798707aafa6f32209d3e4d",
-                          "content_digest":  "fe8e22b043e60e81a2afeceaa17aeb38078b513c2accea8c217fababd7d4cdce",
-                          "n_tensors":  754,
-                          "n_floating":  687,
-                          "last_modified":  "2026-08-31T14:31:26",
-                          "verified_at":  "2026-08-31",
-                          "sha_match_registered":  true,
-                          "backup":  {
-                                         "location":  "D:\\AE-Data\\Models\\finetuned_anime_mixed.pth",
-                                         "status":  "backed_up_verified_2026-08-31",
-                                         "size_bytes":  885087422
-                                     },
-                          "reproduce":  "commit d2608f7",
-                          "can_reproduce":  true,
-                          "note":  "2026-08-31: original copy (mtime 2026-08-16T01:45:26) was destroyed by the 08-30 gitlink de-index because .gitignore:103 'external/' meant it was never version-controlled. Re-pulled byte-identical from AutoDL /root/autodl-tmp and re-verified: size 885087422 + sha256 unchanged.",
-                          "desc":  "BiRefNet mixed-ft (anime IoU 0.9756 / COCO +1.12%)"
-                      },
-                      {
-                          "name":  "matting_prod_fp16",
-                          "path":  "external\\\\birefnet\\\\finetuned_anime_fp16.pth",
-                          "role":  "matting_prod_fp16",
-                          "exists":  true,
-                          "size_bytes":  444640339,
-                          "size_mb":  424.1,
-                          "size_tolerance_bytes":  5242880,
-                          "sha256":  "ecd4e9f23f4531d49f379c91bcf07cf3af4ca4db6a6fc5aa2ad426761b61c5c7",
-                          "sha256_superseded":  "87e875c63d7668681d44c62417c8c9536670aabc9ef0a072a8936e7cb702611c",
-                          "content_digest":  "7e5529bb873d782f9af686662453a94b1cb1db68f33c53a8769938bd260d22c7",
-                          "n_tensors":  754,
-                          "n_floating":  687,
-                          "last_modified":  "2026-08-31T17:40:03",
-                          "verified_at":  "2026-08-31",
-                          "backup":  {
-                                         "location":  "D:\\AE-Data\\Models\\finetuned_anime_fp16.pth",
-                                         "status":  "backed_up_verified_2026-08-31",
-                                         "size_bytes":  444640339,
-                                         "sha256":  "ecd4e9f23f4531d49f379c91bcf07cf3af4ca4db6a6fc5aa2ad426761b61c5c7"
-                                     },
-                          "reproduce":  "python D:/AE-Data/tools/derive_fp16_from_mixed.py (float-only cast from finetuned_anime_mixed.pth)",
-                          "can_reproduce":  true,
-                          "note":  "2026-08-31 re-derived, not recovered from cloud: the 08-30 gitlink de-index destroyed the original external/birefnet/ copy and no fp16 existed remotely. Registered sha/size belong to the lost serialization; content_digest is unchanged in substance because it derives from the byte-identical mixed checkpoint. Two derivations in the same run differed by 12616 bytes - see identity_policy. KNOWN NUMERIC DEFECT (pre-existing, inherited from mixed, not introduced here): decoder.decoder_block4.bn_in.running_var fp32 max 201115.34 > fp16 max 65504, so it becomes inf and that BatchNorm emits a constant bias at eval. Cannot be fixed inside the checkpoint (a runtime doing model.half() then load_state_dict re-casts the fp32 running_var to inf; clamping to 65504 is a different wrong value). Remedy is runtime-side: use autocast (BatchNorm is on the fp32 autocast whitelist) or exclude BN layers from .half(). Also 43 num_batches_tracked int buffers overflow to fp16 inf (training-only, unused at eval) and 24 relative_position_index buffers (max 528) stay exactly representable.",
-                          "desc":  "BiRefNet mixed-ft fp16 (lite, 424MB)"
-                      },
-                      {
-                          "name":  "matting_base",
-                          "path":  "external\\\\birefnet\\\\model.safetensors",
-                          "role":  "matting_base",
-                          "exists":  true,
-                          "size_bytes":  444473596,
-                          "size_mb":  423.9,
-                          "sha256":  "9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154",
-                          "last_modified":  "2026-08-31T14:32:13",
-                          "verified_at":  "2026-08-31",
-                          "sha_match_registered":  true,
-                          "backup":  {
-                                         "location":  "D:\\AE-Data\\Models\\birefnet_base_model.safetensors",
-                                         "status":  "backed_up_verified_2026-08-31",
-                                         "size_bytes":  444473596,
-                                         "sha256":  "9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154"
-                                     },
-                          "reproduce":  "HuggingFace birefnet",
-                          "can_reproduce":  true,
-                          "note":  "2026-08-31: backup location corrected - the previously registered D:\\AE-Data\\Models\\model.safetensors never existed under that name; the real backup is birefnet_base_model.safetensors and its sha256 equals the registered value exactly.",
-                          "desc":  "BiRefNet base checkpoint"
-                      },
-                      {
-                          "name":  "camera_lora_v3b_prod",
-                          "path":  "models\\\\output\\\\anime_camera_lora_v3\\\\adapter_model.safetensors",
-                          "role":  "camera_lora_v3b_prod",
-                          "exists":  true,
-                          "recovered":  "2026-08-31",
-                          "size_bytes":  1811064,
-                          "size_mb":  1.7,
-                          "sha256":  "8295a321b9b20261c8ba7439f799ebcf8fdf7bca0bbe04933b0ceb05542c887e",
-                          "last_modified":  "2026-08-31T18:23:41",
-                          "verified_at":  "2026-08-31",
-                          "sha_match_registered":  true,
-                          "label_schema":  "fine",
-                          "n_labels":  10,
-                          "val_acc_self_reported":  0.4603,
-                          "val_acc_caveat":  "0.4603 is inflated, not a clean measurement. The split is index-level with no shot/clip grouping (train_anime_camera_v5.py:745-748) while time_reverse defaults ON and appends a mirrored twin of the SAME clip (134-139); because SIX_MAP and REVERSE_PAIR are both keyed by the fine movement_label, twins fire even for six-schema runs. Measured straddle on local vlm_labels.jsonl (33764 expanded samples, n_val 5064): 4032 of 15814 twin pairs land on opposite sides = 0.2550 vs theory 2*0.15*0.85 = 0.2550. Same-clip presence on both sides inflates accuracy; valid comparison requires shot-level splits plus class-balanced accuracy against the 0.4387 majority-class floor.",
-                          "companion_files":  {
-                                                  "adapter_config.json":  {
-                                                                              "size_bytes":  1247,
-                                                                              "sha256":  "18363d873065e5e9d223ed968eaa17bff3ecd6af0cd7ffc7f026a3f1989b3772"
-                                                                          },
-                                                  "meta.json":  {
-                                                                    "size_bytes":  411,
-                                                                    "sha256":  "47f2ad1fc2823c90b19de2824ba4d22b8303c49bdd7990a5b37802108cff355f"
-                                                                }
-                                              },
-                          "load_check":  {
-                                            "n_tensors":  74,
-                                            "lora_a":  36,
-                                            "lora_b":  36,
-                                            "classifier_head":  true,
-                                            "dtype":  "torch.float32",
-                                            "all_finite":  true
-                                        },
-                          "backup":  {
-                                         "location":  "D:\\AE-Data\\Models\\anime_camera_lora_v3\\adapter_model.safetensors",
-                                         "status":  "backed_up_verified_2026-08-31",
-                                         "size_bytes":  1811064,
-                                         "sha256":  "8295a321b9b20261c8ba7439f799ebcf8fdf7bca0bbe04933b0ceb05542c887e"
-                                     },
-                          "reproduce":  "train commit 6251551",
-                          "can_reproduce":  true,
-                          "note":  "2026-08-31 recovered. This artifact was ABSENT, along with the entire models/output/ tree; no git blob exists because .gitignore:109 'output/' has no leading slash and therefore also matches models/output/, so the production model directory was never version-controlled. Pulled from AutoDL /root/autodl-tmp/output/anime_camera_lora_v3_fixed/adapter_model.safetensors; remote sha256 == registered sha256 == local sha256. Placed in both the repo default dir that models/anime_camera_classifier.py:34 DEFAULT_LORA_DIR actually reads and the backup dir, with all 6 copies re-hashed. Manifest path says _v3 while the cloud directory says _fixed, and both are correct: per the 2026-08-25 daily note, local _v3 held the fixed (classifier-head-inclusive) weights while cloud _v3 held the pre-fix product - consistent with 1811064 vs 1780112 bytes. Directory name is not artifact identity; hash is. desc corrected: the artifact's own meta.json reports val_acc 0.4603 on the 10-class fine schema, so the previously registered 0.7729 was wrong and must not be quoted as a production metric.",
-                          "desc":  "anime_camera_lora v3b (fine 10-class, val_acc 0.4603 self-reported, production LoRA dir)"
-                      },
-                      {
-                          "name":  "camera_lora_v3b_thresholds",
-                          "path":  "models\\\\output\\\\anime_camera_lora_v3\\\\thresholds_tuned.json",
-                          "role":  "camera_lora_v3b_thresholds",
-                          "exists":  false,
-                          "size_bytes":  513,
-                          "size_mb":  0,
-                          "sha256":  "f67384df8939ad36585d338440c2b9fc5665ce4a8b2a64326b5e78ea8af4a526",
-                          "last_modified":  null,
-                          "verified_at":  "2026-08-31",
-                          "backup":  {
-                                         "location":  "none",
-                                         "status":  "lost"
-                                     },
-                          "reproduce":  "re-tune on a clean held-out split against models/output/anime_camera_lora_v3/adapter_model.safetensors; no on-disk or cloud copy remains",
-                          "can_reproduce":  true,
-                          "note":  "2026-08-31 confirmed HARD LOSS. Absent in repo, absent on AutoDL (remote _fixed dir holds only adapter_config.json / adapter_model.safetensors / meta.json), and no git blob exists because .gitignore:109 'output/' also matches models/output/. Deliberately NOT restored: a different 300-byte coarse-key thresholds_tuned.json (sha256 b3d6383c...) exists in the tree and is a different artifact with different keys - substituting it would be silently wrong. Functional consequence of the absence, superseded 2026-09-01: the code no longer invents fallback thresholds. models/anime_camera_classifier.py _load_thresholds(path, labels) returns None and logs a warning whenever the sidecar is missing, unparsable, or fails to cover every label, and _predict then uses plain argmax. Previously the absence failed open: the coarse-key fallback intersected nothing with the fine schema, so all ten labels silently shared a hardcoded 0.4 while looking calibrated. Predictions are unchanged, because a uniform threshold is a no-op for top-1 selection; what changed is that the degradation is loud instead of invisible.",
-                          "desc":  "v3b tuned thresholds (0.30/0.85 split) - LOST, classifier currently runs on uniform 0.4 fallback"
-                      },
-                      {
-                          "name":  "fate_source_input",
-                          "path":  "data\\\\real_amv_test\\\\DL_FATE_r978_BV1qb411C79B_p1.mp4",
-                          "role":  "fate_source_input",
-                          "exists":  false,
-                          "size_bytes":  3340592,
-                          "size_mb":  3.2,
-                          "sha256":  "2746866345002292577af6eaf1a01e1cd9464dd29126f5f4aac43e308078b19f",
-                          "last_modified":  null,
-                          "verified_at":  "2026-08-31",
-                          "backup":  {
-                                         "location":  "none",
-                                         "status":  "lost_reproducible"
-                                     },
-                          "reproduce":  "re-download BV1qb411C79B p1 from Bilibili (hash will differ from the registered value if the upstream re-encode changed; identify by duration ~31s)",
-                          "can_reproduce":  true,
-                          "note":  "2026-08-31: absent. data/real_amv_test/ holds only ground_truth.json; no *DL_FATE*.mp4 exists anywhere in the repo or on AutoDL. Registered sha256 belongs to the lost file. This input is cheap to replace (public source clip), unlike the weights. Its downstream product DID survive off-repo - see fate_transparent_mov_20260809.",
-                          "desc":  "FATE v17 source clip (~31s) - LOST, re-downloadable"
-                      },
-                      {
-                          "name":  "fate_alpha_mov_v17",
-                          "path":  "output\\\\one_pipeline\\\\DL_DL_FATE_r978_BV1qb411C79B_p1_v17\\\\DL_DL_FATE_r978_BV1qb411C79B_p1_alpha.mov",
-                          "role":  "fate_alpha_mov_lost",
-                          "exists":  false,
-                          "size_mb":  365,
-                          "verified_at":  "2026-08-31",
-                          "note":  "2026-08-31: re-confirmed MISSING_ON_DISK. Repaired the mojibake in the original 08-21 note - the searched scopes were the repo and D:\\\\AE-Work\\\\渲染档案, and only the pipeline_report JSON remains there (report QC_PASS, finished_at 2026-08-16 01:41). Why no git blob can recover it: .gitignore:109 'output/' has no leading slash, so it also matches the top-level output/ tree that held this render - it was never version-controlled. A sibling product of the same source clip DID survive off-repo, see fate_transparent_mov_20260809.",
-                          "reproduce":  "python scripts/make_one_mov_pipeline.py --input data/real_amv_test/DL_FATE_r978_BV1qb411C79B_p1.mp4 --variant large (params in pipeline_report JSON; ~31s)",
-                          "can_reproduce":  true,
-                          "backup":  {
-                                         "status":  "lost_reproducible",
-                                         "location":  "none"
-                                     }
-                      }
-                      ,
-                      {
-                          "name":  "fate_transparent_mov_20260809",
-                          "path":  "D:\\AE-Work\\batch_auto_frame\\DL_FATE_r978_BV1qb411C79B_p1\\DL_FATE_r978_BV1qb411C79B_p1_transparent.mov",
-                          "role":  "fate_transparent_output",
-                          "exists":  true,
-                          "size_bytes":  467470760,
-                          "size_mb":  445.8,
-                          "sha256":  "a4cdbe494b07474c502f69f6dfa5e7f7b38a51988f1fef87792586c428fa2b39",
-                          "last_modified":  "2026-08-09T21:00:45",
-                          "verified_at":  "2026-08-31",
-                          "companion_files":  {
-                                                  "DL_FATE_r978_BV1qb411C79B_p1_transparent_masks":  {
-                                                                                                          "kind":  "directory",
-                                                                                                          "n_files":  392,
-                                                                                                          "size_bytes":  1445053
-                                                                                                      }
-                                              },
-                          "backup":  {
-                                         "location":  "none",
-                                         "status":  "not_backed_up"
-                                     },
-                          "reproduce":  "re-download BV1qb411C79B p1 (fate_source_input, currently lost), then re-run the BiRefNet matting pipeline on it; matting weights themselves are recovered (matting_prod_mixed)",
-                          "can_reproduce":  true,
-                          "note":  "2026-08-31: newly registered - this file was absent from the manifest even though it is the only surviving FATE render product. Measured from disk: size 467470760 + sha256 a4cdbe494b07... + mtime 2026-08-09T21:00:45, one copy, off-repo under D:\\AE-Work, and NOT backed up. That last flag is the same one that let the 08-30 losses go unnoticed, so it is recorded here deliberately rather than glossed over. Its upstream input fate_source_input is lost, so a second copy cannot be produced until that clip is re-downloaded.",
-                          "desc":  "FATE r978 p1 transparent-background MOV (alpha output of the matting pipeline, ~31s, single unbacked copy)"
-                      }]
+    "schema_version": "1.0",
+    "generated_at": "2026-08-21",
+    "last_verified": "2026-08-31",
+    "policy": "P0-D: register SHA-256 + backup path for critical weights/data; lost-but-reproducible artifacts carry reproduce command",
+    "backup_root": "D:\\AE-Data\\Models",
+    "identity_policy": "2026-08-31: torch.save is byte-non-deterministic across runs of the same state_dict (64-byte storage alignment padding over zip entries). For .pth files, sha256 is a snapshot of one serialization, NOT an identity - match on content_digest (sorted key|shape|dtype + per-tensor payload hash) plus a size tolerance. safetensors/.onnx are deterministic, so sha256 stays authoritative there.",
+    "artifacts": [
+        {
+            "name": "matting_prod_mixed",
+            "path": "external\\birefnet\\finetuned_anime_mixed.pth",
+            "role": "matting_prod_mixed",
+            "exists": true,
+            "size_bytes": 885087422,
+            "size_mb": 844.1,
+            "sha256": "8a3a6c8451c6270d81ba75dd96b702e8537d4c6f45798707aafa6f32209d3e4d",
+            "content_digest": "fe8e22b043e60e81a2afeceaa17aeb38078b513c2accea8c217fababd7d4cdce",
+            "n_tensors": 754,
+            "n_floating": 687,
+            "last_modified": "2026-08-31T14:31:26",
+            "verified_at": "2026-08-31",
+            "sha_match_registered": true,
+            "backup": {
+                "location": "D:\\AE-Data\\Models\\finetuned_anime_mixed.pth",
+                "status": "backed_up_verified_2026-08-31",
+                "size_bytes": 885087422
+            },
+            "reproduce": "commit d2608f7",
+            "can_reproduce": true,
+            "note": "2026-08-31: original copy (mtime 2026-08-16T01:45:26) was destroyed by the 08-30 gitlink de-index because .gitignore:103 'external/' meant it was never version-controlled. Re-pulled byte-identical from AutoDL /root/autodl-tmp and re-verified: size 885087422 + sha256 unchanged.",
+            "desc": "BiRefNet mixed-ft (anime IoU 0.9756 / COCO +1.12%)"
+        },
+        {
+            "name": "matting_prod_fp16",
+            "path": "external\\birefnet\\finetuned_anime_fp16.pth",
+            "role": "matting_prod_fp16",
+            "exists": true,
+            "size_bytes": 444640339,
+            "size_mb": 424.1,
+            "size_tolerance_bytes": 5242880,
+            "sha256": "ecd4e9f23f4531d49f379c91bcf07cf3af4ca4db6a6fc5aa2ad426761b61c5c7",
+            "sha256_superseded": "87e875c63d7668681d44c62417c8c9536670aabc9ef0a072a8936e7cb702611c",
+            "content_digest": "7e5529bb873d782f9af686662453a94b1cb1db68f33c53a8769938bd260d22c7",
+            "n_tensors": 754,
+            "n_floating": 687,
+            "last_modified": "2026-08-31T17:40:03",
+            "verified_at": "2026-08-31",
+            "backup": {
+                "location": "D:\\AE-Data\\Models\\finetuned_anime_fp16.pth",
+                "status": "backed_up_verified_2026-08-31",
+                "size_bytes": 444640339,
+                "sha256": "ecd4e9f23f4531d49f379c91bcf07cf3af4ca4db6a6fc5aa2ad426761b61c5c7"
+            },
+            "reproduce": "python D:/AE-Data/tools/derive_fp16_from_mixed.py (float-only cast from finetuned_anime_mixed.pth)",
+            "can_reproduce": true,
+            "note": "2026-08-31 re-derived, not recovered from cloud: the 08-30 gitlink de-index destroyed the original external/birefnet/ copy and no fp16 existed remotely. Registered sha/size belong to the lost serialization; content_digest is unchanged in substance because it derives from the byte-identical mixed checkpoint. Two derivations in the same run differed by 12616 bytes - see identity_policy. KNOWN NUMERIC DEFECT (pre-existing, inherited from mixed, not introduced here): decoder.decoder_block4.bn_in.running_var fp32 max 201115.34 > fp16 max 65504, so it becomes inf and that BatchNorm emits a constant bias at eval. Cannot be fixed inside the checkpoint (a runtime doing model.half() then load_state_dict re-casts the fp32 running_var to inf; clamping to 65504 is a different wrong value). Remedy is runtime-side: use autocast (BatchNorm is on the fp32 autocast whitelist) or exclude BN layers from .half(). Also 43 num_batches_tracked int buffers overflow to fp16 inf (training-only, unused at eval) and 24 relative_position_index buffers (max 528) stay exactly representable.",
+            "desc": "BiRefNet mixed-ft fp16 (lite, 424MB)"
+        },
+        {
+            "name": "matting_base",
+            "path": "external\\birefnet\\model.safetensors",
+            "role": "matting_base",
+            "exists": true,
+            "size_bytes": 444473596,
+            "size_mb": 423.9,
+            "sha256": "9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154",
+            "last_modified": "2026-08-31T14:32:13",
+            "verified_at": "2026-08-31",
+            "sha_match_registered": true,
+            "backup": {
+                "location": "D:\\AE-Data\\Models\\birefnet_base_model.safetensors",
+                "status": "backed_up_verified_2026-08-31",
+                "size_bytes": 444473596,
+                "sha256": "9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154"
+            },
+            "reproduce": "HuggingFace birefnet",
+            "can_reproduce": true,
+            "note": "2026-08-31: backup location corrected - the previously registered D:\\AE-Data\\Models\\model.safetensors never existed under that name; the real backup is birefnet_base_model.safetensors and its sha256 equals the registered value exactly.",
+            "desc": "BiRefNet base checkpoint"
+        },
+        {
+            "name": "camera_lora_v3b_prod",
+            "path": "models\\output\\anime_camera_lora_v3\\adapter_model.safetensors",
+            "role": "camera_lora_v3b_prod",
+            "exists": true,
+            "recovered": "2026-08-31",
+            "size_bytes": 1811064,
+            "size_mb": 1.7,
+            "sha256": "8295a321b9b20261c8ba7439f799ebcf8fdf7bca0bbe04933b0ceb05542c887e",
+            "last_modified": "2026-08-31T18:23:41",
+            "verified_at": "2026-08-31",
+            "sha_match_registered": true,
+            "label_schema": "fine",
+            "n_labels": 10,
+            "val_acc_self_reported": 0.4603,
+            "val_acc_caveat": "0.4603 is inflated, not a clean measurement. The split is index-level with no shot/clip grouping (train_anime_camera_v5.py:745-748) while time_reverse defaults ON and appends a mirrored twin of the SAME clip (134-139); because SIX_MAP and REVERSE_PAIR are both keyed by the fine movement_label, twins fire even for six-schema runs. Measured straddle on local vlm_labels.jsonl (33764 expanded samples, n_val 5064): 4032 of 15814 twin pairs land on opposite sides = 0.2550 vs theory 2*0.15*0.85 = 0.2550. Same-clip presence on both sides inflates accuracy; valid comparison requires shot-level splits plus class-balanced accuracy against the 0.4387 majority-class floor.",
+            "companion_files": {
+                "adapter_config.json": {
+                    "size_bytes": 1247,
+                    "sha256": "18363d873065e5e9d223ed968eaa17bff3ecd6af0cd7ffc7f026a3f1989b3772"
+                },
+                "meta.json": {
+                    "size_bytes": 411,
+                    "sha256": "47f2ad1fc2823c90b19de2824ba4d22b8303c49bdd7990a5b37802108cff355f"
+                }
+            },
+            "load_check": {
+                "n_tensors": 74,
+                "lora_a": 36,
+                "lora_b": 36,
+                "classifier_head": true,
+                "dtype": "torch.float32",
+                "all_finite": true
+            },
+            "backup": {
+                "location": "D:\\AE-Data\\Models\\anime_camera_lora_v3\\adapter_model.safetensors",
+                "status": "backed_up_verified_2026-08-31",
+                "size_bytes": 1811064,
+                "sha256": "8295a321b9b20261c8ba7439f799ebcf8fdf7bca0bbe04933b0ceb05542c887e"
+            },
+            "reproduce": "train commit 6251551",
+            "can_reproduce": true,
+            "note": "2026-08-31 recovered. This artifact was ABSENT, along with the entire models/output/ tree; no git blob exists because .gitignore:109 'output/' has no leading slash and therefore also matches models/output/, so the production model directory was never version-controlled. Pulled from AutoDL /root/autodl-tmp/output/anime_camera_lora_v3_fixed/adapter_model.safetensors; remote sha256 == registered sha256 == local sha256. Placed in both the repo default dir that models/anime_camera_classifier.py:34 DEFAULT_LORA_DIR actually reads and the backup dir, with all 6 copies re-hashed. Manifest path says _v3 while the cloud directory says _fixed, and both are correct: per the 2026-08-25 daily note, local _v3 held the fixed (classifier-head-inclusive) weights while cloud _v3 held the pre-fix product - consistent with 1811064 vs 1780112 bytes. Directory name is not artifact identity; hash is. desc corrected: the artifact's own meta.json reports val_acc 0.4603 on the 10-class fine schema, so the previously registered 0.7729 was wrong and must not be quoted as a production metric.",
+            "desc": "anime_camera_lora v3b (fine 10-class, val_acc 0.4603 self-reported, production LoRA dir)"
+        },
+        {
+            "name": "camera_lora_v3b_thresholds",
+            "path": "models\\output\\anime_camera_lora_v3\\thresholds_tuned.json",
+            "role": "camera_lora_v3b_thresholds",
+            "exists": false,
+            "size_bytes": 513,
+            "size_mb": 0,
+            "sha256": "f67384df8939ad36585d338440c2b9fc5665ce4a8b2a64326b5e78ea8af4a526",
+            "last_modified": null,
+            "verified_at": "2026-08-31",
+            "backup": {
+                "location": "none",
+                "status": "lost"
+            },
+            "reproduce": "re-tune on a clean held-out split against models/output/anime_camera_lora_v3/adapter_model.safetensors; no on-disk or cloud copy remains",
+            "can_reproduce": true,
+            "note": "2026-08-31 confirmed HARD LOSS. Absent in repo, absent on AutoDL (remote _fixed dir holds only adapter_config.json / adapter_model.safetensors / meta.json), and no git blob exists because .gitignore:109 'output/' also matches models/output/. Deliberately NOT restored: a different 300-byte coarse-key thresholds_tuned.json (sha256 b3d6383c...) exists in the tree and is a different artifact with different keys - substituting it would be silently wrong. Functional consequence of the absence, superseded 2026-09-01: the code no longer invents fallback thresholds. models/anime_camera_classifier.py _load_thresholds(path, labels) returns None and logs a warning whenever the sidecar is missing, unparsable, or fails to cover every label, and _predict then uses plain argmax. Previously the absence failed open: the coarse-key fallback intersected nothing with the fine schema, so all ten labels silently shared a hardcoded 0.4 while looking calibrated. Predictions are unchanged, because a uniform threshold is a no-op for top-1 selection; what changed is that the degradation is loud instead of invisible.",
+            "desc": "v3b tuned thresholds (0.30/0.85 split) - LOST, classifier currently runs on uniform 0.4 fallback"
+        },
+        {
+            "name": "fate_source_input",
+            "path": "data\\real_amv_test\\DL_FATE_r978_BV1qb411C79B_p1.mp4",
+            "role": "fate_source_input",
+            "exists": false,
+            "size_bytes": 3340592,
+            "size_mb": 3.2,
+            "sha256": "2746866345002292577af6eaf1a01e1cd9464dd29126f5f4aac43e308078b19f",
+            "last_modified": null,
+            "verified_at": "2026-08-31",
+            "backup": {
+                "location": "none",
+                "status": "lost_reproducible"
+            },
+            "reproduce": "re-download BV1qb411C79B p1 from Bilibili (hash will differ from the registered value if the upstream re-encode changed; identify by duration ~31s)",
+            "can_reproduce": true,
+            "note": "2026-08-31: absent. data/real_amv_test/ holds only ground_truth.json; no *DL_FATE*.mp4 exists anywhere in the repo or on AutoDL. Registered sha256 belongs to the lost file. This input is cheap to replace (public source clip), unlike the weights. Its downstream product DID survive off-repo - see fate_transparent_mov_20260809.",
+            "desc": "FATE v17 source clip (~31s) - LOST, re-downloadable"
+        },
+        {
+            "name": "fate_alpha_mov_v17",
+            "path": "output\\one_pipeline\\DL_DL_FATE_r978_BV1qb411C79B_p1_v17\\DL_DL_FATE_r978_BV1qb411C79B_p1_alpha.mov",
+            "role": "fate_alpha_mov_lost",
+            "exists": false,
+            "size_mb": 365,
+            "verified_at": "2026-08-31",
+            "note": "2026-08-31: re-confirmed MISSING_ON_DISK. Repaired the mojibake in the original 08-21 note - the searched scopes were the repo and D:\\\\AE-Work\\\\渲染档案, and only the pipeline_report JSON remains there (report QC_PASS, finished_at 2026-08-16 01:41). Why no git blob can recover it: .gitignore:109 'output/' has no leading slash, so it also matches the top-level output/ tree that held this render - it was never version-controlled. A sibling product of the same source clip DID survive off-repo, see fate_transparent_mov_20260809.",
+            "reproduce": "python scripts/make_one_mov_pipeline.py --input data/real_amv_test/DL_FATE_r978_BV1qb411C79B_p1.mp4 --variant large (params in pipeline_report JSON; ~31s)",
+            "can_reproduce": true,
+            "backup": {
+                "status": "lost_reproducible",
+                "location": "none"
+            }
+        },
+        {
+            "name": "fate_transparent_mov_20260809",
+            "path": "D:\\AE-Work\\batch_auto_frame\\DL_FATE_r978_BV1qb411C79B_p1\\DL_FATE_r978_BV1qb411C79B_p1_transparent.mov",
+            "role": "fate_transparent_output",
+            "exists": true,
+            "size_bytes": 467470760,
+            "size_mb": 445.8,
+            "sha256": "a4cdbe494b07474c502f69f6dfa5e7f7b38a51988f1fef87792586c428fa2b39",
+            "last_modified": "2026-08-09T21:00:45",
+            "verified_at": "2026-08-31",
+            "companion_files": {
+                "DL_FATE_r978_BV1qb411C79B_p1_transparent_masks": {
+                    "kind": "directory",
+                    "n_files": 392,
+                    "size_bytes": 1445053
+                }
+            },
+            "backup": {
+                "location": "none",
+                "status": "not_backed_up"
+            },
+            "reproduce": "re-download BV1qb411C79B p1 (fate_source_input, currently lost), then re-run the BiRefNet matting pipeline on it; matting weights themselves are recovered (matting_prod_mixed)",
+            "can_reproduce": true,
+            "note": "2026-08-31: newly registered - this file was absent from the manifest even though it is the only surviving FATE render product. Measured from disk: size 467470760 + sha256 a4cdbe494b07... + mtime 2026-08-09T21:00:45, one copy, off-repo under D:\\AE-Work, and NOT backed up. That last flag is the same one that let the 08-30 losses go unnoticed, so it is recorded here deliberately rather than glossed over. Its upstream input fate_source_input is lost, so a second copy cannot be produced until that clip is re-downloaded.",
+            "desc": "FATE r978 p1 transparent-background MOV (alpha output of the matting pipeline, ~31s, single unbacked copy)"
+        }
+    ]
 }

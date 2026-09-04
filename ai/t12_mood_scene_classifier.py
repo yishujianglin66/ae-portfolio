@@ -13,6 +13,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import get_device
+
 VLM_CACHE = ROOT / "cache" / "material_intel"
 OUT_DIR = ROOT / "models"
 
@@ -145,7 +147,7 @@ def main():
     print("\n[4/4] 训练(使用CLIP嵌入+启发式标签)...")
 
     import torch
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     print(f"  设备: {device}")
 
     # 由于没有实际CLIP嵌入缓存, 先用随机嵌入验证模型结构

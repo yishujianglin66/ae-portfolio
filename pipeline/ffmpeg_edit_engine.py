@@ -25,28 +25,8 @@ from dataclasses import dataclass, field, asdict
 
 logger = logging.getLogger(__name__)
 
-# 尝试导入路径解析
-try:
-    from pipeline.stages import resolve_ffmpeg, resolve_ffprobe
-except ImportError:
-    def resolve_ffmpeg(config=None):
-        import shutil
-        try:
-            from core.paths import ffmpeg_bin as _env_ffmpeg
-        except ImportError:
-            _env_ffmpeg = lambda: ""
-        for p in [_env_ffmpeg(), r"C:\ffmpeg\bin\ffmpeg.exe", r"C:\ffmpeg-tmp\bin\ffmpeg.exe"]:
-            if p and os.path.isfile(p): return p
-        return shutil.which("ffmpeg") or "ffmpeg"
-    def resolve_ffprobe(config=None):
-        import shutil
-        try:
-            from core.paths import ffprobe_bin as _env_ffprobe
-        except ImportError:
-            _env_ffprobe = lambda: ""
-        for p in [_env_ffprobe(), r"C:\ffmpeg\bin\ffprobe.exe", r"C:\ffmpeg-tmp\bin\ffprobe.exe"]:
-            if p and os.path.isfile(p): return p
-        return shutil.which("ffprobe") or "ffprobe"
+from core.paths import ffmpeg_bin as _default_ffmpeg
+from core.paths import ffprobe_bin as _default_ffprobe
 
 
 # ============================================================
@@ -326,8 +306,8 @@ class TransitionEngine:
             offset: 转场起始时间(默认=视频A时长-duration)
             ffmpeg_bin: FFmpeg路径
         """
-        ff = ffmpeg_bin or resolve_ffmpeg()
-        fp = resolve_ffprobe()
+        ff = ffmpeg_bin or _default_ffmpeg()
+        fp = _default_ffprobe()
 
         if transition not in TransitionEngine.TRANSITIONS:
             transition = "fade"
@@ -379,7 +359,7 @@ class TransitionEngine:
                 return True
             return False
 
-        ff = ffmpeg_bin or resolve_ffmpeg()
+        ff = ffmpeg_bin or _default_ffmpeg()
         temp_dir = tempfile.mkdtemp(prefix="ffmpeg_xfade_")
         try:
             current = inputs[0]
@@ -408,7 +388,7 @@ class TransitionEngine:
 
     @staticmethod
     def _get_duration(filepath: str, ffprobe: str = "") -> float:
-        fp = ffprobe or resolve_ffprobe()
+        fp = ffprobe or _default_ffprobe()
         try:
             cmd = [fp, "-v", "error", "-show_entries", "format=duration",
                    "-of", "default=noprint_wrappers=1:nokey=1", filepath]
@@ -443,7 +423,7 @@ class TextOverlayEngine:
                   subtitle: str = "", font_size: int = 64,
                   duration: float = 3.0, ffmpeg_bin: str = "") -> bool:
         """添加片头标题"""
-        ff = ffmpeg_bin or resolve_ffmpeg()
+        ff = ffmpeg_bin or _default_ffmpeg()
         fb = FFmpegFilterBuilder()
 
         # 主标题
@@ -504,8 +484,8 @@ class FFmpegEditEngine:
     """
 
     def __init__(self, ffmpeg_bin: str = ""):
-        self.ffmpeg_bin = ffmpeg_bin or resolve_ffmpeg()
-        self.ffprobe_bin = resolve_ffprobe()
+        self.ffmpeg_bin = ffmpeg_bin or _default_ffmpeg()
+        self.ffprobe_bin = _default_ffprobe()
 
     def apply_filters(self, input_video: str, output: str,
                       filter_builder: FFmpegFilterBuilder,

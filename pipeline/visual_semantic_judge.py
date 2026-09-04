@@ -27,6 +27,8 @@ from typing import Any, Dict, List, Optional, Sequence
 
 logger = logging.getLogger(__name__)
 
+from core.torch_runtime import infer_ctx
+
 # 沿用既有渲染验证标准: 输出文件必须大于 100KB 才判定内容可见
 MIN_FILE_SIZE_BYTES = 100 * 1024
 
@@ -523,7 +525,7 @@ class VLMJudge:
             k: v.to(in_device) if hasattr(v, "to") else v
             for k, v in inputs.items()
         }
-        with torch.no_grad():
+        with infer_ctx():
             output_ids = self.model.generate(
                 **inputs, max_new_tokens=300, do_sample=False
             )

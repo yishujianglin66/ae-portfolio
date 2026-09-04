@@ -22,6 +22,8 @@ from __future__ import annotations
 import json
 import subprocess
 import time
+import hmac
+import hashlib
 import concurrent.futures
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -61,6 +63,89 @@ class AERenderChannel:
         self.jsx_path = self.out_dir / "build_comps.jsx"
 
     # ────────────────────────────────────────────────────────────
+    # 签名（与监听器 ae_mcp_listener.jsx 对齐）
+    # ────────────────────────────────────────────────────────────
+    def _load_secret(self) -> str:
+        """监听器 SECRET_FILE = 项目根 .mcp_secret（fail-closed，无 secret 拒签）。"""
+        for cand in (self.project_root / ".mcp_secret",
+                     self.project_root / ".ae-mcp-bridge" / ".mcp_secret",
+                     Path.home() / "Documents" / "ae-mcp-bridge" / ".mcp_secret"):
+            try:
+                if cand.exists():
+                    txt = cand.read_text(encoding="utf-8").strip()
+                    if txt:
+                        return txt
+            except OSError:
+                continue
+        return ""
+
+    def _generate_signature(self, data: Dict, secret: str) -> str:
+        """HMAC-SHA256 hex。canonical = json.dumps(sort_keys, 紧凑分隔符)。"""
+        canonical = json.dumps(data, sort_keys=True, separators=(",", ":"),
+                               ensure_ascii=False)
+        return hmac.new(secret.encode("utf-8"), canonical.encode("utf-8"),
+                        hashlib.sha256).hexdigest()
+
+    # ────────────────────────────────────────────────────────────
+    # AE 整片精修 Pass (2026-09-04): 单次 aerender 给全片所有镜头上
+    # Glow 微光 + 胶片颗粒 — 比逐镜 AE 快 10-20 倍, 每镜都有插件级质感
+    # ────────────────────────────────────────────────────────────
+    def polish_pass(self, video_in: str, out_dir: str = "") -> Optional[str]:
+        import os
+        od = Path(out_dir) if out_dir else self.out_dir
+        od = od.resolve()  # aerender 把相对路径解析到自己安装目录 (2026-09-04 实测)
+        od.mkdir(parents=True, exist_ok=True)
+        aep = od / "polish.aep"
+        out_avi = od / "polish.avi"
+        out_mp4 = od / "polish.mp4"
+        vin = str(video_in).replace(chr(92), "/")
+        aeps = str(aep).replace(chr(92), "/")
+        avis = str(out_avi).replace(chr(92), "/")
+        jsx = f"""
+(function() {{
+  try {{
+    app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+    app.newProject();
+    var imp = app.project.importFile(new ImportOptions(new File("{vin}")));
+    var comp = app.project.items.addComp("POLISH", imp.width, imp.height,
+        1.0, imp.duration, imp.frameRate);
+    comp.layers.add(imp);
+    // 2026-09-04 三坑修复: ①addSolid 第6参是时长(秒), 传1.0只盖住第1秒
+    //   ②中文版 AE 特效参数英文名访问返回 null — 必须 matchName 设值
+    //   ③ADBE Add Grain 此版本不可脚本添加 — 用 ADBE Noise (Amount=4%)
+    var adj = comp.layers.addSolid([1,1,1], "FX", imp.width, imp.height, 1.0, imp.duration);
+    adj.adjustmentLayer = true;
+    var fx = adj.property("Effects");
+    var gl = fx.addProperty("ADBE Glo2");
+    gl.property("ADBE Glo2-0003").setValue(8);    // Glow Radius
+    gl.property("ADBE Glo2-0004").setValue(0.3);  // Glow Intensity
+    var ns = fx.addProperty("ADBE Noise");
+    ns.property("ADBE Noise-0001").setValue(4);   // Amount of Noise (%)
+    app.project.save(new File("{aeps}"));
+    "ok";
+  }} catch(e) {{ "ERR:" + e.toString(); }}
+}})
+"""
+        res = self._bridge_run_jsx(args={"script": jsx, "scriptContent": jsx},
+                                   timeout=180)
+        self._bridge_run_jsx(
+            timeout=60, command="executeAtomScript",
+            args={"script": "try { app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES); 'c'; } catch(e) { String(e); }",
+                  "scriptContent": "try { app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES); 'c'; } catch(e) { String(e); }"})
+        # 新工程无 RStemplate/OMtemplate (传了报"模板不存在"); 默认输出模块即
+        # H.264 .mp4 (~16Mbps) — 无需 Lossless AVI + ffmpeg 转码两级 (2026-09-04 实测)
+        r = subprocess.run([AERENDER, "-project", str(aep), "-comp", "POLISH",
+                            "-output", str(out_mp4)],
+                           capture_output=True, timeout=1800,
+                           encoding="utf-8", errors="replace")  # aerender 中文输出 GBK, text=True 默认 utf-8 会崩 reader 线程
+        if not out_mp4.exists() or out_mp4.stat().st_size < 10000:
+            print(f"    [AE精修] aerender 失败, 回退原片")
+            return None
+        ok = True
+        print(f"    [AE精修] OK: {out_mp4}")
+        return str(out_mp4) if ok else None
+
+    # ────────────────────────────────────────────────────────────
     # 主入口: 完整渲染 AE 高级运镜镜头, 返回 {idx: mp4_path}
     # ────────────────────────────────────────────────────────────
     def build_and_render(self, ae_plan: Dict[int, Dict], fps: int,
@@ -82,10 +167,12 @@ class AERenderChannel:
                 on_fail_reason("AE未运行且启动失败")
             return {}
 
-        # Bridge 就绪检查
-        ping = self._bridge_run_jsx(timeout=90, command="ping", args={})
+        # Bridge 就绪检查 (监听器无 ping 分支, 用最小 executeAtomScript 探测)
+        _probe_script = "app.version;"
+        ping = self._bridge_run_jsx(timeout=90, command="executeAtomScript",
+                                    args={"script": _probe_script, "scriptContent": _probe_script})
         if not (ping and ping.get("status") == "success"):
-            print(f"  [WARN] Bridge ping 未成功({(ping or {}).get('message', '无响应')}), 仍尝试构建")
+            print(f"  [WARN] Bridge 探测未成功({(ping or {}).get('message', '无响应')}), 仍尝试构建")
 
         # Bridge 构建合成
         print("[AE通道] Bridge 构建合成...")
@@ -120,8 +207,10 @@ class AERenderChannel:
             print(f"  [AE通道] {len(_errs)}个镜头构建失败, 将 fallback ffmpeg: {_errs}")
 
         # aerender 前关闭 AE 内工程 (避免 AE/aerender 同时持有同一工程)
-        self._bridge_run_jsx(timeout=60, command="runScript",
-                             args={"code": "try { app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES); 'closed'; } catch(e) { String(e); }"})
+        _close_script = ("try { app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES); 'closed'; } "
+                         "catch(e) { String(e); }")
+        self._bridge_run_jsx(timeout=60, command="executeAtomScript",
+                             args={"script": _close_script, "scriptContent": _close_script})
 
         # aerender 渲染
         print("[AE通道] aerender 渲染...")
@@ -162,14 +251,22 @@ class AERenderChannel:
     # ────────────────────────────────────────────────────────────
     # 内部: 三件套 (从 v22 原样抽取)
     # ────────────────────────────────────────────────────────────
-    def _ensure_ae_running(self) -> bool:
-        """确保 AE 运行 (tasklist 检查 + 无参启动避免 26.3 弹窗)"""
+    def _ensure_ae_running(self, auto_launch: bool = False) -> bool:
+        """确保 AE 运行 (tasklist 检查)。
+
+        auto_launch=False (默认): AE 未运行直接返回 False → 调用方快速 fallback
+        ffmpeg 通道, 不自动启动 AE (避免首启弹窗 + 强杀崩溃风险, 不拖慢流程)。
+        auto_launch=True: 显式请求时无参启动 AE 并等待 90s (v22 原行为)。
+        """
         ae_running = subprocess.run(
             ["tasklist", "/FI", "IMAGENAME eq AfterFX.exe"],
             capture_output=True, text=True, timeout=15,
             encoding="gbk", errors="ignore")
         if "AfterFX.exe" in (ae_running.stdout or ""):
             return True
+        if not auto_launch:
+            print("[AE通道] AE未运行 — 快速降级 ffmpeg 通道 (不自动启动, 防弹窗/崩溃)")
+            return False
         print("[AE通道] AE未运行, 启动中...")
         if self.aep_path.exists():
             self.aep_path.unlink()
@@ -178,31 +275,58 @@ class AERenderChannel:
         time.sleep(90)
         return True
 
-    def _bridge_run_jsx(self, jsx_path=None, timeout=300, command="runScript", args=None):
-        """Bridge协议: 清残留→写命令→轮询结果 (记忆: 残留命令毒杀bridge)"""
+    def _bridge_run_jsx(self, jsx_path=None, timeout=300, command="executeAtomScript", args=None):
+        """Bridge协议: 清残留→写命令→轮询结果 (记忆: 残留命令毒杀bridge)
+
+        2026-09-01 协议对齐: 监听器白名单只有 executeAtomScript 且经
+        new Function(scriptStr) 执行 — 不认 runScript、不吃 {file:...}。
+        → 默认命令改 executeAtomScript; 传 jsx 文件时读全文作 args.script。
+        """
         cmd_file = self.bridge_dir / "ae_command.json"
-        res_file = self.bridge_dir / "ae_result.json"
-        for f in (cmd_file, res_file):
+        # 结果文件兼容两个监听器: 主监听器写 ae_result.json,
+        # bg_listener 写 ae_mcp_result.json。读时都清 + 都读。
+        res_files = [self.bridge_dir / "ae_result.json",
+                     self.bridge_dir / "ae_mcp_result.json"]
+        for f in ([cmd_file] + res_files):
             if f.exists():
                 try:
                     f.unlink()
                 except OSError:
                     pass
+        if args is None:
+            if jsx_path is None:
+                args = {}
+            else:
+                # 监听器 executeScript 是 new Function(字符串) — 必须传脚本全文
+                # 文件带 BOM(ExtendScript 识别中文需 BOM)但 eval 字符串不能带 \ufeff
+                jsx_text = Path(jsx_path).read_text(encoding="utf-8-sig")
+                # script: 主监听器 (ae_mcp_listener.jsx) 读 args.script
+                # scriptContent: bg_listener (ae_mcp_bg_listener.jsx) 读 args.scriptContent
+                args = {"script": jsx_text.lstrip("\ufeff"),
+                        "scriptContent": jsx_text.lstrip("\ufeff")}
         cmd = {
             "command": command,
-            "args": args if args is not None else {"file": _js_str(jsx_path)},
+            "args": args,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S") + f".{int(time.time()*1e6)%1000000:06d}",
             "status": "pending",
         }
+        # 签名验证 (2026-09-01): 监听器 SIGNATURE_ENABLED=true fail-closed,
+        # 无签名命令直接拒绝。规范与 ae/ae_bridge_base._generate_signature 一致:
+        # HMAC-SHA256 hex + canonical json(sort_keys, 紧凑分隔符)。
+        secret = self._load_secret()
+        if secret:
+            sign_data = {k: v for k, v in cmd.items() if k != "signature" and k != "signature_alg"}
+            cmd["signature"] = self._generate_signature(sign_data, secret)
         cmd_file.write_text(json.dumps(cmd, ensure_ascii=False, indent=2), encoding="utf-8")
         t0 = time.time()
         while time.time() - t0 < timeout:
-            if res_file.exists():
-                try:
-                    return json.loads(res_file.read_text(encoding="utf-8"))
-                except (json.JSONDecodeError, OSError):
-                    time.sleep(1)
-                    continue
+            for rf in res_files:
+                if rf.exists():
+                    try:
+                        return json.loads(rf.read_text(encoding="utf-8"))
+                    except (json.JSONDecodeError, OSError):
+                        time.sleep(1)
+                        continue
             time.sleep(2)
         return None
 

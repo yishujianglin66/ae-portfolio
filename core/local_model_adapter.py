@@ -24,6 +24,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import logging
 
+from core.torch_runtime import infer_ctx
+
 logger = logging.getLogger(__name__)
 
 
@@ -464,7 +466,7 @@ class LocalModelAdapter:
                         max_length=self.config.max_length
                     )
                     
-                    with torch.no_grad():
+                    with infer_ctx(self.config.device):
                         outputs = self._model(**inputs)
                         # 使用平均池化
                         attention_mask = inputs["attention_mask"]
@@ -545,7 +547,7 @@ class LocalModelAdapter:
                 max_length=self.config.max_length
             )
             
-            with torch.no_grad():
+            with infer_ctx(self.config.device):
                 outputs = self._model.generate(
                     **inputs,
                     max_new_tokens=max_new_tokens,

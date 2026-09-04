@@ -24,6 +24,7 @@ import numpy as np
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
+from core.torch_runtime import infer_ctx, get_device  # noqa: E402
 from scripts.train_param_tuner import FEATURES  # noqa: E402
 
 
@@ -74,7 +75,7 @@ def main() -> int:
         s["vis"] = encode_frames(bb, s["frames"])
     print("编码完成")
 
-    DEV = "cuda" if torch.cuda.is_available() else "cpu"
+    DEV = get_device()
     D_vis, D_param = 512, len(FEATURES)
 
     class MLPHead(nn.Module):
@@ -108,7 +109,7 @@ def main() -> int:
             loss.backward()
             opt.step()
         model.eval()
-        with torch.no_grad():
+        with infer_ctx(DEV):
             xv = torch.tensor(samples[i]["vis"], dtype=torch.float32, device=DEV).unsqueeze(0)
             xp = torch.tensor(samples[i]["feat"], dtype=torch.float32, device=DEV).unsqueeze(0)
             preds[i] = model(xv, xp).item()

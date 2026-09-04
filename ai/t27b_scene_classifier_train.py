@@ -29,6 +29,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import get_device, infer_ctx
+
 # === 路径配置 ===
 VLM_FULL_DIR = Path(r"D:\aot_corpus\vlm_full")
 VLM_RESULTS = VLM_FULL_DIR / "results.jsonl"
@@ -122,7 +124,7 @@ def train_scene_classifier():
     _log("T27b: 场景分类器训练 (ResNet18)")
     _log("=" * 60)
     
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     _log(f"设备: {device}")
     
     # 1. 加载数据
@@ -220,7 +222,7 @@ def train_scene_classifier():
         resnet.eval()
         val_correct = 0
         val_total = 0
-        with torch.no_grad():
+        with infer_ctx(device):
             for images, labels in val_loader:
                 images, labels = images.to(device), labels.to(device)
                 outputs = resnet(images)

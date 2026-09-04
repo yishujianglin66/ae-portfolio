@@ -46,7 +46,7 @@ SILHOUETTE_FX_EMULATOR = SILHOUETTE_HOME / "resources" / "scripts" / "fx_emulato
 
 OUTPUT_BASE = Path(os.environ.get("AE_WORK_DIR", r"D:\AE-Work"))
 
-KNOWLEDGE_BASE_DIR = Path(__file__).parent / "14-Silhouette知识库"
+KNOWLEDGE_BASE_DIR = Path(__file__).parent.parent / "14-Silhouette知识库"
 TEMPLATE_DIR = KNOWLEDGE_BASE_DIR / "案例模板"
 
 PRESET_CONFIGS = {

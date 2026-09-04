@@ -19,6 +19,8 @@ import threading
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from core.torch_runtime import infer_ctx
+
 ROOT = Path(__file__).resolve().parent.parent
 SCENE_CKPT = ROOT / "models" / "scene_classifier_v1.pt"
 RHYTHM_PKL = ROOT / "models" / "rhythm_reward.pkl"
@@ -125,7 +127,7 @@ class LocalModelHub:
                 if not ok or frame is None:
                     continue
                 img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                with torch.no_grad():
+                with infer_ctx():
                     logits = self._scene_model(self._scene_transform(img).unsqueeze(0))
                     prob = torch.softmax(logits, dim=1)[0]
                 top = int(prob.argmax())

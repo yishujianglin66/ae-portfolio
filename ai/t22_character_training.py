@@ -27,6 +27,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import get_device, infer_ctx
+
 MODEL_DIR = ROOT / "models"
 REPORT_DIR = ROOT / "reports"
 PSEUDO_LABELS = Path(r"D:\aot_corpus\pseudolabels.json")
@@ -72,7 +74,7 @@ def build_character_prototypes():
     )
     model, _, preprocess = open_clip.create_model_and_transforms("ViT-B-32", pretrained=ckpt_path)
     tokenizer = open_clip.get_tokenizer("ViT-B-32")
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     model = model.to(device)
     model.eval()
 
@@ -103,7 +105,7 @@ def build_character_prototypes():
     ]
 
     text_embeddings = []
-    with torch.no_grad():
+    with infer_ctx(device):
         for i in range(0, len(text_prompts), 16):
             batch = text_prompts[i:i+16]
             tokens = tokenizer(batch).to(device)

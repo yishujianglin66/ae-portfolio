@@ -47,6 +47,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
+from core.torch_runtime import infer_ctx, get_device
 
 # Layer 2A: RIFE warplayer（CUDA 双线性 warp），失败则禁用稳定（向后兼容）
 try:
@@ -239,7 +240,7 @@ def stabilize_temporal(mask_raw: np.ndarray, prev_stab: np.ndarray | None,
     h, w = mask_raw.shape[:2]
     flow_t = torch.from_numpy(flow_full).permute(2, 0, 1).unsqueeze(0).float().to(device)
     prev_t = torch.from_numpy(prev_stab.astype(np.float32)).unsqueeze(0).unsqueeze(0).to(device)
-    with torch.no_grad():
+    with infer_ctx(device):
         warped = _rife_warp(prev_t, flow_t).squeeze(0).squeeze(0).cpu().numpy()  # float 0~255
     w_raw, w_prev = STAB_WEIGHTS.get(level, (0.6, 0.4))
     fused = np.clip(w_raw * mask_raw.astype(np.float32) + w_prev * warped, 0, 255)
@@ -444,7 +445,7 @@ def build_image_predictor(params: dict):
 
     variant = params.get("sam_variant", "large")
     config_file = _resolve_config(params, variant)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     print(f"[SAM2-IMG] config={config_file} variant={variant} device={device}", file=sys.stderr)
     model = build_sam2(config_file=config_file, ckpt_path=params["sam2_checkpoint"],
                        device=device, mode="eval", apply_postprocessing=False)
@@ -458,7 +459,7 @@ def build_video_predictor(params: dict):
 
     variant = params.get("sam_variant", "large")
     config_file = _resolve_config(params, variant)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     print(f"[SAM2-VID] config={config_file} variant={variant} device={device}", file=sys.stderr)
     return build_sam2_video_predictor(config_file=config_file, ckpt_path=params["sam2_checkpoint"],
                                       device=device, mode="eval")

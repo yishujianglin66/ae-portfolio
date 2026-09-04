@@ -174,7 +174,8 @@ async def index():
 async def analyze_video(file: UploadFile = File(..., max_length=512 * 1024 * 1024)):
     """分析上传的视频"""
     # 保存文件
-    save_path = UPLOAD_DIR / file.filename
+    safe_name = Path(file.filename).name
+    save_path = UPLOAD_DIR / safe_name
     content = await file.read()
     save_path.write_bytes(content)
 
@@ -235,7 +236,10 @@ async def submit_feedback(data: Dict):
 @app.get("/api/download")
 async def download_file(path: str):
     """下载文件"""
-    file_path = Path(path)
+    file_path = Path(path).resolve()
+    allowed_root = PROJECT_ROOT.resolve()
+    if not str(file_path).startswith(str(allowed_root)):
+        raise HTTPException(status_code=403, detail="禁止访问该路径")
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="文件不存在")
     return FileResponse(file_path, filename=file_path.name)

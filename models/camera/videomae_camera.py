@@ -27,6 +27,7 @@ import os
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
+from core.torch_runtime import infer_ctx
 
 logger = logging.getLogger(__name__)
 
@@ -221,7 +222,7 @@ class VideoMAECameraClassifier:
             device = next(self._model.parameters()).device
             inputs = {k: v.to(device) for k, v in inputs.items()}
             t0 = time.time()
-            with torch.no_grad():
+            with infer_ctx(str(device)):
                 logits = self._model(**inputs).logits
             elapsed = time.time() - t0
             self._n_infer += 1

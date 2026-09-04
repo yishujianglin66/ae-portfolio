@@ -20,6 +20,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+from core.torch_runtime import get_device, infer_ctx
+
 ROOT = Path(__file__).resolve().parent.parent
 LABELS = ROOT / "data" / "training" / "labels.json"
 GOLDEN = ROOT / "data" / "benchmark_golden.json"
@@ -130,7 +132,7 @@ def train():
     import torch
     from torch.utils.data import DataLoader
     _log(f"[P2.2] torch={torch.__version__} cuda={torch.cuda.is_available()}")
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(get_device())
 
     labels = load_labels()
     golden = json.loads(GOLDEN.read_text(encoding="utf-8"))
@@ -176,7 +178,7 @@ def train():
         # 验证
         model.eval()
         ok, tot = 0, 0
-        with torch.no_grad():
+        with infer_ctx(device):
             for x, y, _ in dl_va:
                 x, y = x.to(device), y.to(device)
                 ok += int((model(x).argmax(1) == y).sum())
@@ -211,7 +213,7 @@ def predict_video(video_path: str, sample_frames: int = 16) -> Dict:
     meta = json.loads(META.read_text(encoding="utf-8"))
     c2i = meta["classes"]
     i2c = {v: k for k, v in c2i.items()}
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(get_device())
     model = make_model(meta["num_classes"]).to(device)
     model.load_state_dict(torch.load(CKPT, map_location=device))
     model.eval()

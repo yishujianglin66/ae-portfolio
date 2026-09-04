@@ -434,7 +434,7 @@ async def preview_img(stem: str):
 async def annotate(request: Request):
     """接收标注并调用 SAM2 video 传播模式。"""
     data = await request.json()
-    stem = data["stem"]
+    stem = Path(data["stem"]).name
     markers = data["markers"]
 
     # 转换为 SAM2 prompts

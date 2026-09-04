@@ -25,6 +25,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
+from core.torch_runtime import infer_ctx, get_device
 
 PROJECT = Path(__file__).resolve().parents[1]
 DEFAULT_VIDEO = PROJECT / "data" / "real_amv_test" / "DL_黑岩射手_r924_BV1NL4y1H7u7.mp4"
@@ -79,7 +80,7 @@ def main() -> int:
     # ---- 3. RVM 全段推理（recurrent 连续） ----
     sys.path.insert(0, str(PROJECT / "external" / "rvm"))
     from model import MattingNetwork  # noqa: E402
-    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    dev = get_device()
     net = MattingNetwork("mobilenetv3").eval().to(dev)
     net.load_state_dict(torch.load(args.checkpoint, map_location=dev, weights_only=True))
     print(f"[MODEL] RVM on {dev}", file=sys.stderr)
@@ -92,7 +93,7 @@ def main() -> int:
         gi = args.start + i
         rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
         src = torch.from_numpy(rgb).float().div(255.0).permute(2, 0, 1).unsqueeze(0).unsqueeze(0).to(dev)
-        with torch.no_grad():
+        with infer_ctx(dev):
             _, pha, *rec = net(src, *rec, downsample_ratio=0.4)
         rvm_alpha[gi] = pha[0, 0, 0].cpu().numpy()
         if (i + 1) % 100 == 0:

@@ -30,6 +30,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import get_device, infer_ctx
+
 PSEUDO_LABELS = Path(r"D:\aot_corpus\pseudolabels.json")
 MODEL_DIR = ROOT / "models"
 REPORT_DIR = ROOT / "reports"
@@ -252,7 +254,7 @@ def train_student(train_loader, val_loader, class_names: List[str],
         model.eval()
         val_correct = 0
         val_total = 0
-        with torch.no_grad():
+        with infer_ctx(device):
             for images, labels in val_loader:
                 images, labels = images.to(device), labels.to(device)
                 logits, _ = model(images)
@@ -299,7 +301,7 @@ def run_distillation():
     _log("=" * 60)
 
     import torch
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     _log(f"设备: {device}")
 
     # 1. 检查伪标签

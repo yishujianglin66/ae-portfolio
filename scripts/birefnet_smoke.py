@@ -3,6 +3,7 @@ import sys
 import cv2
 import numpy as np
 import torch
+from core.torch_runtime import infer_ctx
 from torchvision import transforms
 
 from transformers import AutoModelForImageSegmentation
@@ -32,7 +33,7 @@ pil = tf(rgb).unsqueeze(0).half().to(device)
 
 import time
 t0 = time.time()
-with torch.no_grad():
+with infer_ctx(device):
     preds = model(pil)[-1].sigmoid().cpu()
 dt = time.time() - t0
 pred = preds[0].squeeze().float().numpy()  # 1024x1024

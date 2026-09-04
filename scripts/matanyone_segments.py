@@ -18,6 +18,7 @@ import cv2
 import numpy as np
 import torch
 import torch.nn.functional as F
+from core.torch_runtime import infer_ctx, get_device
 
 # torchvision>=0.17 兼容: read_video 移入子模块且 0.28 需 pytorch.fb 布局(缺失)
 # → 用 cv2 自实现等价函数注入 (全帧 RGB TCHW + fps 元数据)
@@ -132,7 +133,7 @@ def main() -> int:
         try:
             m, p = get_owl()
             rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
-            with torch.no_grad():
+            with infer_ctx(get_device()):
                 inputs = p(text=OWL_TEXTS, images=rgb, return_tensors="pt").to("cuda")
                 outputs = m(**inputs)
                 results = p.post_process_grounded_object_detection(

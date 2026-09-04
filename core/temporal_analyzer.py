@@ -11,6 +11,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
+from core.torch_runtime import get_device, infer_ctx
+
 logger = logging.getLogger(__name__)
 
 
@@ -514,7 +516,7 @@ class TemporalAnalyzer:
         import cv2, torch
         from PIL import Image
         from torchvision.models.optical_flow import raft_large, Raft_Large_Weights
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = get_device()
         model = raft_large(weights=Raft_Large_Weights.DEFAULT, progress=False)
         model = model.to(device).eval()
         transforms = Raft_Large_Weights.DEFAULT.transforms()
@@ -533,7 +535,7 @@ class TemporalAnalyzer:
             if not ret: break
             pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
             if prev_pil is not None:
-                with torch.no_grad():
+                with infer_ctx(device):
                     img1, img2 = transforms(prev_pil, pil)
                     img1 = img1.unsqueeze(0).to(device)
                     img2 = img2.unsqueeze(0).to(device)
@@ -567,7 +569,7 @@ class TemporalAnalyzer:
         """TransNetV2 神经网络镜头检测（精度远高于直方图差异）"""
         from transnetv2_pytorch import TransNetV2
         import cv2
-        device = "cuda" if __import__("torch").cuda.is_available() else "cpu"
+        device = get_device()
         model = TransNetV2(device=device)
         cap = cv2.VideoCapture(video_path)
         fps = cap.get(cv2.CAP_PROP_FPS) or 30

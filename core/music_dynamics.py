@@ -273,10 +273,10 @@ class MusicDynamicsAnalyzer:
                        energy_norm: float, is_downbeat: bool) -> Tuple[float, str]:
         """镜头级变速决策 — 变速跟随音乐动态
 
-        漫剪卡点变速惯例:
-          low段(铺垫)   → 慢放落点 (0.55x), 让画面"沉"下去
-          mid段(蓄力)   → 慢镜头 (0.7x), 前面一排慢镜头蓄力
-          high段(爆发)  → 脉冲 (1.0x), 鼓点推进镜头(每个拍点推)
+        铁律 (漫剪卡点铁律 §2, v22 已验证):
+          low段(铺垫)   → 强拍0.55x慢放落点 / 普通0.7x
+          mid段(蓄力)   → 强拍0.9x zoom_back / 普通1.0x static
+          high段(爆发)  → 强拍1.0x pulse / 普通1.3x fast_pan
 
         Returns:
             (speed, technique) — 速度系数与对应技巧标签
@@ -285,13 +285,18 @@ class MusicDynamicsAnalyzer:
             if beat_strength == "strong" or is_downbeat:
                 return 0.55, "slowmo"
             return 0.7, "slowmo"
-        if level == "high":
-            # 爆发段: 鼓点推进镜头 — 每个拍点 1.0x 脉冲推进。
-            # 不加速(旧 1.3-1.5x fast_pan 会稀释"鼓点推进"的冲击感,
-            # 且变速会压缩 onset 时间轴, 导致 AE/ffmpeg 脉冲与鼓点错位)。
-            return 1.0, "pulse"
-        # mid 段(蓄力铺垫): 慢镜头 — 前面一排慢镜头蓄力
-        return 0.7, "slowmo"
+        if level == "mid":
+            if beat_strength == "strong" or is_downbeat:
+                # 2026-09-02 节拍-镜头语法: 小节重音(强拍+downbeat)→0.55 慢镜落点,
+                # 普通强拍→0.9 zoom_back (慢镜/缩放交替, 避免整段单一速度)
+                if is_downbeat and beat_strength == "strong":
+                    return 0.55, "slowmo"
+                return 0.9, "zoom_back"
+            return 1.0, "static"
+        # high 段(爆发): 2026-09-02 用户语法——重鼓点=快切(1.3)+撞拍双切(见 _plan)。
+        # 旧规则强拍 1.0 pulse 无速度变化, 在鼓点上没有"踩"感;
+        # pulse 缩放效果保留在镜头内特效层, 速度层全部给撞击。
+        return 1.3, "fast_pan"
 
     # ------------------------------------------------------------------
     # 4. 统计输出

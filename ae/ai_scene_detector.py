@@ -70,6 +70,8 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from core.torch_runtime import get_device, infer_ctx
+
 
 # ================================================================
 #  数据结构
@@ -470,7 +472,7 @@ class AISceneDetector:
             state_dict = torch.load(str(weights_path), map_location="cpu")
             model.load_state_dict(state_dict)
             model.eval()
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+            device = get_device()
             if device == "cuda":
                 # RTX 4060 8GB VRAM：使用 half precision 节省显存
                 model = model.to(device).half()
@@ -652,7 +654,7 @@ class AISceneDetector:
                 import torch
                 model = self._model["model"]
                 device = self._model["device"]
-                with torch.no_grad():
+                with infer_ctx(device):
                     t = torch.from_numpy(batch).to(device)
                     if device == "cuda":
                         t = t.half()

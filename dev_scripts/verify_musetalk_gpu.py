@@ -15,6 +15,8 @@ import imageio
 import numpy as np
 import torch
 
+from core.torch_runtime import get_device
+
 # ffmpeg 注入 PATH（whisper 解码音频需要）
 _FFMPEG_DIR = os.path.join(
     os.path.dirname(sys.executable), "..", "Lib", "site-packages", "imageio_ffmpeg", "binaries"
@@ -54,7 +56,7 @@ def detect_face_bbox(frame):
 
 
 def run():
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(get_device())
     assert device.type == "cuda", "未检测到 CUDA"
     print(f"device = {device} ({torch.cuda.get_device_name(0)}, 总显存 {torch.cuda.get_device_properties(0).total_memory / 1024**2:.0f} MiB)")
 

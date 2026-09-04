@@ -29,9 +29,9 @@ jobs:
 
       - name: Test enterprise modules
         run: |
-          py -3.11 auth_system.py
-          py -3.11 distributed_scheduler.py
-          py -3.11 monitoring.py
+          py -3.11 auth/auth_system.py
+          py -3.11 pipeline/distributed_scheduler.py
+          py -3.11 monitoring/monitoring.py
 
       - name: Start API server for integration tests
         run: |
@@ -41,7 +41,7 @@ jobs:
 
       - name: Run integration tests
         run: |
-          py -3.11 test_api_integration.py
+          py -3.11 tests/test_api_integration.py
 
       - name: Install pytest test dependencies
         run: |
@@ -56,7 +56,7 @@ jobs:
       - name: Python linting (flake8)
         run: |
           pip install flake8
-          flake8 api_server.py auth_system.py monitoring.py distributed_scheduler.py database.py plugin_system.py --max-line-length=120 --extend-ignore=E501,W503,E203
+          flake8 api_server.py auth/auth_system.py monitoring/monitoring.py pipeline/distributed_scheduler.py database.py tools/plugin_system.py --max-line-length=120 --extend-ignore=E501,W503,E203
         continue-on-error: true
 
       - name: Security scan

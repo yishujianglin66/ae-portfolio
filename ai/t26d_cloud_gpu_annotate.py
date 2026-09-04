@@ -24,6 +24,9 @@ import time
 from pathlib import Path
 from typing import Optional
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from core.torch_runtime import infer_ctx
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # === 路径配置 (AutoDL环境) ===
@@ -197,7 +200,7 @@ def run_cloud_annotation():
                 inputs = processor(text=[text], images=[img], padding=True, return_tensors="pt")
                 inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
-                with torch.no_grad():
+                with infer_ctx():
                     output_ids = model.generate(**inputs, max_new_tokens=500, temperature=0.1)
                 response = processor.decode(output_ids[0], skip_special_tokens=True)
 

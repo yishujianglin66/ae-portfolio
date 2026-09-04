@@ -36,6 +36,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+from core.torch_runtime import infer_ctx
+
 import requests
 
 warnings.filterwarnings("ignore", message=".*torch.classes.*")
@@ -432,7 +434,7 @@ class LocalLLMAdapter:
                 gen_kwargs["streamer"] = kwargs.get("streamer")
 
             # 推理
-            with torch.no_grad():
+            with infer_ctx():
                 outputs = await asyncio.to_thread(
                     self._model.generate,
                     **inputs,

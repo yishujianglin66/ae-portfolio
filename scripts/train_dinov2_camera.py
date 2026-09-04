@@ -35,6 +35,8 @@ import torch.nn as nn
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -291,7 +293,7 @@ class DINOv2TemporalClassifier(nn.Module):
 
         # 逐帧提取特征: [B*T, C, H, W] → [B*T, feat_dim] → [B, T, feat_dim]
         frames_flat = pixel_values.reshape(B * T, C, H, W)
-        with torch.no_grad():
+        with infer_ctx(str(pixel_values.device)):
             outputs = self.backbone(pixel_values=frames_flat)
             # last_hidden_state: [B*T, 1+H*W, feat_dim], 取 CLS token
             feats = outputs.last_hidden_state[:, 0]  # [B*T, feat_dim]
@@ -363,7 +365,7 @@ def main():
     parser.add_argument("--ema-decay", type=float, default=0.9999)
     args = parser.parse_args()
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(get_device())
     logger.info("设备: %s", device)
     logger.info("参数: %s", vars(args))
 
@@ -450,19 +452,19 @@ def main():
         nonlocal ema_n
         ema_n += 1
         decay = min(ema_decay, (1.0 + ema_n) / (10.0 + ema_n))
-        with torch.no_grad():
+        with infer_ctx(str(device)):
             for k, p in model.named_parameters():
                 if p.requires_grad and k in ema_shadow:
                     ema_shadow[k].mul_(decay).add_(p.detach(), alpha=1 - decay)
 
     def ema_apply():
-        with torch.no_grad():
+        with infer_ctx(str(device)):
             for k, p in model.named_parameters():
                 if p.requires_grad and k in ema_shadow:
                     p.copy_(ema_shadow[k])
 
     def ema_restore():
-        with torch.no_grad():
+        with infer_ctx(str(device)):
             for k, p in model.named_parameters():
                 if p.requires_grad and k in ema_shadow:
                     ema_shadow[k].copy_(p.detach())
@@ -523,7 +525,7 @@ def main():
         model.eval()
         correct = 0
         n_val_eval = 0
-        with torch.no_grad():
+        with infer_ctx(str(device)):
             for batch in val_loader:
                 batch = {k: v.to(device) for k, v in batch.items()}
                 out = model(**batch)

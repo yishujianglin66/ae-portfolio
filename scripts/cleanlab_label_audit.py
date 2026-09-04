@@ -55,6 +55,8 @@ from typing import Any, Dict, List, Optional, Tuple
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+
 # ─── 六类运镜 (与 train_anime_camera_v5.py SIX_LABELS / SIX_MAP 一致) ───
 # v3 是 v1+v2+本地新标合并, 可能含细粒度方向, 需折叠到 6 类规范标签
 SIX_MAP: Dict[str, Optional[str]] = {
@@ -228,7 +230,7 @@ def load_clip_model(model_alias: str, logger: logging.Logger) -> Tuple[Any, Any,
         logger.error("安装: py -3.12 -m pip install torch transformers")
         sys.exit(3)
     hf_name = CLIP_MODEL_MAP.get(model_alias, "openai/clip-vit-base-patch32")
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     logger.info("加载 CLIP 模型 %s -> %s (device=%s)", model_alias, hf_name, device)
     model = CLIPModel.from_pretrained(hf_name).to(device)
     model.eval()
@@ -287,7 +289,7 @@ def compute_clip_embeddings(
             skipped += 1
             continue
         imgs = [Image.open(io.BytesIO(b)).convert("RGB") for b in frames]
-        with torch.no_grad():
+        with infer_ctx(device):
             inputs = processor(images=imgs, return_tensors="pt").to(device)
             out = model.get_image_features(**inputs)
             # 兼容不同 transformers 版本: get_image_features 可能返回 Tensor 或 BaseModelOutput 对象

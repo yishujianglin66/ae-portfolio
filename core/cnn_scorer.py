@@ -37,6 +37,7 @@ PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
 from core.visual_scorer import score_video  # noqa: E402
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 SAMPLES = PROJECT / "data" / "param_tuning" / "train_samples.jsonl"
 EMB = PROJECT / "data" / "param_tuning" / "clip_vitl14_emb.npz"
@@ -65,7 +66,7 @@ def _load_clip():
         import torch
         _clip_model, _, _clip_preprocess = open_clip.create_model_and_transforms(
             "ViT-L-14", pretrained=str(CKPT),
-            device="cuda" if torch.cuda.is_available() else "cpu")
+            device=get_device())
         _clip_model.eval()
     return _clip_model, _clip_preprocess
 
@@ -76,7 +77,7 @@ def encode_frames(frame_paths: List[str]) -> np.ndarray:
     model, preprocess = _load_clip()
     from PIL import Image
     tensors = [preprocess(Image.open(p).convert("RGB")) for p in frame_paths]
-    with torch.no_grad():
+    with infer_ctx():
         feats = model.encode_image(torch.stack(tensors).to(next(model.parameters()).device))
         feats = feats / feats.norm(dim=-1, keepdim=True).clamp_min(1e-8)
     emb = feats.cpu().numpy().mean(axis=0)

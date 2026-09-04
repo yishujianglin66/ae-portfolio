@@ -42,7 +42,7 @@ VLM_CKPT = Path(r"D:\aot_corpus\vlm_ckpt.json")
 REPORT_DIR = ROOT / "reports"
 
 # API配置 (SiliconFlow + Qwen3-VL-8B-Instruct)
-VLM_API_KEY = os.environ.get("SILICONFLOW_API_KEY", "sk-gwtbhthfdrjbjqljcntqatsvsvmrqytlpzxoilrgbphusvzh")
+VLM_API_KEY = os.environ.get("SILICONFLOW_API_KEY")
 VLM_BASE_URL = "https://api.siliconflow.cn/v1"
 VLM_MODEL = "Qwen/Qwen3-VL-8B-Instruct"
 VLM_MAX_RETRIES = 3

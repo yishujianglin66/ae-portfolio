@@ -20,6 +20,8 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+
 try:
     from scripts.train_anime_camera_lora import FINE_LABELS, NUM_FRAMES, IMG_SIZE  # noqa: E402
 except ImportError:
@@ -62,7 +64,7 @@ def predict(model, clip: str, device) -> int:
     mean = torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
     std = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
     x = ((x - mean) / std).unsqueeze(0).to(device)
-    with torch.no_grad():
+    with infer_ctx(device):
         logits = model(pixel_values=x).logits[0]
     return int(logits.argmax().item())
 
@@ -79,7 +81,7 @@ def main() -> int:
     args = parser.parse_args()
 
     import torch
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     from transformers import VideoMAEForVideoClassification
     from peft import PeftModel
     # v3 修复: fine schema 的 classifier 是 num_labels 重建的头 (不在基座 ckpt),

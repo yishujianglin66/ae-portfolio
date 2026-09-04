@@ -48,6 +48,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import get_device, infer_ctx
+
 # 数据源路径
 MERGED_VLM = Path(r"D:\multi_ip_corpus\merged_vlm.jsonl")
 VLM_FULL = Path(r"D:\aot_corpus\vlm_full\results.jsonl")
@@ -277,7 +279,7 @@ def build_text_embeds_with_scene(class_names: List[str], entries: List[dict],
     text_embeds = np.zeros((len(class_names), 768), dtype=np.float32)  # ViT-L-14 = 768dim
     clip_model.eval()
 
-    with torch.no_grad():
+    with infer_ctx(device):
         for i, ip_name in enumerate(class_names):
             # 场景感知文本增强
             scenes = Counter(ip_scenes.get(ip_name, []))
@@ -428,7 +430,7 @@ def main_train():
     _log("T32: 均衡采样LoRA重训")
     _log("=" * 60)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     _log(f"设备: {device}")
     if device != "cuda":
         _log("WARNING: 无GPU, 训练将极慢")

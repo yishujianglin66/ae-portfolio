@@ -23,6 +23,10 @@ import torch
 from torchvision import transforms
 from transformers import AutoModelForImageSegmentation
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # repo root: _archive 迁移后 core.* 导入用
+
+from core.torch_runtime import infer_ctx  # noqa: E402
+
 PROJECT = Path(__file__).resolve().parents[1]
 DATA = PROJECT / "external" / "animeseg" / "dataset"
 IMGS = DATA / "imgs"
@@ -92,7 +96,7 @@ def main() -> int:
         h, w = img.shape[:2]
         rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         inp = tf(rgb).unsqueeze(0).half().cuda()
-        with torch.no_grad():
+        with infer_ctx():
             pred = model(inp)[-1].sigmoid().cpu()[0].squeeze().float().numpy()
         pred = cv2.resize(pred, (w, h), interpolation=cv2.INTER_LINEAR)
         pred_u8 = (pred * 255).astype(np.uint8)

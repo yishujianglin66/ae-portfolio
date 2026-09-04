@@ -14,6 +14,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
+from core.torch_runtime import infer_ctx, get_device
 
 COCO_ROOT = Path("/root/autodl-pub/COCO2017")
 VAL_IMG = COCO_ROOT / "val2017"
@@ -58,7 +59,7 @@ def main() -> int:
 
         def detect(img_bgr):
             rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-            with torch.no_grad():
+            with infer_ctx(get_device()):
                 inputs = proc(text=[["person"]], images=rgb, return_tensors="pt").to("cuda")
                 outputs = model(**inputs)
                 results = proc.post_process_grounded_object_detection(

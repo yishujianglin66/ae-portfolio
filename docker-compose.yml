@@ -14,7 +14,7 @@ services:
       - AEK_ENVIRONMENT=production
       - API_HOST=0.0.0.0
       - API_PORT=8000
-      - AE_VAULT_SECRET_KEY=${AE_VAULT_SECRET_KEY:-ae-knowledge-vault-secret-key-please-change-in-production}
+      - AE_VAULT_SECRET_KEY=${AE_VAULT_SECRET_KEY}
       - ACCESS_TOKEN_TTL=3600
       - REFRESH_TOKEN_TTL=604800
       - SCHEDULER_WORKERS=3

@@ -38,6 +38,8 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from core.torch_runtime import infer_ctx  # noqa: E402
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -337,7 +339,7 @@ def annotate_batch(
                     padding=True, return_tensors="pt",
                 ).to(model.device)
 
-                with torch.no_grad():
+                with infer_ctx(str(model.device)):
                     generated = model.generate(
                         **model_inputs, max_new_tokens=200, do_sample=False,
                         temperature=0.0,  # 贪心解码, 标签任务要确定性

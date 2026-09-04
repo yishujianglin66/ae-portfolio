@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional
 
 from .trainer_base import BaseTrainer, TrainingConfig, TrainingResult
 from .lora_trainer import LoRAConfig
+from core.torch_runtime import infer_ctx
 
 logger = logging.getLogger(__name__)
 
@@ -477,7 +478,7 @@ class JSXCodeTrainer(BaseTrainer):
                 max_length=self.config.max_seq_length,
             ).to(next(self._peft_model.parameters()).device)
 
-            with torch.no_grad():
+            with infer_ctx():
                 outputs = self._peft_model.generate(
                     **inputs,
                     max_length=inputs["input_ids"].shape[1] + max_length,

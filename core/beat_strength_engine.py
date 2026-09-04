@@ -338,9 +338,9 @@ if __name__ == "__main__":
     print(f"BGM: {duration:.2f}s")
     
     # beat_this检测
-    import torch
     from beat_this.inference import Audio2Beats
-    model = Audio2Beats(device="cuda" if torch.cuda.is_available() else "cpu")
+    from core.torch_runtime import get_device
+    model = Audio2Beats(device=get_device())
     result = model(y, sr)
     if isinstance(result, tuple):
         beats_sec = np.array(result[0], dtype=float)

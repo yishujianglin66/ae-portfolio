@@ -27,6 +27,7 @@ import torch.nn as nn
 from pathlib import Path
 import sys
 import time
+from core.torch_runtime import infer_ctx
 
 
 class SmallMotionCNN(nn.Module):
@@ -154,7 +155,7 @@ class CameraClassifier2Class:
         input_tensor = torch.from_numpy(avg_diff).float().to(self.device)
         
         # Inference
-        with torch.no_grad():
+        with infer_ctx(self.device):
             output = self.model(input_tensor)
             probs = torch.softmax(output, dim=1)[0]
             pred_idx = probs.argmax().item()

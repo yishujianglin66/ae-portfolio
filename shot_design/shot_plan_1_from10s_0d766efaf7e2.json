@@ -1,0 +1,69 @@
+{
+  "global": {
+    "punch_budget": 4,
+    "punch_spacing_sec": 20
+  },
+  "arcs": [
+    {
+      "start": 0.0,
+      "end": 0.25,
+      "mood": "intro",
+      "motion_per_10": 0,
+      "cameras": [
+        "static"
+      ],
+      "punch_points": [],
+      "notes": "纯静态起手，建立基调"
+    },
+    {
+      "start": 0.25,
+      "end": 12.759,
+      "mood": "build",
+      "motion_per_10": 1,
+      "cameras": [
+        "static",
+        "pan_left"
+      ],
+      "punch_points": [],
+      "notes": "偶发缓摇建立空间，其余硬切"
+    },
+    {
+      "start": 12.759,
+      "end": 27.27,
+      "mood": "drop",
+      "motion_per_10": 2,
+      "cameras": [
+        "static",
+        "push",
+        "zoom_in"
+      ],
+      "punch_points": [
+        13.5
+      ],
+      "notes": "强拍处单点撞击，其余固定硬切"
+    },
+    {
+      "start": 27.27,
+      "end": 30.523,
+      "mood": "build",
+      "motion_per_10": 1,
+      "cameras": [
+        "static",
+        "pan_right"
+      ],
+      "punch_points": [],
+      "notes": "回落段缓摇过渡，保持克制"
+    },
+    {
+      "start": 30.523,
+      "end": 40.53,
+      "mood": "intro",
+      "motion_per_10": 0,
+      "cameras": [
+        "static"
+      ],
+      "punch_points": [],
+      "notes": "收尾纯静态，余韵留白"
+    }
+  ]
+}

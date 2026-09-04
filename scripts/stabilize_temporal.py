@@ -29,6 +29,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
+from core.torch_runtime import infer_ctx, get_device
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "external" / "rife" / "model"))
 from warplayer import warp  # noqa: E402
@@ -62,7 +63,7 @@ def stabilize_frame(mask_raw: np.ndarray, prev_stab: np.ndarray | None,
     h, w = mask_raw.shape[:2]
     flow_t = torch.from_numpy(flow_full).permute(2, 0, 1).unsqueeze(0).float().to(device)
     prev_t = torch.from_numpy(prev_stab.astype(np.float32)).unsqueeze(0).unsqueeze(0).to(device)
-    with torch.no_grad():
+    with infer_ctx(device):
         warped = warp(prev_t, flow_t).squeeze(0).squeeze(0).cpu().numpy()  # float, 0~255
     w_raw, w_prev = WEIGHTS.get(level, (0.6, 0.4))
     fused = np.clip(w_raw * mask_raw.astype(np.float32) + w_prev * warped, 0, 255)

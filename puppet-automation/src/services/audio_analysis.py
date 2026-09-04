@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import torch
+from core.torch_runtime import get_device
 import whisper
 from loguru import logger
 
@@ -21,7 +22,7 @@ class AudioAnalysisService:
     def __init__(self, model_name: str = "base"):
         self.model_name = model_name
         self._model: Optional[whisper.Whisper] = None
-        self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        self._device = get_device()
 
     def _load_model(self):
         """Load Whisper model if not already loaded."""

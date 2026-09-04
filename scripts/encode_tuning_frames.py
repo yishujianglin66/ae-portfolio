@@ -27,6 +27,8 @@ import torch
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
+from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+
 SAMPLES = PROJECT / "data" / "param_tuning" / "train_samples.jsonl"
 OUT = PROJECT / "data" / "param_tuning" / "clip_vitl14_emb.npz"
 CLEAN_IDX = PROJECT / "data" / "param_tuning" / "clean_index.json"
@@ -54,7 +56,7 @@ def main() -> int:
         return 1
     print(f"带帧样本 {len(idx_frames)} / 总 {len(rows)}")
 
-    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    dev = get_device()
     model, _, preprocess = open_clip.create_model_and_transforms(
         "ViT-L-14", pretrained=str(CKPT), device=dev)
     model.eval()
@@ -75,7 +77,7 @@ def main() -> int:
                 from PIL import Image
                 tensors.append(preprocess(Image.open(fp).convert("RGB")))
         xs = torch.stack(tensors).to(dev)
-        with torch.no_grad():
+        with infer_ctx(dev):
             feats = model.encode_image(xs)          # [chunk*4, 768]
             feats = feats / feats.norm(dim=-1, keepdim=True).clamp_min(1e-8)
         # 每样本 4 帧均值 + 归一化

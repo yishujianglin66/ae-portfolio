@@ -185,6 +185,10 @@ async def download_stage_output(run_id: str, stage: str):
         output_dir / "flagship_test" / "S6_export" / "final.mp4",
     ]
     for fc in final_candidates:
+        try:
+            fc.resolve().relative_to(output_dir.resolve())
+        except ValueError:
+            continue
         if fc.exists():
             return FileResponse(fc, filename="final.mp4")
 

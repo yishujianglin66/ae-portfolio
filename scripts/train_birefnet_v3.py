@@ -49,6 +49,9 @@ IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
 PROJECT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT))
+
+from core.torch_runtime import infer_ctx  # noqa: E402
 
 
 # ============================== 损失函数 ==============================
@@ -457,7 +460,7 @@ def main() -> int:
             ema.apply_shadow(model)  # type: ignore[union-attr]
         val_loss, n_val = 0.0, 0
         try:
-            with torch.no_grad():
+            with infer_ctx():
                 for i in range(0, len(val_pairs), args.batch):
                     imgs, masks = load_batch(val_pairs[i:i + args.batch], training=False)
                     if imgs is None or imgs.shape[0] < 2:

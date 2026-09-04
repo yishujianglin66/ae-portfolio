@@ -8,6 +8,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
+from core.torch_runtime import infer_ctx, get_device
 from torchvision import transforms
 
 from transformers import AutoModelForImageSegmentation
@@ -78,7 +79,7 @@ for p in sorted(CUR.glob("mask_*.png")):
         frame = frames[gi]
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         inp = tf(rgb).unsqueeze(0).half().cuda()
-        with torch.no_grad():
+        with infer_ctx(get_device()):
             pred = model(inp)[-1].sigmoid().cpu()[0].squeeze().float().numpy()
         h, w = frame.shape[:2]
         pred = cv2.resize(pred, (w, h), interpolation=cv2.INTER_LINEAR)

@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+from core.torch_runtime import get_device, infer_ctx
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -130,7 +131,7 @@ class AnimeCameraClassifier:
         try:
             import torch
             from transformers import VideoMAEForVideoClassification
-            self._device = "cuda" if torch.cuda.is_available() else "cpu"
+            self._device = get_device()
 
             if not (Path(self.lora_dir) / "adapter_model.safetensors").exists():
                 # 全参微调形态: save_pretrained 直接产出完整模型目录
@@ -193,7 +194,7 @@ class AnimeCameraClassifier:
         mean = torch.tensor(MEAN).view(1, 3, 1, 1)
         std = torch.tensor(STD).view(1, 3, 1, 1)
         x = ((x - mean) / std).unsqueeze(0).to(self._device)
-        with torch.no_grad():
+        with infer_ctx(self._device):
             logits = self._model(pixel_values=x).logits[0]
         probs = torch.softmax(logits, dim=-1).cpu().numpy()
 

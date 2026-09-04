@@ -1,0 +1,69 @@
+{
+  "global": {
+    "punch_budget": 4,
+    "punch_spacing_sec": 20
+  },
+  "arcs": [
+    {
+      "start": 0.0,
+      "end": 0.25,
+      "mood": "intro",
+      "motion_per_10": 0,
+      "cameras": [
+        "static"
+      ],
+      "punch_points": [],
+      "notes": "纯静态硬切，零运动"
+    },
+    {
+      "start": 0.25,
+      "end": 12.759,
+      "mood": "build",
+      "motion_per_10": 1,
+      "cameras": [
+        "static",
+        "pan_left"
+      ],
+      "punch_points": [],
+      "notes": "偶发缓摇建立空间，主体固定"
+    },
+    {
+      "start": 12.759,
+      "end": 27.27,
+      "mood": "drop",
+      "motion_per_10": 2,
+      "cameras": [
+        "static",
+        "push",
+        "zoom_in"
+      ],
+      "punch_points": [
+        13.5
+      ],
+      "notes": "强拍处推镜强调，其余硬切"
+    },
+    {
+      "start": 27.27,
+      "end": 30.523,
+      "mood": "build",
+      "motion_per_10": 1,
+      "cameras": [
+        "static",
+        "pan_right"
+      ],
+      "punch_points": [],
+      "notes": "回落缓摇，静为主"
+    },
+    {
+      "start": 30.523,
+      "end": 40.53,
+      "mood": "intro",
+      "motion_per_10": 0,
+      "cameras": [
+        "static"
+      ],
+      "punch_points": [],
+      "notes": "纯静态收尾，零运动"
+    }
+  ]
+}

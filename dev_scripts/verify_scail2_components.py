@@ -18,6 +18,8 @@ import time
 
 import torch
 
+from core.torch_runtime import get_device, infer_ctx
+
 S2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "external", "scail2"))
 sys.path.insert(0, S2_ROOT)
 os.chdir(S2_ROOT)
@@ -96,7 +98,7 @@ def verify_t5():
         checkpoint_path=T5_PTH, tokenizer_path=T5_TOK)
     ids, mask = t5.tokenizer(["a girl dancing on stage"], return_mask=True)
     ids, mask = ids[:, :64], mask[:, :64]  # 截短序列加速 CPU 前向
-    with torch.no_grad():
+    with infer_ctx("cpu"):
         ctx = t5.model(ids, mask)
     print(f"[T5] CPU 加载+前向 = {time.time() - t0:.1f}s, 权重={size_gb:.1f}GB(bf16), "
           f"context={tuple(ctx.shape)}, dtype={ctx.dtype}")
@@ -120,7 +122,7 @@ def dit_boundary():
 
 
 def run():
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(get_device())
     assert device.type == "cuda", "未检测到 CUDA"
     print(f"device = {device} ({torch.cuda.get_device_name(0)}, "
           f"总显存 {torch.cuda.get_device_properties(0).total_memory / 1024**2:.0f} MiB)")

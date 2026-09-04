@@ -18,6 +18,10 @@ import torch
 from torchvision import transforms
 from transformers import AutoModelForImageSegmentation
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # repo root: _archive 迁移后 core.* 导入用
+
+from core.torch_runtime import infer_ctx  # noqa: E402
+
 COCO_ROOT = Path("/root/autodl-pub/COCO2017")
 VAL_IMG = COCO_ROOT / "val2017"
 VAL_ANN = COCO_ROOT / "annotations" / "instances_val2017.json"
@@ -125,7 +129,7 @@ def main() -> int:
             continue
         rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         inp = tf(rgb).unsqueeze(0).half().cuda()
-        with torch.no_grad():
+        with infer_ctx():
             pred = model(inp)[-1].sigmoid().cpu()[0].squeeze().float().numpy()
         pred = cv2.resize(pred, (w, h), interpolation=cv2.INTER_LINEAR)
         pred_u8 = (pred * 255).astype(np.uint8)

@@ -29,6 +29,8 @@ import torch
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -465,7 +467,7 @@ def main() -> int:
     np.random.seed(args.seed)
     import torch
     torch.manual_seed(args.seed)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     logger.info("device=%s", device)
 
     # 1. 数据
@@ -897,7 +899,7 @@ def main() -> int:
             ema.apply_shadow(model)
         correct = 0
         n_val_eval = 0
-        with torch.no_grad():
+        with infer_ctx(device):
             for batch in val_loader:
                 batch = {k: v.to(device) for k, v in batch.items()}
                 out = model(**batch)

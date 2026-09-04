@@ -25,6 +25,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import get_device, infer_ctx
+
 PSEUDO_LABELS = Path(r"D:\aot_corpus\pseudolabels.json")
 MODEL_DIR = ROOT / "models"
 REPORT_DIR = ROOT / "reports"
@@ -74,7 +76,7 @@ def student_predict_all(model_path: Path) -> List[Dict]:
     from ai.t21_distill_pipeline import build_student_model
     model = build_student_model(len(class_names), class_names)
     model.load_state_dict(checkpoint["model_state"])
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     model = model.to(device)
     model.eval()
 
@@ -89,7 +91,7 @@ def student_predict_all(model_path: Path) -> List[Dict]:
     batch_imgs = []
     batch_paths = []
 
-    with torch.no_grad():
+    with infer_ctx(device):
         for i, entry in enumerate(sampled):
             fp = Path(entry["frame_path"])
             try:

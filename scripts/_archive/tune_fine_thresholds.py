@@ -19,6 +19,9 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # repo root: _archive 迁移后 core.* 导入用
+
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 try:
     from scripts.train_anime_camera_lora import FINE_LABELS, NUM_FRAMES, IMG_SIZE  # noqa: E402
@@ -62,7 +65,7 @@ def get_probs(model, clip: str, device) -> Optional[np.ndarray]:
     mean = torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
     std = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
     x = ((x - mean) / std).unsqueeze(0).to(device)
-    with torch.no_grad():
+    with infer_ctx(device):
         logits = model(pixel_values=x).logits[0]
     return torch.softmax(logits, dim=-1).cpu().numpy()
 
@@ -79,7 +82,7 @@ def main() -> int:
     args = parser.parse_args()
 
     import torch
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     from transformers import VideoMAEForVideoClassification
     from peft import PeftModel
     # v3 修复: 同 eval_fine_lora.py — base 需 num_labels=10 重建头

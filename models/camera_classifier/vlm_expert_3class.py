@@ -24,6 +24,7 @@ import cv2
 import numpy as np
 import re
 import torch
+from core.torch_runtime import infer_ctx
 from pathlib import Path
 import sys
 import time
@@ -283,7 +284,7 @@ class VLMExpertModel:
         
         # Generate (quantized models reject temperature/do_sample kwargs in
         # some transformers versions; keep the call minimal)
-        with torch.no_grad():
+        with infer_ctx(self.device):
             output_ids = self.model.generate(
                 **inputs,
                 max_new_tokens=150,

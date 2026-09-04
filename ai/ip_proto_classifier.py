@@ -35,6 +35,7 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
+from core.torch_runtime import get_device, infer_ctx
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -65,7 +66,7 @@ KNN_K = 5
 TXT_WEIGHT = 0.92            # 无支持类文本零样本分折扣
 C_CONF_PASS = 0.5            # C段: 置信度≤此值视为诚实不确定
 C_ACC_MARGIN_PASS = 0.01     # C段: Top1-Top2累积分差<此值视为无法区分(诚实拒绝)
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = get_device()
 
 # 中文IP名 → 英文别名(CLIP文本空间用)
 IP_ALIASES = {
@@ -165,7 +166,7 @@ def encode_paths(paths: List[Path]) -> np.ndarray:
             except Exception:
                 tensors.append(pre(Image.new("RGB", (224, 224))))
         x = torch.stack(tensors).to(DEVICE)
-        with torch.no_grad(), torch.autocast(DEVICE, dtype=torch.float16):
+        with infer_ctx(DEVICE):
             v = model.encode_image(x)
         v = v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9)
         outs.append(v.float().cpu().numpy())
@@ -190,7 +191,7 @@ def encode_bytes_list(jpegs: List[bytes]) -> np.ndarray:
             except Exception:
                 tensors.append(pre(Image.new("RGB", (224, 224))))
         x = torch.stack(tensors).to(DEVICE)
-        with torch.no_grad():
+        with infer_ctx(DEVICE):
             v = model.encode_image(x)
         v = v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9)
         outs.append(v.float().cpu().numpy())
@@ -201,7 +202,7 @@ def encode_text(ip: str) -> np.ndarray:
     model, _, tok = _load_model()
     en = IP_ALIASES.get(ip, ip)
     tokens = tok([t.format(en) for t in TEXT_PROMPTS]).to(DEVICE)
-    with torch.no_grad():
+    with infer_ctx(DEVICE):
         v = model.encode_text(tokens)
     v = v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9)
     return v.mean(0).float().cpu().numpy()

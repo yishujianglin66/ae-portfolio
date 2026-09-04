@@ -30,6 +30,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import get_device, infer_ctx
+
 MODEL_DIR = ROOT / "models"
 REPORT_DIR = ROOT / "reports"
 INTEL_CACHE = ROOT / "cache" / "material_intel"
@@ -165,7 +167,7 @@ def clip_semantic_search(entries: List[Dict], query: str,
 
     # 编码查询
     text_prompt = f"a photo of {query}, anime character"
-    with torch.no_grad():
+    with infer_ctx():
         tokens = tokenizer([text_prompt]).to(device)
         query_emb = model.encode_text(tokens)
         query_emb = query_emb / query_emb.norm(dim=-1, keepdim=True)
@@ -178,7 +180,7 @@ def clip_semantic_search(entries: List[Dict], query: str,
         # 拼接角色名增强匹配
         char_text = " ".join(e["characters"])
         full_text = f"{desc} {char_text}"
-        with torch.no_grad():
+        with infer_ctx():
             tokens = tokenizer([full_text]).to(device)
             doc_emb = model.encode_text(tokens)
             doc_emb = doc_emb / doc_emb.norm(dim=-1, keepdim=True)
@@ -200,7 +202,7 @@ def run_e2e_verification():
     import torch
     import open_clip
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     _log(f"设备: {device}")
 
     # 1. 加载素材索引

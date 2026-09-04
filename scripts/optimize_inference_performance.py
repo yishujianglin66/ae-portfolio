@@ -10,6 +10,7 @@ import time
 import numpy as np
 import cv2
 import torch
+from core.torch_runtime import infer_ctx
 import psutil
 from pathlib import Path
 from typing import Tuple, List
@@ -160,7 +161,7 @@ def optimized_predict(video_path: str, model_path: str) -> Tuple[str, float, str
     # 推理
     input_tensor = torch.from_numpy(avg_diff).float().to(device)
     
-    with torch.no_grad():
+    with infer_ctx(device):
         output = model(input_tensor)
         probs = torch.softmax(output, dim=1)[0]
         pred_idx = probs.argmax().item()

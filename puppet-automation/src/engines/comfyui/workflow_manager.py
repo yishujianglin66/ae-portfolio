@@ -161,7 +161,8 @@ class WorkflowManager:
         overwrite: bool = True,
     ) -> Path:
         """Save a user workflow to disk."""
-        file_path = self.workflows_dir / f"{name}.json"
+        safe_name = Path(name).name
+        file_path = self.workflows_dir / f"{safe_name}.json"
         if file_path.exists() and not overwrite:
             raise FileExistsError(f"Workflow '{name}' already exists")
 

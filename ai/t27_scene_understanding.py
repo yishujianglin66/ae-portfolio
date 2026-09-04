@@ -31,6 +31,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import get_device, infer_ctx
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -63,7 +65,7 @@ MOOD_TYPES = {
 }
 MOOD_LABELS = list(MOOD_TYPES.keys())
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = get_device()
 
 
 def _log(msg: str):
@@ -222,7 +224,7 @@ class SceneUnderstandingPipeline:
             from PIL import Image
             img = Image.open(img_path).convert("RGB")
             tensor = self._scene_transform(img).unsqueeze(0).to(DEVICE)
-            with torch.no_grad():
+            with infer_ctx(DEVICE):
                 logits = self._scene_model(tensor)
                 probs = F.softmax(logits, dim=-1)[0]
                 scene_idx = probs.argmax().item()
@@ -350,7 +352,7 @@ def train_scene_classifier(vlm_labels_path: Path = None, epochs=10, batch_size=3
             model.eval()
             correct = 0
             total = 0
-            with torch.no_grad():
+            with infer_ctx(DEVICE):
                 for images, labels in test_loader:
                     images, labels = images.to(DEVICE), labels.to(DEVICE)
                     logits = model(images)

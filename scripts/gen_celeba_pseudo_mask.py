@@ -29,6 +29,7 @@ from typing import List
 import cv2
 import numpy as np
 import torch
+from core.torch_runtime import infer_ctx, get_device
 from torchvision import transforms
 
 MIN_AREA_RATIO = 0.02  # 前景面积占比下限 (过滤全黑/噪声)
@@ -86,7 +87,7 @@ def main() -> int:
         if not imgs:
             continue
         inp = torch.stack([tf(x) for x in imgs]).half().cuda()
-        with torch.no_grad():
+        with infer_ctx(get_device()):
             preds = model(inp)[-1].sigmoid().cpu().float().numpy()
         for k, (f, img_bgr, h, w) in enumerate(metas):
             pred = preds[k][0]

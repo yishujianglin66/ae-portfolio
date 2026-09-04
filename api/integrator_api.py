@@ -30,6 +30,7 @@ import time
 import threading
 import argparse
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, Any, Optional, List
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
@@ -260,7 +261,13 @@ class IntegratorAPIServer:
 
     def resume_from_checkpoint(self, request: CheckpointResumeRequest) -> Dict[str, Any]:
         """从检查点恢复工作流"""
-        if not os.path.exists(request.checkpoint_path):
+        resolved = Path(request.checkpoint_path).resolve()
+        allowed_root = Path(self._output_dir).resolve()
+        try:
+            resolved.relative_to(allowed_root)
+        except ValueError:
+            raise HTTPException(status_code=403, detail="检查点路径不在允许范围内")
+        if not os.path.exists(resolved):
             raise HTTPException(status_code=404, detail=f"检查点文件不存在: {request.checkpoint_path}")
 
         integrator = self._create_integrator()

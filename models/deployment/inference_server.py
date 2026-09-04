@@ -8,6 +8,7 @@ import time
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Callable
 from dataclasses import dataclass, field
+from core.torch_runtime import infer_ctx
 
 logger = logging.getLogger(__name__)
 
@@ -257,7 +258,7 @@ class InferenceServer:
             inputs = self._tokenizer(prompt, return_tensors="pt")
             inputs = {k: v.to(self._model.device) for k, v in inputs.items()}
             
-            with torch.no_grad():
+            with infer_ctx(str(self._model.device)):
                 outputs = self._model.generate(
                     **inputs,
                     max_new_tokens=max_new_tokens,
@@ -312,7 +313,7 @@ class InferenceServer:
             )
             tokenized = {k: v.to(self._model.device) for k, v in tokenized.items()}
             
-            with torch.no_grad():
+            with infer_ctx(str(self._model.device)):
                 outputs = self._model.generate(
                     **tokenized,
                     max_new_tokens=max_new_tokens,

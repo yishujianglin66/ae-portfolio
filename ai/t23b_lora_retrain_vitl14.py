@@ -35,6 +35,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from core.torch_runtime import get_device, infer_ctx
+
 PSEUDO_LABELS = Path(r"D:\aot_corpus\pseudolabels.json")
 TEACHER_LABELS = ROOT / "data" / "training" / "labels.json"
 GOLDEN_V2 = ROOT / "data" / "benchmark_golden_v2.json"
@@ -232,7 +234,7 @@ def run_t23b_lora():
     _log("T23b: CLIP ViT-L-14 LoRA对比学习微调")
     _log("=" * 60)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     _log(f"设备: {device}")
     if device == "cuda":
         vram = torch.cuda.get_device_properties(0).total_memory / 1e9
@@ -277,7 +279,7 @@ def run_t23b_lora():
     _log("\n[3/5] 预计算文本嵌入...")
     text_embeds = np.zeros((len(class_names), EMBED_DIM), dtype=np.float32)
     clip_model.eval()
-    with torch.no_grad():
+    with infer_ctx(device):
         for i, ip_name in enumerate(class_names):
             text_tokens = tokenizer([f"a promotional image of {ip_name}"]).to(device)
             text_features = clip_model.encode_text(text_tokens)

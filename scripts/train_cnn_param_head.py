@@ -27,6 +27,8 @@ import numpy as np
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
+from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+
 EMB = PROJECT / "data" / "param_tuning" / "clip_vitl14_emb.npz"
 SAMPLES = PROJECT / "data" / "param_tuning" / "train_samples.jsonl"
 GOLD = PROJECT / "data" / "param_tuning" / "gold_set.jsonl"
@@ -102,7 +104,7 @@ def _mlp_full_fit(X: np.ndarray, y: np.ndarray, seed: int = 0):
     import torch.nn as nn
 
     torch.manual_seed(seed)
-    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    dev = get_device()
     head = nn.Sequential(
         nn.Linear(X.shape[1], 128), nn.ReLU(), nn.Dropout(0.4),
         nn.Linear(128, 1),
@@ -198,7 +200,7 @@ def mlp_loocv(X: np.ndarray, y: np.ndarray, seed: int = 0) -> np.ndarray:
     import torch.nn as nn
 
     torch.manual_seed(seed)
-    dev = "cuda" if torch.cuda.is_available() else "cpu"
+    dev = get_device()
     n = len(y)
     preds = np.zeros(n)
     Xt = torch.tensor(X, dtype=torch.float32)
@@ -221,7 +223,7 @@ def mlp_loocv(X: np.ndarray, y: np.ndarray, seed: int = 0) -> np.ndarray:
             loss.backward()
             opt.step()
         head.eval()
-        with torch.no_grad():
+        with infer_ctx(dev):
             preds[i] = head(Xte.to(dev)).item()
     return preds
 

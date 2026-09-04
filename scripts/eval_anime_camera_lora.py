@@ -24,6 +24,7 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from core.torch_runtime import infer_ctx, get_device  # noqa: E402
 from scripts.train_anime_camera_lora import COARSE_LABELS, COARSE_MAP, NUM_FRAMES, IMG_SIZE  # noqa: E402
 
 MODEL_DIR = r"D:\AE-Data\Models\VideoMAE-MovieShots\movement"
@@ -58,7 +59,7 @@ def predict(model, processor, clip: str, device) -> int:
     frames = v2.Resize((IMG_SIZE, IMG_SIZE))(torch.from_numpy(frames))
     inputs = processor([frames], return_tensors="pt")
     inputs = {k: v.to(device) for k, v in inputs.items()}
-    with torch.no_grad():
+    with infer_ctx(device):
         out = model(**inputs)
     return int(out.logits.argmax(dim=1)[0].item())
 
@@ -125,7 +126,7 @@ def main() -> int:
     args = parser.parse_args()
 
     import torch
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = get_device()
 
     # 数据
     queue = [json.loads(l) for l in

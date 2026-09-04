@@ -5,6 +5,7 @@ import time
 import cv2
 import numpy as np
 import torch
+from core.torch_runtime import infer_ctx, get_device
 
 from transformers import Owlv2ForObjectDetection, Owlv2Processor
 
@@ -27,7 +28,7 @@ for gi in [170, 172, 176, 292, 300]:
         continue
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     t0 = time.time()
-    with torch.no_grad():
+    with infer_ctx(get_device()):
         inputs = processor(text=TEXTS, images=rgb, return_tensors="pt").to("cuda")
         outputs = model(**inputs)
         results = processor.post_process_grounded_object_detection(
