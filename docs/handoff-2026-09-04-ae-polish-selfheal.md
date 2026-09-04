@@ -1,10 +1,51 @@
-# 交接 2026-09-04: AE 精修通道自愈 + polish_pass 五坑修复
+# 交接 2026-09-04: AE 精修通道自愈 + 镜头级插件精修 v2
 
-## 成果
-- run53 终版 = AE 全片精修（Glow 0.3/8 + Noise 4%）+ SFX 混音音轨
-  → `output/unified_run53/run53_final.mp4`（旧版存档 `run53_final_prepolish.mp4`）
-- 闸门 7/7 PASS；经验已收割（render_history.jsonl）
-- `ai/ae_render_channel.py polish_pass` 源码已同步修复，下次直接可用
+## 成果 (v2 镜头级, 用户 18:15 定调)
+- **run53_final.mp4 = 镜头级 AE 精修**: MASTER 总合成 = BASE 全片底层 + 55 个镜头切段图层
+  (116 镜中 47% 上效果, 克制), 每镜头按设计单独上插件, aerender 单次渲染 50s。
+- 闸门 7/7 PASS; 效果分布经 PSNR 抽检验证 (原样镜 >43dB=仅重编码噪声, 效果镜 13-49dB 分层)。
+- 前一版全片 Glow 调色版存档 `run53_final_glowpass.mp4` (用户定调: 调色归达芬奇, 弃用)。
+- 构建器: `scripts/build_master_polish.py` (映射规则+JSX 生成+桥执行一体)。
+
+## 插件库 (本机 2413 特效已枚举 → tmp/ae_effects_all.txt)
+关键可用 matchName (无头添加全部验证过):
+- `CC Force Motion Blur` (运动模糊, -0001=amount, cal 12=轻/20=中; 实际运动中强得多)
+- `GUTS BadTV` (-0001=强度, 2=轻 6=重; 模拟失真冲击)
+- `AESweetsGlitch7in1` (默认 23.6dB 数字故障; -0005 非总量, 敏感参数未定位)
+- `RWB Fast Bokeh` (-0001=半径, 1=轻 2=中; 慢镜散景)
+- `ADBE Glo2` 原生发光 (-0002阈值/-0003半径/-0004强度; 高阈值 0.8=只晕高光 bloom)
+- `GUTS SEPRGB` (默认 37dB 轻度RGB分裂; -0001 TwoD 不可 setValue, 未深挖—成片已烘 RGB)
+- **RealGlow (ADBE JAeToolsRealGlow) 参数空间不可控, 弃用** (P1-P8 全试过, 3.4-8dB 全糊)
+- 危险: 批量添加 15 个 GPU 插件(Twixtor/Sapphire/BCC/Universe/HitFilm)会崩 AE —
+  每批 ≤3 个勘探。Twixtor/Sapphire/BCC 本轮未用 (崩溃风险>收益)。
+
+## 镜头→插件映射 (build_master_polish.py RECIPES)
+- 决斗变速停顿 spd≤0.55: bloom(高光晕) + bokeh@1 (能量高时)
+- 决斗快切 spd≥1.5 能量前25%: badtv@2.5; 高潮 22.1-24.6 核心 4 镜 badtv_hard@6
+- 每 9 个 drop 镜 1 个: glitch7in1 (节制的数字故障强调)
+- 决斗其余快切: fmb@18 (拖影连切); build 快切: fmb_light@14
+- 尾奏 t≥27 慢镜: bloom_soft; intro: 无
+统计: fmb 19 / badtv 15 / bloom 11 / bokeh 11 / glitch 4 / badtv_hard 4 / bloom_soft 2
+
+## 校准方法论 (第三方插件参数无标签 → 宫格渲染量化)
+3×3 宫格 comp (同帧 9 变体, scale 33.33%, position 分格, startTime=-20 取源帧),
+aerender -s 0 -e 0 渲 1 帧, PIL 分格 PSNR vs 原帧 → 剂量 dB 标尺。
+两轮即定位全部配方; SEPRGB setValue 失败/RealGlow 不敏感当场排除。
+
+## v2.1 修复: 黑帧架构 bug
+只给有效果镜头建图层 → 其余 61 镜黑帧 (症状: "原样"时码 PSNR 3-5dB)。
+修复: BASE 全片底层 + 效果镜头层叠加 (layers=56)。
+
+## AE 桥自愈 (v1 发现, 仍然有效)
+- 标准重启后自动监听器随 AE 启动 (ae_auto_listener.log "Auto Listener started"), 无需 GUI 加载 jsx
+- 探活: AERenderChannel._bridge_run_jsx(args={'script':'app.version;',...}) → status success
+- 监听器不回传脚本返回值 — 读值让 JSX 写探针文件
+- 崩溃后标准重启: taskkill → 清 .ae-mcp-bridge/*.json → start AfterFX.exe → 等加载 → 探活
+
+## 待办
+- 用户验收 run53_final (镜头级精修版); 可调维度: 覆盖率47%/各配方剂量/分布规则
+- 若通过: build_master_polish.py 接入 unified_edit ④-c 替换旧 polish_pass
+- aerender 五坑 (相对路径/-comp/模板/时长/matchName) 见 v1 交接段落, polish_pass 源码已修
 
 ## 关键发现: AE 桥自愈（不需要 GUI 接管）
 - AE 标准重启后（taskkill → 清 `.ae-mcp-bridge/ae_command.json+ae_result.json` → start AfterFX.exe → 等加载），
