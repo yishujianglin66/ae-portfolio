@@ -35,6 +35,8 @@ RECIPES = {
     "glitch":   {"m": "AESweetsGlitch7in1", "ps": [], "env": False},
     "radial":   {"m": "CC Radial Fast Blur", "ps": [("CC Radial Fast Blur-0002", 70)], "env": True},
     "radial_soft": {"m": "CC Radial Fast Blur", "ps": [("CC Radial Fast Blur-0002", 35)], "env": True},
+    "fmb_dir": {"m": "CC Force Motion Blur", "ps": [], "env": False},  # ps 由光流注入: [amount, angle]
+    "fmb_dir_light": {"m": "CC Force Motion Blur", "ps": [], "env": False},
     # 转场冲击层 (顶层短层)
     "burst_radial": {"m": "CC Radial Fast Blur", "ps": [("CC Radial Fast Blur-0002", 90)], "env": True},
     "burst_badtv":  {"m": "GUTS BadTV", "ps": [("GUTS BadTV-0001", 4.5)], "env": True},
@@ -65,9 +67,21 @@ def plan_effects(segs):
     d_med = statistics.median(drop_en) if drop_en else 0.5
     d_q3 = statistics.quantiles(drop_en, n=4)[2] if len(drop_en) >= 4 else 0.6
 
+    motion = {m["t0"]: m for m in json.loads(
+        (ROOT / "tmp" / "shot_motion.json").read_text(encoding="utf-8"))}
+    mags_all = sorted(m["mag"] for m in motion.values())
+    m_p50 = mags_all[len(mags_all) // 2]
     drop_n = build_fx_n = fast_streak = hard_used = 0
     last_fx = None
     plan = []
+
+    def _dir_fx(t0, light):
+        """光流感知: 水平主导→方向条纹(角度=实测), 其他/静止→radial (v5)"""
+        m = motion.get(round(t0, 3))
+        if m and m["h"] and m["mag"] >= m_p50:
+            amt = (14 if light else 24) + m["mag"] * (0.5 if light else 0.8)
+            return f"fmb_dir{'_light' if light else ''}:{amt:.0f}:{m['ang'] % 180:.0f}"
+        return "radial_soft"
 
     def _alt(*cands):
         for c in cands:
@@ -101,7 +115,7 @@ def plan_effects(segs):
             elif spd >= 1.1:
                 fast_streak += 1
                 if fast_streak % 2 == 1:
-                    fx = ["radial_soft"] if fast_streak % 4 == 1 else ["fmb"]
+                    fx = [_dir_fx(t0, light=False)]
             if fx and fx != ["fmb"]:
                 fast_streak = 0
         else:  # build
@@ -109,7 +123,7 @@ def plan_effects(segs):
                 build_fx_n += 1
                 cyc = build_fx_n % 4
                 if cyc == 1:
-                    fx = ["radial_soft"]
+                    fx = [_dir_fx(t0, light=True)]
                 elif cyc == 3:
                     fx = ["badtv_light"] if en >= max(b_med, d_med * 0.9) else ["radial_soft"]
             elif spd <= 0.55:
@@ -152,7 +166,15 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
     vin = (run_dir / f"{tag}_lut.mp4").resolve().as_posix()
     aep = (run_dir / "polish" / "master.aep").as_posix()
     def _fx_js(spec, dose):
+        dyn = None
+        if spec.startswith("fmb_dir") and ":" in spec:
+            base, amt, ang = spec.split(":")
+            dyn = [("CC Force Motion Blur-0001", float(amt)),
+                   ("CC Force Motion Blur-0003", float(ang))]
+            spec = base
         r = RECIPES[spec]
+        if dyn:
+            return {"m": r["m"], "ps": [[p, round(v * dose, 3)] for p, v in dyn], "env": False}
         ps = json.dumps([[p, round(v * dose, 4)] for p, v in r["ps"]],
                         separators=(",", ":"))
         return {"m": r["m"], "ps": json.loads(ps), "env": r["env"]}
