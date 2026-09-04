@@ -94,6 +94,34 @@ class TestGlobalSourceDedup:
         assert _clusters(segs) == 0
 
 
+class TestAdjacentDiversity:
+    """相邻镜头同 IP 去重 (切点可见性短板修复)。"""
+
+    def _franch(self, src):
+        import re
+        from pathlib import Path
+        return re.sub(r"[0-9\-_.]+$", "", Path(src).stem).lower()
+
+    def test_no_adjacent_same_franchise(self):
+        obj = _make_obj({"猫1.mp4": 60.0, "猫2.mp4": 60.0, "猫3.mp4": 60.0,
+                         "独自升级5.mp4": 100.0, "独自升级2.mp4": 100.0, "初音.mp4": 60.0})
+        segs = [_seg("猫1.mp4", k * 2.0) for k in range(6)] \
+            + [_seg("独自升级5.mp4", k * 2.0) for k in range(6)] \
+            + [_seg("猫2.mp4", k * 2.0) for k in range(6)] \
+            + [_seg("独自升级2.mp4", k * 2.0) for k in range(6)]
+        obj._enforce_adjacent_diversity(segs)
+        for i in range(1, len(segs)):
+            assert self._franch(segs[i - 1].source_file) != \
+                self._franch(segs[i].source_file), f"idx {i} 同 IP 相邻"
+
+    def test_preserves_count_and_no_crash(self):
+        obj = _make_obj({"猫1.mp4": 60.0, "猫2.mp4": 60.0, "初音.mp4": 60.0})
+        segs = [_seg("猫1.mp4", 1.0), _seg("猫2.mp4", 10.0), _seg("猫1.mp4", 20.0)]
+        before = len(segs)
+        obj._enforce_adjacent_diversity(segs)
+        assert len(segs) == before
+
+
 if __name__ == "__main__":
     import sys
     sys.exit(pytest.main([__file__, "-q"]))

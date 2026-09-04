@@ -2622,6 +2622,8 @@ class ProductionDirector:
 
         # 全局同片段去重 + 单文件占比封顶 (2026-09-04 洛天依/同源重复修复)
         segments = self._enforce_global_source_uniqueness(segments)
+        # 相邻镜头同 IP 去重 (2026-09-05 切点可见性短板修复)
+        segments = self._enforce_adjacent_diversity(segments)
 
         print(f"  生成 {len(segments)} 个段落, 总时长 {duration:.1f}s")
         return script
@@ -3042,6 +3044,70 @@ class ProductionDirector:
         if n_nudge or n_swap:
             print(f"  [去重] 起帧调整 {n_nudge} 镜, 换源 {n_swap} 镜 "
                   f"(全局同片段去重 + 单文件占比≤{int(max_share * 100)}%)")
+        return segments
+
+    def _enforce_adjacent_diversity(self, segments):
+        """相邻镜头同 IP 去重 (2026-09-05 切点可见性短板修复之一)。
+
+        根因: 素材池同 IP 往往对应多个文件(猫1/猫2、独自升级2/5), 引擎只换文件
+        不换 IP → 相邻两镜画面同质, 切点"隐形"(帧差<0.35)。实测 run53 相邻同 IP
+        切点占 16%。兜底: 相邻两镜不得同 IP, 冲突时把后一镜换到使用最少的异 IP
+        文件并取新鲜起点, 且不破坏全局同片段去重(≥0.6s 间距)。原地修改。
+        """
+        if len(segments) < 2:
+            return segments
+        import re
+        from collections import Counter, defaultdict
+        from pathlib import Path
+
+        def franch(src):
+            return re.sub(r"[0-9\-_.]+$", "", Path(src).stem).lower()
+
+        dur_of = self._source_durations or {}
+        all_src = [f for f in dur_of if dur_of.get(f, 0.0) > 0.0] \
+            or sorted({s.source_file for s in segments})
+        counts = Counter(s.source_file for s in segments)
+        used = defaultdict(list)
+        for s in segments:
+            used[s.source_file].append(float(s.source_start))
+
+        def fresh_start(f, win):
+            dur = dur_of.get(f, 60.0)
+            usable = dur - win
+            if usable <= 0:
+                return None
+            lo = min(2.0, max(0.0, usable - 0.5)) if usable > 2.0 else 0.0
+            cands = [lo + k * (usable - lo) / 12.0 for k in range(13)]
+            cands += [lo + k * 0.5 for k in range(int((usable - lo) / 0.5) + 1)]
+            best, best_d = None, -1.0
+            for c in sorted(set(cands)):
+                if c + win > dur + 1e-6:
+                    continue
+                d = min((abs(c - u) for u in used[f]), default=float("inf"))
+                if d >= 0.6 and d > best_d:
+                    best_d, best = d, round(c, 2)
+            return best
+
+        n_swap = 0
+        for i in range(1, len(segments)):
+            prev, cur = segments[i - 1], segments[i]
+            if franch(prev.source_file) != franch(cur.source_file):
+                continue
+            cands = [f for f in all_src if franch(f) != franch(cur.source_file)]
+            if not cands:
+                continue
+            cand = min(cands, key=lambda f: counts[f])
+            win = max(float(cur.duration), 0.05)
+            ss = fresh_start(cand, win)
+            if ss is not None:
+                counts[cur.source_file] -= 1
+                cur.source_file = cand
+                cur.source_start = ss
+                used[cand].append(ss)
+                counts[cand] += 1
+                n_swap += 1
+        if n_swap:
+            print(f"  [差异化] 相邻同IP换源 {n_swap} 镜 (切点可见性修复)")
         return segments
 
     def _calc_source_start(self, seg_idx, src_dur, seg_dur, mood, source_key="",
@@ -4133,6 +4199,8 @@ class ProductionDirector:
                 _zp = None
             if _zp:
                 vf_parts.append(_zp)
+        vf_parts.append(f"fps={fps}")  # 2026-09-05 切点可见性修复: 源为60/30fps, 用fps滤镜
+        #                              确定性重采样到目标fps(替代-r, 避免边界复制帧)
         vf = ",".join(vf_parts)
 
         cmd = [
@@ -4141,10 +4209,10 @@ class ProductionDirector:
             "-t", f"{read_dur:.3f}",  # 输入级读取限制：变速后输出=read_dur/speed=duration
             "-i", source,
             "-vf", vf,
-            "-r", str(fps),
             "-t", f"{duration:.4f}",  # 输出级硬裁: 保证帧数=round(duration*fps),
             #                             防止输入-t+setpts/帧量化的±1帧误差累积成切点漂移
             "-c:v", "libx264", "-preset", "slow",
+            "-bf", "0",  # 2026-09-05 切点可见性修复: 禁B帧→流拷贝concat边界不复制帧
             "-b:v", "50M", "-maxrate", "60M", "-bufsize", "100M",
             "-minrate", "40M",
             "-pix_fmt", "yuv420p", "-an",
