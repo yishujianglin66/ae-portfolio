@@ -37,6 +37,13 @@ DEFAULT_SOURCES = [
     r"D:\AE-Work\resources\video\五条悟（一般）\素材\五条悟第二季.mp4",
     r"D:\BaiduNetdiskDownload\AE新手10套\独自升级（一般）\独自升级2.mp4",
     r"D:\BaiduNetdiskDownload\AE新手10套\独自升级（一般）\独自升级5.mp4",
+    # --- 2026-09-05 素材库扩充(#12): 新番+补段, 缓解画面同质/静帧 ---
+    r"D:\AE-Work\resources\video\蓝色监狱（量多）\素材\nagi2.mp4",
+    r"D:\AE-Work\resources\video\蓝色监狱（量多）\素材\Nagi Seishiro (No CC).mp4",
+    r"D:\AE-Work\resources\video\辉夜（一般）\素材\辉夜1.mp4",
+    r"D:\AE-Work\resources\video\美人鱼（较难）\素材\alya-twix.mp4",
+    r"D:\AE-Work\resources\video\美人鱼（较难）\素材\alya-twixtor04.mp4",
+    r"D:\AE-Work\resources\video\五条悟（一般）\素材\五条悟第二季2.mp4",
 ]
 DEFAULT_BGM = r"D:\AE-Work\音频素材库\BGM\独自升级.mp3"
 
@@ -64,6 +71,7 @@ def stage2_motion_labels(sources: list, cache_dir: Path) -> dict:
         }
         print(f"    {Path(s).name[:36]:<36} {r.get('coarse') or r.get('label'):<11} "
               f"conf={r.get('confidence')}")
+    inv.unload()   # v13 OOM 根治: 运镜标注完成即释放 VLM 5.8GB/VideoMAE, 保阶段⑤评分显存
     return out
 
 
@@ -120,7 +128,9 @@ def main() -> int:
         use_speed_ramp=True,
         verify_content=False,
         theme=args.theme,
-        enable_ae_channel=True,   # 2026-09-02 自检通过(监听器驻留+活体探测), 开AE贝塞尔通道
+        # MASTER_NO_AE_CHANNEL=1: A/B 实验旁路 AE 分镜重渲（切点时间由 plan 决定，
+        # AE 重渲不改变切点；桥接监听器不可用时避免无限等待）
+        enable_ae_channel=os.environ.get("MASTER_NO_AE_CHANNEL") != "1",
         clean_bgm_sfx=False,      # 2026-09-02: BGM 直通保鼓点; SFX 改在最终音轨混(④-b)
         beat_lock_hard_cuts=True, # 2026-09-02: 卡点铁律-全硬切, xfade 中点糊切点(p50偏122ms)
     )
@@ -207,17 +217,22 @@ def main() -> int:
         # 弱拍切点的全响 SFX 会被听成"飘在音乐外的杂音"
         _strong_onsets = []
         try:
-            import librosa as _lb
-            import numpy as _np
-            _yb, _srb = _lb.load(args.bgm, sr=22050, mono=True)
-            _oe = _lb.onset.onset_strength(y=_yb, sr=_srb, hop_length=512)
-            _ot = _lb.times_like(_oe, sr=_srb, hop_length=512)
-            _od = _lb.onset.onset_detect(y=_yb, sr=_srb, units="time")
-            _ost = [float(_oe[min(_np.searchsorted(_ot, t), len(_oe) - 1)])
-                    for t in _od]
-            _th = _np.percentile(_ost, 55)
-            _strong_onsets = sorted(
-                float(t) for t, s in zip(_od, _ost) if s >= _th)
+            # E0-1: 锚点模式下 SFX 强鼓点集直接用 stem 真值（kick/snare 强集）
+            if getattr(director, "_drum_anchor_mode", False) and getattr(director, "_anchor_strong", None):
+                _strong_onsets = [float(t) for t in director._anchor_strong]
+                print(f"    SFX 强鼓点集: drum-anchor 真值 {len(_strong_onsets)} 个")
+            else:
+                import librosa as _lb
+                import numpy as _np
+                _yb, _srb = _lb.load(args.bgm, sr=22050, mono=True)
+                _oe = _lb.onset.onset_strength(y=_yb, sr=_srb, hop_length=512)
+                _ot = _lb.times_like(_oe, sr=_srb, hop_length=512)
+                _od = _lb.onset.onset_detect(y=_yb, sr=_srb, units="time")
+                _ost = [float(_oe[min(_np.searchsorted(_ot, t), len(_oe) - 1)])
+                        for t in _od]
+                _th = _np.percentile(_ost, 55)
+                _strong_onsets = sorted(
+                    float(t) for t, s in zip(_od, _ost) if s >= _th)
         except Exception:
             pass
 
