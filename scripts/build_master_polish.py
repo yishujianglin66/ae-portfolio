@@ -415,6 +415,15 @@ def plan_effects(segs, run_dir=None, tag=None):
         if _n_rep:
             plan.sort(key=lambda e: e["t0"])
         print(f"源多样化替换 (v19): {_n_rep} 处 ← {[b[-10:] for b in _over]}")
+    # v22: 逐镜调色 — 段落情绪 → 微量二级色调 (全局 LUT 之上)。
+    # 高潮段暖 (红+蓝-) / 蓄力段冷 (蓝+红-) / 引子与尾声中性。值刻意轻微 (≤6)。
+    for e in plan:
+        _seg = next((s for s in segs if abs(round(float(s["start_time"]), 3) - round(e["t0"], 3)) < 0.05), None)
+        _mood = (_seg or {}).get("mood", "build")
+        if _mood == "drop":
+            e["grade"] = {"r": 6, "b": -6}      # 高潮暖
+        elif _mood == "build":
+            e["grade"] = {"r": -4, "b": 5}      # 蓄力冷
     return plan
 
 
@@ -516,6 +525,8 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
 
     def _shot_js(s):
         d = {"t0": s["t0"], "t1": s["t1"], "r": [_fx_js(f, s["dose"]) for f in s["fx"]]}
+        if "grade" in s:
+            d["grade"] = s["grade"]
         if "drift" in s:
             d["drift"] = s["drift"]
         if "rescue" in s:
@@ -535,6 +546,13 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
 (function(){{
   var rep = "start";
   var DECAY = {ENV_DECAY_S}, TAIL = {ENV_TAIL};
+  function applyGrade(ly, g) {{
+    try {{
+      var fx = ly.property("Effects").addProperty("ADBE Color Balance");
+      fx.property(1).setValue(g.r);   // 红色平衡 (0 中心, ±100)
+      fx.property(3).setValue(g.b);   // 蓝色平衡
+    }} catch (ge) {{ rep += "|GRADE:" + ge.toString(); }}
+  }}
   function applyFx(ly, r, t0) {{
     var fx = ly.property("Effects").addProperty(r.m);
     for (var k = 0; k < r.ps.length; k++) {{
@@ -608,6 +626,7 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
           dsc.setValueAtTime(sh.t1, [100 * sh.drift, 100 * sh.drift]);
         }}
       }}
+      if (sh.grade) applyGrade(ly, sh.grade);
       for (var j = 0; j < sh.r.length; j++) applyFx(ly, sh.r[j], sh.t0);
     }}
     var bursts = {bursts_js};
