@@ -1,0 +1,6 @@
+[core]
+    remote = external
+[cache]
+    dir = D:/AE-Data/dvc-cache
+['remote "external"']
+    url = D:/AE-Data/dvc-remote
