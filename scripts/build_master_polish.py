@@ -485,6 +485,96 @@ def main():
             for kt, m in ov.items():
                 if abs(s["t0"] - kt) < 0.05:
                     s["dose"] = round(min(s["dose"] * m, 3.5), 3)
+    # v15: 定格内容升级 — 冻结帧 = 动作顶点帧 (源窗口运动能量峰值), 音乐锚点一帧不动。
+    # 原理: 冻结瞬间显示的源时刻 = sin + freeze_offset (cut=0 / mid=(锚-t0)*spd / end=dur*spd),
+    # 平移 sin 让"顶点帧"落到冻结点; 叠化底片重定时镜头 (20.25) 除外 — 转场内容固定。
+    import subprocess as _sp3
+    import numpy as np
+
+    def _src_meta(p):
+        _pr = _sp3.run(["ffprobe", "-v", "error", "-show_entries",
+                        "stream=r_frame_rate:format=duration", "-of", "csv=p=0", str(p)],
+                       capture_output=True, text=True, timeout=60)
+        _line = _pr.stdout.strip().splitlines()[0]
+        _num, _den = _line.split(",")[0].split("/")
+        _fps = float(_num) / float(_den)
+        _dur = 0.0
+        for _ln in _pr.stdout.strip().splitlines():
+            _parts = _ln.split(",")
+            if len(_parts) >= 2 and _parts[0] == _line.split(",")[0]:
+                try:
+                    _dur = float(_parts[-1])
+                    break
+                except ValueError:
+                    pass
+        if _dur <= 0:
+            _pr2 = _sp3.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                             "-of", "csv=p=0", str(p)], capture_output=True, text=True, timeout=60)
+            try:
+                _dur = float(_pr2.stdout.strip())
+            except ValueError:
+                _dur = 0.0
+        return _fps, _dur
+
+    def _motion_argmax(src, sin, span_lo, span_hi, fps, nfr):
+        """返回 [sin+span_lo, sin+span_hi] 内运动能量最高帧的源时刻 (无数据→None)"""
+        _d0 = max(0.0, sin + span_lo - 0.15)
+        _r = _sp3.run(["ffmpeg", "-v", "error", "-ss", f"{_d0:.3f}",
+                       "-t", f"{(sin + span_hi) - _d0 + 0.1:.3f}", "-i", str(src),
+                       "-vf", "scale=240:135", "-f", "rawvideo", "-pix_fmt", "gray", "-"],
+                      capture_output=True, timeout=180)
+        _n = len(_r.stdout) // (240 * 135)
+        if _n < 4:
+            return None
+        _fr = np.frombuffer(_r.stdout[:_n * 240 * 135],
+                            dtype=np.uint8).reshape(_n, 135, 240).astype(np.float32)
+        _mo = np.array([0.0] + [float(np.abs(_fr[i] - _fr[i - 1]).mean()) for i in range(1, _n)])
+        _mo = np.convolve(_mo, np.ones(3) / 3, mode="same")
+        _lo_i = max(2, int(round((sin + span_lo - _d0) * fps)))
+        _hi_i = min(_n - 1, int(round((sin + span_hi - _d0) * fps)))
+        if _hi_i - _lo_i < 3:
+            return None
+        _seg = _mo[_lo_i:_hi_i + 1]
+        if float(_seg.max()) - float(np.median(_mo)) < 2.0:
+            return None   # 平坦场景 (对话/静帧) — 无顶点可言
+        return round(_d0 + (_lo_i + int(_seg.argmax())) / fps, 3)
+
+    _shifted = []
+    for _s in plan:
+        if "twx" not in _s:
+            continue
+        _t = _s["twx"]
+        if str(_t["src"]).endswith("lut.mp4"):
+            continue   # 底片重定时 (叠化转场) — 内容固定不平移
+        _t0, _t1 = _s["t0"], _s["t1"]
+        _spd, _sin = _t["spd"], float(_t["sin"])
+        _dur = _t1 - _t0
+        _mode = _t.get("anchor_mode", "cut")
+        if _mode == "mid":
+            _foff = (_t["anchor"] - _t0) * _spd
+        elif _mode == "end":
+            _foff = _dur * _spd
+        else:
+            _foff = 0.0
+        _fps, _sdur = _src_meta(_t["src"])
+        if _fps <= 0:
+            continue
+        _apex = _motion_argmax(_t["src"], _sin, -0.2, _dur * _spd + 0.45, _fps, None)
+        if _apex is None:
+            continue
+        _cur = _sin + _foff
+        if abs(_apex - _cur) < 0.08:
+            continue   # 顶点≈当前冻结内容 — 不动
+        _sin_new = min(max(_apex - _foff, _sin - 0.3), _sin + 0.45)
+        _sin_new = max(0.05, min(_sin_new, _sdur - _dur * _spd - 0.35))
+        if abs(_sin_new - _sin) < 0.03:
+            continue
+        _t["sin"] = round(_sin_new, 3)
+        _t["impact_shift"] = round(_sin_new - _sin, 3)
+        _shifted.append((round(_t0, 2), _mode, round(_apex, 2), _t["impact_shift"]))
+    if _shifted:
+        print("定格顶点平移 (v15): " + ", ".join(
+            f"t0={t} {m}@apex{a} shift{s:+.2f}s" for t, m, a, s in _shifted))
     # v6.1: Twixtor 源预裁 — startTime 巨偏移会把图层窗推出源时长 (AE钳位成零长层),
     # 预裁 [sin-0.5, sin+dur*spd+0.6] 小片段后 sin=0.5 片内偏移, startTime 偏移极小
     import subprocess as _sp
