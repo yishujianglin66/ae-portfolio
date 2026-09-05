@@ -42,6 +42,8 @@ def main():
     segs = sorted(pr["script"]["segments"], key=lambda s: s["start_time"])
     starts = [s["start_time"] for s in segs if s["start_time"] > 0.05]
     final = run_dir / f"{tag}_final.mp4"
+    if "--final" in sys.argv:   # v9: 曲线版交付件名字带版本后缀, 用 --final 指定被测文件
+        final = Path(sys.argv[sys.argv.index("--final") + 1])
     checks = []
 
     def add(name, ok, detail):

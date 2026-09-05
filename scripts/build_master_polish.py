@@ -60,10 +60,45 @@ def _load_env():
     return at, d["strong"]
 
 
+def _load_onsets():
+    """真实 onset (谱通量, 无平滑滞后) — tmp/true_onsets.json 由 scripts/gen_true_onsets.py 生成。
+
+    引擎切点网格源自 0.6s 平滑能量包络, 峰值可偏离真实 kick 达 ±0.3s;
+    本表用于把 TWX 冻结点锚到真实 kick。缺失时退回 strong 列表 (口径同 burst)。
+    """
+    p = ROOT / "tmp" / "true_onsets.json"
+    if p.exists():
+        return [(d["t"], d["s"]) for d in json.loads(p.read_text(encoding="utf-8"))]
+    return [(t, 1.0) for t in _load_env()[1]]
+
+
+def _twx_anchor(t0, t1, onsets):
+    """TWX 冻结锚点选择 (v9, 用户反馈: 17s 后几处慢镜没对上音乐)。
+
+    实测: 慢镜切点大多贴真实 kick (±2帧), 但 4 处偏离 —
+    24.54 整段悬在两 kick 之间 (切点早 0.32s)、26.29/19.42/27.25 的 kick 在镜头
+    中段 (最远 +0.076s)。v2 时代每拍闪帧掩盖了这些, deflash 后暴露。
+    返回 (mode, anchor):
+      cut  = onset 贴切点 (±0.05s≈±1.2帧) 或无 onset 信息 → 冻结在切点 (v7 现状, 大多数镜头)
+      mid  = 镜头内 (t0+0.05, t1] 有 onset → 切点后恒速续放, 冻结在最强 onset, 再渐加速放出
+      end  = 镜头内无 onset 但 t1+0.12s 内有 → 冲入减速, 冻结在出点 (正贴 kick)
+    """
+    win = [(t, s) for t, s in onsets if t0 - 0.05 <= t <= t1 + 0.12]
+    if not win or any(abs(t - t0) <= 0.05 for t, _ in win):
+        return "cut", t0
+    in_shot = [(t, s) for t, s in win if t <= t1]
+    if in_shot:
+        t_best, _ = max(in_shot, key=lambda x: x[1])
+        if t_best <= t1 - 0.09:      # 离出点 >2帧才有冻结→放出的空间
+            return "mid", round(t_best, 3)
+    return "end", round(t1, 3)
+
+
 def plan_effects(segs):
     """v4 = v3.1 骨架 (段落相对能量/轮换禁重复/呼吸留白) + 连续剂量 + 冲击层"""
     import statistics
     env_at, strong = _load_env()
+    onsets = _load_onsets()
     build_en = [float(s.get("energy", 0.4)) for s in segs
                 if s.get("mood") == "build" and float(s["start_time"]) < 27.0]
     drop_en = [float(s.get("energy", 0.4)) for s in segs if s.get("mood") == "drop"]
@@ -143,6 +178,12 @@ def plan_effects(segs):
                                 "sin": float(s.get("source_start", 0)),
                                 "spd": spd,
                                 "zp": s.get("zoompan_effect") or "push"}
+                # v9: 冻结点锚到真实 kick (只动 15s 后投诉区, 之前已验收镜头不动)
+                if t0 >= 15.0:
+                    mode, anc = _twx_anchor(t0, t1, onsets)
+                    entry["twx"]["anchor_mode"] = mode
+                    if mode != "cut":
+                        entry["twx"]["anchor"] = anc
             plan.append(entry)
     return plan
 
@@ -198,7 +239,7 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
         ps = json.dumps([[p, round(v * dose, 4)] for p, v in r["ps"]],
                         separators=(",", ":"))
         return {"m": r["m"], "ps": json.loads(ps), "env": r["env"]}
-    def _twx_curve(t0, t1, sin, spd):
+    def _twx_curve(t0, t1, sin, spd, mode="cut", anchor=None):
         """连续速度曲线关键帧 [[comp_time, speed_pct], ...]
 
         v7 修复卡点漂移 (用户反馈: 曲线版卡点对不上):
@@ -206,26 +247,47 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
           积分模型下起点漂移 sin×(v0/spd-1) (v1 用 123% 开头 → 偏 0.62s)。
           预卷段写两个恒速 spd 关键帧钉死相位 (对积分/逐点模型都成立)。
         ② 曲线反转 — 冻结对齐切点 (音乐坠落点画面速停), 向下一拍渐加速放出。
+        v9 锚点升级 (用户反馈: 17s 后几处慢镜没对上音乐, 见 _twx_anchor):
+        三模式, 平均速度恒=spd (归一), 预卷相位锚不受曲线形状影响:
+          cut  — 冻结在切点 (原行为): profile @ [t0, t1]
+          mid  — 切点恒速续放 → 出点前 1 帧急减速 → 冻结在 anchor (真实 kick) → 放出;
+                 恒速段恰积 spd×fa, profile 段归一后仍积 spd×(1-fa), k 与 cut 模式相同
+          end  — 反转 profile 冲入 → 冻结在出点 (正贴 t1 后 ≤0.12s 的 kick);
+                 反转不改变梯形积分, k 与 cut 模式相同
         """
         dur = t1 - t0
         fr = [p[0] for p in TWX_SPEED_PROFILE]
         rs = [p[1] for p in TWX_SPEED_PROFILE]
-        integ = sum((rs[i] + rs[i + 1]) / 2 * (fr[i + 1] - fr[i])
-                    for i in range(len(fr) - 1))
-        k = spd / integ   # 归一使曲线段平均速度=spd (时长占比梯形积分)
+        prof_integ = sum((rs[i] + rs[i + 1]) / 2 * (fr[i + 1] - fr[i])
+                         for i in range(len(fr) - 1))
+        k = spd / prof_integ   # 归一使曲线段平均速度=spd (时长占比梯形积分)
         t_pre = t0 - sin / spd
         eps = 1.0 / 24    # 锚末端留 1 帧过渡到曲线首值, 起点误差 <0.2 帧
-        return [[round(t_pre, 3), spd * 100],
-                [round(t0 - eps, 3), spd * 100]] + \
-               [[round(t0 + f * dur, 3), round(r * k * 100, 2)]
-                for f, r in TWX_SPEED_PROFILE]
+        pre = [[round(t_pre, 3), spd * 100], [round(t0 - eps, 3), spd * 100]]
+        if mode == "end":
+            pts = sorted(((1.0 - f, r) for f, r in zip(fr, rs)))
+            return pre + [[round(t0 + f * dur, 3), round(r * k * 100, 2)]
+                          for f, r in pts]
+        if mode == "mid" and anchor is not None and t0 < anchor < t1:
+            a = min(max(anchor, t0 + eps), t1 - eps)
+            # 1帧减速过渡吃掉 ≤0.008s 源内容 (平均速度 -4~-8%) → 出点内容早 0.2 源帧,
+            # 亚帧级, 与 v7 起点锚 "<0.2帧" 同口径; 冻结时刻 (踩拍) 是精确的
+            return pre + \
+                [[round(t0, 3), spd * 100],
+                 [round(a - eps, 3), spd * 100]] + \
+                [[round(a + f * (t1 - a), 3), round(r * k * 100, 2)]
+                 for f, r in zip(fr, rs)]
+        return pre + [[round(t0 + f * dur, 3), round(r * k * 100, 2)]
+                      for f, r in zip(fr, rs)]
 
     def _shot_js(s):
         d = {"t0": s["t0"], "t1": s["t1"], "r": [_fx_js(f, s["dose"]) for f in s["fx"]]}
         if "twx" in s:
             d["twx"] = {"src": s["twx"]["src"].replace(chr(92), "/"),
                         "sin": s["twx"]["sin"], "spd": s["twx"]["spd"], "zp": s["twx"]["zp"],
-                        "curve": _twx_curve(s["t0"], s["t1"], s["twx"]["sin"], s["twx"]["spd"])}
+                        "curve": _twx_curve(s["t0"], s["t1"], s["twx"]["sin"], s["twx"]["spd"],
+                                            s["twx"].get("anchor_mode", "cut"),
+                                            s["twx"].get("anchor"))}
         return d
     shots_js = json.dumps([_shot_js(s) for s in plan], separators=(",", ":"))
     bursts_js = json.dumps(
@@ -361,6 +423,11 @@ def main():
     for k, v in cnt.most_common():
         print(f"  {k}: {v}")
     print(f"Twixtor 慢镜: {sum(1 for s in plan if 'twx' in s)}")
+    _anchored = [(s["t0"], s["twx"]["anchor_mode"], s["twx"].get("anchor"))
+                 for s in plan if s.get("twx", {}).get("anchor_mode", "cut") != "cut"]
+    if _anchored:
+        print("锚点重锚 (v9): " + ", ".join(
+            f"t0={t:.2f} {m}@{a:.2f}" for t, m, a in _anchored))
     print(f"转场冲击层: {len(bursts)} (drop radial {sum(1 for b in bursts if b['t0']>=12.7)} / build badtv {sum(1 for b in bursts if b['t0']<12.7)})")
     print(f"剂量范围: {min(s['dose'] for s in plan):.2f} - {max(s['dose'] for s in plan):.2f}")
     (ROOT / "tmp").mkdir(exist_ok=True)
