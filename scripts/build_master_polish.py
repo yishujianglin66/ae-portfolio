@@ -47,7 +47,9 @@ ENV_TAIL = 0.45      # 衰减后保持比例
 
 # Twixtor 连续速度曲线 (2026-09-05 #10): (时长占比, 相对速度)
 # 快进冲入→急减速→冻结在拍点(顶尖慢镜招牌)。梯形积分归一=1 保平均速度不变, 落拍不漂。
-TWX_SPEED_PROFILE = [(0.0, 0.18), (0.55, 0.50), (1.0, 1.05)]
+# v10.1 (用户反馈: 22/25/27s 处只有死冻结没有"缓慢运动", 突兀): 底速 0.18→0.35,
+# 冻结改缓爬 (~8fps 有效, 读作慢速运动而非停格), 加速放出段不变。§5 预留的 remedy 旋钮。
+TWX_SPEED_PROFILE = [(0.0, 0.35), (0.55, 0.50), (1.0, 1.05)]
 
 
 def _load_env():
@@ -282,6 +284,10 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
 
     def _shot_js(s):
         d = {"t0": s["t0"], "t1": s["t1"], "r": [_fx_js(f, s["dose"]) for f in s["fx"]]}
+        if "drift" in s:
+            d["drift"] = s["drift"]
+        if "rescue" in s:
+            d["rescue"] = s["rescue"]
         if "twx" in s:
             d["twx"] = {"src": s["twx"]["src"].replace(chr(92), "/"),
                         "sin": s["twx"]["sin"], "spd": s["twx"]["spd"], "zp": s["twx"]["zp"],
@@ -325,7 +331,21 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
     for (var i = 0; i < shots.length; i++) {{
       var sh = shots[i];
       var ly;
-      if (sh.twx) {{
+      if (sh.rescue) {{
+        // v10.2 垃圾窗口救援层 — 预烘焙恒速源片段 (setpts 到镜头速度), 1:1 播放 + push 复刻
+        if (!srcCache[sh.rescue.src]) {{
+          srcCache[sh.rescue.src] = app.project.importFile(new ImportOptions(new File(sh.rescue.src)));
+        }}
+        var rsim = srcCache[sh.rescue.src];
+        ly = comp.layers.add(rsim);
+        ly.startTime = sh.t0;
+        ly.inPoint = sh.t0; ly.outPoint = sh.t1;
+        var rbs = Math.max(comp.width / rsim.width, comp.height / rsim.height) * 100;
+        var rsc = ly.property("Scale");
+        rsc.setValueAtTime(sh.t0, [rbs, rbs]);
+        rsc.setValueAtTime(sh.t1, [rbs * sh.rescue.push, rbs * sh.rescue.push]);
+        ly.name = "RS" + i;
+      }} else if (sh.twx) {{
         // v6 Twixtor 层: 源素材 + 光流慢动作 + 缩放关键帧复刻推镜
         if (!srcCache[sh.twx.src]) {{
           srcCache[sh.twx.src] = app.project.importFile(new ImportOptions(new File(sh.twx.src)));
@@ -350,6 +370,11 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
         ly = comp.layers.add(imp);
         ly.inPoint = sh.t0; ly.outPoint = sh.t1;
         ly.name = "S" + i;
+        if (sh.drift) {{   // v10.1: 死帧段慢推镜 — 静止画面给节拍内的缓慢运动
+          var dsc = ly.property("Scale");
+          dsc.setValueAtTime(sh.t0, [100, 100]);
+          dsc.setValueAtTime(sh.t1, [100 * sh.drift, 100 * sh.drift]);
+        }}
       }}
       for (var j = 0; j < sh.r.length; j++) applyFx(ly, sh.r[j], sh.t0);
     }}
@@ -417,6 +442,70 @@ def main():
             _t["sin"] = _lead
     _, strong = _load_env()
     bursts = plan_bursts(plan, strong)
+    # v10.1: 引擎烘的死帧段 (静态源在 1.1-1.5x 下仍 0 运动, 12.7s 后实测 12 处,
+    # 最长 500ms — 用户反馈 22/25/27s "没有缓慢运动, 突兀") → S 层加慢推镜:
+    # Scale 100→106% 线性, 节拍切点起止, 给静止画面节拍内的缓慢运镜
+    import subprocess as _sp2
+    import numpy as _np
+    _r = _sp2.run(["ffmpeg", "-v", "error", "-i", str(run_dir / f"{tag}_lut.mp4"),
+                   "-vf", "scale=160:90", "-f", "rawvideo", "-pix_fmt", "gray", "-"],
+                  capture_output=True, timeout=600)
+    _W, _H = 160, 90
+    _n = len(_r.stdout) // (_W * _H)
+    _fr = _np.frombuffer(_r.stdout[:_n * _W * _H],
+                         dtype=_np.uint8).reshape(_n, _H, _W).astype(_np.float32)
+    _d = _np.array([99.0] + [float(_np.abs(_fr[i] - _fr[i - 1]).mean())
+                             for i in range(1, _n)])
+    _drift_n = 0
+    for _s in plan:
+        if "twx" in _s or _s["t0"] < 12.7:
+            continue
+        _i0 = int(_s["t0"] * 24) + 1          # 跳过切点帧差
+        _i1 = min(int(_s["t1"] * 24) - 1, _n - 1)
+        if _i1 - _i0 >= 2 and float(_np.median(_d[_i0:_i1 + 1])) < 2.5 \
+                and float(_np.max(_d[_i0:_i1 + 1])) < 8.0:
+            _s["drift"] = 1.06
+            _drift_n += 1
+    print(f"死帧段慢推镜 (drift): {_drift_n} → "
+          f"{[round(s['t0'], 2) for s in plan if 'drift' in s]}")
+    # v10.2: 垃圾窗口救援 — 底片窗口内容为 源片水印卡/黑场 (mean luma<60 且整段死帧),
+    # 任何速度曲线/推镜都救不了 (黑场上推镜不可见)。成因: 报告↔底片镜头-源映射漂移
+    # (23.96 底片实拍 Nagi 源 intro 卡+黑场, 报告分配的五条悟@39.44 实际出现在 27.62)。
+    # 救援 = 预烘焙恒速源覆盖层 (setpts 到镜头速度) + push 复刻; 源用显式映射
+    # (23.96 ← 报告给 27.62 的 Nagi@8.41, 底片未用过), 其余垃圾窗口回落到报告自身分配。
+    _luma = _fr.mean(axis=(1, 2))
+    RESCUE_MAP = {23.958: ("D:/AE-Work/resources/video/猫猫（一般）/素材/猫2.mp4", 109.0, 1.1)}
+    _rescue_dir = run_dir / "polish" / "rescue_src"
+    _rescue_dir.mkdir(parents=True, exist_ok=True)
+    _rescue_n = 0
+    for _i, _s in enumerate(plan):
+        if "twx" in _s or _s["t0"] < 12.7 or "rescue" in _s:
+            continue
+        _hit = RESCUE_MAP.get(round(_s["t0"], 3))
+        if _hit is None:
+            continue   # 映射不可靠 → 只做显式映射的救援, 不自动回落
+        _i0 = int(_s["t0"] * 24) + 1
+        _i1 = min(int(_s["t1"] * 24) - 1, _n - 1)
+        if _i1 - _i0 < 2 or float(_np.median(_d[_i0:_i1 + 1])) >= 2.5 \
+                or float(_np.mean(_luma[_i0:_i1 + 1])) >= 60.0:
+            continue
+        _rsrc, _rsin, _rspd = _hit
+        # 文件名编码偏移 — AE 进程常锁住旧片段, 同名覆盖会瞬间失败 (Windows 文件锁,
+        # 参见交接 §6.2), 换源后必须换文件名; 失败要暴露, 不许静默复用陈旧片段
+        _rc = _rescue_dir / f"{_i:02d}_{int(round(_rsin * 10))}.mp4"
+        _prc = _sp2.run(["ffmpeg", "-y", "-ss", f"{_rsin:.3f}",
+                         "-t", f"{(_s['t1'] - _s['t0']) * _rspd + 0.2:.3f}", "-i", _rsrc,
+                         "-vf", f"setpts=PTS/{_rspd:.4f}", "-c:v", "libx264", "-crf", "16",
+                         "-an", str(_rc)], capture_output=True, timeout=300)
+        if _prc.returncode == 0 and _rc.exists():
+            _s["rescue"] = {"src": str(_rc).replace(chr(92), "/"), "push": 1.09}
+            _s.pop("drift", None)
+            _rescue_n += 1
+        else:
+            print(f"  rescue 烘焙失败 t0={_s['t0']}: "
+                  f"{_prc.stderr.decode(errors='replace')[-160:]}")
+    print(f"垃圾窗口救援 (rescue): {_rescue_n} → "
+          f"{[round(s['t0'], 2) for s in plan if 'rescue' in s]}")
     from collections import Counter
     cnt = Counter(f for s in plan for f in s["fx"])
     print(f"镜头效果: {len(plan)}/{len(segs)} ({len(plan)/len(segs):.0%})")
