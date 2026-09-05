@@ -14,8 +14,13 @@ v4 三升级 (在 v3.1 已验收的映射骨架上):
 """
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # 并发会话加的 core 导入需要它先就位
+
+from core.paths import aerender_exe  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -113,6 +118,22 @@ def _twx_anchor(t0, t1, onsets):
     return "end", round(t1, 3)
 
 
+_SRC_DUR_CACHE = {}
+
+
+def _src_dur(p):
+    """源文件时长 (ffprobe format=duration, 带缓存)"""
+    if str(p) not in _SRC_DUR_CACHE:
+        import subprocess as _s
+        _r = _s.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                     "-of", "csv=p=0", str(p)], capture_output=True, text=True, timeout=60)
+        try:
+            _SRC_DUR_CACHE[str(p)] = float(_r.stdout.strip())
+        except ValueError:
+            _SRC_DUR_CACHE[str(p)] = 0.0
+    return _SRC_DUR_CACHE[str(p)]
+
+
 def _win_ok(src, off, dur):
     """候选替换窗口体检: 亮度非黑非白曝 + 有运动 (Nagi 教训: 盲选会选到黑场/卡)"""
     import numpy as np
@@ -128,8 +149,10 @@ def _win_ok(src, off, dur):
                            dtype=np.uint8).reshape(_n, 90, 160).astype(np.float32)
         _lm = [float(x.mean()) for x in _f]
         if not all(18 <= v <= 225 for v in _lm):
-            return False
+            return False   # 真黑/过曝拒绝
         _mo = [float(np.abs(_f[i] - _f[i - 1]).mean()) for i in range(1, _n)]
+        if max(_mo) > 40:
+            return False   # 窗内含硬切 (合集类素材) 拒绝
         return float(np.mean(_mo)) >= 0.3
     except Exception:
         return False
@@ -323,57 +346,69 @@ def plan_effects(segs, run_dir=None, tag=None):
     # manifest 未使用源 (8 文件 ~80s 新素材) 的实测有效内容: twx 平速曲线覆盖
     # 底片 + 保留原 fx/zoompan。每源镜头数上限 9, 重音锚点镜头不动。
     _MAX_PER_SRC = 9
+    _src_dur_cache = {}
     _violin_t = [a for _p0, _p1, a in _load_violin_accents()]
-    _use = {}
+    # 每源已用源时间区间表 (供替换窗口避让)
+    _spans_by_src = {}
     for _seg in segs:   # v19 修正: 按全量 segs 统计 (无 fx 镜头同样是重复内容)
         if not _seg.get("source_file"):
             continue
         _bn = os.path.basename(_seg["source_file"].replace(chr(92), "/"))
-        _t0 = round(float(_seg["start_time"]), 3)
-        _e = next((e for e in plan if abs(e["t0"] - _t0) < 0.05), None)
-        _use.setdefault(_bn, []).append((_e, _seg))
-    _over = {bn: es for bn, es in _use.items() if len(es) > _MAX_PER_SRC}
+        _s0 = float(_seg.get("source_start", 0))
+        _s1 = _s0 + (float(_seg["end_time"]) - float(_seg["start_time"])) * float(_seg.get("speed", 1.0))
+        _t0s = round(float(_seg["start_time"]), 3)
+        _e0 = next((e for e in plan if abs(e["t0"] - _t0s) < 0.05), None)
+        _spans_by_src.setdefault(_bn, []).append((_s0, _s1, _t0s, _e0, _seg))
+    _over = {bn: es for bn, es in _spans_by_src.items() if len(es) > _MAX_PER_SRC}
     if _over:
-        # 已实测有效窗口池 (亮度 18-225 + 有运动; 枫叶.mov 全黑 / 1 (10).mov 全暗 /
-        # 4._1080p 大部暗 已剔除 — Nagi 教训: 死窗口会毒死轮转)
-        _NEW_POOL = (
-            [("D:/AE-Work/resources/video/蓝色监狱（量多）/素材/v0300fg10000cr7mf77og65lhrmfrv5g.MP4", o)
-             for o in (1.0, 2.5, 5.5, 7.0, 9.5, 11.0, 12.5, 14.5, 16.0, 17.0)]
-            + [("D:/BaiduNetdiskDownload/AE新手10套/do you mean（简单）/素材.MP4", o)
-               for o in (1.0, 2.5, 4.0, 5.5, 7.0, 9.0, 11.0, 13.0, 15.0, 17.0, 19.0, 21.0, 23.0, 25.0)]
-            + [("D:/AE-Work/resources/video/美人鱼（较难）/素材/123.mp4", o)
-               for o in (1.0, 5.5, 7.0, 9.5)]
-        )
         _n_rep = 0
         for _bn in sorted(_over, key=lambda b: -len(_over[b])):
             _es = _over[_bn]
             _excess = len(_es) - _MAX_PER_SRC
             _cands = []
-            for e, seg in _es:
+            for _s0, _s1, _t0s, e, seg in _es:
                 if e is not None and ("twx" in e or "rescue" in e):
                     continue
-                if round(round(float(seg["start_time"]), 3), 3) in RESCUE_MAP:
+                if _t0s in RESCUE_MAP:
                     continue
-                _t0c = round(float(seg["start_time"]), 3)
-                if any(abs(a - _t0c) <= 0.30 for a in _violin_t):
+                if any(abs(a - _t0s) <= 0.30 for a in _violin_t):
                     continue   # 小提琴重音锚定镜头不动
                 if e is None:
-                    e = {"t0": _t0c, "t1": round(float(seg["end_time"]), 3),
+                    e = {"t0": _t0s, "t1": round(float(seg["end_time"]), 3),
                          "fx": [], "dose": 1.0, "en": 0.5, "env": 0.5}
                     plan.append(e)
+                    _spans_by_src[_bn][-1] = (_spans_by_src[_bn][-1][0],
+                                              _spans_by_src[_bn][-1][1],
+                                              _t0s, e, seg)
                 _cands.append((e, seg))
             _cands.sort(key=lambda x: x[0]["t0"])
             for e, seg in _cands[:_excess]:
                 _spd = float(seg.get("speed", 1.0))
                 _dur = e["t1"] - e["t0"]
+                _span = _dur * _spd
+                _srcf = seg["source_file"]
+                _sin0 = float(seg.get("source_start", 0))
+                if _bn not in _src_dur_cache:
+                    _src_dur_cache[_bn] = _src_dur(_srcf)
+                _sdur = _src_dur_cache[_bn]
+                if _sdur <= _span + 1.0:
+                    continue   # 源太短无处可移
+                _others = [(a, b) for a, b, t0x, ex, sg in _spans_by_src[_bn]
+                           if abs(t0x - e["t0"]) > 0.05]
                 _got = None
-                for _psrc, _off in _NEW_POOL[_n_rep:]:
-                    if _win_ok(_psrc, _off, _dur * _spd):
-                        _got = (_psrc, _off)
-                        break
+                for _delta in (1.6, -1.6, 2.4, -2.4, 3.2, -3.2, 4.0, -4.0, 4.8, -4.8, 5.6, -5.6):
+                    _cand = _sin0 + _delta * _spd
+                    if _cand < 0.2 or _cand + _span > _sdur - 0.15:
+                        continue
+                    if any(min(_cand + _span, b) - max(_cand, a) > 0.3 for a, b in _others):
+                        continue   # 与其他镜头的源窗重叠 = 还是重复
+                    if not _win_ok(_srcf, _cand, _span):
+                        continue
+                    _got = (_srcf, round(_cand, 3))
+                    break
                 if _got is None:
                     continue
-                e["twx"] = {"src": _got[0], "sin": _got[1], "spd": _spd,
+                e["twx"] = {"src": _got[0].replace(chr(92), "/"), "sin": _got[1], "spd": _spd,
                             "zp": "zoom_in", "anchor_mode": "flat", "repl": _bn[-12:]}
                 e.setdefault("fx", e.get("fx", []))
                 _n_rep += 1
@@ -593,7 +628,16 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
 
 
 def main():
-    run_dir = ROOT / sys.argv[1]
+    # 路径安全 (2026-09-05): argv 白名单校验, 目录名重建自常量而非拼接用户输入
+    import re as _re
+    _raw = str(sys.argv[1]).replace("\\", "/").removeprefix("output/")
+    if not _re.fullmatch(r"unified_run\d+", _raw):
+        print(f"[ERR] 非法 run 目录名(白名单 unified_run\\d+): {_raw}")
+        sys.exit(1)
+    if not _re.fullmatch(r"run\d+", str(sys.argv[2])):
+        print(f"[ERR] 非法 tag(白名单 run\\d+): {sys.argv[2]}")
+        sys.exit(1)
+    run_dir = ROOT / "output" / _raw
     tag = sys.argv[2]
     pr = json.loads((run_dir / "production_report.json").read_text(encoding="utf-8"))
     segs = pr["script"]["segments"]
@@ -809,7 +853,7 @@ def main():
                  for s in plan if s.get("twx", {}).get("anchor_mode", "cut") != "cut"]
     if _anchored:
         print("锚点重锚 (v9): " + ", ".join(
-            f"t0={t:.2f} {m}@{a:.2f}" for t, m, a in _anchored))
+            f"t0={t:.2f} {m}@{(a if a is not None else 0):.2f}" for t, m, a in _anchored))
     print(f"转场冲击层: {len(bursts)} (drop radial {sum(1 for b in bursts if b['t0']>=12.7)} / build badtv {sum(1 for b in bursts if b['t0']<12.7)})")
     print(f"剂量范围: {min(s['dose'] for s in plan):.2f} - {max(s['dose'] for s in plan):.2f}")
     (ROOT / "tmp").mkdir(exist_ok=True)
