@@ -113,6 +113,28 @@ def _twx_anchor(t0, t1, onsets):
     return "end", round(t1, 3)
 
 
+def _win_ok(src, off, dur):
+    """候选替换窗口体检: 亮度非黑非白曝 + 有运动 (Nagi 教训: 盲选会选到黑场/卡)"""
+    import numpy as np
+    try:
+        import subprocess as _s
+        _r = _s.run(["ffmpeg", "-v", "error", "-ss", f"{off:.3f}", "-t", f"{dur + 0.1:.3f}",
+                     "-i", src, "-vf", "scale=160:90", "-f", "rawvideo",
+                     "-pix_fmt", "gray", "-"], capture_output=True, timeout=120)
+        _n = len(_r.stdout) // (160 * 90)
+        if _n < 3:
+            return False
+        _f = np.frombuffer(_r.stdout[:_n * 160 * 90],
+                           dtype=np.uint8).reshape(_n, 90, 160).astype(np.float32)
+        _lm = [float(x.mean()) for x in _f]
+        if not all(18 <= v <= 225 for v in _lm):
+            return False
+        _mo = [float(np.abs(_f[i] - _f[i - 1]).mean()) for i in range(1, _n)]
+        return float(np.mean(_mo)) >= 0.3
+    except Exception:
+        return False
+
+
 def plan_effects(segs, run_dir=None, tag=None):
     """v4 = v3.1 骨架 (段落相对能量/轮换禁重复/呼吸留白) + 连续剂量 + 冲击层"""
     import statistics
@@ -296,7 +318,70 @@ def plan_effects(segs, run_dir=None, tag=None):
                 e["fx"] = ["radial" for f in e["fx"]]   # battle 高动 → 冲击
                 _n_sem += 1
         print(f"语义选效果 (v17): {_n_sem} 处调整")
+    # v19: 源多样化替换 (用户反馈: 镜头重复出境) — top5 源贡献 62% 镜头
+    # (独自升级5 19镜/5.7s源被切碎撒全片), 同场景反复出现。将超额 S 镜替换为
+    # manifest 未使用源 (8 文件 ~80s 新素材) 的实测有效内容: twx 平速曲线覆盖
+    # 底片 + 保留原 fx/zoompan。每源镜头数上限 9, 重音锚点镜头不动。
+    _MAX_PER_SRC = 9
+    _violin_t = [a for _p0, _p1, a in _load_violin_accents()]
+    _use = {}
+    for _seg in segs:   # v19 修正: 按全量 segs 统计 (无 fx 镜头同样是重复内容)
+        if not _seg.get("source_file"):
+            continue
+        _bn = os.path.basename(_seg["source_file"].replace(chr(92), "/"))
+        _t0 = round(float(_seg["start_time"]), 3)
+        _e = next((e for e in plan if abs(e["t0"] - _t0) < 0.05), None)
+        _use.setdefault(_bn, []).append((_e, _seg))
+    _over = {bn: es for bn, es in _use.items() if len(es) > _MAX_PER_SRC}
+    if _over:
+        # 已实测有效窗口池 (亮度 18-225 + 有运动; 枫叶.mov 全黑 / 1 (10).mov 全暗 /
+        # 4._1080p 大部暗 已剔除 — Nagi 教训: 死窗口会毒死轮转)
+        _NEW_POOL = (
+            [("D:/AE-Work/resources/video/蓝色监狱（量多）/素材/v0300fg10000cr7mf77og65lhrmfrv5g.MP4", o)
+             for o in (1.0, 2.5, 5.5, 7.0, 9.5, 11.0, 12.5, 14.5, 16.0, 17.0)]
+            + [("D:/BaiduNetdiskDownload/AE新手10套/do you mean（简单）/素材.MP4", o)
+               for o in (1.0, 2.5, 4.0, 5.5, 7.0, 9.0, 11.0, 13.0, 15.0, 17.0, 19.0, 21.0, 23.0, 25.0)]
+            + [("D:/AE-Work/resources/video/美人鱼（较难）/素材/123.mp4", o)
+               for o in (1.0, 5.5, 7.0, 9.5)]
+        )
+        _n_rep = 0
+        for _bn in sorted(_over, key=lambda b: -len(_over[b])):
+            _es = _over[_bn]
+            _excess = len(_es) - _MAX_PER_SRC
+            _cands = []
+            for e, seg in _es:
+                if e is not None and ("twx" in e or "rescue" in e):
+                    continue
+                if round(round(float(seg["start_time"]), 3), 3) in RESCUE_MAP:
+                    continue
+                _t0c = round(float(seg["start_time"]), 3)
+                if any(abs(a - _t0c) <= 0.30 for a in _violin_t):
+                    continue   # 小提琴重音锚定镜头不动
+                if e is None:
+                    e = {"t0": _t0c, "t1": round(float(seg["end_time"]), 3),
+                         "fx": [], "dose": 1.0, "en": 0.5, "env": 0.5}
+                    plan.append(e)
+                _cands.append((e, seg))
+            _cands.sort(key=lambda x: x[0]["t0"])
+            for e, seg in _cands[:_excess]:
+                _spd = float(seg.get("speed", 1.0))
+                _dur = e["t1"] - e["t0"]
+                _got = None
+                for _psrc, _off in _NEW_POOL[_n_rep:]:
+                    if _win_ok(_psrc, _off, _dur * _spd):
+                        _got = (_psrc, _off)
+                        break
+                if _got is None:
+                    continue
+                e["twx"] = {"src": _got[0], "sin": _got[1], "spd": _spd,
+                            "zp": "zoom_in", "anchor_mode": "flat", "repl": _bn[-12:]}
+                e.setdefault("fx", e.get("fx", []))
+                _n_rep += 1
+        if _n_rep:
+            plan.sort(key=lambda e: e["t0"])
+        print(f"源多样化替换 (v19): {_n_rep} 处 ← {[b[-10:] for b in _over]}")
     return plan
+
 
 
 def plan_bursts(plan, strong):
@@ -379,6 +464,9 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
             pts = sorted(((1.0 - f, r) for f, r in zip(fr, rs)))
             return pre + [[round(t0 + f * dur, 3), round(r * k * 100, 2)]
                           for f, r in pts]
+        if mode == "flat":
+            # v19 源多样化替换: 平速覆盖层 (源片段按镜头速度预烘焙, 无慢曲线)
+            return pre + [[round(t0, 3), spd * 100], [round(t1, 3), spd * 100]]
         if mode == "mid" and anchor is not None and t0 < anchor < t1:
             a = min(max(anchor, t0 + eps), t1 - eps)
             # 1帧减速过渡吃掉 ≤0.008s 源内容 (平均速度 -4~-8%) → 出点内容早 0.2 源帧,
