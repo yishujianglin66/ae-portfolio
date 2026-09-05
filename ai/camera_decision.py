@@ -109,6 +109,23 @@ class SourceCameraInventory:
             self._hier_clf = False
             return None
 
+    def unload(self) -> None:
+        """释放懒加载的 LoRA/分层分类器与其显存 (运镜标注完成后调用)。
+
+        分层 VLM 4bit ~5.8GB + VideoMAE 常驻会挤爆阶段⑤成片评分的 8GB 卡
+        (2026-09-05 OOM 根治: 引用置空 → gc → empty_cache)。
+        """
+        import gc
+        self._lora_clf = None
+        self._hier_clf = None
+        try:
+            import torch
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception:  # noqa: BLE001
+            pass
+
     def analyze(self, video_path: str) -> Dict[str, Any]:
         """分析单个素材的运镜。双层缓存:
           L0 LoRA 动漫运镜分类器 (A5, 高精度) → L1 整文件缓存 → L2 分段光流

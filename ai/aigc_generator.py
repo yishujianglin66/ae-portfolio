@@ -39,6 +39,56 @@ def log(msg: str, level: str = "INFO"):
     print(f"  [{ts}][{level}] {msg}")
 
 
+# --- SSRF 防护 (Mimosa 修复): 只允许已知生成服务域, 拒绝内网/回环地址 ---
+_API_HOSTS = {
+    "api.openai.com", "generativelanguage.googleapis.com", "queue.fal.run",
+    "api.klingai.com", "open.kuaishou.com", "api.pika.style", "api.stability.ai",
+    "dashscope.aliyuncs.com",
+}
+
+
+def _validate_url(url: str) -> str:
+    """校验外呼 URL: 仅 https 域名白名单, 解析后拒绝私网/回环/链路本地地址"""
+    import ipaddress
+    import socket
+    import urllib.parse
+    pu = urllib.parse.urlparse(str(url))
+    if pu.scheme not in ("https", "http") or not pu.hostname:
+        raise ValueError(f"拒绝非 http(s) URL: {url!r}")
+    if pu.hostname not in _API_HOSTS:
+        raise ValueError(f"拒绝非白名单域: {pu.hostname}")
+    for info in socket.getaddrinfo(pu.hostname, pu.port or (443 if pu.scheme == "https" else 80)):
+        ip = ipaddress.ip_address(info[4][0])
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+            raise ValueError(f"拒绝解析到内网地址: {pu.hostname} -> {ip}")
+    return str(url)
+
+
+def _safe_urlopen(req, timeout: float):
+    _validate_url(req.full_url)
+    return _safe_urlopen(req, timeout=timeout)
+
+
+def _safe_download(url: str, output_path: str):
+    """校验 URL + 约束落盘路径在项目素材目录内"""
+    _validate_url(url)
+    out = Path(output_path).resolve()
+    if OUTPUT_DIR not in out.parents and out.parent != OUTPUT_DIR:
+        raise ValueError(f"拒绝越界输出路径: {output_path}")
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    urllib.request.urlretrieve(url, str(out))
+    return str(out)
+
+
+def _safe_output_path(output_path: str) -> str:
+    """约束落盘路径在项目素材目录内 (Mimosa: 防路径穿越)"""
+    out = Path(output_path).resolve()
+    if OUTPUT_DIR not in out.parents and out.parent != OUTPUT_DIR:
+        raise ValueError(f"拒绝越界输出路径: {output_path}")
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    return str(out)
+
+
 # ================================================================
 #  提示词生成器
 # ================================================================
@@ -202,13 +252,13 @@ class DALLEAdapter(BaseAIGCAdapter):
             }).encode("utf-8")
 
             req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with _safe_urlopen(req, timeout=120) as resp:
                 result = json.loads(resp.read().decode("utf-8"))
 
             image_url = result["data"][0]["url"]
 
             # 下载图片
-            urllib.request.urlretrieve(image_url, output_path)
+            _safe_download(image_url, output_path)
 
             return {
                 "success": True,
@@ -255,12 +305,13 @@ class ImagenAdapter(BaseAIGCAdapter):
             }).encode("utf-8")
 
             req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with _safe_urlopen(req, timeout=120) as resp:
                 result = json.loads(resp.read().decode("utf-8"))
 
             # Imagen 返回 base64
             import base64
             image_data = base64.b64decode(result["predictions"][0]["bytesBase64Encoded"])
+            output_path = _safe_output_path(output_path)
             with open(output_path, "wb") as f:
                 f.write(image_data)
 
@@ -329,13 +380,13 @@ class VeoAdapter(BaseAIGCAdapter):
         log(f"  fal.ai Veo 提交任务: {prompt[:50]}...")
         req = urllib.request.Request(url, headers=headers,
                                      data=json.dumps(payload).encode("utf-8"), method="POST")
-        with urllib.request.urlopen(req, timeout=60) as resp:
+        with _safe_urlopen(req, timeout=60) as resp:
             result = json.loads(resp.read().decode("utf-8"))
 
         # fal 可能直接返回或返回 request_id
         if "video" in result and result["video"].get("url"):
             video_url = result["video"]["url"]
-            urllib.request.urlretrieve(video_url, output_path)
+            _safe_download(video_url, output_path)
             return {"success": True, "path": output_path, "source": "Veo(fal)", "prompt": prompt}
 
         request_id = result.get("request_id", "")
@@ -357,14 +408,14 @@ class VeoAdapter(BaseAIGCAdapter):
         while time.time() - start < max_wait:
             try:
                 req = urllib.request.Request(url, headers=headers)
-                with urllib.request.urlopen(req, timeout=30) as resp:
+                with _safe_urlopen(req, timeout=30) as resp:
                     result = json.loads(resp.read().decode("utf-8"))
 
                 status = result.get("status", "")
                 if status == "COMPLETED":
                     video_url = result.get("video", {}).get("url", "")
                     if video_url:
-                        urllib.request.urlretrieve(video_url, output_path)
+                        _safe_download(video_url, output_path)
                         return {"success": True, "path": output_path, "source": "Veo(fal)", "prompt": prompt}
                     return {"success": False, "error": "Completed but no video URL"}
                 elif status in ("FAILED", "CANCELLED"):
@@ -395,7 +446,7 @@ class VeoAdapter(BaseAIGCAdapter):
         log(f"  Gemini Veo 提交: {prompt[:50]}...")
         req = urllib.request.Request(url, headers=headers,
                                      data=json.dumps(payload).encode("utf-8"), method="POST")
-        with urllib.request.urlopen(req, timeout=60) as resp:
+        with _safe_urlopen(req, timeout=60) as resp:
             result = json.loads(resp.read().decode("utf-8"))
 
         # Veo via Gemini 返回 operation name
@@ -418,7 +469,7 @@ class VeoAdapter(BaseAIGCAdapter):
         while time.time() - start < max_wait:
             try:
                 req = urllib.request.Request(url)
-                with urllib.request.urlopen(req, timeout=30) as resp:
+                with _safe_urlopen(req, timeout=30) as resp:
                     result = json.loads(resp.read().decode("utf-8"))
 
                 if result.get("done"):
@@ -426,8 +477,9 @@ class VeoAdapter(BaseAIGCAdapter):
                     if videos:
                         video_data = videos[0].get("video", {})
                         if video_data.get("uri"):
-                            urllib.request.urlretrieve(video_data["uri"], output_path)
+                            _safe_download(video_data["uri"], output_path)
                         elif video_data.get("bytesBase64Encoded"):
+                            output_path = _safe_output_path(output_path)
                             with open(output_path, "wb") as f:
                                 f.write(base64.b64decode(video_data["bytesBase64Encoded"]))
                         return {"success": True, "path": output_path, "source": "Veo(Gemini)", "prompt": prompt}
@@ -478,13 +530,13 @@ class SoraAdapter(BaseAIGCAdapter):
             }).encode("utf-8")
 
             req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-            with urllib.request.urlopen(req, timeout=180) as resp:
+            with _safe_urlopen(req, timeout=180) as resp:
                 result = json.loads(resp.read().decode("utf-8"))
 
             # 假设返回直接下载链接 (实际可能需要轮询)
             video_url = result.get("output", {}).get("url", "")
             if video_url:
-                urllib.request.urlretrieve(video_url, output_path)
+                _safe_download(video_url, output_path)
                 return {
                     "success": True,
                     "path": output_path,
@@ -545,7 +597,7 @@ class KlingAdapter(BaseAIGCAdapter):
             log(f"  可灵 提交视频任务: {prompt[:50]}...")
             req = urllib.request.Request(url, headers=self._headers(api_key),
                                          data=json.dumps(payload).encode("utf-8"), method="POST")
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with _safe_urlopen(req, timeout=60) as resp:
                 result = json.loads(resp.read().decode("utf-8"))
 
             task_id = result.get("data", {}).get("task_id", "")
@@ -572,7 +624,7 @@ class KlingAdapter(BaseAIGCAdapter):
         while time.time() - start < max_wait:
             try:
                 req = urllib.request.Request(url, headers=self._headers(api_key))
-                with urllib.request.urlopen(req, timeout=30) as resp:
+                with _safe_urlopen(req, timeout=30) as resp:
                     result = json.loads(resp.read().decode("utf-8"))
 
                 data = result.get("data", {})
@@ -584,7 +636,7 @@ class KlingAdapter(BaseAIGCAdapter):
                     if videos:
                         video_url = videos[0].get("url", "")
                         if video_url:
-                            urllib.request.urlretrieve(video_url, output_path)
+                            _safe_download(video_url, output_path)
                             return {
                                 "success": True,
                                 "path": output_path,
@@ -629,14 +681,14 @@ class KlingAdapter(BaseAIGCAdapter):
             log(f"  可灵 生成图片: {prompt[:50]}...")
             req = urllib.request.Request(url, headers=self._headers(api_key),
                                          data=json.dumps(payload).encode("utf-8"), method="POST")
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with _safe_urlopen(req, timeout=120) as resp:
                 result = json.loads(resp.read().decode("utf-8"))
 
             images = result.get("data", {}).get("images", [])
             if images:
                 img_url = images[0].get("url", "")
                 if img_url:
-                    urllib.request.urlretrieve(img_url, output_path)
+                    _safe_download(img_url, output_path)
                     return {"success": True, "path": output_path, "source": "Kling", "prompt": prompt}
 
             return {"success": False, "error": f"可灵图片返回异常: {result}"}
@@ -694,14 +746,14 @@ class ARKJimengAdapter(BaseAIGCAdapter):
             req = urllib.request.Request(url, headers=headers, 
                                         data=json.dumps(payload).encode("utf-8"))
             
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with _safe_urlopen(req, timeout=120) as resp:
                 result = json.loads(resp.read().decode("utf-8"))
 
             if "data" in result and result["data"]:
                 img_url = result["data"][0].get("url", "")
                 if img_url:
                     # 下载图片
-                    urllib.request.urlretrieve(img_url, output_path)
+                    _safe_download(img_url, output_path)
                     return {
                         "success": True,
                         "path": output_path,
@@ -747,7 +799,7 @@ class ARKJimengAdapter(BaseAIGCAdapter):
             req = urllib.request.Request(url, headers=headers,
                                         data=json.dumps(payload).encode("utf-8"))
             
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with _safe_urlopen(req, timeout=30) as resp:
                 result = json.loads(resp.read().decode("utf-8"))
 
             # 视频生成是异步的，返回任务ID
@@ -773,14 +825,14 @@ class ARKJimengAdapter(BaseAIGCAdapter):
         while time.time() - start_time < max_wait:
             try:
                 req = urllib.request.Request(url, headers=headers)
-                with urllib.request.urlopen(req, timeout=30) as resp:
+                with _safe_urlopen(req, timeout=30) as resp:
                     result = json.loads(resp.read().decode("utf-8"))
 
                 status = result.get("status", "")
                 if status == "succeeded":
                     video_url = result.get("data", [{}])[0].get("url", "")
                     if video_url:
-                        urllib.request.urlretrieve(video_url, output_path)
+                        _safe_download(video_url, output_path)
                         return {
                             "success": True,
                             "path": output_path,
@@ -848,7 +900,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
             import urllib.request
             url = f"{self.comfyui_url}/system_stats"
             req = urllib.request.Request(url)
-            with urllib.request.urlopen(req, timeout=5) as resp:
+            with _safe_urlopen(req, timeout=5) as resp:
                 return resp.status == 200
         except Exception:
             return False
@@ -965,7 +1017,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with _safe_urlopen(req, timeout=30) as resp:
             result = json.loads(resp.read().decode("utf-8"))
             return result.get("prompt_id", "")
 
@@ -976,7 +1028,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
         while time.time() - start < max_wait:
             try:
                 req = urllib.request.Request(f"{self.comfyui_url}/history/{prompt_id}")
-                with urllib.request.urlopen(req, timeout=10) as resp:
+                with _safe_urlopen(req, timeout=10) as resp:
                     history = json.loads(resp.read().decode("utf-8"))
                 if prompt_id in history:
                     entry = history[prompt_id]
@@ -994,7 +1046,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
         subfolder = file_info.get("subfolder", "")
         file_type = file_info.get("type", "output")
         url = f"{self.comfyui_url}/view?filename={filename}&subfolder={subfolder}&type={file_type}"
-        urllib.request.urlretrieve(url, output_path)
+        _safe_download(url, output_path)
         return {"success": True, "path": output_path, "source": "ComfyUI", "prompt": prompt}
 
     def _download_and_stitch(self, images: List[Dict], output_path: str, prompt: str) -> Dict:
@@ -1024,7 +1076,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
         try:
             import urllib.request
             req = urllib.request.Request(f"{self.comfyui_url}/object_info/CheckpointLoaderSimple")
-            with urllib.request.urlopen(req, timeout=10) as resp:
+            with _safe_urlopen(req, timeout=10) as resp:
                 info = json.loads(resp.read().decode("utf-8"))
             return info.get("CheckpointLoaderSimple", {}).get("input", {}).get("required", {}).get("ckpt_name", [[]])[0]
         except Exception:

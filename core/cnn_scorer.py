@@ -212,13 +212,34 @@ def hybrid_score(video_path: str) -> Dict:
     return result
 
 
+def unload_clip():
+    """释放懒加载的 CLIP ViT-L 与缓存显存 (评分后经验采集等步骤仍需 GPU)。"""
+    global _clip_model, _clip_preprocess
+    if _clip_model is None:
+        return
+    _clip_model = None
+    _clip_preprocess = None
+    try:
+        import gc
+        import torch
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except Exception:
+        pass
+
+
 def score_video_mode(video_path: str, mode: str = "hybrid") -> Dict:
-    """按模式分派评分（迭代闭环入口）。"""
-    if mode == "qwen":
-        return score_video(video_path, n_frames=N_FRAMES)
-    if mode == "local":
-        return local_score(video_path)
-    return hybrid_score(video_path)
+    """按模式分派评分（迭代闭环入口）。评分完即释放 CLIP 显存 —
+    阶段⑤后还有经验采集等 GPU 步骤, ViT-L 常驻会挤爆 8GB 卡 (OOM 修复)。"""
+    try:
+        if mode == "qwen":
+            return score_video(video_path, n_frames=N_FRAMES)
+        if mode == "local":
+            return local_score(video_path)
+        return hybrid_score(video_path)
+    finally:
+        unload_clip()
 
 
 def main() -> int:

@@ -45,6 +45,10 @@ RECIPES = {
 ENV_DECAY_S = 0.16   # 包络衰减时长 (~3帧@24fps)
 ENV_TAIL = 0.45      # 衰减后保持比例
 
+# v11: 垃圾窗口救援映射 — 底片窗口为源片水印卡/黑场 (报告↔底片镜头-源映射漂移的牺牲品),
+# 内容用显式映射 (经帧条目检), 不自动回落到报告分配 (映射不可靠)。
+RESCUE_MAP = {23.958: ("D:/AE-Work/resources/video/猫猫（一般）/素材/猫2.mp4", 109.0, 1.1)}
+
 # Twixtor 连续速度曲线 (2026-09-05 #10): (时长占比, 相对速度)
 # 快进冲入→急减速→冻结在拍点(顶尖慢镜招牌)。梯形积分归一=1 保平均速度不变, 落拍不漂。
 # v10.1 (用户反馈: 22/25/27s 处只有死冻结没有"缓慢运动", 突兀): 底速 0.18→0.35,
@@ -74,6 +78,18 @@ def _load_onsets():
     return [(t, 1.0) for t in _load_env()[1]]
 
 
+def _load_violin_accents():
+    """小提琴持续乐句重音 (tmp/violin_phrases.json, [起,止,重音]) — v12。
+
+    高潮段每段拖长音收在 1 个重点节拍上; 用户定调: 重音处镜头放慢曲线动帧 + 放大。
+    缺失时返回空 (sva 层跳过, 其余语法不受影响)。
+    """
+    p = ROOT / "tmp" / "violin_phrases.json"
+    if not p.exists():
+        return []
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
 def _twx_anchor(t0, t1, onsets):
     """TWX 冻结锚点选择 (v9, 用户反馈: 17s 后几处慢镜没对上音乐)。
 
@@ -96,7 +112,7 @@ def _twx_anchor(t0, t1, onsets):
     return "end", round(t1, 3)
 
 
-def plan_effects(segs):
+def plan_effects(segs, run_dir=None, tag=None):
     """v4 = v3.1 骨架 (段落相对能量/轮换禁重复/呼吸留白) + 连续剂量 + 冲击层"""
     import statistics
     env_at, strong = _load_env()
@@ -187,6 +203,67 @@ def plan_effects(segs):
                     if mode != "cut":
                         entry["twx"]["anchor"] = anc
             plan.append(entry)
+    # v12: 小提琴拖长音重音 (用户定调: 重音处镜头放慢曲线动帧 + 放大) —
+    # 每段拖长音收在 1 个重点节拍上; 引擎已把多数重音对到慢镜 (13.46/15.29/19.0/20.83/22.67/26.29
+    # 的切点冻结都在重音 ±0.4 帧内), 只补真正无慢镜覆盖的重音 (16.78)。
+    for _ps, _pe, acc in _load_violin_accents():
+        if not (12.7 <= acc <= 27.5):
+            continue
+        seg = next((s for s in segs if float(s["start_time"]) <= acc < float(s["end_time"])), None)
+        if seg is None or not seg.get("source_file"):
+            continue
+        t0 = round(float(seg["start_time"]), 3)
+        t1 = round(float(seg.get("end_time", t0 + 0.25)), 3)
+        entry = next((e for e in plan if abs(e["t0"] - t0) < 0.05), None)
+        if entry is None:
+            entry = {"t0": t0, "t1": t1, "fx": [], "dose": 1.0, "en": 0.5, "env": 0.5}
+            plan.append(entry)
+            plan.sort(key=lambda e: e["t0"])
+        if "twx" in entry or "rescue" in entry or round(t0, 3) in RESCUE_MAP:
+            continue   # 已有慢镜/救援语法
+        # 邻接覆盖: 重音落点 ±60ms 内有慢镜切点冻结 → 已覆盖
+        if any(abs(e["t0"] - acc) <= 0.06 or (e["t0"] <= acc <= e["t1"])
+               for e in plan if "twx" in e):
+            continue
+        entry["twx"] = {"src": seg["source_file"], "sin": float(seg.get("source_start", 0)),
+                        "spd": 0.55, "zp": "zoom_in", "sva": acc}
+        if abs(acc - t0) <= 0.05:                     # 重音贴切点 → 冻结在切点
+            entry["twx"]["anchor_mode"] = "cut"
+        elif acc <= t1 - 0.09:                        # 重音在镜头中段 → 冻结在重音
+            entry["twx"]["anchor_mode"] = "mid"
+            entry["twx"]["anchor"] = round(acc, 3)
+        else:                                         # 重音贴出点 → 冲入末尾冻结
+            entry["twx"]["anchor_mode"] = "end"
+            entry["twx"]["anchor"] = t1
+    # v12.1: 20s 后两个无慢镜覆盖的重音 (精细检测 0.85/0.75 双阈值并集) — 显式计划:
+    # 20.25 镜头底片含引擎烘的叠化转场 (庭院→alya), 源替换会毁掉转场 → 底片重定时
+    # (Twixtor 对底片自身窗口做慢曲线, 叠化保留, 冻结在 20.468 重音=叠化中点);
+    # 23.958 救援镜头底片是卡+黑场, 用救援源猫2@109 重 timed, 冻结在 24.16 kick,
+    # rush-out 峰值落在 24.52 第二重音/出点。两者都 zoom_in 1.12 (用户定调: 放大)。
+    SVA_PLAN = {20.25: ("base", 20.468), 23.958: ("rescue_src", 24.16)}
+    for _t0p, (_kind, acc) in SVA_PLAN.items():
+        entry = next((e for e in plan if abs(e["t0"] - _t0p) < 0.05), None)
+        if entry is None or "twx" in entry or "rescue" in entry:
+            continue
+        t0, t1 = entry["t0"], entry["t1"]
+        if _kind == "base":
+            if run_dir is None or tag is None:
+                continue
+            _src = (run_dir / f"{tag}_lut.mp4").resolve().as_posix()
+            _sin = t0                      # 片内偏移=镜头起点, 底片窗口自引用
+        else:
+            _hit = RESCUE_MAP.get(round(t0, 3))
+            if _hit is None:
+                continue
+            _src, _sin = _hit[0], _hit[1]
+        entry["twx"] = {"src": _src, "sin": float(_sin), "spd": 0.55, "zp": "zoom_in",
+                        "sva": acc}
+        if acc <= t1 - 0.09:
+            entry["twx"]["anchor_mode"] = "mid"
+            entry["twx"]["anchor"] = round(acc, 3)
+        else:
+            entry["twx"]["anchor_mode"] = "end"
+            entry["twx"]["anchor"] = t1
     return plan
 
 
@@ -400,7 +477,7 @@ def main():
     tag = sys.argv[2]
     pr = json.loads((run_dir / "production_report.json").read_text(encoding="utf-8"))
     segs = pr["script"]["segments"]
-    plan = plan_effects(segs)
+    plan = plan_effects(segs, run_dir, tag)
     ov_p = ROOT / "tmp" / "dose_overrides.json"
     if ov_p.exists():
         ov = {float(k): v for k, v in json.loads(ov_p.read_text(encoding="utf-8")).items()}
@@ -411,13 +488,16 @@ def main():
     # v6.1: Twixtor 源预裁 — startTime 巨偏移会把图层窗推出源时长 (AE钳位成零长层),
     # 预裁 [sin-0.5, sin+dur*spd+0.6] 小片段后 sin=0.5 片内偏移, startTime 偏移极小
     import subprocess as _sp
+    import time as _time
+    _btag = str(int(_time.time()) % 1000000)  # 构建级唯一后缀 — AE 进程持旧片段文件锁, 同名覆盖必败
     _twx_dir = run_dir / "polish" / "twx_src"
     _twx_dir.mkdir(parents=True, exist_ok=True)
     for _i, _s in enumerate(plan):
         if "twx" not in _s:
             continue
         _t = _s["twx"]
-        _clip = _twx_dir / f"{_i:02d}.mp4"
+        # v12: 片段名编码镜头 t0 (旧序号名在 plan 插入新条目后位移, 会错用别的镜头旧片段)
+        _clip = _twx_dir / f"t{_s['t0']:.3f}_{_btag}.mp4"
         # v6.2: lead 自适应 — 源尾不足时缩前导 (层需跨度 = lead/spd + 镜头长)
         _need = (_s["t1"] - _s["t0"]) + 0.03
         for _lead in (0.5, 0.2, 0.05):
@@ -474,7 +554,6 @@ def main():
     # 救援 = 预烘焙恒速源覆盖层 (setpts 到镜头速度) + push 复刻; 源用显式映射
     # (23.96 ← 报告给 27.62 的 Nagi@8.41, 底片未用过), 其余垃圾窗口回落到报告自身分配。
     _luma = _fr.mean(axis=(1, 2))
-    RESCUE_MAP = {23.958: ("D:/AE-Work/resources/video/猫猫（一般）/素材/猫2.mp4", 109.0, 1.1)}
     _rescue_dir = run_dir / "polish" / "rescue_src"
     _rescue_dir.mkdir(parents=True, exist_ok=True)
     _rescue_n = 0
@@ -492,7 +571,7 @@ def main():
         _rsrc, _rsin, _rspd = _hit
         # 文件名编码偏移 — AE 进程常锁住旧片段, 同名覆盖会瞬间失败 (Windows 文件锁,
         # 参见交接 §6.2), 换源后必须换文件名; 失败要暴露, 不许静默复用陈旧片段
-        _rc = _rescue_dir / f"{_i:02d}_{int(round(_rsin * 10))}.mp4"
+        _rc = _rescue_dir / f"{_i:02d}_{int(round(_rsin * 10))}_{_btag}.mp4"
         _prc = _sp2.run(["ffmpeg", "-y", "-ss", f"{_rsin:.3f}",
                          "-t", f"{(_s['t1'] - _s['t0']) * _rspd + 0.2:.3f}", "-i", _rsrc,
                          "-vf", f"setpts=PTS/{_rspd:.4f}", "-c:v", "libx264", "-crf", "16",
