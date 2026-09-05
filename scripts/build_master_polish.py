@@ -148,20 +148,29 @@ def plan_effects(segs):
 
 
 def plan_bursts(plan, strong):
-    """转场冲击层: 强鼓点上的切点 → 顶层 2-4 帧 burst (drop radial / build badtv)"""
+    """转场冲击层: 强鼓点上的切点 → 顶层 2-4 帧 burst (drop radial / build badtv)
+
+    v7.1 减密 (用户反馈: 15s 后连续闪动) — 底片闪帧已由 deflash 减到 ~1/2s,
+    burst 也收紧: 读 tmp/kept_events.json 避开保留闪帧(±0.35s 不叠加),
+    间距 0.8→1.8s, drop cap 12→5 / build 6→3, 让冲击回归乐句重音密度。
+    """
     cuts = [p["t0"] for p in plan if p["t0"] > 0.3]
     on_strong = lambda t: any(abs(t - st) <= 0.080 for st in strong)
+    kept_f = [e["t"] for e in json.loads(
+        (ROOT / "tmp/kept_events.json").read_text(encoding="utf-8")).get("kept", [])]
+    near_kept = lambda t: any(abs(t - k) < 0.35 for k in kept_f)
     bursts = []
-    for zone, cap, rec, dur in (("drop", 12, "burst_radial", 0.15), ("build", 6, "burst_badtv", 0.10)):
+    for zone, cap, gap, rec, dur in (("drop", 5, 1.8, "burst_radial", 0.15),
+                                     ("build", 3, 2.2, "burst_badtv", 0.10)):
         picked = []
         for t in cuts:
             if zone == "drop" and not (12.7 <= t < 27.0):
                 continue
             if zone == "build" and not (0.3 <= t < 12.7):
                 continue
-            if not on_strong(t):
+            if not on_strong(t) or near_kept(t):
                 continue
-            if picked and t - picked[-1] < 0.8:   # 最小间隔防连爆
+            if picked and t - picked[-1] < gap:   # 最小间隔防连爆
                 continue
             picked.append(t)
             if len(picked) >= cap:
