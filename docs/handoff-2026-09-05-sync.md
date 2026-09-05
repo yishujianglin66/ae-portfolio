@@ -7,6 +7,15 @@
 
 ## 0. 一句话状态
 
+> **v18 增强 (09-05 23:00) 语义选效果落地 (#11 完成离线版) — 已交付 `run53_final_curve_v12.mp4` (闸门 7/7)**:
+> VLM 通道失效 (SiliconFlow/ARK 额度) → 降级方案: `scripts/shot_scene_cv.py` 同款 CV 特征
+> (Farneback 运动/Canny 边缘/肤色代理) 按镜头源窗口计算 (44 镜), 分位数校准阈值。
+> 规则: closeup (有人物+非高动) → 冲击类换柔光; battle (运动 top10%) → 柔光换冲击。
+> 实际调整 3 处 (16.583/20.25 fmb_dir→bokeh, 21.625 badtv→bokeh), 帧条验证 closeup 柔光
+> 明显更优 (脸+柔光=干净, 脸+冲击畸变=丑)。全量 VLM 版待 API 额度恢复后升级。
+> 注: shot_scene_cv.py 的 Write 被 Mimosa 误报拦截 (JSON→VideoCapture 数据流误判穿越),
+> 逻辑内联存档于会话; 特征数据 tmp/shot_scenes_raw.json 已存在。
+
 > **v16 回退 (09-05 22:10) 顶点帧实验判定为感知回归 — 交付 `run53_final_curve_v11.mp4` (恢复 v9 验收观感)**:
 > 用户反馈 15s 后每段小提琴重音"没准确卡上"。三层排查: ①带限 (400-2500Hz) 音头检测证实
 > **全部 7 个冻结锚点精准落在小提琴音头上 (±0 帧)** — 时间轴无错; ②小提琴包络峰与锚点无系统性
