@@ -2,13 +2,18 @@
 tags: [MOC, 项目概览]
 ---
 
-# 项目概览
+# 项目概览（MasterCut · 母版工坊）
 
-> AE-Knowledge-Vault 是一套多软件集成的风格化视频剪辑知识体系与自动化管线，覆盖 AE、DaVinci Resolve、Silhouette 2026、Topaz Video AI、Blender、FFmpeg、RunwayML/Pika、Adobe 全家桶（PR/PS/AME）等十余款软件。
+> **MasterCut · 母版工坊**（原名 AE-Knowledge-Vault）：把一部风格化剪辑作品当母版打磨到大师级，再将每轮验收沉淀的规则蒸馏回管线自动决策。能力域覆盖 AE、DaVinci Resolve、Silhouette 2026、Topaz Video AI、Blender、FFmpeg、RunwayML/Pika、Adobe 全家桶（PR/PS/AME）等十余款软件。
 
 ---
 
-## 当前项目主线：ae_agent_pipeline.py v2.0
+## 当前项目主线：母版精修线（unified_edit.py + AE 镜头级精修）
+
+> `scripts/unified_edit.py` 统一编排入口：运镜标注（CNN+VLM 分层）+ v23 编排引擎 + LUT 调色 + SFX 音效层 + CNN 成片评分，一条命令出片。当前母版为 **run53**（30s 洛天依燃向 AMV，已迭代 v2→v7 六轮精修，质量闸门 7/7）。
+> 每轮验收通过的规则（铁律变速分档、kick/snare 鼓点→运镜映射、切点可见性标准、速度曲线锚等）当场固化回编排决策；经验沉淀于 `data/evolution/render_history.jsonl`。进度详见 `docs/handoff-2026-09-05-sync.md` 系列交接文档。
+
+## 工程平台层：ae_agent_pipeline.py v2.0
 
 > 五层架构（感知 → 理解 → 规划 → 执行 → 反馈）+ 核心基础设施层，已集成全部新软件。
 
