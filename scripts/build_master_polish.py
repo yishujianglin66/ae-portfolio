@@ -45,6 +45,10 @@ RECIPES = {
 ENV_DECAY_S = 0.16   # 包络衰减时长 (~3帧@24fps)
 ENV_TAIL = 0.45      # 衰减后保持比例
 
+# Twixtor 连续速度曲线 (2026-09-05 #10): (时长占比, 相对速度)
+# 快进冲入→急减速→冻结在拍点(顶尖慢镜招牌)。梯形积分归一=1 保平均速度不变, 落拍不漂。
+TWX_SPEED_PROFILE = [(0.0, 0.18), (0.55, 0.50), (1.0, 1.05)]
+
 
 def _load_env():
     p = ROOT / "tmp" / "music_envelope.json"
@@ -185,11 +189,34 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
         ps = json.dumps([[p, round(v * dose, 4)] for p, v in r["ps"]],
                         separators=(",", ":"))
         return {"m": r["m"], "ps": json.loads(ps), "env": r["env"]}
+    def _twx_curve(t0, t1, sin, spd):
+        """连续速度曲线关键帧 [[comp_time, speed_pct], ...]
+
+        v7 修复卡点漂移 (用户反馈: 曲线版卡点对不上):
+        ① 相位锚 — startTime=t0-sin/spd 按恒速校准, 曲线版预卷段速度若≠spd,
+          积分模型下起点漂移 sin×(v0/spd-1) (v1 用 123% 开头 → 偏 0.62s)。
+          预卷段写两个恒速 spd 关键帧钉死相位 (对积分/逐点模型都成立)。
+        ② 曲线反转 — 冻结对齐切点 (音乐坠落点画面速停), 向下一拍渐加速放出。
+        """
+        dur = t1 - t0
+        fr = [p[0] for p in TWX_SPEED_PROFILE]
+        rs = [p[1] for p in TWX_SPEED_PROFILE]
+        integ = sum((rs[i] + rs[i + 1]) / 2 * (fr[i + 1] - fr[i])
+                    for i in range(len(fr) - 1))
+        k = spd / integ   # 归一使曲线段平均速度=spd (时长占比梯形积分)
+        t_pre = t0 - sin / spd
+        eps = 1.0 / 24    # 锚末端留 1 帧过渡到曲线首值, 起点误差 <0.2 帧
+        return [[round(t_pre, 3), spd * 100],
+                [round(t0 - eps, 3), spd * 100]] + \
+               [[round(t0 + f * dur, 3), round(r * k * 100, 2)]
+                for f, r in TWX_SPEED_PROFILE]
+
     def _shot_js(s):
         d = {"t0": s["t0"], "t1": s["t1"], "r": [_fx_js(f, s["dose"]) for f in s["fx"]]}
         if "twx" in s:
             d["twx"] = {"src": s["twx"]["src"].replace(chr(92), "/"),
-                        "sin": s["twx"]["sin"], "spd": s["twx"]["spd"], "zp": s["twx"]["zp"]}
+                        "sin": s["twx"]["sin"], "spd": s["twx"]["spd"], "zp": s["twx"]["zp"],
+                        "curve": _twx_curve(s["t0"], s["t1"], s["twx"]["sin"], s["twx"]["spd"])}
         return d
     shots_js = json.dumps([_shot_js(s) for s in plan], separators=(",", ":"))
     bursts_js = json.dumps(
@@ -243,7 +270,10 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
         sc.setValueAtTime(sh.t1, [bs * zoomEnd, bs * zoomEnd]);
         var tfx = ly.property("Effects").addProperty("Twixtor 45");
         tfx.property("Twixtor 45-0004").setValue(1);
-        tfx.property("Twixtor 45-0005").setValue(sh.twx.spd * 100);
+        // v7 连续速度曲线: 预卷恒速锚(钉相位) + 冻结在切点→渐加速放出(平均=spd)
+        for (var c = 0; c < sh.twx.curve.length; c++) {{
+          tfx.property("Twixtor 45-0005").setValueAtTime(sh.twx.curve[c][0], sh.twx.curve[c][1]);
+        }}
         ly.name = "TWX" + i;
       }} else {{
         ly = comp.layers.add(imp);
