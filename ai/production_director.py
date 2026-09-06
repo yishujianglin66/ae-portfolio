@@ -670,6 +670,7 @@ class ProductionDirector:
                     video_sources=video_sources,
                     bgm_path=bgm_path,
                     content=content,
+                    target_duration=target_duration,
                 )
 
             # ── 后处理引导 (P1): 渲染成功后提示超分/补帧入口, 非阻塞, 默认关 ──
@@ -872,7 +873,7 @@ class ProductionDirector:
 
     def _trigger_auto_evolution(
         self, output_path, result, elapsed, target_ip, video_sources, bgm_path,
-        content=None,
+        content=None, target_duration=None,
     ):
         """渲染成功后异步提交 ExecutionRecord 到自进化引擎。
 
@@ -1115,6 +1116,110 @@ class ProductionDirector:
         except Exception as _ot_e:  # noqa: BLE001
             print(f"  鼓点分型跳过({_ot_e})")
 
+        # ── E0-1 鼓点 stem 锚定 (2026-09-05): separate_drums.py 真值优先 ──
+        # 频段启发式把 hihat/切分音也当切点候选（docs/漫剪跟音乐剪辑深度研究
+        # 诊断的锚定粒度缺口）；stem 分离后 kick/snare 来自真实鼓轨，hihat
+        # 天然不存在。anchors.json 缺席时保持原启发式（fail-safe）。
+        # 环境开关 MASTER_NO_DRUM_ANCHORS=1 可强制关闭（A/B 对照组用）。
+        self._drum_anchor_mode = False
+        import os as _os_da
+        # 规则库裁决（E1-1 消费闭环）: cut_anchor 规则退役/翻负 → 自动回退启发式。
+        # 规则库未建立(data/rules/ruleset.jsonl 不存在) → None, 管线自便。
+        _rule_gate = None
+        try:
+            from scripts.rule_registry import cut_anchor_allowed as _caa
+            _rule_gate = _caa()
+        except Exception as _rg_e:  # noqa: BLE001
+            print(f"  [drum-anchor] 规则库不可达({_rg_e.__class__.__name__}), 按未建立处理")
+        if _os_da.environ.get("MASTER_NO_DRUM_ANCHORS") == "1":
+            print("  [drum-anchor] 已通过环境开关强制关闭（对照组模式）")
+        elif _rule_gate is False and _os_da.environ.get("MASTER_ANCHOR_V2") != "1":
+            print("  [drum-anchor] 规则库裁决: cut_anchor 规则非 active → 回退启发式")
+        else:
+            try:
+                import hashlib as _hl
+                from pathlib import Path as _PathA
+                _ak = (_PathA("cache/stems") /
+                       _hl.sha256(_PathA(bgm_path).read_bytes()).hexdigest()[:12] /
+                       "anchors.json")
+                if _ak.exists():
+                    _anch = json.loads(_ak.read_text(encoding="utf-8"))
+                    self._onset_types = {}
+                    self._onset_energy = {}
+                    _strong_anchors = []
+                    self._anchor_events = {"kick": [], "snare": []}
+                    for _kind in ("kick", "snare"):
+                        for _t, _s in _anch.get(f"{_kind}_onsets", []):
+                            _k3 = round(float(_t), 3)
+                            self._onset_types[_k3] = _kind
+                            self._onset_energy[_k3] = float(_s)
+                            self._anchor_events[_kind].append((float(_t), float(_s)))
+                            if float(_s) >= 0.5:
+                                _strong_anchors.append(float(_t))
+                    # 律动层 = 全部 kick/snare 真值（hihat 已被 stem 分离天然排除）
+                    self._groove_onsets = sorted(float(t) for t in self._onset_types)
+                    self._anchor_strong = sorted(_strong_anchors)
+                    self._drum_anchor_mode = True
+                    # E0-1 关键注入: 切点候选池消费方全部升级为 stem 真值。
+                    # （此前只改 _onset_types 时切点层不受影响——第一轮 A/B已证伪：
+                    #   两臂 plan 切点分布完全相同，因为池子仍是笼统 onset）
+                    _drum_times = sorted({float(t) for ev in self._anchor_events.values()
+                                          for t, _ in ev})
+                    # v2 旋律锚 (2026-09-05 用户听感反馈: 高潮段没卡小提琴节奏变换/
+                    # 重音没有适配镜头) — other 声部的攻击音+音变点并入 _onsets
+                    # (脉冲运镜触发源)，并以 stem 真值覆盖 _melody_onsets/_melody_env
+                    # (raw BGM pyin 被低音主导, 音变检出率被压制 51 vs 44)
+                    _mel = [(round(float(t), 3), float(s))
+                            for t, s in _anch.get("melody_onsets", [])]
+                    _drum_times = sorted(set(_drum_times))
+                    # ── R-2026-0002: 事件选择 × 网格相位 (2026-09-06) ──
+                    # R-0001 两次听感否决的教训: 表达性音符(旋律音变/花音)不在
+                    # 节拍网格上, 切点跟事件时间走 → 每个 cut 都"在某声音上"
+                    # 但整体脱离 BPM 相位 → 人耳判"完全不在点上"。
+                    # v2: 全部锚点事件吸附到最近 16 分音符网格位(相位取自拍点),
+                    # 事件只决定哪些网格位是热的; 距网格超过半格的事件丢弃——
+                    # 宁可少切, 不切在格间。MASTER_ANCHOR_V2=1 启用(A/B 实验位)。
+                    _v2 = _os_da.environ.get("MASTER_ANCHOR_V2") == "1"
+                    _qd, _qm = _drum_times, [t for t, _ in _mel]
+                    if _v2 and getattr(self, "_beats", None) and \
+                            len(self._beats) >= 2:
+                        _bpm = 60.0 / max(1e-6, float(self._beats[1].time -
+                                                       self._beats[0].time))
+                        _t0 = float(self._beats[0].time)
+                        _step = 60.0 / max(1e-6, _bpm) / 4.0  # 16 分音符
+                        _half = _step / 2.0
+
+                        def _q(t):
+                            k = round((float(t) - _t0) / _step)
+                            return round(_t0 + k * _step, 3)
+
+                        _qd = sorted({max(0.0, _q(t)) for t in _drum_times
+                                      if abs(float(t) - _q(t)) <= _half})
+                        _qm = sorted({max(0.0, _q(t)) for t, _ in _mel
+                                      if abs(float(t) - _q(t)) <= _half})
+                        print(f"  [anchor-v2] 网格量化: {_step*1000:.0f}ms 格"
+                              f" (BPM {_bpm:.0f}) — 鼓 {len(_drum_times)}→{len(_qd)}, "
+                              f"旋律 {len(_mel)}→{len(_qm)} (格间事件弃用)")
+                    self._onsets = sorted({*_qd, *_qm})
+                    self._onset_types.update({t: "melody" for t in _qm
+                                              if t not in self._onset_types})
+                    for t, s in _mel:
+                        self._onset_energy.setdefault(round(float(t), 3), float(s))
+                    self._melody_onsets = list(_qm)
+                    _menv = _anch.get("melody_env")
+                    if _menv:
+                        self._melody_env = ([float(t) for t, _ in _menv],
+                                            [float(v) for _, v in _menv])
+                    print(f"  [drum-anchor] stems 真值模式: kick/snare 共 "
+                          f"{len(_drum_times)} 个 (强 {len(self._anchor_strong)}), "
+                          f"旋律锚 {len(_mel)} 个, 源={_ak}")
+                    print(f"  [drum-anchor] _onsets 已替换为 鼓锚+旋律锚 "
+                          f"{len(self._onsets)} 个（笼统 onset 退出切点池）")
+                else:
+                    print(f"  [drum-anchor] 无 anchors.json({_ak.name}), 保持频段启发式")
+            except Exception as _da_e:  # noqa: BLE001
+                print(f"  [drum-anchor] 加载失败, 保持启发式: {_da_e}")
+
         # 1.1b+ 拍点吸附真实鼓点 (2026-09-02 根因修复):
         # beat_track 返回的是速度先验下的节拍网格(估计值), 实测切点只有
         # 34% 落在强鼓点±50ms 内, 54% 偏差>120ms (199BPM 曲目 = 整拍错位),
@@ -1135,6 +1240,9 @@ class ProductionDirector:
                 _thresh = _np2.percentile(_strs, 50)
                 _strong = sorted(
                     float(t) for t, s in zip(self._onsets, _strs) if s >= _thresh)
+                # E0-1: 锚点模式下吸附目标升级为 stem 真鼓点（kick/snare 强集）
+                if getattr(self, "_drum_anchor_mode", False) and getattr(self, "_anchor_strong", []):
+                    _strong = list(self._anchor_strong)
                 _snapped = 0
                 for _b in self._beats:
                     if not _strong:
@@ -2148,6 +2256,9 @@ class ProductionDirector:
                 _min_ss = min(2.0, max(0.0, src_dur - seg_dur - 0.5))
                 if source_start < _min_ss:
                     source_start = _min_ss
+                # 死区避让 (2026-09-06 run53 教训: 黑场/水印卡/静帧整段死滞)
+                source_start = self._nudge_to_live_window(
+                    source, source_start, seg_dur)
 
                 # 文字叠加
                 text_overlay = None
@@ -2628,6 +2739,74 @@ class ProductionDirector:
         print(f"  生成 {len(segments)} 个段落, 总时长 {duration:.1f}s")
         return script
 
+    def _rolls_from_anchor_events(self, kick_times, snare_times, bpm):
+        """E0-1: 用 stem 鼓锚重建连击段（与 _load_beatgrid 同款聚类算法）。"""
+        all_drum_times = sorted(set(
+            [round(t, 4) for t in kick_times] + [round(t, 4) for t in snare_times]))
+        rolls = []
+        if len(all_drum_times) < 4:
+            return rolls
+        _roll_start = None
+        _roll_prev = None
+        _bi = 60.0 / max(float(bpm or 120), 60)
+        _roll_thresh = _bi * 0.35
+        for dt in all_drum_times:
+            if _roll_prev is not None and (dt - _roll_prev) < _roll_thresh:
+                if _roll_start is None:
+                    _roll_start = _roll_prev
+            else:
+                if _roll_start is not None and _roll_prev is not None:
+                    _rdur = _roll_prev - _roll_start
+                    if _rdur >= 0.3:
+                        _drum = "kick" if any(
+                            abs(_roll_start - k) < 0.1 for k in kick_times) else "snare"
+                        rolls.append({"start": round(_roll_start, 3),
+                                      "end": round(_roll_prev, 3),
+                                      "drum": _drum, "t": round(_roll_start, 3)})
+                _roll_start = None
+            _roll_prev = dt
+        if _roll_start is not None and _roll_prev is not None:
+            _rdur = _roll_prev - _roll_start
+            if _rdur >= 0.3:
+                _drum = "kick" if any(
+                    abs(_roll_start - k) < 0.1 for k in kick_times) else "snare"
+                rolls.append({"start": round(_roll_start, 3),
+                              "end": round(_roll_prev, 3),
+                              "drum": _drum, "t": round(_roll_start, 3)})
+        return rolls
+
+    def _inject_stem_anchors(self, grid: Dict[str, Any], bgm_path: str) -> Dict[str, Any]:
+        """E0-1 鼓点 stem 锚定: anchors.json 真值覆盖 beatgrid 的 kick/strong/weak/rolls。
+
+        频段 FFT 分离的 kick/snare 是启发式（150Hz/5kHz 割裂 + librosa onset）；
+        stem 分离后的鼓锚来自真实鼓轨。moments/hard_stops 保留原能量分析。
+        anchors.json 缺席或锚点模式关闭时原样返回（fail-safe）。
+        注意: 锚点时间基于 BGM 文件时间轴, 适用于 bgm_start_sec=0 的用法。
+        """
+        if not getattr(self, "_drum_anchor_mode", False):
+            return grid
+        if not grid:
+            return grid
+        try:
+            ev = getattr(self, "_anchor_events", None) or {}
+            kick = sorted({round(t, 4) for t, _ in ev.get("kick", [])})
+            snare = sorted({round(t, 4) for t, _ in ev.get("snare", [])})
+            all_events = {round(t, 4): float(s)
+                          for kind in ("kick", "snare")
+                          for t, s in ev.get(kind, [])}
+            strong = sorted(t for t, s in all_events.items() if s >= 0.5)
+            weak = sorted(t for t, s in all_events.items() if s < 0.5)
+            grid["kick"] = kick
+            grid["strong"] = strong
+            grid["weak"] = weak
+            grid["rolls"] = self._rolls_from_anchor_events(kick, snare, grid.get("bpm"))
+            grid["source"] = "stem_anchors"
+            print(f"      [beatgrid] stem 锚定覆盖: kick={len(kick)} strong={len(strong)} "
+                  f"weak={len(weak)} rolls={len(grid['rolls'])}（频段启发式退出）")
+        except Exception as _ij_e:  # noqa: BLE001
+            print(f"      [beatgrid] stem 锚定注入失败, 保留频段版: {_ij_e}")
+        return grid
+
     def _load_beatgrid(self, bgm_path: str) -> Optional[Dict[str, Any]]:
         """自包含 beatgrid 分析：librosa 频段分离 → 鼓点分类 → 节拍网格。
 
@@ -2651,7 +2830,7 @@ class ProductionDirector:
 
             if os.path.exists(_cache):
                 with open(_cache, encoding="utf-8") as _f:
-                    return json.load(_f)
+                    return self._inject_stem_anchors(json.load(_f), bgm_path)
 
             print(f"      [beatgrid] 分析 BGM: {os.path.basename(bgm_path)}")
             y, sr = librosa.load(bgm_path, sr=22050, mono=True)
@@ -2828,7 +3007,7 @@ class ProductionDirector:
                   f"strong={len(result['strong'])} weak={len(result['weak'])} "
                   f"rolls={len(rolls)} hard_stops={len(hard_stops)} "
                   f"bpm={result.get('bpm')}")
-            return result
+            return self._inject_stem_anchors(result, bgm_path)
 
         except Exception as _e:
             print(f"      [WARN] beatgrid 加载失败(回退onset): {_e}")
@@ -2956,6 +3135,75 @@ class ProductionDirector:
         except Exception as e:
             print(f"      Onset检测失败: {e}")
             return []
+
+    def _nudge_to_live_window(self, source, offset, seg_dur,
+                              max_scan=4.0, step=0.4):
+        """死区避让 (2026-09-06 run53 教训): 窗口为黑场/水印卡/静帧时, 就近扫描活窗。
+
+        活窗判据 (与 build_master_polish._win_ok 同口径):
+        亮度 18-225 / 平均运动 ≥0.2 (纯静帧拒绝) / 窗内无硬切 (MAD≤40)。
+        实现: 一次连续解码 [offset-max_scan, offset+max_scan] (规避逐候选 -ss
+        寻址在 VFR 素材上的落点漂移), 在流内按帧索引评估候选。
+        找不到活窗时原样返回 (调用方无需处理)。
+        """
+        try:
+            import subprocess as _s
+            import numpy as _np
+            # 源 fps 探测 (run53 教训: 60fps 素材按 24 映射, 时间标签错 2.5 倍)
+            _pr = _s.run(["ffprobe", "-v", "error", "-show_entries", "stream=r_frame_rate",
+                          "-of", "csv=p=0", source], capture_output=True, text=True, timeout=30)
+            _rr = _pr.stdout.strip().splitlines()[0].split(",")[0]
+            _fn, _fd = _rr.split("/")
+            _fps = float(_fn) / float(_fd) if float(_fd) else 24.0
+            _d0 = max(0.0, offset - max_scan)
+            _r = _s.run(["ffmpeg", "-v", "error", "-ss", f"{_d0:.3f}",
+                         "-t", f"{(offset - _d0) + max_scan + seg_dur + 0.2:.3f}",
+                         "-i", source, "-vf", f"scale=160:90,fps={_fps:.0f}", "-f", "rawvideo",
+                         "-pix_fmt", "gray", "-"], capture_output=True, timeout=120)
+            _n = len(_r.stdout) // (160 * 90)
+            if _n < 8:
+                return offset
+            _fr = _np.frombuffer(_r.stdout[:_n * 160 * 90],
+                                 dtype=_np.uint8).reshape(_n, 90, 160).astype(_np.float32)
+            _mo = _np.array([0.0] + [float(np.abs(_fr[i] - _fr[i - 1]).mean())
+                                     for i in range(1, _n)])
+            # 候选起点: 以 step 为步距, 每个候选占 seg_dur 的帧窗
+            _cands = []
+            _k = 0
+            while True:
+                _c = offset - max_scan + _k * step
+                if _c > offset + max_scan:
+                    break
+                if _c >= 0.1:
+                    _cands.append(_c)
+                _k += 1
+            if not _cands:
+                return offset
+
+            def _win_dead(c):
+                _i0 = int(round((c - _d0) * _fps))
+                _i1 = min(_n - 1, _i0 + int(round(seg_dur * _fps)))
+                if _i1 - _i0 < 2:
+                    return True
+                _seg_m = _mo[_i0:_i1 + 1]
+                _lm = _fr[_i0:_i1 + 1].mean(axis=(1, 2))
+                if _lm.min() < 18 or _lm.max() > 235:
+                    return True   # 黑场/过曝
+                if float(_seg_m.mean()) < 0.2 or float(_seg_m.max()) > 40:
+                    return True   # 纯静帧/含硬切
+                return False
+
+            _live = [c for c in _cands if not _win_dead(c)]
+            if not _live:
+                return offset
+            _best = min(_live, key=lambda c: abs(c - offset))
+            if abs(_best - offset) < step * 0.5:
+                return offset   # 原窗口已活
+            print(f"    [死区避让] {os.path.basename(source)[-16:]} "
+                  f"{offset:.2f} → {_best:.2f}")
+            return round(_best, 3)
+        except Exception:
+            return offset
 
     def _enforce_global_source_uniqueness(self, segments, gap=0.5,
                                           max_share=0.25):
@@ -3610,6 +3858,35 @@ class ProductionDirector:
                                                   else "zoom_out")
                         break
 
+        # ══ 重音强调 pass v2 (2026-09-06 v9 语法汲取: 停顿=短镜快吸) ════
+        # v9 20-30s 逐镜拆解结论: 0.55 停顿必须是 0.17-0.33s 短镜(快速吸气,
+        # 读作"顿挫"); 套在 0.4-0.6s 长镜上 = 拖泥带水(run59 教训)。镜头语言
+        # 统一 push(v9 35/37)。节奏: 每 ~2s 一次 dip, 尾部允许三连慢收。
+        try:
+            _acc = sorted(getattr(self, "_anchor_strong", []) or [])
+            _acc_used, _acc_last = 0, -10.0
+            for _s in segs:
+                _st = float(_s.start_time)
+                _en = _st + float(_s.duration)
+                if not (14.5 <= _st <= 30.0) or _st - _acc_last < 1.2:
+                    continue
+                if float(_s.duration) > 0.33:   # v9 语法: 停顿=短镜, 长镜慢放=拖
+                    continue
+                _hit = next((a for a in _acc
+                             if _st + 0.02 <= a <= _en - 0.02), None)
+                if _hit is None:
+                    continue
+                _s.speed = 0.55
+                _s.zoompan_effect = "push"
+                _acc_used += 1
+                _acc_last = _st
+                if _acc_used >= 9:
+                    break
+            print(f"  [重音强调 v2] {_acc_used} 处短镜 0.55 dip "
+                  f"(v9 语法: 停顿=短吸, push 统一)")
+        except Exception as _ac_e:  # noqa: BLE001
+            print(f"  [重音强调] 跳过: {_ac_e}")
+
         # ══ 速度终审 (2026-09-03, 与运镜克隆终审同款根治) ═══════════════
         # 规划层存在多副本速度赋值(第四次发现), 30.75s+ 段的 0.5 来自未收口
         # 的旧副本。解法同运镜: 渲染前用验证公式统一覆写, 单一权威源。
@@ -3697,8 +3974,12 @@ class ProductionDirector:
 
         def _probe_dur(p) -> float:
             try:
+                _ffp = getattr(self, "_ffprobe_bin", None)
+                if not _ffp:
+                    _ffp = shutil.which("ffprobe") or str(Path(self.ffmpeg).with_name("ffprobe.exe"))
+                    self._ffprobe_bin = _ffp
                 _r = subprocess.run(
-                    [FFPROBE, "-v", "quiet", "-show_entries", "format=duration",
+                    [_ffp, "-v", "quiet", "-show_entries", "format=duration",
                      "-of", "csv=p=0", str(p)],
                     capture_output=True, text=True, timeout=30)
                 return float(_r.stdout.strip())
@@ -3732,6 +4013,26 @@ class ProductionDirector:
             # ══ 镜内变速曲线 (2026-09-03 外网变速卡点核心) ══════════════
             # 调研结论: 全管线速度只有每镜常数; 参考片逆向(09-计划文件
             # 2026-08-11)实测"大量非匀速、缓动曲线、慢放不插帧"。Xenoz 要领
+            # 撞击帧决策 (2026-09-03): 起始踩律动层强鼓点的镜头 → 头2帧闪,
+            # 白黑轮换, 每3个锚点留1个不闪(呼吸, 防闪帧疲劳)
+            # (2026-09-05 上移至段循环开头: 曲线变速子段与恒速路径共用,
+            #  修复曲线子段引用未定义变量导致的 NameError 静默回退)
+            _flash_c, _trans_c = "", ""
+            _st_seg = float(seg.start_time)
+            # 最近律动鼓点分型: kick→白黑闪 / snare→RGB故障 / 其余不处理
+            _ntype, _nd = None, 0.06
+            for _tk, _tv in (getattr(self, "_onset_types", {}) or {}).items():
+                _td = abs(_tk - _st_seg)
+                if _td < _nd:
+                    _nd, _ntype = _td, _tv
+            if _ntype == "kick":
+                self._flash_alt = getattr(self, "_flash_alt", 0) + 1
+                if self._flash_alt % 3 != 0:
+                    _flash_c = ("white" if self._flash_alt % 2 == 0 else "black")
+            elif _ntype == "snare":
+                self._glitch_alt = getattr(self, "_glitch_alt", 0) + 1
+                if self._glitch_alt % 2 == 0:  # 半数 snare 故障, 防过密
+                    _trans_c = "glitch"
             # "极陡缓入缓出、几乎无匀速段"。实现: 每镜拆 2-3 个匀速子段拼出
             # 速度包络, 复用 -frames:v 精确帧数 + concat(同编码无接缝),
             # 曲线均值=seg.speed 保证节拍跨度不变。
@@ -3799,24 +4100,7 @@ class ProductionDirector:
                 if _ok_all:
                     continue
                 # 曲线渲染失败 → 落到下方单段恒速回退
-            # 撞击帧决策 (2026-09-03): 起始踩律动层强鼓点的镜头 → 头2帧闪,
-            # 白黑轮换, 每3个锚点留1个不闪(呼吸, 防闪帧疲劳)
-            _flash_c, _trans_c = "", ""
-            _st_seg = float(seg.start_time)
-            # 最近律动鼓点分型: kick→白黑闪 / snare→RGB故障 / 其余不处理
-            _ntype, _nd = None, 0.06
-            for _tk, _tv in (getattr(self, "_onset_types", {}) or {}).items():
-                _td = abs(_tk - _st_seg)
-                if _td < _nd:
-                    _nd, _ntype = _td, _tv
-            if _ntype == "kick":
-                self._flash_alt = getattr(self, "_flash_alt", 0) + 1
-                if self._flash_alt % 3 != 0:
-                    _flash_c = ("white" if self._flash_alt % 2 == 0 else "black")
-            elif _ntype == "snare":
-                self._glitch_alt = getattr(self, "_glitch_alt", 0) + 1
-                if self._glitch_alt % 2 == 0:  # 半数 snare 故障, 防过密
-                    _trans_c = "glitch"
+            # (撞击帧决策已上移至段循环开头, 此处直接使用 _flash_c/_trans_c)
             if True:
                 ok = self._extract_clip(
                     source=seg.source_file,
