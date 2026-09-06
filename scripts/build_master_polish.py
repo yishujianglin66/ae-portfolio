@@ -415,15 +415,16 @@ def plan_effects(segs, run_dir=None, tag=None):
         if _n_rep:
             plan.sort(key=lambda e: e["t0"])
         print(f"源多样化替换 (v19): {_n_rep} 处 ← {[b[-10:] for b in _over]}")
-    # v22: 逐镜调色 — 段落情绪 → 微量二级色调 (全局 LUT 之上)。
-    # 高潮段暖 (红+蓝-) / 蓄力段冷 (蓝+红-) / 引子与尾声中性。值刻意轻微 (≤6)。
-    for e in plan:
-        _seg = next((s for s in segs if abs(round(float(s["start_time"]), 3) - round(e["t0"], 3)) < 0.05), None)
-        _mood = (_seg or {}).get("mood", "build")
-        if _mood == "drop":
-            e["grade"] = {"r": 6, "b": -6}      # 高潮暖
-        elif _mood == "build":
-            e["grade"] = {"r": -4, "b": 5}      # 蓄力冷
+    # v22 情绪调色 — 默认关闭 (参照集实测: 顶尖漫剪整体冷暖中性 ±11, 不做全局段落
+    # 冷暖偏移; 真语法 = 高对比+高饱和+冷阴影, 由分段调整层实现)。复开: AEKV_GRADE=1
+    if os.environ.get("AEKV_GRADE", "0") == "1":
+        for e in plan:
+            _seg = next((s for s in segs if abs(round(float(s["start_time"]), 3) - round(e["t0"], 3)) < 0.05), None)
+            _mood = (_seg or {}).get("mood", "build")
+            if _mood == "drop":
+                e["grade"] = {"r": 6, "b": -6}      # 高潮暖
+            elif _mood == "build":
+                e["grade"] = {"r": -4, "b": 5}      # 蓄力冷
     return plan
 
 
@@ -630,6 +631,22 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
       for (var j = 0; j < sh.r.length; j++) applyFx(ly, sh.r[j], sh.t0);
     }}
     var bursts = {bursts_js};
+    // v23 分段调色调整层 (参照集实测语法: 高对比 151 + 高饱和 99.6 + 冷阴影):
+    var sections = [
+      {{t0: 3.3,  t1: 12.7, bc: 30, vib: -35}},
+      {{t0: 12.7, t1: 27.0, bc: 12, vib: 25}}
+    ];
+    for (var gi = 0; gi < sections.length; gi++) {{
+      var gs = sections[gi];
+      var sol = comp.layers.addSolid([0.5, 0.5, 0.5], "GRADE" + gi, comp.width, comp.height, 1.0);
+      sol.adjustmentLayer = true;
+      sol.inPoint = gs.t0; sol.outPoint = gs.t1;
+      sol.moveToBeginning();
+      var bc = sol.property("Effects").addProperty("ADBE Brightness & Contrast");
+      bc.property(2).setValue(gs.bc);
+      var vb = sol.property("Effects").addProperty("ADBE Vibrance");
+      vb.property(1).setValue(gs.vib);
+    }}
     for (var b = 0; b < bursts.length; b++) {{
       var bu = bursts[b];
       var bl = comp.layers.add(imp);
@@ -862,6 +879,23 @@ def main():
                   f"{_prc.stderr.decode(errors='replace')[-160:]}")
     print(f"垃圾窗口救援 (rescue): {_rescue_n} → "
           f"{[round(s['t0'], 2) for s in plan if 'rescue' in s]}")
+    # v24: flat 替换层 → setpts 预烘焙转换 — 平速重定时不需要 Twixtor 光流
+    # (Twixtor 对部分新素材确定性崩溃 @1.4s)。clip 已按镜头速度重定时,
+    # 层 startTime 回退 lead/spd 使 t0 对齐源 sin。
+    for _s3 in plan:
+        _tw = _s3.get("twx")
+        if not _tw or _tw.get("anchor_mode") != "flat":
+            continue
+        _lead = float(_tw.get("sin", 0.2))
+        _spd3 = float(_tw.get("spd", 1.0))
+        _c2 = _rescue_dir / f"c{_s3['t0']:.3f}.mp4"
+        _sp2.run(["ffmpeg", "-y", "-i", _tw["src"], "-vf",
+                  f"setpts=PTS/{_spd3:.4f}", "-c:v", "libx264", "-crf", "16",
+                  "-an", str(_c2)], capture_output=True, timeout=300)
+        if _c2.exists() and _c2.stat().st_size > 0:
+            _s3["rescue"] = {"src": str(_c2).replace(chr(92), "/"), "push": 1.09,
+                             "st": round(_s3["t0"] - _lead / _spd3, 4)}
+            del _s3["twx"]
     from collections import Counter
     cnt = Counter(f for s in plan for f in s["fx"])
     print(f"镜头效果: {len(plan)}/{len(segs)} ({len(plan)/len(segs):.0%})")
