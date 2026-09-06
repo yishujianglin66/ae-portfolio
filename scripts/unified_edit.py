@@ -44,6 +44,7 @@ DEFAULT_SOURCES = [
     r"D:\AE-Work\resources\video\美人鱼（较难）\素材\alya-twix.mp4",
     r"D:\AE-Work\resources\video\美人鱼（较难）\素材\alya-twixtor04.mp4",
     r"D:\AE-Work\resources\video\五条悟（一般）\素材\五条悟第二季2.mp4",
+    r"D:/AE-Work/resources/video/蓝色监狱（量多）/素材/v0300fg10000cr7mf77og65lhrmfrv5g.MP4",
 ]
 DEFAULT_BGM = r"D:\AE-Work\音频素材库\BGM\独自升级.mp3"
 
