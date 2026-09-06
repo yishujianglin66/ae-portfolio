@@ -378,6 +378,7 @@ class AEAgentPipeline:
             return
 
         from core.event_bus import EventCategory
+        from core.observability import increment_counter, record_histogram
 
         @self._event_bus.subscribe(event_category=EventCategory.PIPELINE, event_type="pipeline.start")
         def on_pipeline_start(event):

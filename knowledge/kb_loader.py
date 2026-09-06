@@ -58,13 +58,13 @@ class Evidence:
         return "WEAK"
 
 
-_PROJECT_ROOT = Path(__file__).resolve().parent
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent  # 仓库根（本文件位于 knowledge/ 子目录）
 KB_ROOT = _PROJECT_ROOT / "10-风格化剪辑知识库"
 KB_ROOTS = [
     _PROJECT_ROOT / "10-风格化剪辑知识库",
     _PROJECT_ROOT / "11-大师知识库",
     _PROJECT_ROOT / "12-漫剪拉镜大师",
-    _PROJECT_ROOT / "14-Silhouette 知识库",
+    _PROJECT_ROOT / "14-Silhouette知识库",
     _PROJECT_ROOT / "15-3D模型与骨骼动画知识库",
     _PROJECT_ROOT / "13-素材获取与搜索",
 ]
@@ -156,11 +156,13 @@ class KBLoader:
         print("开始知识库解析...")
         start = time.time()
 
-        # 扫描所有知识库目录
+        # 扫描所有知识库目录（fail-loud：不存在的根显式告警，禁止静默跳过）
         files = []
         for kb_root in KB_ROOTS:
             if kb_root.exists():
                 files.extend(sorted(glob.glob(str(kb_root / "**" / "*.md"), recursive=True)))
+            else:
+                print(f"[kb_loader] 警告: 知识库根不存在，已跳过 -> {kb_root}")
         self._stats["total_files"] = len(files)
         self._stats["kb_roots"] = [r.name for r in KB_ROOTS if r.exists()]
 

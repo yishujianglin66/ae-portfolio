@@ -1,0 +1,5 @@
+outs:
+- md5: 8e3b967fd84f1de0d3f79e1a25fbfa11
+  size: 13843
+  hash: md5
+  path: material_manifest.json

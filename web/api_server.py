@@ -1817,7 +1817,7 @@ async def add_history(
     _history_store.append(record)
 
     if len(_history_store) > 500:
-        _history_store = _history_store[-500:]
+        _history_store[:] = _history_store[-500:]
 
     return record
 

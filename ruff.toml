@@ -1,0 +1,55 @@
+# ruff 基线配置（E0-5b，2026-09-05）
+# 策略：先只拦截"代码根本跑不了"级别的问题（语法错误/未定义名称），
+#       让闸门即刻可用且绿色；后续按模块逐步收紧规则（E1-6）。
+target-version = "py311"
+line-length = 120
+extend-exclude = [
+    "external",
+    "openspec",
+    "tmp",
+    "test_output_opensource",
+    ".workbuddy",
+]
+
+[lint]
+select = [
+    "E9",   # 语法错误
+    "F7",   # 语法错误 in 断言
+    "F63",  # 无效比较/赋值
+    "F82",  # 未定义名称
+    "F821", # 未定义名称（显式）
+    "F823", # 局部变量在赋值前被引用
+]
+
+[lint.per-file-ignores]
+# vendored / 历史脚本不设限
+"archive/**" = ["E9", "F7", "F63", "F82", "F821", "F823"]
+"mcp-extension/**" = ["E9", "F7", "F63", "F82", "F821", "F823"]
+
+# ── E0-5b 遗留基线豁免（2026-09-05 实测清点，共 60 处）──
+# 原则：这些是"本来就跑不了/跑不到"的遗留与半成品；E1-6 逐文件修复后从本表移除。
+# 语法级损坏（invalid-syntax）优先修；数字为当日错误计数，修复后应递减归零并除名。
+"tests/test_audio_edit_engine.py" = ["E9", "F7", "F63", "F82", "F821", "F823"]      # 9
+"scripts/cleanlab_label_audit.py" = ["E9", "F7", "F63", "F82", "F821", "F823"]      # 8
+"puppet-automation/src/engines/premiere/pr_bridge_client.py" = ["F821", "F823"]      # 6
+"tests/test_video_generator.py" = ["F821"]                                          # 4
+"scripts/m2_auto_iterate.py" = ["E9", "F7", "F63", "F82", "F821", "F823"]           # 4
+"dev_scripts/test_video_generator.py" = ["F821"]                                    # 4
+"puppet-automation/src/engines/blender/engine.py" = ["F821", "F823"]                # 3
+"tests/phase3_showcase_render.py" = ["E9", "F7", "F63", "F82", "F821", "F823"]      # 2
+"scripts/eval_flow_vs_vlm.py" = ["F821"]                                            # 2
+"scripts/analyze_review_consistency.py" = ["F821"]                                  # 2
+"puppet-automation/src/api/main.py" = ["F821"]                                      # 2
+"ai/t36b_check_aria2.py" = ["E9", "F7", "F63", "F82", "F821", "F823"]               # 2
+"web/api_server.py" = ["F821"]                                                      # 1
+"tools/toolchain_api.py" = ["F821"]                                                 # 1
+"scripts/deploy_ae_mcp_bridge.py" = ["F821"]                                        # 1
+"puppet-automation/src/services/layer_render_service.py" = ["F821"]                 # 1
+"puppet-automation/src/engines/blender/puppeteer/engine.py" = ["F821"]              # 1
+"pipeline/adaptive_fallback.py" = ["F821"]                                          # 1
+"models/train_movieshots_camera.py" = ["F821"]                                      # 1
+"media/asset_manager.py" = ["F821"]                                                 # 1
+"core/text_animation_engine.py" = ["F821"]                                          # 1
+"core/experience_harvester.py" = ["F821"]                                           # 1
+"api_server.py" = ["F821"]                                                          # 1
+"api/toolchain_api.py" = ["F821"]                                                   # 1

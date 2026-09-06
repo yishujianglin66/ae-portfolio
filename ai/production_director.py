@@ -3165,7 +3165,7 @@ class ProductionDirector:
                 return offset
             _fr = _np.frombuffer(_r.stdout[:_n * 160 * 90],
                                  dtype=_np.uint8).reshape(_n, 90, 160).astype(_np.float32)
-            _mo = _np.array([0.0] + [float(np.abs(_fr[i] - _fr[i - 1]).mean())
+            _mo = _np.array([0.0] + [float(_np.abs(_fr[i] - _fr[i - 1]).mean())
                                      for i in range(1, _n)])
             # 候选起点: 以 step 为步距, 每个候选占 seg_dur 的帧窗
             _cands = []
@@ -3206,14 +3206,15 @@ class ProductionDirector:
             return offset
 
     def _enforce_global_source_uniqueness(self, segments, gap=0.5,
-                                          max_share=0.25):
+                                          max_share=0.08):
         """全局同片段去重 + 单文件占比封顶 (2026-09-04 洛天依/同源重复修复)。
 
         整场范围内的兜底约束, 不依赖源选择路径的局部去重:
         1. 同一 (file, source_start 相距<=gap) 全片只保留一次; 冲突时先在原文件
            内找一个距所有已用点>=0.6s 的新起点, 找不到才换源。
-        2. 单文件镜头占比封顶 max_share (7 源填 116 镜时 独自升级5 曾达 30%),
-           超限镜头换到使用最少的其它源, 缓解"同一角色反复出现"。
+        2. 单文件镜头占比封顶 max_share (run53 教训 2026-09-06: 0.25 时独自升级5
+           19 镜吃干 5.7s 源整段切碎撒全片 → 重复出境; 收紧 0.08 ≈ 每源 ≤9)。
+           换源目标 = 使用最少的源 (多源全满时也强制分散, 不拒绝)。
         原地修改 segments (只改 source_file / source_start), 返回 segments。
         确定性: 无随机, 可复现。
         """
@@ -3269,7 +3270,7 @@ class ProductionDirector:
             # 换源: 使用最少 + 未超限 + 时长足够的文件, 取新鲜起点
             swapped = False
             for cand in sorted(all_src, key=lambda x: (counts[x],)):
-                if cand == f or counts[cand] >= max_per_file:
+                if cand == f:
                     continue
                 if dur_of.get(cand, 60.0) > win:
                     ss = fresh_start(cand, win, 0.6)
@@ -4027,7 +4028,11 @@ class ProductionDirector:
                     _nd, _ntype = _td, _tv
             if _ntype == "kick":
                 self._flash_alt = getattr(self, "_flash_alt", 0) + 1
-                if self._flash_alt % 3 != 0:
+                # cut_visibility 冲刺 (2026-09-06): drop 段 kick 闪白覆盖 2/3→3/3
+                # (参照集 0.955 vs 我方 0.87 的最后一档=切点帧冲击; build 段保留
+                #  1/3 呼吸跳过防闪帧疲劳)
+                _in_drop = _st_seg >= 14.5
+                if _in_drop or self._flash_alt % 3 != 0:
                     _flash_c = ("white" if self._flash_alt % 2 == 0 else "black")
             elif _ntype == "snare":
                 self._glitch_alt = getattr(self, "_glitch_alt", 0) + 1

@@ -67,7 +67,8 @@ def main() -> int:
         cm[r["original_label"]][r["reviewed_label"]] += 1
     print("\n=== 2. 混淆矩阵 (行=VLM, 列=LK) ===")
     order = sorted(set(vlm_dist) | set(flow_dist))
-    print(f"{'VLM\\LK':<12} " + " ".join(f"{l:>12}" for l in order))
+    _col = "VLM\LK"
+    print(f"{_col:<12} " + " ".join(f"{l:>12}" for l in order))
     for a in sorted(cm):
         row_str = " ".join(f"{cm[a].get(b, 0):>12}" for b in order)
         print(f"{a:<12} {row_str}")

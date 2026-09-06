@@ -677,7 +677,10 @@ def _load_knowledge_base():
     try:
         import sys
         sys.path.insert(0, str(__file__).rsplit("\\", 2)[0])
-        from kb_loader import KBLoader
+        try:
+            from knowledge.kb_loader import KBLoader
+        except ImportError:
+            from kb_loader import KBLoader
         loader = KBLoader()
         kb_effect_map = loader.get_effect_map()
 

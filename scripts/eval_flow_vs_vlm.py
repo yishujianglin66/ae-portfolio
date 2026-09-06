@@ -120,7 +120,8 @@ def main() -> int:
     print("\n混淆矩阵 (行=VLM, 列=光流):")
     order = sorted(set(r["vlm_label"] for r in results)
                    | set(r["flow_label"] for r in results))
-    print(f"{'VLM\\FLOW':<10} " + " ".join(f"{l:>10}" for l in order))
+    _col = "VLM\FLOW"
+    print(f"{_col:<10} " + " ".join(f"{l:>10}" for l in order))
     per_class: Dict[str, Any] = {}
     for a in order:
         row = cm[a]

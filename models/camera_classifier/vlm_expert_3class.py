@@ -206,12 +206,24 @@ class VLMExpertModel:
             device_map='cuda',
         )
     
-    def extract_frames(self, video_path, n_frames=8):
-        """Extract evenly spaced frames from video"""
+    def extract_frames(self, video_path, n_frames=8, max_side=512):
+        """Extract evenly spaced frames from video.
+
+        E0-1 OOM 修复 (2026-09-05): 4K 源帧不缩放直进 Qwen 处理器时,
+        视觉 token 网格爆炸(单帧 ~10k token × 8 帧 → 单次 12.21GiB 激活
+        分配, 8GB 卡必 OOM → 全部素材降级光流)。统一限边 max_side。
+        """
         cap = cv2.VideoCapture(str(video_path))
         if not cap.isOpened():
             raise ValueError(f"Cannot open video: {video_path}")
-        
+
+        def _fit(frame):
+            h, w = frame.shape[:2]
+            scale = max_side / max(h, w)
+            if scale < 1.0:
+                frame = cv2.resize(frame, (int(w * scale), int(h * scale)))
+            return frame
+
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         if total_frames < n_frames:
             frames = []
@@ -219,12 +231,12 @@ class VLMExpertModel:
                 ret, frame = cap.read()
                 if not ret:
                     break
-                frames.append(frame)
+                frames.append(_fit(frame))
             while len(frames) < n_frames:
                 frames.append(frames[-1])
             cap.release()
             return frames[:n_frames]
-        
+
         indices = np.linspace(0, total_frames - 1, n_frames, dtype=int)
         frames = []
         for idx in indices:
@@ -232,13 +244,13 @@ class VLMExpertModel:
             ret, frame = cap.read()
             if not ret:
                 break
-            frames.append(frame)
-        
+            frames.append(_fit(frame))
+
         cap.release()
-        
+
         while len(frames) < n_frames:
             frames.append(frames[-1])
-        
+
         return frames
     
     def classify_motion(self, video_path, prompt=None):

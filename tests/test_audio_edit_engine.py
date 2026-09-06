@@ -689,7 +689,7 @@ class TestAudioAnalyzerNormalization:
                 "segments": [
                     {"segment_type": "intro"},
                     {"segment_type": "verse"},
-                    "segment_type": "chorus"},
+                    {"segment_type": "chorus"},
                 ],
             }
         }

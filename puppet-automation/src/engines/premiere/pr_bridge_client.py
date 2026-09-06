@@ -313,7 +313,7 @@ class PRBridgeClient:
         suppress_ui: bool = True,
     ) -> dict[str, Any]:
         """导入素材文件到项目。"""
-        paths_js = ", ".join(f'"{p.replace("\\", "\\\\")}"' for p in file_paths)
+        paths_js = ", ".join('"' + p.replace("\\", "\\\\") + '"' for p in file_paths)
         suppress = "true" if suppress_ui else "false"
 
         if target_bin:
