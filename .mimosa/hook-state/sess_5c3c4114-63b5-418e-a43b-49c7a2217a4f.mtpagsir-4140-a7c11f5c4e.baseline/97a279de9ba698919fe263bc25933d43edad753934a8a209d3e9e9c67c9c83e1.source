@@ -1,0 +1,45 @@
+"""E0-3 修复后验证：知识库重扫 + KB14 覆盖 + 检索冒烟（闸门2 首行证据）"""
+import sys, json, time
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+ROOTS = ["10-风格化剪辑知识库", "11-大师知识库", "12-漫剪拉镜大师",
+         "14-Silhouette知识库", "15-3D模型与骨骼动画知识库", "13-素材获取与搜索"]
+repo = Path(__file__).resolve().parents[3]
+print("=== 磁盘实况（每库 md 文件数）===")
+disk_counts = {}
+for r in ROOTS:
+    n = len(list((repo / r).rglob("*.md")))
+    disk_counts[r] = n
+    print(f"  {r}: {n}")
+total_disk = sum(disk_counts.values())
+print(f"  合计: {total_disk}")
+
+print("\n=== 实例化 KBLoader（触发重扫）===")
+t0 = time.time()
+from knowledge.kb_loader import KBLoader
+loader = KBLoader()
+print(f"加载耗时 {time.time()-t0:.1f}s")
+stats = loader.get_stats()
+print("stats:", json.dumps(stats, ensure_ascii=False))
+json.dump({"disk_counts": disk_counts, "loader_stats": stats},
+          open(Path(__file__).parent / "after_rescan_stats.json", "w", encoding="utf-8"),
+          ensure_ascii=False, indent=2)
+
+print("\n=== KB14 覆盖验证（content_index 中 14-Silhouette 来源块数）===")
+kb14_chunks = [c for c in loader._content_index if "14-Silhouette" in str(c.get("filepath", ""))]
+print(f"KB14 来源正文块: {len(kb14_chunks)}")
+if kb14_chunks:
+    print("示例:", kb14_chunks[0]["title"], "<-", kb14_chunks[0]["source"])
+
+print("\n=== KB14 内容检索冒烟（Roto 遮罩）===")
+for r in loader.search("roto 遮罩", top_k=3):
+    print(f"  [{r['type']}] {r.get('title') or r.get('keyword')} (score={r['score']}, source={r.get('source','')})")
+
+print("\n=== llm_gateway 知识注入冒烟（修复前恒为空）===")
+ctx = loader.get_context_for_llm("effect_planning", "抠像 roto 轮廓")
+print(ctx[:400] if ctx else "（仍为空！修复未生效）")
+
+assert total_disk > 0 and stats.get("total_files", 0) == total_disk, "收录数与磁盘不符"
+assert len(kb14_chunks) > 0, "KB14 内容块为 0，覆盖失败"
+print("\nPASS: 全部知识库根收录，KB14 已可检索")

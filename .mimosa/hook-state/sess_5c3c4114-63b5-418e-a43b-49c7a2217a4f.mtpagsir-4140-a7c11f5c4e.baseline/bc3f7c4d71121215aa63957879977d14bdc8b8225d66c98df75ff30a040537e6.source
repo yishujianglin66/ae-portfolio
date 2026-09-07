@@ -1,0 +1,107 @@
+"""post_freeze.py — 渲染后冻结帧插入（重音停顿感，v9 定格的后期回归）。
+
+在已渲染的 master.mp4 上，于强锚（鼓/旋律 strength≥0.55）处插入 0.12s
+动作顶点冻结帧——AE 里做要 40 小时（Twixtor 重定时病态），后期做只要 2 分钟。
+处理顺序：按时间倒序逐段切割+插入，使前面的时间戳永不移位。
+
+用法: python tmp/post_freeze.py
+产物: output/unified_run57/polish/master_freeze.mp4
+"""
+import json
+import subprocess
+from pathlib import Path
+
+ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")
+FF = r"C:\ffmpeg\bin\ffmpeg.exe"
+FP = r"C:\ffmpeg\bin\ffprobe.exe"
+SRC = ROOT / "output" / "unified_run57" / "polish" / "master.mp4"
+OUT = ROOT / "output" / "unified_run57" / "polish" / "master_freeze.mp4"
+ANCHORS = ROOT / "cache" / "stems" / "9e00915a2a31" / "anchors.json"
+FREEZE_DUR = 0.12   # 每个重音定格 0.12s（~3 帧 @24fps）
+WINDOW = (12.8, 30.0)
+STRENGTH_MIN = 0.55
+
+
+def dur(path):
+    r = subprocess.run([FP, "-v", "error", "-show_entries", "format=duration",
+                        "-of", "csv=p=0", str(path)], capture_output=True, text=True)
+    return float(r.stdout.strip())
+
+
+def extract_frame(t, out_png):
+    subprocess.run([FF, "-y", "-ss", f"{t:.3f}", "-i", str(SRC), "-frames:v", "1",
+                    str(out_png)], capture_output=True, timeout=60)
+
+
+def main() -> int:
+    a = json.loads(ANCHORS.read_text(encoding="utf-8"))
+    strong = sorted({round(float(t), 3) for k in ("kick", "snare", "melody")
+                     for t, s in a.get(f"{k}_onsets", [])
+                     if float(s) >= STRENGTH_MIN and WINDOW[0] <= float(t) <= WINDOW[1]})
+    # 过近的重音合并（间隔 <0.5s 只保留第一个，避免冻结连成一片）
+    merged = []
+    for t in strong:
+        if not merged or t - merged[-1] >= 0.5:
+            merged.append(t)
+    total = dur(SRC)
+    merged = [t for t in merged if t + FREEZE_DUR < total - 0.2]
+    print(f"冻结点 {len(merged)} 个: {merged}")
+
+    tmp = ROOT / "tmp" / "freeze_segs"
+    tmp.mkdir(parents=True, exist_ok=True)
+    for f in tmp.glob("seg_*.mp4"):
+        f.unlink()
+    # 倒序处理: 每个冻结点把 [t, 视频尾] 段切出并前置 0.12s 冻结帧,
+    # 使后续（更早的）切点时间不受影响。
+    segs = []
+    prev_end = total
+    for idx, t in enumerate(reversed(merged)):
+        seg_a = tmp / f"seg_a{idx:02d}.mp4"
+        r = subprocess.run([FF, "-y", "-ss", f"{t + FREEZE_DUR:.3f}", "-i", str(SRC),
+                            "-c", "copy", str(seg_a)], capture_output=True, timeout=300)
+        seg_b = tmp / f"seg_b{idx:02d}.mp4"
+        r2 = subprocess.run([FF, "-y", "-ss", f"{t:.3f}", "-i", str(SRC),
+                             "-c", "copy", str(seg_b)], capture_output=True, timeout=300)
+        if r.returncode != 0 or r2.returncode != 0:
+            print(f"[ERR] 切段失败 @{t}")
+            return 1
+        fpng = tmp / f"frame_{idx:02d}.png"
+        extract_frame(t + 0.02, fpng)
+        seg_f = tmp / f"seg_f{idx:02d}.mp4"
+        r3 = subprocess.run([FF, "-y", "-loop", "1", "-i", str(fpng),
+                             "-t", f"{FREEZE_DUR:.3f}", "-r", "24",
+                             "-c:v", "libx264", "-preset", "fast",
+                             "-pix_fmt", "yuv420p", str(seg_f)],
+                            capture_output=True, timeout=120)
+        if r3.returncode != 0:
+            print(f"[ERR] 冻结帧失败 @{t}")
+            return 1
+        segs = [seg_f, seg_a, seg_b] + segs
+        prev_end = t
+    # 头段（第一个冻结点之前）
+    head = tmp / "seg_head.mp4"
+    first = merged[0]
+    subprocess.run([FF, "-y", "-ss", "0", "-i", str(SRC), "-t", f"{first:.3f}",
+                    "-c", "copy", str(head)], capture_output=True, timeout=300)
+    segs = [head] + segs
+    # concat
+    lst = tmp / "concat.txt"
+    with open(lst, "w", encoding="utf-8") as f:
+        for s in segs:
+            f.write(f"file '{s.as_posix()}'\n")
+    r = subprocess.run([FF, "-y", "-f", "concat", "-safe", "0", "-i", str(lst),
+                        "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+                        "-pix_fmt", "yuv420p", "-c:a", "copy", str(OUT)],
+                       capture_output=True, timeout=1800)
+    if r.returncode != 0 or not OUT.exists():
+        print("[ERR] concat 失败:",
+              r.stderr.decode("utf-8", "replace")[-400:])
+        return 1
+    print(f"[done] {OUT} ({OUT.stat().st_size / 1e6:.1f}MB, "
+          f"时长 {dur(OUT):.2f}s, 冻结 {len(merged)} 处 × {FREEZE_DUR}s)")
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main())

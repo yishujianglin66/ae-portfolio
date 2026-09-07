@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20260905T131901352Z-14940-4e3bf8bdc0c2",
+  "runStatus": "inconclusive",
+  "errors": [
+    "scan:models/camera_classifier/vlm_expert_3class.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:tmp/test_oom_fix.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:tmp/test_vlm_4k.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:scripts/build_master_polish.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "ed34421c396e3110cc2faa3a3b7c7ab2ef72f32e",
+  "diffHash": "56101056c9be52df2d9c5644c51e365fbb1e56e10044f147a88244d420ae1d1c",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-09-05T13:19:01.352Z",
+  "timing": {
+    "startedAt": "2026-09-05T13:18:55.126Z",
+    "completedAt": "2026-09-05T13:19:01.352Z",
+    "durationMs": 6226
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "scanner_failed": 4,
+      "project_check_failed": 4
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-sess_5c3c4114-63b5-418e-a43b-49c7a2217a4f-20260905T131901352Z-14940-4e3bf8bdc0c2.json"
+}

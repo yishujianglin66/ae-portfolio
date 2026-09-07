@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+"""13.444 镜头: 全量扫描源文件找底片窗口的真实内容偏移"""
+import json
+import subprocess
+
+import numpy as np
+
+W, H, FPS = 160, 90, 24
+
+
+def decode(path, t0, dur):
+    r = subprocess.run(['ffmpeg', '-v', 'error', '-ss', str(max(0, t0)), '-t', str(dur), '-i', path,
+                        '-vf', f'scale={W}:{H}', '-f', 'rawvideo', '-pix_fmt', 'gray', '-'],
+                       capture_output=True, timeout=300)
+    n = len(r.stdout) // (W * H)
+    return np.frombuffer(r.stdout[:n * W * H], dtype=np.uint8).reshape(n, H, W).astype(np.float32)
+
+
+pr = json.load(open('output/unified_run53/production_report.json', encoding='utf-8'))
+shot = next(s for s in pr['script']['segments']
+            if float(s['start_time']) <= 13.444 < float(s['end_time']))
+t0, t1 = float(shot['start_time']), float(shot['end_time'])
+sin_r, spd, src = float(shot['source_start']), float(shot['speed']), shot['source_file']
+print(f'镜头 {t0:.3f}-{t1:.3f} spd={spd} src=...{src[-25:]} 报告sin={sin_r}')
+base = decode('output/unified_run53/run53_lut.mp4', 0, 30.6)
+i0, i1 = int(t0 * FPS) + 1, min(int(t1 * FPS), len(base) - 1)
+bw = base[i0:i1]
+nb = len(bw)
+dur = t1 - t0
+srcfr = decode(src, max(0, sin_r - 4.0), dur * spd + 8.0)
+print('源解码帧数', len(srcfr))
+best = (1e18, None)
+for k in range(0, len(srcfr) - int(dur * spd * FPS) - 1):
+    val = 0.0
+    cnt = 0
+    for j in range(0, nb, 2):
+        sk = k + int(round((j / FPS) * spd * FPS))
+        if sk >= len(srcfr):
+            val = 1e18
+            break
+        val += float(np.abs(srcfr[sk] - bw[j]).mean())
+        cnt += 1
+    if cnt and val / cnt < best[0]:
+        best = (val / cnt, round(max(0, sin_r - 4.0) + k / FPS, 3))
+print(f'全量扫描最佳: 偏移={best[1]} L1={best[0]:.2f}')

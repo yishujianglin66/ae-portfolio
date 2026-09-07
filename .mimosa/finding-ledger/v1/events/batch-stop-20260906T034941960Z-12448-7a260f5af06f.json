@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20260906T034941960Z-12448-7a260f5af06f",
+  "runId": "20260906T034941960Z-12448-7a260f5af06f",
+  "runStatus": "inconclusive",
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "scripts/build_master_polish.py",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "ai/production_director.py",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "scripts/build_master_polish.py",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "ai/production_director.py",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affectsCompletion": true
+      }
+    ]
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "c9e997caba7de64f6dd2112a8d4cb69a556389da",
+  "diffHash": "501e7c2737773aa23fd9d801979561a35dd1f67fc038c3bc954058b4f20069de",
+  "rulesVersion": "unavailable",
+  "sessionHash": "642bf83bf35d16984db792f6b378f42762380fb355a1081b4e6d2f03706bbf14",
+  "reportRef": ".mimosa/reports/task-review-sess_536e529c-8935-4e3a-a5bc-2eb0103761f7-20260906T034941960Z-12448-7a260f5af06f.json",
+  "events": [],
+  "observedFindingIds": [],
+  "verifiedFiles": [],
+  "recordedAt": "2026-09-06T03:49:42.498Z"
+}

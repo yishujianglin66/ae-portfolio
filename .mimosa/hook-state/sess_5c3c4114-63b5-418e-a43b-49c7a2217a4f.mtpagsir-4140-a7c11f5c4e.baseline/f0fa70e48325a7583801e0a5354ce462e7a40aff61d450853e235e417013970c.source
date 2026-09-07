@@ -1,0 +1,11 @@
+import os
+os.environ["HF_XET_HIGH_PERFORMANCE"] = "1"
+os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7897"
+os.environ["HTTP_PROXY"] = "http://127.0.0.1:7897"
+os.environ.pop("HF_HUB_ENABLE_HF_TRANSFER", None)
+from huggingface_hub import hf_hub_download
+p = hf_hub_download(repo_id="SYH99999/MelBandRoformer4StemFTLarge",
+                    filename="MelBandRoformer4StemFTLarge.ckpt",
+                    local_dir="models/separation",
+                    local_dir_use_symlinks=False)
+print("DONE:", p)

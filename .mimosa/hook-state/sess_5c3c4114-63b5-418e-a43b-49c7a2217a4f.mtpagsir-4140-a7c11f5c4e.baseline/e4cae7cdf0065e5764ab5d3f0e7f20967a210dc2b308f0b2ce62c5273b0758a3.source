@@ -1,0 +1,27 @@
+{
+  "name": "ae-atomic-compiler",
+  "version": "0.1.0",
+  "description": "AE原子参数编译器 - 将原子级参数JSON编译为ExtendScript代码",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "ae-compile": "build/cli.js"
+  },
+  "scripts": {
+    "build": "esbuild src/index.ts src/cli.ts src/phase3/index.ts src/phase4/index.ts src/phase5/index.ts --bundle --platform=node --format=esm --outdir=build --out-extension:.js=.js",
+    "build:phase3-test": "esbuild test/phase3-integration-test.ts --bundle --platform=node --format=esm --outfile=build/phase3-integration-test.js",
+    "build:phase4-test": "esbuild test/phase4-integration-test.ts --bundle --platform=node --format=esm --outfile=build/phase4-integration-test.js",
+    "build:phase5-test": "esbuild test/phase5-integration-test.ts --bundle --platform=node --format=esm --outfile=build/phase5-integration-test.js",
+    "start": "node build/cli.js",
+    "test": "node --test test/*.test.js",
+    "test:phase3": "npm run build && npm run build:phase3-test && node build/phase3-integration-test.js",
+    "test:phase4": "npm run build && npm run build:phase4-test && node build/phase4-integration-test.js",
+    "test:phase5": "npm run build && npm run build:phase5-test && node build/phase5-integration-test.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.17.30",
+    "esbuild": "^0.27.4",
+    "typescript": "^5.2.2"
+  }
+}

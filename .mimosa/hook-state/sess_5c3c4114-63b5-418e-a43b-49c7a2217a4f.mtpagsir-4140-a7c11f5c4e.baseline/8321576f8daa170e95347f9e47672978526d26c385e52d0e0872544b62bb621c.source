@@ -1,0 +1,114 @@
+name: Test Health
+
+# E0-5b（2026-09-05 开源增强方案）：测试健康闸门
+# 教训依据：08-26 发现 pytest 收集超时根因（conftest collect_ignore 前缀写错）
+#          75 条规则静默失效 6+ 周未察觉 —— 本工作流的核心就是让"收集坏了"立刻变红。
+# 与现有 ci.yml / quality-gate.yml 互补，不替代。
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  schedule:
+    - cron: "0 18 * * 5" # 每周五 UTC 18:00（周六凌晨 2 点北京时间）全量观测
+  workflow_dispatch:
+
+jobs:
+  collect-smoke:
+    # 闸门 1：收集冒烟 —— 任何收集错误/超时即红（timeout-minutes 显式封顶）
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pytest
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-timeout
+
+      - name: Collection smoke (collect-only must succeed within budget)
+        timeout-minutes: 5
+        env:
+          AEK_ENVIRONMENT: test
+        run: |
+          python -m pytest --collect-only -q 2>&1 | Tee-Object collect_output.txt
+          $last = Get-Content collect_output.txt -Tail 5 | Select-String "error"
+          if ($last) { Write-Host "收集存在错误"; exit 1 }
+
+  lint-baseline:
+    # 闸门 2：ruff 基线（仅语法错误/未定义名称级别，配置见 ruff.toml；E1-6 再收紧）
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: ruff check (syntax/undefined-names baseline)
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: "latest"
+          args: "check --config ruff.toml"
+
+  fast-unit:
+    # 闸门 3：轻依赖快速单测（cache_manager 契约 / kb_loader / effect_registry）
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install minimal test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-timeout
+
+      - name: Run fast offline unit tests
+        env:
+          AEK_ENVIRONMENT: test
+        run: |
+          python -m pytest tests/test_cache_manager.py tests/test_kb_loader.py tests/test_effect_registry.py -q --timeout=120
+
+  weekly-full-observability:
+    # 观测（非闸门）：每周全量收集 + 运行，摸清 CI 环境下的真实通过基线。
+    # continue-on-error 仅为建立基线期；连续两周绿后（E1-6）移除并转强制闸门。
+    runs-on: windows-latest
+    timeout-minutes: 90
+    continue-on-error: true
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install full dependencies
+        timeout-minutes: 30
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || pip install pytest pytest-timeout numpy
+
+      - name: Full suite (weekly observation)
+        env:
+          AEK_ENVIRONMENT: test
+        run: |
+          python -m pytest -q --timeout=300 -x --ignore=mcp-extension -p no:cacheprovider 2>&1 | Tee-Object full_run.txt
+        continue-on-error: true
+
+      - name: Upload run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-full-run
+          path: |
+            full_run.txt
+          if-no-files-found: warn

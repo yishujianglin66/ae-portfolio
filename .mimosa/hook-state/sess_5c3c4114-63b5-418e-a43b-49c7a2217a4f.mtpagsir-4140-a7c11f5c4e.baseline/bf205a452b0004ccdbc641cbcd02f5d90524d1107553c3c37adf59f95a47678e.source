@@ -1,0 +1,43 @@
+# -*- coding: utf-8 -*-
+"""修复 BGM 丢失: LUT 保留音轨 + BGM/SFX 重混 (2026-09-01)"""
+import sys
+import subprocess
+
+sys.path.insert(0, ".")
+from core.sfx_layer import plan_sfx, _load_index  # noqa: E402
+from core.lut_pipeline import load_sampling  # noqa: E402
+
+SRC = "output/unified_first/unified_first.mp4"
+LUT_MP4 = "output/unified_first/first_lut2.mp4"
+FINAL = "output/unified_first/first_final2.mp4"
+
+# 1) LUT (保留音轨: -c:a copy)
+cube = load_sampling().get("好莱坞 _ Hollywood", [None])[0]
+e = cube.replace("\\", "/").replace(":", "\\:")
+r = subprocess.run(
+    ["ffmpeg", "-y", "-i", SRC, "-vf", f"lut3d='{e}'",
+     "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+     "-pix_fmt", "yuv420p", "-c:a", "copy", LUT_MP4],
+    capture_output=True, timeout=600)
+print("LUT(带音轨):", r.returncode == 0)
+
+# 2) BGM(音轨上已是引擎混的) + SFX 叠加
+plan = plan_sfx(
+    [{"time": round(0.6 + i * 0.7, 2),
+      "beat_type": "kick" if i % 3 == 0 else ("drop" if i == 9 else "snare")}
+     for i in range(27)],
+    seed=2027,
+    pools_override={k: _load_index().get(k, []) for k in ("impact", "whoosh", "riser")})
+
+parts = []
+labels = []
+for i, (f, t, g) in enumerate(plan, start=1):
+    parts.append(f"[{i}:a]adelay={int(t*1000)}|{int(t*1000)},volume={g:.2f}[s{i}]")
+    labels.append(f"[s{i}]")
+parts.append("[0:a]" + "".join(labels) + f"amix=inputs={len(plan)}:duration=first:normalize=0[outa]")
+
+cmd = ["ffmpeg", "-y", "-i", LUT_MP4] + sum([["-i", f] for f, _, _ in plan], []) + [
+    "-filter_complex", ";".join(parts), "-map", "0:v", "-map", "[outa]",
+    "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", FINAL]
+r2 = subprocess.run(cmd, capture_output=True, timeout=300)
+print("BGM+SFX:", r2.returncode == 0)

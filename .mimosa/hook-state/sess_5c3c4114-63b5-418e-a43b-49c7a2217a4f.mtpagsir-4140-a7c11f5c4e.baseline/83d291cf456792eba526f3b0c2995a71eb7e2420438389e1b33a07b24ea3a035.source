@@ -1,0 +1,44 @@
+# -*- coding: utf-8 -*-
+"""Twixtor 试点: 单慢镜从源素材光流重渲 (2026-09-04)"""
+import json
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from ai.ae_render_channel import AERenderChannel  # noqa: E402
+
+pr = json.loads((ROOT / "output/unified_run53/production_report.json").read_text(encoding="utf-8"))
+s = [x for x in pr["script"]["segments"] if abs(x["start_time"] - 12.75) < 0.01][0]
+src, sin, dur, spd = s["source_file"], float(s["source_start"]), float(s["duration"]), float(s["speed"])
+vin = src.replace(chr(92), "/")
+print("pilot:", vin[-34:], "@", round(sin, 2), "dur", round(dur, 2), "spd", spd)
+
+ch = AERenderChannel(out_dir=str(ROOT / "output/probe"))
+jsx = f"""
+(function(){{
+  var rep = "start";
+  try {{
+    app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+    app.newProject();
+    var imp = app.project.importFile(new ImportOptions(new File("{vin}")));
+    var comp = app.project.items.addComp("TWX", imp.width, imp.height, 1.0, {dur}, 24);
+    var ly = comp.layers.add(imp);
+    ly.startTime = {-sin / spd};  // Twixtor Speed模式把源偏移×速度 → 除以速度抵消 (2026-09-04 实测: 98.58×0.55=54.2 偏移)
+    ly.inPoint = 0; ly.outPoint = {dur};
+    var fx = ly.property("Effects").addProperty("Twixtor 45");
+    fx.property("Twixtor 45-0004").setValue(1);
+    fx.property("Twixtor 45-0005").setValue({spd * 100:.0f});
+    rep += "|twx_set";
+    app.project.save(new File("{(ROOT / 'output/unified_run53/polish/twx_pilot.aep').as_posix()}"));
+    rep += "|saved";
+  }} catch(e) {{ rep += "|FATAL:" + e.toString(); }}
+  var f = new File("{(ROOT / 'tmp/ae_twx_pilot.txt').as_posix()}");
+  f.encoding = "UTF-8"; f.open("w"); f.write(rep); f.close();
+}})()
+"""
+res = ch._bridge_run_jsx(args={"script": jsx, "scriptContent": jsx}, timeout=180)
+print("bridge:", res)
+time.sleep(3)
+print((ROOT / "tmp/ae_twx_pilot.txt").read_text(encoding="utf-8"))

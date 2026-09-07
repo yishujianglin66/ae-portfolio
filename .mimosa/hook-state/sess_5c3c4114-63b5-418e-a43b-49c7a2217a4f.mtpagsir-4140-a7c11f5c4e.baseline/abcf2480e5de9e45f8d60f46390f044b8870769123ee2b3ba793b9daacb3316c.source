@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+"""Twixtor 时间模型对照实验: 三种 startTime 公式, 合成从 t=10 起 (2026-09-04)"""
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from ai.ae_render_channel import AERenderChannel  # noqa: E402
+
+SIN, SPD, T0, DUR = 98.58, 0.55, 10.0, 0.38
+vin = r"D:/BaiduNetdiskDownload/AE新手10套/独自升级（一般）/独自升级5.mp4"
+ch = AERenderChannel(out_dir=str(ROOT / "output/probe"))
+
+# L1: -(sin/spd)  L2: t0-(sin/spd)  L3: -(t0+sin/spd)
+f1 = -(SIN / SPD)
+f2 = T0 - SIN / SPD
+f3 = -(T0 + SIN / SPD)
+jsx = f"""
+(function(){{
+  var rep = "start";
+  try {{
+    app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+    app.newProject();
+    var imp = app.project.importFile(new ImportOptions(new File("{vin}")));
+    var comp = app.project.items.addComp("DIAG", 640, 360, 1.0, {T0 + DUR + 0.1}, 24);
+    var sts = [{f1}, {f2}, {f3}];
+    for (var i = 0; i < 3; i++) {{
+      var ly = comp.layers.add(imp);
+      ly.startTime = sts[i];
+      ly.inPoint = {T0}; ly.outPoint = {T0 + DUR};
+      ly.property("Position").setValue([120 + i * 200, 180]);
+      ly.property("Scale").setValue([32, 32]);
+      var fx = ly.property("Effects").addProperty("Twixtor 45");
+      fx.property("Twixtor 45-0004").setValue(1);
+      fx.property("Twixtor 45-0005").setValue(55);
+    }}
+    app.project.save(new File("{(ROOT / 'output/unified_run53/polish/twx_diag.aep').as_posix()}"));
+    rep += "|saved";
+  }} catch(e) {{ rep += "|FATAL:" + e.toString(); }}
+  var f = new File("{(ROOT / 'tmp/ae_twx_diag.txt').as_posix()}");
+  f.encoding = "UTF-8"; f.open("w"); f.write(rep); f.close();
+}})()
+"""
+res = ch._bridge_run_jsx(args={"script": jsx, "scriptContent": jsx}, timeout=180)
+print("bridge:", res)
+time.sleep(3)
+print((ROOT / "tmp/ae_twx_diag.txt").read_text(encoding="utf-8"))

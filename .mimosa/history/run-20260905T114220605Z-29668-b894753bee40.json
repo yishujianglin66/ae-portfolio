@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20260905T114220605Z-29668-b894753bee40",
+  "runStatus": "inconclusive",
+  "errors": [
+    "baseline-read:tmp/ab_measure.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:tmp/plan_diag.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "scan:scripts/separate_drums.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:tmp/ab_measure.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:tmp/master_build_check.js: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:tmp/plan_diag.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:scripts/build_master_polish.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:scripts/unified_edit.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:core/cnn_scorer.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:ai/aigc_generator.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:ai/camera_decision.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+    "scan:ai/production_director.py: scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "54acfbf9353ebf22db02cac956158074ecda6ef7",
+  "diffHash": "ffae94f0d5a467af939d078c01197b71d4ed878b297ab0d3dcc3389696c497ca",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-09-05T11:42:20.605Z",
+  "timing": {
+    "startedAt": "2026-09-05T11:42:15.160Z",
+    "completedAt": "2026-09-05T11:42:20.605Z",
+    "durationMs": 5445
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "baseline_snapshot_unreadable": 2,
+      "scanner_failed": 10,
+      "project_check_failed": 12
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-sess_5c3c4114-63b5-418e-a43b-49c7a2217a4f-20260905T114220605Z-29668-b894753bee40.json"
+}

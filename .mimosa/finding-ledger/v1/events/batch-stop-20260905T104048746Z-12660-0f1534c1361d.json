@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "stop-20260905T104048746Z-12660-0f1534c1361d",
+  "runId": "20260905T104048746Z-12660-0f1534c1361d",
+  "runStatus": "inconclusive",
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "output/unified_run54anchor/build_comps.jsx",
+        "detail": "file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "output/unified_run54anchor/build_comps.jsx",
+        "detail": "spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "output/unified_run54anchor/build_comps.jsx",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affectsCompletion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "output/unified_run54anchor/build_comps.jsx",
+        "detail": "scanner_failed: spawnSync C:\\Program Files\\nodejs\\node.exe ETIMEDOUT",
+        "affectsCompletion": true
+      }
+    ]
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "Stop"
+  },
+  "revision": "54acfbf9353ebf22db02cac956158074ecda6ef7",
+  "diffHash": "246660a78e0b1dd7141ec238a6767e04979b5a325c8666e5f4332306d30c098a",
+  "rulesVersion": "unavailable",
+  "sessionHash": "642bf83bf35d16984db792f6b378f42762380fb355a1081b4e6d2f03706bbf14",
+  "reportRef": ".mimosa/reports/task-review-sess_536e529c-8935-4e3a-a5bc-2eb0103761f7-20260905T104048746Z-12660-0f1534c1361d.json",
+  "events": [],
+  "observedFindingIds": [],
+  "verifiedFiles": [],
+  "recordedAt": "2026-09-05T10:40:49.266Z"
+}

@@ -1,0 +1,91 @@
+"""E0-1 A/B 测量：锚点臂 vs 对照臂（三口径 + 切点数）。
+
+口径与 scripts/score_reference_gap.py 同源：
+- 切点: ffmpeg select scene>0.30
+- 笼统踩拍: 成片音轨 HPSS percussive onset, ±80ms
+- 鼓锚踩拍: anchors.json (kick/snare, 30s 内), ±80ms
+"""
+from pathlib import Path
+
+import librosa
+import numpy as np
+import soundfile as sf
+
+ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")
+ANCHORS = ROOT / "cache" / "stems" / "9e00915a2a31" / "anchors.json"
+OUT_EVID = ROOT / "output" / "evidence" / "enhance_drum_anchor_20260905"
+FF = r"C:\ffmpeg\bin\ffmpeg.exe"
+ARM_ANCHOR = ROOT / "output" / "unified_run54anchor" / "run54anchor_final.mp4"
+ARM_CTRL = ROOT / "output" / "unified_run54ctrl" / "run54ctrl_final.mp4"
+
+
+def scene_cuts(path: Path, thr: float = 0.30):
+    import subprocess
+    r = subprocess.run([FF, "-i", str(path), "-vf", f"select='gt(scene,{thr})',showinfo",
+                        "-f", "null", "-"], capture_output=True, timeout=1200)
+    return sorted(set(float(m) for m in
+                      re.findall(r"pts_time:([0-9.]+)", r.stderr.decode("utf-8", "replace"))))
+
+
+def onsets_generic(path: Path):
+    import subprocess
+    r = subprocess.run([FF, "-y", "-i", str(path), "-vn", "-ac", "1", "-ar", "22050",
+                        "-f", "wav", "-"], capture_output=True, timeout=600)
+    y, sr = sf.read(io.BytesIO(r.stdout), dtype="float32")
+    y = y.mean(axis=1) if y.ndim > 1 else y
+    _, yp = librosa.effects.hpss(y)
+    ons = librosa.onset.onset_detect(y=yp, sr=sr, units="time", backtrack=False,
+                                     hop_length=256, delta=0.03, wait=2)
+    return list(ons)
+
+
+import io  # noqa: E402
+import json  # noqa: E402
+import re  # noqa: E402
+
+anchors = json.loads(ANCHORS.read_text(encoding="utf-8"))
+kick = np.array([t for t, s in anchors["kick_onsets"] if t < 30.5])
+snare = np.array([t for t, s in anchors["snare_onsets"] if t < 30.5])
+kick_strong = np.array([t for t, s in anchors["kick_onsets"] if t < 30.5 and s >= 0.5])
+drums = np.sort(np.concatenate([kick, snare]))
+
+
+def measure(name: str, path: Path):
+    cuts = scene_cuts(path)
+    ons = onsets_generic(path)
+
+    def hitrate(ref):
+        ref = np.asarray(ref)
+        if not len(cuts) or not len(ref):
+            return 0.0
+        return round(sum(1 for c in cuts if np.min(np.abs(ref - c)) <= 0.080) / len(cuts), 4)
+
+    row = {
+        "n_cuts": len(cuts),
+        "beat_hit_generic": hitrate(ons),
+        "kick_hit": hitrate(kick),
+        "kick_strong_hit": hitrate(kick_strong),
+        "snare_hit": hitrate(snare),
+        "drum_any_hit": hitrate(drums),
+    }
+    print(f"{name:<10} 切点{row['n_cuts']:>3} | 笼统踩拍 {row['beat_hit_generic']:.4f} | "
+          f"kick {row['kick_hit']:.4f} (强 {row['kick_strong_hit']:.4f}) | "
+          f"snare {row['snare_hit']:.4f} | kick|snare {row['drum_any_hit']:.4f}")
+    return row
+
+
+def main():
+    r1 = measure("锚点臂", ARM_ANCHOR)
+    r0 = measure("对照臂", ARM_CTRL)
+    print("\nΔ(锚点-对照):", {k: round(r1[k] - r0[k], 4) for k in r1})
+    OUT_EVID.mkdir(parents=True, exist_ok=True)
+    payload = {"anchor_arm": r1, "control_arm": r0,
+               "method": "scene cuts thr=0.30 + HPSS onset ±80ms / drum anchors ±80ms",
+               "inputs": {"anchor": str(ARM_ANCHOR), "control": str(ARM_CTRL)}}
+    (OUT_EVID / "ab_result.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print("证据已写:", OUT_EVID / "ab_result.json")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20260905T133346044Z-15256-adc792681acb",
+  "runStatus": "inconclusive",
+  "errors": [
+    "baseline-read:tmp/test_oom_fix.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:tmp/test_vlm_4k.py: baseline_snapshot_unreadable: file is missing from task baseline"
+  ],
+  "target": ".",
+  "revision": "17d67480b94831084560b11c621681ae38cee5bc",
+  "diffHash": "56101056c9be52df2d9c5644c51e365fbb1e56e10044f147a88244d420ae1d1c",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-09-05T13:33:46.044Z",
+  "timing": {
+    "startedAt": "2026-09-05T13:33:44.142Z",
+    "completedAt": "2026-09-05T13:33:46.044Z",
+    "durationMs": 1902
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "baseline_snapshot_unreadable": 2,
+      "project_check_failed": 2
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-sess_536e529c-8935-4e3a-a5bc-2eb0103761f7-20260905T133346044Z-15256-adc792681acb.json"
+}

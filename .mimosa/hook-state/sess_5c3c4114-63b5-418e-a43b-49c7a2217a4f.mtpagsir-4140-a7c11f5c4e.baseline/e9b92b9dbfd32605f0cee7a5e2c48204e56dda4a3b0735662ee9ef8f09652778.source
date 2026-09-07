@@ -1,0 +1,60 @@
+# -*- coding: utf-8 -*-
+"""核查每个真实 kick 在成片中的视觉覆盖(切点/保留闪帧/burst/效果衰减)→ 找裸奔 kick"""
+import json
+
+onsets = json.load(open('tmp/true_onsets.json'))
+plan = json.load(open('tmp/master_plan.json', encoding='utf-8'))
+shots, bursts = plan['shots'], plan['bursts']
+kept = [e['t'] for e in json.load(open('tmp/kept_events.json', encoding='utf-8')).get('kept', [])]
+
+
+def containing_shot(t):
+    for s in shots:
+        if s['t0'] <= t < s['t1']:
+            return s
+    return None
+
+
+def cut_near(t):
+    return any(abs(s['t0'] - t) <= 0.06 for s in shots if s['t0'] > 0.3)
+
+
+def flash_near(t):
+    return any(abs(t - k) <= 0.12 for k in kept)
+
+
+def burst_cover(t):
+    return any(b['t0'] <= t <= b['t1'] + 0.02 for b in bursts)
+
+
+def fx_cover(t):
+    s = containing_shot(t)
+    if not s:
+        return False
+    return bool(s.get('fx')) and (t - s['t0']) <= 0.18
+
+
+print('=== 15.2-27.6s 每个 kick 的 v3 视觉覆盖 ===')
+naked = []
+for t in onsets:
+    if not (15.2 <= t <= 27.6):
+        continue
+    marks = []
+    if cut_near(t):
+        marks.append('切点')
+    if flash_near(t):
+        marks.append('保留闪帧')
+    if burst_cover(t):
+        marks.append('burst')
+    if fx_cover(t):
+        marks.append('效果衰减')
+    s = containing_shot(t)
+    if s:
+        tag = "{:.2f}({}{})".format(s['t0'], ','.join(s['fx']) or '无效果', '/TWX' if 'twx' in s else '')
+    else:
+        tag = '无层'
+    print("kick@{:6.3f} [{}] -> {}".format(t, tag, ' + '.join(marks) if marks else '*** 裸奔 ***'))
+    if not marks:
+        naked.append(round(t, 3))
+print()
+print('裸奔 kick:', naked, '共{}个'.format(len(naked)))

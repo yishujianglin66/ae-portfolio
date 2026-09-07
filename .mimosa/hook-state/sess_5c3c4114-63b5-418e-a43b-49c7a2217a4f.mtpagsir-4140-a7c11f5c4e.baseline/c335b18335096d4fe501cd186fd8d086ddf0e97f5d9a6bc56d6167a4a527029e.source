@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+"""验证 v4 慢镜冻结点 vs 锚定 kick — v3/v4 同测, 只测镜头内运动(排除切帧)"""
+import json
+import subprocess
+
+import numpy as np
+
+FPS = 24
+ANCHORS = {19.417: ('mid', 19.551), 24.542: ('end', 24.833),
+           26.292: ('mid', 26.366), 27.25: ('end', 27.417)}
+
+
+def frames_at(path, t0, t1):
+    cmd = ['ffmpeg', '-v', 'error', '-ss', str(t0), '-t', str(t1 - t0), '-i', path,
+           '-vf', 'scale=160:90', '-f', 'rawvideo', '-pix_fmt', 'gray', '-']
+    r = subprocess.run(cmd, capture_output=True, timeout=120)
+    buf = r.stdout
+    n = len(buf) // (160 * 90)
+    return np.frombuffer(buf[:n * 160 * 90], dtype=np.uint8).reshape(n, 90, 160).astype(np.float32)
+
+
+def freeze_center(path, t0, t1):
+    f = frames_at(path, t0, t1)
+    if len(f) < 3:
+        return None, None, []
+    d = np.array([float(np.abs(f[i] - f[i - 1]).mean()) for i in range(1, len(f))])
+    lo = max(2.0, d.max() * 0.15)
+    still = np.where(d < lo)[0]          # d[i] 对应帧间 (t0+(i+1)/24)
+    center = t0 + float((still + 1).mean()) / FPS if len(still) else None
+    return center, d, still
+
+
+segs = json.load(open('output/unified_run53/production_report.json', encoding='utf-8'))['script']['segments']
+slow = [(round(float(s['start_time']), 3), round(float(s['end_time']), 3))
+        for s in segs if abs(float(s.get('speed', 1)) - 0.55) < 0.01 and float(s['start_time']) >= 15.0]
+
+print(f'{"慢镜窗":>16} {"模式":>4} {"锚kick":>7} | {"v3冻结@":>8} {"v4冻结@":>8} {"v4-kick":>8}')
+for t0, t1 in slow:
+    mode, anc = ANCHORS.get(t0, ('cut', t0))
+    c3, _, _ = freeze_center('output/unified_run53/run53_final_curve_v3.mp4', t0, t1)
+    c4, d4, still4 = freeze_center('output/unified_run53/run53_final_curve_v4.mp4', t0, t1)
+    dev = f'{(c4 - anc) * FPS:+5.1f}f' if c4 is not None else '    n/a'
+    f3 = f'{c3:8.3f}' if c3 is not None else '     n/a'
+    f4 = f'{c4:8.3f}' if c4 is not None else '     n/a'
+    print(f'{t0:7.2f}-{t1:5.2f} {mode:>4} {anc:7.3f} | {f3} {f4} {dev}  still帧={list(still4)}')

@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "AfterEffectsMCP": {
+      "command": "node",
+      "args": ["c:\\Users\\Administrator\\Desktop\\after-effects-mcp-main\\build\\index.js"],
+      "cwd": "c:\\Users\\Administrator\\Desktop\\after-effects-mcp-main"
+    },
+    "AdobeMCP": {
+      "command": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "args": ["bridges/adobe_mcp_server.py", "--app", "after_effects"],
+      "cwd": "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault"
+    },
+    "AdobePhotoshopMCP": {
+      "command": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "args": ["bridges/adobe_mcp_server.py", "--app", "photoshop"],
+      "cwd": "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault"
+    },
+    "AdobePremiereMCP": {
+      "command": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "args": ["bridges/adobe_mcp_server.py", "--app", "premiere"],
+      "cwd": "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault"
+    },
+    "AdobeMediaEncoderMCP": {
+      "command": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+      "args": ["bridges/adobe_mcp_server.py", "--app", "media_encoder"],
+      "cwd": "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault",
+        "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\data",
+        "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\output",
+        "c:\\Users\\Administrator\\Desktop\\AE-Knowledge-Vault\\frames"
+      ]
+    }
+  }
+}

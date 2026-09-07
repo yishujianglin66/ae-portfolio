@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "mimosa-finding-ledger-batch/v1",
+  "batchId": "pretooluse-00b9c2705476117bf204ed8ec67baa16",
+  "runId": null,
+  "runStatus": "completed",
+  "coverage": {
+    "status": "complete",
+    "reasons": []
+  },
+  "source": {
+    "component": "zcode-hook",
+    "operationId": "PreToolUse"
+  },
+  "revision": null,
+  "diffHash": null,
+  "rulesVersion": null,
+  "sessionHash": "642bf83bf35d16984db792f6b378f42762380fb355a1081b4e6d2f03706bbf14",
+  "reportRef": null,
+  "events": [
+    {
+      "eventId": "hook-9971d185b64a96b155804eeedcb462da",
+      "findingId": "mimosa-1bb909947e18374b90388d92",
+      "type": "finding_blocked",
+      "at": "2026-09-05T09:22:03.293Z",
+      "identity": {
+        "projectRelativeFile": "scripts/detect_violin_phrases.py",
+        "ruleId": "security",
+        "codeEvidenceHash": "80a418c8e20ce29835e8b4cc8e261b34829c92bbad96de546925258ce245474e",
+        "confidence": "stable"
+      },
+      "scope": "direct",
+      "line": 54,
+      "endLine": 54,
+      "reasonCode": "deny",
+      "reportedToAgent": true,
+      "evidence": {
+        "kind": "source",
+        "boundary": "candidate",
+        "producer": "deterministic",
+        "evidenceHash": "80a418c8e20ce29835e8b4cc8e261b34829c92bbad96de546925258ce245474e"
+      },
+      "sequence": 0
+    }
+  ],
+  "observedFindingIds": [],
+  "verifiedFiles": [],
+  "recordedAt": "2026-09-05T09:22:03.904Z"
+}

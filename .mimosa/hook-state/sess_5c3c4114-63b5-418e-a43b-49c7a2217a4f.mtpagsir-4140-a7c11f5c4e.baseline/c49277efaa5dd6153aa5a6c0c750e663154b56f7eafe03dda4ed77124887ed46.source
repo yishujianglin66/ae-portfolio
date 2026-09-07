@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+"""离线验证: Python 端签名与 JS 监听器 _canonicalize/HMAC 是否一致"""
+import hashlib
+import hmac
+import json
+import secrets
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+PROJ = Path(__file__).resolve().parent.parent
+
+
+def js_canonicalize(obj):
+    """精确复刻 ae_mcp_listener.jsx 的 _canonicalize (JS 版)"""
+    if obj is None:
+        return "null"
+    if isinstance(obj, (int, float, bool)):
+        return json.dumps(obj, separators=(",", ":"))
+    if isinstance(obj, str):
+        esc = obj.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+        return '"' + esc + '"'
+    if isinstance(obj, list):
+        return "[" + ",".join(js_canonicalize(x) for x in obj) + "]"
+    if isinstance(obj, dict):
+        keys = sorted(k for k in obj if obj[k] is not None)
+        pairs = []
+        for k in keys:
+            esc_k = k.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+            pairs.append('"' + esc_k + '":' + js_canonicalize(obj[k]))
+        return "{" + ",".join(pairs) + "}"
+    return str(obj)
+
+
+def main():
+    # 1. 确保项目根 .mcp_secret 存在（监听器 SECRET_FILE 读它）
+    secret_path = PROJ / ".mcp_secret"
+    if not secret_path.exists():
+        secret_path.write_text(secrets.token_hex(32) + "\n", encoding="utf-8")
+        print(f"[生成] {secret_path}")
+    secret = secret_path.read_text(encoding="utf-8").strip()
+    print(f"[secret] {secret_path} 长度={len(secret)} 前8位={secret[:8]}")
+
+    # 2. 典型命令（含 script 全文 + 中文，验证 canonical 稳定）
+    cmd = {
+        "command": "executeAtomScript",
+        "args": {"script": '// test\napp.project ? 1 : 0;\nvar 中文 = "帧";'},
+        "timestamp": "2026-09-01T00:00:00.000000",
+        "status": "pending",
+    }
+    sign_data = {k: v for k, v in cmd.items() if k != "signature" and k != "signature_alg"}
+
+    # Python 客户端实现（ae_bridge_base）
+    canon_py = json.dumps(sign_data, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    sig_py = hmac.new(secret.encode("utf-8"), canon_py.encode("utf-8"), hashlib.sha256).hexdigest()
+
+    # JS 监听器实现
+    canon_js = js_canonicalize(sign_data)
+    sig_js = hmac.new(secret.encode("utf-8"), canon_js.encode("utf-8"), hashlib.sha256).hexdigest()
+
+    print("canon_py == canon_js :", canon_py == canon_js)
+    print("sig_py  == sig_js   :", sig_py == sig_js)
+    if canon_py != canon_js:
+        print("canon_py:", canon_py)
+        print("canon_js:", canon_js)
+    return 0 if (sig_py == sig_js) else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

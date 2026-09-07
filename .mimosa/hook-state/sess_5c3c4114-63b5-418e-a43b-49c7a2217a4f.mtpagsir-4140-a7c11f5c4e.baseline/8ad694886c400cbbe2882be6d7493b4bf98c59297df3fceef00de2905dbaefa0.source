@@ -1,0 +1,21 @@
+"""分层分类器 OOM 修复冒烟：对 4K 源跑 L0.5 分层分类，期望 hier_* 而非光流降级。"""
+import sys
+import time
+
+sys.path.insert(0, r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")
+SRC = r"D:\AE-Work\resources\video\初音（简单）\Hatsune Miku Twixtor 4K.mp4"
+
+from ai.camera_decision import SourceCameraInventory
+
+inv = SourceCameraInventory()
+t0 = time.time()
+r = inv.analyze(SRC)
+el = time.time() - t0
+print(f"结果: label={r.get('label')} source={r.get('source')} conf={r.get('confidence')} 耗时={el:.0f}s")
+if str(r.get("source", "")).startswith("hier"):
+    print("PASS: 分层分类器在 4K 源上正常工作（OOM 修复生效）")
+elif "flow" in str(r.get("source", "")):
+    print("FAIL: 仍走了光流降级")
+else:
+    print(f"注意: source={r.get('source')}（缓存或 LoRA 路径）")
+inv.unload()

@@ -1,0 +1,266 @@
+"""models/anime_camera_classifier.py - 动漫运镜分类器 (A5 生产接入)
+
+两级架构 (Step 4 最终方案):
+  L1: VideoMAE-LoRA 粗分类 (4 类: Static/Motion/Pull/Push) + 逐类调优阈值
+  L2: 粗类为 Motion 时, 用光流规则细分方向 (pan_left/pan_right/tilt/zoom)
+  → 输出 v2 分类法 7 类: static / zoom_in / zoom_out / pan_left / pan_right / tilt_up / tilt_down
+    (旧 push→zoom_in, zoom_back→zoom_out, orbit 废除按主导方向归类)
+
+接入点: ai/camera_decision.py SourceCameraInventory.inject()
+降级链: LoRA(GPU) → 光流规则(CPU) → unknown
+
+用法:
+  from models.anime_camera_classifier import AnimeCameraClassifier
+  clf = AnimeCameraClassifier()
+  r = clf.classify_video("素材.mp4")
+  # r = {"label": "pan_left", "coarse": "Motion", "confidence": 0.72, "source": "videomae-lora"}
+"""
+from __future__ import annotations
+
+import json
+import logging
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import numpy as np
+from core.torch_runtime import get_device, infer_ctx
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+logger = logging.getLogger(__name__)
+
+MODEL_DIR = r"D:\AE-Data\Models\VideoMAE-MovieShots\movement"
+# 生产默认: v3b (fine 10 类 → v2 合并为 7 类口径, 粗4类口径 0.7729 > v1 0.7172, 直接输出方向无需光流细分)
+DEFAULT_LORA_DIR = str(PROJECT_ROOT / "models" / "output" / "anime_camera_lora_v3")
+
+NUM_FRAMES = 16
+IMG_SIZE = 224
+MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+
+COARSE_LABELS = ["Static", "Motion", "Pull", "Push"]
+
+# Motion 粗类 → 光流规则方向 → v2 项目标签 (7 类)
+RULE_TO_PROJECT = {
+    "static": "static",
+    "pan_left": "pan_left", "pan_right": "pan_right",
+    "tilt_up": "tilt_up", "tilt_down": "tilt_down",
+    "zoom_in": "zoom_in", "zoom_out": "zoom_out",
+    "push": "zoom_in",        # v2: push 并入 zoom_in
+    "zoom_back": "zoom_out",  # v2: zoom_back 并入 zoom_out
+    "orbit": "unsure",        # v2: orbit 废除, 无主导方向 → unsure
+    "diag_pan": "pan_left",   # v2: 对角线 pan 按主导方向, 默认 pan_left
+    "complex": "unsure",      # v2: 复合运动无法归一 → unsure
+    "unknown": "pan_left",    # 降级兜底, 保持原行为
+}
+
+
+class AnimeCameraClassifier:
+    """动漫运镜分类器 (自动识别 fine/coarse schema + 阈值校准 + 光流降级)。"""
+
+    def __init__(self, lora_dir: str = DEFAULT_LORA_DIR,
+                 thresholds_path: Optional[str] = None,
+                 model_dir: str = MODEL_DIR):
+        self.lora_dir = lora_dir
+        self.model_dir = model_dir
+        self.labels = self._load_meta_labels()
+        self.schema = "fine" if len(self.labels) >= 8 else "coarse"
+        if thresholds_path is None:
+            thresholds_path = str(Path(lora_dir) / "thresholds_tuned.json")
+        self.thresholds = self._load_thresholds(thresholds_path, self.labels)
+        self._model = None
+        self._device = None
+
+    def _load_meta_labels(self) -> List[str]:
+        meta = Path(self.lora_dir) / "meta.json"
+        if not meta.exists():
+            logger.warning("meta.json not found at %s, falling back to COARSE_LABELS", meta)
+            return COARSE_LABELS
+        try:
+            data = json.loads(meta.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning("Failed to parse meta.json at %s: %s", meta, exc)
+            return COARSE_LABELS
+        if not isinstance(data.get("labels"), list):
+            logger.warning("meta.json at %s missing 'labels' list, falling back to COARSE_LABELS", meta)
+            return COARSE_LABELS
+        return [str(x) for x in data["labels"]]
+
+    @staticmethod
+    def _load_thresholds(path: str, labels: List[str]) -> Optional[Dict[str, float]]:
+        """加载逐类阈值; 不可用时返回 None 表示"不做门控", 绝不伪造默认值。
+
+        伪造默认值会静默退化: 粗类键对 v2 7 类是空交集, 七个标签会共用
+        硬编码 0.4, 看起来"已校准"实际什么都没校。
+        """
+        p = Path(path)
+        if not p.exists():
+            logger.warning("阈值侧车缺失, 禁用逐类门控 (退化为 argmax): %s", p)
+            return None
+        try:
+            raw = json.loads(p.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            logger.warning("阈值侧车不可解析, 禁用逐类门控: %s (%s)", p, exc)
+            return None
+        data = raw.get("thresholds") if isinstance(raw, dict) else None
+        if not isinstance(data, dict):
+            logger.warning("阈值侧车缺少 thresholds 字典, 禁用逐类门控: %s", p)
+            return None
+        try:
+            table = {str(k): float(v) for k, v in data.items()}
+        except (TypeError, ValueError) as exc:
+            logger.warning("阈值侧车取值非数值, 禁用逐类门控: %s (%s)", p, exc)
+            return None
+        missing = [l for l in labels if l not in table]
+        if missing:
+            logger.warning("阈值侧车未覆盖标签 %s, 禁用逐类门控: %s", missing, p)
+            return None
+        return table
+
+    def _ensure_model(self) -> bool:
+        """懒加载模型 (GPU 可用时), 失败返回 False 走降级。
+
+        支持两种权重形态:
+        - full-ft (v4+): 目录内 model.safetensors 即完整模型, 直接加载
+        - LoRA (v1~v3c): 目录内 adapter_model.safetensors, 基座+adapter 合成
+        """
+        if self._model is not None:
+            return True
+        try:
+            import torch
+            from transformers import VideoMAEForVideoClassification
+            self._device = get_device()
+
+            if not (Path(self.lora_dir) / "adapter_model.safetensors").exists():
+                # 全参微调形态: save_pretrained 直接产出完整模型目录
+                self._model = VideoMAEForVideoClassification.from_pretrained(
+                    self.lora_dir, local_files_only=True)
+                self._model.to(self._device)
+                self._model.eval()
+                logger.info("AnimeCameraClassifier 就绪 [full-ft] (device=%s, %d 类)",
+                            self._device, self._model.config.num_labels)
+                return True
+
+            from peft import PeftModel
+            # fine schema: 分类头是训练时 num_labels 重建的 (不在基座 ckpt),
+            # 训练脚本用 modules_to_save=["classifier"] 存进 adapter;
+            # 这里必须同样以 num_labels 重建 base, 否则 4 类头与 10 类 adapter 不匹配
+            if self.schema == "fine":
+                base = VideoMAEForVideoClassification.from_pretrained(
+                    self.model_dir, local_files_only=True,
+                    num_labels=len(self.labels), ignore_mismatched_sizes=True)
+            else:
+                base = VideoMAEForVideoClassification.from_pretrained(
+                    self.model_dir, local_files_only=True)
+            base.to(self._device)
+            self._model = PeftModel.from_pretrained(base, self.lora_dir)
+            self._model.to(self._device)
+            self._model.eval()
+            logger.info("AnimeCameraClassifier 就绪 (device=%s, schema=%s, %d 类)",
+                        self._device, self.schema, len(self.labels))
+            return True
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("LoRA 加载失败, 走光流规则降级: %s", exc)
+            self._model = None
+            return False
+
+    def _predict(self, video_path: str) -> Optional[Dict[str, Any]]:
+        """LoRA 前向 (手动归一化 + 逐类阈值)。"""
+        if not self._ensure_model():
+            return None
+        import torch
+        from decord import VideoReader, cpu
+        try:
+            vr = VideoReader(video_path, ctx=cpu(0))
+            n = len(vr)
+            if n < 2:
+                return None
+            if n <= NUM_FRAMES:
+                idxs = list(range(n))
+            else:
+                step = (n - 1) / (NUM_FRAMES - 1)
+                idxs = [round(i * step) for i in range(NUM_FRAMES)]
+            frames = vr.get_batch(idxs).asnumpy().astype(np.float32).transpose(0, 3, 1, 2)
+            if frames.shape[0] < NUM_FRAMES:
+                rep = (NUM_FRAMES + frames.shape[0] - 1) // frames.shape[0]
+                frames = np.tile(frames, (rep, 1, 1, 1))[:NUM_FRAMES]
+        except Exception:  # noqa: BLE001
+            return None
+
+        from torchvision.transforms import v2
+        x = v2.Resize((IMG_SIZE, IMG_SIZE))(torch.from_numpy(frames)).float() / 255.0
+        mean = torch.tensor(MEAN).view(1, 3, 1, 1)
+        std = torch.tensor(STD).view(1, 3, 1, 1)
+        x = ((x - mean) / std).unsqueeze(0).to(self._device)
+        with infer_ctx(self._device):
+            logits = self._model(pixel_values=x).logits[0]
+        probs = torch.softmax(logits, dim=-1).cpu().numpy()
+
+        # 阈值化: 高于阈值的类取概率最大者, 全低于 → majority
+        if self.thresholds is None:
+            pred = int(probs.argmax())
+        else:
+            thresh = np.array([self.thresholds[l] for l in self.labels])
+            above = np.where(probs >= thresh)[0]
+            pred = int(probs.argmax()) if len(above) == 0 else int(above[np.argmax(probs[above])])
+        return {"label": self.labels[pred],
+                "confidence": float(probs[pred]),
+                "probs": {self.labels[i]: float(probs[i]) for i in range(len(self.labels))}}
+
+    def classify_video(self, video_path: str) -> Dict[str, Any]:
+        """完整分类: LoRA (fine 直接输出 / coarse 加光流细分) + 降级链。"""
+        if not Path(video_path).exists():
+            # 快速失败: 不存在的文件不得触发模型加载
+            # (实测 from_pretrained 首次加载 30s+, 曾拖死全量 pytest 会话)
+            return {"label": "unknown", "coarse": None,
+                    "confidence": 0.0, "source": "unknown"}
+        result = self._predict(video_path)
+
+        if result is None:
+            # 降级: 纯光流规则
+            try:
+                from core.camera_movement_classifier import classify_video as rule_classify
+                r = rule_classify(video_path)
+                return {"label": r["dominant"], "coarse": None,
+                        "confidence": r["confidence"], "source": "flow_rule_degraded"}
+            except Exception:  # noqa: BLE001
+                return {"label": "unknown", "coarse": None,
+                        "confidence": 0.0, "source": "unknown"}
+
+        label = result["label"]
+        conf = result["confidence"]
+        if self.schema == "fine":
+            # fine 模式: 直接输出细方向 (无光流细分)
+            return {"label": label, "coarse": None,
+                    "confidence": conf, "source": "videomae-lora-fine"}
+
+        # coarse 模式: Motion → 光流细分
+        if label == "Motion":
+            try:
+                from core.camera_movement_classifier import classify_video as rule_classify
+                r = rule_classify(video_path)
+                fine = RULE_TO_PROJECT.get(r["dominant"], "pan_left")
+                return {"label": fine, "coarse": label,
+                        "confidence": round(conf * max(0.5, r["confidence"]), 4),
+                        "source": "videomae-lora+flow"}
+            except Exception:  # noqa: BLE001
+                return {"label": "pan_left", "coarse": label,
+                        "confidence": conf, "source": "videomae-lora"}
+        if label == "Static":
+            return {"label": "static", "coarse": label,
+                    "confidence": conf, "source": "videomae-lora"}
+        if label == "Pull":
+            return {"label": "zoom_out", "coarse": label,
+                    "confidence": conf, "source": "videomae-lora"}
+        return {"label": "zoom_in", "coarse": label,
+                "confidence": conf, "source": "videomae-lora"}
+
+
+if __name__ == "__main__":
+    import sys
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    clf = AnimeCameraClassifier()
+    for v in sys.argv[1:]:
+        print(v, "->", clf.classify_video(v))

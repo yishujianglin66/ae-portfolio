@@ -1,0 +1,65 @@
+# -*- coding: utf-8 -*-
+"""SFX 对齐真实切点重混 (2026-09-01)"""
+import sys
+import json
+import subprocess
+
+sys.path.insert(0, ".")
+from core.sfx_layer import _load_index  # noqa: E402
+
+pr = json.loads(open("output/unified_first/production_report.json", encoding="utf-8").read())
+segs = pr["script"]["segments"]
+pools = {k: _load_index().get(k, []) for k in ("impact", "whoosh", "riser")}
+
+import random  # noqa: E402
+rng = random.Random(2027)
+plan = []
+last = {}
+for s in segs:
+    t = round(s["start_time"], 2)
+    if t < 0.05:
+        continue
+    mood = s.get("mood", "build")
+    if mood in ("drop", "climax"):
+        pool, gain = pools["impact"], 0.85
+    elif mood == "intro":
+        pool, gain = pools["whoosh"], 0.4
+    else:
+        pool, gain = pools["whoosh"], 0.55
+    if not pool:
+        continue
+    f = rng.choice(pool)
+    for _ in range(3):
+        if f != last.get(id(pool)) or len(pool) == 1:
+            break
+        f = rng.choice(pool)
+    last[id(pool)] = f
+    plan.append((f, t, gain))
+print("真实切点 → SFX:", len(plan), "落点")
+
+
+def mix_batch(pb, in_mp4, out_mp4):
+    parts = []
+    labels = []
+    for i, (f, t, g) in enumerate(pb, start=1):
+        ms = int(t * 1000)
+        parts.append(f"[{i}:a]adelay={ms}|{ms},volume={g:.2f}[s{i}]")
+        labels.append(f"[s{i}]")
+    parts.append("[0:a]" + "".join(labels) +
+                 f"amix=inputs={len(pb)+1}:duration=first:normalize=0[outa]")
+    cmd = ["ffmpeg", "-y", "-i", in_mp4]
+    for f, _, _ in pb:
+        cmd += ["-i", f]
+    cmd += ["-filter_complex", ";".join(parts), "-map", "0:v", "-map", "[outa]",
+            "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", out_mp4]
+    return subprocess.run(cmd, capture_output=True, timeout=300).returncode == 0
+
+
+src = "output/unified_first/first_lut2.mp4"
+final = "output/unified_first/first_final3.mp4"
+ok = True
+for bi in range(0, len(plan), 14):
+    tgt = final if bi + 14 >= len(plan) else f"output/unified_first/_m{bi}.mp4"
+    ok = ok and mix_batch(plan[bi:bi + 14], src, tgt)
+    src = tgt
+print("真实卡点版:", ok)

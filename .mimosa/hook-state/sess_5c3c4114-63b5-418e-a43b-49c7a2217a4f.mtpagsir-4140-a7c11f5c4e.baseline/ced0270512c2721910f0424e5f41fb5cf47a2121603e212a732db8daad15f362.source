@@ -1,0 +1,139 @@
+﻿// AE高级运镜通道 — 自动生成 (ES3)
+var V22 = {};
+V22.fps = 24;
+V22.errors = [];
+V22.footageCache = {};
+V22.compCount = 0;
+V22.aepPath = "C:/Users/Administrator/Desktop/AE-Knowledge-Vault/output/unified_run8/ae_shots.aep";
+(function () {
+  try { app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES); } catch (e0) {}
+  app.newProject();
+  app.beginUndoGroup('ae_build');
+  try {
+    var shots = [
+      {"idx": 11, "src": "D:/BaiduNetdiskDownload/AE新手10套/独自升级（一般）/独自升级5.mp4", "srcStart": 115.98, "dur": 0.375, "speed": 0.9, "tech": "zoom_out", "onsets": [0.018]},
+      {"idx": 41, "src": "D:/AE-Work/resources/video/猫猫（一般）/素材/猫1.mp4", "srcStart": 14.71, "dur": 0.2917, "speed": 1.3, "tech": "pulse", "onsets": [0.136, 0.276]},
+      {"idx": 42, "src": "D:/AE-Work/resources/video/初音（简单）/Hatsune Miku Twixtor 4K.mp4", "srcStart": 102.12, "dur": 0.2917, "speed": 1.3, "tech": "pulse", "onsets": [0.286]},
+      {"idx": 44, "src": "D:/AE-Work/resources/video/猫猫（一般）/素材/猫2.mp4", "srcStart": 15.86, "dur": 0.625, "speed": 1.3, "tech": "zoom_back", "onsets": [0.016, 0.167, 0.608]},
+    ];
+    function getFootage(path) {
+      if (V22.footageCache[path]) { return V22.footageCache[path]; }
+      var f = new File(path);
+      if (!f.exists) { throw new Error('素材不存在: ' + path); }
+      var io = new ImportOptions(f);
+      io.forceAlphabeticalImport = true;
+      var item = app.project.importFile(io);
+      V22.footageCache[path] = item;
+      return item;
+    }
+    function ez(speed, influence) { return new KeyframeEase(speed, influence); }
+    function scaleVal(sp, s) {
+      var n = sp.value.length;
+      var v = [];
+      for (var vi = 0; vi < n; vi++) { v.push(s); }
+      return v;
+    }
+    function easeN(sp, e) {
+      var n = sp.value.length;
+      var arr = [];
+      for (var ai = 0; ai < n; ai++) { arr.push(e); }
+      return arr;
+    }
+    function applyEase(sp, eIn, eOut) {
+      for (var ek = 1; ek <= sp.numKeys; ek++) {
+        sp.setTemporalEaseAtKey(ek, easeN(sp, eIn), easeN(sp, eOut));
+      }
+    }
+    for (var i = 0; i < shots.length; i++) {
+      var shot = shots[i];
+      var nFrames = Math.round(shot.dur * V22.fps);
+      if (nFrames < 2) { nFrames = 2; }
+      var compName = 'shot_' + ('00' + shot.idx).slice(-3);
+      try {
+        var comp = app.project.items.addComp(compName, 1920, 1080, 1.0, nFrames / V22.fps, V22.fps);
+        comp.motionBlur = true;
+        comp.motionBlurAdaptive = true;
+        comp.motionBlurSamplesPerFrame = 16;
+        var foot = getFootage(shot.src);
+        var layer = comp.layers.add(foot);
+        layer.motionBlur = true;
+        if (Math.abs(shot.speed - 1.0) > 0.01) {
+          layer.stretch = 100.0 / shot.speed;
+        }
+        layer.startTime = -(shot.srcStart * layer.stretch / 100.0);
+        layer.inPoint = 0;
+        layer.outPoint = comp.duration;
+        var aw = layer.width, ah = layer.height;
+        layer.property('Anchor Point').setValue([aw / 2, ah / 2]);
+        layer.property('Position').setValue([960, 540]);
+        var baseScale = Math.max(1920 / aw, 1080 / ah) * 100 * 1.02;
+        var sp = layer.property('Scale');
+        var tMid = comp.duration / 2;
+        if (shot.tech === 'zoom_back') {
+          sp.setValueAtTime(0, scaleVal(sp, baseScale));
+          sp.setValueAtTime(tMid, scaleVal(sp, baseScale * 1.2));
+          sp.setValueAtTime(comp.duration, scaleVal(sp, baseScale));
+          applyEase(sp, ez(0, 33), ez(0, 33));
+        } else if (shot.tech === 'zoom_in') {
+          sp.setValueAtTime(0, scaleVal(sp, baseScale));
+          sp.setValueAtTime(comp.duration, scaleVal(sp, baseScale * 1.25));
+          sp.setTemporalEaseAtKey(1, easeN(sp, ez(0, 0.1)), easeN(sp, ez(0, 75)));
+          sp.setTemporalEaseAtKey(2, easeN(sp, ez(0, 75)), easeN(sp, ez(0, 0.1)));
+        } else if (shot.tech === 'push') {
+          sp.setValueAtTime(0, scaleVal(sp, baseScale));
+          sp.setValueAtTime(comp.duration, scaleVal(sp, baseScale * 1.3));
+          sp.setTemporalEaseAtKey(1, easeN(sp, ez(0, 0.1)), easeN(sp, ez(0, 10)));
+          sp.setTemporalEaseAtKey(2, easeN(sp, ez(0, 90)), easeN(sp, ez(0, 0.1)));
+        } else if (shot.tech === 'zoom_out') {
+          sp.setValueAtTime(0, scaleVal(sp, baseScale * 1.3));
+          sp.setValueAtTime(comp.duration, scaleVal(sp, baseScale));
+          applyEase(sp, ez(0, 33), ez(0, 33));
+        } else {
+          sp.setValueAtTime(0, scaleVal(sp, baseScale));
+          var lastT = 0;
+          for (var oi = 0; oi < shot.onsets.length; oi++) {
+            var t0 = shot.onsets[oi];
+            if (t0 <= lastT + 0.1) { continue; }
+            sp.setValueAtTime(t0, scaleVal(sp, baseScale * 1.25));
+            sp.setValueAtTime(t0 + 0.08, scaleVal(sp, baseScale));
+            lastT = t0 + 0.08;
+          }
+          sp.setValueAtTime(comp.duration, scaleVal(sp, baseScale));
+          var nk = sp.numKeys;
+          for (var k2 = 1; k2 <= nk; k2++) {
+            sp.setTemporalEaseAtKey(k2, easeN(sp, ez(0, 10)), easeN(sp, ez(0, 60)));
+          }
+        }
+        var rqItem = app.project.renderQueue.items.add(comp);
+        var om = rqItem.outputModule(1);
+        var tplNames = om.templates;
+        var picked = '';
+        for (var ti = 0; ti < tplNames.length; ti++) {
+          var tn = tplNames[ti];
+          if (tn === 'Lossless' || tn === '无损') { picked = tn; break; }
+        }
+        if (picked !== '') { om.applyTemplate(picked); }
+        else { om.format = 'AVI'; }
+        om.file = new File("C:/Users/Administrator/Desktop/AE-Knowledge-Vault/output/unified_run8/ae_raw" + '/' + compName + '.avi');
+        V22.compCount += 1;
+      } catch (e2) {
+        V22.errors.push(compName + ': ' + e2.message);
+      }
+    }
+    app.project.save(File(V22.aepPath));
+  } catch (e) {
+    V22.errors.push('fatal: ' + e.message + ' line:' + e.line);
+  }
+  app.endUndoGroup();
+})();
+(function () {
+  var rs = '{"compCount":' + V22.compCount + ',"errors":[';
+  for (var ei = 0; ei < V22.errors.length; ei++) {
+    if (ei > 0) { rs += ','; }
+    rs += '"' + String(V22.errors[ei]).replace(/"/g, "'").replace(/\n/g, ' ') + '"';
+  }
+  rs += ']}';
+  var rf = new File("C:/Users/Administrator/Desktop/AE-Knowledge-Vault/output/unified_run8/ae_build_result.json");
+  rf.encoding = 'UTF-8';
+  if (rf.open('w')) { rf.write(rs); rf.close(); }
+})();

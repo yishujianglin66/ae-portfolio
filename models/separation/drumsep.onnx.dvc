@@ -1,0 +1,5 @@
+outs:
+- md5: f62228814f4ce907e72baeabbbe5c75d
+  size: 335086851
+  hash: md5
+  path: drumsep.onnx
