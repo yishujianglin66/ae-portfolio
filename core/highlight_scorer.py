@@ -52,6 +52,8 @@ class SegmentScore:
     frame_count: int = 0
     duration_sec: float = 0.0
     compute_time_ms: float = 0.0
+    # 证据链：评分依据日志
+    reasoning_log: str = ""
 
     @property
     def dimensions(self) -> Dict[str, float]:
@@ -132,7 +134,8 @@ class HighlightScorer:
                 video_path=video_path, start_sec=start_sec, end_sec=end_sec,
                 total=0.0, frame_count=len(frames),
                 duration_sec=end_sec - start_sec,
-                compute_time_ms=(time.time() - t0) * 1000
+                compute_time_ms=(time.time() - t0) * 1000,
+                reasoning_log="Insufficient frames for scoring"
             )
             return score
 
@@ -160,6 +163,16 @@ class HighlightScorer:
         # 归一化到0-1
         total = np.clip(total, 0.0, 1.0)
 
+        # Build evidence-based reasoning log
+        reasoning_parts = []
+        if motion_score > 0.5:
+            reasoning_parts.append(f"High motion intensity ({motion_score:.2f})")
+        if camera_score > 0.5:
+            reasoning_parts.append(f"Strong camera movement ({camera_score:.2f})")
+        if scene_score > 0.3:
+            reasoning_parts.append(f"Frequent scene changes ({scene_score:.2f})")
+        reasoning_log = "; ".join(reasoning_parts) if reasoning_parts else "Low visual activity detected"
+
         score = SegmentScore(
             video_path=video_path,
             start_sec=start_sec,
@@ -173,6 +186,7 @@ class HighlightScorer:
             frame_count=len(frames),
             duration_sec=end_sec - start_sec,
             compute_time_ms=(time.time() - t0) * 1000,
+            reasoning_log=reasoning_log,
         )
 
         if self.cache_enabled:
@@ -249,6 +263,7 @@ class HighlightScorer:
                 expression=d.get("expression", 0.0), audio=d.get("audio", 0.0),
                 total=d.get("total", 0.0), frame_count=d.get("frame_count", 0),
                 duration_sec=d.get("duration_sec", 0.0),
+                reasoning_log=d.get("reasoning_log", ""),
             ) for d in data["scores"]]
             logger.info(f"磁盘缓存命中: {video_path} {len(scores)}段")
             return scores
@@ -270,7 +285,7 @@ class HighlightScorer:
                     "scores": [{k: getattr(s, k) for k in
                                 ("video_path", "start_sec", "end_sec", "motion",
                                  "camera", "scene_change", "expression", "audio",
-                                 "total", "frame_count", "duration_sec")}
+                                 "total", "frame_count", "duration_sec", "reasoning_log")}
                                for s in scores]}
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False)
