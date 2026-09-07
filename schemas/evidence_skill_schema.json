@@ -1,0 +1,20 @@
+{
+  "skill_id": "beat_sync_anchor",
+  "version": "1.0.0",
+  "input_contract": {
+    "bgm_features": ["onset_times", "energy_envelope"],
+    "lens_sequence": ["start_sec", "end_sec", "motion_label"]
+  },
+  "evidence_chain": {
+    "trigger_condition": "violin_phrase_detected AND onset_gap > 0.3s",
+    "decision_rationale": "Slow curve + zoom_in required for aesthetic emphasis"
+  },
+  "execution_logic": {
+    "tool_call": "apply_twixtor_curve",
+    "params": {"speed": 0.55, "anchor_point": "mid"}
+  },
+  "acceptance_criteria": {
+    "gate_score_min": 7,
+    "visual_check": "no_artifacts_at_freeze_frame"
+  }
+}
