@@ -1,0 +1,5 @@
+outs:
+- md5: 7049ccd60bbb1ad217528e2740c20357
+  size: 3764030874
+  hash: md5
+  path: MelBandRoformer4StemFTLarge.ckpt
