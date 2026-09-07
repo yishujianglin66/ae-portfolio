@@ -325,7 +325,7 @@ def main() -> int:
                 labels.append(f"[s{i}]")
             parts.append("[0:a]" + "".join(labels) +
                          f"amix=inputs={len(pb)+1}:duration=first:normalize=0[am];"
-                         f"[am]alimiter=attack=1:release=50:limit=0.95:level=0[outa]")
+                         f"[am]alimiter=attack=1:release=50:limit=0.88:level=0[outa]")
             cmd = ["ffmpeg", "-y", "-i", in_mp4]
             for f, _, _ in pb:
                 cmd += ["-i", f]

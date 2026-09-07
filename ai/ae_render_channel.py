@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from core.paths import ae_exe, aerender_exe, ffmpeg_bin, ffprobe_bin
+from core.bridge_failure import from_reason as _bf_from_reason, BridgeFailure
 
 # AE 2025 完整版 (AE 2026 目录是空壳, 只有1个脚本面板)
 # 路径统一收口到 core/paths.py（AEK_AE_EXE / AEK_AERENDER / AEK_FFMPEG / AEK_FFPROBE 可覆盖）
@@ -61,6 +62,16 @@ class AERenderChannel:
         self.ae_dir.mkdir(parents=True, exist_ok=True)
         self.aep_path = self.out_dir / "ae_shots.aep"
         self.jsx_path = self.out_dir / "build_comps.jsx"
+        self.failures: List[BridgeFailure] = []
+
+    def _fail(self, reason: str, stage: str, on_fail_reason=None) -> None:
+        """记录结构化失败 + 回调旧接口（向后兼容）。"""
+        self.failures.append(_bf_from_reason(reason, stage))
+        if on_fail_reason:
+            on_fail_reason(reason)
+
+    def get_failures(self) -> List[Dict]:
+        return [f.to_dict() for f in self.failures]
 
     # ────────────────────────────────────────────────────────────
     # 签名（与监听器 ae_mcp_listener.jsx 对齐）
@@ -153,8 +164,7 @@ class AERenderChannel:
         """ae_plan: {idx: {source, source_start, render_dur, speed, tech,
                            onsets, fps, resolution, color}}"""
         if not ae_plan or not Path(AERENDER).exists():
-            if on_fail_reason:
-                on_fail_reason("计划为空或aerender不存在")
+            self._fail("计划为空或aerender不存在", "preflight", on_fail_reason)
             return {}
 
         print(f"\n[AE通道] 生成JSX ({len(ae_plan)}镜头, 贝塞尔缓动+运动模糊)...")
@@ -163,8 +173,7 @@ class AERenderChannel:
 
         # 确保 AE 运行
         if not self._ensure_ae_running():
-            if on_fail_reason:
-                on_fail_reason("AE未运行且启动失败")
+            self._fail("AE未运行且启动失败", "ae_launch", on_fail_reason)
             return {}
 
         # Bridge 就绪检查 (监听器无 ping 分支, 用最小 executeAtomScript 探测)
@@ -178,8 +187,7 @@ class AERenderChannel:
         print("[AE通道] Bridge 构建合成...")
         bridge_res = self._bridge_run_jsx(str(self.jsx_path), timeout=300)
         if bridge_res is None:
-            if on_fail_reason:
-                on_fail_reason("Bridge无响应(300s超时)")
+            self._fail("Bridge无响应(300s超时)", "bridge_build", on_fail_reason)
             return {}
         print(f"  Bridge: status={bridge_res.get('status', '')}")
         time.sleep(3)
@@ -199,8 +207,7 @@ class AERenderChannel:
         # 此前用 >= len(ae_plan) 作门槛, 个别镜头失败会拖垮整个 AE 通道。
         if not (build_info and build_info.get("compCount", 0) >= 1):
             err = (build_info or {}).get("errors", []) if build_info else ["无构建结果"]
-            if on_fail_reason:
-                on_fail_reason(f"合成构建失败: {err}")
+            self._fail(f"合成构建失败: {err}", "build_validate", on_fail_reason)
             return {}
         _errs = (build_info or {}).get("errors", [])
         if _errs:
@@ -244,8 +251,7 @@ class AERenderChannel:
                     print(f"    shot{idx:02d}: [OK] {p['render_dur']:.3f}s → "
                           f"{int(round(p['render_dur']*p['fps']))}帧")
                 else:
-                    if on_fail_reason:
-                        on_fail_reason(err)
+                    self._fail(err, "normalize", on_fail_reason)
         return ae_clips
 
     # ────────────────────────────────────────────────────────────

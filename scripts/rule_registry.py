@@ -7,7 +7,7 @@ import re
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent
 RULESET = ROOT / "data" / "rules" / "ruleset.jsonl"
@@ -16,7 +16,14 @@ FORMS = ("constraint", "mapping", "dosage", "curve")
 INJECT_POINTS = ("cut_anchor", "effect_map", "transition", "speed_curve",
                  "sfx_gain", "narrative")
 STATUSES = ("active", "standby", "retired")
-VOTE_RETIRE_THRESHOLD = 2  # down 比 up 多出该数量 → 自动降级 standby
+
+# 规则晋升/降级/退役阈值（§7.3 治理机制，消除"何时转正"的人工解释空间）:
+#   active  转正:  up - down >= PROMOTE_THRESHOLD 且 evidence 完整（schema 过闸）
+#   standby 降级:  down - up >= DEMOTE_THRESHOLD（投票翻负）
+#   retired 退役:  standby 后继续翻负至 down - up >= RETIRE_THRESHOLD，或显式 retire
+PROMOTE_THRESHOLD = 2
+DEMOTE_THRESHOLD = 2
+RETIRE_THRESHOLD = 4
 
 # 首条规则：来自 2026-09-05 E0-1 二轮 A/B（闸门 2 合规）
 SEED_RULE: Dict[str, Any] = {
@@ -95,6 +102,32 @@ def validate_schema(rule: Dict[str, Any]) -> List[str]:
     return errs
 
 
+def evaluate_status(rule: Dict[str, Any]) -> Tuple[str, Optional[str]]:
+    """确定性状态机：按投票差 + 证据完整性判定目标状态（§7.3 治理机制）。
+
+    纯函数，不落盘，由 cmd_vote 调用并把结果写回。语义：
+      retired 为终态，不可逆；
+      down-up >= RETIRE_THRESHOLD 且当前 standby → retired（连续翻负退役）;
+      down-up >= DEMOTE_THRESHOLD → standby（投票翻负）;
+      up-down >= PROMOTE_THRESHOLD 且 schema 过闸 → active（转正）;
+      其余维持现状。
+    """
+    votes = rule.get("votes") or {}
+    up = int(votes.get("up", 0))
+    down = int(votes.get("down", 0))
+    diff = down - up
+    cur = rule.get("status", "standby")
+    if cur == "retired":
+        return "retired", "终态，不可逆"
+    if diff >= RETIRE_THRESHOLD and cur == "standby":
+        return "retired", f"standby 后继续翻负 down-up={diff} >= {RETIRE_THRESHOLD}"
+    if diff >= DEMOTE_THRESHOLD:
+        return "standby", f"投票翻负 down-up={diff} >= {DEMOTE_THRESHOLD}"
+    if up - down >= PROMOTE_THRESHOLD and not validate_schema(rule):
+        return "active", f"支持票领先 up-down={up-down} >= {PROMOTE_THRESHOLD} 且证据完整"
+    return cur, None
+
+
 def cmd_seed() -> int:
     rules = load_ruleset()
     if any(r.get("rule_id") == SEED_RULE["rule_id"] for r in rules):
@@ -162,13 +195,17 @@ def cmd_vote(rule_id: str, up: bool, run_tag: str = "") -> int:
         key = "up" if up else "down"
         r["votes"][key] = r["votes"].get(key, 0) + 1
         r["last_confirmed"] = _today()
-        # 退役条款 §7.3-5: 反对票显著领先 → 自动 standby
-        if r["votes"].get("down", 0) - r["votes"].get("up", 0) >= VOTE_RETIRE_THRESHOLD:
-            r["status"] = "standby"
-            print(f"[vote] {rule_id} 反对票领先 → 自动降级 standby")
         if run_tag:
             r.setdefault("vote_runs", []).append(
                 {"run": run_tag, "vote": key, "ts": _now()})
+        # 确定性状态机（§7.3）：转正 / 投票翻负降级 / 连续翻负退役
+        target, reason = evaluate_status(r)
+        if target != r.get("status"):
+            prev = r.get("status")
+            r["status"] = target
+            r.setdefault("status_log", []).append(
+                {"from": prev, "to": target, "reason": reason, "ts": _now()})
+            print(f"[vote] {rule_id} {prev} → {target}（{reason}）")
         save_ruleset(rules)
         print(f"[vote] {rule_id} {key} 落库: {r['votes']}")
         return 0
@@ -180,9 +217,13 @@ def cmd_retire(rule_id: str, reason: str = "") -> int:
     rules = load_ruleset()
     for r in rules:
         if r["rule_id"] == rule_id:
+            prev = r.get("status")
             r["status"] = "retired"
             r["retire_reason"] = reason
             r["retired_at"] = _now()
+            r.setdefault("status_log", []).append(
+                {"from": prev, "to": "retired", "reason": reason or "显式退役",
+                 "ts": _now()})
             save_ruleset(rules)
             print(f"[retire] {rule_id} 已退役（{reason}）——管线自动回退启发式")
             return 0

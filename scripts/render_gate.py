@@ -21,11 +21,17 @@ FF = "C:/ffmpeg/bin/ffmpeg.exe"
 
 
 def _audio(p):
+    """按原生声道/采样率解码, 返回 (frames, channels)。
+
+    曾用 `-ac 1 -ar 22050` 下混: 双声道求平均会掩盖单边削波
+    (run61_final 真峰 1.000=0.0dBFS, 下混后只报 0.933, 无削波误判 PASS),
+    且 22050 采样使 4000-12000Hz 频段的 11025Hz 以上部分不存在。
+    """
     import soundfile as sf
-    r = subprocess.run([FF, "-y", "-i", str(p), "-vn", "-ac", "1", "-ar",
-                        "22050", "-f", "wav", "-"], capture_output=True, timeout=300)
+    r = subprocess.run([FF, "-y", "-i", str(p), "-vn", "-f", "wav", "-"],
+                       capture_output=True, timeout=300)
     y, sr = sf.read(io.BytesIO(r.stdout), dtype="float32")
-    return (y.mean(axis=1) if y.ndim > 1 else y), sr
+    return (y.reshape(-1, 1) if y.ndim == 1 else y), sr
 
 
 def _band(y, sr, lo, hi):
@@ -45,16 +51,22 @@ def main():
     if "--final" in sys.argv:   # v9: 曲线版交付件名字带版本后缀, 用 --final 指定被测文件
         final = Path(sys.argv[sys.argv.index("--final") + 1])
     checks = []
+    print(f"  [被测] {final}")
 
     def add(name, ok, detail):
         checks.append(ok)
         print(f"  [{'PASS' if ok else 'FAIL'}] {name}: {detail}")
 
     # 1 音频纯净(鼓点保留 + 无削波)
-    y, sr = _audio(final)
+    ch, sr = _audio(final)
+    y = ch.mean(axis=1)
     add("鼓点保留", _band(y, sr, 4000, 12000) > 0,
         f"高频能量 {_band(y, sr, 4000, 12000):.1f}")
-    add("无削波", float(np.max(np.abs(y))) <= 0.99, f"peak {np.max(np.abs(y)):.3f}")
+    peak = float(np.abs(ch).max())
+    clip_pct = float(np.mean(np.abs(ch) >= 0.999) * 100)
+    add("无削波", peak <= 0.99,
+        f"逐声道 peak {peak:.3f} ({20*np.log10(max(peak,1e-9)):+.2f}dBFS) "
+        f"顶满采样 {clip_pct:.4f}%")
 
     # 2 切点-鼓点对齐
     import librosa
@@ -77,9 +89,14 @@ def main():
         add("决斗段快档", fast_ratio >= 0.25 and fast_rate >= 3.8,
             f"快档占比 {fast_ratio:.0%} 等效 {fast_rate:.1f}切/s (阈25%/3.8)")
         add("变速档位", tiers >= 3, f"{tiers} 档间隔 (阈3) {sorted(set(round(x,2) for x in g))[:6]}")
-    # 4 速度分层
-    sp = set(round(s.get("speed", 1.0), 2) for s in segs)
-    add("速度分层", len(sp) >= 3, f"{len(sp)} 档 {sorted(sp)[:8]}")
+    # 4 速度分层 (分半程: 全片档位并集会被前半段的丰富度掩盖后半程的平速墙)
+    def _tiers(sub):
+        return sorted(set(round(s.get("speed", 1.0), 2) for s in sub))
+    mid = segs[-1]["end_time"] / 2
+    t1, t2 = _tiers([s for s in segs if s["start_time"] < mid]), \
+             _tiers([s for s in segs if s["start_time"] >= mid])
+    add("速度分层", len(t1) >= 3 and len(t2) >= 3,
+        f"前半 {len(t1)}档 {t1[:6]} | 后半 {len(t2)}档 {t2[:6]} (各阈3)")
     # 5 隐形切点(亮度归一化, 暗画面误报校正)
     def grab(t):
         r = subprocess.run([FF, "-ss", f"{t:.3f}", "-i", str(final), "-frames:v", "1",
@@ -95,7 +112,7 @@ def main():
     add("切点可见", vis >= n_chk * 0.55, f"{vis}/{n_chk} 帧差可见 (阈55%, 暗画面指标保守)")
 
     npass = sum(checks)
-    print(f"\n闸门: {npass}/{len(checks)} 通过" + (" ✅ ACCEPT" if npass == len(checks) else " ❌ REJECT"))
+    print(f"\n闸门: {npass}/{len(checks)} 通过" + (" [ACCEPT]" if npass == len(checks) else " [REJECT]"))
     return 0 if npass == len(checks) else 1
 
 

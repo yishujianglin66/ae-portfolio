@@ -337,6 +337,7 @@ class ProductionDirector:
         self._rhythm_selection: Dict[str, Any] = {}    # 节奏奖励择优证据
         self._used_windows: Dict[str, List[float]] = {}  # 素材已用窗口记录(防重复)
         self._highlight_pool: Optional[Dict[str, List[Tuple[float, float]]]] = None  # 高光段池懒加载
+        self._highlight_pool_warned: bool = False  # 高光池失效只报一次(每选段都会调,防刷屏)
         self._semantic_windows: Optional[Dict[str, List[Tuple[float, str]]]] = None  # 语义窗口池懒加载(Stage2)
         self._beat_class = None       # v22 节拍强弱分级结果 (懒加载)
         self._dyn = None              # v22 音乐动态分析器 (懒加载)
@@ -548,6 +549,15 @@ class ProductionDirector:
             temp_video = self._execute(script, resolution, fps,
                                        enable_ae_channel=enable_ae_channel,
                                        beat_lock_hard_cuts=beat_lock_hard_cuts)
+
+            # _execute 内的乐句克隆/重音强调 pass 会就地改写 speed 与
+            # zoompan_effect, Phase2 落的 yaml 因此描述的是另一部片子
+            # (run62: yaml 12.8s 后 51 镜全 1.55x, 实渲为 0.55/1.1/1.5 三档)。
+            # 渲染后重写, 让可比对的剧本工件与实际交付一致。
+            try:
+                script.save_yaml(output_dir / "director_script.yaml")
+            except Exception as _ys_e:  # noqa: BLE001
+                print(f"  [WARN] 剧本YAML重写失败(不阻断): {_ys_e}")
 
             # 3.5 时长守卫 (2026-08-16): 帧量化后的最后防线 — 实测成片与
             # 剧本时长差 >0.15s 时重编码裁齐, 杜绝"多出几秒"类交付缺陷
@@ -3559,6 +3569,26 @@ class ProductionDirector:
         _tie = sorted(s for s in pool if _ratio(s) <= _min_r + 1e-9)
         return _tie[seg_idx % len(_tie)]
 
+    def _check_semantic_degenerate(self, windows, name: str, cached: bool) -> None:
+        """语义窗口退化检测 — 全同标签 = 零区分度。
+
+        判据不绑定 _calc_source_start 的 _role_scene 词表(避免两处维护漂移):
+        只要所有窗口标签相同, 叙事角色匹配就必然落空, 选段一律穿透到高光池。
+        neutral 额外提示: 它是抽帧失败/无 scene_type/异常共用的默认值,
+        全 neutral 且来自缓存 = 上游失败已被固化, 会永久命中且不再重试。
+        """
+        if not windows:
+            return
+        tags = [str(t) for _, t in windows]
+        if len(set(tags)) > 1:
+            return
+        _tag = tags[0]
+        print(f"  [semantic-window] {name}: {len(tags)} 窗口全为 '{_tag}'"
+              f"({'缓存' if cached else '本次分析'}) → 零区分度, "
+              f"叙事角色匹配必然落空, 选段穿透到高光池"
+              + ("；该缓存已固化上游失败, 建议删除后重跑"
+                 if cached and _tag == "neutral" else ""))
+
     def _get_semantic_windows(self, source_key: str) -> Optional[List[Tuple[float, str]]]:
         """懒加载素材的语义窗口池 [(start_sec, scene_tag), ...] — Qwen3-VL 分析。
 
@@ -3586,8 +3616,10 @@ class ProductionDirector:
             _cache = os.path.join(_cache_dir, f"{_h}_v4_3s.json")
             if os.path.exists(_cache):
                 with open(_cache, encoding="utf-8") as _f:
-                    self._semantic_windows[source_key] = [
-                        (float(s), str(m)) for s, m in _json.load(_f)]
+                    _loaded = [(float(s), str(m)) for s, m in _json.load(_f)]
+                self._semantic_windows[source_key] = _loaded
+                self._check_semantic_degenerate(
+                    _loaded, os.path.basename(source_key), cached=True)
                 return self._semantic_windows[source_key]
             # 无缓存: 按 3s 时间窗口抽帧, 用 Qwen3-VL(_vlm_analyze) 逐窗口分析
             from ai.material_intelligence import MaterialIntelligenceEngine
@@ -3595,6 +3627,9 @@ class ProductionDirector:
             _d = self._source_durations.get(source_key, 60.0)
             _win = 3
             _windows = []
+            # neutral 是三种失败共用的默认值, 分类计数才能区分"VLM 判为中性"
+            # 与"VLM 根本没跑起来" —— 后者不该被当成结果固化进缓存
+            _stats = {"ok": 0, "no_frame": 0, "no_key": 0, "err": 0}
             for _ws in range(0, max(1, int(_d)), _win):
                 try:
                     # v4: count=1 只抽窗口中部单帧(50%), 标签=该帧内容,
@@ -3604,43 +3639,78 @@ class ProductionDirector:
                         count=1)
                     if not _b64:
                         _mood = "neutral"
+                        _stats["no_frame"] += 1
                     else:
                         _res, _ = _eng._vlm_analyze(_b64, source_key)
                         # 存 "scene:action" 复合标签, 爆发段用 scene 精确区分
                         # (mood 太泛: intense 同时出现在蓄力/爆发, scene=battle
                         #  才能精确判定爆发)
-                        _mood = str(_res.get("scene_type", "neutral"))
+                        if isinstance(_res, dict) and "scene_type" in _res:
+                            _mood = str(_res["scene_type"])
+                            _stats["ok"] += 1
+                        else:
+                            _mood = "neutral"
+                            _stats["no_key"] += 1
                 except Exception:
                     _mood = "neutral"
+                    _stats["err"] += 1
                 _windows.append((float(_ws), str(_mood)))
-            os.makedirs(_cache_dir, exist_ok=True)
-            with open(_cache, "w", encoding="utf-8") as _f:
-                _json.dump(_windows, _f, ensure_ascii=False)
             self._semantic_windows[source_key] = _windows
-            print(f"  语义窗口(Qwen3-VL): {os.path.basename(source_key)} "
-                  f"{len(_windows)}段 {[(round(s), m) for s, m in _windows[:4]]}...")
+            if _stats["ok"] == 0:
+                # 无一窗口拿到真实 scene_type → 本次是失败不是结果, 不落盘,
+                # 否则会被永久命中且再不重试(2026-09-06 实测 392 窗口全 neutral)
+                print(f"  [semantic-window] {os.path.basename(source_key)}: "
+                      f"{len(_windows)} 窗口无一拿到 scene_type "
+                      f"(抽帧失败 {_stats['no_frame']} / 无 scene_type 键 "
+                      f"{_stats['no_key']} / 异常 {_stats['err']}) → 拒绝落盘, 下次重试")
+            else:
+                os.makedirs(_cache_dir, exist_ok=True)
+                with open(_cache, "w", encoding="utf-8") as _f:
+                    _json.dump(_windows, _f, ensure_ascii=False)
+                print(f"  语义窗口(Qwen3-VL): {os.path.basename(source_key)} "
+                      f"{len(_windows)}段 有效 {_stats['ok']}"
+                      + (f" (抽帧失败 {_stats['no_frame']} / 无键 {_stats['no_key']}"
+                         f" / 异常 {_stats['err']})"
+                         if _stats["no_frame"] + _stats["no_key"] + _stats["err"] else "")
+                      + f" {[(round(s), m) for s, m in _windows[:4]]}...")
+            self._check_semantic_degenerate(
+                _windows, os.path.basename(source_key), cached=False)
             return _windows
         except Exception as _e:
             print(f"  [WARN] 语义窗口失败(回退高光池): {_e}")
             return None
 
+    def _warn_highlight_pool(self, msg: str) -> None:
+        """高光池失效播报(只一次) — 本方法每选段都会调, 直接 print 会刷屏。"""
+        if self._highlight_pool_warned:
+            return
+        self._highlight_pool_warned = True
+        print(f"  [highlight-pool] {msg}")
+
     def _get_highlight_pool(self, source_key: str) -> Optional[List[Tuple[float, float]]]:
         """懒加载某素材的高光段池 [(start_sec, total_score), ...] 按total降序。
 
-        复用 HighlightScorer 磁盘缓存 (v22 已生成 cache/highlight_scores/),
-        无缓存/不可用返回 None → 调用方回退均匀分散。
+        只读 HighlightScorer 磁盘缓存 (cache/highlight_scores/), 该缓存由
+        scripts/build_highlight_cache.py 预扫描生成; 本方法不会自己算分。
+        无缓存/不可用返回 None → 调用方回退均匀分散, 并播报一次原因。
         """
         try:
             if not source_key or not os.path.exists(source_key):
                 return None
             if self._highlight_pool is None:
                 self._highlight_pool = {}
-                from core.highlight_scorer import HighlightScorer
+                try:
+                    from core.highlight_scorer import HighlightScorer
+                except ImportError as e:
+                    self._warn_highlight_pool(
+                        f"HighlightScorer 不可用({e}) → 全程回退均匀取点")
+                    return None
                 scorer = HighlightScorer(
                     sample_fps=6, resize=(256, 144), cache_enabled=True,
                     disk_cache_dir=os.path.join(
                         _PROJECT_ROOT, "cache", "highlight_scores"))
                 src = list(self._source_durations.keys())
+                _errs = 0
                 for sp in src:
                     try:
                         segs = scorer.load_disk_cache(sp, segment_duration=2.0)
@@ -3649,9 +3719,22 @@ class ProductionDirector:
                                 [(s.start_sec, float(s.total)) for s in segs],
                                 key=lambda x: x[1], reverse=True)
                     except Exception:
+                        _errs += 1
                         continue
+                if not self._highlight_pool:
+                    self._warn_highlight_pool(
+                        f"{len(src)} 源全部无高光缓存"
+                        + (f"(读取异常 {_errs})" if _errs else "")
+                        + " → 跑 python scripts/build_highlight_cache.py")
+                elif len(self._highlight_pool) < len(src) or _errs:
+                    self._warn_highlight_pool(
+                        f"高光缓存覆盖 {len(self._highlight_pool)}/{len(src)} 源"
+                        + (f", 读取异常 {_errs}" if _errs else "")
+                        + " → 未覆盖源回退均匀取点")
             return self._highlight_pool.get(source_key)
-        except Exception:
+        except Exception as e:
+            self._warn_highlight_pool(
+                f"高光池加载异常 {type(e).__name__}: {e} → 回退均匀取点")
             return None
 
     # ================================================================
@@ -3949,6 +4032,11 @@ class ProductionDirector:
                     on_fail_reason=lambda e: print(f"    [AE-FALLBACK] {e} → ffmpeg通道"))
                 if ae_clips_map:
                     print(f"  [AE通道] 成功渲染 {len(ae_clips_map)}/{len(_ae_plan)} 镜头")
+                if _chan.failures:
+                    import json as _json
+                    (self._output_dir / "ae_failures.json").write_text(
+                        _json.dumps(_chan.get_failures(), ensure_ascii=False, indent=2),
+                        encoding="utf-8")
 
         # 节拍锁定硬切模式 (2026-09-02): fade/xfade 的渐变中点天然糊掉切点
         # (实测实际切点 vs 计划 p50 偏 122ms, 最大 587ms, xfade 链内边界数学
