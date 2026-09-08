@@ -13,6 +13,7 @@ r"""T11: BGE-M3语义检索 + 关键词RRF混合检索。
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -27,6 +28,19 @@ sys.path.insert(0, str(ROOT))
 INTEL_CACHE = ROOT / "cache" / "material_intel"
 INDEX_DIR = ROOT / "cache" / "bge_m3_index"
 RRF_K = 20  # 优化: 从60降到20(38条索引更适合小k)
+
+# ---------------------------------------------------------------------------
+# 分流检索（2026-09-08，基准 v2 证据驱动，开关默认关）
+# 证据: output/evidence/r3_benchmark_v2_20260908/（四臂实测）
+#   - 别名命中查询: 关键词通道+RRF 满分（legacy R@10=1.000），原链路不动
+#   - 自然语言查询: 关键词 2-gram 误命中是负资产（hybrid 0.267 < 纯语义 0.286），
+#     纯语义池 + bge-reranker-v2-m3 重排最优（R@10=0.400，+11.4pp vs 纯语义）
+# 启用: set AEKV_RETRIEVAL_RERANK=1
+# ---------------------------------------------------------------------------
+RERANK_ENV = "AEKV_RETRIEVAL_RERANK"
+RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
+RERANK_POOL = 30  # 重排候选池（基准 v2 实测口径）
+_RERANKER = None  # 懒加载单例
 
 # 角色→IP别名映射(增强关键词搜索)
 CHAR_TO_IP = {
@@ -267,9 +281,70 @@ def semantic_search(embeddings: np.ndarray, entries: List[Dict],
     return [entries[i]["file_hash"] for i in top_indices]
 
 
+def query_has_alias_hit(query: str) -> bool:
+    """查询是否命中别名表/IP名（强关键词通道信号）。
+
+    命中 → 走原 hybrid 链路（legacy 基准满分，重排只会轻微失分）；
+    未命中 → 自然语言场景查询，走纯语义+重排（基准 v2 D 臂最优）。
+    """
+    q = query.lower().strip()
+    if not q:
+        return False
+    for alias in CHAR_TO_IP:
+        if alias in q or q in alias:
+            return True
+    all_ips = set(IP_VISUAL_KW.keys()) | set(CHAR_TO_IP.values())
+    for ip in all_ips:
+        if ip and (ip in query or query in ip):
+            return True
+    return False
+
+
+def decide_route(query: str) -> str:
+    """分流决策（纯逻辑，可单测）。返回 'hybrid' 或 'semantic_rerank'。"""
+    if os.environ.get(RERANK_ENV, "0") != "1":
+        return "hybrid"
+    return "hybrid" if query_has_alias_hit(query) else "semantic_rerank"
+
+
+def _get_reranker():
+    """懒加载 CrossEncoder 单例（仅分流启用且命中自然语言分支时加载）。"""
+    global _RERANKER
+    if _RERANKER is None:
+        from sentence_transformers import CrossEncoder
+        _RERANKER = CrossEncoder(RERANKER_MODEL, max_length=512)
+    return _RERANKER
+
+
+def _entry_text(e: Dict) -> str:
+    """喂给重排器的文档文本（与基准 v2 同口径）。"""
+    parts = [e.get("description", ""), " ".join(e.get("ip_names", [])),
+             e.get("mood", ""), e.get("scene_type", "")]
+    return " ".join(p for p in parts if p).strip() or e.get("primary_ip", "")
+
+
+def semantic_rerank_search(entries: List[Dict], embeddings: np.ndarray,
+                           model, query: str, top_k: int = 10,
+                           pool_size: int = RERANK_POOL) -> List[Dict]:
+    """自然语言分支：纯语义候选池 + CrossEncoder 重排（基准 v2 D 臂）。"""
+    query_emb = model.encode([query])[0]
+    pool_hashes = semantic_search(embeddings, entries, query_emb, top_k=pool_size)
+    hash_to_entry = {e["file_hash"]: e for e in entries}
+    pool = [hash_to_entry[h] for h in pool_hashes if h in hash_to_entry]
+    if not pool:
+        return []
+    pairs = [(query, _entry_text(e)) for e in pool]
+    scores = _get_reranker().predict(pairs)
+    order = np.argsort(scores)[::-1][:top_k]
+    return [pool[i] for i in order]
+
+
 def hybrid_search(entries: List[Dict], embeddings: np.ndarray,
                   model, query: str, top_k: int = 10) -> List[Dict]:
-    """混合检索: 关键词+语义RRF融合"""
+    """混合检索: 关键词+语义RRF融合（分流启用时按 decide_route 路由）"""
+    if decide_route(query) == "semantic_rerank":
+        return semantic_rerank_search(entries, embeddings, model, query, top_k)
+
     # 关键词通道
     kw_results = keyword_search(entries, query)
 
