@@ -1,0 +1,818 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MasterCut Visual Effect Schema",
+  "description": "Prompt-as-Code schema for deterministic LLM generation of AE visual effects. Each effect type has typed parameters with validation ranges, enabling reproducible effect application.",
+  "version": "1.0.0",
+  "type": "object",
+  "properties": {
+    "effect_id": {
+      "type": "string",
+      "description": "Unique identifier for this effect instance (e.g., 'twx_001', 'glow_build_03')",
+      "pattern": "^[a-z_]+\\d+$"
+    },
+    "effect_type": {
+      "type": "string",
+      "enum": [
+        "twixtor",
+        "zoom_pan",
+        "bloom",
+        "sapphire_glow",
+        "optical_flares",
+        "bokeh",
+        "badtv",
+        "glitch",
+        "delirium",
+        "motion_blur",
+        "radial_blur",
+        "burst_radial",
+        "burst_badtv",
+        "fmb_directional",
+        "particular",
+        "magic_bullet_looks",
+        "film_stocks"
+      ],
+      "description": "Effect category matching installed plugins (native + Sapphire/Optical Flares/Particular/Delirium/Magic Bullet/Tiffen Dfx)"
+    },
+    "time_range": {
+      "type": "object",
+      "properties": {
+        "start_sec": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Effect start time in seconds"
+        },
+        "end_sec": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Effect end time in seconds"
+        }
+      },
+      "required": ["start_sec", "end_sec"]
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Effect-specific parameters. Structure depends on effect_type."
+    },
+    "envelope": {
+      "type": "object",
+      "description": "Optional temporal envelope for dynamic parameter modulation (拍点包络)",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "peak_value": {
+          "type": "number",
+          "description": "Peak value at cut point (切点满剂量)"
+        },
+        "decay_seconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.0,
+          "default": 0.16,
+          "description": "Decay duration (~3帧@24fps)"
+        },
+        "tail_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.45,
+          "description": "Sustained ratio after decay (衰减后保持比例)"
+        },
+        "anchor_mode": {
+          "type": "string",
+          "enum": ["cut", "mid", "end"],
+          "description": "TWX freeze anchor mode: cut=at cut point, mid=freeze at onset inside shot, end=freeze at exit"
+        }
+      }
+    },
+    "evidence_chain": {
+      "type": "object",
+      "description": "Evidence-based decision tracking (why this effect was chosen)",
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "description": "Linked validated grammar card (e.g., 'run50-validated-2026-09-04')"
+        },
+        "reasoning": {
+          "type": "string",
+          "description": "Why this effect was applied (e.g., 'closeup face → bokeh to avoid distortion')"
+        },
+        "music_alignment": {
+          "type": "object",
+          "properties": {
+            "aligned_to_onset": {
+              "type": "boolean"
+            },
+            "onset_time": {
+              "type": "number"
+            },
+            "beat_strength": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["effect_id", "effect_type", "time_range", "parameters"],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "twixtor"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/TwixtorParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "zoom_pan"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/ZoomPanParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "bloom"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/BloomParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "sapphire_glow"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/SapphireGlowParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "optical_flares"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/OpticalFlaresParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "bokeh"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/BokehParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "badtv"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/BadTVParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "glitch"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/GlitchParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "delirium"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/DeliriumParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "motion_blur"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/MotionBlurParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "radial_blur"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/RadialBlurParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "burst_radial"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/BurstRadialParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "burst_badtv"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/BurstBadTVParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "fmb_directional"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/FMBDirectionalParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "particular"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/ParticularParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "magic_bullet_looks"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/MagicBulletLooksParams"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "effect_type": {
+            "const": "film_stocks"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/definitions/FilmStocksParams"
+          }
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "TwixtorParams": {
+      "type": "object",
+      "description": "Twixtor time remapping parameters (慢镜/变速)",
+      "properties": {
+        "speed_profile": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": [
+              {"type": "number", "minimum": 0, "maximum": 1},
+              {"type": "number", "minimum": 0.1, "maximum": 3.0}
+            ],
+            "description": "[progress, relative_speed] pair"
+          },
+          "minItems": 2,
+          "description": "Speed curve as array of [progress, speed] keyframes. Must integrate to 1.0 for average speed preservation."
+        },
+        "freeze_anchor": {
+          "type": "string",
+          "enum": ["cut", "mid", "end"],
+          "description": "Where to anchor the freeze point relative to onsets"
+        },
+        "zoom_factor": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 2.0,
+          "default": 1.12,
+          "description": "Subtle zoom during freeze (推镜放大)"
+        }
+      },
+      "required": ["speed_profile"]
+    },
+    "ZoomPanParams": {
+      "type": "object",
+      "description": "Scale and position animation (缩放平移)",
+      "properties": {
+        "scale_start": {
+          "type": "number",
+          "minimum": 50,
+          "maximum": 200,
+          "default": 100,
+          "description": "Starting scale percentage"
+        },
+        "scale_end": {
+          "type": "number",
+          "minimum": 50,
+          "maximum": 200,
+          "default": 106,
+          "description": "Ending scale percentage (for slow push)"
+        },
+        "position_start": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[x, y] starting position in pixels"
+        },
+        "position_end": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[x, y] ending position in pixels"
+        },
+        "easing": {
+          "type": "string",
+          "enum": ["linear", "ease_in", "ease_out", "ease_in_out"],
+          "default": "ease_in_out"
+        }
+      },
+      "required": ["scale_start", "scale_end"]
+    },
+    "BloomParams": {
+      "type": "object",
+      "description": "Glow/bloom effect parameters (发光)",
+      "properties": {
+        "threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.80,
+          "description": "Glow threshold (higher = only brightest areas glow)"
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 6,
+          "description": "Glow radius in pixels"
+        },
+        "intensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.38,
+          "description": "Glow intensity"
+        }
+      },
+      "required": ["threshold", "radius", "intensity"],
+      "additionalProperties": false
+    },
+    "BokehParams": {
+      "type": "object",
+      "description": "Depth-of-field bokeh simulation (景深虚化)",
+      "properties": {
+        "blur_amount": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 2.0,
+          "description": "Bokeh blur strength"
+        }
+      },
+      "required": ["blur_amount"],
+      "additionalProperties": false
+    },
+    "BadTVParams": {
+      "type": "object",
+      "description": "Bad TV glitch/distortion effect (电视故障)",
+      "properties": {
+        "distortion": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "default": 9.0,
+          "description": "Distortion amount (higher = more extreme glitch)"
+        },
+        "variant": {
+          "type": "string",
+          "enum": ["light", "hard", "normal"],
+          "default": "normal",
+          "description": "Preset variant (light=4.0, normal=9.0, hard=13.0)"
+        }
+      },
+      "required": ["distortion"],
+      "additionalProperties": false
+    },
+    "GlitchParams": {
+      "type": "object",
+      "description": "General glitch effect (AESweetsGlitch7in1)",
+      "properties": {
+        "preset_index": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7,
+          "default": 1,
+          "description": "Which of the 7 glitch presets to use"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "MotionBlurParams": {
+      "type": "object",
+      "description": "CC Force Motion Blur parameters (强制运动模糊)",
+      "properties": {
+        "samples": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64,
+          "default": 28,
+          "description": "Motion blur samples (higher = smoother but slower)"
+        },
+        "shutter_angle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 720,
+          "default": 180,
+          "description": "Shutter angle in degrees"
+        }
+      },
+      "required": ["samples"],
+      "additionalProperties": false
+    },
+    "RadialBlurParams": {
+      "type": "object",
+      "description": "CC Radial Fast Blur parameters (径向模糊/冲击)",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 70,
+          "description": "Blur amount (higher = more intense radial streak)"
+        },
+        "center": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "default": [960, 540],
+          "description": "[x, y] center point in pixels (for 1920x1080)"
+        }
+      },
+      "required": ["amount"],
+      "additionalProperties": false
+    },
+    "BurstRadialParams": {
+      "type": "object",
+      "description": "Burst impact layer - radial blur (转场冲击层-径向)",
+      "properties": {
+        "peak_amount": {
+          "type": "number",
+          "minimum": 50,
+          "maximum": 100,
+          "default": 90,
+          "description": "Peak burst intensity at cut point"
+        },
+        "duration_frames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 3,
+          "description": "Duration of burst in frames (2-4 frames typical)"
+        }
+      },
+      "required": ["peak_amount", "duration_frames"],
+      "additionalProperties": false
+    },
+    "BurstBadTVParams": {
+      "type": "object",
+      "description": "Burst impact layer - BadTV glitch (转场冲击层-故障)",
+      "properties": {
+        "peak_distortion": {
+          "type": "number",
+          "minimum": 2,
+          "maximum": 10,
+          "default": 4.5,
+          "description": "Peak distortion at cut point"
+        },
+        "duration_frames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 2,
+          "description": "Duration of burst in frames"
+        }
+      },
+      "required": ["peak_distortion", "duration_frames"],
+      "additionalProperties": false
+    },
+    "FMBDirectionalParams": {
+      "type": "object",
+      "description": "Directional motion blur based on optical flow (光流方向模糊)",
+      "properties": {
+        "base_amount": {
+          "type": "number",
+          "minimum": 10,
+          "maximum": 40,
+          "default": 24,
+          "description": "Base blur amount before flow scaling"
+        },
+        "flow_magnitude": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Measured optical flow magnitude (auto-injected by pipeline)"
+        },
+        "flow_angle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 180,
+          "description": "Dominant flow direction in degrees (auto-injected by pipeline)"
+        }
+      },
+      "required": ["base_amount"],
+      "additionalProperties": false
+    },
+    "SapphireGlowParams": {
+      "type": "object",
+      "description": "Sapphire Glow effect (S_Glow - 比原生Glow更柔和自然)",
+      "properties": {
+        "glow_amount": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 50,
+          "description": "Glow intensity"
+        },
+        "glow_size": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200,
+          "default": 30,
+          "description": "Glow radius in pixels"
+        },
+        "glow_color": {
+          "type": "array",
+          "items": {"type": "number", "minimum": 0, "maximum": 1},
+          "minItems": 3,
+          "maxItems": 3,
+          "default": [1, 1, 1],
+          "description": "[R, G, B] glow color"
+        }
+      },
+      "required": ["glow_amount", "glow_size"],
+      "additionalProperties": false
+    },
+    "OpticalFlaresParams": {
+      "type": "object",
+      "description": "Video Copilot Optical Flares (真实镜头光晕)",
+      "properties": {
+        "preset": {
+          "type": "string",
+          "default": "Default",
+          "description": "Flare preset name"
+        },
+        "brightness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 500,
+          "default": 100,
+          "description": "Flare brightness percentage"
+        },
+        "position": {
+          "type": "array",
+          "items": {"type": "number"},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[x, y] flare position"
+        }
+      },
+      "required": ["brightness"],
+      "additionalProperties": false
+    },
+    "ParticularParams": {
+      "type": "object",
+      "description": "Trapcode Particular particle system (顶级粒子引擎)",
+      "properties": {
+        "emitter_type": {
+          "type": "string",
+          "enum": ["point", "box", "sphere", "layer"],
+          "default": "point"
+        },
+        "particles_per_second": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10000,
+          "default": 100
+        },
+        "particle_size": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 2
+        },
+        "life": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 2,
+          "description": "Particle lifetime in seconds"
+        }
+      },
+      "required": ["particles_per_second"],
+      "additionalProperties": false
+    },
+    "DeliriumParams": {
+      "type": "object",
+      "description": "Digieffects Delirium v2.5 (迷幻/故障效果)",
+      "properties": {
+        "effect_preset": {
+          "type": "string",
+          "enum": ["psychedelic", "fractal", "noise", "custom"],
+          "default": "psychedelic"
+        },
+        "intensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 50
+        }
+      },
+      "required": ["intensity"],
+      "additionalProperties": false
+    },
+    "MagicBulletLooksParams": {
+      "type": "object",
+      "description": "Red Giant Magic Bullet Looks (电影级调色预设)",
+      "properties": {
+        "look_preset": {
+          "type": "string",
+          "description": "Preset name (e.g., 'Teal & Orange', 'Bleach Bypass')"
+        },
+        "strength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 100,
+          "description": "Effect strength percentage"
+        }
+      },
+      "required": ["look_preset"],
+      "additionalProperties": false
+    },
+    "FilmStocksParams": {
+      "type": "object",
+      "description": "Tiffen Dfx Film Stocks (胶片模拟)",
+      "properties": {
+        "film_type": {
+          "type": "string",
+          "enum": ["Kodak_2383", "Fuji_3513", "Kodak_5219", "custom"],
+          "default": "Kodak_2383"
+        },
+        "grain_amount": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 30
+        }
+      },
+      "required": ["film_type"],
+      "additionalProperties": false
+    }
+  }
+}

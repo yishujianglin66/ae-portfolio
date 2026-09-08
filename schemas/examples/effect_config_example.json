@@ -1,0 +1,137 @@
+[
+  {
+    "effect_id": "twx_001",
+    "effect_type": "twixtor",
+    "time_range": {
+      "start_sec": 5.0,
+      "end_sec": 8.0
+    },
+    "parameters": {
+      "speed_profile": [
+        [0.0, 0.35],
+        [0.55, 0.50],
+        [1.0, 1.05]
+      ],
+      "freeze_anchor": "mid"
+    },
+    "envelope": {
+      "enabled": true,
+      "peak_value": 0.9,
+      "decay_seconds": 0.16,
+      "tail_ratio": 0.45,
+      "anchor_mode": "mid"
+    },
+    "evidence_chain": {
+      "skill_id": "run50-validated-2026-09-04",
+      "reasoning": "closeup face → slow-mo with mid-freeze to emphasize emotional beat at kick onset",
+      "music_alignment": {
+        "aligned_to_onset": true,
+        "onset_time": 6.5,
+        "beat_strength": 0.85
+      }
+    }
+  },
+  {
+    "effect_id": "bloom_001",
+    "effect_type": "bloom",
+    "time_range": {
+      "start_sec": 10.0,
+      "end_sec": 15.0
+    },
+    "parameters": {
+      "threshold": 0.80,
+      "radius": 6,
+      "intensity": 0.38
+    },
+    "envelope": {
+      "enabled": false
+    },
+    "evidence_chain": {
+      "skill_id": "run50-validated-2026-09-04",
+      "reasoning": "high-energy drop section → bloom for ethereal glow on highlights",
+      "music_alignment": {
+        "section_level": "drop",
+        "energy_mean": 0.72
+      }
+    }
+  },
+  {
+    "effect_id": "badtv_001",
+    "effect_type": "badtv",
+    "time_range": {
+      "start_sec": 12.0,
+      "end_sec": 12.5
+    },
+    "parameters": {
+      "distortion": 9.0
+    },
+    "envelope": {
+      "enabled": true,
+      "peak_value": 1.0,
+      "decay_seconds": 0.16,
+      "tail_ratio": 0.45,
+      "anchor_mode": "cut"
+    },
+    "evidence_chain": {
+      "skill_id": "run50-validated-2026-09-04",
+      "reasoning": "strong kick at cut point → badTV impact burst for glitch aesthetic",
+      "music_alignment": {
+        "aligned_to_onset": true,
+        "onset_time": 12.0,
+        "beat_strength": 0.92
+      }
+    }
+  },
+  {
+    "effect_id": "burst_radial_001",
+    "effect_type": "burst_radial",
+    "time_range": {
+      "start_sec": 18.0,
+      "end_sec": 18.125
+    },
+    "parameters": {
+      "peak_amount": 90,
+      "duration_frames": 3
+    },
+    "envelope": {
+      "enabled": true,
+      "peak_value": 1.0,
+      "decay_seconds": 0.08,
+      "tail_ratio": 0.3,
+      "anchor_mode": "cut"
+    },
+    "evidence_chain": {
+      "skill_id": "run50-validated-2026-09-04",
+      "reasoning": "pre-drop build (12 strong beats) → radial burst impact layer for tension release",
+      "music_alignment": {
+        "section_level": "build",
+        "strong_beats_ahead": 12
+      }
+    }
+  },
+  {
+    "effect_id": "fmb_dir_001",
+    "effect_type": "fmb_directional",
+    "time_range": {
+      "start_sec": 20.0,
+      "end_sec": 23.0
+    },
+    "parameters": {
+      "base_amount": 24,
+      "flow_magnitude": 2.5,
+      "flow_angle": 45.0
+    },
+    "envelope": {
+      "enabled": false
+    },
+    "evidence_chain": {
+      "skill_id": "run50-validated-2026-09-04",
+      "reasoning": "horizontal camera pan detected → directional motion blur following flow angle",
+      "music_alignment": {
+        "section_level": "mid",
+        "motion_mag": 2.5,
+        "motion_angle": 45.0
+      }
+    }
+  }
+]

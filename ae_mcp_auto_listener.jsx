@@ -266,8 +266,7 @@
     }
 
     function executeScript(scriptStr) {
-        var fn = new Function(scriptStr);
-        return fn();
+        return eval(scriptStr);
     }
 
     // ===== Command handlers =====
@@ -1447,6 +1446,12 @@
     log("RES_FILE: " + RES_FILE);
     log("========================================");
 
-    // Start polling
-    app.scheduleTask("checkForCommands()", 500, false);
+    log("Starting command polling loop");
+    checkForCommands();
 }
+
+// Export for Startup delayed loading
+$.global.__startMcpPolling = startMcpListener;
+
+// Auto-start on script load/reload
+startMcpListener();

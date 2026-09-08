@@ -10,7 +10,12 @@ v4 三升级 (在 v3.1 已验收的映射骨架上):
 3. 转场冲击层: 强鼓点上的切点 (drop 前12强/build 前6强) 加 2-4 帧
    顶层 burst 层 (radial@55 冲击延续 / badtv@2), 同样带衰减包络
 
-用法: python scripts/build_master_polish.py <run_dir> <tag> [--bgm xx.mp3]
+用法: python scripts/build_master_polish.py <run_dir> <tag>
+      python scripts/build_master_polish.py <run_dir> <tag> --effects-json <schema配置.json>
+      python scripts/build_master_polish.py <run_dir> <tag> --dry-run   # 只出 plan+JSX, 不碰 AE
+
+位置参数契约 (<run_dir> <tag>) 自 2026-09-05 起对外公布, 不可变更;
+--effects-json / --dry-run 为 2026-09-07 新增可选参数, 不传时行为与旧版完全一致。
 """
 import json
 import os
@@ -60,6 +65,105 @@ RESCUE_MAP = {23.958: ("D:/AE-Work/resources/video/猫猫（一般）/素材/猫
 # v10.1 (用户反馈: 22/25/27s 处只有死冻结没有"缓慢运动", 突兀): 底速 0.18→0.35,
 # 冻结改缓爬 (~8fps 有效, 读作慢速运动而非停格), 加速放出段不变。§5 预留的 remedy 旋钮。
 TWX_SPEED_PROFILE = [(0.0, 0.35), (0.55, 0.50), (1.0, 1.05)]
+
+# ── visual_effect_schema.json 注入 (2026-09-07) ──────────────────────────
+# schema effect_type → RECIPES 键。只映射已在 run53 实机跑通并验收的配方;
+# 第三方插件 matchName 未经 AE 枚举实证的一律不编造 (硬性检查清单 A1)。
+SCHEMA_TO_RECIPE = {
+    "bloom": "bloom",
+    "bokeh": "bokeh",
+    "badtv": "badtv",
+    "glitch": "glitch",
+    "radial_blur": "radial",
+    "motion_blur": "fmb",
+    "burst_radial": "burst_radial",
+    "burst_badtv": "burst_badtv",
+}
+
+# 需要运行时参数的类型 → spec 字符串 "fmb_dir:<amount>:<angle>" (见 _fx_js)
+SCHEMA_DYN_RECIPE = {"fmb_directional": "fmb_dir"}
+
+BURST_TYPES = {"burst_radial", "burst_badtv"}
+
+# 明确不可注入的类型 + 原因。必须显式上报, 禁止静默丢弃:
+# 2026-09-07 事故 — run53v43_effects_premium_v2.json 的 139 条里 105 条属于
+# 下列类型, 静默丢弃会让上层报出"139 个特效已应用"的假绿灯。
+SCHEMA_UNMAPPED = {
+    "twixtor": "由 plan_effects 的 twx 通道按真实 onset 生成, 不接受外部注入",
+    "zoom_pan": "由 production_report segments.zoompan_effect 驱动",
+    "sapphire_glow": "RECIPES 无 S_Glow matchName — 未经 AE 枚举实证",
+    "optical_flares": "RECIPES 无 Optical Flares matchName — 未经 AE 枚举实证",
+    "delirium": "RECIPES 无 Delirium matchName — 未经 AE 枚举实证",
+    "particular": "RECIPES 无 Particular matchName — 未经 AE 枚举实证",
+    "magic_bullet_looks": "RECIPES 无 Magic Bullet Looks matchName — 未经 AE 枚举实证",
+    "film_stocks": "RECIPES 无 Tiffen Film Stocks matchName — 未经 AE 枚举实证",
+}
+
+
+def schema_effects_to_plan(effects):
+    """把 visual_effect_schema.json 配置翻译为内部 (plan, bursts) 表示。
+
+    返回 (plan, bursts, report)。report 显式记账 unmapped / skipped,
+    供调用方如实上报 — 绝不把"没实现"粉饰成"已应用"。
+
+    内部条目契约 (build_jsx 只取这几个键, 多余键安全忽略):
+      plan : {t0, t1, fx:[spec...], dose}  可选 twx/rescue/grade/drift
+      burst: {t0, t1, fx:[spec...], dose, en, env}
+    """
+    plan, bursts = [], []
+    unmapped, skipped = {}, []
+    for i, e in enumerate(effects):
+        et = e.get("effect_type")
+        tr = e.get("time_range") or {}
+        t0 = round(float(tr.get("start_sec", 0.0)), 3)
+        t1 = round(float(tr.get("end_sec", t0)), 3)
+        if t1 <= t0:
+            skipped.append({"index": i, "effect_id": e.get("effect_id"),
+                            "reason": f"time_range 非法 (start={t0} >= end={t1})"})
+            continue
+
+        if et in SCHEMA_UNMAPPED:
+            slot = unmapped.setdefault(
+                et, {"reason": SCHEMA_UNMAPPED[et], "count": 0, "effect_ids": []})
+            slot["count"] += 1
+            if len(slot["effect_ids"]) < 5:
+                slot["effect_ids"].append(e.get("effect_id"))
+            continue
+
+        params = e.get("parameters") or {}
+        env = e.get("envelope") or {}
+        dose = float(env.get("peak_value", 1.0)) if env.get("enabled") else 1.0
+
+        if et in SCHEMA_DYN_RECIPE:
+            amt = float(params.get("base_amount", 24))
+            # 光流方向是 0-360°; _fx_js 写 CC Force Motion Blur-0003, 取模 180 对齐既有口径
+            ang = float(params.get("flow_angle", 0.0)) % 180
+            spec = f"{SCHEMA_DYN_RECIPE[et]}:{amt:.0f}:{ang:.0f}"
+        elif et in SCHEMA_TO_RECIPE:
+            spec = SCHEMA_TO_RECIPE[et]
+        else:
+            skipped.append({"index": i, "effect_id": e.get("effect_id"),
+                            "reason": f"未知 effect_type '{et}' (schema 与映射表均无)"})
+            continue
+
+        entry = {"t0": t0, "t1": t1, "fx": [spec], "dose": round(dose, 3),
+                 "en": 1, "env": 1 if env.get("enabled") else 0,
+                 "src_effect_id": e.get("effect_id")}
+        (bursts if et in BURST_TYPES else plan).append(entry)
+
+    plan.sort(key=lambda x: x["t0"])
+    bursts.sort(key=lambda x: x["t0"])
+    report = {
+        "input_count": len(effects),
+        "plan_count": len(plan),
+        "burst_count": len(bursts),
+        "applied_count": len(plan) + len(bursts),
+        "unmapped_count": sum(v["count"] for v in unmapped.values()),
+        "unmapped_types": unmapped,
+        "skipped_count": len(skipped),
+        "skipped": skipped,
+    }
+    return plan, bursts, report
 
 
 def _load_env():
@@ -663,21 +767,93 @@ def build_jsx(run_dir: Path, tag: str, plan, bursts):
 """
 
 
+def _parse_args():
+    """argparse 包装 — 位置参数契约 (<run_dir> <tag>) 完全向后兼容。
+
+    2026-09-07 修复: 原实现裸读 sys.argv[1]/[2], 导致
+    agents/mastercut_agent.py 以 --input-video/--effects-json 等 flag 调用时,
+    sys.argv[1]="--input-video" 撞白名单 → 直接 exit(1), 特效注入链路
+    从建成起就从未真正执行过。
+    """
+    import argparse
+    ap = argparse.ArgumentParser(
+        prog="build_master_polish.py",
+        description="镜头级 AE 精修 — 拍点包络 + 连续密度曲线 + 转场冲击层",
+        epilog="示例: python scripts/build_master_polish.py output/unified_run53 run53")
+    ap.add_argument("run_dir", help="run 目录, 白名单 unified_run\\d+ (可带 output/ 前缀)")
+    ap.add_argument("tag", help="tag, 白名单 run\\d+")
+    ap.add_argument("--effects-json", dest="effects_json", default=None,
+                    help="visual_effect_schema.json 兼容配置; 传入时取代内部 plan_effects 的 fx 规划")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="只生成 plan + JSX 并落盘, 不调用 AE Bridge (离线验证用)")
+    return ap.parse_args()
+
+
 def main():
     # 路径安全 (2026-09-05): argv 白名单校验, 目录名重建自常量而非拼接用户输入
     import re as _re
-    _raw = str(sys.argv[1]).replace("\\", "/").removeprefix("output/")
+    args = _parse_args()
+    _raw = str(args.run_dir).replace("\\", "/").removeprefix("output/")
     if not _re.fullmatch(r"unified_run\d+", _raw):
         print(f"[ERR] 非法 run 目录名(白名单 unified_run\\d+): {_raw}")
-        sys.exit(1)
-    if not _re.fullmatch(r"run\d+", str(sys.argv[2])):
-        print(f"[ERR] 非法 tag(白名单 run\\d+): {sys.argv[2]}")
-        sys.exit(1)
+        sys.exit(2)
+    if not _re.fullmatch(r"run\d+", str(args.tag)):
+        print(f"[ERR] 非法 tag(白名单 run\\d+): {args.tag}")
+        sys.exit(2)
     run_dir = ROOT / "output" / _raw
-    tag = sys.argv[2]
-    pr = json.loads((run_dir / "production_report.json").read_text(encoding="utf-8"))
+    tag = args.tag
+    pr_p = run_dir / "production_report.json"
+    if not pr_p.exists():
+        print(f"[ERR] 缺前置产物 {pr_p} — 需先跑 unified_edit 生成 production_report")
+        sys.exit(2)
+    pr = json.loads(pr_p.read_text(encoding="utf-8"))
     segs = pr["script"]["segments"]
-    plan = plan_effects(segs, run_dir, tag)
+
+    inj_report = None
+    if args.effects_json:
+        ej = Path(args.effects_json)
+        if not ej.exists():
+            print(f"[ERR] --effects-json 不存在: {ej}")
+            sys.exit(2)
+        _eff = json.loads(ej.read_text(encoding="utf-8"))
+        if isinstance(_eff, dict):
+            _eff = _eff.get("effects") or _eff.get("effect_configs") or [_eff]
+        plan, bursts, inj_report = schema_effects_to_plan(_eff)
+        # 慢镜(twx)与垃圾窗救援(rescue)是已验收观感的一部分, 且 schema 无对应可注入类型
+        # (twixtor 已标为不可外部注入) → 从 base plan 携带过来, fx 置空避免重复上效果。
+        base = plan_effects(segs, run_dir, tag)
+        carried = []
+        for b in base:
+            if not any(k in b for k in ("twx", "rescue")):
+                continue
+            c = {"t0": b["t0"], "t1": b["t1"], "fx": [], "dose": b.get("dose", 1.0)}
+            for k in ("twx", "rescue", "grade", "drift"):
+                if k in b:
+                    c[k] = b[k]
+            carried.append(c)
+        plan = sorted(plan + carried, key=lambda x: x["t0"])
+        inj_report["carried_from_base"] = len(carried)
+        print(f"[schema注入] 输入 {inj_report['input_count']} 条 → "
+              f"plan {inj_report['plan_count']} + burst {inj_report['burst_count']} "
+              f"= 可执行 {inj_report['applied_count']} 条; 携带 base 慢镜/救援 {len(carried)} 条")
+        if inj_report["unmapped_count"]:
+            print(f"[schema注入] 无法映射 {inj_report['unmapped_count']} 条 "
+                  f"({len(inj_report['unmapped_types'])} 种类型) — 不会静默丢弃, 详见报告:")
+            for _t, _v in sorted(inj_report["unmapped_types"].items(),
+                                 key=lambda kv: -kv[1]["count"]):
+                print(f"    {_t}: {_v['count']} 条 — {_v['reason']}")
+        if inj_report["skipped_count"]:
+            print(f"[schema注入] 跳过 {inj_report['skipped_count']} 条 (时间区间非法/未知类型)")
+        (ROOT / "tmp").mkdir(exist_ok=True)
+        (ROOT / "tmp" / "effects_injection_report.json").write_text(
+            json.dumps(inj_report, ensure_ascii=False, indent=1), encoding="utf-8")
+        if inj_report["applied_count"] == 0:
+            # 零可执行特效时继续渲染 = 产出一个看起来成功但什么也没加的片子 (假绿灯)
+            print("[ERR] schema 注入后无可执行特效 — 拒绝空渲染")
+            sys.exit(3)
+    else:
+        plan = plan_effects(segs, run_dir, tag)
+        bursts = None
     ov_p = ROOT / "tmp" / "dose_overrides.json"
     if ov_p.exists():
         ov = {float(k): v for k, v in json.loads(ov_p.read_text(encoding="utf-8")).items()}
@@ -815,7 +991,13 @@ def main():
             _t["src"] = str(_clip).replace(chr(92), "/")
             _t["sin"] = _lead
     _, strong = _load_env()
-    bursts = plan_bursts(plan, strong)
+    if inj_report is None:
+        bursts = plan_bursts(plan, strong)
+    else:
+        # schema 注入模式: bursts 已由 schema_effects_to_plan 给出。
+        # 此处若仍调 plan_bursts 会无条件覆盖, 把 burst_radial/burst_badtv
+        # 的显式配置全部丢掉 — 正是"声明已应用、实际没上"的成因之一。
+        print(f"[schema注入] 保留 schema bursts {len(bursts)} 条 (跳过 plan_bursts 内部规划)")
     # v10.1: 引擎烘的死帧段 (静态源在 1.1-1.5x 下仍 0 运动, 12.7s 后实测 12 处,
     # 最长 500ms — 用户反馈 22/25/27s "没有缓慢运动, 突兀") → S 层加慢推镜:
     # Scale 100→106% 线性, 节拍切点起止, 给静止画面节拍内的缓慢运镜
@@ -908,13 +1090,27 @@ def main():
         print("锚点重锚 (v9): " + ", ".join(
             f"t0={t:.2f} {m}@{(a if a is not None else 0):.2f}" for t, m, a in _anchored))
     print(f"转场冲击层: {len(bursts)} (drop radial {sum(1 for b in bursts if b['t0']>=12.7)} / build badtv {sum(1 for b in bursts if b['t0']<12.7)})")
-    print(f"剂量范围: {min(s['dose'] for s in plan):.2f} - {max(s['dose'] for s in plan):.2f}")
+    _doses = [s["dose"] for s in plan if "dose" in s]
+    if _doses:
+        print(f"剂量范围: {min(_doses):.2f} - {max(_doses):.2f}")
+    else:
+        print("剂量范围: (plan 为空)")
     (ROOT / "tmp").mkdir(exist_ok=True)
     (run_dir / "polish").mkdir(exist_ok=True)
     (ROOT / "tmp" / "master_plan.json").write_text(
         json.dumps({"shots": plan, "bursts": bursts}, ensure_ascii=False, indent=1),
         encoding="utf-8")
     jsx = build_jsx(run_dir, tag, plan, bursts)
+
+    if args.dry_run:
+        # 离线验证通道: 不碰 AE。AE 被其他会话占用时用它证明
+        # schema→plan→JSX 链路已通, 而不需要抢 Bridge。
+        jsx_p = ROOT / "tmp" / f"master_dryrun_{tag}.jsx"
+        jsx_p.write_text(jsx, encoding="utf-8")
+        print(f"[dry-run] JSX 已生成 {jsx_p} ({len(jsx):,} 字符) — 未调用 AE Bridge")
+        print(f"[dry-run] plan={len(plan)} bursts={len(bursts)} "
+              f"twx={sum(1 for s in plan if 'twx' in s)}")
+        return
 
     import time
     sys.path.insert(0, str(ROOT))
@@ -926,6 +1122,14 @@ def main():
     log = ROOT / "tmp" / "ae_master_build.txt"
     if log.exists():
         print("build:", log.read_text(encoding="utf-8")[:600])
+    # Bridge 超时返回 None 时原本仅 print 就结束, 进程仍以 0 退出 —
+    # 上层无法区分"建好了"与"根本没执行"。改为显式非零退出。
+    if res is None:
+        print("[ERR] Bridge 300s 无响应 (res=None) — AE 未执行 JSX, 不视为成功")
+        sys.exit(4)
+    if isinstance(res, dict) and res.get("status") not in (None, "success"):
+        print(f"[ERR] Bridge 返回非 success 状态: {res.get('status')}")
+        sys.exit(4)
 
 
 if __name__ == "__main__":
