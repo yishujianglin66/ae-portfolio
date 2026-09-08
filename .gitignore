@@ -267,3 +267,4 @@ models/weights/
 # test_resources/ 的父目录被上面的 resources/ 排除，必须先重新纳入目录再纳入文件
 !05-测试套件/test_resources/
 !05-测试套件/test_resources/*.png
+.mimosa/
