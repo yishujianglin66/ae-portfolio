@@ -1,0 +1,1708 @@
+{
+ "created": "2026-09-08 19:04:13",
+ "existing_in_ref_set": [
+  "BV14EdpYsEbB",
+  "BV188411b7W5",
+  "BV1Aq7EzQELW",
+  "BV1GMTc6GEfP",
+  "BV1LhMqzKE9h",
+  "BV1MTyeBQE4T",
+  "BV1bK4y1N7yn",
+  "BV1bo4y1f7m4",
+  "BV1mL411x7HB",
+  "BV1n34y1z7Ut",
+  "BV1pP42znEBU",
+  "BV1qC4y1E7oU"
+ ],
+ "n_existing": 12,
+ "n_candidates": 150,
+ "by_tier": {
+  "technique": 12,
+  "general": 10,
+  "narrative": 39,
+  "creator": 28,
+  "burn": 61
+ },
+ "candidates": [
+  {
+   "bv": "BV17M4y1M7Lv",
+   "title": "《原神》万叶手书「可叹叶飘零，归期未有期」",
+   "duration": 232.5,
+   "views": 9329420,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1nV411a7jr",
+   "title": "挑战B站最强踩点！108部动画超燃混剪！！！",
+   "duration": 150.2,
+   "views": 6220412,
+   "query": "热血 动漫 混剪 踩点",
+   "tier": "burn",
+   "queries": [
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1D4411k7UE",
+   "title": "【海贼王/极致踩点/燃爆】点燃你的腺上激素，爽就完事了！！！",
+   "duration": 180.4,
+   "views": 5135642,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点",
+    "漫剪 燃向 踩点",
+    "动漫卡点 混剪 超燃",
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1H4SLY5EVJ",
+   "title": "⚡30秒不投币！算你输！⚡",
+   "duration": 147.6,
+   "views": 4043022,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃",
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1y7421K7Jv",
+   "title": "【原神新春会】「终焉」X「End of All」",
+   "duration": 224.4,
+   "views": 3997295,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1PK421b7c1",
+   "title": "“被压制的那个好像不是我啊”",
+   "duration": 240.7,
+   "views": 3975078,
+   "query": "MAD 动漫",
+   "tier": "general",
+   "queries": [
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1uE411Z79z",
+   "title": "【兵长A爆！踩点】1:22秒让你沉陷于兵长的魅力中！",
+   "duration": 82.8,
+   "views": 3705093,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点"
+   ]
+  },
+  {
+   "bv": "BV1Sx411S7ZH",
+   "title": "【弹幕高能】炮姐庆生预备，大家一起为炮姐发祝福语弹幕吧！5月2日炮姐生日快乐，你指尖跃动的电光，是我此生不变的信仰，唯我超电磁炮永世长存！",
+   "duration": 253.2,
+   "views": 3450873,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1TP4y1Q72x",
+   "title": "《原神》流浪者手书「彷徨在那无可奈何的夜」",
+   "duration": 163.1,
+   "views": 2972504,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV13Q4y1N734",
+   "title": "【AMV-柯南】全员高燃混剪，你准备好了吗",
+   "duration": 232.6,
+   "views": 2892902,
+   "query": "高燃混剪 AMV 神级",
+   "tier": "burn",
+   "queries": [
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1SP411A7QL",
+   "title": "警告⚠️：别眨眼，前方爆燃！带你感受天花板级别的打戏盛宴！！",
+   "duration": 211.5,
+   "views": 2607280,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃",
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1VY4y1o79P",
+   "title": "[前方高燃预警]全员恶人，各自为营",
+   "duration": 135.1,
+   "views": 2394929,
+   "query": "热血 动漫 混剪 踩点",
+   "tier": "burn",
+   "queries": [
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1MB84eoEtP",
+   "title": "【fate/saber/全程高燃】这就是吾王的巅峰打戏",
+   "duration": 213.3,
+   "views": 2308598,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点",
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1Lx411v7X3",
+   "title": "【虐心向/MAD】原来,你已经不在我身旁",
+   "duration": 340.0,
+   "views": 1948042,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向"
+   ]
+  },
+  {
+   "bv": "BV17a4y1x77M",
+   "title": "这才是男生眼中的花子君！全程踩点燃向！",
+   "duration": 77.4,
+   "views": 1764276,
+   "query": "热血 动漫 混剪 踩点",
+   "tier": "burn",
+   "queries": [
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV19C411z7Nr",
+   "title": "“前方高燃！！！”—《Alibi》",
+   "duration": 219.7,
+   "views": 1703334,
+   "query": "高燃混剪 AMV 神级",
+   "tier": "burn",
+   "queries": [
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1re411g7M9",
+   "title": "『索隆超燃混剪』25秒后准备好硬币 这才是海贼王副手的实力！",
+   "duration": 225.7,
+   "views": 1619516,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃",
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1EsHHzwEXY",
+   "title": "“雨一直下就好了…”",
+   "duration": 357.8,
+   "views": 1619398,
+   "query": "MAD 动漫",
+   "tier": "general",
+   "queries": [
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1yW4y1U7Bz",
+   "title": "“有的伤口不止是在身体上”",
+   "duration": 122.5,
+   "views": 1546262,
+   "query": "MAD 动漫",
+   "tier": "general",
+   "queries": [
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV19t41157E6",
+   "title": "【阴阳师/踩点/燃向】毁灭，才是反派的浪漫~~",
+   "duration": 195.1,
+   "views": 1483670,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV1NQcLe7EjC",
+   "title": "⚠️史诗级高燃！战力天花板的觉醒时刻",
+   "duration": 181.1,
+   "views": 1226195,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃",
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1t4411F7tG",
+   "title": "【魔道祖师|踩点向】To make it in this world（踩点|燃向|衔接）",
+   "duration": 110.7,
+   "views": 1208254,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV1pY411V7mG",
+   "title": "“晦涩  阴暗  浪漫”",
+   "duration": 147.2,
+   "views": 1069255,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV12T411u7sU",
+   "title": "⚡「凹凸世界-全员就位」⚡【全员|踩点/4k/高燃】",
+   "duration": 177.8,
+   "views": 1051467,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV14b411t7fg",
+   "title": "【AMV/狂赌之渊】Beggars『踩点/燃向』",
+   "duration": 70.7,
+   "views": 1040091,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV1nz4y1L7ef",
+   "title": "“仅此124秒，带你感受来自时光代理人的压迫感！！！”",
+   "duration": 124.1,
+   "views": 900030,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃"
+   ]
+  },
+  {
+   "bv": "BV19FfzYpEda",
+   "title": "是故事里新的起点！",
+   "duration": 67.2,
+   "views": 890951,
+   "query": "MAD 动漫",
+   "tier": "general",
+   "queries": [
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV14z4y1d7k6",
+   "title": "“人，为什么要活着”",
+   "duration": 264.2,
+   "views": 883651,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV1m84y1p73B",
+   "title": "【鲁路修｜个人向】✦ 荣耀向我俯首 ✦ 请看事业批大男主统治世界！！！！",
+   "duration": 161.4,
+   "views": 866884,
+   "query": "高燃混剪 AMV 神级",
+   "tier": "burn",
+   "queries": [
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1Zg4y1c7KU",
+   "title": "【一念永恒/4k】：⚡年度超燃混剪⚡",
+   "duration": 92.1,
+   "views": 831047,
+   "query": "高燃混剪 AMV 神级",
+   "tier": "burn",
+   "queries": [
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1yb41187Q4",
+   "title": "【进击的巨人夺回篇·中】存在于绝望背后的信念！",
+   "duration": 362.6,
+   "views": 784351,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1Bd6oYAErS",
+   "title": "\"动漫中的那些意难平!\"",
+   "duration": 68.2,
+   "views": 741045,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向"
+   ]
+  },
+  {
+   "bv": "BV1Kt411p7Xd",
+   "title": "年度治愈动画大作《朝花夕誓》同人MV——于离别之朝束起约定之花",
+   "duration": 299.7,
+   "views": 730589,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1Rb411x7cz",
+   "title": "【综漫】惊鸿",
+   "duration": 160.8,
+   "views": 704035,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV14T4y1A7GL",
+   "title": "今天是我们的婚礼！我写了一首歌，想要和你《一直在一起》-演唱「洛天依」",
+   "duration": 182.4,
+   "views": 643848,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV11pqBBrEd9",
+   "title": "学习100种剪辑手法之“life force超燃卡点”",
+   "duration": 236.7,
+   "views": 631269,
+   "query": "热血 动漫 混剪 踩点",
+   "tier": "burn",
+   "queries": [
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1wh4y1w761",
+   "title": "💕𝓒𝓱𝓮𝓬𝓴𝓵𝓲𝓼𝓽♂",
+   "duration": 74.2,
+   "views": 616079,
+   "query": "MAD 动漫",
+   "tier": "general",
+   "queries": [
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1Za4y1571t",
+   "title": "【首席高燃】“看好了，魔刀是这样用的”",
+   "duration": 205.4,
+   "views": 600119,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV1Az4y1V7Yb",
+   "title": "【4K】这可能是你看过最帅的蜘蛛侠混剪",
+   "duration": 154.8,
+   "views": 575339,
+   "query": "高燃混剪 AMV 神级",
+   "tier": "burn",
+   "queries": [
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1zmhA6dEBi",
+   "title": "“少年暴君”",
+   "duration": 82.5,
+   "views": 513928,
+   "query": "热血 动漫 混剪 踩点",
+   "tier": "burn",
+   "queries": [
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1K1421Q7Ve",
+   "title": "第一次帮老婆换衣服，男主彻底慌了，没经验啊！",
+   "duration": 86.9,
+   "views": 510027,
+   "query": "MAD 动漫",
+   "tier": "general",
+   "queries": [
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV144411B77s",
+   "title": "炮姐战歌，记录高燃时刻！",
+   "duration": 256.1,
+   "views": 501628,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点"
+   ]
+  },
+  {
+   "bv": "BV1ND4y1D7ZR",
+   "title": "我永远喜欢五更瑠璃！！俺妹十周年黑猫纪念视频",
+   "duration": 247.5,
+   "views": 494631,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1qc411j7Ge",
+   "title": "𝙀𝙫𝙚𝙧𝙮𝙩𝙝𝙞𝙣𝙜 𝙗𝙡𝙖𝙘𝙠【高燃/踩点/暗影大人MAD】",
+   "duration": 238.5,
+   "views": 456683,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点"
+   ]
+  },
+  {
+   "bv": "BV1ws411S7tm",
+   "title": "【静止画MAD】 introductory chapter 【路人女主】",
+   "duration": 264.1,
+   "views": 454677,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1jLAJeLEYV",
+   "title": "⚡️前方惊艳无限！来感受米游的踩点盛宴吧！",
+   "duration": 351.0,
+   "views": 423696,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃"
+   ]
+  },
+  {
+   "bv": "BV1LG4y1v7hz",
+   "title": "⚠️弹丸论破，但是高燃踩点！⚠️",
+   "duration": 171.9,
+   "views": 422109,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点",
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV17u411q71k",
+   "title": "「此时此刻 超越极限」",
+   "duration": 154.3,
+   "views": 418141,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点",
+    "漫剪 燃向 踩点",
+    "动漫卡点 混剪 超燃"
+   ]
+  },
+  {
+   "bv": "BV1Qb411g7ac",
+   "title": "【高燃/踩点】用高燃的方式打开约定的梦幻岛",
+   "duration": 179.4,
+   "views": 398113,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点",
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1Mb411M7yL",
+   "title": "【不死者之王/混剪/1080P】前方高能，吾乃侍奉无上至尊之人！",
+   "duration": 231.9,
+   "views": 389925,
+   "query": "热血 动漫 混剪 踩点",
+   "tier": "burn",
+   "queries": [
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1hW6FYZE5V",
+   "title": "【猫之茗X混剪】给圈外人一点小小的茗圈震撼",
+   "duration": 143.2,
+   "views": 360875,
+   "query": "高燃混剪 AMV 神级",
+   "tier": "burn",
+   "queries": [
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1Xs411C7Tx",
+   "title": "猫【Mad 大赛 2016】",
+   "duration": 144.3,
+   "views": 359368,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1yY9mBCEza",
+   "title": "“不是，谁教你这么剪剑来的啊？”",
+   "duration": 228.7,
+   "views": 346803,
+   "query": "高燃混剪 AMV 神级",
+   "tier": "burn",
+   "queries": [
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1tH4y1W7pf",
+   "title": "黑桃Q纹身寓意",
+   "duration": 60.5,
+   "views": 329624,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1qf4y1e7Ne",
+   "title": "【甜蜜家园/Sweet Home】燃向|全员疯狂踩点",
+   "duration": 148.2,
+   "views": 290404,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV1b2h36bEhk",
+   "title": "最帅出场，经费燃烧！",
+   "duration": 101.0,
+   "views": 269870,
+   "query": "热血 动漫 混剪 踩点",
+   "tier": "burn",
+   "queries": [
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1WV4y1a7W1",
+   "title": "INTP·苦难叙事",
+   "duration": 110.5,
+   "views": 268795,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV1oA411x7AY",
+   "title": "来戴上耳机，一起狂欢！！综漫「MidnightCity」",
+   "duration": 174.8,
+   "views": 246701,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV17M411c7Az",
+   "title": "日本情绪短片，画面太舒服了",
+   "duration": 84.3,
+   "views": 245930,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV1sF411R7q2",
+   "title": "“那些温柔又高级的文案”",
+   "duration": 205.5,
+   "views": 238413,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV1MJ411Q78f",
+   "title": "【永远的7日之都】一场名为救赎的时间旅行",
+   "duration": 190.5,
+   "views": 234889,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1Et411z7Ao",
+   "title": "【七大罪/高燃AMV】我曾为了你放弃称王，现在我要为了你重回王座！",
+   "duration": 199.2,
+   "views": 222051,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点",
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1rj411U7jc",
+   "title": "【绝望合集】“所以生命啊，它苦涩如歌。”|催泪向",
+   "duration": 195.9,
+   "views": 211617,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感",
+    "MAD 故事向",
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1S7411d7Hy",
+   "title": "【国漫/全程高燃/一人之下】高燃混剪！",
+   "duration": 126.2,
+   "views": 204086,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点",
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1cu4y157DA",
+   "title": "“我从未如此深刻的感受到 与灵魂差距甚远 而我的存在却如此真实”——加缪  ｜《超脱》",
+   "duration": 325.5,
+   "views": 203262,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV19V4y1x7Aj",
+   "title": "Hands in my hand | 动态歌词排版 | 燃向踩点 | 混剪",
+   "duration": 176.3,
+   "views": 194121,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV1984y1w7oT",
+   "title": "“ 黑 桃 2 ”",
+   "duration": 110.3,
+   "views": 192713,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1K4Q3Y1EVZ",
+   "title": "𝓓𝓲𝓮 𝓯𝓸𝓻 𝔂𝓸𝓾｜“你不是E级，对吧！”",
+   "duration": 141.0,
+   "views": 189992,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃"
+   ]
+  },
+  {
+   "bv": "BV1T3e1zGEdc",
+   "title": "放开会长让我来",
+   "duration": 220.7,
+   "views": 163862,
+   "query": "MAD 动漫",
+   "tier": "general",
+   "queries": [
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1FS4y1t76A",
+   "title": "【魔圆/踩点/高燃】𝑩𝒆 𝑻𝒉𝒆 𝑹𝒆𝒏𝒆𝒈𝒂𝒅𝒆𝒔",
+   "duration": 91.4,
+   "views": 159939,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点"
+   ]
+  },
+  {
+   "bv": "BV1sPvsB8E43",
+   "title": "“这才是忘记一个不在乎你的人最好的方式”",
+   "duration": 278.1,
+   "views": 155402,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV1nW411g74U",
+   "title": "【静止画MAD】【龙王的工作！】银空",
+   "duration": 92.5,
+   "views": 153471,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1Nx4y1Z76T",
+   "title": "【K/高燃/混剪/全员美男】NO BLOOD！NO BONE！NO ASH！",
+   "duration": 75.7,
+   "views": 139662,
+   "query": "高燃混剪 AMV 神级",
+   "tier": "burn",
+   "queries": [
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1aj411a7bk",
+   "title": "⚠️前方高能！把音乐释放到极致！来感受一下十月的顶级打戏！",
+   "duration": 147.5,
+   "views": 130488,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃",
+    "热血 动漫 混剪 踩点",
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1ax41127iV",
+   "title": "【进入白学现场】如果给白学现场配上恰当的音乐...",
+   "duration": 224.3,
+   "views": 121250,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1VN4y1K72e",
+   "title": "【Lycoris Recoil/踩点/高燃/Light That Fire】千攻泷受·一生推💕",
+   "duration": 121.5,
+   "views": 116950,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点"
+   ]
+  },
+  {
+   "bv": "BV1is4y1U7we",
+   "title": "【剪辑心法】剪辑突兀不连贯？因为你不懂这些剪辑基本规则（初阶版）！",
+   "duration": 163.0,
+   "views": 116759,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV1U85X6YEPX",
+   "title": "“巴纳姆效应能让任何人瞬间爱上你”",
+   "duration": 252.0,
+   "views": 113321,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV1NYtKeXEPu",
+   "title": "【静止画MAD】人造人・沙鲁篇【龙珠Z】",
+   "duration": 150.1,
+   "views": 109569,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1XW411S7fN",
+   "title": "【杀戮天使】Heathens【高燃/踩点】一起来看看只用6集到底能剪出些什么？",
+   "duration": 100.8,
+   "views": 106410,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点",
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV12E411k7zY",
+   "title": "【海贼王】狂热行动高燃踩点 海迷们！在此集结！",
+   "duration": 107.8,
+   "views": 105130,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点"
+   ]
+  },
+  {
+   "bv": "BV19M4m1r7Zn",
+   "title": "千鹤开发日记01-3",
+   "duration": 112.8,
+   "views": 104113,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1GV411G7pD",
+   "title": "【AE拉镜】多核拉镜",
+   "duration": 78.2,
+   "views": 98519,
+   "query": "AMV 拉镜 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 拉镜 运镜"
+   ]
+  },
+  {
+   "bv": "BV1ZqKL69EK3",
+   "title": "将这极致的踩点与节奏，共同绘制成一副精彩绝伦、酣畅淋漓的视觉盛宴 [猫鼠手游S皮超燃卡点混剪&无缝衔接·重制版]",
+   "duration": 86.8,
+   "views": 82377,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃"
+   ]
+  },
+  {
+   "bv": "BV1zq4y1a7WC",
+   "title": "【高燃踩点】⚡这叫做二次元踩点⚡",
+   "duration": 115.4,
+   "views": 77210,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃",
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1Jo4y1j7sN",
+   "title": "【一人之下/高燃踩点/全员向】⚡️挑 战 一 口 气 看 完⚡️",
+   "duration": 103.2,
+   "views": 75208,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点"
+   ]
+  },
+  {
+   "bv": "BV1UMdQBPEdQ",
+   "title": "除了帅一无是处！/纪念向视频【神印王座/混剪踩点】",
+   "duration": 236.9,
+   "views": 56304,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV1HH4y1w7CT",
+   "title": "近期新运镜和爆火热门素材！",
+   "duration": 340.1,
+   "views": 52984,
+   "query": "AMV 拉镜 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 拉镜 运镜",
+    "AMV 3D 运镜"
+   ]
+  },
+  {
+   "bv": "BV1qYefzeE6x",
+   "title": "[Die for You]  | 高燃爽打！诡秘之主 4K热血踩点混剪",
+   "duration": 120.2,
+   "views": 52846,
+   "query": "热血 动漫 混剪 踩点",
+   "tier": "burn",
+   "queries": [
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1Zq4y167jb",
+   "title": "【拳愿阿修罗/120帧】最燃混剪 点进来就直接被打死！",
+   "duration": 128.0,
+   "views": 52747,
+   "query": "高燃混剪 AMV 神级",
+   "tier": "burn",
+   "queries": [
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV11K4y157qd",
+   "title": "“这一年的故事很简单，遇见了你，我很喜欢”",
+   "duration": 210.3,
+   "views": 51851,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向"
+   ]
+  },
+  {
+   "bv": "BV1eHNoeXEVH",
+   "title": "“ 救 赎 的 爱 ”",
+   "duration": 320.0,
+   "views": 50867,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向"
+   ]
+  },
+  {
+   "bv": "BV1E7411n7nz",
+   "title": "【静止画MAD】亚人",
+   "duration": 95.9,
+   "views": 47792,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1SP4y157wV",
+   "title": "❤B站最燃犬夜叉混剪❤点进来你绝不会后悔！！！",
+   "duration": 231.2,
+   "views": 46416,
+   "query": "高燃混剪 AMV 神级",
+   "tier": "burn",
+   "queries": [
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1Vvtw6NEXC",
+   "title": "夏日终章",
+   "duration": 86.8,
+   "views": 45770,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV19Ztq6KEL1",
+   "title": "新手镜必学！两分钟吃透4种实用绞杀连招！高手镜都在用！",
+   "duration": 153.4,
+   "views": 42382,
+   "query": "漫剪 拉镜 教程",
+   "tier": "technique",
+   "queries": [
+    "漫剪 拉镜 教程"
+   ]
+  },
+  {
+   "bv": "BV1TM4y1i7Yv",
+   "title": "【Hi-Res 48k/24bit】ツナグキズナ - Team．ねこかん[猫] featuring．天乙准花",
+   "duration": 275.5,
+   "views": 41755,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1Z7411P78B",
+   "title": "【命运石之门0/静止画MAD】他与她的选择",
+   "duration": 225.2,
+   "views": 39911,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1xB8Q6PExX",
+   "title": "“人类是无法互相理解的”【高达/MAD】致我们心中永远的高达",
+   "duration": 224.2,
+   "views": 38490,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向"
+   ]
+  },
+  {
+   "bv": "BV1sR4y1U73B",
+   "title": "《弥留之国的爱丽丝》黑桃Q：武术太妹-山本千寻",
+   "duration": 65.4,
+   "views": 37132,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1FTuG68Edf",
+   "title": "前方高能，让你爽到极致！",
+   "duration": 77.8,
+   "views": 36709,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃"
+   ]
+  },
+  {
+   "bv": "BV1Ex411q7WQ",
+   "title": "【黑桃Q】为这个美好的世界献上无穷开心",
+   "duration": 145.0,
+   "views": 34343,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1n84y1h74x",
+   "title": "【水星的魔女/剧情向/狸米MAD】我与你的故事",
+   "duration": 246.5,
+   "views": 33585,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向"
+   ]
+  },
+  {
+   "bv": "BV1FD421p7au",
+   "title": "动漫素材1080p［旋转／运镜／穿梭］无水印!",
+   "duration": 309.1,
+   "views": 33138,
+   "query": "AMV 3D 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 3D 运镜"
+   ]
+  },
+  {
+   "bv": "BV1bA4m1V7Va",
+   "title": "【动画参考】（运镜方式）旋转镜头合集（1）",
+   "duration": 71.8,
+   "views": 30283,
+   "query": "AMV 3D 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 3D 运镜"
+   ]
+  },
+  {
+   "bv": "BV1hx411n7Tv",
+   "title": "【黑桃Q】珂朵莉，末日时的最后拯救",
+   "duration": 310.3,
+   "views": 25824,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1Hf4y1r7qT",
+   "title": "【无限滑板】前方高燃",
+   "duration": 158.2,
+   "views": 25601,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点",
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV1D84y167nE",
+   "title": "MV【哪里都是你】个人自制短片 情绪风短片",
+   "duration": 195.8,
+   "views": 22700,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV1qp4y1X7Ms",
+   "title": "【枪战混剪/踩点/全程高燃】前方高能！震撼人心，感受视觉盛宴",
+   "duration": 141.3,
+   "views": 21501,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点",
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV1qKMmzAE1f",
+   "title": "摇晃运镜，抠像、瞳孔转场",
+   "duration": 160.2,
+   "views": 18754,
+   "query": "AMV 拉镜 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 拉镜 运镜",
+    "AMV 3D 运镜"
+   ]
+  },
+  {
+   "bv": "BV1Dn4y1Q7Du",
+   "title": "［动漫素材-旋转运镜］第3期1080P！",
+   "duration": 242.5,
+   "views": 18620,
+   "query": "AMV 3D 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 3D 运镜"
+   ]
+  },
+  {
+   "bv": "BV1aK411D77z",
+   "title": "【杨志刚 | 黑桃Q | 轻踩点】“按级别，你应该叫我长官”",
+   "duration": 138.0,
+   "views": 17370,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1Fb411Y7JJ",
+   "title": "【MAD】爱上他人，便是孤独的开始",
+   "duration": 282.9,
+   "views": 14563,
+   "query": "AMV 叙事 情感",
+   "tier": "narrative",
+   "queries": [
+    "AMV 叙事 情感"
+   ]
+  },
+  {
+   "bv": "BV1mK4y1J7FD",
+   "title": "国漫【妙先生】饱受争议人性大作|超燃卡点剪辑|愿你善良，祝你平安。",
+   "duration": 137.9,
+   "views": 14087,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃",
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1XoYjeyEnV",
+   "title": "【冰海战记mad/燃向】“成长的痛苦是不可避免的邪恶”",
+   "duration": 300.3,
+   "views": 12351,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向"
+   ]
+  },
+  {
+   "bv": "BV1UW411q7fL",
+   "title": "【MAD/催泪向/多素材/综漫/是你让我变得如此脆弱】",
+   "duration": 310.0,
+   "views": 11575,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向"
+   ]
+  },
+  {
+   "bv": "BV1jt4y1k7mq",
+   "title": "【静止系/家庭教师】未来へ",
+   "duration": 274.6,
+   "views": 9224,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV19P411M7bd",
+   "title": "【静止画MAD】灌篮高手全国大赛静止画~~全展示",
+   "duration": 250.8,
+   "views": 9038,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1TeFcezE7m",
+   "title": "【外网转载】【静止画MAD】時はただ無常に━━【嘘喰い】#噬谎者",
+   "duration": 224.9,
+   "views": 8281,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1ks411Z7Ju",
+   "title": "【静止画MAD】Parallel world【Rewrite】",
+   "duration": 285.6,
+   "views": 8264,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1gW4y1f7cZ",
+   "title": "伪3D运镜",
+   "duration": 104.9,
+   "views": 7399,
+   "query": "AMV 3D 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 3D 运镜"
+   ]
+  },
+  {
+   "bv": "BV1Du411y7sf",
+   "title": "【转载 / 静止画MAD】這い上がれ【アオアシ | 青之芦苇】",
+   "duration": 286.2,
+   "views": 7188,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV17s411N7y8",
+   "title": "【静止画MAD】Little Busters!『I'm Not Scared』【军魔】",
+   "duration": 299.4,
+   "views": 6971,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1YP1FYgERd",
+   "title": "【ミリシタ/MLTD MV】スペードのQ 完整版（中英日字幕）",
+   "duration": 233.4,
+   "views": 6518,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1WCNk6rEd1",
+   "title": "【斩神2.0混剪】“神存在的意义，又是什么”",
+   "duration": 192.1,
+   "views": 5059,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV1t64U6WEFx",
+   "title": "“56部番，哪一个才是你的意难平呢？”",
+   "duration": 282.5,
+   "views": 4822,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向",
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1X84y1z7S1",
+   "title": "「暗表」手书 《祝福》——yoasobi",
+   "duration": 91.8,
+   "views": 4166,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1bvbs64Eer",
+   "title": "⚡“可惜我们终究只能隔着屏幕见证他们的一生......”⚡",
+   "duration": 85.4,
+   "views": 4105,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向"
+   ]
+  },
+  {
+   "bv": "BV1TBkiBHEN9",
+   "title": "【AE脚本】突发奇想利用AI制作了一个拉镜运动脚本！",
+   "duration": 318.8,
+   "views": 4013,
+   "query": "AMV 拉镜 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 拉镜 运镜"
+   ]
+  },
+  {
+   "bv": "BV1mg4y1F7JX",
+   "title": "杨志刚一分钟不心动挑战！（黑桃Q篇）",
+   "duration": 70.6,
+   "views": 3900,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1da4r61EXs",
+   "title": "【补档】心心念念的unravel，伟大无需多言",
+   "duration": 239.3,
+   "views": 3648,
+   "query": "MAD 动漫",
+   "tier": "general",
+   "queries": [
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1G64y1h7KV",
+   "title": "【静止画MAD】三秋縋《三日间的幸福》最後の夏、君を想い僕は死ぬ",
+   "duration": 201.0,
+   "views": 3017,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV11Fbs6nE9v",
+   "title": "金屋藏娇",
+   "duration": 99.6,
+   "views": 2950,
+   "query": "MAD 动漫",
+   "tier": "general",
+   "queries": [
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV19EaRz6EKA",
+   "title": "【剧情向mad】“如果你也厌恶过这一成不变的日常。”",
+   "duration": 239.6,
+   "views": 2582,
+   "query": "MAD 故事向",
+   "tier": "narrative",
+   "queries": [
+    "MAD 故事向"
+   ]
+  },
+  {
+   "bv": "BV16V411b7pr",
+   "title": "全程高燃! 极致踩点!!!",
+   "duration": 192.9,
+   "views": 2552,
+   "query": "AMV 高燃 踩点",
+   "tier": "burn",
+   "queries": [
+    "AMV 高燃 踩点",
+    "高燃混剪 AMV 神级"
+   ]
+  },
+  {
+   "bv": "BV12Ytz6cESD",
+   "title": "60秒教会你拍“就带走我的天真”彩虹节拉镜卡点转场",
+   "duration": 62.7,
+   "views": 2076,
+   "query": "AMV 拉镜 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 拉镜 运镜",
+    "漫剪 拉镜 教程"
+   ]
+  },
+  {
+   "bv": "BV1Gy4y1T7Ru",
+   "title": "【国漫/踩点/燃向】冷门动画也要有看得人眼睛流血的卡点混剪（《缇可》夏天）",
+   "duration": 180.7,
+   "views": 1619,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV11x411o7ZF",
+   "title": "【静止画MAD/伪恋】一曲樱色的恋歌",
+   "duration": 115.8,
+   "views": 1436,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1Yk4y1y7AH",
+   "title": "[静止画MAD/最终兵器彼女]listen to time again",
+   "duration": 120.1,
+   "views": 1374,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1GWbw6iExf",
+   "title": "「理想」与「现实」的分界线",
+   "duration": 97.1,
+   "views": 1309,
+   "query": "MAD 动漫",
+   "tier": "general",
+   "queries": [
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1dqtB6zEB4",
+   "title": "MiniMax-H3-运镜实战",
+   "duration": 156.2,
+   "views": 1213,
+   "query": "AMV 3D 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 3D 运镜"
+   ]
+  },
+  {
+   "bv": "BV11ju16hEas",
+   "title": "海螺minimax h3模型运镜测试:推、拉、摇、移、甩、跟运镜，以及提示词写法",
+   "duration": 165.0,
+   "views": 1181,
+   "query": "AMV 3D 运镜",
+   "tier": "technique",
+   "queries": [
+    "AMV 3D 运镜"
+   ]
+  },
+  {
+   "bv": "BV1C24y1Q79T",
+   "title": "【杨志刚‖黑桃Q‖微踩点歌词燃向】The fear。",
+   "duration": 77.8,
+   "views": 970,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1Zw411176x",
+   "title": "静止画MAD/欲望寄生jagan",
+   "duration": 98.7,
+   "views": 596,
+   "query": "静止画 MAD 日系",
+   "tier": "narrative",
+   "queries": [
+    "静止画 MAD 日系"
+   ]
+  },
+  {
+   "bv": "BV1pRuE6DEJf",
+   "title": "假面小队×《荣耀向我俯首》｜“别留手，打爆他们。”",
+   "duration": 160.3,
+   "views": 472,
+   "query": "漫剪 燃向 踩点",
+   "tier": "burn",
+   "queries": [
+    "漫剪 燃向 踩点"
+   ]
+  },
+  {
+   "bv": "BV1WEEqz6EhS",
+   "title": "原创:暗猫の祝福",
+   "duration": 91.0,
+   "views": 249,
+   "query": "暗猫の祝福 AMV",
+   "tier": "creator",
+   "queries": [
+    "暗猫の祝福 AMV"
+   ]
+  },
+  {
+   "bv": "BV1WUtR6KEnt",
+   "title": "［综漫/高燃/AMV] 前方高能｜数百部动漫联动，踩点盛宴🔥",
+   "duration": 229.6,
+   "views": 190,
+   "query": "热血 动漫 混剪 踩点",
+   "tier": "burn",
+   "queries": [
+    "热血 动漫 混剪 踩点",
+    "MAD 动漫"
+   ]
+  },
+  {
+   "bv": "BV1MHbT6VExs",
+   "title": "【MyGO/灯祥/爱灯MAD】“那个女孩教会我爱”",
+   "duration": 260.3,
+   "views": 183,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  },
+  {
+   "bv": "BV1ys816mEb9",
+   "title": "超燃动漫混剪卡点1088",
+   "duration": 246.1,
+   "views": 174,
+   "query": "动漫卡点 混剪 超燃",
+   "tier": "burn",
+   "queries": [
+    "动漫卡点 混剪 超燃",
+    "热血 动漫 混剪 踩点"
+   ]
+  },
+  {
+   "bv": "BV1REbp68E1K",
+   "title": "「Mad/AMV」爱丽丝啊，总有一天我会将你从那里拯救出来",
+   "duration": 98.0,
+   "views": 28,
+   "query": "黑桃Q MAD",
+   "tier": "creator",
+   "queries": [
+    "黑桃Q MAD"
+   ]
+  }
+ ]
+}
