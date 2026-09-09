@@ -51,11 +51,24 @@ API_BACKENDS = [
     {"name": "DASHSCOPE", "base_url":
      "https://dashscope.aliyuncs.com/compatible-mode/v1",
      "key_env": "DASHSCOPE_API_KEY",
-     "models": ["qwen-plus", "qwen-turbo"],
+     "models": ["qwen3.8-flash", "qwen3.5-flash", "qwen-plus"],
      "free_kw": ["free", "expires", "flash", "turbo", "lite"]},
+    # 百炼第二额度池（Boss 2026-09-09 提供，与 DASHSCOPE key 模型宇宙一致、
+    # 免费额度独立——耗尽衔接：DeepSeek 额度尽 → DASHSCOPE → BAILIAN 续命）
+    # 模型顺序 = 36 条 heldout 对决赛实测质量（2026-09-09）:
+    #   qwen3.8-flash P=1.000 > qwen3.5-flash P=0.972 > qwen-flash P=0.694
+    #   > qwen3.6-flash P=0.528（错误识别比 NO_IP 更有害，低分者仅兜底）
+    {"name": "BAILIAN", "base_url":
+     "https://dashscope.aliyuncs.com/compatible-mode/v1",
+     "key_env": "BAILIAN_API_KEY",
+     "models": ["qwen3.8-flash", "qwen3.5-flash", "qwen-flash"],
+     "free_kw": ["free", "expires", "flash", "turbo", "lite"]},
+    # 硅基流动选型（2026-09-09 对决赛，考虑成本）：指定 deepseek-ai/DeepSeek-V4-Flash
+    # P=0.917 (33/36)，1.00/2.00 元/M（缓存命中 0.02），官方空闲价的 44%。
+    # 淘汰：GLM-Z1-9B 免费 P=0.556 / Qwen3.5-9B P=0.111 / Qwen3.5-35B-A3B P=0.361。
     {"name": "SILICONFLOW", "base_url": "https://api.siliconflow.cn/v1",
      "key_env": "SILICONFLOW_API_KEY",
-     "models": [],
+     "models": ["deepseek-ai/DeepSeek-V4-Flash"],
      "free_kw": ["free", "expires", "flash", "turbo", "lite"]},
 ]
 RETRY_BACKOFF = [5, 15, 30]
@@ -90,6 +103,21 @@ SYSTEM_PROMPT = (
 
 def _log(msg: str):
     print(f"[R3-QN] {msg}", flush=True)
+
+
+KEYS_FILE = ROOT / "cache" / "api_keys.json"  # gitignored（cache/）
+
+
+def load_api_key(name: str) -> str:
+    """key 解析：环境变量优先，其次 cache/api_keys.json（不入库）。"""
+    v = os.environ.get(name, "")
+    if v:
+        return v
+    try:
+        data = json.loads(KEYS_FILE.read_text(encoding="utf-8"))
+        return data.get(name, "")
+    except Exception:  # noqa: BLE001
+        return ""
 
 
 def load_norm_cache() -> dict:
@@ -199,7 +227,7 @@ def _build_call_chain() -> list:
     """展开为 (name, base_url, key, model) 线性调用链：指定模型优先。"""
     chain = []
     for b in API_BACKENDS:
-        key = os.environ.get(b["key_env"], "")
+        key = load_api_key(b["key_env"])
         if not key:
             _log(f"  [链] {b['name']}: key 未配置，跳过")
             continue
