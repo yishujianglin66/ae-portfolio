@@ -143,35 +143,109 @@ ffmpeg 在帧时间戳前 0.5ms 内会回退到上一帧。
 
 ---
 
-## 六、建议的替代口径
+## 六、替代口径 v2 已落地并重算（2026-09-09 晚）
 
-当前指标的两个缺陷：① 帧边界数值不稳定；② 采样 12/110 点，代表性差。
+### 6.1 v2 设计
 
-**替代方案（建议 R1 采用）**：
+`scripts/cut_visibility_v2.py`，三处修正：
 
-1. **帧号对齐 + 容差平均**：比较 `frame(fn-1)` 与 `frame(fn+1)`、`frame(fn+2)`、`frame(fn+3)` 三对的均值，消除单点舍入敏感性。
-2. **全切点统计**：不做 12 点采样，报告全切点的均值 + p25/p50/p75（与参照集同口径重算）。
-3. **双指标并用**：`cut_visibility`（帧差）+ `frozen_cut 率`（感知哈希），两者同时改善才算真实提升。
-4. **参照集需重算**：现参照集 0.8392 同样受此影响，替换口径后必须整体重跑才能比较。
+| 项 | v1 | v2 |
+|----|----|----|
+| 取帧 | `-ss t±1/24`（帧边界回退） | **帧号对齐** `select=eq(n,fn)` |
+| 比较 | 单对 `fn-1` vs `fn+3` | **多帧对均值**：`fn-1` vs `fn+1/fn+2/fn+3` 三对取均值 |
+| 统计 | 采样 12 点 | **全切点**均值 + p25/p50/p75 |
+| 附加 | 无 | **ahash 冻结率**（双指标并用） |
+
+**确定性验证**：同一视频连跑 3 次，v2 = 1.0737 / 1.0737 / 1.0737，**波动 0.000000**
+（v1 在 ±0.5ms 扰动下波动 0.78）。
+
+**性能**：单部从 36s 优化到 5s（全片一次性抽低分辨率帧后按帧号索引，替代逐批 select）。
+
+### 6.2 参照集重算结果（n=137，排除 8 部无切点片）
+
+| 指标 | 值 |
+|------|-----|
+| v2 均值 | 0.6367 |
+| p25 / p50 / p75 / p90 | 0.3718 / 0.6858 / 0.9431 / 0.9914 |
+| min / max | 0.0 / 1.0889 |
+| 冻结率均值 | 0.3862 |
+
+**排除说明**：8 部 `n_cuts=0` 全是 MMD / 可动纸片人单镜头长片（scene 检测无切点），不参与统计。
+
+### 6.3 按风格分层（跨风格不可混算）
+
+| tier | n | v2 均值 | p50 | 冻结率 |
+|------|---|---------|-----|--------|
+| seed | 12 | 0.9523 | 0.9750 | 0.0472 |
+| narrative | 12 | 0.9167 | 0.9508 | 0.0669 |
+| burn | 31 | 0.8738 | 0.9278 | 0.0793 |
+| creator | 4 | 0.7866 | 0.8396 | 0.2154 |
+| master_lens | 8 | 0.5965 | 0.6653 | 0.4559 |
+| amv | 22 | 0.5813 | 0.6102 | 0.5032 |
+| creator_cn | 12 | 0.5383 | 0.5477 | 0.5108 |
+| puppet | 8 | 0.4068 | 0.3457 | 0.6743 |
+| contest | 5 | 0.4045 | 0.3435 | 0.6937 |
+| handdrawn | 22 | 0.2367 | 0.2192 | 0.7980 |
+| authority | 1 | 0.0627 | 0.0627 | 0.9600 |
+
+**关键观察**：手书（0.2367）与木偶（0.4068）的 v2 值远低于燃向（0.8738），
+冻结率则相反（79.8% / 67.4% vs 7.9%）——**这些风格天然是长镜头/有限动画，
+scene 检测会在其中报出大量"假切点"**。故**对标 run61 这类燃向片应只与
+seed / narrative / burn 层比较**。
+
+### 6.4 run61 在新口径下的位置
+
+| 项 | 值 |
+|---|-----|
+| cut_visibility_v2 | **1.0737** |
+| 冻结率 | 0.0091（1/110 刀） |
+| 参照集排名分位 | **99.3%** |
+| vs burn 层（均值 0.8738 / p50 0.9278） | 显著领先 |
+
+**结论**：在修正后的确定性口径下，**run61 的切点可见性处于参照集前 1% 水平**，
+且冻结率仅 0.91%（参照集均值 38.6%）。
+
+> **对 R1 的意义**：B1 原假设（cut_visibility 落后 8.5pp、需攻坚到 0.92）
+> **在 v2 口径下不成立**。run61 的切点质量在同类（燃向）中已属顶尖，
+> 真正的问题在旧指标本身。R1 的攻坚对象应重新定义为：
+> **把冻结率进一步压低（当前 0.91%）+ 把 v2 推广到其它风格域**。
 
 ---
 
-## 七、证据索引
+## 七、与原报告认知的差异
+
+| 原报告说法 | 实测结论 |
+|-----------|---------|
+| "差距源于切点帧内容，参照集为硬内容跳变" | 方向部分成立（确有 76 处 frozen_cut），但**指标本身噪声主导，0.8698 不可靠** |
+| "先修 `tmp/post_freeze.py` 滤镜图拼接 bug" | **无关**。`post_freeze.py` 是后期冻结帧实验脚本；`AEKV_IMPACT_SHIFT` 在 `build_master_polish.py:875` |
+| "AEKV_IMPACT_SHIFT=1 重评" | 该开关改变"定格帧显示哪一帧"，**不解决切点两侧相同，也不解决指标病态** |
+| "加闪白提升 cut_visibility" | **已证伪**：归一化会消掉亮度变化（run61 实测 0.8696→0.8698 无变化） |
+| "cut_visibility 0.870 → ≥0.92" | **验收线不成立**：v1 口径下 ±0.5ms 微扰即可让指标在 0.35-1.14 间跳变；v2 口径下 run61 已达 99.3% 分位 |
+
+---
+
+## 八、证据索引
 
 | 证据 | 路径 |
 |------|------|
-| 逐切点诊断（110 全量） | `reports/cutvis_run61.json` |
+| v2 逐部缓存（145 部） | `reports/cutvis_v2_cache.json` |
+| v2 汇总统计 | `reports/cut_visibility_v2.json` |
+| v1 逐切点诊断 | `reports/cutvis_run61.json` |
 | 切点事故检测 | `output/unified_run61/run61_cutpoints.json` |
 | EDL 切点表 | `output/unified_run61/edl.json` |
-| 诊断工具 | `scripts/cut_visibility_diag.py` |
+| v1 诊断工具 | `scripts/cut_visibility_diag.py` |
+| **v2 度量工具** | `scripts/cut_visibility_v2.py` |
+| **v2 汇总报告** | `scripts/cutvis_v2_report.py` |
 | 修复工具（已存在，未接线） | `scripts/cutpoint_selfeval.py` |
-| 参照集分位数 | `reports/reference_stats.json` |
 
 复现：
 
 ```bash
+# v2 全量重算（缓存命中则秒出）
+python scripts/cut_visibility_v2.py --refs data/reference_top --workers 4
+python scripts/cutvis_v2_report.py --mine output/unified_run61/polish/master_hr.mp4
+# v1 对照
 python scripts/cut_visibility_diag.py --video output/unified_run61/polish/master_hr.mp4 --weakest 15
-python scripts/cutpoint_selfeval.py --video output/unified_run61/polish/master_hr.mp4 \
-    --cutpoints output/unified_run61/edl.json
 ```
+
 
