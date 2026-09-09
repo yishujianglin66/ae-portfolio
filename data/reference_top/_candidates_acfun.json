@@ -1,0 +1,1785 @@
+{
+ "created": "2026-09-08 21:42:21",
+ "n_candidates": 197,
+ "by_tier": {
+  "amv": 136,
+  "contest": 11,
+  "mad": 50
+ },
+ "note": "AcFun: 下载 URL 用 contentId 构造 /v/ac<cid>；videoId 会 404",
+ "candidates": [
+  {
+   "cid": "2503567",
+   "url": "https://www.acfun.cn/v/ac2503567",
+   "title": "【泛式/单集MAD】一拳超人: 深海王篇——不屈的正义",
+   "duration": 220,
+   "views": 1029648,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2346223",
+   "url": "https://www.acfun.cn/v/ac2346223",
+   "title": "【一拳超人/AMV】击杀咏叹调//Murder Melody",
+   "duration": 253,
+   "views": 729664,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2315343",
+   "url": "https://www.acfun.cn/v/ac2315343",
+   "title": "【MAD/FATE SN UBW】尘归尘，土归土",
+   "duration": 316,
+   "views": 584627,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2349288",
+   "url": "https://www.acfun.cn/v/ac2349288",
+   "title": "[一拳超人超燃AMV] JUST ONE PUNCH！",
+   "duration": 110,
+   "views": 525817,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2337076",
+   "url": "https://www.acfun.cn/v/ac2337076",
+   "title": "【AMV 略鬼畜】一拳超人，太强的话，会很寂寞的",
+   "duration": 176,
+   "views": 390793,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1117150",
+   "url": "https://www.acfun.cn/v/ac1117150",
+   "title": "【MAD】致七宫_Byebye，勇者。",
+   "duration": 320,
+   "views": 263856,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "3016322",
+   "url": "https://www.acfun.cn/v/ac3016322",
+   "title": "各种晒妹子!! 各种吻!!! Amv 初吻",
+   "duration": 246,
+   "views": 217563,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2357574",
+   "url": "https://www.acfun.cn/v/ac2357574",
+   "title": "【高燃/闪现衔接/MAD】浴火涅槃 汝乃凤凰",
+   "duration": 157,
+   "views": 203850,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2433831",
+   "url": "https://www.acfun.cn/v/ac2433831",
+   "title": "【AMV】HERO S COME BACK【AKROSS Con 2015】",
+   "duration": 96,
+   "views": 193184,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2319337",
+   "url": "https://www.acfun.cn/v/ac2319337",
+   "title": "【AMV】分开这么久了，你有想过我吗",
+   "duration": 268,
+   "views": 191250,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2089171",
+   "url": "https://www.acfun.cn/v/ac2089171",
+   "title": "【多素材MAD】在哥哥面前跳舞好害羞呀////",
+   "duration": 265,
+   "views": 189464,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "3955423",
+   "url": "https://www.acfun.cn/v/ac3955423",
+   "title": "【一拳超人/AMV/超燃】佩戴耳机效果更佳",
+   "duration": 230,
+   "views": 178717,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "3412438",
+   "url": "https://www.acfun.cn/v/ac3412438",
+   "title": "【你的名字/AMV】从梦中找寻你の名字",
+   "duration": 172,
+   "views": 170422,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2551109",
+   "url": "https://www.acfun.cn/v/ac2551109",
+   "title": "【博人传 AMV】",
+   "duration": 242,
+   "views": 169989,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2694782",
+   "url": "https://www.acfun.cn/v/ac2694782",
+   "title": "【超闪衔接AMV】战斗不停，燃息不止",
+   "duration": 285,
+   "views": 162857,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1817104",
+   "url": "https://www.acfun.cn/v/ac1817104",
+   "title": "【白箱MAD】那些为梦想奋斗的人!",
+   "duration": 263,
+   "views": 151698,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1618978",
+   "url": "https://www.acfun.cn/v/ac1618978",
+   "title": "Mirai MAD黄金祭2014 DAY1：樂園",
+   "duration": 130,
+   "views": 132834,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2702228",
+   "url": "https://www.acfun.cn/v/ac2702228",
+   "title": "【欢乐节奏向/AMV】这是我最好的咸鱼了~！",
+   "duration": 129,
+   "views": 118864,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2343297",
+   "url": "https://www.acfun.cn/v/ac2343297",
+   "title": "【MAD/京阿尼妹子】嘿嘿嘿",
+   "duration": 205,
+   "views": 118046,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2537523",
+   "url": "https://www.acfun.cn/v/ac2537523",
+   "title": "AMV-龙珠Z/孙悟饭 ▪ 英雄传奇",
+   "duration": 341,
+   "views": 106474,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2753845",
+   "url": "https://www.acfun.cn/v/ac2753845",
+   "title": "【春物/MAD】我的青春恋爱物语——谎 言！！！",
+   "duration": 330,
+   "views": 103890,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2397038",
+   "url": "https://www.acfun.cn/v/ac2397038",
+   "title": "【AMV】玉子的甜蜜爱恋",
+   "duration": 107,
+   "views": 103157,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2504503",
+   "url": "https://www.acfun.cn/v/ac2504503",
+   "title": "【庆年AMV】这次就给你们来一场节奏盛宴",
+   "duration": 313,
+   "views": 101793,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1869939",
+   "url": "https://www.acfun.cn/v/ac1869939",
+   "title": "【燃向MAD】浪客剑心真人版",
+   "duration": 242,
+   "views": 94048,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "3775336",
+   "url": "https://www.acfun.cn/v/ac3775336",
+   "title": "MADHOUSE的王牌动作原画师——泽田英彦MAD",
+   "duration": 279,
+   "views": 89763,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1836108",
+   "url": "https://www.acfun.cn/v/ac1836108",
+   "title": "【AMV】燃烧的电音。多动漫衔切剪辑",
+   "duration": 139,
+   "views": 82839,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2166473",
+   "url": "https://www.acfun.cn/v/ac2166473",
+   "title": "【MAD/罪恶王冠】当罪恶王冠遇上红A帅醒曲",
+   "duration": 263,
+   "views": 77564,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "15294023",
+   "url": "https://www.acfun.cn/v/ac15294023",
+   "title": "【高燃MAD】当我觉醒的那一刻...世界：你毛都不是！",
+   "duration": 207,
+   "views": 76003,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "4769608",
+   "url": "https://www.acfun.cn/v/ac4769608",
+   "title": "【盛唐幻夜X逍遥诀手游】归去来兮-夜幕CP虐心手书MAD",
+   "duration": 234,
+   "views": 73640,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1877020",
+   "url": "https://www.acfun.cn/v/ac1877020",
+   "title": "【作画MAD】国人原画师孙猛个人作画MAD",
+   "duration": 233,
+   "views": 64478,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "490802",
+   "url": "https://www.acfun.cn/v/ac490802",
+   "title": "【全高达MAD】爱在高达",
+   "duration": 232,
+   "views": 63549,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2608429",
+   "url": "https://www.acfun.cn/v/ac2608429",
+   "title": "太阳的后裔 OST-Mad Clown&amp;金娜英-再见到你【中韩双语】【神叨字幕组】",
+   "duration": 235,
+   "views": 55101,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "12957609",
+   "url": "https://www.acfun.cn/v/ac12957609",
+   "title": "这就是我们用青春守护的“玉”！【火影忍者疾风传/青鸟AMV】",
+   "duration": 213,
+   "views": 47454,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2465497",
+   "url": "https://www.acfun.cn/v/ac2465497",
+   "title": "【综漫 AMV / 多素材 燃系 】战斗是为了未来与未来！！！",
+   "duration": 216,
+   "views": 44262,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2566265",
+   "url": "https://www.acfun.cn/v/ac2566265",
+   "title": "【JOJO/AMV】人类的赞歌",
+   "duration": 313,
+   "views": 41989,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1764791",
+   "url": "https://www.acfun.cn/v/ac1764791",
+   "title": "【误解系AMV】千反田X阿虚 不离不弃",
+   "duration": 225,
+   "views": 37046,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2554801",
+   "url": "https://www.acfun.cn/v/ac2554801",
+   "title": "【AMV/Mermaid】我是否住进你的心房了呢",
+   "duration": 311,
+   "views": 36968,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2541402",
+   "url": "https://www.acfun.cn/v/ac2541402",
+   "title": "【综漫/新人向/AMV/】爆燃出你的热血",
+   "duration": 268,
+   "views": 35312,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1890221",
+   "url": "https://www.acfun.cn/v/ac1890221",
+   "title": "[综漫AMV] 平凡的世界 平凡的旅程",
+   "duration": 307,
+   "views": 34085,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16299856",
+   "url": "https://www.acfun.cn/v/ac16299856",
+   "title": "少年骇客/高燃混剪AMV【英雄登………………哦！小破表别挂啊！！！】",
+   "duration": 269,
+   "views": 33576,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2078894",
+   "url": "https://www.acfun.cn/v/ac2078894",
+   "title": "【MAD·催泪向】你的身影充斥着我的脑海，挥之不去",
+   "duration": 269,
+   "views": 33482,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1919207",
+   "url": "https://www.acfun.cn/v/ac1919207",
+   "title": "【治愈/合作/AMV】再一次听见了你的声音",
+   "duration": 311,
+   "views": 29095,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10368003",
+   "url": "https://www.acfun.cn/v/ac10368003",
+   "title": "听说A站的人超好，所以我就投了一个一拳超人的视频",
+   "duration": 91,
+   "views": 28905,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2066929",
+   "url": "https://www.acfun.cn/v/ac2066929",
+   "title": "凯的热血和青春这一脚应该是最后的挥洒【AMV】",
+   "duration": 159,
+   "views": 28795,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "3302540",
+   "url": "https://www.acfun.cn/v/ac3302540",
+   "title": "【AKross2016/NanaMi】孤独者的荣光",
+   "duration": 244,
+   "views": 27673,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2532501",
+   "url": "https://www.acfun.cn/v/ac2532501",
+   "title": "[次元壁/MAD]Kitsch",
+   "duration": 219,
+   "views": 27596,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2052635",
+   "url": "https://www.acfun.cn/v/ac2052635",
+   "title": "【地铁音MAD】【上海地铁】【Love Live】欲于魔都地铁起舞",
+   "duration": 270,
+   "views": 27088,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "4689820",
+   "url": "https://www.acfun.cn/v/ac4689820",
+   "title": "AcFun10月新番超混剪MAD",
+   "duration": 348,
+   "views": 25814,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2052467",
+   "url": "https://www.acfun.cn/v/ac2052467",
+   "title": "【AMV/火影】卡卡西VS带土",
+   "duration": 164,
+   "views": 19589,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "4538774",
+   "url": "https://www.acfun.cn/v/ac4538774",
+   "title": "【黑篮完结之章】【激燃AMV】无篮球 不青春",
+   "duration": 162,
+   "views": 16180,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2434350",
+   "url": "https://www.acfun.cn/v/ac2434350",
+   "title": "【AMV】你是我闪耀的那道光",
+   "duration": 285,
+   "views": 15096,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2457738",
+   "url": "https://www.acfun.cn/v/ac2457738",
+   "title": "一拳超人 amv",
+   "duration": 231,
+   "views": 12416,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1837390",
+   "url": "https://www.acfun.cn/v/ac1837390",
+   "title": "【这么带感的轻音你敢信？】Ho-Kago Teastep - AMV",
+   "duration": 272,
+   "views": 12094,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1261266",
+   "url": "https://www.acfun.cn/v/ac1261266",
+   "title": "【乒乓】Down The Road【骚AMV】",
+   "duration": 154,
+   "views": 10720,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1732985",
+   "url": "https://www.acfun.cn/v/ac1732985",
+   "title": "【MAD】【落樱缤纷，是你我的距离】",
+   "duration": 347,
+   "views": 9783,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2405408",
+   "url": "https://www.acfun.cn/v/ac2405408",
+   "title": "【完结纪念MAD】一拳超人 ONE PUNCH MAN 大片燃向",
+   "duration": 359,
+   "views": 9619,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1856850",
+   "url": "https://www.acfun.cn/v/ac1856850",
+   "title": "【超燃MAD】任天堂全明星大乱斗【高达创战者】",
+   "duration": 197,
+   "views": 9200,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2744542",
+   "url": "https://www.acfun.cn/v/ac2744542",
+   "title": "【一拳超人AMV】 Evolution",
+   "duration": 283,
+   "views": 8380,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2019376",
+   "url": "https://www.acfun.cn/v/ac2019376",
+   "title": "【单素材.燃amv】放假了给我燃起来！",
+   "duration": 232,
+   "views": 8370,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2512702",
+   "url": "https://www.acfun.cn/v/ac2512702",
+   "title": "【AMV】LOVE THEORY【AKROSS Con 2015】",
+   "duration": 192,
+   "views": 8279,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "430174",
+   "url": "https://www.acfun.cn/v/ac430174",
+   "title": "[MAD]　→→→↓→→↑→→↑→←",
+   "duration": 239,
+   "views": 8040,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "15568612",
+   "url": "https://www.acfun.cn/v/ac15568612",
+   "title": "【AMV|混剪|高燃】一战封神，没事别惹我！",
+   "duration": 185,
+   "views": 8012,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2444790",
+   "url": "https://www.acfun.cn/v/ac2444790",
+   "title": "【一拳超人x周董】【AMV】埼大侠",
+   "duration": 133,
+   "views": 7655,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16643548",
+   "url": "https://www.acfun.cn/v/ac16643548",
+   "title": "【AMV·高燃混剪】当我看向你的那一刻，你，已经成为loser",
+   "duration": 155,
+   "views": 6781,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2335851",
+   "url": "https://www.acfun.cn/v/ac2335851",
+   "title": "【AMV】YEARNING DECEPTION【AKROSS Con 2015】",
+   "duration": 191,
+   "views": 6521,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2356133",
+   "url": "https://www.acfun.cn/v/ac2356133",
+   "title": "【AMV】FATE S END【AKROSS Con 2015】",
+   "duration": 148,
+   "views": 6262,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2439236",
+   "url": "https://www.acfun.cn/v/ac2439236",
+   "title": "【AMV】AGAINST FATE【AKROSS Con 2015】",
+   "duration": 163,
+   "views": 6258,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2059006",
+   "url": "https://www.acfun.cn/v/ac2059006",
+   "title": "AMV-Electronic Music",
+   "duration": 224,
+   "views": 6250,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1971395",
+   "url": "https://www.acfun.cn/v/ac1971395",
+   "title": "【AMV】Moon Powder【 AKROSS Con 2014】",
+   "duration": 210,
+   "views": 6181,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "3976214",
+   "url": "https://www.acfun.cn/v/ac3976214",
+   "title": "【MAD】出发吧！跨越星空的钢之魂【机战V】【the Exceeder】",
+   "duration": 276,
+   "views": 6058,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2464669",
+   "url": "https://www.acfun.cn/v/ac2464669",
+   "title": "【AMV】MARY MARY ACTION【AKROSS Con 2015】",
+   "duration": 205,
+   "views": 5838,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "1956975",
+   "url": "https://www.acfun.cn/v/ac1956975",
+   "title": "【AMV】陪伴，是最长情的告白",
+   "duration": 357,
+   "views": 5555,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2720486",
+   "url": "https://www.acfun.cn/v/ac2720486",
+   "title": "[amv]火影忍者疾风传伪op旧物珍藏",
+   "duration": 91,
+   "views": 4845,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "4967689",
+   "url": "https://www.acfun.cn/v/ac4967689",
+   "title": "【高燃/AMV/火影忍者】宇智波斑:待我归来，世界必将臣服！！",
+   "duration": 138,
+   "views": 4624,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2441173",
+   "url": "https://www.acfun.cn/v/ac2441173",
+   "title": "【AMV】I LL BE HERE【AKROSS Con 2015】",
+   "duration": 179,
+   "views": 4592,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2350070",
+   "url": "https://www.acfun.cn/v/ac2350070",
+   "title": "【AMV】MY MEDICAL LIFE【AKROSS Con 2015】",
+   "duration": 280,
+   "views": 4569,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "2512680",
+   "url": "https://www.acfun.cn/v/ac2512680",
+   "title": "【AMV】SILENCE IS GOLDEN【AKROSS Con 2015】",
+   "duration": 250,
+   "views": 4564,
+   "tier": "contest",
+   "platform": "acfun"
+  },
+  {
+   "cid": "13348644",
+   "url": "https://www.acfun.cn/v/ac13348644",
+   "title": "【超燃/火影忍者/AMV】这个术你是绝对无法逃脱",
+   "duration": 129,
+   "views": 3271,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10804964",
+   "url": "https://www.acfun.cn/v/ac10804964",
+   "title": "【前方高燃/AMV】你一定要坚持下去啊！《刀剑神域》",
+   "duration": 245,
+   "views": 3100,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "4947698",
+   "url": "https://www.acfun.cn/v/ac4947698",
+   "title": "「火影AMV」新生代中忍考试太无聊？来看看老一辈们的战斗吧！",
+   "duration": 308,
+   "views": 3003,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16203285",
+   "url": "https://www.acfun.cn/v/ac16203285",
+   "title": "【MAD/高燃/卡点】一见面就动手 太失礼了吧",
+   "duration": 214,
+   "views": 2959,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "14467804",
+   "url": "https://www.acfun.cn/v/ac14467804",
+   "title": "【amv/fate】用超兽武装的方式打开fate",
+   "duration": 222,
+   "views": 2684,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10228150",
+   "url": "https://www.acfun.cn/v/ac10228150",
+   "title": "【高燃】灵能百分百AMV - 99%",
+   "duration": 232,
+   "views": 2668,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10355732",
+   "url": "https://www.acfun.cn/v/ac10355732",
+   "title": "《火影忍者/高燃/踩点/AMV》享受火影的体术奥义吧",
+   "duration": 227,
+   "views": 2461,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "13614789",
+   "url": "https://www.acfun.cn/v/ac13614789",
+   "title": "【AMV/高燃/混剪】前方高能，节奏带感。",
+   "duration": 231,
+   "views": 2433,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "3772009",
+   "url": "https://www.acfun.cn/v/ac3772009",
+   "title": "火影忍者「ＡＭＶ」Stay This Way",
+   "duration": 234,
+   "views": 2284,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10323997",
+   "url": "https://www.acfun.cn/v/ac10323997",
+   "title": "【火影忍者 疾风传】宇智波斑vs忍者联军AMV 混和vs千手柱间镜头",
+   "duration": 248,
+   "views": 2272,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "4947599",
+   "url": "https://www.acfun.cn/v/ac4947599",
+   "title": "『火影AMV』听说这是火影里爱的最深的一段感情！",
+   "duration": 270,
+   "views": 2131,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "3233142",
+   "url": "https://www.acfun.cn/v/ac3233142",
+   "title": "【AMV】火影—The Lights",
+   "duration": 228,
+   "views": 1894,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16917775",
+   "url": "https://www.acfun.cn/v/ac16917775",
+   "title": "【迪迦奥特曼高燃MAD】这才是真正的光！",
+   "duration": 287,
+   "views": 1819,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "14646021",
+   "url": "https://www.acfun.cn/v/ac14646021",
+   "title": "《乳龙帝 AMV》热血混剪，高燃来袭",
+   "duration": 268,
+   "views": 1735,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "4632472",
+   "url": "https://www.acfun.cn/v/ac4632472",
+   "title": "Fate stay night UBW 高燃 MAD",
+   "duration": 219,
+   "views": 1703,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "4618344",
+   "url": "https://www.acfun.cn/v/ac4618344",
+   "title": "[MAD.AMV.燃向.火影忍者]羁绊就是要像这样打来打去才够真！！！！",
+   "duration": 291,
+   "views": 1700,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10220601",
+   "url": "https://www.acfun.cn/v/ac10220601",
+   "title": "【鬼灭之刃/高燃/AMV】Intimidation——灭鬼之刃，誓死不休",
+   "duration": 79,
+   "views": 1617,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10435078",
+   "url": "https://www.acfun.cn/v/ac10435078",
+   "title": "【催泪向/全程高燃/AMV】前方高能！请戴好你的耳机！",
+   "duration": 339,
+   "views": 1606,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10816241",
+   "url": "https://www.acfun.cn/v/ac10816241",
+   "title": "【综漫/高燃/AMV/史诗】正因为有了这Zero Eclipse，吾等大义才没有阴霾",
+   "duration": 236,
+   "views": 1574,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "13271458",
+   "url": "https://www.acfun.cn/v/ac13271458",
+   "title": "【高燃·MAD/ヨルムンガンド军火女王】Jormungand,北欧神话中的巨蛇怪…",
+   "duration": 228,
+   "views": 1545,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10192596",
+   "url": "https://www.acfun.cn/v/ac10192596",
+   "title": "【斯坦因/高燃/AMV】世人皆醉我独醒，举世皆浊我独清！",
+   "duration": 262,
+   "views": 1474,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "32561263",
+   "url": "https://www.acfun.cn/v/ac32561263",
+   "title": "[HATENA/AMV] Fate/Grand Order",
+   "duration": 90,
+   "views": 1447,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "4970218",
+   "url": "https://www.acfun.cn/v/ac4970218",
+   "title": "【AMV/动漫混剪】当罪恶王冠x刀剑神域x火影忍者x喰种交织在一起。",
+   "duration": 233,
+   "views": 1378,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "15429490",
+   "url": "https://www.acfun.cn/v/ac15429490",
+   "title": "【綜漫高燃AMV】這首BGM有毒 當FADE遇見這些旋律",
+   "duration": 230,
+   "views": 1343,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "15578646",
+   "url": "https://www.acfun.cn/v/ac15578646",
+   "title": "【AMV/催泪向/火影忍者疾风传】约·束",
+   "duration": 320,
+   "views": 1329,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "29460726",
+   "url": "https://www.acfun.cn/v/ac29460726",
+   "title": "【Fate/AMV】ᒪOᐯE ᗰE ᒪIKE YOᑌ ᗪO",
+   "duration": 165,
+   "views": 1323,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "33039653",
+   "url": "https://www.acfun.cn/v/ac33039653",
+   "title": "[高达00/AMV/高燃]以神明自居的人，由我来终结",
+   "duration": 224,
+   "views": 1322,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10438850",
+   "url": "https://www.acfun.cn/v/ac10438850",
+   "title": "【一拳超人/饿狼/AMV】饿狼:我可是要打败所有英雄的！",
+   "duration": 93,
+   "views": 1310,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10193248",
+   "url": "https://www.acfun.cn/v/ac10193248",
+   "title": "【AMV/亚人】In The End/踩点/高燃",
+   "duration": 161,
+   "views": 1293,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16249455",
+   "url": "https://www.acfun.cn/v/ac16249455",
+   "title": "【FATE&HELLSING-MAD.高燃】 诸君我喜欢战争.",
+   "duration": 174,
+   "views": 1285,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "12985430",
+   "url": "https://www.acfun.cn/v/ac12985430",
+   "title": "【鬼灭之刃&Fate:UBW/超燃混剪/踩点/AMV】前方高能！请戴上耳机感受！！！",
+   "duration": 113,
+   "views": 1285,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "18147688",
+   "url": "https://www.acfun.cn/v/ac18147688",
+   "title": "【《星掠者》高燃混剪/AMV/催泪向】这是什么神仙女主，直接被人渣骗到小房间！",
+   "duration": 202,
+   "views": 1255,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10212773",
+   "url": "https://www.acfun.cn/v/ac10212773",
+   "title": "【AMV.MAD/灵能百分百/高燃踩点】承受吧！我这充满百分之百的敌意！",
+   "duration": 155,
+   "views": 1246,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "18591374",
+   "url": "https://www.acfun.cn/v/ac18591374",
+   "title": "时隔8年〈境界的彼方〉，让我不经意之间想起了他-栗山未来。【高燃/混剪×MAD】",
+   "duration": 230,
+   "views": 1238,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "12024075",
+   "url": "https://www.acfun.cn/v/ac12024075",
+   "title": "【火影/鸣佐/泪燃/amv】你看，那个人好像一只“麻雀”哎",
+   "duration": 245,
+   "views": 1222,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10355714",
+   "url": "https://www.acfun.cn/v/ac10355714",
+   "title": "《火影忍者/高燃/踩点/AMV》我们一直都是最亲密的朋友",
+   "duration": 253,
+   "views": 1204,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10772372",
+   "url": "https://www.acfun.cn/v/ac10772372",
+   "title": "【fgo/fate/AMV高燃】英灵战争，就算是神我也屠给你看！",
+   "duration": 286,
+   "views": 1181,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10358637",
+   "url": "https://www.acfun.cn/v/ac10358637",
+   "title": "【一拳超人MAD/AMV】 踩点高燃“我变秃了，也变强了”",
+   "duration": 225,
+   "views": 1170,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "14678720",
+   "url": "https://www.acfun.cn/v/ac14678720",
+   "title": "【踩点/高燃/MAD】高燃踩点，暴力打击，史诗级画质",
+   "duration": 210,
+   "views": 1167,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10370156",
+   "url": "https://www.acfun.cn/v/ac10370156",
+   "title": "【Z】【高燃/AMV】【一拳超人】最强的hero！",
+   "duration": 113,
+   "views": 1160,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "17183117",
+   "url": "https://www.acfun.cn/v/ac17183117",
+   "title": "【AMV/Fate stay night UBW】Aimer - Brave Shine（OP）",
+   "duration": 229,
+   "views": 1132,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "12232528",
+   "url": "https://www.acfun.cn/v/ac12232528",
+   "title": "【鬼灭之刃/高燃混剪/AMV】无人能斩断的羁绊！！！",
+   "duration": 163,
+   "views": 1120,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "19708371",
+   "url": "https://www.acfun.cn/v/ac19708371",
+   "title": "【铠甲勇士/Mad-高燃&帝王侠】涅槃重生·帝皇再临，参见吾皇！",
+   "duration": 267,
+   "views": 1114,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "4968854",
+   "url": "https://www.acfun.cn/v/ac4968854",
+   "title": "【火影/鸣雏/AMV】雏田：最喜欢你了，鸣人！",
+   "duration": 258,
+   "views": 1111,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "14477450",
+   "url": "https://www.acfun.cn/v/ac14477450",
+   "title": "【AMV/鬼灭】鬼灭之刃高燃混剪，up主早期作品",
+   "duration": 190,
+   "views": 1106,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "21930867",
+   "url": "https://www.acfun.cn/v/ac21930867",
+   "title": "【Fate系列/AMV/燃向】无尽战争",
+   "duration": 151,
+   "views": 1101,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "15690527",
+   "url": "https://www.acfun.cn/v/ac15690527",
+   "title": "【Fate/AMV】我等是英灵，是铭刻在人类史上过往之人的影子！！！",
+   "duration": 192,
+   "views": 1095,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "14889561",
+   "url": "https://www.acfun.cn/v/ac14889561",
+   "title": "【高燃/多素材/AMV】即使世间冷漠，我也愿为你而燃",
+   "duration": 194,
+   "views": 1077,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "15734301",
+   "url": "https://www.acfun.cn/v/ac15734301",
+   "title": "【MAD 高燃】你想成为使纵力量的人吗？",
+   "duration": 203,
+   "views": 1071,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16732602",
+   "url": "https://www.acfun.cn/v/ac16732602",
+   "title": "【AMV/Fate stay night HF/间桐樱】茗于花海，只为樱落",
+   "duration": 282,
+   "views": 1065,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "25497089",
+   "url": "https://www.acfun.cn/v/ac25497089",
+   "title": "【高燃-海.陆.空＆MAD】喀秋莎：信不信我把你送去西伯利亚捡土豆！",
+   "duration": 249,
+   "views": 1058,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "31226019",
+   "url": "https://www.acfun.cn/v/ac31226019",
+   "title": "【一拳超人/AMV】全 员 英 雄",
+   "duration": 91,
+   "views": 1055,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "12606201",
+   "url": "https://www.acfun.cn/v/ac12606201",
+   "title": "【火影/AMV/丧/XXX】一定要努力乐观的活下去啊！",
+   "duration": 127,
+   "views": 1054,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "14945972",
+   "url": "https://www.acfun.cn/v/ac14945972",
+   "title": "【AMV/踩点/高燃】斩！",
+   "duration": 225,
+   "views": 1053,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "32981971",
+   "url": "https://www.acfun.cn/v/ac32981971",
+   "title": "【无职转生-高燃AMV】优于别人，并不高贵，真正的高贵，是优于过去的自己",
+   "duration": 137,
+   "views": 1035,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "17575193",
+   "url": "https://www.acfun.cn/v/ac17575193",
+   "title": "【名侦探柯南の高燃·MAD/混剪】RISE.登峰造极境",
+   "duration": 190,
+   "views": 1033,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "31287732",
+   "url": "https://www.acfun.cn/v/ac31287732",
+   "title": "【高燃/MAD】“现在的我，不可阻挡”",
+   "duration": 203,
+   "views": 1023,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "31191672",
+   "url": "https://www.acfun.cn/v/ac31191672",
+   "title": "【AMV/FATE HF】樱线 第一章",
+   "duration": 107,
+   "views": 972,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "29055896",
+   "url": "https://www.acfun.cn/v/ac29055896",
+   "title": "高校艦隊ハイスクール・フリート/高燃.MAD",
+   "duration": 92,
+   "views": 801,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "32973568",
+   "url": "https://www.acfun.cn/v/ac32973568",
+   "title": "[NT高达/高燃剪辑/AMV]好远呐，我们可没办法追上光速",
+   "duration": 270,
+   "views": 789,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47536932",
+   "url": "https://www.acfun.cn/v/ac47536932",
+   "title": "【一拳超人】One Punch Man「AMV」- Opening 1: The Hero!!",
+   "duration": 225,
+   "views": 673,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16526250",
+   "url": "https://www.acfun.cn/v/ac16526250",
+   "title": "【火影/AMV/燃向】一袭剪影--火之意志，生生不息！",
+   "duration": 239,
+   "views": 662,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "30448683",
+   "url": "https://www.acfun.cn/v/ac30448683",
+   "title": "YAYO[一拳超人//AMV]",
+   "duration": 154,
+   "views": 637,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "14775489",
+   "url": "https://www.acfun.cn/v/ac14775489",
+   "title": "【FATE ZERO/满天/AMV】卫宫切嗣——Salvation And Renunciation",
+   "duration": 317,
+   "views": 624,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16356258",
+   "url": "https://www.acfun.cn/v/ac16356258",
+   "title": "【高燃-海·陆·空＆MAD】喀秋莎同志，你还欠我一瓶伏特加！",
+   "duration": 193,
+   "views": 623,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "10691228",
+   "url": "https://www.acfun.cn/v/ac10691228",
+   "title": "[fate/amv]为致理想彼岸，我已斩断私情",
+   "duration": 253,
+   "views": 614,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "31799171",
+   "url": "https://www.acfun.cn/v/ac31799171",
+   "title": "地表最强，高燃动漫混剪(一)[MAD]",
+   "duration": 202,
+   "views": 613,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47760494",
+   "url": "https://www.acfun.cn/v/ac47760494",
+   "title": "【命运之夜】Fate/Grand Order「AMV」Heroes Are Calling ᴴᴰ",
+   "duration": 180,
+   "views": 587,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "13395090",
+   "url": "https://www.acfun.cn/v/ac13395090",
+   "title": "【AMV/一拳超人/高燃向】没有这个男人解决不了的敌人，如果有那就再来一拳\n！",
+   "duration": 199,
+   "views": 555,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "31799087",
+   "url": "https://www.acfun.cn/v/ac31799087",
+   "title": "地表最强，高燃动漫混剪(二)[MAD]",
+   "duration": 174,
+   "views": 553,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "15384881",
+   "url": "https://www.acfun.cn/v/ac15384881",
+   "title": " 【火影/AMV】带土；赎罪与鸣人同样的梦想，可一无所有",
+   "duration": 216,
+   "views": 545,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "11442065",
+   "url": "https://www.acfun.cn/v/ac11442065",
+   "title": "【火影amv】我是你最棒的弟子！",
+   "duration": 237,
+   "views": 528,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "17741277",
+   "url": "https://www.acfun.cn/v/ac17741277",
+   "title": "【AMV/Fate】不要输给这除了强大一无是处的世界",
+   "duration": 175,
+   "views": 509,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "33458726",
+   "url": "https://www.acfun.cn/v/ac33458726",
+   "title": "【热血/踩点/高燃/MAD】All Hail Lelouch",
+   "duration": 174,
+   "views": 494,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16845594",
+   "url": "https://www.acfun.cn/v/ac16845594",
+   "title": "【高燃@MAD】神啊，请收下我的膝盖吧！",
+   "duration": 229,
+   "views": 485,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "15372871",
+   "url": "https://www.acfun.cn/v/ac15372871",
+   "title": "【一人之下＆高燃-MAD】 Off With Her  Head .",
+   "duration": 173,
+   "views": 461,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "17709448",
+   "url": "https://www.acfun.cn/v/ac17709448",
+   "title": "【AMV/火影忍者】DOMINO - U can do it!",
+   "duration": 252,
+   "views": 434,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "34868401",
+   "url": "https://www.acfun.cn/v/ac34868401",
+   "title": "【紫罗兰永恒花园-高燃/MAd】薇尔莉特℃",
+   "duration": 197,
+   "views": 432,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "11673500",
+   "url": "https://www.acfun.cn/v/ac11673500",
+   "title": "【综漫-高燃-AMV】看的不是视频，是鸡皮疙瘩！",
+   "duration": 159,
+   "views": 412,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47716874",
+   "url": "https://www.acfun.cn/v/ac47716874",
+   "title": "【命运守护之夜】Fate/Zero 「AMV」 Night on Fire",
+   "duration": 287,
+   "views": 404,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "46974382",
+   "url": "https://www.acfun.cn/v/ac46974382",
+   "title": "【AMV】ALAKRAN【火影忍者】",
+   "duration": 61,
+   "views": 391,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "20299159",
+   "url": "https://www.acfun.cn/v/ac20299159",
+   "title": "【AMV/MAD/高燃/综漫/混剪】戴好耳机，享受这场视觉盛宴！！",
+   "duration": 234,
+   "views": 382,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47788556",
+   "url": "https://www.acfun.cn/v/ac47788556",
+   "title": "【命运之夜】Fate/Series [AMV] - Set fire to the sky",
+   "duration": 229,
+   "views": 382,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "31191745",
+   "url": "https://www.acfun.cn/v/ac31191745",
+   "title": "【AMV/FATE HF】樱线 第二章",
+   "duration": 137,
+   "views": 371,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47805197",
+   "url": "https://www.acfun.cn/v/ac47805197",
+   "title": "【一拳超人】One Punch Man AMV - Indestructible",
+   "duration": 277,
+   "views": 339,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47825953",
+   "url": "https://www.acfun.cn/v/ac47825953",
+   "title": "【一拳超人】One Punch Man AMV - Rise",
+   "duration": 307,
+   "views": 336,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "41752237",
+   "url": "https://www.acfun.cn/v/ac41752237",
+   "title": "【高燃/略青春/MAD】─ 彼世再战 ─（新增P2：细节简化版）",
+   "duration": 236,
+   "views": 333,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "14960511",
+   "url": "https://www.acfun.cn/v/ac14960511",
+   "title": "〔火影•AMV〕当我睁开双眼，这这整个世界都将为我颤抖！",
+   "duration": 208,
+   "views": 328,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16604388",
+   "url": "https://www.acfun.cn/v/ac16604388",
+   "title": "【高燃MAD】世界核平の日常",
+   "duration": 229,
+   "views": 326,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47819478",
+   "url": "https://www.acfun.cn/v/ac47819478",
+   "title": "【一拳超人】One Punch Man |AMV| - See me Fall",
+   "duration": 143,
+   "views": 323,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47978588",
+   "url": "https://www.acfun.cn/v/ac47978588",
+   "title": "【一拳超人】One-Punch Man AMV - Change Me Forever",
+   "duration": 204,
+   "views": 316,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47943396",
+   "url": "https://www.acfun.cn/v/ac47943396",
+   "title": "【一拳超人】One-punch man (ワンパンマン) AMV-Remember the name",
+   "duration": 216,
+   "views": 300,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47884925",
+   "url": "https://www.acfun.cn/v/ac47884925",
+   "title": "【一拳超人】One Punch Man [AMV] - Survivor",
+   "duration": 205,
+   "views": 282,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47768334",
+   "url": "https://www.acfun.cn/v/ac47768334",
+   "title": "【命运之夜】Fate- Grand Order Solomon「 AMV 」ForeverONLAP",
+   "duration": 226,
+   "views": 277,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "15502377",
+   "url": "https://www.acfun.cn/v/ac15502377",
+   "title": "【AMV】火影忍者_Ragnarök",
+   "duration": 87,
+   "views": 263,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "48007234",
+   "url": "https://www.acfun.cn/v/ac48007234",
+   "title": "【一拳超人/MAD】ONE PUNCH MAN-ワンパンマン×ヒバナ【AMV】",
+   "duration": 203,
+   "views": 259,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47822119",
+   "url": "https://www.acfun.cn/v/ac47822119",
+   "title": "【命运之夜】Fate/Grand Order 「AMV」 - RockAndRollThugs ᴴᴰ",
+   "duration": 215,
+   "views": 245,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47782104",
+   "url": "https://www.acfun.cn/v/ac47782104",
+   "title": "【命运之夜】Fate/Grand Order - Up From The Bottom [AMV]",
+   "duration": 184,
+   "views": 245,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "16384197",
+   "url": "https://www.acfun.cn/v/ac16384197",
+   "title": "【MAD】【高燃】一首歌点燃这个篇章！",
+   "duration": 225,
+   "views": 243,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47779054",
+   "url": "https://www.acfun.cn/v/ac47779054",
+   "title": "【命运之夜】Fate「AMV」All Of Me (Fivefold)",
+   "duration": 180,
+   "views": 227,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47788461",
+   "url": "https://www.acfun.cn/v/ac47788461",
+   "title": "【一拳超人】AMV - Saitama - Unbreakable [ONE PUNCH MAN]",
+   "duration": 187,
+   "views": 224,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "13647010",
+   "url": "https://www.acfun.cn/v/ac13647010",
+   "title": "【AMV】Fate/HF 混剪",
+   "duration": 103,
+   "views": 218,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47723080",
+   "url": "https://www.acfun.cn/v/ac47723080",
+   "title": "【命运守护之夜】Fate Series - Awaken「AMV」",
+   "duration": 196,
+   "views": 217,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "36610645",
+   "url": "https://www.acfun.cn/v/ac36610645",
+   "title": "【高燃MAD】让我用少年的热血抢走你的硬币吧！！！",
+   "duration": 209,
+   "views": 204,
+   "tier": "mad",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47782039",
+   "url": "https://www.acfun.cn/v/ac47782039",
+   "title": "【一拳超人】One Punch Man AMV - Murder Melody [HD]",
+   "duration": 253,
+   "views": 201,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47848074",
+   "url": "https://www.acfun.cn/v/ac47848074",
+   "title": "【命运之夜/AMV】Fate/Grand Order「Dead Man WalkingSkillet",
+   "duration": 230,
+   "views": 201,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "23318331",
+   "url": "https://www.acfun.cn/v/ac23318331",
+   "title": "【火影AMV】“我早就闭上了双眼，我的目的只在于黑暗之中”",
+   "duration": 63,
+   "views": 200,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "28541913",
+   "url": "https://www.acfun.cn/v/ac28541913",
+   "title": "【FATE HF线/AMV】背叛了理想，只想成为樱正义的伙伴",
+   "duration": 301,
+   "views": 195,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47725461",
+   "url": "https://www.acfun.cn/v/ac47725461",
+   "title": "【一拳超人】One Punch Man - AMV - Whatever It Takes",
+   "duration": 188,
+   "views": 194,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47964122",
+   "url": "https://www.acfun.cn/v/ac47964122",
+   "title": "[命运之夜/AMV] Fate Series - Not Gonna Die",
+   "duration": 284,
+   "views": 194,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "33856285",
+   "url": "https://www.acfun.cn/v/ac33856285",
+   "title": "【AMV/综漫/高燃】火力全开！战斗的理由只有一个，那就是为了你~",
+   "duration": 94,
+   "views": 187,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "30448163",
+   "url": "https://www.acfun.cn/v/ac30448163",
+   "title": "AMV 一拳超人- [C]",
+   "duration": 133,
+   "views": 187,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47732590",
+   "url": "https://www.acfun.cn/v/ac47732590",
+   "title": "【命运之夜】Fate/Grand Order Solomon【AMV】Let s Do This",
+   "duration": 138,
+   "views": 183,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47748634",
+   "url": "https://www.acfun.cn/v/ac47748634",
+   "title": "【一拳超人】One punch man AMV - Ready Or Not",
+   "duration": 223,
+   "views": 179,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47844560",
+   "url": "https://www.acfun.cn/v/ac47844560",
+   "title": "【一拳超人】One Punch Man - Unbreakable 【AMV】",
+   "duration": 195,
+   "views": 178,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47773921",
+   "url": "https://www.acfun.cn/v/ac47773921",
+   "title": "【命运之夜】Fate Grand Order 「AMV」 For the Glory",
+   "duration": 275,
+   "views": 143,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47825988",
+   "url": "https://www.acfun.cn/v/ac47825988",
+   "title": "【命运之夜】Fate/Grand Order 【FGO】「AMV」- Trials",
+   "duration": 223,
+   "views": 142,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47832770",
+   "url": "https://www.acfun.cn/v/ac47832770",
+   "title": "【命运之夜】Fate Grand OrderCamelotPaladinAgateram 「AMV」",
+   "duration": 177,
+   "views": 133,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47491737",
+   "url": "https://www.acfun.cn/v/ac47491737",
+   "title": "【MAD】かっこいいアンパンマンマーチでワンパンマン One Punch Man【一拳超人 AMV】",
+   "duration": 64,
+   "views": 116,
+   "tier": "amv",
+   "platform": "acfun"
+  },
+  {
+   "cid": "47776257",
+   "url": "https://www.acfun.cn/v/ac47776257",
+   "title": "【命运之夜】Fate/Grand Order：Babylonia【AMV】AcrossTheLine",
+   "duration": 221,
+   "views": 107,
+   "tier": "amv",
+   "platform": "acfun"
+  }
+ ]
+}
