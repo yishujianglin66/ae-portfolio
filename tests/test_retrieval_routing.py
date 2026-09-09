@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT))
 from ai.t11_hybrid_search import (  # noqa: E402
     RERANK_ENV, decide_route, query_has_alias_hit,
 )
+from ai.query_normalizer import NORM_API_ENV  # noqa: E402
 
 
 class TestQueryHasAliasHit(unittest.TestCase):
@@ -48,12 +49,17 @@ class TestDecideRoute(unittest.TestCase):
 
     def setUp(self):
         self._old = os.environ.pop(RERANK_ENV, None)
+        self._old_norm = os.environ.pop(NORM_API_ENV, None)
 
     def tearDown(self):
         if self._old is None:
             os.environ.pop(RERANK_ENV, None)
         else:
             os.environ[RERANK_ENV] = self._old
+        if self._old_norm is None:
+            os.environ.pop(NORM_API_ENV, None)
+        else:
+            os.environ[NORM_API_ENV] = self._old_norm
 
     def test_default_off_alias_query(self):
         self.assertEqual(decide_route("艾伦变身"), "hybrid")
@@ -73,6 +79,76 @@ class TestDecideRoute(unittest.TestCase):
     def test_enabled_other_value_ignored(self):
         os.environ[RERANK_ENV] = "true"  # 非 "1" 不启用
         self.assertEqual(decide_route("体内封印九尾妖狐的孤儿"), "hybrid")
+
+
+class TestNormFilterRoute(unittest.TestCase):
+    """归一化过滤路由（R3 收官，2026-09-10）：AEKV_NORM_API=1 时
+    自然语言查询走 norm_filter；别名命中查询始终 hybrid（legacy 保护）。"""
+
+    def setUp(self):
+        self._old = os.environ.pop(RERANK_ENV, None)
+        self._old_norm = os.environ.pop(NORM_API_ENV, None)
+
+    def tearDown(self):
+        if self._old is None:
+            os.environ.pop(RERANK_ENV, None)
+        else:
+            os.environ[RERANK_ENV] = self._old
+        if self._old_norm is None:
+            os.environ.pop(NORM_API_ENV, None)
+        else:
+            os.environ[NORM_API_ENV] = self._old_norm
+
+    def test_norm_on_natural_goes_filter(self):
+        os.environ[NORM_API_ENV] = "1"
+        self.assertEqual(decide_route("体内封印九尾妖狐的孤儿"), "norm_filter")
+
+    def test_norm_on_alias_stays_hybrid(self):
+        # 归一化只对关键词无命中查询启用——legacy 保护的铁律
+        os.environ[NORM_API_ENV] = "1"
+        self.assertEqual(decide_route("利威尔兵长"), "hybrid")
+        self.assertEqual(decide_route("鬼灭之刃高燃"), "hybrid")
+
+    def test_norm_off_default(self):
+        os.environ[RERANK_ENV] = "1"
+        self.assertEqual(decide_route("体内封印九尾妖狐的孤儿"),
+                         "semantic_rerank")
+
+    def test_norm_priority_over_rerank(self):
+        # 两开关同开：归一化优先（上限更高的路径）
+        os.environ[NORM_API_ENV] = "1"
+        os.environ[RERANK_ENV] = "1"
+        self.assertEqual(decide_route("体内封印九尾妖狐的孤儿"), "norm_filter")
+
+    def test_norm_other_value_ignored(self):
+        os.environ[NORM_API_ENV] = "true"  # 非 "1" 不启用
+        os.environ[RERANK_ENV] = "1"
+        self.assertEqual(decide_route("体内封印九尾妖狐的孤儿"),
+                         "semantic_rerank")
+
+
+class TestNormalizeQueryOffline(unittest.TestCase):
+    """归一化器离线行为：开关关/无 key 时安全回退 NO_IP，不发网络请求。"""
+
+    def setUp(self):
+        self._old_norm = os.environ.pop(NORM_API_ENV, None)
+
+    def tearDown(self):
+        if self._old_norm is None:
+            os.environ.pop(NORM_API_ENV, None)
+        else:
+            os.environ[NORM_API_ENV] = self._old_norm
+
+    def test_switch_off_returns_no_ip(self):
+        from ai.query_normalizer import normalize_query
+        rec = normalize_query("体内封印九尾妖狐的孤儿")
+        self.assertEqual(rec["ip"], "NO_IP")
+
+    def test_empty_query_no_ip(self):
+        from ai.query_normalizer import normalize_query
+        os.environ[NORM_API_ENV] = "1"
+        rec = normalize_query("")
+        self.assertEqual(rec["ip"], "NO_IP")
 
 
 if __name__ == "__main__":

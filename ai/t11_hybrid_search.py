@@ -301,10 +301,21 @@ def query_has_alias_hit(query: str) -> bool:
 
 
 def decide_route(query: str) -> str:
-    """分流决策（纯逻辑，可单测）。返回 'hybrid' 或 'semantic_rerank'。"""
+    """分流决策（纯逻辑，可单测）。
+
+    'hybrid'          别名/IP 命中（legacy 满分链路，保护不动）
+    'norm_filter'     自然语言 + AEKV_NORM_API=1 → API 归一化 IP 过滤路由
+    'semantic_rerank' 自然语言 + AEKV_RETRIEVAL_RERANK=1 → 纯语义+重排（D 臂）
+    'hybrid'          其余（默认，向后兼容）
+    """
+    if query_has_alias_hit(query):
+        return "hybrid"
+    from ai.query_normalizer import NORM_API_ENV
+    if os.environ.get(NORM_API_ENV, "0") == "1":
+        return "norm_filter"
     if os.environ.get(RERANK_ENV, "0") != "1":
         return "hybrid"
-    return "hybrid" if query_has_alias_hit(query) else "semantic_rerank"
+    return "semantic_rerank"
 
 
 def _get_reranker():
@@ -339,10 +350,44 @@ def semantic_rerank_search(entries: List[Dict], embeddings: np.ndarray,
     return [pool[i] for i in order]
 
 
+def norm_filter_search(entries: List[Dict], embeddings: np.ndarray,
+                       model, query: str, top_k: int = 10,
+                       pool_size: int = RERANK_POOL) -> List[Dict]:
+    """归一化过滤路由（R3 收官架构 v4，heldout R@10=1.000 实测）。
+
+    API 多数票归一化识别 IP → 候选限定该 IP → 语义排序 → CrossEncoder 重排；
+    NO_IP/识别失败 → 回退 D 臂（semantic_rerank_search）兜底。
+    """
+    from ai.query_normalizer import normalize_query
+    rec = normalize_query(query)
+    ip = rec.get("ip", "NO_IP")
+    if ip == "NO_IP":
+        return semantic_rerank_search(entries, embeddings, model, query,
+                                      top_k, pool_size)
+    sub = [e for e in entries
+           if ip in e.get("ip_names", []) or ip in e.get("primary_ip", "")]
+    if not sub:
+        return semantic_rerank_search(entries, embeddings, model, query,
+                                      top_k, pool_size)
+    sub_emb = model.encode(
+        [e.get("description") or e.get("primary_ip", "") for e in sub])
+    q_emb = model.encode([query])[0]
+    sims = (sub_emb / np.linalg.norm(sub_emb, axis=1, keepdims=True)) @ \
+        (q_emb / np.linalg.norm(q_emb))
+    order = np.argsort(sims)[::-1][:pool_size]
+    pool = [sub[i] for i in order]
+    pairs = [(query, _entry_text(e)) for e in pool]
+    scores = _get_reranker().predict(pairs)
+    return [pool[i] for i in np.argsort(scores)[::-1][:top_k]]
+
+
 def hybrid_search(entries: List[Dict], embeddings: np.ndarray,
                   model, query: str, top_k: int = 10) -> List[Dict]:
     """混合检索: 关键词+语义RRF融合（分流启用时按 decide_route 路由）"""
-    if decide_route(query) == "semantic_rerank":
+    route = decide_route(query)
+    if route == "norm_filter":
+        return norm_filter_search(entries, embeddings, model, query, top_k)
+    if route == "semantic_rerank":
         return semantic_rerank_search(entries, embeddings, model, query, top_k)
 
     # 关键词通道

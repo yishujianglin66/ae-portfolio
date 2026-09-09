@@ -317,15 +317,36 @@ def stage4b_apply_sfx(
     def _qframe(t):
         return int(round((t - 0.006) * 24) * _FRAME_MS)
     
+    # 能量预算 (2026-09-09): 混音前实测底轨真峰值，按余量缩放 SFX 增益。
+    # 背景: run61 底轨已 -9.1 LUFS / TP +0.2 dBFS，任何附加能量必然削波。
+    _budget = {"sfx_scale": 1.0, "base_gain_db": 0.0, "verdict": "unknown"}
+    try:
+        from core.audio_budget import measure as _ab_measure, budget as _ab_budget
+        _bm = _ab_measure(input_video)
+        _budget = _ab_budget(_bm, n_sfx=len(plan))
+        print(f"    [音频预算] {_budget['verdict']}: {_budget['note']}")
+    except Exception as _ab_e:  # noqa: BLE001
+        print(f"    [音频预算跳过] {_ab_e}")
+
+    _sfx_scale = float(_budget.get("sfx_scale", 1.0))
+    _base_gain_db = float(_budget.get("base_gain_db", 0.0))
+
     def _mix_batch(pb, in_mp4, out_mp4):
         parts, labels = [], []
         for i, (f, ms, g) in enumerate(pb, start=1):
             _qms = int(round(ms / _FRAME_MS) * _FRAME_MS)
-            parts.append(f"[{i}:a]adelay={_qms}|{_qms},volume={g:.2f}[s{i}]")
+            _g = round(float(g) * _sfx_scale, 4)
+            parts.append(f"[{i}:a]adelay={_qms}|{_qms},volume={_g:.3f}[s{i}]")
             labels.append(f"[s{i}]")
-        parts.append("[0:a]" + "".join(labels) +
+        # 底轨：按预算衰减（若需）并显式打标签，才能进 amix
+        if abs(_base_gain_db) > 0.01:
+            parts.append(f"[0:a]volume={_base_gain_db:.2f}dB[base]")
+        else:
+            parts.append("[0:a]anull[base]")
+        # amix 后限幅到 -1.5 dBFS (0.8414)，level=disabled 避免自动增益补偿
+        parts.append("[base]" + "".join(labels) +
                      f"amix=inputs={len(pb)+1}:duration=first:normalize=0[am];"
-                     f"[am]alimiter=attack=1:release=50:limit=0.88:level=0[outa]")
+                     f"[am]alimiter=attack=1:release=50:limit=0.8414:level=disabled[outa]")
         cmd = ["ffmpeg", "-y", "-i", in_mp4]
         for f, _, _ in pb:
             cmd += ["-i", f]
@@ -503,6 +524,51 @@ def main() -> int:
     report["capabilities_used"]["sfx"] = sfx_result["success"]
     final_video = sfx_result["output_video"]
     print(f"    SFX v2.1: {'OK' if sfx_result['success'] else 'FAIL'} ({sfx_result['sfx_count']} 落点)")
+
+    # --- P2 切点级 self-eval: 渲染成品 × EDL 切点边界技术事故检测
+    # (吸收 video-use 设计: CNN 评分管整体, 切点检测管单刀事故)
+    try:
+        from scripts.cutpoint_selfeval import analyze_cutpoints
+        _edl_path = out_dir / "edl.json"
+        if _edl_path.exists():
+            _edl_j = json.loads(_edl_path.read_text(encoding="utf-8"))
+            _cp_rep = analyze_cutpoints(final_video, _edl_j.get("cut_points", []))
+            (out_dir / "cutpoint_report.json").write_text(
+                json.dumps(_cp_rep, ensure_ascii=False, indent=1),
+                encoding="utf-8")
+            report["cutpoint_selfeval"] = {
+                "verdict": _cp_rep["verdict"],
+                "issues": len(_cp_rep["issues"]),
+            }
+            print(f"    切点自检: {_cp_rep['verdict']} "
+                  f"({_cp_rep['cut_count']} 刀, {len(_cp_rep['issues'])} 事故)")
+    except Exception as _cp_e:  # noqa: BLE001
+        print(f"    [切点自检跳过] {_cp_e}")
+
+    # --- 交付规格闸门 (2026-09-09): 码率/帧率/位深/时长/音频峰值
+    # 吸收 AKROSS Con 交付规格；不达标只告警不阻断（保留成片供诊断），
+    # 但把结论写进报告与 evidence，避免"检测了却不管"。
+    try:
+        from scripts.check_delivery_spec import check_one as _spec_check, SPEC as _SPEC
+        _spec = dict(_SPEC)
+        # 短样片按实际时长放宽下限（AKROSS 原始口径是 1-15 分钟）
+        _spec["duration_sec"] = (min(_spec["duration_sec"][0], args.duration * 0.8),
+                                 _spec["duration_sec"][1])
+        _spec_rep = _spec_check(Path(final_video), _spec)
+        (out_dir / "delivery_spec_report.json").write_text(
+            json.dumps(_spec_rep.as_dict(), ensure_ascii=False, indent=1),
+            encoding="utf-8")
+        _spec_issues = [c for c in _spec_rep.checks if c.status != "PASS"]
+        report["delivery_spec"] = {
+            "verdict": _spec_rep.status,
+            "issues": [{"name": c.name, "detail": c.detail} for c in _spec_issues],
+        }
+        print(f"    交付规格: {_spec_rep.status} "
+              f"({len(_spec_issues)} 项需关注)")
+        for _c in _spec_issues:
+            print(f"      ! {_c.name}: {_c.detail}")
+    except Exception as _sp_e:  # noqa: BLE001
+        print(f"    [交付规格自检跳过] {_sp_e}")
 
     # Stage 5: Score video
     print("\n[能力⑤] 成片评分...")
