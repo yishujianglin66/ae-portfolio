@@ -31,9 +31,37 @@ os.environ.setdefault("HF_HUB_CACHE", r"D:\hf_cache\hub")
 
 EVIDENCE_DIR = ROOT / "output" / "evidence" / "r3_query_norm_20260909"
 NORM_CACHE = ROOT / "cache" / "bge_m3_index" / "query_norm_cache.jsonl"
+NORM_API_CACHE = ROOT / "cache" / "bge_m3_index" / "query_norm_api_cache.jsonl"
 VLM_MODEL = "chancharikm/qwen2.5-vl-7b-cam-motion"
 RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
 CANDIDATE_POOL = 30
+
+# API 归一化后端链（OpenAI 兼容；key 从环境变量取，绝不落盘/回显）。
+# 额度自动衔接（2026-09-09 Boss 指令）：
+#   1. 每个后端先试「指定模型」（Boss 指定的免费额度模型最优先）
+#   2. GET /models 自动发现，按免费额度关键词匹配排序后衔接进链
+#   3. 模型不可用/额度耗尽(HTTP 400/402/403/404/429) → 指针永久推进
+#   4. 网络瞬断(URLError) → 同模型退避重试 [5,15,30]s，耗尽才换下一组合
+API_BACKENDS = [
+    {"name": "DEEPSEEK", "base_url": "https://api.deepseek.com/v1",
+     "key_env": "DEEPSEEK_API_KEY",
+     "models": ["deepseek-v4.1-flash-expires-on-0910",  # Boss 指定，0910 到期
+                "deepseek-v4-flash"],
+     "free_kw": ["free", "expires", "flash"]},
+    {"name": "DASHSCOPE", "base_url":
+     "https://dashscope.aliyuncs.com/compatible-mode/v1",
+     "key_env": "DASHSCOPE_API_KEY",
+     "models": ["qwen-plus", "qwen-turbo"],
+     "free_kw": ["free", "expires", "flash", "turbo", "lite"]},
+    {"name": "SILICONFLOW", "base_url": "https://api.siliconflow.cn/v1",
+     "key_env": "SILICONFLOW_API_KEY",
+     "models": [],
+     "free_kw": ["free", "expires", "flash", "turbo", "lite"]},
+]
+RETRY_BACKOFF = [5, 15, 30]
+_DISCOVER_CAP = 8  # 每后端自动发现最多衔接 8 个模型
+_DISCOVER_EXCLUDE = ("vl", "embedding", "audio", "tts", "asr", "rerank",
+                     "speech", "video", "image", "sora", "omni")
 
 # IP 闭集 = 伪标签语料的全部 IP（生产索引的 manifest，不是泄漏）
 IP_UNIVERSE = [
@@ -135,6 +163,160 @@ def run_norm(queries: list):
                                ensure_ascii=False) + "\n")
             cache[q] = {"query": q, "ip": ip, "expanded": expanded}
     _log(f"  归一化完成 {len(todo)} 条，{time.time()-t0:.0f}s -> {NORM_CACHE}")
+    return cache
+
+
+class _ModelUnavailable(Exception):
+    """模型不可用/额度耗尽（HTTP 400/402/403/404/429）→ 指针永久推进。"""
+
+
+def _discover_models(base_url: str, key: str, free_kw: list) -> list:
+    """GET /models 自动发现，按免费额度关键词命中数排序（仅留命中者）。"""
+    import urllib.request
+
+    req = urllib.request.Request(
+        base_url.rstrip("/") + "/models",
+        headers={"Authorization": f"Bearer {key}"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = json.loads(r.read())
+    except Exception:  # noqa: BLE001  发现失败不影响指定模型链
+        return []
+    ids = [m.get("id", "") for m in data.get("data", []) if m.get("id")]
+    ranked = []
+    for mid in ids:
+        low = mid.lower()
+        if any(x in low for x in _DISCOVER_EXCLUDE):
+            continue
+        hits = sum(1 for kw in free_kw if kw in low)
+        if hits > 0:
+            ranked.append((-hits, mid))
+    ranked.sort()
+    return [m for _, m in ranked[:_DISCOVER_CAP]]
+
+
+def _build_call_chain() -> list:
+    """展开为 (name, base_url, key, model) 线性调用链：指定模型优先。"""
+    chain = []
+    for b in API_BACKENDS:
+        key = os.environ.get(b["key_env"], "")
+        if not key:
+            _log(f"  [链] {b['name']}: key 未配置，跳过")
+            continue
+        models = list(b["models"])
+        disc = _discover_models(b["base_url"], key, b["free_kw"])
+        extra = [m for m in disc if m not in models]
+        models += extra
+        _log(f"  [链] {b['name']}: 指定 {len(b['models'])} + 发现免费 "
+             f"{len(extra)} = {len(models)} 模型 {models}")
+        for m in models:
+            chain.append((b["name"], b["base_url"], key, m))
+    return chain
+
+
+def _call_with_retry(base_url: str, key: str, model: str, q: str) -> str:
+    """单模型调用：URLError 退避重试；额度/模型类 HTTP 错误抛 _ModelUnavailable。"""
+    import urllib.error
+    import urllib.request
+
+    data = json.dumps({
+        "model": model,
+        "messages": [{"role": "system", "content": SYSTEM_PROMPT},
+                     {"role": "user", "content": q}],
+        # Boss 指定的 deepseek-v4.1-flash-expires-on-0910 是推理模型：
+        # 思考走 reasoning_content（动辄数百 token），答案在 content。
+        # max_tokens 必须 ≥2048，否则思考耗尽预算 → content 空/截断。
+        "max_tokens": 2048, "temperature": 0.1,
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        base_url.rstrip("/") + "/chat/completions", data=data,
+        headers={"Authorization": f"Bearer {key}",
+                 "Content-Type": "application/json"})
+    last_net_err = None
+    for delay in [0] + RETRY_BACKOFF:
+        if delay:
+            time.sleep(delay)
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                d = json.loads(r.read())
+            return d["choices"][0]["message"]["content"].strip()
+        except urllib.error.HTTPError as e:
+            if e.code in (400, 402, 403, 404, 429):
+                raise _ModelUnavailable(f"HTTP {e.code}") from e
+            raise
+        except urllib.error.URLError as e:  # 网络瞬断：退避重试
+            last_net_err = e
+            continue
+    raise _ModelUnavailable(f"网络重试耗尽 ({type(last_net_err).__name__})")
+
+
+def run_norm_api(queries: list):
+    """Phase1-API: 远程 LLM 归一化（DeepSeek→DashScope→SiliconFlow，
+    指定模型优先 + /models 免费额度自动衔接，断点续传独立缓存）。"""
+    chain = _build_call_chain()
+    if not chain:
+        raise RuntimeError("无可用的 API 后端（key 均未配置）")
+
+    # 载入缓存并剔除污染记录（上轮 URLError 写入的空 raw，须重跑）
+    cache, poisoned = {}, 0
+    if NORM_API_CACHE.exists():
+        for line in NORM_API_CACHE.read_text(encoding="utf-8").splitlines():
+            try:
+                d = json.loads(line)
+            except Exception:
+                poisoned += 1
+                continue
+            if not d.get("raw") or not d.get("backend"):
+                poisoned += 1  # 空响应 = 网络失败污染，丢弃
+                continue
+            raw = d["raw"]
+            if "{" not in raw or "}" not in raw:
+                poisoned += 1  # JSON 截断（旧 max_tokens=150 思考耗尽），丢弃
+                continue
+            cache[d["query"]] = d
+    if poisoned:
+        NORM_API_CACHE.write_text(
+            "".join(json.dumps(c, ensure_ascii=False) + "\n"
+                    for c in cache.values()), encoding="utf-8")
+        _log(f"  清理污染缓存记录 {poisoned} 条，缓存留 {len(cache)} 条")
+    todo = [q for q in queries if q not in cache]
+    _log(f"Phase1-API 查询归一化: 共 {len(queries)}，缓存 {len(cache)}，"
+         f"待做 {len(todo)}")
+    if not todo:
+        return cache
+
+    t0 = time.time()
+    ptr = 0  # 调用链指针：模型不可用/额度耗尽时永久推进
+    with open(NORM_API_CACHE, "a", encoding="utf-8") as f:
+        for q in todo:
+            raw, bname, model_used = "", "", ""
+            for ci in range(ptr, len(chain)):
+                bname_, burl, key, model = chain[ci]
+                try:
+                    raw = _call_with_retry(burl, key, model, q)
+                    bname, model_used = bname_, model
+                    break
+                except _ModelUnavailable as e:
+                    _log(f"  [额度] {bname_}/{model}: {e} → 指针推进")
+                    if ci == ptr:
+                        ptr = ci + 1
+                except Exception as e:  # noqa: BLE001  瞬时错误不永久推进
+                    _log(f"  [WARN] {bname_}/{model} {q[:12]}: "
+                         f"{type(e).__name__}")
+            js = raw[raw.find("{"):raw.rfind("}") + 1] if "{" in raw else ""
+            try:
+                d = json.loads(js)
+                ip = d.get("ip", "NO_IP")
+                expanded = d.get("expanded", q)
+            except Exception:
+                ip, expanded = "NO_IP", q
+            if ip != "NO_IP" and ip not in IP_UNIVERSE:
+                ip = "NO_IP"
+            rec = {"query": q, "ip": ip, "expanded": expanded,
+                   "backend": bname, "model": model_used, "raw": raw[:200]}
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            cache[q] = rec
+    _log(f"  API 归一化完成 {len(todo)} 条，{time.time()-t0:.0f}s -> {NORM_API_CACHE}")
     return cache
 
 
@@ -283,7 +465,10 @@ def main():
     from ai.t11_hybrid_search import TEST_QUERIES
 
     all_queries = [q for q, _ in HELD_OUT_QUERIES] + [q for q, _ in TEST_QUERIES]
-    norm = run_norm(all_queries)
+    if os.environ.get("AEKV_NORM_BACKEND", "api") == "api":
+        norm = run_norm_api(all_queries)
+    else:
+        norm = run_norm(all_queries)
     run_retrieval(norm)
 
 
