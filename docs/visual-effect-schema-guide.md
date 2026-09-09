@@ -6,10 +6,21 @@ This guide explains how to use the structured JSON Schema for AE visual effects 
 
 The visual effect schema (`schemas/visual_effect_schema.json`) provides a machine-readable contract for defining AE effects with:
 
-- **Type-safe parameter validation** via JSON Schema `oneOf` conditional patterns
+- **Type-safe parameter validation** via root-level `allOf` with `if`/`then` clauses
+  (not `oneOf` —— `oneOf` 会让空 `parameters` 同时匹配多个类型而产生歧义)
 - **Temporal envelopes** for dynamic modulation (拍点包络: peak value, decay duration, tail ratio)
 - **Evidence chain integration** linking effects to validated grammar cards via `skill_id` and `reasoning_log`
-- **11 effect types**: twixtor, zoom_pan, bloom, bokeh, badtv, glitch, motion_blur, radial_blur, burst_radial, burst_badtv, fmb_directional
+- **17 effect types** (`effect_type` enum in `schemas/visual_effect_schema.json`, `version: 1.0.0`):
+  `twixtor`, `zoom_pan`, `bloom`, `sapphire_glow`, `optical_flares`, `bokeh`,
+  `badtv`, `glitch`, `delirium`, `motion_blur`, `radial_blur`, `burst_radial`,
+  `burst_badtv`, `fmb_directional`, `particular`, `magic_bullet_looks`, `film_stocks`
+
+  ⚠️ 其中只有 **9 种在 `build_master_polish.RECIPES` 中有实现** 可真正渲染
+  （`bloom`, `bokeh`, `badtv`, `glitch`, `radial_blur`, `motion_blur`,
+  `burst_radial`, `burst_badtv`, `fmb_directional`）。
+  `twixtor` / `zoom_pan` 由内部规划通道驱动，不可外部注入；
+  6 种 premium 插件类型无 RECIPES 条目（matchName 未经 AE 枚举实证）。
+  详见 `docs/visual-effect-schema-verification-2026-09-08.md`。
 
 ## Schema Structure
 
@@ -295,21 +306,50 @@ if not validation["valid"]:
 ```
 
 Validation checks:
-- `effect_type` matches one of the 11 defined types.
-- `parameters` conform to the type-specific definition (via `oneOf` schema).
-- `time_range.start_sec < time_range.end_sec`.
+- `effect_type` matches one of the 17 defined types.
+- `parameters` conform to the type-specific definition (via root-level `allOf`
+  with `if`/`then` clauses —— 不是 `oneOf`；`oneOf` 会让空参数对象同时匹配多个类型）。
+- `time_range.start_sec < time_range.end_sec` —— ⚠️ **当前并未被 schema 强制**。
+  实测 `start_sec=9, end_sec=1` 仍通过校验；`schema_effects_to_plan()`
+  会把它归入 `skipped` 并给出原因，所以不会造成错误渲染，但约束应补到 schema 层。
 - `envelope.decay_seconds > 0` if enabled.
 - `evidence_chain.skill_id` is present (required for audit trail).
 
 ## Integration with build_master_polish.py
 
-The `_apply_effects_to_video()` function writes effects to a temporary JSON file and calls `scripts/build_master_polish.py` with `--effects-json` parameter.
+**已于 2026-09-08 完成。** 实证记录见
+`docs/visual-effect-schema-verification-2026-09-08.md`。
 
-**Note:** As of 2026-09-07, `build_master_polish.py` does not yet accept `--effects-json`. To complete the integration:
+链路分两步（`build_master_polish.py` **只建 comp 存 aep，不产 mp4**）：
 
-1. Refactor `build_master_polish.py` to read effect configs from JSON instead of hardcoding RECIPES.
-2. Map schema effect types to RECIPES matchNames (e.g., `"bloom"` → `"ADBE Glo2"`).
-3. Apply envelope modulation via `setValueAtTime` for `env: True` effects.
+```
+python scripts/build_master_polish.py <run_dir> <tag> --effects-json <配置.json>
+        → output/<run_dir>/polish/master.aep
+python scripts/render_master.py <run_dir> <tag>
+        → output/<run_dir>/polish/<tag>_master.mp4
+```
+
+`agents/mastercut_agent.py::_apply_effects_to_video()` 会自动跑完这两步。
+
+已落地：
+
+1. `build_master_polish.py` 改用 argparse，并新增 `--effects-json` 与 `--dry-run`；
+   位置参数 `<run_dir> <tag>` 契约保持不变（旧形式调用仍可用）。
+2. `schema_effects_to_plan()` 将 schema 配置翻译为内部 `plan` / `bursts`；
+   类型映射见 `SCHEMA_TO_RECIPE` / `SCHEMA_DYN_RECIPE` / `SCHEMA_UNMAPPED`。
+3. 包络：`envelope.enabled` 时取 `peak_value` 作 dose，由 `_fx_js` 的 `r.env`
+   走 `setValueAtTime(t0, v)` + `setValueAtTime(t0+DECAY, v*TAIL)`。
+4. 对账记账：`tmp/effects_injection_report.json` 输出
+   `applied + unmapped + skipped == input`，**禁止静默丢弃**。
+
+⚠️ **未覆盖的类型**：`sapphire_glow` / `optical_flares` / `delirium` /
+`particular` / `magic_bullet_looks` / `film_stocks` 在 `RECIPES` 中无条目
+（matchName 未经 AE 枚举实证，不得编造）；`twixtor` 由 `plan_effects` 的 twx
+通道按真实 onset 生成，`zoom_pan` 由 `segments.zoompan_effect` 驱动 —— 三者均
+不可外部注入。因此 `run53v43_effects_premium_v2.json` 139 条中实际仅 33 条可渲染。
+
+另有命名分裂待清：`RECIPES` 用 `radial` 作键，而 schema enum 只有 `radial_blur`；
+部分历史产物（如 `run53v43_effects_dense.json`）直接写了 `radial`，会被归入 skipped。
 
 See `schemas/visual_effect_schema.json` definitions for parameter ranges matching production RECIPES.
 
@@ -331,7 +371,15 @@ A: Check that `parameters` only includes fields defined for that `effect_type`. 
 A: Ensure `envelope.enabled: true` and `anchor_mode` is set. Also verify that `enable_ae=True` when calling `render_cut`.
 
 **Q: Effects not applied to video**
-A: Check that `build_master_polish.py` exists and accepts `--effects-json`. If not, implement the integration (see Integration section above).
+A: 查 `tmp/effects_injection_report.json` 的 `unmapped_types` 与 `skipped` ——
+类型在 `RECIPES` 中无实现时会被**如实计入 unmapped 而不是静默丢弃**。
+再看 `effects_applied` 是否等于 `effects_requested`；不等就是部分交付。
+渲染产物低于 100KB 会被 `_apply_effects_to_video` 直接判为失败（黑屏/空合成）。
+
+**Q: 报的数能不能信？**
+A: 2026-09-08 后能。之前 `_stage_render_cut` 无条件返回 `len(effects)`，
+即使链路 `exit(1)` 也报“全部已应用”。现在报告数与 `build_jsx` 产物内的
+效果条目数逐条一致，并由 `tests/test_visual_effect_schema.py` 钉住。
 
 **Q: LLM generates invalid configs**
 A: Provide the full schema in the prompt context. Use few-shot examples from `effect_config_example.json`.

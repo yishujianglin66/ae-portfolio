@@ -187,46 +187,161 @@ def _validate_effect_configs(effects: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+# 渲染产物最小体积 (项目铁律: 输出文件 >100KB 才算渲染成功)
+MIN_RENDER_BYTES = 100 * 1024
+
+
 def _apply_effects_to_video(
-    input_video: str,
     effects: List[Dict[str, Any]],
     output_dir: str,
-    tag: str = "effects",
+    run_dir_name: Optional[str] = None,
+    tag: Optional[str] = None,
+    dry_run: bool = False,
 ) -> Dict[str, Any]:
-    """Apply validated effect configurations to video using build_master_polish.py logic."""
+    """经 build_master_polish.py + render_master.py 应用已校验的特效配置。
+
+    2026-09-07 修复三个致命缺陷:
+      1. 原实现用 --input-video/--effects-json/--output-dir/--tag 调用, 而当时
+         build_master_polish.py 裸读位置参数 sys.argv[1]/[2] 并施加白名单
+         (unified_run\\d+ / run\\d+) → sys.argv[1]="--input-video" 必然 exit(1)。
+         实测证据: returncode=1, "[ERR] 非法 run 目录名: --input-video"。
+      2. 原实现等待 <tag>_polished.mp4, 但没有任何代码会产出该文件 —
+         build 只建 comp 存 polish/master.aep, 真正渲染由 render_master.py
+         负责 (aerender -comp MASTER)。现补齐这一步。
+      3. 原实现 text=True 解码中文版 AE 的 GBK 输出会抛 UnicodeDecodeError
+         并拖垮 subprocess reader 线程。改为 bytes + errors="replace"。
+
+    不再接受 input_video: 底片由 build_master_polish.py 内部推导为
+    run_dir/<tag>_lut.mp4, 外部传入无作用。
+
+    dry_run=True 时只验证 schema→plan→JSX 链路, 不调用 AE (AE 被其他会话占用时可用)。
+    """
+    import re as _re
     import subprocess as sp
-    
+
     out_dir = Path(output_dir)
+
+    # run_dir / tag 推导 — 先过白名单, 否则子进程只会回一句含糊的 ERR
+    if run_dir_name is None:
+        run_dir_name = out_dir.name
+    if not _re.fullmatch(r"unified_run\d+", str(run_dir_name)):
+        return {
+            "success": False,
+            "error": (f"output_dir 目录名 '{run_dir_name}' 不符合 build_master_polish.py "
+                      f"白名单 unified_run\\d+ — 无法定位 run 目录"),
+            "effects_applied": 0,
+            "effects_requested": len(effects),
+        }
+    if tag is None:
+        tag = str(run_dir_name).removeprefix("unified_")   # unified_run53 → run53
+    if not _re.fullmatch(r"run\d+", str(tag)):
+        return {
+            "success": False,
+            "error": f"推导出的 tag '{tag}' 不符合白名单 run\\d+",
+            "effects_applied": 0,
+            "effects_requested": len(effects),
+        }
+
+    lut = out_dir / f"{tag}_lut.mp4"
+    if not lut.exists():
+        return {
+            "success": False,
+            "error": f"缺底片 {lut.name} — build_master_polish.py 以此为输入, 需先跑 LUT 阶段",
+            "effects_applied": 0,
+            "effects_requested": len(effects),
+        }
+
     out_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Write effects config to temporary JSON for build_master_polish.py consumption
-    effects_json = out_dir / f"{tag}_effects.json"
+    effects_json = out_dir / f"{tag}_schema_effects.json"
     effects_json.write_text(
-        json.dumps(effects, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    
-    # Call build_master_polish.py with effects config
-    # Note: This assumes build_master_polish.py accepts --effects-json parameter
-    # If not, we'd need to refactor it to consume the JSON schema
-    result = sp.run(
-        [sys.executable, str(PROJECT / "scripts" / "build_master_polish.py"),
-         "--input-video", input_video,
-         "--effects-json", str(effects_json),
-         "--output-dir", str(out_dir),
-         "--tag", tag],
-        capture_output=True, text=True, timeout=1800,
-    )
-    
-    output_video = str(out_dir / f"{tag}_polished.mp4")
-    
-    return {
-        "success": result.returncode == 0 and Path(output_video).exists(),
-        "output_video": output_video if result.returncode == 0 else None,
-        "stdout": result.stdout,
-        "stderr": result.stderr,
-        "effects_applied": len(effects),
+        json.dumps(effects, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    env = dict(os.environ, PYTHONIOENCODING="utf-8")
+    cmd = [sys.executable, str(PROJECT / "scripts" / "build_master_polish.py"),
+           str(run_dir_name), str(tag), "--effects-json", str(effects_json)]
+    if dry_run:
+        cmd.append("--dry-run")
+
+    logger.info(f"[effects] build: {' '.join(cmd[1:])}")
+    build = sp.run(cmd, capture_output=True, timeout=1800, cwd=str(PROJECT), env=env)
+    build_out = build.stdout.decode("utf-8", "replace")
+    build_err = build.stderr.decode("utf-8", "replace")
+
+    # 注入记账 — 由 build_master_polish.py 落盘, 是"实际上了多少"的唯一可信来源
+    report_p = PROJECT / "tmp" / "effects_injection_report.json"
+    inj: Dict[str, Any] = {}
+    if report_p.exists():
+        try:
+            inj = json.loads(report_p.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            inj = {}
+
+    applied = int(inj.get("applied_count", 0))
+    unmapped = int(inj.get("unmapped_count", 0))
+    skipped = int(inj.get("skipped_count", 0))
+
+    result: Dict[str, Any] = {
+        "success": False,
+        "stage": "build",
+        "returncode": build.returncode,
+        "stdout": build_out[-4000:],
+        "stderr": build_err[-4000:],
+        "effects_requested": len(effects),
+        "effects_applied": applied,
+        "effects_unmapped": unmapped,
+        "effects_skipped": skipped,
+        "unmapped_types": inj.get("unmapped_types", {}),
+        "carried_from_base": inj.get("carried_from_base", 0),
+        "output_video": None,
+        "dry_run": dry_run,
     }
+
+    if build.returncode != 0:
+        result["error"] = (
+            f"build_master_polish.py 退出码 {build.returncode} "
+            f"(2=参数/前置缺失, 3=无可执行特效, 4=Bridge 无响应)")
+        return result
+
+    if dry_run:
+        # 离线模式到 JSX 生成为止; 不声称产出了视频
+        result["success"] = True
+        result["stage"] = "dry_run"
+        result["note"] = "schema→plan→JSX 链路已验证; 未调用 AE, 无渲染产物"
+        return result
+
+    aep = out_dir / "polish" / "master.aep"
+    if not aep.exists():
+        result["error"] = f"build 声称成功但未产出 {aep} — AE 未真正建合成"
+        return result
+
+    # 第二步: 真实 aerender 渲染 (build 只存 aep, 不出 mp4)
+    render_cmd = [sys.executable, str(PROJECT / "scripts" / "render_master.py"),
+                  str(run_dir_name), str(tag)]
+    logger.info(f"[effects] render: {' '.join(render_cmd[1:])}")
+    rend = sp.run(render_cmd, capture_output=True, timeout=1800, cwd=str(PROJECT), env=env)
+    result["stage"] = "render"
+    result["render_returncode"] = rend.returncode
+    result["render_stdout"] = rend.stdout.decode("utf-8", "replace")[-4000:]
+    result["render_stderr"] = rend.stderr.decode("utf-8", "replace")[-4000:]
+
+    out_mp4 = out_dir / "polish" / f"{tag}_master.mp4"
+    if rend.returncode != 0 or not out_mp4.exists():
+        result["error"] = f"render_master.py 失败或未产出 {out_mp4.name}"
+        return result
+
+    size = out_mp4.stat().st_size
+    result["output_video"] = str(out_mp4)
+    result["output_bytes"] = size
+    if size < MIN_RENDER_BYTES:
+        # 铁律: <100KB 判定为黑屏/空渲染, 不得当作成功
+        result["error"] = (f"渲染产物仅 {size:,} B < {MIN_RENDER_BYTES:,} B "
+                           f"— 判定为异常输出(黑屏/空合成), 不算成功")
+        return result
+
+    result["success"] = True
+    result["note"] = (f"已渲染 {size / 1024 / 1024:.1f} MB; 实际生效特效 {applied} 条"
+                      + (f", 另有 {unmapped} 条因类型无 RECIPES 实现未生效" if unmapped else ""))
+    return result
 
 
 def _stage_render_cut(
@@ -240,13 +355,17 @@ def _stage_render_cut(
     enable_ae: bool = False,
     skill_id: Optional[str] = None,
     effects: Optional[List[Dict[str, Any]]] = None,
+    effects_dry_run: bool = False,
     **kwargs,
 ) -> Dict[str, Any]:
     """③ Orchestration rendering (ProductionDirector V23 engine).
-    
+
     Supports optional effect configurations via visual_effect_schema.json.
     When effects are provided, validates them against the schema and applies
     them in a post-processing pass if enable_ae=True.
+
+    effects_dry_run=True 时特效链路只跑到 JSX 生成, 不占 AE —— 供 AE 被其他
+    会话占用时做离线链路验证。
     """
     from ai.production_director import ProductionDirector
 
@@ -293,23 +412,32 @@ def _stage_render_cut(
 
     # Apply effects if provided and AE channel enabled
     final_video = str(base_video)
+    effect_result: Optional[Dict[str, Any]] = None
     if effects and enable_ae:
         logger.info(f"Applying {len(effects)} effects...")
+        # 不传 tag: 旧实现传 f"{stem}_fx" 违反 build_master_polish.py 的 run\\d+
+        # 白名单; run_dir/tag 现由 _apply_effects_to_video 从 output_dir 推导。
         effect_result = _apply_effects_to_video(
-            input_video=str(base_video),
             effects=effects,
             output_dir=str(out_dir),
-            tag=f"{Path(output_name).stem}_fx",
+            dry_run=effects_dry_run,
         )
-        if effect_result["success"]:
+        if effect_result["success"] and effect_result.get("output_video"):
             final_video = effect_result["output_video"]
-        else:
-            logger.warning(f"Effect application failed: {effect_result.get('stderr')}")
+        elif not effect_result["success"]:
+            # 失败不静默降级回 base_video 却不告知 —— 调用方必须能区分
+            # "特效已上" 与 "特效失败只拿到底片"
+            logger.warning(
+                f"Effect application FAILED (stage={effect_result.get('stage')}): "
+                f"{effect_result.get('error')}")
 
     # Extract internal state for evidence chain
     dyn_sections = getattr(director, "_dyn_sections", []) or []
     onsets = getattr(director, "_onsets", []) or []
 
+    # 如实上报: 只统计真正生效的条数。旧实现无条件返回 len(effects),
+    # 即使 _apply_effects_to_video 己失败也报"全部已应用" —— 假绿灯。
+    applied = int((effect_result or {}).get("effects_applied", 0))
     return {
         "video_path": final_video,
         "base_video": str(base_video),
@@ -318,7 +446,15 @@ def _stage_render_cut(
         "onset_count": len(onsets),
         "ae_enabled": enable_ae,
         "skill_id": skill_id,
-        "effects_applied": len(effects) if effects else 0,
+        "effects_requested": len(effects) if effects else 0,
+        "effects_applied": applied,
+        "effects_unmapped": int((effect_result or {}).get("effects_unmapped", 0)),
+        "effects_skipped": int((effect_result or {}).get("effects_skipped", 0)),
+        "effects_success": (bool(effect_result["success"]) if effect_result else None),
+        "effects_stage": (effect_result or {}).get("stage"),
+        "effects_error": (effect_result or {}).get("error"),
+        "effects_output": (effect_result or {}).get("output_video"),
+        "effects_note": (effect_result or {}).get("note"),
         "effects_validation": effects_validation,
     }
 
@@ -564,6 +700,7 @@ class MasterCutAgent:
                 "enable_ae": "bool",
                 "skill_id": "Optional[str]",
                 "effects": "Optional[List[Dict]] - visual_effect_schema.json compliant effect configs",
+                "effects_dry_run": "bool - 只验证 schema→plan→JSX 链路, 不调用 AE",
             },
         )
         self.registry.register(

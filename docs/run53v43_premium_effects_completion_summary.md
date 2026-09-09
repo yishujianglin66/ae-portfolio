@@ -10,9 +10,10 @@
 - Categorized plugins by vendor: Red Giant Suite, Sapphire (Boris FX), Tiffen Dfx v4, Digieffects Delirium v2.5
 - Identified 8 new premium effect types to add to schema
 
-### 2. Visual Effect Schema v2.0 Extended
+### 2. Visual Effect Schema Extended (v1.0.0)
 - **File**: `schemas/visual_effect_schema.json`
-- Extended `effect_type` enum from 11 → 19 types
+- Extended `effect_type` enum from 11 → 17 types
+  （旧版本文误写为 "11 → 19"；实测 enum 长 17，`version` 字段为 `1.0.0` 非 "v2.0"）
 - Added 6 new parameter schemas:
   - `SapphireGlowParams`: glow_amount, glow_size, glow_color [R,G,B]
   - `OpticalFlaresParams`: preset, brightness, position [x,y]
@@ -118,7 +119,9 @@ All burst effects use beat-aligned envelope modulation:
 The premium effects configuration demonstrates deterministic LLM generation:
 - Input: Segment mood labels + music energy profiles
 - Output: Machine-readable JSON with 139 validated effect configs
-- Validation: All effects conform to visual_effect_schema.json v2.0
+- Validation: All 139 effects conform to visual_effect_schema.json v1.0.0
+  （但仅 33/139 条在 `RECIPES` 中有实现可渲染 —— 详见
+  `docs/visual-effect-schema-verification-2026-09-08.md`）
 
 ### Emotion-Driven Effect Distribution
 Effects are strategically placed based on musical structure:
@@ -142,7 +145,7 @@ All burst effects (burst_radial, burst_badtv) are aligned to strong beats:
 | File | Purpose | Status |
 |------|---------|--------|
 | `docs/plugin_inventory.md` | 86+ plugin catalog | ✅ Complete |
-| `schemas/visual_effect_schema.json` | Extended schema v2.0 | ✅ Complete |
+| `schemas/visual_effect_schema.json` | Extended schema v1.0.0 (17 types) | ⚠️ 定义完成；6 种类型无 RECIPES 实现 |
 | `output/unified_run53/run53v43_effects_premium_v2.json` | 139 effect configs | ✅ Complete |
 | `scripts/generate_premium_effects.py` | Config generator | ✅ Complete |
 | `scripts/auto_apply_run53v43_premium.py` | AE automation | ⚠️ Blocked |

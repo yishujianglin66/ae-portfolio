@@ -51,8 +51,16 @@
 
 ## Schema验证
 
-✅ 所有139个特效通过`visual_effect_schema.json` v2.0验证
-- 新增8种专业插件类型：sapphire_glow, optical_flares, particular, delirium, magic_bullet_looks, film_stocks
+✅ 所有139个特效通过`visual_effect_schema.json` v1.0.0 验证
+
+⚠️ 但**通过 schema 校验 ≠ 能渲染**：139 条中仅 **33 条**在
+`build_master_polish.RECIPES` 中有实现，其余 **106 条**（film_stocks 26 /
+magic_bullet_looks 20 / delirium 20 / particular 20 / optical_flares 15 /
+sapphire_glow 4，及走独立通道的 twixtor 1）**当前无法落地**，因为对应插件的
+matchName 未经 AE 枚举实证。对账明细见
+`docs/visual-effect-schema-verification-2026-09-08.md`。
+- 新增6种专业插件类型：sapphire_glow, optical_flares, particular, delirium, magic_bullet_looks, film_stocks
+  （旧版写作"新增8种"但只列出 6 个名称；enum 实际 11 → 17，差值为 6）
 - 每种特效都有完整的evidence_chain（skill_id + reasoning + music_alignment）
 
 ## 输出文件
@@ -110,5 +118,8 @@ result = agent.render_cut(
 ---
 
 **生成时间**: 2026-09-07 12:20  
-**Schema版本**: v2.0（支持19种特效类型）  
+**Schema版本**: v1.0.0（`version` 字段实测值；支持 **17** 种特效类型）
+
+> 本文旧版写作 "v2.0（支持19种）"，与 schema 实际的 `version: 1.0.0` 与
+> 17 种 enum 均不符（同一时期三份文档分别写着 11 / 17 / 19）。已更正。  
 **Skill ID**: run53-premium-plugins-2026-09-07
