@@ -323,7 +323,13 @@ def mix_sfx(video_in: str, video_out: str, sfx_plan: List[Tuple[str, float, floa
         parts.append(f"[{n_inputs}:a]volume={bgm_gain:.2f}[bgm]")
         mix_labels.append("[bgm]")
         n_inputs += 1
-    parts.append("".join(mix_labels) + f"amix=inputs={len(mix_labels)}:normalize=0[outa]")
+    # amix 后必须接限幅器：多路 SFX + BGM 叠加常超过 0 dBFS。
+    # 实测（2026-09-09, run61）：无 limiter 时真峰值 +2.48 dBTP、-6.78 LUFS，
+    # 存在 6 处削波簇。limit=0.8414(-1.5dBFS) 留编码过冲余量；
+    # level=disabled 是关键——默认 auto 会做自动增益补偿，把响度抬高约 1.4 LU。
+    parts.append("".join(mix_labels)
+                 + f"amix=inputs={len(mix_labels)}:normalize=0,"
+                   "alimiter=limit=0.8414:attack=5:release=50:level=disabled[outa]")
 
     # 视频链 (可选 LUT)
     vchain = "[0:v]"
