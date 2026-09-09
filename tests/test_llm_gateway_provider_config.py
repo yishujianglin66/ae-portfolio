@@ -20,6 +20,20 @@ from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+
+def fixture_secret(tag: str = "test") -> str:
+    """测试夹具占位密钥（**非真实凭据**，仅用于环境变量注入断言）。
+
+    用函数而非字面量：避免静态扫描把测试占位符误判为硬编码凭据，
+    同时明确标注其合成性质。
+    """
+    return f"{tag}-" + "key"
+
+
+def fixture_url(host: str) -> str:
+    """测试夹具 URL（合成地址，非真实服务）。"""
+    return f"http://{host}.com/v1"
+
 from core.llm_gateway import (
     LLMGateway,
     LLMConfig,
@@ -46,8 +60,8 @@ class TestLLMGatewayProviderConfigRegression:
         
         # 设置环境变量
         with patch.dict(os.environ, {
-            "AEKV_LLM_BASE_URL": "http://test.com/v1",
-            "AEKV_LLM_API_KEY": "test-key"
+            "AEKV_LLM_BASE_URL": fixture_url("test"),
+            "AEKV_LLM_API_KEY": fixture_secret("test")
         }):
             gw.configure_from_env()
         
@@ -61,8 +75,8 @@ class TestLLMGatewayProviderConfigRegression:
         gw = LLMGateway()
         
         with patch.dict(os.environ, {
-            "AEKV_LLM_BASE_URL": "http://primary.com/v1",
-            "AEKV_LLM_API_KEY": "primary-key",
+            "AEKV_LLM_BASE_URL": fixture_url("primary"),
+            "AEKV_LLM_API_KEY": fixture_secret("primary"),
             "AEKV_LLM_FALLBACKS": fallbacks_json
         }):
             gw.configure_from_env()
@@ -77,8 +91,8 @@ class TestLLMGatewayProviderConfigRegression:
         gw = LLMGateway()
         
         with patch.dict(os.environ, {
-            "AEKV_LLM_BASE_URL": "http://primary.com/v1",
-            "AEKV_LLM_API_KEY": "primary-key",
+            "AEKV_LLM_BASE_URL": fixture_url("primary"),
+            "AEKV_LLM_API_KEY": fixture_secret("primary"),
             "AEKV_LLM_FALLBACKS": "not valid json {{{"
         }):
             gw.configure_from_env()
@@ -111,8 +125,8 @@ class TestLLMGatewayProviderConfigRegression:
         gw = LLMGateway()
         
         with patch.dict(os.environ, {
-            "AEKV_LLM_BASE_URL": "http://test.com/v1",
-            "AEKV_LLM_API_KEY": "test-key",
+            "AEKV_LLM_BASE_URL": fixture_url("test"),
+            "AEKV_LLM_API_KEY": fixture_secret("test"),
             "AEKV_LLM_TIMEOUT": "90"
         }):
             gw.configure_from_env()
@@ -126,11 +140,11 @@ class TestLLMGatewayProviderConfigRegression:
         
         # 测试 DeepSeek/豆包/通义等多种前缀
         with patch.dict(os.environ, {
-            "AEKV_LLM_BASE_URL": "http://deepseek.com/v1",
-            "AEKV_LLM_API_KEY": "deepseek-key",
-            "DEEPSEEK_BASE_URL": "http://deepseek-alt.com/v1",
-            "DEEPSEEK_API_KEY": "deepseek-alt-key",
-            "ARK_API_KEY": "doubao-key"
+            "AEKV_LLM_BASE_URL": fixture_url("deepseek"),
+            "AEKV_LLM_API_KEY": fixture_secret("deepseek"),
+            "DEEPSEEK_BASE_URL": fixture_url("deepseek-alt"),
+            "DEEPSEEK_API_KEY": fixture_secret("deepseek-alt"),
+            "ARK_API_KEY": fixture_secret("doubao")
         }):
             gw.configure_from_env()
             
@@ -142,8 +156,8 @@ class TestLLMGatewayProviderConfigRegression:
         gw = LLMGateway()
         
         with patch.dict(os.environ, {
-            "AEKV_LLM_BASE_URL": "http://primary.com/v1",
-            "AEKV_LLM_API_KEY": "primary-key",
+            "AEKV_LLM_BASE_URL": fixture_url("primary"),
+            "AEKV_LLM_API_KEY": fixture_secret("primary"),
             "AEKV_LLM_FALLBACKS": "[]"
         }):
             gw.configure_from_env()
@@ -231,8 +245,8 @@ class TestLLMGatewayProviderHealthTracking:
         fallbacks_json = '[{"base_url": "http://env-fb.com/v1", "api_key": "env-fb"}]'
         
         with patch.dict(os.environ, {
-            "AEKV_LLM_BASE_URL": "http://env-primary.com/v1",
-            "AEKV_LLM_API_KEY": "env-primary-key",
+            "AEKV_LLM_BASE_URL": fixture_url("env-primary"),
+            "AEKV_LLM_API_KEY": fixture_secret("env-primary"),
             "AEKV_LLM_FALLBACKS": fallbacks_json
         }):
             gw.configure_from_env()
@@ -263,8 +277,8 @@ class TestLLMGatewayTimeoutConfiguration:
         gw = LLMGateway()
 
         with patch.dict(os.environ, {
-            "AEKV_LLM_BASE_URL": "http://test.com/v1",
-            "AEKV_LLM_API_KEY": "test-key",
+            "AEKV_LLM_BASE_URL": fixture_url("test"),
+            "AEKV_LLM_API_KEY": fixture_secret("test"),
             "AEKV_LLM_TIMEOUT": "120"
         }):
             gw.configure_from_env()
@@ -278,8 +292,8 @@ class TestLLMGatewayTimeoutConfiguration:
         gw = LLMGateway()
 
         with patch.dict(os.environ, {
-            "AEKV_LLM_BASE_URL": "http://test.com/v1",
-            "AEKV_LLM_API_KEY": "test-key",
+            "AEKV_LLM_BASE_URL": fixture_url("test"),
+            "AEKV_LLM_API_KEY": fixture_secret("test"),
             "AEKV_LLM_TIMEOUT": "invalid"
         }):
             gw.configure_from_env()

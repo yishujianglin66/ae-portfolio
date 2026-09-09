@@ -58,23 +58,54 @@ MOTION_ROLE = {
 
 def stage1_beat_analysis(bgm_path: str) -> dict:
     """① BGM 节拍/动态分析 (beat_strength_engine + music_dynamics).
-    
+
     Returns structured beat and section data for agent consumption.
+
+    修复（2026-09-09）：原实现调用 `engine.detect()` / `dyn.analyze(path)`，
+    但这两个 API 不存在（真实签名见下），且模块路径写成 `ai.*`（实为 `core.*`）。
+    该函数此前恒抛异常——因产出只写进报告、不参与渲染，成为休眠 bug。
+    现按生产路径（ai/production_director.py:1572）的正确用法重写。
     """
-    from ai.beat_strength_engine import BeatStrengthEngine
-    from ai.music_dynamics import MusicDynamicsAnalyzer
-    
-    engine = BeatStrengthEngine()
-    beats = engine.detect(bgm_path)
-    
-    dyn = MusicDynamicsAnalyzer()
-    sections = dyn.analyze(bgm_path)
-    
+    import librosa
+    import numpy as np
+
+    from core.beat_strength_engine import BeatStrengthEngine
+    from core.music_dynamics import MusicDynamicsAnalyzer
+
+    y, sr = librosa.load(bgm_path, sr=22050, mono=True)
+    tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+    beat_times = librosa.frames_to_time(beat_frames, sr=sr)
+    onset_env = librosa.onset.onset_strength(y=y, sr=sr)
+    rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
+    rms_times = librosa.frames_to_time(
+        np.arange(len(rms)), sr=sr, hop_length=512)
+    onsets_sec = librosa.onset.onset_detect(
+        y=y, sr=sr, units="time", backtrack=False)
+
+    engine = BeatStrengthEngine(fps=24)
+    # 无 downbeat 检测时用空数组（classify_beats 内部按 onset 能量分级）
+    beat_class = engine.classify_beats(
+        np.asarray(beat_times), np.asarray([]),
+        onset_envelope=onset_env, rms_energy=rms, times=rms_times,
+        sr=sr, hop_length=512)
+
+    dyn = MusicDynamicsAnalyzer(min_section_dur=1.2, smooth_frames=15)
+    sections = dyn.analyze(
+        rms, rms_times, len(y) / sr,
+        beats_sec=np.asarray(beat_times) if len(beat_times) else None,
+        onsets_sec=np.asarray(onsets_sec) if len(onsets_sec) else None,
+    )
+
+    stats = beat_class.statistics()
     return {
-        "beat_count": len(beats),
-        "beats": [{"time": b.time, "strength": b.strength} for b in beats[:50]],
+        "tempo_bpm": round(float(np.atleast_1d(tempo)[0]), 2),
+        "beat_count": len(beat_times),
+        "beat_strength": stats,
+        "beats": [{"time": round(float(t), 3)}
+                  for t in beat_times[:50]],
         "sections": [
-            {"start": s.start, "end": s.end, "level": s.level, "energy": s.energy_mean}
+            {"start": round(float(s.start), 3), "end": round(float(s.end), 3),
+             "level": s.level, "energy": round(float(s.energy_mean), 4)}
             for s in sections
         ],
     }
@@ -109,10 +140,12 @@ def stage3_render_cut(
     theme: str,
     style: str,
     enable_ae: bool = True,
+    cut_times_override: list | None = None,
 ) -> dict:
     """③ 编排渲染 (ProductionDirector V23 引擎).
-    
+
     Returns path to rendered video and production metadata.
+    cut_times_override: P2 切点修复轮注入的修复切点表 (2026-09-10 接线)。
     """
     from ai.production_director import ProductionDirector
     
@@ -138,6 +171,7 @@ def stage3_render_cut(
         enable_ae_channel=enable_ae,
         clean_bgm_sfx=False,
         beat_lock_hard_cuts=True,
+        cut_times_override=cut_times_override,
     )
     
     # Extract internal state for evidence chain
@@ -427,6 +461,12 @@ def main() -> int:
     ap.add_argument("--style", default="amv_highenergy")
     ap.add_argument("--tag", default="run")
     ap.add_argument("--skip-motion", action="store_true", help="跳过②(调试用)")
+    ap.add_argument("--repair-cuts", dest="repair_cuts", action="store_true",
+                    default=True, help="切点自检 FAIL 时自动修表重渲 (默认开)")
+    ap.add_argument("--no-repair-cuts", dest="repair_cuts", action="store_false",
+                    help="关闭切点自动修复 (只检测出报告, 旧行为)")
+    ap.add_argument("--repair-rounds", type=int, default=2,
+                    help="切点自检总轮数上限(含首轮检测), 默认2=最多1次重渲")
     args = ap.parse_args()
 
     sources = args.sources or DEFAULT_SOURCES
@@ -455,95 +495,172 @@ def main() -> int:
         report["motion_labels"] = motion_result
         report["capabilities_used"]["motion_labels"] = True
 
-    # Stage 3: Render cut
-    print("\n[能力③] V23 编排引擎...")
-    render_result = stage3_render_cut(
-        sources=sources,
-        bgm_path=args.bgm,
-        output_dir=out_dir,
-        tag=args.tag,
-        duration=args.duration,
-        theme=args.theme,
-        style=args.style,
-        enable_ae=os.environ.get("MASTER_NO_AE_CHANNEL") != "1",
-    )
+    # Stage 3+4 渲染链闭包: stage3 → EDL → 4a LUT → 4b SFX
+    # 闭包化以便 P2 切点修复轮带 cut_times_override 重入同一链路 (2026-09-10)
+    def _render_chain(cut_times_override=None):
+        print("\n[能力③] V23 编排引擎..."
+              + (" (切点修复重渲)" if cut_times_override else ""))
+        render_result = stage3_render_cut(
+            sources=sources,
+            bgm_path=args.bgm,
+            output_dir=out_dir,
+            tag=args.tag,
+            duration=args.duration,
+            theme=args.theme,
+            style=args.style,
+            enable_ae=os.environ.get("MASTER_NO_AE_CHANNEL") != "1",
+            cut_times_override=cut_times_override,
+        )
+        print(f"    成片: {render_result['video_path']}")
+
+        # --- P0 确定性渲染框架: EDL 落盘 (吸收 HyperFrames 渲染清单 + video-use EDL 设计)
+        # 非侵入: 失败只记日志, 绝不阻断主管线
+        try:
+            from scripts.edl import build_edl, save_edl, lint_edl
+            _pr_path = out_dir / "production_report.json"
+            if _pr_path.exists():
+                _edl = build_edl(_pr_path, bgm_path=args.bgm, sources=sources,
+                                style=args.style, theme=args.theme,
+                                duration=args.duration)
+                _errs = lint_edl(_edl)
+                save_edl(_edl, out_dir / "edl.json")
+                report["edl"] = {"path": str(out_dir / "edl.json"),
+                                 "cuts": len(_edl["cuts"]),
+                                 "lint_errors": _errs}
+                print(f"    EDL: {len(_edl['cuts'])} cuts 落盘 "
+                      f"(lint {'PASS' if not _errs else 'FAIL ' + str(len(_errs))})")
+        except Exception as _edl_e:  # noqa: BLE001
+            print(f"    [EDL 跳过] {_edl_e}")
+
+        # Prepare data for SFX
+        _sections_dicts = [{"start": s.start, "end": s.end, "level": s.level,
+                            "energy_mean": s.energy_mean}
+                           for s in render_result["dyn_sections"]]
+        _onsets_raw = render_result["onsets_raw"]
+        print(f"    音乐分析: {len(render_result['dyn_sections'])} 动态段, "
+              f"{len(_onsets_raw)} onset")
+
+        # Stage 4a: Apply LUT
+        print("\n[能力④-a] LUT 质感管线...")
+        lut_result = stage4a_apply_lut(
+            input_video=render_result["video_path"],
+            output_dir=out_dir,
+            style=args.style,
+            tag=args.tag,
+        )
+        print("    LUT: " + ("OK" if lut_result["success"] else "SKIP"))
+
+        # Stage 4b: Apply SFX
+        print("\n[能力④-b] SFX v2.1 音乐性增强...")
+        pr_path = out_dir / "production_report.json"
+        sfx_result = stage4b_apply_sfx(
+            input_video=lut_result["output_video"],
+            bgm_path=args.bgm,
+            output_dir=out_dir,
+            tag=args.tag,
+            duration=args.duration,
+            sections_dicts=_sections_dicts,
+            onsets_raw=_onsets_raw,
+            pr_path=pr_path,
+        )
+        print(f"    SFX v2.1: {'OK' if sfx_result['success'] else 'FAIL'} "
+              f"({sfx_result['sfx_count']} 落点)")
+        return {"render_result": render_result, "lut_result": lut_result,
+                "sfx_result": sfx_result,
+                "final_video": sfx_result["output_video"]}
+
+    _chain = _render_chain()
+    render_result = _chain["render_result"]
     report["base_video"] = render_result["video_path"]
     report["capabilities_used"]["v23_engine"] = True
-    print(f"    成片: {render_result['video_path']}")
+    report["capabilities_used"]["lut"] = _chain["lut_result"]["success"]
+    report["capabilities_used"]["sfx"] = _chain["sfx_result"]["success"]
+    final_video = _chain["final_video"]
 
-    # --- P0 确定性渲染框架: EDL 落盘 (吸收 HyperFrames 渲染清单 + video-use EDL 设计)
-    # 非侵入: 失败只记日志, 绝不阻断主管线
+    # --- P2 切点级 self-eval + repair 接线 (2026-09-10)
+    # 此前只 analyze 不 repair: run61 检出 76 处 frozen_cut 仍照常出片。
+    # 现在 FAIL → repair_cutpoints 修表(frozen/min_gap 丢弃, pop ±1帧微调)
+    # → 带 cut_times_override 重渲整链(stage3+EDL+4a+4b) → 再检,
+    # 最多 --repair-rounds 轮(默认2, 含首轮检测即最多1次重渲)。
+    # 关闭: --no-repair-cuts 或 AEKV_REPAIR_CUTS=0。
+    # 已知边界: audio_pop 部分源自 4b SFX 落点, 修切点后 SFX 跟随移动,
+    # ±1帧微调主要消除拼接咔哒; flash 为人工项不自动修。
     try:
-        from scripts.edl import build_edl, save_edl, lint_edl
-        _pr_path = out_dir / "production_report.json"
-        if _pr_path.exists():
-            _edl = build_edl(_pr_path, bgm_path=args.bgm, sources=sources,
-                            style=args.style, theme=args.theme,
-                            duration=args.duration)
-            _errs = lint_edl(_edl)
-            save_edl(_edl, out_dir / "edl.json")
-            report["edl"] = {"path": str(out_dir / "edl.json"),
-                             "cuts": len(_edl["cuts"]),
-                             "lint_errors": _errs}
-            print(f"    EDL: {len(_edl['cuts'])} cuts 落盘 "
-                  f"(lint {'PASS' if not _errs else 'FAIL ' + str(len(_errs))})")
-    except Exception as _edl_e:  # noqa: BLE001
-        print(f"    [EDL 跳过] {_edl_e}")
-
-    # Prepare data for SFX
-    _sections_dicts = [{"start": s.start, "end": s.end, "level": s.level,
-                        "energy_mean": s.energy_mean} for s in render_result["dyn_sections"]]
-    _onsets_raw = render_result["onsets_raw"]
-    print(f"    音乐分析: {len(render_result['dyn_sections'])} 动态段, {len(_onsets_raw)} onset")
-
-    # Stage 4a: Apply LUT
-    print("\n[能力④-a] LUT 质感管线...")
-    lut_result = stage4a_apply_lut(
-        input_video=render_result["video_path"],
-        output_dir=out_dir,
-        style=args.style,
-        tag=args.tag,
-    )
-    report["capabilities_used"]["lut"] = lut_result["success"]
-    video_after_lut = lut_result["output_video"]
-    print("    LUT: " + ("OK" if lut_result["success"] else "SKIP"))
-
-    # Stage 4b: Apply SFX
-    print("\n[能力④-b] SFX v2.1 音乐性增强...")
-    pr_path = out_dir / "production_report.json"
-    sfx_result = stage4b_apply_sfx(
-        input_video=video_after_lut,
-        bgm_path=args.bgm,
-        output_dir=out_dir,
-        tag=args.tag,
-        duration=args.duration,
-        sections_dicts=_sections_dicts,
-        onsets_raw=_onsets_raw,
-        pr_path=pr_path,
-    )
-    report["capabilities_used"]["sfx"] = sfx_result["success"]
-    final_video = sfx_result["output_video"]
-    print(f"    SFX v2.1: {'OK' if sfx_result['success'] else 'FAIL'} ({sfx_result['sfx_count']} 落点)")
-
-    # --- P2 切点级 self-eval: 渲染成品 × EDL 切点边界技术事故检测
-    # (吸收 video-use 设计: CNN 评分管整体, 切点检测管单刀事故)
-    try:
-        from scripts.cutpoint_selfeval import analyze_cutpoints
+        from scripts.cutpoint_selfeval import analyze_cutpoints, repair_cutpoints
         _edl_path = out_dir / "edl.json"
         if _edl_path.exists():
             _edl_j = json.loads(_edl_path.read_text(encoding="utf-8"))
-            _cp_rep = analyze_cutpoints(final_video, _edl_j.get("cut_points", []))
+            _cuts = [float(t) for t in _edl_j.get("cut_points", [])]
+            _cp_rep = analyze_cutpoints(final_video, _cuts)
+            _history = [{"round": 0, "video": final_video,
+                         "cut_count": _cp_rep["cut_count"],
+                         "verdict": _cp_rep["verdict"],
+                         "issues": _cp_rep["issues"]}]
+            print(f"    切点自检: {_cp_rep['verdict']} "
+                  f"({_cp_rep['cut_count']} 刀, {len(_cp_rep['issues'])} 事故)")
+            _repair_on = (args.repair_cuts
+                          and os.environ.get("AEKV_REPAIR_CUTS", "1") == "1")
+            _rnd = 0
+            while (_cp_rep["verdict"] == "FAIL" and _repair_on
+                   and _rnd < max(args.repair_rounds - 1, 0)):
+                _new_cuts = repair_cutpoints(_cuts, _cp_rep["issues"])
+                if not _new_cuts or _new_cuts == sorted(_cuts):
+                    print("    切点修复: 修表无变化(仅剩人工项), 停止重渲转人工")
+                    break
+                _rnd += 1
+                print(f"    切点修复 round {_rnd}: "
+                      f"{len(_cuts)}→{len(_new_cuts)} 刀, 整链重渲...")
+                _chain = _render_chain(cut_times_override=_new_cuts)
+                final_video = _chain["final_video"]
+                report["capabilities_used"]["lut"] = _chain["lut_result"]["success"]
+                report["capabilities_used"]["sfx"] = _chain["sfx_result"]["success"]
+                # 重渲后 EDL 已重建, 以落盘 EDL 切点为唯一真相再检
+                _edl_j = json.loads(_edl_path.read_text(encoding="utf-8"))
+                _cuts = [float(t) for t in _edl_j.get("cut_points", _new_cuts)]
+                _cp_rep = analyze_cutpoints(final_video, _cuts)
+                _history.append({"round": _rnd, "video": final_video,
+                                 "cut_count": _cp_rep["cut_count"],
+                                 "verdict": _cp_rep["verdict"],
+                                 "issues": _cp_rep["issues"]})
+                print(f"    切点复检 round {_rnd}: {_cp_rep['verdict']} "
+                      f"({_cp_rep['cut_count']} 刀, {len(_cp_rep['issues'])} 事故)")
+            _cp_out = dict(_cp_rep)
+            _cp_out["repair"] = {"enabled": _repair_on, "rounds_used": _rnd,
+                                 "history": _history}
             (out_dir / "cutpoint_report.json").write_text(
-                json.dumps(_cp_rep, ensure_ascii=False, indent=1),
+                json.dumps(_cp_out, ensure_ascii=False, indent=1),
                 encoding="utf-8")
             report["cutpoint_selfeval"] = {
                 "verdict": _cp_rep["verdict"],
                 "issues": len(_cp_rep["issues"]),
+                "repair_rounds": _rnd,
             }
-            print(f"    切点自检: {_cp_rep['verdict']} "
-                  f"({_cp_rep['cut_count']} 刀, {len(_cp_rep['issues'])} 事故)")
     except Exception as _cp_e:  # noqa: BLE001
         print(f"    [切点自检跳过] {_cp_e}")
+
+    # --- 音频母带 (2026-09-09): 响度归一到 -14 LUFS / 真峰值 ≤ -1.5 dBTP
+    # 混音阶段已挂 limiter 与能量预算；此步做**交付口径归一**（流媒体标准），
+    # 幂等：已达标时几乎不动。视频流直接复制，零画质损失。
+    # 开关：AEKV_MASTER_DELIVER=0 可关闭（默认开启）。
+    if os.environ.get("AEKV_MASTER_DELIVER", "1") == "1":
+        try:
+            from scripts.master_deliver import (
+                measure_loudness as _md_measure, encode_master as _md_encode,
+                verify_audio as _md_verify,
+            )
+            _md_src = Path(final_video)
+            _md_out = _md_src.with_name(_md_src.stem + "_mastered.mp4")
+            _md_measured = _md_measure(_md_src)
+            if _md_encode(_md_src, _md_out, _md_measured):
+                _md_la = _md_verify(_md_out)
+                report["audio_master"] = {"path": str(_md_out), "audio": _md_la}
+                print(f"    音频母带: {_md_la.get('lufs')} LUFS / "
+                      f"真峰值 {_md_la.get('true_peak_dbtp')} dBTP")
+                final_video = str(_md_out)
+            else:
+                print("    [音频母带失败] 保留混音版")
+        except Exception as _md_e:  # noqa: BLE001
+            print(f"    [音频母带跳过] {_md_e}")
 
     # --- 交付规格闸门 (2026-09-09): 码率/帧率/位深/时长/音频峰值
     # 吸收 AKROSS Con 交付规格；不达标只告警不阻断（保留成片供诊断），
@@ -571,11 +688,21 @@ def main() -> int:
         print(f"    [交付规格自检跳过] {_sp_e}")
 
     # Stage 5: Score video
+    # 评分依赖 open_clip + 本地权重；缺失时应降级跳过，不能中断整条链路
+    # （否则后续闸门/经验采集/报告落盘全部丢失——2026-09-09 实测踩到）。
     print("\n[能力⑤] 成片评分...")
-    score_result = stage5_score_video(final_video)
-    report["scores"] = score_result["scores"]
-    for k, v in sorted(score_result["scores"].items()):
-        print(f"    {k.replace('score_', ''):<14} {v}")
+    try:
+        score_result = stage5_score_video(final_video)
+        if "scores" in score_result and score_result["scores"]:
+            report["scores"] = score_result["scores"]
+            for k, v in sorted(score_result["scores"].items()):
+                print(f"    {k.replace('score_', ''):<14} {v}")
+        else:
+            report["scores"] = None
+            print(f"    [评分降级] {score_result.get('error', '无结果')}")
+    except Exception as _sc_e:  # noqa: BLE001
+        report["scores"] = None
+        print(f"    [评分跳过] {type(_sc_e).__name__}: {_sc_e}")
 
     # Stage 6: Quality gate
     try:

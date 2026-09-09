@@ -28,6 +28,27 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 
+def safe_output_path(path: str | Path, root: Path = PROJECT_ROOT) -> Path:
+    """把输出路径规范化到 root 之内，拒绝路径穿越。
+
+    用途：--output 与 save() 的目标路径均来自外部输入，直接拼接会让
+    `--output ../../etc` 之类的值写到项目外。此函数做三层校验：
+      1. 拒绝含 `..` 的路径分量；
+      2. resolve 后必须落在 root 之内；
+      3. 拒绝 root 自身（必须是文件或子目录）。
+
+    抛出 ValueError 由调用方处理，不静默降级。
+    """
+    p = Path(path)
+    if any(part == ".." for part in p.parts):
+        raise ValueError(f"输出路径含路径穿越分量: {p}")
+    resolved = (root / p).resolve() if not p.is_absolute() else p.resolve()
+    root_r = root.resolve()
+    if resolved == root_r or root_r not in resolved.parents:
+        raise ValueError(f"输出路径越出允许根目录: {resolved}")
+    return resolved
+
+
 @dataclass
 class StyleSample:
     sample_id: str
@@ -696,6 +717,7 @@ class StyleDatasetBuilder:
         return len(self.samples) - original_count
 
     def save(self, output_path: Path) -> int:
+        output_path = safe_output_path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(output_path, "w", encoding="utf-8") as f:
@@ -903,6 +925,7 @@ for (var key in params) {{
         return len(self.samples)
 
     def save(self, output_path: Path) -> int:
+        output_path = safe_output_path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(output_path, "w", encoding="utf-8") as f:
@@ -935,7 +958,11 @@ def main():
     parser.add_argument("--clean", action="store_true", default=True, help="清洗数据")
     args = parser.parse_args()
 
-    output_dir = PROJECT_ROOT / args.output
+    try:
+        output_dir = safe_output_path(args.output)
+    except ValueError as _e:
+        print(f"[ERR] 输出路径非法: {_e}")
+        return 2
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print("=" * 60)

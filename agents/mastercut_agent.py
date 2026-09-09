@@ -123,8 +123,8 @@ class ToolRegistry:
 
 def _stage_analyze_beat(bgm_path: str, **kwargs) -> Dict[str, Any]:
     """① BGM beat/dynamics analysis (beat_strength_engine + music_dynamics)."""
-    from ai.beat_strength_engine import BeatStrengthEngine
-    from ai.music_dynamics import MusicDynamicsAnalyzer
+    from core.beat_strength_engine import BeatStrengthEngine
+    from core.music_dynamics import MusicDynamicsAnalyzer
 
     engine = BeatStrengthEngine()
     beats = engine.detect(bgm_path)
