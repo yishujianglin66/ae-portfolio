@@ -26,6 +26,7 @@ MANIFEST = REF_DIR / "_manifest.json"
 README = REF_DIR / "README.md"
 FFPROBE = "C:/ffmpeg/bin/ffprobe.exe"
 BV_RE = re.compile(r"(BV[0-9A-Za-z]{10})")
+AC_RE = re.compile(r"\[ac(\d+)\]")
 
 
 def probe(path: Path) -> dict:
@@ -67,12 +68,26 @@ def sha16(path: Path) -> str:
 
 
 def main() -> int:
-    # 候选池的 tier/views 用于回填元数据
+    # 候选池的 tier/views 用于回填元数据（B站 / AcFun / 大师名 / 风格系列 四个池）
     meta_by_bv: dict[str, dict] = {}
-    if CAND.exists():
+    for cand_file in (CAND,
+                      REF_DIR / "_candidates_acfun.json",
+                      REF_DIR / "_candidates_masters.json",
+                      REF_DIR / "_candidates_styles.json"):
+        if not cand_file.exists():
+            continue
         try:
-            for c in json.loads(CAND.read_text(encoding="utf-8"))["candidates"]:
-                meta_by_bv[c["bv"]] = c
+            for c in json.loads(cand_file.read_text(encoding="utf-8"))["candidates"]:
+                key = (c.get("bv") or c.get("key")
+                       or (f"ac{c['cid']}" if c.get("cid") else ""))
+                if not key:
+                    continue
+                # 统一 tier/series 字段名
+                if "category" in c and "tier" not in c:
+                    c["tier"] = c["category"]
+                if "series" in c:
+                    c["tier"] = c["series"]
+                meta_by_bv[key] = c
         except Exception:
             pass
     # yt-dlp 通道的 manifest 也回填
@@ -87,15 +102,35 @@ def main() -> int:
 
     items = []
     for f in sorted(REF_DIR.glob("*.mp4")):
-        m = BV_RE.search(f.name)
-        bv = m.group(1) if m else ""
-        cand = meta_by_bv.get(bv, {})
+        # 支持两种来源标记：B站 [BVxxxxxxxxxx] / AcFun [ac<cid>]
+        mb = BV_RE.search(f.name)
+        ma = AC_RE.search(f.name)
+        if mb:
+            key, platform = mb.group(1), "bilibili"
+        elif ma:
+            key, platform = f"ac{ma.group(1)}", "acfun"
+        else:
+            key, platform = "", "unknown"
+        cand = meta_by_bv.get(key, {})
         info = probe(f)
-        title = re.sub(r"\s*\[BV[0-9A-Za-z]{10}\]$", "", f.stem).strip()
+        title = re.sub(r"\s*\[(BV[0-9A-Za-z]{10}|ac\d+)\]$", "", f.stem).strip()
+        # 画质档位：评估时按档筛选，避免老资源拉低对标基线
+        h = info.get("height") or 0
+        if h >= 1080:
+            quality = "hd1080"
+        elif h >= 720:
+            quality = "hd720"
+        elif h >= 480:
+            quality = "sd480"
+        else:
+            quality = "low"
         items.append({
-            "bv": bv,
+            "bv": key,
+            "platform": platform,
+            "cid": cand.get("cid"),
             "title": title,
             "tier": cand.get("tier", "seed"),
+            "quality": quality,
             "views": cand.get("views"),
             "file": f.name,
             "sha256_16": sha16(f),
@@ -115,6 +150,8 @@ def main() -> int:
     durs = [i["duration"] for i in items if i["duration"]]
     kbps = [i["kbps"] for i in items if i["kbps"]]
     tiers = Counter(i["tier"] for i in items)
+    platforms = Counter(i["platform"] for i in items)
+    qualities = Counter(i.get("quality", "unknown") for i in items)
     total_gb = sum(i["size_mb"] or 0 for i in items) / 1000
 
     lines = [
@@ -125,14 +162,17 @@ def main() -> int:
         "",
         "## 采集口径",
         "",
-        "- 来源：B站（`yt-dlp bilisearch` 多组关键词，29 组检索词建候选池）",
-        "- 筛选：标题须命中 AMV/MAD 域信号；排除教程/素材包/短片；播放量下限 2,000",
-        "- 分层：燃向 burn / 叙事 narrative / 技术流 technique / 顶尖创作者 creator",
-        "- 下载：完整视频，`bv[height<=1080]+ba` 优先 1080p（大师级不靠高码率）",
+        "- 来源：**B站**（`yt-dlp bilisearch` 29 组关键词）+ **AcFun**（官方搜索 API，含 AKROSS Con 国际赛事作品）",
+        "- 筛选：标题须命中 AMV/MAD 域信号；排除教程/素材包/合集/短片；时长 60-400s",
+        "- 分层：燃向 burn / 叙事 narrative / 赛事 contest / 顶尖创作者 creator",
+        "- 下载：完整视频，优先 1080p（大师级不靠高码率）",
+        f"- 平台分布：{', '.join(f'{k} {v}' for k, v in sorted(platforms.items(), key=lambda x: -x[1]))}",
         "",
         f"## 规模（{len(items)} 部 / {total_gb:.1f} GB）",
         "",
         f"- 分层分布：{', '.join(f'{k} {v}' for k, v in sorted(tiers.items(), key=lambda x: -x[1]))}",
+        f"- 画质档位：{', '.join(f'{k} {v}' for k, v in sorted(qualities.items(), key=lambda x: -x[1]))}",
+        f"  （`low`/`sd480` 为老资源，评估时可用 `quality` 字段筛除，避免拉低对标基线）",
         f"- 分辨率：{', '.join(f'{k} × {v}' for k, v in sorted(res.items(), key=lambda x: -x[1]))}",
         f"- 帧率：{', '.join(f'{k} × {v}' for k, v in fps_band.items())}",
         f"- 时长：{min(durs):.0f}s ~ {max(durs):.0f}s（中位 {sorted(durs)[len(durs)//2]:.0f}s）"
@@ -140,37 +180,126 @@ def main() -> int:
         f"- 码率：{min(kbps)} ~ {max(kbps)} kbps（中位 {sorted(kbps)[len(kbps)//2]} kbps）"
         if kbps else "- 码率：n/a",
         "",
+    ]
+
+    # 分位数段落（若 reference_stats.py 已跑过则自动嵌入）
+    stats_file = PROJ / "reports" / "reference_stats.json"
+    if stats_file.exists():
+        try:
+            st = json.loads(stats_file.read_text(encoding="utf-8"))
+            pct = st.get("percentiles") or {}
+            mine_sig = (st.get("mine") or {}).get("signal") or {}
+            if pct:
+                lines += [
+                    f"## 指标分位数（n={st.get('n_refs')}，实测）",
+                    "",
+                    "由 `scripts/reference_stats.py` 计算，逐部落盘 `reports/reference_stats.json`，",
+                    "缓存 `reports/ref_metrics_cache.json`（二次运行秒出）。",
+                    "",
+                    "| 指标 | 均值 | p25 | p50 | p75 | p90 | min | max |",
+                    "|------|------|-----|-----|-----|-----|-----|-----|",
+                ]
+                for k, s in pct.items():
+                    lines.append(
+                        f"| {k} | {s['mean']} | {s['p25']} | {s['p50']} | {s['p75']} | "
+                        f"{s['p90']} | {s['min']} | {s['max']} |")
+                if mine_sig:
+                    lines += [
+                        "",
+                        "**与 run61 最佳候选（master_hr.mp4）对比**：",
+                        "",
+                        "| 指标 | 本片 | 参照均值 | p75 | 判定 |",
+                        "|------|------|---------|-----|------|",
+                    ]
+                    for k, s in pct.items():
+                        mv = mine_sig.get(k)
+                        if mv is None:
+                            continue
+                        if s["better"]:
+                            verdict = ("超 p90" if mv > s["p90"] else
+                                       "超 p75" if mv > s["p75"] else
+                                       "超均值" if mv > s["mean"] else "低于均值")
+                        else:
+                            verdict = "优于均值" if mv < s["mean"] else "劣于均值"
+                        lines.append(f"| {k} | {mv} | {s['mean']} | {s['p75']} | {verdict} |")
+                lines += [
+                    "",
+                    "> **证据说明**：原评估报告引用的「参照前三分位 0.8193」在落盘数据中不存在"
+                    "（旧脚本 `score_reference_gap.py` 只算 mean/min/max，未实现分位数）。",
+                    f"以上分位数为 n={st.get('n_refs')} 实测值，可直接复核。",
+                    "",
+                ]
+            # 按风格分层（跨风格混算均值会失真）
+            by_tier = st.get("by_tier") or {}
+            if by_tier:
+                lines += [
+                    "### 按风格分层（均值，跨风格不可直接混算）",
+                    "",
+                    "| tier | n | beat_hit_rate | cut_visibility | cut_rate | hf_energy |",
+                    "|------|---|--------------|---------------|---------|-----------|",
+                ]
+                for t, e in sorted(by_tier.items(), key=lambda x: -x[1]["n"]):
+                    lines.append(
+                        f"| {t} | {e['n']} | {e['beat_hit_rate']} | "
+                        f"{e['cut_visibility']} | {e['cut_rate']} | {e['hf_energy']} |")
+                lines += [
+                    "",
+                    "> 木偶（puppet）与手书（handdrawn）的 cut_visibility / cut_rate 天然远低于",
+                    "> 燃向漫剪——前者是有限动画/骨骼驱动，切点密度本就稀疏。**对标 run61 这类",
+                    "> 燃向踩点片时，应只与 burn / amv / seed 层比较**，勿用全体均值。",
+                    "",
+                ]
+        except Exception as e:
+            lines += [f"<!-- 分位数段落生成失败: {e} -->", ""]
+
+    lines += [
         "## 清单",
         "",
-        "| # | 标题 | 分层 | 时长 | 分辨率 | 帧率 | 大小 | BV |",
-        "|---|------|------|------|--------|------|------|-----|",
+        "| # | 标题 | 平台 | 分层 | 画质 | 时长 | 分辨率 | 帧率 | 大小 | 来源 |",
+        "|---|------|------|------|------|------|--------|------|------|------|",
     ]
     for i, it in enumerate(sorted(items, key=lambda x: -(x["views"] or 0)), 1):
-        t = it["title"][:42].replace("|", "｜")
+        t = it["title"][:40].replace("|", "｜")
+        if it["platform"] == "bilibili":
+            src = f"[{it['bv']}](https://www.bilibili.com/video/{it['bv']})"
+        elif it["platform"] == "acfun":
+            src = f"[{it['bv']}](https://www.acfun.cn/v/ac{it['cid'] if it.get('cid') else it['bv'][2:]})"
+        else:
+            src = "—"
         lines.append(
-            f"| {i} | {t} | {it['tier']} | {it['duration']:.0f}s | "
+            f"| {i} | {t} | {it['platform']} | {it['tier']} | {it.get('quality', '—')} | "
+            f"{it['duration']:.0f}s | "
             f"{it['width']}x{it['height']} | {it['fps']:g} | {it['size_mb']:.1f}MB | "
-            f"[{it['bv']}](https://www.bilibili.com/video/{it['bv']}) |")
+            f"{src} |")
 
     lines += [
         "",
         "## 复现",
         "",
         "```bash",
-        "# 1. 建候选池（B站检索，只取元数据）",
+        "# 1a. 建 B站候选池（检索，只取元数据）",
         "python scripts/collect_reference_candidates.py --per-query 20",
-        "# 2. 下载（分层抽样，含 412 风控退避重试）",
+        "# 1b. 建 AcFun 候选池（含 AKROSS Con 赛事作品）",
+        "python scripts/collect_acfun_candidates.py --per-query 30",
+        "# 2a. 下载 B站（分层抽样，含 412 风控退避重试）",
         "python scripts/download_reference_set.py --target 60 --min-views 3000",
+        "# 2b. 下载 AcFun（赛事层优先）",
+        "python scripts/download_acfun_reference.py --target 20",
         "# 3. 重建清单与本表",
         "python scripts/build_reference_manifest.py",
+        "# 4. 逐部指标 + 分位数（并行，带缓存）",
+        "python scripts/reference_stats.py --refs data/reference_top \\",
+        "    --mine output/unified_run61/polish/master_hr.mp4 --workers 6",
         "```",
         "",
         "## 已知限制",
         "",
-        "- 全部来自 B站单一平台（YouTube 无代理不可达），平台分布未覆盖。",
+        "- 平台覆盖 B站 + AcFun 两家（YouTube/Niconico/Vimeo 无代理不可达，已实测）。",
         "- 播放量为下载时快照，非持续追踪。",
-        "- 单风格域偏重燃向踩点（占多数），叙事/技术流样本较少，分层统计时需注意功效。",
-        "- 逐部指标（beat_hit_rate / cut_visibility 等）由 `scripts/score_reference_gap.py` 计算。",
+        "- 分层偏重燃向（burn 占比最高）；技术流层为空——B站/AcFun 该关键词域均为教程，",
+        "  需改用大师名定向搜索或人工投稿补齐。",
+        "- 逐部指标（beat_hit_rate / cut_visibility 等）由 `scripts/reference_stats.py` 计算，",
+        "  与旧 `score_reference_gap.py` 同源函数，但后者不输出分位数。",
         "",
     ]
     README.write_text("\n".join(lines), encoding="utf-8")

@@ -450,6 +450,25 @@ def main() -> int:
     report["capabilities_used"]["v23_engine"] = True
     print(f"    成片: {render_result['video_path']}")
 
+    # --- P0 确定性渲染框架: EDL 落盘 (吸收 HyperFrames 渲染清单 + video-use EDL 设计)
+    # 非侵入: 失败只记日志, 绝不阻断主管线
+    try:
+        from scripts.edl import build_edl, save_edl, lint_edl
+        _pr_path = out_dir / "production_report.json"
+        if _pr_path.exists():
+            _edl = build_edl(_pr_path, bgm_path=args.bgm, sources=sources,
+                            style=args.style, theme=args.theme,
+                            duration=args.duration)
+            _errs = lint_edl(_edl)
+            save_edl(_edl, out_dir / "edl.json")
+            report["edl"] = {"path": str(out_dir / "edl.json"),
+                             "cuts": len(_edl["cuts"]),
+                             "lint_errors": _errs}
+            print(f"    EDL: {len(_edl['cuts'])} cuts 落盘 "
+                  f"(lint {'PASS' if not _errs else 'FAIL ' + str(len(_errs))})")
+    except Exception as _edl_e:  # noqa: BLE001
+        print(f"    [EDL 跳过] {_edl_e}")
+
     # Prepare data for SFX
     _sections_dicts = [{"start": s.start, "end": s.end, "level": s.level,
                         "energy_mean": s.energy_mean} for s in render_result["dyn_sections"]]
