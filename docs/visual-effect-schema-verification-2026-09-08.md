@@ -163,3 +163,54 @@ render_master.py       <run> <tag>                    →  polish/<tag>_master.m
 | `scripts/apply_run53v43_effects.py` | 重写为委托单一实现，清除 6 处缺陷 |
 | `tests/test_visual_effect_schema.py` | 新建，280 行 / 18 项，1.3s |
 | `docs/visual-effect-schema-summary.md` | 更正 11→17、Status 由「✅ COMPLETED」改为「⚠️ 部分完成」、加更正说明与 Known Gaps |
+
+---
+
+## 5. 2026-09-09 Schema 缺口修复
+
+**日期：** 2026-09-09
+**范围：** 修复 summary Known Gaps 中的 3 项数据缺陷 + particular 插件实现
+**结论：** 3 项缺口已闭合，particular 已可渲染，测试从 18 增至 20 项全通过
+
+### 5.1 flow_angle 上限 180 → 360
+
+- 文件: `schemas/visual_effect_schema.json`
+- 光流方向是 0-360°，dense 文件有 10 条数据用到 210/240/270/300/330，旧上限导致全部不通过
+- `maximum` 从 180 改为 360
+
+### 5.2 radial 别名加入 schema enum
+
+- 文件: `schemas/visual_effect_schema.json` + `scripts/build_master_polish.py`
+- dense 文件 20 条用 `radial`（RECIPES 键名），schema enum 只认 `radial_blur`，导致全部 skipped
+- 双向兼容：schema enum 加 `"radial"` 作为合法值，`SCHEMA_TO_RECIPE` 加 `"radial": "radial"` 直接映射
+- dense 文件 skipped 从 20 降为 0
+
+### 5.3 particular 加入 RECIPES
+
+- 文件: `scripts/build_master_polish.py`
+- matchName `tc Particular` 已在 `.ae-mcp-bridge/enhance_v2.jsx` 和 `rebuild_v2.jsx` 中成功使用
+- RECIPES 新增 `"particular"` 条目（velocity/life/size/pps 4 个默认参数）
+- `SCHEMA_UNMAPPED` 删除 `"particular"` 条目，剩余 5 种 premium 插件
+
+### 5.4 测试更新
+
+- `tests/test_visual_effect_schema.py` 从 18 项增至 20 项：
+  - 新增 `test_radial_alias_maps_to_same_recipe`: 验证 `radial` 和 `radial_blur` 映射到同一 RECIPES 键
+  - 新增 `test_flow_angle_360_accepted`: 验证 270° 配置通过 schema、400° 被拒绝
+  - 更新 `test_unmapped_premium_types_have_no_fabricated_matchname`: 移除 particular
+
+### 5.5 预期产出
+
+| 指标 | 修复前 | 修复后 |
+|---|---|---|
+| schema enum 类型数 | 17 | 18 (+radial 别名) |
+| dense 文件 skipped (radial) | 20 | 0 |
+| dense 文件 flow_angle 不通过 | 10 | 0 |
+| SCHEMA_UNMAPPED 条目数 | 6 | 5 |
+| premium_v2 可渲染 | 33 | 33 (+20 particular) |
+| 测试数 | 18 | 20 |
+
+### 5.6 剩余缺口
+
+- 5 种 premium 插件 (sapphire_glow / optical_flares / delirium / magic_bullet_looks / film_stocks) 仍需 AE 枚举实证
+- time_range 跨字段约束仍在翻译层兜底（JSON Schema draft-07 不支持数值比较）

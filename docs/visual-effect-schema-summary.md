@@ -21,7 +21,7 @@ Structured JSON Schema for AE visual effects integrated into the MasterCut pipel
 
 ### 1. Core Schema (`schemas/visual_effect_schema.json`)
 
-Comprehensive JSON Schema covering **17 effect types**（旧版文档误写为 11；premium 总结文档又误写为 19）:
+Comprehensive JSON Schema covering **18 effect types**（旧版文档误写为 11；premium 总结文档又误写为 19；2026-09-09 加 `radial` 别名后为 18）:
 - `twixtor` - Time remapping with continuous velocity curves
 - `zoom_pan` - Scale and position animation
 - `bloom` - Glow/bloom effect (ADBE Glo2)
@@ -33,9 +33,11 @@ Comprehensive JSON Schema covering **17 effect types**（旧版文档误写为 1
 - `burst_radial` - Burst impact layer (radial)
 - `burst_badtv` - Burst impact layer (BadTV)
 - `fmb_directional` - Directional motion blur with optical flow
-- `sapphire_glow` / `optical_flares` / `delirium` / `particular` /
-  `magic_bullet_looks` / `film_stocks` —— 2026-09-07 新增的 6 种第三方插件类型，
+- `sapphire_glow` / `optical_flares` / `delirium` /
+  `magic_bullet_looks` / `film_stocks` —— 2026-09-07 新增的 5 种第三方插件类型，
   **均无 RECIPES 实现**（matchName 未经 AE 枚举实证，不得编造）
+- `particular` —— 2026-09-09 加入 RECIPES（matchName `tc Particular` 经 AE Bridge 实证）
+- `radial` —— 2026-09-09 加入 enum 作为 `radial_blur` 的别名（dense 数据用 RECIPES 键名）
 
 **Key Features:**
 - **Type-safe parameter validation** via top-level `allOf` conditional schemas
@@ -190,7 +192,7 @@ Matches production constants in `build_master_polish.py`:
    `r.env` 走 `setValueAtTime(t0, v)` + `setValueAtTime(t0+DECAY, v*TAIL)`
 5. ✅ burst 层路由到 `bursts` 列表（`duration_frames` 映射为 `t1 - t0`）
 
-**仍未完成**：上节 Known Gaps 第 1 项（6 种 premium 插件类型无 RECIPES 实现）。
+**仍未完成**：上节 Known Gaps 第 1 项（5 种 premium 插件类型无 RECIPES 实现）。
 
 **Mapping table:**
 | Schema Type | RECIPES Key | Match Name | Env Flag |
@@ -198,7 +200,8 @@ Matches production constants in `build_master_polish.py`:
 | bloom | bloom | ADBE Glo2 | False |
 | bokeh | bokeh | RWB Fast Bokeh | False |
 | badtv | badtv | GUTS BadTV | True |
-| radial_blur | radial | CC Radial Fast Blur | True |
+| radial_blur / radial | radial | CC Radial Fast Blur | True |
+| particular | particular | tc Particular | False |
 | burst_radial | burst_radial | CC Radial Fast Blur | True |
 | burst_badtv | burst_badtv | GUTS BadTV | True |
 | motion_blur | fmb | CC Force Motion Blur | False |
@@ -206,11 +209,11 @@ Matches production constants in `build_master_polish.py`:
 
 ## Testing Results
 
-2026-09-08 实测（`tests/test_visual_effect_schema.py`，18 passed / 1.3s）：
+2026-09-09 实测（`tests/test_visual_effect_schema.py`，20 passed / 1.5s）：
 
 ✅ 5 个示例配置通过 schema 校验（jsonschema 4.26.0）
 ✅ schema 正确拒绝非法配置：未知类型 / 越界 / 类型错 / 未知参数注入 / 缺必填 / id 正则
-✅ 映射表与 schema enum 一一对应，17/17 无空洞
+✅ 映射表与 schema enum 一一对应，18/18 无空洞
 ✅ 翻译对账闭合：applied + unmapped + skipped == input（无静默丢弃）
 ✅ build_jsx 产物内效果条目数 == 报告数，且 matchName 全部来自 RECIPES
 ✅ 真实 aerender 渲染：`run53_master.mp4` 59,238,698 B，h264 1920x1080@24fps，720 帧 = 30.0s
@@ -218,16 +221,14 @@ Matches production constants in `build_master_polish.py`:
 旧版本文列出的 "✅ Agent integration compiles without errors" 等四条并不能
 证明链路可用 —— 它只跑了 import，从未跑过真实调用。
 
-## Known Gaps（2026-09-08 未解决，需后续跟进）
+## Known Gaps（2026-09-09 更新）
 
-1. **6 种 premium 插件类型无渲染实现** —— `sapphire_glow` / `optical_flares` /
-   `delirium` / `particular` / `magic_bullet_looks` / `film_stocks` 在 `RECIPES`
+1. **5 种 premium 插件类型无渲染实现** —— `sapphire_glow` / `optical_flares` /
+   `delirium` / `magic_bullet_looks` / `film_stocks` 在 `RECIPES`
    中无条目。`run53v43_effects_premium_v2.json` 的 139 条中 **106 条属于这些类型**，
-   实际仅 33 条可渲染。需先用 AE 枚举出真实 matchName 才可能补齐。
-2. **`radial` vs `radial_blur` 命名分裂** —— `run53v43_effects_dense.json` 用
-   `radial`（RECIPES 键名），schema enum 只认 `radial_blur`，导致 20 条被归入 skipped。
-3. **`flow_angle` 上限写错** —— schema 限定 `maximum: 180`，但光流方向是 0-360°，
-   生产数据用到 210/240/270。dense 文件另有 10 条因此不通过。
+   实际仅 33 条可渲染（2026-09-09: particular 已移出，见下方）。需先用 AE 枚举出真实 matchName 才可能补齐。
+2. ~~**`radial` vs `radial_blur` 命名分裂**~~ —— ✅ 2026-09-09 修复：`radial` 加入 schema enum 作为合法别名，`SCHEMA_TO_RECIPE` 加 `"radial": "radial"` 直接映射。dense 文件 20 条 skipped 降为 0。
+3. ~~**`flow_angle` 上限写错**~~ —— ✅ 2026-09-09 修复：schema `maximum` 从 180 改为 360。dense 文件 10 条不通过降为 0。
 4. **`time_range` 缺跨字段约束** —— `start_sec > end_sec` 仍过 schema（翻译器会
    归入 skipped，不会错渲染，但 schema 层应补）。已在测试中钉住此现状。
 5. **`ai/production_director.py`（271KB，V23 真引擎）不认识 schema** ——
@@ -245,7 +246,7 @@ Matches production constants in `build_master_polish.py`:
 
 ## Conclusion
 
-Schema 定义层可用且质量不错（17 类型约束严谨、`additionalProperties: false` 生效）。
+Schema 定义层可用且质量不错（18 类型约束严谨、`additionalProperties: false` 生效）。
 
 但旧结论 "Task 8 is complete ... 可以投入使用了" **不成立**：它是纸面合同，
 当时没人消费它，第一跳就 `exit(1)`。2026-09-08 已完成 P0 修复（见
@@ -256,7 +257,14 @@ Schema 定义层可用且质量不错（17 类型约束严谨、`additionalPrope
 - `_apply_effects_to_video()` 按真实契约调用，并补齐缺失的 `render_master.py` 渲染步骤
 - 删除两层假绿灯（agent 无条件报 `len(effects)`、脚本 `.get(..., len(effects))` 兜底）
 - 修正 `ToolResult.data` 不存在（实际是 `.output`）导致调用方恒走 FAIL 分支
-- 新增 `tests/test_visual_effect_schema.py`（18 项）防回归
+- 新增 `tests/test_visual_effect_schema.py`（20 项）防回归
 
-**距"完整可用"仍差**：6 种 premium 插件类型的 RECIPES 实现（需 AE 枚举实证 matchName）。
+**2026-09-09 缺口修复**（见 `docs/visual-effect-schema-verification-2026-09-08.md` 第 5 节）：
+
+- `flow_angle` 上限 180 → 360（光流方向 0-360°）
+- `radial` 加入 schema enum 别名 + `SCHEMA_TO_RECIPE` 直接映射，消除 dense 文件 20 条 skipped
+- `particular` 加入 RECIPES（matchName `tc Particular` 经 AE Bridge 实证），移出 `SCHEMA_UNMAPPED`
+- 测试从 18 项增至 20 项（新增 radial alias、flow_angle 360 验证）
+
+**距"完整可用"仍差**：5 种 premium 插件类型的 RECIPES 实现（需 AE 枚举实证 matchName）。
 在那之前，`run53v43_effects_premium_v2.json` 只能渲染 33/139 条，属**部分交付**。

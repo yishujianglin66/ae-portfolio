@@ -24,6 +24,7 @@
         "delirium",
         "motion_blur",
         "radial_blur",
+        "radial",
         "burst_radial",
         "burst_badtv",
         "fmb_directional",
@@ -661,8 +662,8 @@
         "flow_angle": {
           "type": "number",
           "minimum": 0,
-          "maximum": 180,
-          "description": "Dominant flow direction in degrees (auto-injected by pipeline)"
+          "maximum": 360,
+          "description": "Dominant flow direction in degrees (0-360, auto-injected by pipeline)"
         }
       },
       "required": ["base_amount"],

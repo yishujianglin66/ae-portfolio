@@ -51,6 +51,13 @@ RECIPES = {
     # 转场冲击层 (顶层短层)
     "burst_radial": {"m": "CC Radial Fast Blur", "ps": [("CC Radial Fast Blur-0002", 90)], "env": True},
     "burst_badtv":  {"m": "GUTS BadTV", "ps": [("GUTS BadTV-0001", 4.5)], "env": True},
+    # premium 插件 (matchName 经 AE Bridge 实证)
+    "particular": {"m": "tc Particular", "ps": [
+        ("tc Particular-0011", 10),    # velocity
+        ("tc Particular-0002", 1.5),   # life
+        ("tc Particular-0027", 2.0),   # particle size
+        ("tc Particular-0146", 200),   # particles per second
+    ], "env": False},
 }
 
 ENV_DECAY_S = 0.16   # 包络衰减时长 (~3帧@24fps)
@@ -75,9 +82,11 @@ SCHEMA_TO_RECIPE = {
     "badtv": "badtv",
     "glitch": "glitch",
     "radial_blur": "radial",
+    "radial": "radial",  # 别名: dense 数据用 RECIPES 键名
     "motion_blur": "fmb",
     "burst_radial": "burst_radial",
     "burst_badtv": "burst_badtv",
+    "particular": "particular",  # matchName tc Particular (AE Bridge 实证)
 }
 
 # 需要运行时参数的类型 → spec 字符串 "fmb_dir:<amount>:<angle>" (见 _fx_js)
@@ -94,7 +103,6 @@ SCHEMA_UNMAPPED = {
     "sapphire_glow": "RECIPES 无 S_Glow matchName — 未经 AE 枚举实证",
     "optical_flares": "RECIPES 无 Optical Flares matchName — 未经 AE 枚举实证",
     "delirium": "RECIPES 无 Delirium matchName — 未经 AE 枚举实证",
-    "particular": "RECIPES 无 Particular matchName — 未经 AE 枚举实证",
     "magic_bullet_looks": "RECIPES 无 Magic Bullet Looks matchName — 未经 AE 枚举实证",
     "film_stocks": "RECIPES 无 Tiffen Film Stocks matchName — 未经 AE 枚举实证",
 }

@@ -10,16 +10,16 @@ The visual effect schema (`schemas/visual_effect_schema.json`) provides a machin
   (not `oneOf` —— `oneOf` 会让空 `parameters` 同时匹配多个类型而产生歧义)
 - **Temporal envelopes** for dynamic modulation (拍点包络: peak value, decay duration, tail ratio)
 - **Evidence chain integration** linking effects to validated grammar cards via `skill_id` and `reasoning_log`
-- **17 effect types** (`effect_type` enum in `schemas/visual_effect_schema.json`, `version: 1.0.0`):
+- **18 effect types** (`effect_type` enum in `schemas/visual_effect_schema.json`, `version: 1.0.0`):
   `twixtor`, `zoom_pan`, `bloom`, `sapphire_glow`, `optical_flares`, `bokeh`,
-  `badtv`, `glitch`, `delirium`, `motion_blur`, `radial_blur`, `burst_radial`,
+  `badtv`, `glitch`, `delirium`, `motion_blur`, `radial_blur`, `radial`, `burst_radial`,
   `burst_badtv`, `fmb_directional`, `particular`, `magic_bullet_looks`, `film_stocks`
 
-  ⚠️ 其中只有 **9 种在 `build_master_polish.RECIPES` 中有实现** 可真正渲染
-  （`bloom`, `bokeh`, `badtv`, `glitch`, `radial_blur`, `motion_blur`,
-  `burst_radial`, `burst_badtv`, `fmb_directional`）。
+  ⚠️ 其中只有 **10 种在 `build_master_polish.RECIPES` 中有实现** 可真正渲染
+  （`bloom`, `bokeh`, `badtv`, `glitch`, `radial_blur`/`radial`, `motion_blur`,
+  `burst_radial`, `burst_badtv`, `fmb_directional`, `particular`）。
   `twixtor` / `zoom_pan` 由内部规划通道驱动，不可外部注入；
-  6 种 premium 插件类型无 RECIPES 条目（matchName 未经 AE 枚举实证）。
+  5 种 premium 插件类型无 RECIPES 条目（matchName 未经 AE 枚举实证）。
   详见 `docs/visual-effect-schema-verification-2026-09-08.md`。
 
 ## Schema Structure
@@ -306,7 +306,7 @@ if not validation["valid"]:
 ```
 
 Validation checks:
-- `effect_type` matches one of the 17 defined types.
+- `effect_type` matches one of the 18 defined types.
 - `parameters` conform to the type-specific definition (via root-level `allOf`
   with `if`/`then` clauses —— 不是 `oneOf`；`oneOf` 会让空参数对象同时匹配多个类型）。
 - `time_range.start_sec < time_range.end_sec` —— ⚠️ **当前并未被 schema 强制**。

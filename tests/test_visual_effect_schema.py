@@ -119,8 +119,8 @@ def test_mapping_tables_cover_every_schema_type_without_holes(schema):
 def test_no_mapped_effect_type_is_unimplemented():
     """映射到的 RECIPES 键必须真实存在于 build_master_polish.RECIPES。
 
-    这是 2026-09-07 断链的核心教训: schema 声明了 17 种, 而渲染端 RECIPES
-    只实现 15 个键, 其中 6 种 premium 插件类型一个都没实现。
+    这是 2026-09-07 断链的核心教训: schema 声明了 18 种, 而渲染端 RECIPES
+    只实现部分键, 其中 5 种 premium 插件类型无 matchName 实证。
     """
     import scripts.build_master_polish as B
 
@@ -134,11 +134,43 @@ def test_no_mapped_effect_type_is_unimplemented():
 
 
 def test_unmapped_premium_types_have_no_fabricated_matchname():
-    """第三方插件类型必须留在 SCHEMA_UNMAPPED, 不许为了凑数编 matchName。"""
+    """第三方插件类型必须留在 SCHEMA_UNMAPPED, 不许为了凑数编 matchName。
+
+    2026-09-09: particular 已移出 (matchName tc Particular 经 AE Bridge 实证)。
+    """
     for t in ("sapphire_glow", "optical_flares", "delirium",
-              "particular", "magic_bullet_looks", "film_stocks"):
+              "magic_bullet_looks", "film_stocks"):
         assert t in SCHEMA_UNMAPPED, f"{t} 应标为不可注入 (matchName 未经 AE 枚举实证)"
         assert t not in SCHEMA_TO_RECIPE and t not in SCHEMA_DYN_RECIPE
+
+
+def test_radial_alias_maps_to_same_recipe():
+    """radial 和 radial_blur 必须映射到同一个 RECIPES 键。
+
+    2026-09-09 修复: dense 数据用 RECIPES 键名 'radial', schema enum 只认
+    'radial_blur', 导致 20 条被 skipped。现在两个名字都合法且映射到同一键。
+    """
+    assert SCHEMA_TO_RECIPE.get("radial") == SCHEMA_TO_RECIPE.get("radial_blur")
+    assert SCHEMA_TO_RECIPE["radial"] == "radial"
+
+
+def test_flow_angle_360_accepted(schema):
+    """flow_angle 上限已改为 360, 270 度配置必须通过 schema 校验。
+
+    2026-09-09 修复: 旧版 maximum=180 导致 dense 文件 10 条数据不通过。
+    """
+    inst = {"effect_id": "fmb_001", "effect_type": "fmb_directional",
+            "time_range": {"start_sec": 1.0, "end_sec": 3.0},
+            "parameters": {"base_amount": 24, "flow_angle": 270}}
+    jsonschema.validate(instance=inst, schema=schema)  # 必须通过
+
+    # 超过 360 仍应拒绝
+    inst_bad = dict(inst, parameters={"base_amount": 24, "flow_angle": 400})
+    try:
+        jsonschema.validate(instance=inst_bad, schema=schema)
+        assert False, "flow_angle=400 应被拒绝"
+    except jsonschema.ValidationError:
+        pass
 
 
 # ────────────────────────────────────────────────────────────────
