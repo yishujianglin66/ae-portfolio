@@ -58,6 +58,9 @@ RECIPES = {
         ("tc Particular-0027", 2.0),   # particle size
         ("tc Particular-0146", 200),   # particles per second
     ], "env": False},
+    "sapphire_glow": {"m": "S_Glow", "ps": [], "env": False},
+    "optical_flares": {"m": "Optical Flares", "ps": [], "env": False},
+    "magic_bullet_looks": {"m": "Magic Bullet Looks", "ps": [], "env": False},
 }
 
 ENV_DECAY_S = 0.16   # 包络衰减时长 (~3帧@24fps)
@@ -87,6 +90,9 @@ SCHEMA_TO_RECIPE = {
     "burst_radial": "burst_radial",
     "burst_badtv": "burst_badtv",
     "particular": "particular",  # matchName tc Particular (AE Bridge 实证)
+    "sapphire_glow": "sapphire_glow",  # matchName S_Glow (AE Bridge 实证 2026-09-09)
+    "optical_flares": "optical_flares",  # matchName Optical Flares (AE Bridge 实证 2026-09-09)
+    "magic_bullet_looks": "magic_bullet_looks",  # matchName Magic Bullet Looks (AE Bridge 实证 2026-09-09)
 }
 
 # 需要运行时参数的类型 → spec 字符串 "fmb_dir:<amount>:<angle>" (见 _fx_js)
@@ -100,11 +106,8 @@ BURST_TYPES = {"burst_radial", "burst_badtv"}
 SCHEMA_UNMAPPED = {
     "twixtor": "由 plan_effects 的 twx 通道按真实 onset 生成, 不接受外部注入",
     "zoom_pan": "由 production_report segments.zoompan_effect 驱动",
-    "sapphire_glow": "RECIPES 无 S_Glow matchName — 未经 AE 枚举实证",
-    "optical_flares": "RECIPES 无 Optical Flares matchName — 未经 AE 枚举实证",
-    "delirium": "RECIPES 无 Delirium matchName — 未经 AE 枚举实证",
-    "magic_bullet_looks": "RECIPES 无 Magic Bullet Looks matchName — 未经 AE 枚举实证",
-    "film_stocks": "RECIPES 无 Tiffen Film Stocks matchName — 未经 AE 枚举实证",
+    "delirium": "RECIPES 无 Delirium matchName — 本机未安装 Digieffects Delirium, 无法 AE 实证",
+    "film_stocks": "RECIPES 无 Tiffen Film Stocks matchName — 本机未安装 Tiffen Dfx, 无法 AE 实证",
 }
 
 

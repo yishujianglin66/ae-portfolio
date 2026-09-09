@@ -202,6 +202,9 @@ Matches production constants in `build_master_polish.py`:
 | badtv | badtv | GUTS BadTV | True |
 | radial_blur / radial | radial | CC Radial Fast Blur | True |
 | particular | particular | tc Particular | False |
+| sapphire_glow | sapphire_glow | S_Glow | False |
+| optical_flares | optical_flares | Optical Flares | False |
+| magic_bullet_looks | magic_bullet_looks | Magic Bullet Looks | False |
 | burst_radial | burst_radial | CC Radial Fast Blur | True |
 | burst_badtv | burst_badtv | GUTS BadTV | True |
 | motion_blur | fmb | CC Force Motion Blur | False |
@@ -209,7 +212,7 @@ Matches production constants in `build_master_polish.py`:
 
 ## Testing Results
 
-2026-09-09 实测（`tests/test_visual_effect_schema.py`，20 passed / 1.5s）：
+2026-09-09 实测（`tests/test_visual_effect_schema.py`，21 passed / 9s）：
 
 ✅ 5 个示例配置通过 schema 校验（jsonschema 4.26.0）
 ✅ schema 正确拒绝非法配置：未知类型 / 越界 / 类型错 / 未知参数注入 / 缺必填 / id 正则
@@ -223,10 +226,9 @@ Matches production constants in `build_master_polish.py`:
 
 ## Known Gaps（2026-09-09 更新）
 
-1. **5 种 premium 插件类型无渲染实现** —— `sapphire_glow` / `optical_flares` /
-   `delirium` / `magic_bullet_looks` / `film_stocks` 在 `RECIPES`
-   中无条目。`run53v43_effects_premium_v2.json` 的 139 条中 **106 条属于这些类型**，
-   实际仅 33 条可渲染（2026-09-09: particular 已移出，见下方）。需先用 AE 枚举出真实 matchName 才可能补齐。
+1. **2 种 premium 插件类型无渲染实现** —— `delirium` / `film_stocks` 在 `RECIPES`
+   中无条目（本机未安装 Digieffects Delirium 和 Tiffen Dfx，无法 AE 实证）。
+   `sapphire_glow` / `optical_flares` / `magic_bullet_looks` 已于 2026-09-09 经 AE Bridge 实证加入 RECIPES。
 2. ~~**`radial` vs `radial_blur` 命名分裂**~~ —— ✅ 2026-09-09 修复：`radial` 加入 schema enum 作为合法别名，`SCHEMA_TO_RECIPE` 加 `"radial": "radial"` 直接映射。dense 文件 20 条 skipped 降为 0。
 3. ~~**`flow_angle` 上限写错**~~ —— ✅ 2026-09-09 修复：schema `maximum` 从 180 改为 360。dense 文件 10 条不通过降为 0。
 4. **`time_range` 缺跨字段约束** —— `start_sec > end_sec` 仍过 schema（翻译器会
@@ -264,7 +266,7 @@ Schema 定义层可用且质量不错（18 类型约束严谨、`additionalPrope
 - `flow_angle` 上限 180 → 360（光流方向 0-360°）
 - `radial` 加入 schema enum 别名 + `SCHEMA_TO_RECIPE` 直接映射，消除 dense 文件 20 条 skipped
 - `particular` 加入 RECIPES（matchName `tc Particular` 经 AE Bridge 实证），移出 `SCHEMA_UNMAPPED`
-- 测试从 18 项增至 20 项（新增 radial alias、flow_angle 360 验证）
+- 测试从 18 项增至 21 项（新增 radial alias、flow_angle 360 验证）
 
 **距"完整可用"仍差**：5 种 premium 插件类型的 RECIPES 实现（需 AE 枚举实证 matchName）。
 在那之前，`run53v43_effects_premium_v2.json` 只能渲染 33/139 条，属**部分交付**。

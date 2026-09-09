@@ -134,14 +134,38 @@ def test_no_mapped_effect_type_is_unimplemented():
 
 
 def test_unmapped_premium_types_have_no_fabricated_matchname():
-    """第三方插件类型必须留在 SCHEMA_UNMAPPED, 不许为了凑数编 matchName。
+    """未安装插件类型必须留在 SCHEMA_UNMAPPED, 不许为了凑数编 matchName。
 
     2026-09-09: particular 已移出 (matchName tc Particular 经 AE Bridge 实证)。
+    2026-09-09: sapphire_glow/optical_flares/magic_bullet_looks 已移出
+               (matchName 经 AE Bridge 实证, 见 test_premium_plugins_ae_verified)。
     """
-    for t in ("sapphire_glow", "optical_flares", "delirium",
-              "magic_bullet_looks", "film_stocks"):
-        assert t in SCHEMA_UNMAPPED, f"{t} 应标为不可注入 (matchName 未经 AE 枚举实证)"
+    for t in ("delirium", "film_stocks"):
+        assert t in SCHEMA_UNMAPPED, f"{t} 应标为不可注入 (本机未安装, 无法 AE 实证)"
         assert t not in SCHEMA_TO_RECIPE and t not in SCHEMA_DYN_RECIPE
+
+
+def test_premium_plugins_ae_verified():
+    """sapphire_glow/optical_flares/magic_bullet_looks 已加入 RECIPES。
+
+    matchName 全部经 AE Bridge executeAtomScript 实证 (2026-09-09):
+      sapphire_glow      → S_Glow
+      optical_flares     → Optical Flares
+      magic_bullet_looks → Magic Bullet Looks
+    """
+    import scripts.build_master_polish as B
+    for schema_type, expected_match in [
+        ("sapphire_glow", "S_Glow"),
+        ("optical_flares", "Optical Flares"),
+        ("magic_bullet_looks", "Magic Bullet Looks"),
+    ]:
+        assert schema_type in SCHEMA_TO_RECIPE, f"{schema_type} 应在 SCHEMA_TO_RECIPE"
+        recipe_key = SCHEMA_TO_RECIPE[schema_type]
+        assert recipe_key in B.RECIPES, f"{schema_type} -> {recipe_key} 不在 RECIPES"
+        assert B.RECIPES[recipe_key]["m"] == expected_match, (
+            f"{schema_type} matchName 应为 {expected_match!r}")
+        assert schema_type not in SCHEMA_UNMAPPED, (
+            f"{schema_type} 已实证, 不应再留在 SCHEMA_UNMAPPED")
 
 
 def test_radial_alias_maps_to_same_recipe():
