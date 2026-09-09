@@ -35,6 +35,7 @@ import numpy as np
 
 PROJ = Path(__file__).resolve().parent.parent
 FF = shutil.which("ffmpeg") or "C:/ffmpeg/bin/ffmpeg.exe"
+FFPROBE = shutil.which("ffprobe") or "C:/ffmpeg/bin/ffprobe.exe"
 ALLOWED_SUFFIXES = (".mp4", ".mov", ".mkv", ".webm", ".m4v")
 SAMPLE_MAX = 12          # 与 score_reference_gap 一致：最多采样 12 个切点
 
@@ -66,7 +67,14 @@ def scene_cuts(path: Path, thr: float) -> list[float]:
 
 
 def frame_norm(path: Path, t: float, w: int = 48, h: int = 27) -> np.ndarray | None:
-    """取一帧 → 灰度 → 缩放 → 零均值单位方差归一化（与官方口径一致）。"""
+    """取一帧 → 灰度 → 缩放 → 零均值单位方差归一化（与官方口径一致）。
+
+    ⚠️ 时间必须格式化为 **3 位小数**（官方实现即 `f"{t:.3f}"`）。
+    实测（2026-09-09）：ffmpeg 的 -ss 在帧边界处存在临界行为——
+    `-ss 13.416667` 会回退到前一帧，而 `-ss 13.417` 命中目标帧，
+    两者帧差相差 20 倍以上。3 位小数的舍入恰好避开该临界区。
+    因此**不要**提高此处的格式化精度。
+    """
     cmd = [FF, "-ss", f"{max(t, 0):.3f}", "-i", str(path), "-frames:v", "1",
            "-vf", f"scale={w}:{h},normalize", "-f", "rawvideo",
            "-pix_fmt", "gray", "-"]
@@ -77,7 +85,26 @@ def frame_norm(path: Path, t: float, w: int = 48, h: int = 27) -> np.ndarray | N
     return (v - v.mean()) / (v.std() + 1e-6)
 
 
+def probe_fps(path: Path) -> float:
+    r = _run([FFPROBE, "-v", "error", "-select_streams", "v:0",
+              "-show_entries", "stream=r_frame_rate", "-of", "csv=p=0",
+              str(path)], timeout=60)
+    try:
+        frac = (r.stdout or b"").decode().strip().splitlines()[0]
+        num, den = frac.split("/")
+        return float(num) / float(den) if float(den) else 24.0
+    except (IndexError, ValueError, ZeroDivisionError):
+        return 24.0
+
+
 def per_cut(path: Path, thr: float) -> dict:
+    """逐切点计算可见性。
+
+    口径与官方 `score_reference_gap._signal` 完全一致：
+    比较 frame(t - 1/24) 与 frame(t + 3/24)，时间按 3 位小数格式化。
+    （曾尝试改为帧号对齐，但实测会因 ffmpeg -ss 的帧边界临界行为产生
+    假阴性，见 frame_norm 的说明；此处保持官方口径以保证可比性。）
+    """
     cuts = scene_cuts(path, thr)
     n = len(cuts)
     rows = []
@@ -86,7 +113,8 @@ def per_cut(path: Path, thr: float) -> dict:
         b = frame_norm(path, t + 3 / 24)
         if a is None or b is None or a.shape != b.shape:
             continue
-        rows.append({"t": round(t, 3), "vis": round(float(np.abs(a - b).mean()), 4)})
+        rows.append({"t": round(t, 3),
+                     "vis": round(float(np.abs(a - b).mean()), 4)})
     # 官方采样口径：cuts[::max(1, n//12)][:12]
     sampled_idx = list(range(0, n, max(1, n // SAMPLE_MAX)))[:SAMPLE_MAX] if n else []
     sampled = [rows[i]["vis"] for i in sampled_idx if i < len(rows)]
