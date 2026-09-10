@@ -67,6 +67,7 @@ ZONE_CFG = {
     "outro": {"gap": 1.2, "hold": 2.5, "cap": 2},
 }
 ZONE_END_GUARD = 0.35     # 锚点距分区结束 <0.35s 不选 (会被钳成不可读短事件)
+DROP_POS_CYCLE = [(960, 540), (620, 360), (1300, 720)]   # v4: drop 三分位轮换 (中/左上/右下)
 ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 0.4 保覆盖)
 
 # 字体: font_stack[0] 为首选 (probe_font=true 表示未实机实证, 探针不过则用栈尾已实证字体)
@@ -75,14 +76,6 @@ ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 
 #   shadow = (opacity 0-1, direction deg, distance, softness) —— ADBE Drop Shadow 0002/3/4/5
 #   bevel  = (edge_thickness, light_angle, light_intensity) —— ADBE Bevel Alpha 0001/2/4
 STYLES = {
-    "intro_serif": {
-        "fonts": ["Georgia", "Times New Roman", "SimSun", "BebasNeue"],
-        "size": (100, 125), "fill": [0.96, 0.94, 0.89],      # v2: 提亮防"水印感"
-        "stroke": ([0.05, 0.04, 0.06], 1.8), "pos": "center", "enter": "fade_scale",
-        "glow": (150, 30, 0.55), "glow2": None,
-        "shadow": (0.45, 135, 5, 15), "bevel": None,
-        "tracking": None,
-    },
     "build_side": {
         "fonts": ["BebasNeue", "Consolas"],                  # 全实证
         "size": (85, 120), "fill": [0.95, 0.95, 0.98],
@@ -90,15 +83,29 @@ STYLES = {
         "glow": (130, 18, 0.9), "glow2": None,
         "shadow": (0.6, 135, 6, 8), "bevel": (2, -45, 0.35),
         "tracking": None,
+        "typewriter": True,   # v3: 逐字揭示（手册 §十六, Range Selector idx 1/2/3）
+    },
+    "intro_serif": {
+        "fonts": ["Georgia", "Times New Roman", "SimSun", "BebasNeue"],
+        "size": (100, 125), "fill": [0.96, 0.94, 0.89],
+        "stroke": ([0.05, 0.04, 0.06], 1.8), "pos": "center", "enter": "fade_scale",
+        "glow": (150, 30, 0.55), "glow2": None,
+        "shadow": (0.45, 135, 5, 15), "bevel": None,
+        "tracking": None,
+        "blurfade": True,     # v3: 模糊淡入（手册 §十七, ADBE Gaussian Blur 2 prop1: 60→0）
     },
     "drop_impact": {
         "fonts": ["Anton", "Impact", "BebasNeue"],           # 全实证
         "size": (160, 215), "fill": [1.0, 1.0, 1.0],
         "stroke": ([0.02, 0.02, 0.05], 6.0), "pos": "center",
         "enter": "punch_tracking",
-        "glow": (110, 30, 2.2), "glow2": (205, 80, 0.9),     # 主发光脉冲 + 高阈值大半径外层 bloom
+        "glow": (115, 25, 1.7), "glow2": (205, 80, 0.9),     # v4: 主发光峰值 3.74→2.89 防文字边缘过曝疲劳
         "shadow": (0.78, 135, 10, 12), "bevel": (3, -45, 0.55),
         "tracking": 250,
+        # v3/v4 技法开关（手册附D/E/F 实证；v4 删冲击波——白 Add 闪光被 Boss 反馈"色度不对劲"，实证仅局部但仍干扰）:
+        "cascade": True,    # 逐字级联翻入（按事件循环变款, 见事件构建处）
+        "elastic": True,    # 弹性缩放砸入: amp*sin/exp 衰减表达式（附D 实测 1726KB）
+        "shockwave": False, # v4 关闭: 合成级白固态闪光（视频被影响的感知来源）
     },
 }
 MOOD_TO_STYLE = {"intro": "intro_serif", "build": "build_side",
@@ -163,7 +170,7 @@ def zone_of(t):
 
 # ── 事件规划 ────────────────────────────────────────────────────────────
 def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
-                max_events=None, total_dur=None):
+                max_events=None, total_dur=None, bg_video=None):
     """产出事件表 + 逐 segment 处置表 (显式记账, 不静默丢)"""
     if total_dur is None:
         total_dur = float(segs[-1]["end_time"]) if segs else 0.0
@@ -253,12 +260,22 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                 y = int(1080 * (0.18 if side_flip % 2 == 0 else 0.82))
                 size = int(size * 0.8)
                 side_flip += 1
+            elif style_id == "drop_impact":
+                # v4.1: 背景亮度感知选位 (双时刻加权, 防白字压高光; 回退轮换)
+                x, y = _pick_dark_pos(t_in, bg_video, bank_pos[zone], hold=hold)
         else:  # side_alt
             x = int(1920 * (0.30 if side_flip % 2 == 0 else 0.70))
             y = int(1080 * 0.42)
             side_flip += 1
             if closeup:
                 y = int(1080 * (0.18 if side_flip % 2 == 0 else 0.82))
+
+        # v4: drop 入场循环变款 (级联翻入 / 打字机 / 纯弹性), 防同款连打疲劳
+        cascade = st.get("cascade", False)
+        typewriter = st.get("typewriter", False)
+        if style_id == "drop_impact":
+            _v = bank_pos[zone] % 3
+            cascade, typewriter = (_v == 0), (_v == 1)
 
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
@@ -274,6 +291,11 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "glow2": st.get("glow2"),
             "shadow": st.get("shadow"),
             "bevel": st.get("bevel"),
+            "cascade": cascade,
+            "elastic": st.get("elastic", False),
+            "shockwave": st.get("shockwave", False),
+            "typewriter": typewriter,
+            "blurfade": st.get("blurfade", False),
             "tracking": st["tracking"],
             "anchor_shot": {"index": seg.get("index"), "t0": t0, "t1": t1},
         }
@@ -310,6 +332,37 @@ def _skin_p70(scenes):
     return mos[int(len(mos) * 0.7)] if mos else 99.0
 
 
+def _region_luma(video, t, cx, cy, w=520, h=320):
+    """采样视频 t 时刻候选位区域平均亮度 (gray 1x1); 失败返回 255=按亮处理不选"""
+    try:
+        r = subprocess.run(
+            ["ffmpeg", "-v", "error", "-ss", str(max(t - 0.05, 0.0)), "-i", str(video),
+             "-frames:v", "1", "-vf",
+             "crop=%d:%d:%d:%d,scale=1:1" % (w, h, max(cx - w // 2, 0), max(cy - h // 2, 0)),
+             "-f", "rawvideo", "-pix_fmt", "gray", "-"],
+            capture_output=True, timeout=10)
+        b = r.stdout
+        return sum(b) / len(b) if b else 255.0
+    except Exception:
+        return 255.0
+
+
+def _pick_dark_pos(t_in, bg_video, fallback_i, hold=0.9):
+    """v4.1 背景亮度感知选位: 三候选位 × 读字窗口(t+0.35h / t+0.65h)两点采样,
+    每位取最大亮度(最坏情况), 挑最小者——BREAK 案例实证: t_in 是切点闪光帧全屏无区分度,
+    爆炸类高光会在保持期内瞬态后发, 只看 t_in 或单点中期都会漏;
+    无基线视频/全失败 → 回退三分位轮换"""
+    if not bg_video or not Path(bg_video).exists():
+        return DROP_POS_CYCLE[fallback_i % len(DROP_POS_CYCLE)]
+    best, best_l = DROP_POS_CYCLE[fallback_i % 3], 1e9
+    for cx, cy in DROP_POS_CYCLE:
+        lum = max(_region_luma(bg_video, t_in + 0.35 * hold, cx, cy),
+                  _region_luma(bg_video, t_in + 0.65 * hold, cx, cy))
+        if lum < best_l - 1e-6:
+            best, best_l = (cx, cy), lum
+    return best
+
+
 # ── JSX 生成 (仅实证 API; ES3) ──────────────────────────────────────────
 ENV_DECAY_S = 0.16
 ENV_TAIL = 0.45
@@ -337,6 +390,11 @@ def build_jsx(events, out_aep: Path):
         d["glow2"] = list(e["glow2"]) if e.get("glow2") else None
         d["shadow"] = list(e["shadow"]) if e.get("shadow") else None
         d["bevel"] = list(e["bevel"]) if e.get("bevel") else None
+        d["cascade"] = bool(e.get("cascade"))
+        d["elastic"] = bool(e.get("elastic"))
+        d["shockwave"] = bool(e.get("shockwave"))
+        d["typewriter"] = bool(e.get("typewriter"))
+        d["blurfade"] = bool(e.get("blurfade"))
         d["tracking"] = e.get("tracking")
         # 入/出场关键帧时刻 (hold 过短时按比例缩, 保证 keyframes 单调)
         hold = e["t_out"] - e["t_in"]
@@ -406,6 +464,66 @@ def build_jsx(events, out_aep: Path):
                      .addProperty("ADBE Text Tracking Amount");
           tr.setValueAtTime(ev.t_in, ev.tracking);
           tr.setValueAtTime(ev.t_in + 0.2, 0);
+        }}
+        // ── v3 手册实证技法（全部 try/catch, 手册: AE-文字特效JSX动画可靠参数手册 附D/E/F）──
+        if (ev.cascade) {{                                    // 逐字级联翻入: RotY(-90)+Opacity(0)+RS idx3 扫过
+          try {{
+            var ca = tp.property("ADBE Text Animators").addProperty("ADBE Text Animator");
+            ca.name = "Cascade";
+            var crs = ca.property("ADBE Text Selectors").addProperty("ADBE Text Selector");
+            crs.property(1).setValue(0);                      // Percent Start (必须用索引, 手册约束)
+            crs.property(2).setValue(100);                    // Percent End
+            crs.property(3).setValueAtTime(ev.t_in, -100);    // Offset: -100=全隐藏
+            crs.property(3).setValueAtTime(ev.t_in + 0.30, 0);// 0=全显示 (0.30s 级联扫过)
+            var cpr = ca.property("ADBE Text Animator Properties");
+            cpr.addProperty("ADBE Text Opacity").setValue(0);
+            cpr.addProperty("ADBE Text Rotation Y").setValue(-90);
+          }} catch (ce) {{ rep += "|CASCADE" + i; }}
+        }}
+        if (ev.elastic) {{                                     // 弹性缩放砸入 (手册 §二十)
+          try {{
+            L.scale.expression =
+              "t=time-inPoint;if(t<0.01){{[0,0];}}else{{" +
+              "amp=38;freq=2.8;decay=5;" +
+              "s=amp*Math.sin(freq*t*Math.PI*2)/Math.exp(decay*t)+100;[s,s];}}";
+          }} catch (ee) {{ rep += "|ELASTIC" + i; }}
+        }}
+        if (ev.shockwave) {{                                    // 冲击波爆发 (手册 附F: Ramp radial + Add + 衰减)
+          try {{
+            var wv = comp.layers.addSolid([1, 1, 1], "SHOCK" + i, 240, 240, 1, 5);
+            wv.position.setValue([ev.x, ev.y]);
+            wv.blendMode = 5;                                  // Add
+            wv.inPoint = ev.t_in - 0.02; wv.outPoint = ev.t_in + 0.7;
+            var rp = wv.property("Effects").addProperty("ADBE Ramp");
+            rp.property(1).setValue([120, 120]);
+            rp.property(2).setValue([1, 1, 1, 1]);
+            rp.property(3).setValue([120, 120]);
+            rp.property(4).setValue([0, 0, 0, 0]);
+            rp.property(5).setValue(2);                         // radial
+            wv.scale.expression =
+              "t=time-inPoint;p=Math.min(t/0.45,1);s=10+p*88;[s,s];";
+            wv.opacity.expression =
+              "t=time-inPoint;if(t<0.04){{85*(t/0.04);}}else{{Math.max(85*Math.exp(-7*(t-0.04)),0);}}";
+          }} catch (we) {{ rep += "|SHOCKWAVE" + i; }}
+        }}
+        if (ev.typewriter) {{                                   // 打字机逐字揭示 (手册 §十六)
+          try {{
+            var ta = tp.property("ADBE Text Animators").addProperty("ADBE Text Animator");
+            ta.name = "TypeIn";
+            var trs = ta.property("ADBE Text Selectors").addProperty("ADBE Text Selector");
+            trs.property(1).setValue(0);
+            trs.property(2).setValue(100);
+            trs.property(3).setValueAtTime(ev.t_in, -100);
+            trs.property(3).setValueAtTime(ev.t_in + 0.45, 0);
+            ta.property("ADBE Text Animator Properties").addProperty("ADBE Text Opacity").setValue(0);
+          }} catch (te) {{ rep += "|TYPEWRITER" + i; }}
+        }}
+        if (ev.blurfade) {{                                     // 模糊淡入 (手册 §十七: Gaussian Blur 2 prop1)
+          try {{
+            var bl = L.property("Effects").addProperty("ADBE Gaussian Blur 2");
+            bl.property(1).setValueAtTime(ev.t_in, 60);
+            bl.property(1).setValueAtTime(ev.t_in + 0.5, 0);
+          }} catch (be) {{ rep += "|BLURFADE" + i; }}
         }}
         if (ev.glow) {{
           // 实证序号 (2026-09-10 探针): 0002=发光阈值(0-255), 0003=半径, 0004=强度
@@ -533,7 +651,8 @@ def main():
     events, disposition = plan_events(segs, onsets, env_at, scenes, words,
                                       hold_mode=args.hold_mode,
                                       max_events=args.max_events,
-                                      total_dur=total_dur)
+                                      total_dur=total_dur,
+                                      bg_video=run_dir / "run53_premium_final.mp4")
     checks = validate(events, disposition, segs, onsets, total_dur)
 
     out_dir = run_dir / "text_overlay"
