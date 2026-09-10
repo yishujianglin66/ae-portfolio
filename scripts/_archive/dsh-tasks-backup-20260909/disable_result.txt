@@ -1,0 +1,13 @@
+﻿=== disable run 2026-09-09T22:39:25.7309934+08:00 ===
+OK disabled DSH-Web-Watchdog
+OK disabled DSH-Web-AutoStart
+OK disabled DSH-Plugin-Scout
+
+TaskName             State
+--------             -----
+DSH-Plugin-Scout  Disabled
+DSH-Web-AutoStart Disabled
+DSH-Web-Watchdog  Disabled
+
+
+

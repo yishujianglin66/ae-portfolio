@@ -274,3 +274,6 @@ models/weights/
 !05-测试套件/test_resources/
 !05-测试套件/test_resources/*.png
 .mimosa/
+
+# 测试运行时残留（test_edge_cases.py 自建自删，中断时会遗留）
+tests/_test_bad.json
