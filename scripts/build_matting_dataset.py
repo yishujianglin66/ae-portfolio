@@ -58,6 +58,8 @@ def ensure_dirs(out: Path):
 def save_pair(out: Path, prefix: str, img: np.ndarray, mask_bin: np.ndarray,
               stem: str, src: str, manifest: List[Dict]):
     """mask_bin: bool/HxW (True=前景). 保真写原图 + 二值 mask."""
+    assert mask_bin.ndim == 2, \
+        f"mask 必须 2D, 实际 {mask_bin.shape} (3D 会写出三通道 mask 污染训练集)"
     h, w = img.shape[:2]
     mask_u8 = (mask_bin.astype(np.uint8) * 255)
     if mask_bin.shape[:2] != (h, w):
@@ -90,14 +92,21 @@ def extract_voc(voc: Path, out: Path, manifest: List[Dict], max_n: Optional[int]
         try:
             from PIL import Image
             im = Image.open(str(mp))
-            mask = np.array(im)
+            if im.mode == "P":
+                mask = np.array(im)  # 调色板 PNG: 像素值=类索引 (2D)
+            # 非 P 模式(RGB 衍生)不取: 索引→调色板颜色映射不可知,
+            # 直接 np.array 会得到 HxWx3 → person=mask==15 变 3D bool,
+            # save_pair 写出三通道 mask 污染训练集 (2026-09-10 修复)。
+            # 留 None 走 cv2 兜底, 取不到可靠索引的样本自然被面积阈值过滤。
         except Exception:
             pass
-        if mask is None:  # 兜底: PIL 不可用时退回 cv2 单通道
+        if mask is None:  # 兜底: PIL 不可用/非调色板时退回 cv2 单通道
             _m = cv2.imread(str(mp), cv2.IMREAD_UNCHANGED)
             if _m is None:
                 continue
             mask = _m[..., 0] if _m.ndim == 3 else _m
+        if mask.ndim != 2:  # 双保险: 任何路径都不得带 3D mask 进 save_pair
+            continue
         person = mask == PERSON_VOC
         if int(person.sum()) < MIN_PERSON_PIXELS:
             continue

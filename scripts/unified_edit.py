@@ -46,7 +46,8 @@ DEFAULT_SOURCES = [
     r"D:\AE-Work\resources\video\五条悟（一般）\素材\五条悟第二季2.mp4",
     r"D:/AE-Work/resources/video/蓝色监狱（量多）/素材/v0300fg10000cr7mf77og65lhrmfrv5g.MP4",
 ]
-DEFAULT_BGM = r"D:\AE-Work\音频素材库\BGM\独自升级.mp3"
+# 2026-09-10: 原 default 独自升级.mp3 已随 D 盘清理删除，换 repair62 冒烟实证过的 1_hot40s.mp3
+DEFAULT_BGM = r"D:\AE-Work\音频素材库\BGM_hot40s.mp3"
 
 # 运镜标签 → 编排参数映射 (VLM 标签告诉导演哪段素材适合什么角色)
 MOTION_ROLE = {
@@ -400,11 +401,13 @@ def stage4b_apply_sfx(
         ok2 = True
     
     # Clean up intermediate files
-    for _tmpm in output_dir.glob("_sm*.mp4"):
-        try:
-            _tmpm.unlink()
-        except OSError:
-            pass
+    # V23_KEEP_INTERMEDIATES=1 跳过 (2026-09-10): 后台沙箱批量删除熔断
+    if os.environ.get("V23_KEEP_INTERMEDIATES") != "1":
+        for _tmpm in output_dir.glob("_sm*.mp4"):
+            try:
+                _tmpm.unlink()
+            except OSError:
+                pass
     
     return {
         "success": ok2,

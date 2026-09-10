@@ -198,6 +198,7 @@
         };
     }
 
+    function startMcpListener() {
     // ===== File path constants =====
     var PROJ_ROOT =
         "C:/Users/Administrator/Desktop/AE-Knowledge-Vault";
@@ -1434,9 +1435,12 @@
             log("Loop error: " + e.toString());
         }
         app.scheduleTask(
-            "checkForCommands()", 500, false
+            "$.global.checkForCommands()", 500, false
         );
     }
+
+    // Expose to global scope so scheduleTask string eval can find it
+    $.global.checkForCommands = checkForCommands;
 
     // ===== Startup log =====
     log("========================================");
@@ -1448,6 +1452,7 @@
 
     log("Starting command polling loop");
     checkForCommands();
+    } // end startMcpListener
 }
 
 // Export for Startup delayed loading
