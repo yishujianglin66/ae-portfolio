@@ -47,7 +47,7 @@ DEFAULT_SOURCES = [
     r"D:/AE-Work/resources/video/蓝色监狱（量多）/素材/v0300fg10000cr7mf77og65lhrmfrv5g.MP4",
 ]
 # 2026-09-10: 原 default 独自升级.mp3 已随 D 盘清理删除，换 repair62 冒烟实证过的 1_hot40s.mp3
-DEFAULT_BGM = r"D:\AE-Work\音频素材库\BGM_hot40s.mp3"
+DEFAULT_BGM = r"D:\AE-Work\音频素材库\BGM\1_hot40s.mp3"
 
 # 运镜标签 → 编排参数映射 (VLM 标签告诉导演哪段素材适合什么角色)
 MOTION_ROLE = {
