@@ -46,16 +46,33 @@ _API_HOSTS = {
     "dashscope.aliyuncs.com",
 }
 
+# 本地服务显式白名单（2026-09-09 修复：ComfyUI 本地通道从未可达）。
+# ComfyUIAdapter 的目标是本机 ComfyUI（127.0.0.1:8188），属显式配置的本地
+# 服务而非外部输入；此前 _validate_url 把 loopback 一律拒绝，导致
+# is_available() 恒为 False，"ComfyUI 一开自动升级"链路从未生效。
+_LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
 
 def _validate_url(url: str) -> str:
-    """校验外呼 URL: 仅 https 域名白名单, 解析后拒绝私网/回环/链路本地地址"""
+    """校验外呼 URL。
+
+    - 外部域名：仅 https 白名单，解析后拒绝私网/回环/链路本地/保留地址；
+    - 本地服务（127.0.0.1/localhost/::1）：仅允许 http，端口须为已知本地服务
+      （ComfyUI 8188）。其余一律拒绝。
+    """
     import ipaddress
     import socket
     import urllib.parse
     pu = urllib.parse.urlparse(str(url))
     if pu.scheme not in ("https", "http") or not pu.hostname:
         raise ValueError(f"拒绝非 http(s) URL: {url!r}")
-    if pu.hostname not in _API_HOSTS:
+    host = pu.hostname.lower()
+    if host in _LOCAL_HOSTS:
+        # 本地 ComfyUI 通道：仅 http + 已知端口
+        if pu.scheme != "http" or pu.port not in (8188,):
+            raise ValueError(f"拒绝非法本地服务地址: {url!r}")
+        return str(url)
+    if host not in _API_HOSTS:
         raise ValueError(f"拒绝非白名单域: {pu.hostname}")
     for info in socket.getaddrinfo(pu.hostname, pu.port or (443 if pu.scheme == "https" else 80)):
         ip = ipaddress.ip_address(info[4][0])
@@ -65,8 +82,11 @@ def _validate_url(url: str) -> str:
 
 
 def _safe_urlopen(req, timeout: float):
+    # 2026-09-09 修复：原实现递归调用自身（重构事故），任何调用都会
+    # RecursionError 且被上层 except 吞掉 → 全部适配器（含 ComfyUI 本地
+    # 通道）从未真正发出过请求。改为经 opener 发起（URL 先过 _validate_url）。
     _validate_url(req.full_url)
-    return _safe_urlopen(req, timeout=timeout)
+    return urllib.request.build_opener().open(req, timeout=timeout)
 
 
 def _safe_download(url: str, output_path: str):
