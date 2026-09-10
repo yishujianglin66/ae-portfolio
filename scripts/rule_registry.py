@@ -157,23 +157,87 @@ def cmd_list() -> int:
     return 0
 
 
-def cut_anchor_allowed() -> Optional[bool]:
+def cut_anchor_allowed(context: Optional[Dict[str, Any]] = None) -> Optional[bool]:
     """锚点模式裁决：规则库未建立 → None（管线自便）；已建立 → 查 active 规则。
 
     退役/翻负的规则使本函数返回 False，production_director 自动回退启发式——
     "规则即契约"的消费端。
+
+    context（可选）: {"style":..., "duration":..., "bgm_structure":...}
+    提供时按 applicability 过滤——异风格/超时长范围运行时，不适用的规则
+    自动退场，管线回退启发式（这正是 R4 泛化验证期望的行为）。
     """
     if not RULESET.exists():
         return None
-    return bool(active_rules("cut_anchor"))
+    return bool(active_rules("cut_anchor", context=context))
 
 
-def active_rules(inject_point: Optional[str] = None) -> List[Dict[str, Any]]:
+def rule_applies(rule: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> bool:
+    """判断规则是否适用于当前运行上下文（applicability 校验）。
+
+    修复（2026-09-09, R4 诊断发现）：此前 active_rules 只按 inject_point 过滤，
+    applicability 里的 style/duration_range/bgm_structure 从未被校验——
+    "适用域"沦为纸面声明，跨风格运行会误注入。
+
+    校验规则（缺省的维度不约束；context 未提供的维度跳过）：
+      - style          : context["style"] 须在声明列表内（大小写不敏感）
+      - duration_range : context["duration"] 须落在 [lo, hi]
+      - bgm_structure  : context["bgm_structure"] 须与声明列表有交集
+
+    context=None 时视为"无信息"，一律放行（保持向后兼容，避免误伤旧调用）。
+    """
+    if context is None:
+        return True
+    ap = rule.get("applicability") or {}
+    if not ap:
+        return True
+
+    # style
+    declared_styles = ap.get("style") or []
+    ctx_style = context.get("style")
+    if declared_styles and ctx_style:
+        norm = {str(s).strip().lower() for s in declared_styles}
+        if str(ctx_style).strip().lower() not in norm:
+            return False
+
+    # duration_range
+    dr = ap.get("duration_range")
+    ctx_dur = context.get("duration")
+    if (isinstance(dr, (list, tuple)) and len(dr) == 2
+            and ctx_dur is not None):
+        try:
+            lo, hi = float(dr[0]), float(dr[1])
+            if not (lo <= float(ctx_dur) <= hi):
+                return False
+        except (TypeError, ValueError):
+            pass  # 声明不可解析 → 不约束
+
+    # bgm_structure
+    declared_struct = ap.get("bgm_structure") or []
+    ctx_struct = context.get("bgm_structure") or context.get("structure")
+    if declared_struct and ctx_struct:
+        if isinstance(ctx_struct, str):
+            ctx_set = {ctx_struct.strip().lower()}
+        else:
+            ctx_set = {str(s).strip().lower() for s in ctx_struct}
+        declared_set = {str(s).strip().lower() for s in declared_struct}
+        if not (ctx_set & declared_set):
+            return False
+
+    return True
+
+
+def active_rules(inject_point: Optional[str] = None,
+                 context: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     """管线消费 API：返回可注入的 active 规则（schema 全过才放行，闸门 5）。
 
     消费方示例（production_director 锚点块）:
-        rules = active_rules("cut_anchor")
-        use_anchor_mode = bool(rules)  # 规则退役/翻负 → 自动回退启发式
+        rules = active_rules("cut_anchor", context={"style": "amv_highenergy",
+                                                    "duration": 30})
+        use_anchor_mode = bool(rules)  # 规则退役/翻负/不适用 → 自动回退启发式
+
+    context 提供 style/duration/bgm_structure 时按 applicability 过滤；
+    不传 context 则只按 inject_point + status 过滤（向后兼容）。
     """
     out = []
     for r in load_ruleset():
@@ -182,6 +246,8 @@ def active_rules(inject_point: Optional[str] = None) -> List[Dict[str, Any]]:
         if validate_schema(r):
             continue
         if inject_point and r.get("inject_point") != inject_point:
+            continue
+        if not rule_applies(r, context):
             continue
         out.append(r)
     return out
