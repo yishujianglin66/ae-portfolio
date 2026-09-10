@@ -16,6 +16,11 @@ Python 3.11（.venv）/ Node 22 / ComfyUI / FFmpeg / MCP / After Effects 脚本 
 - **永远用 v3**（`scripts/cut_visibility_v3.py`）：分母 = EDL 声明切点全集（不是场景检测发现的）；frozen_rate = frozen/n_declared。
 - v3 必须搭配 EDL 的 `cut_points` 字段，不可缺。
 - 任何"切点可见性"报告必须报 v3 数字，否则不算数。
+- **🔴 验收必须测交付成片 `*_final_mastered.mp4`，绝不能测中间产物 `*_cut.mp4`**：
+  `cut.mp4` 是 repair_cutpoints **之前**的粗剪，问题全在里面；管线最后一公里
+  `repair_cutpoints` 会检出 frozen 并**抽稀重渲**（r1_fixed_v5 实测 58 刀→45 刀，
+  砍掉的正是冻结刀）。拿粗剪当结论会把"已被下游修掉的问题"当成未解决，白挖好几轮根因。
+  实测对照：v5 粗剪 v3=0.9247/冻结 12，成片 **v3=1.0978/冻结 0**。
 
 ## production_director 漂移钳制铁律（2026-09-10 立）
 - `_tl_drift` 累加器在慢放段 (speed<1) 失控：read_dur=duration*speed 输入窗口 < out_frames/fps 输出所需，
