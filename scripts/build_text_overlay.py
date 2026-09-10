@@ -41,6 +41,7 @@
 """
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -69,25 +70,35 @@ ZONE_END_GUARD = 0.35     # 锚点距分区结束 <0.35s 不选 (会被钳成不
 ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 0.4 保覆盖)
 
 # 字体: font_stack[0] 为首选 (probe_font=true 表示未实机实证, 探针不过则用栈尾已实证字体)
+# v2 样式 (2026-09-10 Boss 反馈"效果太普通"后升级, 配方①描边投影+④双层发光+⑦轻斜面):
+#   glow/glow2 = (threshold 0-255, radius, intensity) —— 实证序号: 0002=阈值(0-255!), 0003=半径, 0004=强度
+#   shadow = (opacity 0-1, direction deg, distance, softness) —— ADBE Drop Shadow 0002/3/4/5
+#   bevel  = (edge_thickness, light_angle, light_intensity) —— ADBE Bevel Alpha 0001/2/4
 STYLES = {
     "intro_serif": {
         "fonts": ["Georgia", "Times New Roman", "SimSun", "BebasNeue"],
-        "size": (95, 120), "fill": [0.86, 0.83, 0.78],      # 低饱和暖灰
-        "stroke": None, "pos": "center", "enter": "fade_scale",
-        "glow": None, "tracking": None,
+        "size": (100, 125), "fill": [0.96, 0.94, 0.89],      # v2: 提亮防"水印感"
+        "stroke": ([0.05, 0.04, 0.06], 1.8), "pos": "center", "enter": "fade_scale",
+        "glow": (150, 30, 0.55), "glow2": None,
+        "shadow": (0.45, 135, 5, 15), "bevel": None,
+        "tracking": None,
     },
     "build_side": {
         "fonts": ["BebasNeue", "Consolas"],                  # 全实证
-        "size": (80, 115), "fill": [0.92, 0.92, 0.96],
-        "stroke": None, "pos": "side_alt", "enter": "slide_back",
-        "glow": (1.2, 60, 0.5), "tracking": None,
+        "size": (85, 120), "fill": [0.95, 0.95, 0.98],
+        "stroke": ([0.03, 0.03, 0.06], 2.2), "pos": "side_alt", "enter": "slide_back",
+        "glow": (130, 18, 0.9), "glow2": None,
+        "shadow": (0.6, 135, 6, 8), "bevel": (2, -45, 0.35),
+        "tracking": None,
     },
     "drop_impact": {
         "fonts": ["Anton", "Impact", "BebasNeue"],           # 全实证
-        "size": (150, 205), "fill": [1.0, 1.0, 1.0],
-        "stroke": ([0.02, 0.02, 0.05], 3.5), "pos": "center",
+        "size": (160, 215), "fill": [1.0, 1.0, 1.0],
+        "stroke": ([0.02, 0.02, 0.05], 6.0), "pos": "center",
         "enter": "punch_tracking",
-        "glow": (2.0, 90, 0.35), "tracking": 250,
+        "glow": (110, 30, 2.2), "glow2": (205, 80, 0.9),     # 主发光脉冲 + 高阈值大半径外层 bloom
+        "shadow": (0.78, 135, 10, 12), "bevel": (3, -45, 0.55),
+        "tracking": 250,
     },
 }
 MOOD_TO_STYLE = {"intro": "intro_serif", "build": "build_side",
@@ -260,6 +271,9 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "stroke": st["stroke"],
             "enter": st["enter"],
             "glow": st["glow"],
+            "glow2": st.get("glow2"),
+            "shadow": st.get("shadow"),
+            "bevel": st.get("bevel"),
             "tracking": st["tracking"],
             "anchor_shot": {"index": seg.get("index"), "t0": t0, "t1": t1},
         }
@@ -315,10 +329,14 @@ def build_jsx(events, out_aep: Path):
         else:
             d["strokeColor"], d["strokeW"] = None, 0
         if e.get("glow"):
-            gi, gr, gt = e["glow"]
-            d["glow"] = [round(gi * (0.7 + 0.6 * e["energy"]), 3), gr, gt]
+            # glow = (threshold 0-255, radius, intensity); 能量只调制强度(第3位)
+            gt_, gr, gi_ = e["glow"]
+            d["glow"] = [gt_, gr, round(gi_ * (0.7 + 0.6 * e["energy"]), 3)]
         else:
             d["glow"] = None
+        d["glow2"] = list(e["glow2"]) if e.get("glow2") else None
+        d["shadow"] = list(e["shadow"]) if e.get("shadow") else None
+        d["bevel"] = list(e["bevel"]) if e.get("bevel") else None
         d["tracking"] = e.get("tracking")
         # 入/出场关键帧时刻 (hold 过短时按比例缩, 保证 keyframes 单调)
         hold = e["t_out"] - e["t_in"]
@@ -390,13 +408,42 @@ def build_jsx(events, out_aep: Path):
           tr.setValueAtTime(ev.t_in + 0.2, 0);
         }}
         if (ev.glow) {{
+          // 实证序号 (2026-09-10 探针): 0002=发光阈值(0-255), 0003=半径, 0004=强度
+          // v1 曾把 0002 当强度/0004 当阈值 —— 参数反转是"效果普通"的根因
           var gf = L.property("Effects").addProperty("ADBE Glo2");
-          gf.property("ADBE Glo2-0003").setValue(ev.glow[1]);   // radius
-          gf.property("ADBE Glo2-0004").setValue(ev.glow[2]);   // threshold
-          gf.property("ADBE Glo2-0002").setValueAtTime(          // 入场脉冲包络 (ENV_DECAY/TAIL 语法)
-            ev.t_in, ev.glow[0]);
-          gf.property("ADBE Glo2-0002").setValueAtTime(
-            ev.t_in + {ENV_DECAY_S}, ev.glow[0] * {ENV_TAIL});
+          gf.property("ADBE Glo2-0002").setValue(ev.glow[0]);          // threshold
+          gf.property("ADBE Glo2-0003").setValue(ev.glow[1]);          // radius
+          gf.property("ADBE Glo2-0004").setValueAtTime(                // 强度入场脉冲 (ENV 语法)
+            ev.t_in, ev.glow[2] * 1.7);
+          gf.property("ADBE Glo2-0004").setValueAtTime(
+            ev.t_in + {ENV_DECAY_S}, ev.glow[2]);
+        }}
+        if (ev.glow2) {{                                                // 配方④: 高阈值大半径外层 bloom
+          try {{
+            var g2 = L.property("Effects").addProperty("ADBE Glo2");
+            g2.name = "Bloom";
+            g2.property("ADBE Glo2-0002").setValue(ev.glow2[0]);
+            g2.property("ADBE Glo2-0003").setValue(ev.glow2[1]);
+            g2.property("ADBE Glo2-0004").setValue(ev.glow2[2]);
+          }} catch (g2e) {{ rep += "|GLOW2" + i; }}
+        }}
+        if (ev.shadow) {{                                               // 配方①: 投影层次
+          try {{
+            var sh = L.property("Effects").addProperty("ADBE Drop Shadow");
+            sh.property("ADBE Drop Shadow-0001").setValue([0, 0, 0, 1]);   // 颜色
+            sh.property("ADBE Drop Shadow-0002").setValue(ev.shadow[0] * 255); // 不透明度(0-255)
+            sh.property("ADBE Drop Shadow-0003").setValue(ev.shadow[1]);   // 方向
+            sh.property("ADBE Drop Shadow-0004").setValue(ev.shadow[2]);   // 距离
+            sh.property("ADBE Drop Shadow-0005").setValue(ev.shadow[3]);   // 柔和度
+          }} catch (she) {{ rep += "|SHADOW" + i; }}
+        }}
+        if (ev.bevel) {{                                                // 配方⑦lite: 边缘立体
+          try {{
+            var bv = L.property("Effects").addProperty("ADBE Bevel Alpha");
+            bv.property("ADBE Bevel Alpha-0001").setValue(ev.bevel[0]);   // 边缘厚度
+            bv.property("ADBE Bevel Alpha-0002").setValue(ev.bevel[1]);   // 灯光角度
+            bv.property("ADBE Bevel Alpha-0004").setValue(ev.bevel[2]);   // 灯光强度
+          }} catch (bve) {{ rep += "|BEVEL" + i; }}
         }}
       }}
       app.project.save(new File("{out_aep.as_posix()}"));
@@ -491,14 +538,15 @@ def main():
 
     out_dir = run_dir / "text_overlay"
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_aep = run_dir / "run53_text_v1.aep"
+    ver = os.environ.get("TEXT_OVERLAY_VER", "v2")            # v2=P1配方①④⑦样式 (v1已被git历史覆盖备份)
+    out_aep = run_dir / f"run53_text_{ver}.aep"
     jsx = build_jsx(events, out_aep)
     (out_dir / "events.json").write_text(
         json.dumps({"events": events, "disposition": disposition,
                     "checks": checks, "hold_mode": args.hold_mode,
                     "generated_by": "build_text_overlay.py P0"},
                    ensure_ascii=False, indent=1), encoding="utf-8")
-    jsx_p = out_dir / "text_overlay_v1.jsx"
+    jsx_p = out_dir / f"text_overlay_{ver}.jsx"
     jsx_p.write_text(jsx, encoding="utf-8")
 
     # ── 报告 ──
