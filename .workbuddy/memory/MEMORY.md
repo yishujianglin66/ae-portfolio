@@ -24,3 +24,23 @@ Python 3.11（.venv）/ Node 22 / ComfyUI / FFmpeg / MCP / After Effects 脚本 
 - 钳制 `_TL_DRIFT_LIMIT = 2.0/24.0`（±2 帧 ≈ ±83ms），溢出强制归零。
 - 钳制后仿真最大漂移 7.1 帧 ≈ ±295ms（仍受 ±2 帧限制但允许爬升一次）。
 - 单测覆盖：`tests/test_rl_drift_clamp.py`（4）+ `tests/test_rl_run61_realistic.py`（3）= 7 用例。
+
+## v3 指标口径铁律（2026-09-10 立）
+- **v3 / p50 / p25 / min 四个 vis 类指标方向一致，全部"越大越好"**，不存在反转。
+  p25 = 第 25 百分位（弱尾控制线）、min = 最差一刀——都是**下限类指标**，数值变大=最差的刀被抬起来。
+- 冻结率 / 弱切率才是"越小越好"。
+- **min 修复后反而变小不算退步**：漂移修好后取帧位置回归正确，而正确位置上素材本身静止 →
+  最差刀从"勉强 0.025 差异"变成"彻底 0"（被验明正身），同时一批刀从坏变好。汇报时必须点破。
+
+## 素材选点尾部余量铁律（2026-09-10 立）
+- **凡是给 segment 分配 `source_start` 的地方，都必须留 `_TAIL_MARGIN`（1.5s）尾部余量**，
+  素材末尾常是黑场/片尾字幕/静止画面（死区），切点贴尾必然冻结。
+- **窗口必须乘 speed**：实际消耗素材 = `duration * speed`，快放 speed=1.5 时 0.21s 片段要读 0.315s，
+  用时间线时长算会读超（实测 4 刀尾部余量为负）。
+- **陷阱**：`_enforce_global_source_uniqueness`（全局素材去重）运行在规划侧钳制**之后**，
+  它的 `fresh_start` 用 `usable = dur - win` 会把选点重新顶回素材最后一帧，
+  把前面的尾部钳制**全部绕过**（r1_fixed_v4 残留 12 刀就是这么来的，三轮修复一动没动）。
+- 已加固 4 处：规划侧 `_max_ss`、推回侧 `_pushed`、`_enforce_global_source_uniqueness.fresh_start`、
+  同 IP 相邻去重 `fresh_start`、尾部填充段。单测 `tests/test_rl_tail_margin.py`(6)
+  + `tests/test_rl_fresh_start_tail.py`(8)。
+- **排查心法**：修复后坏切点时间戳**一模一样** = 该修复根本没碰到它们，是另一类根因，别再修同一个地方。

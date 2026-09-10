@@ -2783,7 +2783,8 @@ class ProductionDirector:
                     mood=last.mood,
                     energy=last.energy,
                     source_file=src,
-                    source_start=min(last.source_start + last.duration, max(src_dur - gap, 0)),
+                    source_start=min(last.source_start + last.duration,
+                                     max(src_dur - gap - _TAIL_MARGIN, 0)),
                     text_overlay=None,
                     color_grade=last.color_grade,
                     transition=last.transition,
@@ -3294,7 +3295,19 @@ class ProductionDirector:
 
         def fresh_start(f, win, min_gap):
             dur = dur_of.get(f, 60.0)
-            usable = dur - win
+            # ══ 2026-09-10 R1 第四轮根因（全局去重侧）══════════════════
+            # 旧逻辑 usable = dur - win → 最大候选点精确等于 dur-win, 即
+            # **切点贴在素材最后一帧**。素材尾部常是黑场/片尾字幕/静止画面
+            # → 前后帧 ahash 距离 0~1, 切了完全看不见。
+            # r1_fixed_v4 残留 12 刀的 source_start 与 dur-win 分毫不差:
+            #   seg38 v0300    ss=18.13  = 18.34 - 0.21
+            #   seg43 nagi2    ss=60.02 ≈ 60.22 - 0.21
+            #   seg51 Nagi     ss=67.55  = 67.80 - 0.25
+            #   seg52 alya     ss=67.73  = 67.98 - 0.25
+            #   seg57 独自升级5 ss=232.13 = 232.34 - 0.21
+            # 且本函数运行在规划侧 _TAIL_MARGIN 钳制**之后**, 直接把选点
+            # 顶回素材末尾, 把前三轮修复全部绕过。此处补上同样的尾部余量。
+            usable = dur - win - _TAIL_MARGIN
             if usable <= 0:
                 return None
             lo = min(2.0, max(0.0, usable - 0.5)) if usable > 2.0 else 0.0
@@ -3312,7 +3325,9 @@ class ProductionDirector:
         n_nudge = n_swap = 0
         for s in segments:
             f = s.source_file
-            win = max(float(s.duration), 0.05)
+            # win = 实际要消耗的素材长度 (快放 speed>1 时大于时间线时长)
+            _sp = float(getattr(s, "speed", 1.0) or 1.0)
+            win = max(float(s.duration) * _sp, 0.05)
             over = counts[f] >= max_per_file
             clash = bool(used[f]) and \
                 min((abs(float(s.source_start) - u) for u in used[f]),
@@ -3384,7 +3399,8 @@ class ProductionDirector:
 
         def fresh_start(f, win):
             dur = dur_of.get(f, 60.0)
-            usable = dur - win
+            # 同 3325 处: 补尾部安全余量, 避免切点贴在素材最后一帧
+            usable = dur - win - _TAIL_MARGIN
             if usable <= 0:
                 return None
             lo = min(2.0, max(0.0, usable - 0.5)) if usable > 2.0 else 0.0
@@ -3408,7 +3424,8 @@ class ProductionDirector:
             if not cands:
                 continue
             cand = min(cands, key=lambda f: counts[f])
-            win = max(float(cur.duration), 0.05)
+            _sp = float(getattr(cur, "speed", 1.0) or 1.0)
+            win = max(float(cur.duration) * _sp, 0.05)
             ss = fresh_start(cand, win)
             if ss is not None:
                 counts[cur.source_file] -= 1
