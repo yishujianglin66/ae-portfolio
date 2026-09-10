@@ -4083,6 +4083,24 @@ class ProductionDirector:
                         _s.transition_params.pop("type", None)
                         _s.transition_params.pop("duration", None)
                     _demoted += 1
+
+            # ══ 2026-09-10 R1 二次根因修复 ══════════════════════════════
+            # chain_last_extra 在 L3839 按**降级前**的转场时长计算, 用于给
+            # 链内最后一个 clip 预补偿 Σt (xfade 会消耗掉这部分时长)。
+            # 但 beat_lock 把全部转场降级为 cut 后, xfade 根本不执行,
+            # 补偿时长无人消耗 → 该 clip 被渲染成计划的 3-5 倍长
+            # (r1_fixed_v1 实测: seg#5 计划 7 帧 → 实际 33 帧;
+            #  seg#11 计划 8 → 24 帧; 59 段累计多渲 62 帧 = 2.58s,
+            #  正是 [时长守卫] 22.12s → 19.40s 的 2.72s 超长来源)。
+            # 时间线被整体拉长 14% → EDL 声明切点落在段内部而非边界
+            # → 切点两侧同段画面 → frozen_cut。
+            # 修复: 全量降级后无任何转场需要补偿, 直接清空。
+            if chain_last_extra:
+                _cleared_extra = sum(chain_last_extra.values())
+                chain_last_extra.clear()
+                print(f"  [节拍锁定] 转场补偿已清零 (原 Σextra="
+                      f"{_cleared_extra:.3f}s, 降级后无 xfade 可消耗)")
+
             if _demoted:
                 print(f"  [节拍锁定] {_demoted} 个转场降级硬切 (切点=concat累计, 漂移累加器锁定)")
 
