@@ -266,7 +266,7 @@ Schema 定义层可用且质量不错（18 类型约束严谨、`additionalPrope
 - `flow_angle` 上限 180 → 360（光流方向 0-360°）
 - `radial` 加入 schema enum 别名 + `SCHEMA_TO_RECIPE` 直接映射，消除 dense 文件 20 条 skipped
 - `particular` 加入 RECIPES（matchName `tc Particular` 经 AE Bridge 实证），移出 `SCHEMA_UNMAPPED`
-- 测试从 18 项增至 21 项（新增 radial alias、flow_angle 360 验证）
+- 测试从 18 项增至 21 项（新增 radial alias、flow_angle 360、premium plugins ae_verified 验证）
 
-**距"完整可用"仍差**：5 种 premium 插件类型的 RECIPES 实现（需 AE 枚举实证 matchName）。
-在那之前，`run53v43_effects_premium_v2.json` 只能渲染 33/139 条，属**部分交付**。
+**距"完整可用"仍差**：2 种 premium 插件类型（delirium / film_stocks）需安装插件后 AE 枚举实证 matchName。
+在那之前，`run53v43_effects_premium_v2.json` 可渲染 33 + sapphire_glow/optical_flares/magic_bullet_looks 对应条目。
