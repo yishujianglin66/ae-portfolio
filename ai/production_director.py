@@ -40,6 +40,12 @@ from typing import Any, Dict, List, Optional, Tuple
 _PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
+# 素材尾部安全余量 (2026-09-10 R1 第三轮根因):
+# _extract_clip 的边界保护把 start_time 推回 src_dur - read_dur 时, 紧贴
+# 素材末尾 → 落进黑场/片尾字幕/静止画面死区 → 多段画面都是黑的 → 切点冻结。
+# 推回时保留此余量, 并在此后走一次死区避让。
+_TAIL_MARGIN = 1.5
+
 # 导入核心模块
 from ae.beat_detector import BeatDetector, BeatInfo
 from ae.emotion_curve_generator import EmotionCurveGenerator, EmotionCurve
@@ -4516,8 +4522,26 @@ class ProductionDirector:
         speed = max(0.25, min(4.0, float(speed or 1.0)))
         read_dur = duration * speed
         # 不要超出素材末尾
+        # ══ 2026-09-10 R1 第三轮根因修复 ══════════════════════════════
+        # 原实现: start_time = max(0, src_dur - read_dur) —— 把起点推到
+        # 紧贴素材末尾。而素材末尾通常是黑场/片尾字幕/静止画面(死区),
+        # 多段被推到各自的尾部后画面都是黑的 → 切点两侧同画面
+        # → frozen_cut。
+        # r1_fixed_v2 实测: 11 个残留冻结切点全部集中在末 4.6s,
+        # 对应段的 source_start 全在素材尾部 0.2-0.4s 内
+        # (独自升级5 ss=232.13/全长232.3, 猫1 ss=117.68/全长117.9,
+        #  Nagi ss=67.55/全长67.8)。
+        # 修复: ① 推回时保留 TAIL_MARGIN 安全余量 (不贴着末尾);
+        #       ② 推回后再走一次死区避让, 把起点挪到最近的活窗。
         if start_time + read_dur > src_dur:
-            start_time = max(0, src_dur - read_dur)
+            _pushed = max(0.0, src_dur - read_dur - _TAIL_MARGIN)
+            if _pushed != start_time:
+                start_time = _pushed
+                try:
+                    start_time = self._nudge_to_live_window(
+                        source, start_time, read_dur)
+                except Exception:  # noqa: BLE001
+                    pass  # 避让失败就用带余量的推回值
 
         w, h = resolution
         sat = color.get("saturation", 1.2)
