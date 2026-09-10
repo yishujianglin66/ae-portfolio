@@ -29,14 +29,15 @@ import urllib.request
 from typing import Any, Dict, List, Optional
 
 # MCP SDK
+# 2026-09-10 适配：mcp 2.x 移除了 @app.list_tools()/@app.call_tool() 装饰器 API
+# （.venv 重建后装的是 mcp 2.2.0）。requirements.txt 本来就 pin fastmcp>=2.0，
+# 统一改用 FastMCP（项目官方路线），业务 helper 不变。
 try:
-    from mcp.server import Server
-    from mcp.server.stdio import stdio_server
-    from mcp.types import Tool, TextContent
+    from fastmcp import FastMCP
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
-    print("[ComfyUI MCP] mcp package not found, running in standalone mode")
+    print("[ComfyUI MCP] fastmcp package not found, running in standalone mode")
 
 
 COMFYUI_URL = os.environ.get("COMFYUI_URL", "http://127.0.0.1:8188")
@@ -130,102 +131,49 @@ client = ComfyUIClient()
 # ================================================================
 
 if MCP_AVAILABLE:
-    app = Server("comfyui-mcp")
+    app = FastMCP("comfyui-mcp")
 
-    @app.list_tools()
-    async def list_tools() -> List[Tool]:
-        return [
-            Tool(
-                name="comfyui_generate_image",
-                description="使用 ComfyUI 生成图像 (支持 Flux/SDXL/SD3.5 等模型)",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "prompt": {"type": "string", "description": "生成提示词"},
-                        "negative_prompt": {"type": "string", "default": "blurry, low quality"},
-                        "width": {"type": "integer", "default": 1024},
-                        "height": {"type": "integer", "default": 1024},
-                        "model": {"type": "string", "default": "flux-dev"},
-                        "steps": {"type": "integer", "default": 20},
-                        "output_path": {"type": "string", "default": "output.png"},
-                    },
-                    "required": ["prompt"],
-                },
-            ),
-            Tool(
-                name="comfyui_generate_video",
-                description="使用 ComfyUI 生成视频 (支持 Wan 2.2/HunyuanVideo/LTX 等模型)",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "prompt": {"type": "string", "description": "生成提示词"},
-                        "width": {"type": "integer", "default": 720},
-                        "height": {"type": "integer", "default": 1280},
-                        "model": {"type": "string", "default": "wan2.2_14b"},
-                        "frames": {"type": "integer", "default": 81},
-                        "output_path": {"type": "string", "default": "output.mp4"},
-                    },
-                    "required": ["prompt"],
-                },
-            ),
-            Tool(
-                name="comfyui_list_models",
-                description="列出 ComfyUI 已安装的所有模型",
-                inputSchema={"type": "object", "properties": {}},
-            ),
-            Tool(
-                name="comfyui_gpu_info",
-                description="获取 GPU 状态信息",
-                inputSchema={"type": "object", "properties": {}},
-            ),
-            Tool(
-                name="comfyui_run_workflow",
-                description="运行自定义 ComfyUI 工作流 JSON",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "workflow": {"type": "object", "description": "ComfyUI workflow JSON"},
-                        "output_path": {"type": "string", "default": "output.png"},
-                        "timeout": {"type": "integer", "default": 300},
-                    },
-                    "required": ["workflow"],
-                },
-            ),
-            Tool(
-                name="comfyui_get_history",
-                description="获取 ComfyUI 历史任务结果",
-                inputSchema={
-                    "type": "object",
-                    "properties": {
-                        "prompt_id": {"type": "string", "description": "任务ID"},
-                    },
-                    "required": ["prompt_id"],
-                },
-            ),
-        ]
+    @app.tool(name="comfyui_generate_image",
+              description="使用 ComfyUI 生成图像 (支持 Flux/SDXL/SD3.5 等模型)")
+    def tool_generate_image(prompt: str,
+                            negative_prompt: str = "blurry, low quality",
+                            width: int = 1024, height: int = 1024,
+                            model: str = "flux-dev", steps: int = 20,
+                            output_path: str = "output.png") -> str:
+        result = _generate_image(locals())
+        return json.dumps(result, ensure_ascii=False, indent=2)
 
-    @app.call_tool()
-    async def call_tool(name: str, arguments: Dict) -> List[TextContent]:
-        try:
-            if name == "comfyui_generate_image":
-                result = _generate_image(arguments)
-            elif name == "comfyui_generate_video":
-                result = _generate_video(arguments)
-            elif name == "comfyui_list_models":
-                result = {"models": client.list_models()}
-            elif name == "comfyui_gpu_info":
-                result = client.get_gpu_info()
-            elif name == "comfyui_run_workflow":
-                result = _run_workflow(arguments)
-            elif name == "comfyui_get_history":
-                result = client.get_history(arguments.get("prompt_id", ""))
-            else:
-                result = {"error": f"Unknown tool: {name}"}
+    @app.tool(name="comfyui_generate_video",
+              description="使用 ComfyUI 生成视频 (支持 Wan 2.2/HunyuanVideo/LTX 等模型)")
+    def tool_generate_video(prompt: str, width: int = 720, height: int = 1280,
+                            model: str = "wan2.2_14b", frames: int = 81,
+                            output_path: str = "output.mp4") -> str:
+        result = _generate_video(locals())
+        return json.dumps(result, ensure_ascii=False, indent=2)
 
-            return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
+    @app.tool(name="comfyui_list_models",
+              description="列出 ComfyUI 已安装的所有模型")
+    def tool_list_models() -> str:
+        return json.dumps({"models": client.list_models()},
+                          ensure_ascii=False, indent=2)
 
-        except Exception as e:
-            return [TextContent(type="text", text=json.dumps({"error": str(e)}))]
+    @app.tool(name="comfyui_gpu_info",
+              description="获取 GPU 状态信息")
+    def tool_gpu_info() -> str:
+        return json.dumps(client.get_gpu_info(), ensure_ascii=False, indent=2)
+
+    @app.tool(name="comfyui_run_workflow",
+              description="运行自定义 ComfyUI 工作流 JSON")
+    def tool_run_workflow(workflow: Dict, output_path: str = "output.png",
+                          timeout: int = 300) -> str:
+        result = _run_workflow(locals())
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
+    @app.tool(name="comfyui_get_history",
+              description="获取 ComfyUI 历史任务结果")
+    def tool_get_history(prompt_id: str) -> str:
+        return json.dumps(client.get_history(prompt_id),
+                          ensure_ascii=False, indent=2)
 
 
 def _generate_image(args: Dict) -> Dict:
@@ -319,11 +267,9 @@ def _run_workflow(args: Dict) -> Dict:
 
 async def main():
     if not MCP_AVAILABLE:
-        print("[ComfyUI MCP] Install mcp: pip install mcp[cli]")
+        print("[ComfyUI MCP] Install fastmcp: pip install fastmcp")
         return
-
-    async with stdio_server() as (read, write):
-        await app.run(read, write, app.create_initialization_options())
+    app.run()  # FastMCP 默认 stdio 传输
 
 
 if __name__ == "__main__":

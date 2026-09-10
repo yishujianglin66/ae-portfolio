@@ -234,14 +234,17 @@ class TestSpeedForShot:
         # low 段: 普通 → 0.7 slowmo
         ("low", "weak", False, 0.7, "slowmo"),
         ("low", "medium", False, 0.7, "slowmo"),
-        # high 段: 全部 1.0 pulse（不加速，保持鼓点冲击）
-        ("high", "strong", True, 1.0, "pulse"),
-        ("high", "weak", False, 1.0, "pulse"),
-        ("high", "medium", False, 1.0, "pulse"),
-        # mid 段: 全部 0.7 slowmo（蓄力铺垫）
-        ("mid", "strong", False, 0.7, "slowmo"),
-        ("mid", "weak", False, 0.7, "slowmo"),
-        ("mid", "medium", True, 0.7, "slowmo"),
+        # high 段: 全部 1.3 fast_pan（2026-09-02 用户语法：重鼓点=快切撞击，
+        # pulse 缩放移到镜头内特效层，速度层全部给撞击——core/music_dynamics.py）
+        ("high", "strong", True, 1.3, "fast_pan"),
+        ("high", "weak", False, 1.3, "fast_pan"),
+        ("high", "medium", False, 1.3, "fast_pan"),
+        # mid 段（2026-09-02 节拍-镜头语法）: 小节重音(强拍+downbeat)→0.55 慢镜落点；
+        # 普通强拍/重拍→0.9 zoom_back（慢镜/缩放交替）；普通→1.0 static
+        ("mid", "strong", True, 0.55, "slowmo"),
+        ("mid", "strong", False, 0.9, "zoom_back"),
+        ("mid", "weak", False, 1.0, "static"),
+        ("mid", "medium", True, 0.9, "zoom_back"),
     ])
     def test_speed_matrix(self, level, bs, db, exp_speed, exp_tech):
         a = _analyzer()

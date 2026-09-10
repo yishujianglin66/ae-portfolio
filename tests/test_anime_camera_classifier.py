@@ -12,6 +12,18 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _reset_torch_device_cache():
+    """core.torch_runtime.get_device() 有模块级缓存——patch cuda.is_available
+    的测试会互相污染（cpu 用例缓存 'cpu' 后 cuda 用例拿到脏缓存）。
+    每个用例前后清空缓存，保证设备判定与本用例的 patch 对齐。"""
+    import core.torch_runtime as tr
+    old = tr._device_cache
+    tr._device_cache = None
+    yield
+    tr._device_cache = old
+
+
 # ============================================================================
 # 全参模型加载分支测试
 # ============================================================================

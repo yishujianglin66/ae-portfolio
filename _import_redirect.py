@@ -15,6 +15,7 @@ _REDIRECT_MAP = {
     "adobe_suite_integration": "integrations.adobe_suite_integration",
     "phase2_real_audio_integration": "integrations.phase2_real_audio_integration",
     "workflow_batch_integration": "integrations.workflow_batch_integration",
+    "mediapipe_integration": "integrations.mediapipe_integration",
     
     # bridges/
     "adobe_universal_bridge": "bridges.adobe_universal_bridge",

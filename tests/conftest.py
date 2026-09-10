@@ -11,6 +11,10 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
+# 测试环境启用开发账号种子（puppet-automation/src/auth.py 的 admin/operator/viewer
+# 仅在 AE_DEV_ACCOUNTS=1 时加载；测试断言依赖这些账号存在）
+os.environ.setdefault("AE_DEV_ACCOUNTS", "1")
+
 # 加载 import 重定向兼容层，使旧模块名(如 video_generator)能映射到新包路径(如 video.video_generator)
 # 根目录治理后(2026-08-26)，大量模块已迁移到功能域子包，必须启用重定向否则测试导入失败
 try:

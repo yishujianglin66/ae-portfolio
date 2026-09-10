@@ -98,10 +98,24 @@ def load_card(style_id: str) -> Optional[StyleCard]:
 
 
 def list_cards() -> List[str]:
-    """列出所有已注册的风格卡 ID。"""
+    """列出所有已注册的风格卡 ID。
+
+    只返回符合 StyleCard 模式（含 style_id + name）的文件。
+    目录里允许放非卡片的研究资产（如 handoff-2026-09-02 记录的
+    beat_grammar_validated_v1.json——harvest_experience.py 按固定路径读取），
+    它们不参与卡片注册与矩阵测试。
+    """
     if not _CARD_DIR.exists():
         return []
-    return [p.stem for p in _CARD_DIR.glob("*.json")]
+    out = []
+    for p in _CARD_DIR.glob("*.json"):
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if isinstance(data, dict) and data.get("style_id") and data.get("name"):
+            out.append(p.stem)
+    return out
 
 
 def get_taste_profile(style_id: str) -> Dict[str, int]:

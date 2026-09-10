@@ -1,0 +1,106 @@
+{
+  "version": "2.0.0",
+  "directories": {
+    "video_library": "D:/AE-Work/视频素材库",
+    "audio_library": "D:/AE-Work/音频素材库",
+    "image_library": "D:/AE-Work/图片素材库",
+    "bgm_library": "D:/AE-Work/音频素材库/BGM",
+    "sound_effects": "D:/AE-Work/音效素材库",
+    "download_temp": "D:/AE-Work/临时下载",
+    "output": "D:/AE-Work/成品库",
+    "logs": "D:/AE-Work/日志与报告",
+    "cookies": "./cookies",
+    "vector_index": "D:/AE-Work/向量索引",
+    "temp_frames": "D:/AE-Work/临时帧"
+  },
+  "tools": {
+    "yt_dlp": "C:/Users/Administrator/AppData/Local/Programs/Python/Python311/Scripts/yt-dlp.exe",
+    "ffmpeg": "D:/BaiduNetdiskDownload/ffmpeg-8.1.1-essentials_build/bin/ffmpeg.exe",
+    "ffprobe": "D:/BaiduNetdiskDownload/ffmpeg-8.1.1-essentials_build/bin/ffprobe.exe",
+    "python": "python"
+  },
+  "download": {
+    "max_concurrent": 3,
+    "timeout": 300,
+    "retries": 3,
+    "audio_only_formats": ["m4a", "mp3", "wav"],
+    "video_formats": ["mp4", "mov", "webm"],
+    "default_user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+    "fallback_browser": "edge"
+  },
+  "audio": {
+    "default_sample_rate": 44100,
+    "default_bitrate": "192k",
+    "analysis": {
+      "tempo_window": 10,
+      "beat_threshold": 0.5
+    }
+  },
+  "platforms": {
+    "douyin": {
+      "enabled": true,
+      "cookie_path": "./cookies/douyin_cookies.txt",
+      "download_mode": "watermark_free",
+      "prefer_format": "mp4",
+      "referer": "https://www.douyin.com/",
+      "requires_login": true,
+      "note": "无登录 cookies 仅能获取游客级数据，下载高清无水印视频必须配置 ttwid+sessionid"
+    },
+    "bilibili": {
+      "enabled": true,
+      "prefer_high_quality": true,
+      "cookie_path": "./cookies/bilibili_cookies.txt",
+      "referer": "https://www.bilibili.com/",
+      "requires_login": true,
+      "note": "需 SESSDATA cookie 避免 412，未配置时自动从 Edge 兜底"
+    },
+    "youtube": {
+      "enabled": true,
+      "language": "zh-CN",
+      "cookie_path": "./cookies/youtube_cookies.txt",
+      "referer": "https://www.youtube.com/",
+      "requires_login": false,
+      "note": "国内需配合代理使用，配置 cookies 可访问年龄限制视频"
+    },
+    "tiktok": {
+      "enabled": true,
+      "cookie_path": "./cookies/tiktok_cookies.txt",
+      "referer": "https://www.tiktok.com/",
+      "requires_login": false,
+      "note": "国内通常需代理"
+    },
+    "kuaishou": {
+      "enabled": true,
+      "cookie_path": "./cookies/kuaishou_cookies.txt",
+      "referer": "https://www.kuaishou.com/",
+      "requires_login": true,
+      "note": "需 did+client_key cookies，否则返回 412"
+    },
+    "xiaohongshu": {
+      "enabled": true,
+      "cookie_path": "./cookies/xiaohongshu_cookies.txt",
+      "referer": "https://www.xiaohongshu.com/",
+      "requires_login": true,
+      "note": "小红书反爬严格，必须配置登录 cookies (web_session+xsecappid)"
+    },
+    "weibo": {
+      "enabled": true,
+      "cookie_path": "./cookies/weibo_cookies.txt",
+      "referer": "https://weibo.com/",
+      "requires_login": true,
+      "note": "微博视频需 SUB+SUBP cookies"
+    },
+    "xigua": {
+      "enabled": true,
+      "cookie_path": "./cookies/xigua_cookies.txt",
+      "referer": "https://www.ixigua.com/",
+      "requires_login": false,
+      "note": "西瓜视频与抖音共享部分 cookies 体系"
+    }
+  },
+  "auto_import": {
+    "enabled": true,
+    "target_composition": "Main Comp",
+    "after_import_action": "center_and_fit"
+  }
+}
