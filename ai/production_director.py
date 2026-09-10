@@ -4751,6 +4751,15 @@ class ProductionDirector:
                 err = r.stderr[:300] if r.stderr else "unknown"
                 print(f"    [WARN] 裁剪失败 ({Path(output).name}): {err}")
                 return False
+            # ══ 2026-09-10 R1 第五类根因：超短片段帧数兜底 ══════════════
+            # 片段比计划短 → 时间线整体前移 → EDL 声明的切点落进相邻片段
+            # 内部 → 前后帧同源 → 切点消失。补齐到计划帧数，保证 concat
+            # 累计边界 == 计划切点（drift 被钳制后无法补偿这种短帧）。
+            if out_frames > 0:
+                _pad = self._ensure_frame_count(output, out_frames, fps)
+                if _pad > 0:
+                    print(f"    [帧数兜底] {Path(output).name}: "
+                          f"补 {_pad} 帧 → {out_frames} 帧")
             return True
         except subprocess.TimeoutExpired:
             print(f"    [WARN] 裁剪超时: {Path(output).name}")
@@ -5273,6 +5282,61 @@ class ProductionDirector:
     # ================================================================
     #  工具方法
     # ================================================================
+
+    def _probe_frame_count(self, path) -> int:
+        """探测视频实际帧数（失败返回 -1）。"""
+        cmd = [
+            self.ffprobe, "-v", "error", "-count_frames",
+            "-select_streams", "v", "-show_entries", "stream=nb_read_frames",
+            "-of", "default=nw=1:nk=1", path,
+        ]
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            return int(str(r.stdout).strip().splitlines()[0])
+        except Exception:
+            return -1
+
+    def _ensure_frame_count(self, path, want: int, fps: float) -> int:
+        """帧数兜底 (2026-09-10 R1 第五类根因)。
+
+        超短片段（0.21s ≈ 5 帧）实测会渲染丢帧：seg57 计划 5 帧实际只有 2 帧。
+        片段比计划短 → 时间线整体前移 → EDL 声明的切点时刻落进**相邻片段内部**
+        → 切点前后帧同源 → 切点消失（诊断：段内 ahash 峰值 28~43，切点处 0~2）。
+
+        `_tl_drift` 被钳制在 ±2 帧后无法补偿这种累积短帧（钳制防住了失控，
+        也挡住了补偿），故改为在源头补齐：用 tpad 克隆末帧到计划帧数。
+
+        返回补上的帧数（0 表示本来就够了，负数表示探测失败）。
+        """
+        if want <= 0:
+            return 0
+        got = self._probe_frame_count(path)
+        if got < 0 or got >= want:
+            return 0
+        miss = want - got
+        tmp = f"{path}.pad.mp4"
+        cmd = [
+            self.ffmpeg, "-y", "-v", "error", "-i", str(path),
+            "-vf", f"tpad=stop_mode=clone:stop_duration={miss / fps:.6f}",
+            "-frames:v", str(want),
+            "-c:v", "libx264", "-preset", "veryfast",
+            "-bf", "0",  # 与主管线一致: 禁 B 帧, 保证 concat 流拷贝边界干净
+            "-pix_fmt", "yuv420p", "-an",
+            "-movflags", "+faststart", tmp,
+        ]
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True,
+                               timeout=300, encoding="utf-8", errors="ignore")
+            if r.returncode != 0 or not os.path.exists(tmp):
+                if os.path.exists(tmp):
+                    os.remove(tmp)
+                return -1
+            os.replace(tmp, path)
+            return miss
+        except Exception:
+            if os.path.exists(tmp):
+                os.remove(tmp)
+            return -1
 
     def _probe_duration(self, path) -> float:
         """探测文件时长"""
