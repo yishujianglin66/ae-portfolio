@@ -2304,6 +2304,20 @@ class ProductionDirector:
                 _min_ss = min(2.0, max(0.0, src_dur - seg_dur - 0.5))
                 if source_start < _min_ss:
                     source_start = _min_ss
+                # ══ 2026-09-10 R1 第三轮根因（规划侧）══════════════════════
+                # 片头有黑场钳制, 片尾**没有** → 规划阶段就能选到距尾 0.2s 的
+                # 位置。片尾常是黑场/片尾字幕/静止画面 → 切了看不见。
+                # r1_fixed_v3 实测残留 11 个冻结切点中 5 个的 source_start
+                # 距素材尾仅 0.2-0.3s:
+                #   Nagi        ss=67.55 / 全长 67.8s  → 距尾 0.25s
+                #   nagi2       ss=60.02 / 全长 60.2s  → 距尾 0.18s
+                #   alya-twix   ss=67.73 / 全长 68.0s  → 距尾 0.27s
+                #   五条悟第二季2 ss=16.70 / 全长 16.9s → 距尾 0.20s
+                #   v0300fg     ss=18.13 / 全长 18.3s  → 距尾 0.17s
+                # 对称钳制: 起点 + 段长 不得进入尾部 _TAIL_MARGIN 内。
+                _max_ss = max(0.0, src_dur - seg_dur - _TAIL_MARGIN)
+                if source_start > _max_ss:
+                    source_start = _max_ss
                 # 死区避让 (2026-09-06 run53 教训: 黑场/水印卡/静帧整段死滞)
                 source_start = self._nudge_to_live_window(
                     source, source_start, seg_dur)
