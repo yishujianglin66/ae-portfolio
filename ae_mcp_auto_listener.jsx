@@ -1434,9 +1434,8 @@
         } catch (e) {
             log("Loop error: " + e.toString());
         }
-        app.scheduleTask(
-            "$.global.checkForCommands()", 500, false
-        );
+        // 2026-09-10 实证：单发自续链（..., false）在本机 AE2025 首次后即死，
+        // recurring=true 才存活——故自续调度移除，启动处统一挂 recurring（防任务增殖）。
     }
 
     // Expose to global scope so scheduleTask string eval can find it
@@ -1450,8 +1449,11 @@
     log("RES_FILE: " + RES_FILE);
     log("========================================");
 
-    log("Starting command polling loop");
+    log("Starting command polling loop (recurring)");
     checkForCommands();
+    app.scheduleTask(
+        "$.global.checkForCommands()", 500, true
+    );
     } // end startMcpListener
 }
 
