@@ -309,6 +309,10 @@ class ProductionDirector:
         self.taste: TasteProfile = (
             TasteProfile.from_dict(taste_profile) if taste_profile else DEFAULT_TASTE
         )
+        # 风格标识（用于规则适用域裁决；taste_profile 里带 style_id 时记录）
+        self._style_id: Optional[str] = (
+            (taste_profile or {}).get("style_id") if taste_profile else None
+        )
 
         # 核心模块
         self.beat_detector = BeatDetector()
@@ -400,6 +404,7 @@ class ProductionDirector:
         enable_ae_channel: bool = False,
         clean_bgm_sfx: bool = False,
         beat_lock_hard_cuts: bool = False,
+        cut_times_override: Optional[List[float]] = None,
     ) -> str:
         """端到端渲染。
 
@@ -429,6 +434,9 @@ class ProductionDirector:
             allow_mixed: 是否允许使用多IP混剪类素材。默认False。
             verify_content: 渲染完成后是否用VLM复核成片内容确为目标IP。默认True。
             use_speed_ramp: 启用情绪驱动变速（SPEED_PRESETS）。默认False保持基线行为。
+            cut_times_override: 外部切点表（输出视频时间轴, 秒）。非空时跳过
+                内部切点计算结果，按弧段区间重新分配该表（P2 切点自检 repair
+                接线用, 2026-09-10）。弧段边界/能量结构/择优逻辑全部保持。
         """
         t0 = time.time()
 
@@ -498,7 +506,8 @@ class ProductionDirector:
                                 actual_duration, lyrics, target_ip,
                                 style_spec=style_spec,
                                 use_speed_ramp=use_speed_ramp,
-                                theme=theme)
+                                theme=theme,
+                                cut_times_override=cut_times_override)
 
             # P2: 剧本YAML化 + 决策日志 (与渲染同步输出, 失败不阻断渲染)
             try:
@@ -529,9 +538,11 @@ class ProductionDirector:
             print("\n[Phase 3] 渲染执行...")
             # 磁盘守卫 (2026-08-16): C盘满(No space left)曾击穿渲染,
             # 渲染前清理历史 run 目录并校验剩余空间
+            # V23_KEEP_INTERMEDIATES=1 时跳过 rmtree (2026-09-10):
+            # 后台沙箱批量删除熔断无TTY确认会判死, 保留供事后人工清理。
             try:
                 _dw = Path(self.work_dir)
-                if _dw.exists():
+                if _dw.exists() and os.environ.get("V23_KEEP_INTERMEDIATES") != "1":
                     import shutil as _sh
                     for _old in _dw.glob("run_*"):
                         if _old.is_dir():
@@ -1135,16 +1146,22 @@ class ProductionDirector:
         import os as _os_da
         # 规则库裁决（E1-1 消费闭环）: cut_anchor 规则退役/翻负 → 自动回退启发式。
         # 规则库未建立(data/rules/ruleset.jsonl 不存在) → None, 管线自便。
+        # 适用域校验（2026-09-09, R4）: 透传 style/duration，异风格运行时
+        # 不适用的规则自动退场 → 回退启发式（此前 applicability 从未被校验）。
         _rule_gate = None
+        _rule_ctx = None
         try:
+            _rule_ctx = {"style": self._style_id, "duration": target_duration}
             from scripts.rule_registry import cut_anchor_allowed as _caa
-            _rule_gate = _caa()
+            _rule_gate = _caa(_rule_ctx)
         except Exception as _rg_e:  # noqa: BLE001
             print(f"  [drum-anchor] 规则库不可达({_rg_e.__class__.__name__}), 按未建立处理")
         if _os_da.environ.get("MASTER_NO_DRUM_ANCHORS") == "1":
             print("  [drum-anchor] 已通过环境开关强制关闭（对照组模式）")
         elif _rule_gate is False and _os_da.environ.get("MASTER_ANCHOR_V2") != "1":
-            print("  [drum-anchor] 规则库裁决: cut_anchor 规则非 active → 回退启发式")
+            print(f"  [drum-anchor] 规则库裁决: cut_anchor 规则不适用当前运行"
+                  f"(style={_rule_ctx.get('style')}, duration={target_duration}s)"
+                  f" → 回退启发式")
         else:
             try:
                 import hashlib as _hl
@@ -1462,7 +1479,8 @@ class ProductionDirector:
     # ================================================================
 
     def _plan(self, video_sources, bgm_path, bgm_start_sec, duration, lyrics, target_ip="",
-              style_spec=None, use_speed_ramp: bool = False, theme: Optional[str] = None):
+              style_spec=None, use_speed_ramp: bool = False, theme: Optional[str] = None,
+              cut_times_override: Optional[List[float]] = None):
         """编排导演剧本 — 基于情绪曲线划分段落，踩拍切点，智能素材匹配
 
         2026-08-13 Stage1: theme 传入时用 direct_from_text 生成分镜,
@@ -1976,6 +1994,20 @@ class ProductionDirector:
             if _roll_spanned:
                 print(f"  连击段抽稀(kick/snare): {sorted(_roll_spanned)} "
                       f"→ 合并长镜头+脉冲缩放")
+
+        # ── 切点覆盖注入 (P2 repair 接线, 2026-09-10) ──
+        # unified_edit 切点自检 FAIL → repair_cutpoints 修表 → 带本参数重渲。
+        # 注入点选在所有内部切点计算(吸附/抽稀)之后、择优与镜头设计之前:
+        # 覆盖表即最终切点, 下游 rhythm 择优/LLM 镜头设计/时间线构建照常消费。
+        if cut_times_override:
+            _ov = sorted(set(round(float(t), 3) for t in cut_times_override
+                             if 0.0 < float(t) < duration))
+            for s_ in arc_segments:
+                s_["cut_times"] = [t for t in _ov
+                                   if s_["start"] + 1e-3 < t < s_["end"] - 1e-3]
+            self._cut_times_override = list(_ov)
+            print(f"  切点覆盖: 注入 {len(_ov)} 个修复切点 "
+                  f"(P2 repair, 跳过内部切点计算结果)")
 
         # === rhythm_reward 本地模型: 切点方案择优 ===
         # 生成多个候选切点方案，用训练好的节奏奖励模型预测踩拍质量并择最优
@@ -4054,12 +4086,21 @@ class ProductionDirector:
             if _demoted:
                 print(f"  [节拍锁定] {_demoted} 个转场降级硬切 (切点=concat累计, 漂移累加器锁定)")
 
-        # 累计帧量化漂移反馈 (2026-09-02 根因修复):
+        # 累计帧量化漂移反馈 (2026-09-02 根因修复 → 2026-09-10 二次根因):
         # 每片段被量化到整帧 (24fps → ±20.8ms), 50 片随机游走累计 ±150ms,
         # 实测实际切点-强鼓点对齐率仅 13% (报告 42%) — 渲染层把切点漂离鼓点。
         # 累加器: 每片实测时长(ffprobe)与计划时长之差累加, 反馈进下一片
         # 目标时长, 把累计时间线锁死在计划切点上 (±1 帧内)。
+        #   ⚠ 2026-09-10 实测 bug: run61 实测 49.62s vs plan 30s, 漂移 +19.62s!
+        #   根因: 慢放段 (speed<1) 下, read_dur=duration*speed 比 out_frames/fps
+        #   短, 慢源 30fps 经 fps=24 重采样后输出帧数 < out_frames; 但 -frames:v
+        #   仍按 out_frames 算 _ad 期望, 实际 _probe_dur < render_dur, 漂移逐片
+        #   累加且无人衰减, 边界保护 (start_time>=src_dur 重置为 0) 在漂移巨大
+        #   后把 source_start 推回素材头/尾, 多段坍塌到同一画面 → 切点不可见。
+        #   修复: 漂移钳制到 ±2 帧 (≈ ±83ms @24fps), 溢出则强制补偿 (把 render_dur
+        #   调整到 _ad, 下一片漂移清零), 避免累加器发散。
         _tl_drift = 0.0
+        _TL_DRIFT_LIMIT = 2.0 / 24.0   # ±2 帧 ≈ ±83ms (24fps)
 
         def _probe_dur(p) -> float:
             try:
@@ -4083,6 +4124,12 @@ class ProductionDirector:
             # 无预补偿渲染: 各 clip 精确 d_i; 链内最后 clip 一次性
             # 补偿本链全部转场时长 (2026-08-16 零泄漏重构)
             render_dur = seg.duration + chain_last_extra.get(i, 0.0) + _tl_drift
+
+            # 漂移钳制 (2026-09-10): 累加器一旦溢出 ±2 帧就强制归零, 防止
+            # run61 实测 +19.62s 失控漂移把 source_start 推回素材尾/头导致
+            # 多段坍塌。钳制内仍允许 ±1 帧的 beat-lock 微调。
+            if abs(_tl_drift) > _TL_DRIFT_LIMIT:
+                _tl_drift = 0.0
 
             clip_path = run_dir / f"clip_{seg.index:03d}.mp4"
             preset = self._color_presets.get(seg.color_grade, self._color_presets["climax"])
@@ -4260,6 +4307,12 @@ class ProductionDirector:
         # 每次渲染留 3-5GB 中间文件, 58 次运行堆满 C 盘 (No space left
         # on device 直接击穿渲染)。合成完成后立即删除 clip_*/group_*,
         # 仅保留 concatenated.mp4 供混音消费。
+        # V23_KEEP_INTERMEDIATES=1 跳过清理 (2026-09-10): 后台沙箱对批量
+        # 删除有 turn 级 50 次熔断 (SAFE_DELETE_BULK_CONFIRM_REQUIRED),
+        # 无TTY 无法确认直接判死; 调试/后台跑批时置 1 保留中间产物。
+        if os.environ.get("V23_KEEP_INTERMEDIATES") == "1":
+            print("    [磁盘] V23_KEEP_INTERMEDIATES=1, 保留中间产物")
+            return str(concat_output)
         try:
             for _p in run_dir.glob("clip_*.mp4"):
                 _p.unlink(missing_ok=True)
