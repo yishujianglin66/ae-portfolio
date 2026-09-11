@@ -341,6 +341,34 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             if closeup:
                 y = int(1080 * (0.18 if side_flip % 2 == 0 else 0.82))
 
+        # v10 对比度感知样式 (Boss"有些字发光看不出"): 12 drop 事件 9 个落在亮背景
+        # (读字期最坏亮度 136-254) → 白字+白辉光融进背景; 且同一位置亮度在保持期内
+        # 大幅跳变(如 82→253→74) → 必须按最坏情况定样式, 不能一刀切
+        stroke_cfg = st["stroke"]
+        shadow_cfg = st.get("shadow")
+        glow_col = None            # (A_rgb, B_rgb); None=AE 默认白/黑
+        bg_lum = _worst_region_luma(bg_video, t_in, hold, x, y)
+        if bg_lum >= 150:          # 亮底: 白字白辉光物理上看不出 → 青色光晕可见 + 粗描边保读
+            bg_class = "bright"
+            stroke_cfg = (stroke_cfg[0], 9.0)
+            shadow_cfg = (0.85, 135, 8, 14)
+            glow = (205, 20, round((glow[2] if glow else 1.0) * 1.15, 3)) if glow else glow
+            glow_col = ([0.10, 0.80, 1.0], [0.0, 0.15, 0.45])
+            pulse = 1.15
+        elif bg_lum >= 90:         # 中间调: 暖金光晕
+            bg_class = "mid"
+            stroke_cfg = (stroke_cfg[0], 7.0)
+            shadow_cfg = (0.80, 135, 10, 14)
+            glow = (190, 16, round((glow[2] if glow else 1.0) * 1.05, 3)) if glow else glow
+            glow_col = ([1.0, 0.66, 0.18], [0.30, 0.10, 0.0])
+            pulse = 1.25
+        else:                      # 暗底: 白辉光清晰可见
+            bg_class = "dark"
+            stroke_cfg = (stroke_cfg[0], 3.5)
+            shadow_cfg = (0.55, 135, 8, 10)
+            glow = (150, 18, round((glow[2] if glow else 1.0) * 1.30, 3)) if glow else glow
+            pulse = 1.45
+
         # v9: drop 变款全整层平移 (RS 动画器与脚本字体互斥; v8 实证旋转变款使文字倾斜超框压高光)
         # _v: 0=drop_fall 自上落下 / 1=rise_up 自下升起 / 2=纯 punch tracking
         drop_fall = rise_up = False
@@ -357,13 +385,17 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "script": scl,
             "probe_font": font not in VERIFIED_FONTS,
             "fill": st["fill"],
-            "stroke": st["stroke"],
+            "stroke": stroke_cfg,
             "enter": st["enter"],
             "glow": glow,
             "glow2": glow2,
-            "shadow": st.get("shadow"),
+            "shadow": shadow_cfg,
             "bevel": bevel,
             "glow_pulse": pulse,
+            "glow_col_a": glow_col[0] if glow_col else None,
+            "glow_col_b": glow_col[1] if glow_col else None,
+            "bg_lum": round(bg_lum, 1),
+            "bg_class": bg_class,
             "cascade": st.get("cascade", False),
             "elastic": st.get("elastic", False),
             "shockwave": st.get("shockwave", False),
@@ -422,6 +454,16 @@ def _region_luma(video, t, cx, cy, w=520, h=320):
         return 255.0
 
 
+def _worst_region_luma(video, t_in, hold, x, y, w=520, h=320):
+    """读字期内该位置的最大区域亮度 (最坏情况); 无基线/失败回退 128(中间调)"""
+    if not video or not Path(video).exists():
+        return 128.0
+    vals = [_region_luma(video, t_in + f * hold, x, y, w, h)
+            for f in (0.12, 0.45, 0.80)]
+    vals = [v for v in vals if v is not None]
+    return max(vals) if vals else 128.0
+
+
 def _pick_dark_pos(t_in, bg_video, fallback_i, hold=0.9):
     """v4.1 背景亮度感知选位: 三候选位 × 读字窗口(t+0.35h / t+0.65h)两点采样,
     每位取最大亮度(最坏情况), 挑最小者——BREAK 案例实证: t_in 是切点闪光帧全屏无区分度,
@@ -466,6 +508,8 @@ def build_jsx(events, out_aep: Path):
             d["glow"] = None
         d["glow2"] = list(e["glow2"]) if e.get("glow2") else None
         d["glow_pulse"] = float(e.get("glow_pulse", 1.7))
+        d["glow_col_a"] = list(e["glow_col_a"]) if e.get("glow_col_a") else None
+        d["glow_col_b"] = list(e["glow_col_b"]) if e.get("glow_col_b") else None
         d["shadow"] = list(e["shadow"]) if e.get("shadow") else None
         d["bevel"] = list(e["bevel"]) if e.get("bevel") else None
         d["cascade"] = bool(e.get("cascade"))
@@ -619,10 +663,19 @@ def build_jsx(events, out_aep: Path):
         }}
         if (ev.glow) {{
           // 实证序号 (2026-09-10 探针): 0002=发光阈值(0-255), 0003=半径, 0004=强度
-          // v1 曾把 0002 当强度/0004 当阈值 —— 参数反转是"效果普通"的根因
+          // v10 探针补充: 0012=颜色A / 0013=颜色B (默认 白/黑 → 光永远是白的; 亮底上不可见)
           var gf = L.property("Effects").addProperty("ADBE Glo2");
           gf.property("ADBE Glo2-0002").setValue(ev.glow[0]);          // threshold
           gf.property("ADBE Glo2-0003").setValue(ev.glow[1]);          // radius
+          if (ev.glow_col_a) {{
+            try {{
+              gf.property("ADBE Glo2-0007").setValue(2);   // 发光颜色模式= A&B (默认1=原色, 忽略A/B!)
+              gf.property("ADBE Glo2-0012").setValue(
+                [ev.glow_col_a[0], ev.glow_col_a[1], ev.glow_col_a[2], 1]);
+              gf.property("ADBE Glo2-0013").setValue(
+                [ev.glow_col_b[0], ev.glow_col_b[1], ev.glow_col_b[2], 1]);
+            }} catch (gce) {{ rep += "|GLOWCOL" + i; }}
+          }}
           gf.property("ADBE Glo2-0004").setValueAtTime(                // 强度入场脉冲 (ENV 语法, v6.1 按文字系)
             ev.t_in, ev.glow[2] * ev.glow_pulse);
           gf.property("ADBE Glo2-0004").setValueAtTime(
@@ -769,7 +822,8 @@ def main():
         print(f"  #{e['id']:02d} {e['t_in']:6.2f}-{e['t_out']:6.2f} "
               f"({e['hold']:4.2f}s) {e['mood']:<5} {e['style_id']:<12} "
               f"'{e['word']}'[{e.get('script', '?')}] {e['font']} "
-              f"{e['size']}px @({e['x']},{e['y']}){cu}{probe}")
+              f"{e['size']}px @({e['x']},{e['y']}) bg={e.get('bg_class', '?')}"
+              f"({e.get('bg_lum', -1):.0f}){cu}{probe}")
     zc = {}
     for e in events:
         zc[zone_of(e["t_in"])] = zc.get(zone_of(e["t_in"]), 0) + 1
