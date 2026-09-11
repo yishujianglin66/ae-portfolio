@@ -342,7 +342,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                 y = int(1080 * (0.18 if side_flip % 2 == 0 else 0.82))
 
         # W2 三维层 (2026-09-11 探针: 基底4层全2D → 加摄像机不影响基底; 默认 z=-2666.67 为1:1)
-        # 仅 drop 区 (能量最高) 转 3D; z 三档轮换做纵深层次; 摄像机缓推由 JSX 侧统一建
+        # 仅 drop 区 (能量最高) 转 3D; z 三档轮换做纵深层次; 摄像机方案实测否决 (整帧重合成)
         z_dep = 0
         is3d = (style_id == "drop_impact")
         if is3d:
@@ -381,6 +381,15 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             glow = (150, 18, round((glow[2] if glow else 1.0) * 1.30, 3)) if glow else glow
             pulse = 1.45
 
+        # v17 冲击分级 (镜头运动强度归一化调制) + 通道分离冲击 (高能 drop 词)
+        # 依据: v15 的线性 energy 调制对静止镜头也过强; 改用 shot_scenes motion 归一值
+        mo_n = 0.5
+        if sc is not None:
+            mo_n = min(1.0, float(sc.get("motion", 0)) / max(_skin_p70(scenes), 1e-6))
+        impact_mul = round(0.82 + 0.36 * mo_n, 3)
+        chroma = bool(is3d and energy >= 0.70)   # 仅最强 3 个爆点用通道分离 (防同款连打疲劳)
+        chroma_dx = round(12 + 16 * mo_n, 1)
+
         # v9: drop 变款全整层平移 (RS 动画器与脚本字体互斥; v8 实证旋转变款使文字倾斜超框压高光)
         # _v: 0=drop_fall 自上落下 / 1=rise_up 自下升起 / 2=纯 punch tracking
         drop_fall = rise_up = False
@@ -414,6 +423,9 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "inner_w": inner_w,
             "is3d": is3d,
             "z": z_dep,
+            "chroma": chroma,
+            "chroma_dx": chroma_dx,
+            "impact_mul": impact_mul,
             "cascade": st.get("cascade", False),
             "elastic": st.get("elastic", False),
             "shockwave": st.get("shockwave", False),
@@ -536,15 +548,19 @@ def build_jsx(events, out_aep: Path):
         d["inner_w"] = float(e.get("inner_w", 0))
         d["is3d"] = bool(e.get("is3d"))
         d["z"] = float(e.get("z", 0))
-        # v15 冲击力包参数 (探针实证: ADBE Motion Blur=方向模糊 / ADBE Radial Blur / ADBE Turbulent Displace)
+        # v15/v17 冲击力包参数 (探针实证: ADBE Motion Blur=方向模糊 / ADBE Radial Blur / ADBE Turbulent Displace)
+        # v17: 冲量按镜头运动强度分级 (impact_mul), 静止镜头收敛 / 高速爆炸镜头拉满
         en = float(e.get("energy", 0.6))
+        im = float(e.get("impact_mul", 1.0))
+        d["chroma"] = bool(e.get("chroma"))
+        d["chroma_dx"] = float(e.get("chroma_dx", 12))
         d["db_dir"] = 0 if e.get("z", 0) == 0 else 90
-        d["db_in"] = round(45 + 45 * en, 1)        # 入场方向模糊长度
-        d["db_out"] = round(30 + 30 * en, 1)       # 出场方向模糊长度
-        d["rb_in"] = round(12 + 20 * en, 1)        # 入场径向模糊强度 (爆发感)
-        d["tb_amt"] = round(2 + 4.5 * en, 2)       # 湍流呼吸位移
+        d["db_in"] = round((45 + 45 * en) * im, 1)
+        d["db_out"] = round((30 + 30 * en) * im, 1)
+        d["rb_in"] = round((12 + 20 * en) * im, 1)
+        d["tb_amt"] = round(2 + 4.5 * en, 2)
         d["tb_size"] = round(55 + 65 * en, 1)
-        d["tb_evo"] = round(80 + 70 * en, 1)       # 演化速度 (表达式驱动 → 持续流动)
+        d["tb_evo"] = round(80 + 70 * en, 1)
         d["cascade"] = bool(e.get("cascade"))
         d["elastic"] = bool(e.get("elastic"))
         d["shockwave"] = bool(e.get("shockwave"))
@@ -807,6 +823,23 @@ def build_jsx(events, out_aep: Path):
           L.motionBlur = true;
           if (U) U.motionBlur = true;
         }} catch (mbe2) {{ rep += "|LAYERMB" + i; }}
+        if (ev.chroma) {{                             // v17 通道分离: 红/青幽灵层错位入场 (Add 混合)
+          try {{
+            var mkGhost = function (col, dx, nm) {{
+              var G = comp.layers.addText(ev.word);
+              G.name = nm + i + "_" + ev.word;
+              setDoc(G, ev, col, col, 0);
+              G.blendMode = 5;                        // Add
+              G.parent = L;
+              G.inPoint = ev.t_in; G.outPoint = ev.t_out + 0.05;
+              addKick(G, ev);
+              G.position.setValueAtTime(ev.t_in, [dx, 0, 0]);
+              G.position.setValueAtTime(ev.t_in + 0.20, [0, 0, 0]);
+            }};
+            mkGhost([1.0, 0.06, 0.06], -ev.chroma_dx, "TXTR");
+            mkGhost([0.06, 0.85, 1.0], ev.chroma_dx, "TXTC");
+          }} catch (che) {{ rep += "|CHROMA" + i; }}
+        }}
       }}
       app.project.save(new File("{out_aep.as_posix()}"));
       rep += "|saved layers=" + comp.numLayers + " texts=" + evs.length;
