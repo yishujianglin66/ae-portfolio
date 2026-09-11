@@ -116,33 +116,46 @@ MOOD_TO_STYLE = {"intro": "intro_serif", "build": "build_side",
 #   故 jp 池只收 17/17 全覆字体 (LiSu/DengXian-Bold/YuGothic系/MS-Gothic系/STSong系/STXihei),
 #   cn 池才能用装饰性字体 (琥珀/彩云/新魏/彩色系). 覆盖表见 tmp/check_glyph_coverage.py
 FONT_POOLS = {
-    "drop_impact": {   # 冲击词: 展示级重体 (v19: 接入系统级安装的 Anton/BlackOps/方正超粗黑/汉仪超粗宋)
+    "drop_impact": {   # 冲击词 (v20: 并入 L1 白名单展示字体)
         "jp":    ["LiSu", "DengXian-Bold", "YuGothic-Bold", "MS-PGothic"],
         "cn":    ["FZCCHFW--GB1-0", "HYa0gj", "FZHPFW--GB1-0", "STHupo", "STCaiyun"],
-        "latin": ["Anton-Regular", "BlackOpsOne-Regular", "AlfaSlabOne-Regular",
-                  "Bangers-Regular", "Blanka-Regular", "321impact"],
+        "latin": ["BebasKai", "Brat", "BroadcastMatter", "FasterOne-Regular",
+                  "MetalMania-Regular", "Anton-Regular", "BlackOpsOne-Regular",
+                  "AlfaSlabOne-Regular", "Bangers-Regular", "Blanka-Regular", "321impact"],
     },
-    "build_side": {    # 铺垫词 (4-11s 段): v19 换高辨识度字体 + 字号上调
+    "build_side": {    # 铺垫词 (4-11s 段)
         "jp":    ["YuGothic-Medium", "DengXian-Bold", "STZhongsong"],
         "cn":    ["FZPHFW--GB1-0", "FZKTFW--GB1-0", "STSong"],
-        "latin": ["BebasNeue-Bold", "Kanit-Black", "HansonBold", "AgencyFB-Bold"],
+        "latin": ["Lato-Black", "Inter-Black", "BrandonGrotesque-Black", "AlegreyaSansSC-Black",
+                  "BebasNeue-Bold", "Kanit-Black", "HansonBold", "AgencyFB-Bold"],
     },
-    "intro_serif": {   # 开场/收尾: 展示衬线/书法
+    "intro_serif": {   # 开场/收尾: 衬线/书法/花体
         "jp":    ["STFangsong", "YuGothic-Light", "STSong"],
         "cn":    ["FZSSFW--GB1-0", "FZKTFW--GB1-0", "STXingkai", "STLiti", "STKaiti"],
-        "latin": ["AlfaSlabOne-Regular", "BowlbyOneSC-Regular", "ArtBrush",
-                  "BodoniMTBlack", "CopperplateGothic-Bold"],
+        "latin": ["DrSugiyama-Regular", "GreatVibes-Regular", "Allura-Regular",
+                  "Asset-Regular", "AutourOne-Regular", "AlfaSlabOne-Regular",
+                  "BowlbyOneSC-Regular", "BodoniMTBlack", "CopperplateGothic-Bold"],
     },
 }
-VERIFIED_FONTS = {          # HKLM 真相表 + cmap 覆盖 + 渲染差分三重校验 (2026-09-11)
-    # v19 系统级新装 (需管理员, tmp/install_fonts_full.py)
+VERIFIED_FONTS = {          # HKLM 真相表 + cmap 覆盖 + 渲染差分三重校验 (2026-09-11/12)
+    # 系统级安装批次一 (tmp/install_fonts_full.py, 28 个; 不含 trial)
     "Anton-Regular", "BebasNeue-Bold", "Antonio-Bold", "BlackOpsOne-Regular",
     "Bangers-Regular", "AlfaSlabOne-Regular", "BowlbyOneSC-Regular", "Blanka-Regular",
     "BungeeShade-Regular", "HansonBold", "Kanit-Black", "Kanit-ExtraBold",
-    "Bumrush", "321impact", "BRUSHSTRIKE", "ArtBrush",
+    "Bumrush", "321impact", "ArtBrush",
     "FZWBFW--GB1-0", "FZCCHFW--GB1-0", "FZH4FW--GB1-0", "FZHPFW--GB1-0",
     "FZHTFW--GB1-0", "FZPHFW--GB1-0", "FZSSFW--GB1-0", "FZKTFW--GB1-0",
     "FZSTFW--GB1-0", "HYa0gj", "GBWeiBei-Bold", "SungtiEG-Ultra-GB",
+    # L1 白名单批次 (scripts/install_fonts_l1.py, 84 个)
+    "BebasKai", "Brat", "BroadcastMatter", "FasterOne-Regular", "MetalMania-Regular",
+    "Creepster-Regular", "GreatVibes-Regular", "Allura-Regular", "DrSugiyama-Regular",
+    "Chewy-Regular", "LuckiestGuy-Regular", "Asset-Regular", "AutourOne-Regular",
+    "Lato-Black", "Inter-Black", "BrandonGrotesque-Black", "AlegreyaSansSC-Black",
+    "Kanit-Thin", "Merriweather-Black", "Eater-Regular", "LondrinaShadow-Regular",
+    "LondrinaOutline-Regular", "FascinateInline-Regular", "Codystar-Light",
+    "Galada-Regular", "Charmonman-Bold", "Elianto-Regular", "Hundo", "Aspire-DemiBold",
+    "Barriecito-Regular", "Flavors-Regular", "HennyPenny-Regular", "FingerPaint-Regular",
+    "BadScript-Regular", "HerrVonMuellerhoff-Regular",
     # 既有系统字体
     "LiSu", "DengXian-Bold", "YuGothic-Bold", "YuGothic-Medium", "YuGothic-Regular",
     "YuGothic-Light", "MS-PGothic", "MS-Gothic", "STHupo", "FZCHSJW--GB1-0",
@@ -613,7 +626,23 @@ def build_jsx(events, out_aep: Path):
     if (!comp) {{ var fp = new File("{aep_in}"); app.open(fp); comp = findComp(); }}
     if (!comp) {{ rep += "|NOCOMP"; }}
     else {{
-      try {{ comp.motionBlur = true; }} catch (mbe) {{ rep += "|COMPMB"; }}   // v15: 合成运动模糊 (仅对开了图层开关的层生效, 基底层不受影响)
+      try {{ comp.motionBlur = true; }} catch (mbe) {{ rep += "|COMPMB"; }}   // v15: 合成运动模糊
+      // v20 基底光效规范化 (Boss 设定): 素材层 Glo2 = OFF, 粒子层 Glo2 = ON
+      // (独立 bridge 调用启用粒子发光曾多次超时/卡住 → 并入注入流程, 状态确定且可核验)
+      for (var bi = 1; bi <= comp.numLayers; bi++) {{
+        var bly = comp.layer(bi);
+        var bfx = null;
+        try {{ bfx = bly.property("Effects"); }} catch (be0) {{ continue; }}
+        if (!bfx) continue;
+        for (var bj = 1; bj <= bfx.numProperties; bj++) {{
+          var be = bfx.property(bj);
+          var bmn = "";
+          try {{ bmn = be.matchName; }} catch (be1) {{ continue; }}
+          if (bmn !== "ADBE Glo2") continue;
+          var want = (bly.name.indexOf("PART_") === 0);
+          try {{ be.enabled = want; }} catch (be2) {{ rep += "|GLOWNORM"; }}
+        }}
+      }}
       var evs = {evs_js};
       // ── W1 双描边 helper (2026-09-11) ─────────────────────────────────
       function setDoc(L, ev, fillCol, strokeCol, strokeW) {{

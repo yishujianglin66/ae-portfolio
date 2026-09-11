@@ -1,0 +1,1702 @@
+{
+ "generated_by": "scripts/build_font_whitelist.py",
+ "source_catalog": "10-风格化剪辑知识库\\字体预设库.md",
+ "source_registry": "schemas\\font_registry.json",
+ "note": "L1 = 预设库文档化展示字体 ∩ 用户目录可装 ∩ 非授权风险; 安装后必须过渲染差分探针",
+ "count": 84,
+ "by_category": {
+  "粗犷冲击字体(8+ 款)": [
+   "BebasKai"
+  ],
+  "街头涂鸦字体(8+ 款)": [
+   "Brat",
+   "BroadcastMatter"
+  ],
+  "手写签名字体(10+ 款)": [
+   "GreatVibes-Regular",
+   "Allura-Regular",
+   "HerrVonMuellerhoff-Regular",
+   "DrSugiyama-Regular",
+   "BadScript-Regular"
+  ],
+  "马戏团童趣字体(8+ 款)": [
+   "Barriecito-Regular",
+   "Chewy-Regular",
+   "LuckiestGuy-Regular",
+   "Flavors-Regular",
+   "HennyPenny-Regular",
+   "FingerPaint-Regular"
+  ],
+  "哥特恐怖字体(6 款)": [
+   "Creepster-Regular",
+   "Eater-Regular",
+   "MetalMania-Regular",
+   "LondrinaShadow-Regular",
+   "LondrinaOutline-Regular"
+  ],
+  "复古装饰字体(10+ 款)": [
+   "Asset-Regular",
+   "FascinateInline-Regular",
+   "Codystar-Light",
+   "AutourOne-Regular",
+   "Galada-Regular",
+   "Charmonman-Bold",
+   "Charmonman-Regular"
+  ],
+  "现代极简字体(6+ 款)": [
+   "Elianto-Regular",
+   "Hundo",
+   "Aspire-DemiBold"
+  ],
+  "速度动感字体(2 款)": [
+   "FasterOne-Regular"
+  ],
+  "字体与入场动画搭配表": [
+   "Inter-Medium",
+   "Lato-Regular",
+   "BrandonGrotesque-Bold"
+  ],
+  "字体版权说明": [
+   "Lato-Hairline",
+   "Lato-Light",
+   "Lato-Medium",
+   "Lato-Semibold",
+   "Lato-Bold",
+   "Lato-Heavy",
+   "Lato-Black",
+   "Kanit-Thin",
+   "Kanit-ExtraLight",
+   "Kanit-Light",
+   "Kanit-Regular",
+   "Kanit-Medium",
+   "Kanit-SemiBold",
+   "Kanit-Bold",
+   "Inter-Thin",
+   "Inter-ExtraLight",
+   "Inter-Light",
+   "Inter-SemiBold",
+   "Inter-Bold",
+   "Inter-ExtraBold",
+   "Inter-Black",
+   "BrandonGrotesque-Thin",
+   "BrandonGrotesque-Light",
+   "BrandonGrotesque-Regular",
+   "BrandonGrotesque-Medium",
+   "BrandonGrotesque-Black",
+   "AlegreyaSansSC-Thin",
+   "AlegreyaSansSC-Light",
+   "AlegreyaSansSC-Regular",
+   "AlegreyaSansSC-Medium",
+   "AlegreyaSansSC-Bold",
+   "AlegreyaSansSC-ExtraBold",
+   "AlegreyaSansSC-Black",
+   "Merriweather-Light",
+   "Merriweather-Regular",
+   "Merriweather-Bold",
+   "Merriweather-Black",
+   "BebasNeue-Thin",
+   "BebasNeue-Book",
+   "BebasNeue-Light",
+   "BebasNeue-Regular",
+   "DejaVuSans",
+   "DejaVuSans-Bold",
+   "DejaVuSans-Oblique",
+   "DejaVuSans-ExtraLight",
+   "Karla-Regular",
+   "Karla-Italic",
+   "Karla-Bold",
+   "Karla-BoldItalic",
+   "Antonio-Light",
+   "Antonio-Regular"
+  ]
+ },
+ "fonts": [
+  {
+   "ps_name": "BebasKai",
+   "category": "粗犷冲击字体(8+ 款)",
+   "file": "BebasKai.ttf",
+   "family": "Bebas Kai",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Brat",
+   "category": "街头涂鸦字体(8+ 款)",
+   "file": "Brat.ttf",
+   "family": "Brat",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BroadcastMatter",
+   "category": "街头涂鸦字体(8+ 款)",
+   "file": "Broadcast_Matter.ttf",
+   "family": "Broadcast Matter",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "GreatVibes-Regular",
+   "category": "手写签名字体(10+ 款)",
+   "file": "GreatVibes-Regular.ttf",
+   "family": "Great Vibes",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Allura-Regular",
+   "category": "手写签名字体(10+ 款)",
+   "file": "Allura-Regular.ttf",
+   "family": "Allura",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "HerrVonMuellerhoff-Regular",
+   "category": "手写签名字体(10+ 款)",
+   "file": "HerrVonMuellerhoff-Regular.ttf",
+   "family": "Herr Von Muellerhoff",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "DrSugiyama-Regular",
+   "category": "手写签名字体(10+ 款)",
+   "file": "DrSugiyama-Regular.ttf",
+   "family": "Dr Sugiyama",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BadScript-Regular",
+   "category": "手写签名字体(10+ 款)",
+   "file": "BadScript-Regular.ttf",
+   "family": "Bad Script",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Barriecito-Regular",
+   "category": "马戏团童趣字体(8+ 款)",
+   "file": "Barriecito-Regular.ttf",
+   "family": "Barriecito",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Chewy-Regular",
+   "category": "马戏团童趣字体(8+ 款)",
+   "file": "Chewy-Regular.ttf",
+   "family": "Chewy",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "LuckiestGuy-Regular",
+   "category": "马戏团童趣字体(8+ 款)",
+   "file": "LuckiestGuy-Regular.ttf",
+   "family": "Luckiest Guy",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Flavors-Regular",
+   "category": "马戏团童趣字体(8+ 款)",
+   "file": "Flavors-Regular.ttf",
+   "family": "Flavors",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "HennyPenny-Regular",
+   "category": "马戏团童趣字体(8+ 款)",
+   "file": "HennyPenny-Regular.ttf",
+   "family": "Henny Penny",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "FingerPaint-Regular",
+   "category": "马戏团童趣字体(8+ 款)",
+   "file": "FingerPaint-Regular.ttf",
+   "family": "Finger Paint",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Creepster-Regular",
+   "category": "哥特恐怖字体(6 款)",
+   "file": "Creepster-Regular.ttf",
+   "family": "Creepster",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Eater-Regular",
+   "category": "哥特恐怖字体(6 款)",
+   "file": "Eater-Regular.ttf",
+   "family": "Eater",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "MetalMania-Regular",
+   "category": "哥特恐怖字体(6 款)",
+   "file": "MetalMania-Regular.ttf",
+   "family": "Metal Mania",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "LondrinaShadow-Regular",
+   "category": "哥特恐怖字体(6 款)",
+   "file": "LondrinaShadow-Regular.ttf",
+   "family": "Londrina Shadow",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "LondrinaOutline-Regular",
+   "category": "哥特恐怖字体(6 款)",
+   "file": "LondrinaOutline-Regular.ttf",
+   "family": "Londrina Outline",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Asset-Regular",
+   "category": "复古装饰字体(10+ 款)",
+   "file": "Asset-Regular.ttf",
+   "family": "Asset",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "FascinateInline-Regular",
+   "category": "复古装饰字体(10+ 款)",
+   "file": "FascinateInline-Regular.ttf",
+   "family": "Fascinate Inline",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Codystar-Light",
+   "category": "复古装饰字体(10+ 款)",
+   "file": "Codystar-Light.ttf",
+   "family": "Codystar",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "AutourOne-Regular",
+   "category": "复古装饰字体(10+ 款)",
+   "file": "AutourOne-Regular.ttf",
+   "family": "Autour One",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Galada-Regular",
+   "category": "复古装饰字体(10+ 款)",
+   "file": "Galada-Regular.ttf",
+   "family": "Galada",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Charmonman-Bold",
+   "category": "复古装饰字体(10+ 款)",
+   "file": "Charmonman-Bold.ttf",
+   "family": "Charmonman",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Charmonman-Regular",
+   "category": "复古装饰字体(10+ 款)",
+   "file": "Charmonman-Regular.ttf",
+   "family": "Charmonman",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Elianto-Regular",
+   "category": "现代极简字体(6+ 款)",
+   "file": "Elianto-Regular.ttf",
+   "family": "Elianto",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Hundo",
+   "category": "现代极简字体(6+ 款)",
+   "file": "Hundo.ttf",
+   "family": "Hundo",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Aspire-DemiBold",
+   "category": "现代极简字体(6+ 款)",
+   "file": "Aspire-DemiBold.ttf",
+   "family": "Aspire",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "FasterOne-Regular",
+   "category": "速度动感字体(2 款)",
+   "file": "FasterOne-Regular.ttf",
+   "family": "Faster One",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Inter-Medium",
+   "category": "字体与入场动画搭配表",
+   "file": "Inter-Medium.ttf",
+   "family": "Inter Medium",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Lato-Regular",
+   "category": "字体与入场动画搭配表",
+   "file": "Lato-Regular.ttf",
+   "family": "Lato",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BrandonGrotesque-Bold",
+   "category": "字体与入场动画搭配表",
+   "file": "BrandonGrotesque-Bold.ttf",
+   "family": "Brandon Grotesque Bold",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Lato-Hairline",
+   "category": "字体版权说明",
+   "file": "Lato-Thin.ttf",
+   "family": "Lato Hairline",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Lato-Light",
+   "category": "字体版权说明",
+   "file": "Lato-Light.ttf",
+   "family": "Lato Light",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Lato-Medium",
+   "category": "字体版权说明",
+   "file": "Lato-Medium.ttf",
+   "family": "Lato",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Lato-Semibold",
+   "category": "字体版权说明",
+   "file": "Lato-Semibold.ttf",
+   "family": "Lato",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Lato-Bold",
+   "category": "字体版权说明",
+   "file": "Lato-Bold.ttf",
+   "family": "Lato",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Lato-Heavy",
+   "category": "字体版权说明",
+   "file": "Lato-Heavy.ttf",
+   "family": "Lato",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Lato-Black",
+   "category": "字体版权说明",
+   "file": "Lato-Black.ttf",
+   "family": "Lato Black",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Kanit-Thin",
+   "category": "字体版权说明",
+   "file": "kanit-thin.otf",
+   "family": "Kanit",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Kanit-ExtraLight",
+   "category": "字体版权说明",
+   "file": "kanit-extralight.otf",
+   "family": "Kanit",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Kanit-Light",
+   "category": "字体版权说明",
+   "file": "kanit-light.otf",
+   "family": "Kanit",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Kanit-Regular",
+   "category": "字体版权说明",
+   "file": "kanit-regular.otf",
+   "family": "Kanit",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Kanit-Medium",
+   "category": "字体版权说明",
+   "file": "kanit-medium.otf",
+   "family": "Kanit",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Kanit-SemiBold",
+   "category": "字体版权说明",
+   "file": "kanit-semibold.otf",
+   "family": "Kanit",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Kanit-Bold",
+   "category": "字体版权说明",
+   "file": "kanit-bold.otf",
+   "family": "Kanit",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Inter-Thin",
+   "category": "字体版权说明",
+   "file": "Inter-Thin.ttf",
+   "family": "Inter Thin",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Inter-ExtraLight",
+   "category": "字体版权说明",
+   "file": "Inter-ExtraLight.ttf",
+   "family": "Inter ExtraLight",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Inter-Light",
+   "category": "字体版权说明",
+   "file": "Inter-Light.ttf",
+   "family": "Inter Light",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Inter-SemiBold",
+   "category": "字体版权说明",
+   "file": "Inter-SemiBold.ttf",
+   "family": "Inter SemiBold",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Inter-Bold",
+   "category": "字体版权说明",
+   "file": "Inter-Bold.ttf",
+   "family": "Inter",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Inter-ExtraBold",
+   "category": "字体版权说明",
+   "file": "Inter-ExtraBold.ttf",
+   "family": "Inter ExtraBold",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Inter-Black",
+   "category": "字体版权说明",
+   "file": "Inter-Black.ttf",
+   "family": "Inter Black",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BrandonGrotesque-Thin",
+   "category": "字体版权说明",
+   "file": "BrandonGrotesque-Thin.ttf",
+   "family": "Brandon Grotesque Thin",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BrandonGrotesque-Light",
+   "category": "字体版权说明",
+   "file": "BrandonGrotesque-Light.ttf",
+   "family": "Brandon Grotesque Light",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BrandonGrotesque-Regular",
+   "category": "字体版权说明",
+   "file": "BrandonGrotesque-Regular.ttf",
+   "family": "Brandon Grotesque Regular",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BrandonGrotesque-Medium",
+   "category": "字体版权说明",
+   "file": "BrandonGrotesque-Medium.ttf",
+   "family": "Brandon Grotesque Medium",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BrandonGrotesque-Black",
+   "category": "字体版权说明",
+   "file": "BrandonGrotesque-Black.ttf",
+   "family": "Brandon Grotesque Black",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "AlegreyaSansSC-Thin",
+   "category": "字体版权说明",
+   "file": "AlegreyaSansSC-Thin.ttf",
+   "family": "Alegreya Sans SC Thin",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "AlegreyaSansSC-Light",
+   "category": "字体版权说明",
+   "file": "AlegreyaSansSC-Light.ttf",
+   "family": "Alegreya Sans SC Light",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "AlegreyaSansSC-Regular",
+   "category": "字体版权说明",
+   "file": "AlegreyaSansSC-Regular.ttf",
+   "family": "Alegreya Sans SC",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "AlegreyaSansSC-Medium",
+   "category": "字体版权说明",
+   "file": "AlegreyaSansSC-Medium.ttf",
+   "family": "Alegreya Sans SC Medium",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "AlegreyaSansSC-Bold",
+   "category": "字体版权说明",
+   "file": "AlegreyaSansSC-Bold.ttf",
+   "family": "Alegreya Sans SC",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "AlegreyaSansSC-ExtraBold",
+   "category": "字体版权说明",
+   "file": "AlegreyaSansSC-ExtraBold.ttf",
+   "family": "Alegreya Sans SC ExtraBold",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "AlegreyaSansSC-Black",
+   "category": "字体版权说明",
+   "file": "AlegreyaSansSC-Black.ttf",
+   "family": "Alegreya Sans SC Black",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Merriweather-Light",
+   "category": "字体版权说明",
+   "file": "Merriweather-Light.ttf",
+   "family": "Merriweather",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Merriweather-Regular",
+   "category": "字体版权说明",
+   "file": "Merriweather-Regular.ttf",
+   "family": "Merriweather",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Merriweather-Bold",
+   "category": "字体版权说明",
+   "file": "Merriweather-Bold.ttf",
+   "family": "Merriweather",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Merriweather-Black",
+   "category": "字体版权说明",
+   "file": "Merriweather-Black.ttf",
+   "family": "Merriweather",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BebasNeue-Thin",
+   "category": "字体版权说明",
+   "file": "BebasNeueThin-4B3mY.ttf",
+   "family": "Bebas Neue",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BebasNeue-Book",
+   "category": "字体版权说明",
+   "file": "BebasNeueBook-d9A1l.ttf",
+   "family": "Bebas Neue",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BebasNeue-Light",
+   "category": "字体版权说明",
+   "file": "BebasNeue-Light.ttf",
+   "family": "Bebas Neue",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "BebasNeue-Regular",
+   "category": "字体版权说明",
+   "file": "BebasNeueRegular-gxj83.ttf",
+   "family": "Bebas Neue",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "DejaVuSans",
+   "category": "字体版权说明",
+   "file": "DejaVuSans.ttf",
+   "family": "DejaVu Sans",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "DejaVuSans-Bold",
+   "category": "字体版权说明",
+   "file": "DejaVuSans-Bold.ttf",
+   "family": "DejaVu Sans",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "DejaVuSans-Oblique",
+   "category": "字体版权说明",
+   "file": "DejaVuSans-Oblique.ttf",
+   "family": "DejaVu Sans",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "DejaVuSans-ExtraLight",
+   "category": "字体版权说明",
+   "file": "DejaVuSans-ExtraLight.ttf",
+   "family": "DejaVu Sans Light",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Karla-Regular",
+   "category": "字体版权说明",
+   "file": "Karla-Regular.ttf",
+   "family": "Karla",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Karla-Italic",
+   "category": "字体版权说明",
+   "file": "Karla-Italic.ttf",
+   "family": "Karla",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Karla-Bold",
+   "category": "字体版权说明",
+   "file": "Karla-Bold.ttf",
+   "family": "Karla",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Karla-BoldItalic",
+   "category": "字体版权说明",
+   "file": "Karla-BoldItalic.ttf",
+   "family": "Karla",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Antonio-Light",
+   "category": "字体版权说明",
+   "file": "Antonio-Light.ttf",
+   "family": "Antonio",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  },
+  {
+   "ps_name": "Antonio-Regular",
+   "category": "字体版权说明",
+   "file": "Antonio-Regular.ttf",
+   "family": "Antonio",
+   "cov_jp": 0,
+   "cov_cn": 0,
+   "cov_latin": 18,
+   "jp_full": false,
+   "cn_full": false,
+   "latin_full": true
+  }
+ ],
+ "excluded": {
+  "already_system": [
+   [
+    "Arial 家族(4 字重)",
+    "ArialMT"
+   ],
+   [
+    "Arial 家族(4 字重)",
+    "Arial-BoldMT"
+   ],
+   [
+    "Arial 家族(4 字重)",
+    "Arial-ItalicMT"
+   ],
+   [
+    "Arial 家族(4 字重)",
+    "Arial-BoldItalicMT"
+   ],
+   [
+    "Calibri 家族(6 字重)",
+    "Calibri"
+   ],
+   [
+    "Calibri 家族(6 字重)",
+    "Calibri-Bold"
+   ],
+   [
+    "Calibri 家族(6 字重)",
+    "Calibri-Italic"
+   ],
+   [
+    "Calibri 家族(6 字重)",
+    "Calibri-BoldItalic"
+   ],
+   [
+    "Calibri 家族(6 字重)",
+    "Calibri-Light"
+   ],
+   [
+    "Calibri 家族(6 字重)",
+    "Calibri-LightItalic"
+   ],
+   [
+    "Cambria 家族(4 字重)",
+    "Cambria"
+   ],
+   [
+    "Cambria 家族(4 字重)",
+    "Cambria-Bold"
+   ],
+   [
+    "Cambria 家族(4 字重)",
+    "Cambria-Italic"
+   ],
+   [
+    "Cambria 家族(4 字重)",
+    "Cambria-BoldItalic"
+   ],
+   [
+    "Candara 家族(4 字重)",
+    "Candara"
+   ],
+   [
+    "Candara 家族(4 字重)",
+    "Candara-Bold"
+   ],
+   [
+    "Candara 家族(4 字重)",
+    "Candara-Italic"
+   ],
+   [
+    "Candara 家族(4 字重)",
+    "Candara-BoldItalic"
+   ],
+   [
+    "Consolas(等宽,4 字重)",
+    "Consolas"
+   ],
+   [
+    "Consolas(等宽,4 字重)",
+    "Consolas-Bold"
+   ],
+   [
+    "Consolas(等宽,4 字重)",
+    "Consolas-Italic"
+   ],
+   [
+    "Consolas(等宽,4 字重)",
+    "Consolas-BoldItalic"
+   ],
+   [
+    "Constantia 家族(4 字重)",
+    "Constantia"
+   ],
+   [
+    "Constantia 家族(4 字重)",
+    "Constantia-Bold"
+   ],
+   [
+    "Constantia 家族(4 字重)",
+    "Constantia-Italic"
+   ],
+   [
+    "Constantia 家族(4 字重)",
+    "Constantia-BoldItalic"
+   ],
+   [
+    "Corbel 家族(5 字重)",
+    "Corbel"
+   ],
+   [
+    "Corbel 家族(5 字重)",
+    "Corbel-Bold"
+   ],
+   [
+    "Corbel 家族(5 字重)",
+    "Corbel-Italic"
+   ],
+   [
+    "Corbel 家族(5 字重)",
+    "Corbel-BoldItalic"
+   ],
+   [
+    "Courier New 家族(4 字重)",
+    "CourierNewPSMT"
+   ],
+   [
+    "Courier New 家族(4 字重)",
+    "CourierNewPS-BoldMT"
+   ],
+   [
+    "Courier New 家族(4 字重)",
+    "CourierNewPS-ItalicMT"
+   ],
+   [
+    "Courier New 家族(4 字重)",
+    "CourierNewPS-BoldItalicMT"
+   ],
+   [
+    "Georgia 家族(4 字重)",
+    "Georgia"
+   ],
+   [
+    "Georgia 家族(4 字重)",
+    "Georgia-Bold"
+   ],
+   [
+    "Georgia 家族(4 字重)",
+    "Georgia-Italic"
+   ],
+   [
+    "Georgia 家族(4 字重)",
+    "Georgia-BoldItalic"
+   ],
+   [
+    "Times New Roman 家族(4 字重)",
+    "TimesNewRomanPSMT"
+   ],
+   [
+    "Times New Roman 家族(4 字重)",
+    "TimesNewRomanPS-BoldMT"
+   ],
+   [
+    "Times New Roman 家族(4 字重)",
+    "TimesNewRomanPS-ItalicMT"
+   ],
+   [
+    "Times New Roman 家族(4 字重)",
+    "TimesNewRomanPS-BoldItalicMT"
+   ],
+   [
+    "Verdana 家族(4 字重)",
+    "Verdana"
+   ],
+   [
+    "Verdana 家族(4 字重)",
+    "Verdana-Bold"
+   ],
+   [
+    "Verdana 家族(4 字重)",
+    "Verdana-Italic"
+   ],
+   [
+    "Verdana 家族(4 字重)",
+    "Verdana-BoldItalic"
+   ],
+   [
+    "Trebuchet MS 家族(4 字重)",
+    "TrebuchetMS"
+   ],
+   [
+    "Trebuchet MS 家族(4 字重)",
+    "TrebuchetMS-Bold"
+   ],
+   [
+    "Trebuchet MS 家族(4 字重)",
+    "TrebuchetMS-Italic"
+   ],
+   [
+    "Palatino Linotype 家族(4 字重)",
+    "PalatinoLinotype-Roman"
+   ],
+   [
+    "Palatino Linotype 家族(4 字重)",
+    "PalatinoLinotype-Bold"
+   ],
+   [
+    "Palatino Linotype 家族(4 字重)",
+    "PalatinoLinotype-Italic"
+   ],
+   [
+    "Palatino Linotype 家族(4 字重)",
+    "PalatinoLinotype-BoldItalic"
+   ],
+   [
+    "Tahoma(2 字重)",
+    "Tahoma"
+   ],
+   [
+    "Tahoma(2 字重)",
+    "Tahoma-Bold"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-Bold"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-Italic"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-BoldItalic"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-Light"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-Semilight"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-Semibold"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-SemiboldItalic"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-LightItalic"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-SemilightItalic"
+   ],
+   [
+    "Impact / Arial Black / Comic Sans MS / Gabriola",
+    "Impact"
+   ],
+   [
+    "Impact / Arial Black / Comic Sans MS / Gabriola",
+    "Arial-Black"
+   ],
+   [
+    "Impact / Arial Black / Comic Sans MS / Gabriola",
+    "ComicSansMS"
+   ],
+   [
+    "Impact / Arial Black / Comic Sans MS / Gabriola",
+    "ComicSansMS-Bold"
+   ],
+   [
+    "其他系统英文字体",
+    "MalgunGothicBold"
+   ],
+   [
+    "其他系统英文字体",
+    "Bahnschrift"
+   ],
+   [
+    "其他系统英文字体",
+    "MVBoli"
+   ],
+   [
+    "其他系统英文字体",
+    "FranklinGothic-Medium"
+   ],
+   [
+    "其他系统英文字体",
+    "FranklinGothic-MediumItalic"
+   ],
+   [
+    "粗犷冲击字体(8+ 款)",
+    "Anton-Regular"
+   ],
+   [
+    "粗犷冲击字体(8+ 款)",
+    "BowlbyOneSC-Regular"
+   ],
+   [
+    "粗犷冲击字体(8+ 款)",
+    "BlackOpsOne-Regular"
+   ],
+   [
+    "街头涂鸦字体(8+ 款)",
+    "Blanka-Regular"
+   ],
+   [
+    "街头涂鸦字体(8+ 款)",
+    "BungeeShade-Regular"
+   ],
+   [
+    "马戏团童趣字体(8+ 款)",
+    "Bangers-Regular"
+   ],
+   [
+    "复古装饰字体(10+ 款)",
+    "AlfaSlabOne-Regular"
+   ],
+   [
+    "字体与入场动画搭配表",
+    "BebasNeue-Bold"
+   ],
+   [
+    "字体与入场动画搭配表",
+    "Antonio-Bold"
+   ],
+   [
+    "字体版权说明",
+    "Kanit-ExtraBold"
+   ],
+   [
+    "字体版权说明",
+    "Kanit-Black"
+   ]
+  ],
+  "license_risk": [
+   {
+    "category": "其他系统英文字体",
+    "ps_name": "InkFree",
+    "file": "Inkfree.ttf"
+   },
+   {
+    "category": "街头涂鸦字体(8+ 款)",
+    "ps_name": "MegaFresh",
+    "file": "Mega Fresh - Demo.ttf"
+   },
+   {
+    "category": "字体版权说明",
+    "ps_name": "CocogoosePro-Thin",
+    "file": "Cocogoose Pro Thin-trial.ttf"
+   }
+  ],
+  "not_installed": [
+   [
+    "Corbel 家族(5 字重)",
+    "Corbel-Light"
+   ],
+   [
+    "Trebuchet MS 家族(4 字重)",
+    "TrebuchetMS-BoldItalic"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-Black"
+   ],
+   [
+    "Segoe UI 全家族(12 字重)",
+    "SegoeUI-BlackItalic"
+   ],
+   [
+    "Impact / Arial Black / Comic Sans MS / Gabriola",
+    "Gabriola-Regular"
+   ],
+   [
+    "其他系统英文字体",
+    "MalgunGothicRegular"
+   ],
+   [
+    "其他系统英文字体",
+    "SitkaVF"
+   ],
+   [
+    "其他系统英文字体",
+    "SitkaVF-Italic"
+   ],
+   [
+    "粗犷冲击字体(8+ 款)",
+    "Impacted"
+   ],
+   [
+    "粗犷冲击字体(8+ 款)",
+    "KenyanCoffee-Regular"
+   ],
+   [
+    "粗犷冲击字体(8+ 款)",
+    "KenyanCoffee-Bold"
+   ],
+   [
+    "粗犷冲击字体(8+ 款)",
+    "KenyanCoffee-Italic"
+   ],
+   [
+    "粗犷冲击字体(8+ 款)",
+    "KenyanCoffee-BoldItalic"
+   ],
+   [
+    "粗犷冲击字体(8+ 款)",
+    "Hanson-Bold"
+   ],
+   [
+    "街头涂鸦字体(8+ 款)",
+    "Building"
+   ],
+   [
+    "街头涂鸦字体(8+ 款)",
+    "HardestStyle"
+   ],
+   [
+    "街头涂鸦字体(8+ 款)",
+    "BarryKades"
+   ],
+   [
+    "街头涂鸦字体(8+ 款)",
+    "Beantown"
+   ],
+   [
+    "手写签名字体(10+ 款)",
+    "DhanikansSignature2"
+   ],
+   [
+    "手写签名字体(10+ 款)",
+    "DhanikansSignature-Italic"
+   ],
+   [
+    "手写签名字体(10+ 款)",
+    "AusthinaBrush"
+   ],
+   [
+    "手写签名字体(10+ 款)",
+    "GiveYouGlory-Regular"
+   ],
+   [
+    "手写签名字体(10+ 款)",
+    "LovedbytheKing-Regular"
+   ],
+   [
+    "手写签名字体(10+ 款)",
+    "Molle-RegularItalic"
+   ],
+   [
+    "马戏团童趣字体(8+ 款)",
+    "Frijole-Regular"
+   ],
+   [
+    "马戏团童趣字体(8+ 款)",
+    "IndieFlower-Regular"
+   ],
+   [
+    "哥特恐怖字体(6 款)",
+    "Megrim-Regular"
+   ],
+   [
+    "哥特恐怖字体(6 款)",
+    "Monofett-Regular"
+   ],
+   [
+    "复古装饰字体(10+ 款)",
+    "Codystar-Regular"
+   ],
+   [
+    "复古装饰字体(10+ 款)",
+    "Jelytta"
+   ],
+   [
+    "现代极简字体(6+ 款)",
+    "Byom-RegularTrial"
+   ],
+   [
+    "现代极简字体(6+ 款)",
+    "Byom-BoldTrial"
+   ],
+   [
+    "现代极简字体(6+ 款)",
+    "Byom-LightTrial"
+   ],
+   [
+    "现代极简字体(6+ 款)",
+    "Byom-ThinTrial"
+   ],
+   [
+    "现代极简字体(6+ 款)",
+    "Byom-IconsTrial"
+   ],
+   [
+    "速度动感字体(2 款)",
+    "Brushstrike-Trial"
+   ],
+   [
+    "中文手写与装饰(3 款)",
+    "MaShanZheng"
+   ],
+   [
+    "中文手写与装饰(3 款)",
+    "AliandoRocky"
+   ],
+   [
+    "中文手写与装饰(3 款)",
+    "FZCuHeiSongS-B-GB"
+   ],
+   [
+    "字体与入场动画搭配表",
+    "CocogoosePro-Bold"
+   ],
+   [
+    "字体版权说明",
+    "Lato-Thin"
+   ],
+   [
+    "字体版权说明",
+    "Inter-Variable"
+   ],
+   [
+    "字体版权说明",
+    "CocogoosePro-Ultralight"
+   ],
+   [
+    "字体版权说明",
+    "CocogoosePro-Semilight"
+   ],
+   [
+    "字体版权说明",
+    "CocogoosePro-Regular"
+   ],
+   [
+    "字体版权说明",
+    "CocogoosePro-Light"
+   ],
+   [
+    "字体版权说明",
+    "CocogoosePro-Letterpress"
+   ],
+   [
+    "字体版权说明",
+    "CocogoosePro-Darkmode"
+   ],
+   [
+    "字体版权说明",
+    "DejaVuSans-Condensed"
+   ],
+   [
+    "字体版权说明",
+    "DejaVuSans-CondensedBold"
+   ],
+   [
+    "字体版权说明",
+    "DejaVuSans-CondensedOblique"
+   ],
+   [
+    "字体版权说明",
+    "FranklinGothic-Regular"
+   ],
+   [
+    "字体版权说明",
+    "FranklinGothic-Italic"
+   ],
+   [
+    "字体版权说明",
+    "FranklinGothic-Condensed"
+   ]
+  ]
+ }
+}
