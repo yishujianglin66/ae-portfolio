@@ -67,7 +67,7 @@ ZONE_CFG = {
     "outro": {"gap": 1.2, "hold": 2.5, "cap": 2},
 }
 ZONE_END_GUARD = 0.35     # 锚点距分区结束 <0.35s 不选 (会被钳成不可读短事件)
-DROP_POS_CYCLE = [(960, 540), (620, 360), (1300, 720)]   # v4: drop 三分位轮换 (中/左上/右下)
+DROP_POS_CYCLE = [(960, 540), (700, 380), (1220, 700)]   # v9: 内收 (v8 实证 620/1300 宽字超框)
 ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 0.4 保覆盖)
 
 # 字体: font_stack[0] 为首选 (probe_font=true 表示未实机实证, 探针不过则用栈尾已实证字体)
@@ -95,12 +95,13 @@ STYLES = {
         "blurfade": True,     # v3: 模糊淡入（手册 §十七, ADBE Gaussian Blur 2 prop1: 60→0）
     },
     "drop_impact": {
-        "size": (160, 215), "fill": [1.0, 1.0, 1.0],
-        "stroke": ([0.02, 0.02, 0.05], 6.0), "pos": "center",
+        "size": (150, 196), "fill": [1.0, 1.0, 1.0],
+        "stroke": ([0.02, 0.02, 0.05], 5.0), "pos": "center",
         "enter": "punch_tracking",
-        "glow": (115, 25, 1.7), "glow2": (205, 80, 0.9),     # v4: 主发光峰值 3.74→2.89 防文字边缘过曝疲劳
+        # v8: 去 Bloom 第二发光 (Boss"特效重复添加"观感 = 双发光叠加); 主发光大幅收紧防全帧提亮
+        "glow": (115, 25, 1.7), "glow2": None,
         "shadow": (0.78, 135, 10, 12), "bevel": (3, -45, 0.55),
-        "tracking": 250,
+        "tracking": 110,   # v9: 250→110 (v8 实证 punch 展开期 5 字母超框被切)
         "cascade": False,   # v7 禁用: RS 动画器与脚本字体互斥 (见 build_side 注)
         "elastic": True,    # 弹性缩放砸入: amp*sin/exp 衰减表达式（层变换, 字体安全）
         "shockwave": False, # v4 关闭: 合成级白固态闪光（视频被影响的感知来源）
@@ -299,17 +300,19 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         font_pos[fkey] = font_pos.get(fkey, 0) + 1
         last_font[fkey] = font
 
-        # v6.1: 发光按文字系调制 (Boss 反馈"亮度过剩") — 密集 CJK 字形发光面积远大于
-        # 压缩拉丁体, 同参数形成大面积光晕洗白文字与背景 ("视频被影响"的感知来源)
+        # v8: 发光按文字系大幅收紧 — 全片逐帧扫描实证 107/720 帧整帧提亮 (峰值+13),
+        # 来源=文字白墨+光晕覆盖画面 20-30% 面积 (Boss"视频被影响/亮度过剩"的量化根因);
+        # 收紧目标: 阈值抬高只让最亮核心发光 + 半径砍半 + 去 Bloom 第二发光
         glow, glow2, bevel, pulse = st["glow"], st.get("glow2"), st.get("bevel"), 1.7
         if scl in ("jp", "cn"):
-            glow = (175, glow[1], round(glow[2] * 0.70, 3)) if glow else glow
-            glow2 = (215, int(glow2[1] * 0.6), round(glow2[2] * 0.55, 3)) if glow2 else glow2
-            bevel = (bevel[0], bevel[1], round(bevel[2] * 0.70, 3)) if bevel else bevel
-            pulse = 1.35
-        elif glow:   # latin: Impact 系压缩重体墨量也不小, 轻降
-            glow = (150, glow[1], round(glow[2] * 0.85, 3))
-            pulse = 1.55
+            glow = (185, 14, round(glow[2] * 0.62, 3)) if glow else glow
+            glow2 = None
+            bevel = (bevel[0], bevel[1], round(bevel[2] * 0.55, 3)) if bevel else bevel
+            pulse = 1.28
+        elif glow:   # latin
+            glow = (158, 16, round(glow[2] * 0.78, 3))
+            glow2 = None
+            pulse = 1.42
 
         # 能量 → 字号/发光 (镜头 energy × 包络 归一混合)
         shot_en = float(seg.get("energy", 0.4))
@@ -338,12 +341,12 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             if closeup:
                 y = int(1080 * (0.18 if side_flip % 2 == 0 else 0.82))
 
-        # v7: drop 入场循环变款全部改整层变换 (RS 动画器与脚本字体互斥, v6.1 实证)
-        # _v: 0=spin_z 整层翻入 / 1=drop_fall 整层下落 / 2=纯 punch tracking
-        spin = drop_fall = False
+        # v9: drop 变款全整层平移 (RS 动画器与脚本字体互斥; v8 实证旋转变款使文字倾斜超框压高光)
+        # _v: 0=drop_fall 自上落下 / 1=rise_up 自下升起 / 2=纯 punch tracking
+        drop_fall = rise_up = False
         if style_id == "drop_impact":
             _v = bank_pos[zone] % 3
-            spin, drop_fall = (_v == 0), (_v == 1)
+            drop_fall, rise_up = (_v == 0), (_v == 1)
 
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
@@ -365,8 +368,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "elastic": st.get("elastic", False),
             "shockwave": st.get("shockwave", False),
             "typewriter": st.get("typewriter", False),
-            "spin": spin,
             "drop_fall": drop_fall,
+            "rise_up": rise_up,
             "blurfade": st.get("blurfade", False),
             "tracking": st["tracking"],
             "anchor_shot": {"index": seg.get("index"), "t0": t0, "t1": t1},
@@ -428,7 +431,9 @@ def _pick_dark_pos(t_in, bg_video, fallback_i, hold=0.9):
         return DROP_POS_CYCLE[fallback_i % len(DROP_POS_CYCLE)]
     best, best_l = DROP_POS_CYCLE[fallback_i % 3], 1e9
     for cx, cy in DROP_POS_CYCLE:
-        lum = max(_region_luma(bg_video, t_in + 0.35 * hold, cx, cy),
+        # v9: 加早期采样 0.12h — v8 实证爆炸高光在 0.13h 就爆发, 0.35h 起步的采样全漏
+        lum = max(_region_luma(bg_video, t_in + 0.12 * hold, cx, cy),
+                  _region_luma(bg_video, t_in + 0.35 * hold, cx, cy),
                   _region_luma(bg_video, t_in + 0.65 * hold, cx, cy))
         if lum < best_l - 1e-6:
             best, best_l = (cx, cy), lum
@@ -467,8 +472,8 @@ def build_jsx(events, out_aep: Path):
         d["elastic"] = bool(e.get("elastic"))
         d["shockwave"] = bool(e.get("shockwave"))
         d["typewriter"] = bool(e.get("typewriter"))
-        d["spin"] = bool(e.get("spin"))
         d["drop_fall"] = bool(e.get("drop_fall"))
+        d["rise_up"] = bool(e.get("rise_up"))
         d["blurfade"] = bool(e.get("blurfade"))
         d["tracking"] = e.get("tracking")
         # 入/出场关键帧时刻 (hold 过短时按比例缩, 保证 keyframes 单调)
@@ -581,17 +586,17 @@ def build_jsx(events, out_aep: Path):
               "t=time-inPoint;if(t<0.04){{85*(t/0.04);}}else{{Math.max(85*Math.exp(-7*(t-0.04)),0);}}";
           }} catch (we) {{ rep += "|SHOCKWAVE" + i; }}
         }}
-        if (ev.spin) {{                                          // v7 整层 Z 翻入 (层变换, 字体安全)
+        if (ev.drop_fall) {{                                     // v9 整层下落砸入 (纯平移, 不旋转)
           try {{
-            L.rotation.setValueAtTime(ev.t_in, -120);
-            L.rotation.setValueAtTime(ev.t_in + 0.28, 0);
-          }} catch (sne) {{ rep += "|SPIN" + i; }}
-        }}
-        if (ev.drop_fall) {{                                     // v7 整层下落砸入 (层变换)
-          try {{
-            L.position.setValueAtTime(ev.t_in, [ev.x, ev.y - 260]);
-            L.position.setValueAtTime(ev.t_in + 0.30, [ev.x, ev.y]);
+            L.position.setValueAtTime(ev.t_in, [ev.x, ev.y - 240]);
+            L.position.setValueAtTime(ev.t_in + 0.26, [ev.x, ev.y]);
           }} catch (dfe) {{ rep += "|DROPFALL" + i; }}
+        }}
+        if (ev.rise_up) {{                                       // v9 整层自下升起 (纯平移)
+          try {{
+            L.position.setValueAtTime(ev.t_in, [ev.x, ev.y + 240]);
+            L.position.setValueAtTime(ev.t_in + 0.26, [ev.x, ev.y]);
+          }} catch (rue) {{ rep += "|RISEUP" + i; }}
         }}
         if (ev.typewriter) {{                                   // 打字机逐字揭示 (手册 §十六)
           try {{
