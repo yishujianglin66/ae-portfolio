@@ -30,8 +30,8 @@
     ADBE Glo2(0002/0003/0004) / easeOutBack 位置表达式 / Scale 关键帧
   - Text Document 的 strokeColor/strokeWidth 见交接 §四已实证属性名, JSX 内 try/catch 保护
   - ES3 语法; aerender -s/-e 是帧号 (执行模式渲染时秒×24)
-  - 字体实证清单: BebasNeue/Anton/Impact/Consolas (batch_render_expand_v4 渲染>100KB);
-    Georgia/Times New Roman/SimSun 未实证 → probe_font=true, 注入前实机探针
+  - 字体实证清单 (v6, 2026-09-11 probe_font_pool.jsx 26 字体全 =YES): 见 VERIFIED_FONTS;
+    字形覆盖约束: JP 词 (強発壊無縛臨韻) 只配 JP 字体, CN 池可混 JP 字体 (JIS1-2 覆盖简体常用字)
 
 用法 (位置参数契约同 build_master_polish, 2026-09-05 公布, 不可变更):
   python scripts/build_text_overlay.py <run_dir> <tag> [--dry-run]
@@ -77,7 +77,6 @@ ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 
 #   bevel  = (edge_thickness, light_angle, light_intensity) —— ADBE Bevel Alpha 0001/2/4
 STYLES = {
     "build_side": {
-        "fonts": ["BebasNeue", "Consolas"],                  # 全实证
         "size": (85, 120), "fill": [0.95, 0.95, 0.98],
         "stroke": ([0.03, 0.03, 0.06], 2.2), "pos": "side_alt", "enter": "slide_back",
         "glow": (130, 18, 0.9), "glow2": None,
@@ -86,7 +85,6 @@ STYLES = {
         "typewriter": True,   # v3: 逐字揭示（手册 §十六, Range Selector idx 1/2/3）
     },
     "intro_serif": {
-        "fonts": ["Georgia", "Times New Roman", "SimSun", "BebasNeue"],
         "size": (100, 125), "fill": [0.96, 0.94, 0.89],
         "stroke": ([0.05, 0.04, 0.06], 1.8), "pos": "center", "enter": "fade_scale",
         "glow": (150, 30, 0.55), "glow2": None,
@@ -95,7 +93,6 @@ STYLES = {
         "blurfade": True,     # v3: 模糊淡入（手册 §十七, ADBE Gaussian Blur 2 prop1: 60→0）
     },
     "drop_impact": {
-        "fonts": ["Anton", "Impact", "BebasNeue"],           # 全实证
         "size": (160, 215), "fill": [1.0, 1.0, 1.0],
         "stroke": ([0.02, 0.02, 0.05], 6.0), "pos": "center",
         "enter": "punch_tracking",
@@ -110,6 +107,48 @@ STYLES = {
 }
 MOOD_TO_STYLE = {"intro": "intro_serif", "build": "build_side",
                  "drop": "drop_impact", "outro": "intro_serif"}
+
+# ── v6 字体池 (2026-09-11 probe_font_pool.jsx 26 字体实机探针全 =YES) ──────
+# 字形覆盖铁律: YES 只代表字体已安装可按该 PS 名寻址, 不代表字形覆盖——
+#   JP 词含新字体/传统字形 (強発壊無縛臨韻), 简体中文字库大概率缺字 → JP 词只配 JP 字体;
+#   CN 词 (五条悟/加速/迂回/静止/虚式) 标准简体字, JP 字体 (JIS1-2) 也覆盖 → cn 池可混 JP 字体
+# v5 根因: 事件字体恒为 st["fonts"][0] (drop 全 Anton), Anton 无 CJK 字形被 AE 静默回退到
+#   同一回退字体 —— "一直用一样的字体"的直接来源。
+FONT_POOLS = {
+    "drop_impact": {   # 冲击词: 重笔画
+        "jp":    ["YuGothic-Bold", "YuGothic-Semibold", "MS-PGothic"],
+        "cn":    ["FZCuHeiSongS-B-GB", "SimHei", "YuGothic-Bold"],
+        "latin": ["Anton", "Impact", "Hanson-Bold", "BlackOpsOne-Regular"],
+    },
+    "build_side": {    # 铺垫词: 现代无衬线
+        "jp":    ["YuGothic-Medium", "YuGothic-Semibold", "YuGothic-Regular"],
+        "cn":    ["NotoSansSC-VF", "SimHei", "YuGothic-Medium"],
+        "latin": ["BebasNeue", "Antonio-Bold", "Kanit-Bold"],
+    },
+    "intro_serif": {   # 开场/收尾: 衬线/书法质感
+        "jp":    ["YuMincho-Demibold", "YuGothic-Light"],
+        "cn":    ["STKaiti", "MaShanZheng", "FZShuTi"],
+        "latin": ["Georgia", "BebasNeue"],
+    },
+}
+VERIFIED_FONTS = {          # 2026-09-11 探针实证可在 AE 寻址 (字形约束见 FONT_POOLS 注)
+    "YuGothic-Bold", "YuGothic-Semibold", "YuGothic-Medium", "YuGothic-Light",
+    "YuGothic-Regular", "MS-PGothic", "MS-Gothic", "YuMincho-Demibold",
+    "SimHei", "KaiTi", "FZCuHeiSongS-B-GB", "MaShanZheng", "NotoSansSC-VF",
+    "STKaiti", "FZShuTi", "LiSu", "YouYuan", "MicrosoftYaHei-Bold",
+    "Anton", "Impact", "Hanson-Bold", "BlackOpsOne-Regular", "BebasNeue",
+    "Antonio-Bold", "Kanit-Bold", "Bangers-Regular", "Georgia",
+}
+JP_ONLY_CHARS = set("強発壊無縛臨韻")      # 词库内 JP 专字形 (简体字库缺字风险)
+
+
+def script_class(word):
+    """jp=含 JP 专字形; cn=仅通用汉字; latin=ASCII"""
+    if any(ch in JP_ONLY_CHARS for ch in word):
+        return "jp"
+    if any("\u4e00" <= ch <= "\u9fff" for ch in word):
+        return "cn"
+    return "latin"
 
 # 默认词库 (报告无歌词素材 → 按源 IP 咒术回战/五条悟 的 AMV 惯用词; --words-json 可覆盖)
 DEFAULT_WORDS = {
@@ -214,6 +253,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
     env_vals = [env_at(t) for t, _, _ in picked]
     env_max = max(env_vals) if env_vals else 1.0
     side_flip = 0
+    font_pos = {}        # v6 池内轮换游标 (按 样式×文字系 独立, 保证每池首字都能轮到)
+    last_font = {}
     for i, (t, sn, zone) in enumerate(picked):
         cfg = ZONE_CFG[zone]
         mood = "outro" if zone == "outro" else zone
@@ -242,6 +283,17 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             w = bank[(bank_pos[zone] + 1) % len(bank)]
             bank_pos[zone] += 1
         bank_pos[zone] += 1
+
+        # v6: 字体按文字系分池轮换 (jp/cn/latin 见 FONT_POOLS), 池内不背靠背重复
+        scl = script_class(w)
+        pool = FONT_POOLS[style_id][scl]
+        fkey = (style_id, scl)
+        font = pool[font_pos.get(fkey, 0) % len(pool)]
+        if last_font.get(fkey) == font and len(pool) > 1:
+            font = pool[(font_pos.get(fkey, 0) + 1) % len(pool)]
+            font_pos[fkey] = font_pos.get(fkey, 0) + 1
+        font_pos[fkey] = font_pos.get(fkey, 0) + 1
+        last_font[fkey] = font
 
         # 能量 → 字号/发光 (镜头 energy × 包络 归一混合)
         shot_en = float(seg.get("energy", 0.4))
@@ -281,9 +333,10 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
             "mood": mood, "energy": energy, "style_id": style_id,
             "word": w, "size": size, "x": x, "y": y, "closeup": closeup,
-            "font": st["fonts"][0],
-            "font_stack": st["fonts"],
-            "probe_font": st["fonts"][0] not in ("BebasNeue", "Anton", "Impact", "Consolas"),
+            "font": font,
+            "font_stack": pool,
+            "script": scl,
+            "probe_font": font not in VERIFIED_FONTS,
             "fill": st["fill"],
             "stroke": st["stroke"],
             "enter": st["enter"],
@@ -676,7 +729,8 @@ def main():
         cu = " closeup→安全带" if e["closeup"] else ""
         print(f"  #{e['id']:02d} {e['t_in']:6.2f}-{e['t_out']:6.2f} "
               f"({e['hold']:4.2f}s) {e['mood']:<5} {e['style_id']:<12} "
-              f"'{e['word']}' {e['size']}px @({e['x']},{e['y']}){cu}{probe}")
+              f"'{e['word']}'[{e.get('script', '?')}] {e['font']} "
+              f"{e['size']}px @({e['x']},{e['y']}){cu}{probe}")
     zc = {}
     for e in events:
         zc[zone_of(e["t_in"])] = zc.get(zone_of(e["t_in"]), 0) + 1
