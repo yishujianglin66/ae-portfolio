@@ -82,7 +82,9 @@ STYLES = {
         "glow": (130, 18, 0.9), "glow2": None,
         "shadow": (0.6, 135, 6, 8), "bevel": (2, -45, 0.35),
         "tracking": None,
-        "typewriter": True,   # v3: 逐字揭示（手册 §十六, Range Selector idx 1/2/3）
+        # v7 禁用 RS 动画器 (typewriter/cascade): 实证动画范围选择器切换逐字光栅化路径时
+        # 脚本设置的字体被静默替换为默认字体 (v6.1 二分: punch/elastic/无动画层字体全部正常)
+        "typewriter": False,
     },
     "intro_serif": {
         "size": (100, 125), "fill": [0.96, 0.94, 0.89],
@@ -99,47 +101,49 @@ STYLES = {
         "glow": (115, 25, 1.7), "glow2": (205, 80, 0.9),     # v4: 主发光峰值 3.74→2.89 防文字边缘过曝疲劳
         "shadow": (0.78, 135, 10, 12), "bevel": (3, -45, 0.55),
         "tracking": 250,
-        # v3/v4 技法开关（手册附D/E/F 实证；v4 删冲击波——白 Add 闪光被 Boss 反馈"色度不对劲"，实证仅局部但仍干扰）:
-        "cascade": True,    # 逐字级联翻入（按事件循环变款, 见事件构建处）
-        "elastic": True,    # 弹性缩放砸入: amp*sin/exp 衰减表达式（附D 实测 1726KB）
+        "cascade": False,   # v7 禁用: RS 动画器与脚本字体互斥 (见 build_side 注)
+        "elastic": True,    # 弹性缩放砸入: amp*sin/exp 衰减表达式（层变换, 字体安全）
         "shockwave": False, # v4 关闭: 合成级白固态闪光（视频被影响的感知来源）
     },
 }
 MOOD_TO_STYLE = {"intro": "intro_serif", "build": "build_side",
                  "drop": "drop_impact", "outro": "intro_serif"}
 
-# ── v6 字体池 (2026-09-11 probe_font_pool.jsx 26 字体实机探针全 =YES) ──────
-# 字形覆盖铁律: YES 只代表字体已安装可按该 PS 名寻址, 不代表字形覆盖——
-#   JP 词含新字体/传统字形 (強発壊無縛臨韻), 简体中文字库大概率缺字 → JP 词只配 JP 字体;
-#   CN 词 (五条悟/加速/迂回/静止/虚式) 标准简体字, JP 字体 (JIS1-2) 也覆盖 → cn 池可混 JP 字体
-# v5 根因: 事件字体恒为 st["fonts"][0] (drop 全 Anton), Anton 无 CJK 字形被 AE 静默回退到
-#   同一回退字体 —— "一直用一样的字体"的直接来源。
+# ── v6.1 字体池 (2026-09-11 fontTools nameID6 真相表: 只收 HKLM 系统字体真实 PS 名) ──
+# 铁律 (v6 事故实证): AE 只解析 HKLM 系统字体, 用户目录 (LOCALAPPDATA) 字体全部不可见;
+#   预设库 §8.1 set→回读探针有盲区 — 回读只是回显存储字符串, 不证明可解析
+#   (v6 实证: Anton/BebasNeue/Antonio 等 USER 字体 v1 起从未真正渲染, 全被替换成同一默认字体)。
+# 真相表方法: fontTools 枚举全部 face (含 TTC 多 face) 的 nameID 6 + 文件位置 → HKLM 才可用。
 FONT_POOLS = {
-    "drop_impact": {   # 冲击词: 重笔画
-        "jp":    ["YuGothic-Bold", "YuGothic-Semibold", "MS-PGothic"],
-        "cn":    ["FZCuHeiSongS-B-GB", "SimHei", "YuGothic-Bold"],
-        "latin": ["Anton", "Impact", "Hanson-Bold", "BlackOpsOne-Regular"],
+    "drop_impact": {   # 冲击词: 重笔画/压缩展示系
+        "jp":    ["YuGothic-Bold", "MS-PGothic", "YuGothic-Medium"],
+        "cn":    ["FZCHSJW--GB1-0", "SimHei", "MicrosoftYaHei-Bold"],   # FZCHSJW=方正粗黑宋简体
+        "latin": ["Impact", "Haettenschweiler", "Arial-Black", "FranklinGothic-Heavy"],
     },
-    "build_side": {    # 铺垫词: 现代无衬线
-        "jp":    ["YuGothic-Medium", "YuGothic-Semibold", "YuGothic-Regular"],
-        "cn":    ["NotoSansSC-VF", "SimHei", "YuGothic-Medium"],
-        "latin": ["BebasNeue", "Antonio-Bold", "Kanit-Bold"],
+    "build_side": {    # 铺垫词: 现代无衬线/窄体
+        "jp":    ["YuGothic-Regular", "YuGothic-Medium"],
+        "cn":    ["STXihei", "MicrosoftYaHei", "YouYuan"],
+        "latin": ["TwCenMT-CondensedBold", "TrebuchetMS-Bold", "AgencyFB-Bold"],
     },
     "intro_serif": {   # 开场/收尾: 衬线/书法质感
-        "jp":    ["YuMincho-Demibold", "YuGothic-Light"],
-        "cn":    ["STKaiti", "MaShanZheng", "FZShuTi"],
-        "latin": ["Georgia", "BebasNeue"],
+        "jp":    ["YuGothic-Light", "SimSun"],
+        "cn":    ["STKaiti", "STXinwei", "KaiTi"],
+        "latin": ["Georgia", "Rockwell"],
     },
 }
-VERIFIED_FONTS = {          # 2026-09-11 探针实证可在 AE 寻址 (字形约束见 FONT_POOLS 注)
-    "YuGothic-Bold", "YuGothic-Semibold", "YuGothic-Medium", "YuGothic-Light",
-    "YuGothic-Regular", "MS-PGothic", "MS-Gothic", "YuMincho-Demibold",
-    "SimHei", "KaiTi", "FZCuHeiSongS-B-GB", "MaShanZheng", "NotoSansSC-VF",
-    "STKaiti", "FZShuTi", "LiSu", "YouYuan", "MicrosoftYaHei-Bold",
-    "Anton", "Impact", "Hanson-Bold", "BlackOpsOne-Regular", "BebasNeue",
-    "Antonio-Bold", "Kanit-Bold", "Bangers-Regular", "Georgia",
+VERIFIED_FONTS = {          # fontTools 真相表实证 HKLM + PS 名精确匹配 (2026-09-11)
+    "YuGothic-Bold", "YuGothic-Medium", "YuGothic-Light", "YuGothic-Regular",
+    "MS-PGothic", "MS-Gothic", "SimSun", "SimHei", "KaiTi", "LiSu", "YouYuan",
+    "MicrosoftYaHei", "MicrosoftYaHei-Bold", "DengXian-Bold",
+    "FZCHSJW--GB1-0", "STKaiti", "STXinwei", "STZhongsong", "STXihei",
+    "STFangsong", "STSong", "STHupo", "STXingkai", "STLiti", "STCaiyun",
+    "Impact", "Haettenschweiler", "Arial-Black", "SegoeUIBlack",
+    "FranklinGothic-Heavy", "FranklinGothic-DemiCond", "GillSans-UltraBoldCondensed",
+    "TwCenMT-CondensedBold", "TrebuchetMS-Bold", "AgencyFB-Bold",
+    "Georgia", "Georgia-Bold", "Rockwell", "Rockwell-ExtraBold",
+    "TimesNewRomanPSMT", "TimesNewRomanPS-BoldMT", "Cambria-Bold",
 }
-JP_ONLY_CHARS = set("強発壊無縛臨韻")      # 词库内 JP 专字形 (简体字库缺字风险)
+JP_ONLY_CHARS = set("強発壊無縛臨韻")      # 词库内 JP 专字形 (JP 字体优先保字形正确)
 
 
 def script_class(word):
@@ -295,6 +299,18 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         font_pos[fkey] = font_pos.get(fkey, 0) + 1
         last_font[fkey] = font
 
+        # v6.1: 发光按文字系调制 (Boss 反馈"亮度过剩") — 密集 CJK 字形发光面积远大于
+        # 压缩拉丁体, 同参数形成大面积光晕洗白文字与背景 ("视频被影响"的感知来源)
+        glow, glow2, bevel, pulse = st["glow"], st.get("glow2"), st.get("bevel"), 1.7
+        if scl in ("jp", "cn"):
+            glow = (175, glow[1], round(glow[2] * 0.70, 3)) if glow else glow
+            glow2 = (215, int(glow2[1] * 0.6), round(glow2[2] * 0.55, 3)) if glow2 else glow2
+            bevel = (bevel[0], bevel[1], round(bevel[2] * 0.70, 3)) if bevel else bevel
+            pulse = 1.35
+        elif glow:   # latin: Impact 系压缩重体墨量也不小, 轻降
+            glow = (150, glow[1], round(glow[2] * 0.85, 3))
+            pulse = 1.55
+
         # 能量 → 字号/发光 (镜头 energy × 包络 归一混合)
         shot_en = float(seg.get("energy", 0.4))
         env_n = (env_at(t_in) / env_max) if env_max > 0 else 0.5
@@ -322,12 +338,12 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             if closeup:
                 y = int(1080 * (0.18 if side_flip % 2 == 0 else 0.82))
 
-        # v4: drop 入场循环变款 (级联翻入 / 打字机 / 纯弹性), 防同款连打疲劳
-        cascade = st.get("cascade", False)
-        typewriter = st.get("typewriter", False)
+        # v7: drop 入场循环变款全部改整层变换 (RS 动画器与脚本字体互斥, v6.1 实证)
+        # _v: 0=spin_z 整层翻入 / 1=drop_fall 整层下落 / 2=纯 punch tracking
+        spin = drop_fall = False
         if style_id == "drop_impact":
             _v = bank_pos[zone] % 3
-            cascade, typewriter = (_v == 0), (_v == 1)
+            spin, drop_fall = (_v == 0), (_v == 1)
 
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
@@ -340,14 +356,17 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "fill": st["fill"],
             "stroke": st["stroke"],
             "enter": st["enter"],
-            "glow": st["glow"],
-            "glow2": st.get("glow2"),
+            "glow": glow,
+            "glow2": glow2,
             "shadow": st.get("shadow"),
-            "bevel": st.get("bevel"),
-            "cascade": cascade,
+            "bevel": bevel,
+            "glow_pulse": pulse,
+            "cascade": st.get("cascade", False),
             "elastic": st.get("elastic", False),
             "shockwave": st.get("shockwave", False),
-            "typewriter": typewriter,
+            "typewriter": st.get("typewriter", False),
+            "spin": spin,
+            "drop_fall": drop_fall,
             "blurfade": st.get("blurfade", False),
             "tracking": st["tracking"],
             "anchor_shot": {"index": seg.get("index"), "t0": t0, "t1": t1},
@@ -441,12 +460,15 @@ def build_jsx(events, out_aep: Path):
         else:
             d["glow"] = None
         d["glow2"] = list(e["glow2"]) if e.get("glow2") else None
+        d["glow_pulse"] = float(e.get("glow_pulse", 1.7))
         d["shadow"] = list(e["shadow"]) if e.get("shadow") else None
         d["bevel"] = list(e["bevel"]) if e.get("bevel") else None
         d["cascade"] = bool(e.get("cascade"))
         d["elastic"] = bool(e.get("elastic"))
         d["shockwave"] = bool(e.get("shockwave"))
         d["typewriter"] = bool(e.get("typewriter"))
+        d["spin"] = bool(e.get("spin"))
+        d["drop_fall"] = bool(e.get("drop_fall"))
         d["blurfade"] = bool(e.get("blurfade"))
         d["tracking"] = e.get("tracking")
         # 入/出场关键帧时刻 (hold 过短时按比例缩, 保证 keyframes 单调)
@@ -559,6 +581,18 @@ def build_jsx(events, out_aep: Path):
               "t=time-inPoint;if(t<0.04){{85*(t/0.04);}}else{{Math.max(85*Math.exp(-7*(t-0.04)),0);}}";
           }} catch (we) {{ rep += "|SHOCKWAVE" + i; }}
         }}
+        if (ev.spin) {{                                          // v7 整层 Z 翻入 (层变换, 字体安全)
+          try {{
+            L.rotation.setValueAtTime(ev.t_in, -120);
+            L.rotation.setValueAtTime(ev.t_in + 0.28, 0);
+          }} catch (sne) {{ rep += "|SPIN" + i; }}
+        }}
+        if (ev.drop_fall) {{                                     // v7 整层下落砸入 (层变换)
+          try {{
+            L.position.setValueAtTime(ev.t_in, [ev.x, ev.y - 260]);
+            L.position.setValueAtTime(ev.t_in + 0.30, [ev.x, ev.y]);
+          }} catch (dfe) {{ rep += "|DROPFALL" + i; }}
+        }}
         if (ev.typewriter) {{                                   // 打字机逐字揭示 (手册 §十六)
           try {{
             var ta = tp.property("ADBE Text Animators").addProperty("ADBE Text Animator");
@@ -584,8 +618,8 @@ def build_jsx(events, out_aep: Path):
           var gf = L.property("Effects").addProperty("ADBE Glo2");
           gf.property("ADBE Glo2-0002").setValue(ev.glow[0]);          // threshold
           gf.property("ADBE Glo2-0003").setValue(ev.glow[1]);          // radius
-          gf.property("ADBE Glo2-0004").setValueAtTime(                // 强度入场脉冲 (ENV 语法)
-            ev.t_in, ev.glow[2] * 1.7);
+          gf.property("ADBE Glo2-0004").setValueAtTime(                // 强度入场脉冲 (ENV 语法, v6.1 按文字系)
+            ev.t_in, ev.glow[2] * ev.glow_pulse);
           gf.property("ADBE Glo2-0004").setValueAtTime(
             ev.t_in + {ENV_DECAY_S}, ev.glow[2]);
         }}
