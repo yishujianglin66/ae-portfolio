@@ -341,6 +341,13 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             if closeup:
                 y = int(1080 * (0.18 if side_flip % 2 == 0 else 0.82))
 
+        # W2 三维层 (2026-09-11 探针: 基底4层全2D → 加摄像机不影响基底; 默认 z=-2666.67 为1:1)
+        # 仅 drop 区 (能量最高) 转 3D; z 三档轮换做纵深层次; 摄像机缓推由 JSX 侧统一建
+        z_dep = 0
+        is3d = (style_id == "drop_impact")
+        if is3d:
+            z_dep = (0, -140, 140)[bank_pos[zone] % 3]
+
         # v10 对比度感知样式 (Boss"有些字发光看不出"): 12 drop 事件 9 个落在亮背景
         # (读字期最坏亮度 136-254) → 白字+白辉光融进背景; 且同一位置亮度在保持期内
         # 大幅跳变(如 82→253→74) → 必须按最坏情况定样式, 不能一刀切
@@ -404,6 +411,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "accent": accent,
             "outer_w": outer_w,
             "inner_w": inner_w,
+            "is3d": is3d,
+            "z": z_dep,
             "cascade": st.get("cascade", False),
             "elastic": st.get("elastic", False),
             "shockwave": st.get("shockwave", False),
@@ -524,6 +533,8 @@ def build_jsx(events, out_aep: Path):
         d["accent"] = list(e["accent"]) if e.get("accent") else None
         d["outer_w"] = float(e.get("outer_w", 0))
         d["inner_w"] = float(e.get("inner_w", 0))
+        d["is3d"] = bool(e.get("is3d"))
+        d["z"] = float(e.get("z", 0))
         d["cascade"] = bool(e.get("cascade"))
         d["elastic"] = bool(e.get("elastic"))
         d["shockwave"] = bool(e.get("shockwave"))
@@ -595,6 +606,7 @@ def build_jsx(events, out_aep: Path):
       }}
       function addMove(GL, ev) {{
         // 变换类入场动画只施加于底层 (上层经 parent 继承)
+        var yOff = 0, zOff = 0;
         if (ev.enter == "fade_scale") {{
           GL.scale.setValueAtTime(ev.t_in, [115, 115]);
           GL.scale.setValueAtTime(ev.t_in + 0.35, [100, 100]);
@@ -606,20 +618,26 @@ def build_jsx(events, out_aep: Path):
             "x=x0+(x1-x0)*(1+((s+1)*p*p*p+s*p*p));[x,y];}}else{{[x1,y];}}";
         }}
         if (ev.elastic) {{
+          // 3D 层 scale 为三维 → 表达式须返回 3 值, 否则 AE 报错
+          var s0 = ev.is3d ? "[0,0,0]" : "[0,0]";
+          var s1 = ev.is3d ? "[s,s,s]" : "[s,s]";
           GL.scale.expression =
-            "t=time-inPoint;if(t<0.01){{[0,0];}}else{{" +
+            "t=time-inPoint;if(t<0.01){{" + s0 + ";}}else{{" +
             "amp=38;freq=2.8;decay=5;" +
-            "s=amp*Math.sin(freq*t*Math.PI*2)/Math.exp(decay*t)+100;[s,s];}}";
+            "s=amp*Math.sin(freq*t*Math.PI*2)/Math.exp(decay*t)+100;" + s1 + ";}}";
         }}
-        if (ev.drop_fall) {{
-          GL.position.setValueAtTime(ev.t_in, [ev.x, ev.y - 240]);
-          GL.position.setValueAtTime(ev.t_in + 0.26, [ev.x, ev.y]);
-        }}
-        if (ev.rise_up) {{
-          GL.position.setValueAtTime(ev.t_in, [ev.x, ev.y + 240]);
-          GL.position.setValueAtTime(ev.t_in + 0.26, [ev.x, ev.y]);
+        if (ev.drop_fall) {{ yOff = -240; }}
+        if (ev.rise_up) {{ yOff = 240; }}
+        if (ev.is3d) {{ zOff = -170; }}          // 3D 纵深: 由远及近的 Z 位移 (无摄像机)
+        if (yOff !== 0 || zOff !== 0) {{
+          var dur = (ev.drop_fall || ev.rise_up) ? 0.26 : 0.34;
+          GL.position.setValueAtTime(ev.t_in, [ev.x, ev.y + yOff, ev.z + zOff]);
+          GL.position.setValueAtTime(ev.t_in + dur, [ev.x, ev.y, ev.z]);
         }}
       }}
+      // W2 三维层: 不建摄像机 —— 实测 (v13) 合成内存在摄像机会使 Advanced 3D 渲染器
+      // 对整帧重新合成 (无文字帧亦出现 0.48% 全画面细微差异) = "视频被影响"风险面;
+      // 改为 3D 图层自身的 Z 位移动画 (无摄像机时 AE 用默认视图, 2D 基底层零影响)。
       for (var i = 0; i < evs.length; i++) {{
         var ev = evs[i];
         var L = null, U = null, MV = null;
@@ -629,13 +647,15 @@ def build_jsx(events, out_aep: Path):
           U = comp.layers.addText(ev.word);
           U.name = "TXTU" + i + "_" + ev.word;
           setDoc(U, ev, ev.accent, ev.accent, ev.outer_w);
-          U.position.setValue([ev.x, ev.y]);
+          if (ev.is3d) {{ U.threeDLayer = true; }}
+          U.position.setValue([ev.x, ev.y, ev.z]);
           U.inPoint = ev.t_in; U.outPoint = ev.t_out + 0.05;
           addKick(U, ev); addTrack(U, ev);
           L = comp.layers.addText(ev.word);
           L.name = "TXT" + i + "_" + ev.word;
           setDoc(L, ev, ev.fill, ev.strokeColor, ev.inner_w);
-          L.parent = U; L.position.setValue([0, 0]);
+          if (ev.is3d) {{ L.threeDLayer = true; }}
+          L.parent = U; L.position.setValue([0, 0, 0]);
           L.inPoint = ev.t_in; L.outPoint = ev.t_out + 0.05;
           addKick(L, ev); addTrack(L, ev);
           MV = U;
@@ -643,7 +663,8 @@ def build_jsx(events, out_aep: Path):
           L = comp.layers.addText(ev.word);
           L.name = "TXT" + i + "_" + ev.word;
           setDoc(L, ev, ev.fill, ev.strokeColor, ev.strokeW);
-          L.position.setValue([ev.x, ev.y]);
+          if (ev.is3d) {{ L.threeDLayer = true; }}
+          L.position.setValue([ev.x, ev.y, ev.z]);
           L.inPoint = ev.t_in; L.outPoint = ev.t_out + 0.05;
           addKick(L, ev);
           if (ev.enter == "punch_tracking") addTrack(L, ev);
