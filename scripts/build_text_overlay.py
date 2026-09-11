@@ -77,7 +77,7 @@ ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 
 #   bevel  = (edge_thickness, light_angle, light_intensity) —— ADBE Bevel Alpha 0001/2/4
 STYLES = {
     "build_side": {
-        "size": (85, 120), "fill": [0.95, 0.95, 0.98],
+        "size": (98, 134), "fill": [0.95, 0.95, 0.98],
         "stroke": ([0.03, 0.03, 0.06], 2.2), "pos": "side_alt", "enter": "slide_back",
         "glow": (130, 18, 0.9), "glow2": None,
         "shadow": (0.6, 135, 6, 8), "bevel": (2, -45, 0.35),
@@ -116,25 +116,34 @@ MOOD_TO_STYLE = {"intro": "intro_serif", "build": "build_side",
 #   故 jp 池只收 17/17 全覆字体 (LiSu/DengXian-Bold/YuGothic系/MS-Gothic系/STSong系/STXihei),
 #   cn 池才能用装饰性字体 (琥珀/彩云/新魏/彩色系). 覆盖表见 tmp/check_glyph_coverage.py
 FONT_POOLS = {
-    "drop_impact": {   # 冲击词: 个性重体
+    "drop_impact": {   # 冲击词: 展示级重体 (v19: 接入系统级安装的 Anton/BlackOps/方正超粗黑/汉仪超粗宋)
         "jp":    ["LiSu", "DengXian-Bold", "YuGothic-Bold", "MS-PGothic"],
-        "cn":    ["STHupo", "FZCHSJW--GB1-0", "STCaiyun", "STXinwei"],
-        "latin": ["Impact", "Haettenschweiler", "GillSans-UltraBoldCondensed",
-                  "CooperBlack", "BodoniMTBlack"],
+        "cn":    ["FZCCHFW--GB1-0", "HYa0gj", "FZHPFW--GB1-0", "STHupo", "STCaiyun"],
+        "latin": ["Anton-Regular", "BlackOpsOne-Regular", "AlfaSlabOne-Regular",
+                  "Bangers-Regular", "Blanka-Regular", "321impact"],
     },
-    "build_side": {    # 铺垫词: 现代窄体/几何
-        "jp":    ["YuGothic-Medium", "STZhongsong", "DengXian-Bold"],
-        "cn":    ["STXihei", "STSong", "AlibabaPuHuiTi_3_45_Light", "YouYuan"],
-        "latin": ["TwCenMT-CondensedBold", "AgencyFB-Bold", "BernardMT-Condensed",
-                  "CenturyGothic-Bold"],
+    "build_side": {    # 铺垫词 (4-11s 段): v19 换高辨识度字体 + 字号上调
+        "jp":    ["YuGothic-Medium", "DengXian-Bold", "STZhongsong"],
+        "cn":    ["FZPHFW--GB1-0", "FZKTFW--GB1-0", "STSong"],
+        "latin": ["BebasNeue-Bold", "Kanit-Black", "HansonBold", "AgencyFB-Bold"],
     },
-    "intro_serif": {   # 开场/收尾: 衬线书法质感
-        "jp":    ["YuGothic-Light", "STFangsong", "SimSun"],
-        "cn":    ["STKaiti", "STXingkai", "STLiti", "STZhongsong"],
-        "latin": ["Georgia", "BodoniMTBlack", "CopperplateGothic-Bold", "Rockwell-ExtraBold"],
+    "intro_serif": {   # 开场/收尾: 展示衬线/书法
+        "jp":    ["STFangsong", "YuGothic-Light", "STSong"],
+        "cn":    ["FZSSFW--GB1-0", "FZKTFW--GB1-0", "STXingkai", "STLiti", "STKaiti"],
+        "latin": ["AlfaSlabOne-Regular", "BowlbyOneSC-Regular", "ArtBrush",
+                  "BodoniMTBlack", "CopperplateGothic-Bold"],
     },
 }
-VERIFIED_FONTS = {          # HKLM 真相表 + cmap 覆盖双校验 (2026-09-11)
+VERIFIED_FONTS = {          # HKLM 真相表 + cmap 覆盖 + 渲染差分三重校验 (2026-09-11)
+    # v19 系统级新装 (需管理员, tmp/install_fonts_full.py)
+    "Anton-Regular", "BebasNeue-Bold", "Antonio-Bold", "BlackOpsOne-Regular",
+    "Bangers-Regular", "AlfaSlabOne-Regular", "BowlbyOneSC-Regular", "Blanka-Regular",
+    "BungeeShade-Regular", "HansonBold", "Kanit-Black", "Kanit-ExtraBold",
+    "Bumrush", "321impact", "BRUSHSTRIKE", "ArtBrush",
+    "FZWBFW--GB1-0", "FZCCHFW--GB1-0", "FZH4FW--GB1-0", "FZHPFW--GB1-0",
+    "FZHTFW--GB1-0", "FZPHFW--GB1-0", "FZSSFW--GB1-0", "FZKTFW--GB1-0",
+    "FZSTFW--GB1-0", "HYa0gj", "GBWeiBei-Bold", "SungtiEG-Ultra-GB",
+    # 既有系统字体
     "LiSu", "DengXian-Bold", "YuGothic-Bold", "YuGothic-Medium", "YuGothic-Regular",
     "YuGothic-Light", "MS-PGothic", "MS-Gothic", "STHupo", "FZCHSJW--GB1-0",
     "STCaiyun", "STXinwei", "STKaiti", "STXingkai", "STLiti", "STZhongsong",
