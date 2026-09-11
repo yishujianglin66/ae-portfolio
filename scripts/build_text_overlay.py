@@ -347,6 +347,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         stroke_cfg = st["stroke"]
         shadow_cfg = st.get("shadow")
         glow_col = None            # (A_rgb, B_rgb); None=AE 默认白/黑
+        # W1 双描边 (2026-09-11 探针: 图层样式不可脚本启用 → 用双文字层实现"彩色外环+深色内描边")
+        dbl, accent, outer_w, inner_w = False, None, 0.0, 0.0
         bg_lum = _worst_region_luma(bg_video, t_in, hold, x, y)
         if bg_lum >= 150:          # 亮底: 白字白辉光物理上看不出 → 青色光晕可见 + 粗描边保读
             bg_class = "bright"
@@ -355,6 +357,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             glow = (205, 20, round((glow[2] if glow else 1.0) * 1.15, 3)) if glow else glow
             glow_col = ([0.10, 0.80, 1.0], [0.0, 0.15, 0.45])
             pulse = 1.15
+            dbl, accent, outer_w, inner_w = True, [0.10, 0.80, 1.0], 16.0, 4.0
         elif bg_lum >= 90:         # 中间调: 暖金光晕
             bg_class = "mid"
             stroke_cfg = (stroke_cfg[0], 7.0)
@@ -362,7 +365,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             glow = (190, 16, round((glow[2] if glow else 1.0) * 1.05, 3)) if glow else glow
             glow_col = ([1.0, 0.66, 0.18], [0.30, 0.10, 0.0])
             pulse = 1.25
-        else:                      # 暗底: 白辉光清晰可见
+            dbl, accent, outer_w, inner_w = True, [1.0, 0.66, 0.18], 13.0, 3.5
+        else:                      # 暗底: 白辉光清晰可见 (保留 v11 已验收单层样式)
             bg_class = "dark"
             stroke_cfg = (stroke_cfg[0], 3.5)
             shadow_cfg = (0.55, 135, 8, 10)
@@ -396,6 +400,10 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "glow_col_b": glow_col[1] if glow_col else None,
             "bg_lum": round(bg_lum, 1),
             "bg_class": bg_class,
+            "dbl": dbl,
+            "accent": accent,
+            "outer_w": outer_w,
+            "inner_w": inner_w,
             "cascade": st.get("cascade", False),
             "elastic": st.get("elastic", False),
             "shockwave": st.get("shockwave", False),
@@ -512,6 +520,10 @@ def build_jsx(events, out_aep: Path):
         d["glow_col_b"] = list(e["glow_col_b"]) if e.get("glow_col_b") else None
         d["shadow"] = list(e["shadow"]) if e.get("shadow") else None
         d["bevel"] = list(e["bevel"]) if e.get("bevel") else None
+        d["dbl"] = bool(e.get("dbl"))
+        d["accent"] = list(e["accent"]) if e.get("accent") else None
+        d["outer_w"] = float(e.get("outer_w", 0))
+        d["inner_w"] = float(e.get("inner_w", 0))
         d["cascade"] = bool(e.get("cascade"))
         d["elastic"] = bool(e.get("elastic"))
         d["shockwave"] = bool(e.get("shockwave"))
@@ -547,48 +559,98 @@ def build_jsx(events, out_aep: Path):
     if (!comp) {{ rep += "|NOCOMP"; }}
     else {{
       var evs = {evs_js};
-      for (var i = 0; i < evs.length; i++) {{
-        var ev = evs[i];
-        var L = comp.layers.addText(ev.word);
-        L.name = "TXT" + i + "_" + ev.word;
+      // ── W1 双描边 helper (2026-09-11) ─────────────────────────────────
+      function setDoc(L, ev, fillCol, strokeCol, strokeW) {{
         var tp = L.property("Text");
         var d = tp.property("ADBE Text Document").value;
         d.font = ev.font; d.fontSize = ev.size;
-        d.fillColor = [ev.fill[0], ev.fill[1], ev.fill[2]];
+        d.fillColor = [fillCol[0], fillCol[1], fillCol[2]];
         d.applyFill = true;
         try {{
-          d.applyStroke = ev.strokeW > 0;
-          if (ev.strokeW > 0) {{
-            d.strokeColor = [ev.strokeColor[0], ev.strokeColor[1], ev.strokeColor[2]];
-            d.strokeWidth = ev.strokeW; d.strokeOverFill = false;
+          d.applyStroke = strokeW > 0;
+          if (strokeW > 0) {{
+            d.strokeColor = [strokeCol[0], strokeCol[1], strokeCol[2]];
+            d.strokeWidth = strokeW; d.strokeOverFill = false;
           }}
-        }} catch (se) {{ rep += "|STROKE" + i; }}
+        }} catch (se) {{ rep += "|STROKE"; }}
         d.justification = ParagraphJustification.CENTER_JUSTIFY;
         tp.property("ADBE Text Document").setValue(d);
-        L.position.setValue([ev.x, ev.y]);
-        L.inPoint = ev.t_in; L.outPoint = ev.t_out + 0.05;
+      }}
+      function addKick(L, ev) {{
         // 入场砸入 → 保持 → 出场淡出 (opacity 0-100, 实证口径)
         L.opacity.setValueAtTime(ev.t_in, 0);
         L.opacity.setValueAtTime(ev.t_in + ev.fin, 100);
         L.opacity.setValueAtTime(ev.t_out - ev.fout, 100);
         L.opacity.setValueAtTime(ev.t_out, 0);
+      }}
+      function addTrack(L, ev) {{
+        if (!ev.tracking) return;
+        var tp2 = L.property("Text");
+        var an = tp2.property("ADBE Text Animators").addProperty("ADBE Text Animator");
+        an.name = "Punch";
+        var tr = an.property("ADBE Text Animator Properties")
+                   .addProperty("ADBE Text Tracking Amount");
+        tr.setValueAtTime(ev.t_in, ev.tracking);
+        tr.setValueAtTime(ev.t_in + 0.2, 0);
+      }}
+      function addMove(GL, ev) {{
+        // 变换类入场动画只施加于底层 (上层经 parent 继承)
         if (ev.enter == "fade_scale") {{
-          L.scale.setValueAtTime(ev.t_in, [115, 115]);
-          L.scale.setValueAtTime(ev.t_in + 0.35, [100, 100]);
+          GL.scale.setValueAtTime(ev.t_in, [115, 115]);
+          GL.scale.setValueAtTime(ev.t_in + 0.35, [100, 100]);
         }} else if (ev.enter == "slide_back") {{
           var dx = ev.x < 960 ? -420 : 420;   // 从所在侧外侧滑入
-          L.position.expression =
+          GL.position.expression =
             "t=time-inPoint;var x0=" + (ev.x + dx) + ",x1=" + ev.x + ";var y=" + ev.y + ";" +
             "if(t<0.08){{[x0,y];}}else if(t<0.58){{p=(t-0.08)/0.5;s=1.70158;p=p-1;" +
             "x=x0+(x1-x0)*(1+((s+1)*p*p*p+s*p*p));[x,y];}}else{{[x1,y];}}";
-        }} else if (ev.enter == "punch_tracking" && ev.tracking) {{
-          var an = tp.property("ADBE Text Animators").addProperty("ADBE Text Animator");
-          an.name = "Punch";
-          var tr = an.property("ADBE Text Animator Properties")
-                     .addProperty("ADBE Text Tracking Amount");
-          tr.setValueAtTime(ev.t_in, ev.tracking);
-          tr.setValueAtTime(ev.t_in + 0.2, 0);
         }}
+        if (ev.elastic) {{
+          GL.scale.expression =
+            "t=time-inPoint;if(t<0.01){{[0,0];}}else{{" +
+            "amp=38;freq=2.8;decay=5;" +
+            "s=amp*Math.sin(freq*t*Math.PI*2)/Math.exp(decay*t)+100;[s,s];}}";
+        }}
+        if (ev.drop_fall) {{
+          GL.position.setValueAtTime(ev.t_in, [ev.x, ev.y - 240]);
+          GL.position.setValueAtTime(ev.t_in + 0.26, [ev.x, ev.y]);
+        }}
+        if (ev.rise_up) {{
+          GL.position.setValueAtTime(ev.t_in, [ev.x, ev.y + 240]);
+          GL.position.setValueAtTime(ev.t_in + 0.26, [ev.x, ev.y]);
+        }}
+      }}
+      for (var i = 0; i < evs.length; i++) {{
+        var ev = evs[i];
+        var L = null, U = null, MV = null;
+        if (ev.dbl) {{
+          // 双描边: 底层 = 彩色外环(实心), 上层 = 白字 + 深色内描边
+          // (图层样式描边无法脚本启用 → canSetEnabled=false, 用双文字层等效实现)
+          U = comp.layers.addText(ev.word);
+          U.name = "TXTU" + i + "_" + ev.word;
+          setDoc(U, ev, ev.accent, ev.accent, ev.outer_w);
+          U.position.setValue([ev.x, ev.y]);
+          U.inPoint = ev.t_in; U.outPoint = ev.t_out + 0.05;
+          addKick(U, ev); addTrack(U, ev);
+          L = comp.layers.addText(ev.word);
+          L.name = "TXT" + i + "_" + ev.word;
+          setDoc(L, ev, ev.fill, ev.strokeColor, ev.inner_w);
+          L.parent = U; L.position.setValue([0, 0]);
+          L.inPoint = ev.t_in; L.outPoint = ev.t_out + 0.05;
+          addKick(L, ev); addTrack(L, ev);
+          MV = U;
+        }} else {{
+          L = comp.layers.addText(ev.word);
+          L.name = "TXT" + i + "_" + ev.word;
+          setDoc(L, ev, ev.fill, ev.strokeColor, ev.strokeW);
+          L.position.setValue([ev.x, ev.y]);
+          L.inPoint = ev.t_in; L.outPoint = ev.t_out + 0.05;
+          addKick(L, ev);
+          if (ev.enter == "punch_tracking") addTrack(L, ev);
+          MV = L;
+        }}
+        var tp = L.property("Text");
+        try {{ addMove(MV, ev); }} catch (mve) {{ rep += "|MOVE" + i; }}
         // ── v3 手册实证技法（全部 try/catch, 手册: AE-文字特效JSX动画可靠参数手册 附D/E/F）──
         if (ev.cascade) {{                                    // 逐字级联翻入: RotY(-90)+Opacity(0)+RS idx3 扫过
           try {{
@@ -603,14 +665,6 @@ def build_jsx(events, out_aep: Path):
             cpr.addProperty("ADBE Text Opacity").setValue(0);
             cpr.addProperty("ADBE Text Rotation Y").setValue(-90);
           }} catch (ce) {{ rep += "|CASCADE" + i; }}
-        }}
-        if (ev.elastic) {{                                     // 弹性缩放砸入 (手册 §二十)
-          try {{
-            L.scale.expression =
-              "t=time-inPoint;if(t<0.01){{[0,0];}}else{{" +
-              "amp=38;freq=2.8;decay=5;" +
-              "s=amp*Math.sin(freq*t*Math.PI*2)/Math.exp(decay*t)+100;[s,s];}}";
-          }} catch (ee) {{ rep += "|ELASTIC" + i; }}
         }}
         if (ev.shockwave) {{                                    // 冲击波爆发 (手册 附F: Ramp radial + Add + 衰减)
           try {{
@@ -629,18 +683,6 @@ def build_jsx(events, out_aep: Path):
             wv.opacity.expression =
               "t=time-inPoint;if(t<0.04){{85*(t/0.04);}}else{{Math.max(85*Math.exp(-7*(t-0.04)),0);}}";
           }} catch (we) {{ rep += "|SHOCKWAVE" + i; }}
-        }}
-        if (ev.drop_fall) {{                                     // v9 整层下落砸入 (纯平移, 不旋转)
-          try {{
-            L.position.setValueAtTime(ev.t_in, [ev.x, ev.y - 240]);
-            L.position.setValueAtTime(ev.t_in + 0.26, [ev.x, ev.y]);
-          }} catch (dfe) {{ rep += "|DROPFALL" + i; }}
-        }}
-        if (ev.rise_up) {{                                       // v9 整层自下升起 (纯平移)
-          try {{
-            L.position.setValueAtTime(ev.t_in, [ev.x, ev.y + 240]);
-            L.position.setValueAtTime(ev.t_in + 0.26, [ev.x, ev.y]);
-          }} catch (rue) {{ rep += "|RISEUP" + i; }}
         }}
         if (ev.typewriter) {{                                   // 打字机逐字揭示 (手册 §十六)
           try {{
@@ -823,7 +865,7 @@ def main():
               f"({e['hold']:4.2f}s) {e['mood']:<5} {e['style_id']:<12} "
               f"'{e['word']}'[{e.get('script', '?')}] {e['font']} "
               f"{e['size']}px @({e['x']},{e['y']}) bg={e.get('bg_class', '?')}"
-              f"({e.get('bg_lum', -1):.0f}){cu}{probe}")
+              f"({e.get('bg_lum', -1):.0f}){' 双描边' if e.get('dbl') else ''}{cu}{probe}")
     zc = {}
     for e in events:
         zc[zone_of(e["t_in"])] = zc.get(zone_of(e["t_in"]), 0) + 1
