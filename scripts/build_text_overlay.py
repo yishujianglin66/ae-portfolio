@@ -364,7 +364,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             glow = (205, 20, round((glow[2] if glow else 1.0) * 1.15, 3)) if glow else glow
             glow_col = ([0.10, 0.80, 1.0], [0.0, 0.15, 0.45])
             pulse = 1.15
-            dbl, accent, outer_w, inner_w = True, [0.10, 0.80, 1.0], 16.0, 4.0
+            # v15: 实心彩色外环被 Boss 判"劣质感" → 双描边关闭 (保留代码路径, 样式回 v11 单层)
+            dbl, accent, outer_w, inner_w = False, None, 0.0, 0.0
         elif bg_lum >= 90:         # 中间调: 暖金光晕
             bg_class = "mid"
             stroke_cfg = (stroke_cfg[0], 7.0)
@@ -372,7 +373,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             glow = (190, 16, round((glow[2] if glow else 1.0) * 1.05, 3)) if glow else glow
             glow_col = ([1.0, 0.66, 0.18], [0.30, 0.10, 0.0])
             pulse = 1.25
-            dbl, accent, outer_w, inner_w = True, [1.0, 0.66, 0.18], 13.0, 3.5
+            dbl, accent, outer_w, inner_w = False, None, 0.0, 0.0
         else:                      # 暗底: 白辉光清晰可见 (保留 v11 已验收单层样式)
             bg_class = "dark"
             stroke_cfg = (stroke_cfg[0], 3.5)
@@ -535,6 +536,15 @@ def build_jsx(events, out_aep: Path):
         d["inner_w"] = float(e.get("inner_w", 0))
         d["is3d"] = bool(e.get("is3d"))
         d["z"] = float(e.get("z", 0))
+        # v15 冲击力包参数 (探针实证: ADBE Motion Blur=方向模糊 / ADBE Radial Blur / ADBE Turbulent Displace)
+        en = float(e.get("energy", 0.6))
+        d["db_dir"] = 0 if e.get("z", 0) == 0 else 90
+        d["db_in"] = round(45 + 45 * en, 1)        # 入场方向模糊长度
+        d["db_out"] = round(30 + 30 * en, 1)       # 出场方向模糊长度
+        d["rb_in"] = round(12 + 20 * en, 1)        # 入场径向模糊强度 (爆发感)
+        d["tb_amt"] = round(2 + 4.5 * en, 2)       # 湍流呼吸位移
+        d["tb_size"] = round(55 + 65 * en, 1)
+        d["tb_evo"] = round(80 + 70 * en, 1)       # 演化速度 (表达式驱动 → 持续流动)
         d["cascade"] = bool(e.get("cascade"))
         d["elastic"] = bool(e.get("elastic"))
         d["shockwave"] = bool(e.get("shockwave"))
@@ -569,6 +579,7 @@ def build_jsx(events, out_aep: Path):
     if (!comp) {{ var fp = new File("{aep_in}"); app.open(fp); comp = findComp(); }}
     if (!comp) {{ rep += "|NOCOMP"; }}
     else {{
+      try {{ comp.motionBlur = true; }} catch (mbe) {{ rep += "|COMPMB"; }}   // v15: 合成运动模糊 (仅对开了图层开关的层生效, 基底层不受影响)
       var evs = {evs_js};
       // ── W1 双描边 helper (2026-09-11) ─────────────────────────────────
       function setDoc(L, ev, fillCol, strokeCol, strokeW) {{
@@ -771,6 +782,31 @@ def build_jsx(events, out_aep: Path):
             bv.property("ADBE Bevel Alpha-0004").setValue(ev.bevel[2]);   // 灯光强度
           }} catch (bve) {{ rep += "|BEVEL" + i; }}
         }}
+        // ── v15 冲击力包 (探针实证内建效果参数) ──────────────────────────
+        try {{                                        // 方向模糊: 入场拖影 + 出场拉出
+          var dbf = L.property("Effects").addProperty("ADBE Motion Blur");
+          dbf.property("ADBE Motion Blur-0001").setValue(ev.db_dir);
+          dbf.property("ADBE Motion Blur-0002").setValueAtTime(ev.t_in, ev.db_in);
+          dbf.property("ADBE Motion Blur-0002").setValueAtTime(ev.t_in + 0.14, 0);
+          dbf.property("ADBE Motion Blur-0002").setValueAtTime(ev.t_out - ev.fout, 0);
+          dbf.property("ADBE Motion Blur-0002").setValueAtTime(ev.t_out, ev.db_out);
+        }} catch (dbe) {{ rep += "|DIRBLUR" + i; }}
+        try {{                                        // 径向模糊: 入场爆发 (向心/离心)
+          var rbf = L.property("Effects").addProperty("ADBE Radial Blur");
+          rbf.property("ADBE Radial Blur-0002").setValue([ev.x, ev.y]);
+          rbf.property("ADBE Radial Blur-0001").setValueAtTime(ev.t_in, ev.rb_in);
+          rbf.property("ADBE Radial Blur-0001").setValueAtTime(ev.t_in + 0.16, 0);
+        }} catch (rbe) {{ rep += "|RADBLUR" + i; }}
+        try {{                                        // 湍流置换: 保持期微流动 (活起来)
+          var tbf = L.property("Effects").addProperty("ADBE Turbulent Displace");
+          tbf.property("ADBE Turbulent Displace-0002").setValue(ev.tb_amt);
+          tbf.property("ADBE Turbulent Displace-0003").setValue(ev.tb_size);
+          tbf.property("ADBE Turbulent Displace-0006").expression = "time*" + ev.tb_evo;
+        }} catch (tbe) {{ rep += "|TURB" + i; }}
+        try {{                                        // 图层运动模糊 (合成开关已开)
+          L.motionBlur = true;
+          if (U) U.motionBlur = true;
+        }} catch (mbe2) {{ rep += "|LAYERMB" + i; }}
       }}
       app.project.save(new File("{out_aep.as_posix()}"));
       rep += "|saved layers=" + comp.numLayers + " texts=" + evs.length;
