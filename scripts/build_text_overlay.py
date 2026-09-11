@@ -110,39 +110,42 @@ STYLES = {
 MOOD_TO_STYLE = {"intro": "intro_serif", "build": "build_side",
                  "drop": "drop_impact", "outro": "intro_serif"}
 
-# ── v6.1 字体池 (2026-09-11 fontTools nameID6 真相表: 只收 HKLM 系统字体真实 PS 名) ──
-# 铁律 (v6 事故实证): AE 只解析 HKLM 系统字体, 用户目录 (LOCALAPPDATA) 字体全部不可见;
-#   预设库 §8.1 set→回读探针有盲区 — 回读只是回显存储字符串, 不证明可解析
-#   (v6 实证: Anton/BebasNeue/Antonio 等 USER 字体 v1 起从未真正渲染, 全被替换成同一默认字体)。
-# 真相表方法: fontTools 枚举全部 face (含 TTC 多 face) 的 nameID 6 + 文件位置 → HKLM 才可用。
+# ── v18 字体池 (2026-09-11 重建: HKLM 真相表 + fontTools cmap 字形覆盖双校验) ──
+# 铁律: ① AE 只解析 HKLM 系统字体 (用户目录字体不可见) ② 必须校验 cmap 覆盖——
+#   日文词 (強発壊無縛臨韻) 只有部分字体覆盖 (实测 琥珀/彩云/新魏/行楷/粗黑宋 = 9/17 不覆盖!),
+#   故 jp 池只收 17/17 全覆字体 (LiSu/DengXian-Bold/YuGothic系/MS-Gothic系/STSong系/STXihei),
+#   cn 池才能用装饰性字体 (琥珀/彩云/新魏/彩色系). 覆盖表见 tmp/check_glyph_coverage.py
 FONT_POOLS = {
-    "drop_impact": {   # 冲击词: 重笔画/压缩展示系
-        "jp":    ["YuGothic-Bold", "MS-PGothic", "YuGothic-Medium"],
-        "cn":    ["FZCHSJW--GB1-0", "SimHei", "MicrosoftYaHei-Bold"],   # FZCHSJW=方正粗黑宋简体
-        "latin": ["Impact", "Haettenschweiler", "Arial-Black", "FranklinGothic-Heavy"],
+    "drop_impact": {   # 冲击词: 个性重体
+        "jp":    ["LiSu", "DengXian-Bold", "YuGothic-Bold", "MS-PGothic"],
+        "cn":    ["STHupo", "FZCHSJW--GB1-0", "STCaiyun", "STXinwei"],
+        "latin": ["Impact", "Haettenschweiler", "GillSans-UltraBoldCondensed",
+                  "CooperBlack", "BodoniMTBlack"],
     },
-    "build_side": {    # 铺垫词: 现代无衬线/窄体
-        "jp":    ["YuGothic-Regular", "YuGothic-Medium"],
-        "cn":    ["STXihei", "MicrosoftYaHei", "YouYuan"],
-        "latin": ["TwCenMT-CondensedBold", "TrebuchetMS-Bold", "AgencyFB-Bold"],
+    "build_side": {    # 铺垫词: 现代窄体/几何
+        "jp":    ["YuGothic-Medium", "STZhongsong", "DengXian-Bold"],
+        "cn":    ["STXihei", "STSong", "AlibabaPuHuiTi_3_45_Light", "YouYuan"],
+        "latin": ["TwCenMT-CondensedBold", "AgencyFB-Bold", "BernardMT-Condensed",
+                  "CenturyGothic-Bold"],
     },
-    "intro_serif": {   # 开场/收尾: 衬线/书法质感
-        "jp":    ["YuGothic-Light", "SimSun"],
-        "cn":    ["STKaiti", "STXinwei", "KaiTi"],
-        "latin": ["Georgia", "Rockwell"],
+    "intro_serif": {   # 开场/收尾: 衬线书法质感
+        "jp":    ["YuGothic-Light", "STFangsong", "SimSun"],
+        "cn":    ["STKaiti", "STXingkai", "STLiti", "STZhongsong"],
+        "latin": ["Georgia", "BodoniMTBlack", "CopperplateGothic-Bold", "Rockwell-ExtraBold"],
     },
 }
-VERIFIED_FONTS = {          # fontTools 真相表实证 HKLM + PS 名精确匹配 (2026-09-11)
-    "YuGothic-Bold", "YuGothic-Medium", "YuGothic-Light", "YuGothic-Regular",
-    "MS-PGothic", "MS-Gothic", "SimSun", "SimHei", "KaiTi", "LiSu", "YouYuan",
-    "MicrosoftYaHei", "MicrosoftYaHei-Bold", "DengXian-Bold",
-    "FZCHSJW--GB1-0", "STKaiti", "STXinwei", "STZhongsong", "STXihei",
-    "STFangsong", "STSong", "STHupo", "STXingkai", "STLiti", "STCaiyun",
-    "Impact", "Haettenschweiler", "Arial-Black", "SegoeUIBlack",
-    "FranklinGothic-Heavy", "FranklinGothic-DemiCond", "GillSans-UltraBoldCondensed",
-    "TwCenMT-CondensedBold", "TrebuchetMS-Bold", "AgencyFB-Bold",
-    "Georgia", "Georgia-Bold", "Rockwell", "Rockwell-ExtraBold",
-    "TimesNewRomanPSMT", "TimesNewRomanPS-BoldMT", "Cambria-Bold",
+VERIFIED_FONTS = {          # HKLM 真相表 + cmap 覆盖双校验 (2026-09-11)
+    "LiSu", "DengXian-Bold", "YuGothic-Bold", "YuGothic-Medium", "YuGothic-Regular",
+    "YuGothic-Light", "MS-PGothic", "MS-Gothic", "STHupo", "FZCHSJW--GB1-0",
+    "STCaiyun", "STXinwei", "STKaiti", "STXingkai", "STLiti", "STZhongsong",
+    "STSong", "STFangsong", "STXihei", "SimSun", "SimHei", "KaiTi", "YouYuan",
+    "AlibabaPuHuiTi_3_45_Light", "MicrosoftYaHei-Bold",
+    "Impact", "Haettenschweiler", "Arial-Black", "GillSans-UltraBoldCondensed",
+    "CooperBlack", "BodoniMTBlack", "FranklinGothic-Heavy", "FranklinGothic-DemiCond",
+    "SegoeUIBlack", "ShowcardGothic-Reg", "Stencil", "Rockwell-ExtraBold",
+    "CopperplateGothic-Bold", "CenturyGothic-Bold", "AgencyFB-Bold",
+    "BernardMT-Condensed", "TwCenMT-CondensedBold", "TrebuchetMS-Bold",
+    "Georgia", "Rockwell", "GloucesterMT-ExtraCondensed", "BerlinSansFB-Bold",
 }
 JP_ONLY_CHARS = set("強発壊無縛臨韻")      # 词库内 JP 专字形 (JP 字体优先保字形正确)
 
@@ -260,6 +263,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
     side_flip = 0
     font_pos = {}        # v6 池内轮换游标 (按 样式×文字系 独立, 保证每池首字都能轮到)
     last_font = {}
+    wf_map = {}          # v18 词→最近一次字体 (同词换字体)
     for i, (t, sn, zone) in enumerate(picked):
         cfg = ZONE_CFG[zone]
         mood = "outro" if zone == "outro" else zone
@@ -299,6 +303,11 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             font_pos[fkey] = font_pos.get(fkey, 0) + 1
         font_pos[fkey] = font_pos.get(fkey, 0) + 1
         last_font[fkey] = font
+        # v18: 同一个词再次出现时换字体 (词-字体去重, 防同词同款)
+        if wf_map.get(w) == font and len(pool) > 1:
+            font = pool[(font_pos.get(fkey, 0)) % len(pool)]
+            font_pos[fkey] = font_pos.get(fkey, 0) + 1
+        wf_map[w] = font
 
         # v8: 发光按文字系大幅收紧 — 全片逐帧扫描实证 107/720 帧整帧提亮 (峰值+13),
         # 来源=文字白墨+光晕覆盖画面 20-30% 面积 (Boss"视频被影响/亮度过剩"的量化根因);
