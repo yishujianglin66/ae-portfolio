@@ -120,25 +120,26 @@ MOOD_TO_STYLE = {"intro": "intro_serif", "build": "build_side",
 #   故 jp 池只收 17/17 全覆字体 (LiSu/DengXian-Bold/YuGothic系/MS-Gothic系/STSong系/STXihei),
 #   cn 池才能用装饰性字体 (琥珀/彩云/新魏/彩色系). 覆盖表见 tmp/check_glyph_coverage.py
 FONT_POOLS = {
-    "drop_impact": {   # 冲击词 (v20: 并入 L1 白名单展示字体)
-        "jp":    ["LiSu", "DengXian-Bold", "YuGothic-Bold", "MS-PGothic"],
-        "cn":    ["FZCCHFW--GB1-0", "HYa0gj", "FZHPFW--GB1-0", "STHupo", "STCaiyun"],
-        "latin": ["BebasKai", "Brat", "BroadcastMatter", "FasterOne-Regular",
-                  "MetalMania-Regular", "Anton-Regular", "BlackOpsOne-Regular",
-                  "AlfaSlabOne-Regular", "Bangers-Regular", "Blanka-Regular", "321impact"],
+    "drop_impact": {   # 冲击词: v24 厚重字体回归池首 (细/装饰体后置, 避免整体观感变轻变平)
+        "jp":    ["YuGothic-Bold", "MS-PGothic", "DengXian-Bold", "LiSu"],
+        "cn":    ["FZCCHFW--GB1-0", "HYa0gj", "FZHPFW--GB1-0", "FZCHSJW--GB1-0", "STHupo", "STCaiyun"],
+        "latin": ["Anton-Regular", "BlackOpsOne-Regular", "AlfaSlabOne-Regular",
+                  "GillSans-UltraBoldCondensed", "CooperBlack", "Bangers-Regular",
+                  "MetalMania-Regular", "Blanka-Regular", "321impact",
+                  "BebasKai", "Brat", "BroadcastMatter", "FasterOne-Regular"],
     },
-    "build_side": {    # 铺垫词 (4-11s 段)
-        "jp":    ["YuGothic-Medium", "DengXian-Bold", "STZhongsong"],
+    "build_side": {    # 铺垫词 (4-11s 段): 厚重优先
+        "jp":    ["DengXian-Bold", "YuGothic-Medium", "STZhongsong"],
         "cn":    ["FZPHFW--GB1-0", "FZKTFW--GB1-0", "STSong"],
-        "latin": ["Lato-Black", "Inter-Black", "BrandonGrotesque-Black", "AlegreyaSansSC-Black",
-                  "BebasNeue-Bold", "Kanit-Black", "HansonBold", "AgencyFB-Bold"],
+        "latin": ["Lato-Black", "Inter-Black", "BrandonGrotesque-Black", "Kanit-Black",
+                  "BebasNeue-Bold", "HansonBold", "AgencyFB-Bold", "AlegreyaSansSC-Black"],
     },
-    "intro_serif": {   # 开场/收尾: 衬线/书法/花体
-        "jp":    ["STFangsong", "YuGothic-Light", "STSong"],
+    "intro_serif": {   # 开场/收尾: 厚重衬线优先, 细花体后置
+        "jp":    ["STZhongsong", "STFangsong", "YuGothic-Light"],
         "cn":    ["FZSSFW--GB1-0", "FZKTFW--GB1-0", "STXingkai", "STLiti", "STKaiti"],
-        "latin": ["DrSugiyama-Regular", "GreatVibes-Regular", "Allura-Regular",
-                  "Asset-Regular", "AutourOne-Regular", "AlfaSlabOne-Regular",
-                  "BowlbyOneSC-Regular", "BodoniMTBlack", "CopperplateGothic-Bold"],
+        "latin": ["AlfaSlabOne-Regular", "BowlbyOneSC-Regular", "BodoniMTBlack",
+                  "CopperplateGothic-Bold", "AutourOne-Regular", "Asset-Regular",
+                  "DrSugiyama-Regular", "GreatVibes-Regular", "Allura-Regular"],
     },
 }
 VERIFIED_FONTS = {          # HKLM 真相表 + cmap 覆盖 + 渲染差分三重校验 (2026-09-11/12)
@@ -395,18 +396,17 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         bg_lum = _worst_region_luma(bg_video, t_in, hold, x, y)
         if bg_lum >= 150:          # 亮底: 白字白辉光物理上看不出 → 青色光晕可见 + 粗描边保读
             bg_class = "bright"
-            stroke_cfg = (stroke_cfg[0], 9.0)
+            stroke_cfg = (stroke_cfg[0], 11.0)      # v24: 9→11 加强描边(观感变弱的主因之一)
             shadow_cfg = (0.85, 135, 8, 14)
-            glow = (205, 20, round((glow[2] if glow else 1.0) * 1.15, 3)) if glow else glow
+            glow = (185, 20, round((glow[2] if glow else 1.0) * 1.35, 3)) if glow else glow
             glow_col = ([0.10, 0.80, 1.0], [0.0, 0.15, 0.45])
             pulse = 1.15
-            # v15: 实心彩色外环被 Boss 判"劣质感" → 双描边关闭 (保留代码路径, 样式回 v11 单层)
             dbl, accent, outer_w, inner_w = False, None, 0.0, 0.0
         elif bg_lum >= 90:         # 中间调: 暖金光晕
             bg_class = "mid"
-            stroke_cfg = (stroke_cfg[0], 7.0)
+            stroke_cfg = (stroke_cfg[0], 9.0)       # v24: 7→9
             shadow_cfg = (0.80, 135, 10, 14)
-            glow = (190, 16, round((glow[2] if glow else 1.0) * 1.05, 3)) if glow else glow
+            glow = (175, 18, round((glow[2] if glow else 1.0) * 1.20, 3)) if glow else glow
             glow_col = ([1.0, 0.66, 0.18], [0.30, 0.10, 0.0])
             pulse = 1.25
             dbl, accent, outer_w, inner_w = False, None, 0.0, 0.0
