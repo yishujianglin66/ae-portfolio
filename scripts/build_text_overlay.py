@@ -623,12 +623,16 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "pulse_mul": round(_pulse_mul, 3),
             "mood_profile": mood_name,
             "entropy": round(_ent, 3),
-            # v30 冲击配方轮换 (解决"效果单一": 12 个爆点原来全用同一种抖动)
-            # v31 扩到 6 配方 (12 爆点 → 每配方恰好 2 次, 不相邻) + 配方内参数按 i 取模变化
-            "impact_recipe": (["shake", "rays", "chroma", "feedback", "edgerays", "filmflash"][i % 6]
-                              if (style_id == "drop_impact" and beats and _plugins_on) else None),
+            # v33 视觉编排 (Boss: "太乱, 应局部/某些时段应用"): 引入留白与对比
+            # 数据依据: 参照作品静段 31-89% / 强段 3-21% / 最长连续强段 1-3s;
+            #   本片(v32)静段 0% / 强段 100% / 连续强段 29s → 无收放, 故观感乱
+            # 规则: ① 配方只给"隔拍"(drop 内 i 为偶数) → 每两次爆点只一次特效, 另一半留白
+            #       ② intro/build/outro 一律不给冲击配方 (纯文字与揭示, 保持安静)
+            #       ③ 颗粒只在收尾段(电影感/余韵)出现, 见 JSX 关键帧
+            "impact_recipe": (["shake", "rays", "chroma", "feedback", "edgerays", "filmflash"][(i // 2) % 6]
+                              if (style_id == "drop_impact" and beats and _plugins_on and i % 2 == 0) else None),
             "recipe_i": i,
-            # v31d: 用"出现次数"做参数变化 —— 只用 i%k 会让同配方的两次出现参数完全相同 (i 与 i+6 同奇偶同模3)
+            "recipe_occ": i // 2,            # v31d: 用"出现次数"做参数变化 —— 只用 i%k 会让同配方的两次出现参数完全相同 (i 与 i+6 同奇偶同模3)
             "recipe_occ": i // 6,
             "from_timeline": bool(_from_tl),
             "font_override": _tl_font_override,
@@ -775,10 +779,12 @@ def build_jsx(events, out_aep: Path):
         d["chroma"] = bool(e.get("chroma"))
         d["chroma_dx"] = float(e.get("chroma_dx", 12))
         d["db_dir"] = 0 if e.get("z", 0) == 0 else 90
-        d["db_in"] = round((45 + 45 * en) * im, 1)
-        d["db_out"] = round((30 + 30 * en) * im, 1)
-        d["rb_in"] = round((12 + 20 * en) * im, 1)
-        d["tb_amt"] = round(2 + 4.5 * en, 2)
+        # v33 对比强化: 无冲击配方的"安静拍"把常驻效果(方向/径向模糊、湍流)也压轻 → 留白更干净
+        _calm = 0.65 if not e.get("impact_recipe") else 1.0
+        d["db_in"] = round((45 + 45 * en) * im * _calm, 1)
+        d["db_out"] = round((30 + 30 * en) * im * _calm, 1)
+        d["rb_in"] = round((12 + 20 * en) * im * _calm, 1)
+        d["tb_amt"] = round((2 + 4.5 * en) * _calm, 2)
         d["tb_size"] = round(55 + 65 * en, 1)
         d["tb_evo"] = round(80 + 70 * en, 1)
         d["cascade"] = bool(e.get("cascade"))
@@ -1225,28 +1231,27 @@ def build_jsx(events, out_aep: Path):
         }}
         // ── W2 揭示技法已前移至效果栈首 (见上方, 必须在发光/模糊之前才能裁字形) ──
       }}
-      // ── v32 全局颗粒 (Boss 批准): 直接作用于素材层 ──
-      // 试过调整层路线两次均无效 (Sapphire 效果在调整层上读不到下层合成), 故改为加在同在合成中的素材层
-      // 判据: 全片均值不变暗 + 高频噪声上升; Frequency 用较粗值(35)否则被 H.264 压掉
-      try {{
-        var footage = null;
-        for (var fi = comp.numLayers; fi >= 1; fi--) {{
-          var fn = comp.layer(fi).name;
-          if (fn.indexOf("TXT") === 0 || fn.indexOf("GRAIN") === 0) continue;
-          if (fn.indexOf(".mp4") >= 0 || fn.indexOf("final") >= 0) {{ footage = comp.layer(fi); break; }}
-        }}
-        if (footage) {{
-          var gr = footage.property("Effects").addProperty("S_Grain");
-          // 实证: 无损渲染颗粒可见(局部std ×1.86), 但 H.264@15Mbps 会压掉 → 需更粗更强才扛得住压缩
-          gr.property("S_Grain-0051").setValue(0.38);                                // Color Amplitude (兼顾可见与亮度稳定)
-          gr.property("S_Grain-0052").setValue(12);                                  // Color Frequency (粗颗粒)
-          try {{ gr.property("S_Grain-0057").setValue(0.30); }} catch (gg) {{}}        // Bw Amplitude
-          try {{ gr.property("S_Grain-0058").setValue(14); }} catch (gk) {{}}
-          try {{ gr.property("S_Grain-0060").setValue(0.37); }} catch (gh) {{}}        // Seed 固定
-          try {{ gr.property("S_Grain-0061").setValue(1); }} catch (gi2) {{}}          // Jitter Frames
-          rep += "|GRAIN_ON_FOOTAGE(" + footage.name + ")";
-        }} else {{ rep += "|GRAIN_NOFOOTAGE"; }}
-      }} catch (ge) {{ rep += "|GRAIN"; }}
+      // ── v32/v33 颗粒实验结论: 已停用 (默认关闭) ──
+      // 实证: ① 细颗粒(Freq 100) 无损可见但被 H.264@15Mbps 完全压掉; ② 粗颗粒(Freq 12) 形成大块
+      // 明暗斑并把整帧提亮 (4.5s 均值 57→127, 且采样点趋同 ≈ 恒定偏移) → 正是"太乱"的主因;
+      // ③ 关键帧化的 Color Amplitude 在该版本上未按预期生效 → 不做无依据的补救。
+      // 需要重启颗粒实验时设 TEXT_OVERLAY_GRAIN=1 (届时必须做**同帧** A/B 区域级校验)。
+      if ({'true' if os.environ.get("TEXT_OVERLAY_GRAIN", "0") == "1" else 'false'}) {{
+        try {{
+          var footage = null;
+          for (var fi = comp.numLayers; fi >= 1; fi--) {{
+            var fn = comp.layer(fi).name;
+            if (fn.indexOf("TXT") === 0) continue;
+            if (fn.indexOf(".mp4") >= 0 || fn.indexOf("final") >= 0) {{ footage = comp.layer(fi); break; }}
+          }}
+          if (footage) {{
+            var gr = footage.property("Effects").addProperty("S_Grain");
+            gr.property("S_Grain-0052").setValue(30);
+            gr.property("S_Grain-0051").setValue(0.12);
+            rep += "|GRAIN_ON";
+          }}
+        }} catch (ge) {{ rep += "|GRAIN"; }}
+      }}
       app.project.save(new File("{out_aep.as_posix()}"));
       rep += "|saved layers=" + comp.numLayers + " texts=" + evs.length;
     }}
