@@ -79,6 +79,8 @@ STYLES = {
     "build_side": {
         "size": (98, 134), "fill": [0.95, 0.95, 0.98],
         "stroke": ([0.03, 0.03, 0.06], 2.2), "pos": "side_alt", "enter": "slide_back",
+        # W2 入场变款循环: 滑入 / 上升揭示 / 横向揭示 (Linear Wipe, 层级效果 → 字体安全)
+        "enter_cycle": ["slide_back", "wipe_up", "slide_back", "wipe_right"],
         "glow": (130, 18, 0.9), "glow2": None,
         "shadow": (0.6, 135, 6, 8), "bevel": (2, -45, 0.35),
         "tracking": None,
@@ -89,6 +91,8 @@ STYLES = {
     "intro_serif": {
         "size": (100, 125), "fill": [0.96, 0.94, 0.89],
         "stroke": ([0.05, 0.04, 0.06], 1.8), "pos": "center", "enter": "fade_scale",
+        # W2 入场变款循环 (开场/收尾): 缩放淡入 / 上升揭示 / 模糊淡入 / 横向揭示
+        "enter_cycle": ["fade_scale", "wipe_up", "blurfade", "wipe_right"],
         "glow": (150, 30, 0.55), "glow2": None,
         "shadow": (0.45, 135, 5, 15), "bevel": None,
         "tracking": None,
@@ -286,6 +290,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
     font_pos = {}        # v6 池内轮换游标 (按 样式×文字系 独立, 保证每池首字都能轮到)
     last_font = {}
     wf_map = {}          # v18 词→最近一次字体 (同词换字体)
+    enter_pos = {}       # W2 入场变款游标 (按样式)
     for i, (t, sn, zone) in enumerate(picked):
         cfg = ZONE_CFG[zone]
         mood = "outro" if zone == "outro" else zone
@@ -428,6 +433,13 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             _v = bank_pos[zone] % 3
             drop_fall, rise_up = (_v == 0), (_v == 1)
 
+        # W2 入场变款循环 (wipe_up/wipe_right = Linear Wipe 层级效果 → 字体安全, 已探针实证)
+        enter = st["enter"]
+        ecyc = st.get("enter_cycle")
+        if ecyc:
+            enter = ecyc[enter_pos.get(style_id, 0) % len(ecyc)]
+            enter_pos[style_id] = enter_pos.get(style_id, 0) + 1
+
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
             "mood": mood, "energy": energy, "style_id": style_id,
@@ -438,7 +450,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "probe_font": font not in VERIFIED_FONTS,
             "fill": st["fill"],
             "stroke": stroke_cfg,
-            "enter": st["enter"],
+            "enter": enter,
             "glow": glow,
             "glow2": glow2,
             "shadow": shadow_cfg,
@@ -746,6 +758,32 @@ def build_jsx(events, out_aep: Path):
         }}
         var tp = L.property("Text");
         try {{ addMove(MV, ev); }} catch (mve) {{ rep += "|MOVE" + i; }}
+        // ── W2 揭示技法: 图层遮罩 (探针实证: mask atom + Shape 赋值/关键帧可用, 不碰文字动画器) ──
+        // 为何不用 Linear Wipe: 它作用于整帧(1920x1080)而非文字范围 → 擦除线扫过时文字整块跳出
+        // (v21/v22 实证); 遮罩按 sourceRectAtTime 的文字边界裁切 = 真正的"揭示"
+        if (ev.enter == "wipe_up" || ev.enter == "wipe_right") {{
+          try {{
+            var mk = L.property("ADBE Mask Parade").addProperty("ADBE Mask Atom");
+            var r = L.sourceRectAtTime(ev.t_in, false);
+            var x0 = r.left - 8, x1 = r.left + r.width + 8;
+            var y0 = r.top - 8, y1 = r.top + r.height + 8;
+            var sFull = new Shape();
+            sFull.vertices = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]; sFull.closed = true;
+            var sZero = new Shape();
+            if (ev.enter == "wipe_up") {{
+              sZero.vertices = [[x0, y1], [x1, y1], [x1, y1], [x0, y1]];
+            }} else {{
+              sZero.vertices = [[x0, y0], [x0, y0], [x0, y1], [x0, y1]];
+            }}
+            sZero.closed = true;
+            var shp = mk.property("ADBE Mask Shape");
+            shp.setValueAtTime(ev.t_in, sZero);
+            shp.setValueAtTime(ev.t_in + 0.34, sFull);
+            shp.setValueAtTime(ev.t_out - ev.fout, sFull);
+            shp.setValueAtTime(ev.t_out, sZero);
+            try {{ mk.property("ADBE Mask Feather").setValue([6, 6]); }} catch (mfe) {{}}
+          }} catch (mke) {{ rep += "|MASKREVEAL" + i; }}
+        }}
         // ── v3 手册实证技法（全部 try/catch, 手册: AE-文字特效JSX动画可靠参数手册 附D/E/F）──
         if (ev.cascade) {{                                    // 逐字级联翻入: RotY(-90)+Opacity(0)+RS idx3 扫过
           try {{
@@ -887,6 +925,7 @@ def build_jsx(events, out_aep: Path):
             mkGhost([0.06, 0.85, 1.0], ev.chroma_dx, "TXTC");
           }} catch (che) {{ rep += "|CHROMA" + i; }}
         }}
+        // ── W2 揭示技法已前移至效果栈首 (见上方, 必须在发光/模糊之前才能裁字形) ──
       }}
       app.project.save(new File("{out_aep.as_posix()}"));
       rep += "|saved layers=" + comp.numLayers + " texts=" + evs.length;
