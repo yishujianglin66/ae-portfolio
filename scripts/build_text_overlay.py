@@ -128,11 +128,11 @@ FONT_POOLS = {
                   "MetalMania-Regular", "Blanka-Regular", "321impact",
                   "BebasKai", "Brat", "BroadcastMatter", "FasterOne-Regular"],
     },
-    "build_side": {    # 铺垫词 (4-11s 段): 厚重优先
-        "jp":    ["DengXian-Bold", "YuGothic-Medium", "STZhongsong"],
-        "cn":    ["FZPHFW--GB1-0", "FZKTFW--GB1-0", "STSong"],
-        "latin": ["Lato-Black", "Inter-Black", "BrandonGrotesque-Black", "Kanit-Black",
-                  "BebasNeue-Bold", "HansonBold", "AgencyFB-Bold", "AlegreyaSansSC-Black"],
+    "build_side": {    # 铺垫词 (4-11s 段): v25 换成有个性的字体 (原 等线/平黑/Lato 被 Boss 判不达标)
+        "jp":    ["LiSu", "DengXian-Bold", "YuGothic-Bold", "STZhongsong"],
+        "cn":    ["FZHPFW--GB1-0", "FZSTFW--GB1-0", "STHupo", "FZKTFW--GB1-0"],
+        "latin": ["HansonBold", "BrandonGrotesque-Black", "Kanit-Black", "321impact",
+                  "BebasNeue-Bold", "Inter-Black"],
     },
     "intro_serif": {   # 开场/收尾: 厚重衬线优先, 细花体后置
         "jp":    ["STZhongsong", "STFangsong", "YuGothic-Light"],
@@ -185,7 +185,8 @@ def script_class(word):
         return "cn"
     return "latin"
 
-# 默认词库 (报告无歌词素材 → 按源 IP 咒术回战/五条悟 的 AMV 惯用词; --words-json 可覆盖)
+# 默认词库 (报告无歌词素材 → 按源 IP 咒术回战/五条悟 的 AMV 惯用词)
+# v25: 词库外置 —— 若 data/text_overlay_words.json 存在则覆盖 (改文字无需改代码)
 DEFAULT_WORDS = {
     "intro": ["五条悟", "THE STRONGEST"],
     "build": ["無限", "束縛", "加速", "VIOLATION", "迂回", "LIMIT",
@@ -194,6 +195,26 @@ DEFAULT_WORDS = {
               "崩壊", "RED", "虚式"],
     "outro": ["THE END", "余韻"],
 }
+WORDS_FILE = "data/text_overlay_words.json"
+
+
+def load_words(override: dict | None = None) -> dict:
+    """词库优先级: --words-json > data/text_overlay_words.json > DEFAULT_WORDS"""
+    words = {k: list(v) for k, v in DEFAULT_WORDS.items()}
+    p = ROOT / WORDS_FILE
+    if p.exists():
+        try:
+            ext = json.loads(p.read_text(encoding="utf-8"))
+            for k, v in ext.items():
+                if isinstance(v, list) and v:
+                    words[k] = list(v)
+        except Exception as e:
+            print(f"[WARN] 词库文件解析失败, 用默认: {e}")
+    if override:
+        for k, v in override.items():
+            if isinstance(v, list) and v:
+                words[k] = list(v)
+    return words
 
 COMP_NAME = "run53_premium_v3"     # 验收基线合成 (交接 §一)
 AEP_NAME = "run53_premium_v3.aep"
@@ -440,6 +461,15 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             enter = ecyc[enter_pos.get(style_id, 0) % len(ecyc)]
             enter_pos[style_id] = enter_pos.get(style_id, 0) + 1
 
+        # v25 音乐联动: 事件窗内节拍脉冲 (供非弹性层做缩放脉冲) + 包络采样 (供发光逐帧呼吸)
+        bz = [(round(tt, 3), round(ss / smax, 3)) for tt, ss in onsets if t_in <= tt <= t_out]
+        bz.sort(key=lambda x: -x[1])
+        beats = bz[:3]                                   # 最多 3 个最强节拍脉冲
+        n_s = 7
+        env_s = [(round(t_in + hold * k / (n_s - 1), 3),
+                  round((env_at(t_in + hold * k / (n_s - 1)) / env_max), 3) if env_max else 0.5)
+                 for k in range(n_s)]
+
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
             "mood": mood, "energy": energy, "style_id": style_id,
@@ -466,6 +496,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "inner_w": inner_w,
             "is3d": is3d,
             "z": z_dep,
+            "beats": beats,
+            "env_s": env_s,
             "chroma": chroma,
             "chroma_dx": chroma_dx,
             "impact_mul": impact_mul,
@@ -591,6 +623,8 @@ def build_jsx(events, out_aep: Path):
         d["inner_w"] = float(e.get("inner_w", 0))
         d["is3d"] = bool(e.get("is3d"))
         d["z"] = float(e.get("z", 0))
+        d["beats"] = [[float(a), float(b)] for a, b in (e.get("beats") or [])]
+        d["env_s"] = [[float(a), float(b)] for a, b in (e.get("env_s") or [])]
         # v15/v17 冲击力包参数 (探针实证: ADBE Motion Blur=方向模糊 / ADBE Radial Blur / ADBE Turbulent Displace)
         # v17: 冲量按镜头运动强度分级 (impact_mul), 静止镜头收敛 / 高速爆炸镜头拉满
         en = float(e.get("energy", 0.6))
@@ -758,6 +792,17 @@ def build_jsx(events, out_aep: Path):
         }}
         var tp = L.property("Text");
         try {{ addMove(MV, ev); }} catch (mve) {{ rep += "|MOVE" + i; }}
+        // ── v25 音乐联动: 节拍脉冲缩放 (非弹性层; 弹性的 drop 层由发光呼吸负责律动) ──
+        if (ev.beats && ev.beats.length && !ev.elastic) {{
+          try {{
+            for (var b = 0; b < ev.beats.length; b++) {{
+              var bt = ev.beats[b][0], bstr = ev.beats[b][1];
+              var amp = 4 + 10 * bstr;                             // 节拍越强脉冲越大 (4~14%)
+              L.scale.setValueAtTime(bt, [100 + amp, 100 + amp]);
+              L.scale.setValueAtTime(bt + 0.12, [100, 100]);
+            }}
+          }} catch (sbe) {{ rep += "|BEATSCALE" + i; }}
+        }}
         // ── W2 揭示技法: 图层遮罩 (探针实证: mask atom + Shape 赋值/关键帧可用, 不碰文字动画器) ──
         // 为何不用 Linear Wipe: 它作用于整帧(1920x1080)而非文字范围 → 擦除线扫过时文字整块跳出
         // (v21/v22 实证); 遮罩按 sourceRectAtTime 的文字边界裁切 = 真正的"揭示"
@@ -855,6 +900,12 @@ def build_jsx(events, out_aep: Path):
             ev.t_in, ev.glow[2] * ev.glow_pulse);
           gf.property("ADBE Glo2-0004").setValueAtTime(
             ev.t_in + {ENV_DECAY_S}, ev.glow[2]);
+          // v25 音乐联动: 保持期内发光强度按音乐包络逐帧呼吸 (确定性烘焙, 非随机)
+          var es = ev.env_s || [];
+          for (var q = 1; q < es.length; q++) {{
+            gf.property("ADBE Glo2-0004").setValueAtTime(
+              es[q][0], Math.max(0.05, ev.glow[2] * (0.78 + 0.60 * es[q][1])));
+          }}
         }}
         if (ev.glow2) {{                                                // 配方④: 高阈值大半径外层 bloom
           try {{
@@ -1001,9 +1052,15 @@ def main():
         print(f"[ERR] 缺前置产物 {run_dir / 'production_report.json'}")
         sys.exit(2)
 
-    words = dict(DEFAULT_WORDS)
+    words = load_words(None)
+    _wp = ROOT / WORDS_FILE
+    if not _wp.exists():
+        _wp.parent.mkdir(parents=True, exist_ok=True)
+        _wp.write_text(json.dumps(DEFAULT_WORDS, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"[P0] 已生成可编辑词库: {_wp} (改文字后重跑本脚本即生效)")
     if args.words_json:
-        words.update(json.loads(Path(args.words_json).read_text(encoding="utf-8")))
+        words = load_words(json.loads(Path(args.words_json).read_text(encoding="utf-8")))
+        print(f"[P0] 词库覆盖: {args.words_json}")
 
     segs = load_segments(run_dir)
     onsets = load_onsets()
