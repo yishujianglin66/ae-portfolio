@@ -70,6 +70,17 @@ ZONE_CFG = {
 ZONE_END_GUARD = 0.35     # 锚点距分区结束 <0.35s 不选 (会被钳成不可读短事件)
 DROP_POS_CYCLE = [(960, 540), (700, 380), (1220, 700)]   # v9: 内收 (v8 实证 620/1300 宽字超框)
 ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 0.4 保覆盖)
+# v37 时段处理强度分级 (Boss: "应该局部或者某些时间段应用" / "感觉没啥变化")
+# 实证依据: 逐帧"成片 vs 原始素材"差异曲线显示 安静段(9.69) 竟强于 drop 段(8.00)
+#   → 之前所有改动只动短暂特效(占比极小), 真正影响观感的是"文字本身一直很重"
+# 分级: intro 极简(细描边/无发光) → build 轻(弱发光) → drop 满(重描边+强发光+特效) → outro 柔
+ZONE_TREAT = {
+    # size=字号倍率 (实证: 光晕/描边的差异对"视觉重量"影响有限, 字号才是主杠杆)
+    "intro": {"glow": 0.0,  "stroke": 2.5, "shadow": 0.5, "bevel": 0.4, "shimmer": False, "size": 0.78},
+    "build": {"glow": 0.45, "stroke": 5.5, "shadow": 0.8, "bevel": 0.7, "shimmer": False, "size": 0.70},
+    "drop":  {"glow": 1.0,  "stroke": 12.0, "shadow": 1.0, "bevel": 1.0, "shimmer": True, "size": 1.10},
+    "outro": {"glow": 0.6,  "stroke": 4.5, "shadow": 0.9, "bevel": 0.8, "shimmer": False, "size": 0.95},
+}
 
 # 字体: font_stack[0] 为首选 (probe_font=true 表示未实机实证, 探针不过则用栈尾已实证字体)
 # v2 样式 (2026-09-10 Boss 反馈"效果太普通"后升级, 配方①描边投影+④双层发光+⑦轻斜面):
@@ -628,6 +639,23 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         _want_recipe = bool(style_id == "drop_impact" and beats and _plugins_on
                             and round(t_in, 3) in _recipe_ts)
 
+        # v37 时段处理分级: 把"整体处理强度"按时段缩放 (这才是可见的收放)
+        _zc = ZONE_TREAT.get(zone, ZONE_TREAT["drop"])
+        if glow:
+            glow = None if _zc["glow"] <= 0 else (glow[0], glow[1], round(glow[2] * _zc["glow"], 3))
+        if glow2 and _zc["glow"] < 0.7:
+            glow2 = None                                       # 轻时段不要双层发光
+        stroke_cfg = (stroke_cfg[0], round(min(stroke_cfg[1], _zc["stroke"]), 1))
+        # v38 分段字号倍率 (主杠杆): build 段文字明显变小 → 与 drop 段形成体量对比
+        size = max(60, int(round(size * _zc.get("size", 1.0))))
+        if shadow_cfg:
+            shadow_cfg = (round(shadow_cfg[0] * _zc["shadow"], 2),) + tuple(shadow_cfg[1:])
+        if bevel:
+            bevel = (bevel[0], bevel[1], round(bevel[2] * _zc["bevel"], 2))
+        _shimmer = _zc["shimmer"]
+        if not _shimmer:
+            chroma = False                                     # 通道分离只属 drop 时段
+
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
             "mood": mood, "energy": energy, "style_id": style_id,
@@ -821,12 +849,16 @@ def build_jsx(events, out_aep: Path):
         d["chroma"] = bool(e.get("chroma"))
         d["chroma_dx"] = float(e.get("chroma_dx", 12))
         d["db_dir"] = 0 if e.get("z", 0) == 0 else 90
-        # v33 对比强化: 无冲击配方的"安静拍"把常驻效果(方向/径向模糊、湍流)也压轻 → 留白更干净
-        _calm = 0.65 if not e.get("impact_recipe") else 1.0
-        d["db_in"] = round((45 + 45 * en) * im * _calm, 1)
-        d["db_out"] = round((30 + 30 * en) * im * _calm, 1)
-        d["rb_in"] = round((12 + 20 * en) * im * _calm, 1)
-        d["tb_amt"] = round((2 + 4.5 * en) * _calm, 2)
+        # v36 对比强化 (Boss: "感觉没啥变化" → 前两版只调结构, 观感强度未变):
+        # 峰均比是关键 (参照 2.5-8.4 vs 我们 1.15) ⇒ ① 安静拍**彻底去掉**入场模糊(原来还有 65%)
+        # ② 特效拍幅度与时长放大 (见 JSX ik 与 PEAK 倍率) → 该静的静透, 该炸的炸开
+        _calm = 0.0 if not e.get("impact_recipe") else 1.0
+        _peak = 1.9 if e.get("impact_recipe") else 1.0      # 特效拍增幅
+        d["db_in"] = round((45 + 45 * en) * im * _calm * _peak, 1)
+        d["db_out"] = round((30 + 30 * en) * im * _calm * _peak, 1)
+        d["rb_in"] = round((12 + 20 * en) * im * _calm * _peak, 1)
+        d["tb_amt"] = round((2 + 4.5 * en) * (1.0 if e.get("impact_recipe") else 0.35), 2)
+        d["peak"] = round(_peak, 2)
         d["tb_size"] = round(55 + 65 * en, 1)
         d["tb_evo"] = round(80 + 70 * en, 1)
         d["cascade"] = bool(e.get("cascade"))
@@ -1014,7 +1046,7 @@ def build_jsx(events, out_aep: Path):
         if (ev.impact_recipe) {{
           var ri = ev.recipe_i || 0;
           var oc = ev.recipe_occ || 1;              // 出现次数: 同配方第 2 次参数必须不同
-          var ik = 0.75 + 0.6 * (ev.local_i || 0.5); // v35: 音乐局部强度越大, 特效越强 (0.75-1.35)
+          var ik = (0.75 + 0.6 * (ev.local_i || 0.5)) * (ev.peak || 1.0);  // v36: 音乐强度 × 峰值倍率
           var bs = ev.beats || [];
           if (ev.impact_recipe == "shake") {{
             try {{
