@@ -64,9 +64,16 @@ ZONE_CFG = {
     #            最小间距  最大保持  事件上限
     "intro": {"gap": 1.2, "hold": 2.5, "cap": 2},
     "build": {"gap": 0.85, "hold": 2.2, "cap": 6},
-    "drop":  {"gap": 0.60, "hold": 0.95, "cap": 12},
+    "drop":  {"gap": 0.60, "hold": 0.95, "cap": 15},   # v39 cap 12→15: 供"补洞"使用 (见 MAX_GAP)
     "outro": {"gap": 1.2, "hold": 2.5, "cap": 2},
 }
+# v39 最大空档约束 (Boss: "几乎能跟上音乐节奏踩点, 继续推进")
+# 实测诊断: 强度贪心 + 0.60s 间距护栏 的交互会剪掉"紧邻已选强拍"的强拍 —— drop 区
+#   23.24→26.01 留下 2.77s 无字空档, 而其间 25.55 强度 0.81 (全片第 14 强) 竟未入选;
+#   16.78→18.62 同样留 1.84s 空档 (17.70 强度 0.71 未入选)。
+# 只约束 drop (高潮段): build 段的长保持是"收", 有意为之, 不动。
+MAX_GAP = {"intro": 99.0, "build": 99.0, "drop": 1.15, "outro": 99.0}
+BEAT_PULSE_THR = 0.55      # v39 保持期内脉冲入选阈值 (归一强度); 未达标则保底取最强 1 拍
 ZONE_END_GUARD = 0.35     # 锚点距分区结束 <0.35s 不选 (会被钳成不可读短事件)
 DROP_POS_CYCLE = [(960, 540), (700, 380), (1220, 700)]   # v9: 内收 (v8 实证 620/1300 宽字超框)
 ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 0.4 保覆盖)
@@ -371,6 +378,42 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                 continue
             picked.append((t, sn, zone))
             n_zone += 1
+
+    # 1b) v39 补洞: 把超过 MAX_GAP 的无字空档用"该空档内最强且合法"的 onset 填上
+    #     为什么单独做这一步: 贪心是"局部最优", 它先选了 A 就必然剪掉 A±0.6s 内的强拍 B,
+    #     但 B 可能是填洞的唯一人选 —— 所以必须按"时间轴覆盖率"再做一遍, 而不是放松阈值
+    #     (放松阈值会让强拍邻居更早被剪, 反而更糟)。
+    for zone, _lo, _hi in ZONES:
+        mg = MAX_GAP.get(zone, 99.0)
+        if mg >= 99.0:
+            continue
+        cfg = ZONE_CFG[zone]
+        hi = _hi
+        for _round in range(4):                        # 每轮每个空档补 1 个, 最多 4 轮
+            zp = sorted(p for p in picked if p[2] == zone)
+            if len(zp) >= cfg["cap"]:
+                break
+            added = 0
+            for a, b in zip(zp, zp[1:]):
+                if b[0] - a[0] <= mg:
+                    continue
+                if len([p for p in picked if p[2] == zone]) >= cfg["cap"]:
+                    break
+                lo_i, hi_i = a[0] + cfg["gap"], b[0] - cfg["gap"]
+                cs = [(t, s / smax) for t, s in onsets
+                      if lo_i <= t <= hi_i and s / smax >= ONSET_S_THR
+                      and zone_of(t) == zone
+                      and hi - t >= ZONE_END_GUARD
+                      and _shot_index(seg_bounds, t) is not None
+                      and all(abs(t - pt) >= 0.30 for pt, _, _ in picked)]
+                if not cs:
+                    continue
+                t, sn = max(cs, key=lambda x: x[1])
+                picked.append((t, sn, zone))
+                added += 1
+            if not added:
+                break
+
     if max_events:
         picked = sorted(picked, key=lambda x: -x[1])[:int(max_events)]
     picked.sort(key=lambda x: x[0])
@@ -605,9 +648,11 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             enter = "fade_scale" if style_id == "intro_serif" else "slide_back"
 
         # v25 音乐联动: 事件窗内节拍脉冲 (供非弹性层做缩放脉冲) + 包络采样 (供发光逐帧呼吸)
+        # v39 修 "保持期内有字无动作": 原取窗内最强 3 拍, 第 4 强的强拍(实测 29.23 强度 0.76)
+        #   就完全没动作 → 改为"强度达标即入选", 上限 5 (避免末段长保持事件脉冲过密)。
         bz = [(round(tt, 3), round(ss / smax, 3)) for tt, ss in onsets if t_in <= tt <= t_out]
         bz.sort(key=lambda x: -x[1])
-        beats = bz[:3]                                   # 最多 3 个最强节拍脉冲
+        beats = [b for b in bz if b[1] >= BEAT_PULSE_THR][:5] or bz[:1]
         n_s = 7
         env_s = [(round(t_in + hold * k / (n_s - 1), 3),
                   round((env_at(t_in + hold * k / (n_s - 1)) / env_max), 3) if env_max else 0.5)
@@ -1042,6 +1087,28 @@ def build_jsx(events, out_aep: Path):
             }}
           }} catch (mve2) {{ rep += "|MVDRIFT" + i; }}
         }}
+        // ── v41 踩拍上跳 (弹性层专用; 修"drop 段无节拍响应") ──
+        // 为什么不用 scale: 弹性层的 scale 由表达式持有 → setValueAtTime 无效;
+        // 为什么不用发光闪(v40试过): 亮背景上发光本就看不见 (实测中位变化 +0.0001),
+        //   必须用**几何位移**才能在明暗背景上都可见。position 未被表达式占用, 可安全打键。
+        // 上跳幅度随拍强与情绪档缩放; 0.09s 回落 → 观感是"文字跟着鼓点弹一下"。
+        if (ev.elastic && ev.beats && ev.beats.length) {{
+          try {{
+            var bs4 = ev.beats;
+            for (var b4 = 0; b4 < bs4.length; b4++) {{
+              var bt4 = bs4[b4][0], bstr4 = bs4[b4][1];
+              if (bt4 <= ev.t_in + 0.40 || bt4 >= ev.t_out - 0.12) continue;
+              var kick = (14 + 22 * bstr4) * ev.pulse_mul;
+              if (ev.is3d) {{
+                MV.position.setValueAtTime(bt4, [ev.x, ev.y - kick, ev.z || 0]);
+                MV.position.setValueAtTime(bt4 + 0.09 * ev.sp, [ev.x, ev.y, ev.z || 0]);
+              }} else {{
+                MV.position.setValueAtTime(bt4, [ev.x, ev.y - kick]);
+                MV.position.setValueAtTime(bt4 + 0.09 * ev.sp, [ev.x, ev.y]);
+              }}
+            }}
+          }} catch (bke) {{ rep += "|BEATKICK" + i; }}
+        }}
         // ── v30 冲击配方轮换 (每事件一种, 解决"效果单一"; 参数按事件序号再变化) ──
         if (ev.impact_recipe) {{
           var ri = ev.recipe_i || 0;
@@ -1233,6 +1300,26 @@ def build_jsx(events, out_aep: Path):
           for (var q = 1; q < es.length; q++) {{
             gf.property("ADBE Glo2-0004").setValueAtTime(
               es[q][0], Math.max(0.05, ev.glow[2] * (0.78 + 0.60 * es[q][1])));
+          }}
+          // ── v40 踩拍发光闪 (修 drop 段"整段无节拍响应") ──
+          // 根因: drop_impact 样式的 scale 由 elastic 表达式驱动 → setValueAtTime 对表达式属性无效,
+          //   且脉冲代码有 !ev.elastic 守卫 → 高潮段 13 个事件**一个节拍脉冲都没有** (实测 AE 属性真值:
+          //   TXT8-TXT22 的 scale 无关键帧)。而发光强度是逐帧烘焙的关键帧, 不受表达式限制 → 用它做踩拍。
+          // 加守卫: ① 跳过入场附近 (入场自带脉冲) ② 有冲击配方的事件不加 (配方已在拍点上调制自身幅度)。
+          if (!ev.impact_recipe) {{
+            try {{
+              var bs2 = ev.beats || [];
+              for (var b3 = 0; b3 < bs2.length; b3++) {{
+                var bt3 = bs2[b3][0], bstr3 = bs2[b3][1];
+                if (bt3 <= ev.t_in + 0.22 || bt3 >= ev.t_out - 0.06) continue;
+                var envb = 0.78 + 0.60 * bstr3;                      // 该拍的包络基线
+                var boost = 1.22 + 0.50 * bstr3;                     // 1.22-1.72 倍发光闪
+                gf.property("ADBE Glo2-0004").setValueAtTime(
+                  bt3, Math.max(0.05, ev.glow[2] * envb * boost));
+                gf.property("ADBE Glo2-0004").setValueAtTime(
+                  bt3 + 0.10 * ev.sp, Math.max(0.05, ev.glow[2] * envb));
+              }}
+            }} catch (bbe) {{ rep += "|BEATGLOW" + i; }}
           }}
         }}
         if (ev.glow2) {{                                                // 配方④: 高阈值大半径外层 bloom
