@@ -624,8 +624,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "mood_profile": mood_name,
             "entropy": round(_ent, 3),
             # v30 冲击配方轮换 (解决"效果单一": 12 个爆点原来全用同一种抖动)
-            # 4 配方按事件轮换 + 配方内参数再变化 (Style/Freq/方向/步数按 i 取模)
-            "impact_recipe": (["shake", "rays", "chroma", "feedback"][i % 4]
+            # v31 扩到 6 配方 (12 爆点 → 每配方恰好 2 次, 不相邻) + 配方内参数按 i 取模变化
+            "impact_recipe": (["shake", "rays", "chroma", "feedback", "edgerays", "filmflash"][i % 6]
                               if (style_id == "drop_impact" and beats and _plugins_on) else None),
             "recipe_i": i,
             "from_timeline": bool(_from_tl),
@@ -1005,11 +1005,38 @@ def build_jsx(events, out_aep: Path):
             try {{
               var fb = L.property("Effects").addProperty("S_Feedback");
               fb.property("S_Feedback-0100").setValue(10 + (ri % 3) * 4);                     // Max Steps 10/14/18
-              try {{ fb.property("S_Feedback-0050").setValue(0.55 + 0.08 * (ri % 3)); }} catch (f0) {{}}
+              var fbPrev = fb.property("S_Feedback-0050");                                    // Prev Brightness
+              fbPrev.setValueAtTime(ev.t_in, 0.15);                                           // v31c: 文字先可见
+              fbPrev.setValueAtTime(ev.t_in + 0.16 * ev.sp, 0.55);                            // 回授堆叠(爆发感)
+              fbPrev.setValueAtTime(ev.t_in + 0.60 * ev.sp, 0.08);                            // 衰减
               var fbBlur = fb.property("S_Feedback-0056");
               fbBlur.setValueAtTime(ev.t_in, 2.5);
               fbBlur.setValueAtTime(ev.t_in + 0.3 * ev.sp, 0);
             }} catch (e_fb) {{ rep += "|FEEDBACK" + i; }}
+          }} else if (ev.impact_recipe == "edgerays") {{
+            try {{
+              var er = L.property("Effects").addProperty("S_EdgeRays");
+              er.property("S_EdgeRays-0050").setValue([ev.x, ev.y]);
+              er.property("S_EdgeRays-0051").setValue(0.22 + 0.12 * (ri % 2));
+              try {{ er.property("S_EdgeRays-0100").setValue(ri % 2); }} catch (er0) {{}}
+              var erb = er.property("S_EdgeRays-0052");
+              erb.setValueAtTime(ev.t_in, 0.3);
+              erb.setValueAtTime(ev.t_in + 0.10 * ev.sp, 2.8 * ev.pulse_mul);
+              erb.setValueAtTime(ev.t_in + 0.45 * ev.sp, 0);
+            }} catch (e_er) {{ rep += "|EDGERAYS" + i; }}
+          }} else if (ev.impact_recipe == "filmflash") {{
+            try {{
+              var fe = L.property("Effects").addProperty("S_FilmEffect");
+              var fpe = fe.property("S_FilmEffect-0057");                                     // Print Exposure
+              fpe.setValueAtTime(ev.t_in, 0);
+              fpe.setValueAtTime(ev.t_in + 0.08 * ev.sp, 1.2 + 0.5 * (ri % 2));
+              fpe.setValueAtTime(ev.t_in + 0.5 * ev.sp, 0);
+              var fgb = fe.property("S_FilmEffect-0063");                                     // Glow Brightness
+              fgb.setValueAtTime(ev.t_in, 0);
+              fgb.setValueAtTime(ev.t_in + 0.08 * ev.sp, 2.2 * ev.pulse_mul);
+              fgb.setValueAtTime(ev.t_in + 0.55 * ev.sp, 0);
+              try {{ fe.property("S_FilmEffect-0056").setValueAtTime(ev.t_in, -0.4 + 0.8 * (ri % 2)); }} catch (fe0) {{}}
+            }} catch (e_fe) {{ rep += "|FILMFLASH" + i; }}
           }}
         }}
         if (ev.lshadow) {{                                                // 文字长阴影 (显式开关; 默认关)
