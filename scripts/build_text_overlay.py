@@ -1225,6 +1225,28 @@ def build_jsx(events, out_aep: Path):
         }}
         // ── W2 揭示技法已前移至效果栈首 (见上方, 必须在发光/模糊之前才能裁字形) ──
       }}
+      // ── v32 全局颗粒 (Boss 批准): 直接作用于素材层 ──
+      // 试过调整层路线两次均无效 (Sapphire 效果在调整层上读不到下层合成), 故改为加在同在合成中的素材层
+      // 判据: 全片均值不变暗 + 高频噪声上升; Frequency 用较粗值(35)否则被 H.264 压掉
+      try {{
+        var footage = null;
+        for (var fi = comp.numLayers; fi >= 1; fi--) {{
+          var fn = comp.layer(fi).name;
+          if (fn.indexOf("TXT") === 0 || fn.indexOf("GRAIN") === 0) continue;
+          if (fn.indexOf(".mp4") >= 0 || fn.indexOf("final") >= 0) {{ footage = comp.layer(fi); break; }}
+        }}
+        if (footage) {{
+          var gr = footage.property("Effects").addProperty("S_Grain");
+          // 实证: 无损渲染颗粒可见(局部std ×1.86), 但 H.264@15Mbps 会压掉 → 需更粗更强才扛得住压缩
+          gr.property("S_Grain-0051").setValue(0.38);                                // Color Amplitude (兼顾可见与亮度稳定)
+          gr.property("S_Grain-0052").setValue(12);                                  // Color Frequency (粗颗粒)
+          try {{ gr.property("S_Grain-0057").setValue(0.30); }} catch (gg) {{}}        // Bw Amplitude
+          try {{ gr.property("S_Grain-0058").setValue(14); }} catch (gk) {{}}
+          try {{ gr.property("S_Grain-0060").setValue(0.37); }} catch (gh) {{}}        // Seed 固定
+          try {{ gr.property("S_Grain-0061").setValue(1); }} catch (gi2) {{}}          // Jitter Frames
+          rep += "|GRAIN_ON_FOOTAGE(" + footage.name + ")";
+        }} else {{ rep += "|GRAIN_NOFOOTAGE"; }}
+      }} catch (ge) {{ rep += "|GRAIN"; }}
       app.project.save(new File("{out_aep.as_posix()}"));
       rep += "|saved layers=" + comp.numLayers + " texts=" + evs.length;
     }}
