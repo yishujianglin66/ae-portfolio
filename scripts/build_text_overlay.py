@@ -1091,20 +1091,28 @@ def build_jsx(events, out_aep: Path):
         // 为什么不用 scale: 弹性层的 scale 由表达式持有 → setValueAtTime 无效;
         // 为什么不用发光闪(v40试过): 亮背景上发光本就看不见 (实测中位变化 +0.0001),
         //   必须用**几何位移**才能在明暗背景上都可见。position 未被表达式占用, 可安全打键。
-        // 上跳幅度随拍强与情绪档缩放; 0.09s 回落 → 观感是"文字跟着鼓点弹一下"。
+        // v42 Boss"更狠": 幅度 14+22*bstr → 24+36*bstr (约 45-56px), 回落 0.09→0.07s,
+        //   并加"过冲回弹" (弹起→回落→向下过冲 0.16*kick→归位) 与最强拍水平冲击 6px。
         if (ev.elastic && ev.beats && ev.beats.length) {{
           try {{
             var bs4 = ev.beats;
             for (var b4 = 0; b4 < bs4.length; b4++) {{
               var bt4 = bs4[b4][0], bstr4 = bs4[b4][1];
-              if (bt4 <= ev.t_in + 0.40 || bt4 >= ev.t_out - 0.12) continue;
-              var kick = (14 + 22 * bstr4) * ev.pulse_mul;
+              // 守卫: 避开入场动画 (0.40s) 与出场漂移键 (需留出整套回弹时间)
+              if (bt4 <= ev.t_in + 0.40 || bt4 + 0.25 * ev.sp >= ev.t_out - 0.02) continue;
+              var kick = (24 + 36 * bstr4) * ev.pulse_mul;
+              var jit = (bstr4 >= 0.85) ? 6 : 0;                 // 最强拍加水平冲击
+              var zz = ev.z || 0;
               if (ev.is3d) {{
-                MV.position.setValueAtTime(bt4, [ev.x, ev.y - kick, ev.z || 0]);
-                MV.position.setValueAtTime(bt4 + 0.09 * ev.sp, [ev.x, ev.y, ev.z || 0]);
+                MV.position.setValueAtTime(bt4, [ev.x + jit, ev.y - kick, zz]);
+                MV.position.setValueAtTime(bt4 + 0.07 * ev.sp, [ev.x, ev.y, zz]);
+                MV.position.setValueAtTime(bt4 + 0.13 * ev.sp, [ev.x, ev.y + 0.16 * kick, zz]);
+                MV.position.setValueAtTime(bt4 + 0.22 * ev.sp, [ev.x, ev.y, zz]);
               }} else {{
-                MV.position.setValueAtTime(bt4, [ev.x, ev.y - kick]);
-                MV.position.setValueAtTime(bt4 + 0.09 * ev.sp, [ev.x, ev.y]);
+                MV.position.setValueAtTime(bt4, [ev.x + jit, ev.y - kick]);
+                MV.position.setValueAtTime(bt4 + 0.07 * ev.sp, [ev.x, ev.y]);
+                MV.position.setValueAtTime(bt4 + 0.13 * ev.sp, [ev.x, ev.y + 0.16 * kick]);
+                MV.position.setValueAtTime(bt4 + 0.22 * ev.sp, [ev.x, ev.y]);
               }}
             }}
           }} catch (bke) {{ rep += "|BEATKICK" + i; }}
