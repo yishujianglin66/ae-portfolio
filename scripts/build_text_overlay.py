@@ -381,6 +381,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
     _glow_mul = float(_prof.get("glow_mul", 1.0))
     _drift_mul = float(_prof.get("drift_mul", 1.0))
     _pulse_mul = float(_prof.get("pulse_mul", 1.0))
+    _plugins_on = os.environ.get("TEXT_OVERLAY_PLUGINS", "1") not in ("0", "false", "False")
     for i, (t, sn, zone) in enumerate(picked):
         cfg = ZONE_CFG[zone]
         mood = "outro" if zone == "outro" else zone
@@ -403,7 +404,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         hold = round(t_out - t_in, 3)
 
         # 词 (v28: 时间表优先 → 未命中处回退分区词库循环)
-        _tl = timeline or []
+        _tl = list(timeline or [])       # 拷贝! 不可 mutate 调用方列表 (否则主流程对账看不到条目)
         _tl_font_override = None
         _tl_hit = None
         for _k, _item in enumerate(_tl):
@@ -540,9 +541,10 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
 
         # v9: drop 变款全整层平移 (RS 动画器与脚本字体互斥; v8 实证旋转变款使文字倾斜超框压高光)
         # _v: 0=drop_fall 自上落下 / 1=rise_up 自下升起 / 2=纯 punch tracking
+        # v29 修正: 变款循环改用事件序号 (原用 bank_pos, 但时间表命中时不推进 bank_pos → 相邻同款)
         drop_fall = rise_up = False
         if style_id == "drop_impact":
-            _v = bank_pos[zone] % 3
+            _v = i % 3
             drop_fall, rise_up = (_v == 0), (_v == 1)
 
         # W2 入场变款循环 (wipe_up/wipe_right = Linear Wipe 层级效果 → 字体安全, 已探针实证)
@@ -621,6 +623,10 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "pulse_mul": round(_pulse_mul, 3),
             "mood_profile": mood_name,
             "entropy": round(_ent, 3),
+            # v29 第三方插件 (已实证可驱动): S_Shake 节拍抖动(drop) / LongShadow 文字长阴影(intro/outro)
+            # 环境变量 TEXT_OVERLAY_PLUGINS=0 可整体关闭 (插件引发异常时用于快速隔离)
+            "px_shake": bool(style_id == "drop_impact") and bool(beats) and _plugins_on,
+            "lshadow": bool(style_id == "intro_serif") and _plugins_on,
             "from_timeline": bool(_from_tl),
             "font_override": _tl_font_override,
             "chroma": chroma,
@@ -754,6 +760,8 @@ def build_jsx(events, out_aep: Path):
         d["mv_dy"] = float(e.get("mv_dy", 0))
         d["sp"] = float(e.get("sp", 1.0))            # 时长缩放 (1/speed)
         d["pulse_mul"] = float(e.get("pulse_mul", 1.0))
+        d["px_shake"] = bool(e.get("px_shake"))
+        d["lshadow"] = bool(e.get("lshadow"))
         # v15/v17 冲击力包参数 (探针实证: ADBE Motion Blur=方向模糊 / ADBE Radial Blur / ADBE Turbulent Displace)
         # v17: 冲量按镜头运动强度分级 (impact_mul), 静止镜头收敛 / 高速爆炸镜头拉满
         en = float(e.get("energy", 0.6))
@@ -947,6 +955,35 @@ def build_jsx(events, out_aep: Path):
               MV.position.setValueAtTime(ev.t_out, [px + ev.mv_dx, py + ev.mv_dy]);
             }}
           }} catch (mve2) {{ rep += "|MVDRIFT" + i; }}
+        }}
+        // ── v29 第三方插件 (已实证可驱动; 探针: S_Shake-0050/0051/0054, ADBE LongShadow-0005/0006/0017) ──
+        if (ev.px_shake) {{
+          try {{
+            var shk = L.property("Effects").addProperty("S_Shake");
+            shk.property("S_Shake-0051").setValue(8);                    // Frequency
+            try {{ shk.property("S_Shake-0054").setValue(1); }} catch (s1) {{}}  // Motion Blur on
+            try {{ shk.property("S_Shake-0056").setValue(7); }} catch (s2) {{}}  // Seed (确定性固定)
+            var amp = shk.property("S_Shake-0050");                      // Amplitude
+            amp.setValueAtTime(ev.t_in, 0);
+            var bs = ev.beats || [];
+            for (var b2 = 0; b2 < bs.length; b2++) {{
+              var bt2 = bs[b2][0], bstr2 = bs[b2][1];
+              var a2 = (0.35 + 0.9 * bstr2) * ev.pulse_mul;              // 节拍越强抖得越狠
+              amp.setValueAtTime(bt2, a2);
+              amp.setValueAtTime(bt2 + 0.14 * ev.sp, 0);
+            }}
+            amp.setValueAtTime(ev.t_out, 0);
+          }} catch (shke) {{ rep += "|SHAKE" + i; }}
+        }}
+        if (ev.lshadow) {{                                                // 文字长阴影 (标题质感)
+          try {{
+            var ls = L.property("Effects").addProperty("LongShadow");
+            ls.property("ADBE LongShadow-0005").setValue(225);           // 方向
+            ls.property("ADBE LongShadow-0006").setValue(22);            // 长度 px
+            try {{ ls.property("ADBE LongShadow-0014").setValue(0.35); }} catch (l1) {{}}  // Fade Out
+            try {{ ls.property("ADBE LongShadow-0017").setValue([0.02, 0.03, 0.06, 1]); }} catch (l2) {{}}
+            try {{ ls.property("ADBE LongShadow-0018").setValue(0.25); }} catch (l3) {{}}  // Tint Amount
+          }} catch (lse) {{ rep += "|LSHADOW" + i; }}
         }}
         // ── W2 揭示技法: 图层遮罩 (探针实证: mask atom + Shape 赋值/关键帧可用, 不碰文字动画器) ──
         // 为何不用 Linear Wipe: 它作用于整帧(1920x1080)而非文字范围 → 擦除线扫过时文字整块跳出
@@ -1171,7 +1208,12 @@ def validate(events, disposition, segs, onsets, total_dur):
     rep_font = [f"{a['word']}→{b['word']}" for a, b in zip(events, events[1:]) if a["font"] == b["font"]]
     rep_var = [f"{a['word']}→{b['word']}" for a, b in zip(events, events[1:])
                if _variant(a) == _variant(b)]
+    # 时间表显式指定字体导致的相邻重复 → 用户意图优先, 门禁不计失败, 仅提示
+    rep_font_override = [f"{a['word']}→{b['word']}" for a, b in zip(events, events[1:])
+                         if a["font"] == b["font"] and (a.get("font_override") or b.get("font_override"))]
+    rep_font = [x for x in rep_font if x not in rep_font_override]
     checks["no_repeat_consecutive_fonts"] = not rep_font
+    checks["font_repeat_from_override"] = rep_font_override
     _ent_used = events[0].get("entropy", 0.65) if events else 0.65
     # 低熵档 (entropy<0.35) 本就是"固定变款"的显式选择 → 该门禁标 N/A 而非失败 (诚实口径)
     checks["entropy"] = _ent_used
