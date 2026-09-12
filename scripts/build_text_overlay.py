@@ -195,6 +195,29 @@ def script_class(word):
         return "cn"
     return "latin"
 
+
+# v28 字体-文字系兼容白名单 (依据 tmp/check_glyph_coverage.py 实测 cmap 结果)
+JP_SAFE_FONTS = {          # 日文词全覆盖 (17/17)
+    "LiSu", "DengXian-Bold", "YuGothic-Bold", "YuGothic-Medium", "YuGothic-Regular",
+    "YuGothic-Light", "MS-PGothic", "MS-Gothic", "STSong", "STZhongsong", "STFangsong",
+    "STXihei", "SimSun", "SimHei", "KaiTi", "STKaiti", "YouYuan", "AlibabaPuHuiTi_3_45_Light",
+}
+CN_SAFE_FONTS = JP_SAFE_FONTS | {   # 中文词额外可用 (中文 11/11, 日文不足)
+    "STHupo", "STCaiyun", "STXinwei", "STXingkai", "STLiti", "MicrosoftYaHei-Bold",
+    "FZCHSJW--GB1-0", "FZCCHFW--GB1-0", "FZH4FW--GB1-0", "FZHPFW--GB1-0", "FZHTFW--GB1-0",
+    "FZPHFW--GB1-0", "FZSSFW--GB1-0", "FZKTFW--GB1-0", "FZSTFW--GB1-0", "FZWBFW--GB1-0",
+    "HYa0gj", "GBWeiBei-Bold", "SungtiEG-Ultra-GB",
+}
+
+
+def font_allowed_for_script(font, scl):
+    """latin 词: 任意已实证字体; cn 词: 中文白名单; jp 词: 仅日文全覆白名单"""
+    if scl == "latin":
+        return True
+    if scl == "cn":
+        return font in CN_SAFE_FONTS
+    return font in JP_SAFE_FONTS
+
 # 默认词库 (报告无歌词素材 → 按源 IP 咒术回战/五条悟 的 AMV 惯用词)
 # v25: 词库外置 —— 若 data/text_overlay_words.json 存在则覆盖 (改文字无需改代码)
 DEFAULT_WORDS = {
@@ -206,6 +229,32 @@ DEFAULT_WORDS = {
     "outro": ["THE END", "余韻"],
 }
 WORDS_FILE = "data/text_overlay_words.json"
+TIMELINE_FILE = "data/text_overlay_timeline.json"   # v28: 时间→文字(可带字体) 对应表
+TIMELINE_TOL = 0.6                                  # 事件锚点与该时刻相差 ≤ 此值即命中 (秒)
+
+
+def load_timeline():
+    """时间-文字对应表: [{t, word, font?}] —— 存在则优先于分区词库的循环分配"""
+    p = ROOT / TIMELINE_FILE
+    if not p.exists():
+        return []
+    try:
+        raw = json.loads(p.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"[WARN] 时间表解析失败, 忽略: {e}")
+        return []
+    items = raw if isinstance(raw, list) else raw.get("timeline", [])
+    out = []
+    for it in items:
+        if isinstance(it, dict) and "t" in it and it.get("word"):
+            try:
+                out.append({"t": float(it["t"]), "word": str(it["word"]),
+                            "font": it.get("font") or None,
+                            "note": it.get("note") or ""})
+            except (TypeError, ValueError):
+                print(f"[WARN] 时间表条目非法, 跳过: {it}")
+    out.sort(key=lambda x: x["t"])
+    return out
 
 
 def load_words(override: dict | None = None) -> dict:
@@ -276,7 +325,8 @@ def zone_of(t):
 # ── 事件规划 ────────────────────────────────────────────────────────────
 def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                 max_events=None, total_dur=None, bg_video=None,
-                profile=None, entropy=0.65, speed=1.0, seed=20260912, mood_name="auto"):
+                profile=None, entropy=0.65, speed=1.0, seed=20260912, mood_name="auto",
+                timeline=None, tl_tol=TIMELINE_TOL):
     """产出事件表 + 逐 segment 处置表 (显式记账, 不静默丢)"""
     if total_dur is None:
         total_dur = float(segs[-1]["end_time"]) if segs else 0.0
@@ -352,13 +402,25 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         t_out = round(max(t_out, t_in + 0.15), 3)      # 最小保持 0.15s (≈4帧)
         hold = round(t_out - t_in, 3)
 
-        # 词 (区内轮换, 不与上一词重复)
-        bank = words.get(zone) or words.get(mood) or ["TEXT"]
-        w = bank[bank_pos[zone] % len(bank)]
-        if len(events) and events[-1]["word"] == w:
-            w = bank[(bank_pos[zone] + 1) % len(bank)]
+        # 词 (v28: 时间表优先 → 未命中处回退分区词库循环)
+        _tl = timeline or []
+        _tl_font_override = None
+        _tl_hit = None
+        for _k, _item in enumerate(_tl):
+            if abs(_item["t"] - t_in) <= tl_tol:
+                _tl_hit = _tl.pop(_k)
+                break
+        if _tl_hit is not None:
+            w = _tl_hit["word"]
+            _tl_font_override = _tl_hit.get("font")
+        else:
+            bank = words.get(zone) or words.get(mood) or ["TEXT"]
+            w = bank[bank_pos[zone] % len(bank)]
+            if len(events) and events[-1]["word"] == w:
+                w = bank[(bank_pos[zone] + 1) % len(bank)]
+                bank_pos[zone] += 1
             bank_pos[zone] += 1
-        bank_pos[zone] += 1
+        _from_tl = _tl_hit is not None
 
         # v6: 字体按文字系分池轮换 (jp/cn/latin 见 FONT_POOLS), 池内不背靠背重复
         scl = script_class(w)
@@ -373,6 +435,14 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             font_pos[fkey] = font_pos.get(fkey, 0) + 1
         font_pos[fkey] = font_pos.get(fkey, 0) + _adv
         last_font[fkey] = font
+        # v28 时间表字体指定: 需已实证 + 覆盖该词文字系 (覆盖判定基于实测 cmap 结果)
+        if _tl_font_override:
+            if _tl_font_override not in VERIFIED_FONTS:
+                print(f"[WARN] 时间表字体未实证, 忽略: {_tl_font_override} (词 {w})")
+            elif not font_allowed_for_script(_tl_font_override, scl):
+                print(f"[WARN] 时间表字体 {_tl_font_override} 不覆盖 {scl} 字形, 忽略 (词 {w})")
+            else:
+                font = _tl_font_override
         # v18: 同一个词再次出现时换字体 (词-字体去重, 防同词同款)
         if wf_map.get(w) == font and len(pool) > 1:
             font = pool[(font_pos.get(fkey, 0)) % len(pool)]
@@ -551,6 +621,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "pulse_mul": round(_pulse_mul, 3),
             "mood_profile": mood_name,
             "entropy": round(_ent, 3),
+            "from_timeline": bool(_from_tl),
+            "font_override": _tl_font_override,
             "chroma": chroma,
             "chroma_dx": chroma_dx,
             "impact_mul": impact_mul,
@@ -1180,6 +1252,9 @@ def main():
     env_at = load_envelope_at()
     scenes = load_scenes()
     total_dur = float(segs[-1]["end_time"]) if segs else 0.0
+    timeline = load_timeline()
+    if timeline:
+        print(f"[P0] 时间表命中: 载入 {len(timeline)} 条 (容差 ±{TIMELINE_TOL}s)")
 
     events, disposition = plan_events(segs, onsets, env_at, scenes, words,
                                       hold_mode=args.hold_mode,
@@ -1190,8 +1265,19 @@ def main():
                                       entropy=args.entropy,
                                       speed=args.speed,
                                       seed=args.seed,
-                                      mood_name=args.mood)
+                                      mood_name=args.mood,
+                                      timeline=timeline)
     checks = validate(events, disposition, segs, onsets, total_dur)
+    # 时间表对账 (显式记账: 命中/未命中, 未命中告警——否则用户以为指定了其实没生效)
+    if timeline:
+        matched_t = [round(e["t_in"], 2) for e in events if e.get("from_timeline")]
+        unmatched = [it for it in timeline if not any(abs(it["t"] - mt) <= TIMELINE_TOL for mt in matched_t)]
+        checks["timeline_specified"] = len(timeline)
+        checks["timeline_matched"] = len(matched_t)
+        checks["timeline_unmatched"] = [{"t": it["t"], "word": it["word"]} for it in unmatched]
+        if unmatched:
+            _txt = ", ".join(f"{it['t']}s:{it['word']}" for it in unmatched)
+            print(f"[P0] ⚠ 时间表未命中 {len(unmatched)} 条 (该时刻无事件锚点): {_txt}")
 
     out_dir = run_dir / "text_overlay"
     out_dir.mkdir(parents=True, exist_ok=True)

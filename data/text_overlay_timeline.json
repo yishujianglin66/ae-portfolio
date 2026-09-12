@@ -1,0 +1,19 @@
+{
+ "_说明": "时间→文字对应表: 指定某句话出现在某时刻 (与事件锚点匹配, 容差 ±0.6s)。未命中会在构建日志告警。",
+ "_字段说明": {
+  "t": "目标时刻(秒), 需落在事件锚点 ±0.6s 内",
+  "word": "要显示的文字",
+  "font": "可选: 指定该句字体 — 须已实证且字形覆盖该词文字系, 否则告警并回退池内选择",
+  "note": "可选: 备注, 不参与渲染"
+ },
+ "_可用字体示例": "中文: LiSu(隶书)/DengXian-Bold(等线粗)/FZCCHFW--GB1-0(超粗黑)/FZHPFW--GB1-0(琥珀)/STFangsong(仿宋)/STZhongsong(中宋)；拉丁: Anton-Regular/BlackOpsOne-Regular/AlfaSlabOne-Regular/BebasNeue-Bold/HansonBold/Lato-Black/DrSugiyama-Regular/GreatVibes-Regular",
+ "timeline": [
+  { "t": 1.09,  "word": "五条悟" },
+  { "t": 13.07, "word": "最強",   "font": "LiSu",              "note": "隶书强调" },
+  { "t": 14.01, "word": "BREAK",  "font": "Anton-Regular",     "note": "经典冲击体" },
+  { "t": 15.86, "word": "無下限", "font": "DengXian-Bold" },
+  { "t": 18.62, "word": "IMPACT", "font": "BlackOpsOne-Regular", "note": "军规体" },
+  { "t": 21.40, "word": "虚式",   "font": "FZCCHFW--GB1-0",    "note": "方正超粗黑" },
+  { "t": 28.54, "word": "余韻",   "font": "STFangsong",        "note": "宋体收尾" }
+ ]
+}
