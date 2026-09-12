@@ -623,10 +623,12 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "pulse_mul": round(_pulse_mul, 3),
             "mood_profile": mood_name,
             "entropy": round(_ent, 3),
-            # v29 第三方插件 (已实证可驱动): S_Shake 节拍抖动(drop) / LongShadow 文字长阴影(intro/outro)
-            # 环境变量 TEXT_OVERLAY_PLUGINS=0 可整体关闭 (插件引发异常时用于快速隔离)
+            # v29 第三方插件: S_Shake 节拍抖动(drop, 已实证含 3D/运动模糊/关键帧均可渲染)
+            # LongShadow 默认关闭: 单独可用, 但与遮罩/效果组合时在**构建阶段**卡死 AE (2026-09-12 实证)
+            # 开关 TEXT_OVERLAY_PLUGINS=0 可整体关闭
             "px_shake": bool(style_id == "drop_impact") and bool(beats) and _plugins_on,
-            "lshadow": bool(style_id == "intro_serif") and _plugins_on,
+            "lshadow": bool(os.environ.get("TEXT_OVERLAY_LONGSHADOW", "0") == "1")
+                       and style_id == "intro_serif" and _plugins_on,
             "from_timeline": bool(_from_tl),
             "font_override": _tl_font_override,
             "chroma": chroma,
