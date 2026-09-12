@@ -382,6 +382,40 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
     _drift_mul = float(_prof.get("drift_mul", 1.0))
     _pulse_mul = float(_prof.get("pulse_mul", 1.0))
     _plugins_on = os.environ.get("TEXT_OVERLAY_PLUGINS", "1") not in ("0", "false", "False")
+    # v35 音乐结构驱动强度: 用音乐包络的**局部强度**决定"哪里给特效、给多强"(替代固定隔拍)
+    # 副歌/高潮(包络高)密而强, 主歌(包络低)疏而弱 → 留白跟着音乐呼吸
+    _env_raw = [env_at(t) for t, _, _ in picked] if picked else [0.5]
+    _sv = sorted(_env_raw)
+    def _pct(vals, p):
+        if not vals:
+            return 0.0
+        return vals[min(int(len(vals) * p), len(vals) - 1)]
+    _lo, _hi = _pct(_sv, 0.10), _pct(_sv, 0.95)
+    def _nrm(v):
+        return 0.0 if _hi <= _lo else max(0.0, min(1.0, (v - _lo) / (_hi - _lo)))
+    def _local_i(t):
+        vs = [env_at(t + d) for d in (-0.4, -0.2, 0.0, 0.2, 0.4)]
+        return round(_nrm(sum(vs) / len(vs)), 3)
+    # v35 阈值: 以 **drop 区事件**的局部强度中位数为界 → 只有该区里较响的拍子才给特效
+    # (若用全体事件分位, 会被 intro/build 的安静值拉偏 → 特效过稀, 实测仅 1 个)
+    _drop_t = []
+    for _t, _sn, _z in picked:
+        _si = _shot_index([(float(s["start_time"]), float(s["end_time"])) for s in segs], _t)
+        if _si is not None and zone_of(_t) == "drop":
+            _drop_t.append(_local_i(_t))
+    _thr_rec = round(sorted(_drop_t)[len(_drop_t) // 2], 3) if _drop_t else 0.5
+    _last_recipe_t = None
+    # v35 选取策略: 强度优先贪心 (先选最响的拍, 再选距其 ≥1.0s 的次响拍)
+    # —— 时间序先到先得会让"最响的拍"因间隔规则被漏掉 (实测安静拍里出现过 local_i 0.948)
+    RECIPE_MIN_GAP = 1.0                                            # 特效事件最小间隔(秒), 防扎堆
+    _cand = sorted([(t, _local_i(t)) for t, _sn, _z in picked if _z == "drop"], key=lambda x: -x[1])
+    _sel = []
+    for _t, _li2 in _cand:
+        if _li2 < _thr_rec:
+            break
+        if all(abs(_t - _st) >= RECIPE_MIN_GAP for _st in _sel):
+            _sel.append(_t)
+    _recipe_ts = {round(t, 3) for t in _sel}
     for i, (t, sn, zone) in enumerate(picked):
         cfg = ZONE_CFG[zone]
         mood = "outro" if zone == "outro" else zone
@@ -589,6 +623,11 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             glow = (glow[0], glow[1], round(glow[2] * _glow_mul, 3))
         chroma = bool(chroma and _prof.get("chroma", True))    # elegant 档关闭通道分离
 
+        # v35: 计算本事件的音乐局部强度, 决定是否给冲击特效 (并记录, 供报告与强度缩放)
+        _li = _local_i(t_in)
+        _want_recipe = bool(style_id == "drop_impact" and beats and _plugins_on
+                            and round(t_in, 3) in _recipe_ts)
+
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
             "mood": mood, "energy": energy, "style_id": style_id,
@@ -629,10 +668,12 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             # 规则: ① 配方只给"隔拍"(drop 内 i 为偶数) → 每两次爆点只一次特效, 另一半留白
             #       ② intro/build/outro 一律不给冲击配方 (纯文字与揭示, 保持安静)
             #       ③ 颗粒只在收尾段(电影感/余韵)出现, 见 JSX 关键帧
+            # v35 音乐结构驱动: 局部强度 ≥ 阈值 且 距上一个特效 ≥1.2s 才给配方 (副歌密/主歌疏)
             "impact_recipe": (["shake", "rays", "chroma", "feedback", "edgerays", "filmflash"][(i // 2) % 6]
-                              if (style_id == "drop_impact" and beats and _plugins_on and i % 2 == 0) else None),
+                              if _want_recipe else None),
             "recipe_i": i,
-            "recipe_occ": i // 2,            # v31d: 用"出现次数"做参数变化 —— 只用 i%k 会让同配方的两次出现参数完全相同 (i 与 i+6 同奇偶同模3)
+            "recipe_occ": i // 2,
+            "local_i": _li,            # v31d: 用"出现次数"做参数变化 —— 只用 i%k 会让同配方的两次出现参数完全相同 (i 与 i+6 同奇偶同模3)
             "recipe_occ": i // 6,
             "from_timeline": bool(_from_tl),
             "font_override": _tl_font_override,
@@ -772,6 +813,7 @@ def build_jsx(events, out_aep: Path):
         d["impact_recipe"] = e.get("impact_recipe")
         d["recipe_i"] = int(e.get("recipe_i", 0))
         d["recipe_occ"] = int(e.get("recipe_occ", 1))
+        d["local_i"] = float(e.get("local_i", 0.5))       # v35 音乐局部强度 (0-1)
         # v15/v17 冲击力包参数 (探针实证: ADBE Motion Blur=方向模糊 / ADBE Radial Blur / ADBE Turbulent Displace)
         # v17: 冲量按镜头运动强度分级 (impact_mul), 静止镜头收敛 / 高速爆炸镜头拉满
         en = float(e.get("energy", 0.6))
@@ -972,6 +1014,7 @@ def build_jsx(events, out_aep: Path):
         if (ev.impact_recipe) {{
           var ri = ev.recipe_i || 0;
           var oc = ev.recipe_occ || 1;              // 出现次数: 同配方第 2 次参数必须不同
+          var ik = 0.75 + 0.6 * (ev.local_i || 0.5); // v35: 音乐局部强度越大, 特效越强 (0.75-1.35)
           var bs = ev.beats || [];
           if (ev.impact_recipe == "shake") {{
             try {{
@@ -984,7 +1027,7 @@ def build_jsx(events, out_aep: Path):
               amp.setValueAtTime(ev.t_in, 0);
               for (var b2 = 0; b2 < bs.length; b2++) {{
                 var bt2 = bs[b2][0], bstr2 = bs[b2][1];
-                amp.setValueAtTime(bt2, (0.35 + 0.9 * bstr2) * ev.pulse_mul);
+                amp.setValueAtTime(bt2, (0.35 + 0.9 * bstr2) * ev.pulse_mul * ik);
                 amp.setValueAtTime(bt2 + 0.14 * ev.sp, 0);
               }}
               amp.setValueAtTime(ev.t_out, 0);
@@ -997,7 +1040,7 @@ def build_jsx(events, out_aep: Path):
               try {{ rys.property("S_Rays-0100").setValue(oc % 2); }} catch (r0) {{}}          // 方向轮换
               var br = rys.property("S_Rays-0052");
               br.setValueAtTime(ev.t_in, 0.4);
-              br.setValueAtTime(ev.t_in + 0.12 * ev.sp, (2.8 + 0.7 * (oc % 2)) * ev.pulse_mul);
+              br.setValueAtTime(ev.t_in + 0.12 * ev.sp, (2.8 + 0.7 * (oc % 2)) * ev.pulse_mul * ik);
               br.setValueAtTime(ev.t_in + 0.42 * ev.sp, 0);
             }} catch (e_ry) {{ rep += "|RAYS" + i; }}
           }} else if (ev.impact_recipe == "chroma") {{
@@ -1008,7 +1051,7 @@ def build_jsx(events, out_aep: Path):
               try {{ wc.property("S_WarpChroma-0058").setValue(((oc % 2) ? -1 : 1) * 0.03); }} catch (c1) {{}}
               var wa = wc.property("S_WarpChroma-0100");
               wa.setValueAtTime(ev.t_in, 0.02);
-              wa.setValueAtTime(ev.t_in + 0.14 * ev.sp, (0.42 + 0.16 * (oc % 2)) * ev.pulse_mul);
+              wa.setValueAtTime(ev.t_in + 0.14 * ev.sp, (0.42 + 0.16 * (oc % 2)) * ev.pulse_mul * ik);
               wa.setValueAtTime(ev.t_in + 0.5 * ev.sp, 0.02);
             }} catch (e_wc) {{ rep += "|WARPCHROMA" + i; }}
           }} else if (ev.impact_recipe == "feedback") {{
@@ -1017,7 +1060,7 @@ def build_jsx(events, out_aep: Path):
               fb.property("S_Feedback-0100").setValue(10 + (oc % 3) * 4);                      // Max Steps 10/14/18
               var fbPrev = fb.property("S_Feedback-0050");                                    // Prev Brightness
               fbPrev.setValueAtTime(ev.t_in, 0.15);                                           // v31c: 文字先可见
-              fbPrev.setValueAtTime(ev.t_in + 0.16 * ev.sp, 0.45 + 0.12 * (oc % 2));          // 回授堆叠(按出现次数变化)
+              fbPrev.setValueAtTime(ev.t_in + 0.16 * ev.sp, (0.45 + 0.12 * (oc % 2)) * ik);          // 回授堆叠(按出现次数+强度)
               fbPrev.setValueAtTime(ev.t_in + 0.60 * ev.sp, 0.08);                            // 衰减
               var fbBlur = fb.property("S_Feedback-0056");
               fbBlur.setValueAtTime(ev.t_in, 2.5);
@@ -1031,7 +1074,7 @@ def build_jsx(events, out_aep: Path):
               try {{ er.property("S_EdgeRays-0100").setValue(oc % 2); }} catch (er0) {{}}
               var erb = er.property("S_EdgeRays-0052");
               erb.setValueAtTime(ev.t_in, 0.3);
-              erb.setValueAtTime(ev.t_in + 0.10 * ev.sp, (2.3 + 0.9 * (oc % 2)) * ev.pulse_mul);
+              erb.setValueAtTime(ev.t_in + 0.10 * ev.sp, (2.3 + 0.9 * (oc % 2)) * ev.pulse_mul * ik);
               erb.setValueAtTime(ev.t_in + 0.45 * ev.sp, 0);
             }} catch (e_er) {{ rep += "|EDGERAYS" + i; }}
           }} else if (ev.impact_recipe == "filmflash") {{
@@ -1039,11 +1082,11 @@ def build_jsx(events, out_aep: Path):
               var fe = L.property("Effects").addProperty("S_FilmEffect");
               var fpe = fe.property("S_FilmEffect-0057");                                     // Print Exposure
               fpe.setValueAtTime(ev.t_in, 0);
-              fpe.setValueAtTime(ev.t_in + 0.08 * ev.sp, 1.1 + 0.7 * (oc % 2));
+              fpe.setValueAtTime(ev.t_in + 0.08 * ev.sp, (1.1 + 0.7 * (oc % 2)) * ik);
               fpe.setValueAtTime(ev.t_in + 0.5 * ev.sp, 0);
               var fgb = fe.property("S_FilmEffect-0063");                                     // Glow Brightness
               fgb.setValueAtTime(ev.t_in, 0);
-              fgb.setValueAtTime(ev.t_in + 0.08 * ev.sp, (1.7 + 1.0 * (oc % 2)) * ev.pulse_mul);
+              fgb.setValueAtTime(ev.t_in + 0.08 * ev.sp, (1.7 + 1.0 * (oc % 2)) * ev.pulse_mul * ik);
               fgb.setValueAtTime(ev.t_in + 0.55 * ev.sp, 0);
               try {{ fe.property("S_FilmEffect-0056").setValueAtTime(ev.t_in, -0.3 + 0.7 * (oc % 2)); }} catch (fe0) {{}}
             }} catch (e_fe) {{ rep += "|FILMFLASH" + i; }}
