@@ -623,12 +623,11 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "pulse_mul": round(_pulse_mul, 3),
             "mood_profile": mood_name,
             "entropy": round(_ent, 3),
-            # v29 第三方插件: S_Shake 节拍抖动(drop, 已实证含 3D/运动模糊/关键帧均可渲染)
-            # LongShadow 默认关闭: 单独可用, 但与遮罩/效果组合时在**构建阶段**卡死 AE (2026-09-12 实证)
-            # 开关 TEXT_OVERLAY_PLUGINS=0 可整体关闭
-            "px_shake": bool(style_id == "drop_impact") and bool(beats) and _plugins_on,
-            "lshadow": bool(os.environ.get("TEXT_OVERLAY_LONGSHADOW", "0") == "1")
-                       and style_id == "intro_serif" and _plugins_on,
+            # v30 冲击配方轮换 (解决"效果单一": 12 个爆点原来全用同一种抖动)
+            # 4 配方按事件轮换 + 配方内参数再变化 (Style/Freq/方向/步数按 i 取模)
+            "impact_recipe": (["shake", "rays", "chroma", "feedback"][i % 4]
+                              if (style_id == "drop_impact" and beats and _plugins_on) else None),
+            "recipe_i": i,
             "from_timeline": bool(_from_tl),
             "font_override": _tl_font_override,
             "chroma": chroma,
@@ -764,6 +763,8 @@ def build_jsx(events, out_aep: Path):
         d["pulse_mul"] = float(e.get("pulse_mul", 1.0))
         d["px_shake"] = bool(e.get("px_shake"))
         d["lshadow"] = bool(e.get("lshadow"))
+        d["impact_recipe"] = e.get("impact_recipe")
+        d["recipe_i"] = int(e.get("recipe_i", 0))
         # v15/v17 冲击力包参数 (探针实证: ADBE Motion Blur=方向模糊 / ADBE Radial Blur / ADBE Turbulent Displace)
         # v17: 冲量按镜头运动强度分级 (impact_mul), 静止镜头收敛 / 高速爆炸镜头拉满
         en = float(e.get("energy", 0.6))
@@ -958,33 +959,64 @@ def build_jsx(events, out_aep: Path):
             }}
           }} catch (mve2) {{ rep += "|MVDRIFT" + i; }}
         }}
-        // ── v29 第三方插件 (已实证可驱动; 探针: S_Shake-0050/0051/0054, ADBE LongShadow-0005/0006/0017) ──
-        if (ev.px_shake) {{
-          try {{
-            var shk = L.property("Effects").addProperty("S_Shake");
-            shk.property("S_Shake-0051").setValue(8);                    // Frequency
-            try {{ shk.property("S_Shake-0054").setValue(1); }} catch (s1) {{}}  // Motion Blur on
-            try {{ shk.property("S_Shake-0056").setValue(7); }} catch (s2) {{}}  // Seed (确定性固定)
-            var amp = shk.property("S_Shake-0050");                      // Amplitude
-            amp.setValueAtTime(ev.t_in, 0);
-            var bs = ev.beats || [];
-            for (var b2 = 0; b2 < bs.length; b2++) {{
-              var bt2 = bs[b2][0], bstr2 = bs[b2][1];
-              var a2 = (0.35 + 0.9 * bstr2) * ev.pulse_mul;              // 节拍越强抖得越狠
-              amp.setValueAtTime(bt2, a2);
-              amp.setValueAtTime(bt2 + 0.14 * ev.sp, 0);
-            }}
-            amp.setValueAtTime(ev.t_out, 0);
-          }} catch (shke) {{ rep += "|SHAKE" + i; }}
+        // ── v30 冲击配方轮换 (每事件一种, 解决"效果单一"; 参数按事件序号再变化) ──
+        if (ev.impact_recipe) {{
+          var ri = ev.recipe_i || 0;
+          var bs = ev.beats || [];
+          if (ev.impact_recipe == "shake") {{
+            try {{
+              var shk = L.property("Effects").addProperty("S_Shake");
+              try {{ shk.property("S_Shake-0001").setValue(1 + (ri % 3)); }} catch (s0) {{}}   // Style 1/2/3 轮换
+              shk.property("S_Shake-0051").setValue(5 + (ri % 3) * 3);                        // Freq 5/8/11
+              try {{ shk.property("S_Shake-0054").setValue(1); }} catch (s1) {{}}
+              try {{ shk.property("S_Shake-0056").setValue(7); }} catch (s2) {{}}
+              var amp = shk.property("S_Shake-0050");
+              amp.setValueAtTime(ev.t_in, 0);
+              for (var b2 = 0; b2 < bs.length; b2++) {{
+                var bt2 = bs[b2][0], bstr2 = bs[b2][1];
+                amp.setValueAtTime(bt2, (0.35 + 0.9 * bstr2) * ev.pulse_mul);
+                amp.setValueAtTime(bt2 + 0.14 * ev.sp, 0);
+              }}
+              amp.setValueAtTime(ev.t_out, 0);
+            }} catch (e_sh) {{ rep += "|SHAKE" + i; }}
+          }} else if (ev.impact_recipe == "rays") {{
+            try {{
+              var rys = L.property("Effects").addProperty("S_Rays");
+              rys.property("S_Rays-0050").setValue([ev.x, ev.y]);                             // 中心=文字位
+              rys.property("S_Rays-0051").setValue(0.18 + 0.10 * ((ri % 2) ? 1 : 0));         // 长度轮换
+              try {{ rys.property("S_Rays-0100").setValue(ri % 2); }} catch (r0) {{}}          // 方向轮换
+              var br = rys.property("S_Rays-0052");
+              br.setValueAtTime(ev.t_in, 0.4);
+              br.setValueAtTime(ev.t_in + 0.12 * ev.sp, 3.2 * ev.pulse_mul);
+              br.setValueAtTime(ev.t_in + 0.42 * ev.sp, 0);
+            }} catch (e_ry) {{ rep += "|RAYS" + i; }}
+          }} else if (ev.impact_recipe == "chroma") {{
+            try {{
+              var wc = L.property("Effects").addProperty("S_WarpChroma");
+              wc.property("S_WarpChroma-0051").setValue([ev.x, ev.y]);
+              try {{ wc.property("S_WarpChroma-0054").setValue(((ri % 2) ? 1 : -1) * 0.03); }} catch (c0) {{}}
+              try {{ wc.property("S_WarpChroma-0058").setValue(((ri % 2) ? -1 : 1) * 0.03); }} catch (c1) {{}}
+              var wa = wc.property("S_WarpChroma-0100");
+              wa.setValueAtTime(ev.t_in, 0.02);
+              wa.setValueAtTime(ev.t_in + 0.14 * ev.sp, 0.55 * ev.pulse_mul);
+              wa.setValueAtTime(ev.t_in + 0.5 * ev.sp, 0.02);
+            }} catch (e_wc) {{ rep += "|WARPCHROMA" + i; }}
+          }} else if (ev.impact_recipe == "feedback") {{
+            try {{
+              var fb = L.property("Effects").addProperty("S_Feedback");
+              fb.property("S_Feedback-0100").setValue(10 + (ri % 3) * 4);                     // Max Steps 10/14/18
+              try {{ fb.property("S_Feedback-0050").setValue(0.55 + 0.08 * (ri % 3)); }} catch (f0) {{}}
+              var fbBlur = fb.property("S_Feedback-0056");
+              fbBlur.setValueAtTime(ev.t_in, 2.5);
+              fbBlur.setValueAtTime(ev.t_in + 0.3 * ev.sp, 0);
+            }} catch (e_fb) {{ rep += "|FEEDBACK" + i; }}
+          }}
         }}
-        if (ev.lshadow) {{                                                // 文字长阴影 (标题质感)
+        if (ev.lshadow) {{                                                // 文字长阴影 (显式开关; 默认关)
           try {{
             var ls = L.property("Effects").addProperty("LongShadow");
-            ls.property("ADBE LongShadow-0005").setValue(225);           // 方向
-            ls.property("ADBE LongShadow-0006").setValue(22);            // 长度 px
-            try {{ ls.property("ADBE LongShadow-0014").setValue(0.35); }} catch (l1) {{}}  // Fade Out
-            try {{ ls.property("ADBE LongShadow-0017").setValue([0.02, 0.03, 0.06, 1]); }} catch (l2) {{}}
-            try {{ ls.property("ADBE LongShadow-0018").setValue(0.25); }} catch (l3) {{}}  // Tint Amount
+            ls.property("ADBE LongShadow-0005").setValue(225);
+            ls.property("ADBE LongShadow-0006").setValue(22);
           }} catch (lse) {{ rep += "|LSHADOW" + i; }}
         }}
         // ── W2 揭示技法: 图层遮罩 (探针实证: mask atom + Shape 赋值/关键帧可用, 不碰文字动画器) ──
