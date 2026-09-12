@@ -42,6 +42,7 @@
 import argparse
 import json
 import os
+import random
 import re
 import subprocess
 import sys
@@ -113,6 +114,15 @@ STYLES = {
 }
 MOOD_TO_STYLE = {"intro": "intro_serif", "build": "build_side",
                  "drop": "drop_impact", "outro": "intro_serif"}
+
+# v27 W4 情绪档案 (mood profile): 同一份音乐可演绎成不同风格, 由 CLI 切换
+# chroma=通道分离 / wipe=遮罩揭示 / drift_mul=漂移幅度倍率 / glow_mul=发光倍率 / pulse_mul=节拍脉冲倍率
+MOOD_PROFILES = {
+    "auto":    None,                                                  # 保持既有行为
+    "impact":  {"chroma": True,  "wipe": True,  "drift_mul": 1.2, "glow_mul": 1.15, "pulse_mul": 1.15},
+    "elegant": {"chroma": False, "wipe": True,  "drift_mul": 0.7, "glow_mul": 0.85, "pulse_mul": 0.75},
+    "kinetic": {"chroma": True,  "wipe": False, "drift_mul": 1.5, "glow_mul": 1.05, "pulse_mul": 1.35},
+}
 
 # ── v18 字体池 (2026-09-11 重建: HKLM 真相表 + fontTools cmap 字形覆盖双校验) ──
 # 铁律: ① AE 只解析 HKLM 系统字体 (用户目录字体不可见) ② 必须校验 cmap 覆盖——
@@ -265,7 +275,8 @@ def zone_of(t):
 
 # ── 事件规划 ────────────────────────────────────────────────────────────
 def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
-                max_events=None, total_dur=None, bg_video=None):
+                max_events=None, total_dur=None, bg_video=None,
+                profile=None, entropy=0.65, speed=1.0, seed=20260912, mood_name="auto"):
     """产出事件表 + 逐 segment 处置表 (显式记账, 不静默丢)"""
     if total_dur is None:
         total_dur = float(segs[-1]["end_time"]) if segs else 0.0
@@ -313,6 +324,13 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
     last_font = {}
     wf_map = {}          # v18 词→最近一次字体 (同词换字体)
     enter_pos = {}       # W2 入场变款游标 (按样式)
+    _rng = random.Random(seed)                 # 非安全用途: 确定性变款控制 (同 seed 同输出, 可复现性要求)
+    _prof = profile or {}
+    _ent = max(0.0, min(1.0, float(entropy)))
+    _sp = 1.0 / max(float(speed), 0.1)          # 时长缩放 (speed 越大入场越快)
+    _glow_mul = float(_prof.get("glow_mul", 1.0))
+    _drift_mul = float(_prof.get("drift_mul", 1.0))
+    _pulse_mul = float(_prof.get("pulse_mul", 1.0))
     for i, (t, sn, zone) in enumerate(picked):
         cfg = ZONE_CFG[zone]
         mood = "outro" if zone == "outro" else zone
@@ -347,10 +365,13 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         pool = FONT_POOLS[style_id][scl]
         fkey = (style_id, scl)
         font = pool[font_pos.get(fkey, 0) % len(pool)]
+        _adv = 1 if _rng.random() < _ent else 0
+        if _adv == 0 and last_font.get(fkey) == font and len(pool) > 1:
+            _adv = 1                              # entropy=0 时也避免背靠背同款
         if last_font.get(fkey) == font and len(pool) > 1:
             font = pool[(font_pos.get(fkey, 0) + 1) % len(pool)]
             font_pos[fkey] = font_pos.get(fkey, 0) + 1
-        font_pos[fkey] = font_pos.get(fkey, 0) + 1
+        font_pos[fkey] = font_pos.get(fkey, 0) + _adv
         last_font[fkey] = font
         # v18: 同一个词再次出现时换字体 (词-字体去重, 防同词同款)
         if wf_map.get(w) == font and len(pool) > 1:
@@ -457,9 +478,14 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         # W2 入场变款循环 (wipe_up/wipe_right = Linear Wipe 层级效果 → 字体安全, 已探针实证)
         enter = st["enter"]
         ecyc = st.get("enter_cycle")
-        if ecyc:
+        if ecyc and _ent > 0:
+            _eadv = 1 if _rng.random() < _ent else 0
             enter = ecyc[enter_pos.get(style_id, 0) % len(ecyc)]
-            enter_pos[style_id] = enter_pos.get(style_id, 0) + 1
+            enter_pos[style_id] = enter_pos.get(style_id, 0) + max(_eadv, 1)
+        elif ecyc:
+            enter = ecyc[0]                       # entropy=0 → 固定首款 (最稳最一致)
+        if _prof.get("wipe") is False and enter in ("wipe_up", "wipe_right"):
+            enter = "fade_scale" if style_id == "intro_serif" else "slide_back"
 
         # v25 音乐联动: 事件窗内节拍脉冲 (供非弹性层做缩放脉冲) + 包络采样 (供发光逐帧呼吸)
         bz = [(round(tt, 3), round(ss / smax, 3)) for tt, ss in onsets if t_in <= tt <= t_out]
@@ -477,7 +503,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         _DIRS = [(0.71, -0.71), (-0.71, -0.71), (0.71, 0.71), (-0.71, 0.71),
                  (1.0, 0.0), (-1.0, 0.0), (0.0, -1.0), (0.0, 1.0)]
         _dir = _DIRS[i % len(_DIRS)]
-        _amp = (12.0 + 18.0 * mo_n) * (1.2 if style_id == "drop_impact" else 1.0)
+        _amp = (12.0 + 18.0 * mo_n) * (1.2 if style_id == "drop_impact" else 1.0) * _drift_mul
         mv_dx = round(_dir[0] * _amp, 1)
         mv_dy = round(_dir[1] * _amp, 1)
         # 安全边距门禁: 估文字半宽/半高, 保证漂移后不出画
@@ -485,6 +511,11 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         _half_h = 0.75 * size
         mv_dx = max(min(mv_dx, 1740 - _half_w - x), -(_half_w + x - 180))
         mv_dy = max(min(mv_dy, 960 - _half_h - y), -(y - 120 - _half_h))
+
+        # 情绪档案: 发光倍率
+        if glow:
+            glow = (glow[0], glow[1], round(glow[2] * _glow_mul, 3))
+        chroma = bool(chroma and _prof.get("chroma", True))    # elegant 档关闭通道分离
 
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
@@ -516,6 +547,10 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "env_s": env_s,
             "mv_dx": mv_dx,
             "mv_dy": mv_dy,
+            "sp": round(_sp, 4),
+            "pulse_mul": round(_pulse_mul, 3),
+            "mood_profile": mood_name,
+            "entropy": round(_ent, 3),
             "chroma": chroma,
             "chroma_dx": chroma_dx,
             "impact_mul": impact_mul,
@@ -645,6 +680,8 @@ def build_jsx(events, out_aep: Path):
         d["env_s"] = [[float(a), float(b)] for a, b in (e.get("env_s") or [])]
         d["mv_dx"] = float(e.get("mv_dx", 0))
         d["mv_dy"] = float(e.get("mv_dy", 0))
+        d["sp"] = float(e.get("sp", 1.0))            # 时长缩放 (1/speed)
+        d["pulse_mul"] = float(e.get("pulse_mul", 1.0))
         # v15/v17 冲击力包参数 (探针实证: ADBE Motion Blur=方向模糊 / ADBE Radial Blur / ADBE Turbulent Displace)
         # v17: 冲量按镜头运动强度分级 (impact_mul), 静止镜头收敛 / 高速爆炸镜头拉满
         en = float(e.get("energy", 0.6))
@@ -749,7 +786,7 @@ def build_jsx(events, out_aep: Path):
         var yOff = 0, zOff = 0;
         if (ev.enter == "fade_scale") {{
           GL.scale.setValueAtTime(ev.t_in, [115, 115]);
-          GL.scale.setValueAtTime(ev.t_in + 0.35, [100, 100]);
+          GL.scale.setValueAtTime(ev.t_in + 0.35 * ev.sp, [100, 100]);
         }} else if (ev.enter == "slide_back") {{
           var dx = ev.x < 960 ? -420 : 420;   // 从所在侧外侧滑入
           GL.position.expression =
@@ -761,17 +798,19 @@ def build_jsx(events, out_aep: Path):
           // 3D 层 scale 为三维 → 表达式须返回 3 值, 否则 AE 报错
           var s0 = ev.is3d ? "[0,0,0]" : "[0,0]";
           var s1 = ev.is3d ? "[s,s,s]" : "[s,s]";
+          var fr = (2.8 / ev.sp).toFixed(3);            // speed 越大振荡越快
+          var dc = (5.0 / ev.sp).toFixed(3);
           GL.scale.expression =
             "t=time-inPoint;if(t<0.01){{" + s0 + ";}}else{{" +
-            "amp=38;freq=2.8;decay=5;" +
+            "amp=38;freq=" + fr + ";decay=" + dc + ";" +
             "s=amp*Math.sin(freq*t*Math.PI*2)/Math.exp(decay*t)+100;" + s1 + ";}}";
         }}
-        if (ev.drop_fall) {{ yOff = -240; }}
-        if (ev.rise_up) {{ yOff = 240; }}
         if (ev.is3d) {{ zOff = -170; }}          // 3D 纵深: 由远及近的 Z 位移 (无摄像机)
-        if (yOff !== 0 || zOff !== 0) {{
-          var dur = (ev.drop_fall || ev.rise_up) ? 0.26 : 0.34;
-          GL.position.setValueAtTime(ev.t_in, [ev.x, ev.y + yOff, ev.z + zOff]);
+        var _mvDur = 0.26 * ev.sp;
+        if (ev.drop_fall || ev.rise_up || zOff !== 0) {{
+          var y0 = ev.y + (ev.drop_fall ? -240 : (ev.rise_up ? 240 : 0));
+          var dur = (ev.drop_fall || ev.rise_up) ? _mvDur : (0.34 * ev.sp);
+          GL.position.setValueAtTime(ev.t_in, [ev.x, y0, ev.z + zOff]);
           GL.position.setValueAtTime(ev.t_in + dur, [ev.x, ev.y, ev.z]);
         }}
       }}
@@ -817,9 +856,9 @@ def build_jsx(events, out_aep: Path):
           try {{
             for (var b = 0; b < ev.beats.length; b++) {{
               var bt = ev.beats[b][0], bstr = ev.beats[b][1];
-              var amp = 4 + 10 * bstr;                             // 节拍越强脉冲越大 (4~14%)
+              var amp = (4 + 10 * bstr) * ev.pulse_mul;            // 节拍越强脉冲越大; pulse_mul 为情绪档倍率
               L.scale.setValueAtTime(bt, [100 + amp, 100 + amp]);
-              L.scale.setValueAtTime(bt + 0.12, [100, 100]);
+              L.scale.setValueAtTime(bt + 0.12 * ev.sp, [100, 100]);
             }}
           }} catch (sbe) {{ rep += "|BEATSCALE" + i; }}
         }}
@@ -857,7 +896,7 @@ def build_jsx(events, out_aep: Path):
             sZero.closed = true;
             var shp = mk.property("ADBE Mask Shape");
             shp.setValueAtTime(ev.t_in, sZero);
-            shp.setValueAtTime(ev.t_in + 0.34, sFull);
+            shp.setValueAtTime(ev.t_in + 0.34 * ev.sp, sFull);
             shp.setValueAtTime(ev.t_out - ev.fout, sFull);
             shp.setValueAtTime(ev.t_out, sZero);
             try {{ mk.property("ADBE Mask Feather").setValue([6, 6]); }} catch (mfe) {{}}
@@ -931,9 +970,9 @@ def build_jsx(events, out_aep: Path):
             }} catch (gce) {{ rep += "|GLOWCOL" + i; }}
           }}
           gf.property("ADBE Glo2-0004").setValueAtTime(                // 强度入场脉冲 (ENV 语法, v6.1 按文字系)
-            ev.t_in, ev.glow[2] * ev.glow_pulse);
+            ev.t_in, ev.glow[2] * ev.glow_pulse * ev.pulse_mul);
           gf.property("ADBE Glo2-0004").setValueAtTime(
-            ev.t_in + {ENV_DECAY_S}, ev.glow[2]);
+            ev.t_in + {ENV_DECAY_S} * ev.sp, ev.glow[2]);
           // v25 音乐联动: 保持期内发光强度按音乐包络逐帧呼吸 (确定性烘焙, 非随机)
           var es = ev.env_s || [];
           for (var q = 1; q < es.length; q++) {{
@@ -1050,6 +1089,39 @@ def validate(events, disposition, segs, onsets, total_dur):
     # 字体实证记账
     checks["probe_fonts"] = sorted({e["font"] for e in events if e["probe_font"]})
     checks["verified_fonts_only"] = not checks["probe_fonts"]
+
+    # ── W4 硬门禁 (设计规则, 来自 bang-motion 类实践: menus-not-defaults / 不重复 / 两级文字 / 字号下限) ──
+    def _variant(e):
+        if e["style_id"] == "drop_impact":
+            return "drop_fall" if e.get("drop_fall") else ("rise_up" if e.get("rise_up") else "punch")
+        return e["enter"]
+
+    rep_font = [f"{a['word']}→{b['word']}" for a, b in zip(events, events[1:]) if a["font"] == b["font"]]
+    rep_var = [f"{a['word']}→{b['word']}" for a, b in zip(events, events[1:])
+               if _variant(a) == _variant(b)]
+    checks["no_repeat_consecutive_fonts"] = not rep_font
+    _ent_used = events[0].get("entropy", 0.65) if events else 0.65
+    # 低熵档 (entropy<0.35) 本就是"固定变款"的显式选择 → 该门禁标 N/A 而非失败 (诚实口径)
+    checks["entropy"] = _ent_used
+    checks["no_repeat_consecutive_variants"] = (not rep_var) or (_ent_used < 0.35)
+    checks["variant_gate_note"] = "N/A(低熵档显式固定变款)" if _ent_used < 0.35 else ""
+    checks["repeat_font_pairs"] = rep_font[:5]
+    checks["repeat_variant_pairs"] = rep_var[:5]
+    # 并发文字层数 (两级文字约束: 本项目设计为单层事件, 上限 2)
+    ev_sorted = sorted(events, key=lambda e: e["t_in"])
+    max_conc, cur = 0, []
+    for e in ev_sorted:
+        cur = [x for x in cur if x["t_out"] > e["t_in"]]
+        cur.append(e)
+        max_conc = max(max_conc, len(cur))
+    checks["max_concurrent_text"] = max_conc
+    checks["two_levels_pass"] = max_conc <= 2
+    # 字号下限 (1920 宽舞台: 60px 下限, 对应 1080 宽 30px 的可读性经验)
+    checks["min_font_size"] = min(e["size"] for e in events) if events else None
+    checks["font_size_floor_pass"] = bool(events) and checks["min_font_size"] >= 60
+    checks["mood_entropy_speed"] = {"mood": events[0].get("mood_profile") if events else None,
+                                    "sp": events[0].get("sp") if events else None,
+                                    "pulse_mul": events[0].get("pulse_mul") if events else None}
     return checks
 
 
@@ -1069,6 +1141,13 @@ def _parse_args():
                     help="phrase=保持到下一切点/上限(可读性优先, 默认); shot=严格镜头边界")
     ap.add_argument("--max-events", type=int, default=None,
                     help="事件总数上限 (默认按分区 cap: 2+6+10+2=20)")
+    ap.add_argument("--mood", choices=list(MOOD_PROFILES.keys()), default="auto",
+                    help="情绪档案: auto=既有行为 / impact=冲击优先 / elegant=克制优雅 / kinetic=动感")
+    ap.add_argument("--entropy", type=float, default=0.65,
+                    help="变款随机度 0~1 (0=固定首款最一致, 1=每事件换款最多样); 确定性(固定 seed)")
+    ap.add_argument("--speed", type=float, default=1.0,
+                    help="节奏速度倍率 (入场/脉冲时长 ∝ 1/speed; 弹性动画频率 ∝ speed)")
+    ap.add_argument("--seed", type=int, default=20260912, help="变款 PRNG 种子 (保证可复现)")
     return ap.parse_args()
 
 
@@ -1106,7 +1185,12 @@ def main():
                                       hold_mode=args.hold_mode,
                                       max_events=args.max_events,
                                       total_dur=total_dur,
-                                      bg_video=run_dir / "run53_premium_final.mp4")
+                                      bg_video=run_dir / "run53_premium_final.mp4",
+                                      profile=MOOD_PROFILES.get(args.mood),
+                                      entropy=args.entropy,
+                                      speed=args.speed,
+                                      seed=args.seed,
+                                      mood_name=args.mood)
     checks = validate(events, disposition, segs, onsets, total_dur)
 
     out_dir = run_dir / "text_overlay"
@@ -1144,6 +1228,15 @@ def main():
           f"{checks['zones_covered']}")
     print(f"[P0] 镜头处置: {checks['segments_in_event']}/{checks['segments_total']} "
           f"挂事件, 其余显式跳过 (处置覆盖 {checks['segment_disposition_coverage']:.0%})")
+    print(f"[P0] W4 门禁: 同款不连打-字体={checks['no_repeat_consecutive_fonts']} "
+          f"同款不连打-变款={checks['no_repeat_consecutive_variants']} "
+          f"两级文字≤2={checks['two_levels_pass']}(实测并发 {checks['max_concurrent_text']}) "
+          f"字号下限≥60={checks['font_size_floor_pass']}(最小 {checks['min_font_size']})")
+    if checks["repeat_font_pairs"] or checks["repeat_variant_pairs"]:
+        print(f"[P0] ⚠ 相邻重复: 字体 {checks['repeat_font_pairs']} / 变款 {checks['repeat_variant_pairs']}")
+    print(f"[P0] 情绪档: mood={checks['mood_entropy_speed']['mood']} "
+          f"时长缩放 sp={checks['mood_entropy_speed']['sp']} "
+          f"脉冲倍率={checks['mood_entropy_speed']['pulse_mul']}")
     if checks["probe_fonts"]:
         print(f"[P0] ⚠ 字体待实机探针: {checks['probe_fonts']} — 注入前跑字体在位清单 "
               f"(交接 §六.6), 不过则降级 BebasNeue")
