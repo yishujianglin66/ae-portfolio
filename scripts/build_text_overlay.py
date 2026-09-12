@@ -470,6 +470,22 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                   round((env_at(t_in + hold * k / (n_s - 1)) / env_max), 3) if env_max else 0.5)
                  for k in range(n_s)]
 
+        # W3 运动迁移: 镜头运动强度 (shot_scenes.motion) 驱动**保持期缓慢漂移**
+        # 负结果记录: 相位相关(置信0.004-0.015)/中值光流(前后景反向运动抵消≈0)/ECC(cc 0.03-0.55)
+        # 三种矢量估计在本素材(平均每0.8s切点+粒子+前后景混合运动)均不可信 → 不硬凑矢量,
+        # 改为: 方向取确定性循环(8 向, 按事件序号, 防重复疲劳) + 幅度随镜头运动强度(12~30px)
+        _DIRS = [(0.71, -0.71), (-0.71, -0.71), (0.71, 0.71), (-0.71, 0.71),
+                 (1.0, 0.0), (-1.0, 0.0), (0.0, -1.0), (0.0, 1.0)]
+        _dir = _DIRS[i % len(_DIRS)]
+        _amp = (12.0 + 18.0 * mo_n) * (1.2 if style_id == "drop_impact" else 1.0)
+        mv_dx = round(_dir[0] * _amp, 1)
+        mv_dy = round(_dir[1] * _amp, 1)
+        # 安全边距门禁: 估文字半宽/半高, 保证漂移后不出画
+        _half_w = 0.30 * size * max(len(w), 1)
+        _half_h = 0.75 * size
+        mv_dx = max(min(mv_dx, 1740 - _half_w - x), -(_half_w + x - 180))
+        mv_dy = max(min(mv_dy, 960 - _half_h - y), -(y - 120 - _half_h))
+
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
             "mood": mood, "energy": energy, "style_id": style_id,
@@ -498,6 +514,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "z": z_dep,
             "beats": beats,
             "env_s": env_s,
+            "mv_dx": mv_dx,
+            "mv_dy": mv_dy,
             "chroma": chroma,
             "chroma_dx": chroma_dx,
             "impact_mul": impact_mul,
@@ -625,6 +643,8 @@ def build_jsx(events, out_aep: Path):
         d["z"] = float(e.get("z", 0))
         d["beats"] = [[float(a), float(b)] for a, b in (e.get("beats") or [])]
         d["env_s"] = [[float(a), float(b)] for a, b in (e.get("env_s") or [])]
+        d["mv_dx"] = float(e.get("mv_dx", 0))
+        d["mv_dy"] = float(e.get("mv_dy", 0))
         # v15/v17 冲击力包参数 (探针实证: ADBE Motion Blur=方向模糊 / ADBE Radial Blur / ADBE Turbulent Displace)
         # v17: 冲量按镜头运动强度分级 (impact_mul), 静止镜头收敛 / 高速爆炸镜头拉满
         en = float(e.get("energy", 0.6))
@@ -802,6 +822,20 @@ def build_jsx(events, out_aep: Path):
               L.scale.setValueAtTime(bt + 0.12, [100, 100]);
             }}
           }} catch (sbe) {{ rep += "|BEATSCALE" + i; }}
+        }}
+        // ── v26 W3 运动迁移: 镜头运动强度驱动的径向视差漂移 (保持期内缓慢位移) ──
+        // 跳过 slide_back (其 position 由表达式持有); drop_fall/rise_up 已有起止键 → 追加末帧漂移
+        if ((ev.mv_dx || ev.mv_dy) && ev.enter != "slide_back") {{
+          try {{
+            var px = ev.x, py = ev.y, pz = ev.z || 0;
+            if (ev.is3d) {{
+              MV.position.setValueAtTime(ev.t_out - ev.fout, [px, py, pz]);
+              MV.position.setValueAtTime(ev.t_out, [px + ev.mv_dx, py + ev.mv_dy, pz]);
+            }} else {{
+              MV.position.setValueAtTime(ev.t_out - ev.fout, [px, py]);
+              MV.position.setValueAtTime(ev.t_out, [px + ev.mv_dx, py + ev.mv_dy]);
+            }}
+          }} catch (mve2) {{ rep += "|MVDRIFT" + i; }}
         }}
         // ── W2 揭示技法: 图层遮罩 (探针实证: mask atom + Shape 赋值/关键帧可用, 不碰文字动画器) ──
         // 为何不用 Linear Wipe: 它作用于整帧(1920x1080)而非文字范围 → 擦除线扫过时文字整块跳出
