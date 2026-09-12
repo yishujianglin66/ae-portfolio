@@ -628,6 +628,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "impact_recipe": (["shake", "rays", "chroma", "feedback", "edgerays", "filmflash"][i % 6]
                               if (style_id == "drop_impact" and beats and _plugins_on) else None),
             "recipe_i": i,
+            # v31d: 用"出现次数"做参数变化 —— 只用 i%k 会让同配方的两次出现参数完全相同 (i 与 i+6 同奇偶同模3)
+            "recipe_occ": i // 6,
             "from_timeline": bool(_from_tl),
             "font_override": _tl_font_override,
             "chroma": chroma,
@@ -765,6 +767,7 @@ def build_jsx(events, out_aep: Path):
         d["lshadow"] = bool(e.get("lshadow"))
         d["impact_recipe"] = e.get("impact_recipe")
         d["recipe_i"] = int(e.get("recipe_i", 0))
+        d["recipe_occ"] = int(e.get("recipe_occ", 1))
         # v15/v17 冲击力包参数 (探针实证: ADBE Motion Blur=方向模糊 / ADBE Radial Blur / ADBE Turbulent Displace)
         # v17: 冲量按镜头运动强度分级 (impact_mul), 静止镜头收敛 / 高速爆炸镜头拉满
         en = float(e.get("energy", 0.6))
@@ -962,12 +965,13 @@ def build_jsx(events, out_aep: Path):
         // ── v30 冲击配方轮换 (每事件一种, 解决"效果单一"; 参数按事件序号再变化) ──
         if (ev.impact_recipe) {{
           var ri = ev.recipe_i || 0;
+          var oc = ev.recipe_occ || 1;              // 出现次数: 同配方第 2 次参数必须不同
           var bs = ev.beats || [];
           if (ev.impact_recipe == "shake") {{
             try {{
               var shk = L.property("Effects").addProperty("S_Shake");
-              try {{ shk.property("S_Shake-0001").setValue(1 + (ri % 3)); }} catch (s0) {{}}   // Style 1/2/3 轮换
-              shk.property("S_Shake-0051").setValue(5 + (ri % 3) * 3);                        // Freq 5/8/11
+              try {{ shk.property("S_Shake-0001").setValue(1 + (oc % 3)); }} catch (s0) {{}}   // Style 1-3
+              shk.property("S_Shake-0051").setValue(5 + (oc % 3) * 3);                        // Freq 5/8/11
               try {{ shk.property("S_Shake-0054").setValue(1); }} catch (s1) {{}}
               try {{ shk.property("S_Shake-0056").setValue(7); }} catch (s2) {{}}
               var amp = shk.property("S_Shake-0050");
@@ -983,31 +987,31 @@ def build_jsx(events, out_aep: Path):
             try {{
               var rys = L.property("Effects").addProperty("S_Rays");
               rys.property("S_Rays-0050").setValue([ev.x, ev.y]);                             // 中心=文字位
-              rys.property("S_Rays-0051").setValue(0.18 + 0.10 * ((ri % 2) ? 1 : 0));         // 长度轮换
-              try {{ rys.property("S_Rays-0100").setValue(ri % 2); }} catch (r0) {{}}          // 方向轮换
+              rys.property("S_Rays-0051").setValue(0.18 + 0.10 * (oc % 2));                   // 长度轮换
+              try {{ rys.property("S_Rays-0100").setValue(oc % 2); }} catch (r0) {{}}          // 方向轮换
               var br = rys.property("S_Rays-0052");
               br.setValueAtTime(ev.t_in, 0.4);
-              br.setValueAtTime(ev.t_in + 0.12 * ev.sp, 3.2 * ev.pulse_mul);
+              br.setValueAtTime(ev.t_in + 0.12 * ev.sp, (2.8 + 0.7 * (oc % 2)) * ev.pulse_mul);
               br.setValueAtTime(ev.t_in + 0.42 * ev.sp, 0);
             }} catch (e_ry) {{ rep += "|RAYS" + i; }}
           }} else if (ev.impact_recipe == "chroma") {{
             try {{
               var wc = L.property("Effects").addProperty("S_WarpChroma");
               wc.property("S_WarpChroma-0051").setValue([ev.x, ev.y]);
-              try {{ wc.property("S_WarpChroma-0054").setValue(((ri % 2) ? 1 : -1) * 0.03); }} catch (c0) {{}}
-              try {{ wc.property("S_WarpChroma-0058").setValue(((ri % 2) ? -1 : 1) * 0.03); }} catch (c1) {{}}
+              try {{ wc.property("S_WarpChroma-0054").setValue(((oc % 2) ? 1 : -1) * 0.03); }} catch (c0) {{}}
+              try {{ wc.property("S_WarpChroma-0058").setValue(((oc % 2) ? -1 : 1) * 0.03); }} catch (c1) {{}}
               var wa = wc.property("S_WarpChroma-0100");
               wa.setValueAtTime(ev.t_in, 0.02);
-              wa.setValueAtTime(ev.t_in + 0.14 * ev.sp, 0.55 * ev.pulse_mul);
+              wa.setValueAtTime(ev.t_in + 0.14 * ev.sp, (0.42 + 0.16 * (oc % 2)) * ev.pulse_mul);
               wa.setValueAtTime(ev.t_in + 0.5 * ev.sp, 0.02);
             }} catch (e_wc) {{ rep += "|WARPCHROMA" + i; }}
           }} else if (ev.impact_recipe == "feedback") {{
             try {{
               var fb = L.property("Effects").addProperty("S_Feedback");
-              fb.property("S_Feedback-0100").setValue(10 + (ri % 3) * 4);                     // Max Steps 10/14/18
+              fb.property("S_Feedback-0100").setValue(10 + (oc % 3) * 4);                      // Max Steps 10/14/18
               var fbPrev = fb.property("S_Feedback-0050");                                    // Prev Brightness
               fbPrev.setValueAtTime(ev.t_in, 0.15);                                           // v31c: 文字先可见
-              fbPrev.setValueAtTime(ev.t_in + 0.16 * ev.sp, 0.55);                            // 回授堆叠(爆发感)
+              fbPrev.setValueAtTime(ev.t_in + 0.16 * ev.sp, 0.45 + 0.12 * (oc % 2));          // 回授堆叠(按出现次数变化)
               fbPrev.setValueAtTime(ev.t_in + 0.60 * ev.sp, 0.08);                            // 衰减
               var fbBlur = fb.property("S_Feedback-0056");
               fbBlur.setValueAtTime(ev.t_in, 2.5);
@@ -1017,11 +1021,11 @@ def build_jsx(events, out_aep: Path):
             try {{
               var er = L.property("Effects").addProperty("S_EdgeRays");
               er.property("S_EdgeRays-0050").setValue([ev.x, ev.y]);
-              er.property("S_EdgeRays-0051").setValue(0.22 + 0.12 * (ri % 2));
-              try {{ er.property("S_EdgeRays-0100").setValue(ri % 2); }} catch (er0) {{}}
+              er.property("S_EdgeRays-0051").setValue(0.22 + 0.12 * (oc % 2));
+              try {{ er.property("S_EdgeRays-0100").setValue(oc % 2); }} catch (er0) {{}}
               var erb = er.property("S_EdgeRays-0052");
               erb.setValueAtTime(ev.t_in, 0.3);
-              erb.setValueAtTime(ev.t_in + 0.10 * ev.sp, 2.8 * ev.pulse_mul);
+              erb.setValueAtTime(ev.t_in + 0.10 * ev.sp, (2.3 + 0.9 * (oc % 2)) * ev.pulse_mul);
               erb.setValueAtTime(ev.t_in + 0.45 * ev.sp, 0);
             }} catch (e_er) {{ rep += "|EDGERAYS" + i; }}
           }} else if (ev.impact_recipe == "filmflash") {{
@@ -1029,13 +1033,13 @@ def build_jsx(events, out_aep: Path):
               var fe = L.property("Effects").addProperty("S_FilmEffect");
               var fpe = fe.property("S_FilmEffect-0057");                                     // Print Exposure
               fpe.setValueAtTime(ev.t_in, 0);
-              fpe.setValueAtTime(ev.t_in + 0.08 * ev.sp, 1.2 + 0.5 * (ri % 2));
+              fpe.setValueAtTime(ev.t_in + 0.08 * ev.sp, 1.1 + 0.7 * (oc % 2));
               fpe.setValueAtTime(ev.t_in + 0.5 * ev.sp, 0);
               var fgb = fe.property("S_FilmEffect-0063");                                     // Glow Brightness
               fgb.setValueAtTime(ev.t_in, 0);
-              fgb.setValueAtTime(ev.t_in + 0.08 * ev.sp, 2.2 * ev.pulse_mul);
+              fgb.setValueAtTime(ev.t_in + 0.08 * ev.sp, (1.7 + 1.0 * (oc % 2)) * ev.pulse_mul);
               fgb.setValueAtTime(ev.t_in + 0.55 * ev.sp, 0);
-              try {{ fe.property("S_FilmEffect-0056").setValueAtTime(ev.t_in, -0.4 + 0.8 * (ri % 2)); }} catch (fe0) {{}}
+              try {{ fe.property("S_FilmEffect-0056").setValueAtTime(ev.t_in, -0.3 + 0.7 * (oc % 2)); }} catch (fe0) {{}}
             }} catch (e_fe) {{ rep += "|FILMFLASH" + i; }}
           }}
         }}
