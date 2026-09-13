@@ -223,7 +223,39 @@ FONT_POOLS = {
                   "DrSugiyama-Regular", "GreatVibes-Regular", "Allura-Regular"],
     },
 }
+# ── v47 细体池 (Boss 选定方向: "克制为主 + 偶发重音", 中文换细体) ──
+# 全部字面已过 A1 实证 (probe_light_fonts.jsx: 同词逐字面渲 1 帧, 判据双条 ——
+#   ① 任意两格像素完全相同 = 至少一个被静默替换; ② 标称 Light/Thin 必须明显细于默认粗体)。
+#   实测: 无任何两格相同, 且白像素占比按预期分层 (仿宋 0.038 < 正黑细 0.039 < 等线细 0.041
+#   < 楷体 0.048 < 普惠体细 0.051 < 雅黑细 0.056; 拉丁 Lato-Hairline 0.007 最细)。
+LIGHT_POOLS = {
+    "drop_calm": {
+        "jp":    ["AlibabaPuHuiTi_3_45_Light", "DengXian-Light", "MicrosoftJhengHeiLight",
+                  "YuGothic-Light", "MicrosoftYaHeiLight", "FangSong"],
+        "cn":    ["AlibabaPuHuiTi_3_45_Light", "DengXian-Light", "MicrosoftJhengHeiLight",
+                  "FangSong", "KaiTi", "MicrosoftYaHeiLight"],
+        # 拉丁细体按"越细越靠前": 无衬线为主, 衬线体 (Merriweather) 放末尾当变奏
+        "latin": ["BebasNeue-Light", "Kanit-Thin", "Lato-Light", "Lato-Hairline",
+                  "Inter-Light", "BrandonGrotesque-Light", "Antonio-Light", "Merriweather-Light"],
+    },
+}
+# 克制的取色 (不与背景"抢亮"): 暗底用奶白而非纯白, 亮底用近墨而非纯黑
+CALM_CREAM = [0.95, 0.93, 0.87]
+CALM_INK = [0.06, 0.06, 0.09]
+CALM_TRACKING = 90          # 克制档用较宽字距 (编辑排版感), 而非冲击档的展开动画
+PUNCH_TOP_N = 3             # "偶发重音": 只给音乐局部强度最高的 N 个 drop 事件保留冲击处理
+CALM_SMALL_PX = 140         # 克制档小字号门限 (低于此值补细描边, 见可读性兜底)
+CALM_MIN_DL = 55.0          # 字色与局部背景的最小亮度差 (低于此值补细描边)
+CALM_LIGHT_BG = 140.0       # 克制档"亮底"判据 (用字期中段亮度, 非 bg_class)
+# 依据: drop 的 local_i 实测区间 0.54-0.75, 若用绝对阈值(如 0.9)会一个都不触发 ——
+#   故按**排名**取前 N (与 _recipe_ts 的强度优先贪心同一思路)。
+
 VERIFIED_FONTS = {          # HKLM 真相表 + cmap 覆盖 + 渲染差分三重校验 (2026-09-11/12)
+    # v47 细体批次 (probe_light_fonts.jsx 实证: 逐格互不相同 + 粗细分层符合预期)
+    "AlibabaPuHuiTi_3_45_Light", "YuGothic-Light", "KaiTi",
+    "DengXian-Light", "MicrosoftJhengHeiLight", "MicrosoftYaHeiLight", "FangSong",
+    "BebasNeue-Light", "Kanit-Thin", "Lato-Light", "Lato-Hairline", "Inter-Light",
+    "BrandonGrotesque-Light", "Antonio-Light", "Merriweather-Light",
     # 系统级安装批次一 (tmp/install_fonts_full.py, 28 个; 不含 trial)
     "Anton-Regular", "BebasNeue-Bold", "Antonio-Bold", "BlackOpsOne-Regular",
     "Bangers-Regular", "AlfaSlabOne-Regular", "BowlbyOneSC-Regular", "Blanka-Regular",
@@ -528,6 +560,11 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         if all(abs(_t - _st) >= RECIPE_MIN_GAP for _st in _sel):
             _sel.append(_t)
     _recipe_ts = {round(t, 3) for t in _sel}
+    # v47 "偶发重音": 只给音乐局部强度最高的 PUNCH_TOP_N 个 drop 事件保留冲击处理, 其余走克制。
+    # 用**排名**而非绝对阈值 —— drop 的 local_i 实测区间 0.54-0.75, 阈值法会一个都不触发。
+    _punch_ts = {round(t, 3) for t, _li3 in
+                 sorted([(t, _local_i(t)) for t, _sn, _z in picked if _z == "drop"],
+                        key=lambda x: -x[1])[:PUNCH_TOP_N]}
     for i, (t, sn, zone) in enumerate(picked):
         cfg = ZONE_CFG[zone]
         mood = "outro" if zone == "outro" else zone
@@ -772,9 +809,11 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         layout_name = "single"
         word_emit = w
         n_lines = 1
+        _is_calm = False                              # v47: 克制档标记 (控制 elastic/enter/踩拍动作)
         if zone == "drop":
             drop_ord += 1
             _vo = drop_ord
+            _punch = round(t_in, 3) in _punch_ts          # v47: 只有最强 N 拍走冲击档
             look_name = LOOKS[(_vo - 1) % len(LOOKS)]
             layout_name = LAYOUTS[(_vo - 1) % len(LAYOUTS)]
             word_emit, n_lines = apply_layout(w, layout_name)
@@ -851,6 +890,47 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                 # 注意: 用"第几次 tilt"定符号 —— 用 _vo%2 会失效 (tilt 恒落在偶数序数 → 永远同一方向)
                 rot_deg = 6.0 if (((_vo - 1) // len(LOOKS)) % 2 == 0) else -6.0
 
+            # ── v47 克制档 (Boss 选定: "克制为主 + 偶发重音") ──
+            # 放在所有字效分支之后 = 覆盖取胜。克制的三件事:
+            #   ① 换细体池 (实证过; 中文细体是"高级感"里最立竿见影的一项)
+            #   ② 去掉全部"抢亮"处理: 粗描边 / 辉光 / 投影 / 斜面都不给 ——
+            #      质感交给字体本身与留白, 而不是靠描边把字"抠"出来
+            #   ③ 缓入替弹跳: elastic=False 同时自动去掉踩拍上跳与砸入过冲 (JSX 侧按 elastic 门控)
+            # 取色按背景反差, 但用**奶白/近墨**而非纯白/纯黑 (纯白在画面里是最亮的白, 显"喊")
+            if not _punch:
+                _pool_light = LIGHT_POOLS["drop_calm"][scl]
+                font = _pool_light[font_pos.get(("drop_calm", scl), 0) % len(_pool_light)]
+                font_pos[("drop_calm", scl)] = font_pos.get(("drop_calm", scl), 0) + 1
+                # 字色改用**字期中段亮度**选 (与空心字同一教训): bg_class 取字期内最亮时刻,
+                #   对"白字+粗描边"安全, 但克制档默认无描边 → 字色必须匹配"文字真正停在那儿"
+                #   的背景。实测 #17 被判亮底配近墨, 而中段区域仅 51 → 近墨压深背景 ΔL 35, 隐形。
+                _lmid2 = _region_luma(bg_video, t_in + 0.55 * hold, x, y)
+                _lmid2 = 128.0 if _lmid2 is None else _lmid2
+                fill_cfg = CALM_INK if _lmid2 >= CALM_LIGHT_BG else CALM_CREAM
+                stroke_cfg = None
+                glow = None
+                glow2 = None
+                glow_col = None
+                shadow_cfg = None
+                bevel = None
+                chroma = False
+                track_cfg = CALM_TRACKING
+                rot_deg = 0.0                             # 倾斜属于"张扬", 克制档不用
+                look_name = "calm"
+                enter = "fade_scale"                      # 缓入替弹跳
+                _is_calm = True
+                # 可读性兜底 (实测得来): 细体把可读性全押在"字色 vs 背景"上, 但细笔画在
+                #   小字号下抗锯齿退化 —— 实测 #12(97px)/#18(119px) 峰值亮度只到 189/171
+                #   (拿不到标称奶白 236), ΔL 掉到 37/30, 不够读。
+                # 修法: 小字号**或**背景中亮度时补一根 1.5-2.6px 细描边把字骨立住 ——
+                #   细描边仍是"排版", 与冲击档 11px 粗边有本质区别。
+                _lmid2 = _region_luma(bg_video, t_in + 0.55 * hold, x, y)
+                _lmid2 = 128.0 if _lmid2 is None else _lmid2
+                _txtL = (0.299 * fill_cfg[0] + 0.587 * fill_cfg[1] + 0.114 * fill_cfg[2]) * 255
+                if size < CALM_SMALL_PX or abs(_txtL - _lmid2) < CALM_MIN_DL:
+                    _sink = CALM_INK if _txtL > _lmid2 else [0.98, 0.98, 1.0]
+                    stroke_cfg = (_sink, round(max(1.5, min(2.6, size * 0.018)), 1))
+
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
             "mood": mood, "energy": energy, "style_id": style_id,
@@ -908,7 +988,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "chroma_dx": chroma_dx,
             "impact_mul": impact_mul,
             "cascade": st.get("cascade", False),
-            "elastic": st.get("elastic", False),
+            "elastic": (False if _is_calm else st.get("elastic", False)),
+            "calm": _is_calm,                     # v47 克制档 (JSX 据此关掉踩拍缩放脉冲)
             "shockwave": st.get("shockwave", False),
             "typewriter": st.get("typewriter", False),
             "drop_fall": drop_fall,
@@ -1052,6 +1133,7 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
         d["rot"] = float(e.get("rot", 0.0))                # v44
         d["look"] = e.get("look")                          # v44 (仅报告用)
         d["nLines"] = int(e.get("n_lines", 1))              # v46 排版行数 (供行距设置)
+        d["calm"] = bool(e.get("calm"))                     # v47 克制档: 关掉踩拍动作
         d["z"] = float(e.get("z", 0))
         d["beats"] = [[float(a), float(b)] for a, b in (e.get("beats") or [])]
         d["env_s"] = [[float(a), float(b)] for a, b in (e.get("env_s") or [])]
@@ -1264,7 +1346,7 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
         var tp = L.property("Text");
         try {{ addMove(MV, ev); }} catch (mve) {{ rep += "|MOVE" + i; }}
         // ── v25 音乐联动: 节拍脉冲缩放 (非弹性层; 弹性的 drop 层由发光呼吸负责律动) ──
-        if (ev.beats && ev.beats.length && !ev.elastic) {{
+        if (ev.beats && ev.beats.length && !ev.elastic && !ev.calm) {{
           try {{
             for (var b = 0; b < ev.beats.length; b++) {{
               var bt = ev.beats[b][0], bstr = ev.beats[b][1];
