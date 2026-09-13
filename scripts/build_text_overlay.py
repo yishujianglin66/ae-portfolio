@@ -235,8 +235,10 @@ LIGHT_POOLS = {
         "cn":    ["DengXian-Light", "FangSong", "AlibabaPuHuiTi_3_45_Light",
                   "MicrosoftJhengHeiLight", "KaiTi", "MicrosoftYaHeiLight"],
         # 拉丁细体按"越细越靠前": 无衬线为主, 衬线体 (Merriweather) 放末尾当变奏
-        "latin": ["Lato-Hairline", "BebasNeue-Light", "Kanit-Thin", "Lato-Light",
-                  "Inter-Light", "BrandonGrotesque-Light", "Antonio-Light", "Merriweather-Light"],
+        # 发丝级 (Lato-Hairline / Kanit-Thin) 押到最后 —— 实测**亚像素笔画在 1080p 视频里
+        #   渲染出来必然是灰的** (标称近墨 #0F0F17 渲成中灰), 属印刷体思路, 不适合动态视频。
+        "latin": ["BebasNeue-Light", "Lato-Light", "Inter-Light", "BrandonGrotesque-Light",
+                  "Antonio-Light", "Merriweather-Light", "Kanit-Thin", "Lato-Hairline"],
     },
 }
 # 克制的取色 (不与背景"抢亮"): 暗底用奶白而非纯白, 亮底用近墨而非纯黑
@@ -907,10 +909,17 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                 # 字色改用**字期中段亮度**选 (与空心字同一教训): bg_class 取字期内最亮时刻,
                 #   对"白字+粗描边"安全, 但克制档默认无描边 → 字色必须匹配"文字真正停在那儿"
                 #   的背景。实测 #17 被判亮底配近墨, 而中段区域仅 51 → 近墨压深背景 ΔL 35, 隐形。
+                # v49 稳健取色: **不再按背景切浅/深字色**, 恒定"浅字 + 细深描边"。
+                #   为什么删掉极性判断: 它依赖 _region_luma 代表"文字实际落位处的背景",
+                #   而这个假设已两次失效 ——
+                #     ① 空心字 #9: 判 150(亮)取近黑描边, 渲染时刻实际 76(暗) → 深压深隐形;
+                #     ② 克制档 #17: 判中段 51(暗)取奶白, 而文字实际像素处背景 236(亮)
+                #        → 奶白压亮底, 实测 ΔL 32.9。
+                #   恒定浅字+细深描边是**与背景无关**的方案: 深描边保亮底, 浅字保暗底
+                #   (经典 AMV 白字黑边同源), 也省掉了对背景采样的依赖。
                 _lmid2 = _region_luma(bg_video, t_in + 0.55 * hold, x, y)
                 _lmid2 = 128.0 if _lmid2 is None else _lmid2
-                fill_cfg = CALM_INK if _lmid2 >= CALM_LIGHT_BG else CALM_CREAM
-                stroke_cfg = None
+                fill_cfg = CALM_CREAM
                 # v48 极弱**同色**光晕 —— 但只给"暗底浅字"那一档。
                 #   实测得来的限制: 亮底深字若给光晕, 且 glow_col 留 None 就会落到 AE 的
                 #   默认泛光色 (白/黑), 在深字周围生成**白晕** → 字发浑、对比反而下降。
@@ -943,9 +952,10 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                 _lmid2 = _region_luma(bg_video, t_in + 0.55 * hold, x, y)
                 _lmid2 = 128.0 if _lmid2 is None else _lmid2
                 _txtL = (0.299 * fill_cfg[0] + 0.587 * fill_cfg[1] + 0.114 * fill_cfg[2]) * 255
-                if size < CALM_SMALL_PX or abs(_txtL - _lmid2) < CALM_MIN_DL:
-                    _sink = CALM_INK if _txtL > _lmid2 else [0.98, 0.98, 1.0]
-                    stroke_cfg = (_sink, round(max(1.5, min(2.6, size * 0.018)), 1))
+                # v49: 细描边改为**恒定** (v48 只在"小字号/低对比"时才补, 结果亮底大面积发灰)。
+                #   实测依据: 发丝笔画渲成中灰 → 无论字色多深都读不出。
+                #   细描边 (1.6-2.8px) 把字骨立回来, 同时保持"排版"而非"贴纸"的观感。
+                stroke_cfg = (CALM_INK, round(max(1.6, min(2.8, size * 0.016)), 1))
 
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
