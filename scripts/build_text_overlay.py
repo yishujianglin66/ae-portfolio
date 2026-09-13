@@ -46,6 +46,7 @@ import random
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -249,6 +250,10 @@ DEFAULT_WORDS = {
 WORDS_FILE = "data/text_overlay_words.json"
 TIMELINE_FILE = "data/text_overlay_timeline.json"   # v28: 时间→文字(可带字体) 对应表
 TIMELINE_TOL = 0.6                                  # 事件锚点与该时刻相差 ≤ 此值即命中 (秒)
+# run 目录名 / tag 白名单 (路径安全: 严格 fullmatch 防遍历; 与 build_master_polish 对齐)
+# Step1.5: 放宽接受 R1 修复run (unified_r1_fixed_vN) → 文字链也能指向 R1 成果
+RUN_DIR_PATTERN = r"unified_(?:run\d+|r1_fixed_v\d+)"
+TAG_PATTERN = r"run\d+"
 
 
 def load_timeline():
@@ -428,6 +433,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
     last_font = {}
     wf_map = {}          # v18 词→最近一次字体 (同词换字体)
     enter_pos = {}       # W2 入场变款游标 (按样式)
+    drop_ord = 0         # v43 drop 段"逐次变款"序数 (按 zone=drop 递增)
     _rng = random.Random(seed)                 # 非安全用途: 确定性变款控制 (同 seed 同输出, 可复现性要求)
     _prof = profile or {}
     _ent = max(0.0, min(1.0, float(entropy)))
@@ -701,6 +707,29 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         if not _shimmer:
             chroma = False                                     # 通道分离只属 drop 时段
 
+        # ── v43 drop 段"逐次变款" (Boss: "继续推进") ──
+        # 实证依据 (drop 15 个事件实测): 入场 tracking 全 110、填充色全纯白、
+        #   13/15 的字号挤在 198-207 → "单一"不在特效, 在配色与处理。
+        # 关键区分 —— 哪些维度**不能**轮换: 光晕色与描边宽由背景亮度决定对比度
+        #   (亮底必须青辉光 + 粗描边; 早前已实证亮底白辉光物理不可见), 属受约束维度,
+        #   盲目轮换会牺牲可读性。所以只动三个不受对比度约束的自由维度:
+        #   ① 入场跟踪展开量 ② 字号微差 ③ 填充色温。
+        # 三档填充色的亮度均 ≥240 (纯白 255 / 暖白 247 / 冷白 243), 可读性不受影响。
+        fill_cfg = st["fill"]
+        track_cfg = st["tracking"]
+        if zone == "drop":
+            drop_ord += 1
+            _vo = drop_ord
+            _trk = (80, 110, 145)[_vo % 3]                     # v9 记 250 会让长词在 punch 展开期超框
+            size = max(60, int(round(size * (1.05 if _vo % 2 else 1.0))))
+            fill_cfg = ([1.0, 1.0, 1.0], [1.0, 0.965, 0.90], [0.93, 0.965, 1.0])[_vo % 3]
+            # 宽度守卫: 弹性峰值 138% × 跟踪展开后的估宽 必须落在安全框内 (防长词被切)
+            def _peak_w(t):
+                return size * 0.62 * max(1, len(w)) * (1 + t / 1000.0) * 1.38
+            while _trk > 0 and _peak_w(_trk) > 1780:
+                _trk -= 15
+            track_cfg = _trk if _trk > 0 else None
+
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
             "mood": mood, "energy": energy, "style_id": style_id,
@@ -709,7 +738,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "font_stack": pool,
             "script": scl,
             "probe_font": font not in VERIFIED_FONTS,
-            "fill": st["fill"],
+            "fill": fill_cfg,
             "stroke": stroke_cfg,
             "enter": enter,
             "glow": glow,
@@ -760,7 +789,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "drop_fall": drop_fall,
             "rise_up": rise_up,
             "blurfade": st.get("blurfade", False),
-            "tracking": st["tracking"],
+            "tracking": track_cfg,
             "anchor_shot": {"index": seg.get("index"), "t0": t0, "t1": t1},
         }
         events.append(ev)
@@ -844,7 +873,7 @@ ENV_DECAY_S = 0.16
 ENV_TAIL = 0.45
 
 
-def build_jsx(events, out_aep: Path):
+def build_jsx(events, out_aep: Path, nonce: str = "start"):
     """在验收基线工程上追加文字层 (非破坏: 不动现有层, 只 addText + save 新文件)
 
     消费 comp: run53_premium_v3 (已在 AE 打开则直接用 — apply_premium_fx.jsx 同款
@@ -924,9 +953,12 @@ def build_jsx(events, out_aep: Path):
     evs_js = json.dumps([_ev_js(e) for e in events], separators=(",", ":"))
     aep_in = (ROOT / "output" / "unified_run53" / AEP_NAME).resolve().as_posix()
     log_p = (ROOT / "tmp" / "ae_text_build.txt").as_posix()
+    # v43 注入回执 nonce: 每次构建唯一。AE 侧把它写在日志开头, 调用侧必须回读到同一个
+    # nonce 才算注入成功 —— 否则"上一版留下的日志"会被当成成功 (实测踩过: v43 没注入,
+    # 却因为 v42 的日志同样是 "start|saved layers=41 texts=25" 而报成功)。
     return f"""
 (function() {{
-  var rep = "start";
+  var rep = "{nonce}";
   var compName = "{COMP_NAME}";
   function findComp() {{
     for (var i = 1; i <= app.project.numItems; i++) {{
@@ -1524,22 +1556,39 @@ def _parse_args():
     ap.add_argument("--speed", type=float, default=1.0,
                     help="节奏速度倍率 (入场/脉冲时长 ∝ 1/speed; 弹性动画频率 ∝ speed)")
     ap.add_argument("--seed", type=int, default=20260912, help="变款 PRNG 种子 (保证可复现)")
+    ap.add_argument("--edl", dest="edl", default=None,
+                    help="edl.json 路径; 提供时先过 lint 契约闸门, 且其 text_events 轨(若有)直接作事件表(跳过现场 plan_events)")
     return ap.parse_args()
 
 
 def main():
     args = _parse_args()
     raw = str(args.run_dir).replace("\\", "/").removeprefix("output/")
-    if not re.fullmatch(r"unified_run\d+", raw):
-        print(f"[ERR] 非法 run 目录名(白名单 unified_run\\d+): {raw}")
+    if not re.fullmatch(RUN_DIR_PATTERN, raw):
+        print(f"[ERR] 非法 run 目录名(白名单 unified_run<N> | unified_r1_fixed_v<N>): {raw}")
         sys.exit(2)
-    if not re.fullmatch(r"run\d+", str(args.tag)):
+    if not re.fullmatch(TAG_PATTERN, str(args.tag)):
         print(f"[ERR] 非法 tag(白名单 run\\d+): {args.tag}")
         sys.exit(2)
     run_dir = ROOT / "output" / raw
     if not (run_dir / "production_report.json").exists():
         print(f"[ERR] 缺前置产物 {run_dir / 'production_report.json'}")
         sys.exit(2)
+
+    # §4/Step1.5: --edl 数据契约闸门(读+lint, fail-fast)。仅显式传入才启用 → 无 --edl 时零行为变化(BACKWARD)
+    _edl = None
+    if args.edl:
+        from scripts.edl import load_edl
+        _edl_p = Path(args.edl)
+        if not _edl_p.exists():
+            print(f"[ERR] --edl 不存在: {_edl_p}")
+            sys.exit(2)
+        try:
+            _edl = load_edl(_edl_p)          # lint 失败抛 ValueError
+        except ValueError as _e:
+            print(f"[ERR] EDL 契约校验失败: {_e}")
+            sys.exit(2)
+    _edl_events = (_edl or {}).get("text_events") or None
 
     words = load_words(None)
     _wp = ROOT / WORDS_FILE
@@ -1560,18 +1609,26 @@ def main():
     if timeline:
         print(f"[P0] 时间表命中: 载入 {len(timeline)} 条 (容差 ±{TIMELINE_TOL}s)")
 
-    events, disposition = plan_events(segs, onsets, env_at, scenes, words,
-                                      hold_mode=args.hold_mode,
-                                      max_events=args.max_events,
-                                      total_dur=total_dur,
-                                      bg_video=run_dir / "run53_premium_final.mp4",
-                                      profile=MOOD_PROFILES.get(args.mood),
-                                      entropy=args.entropy,
-                                      speed=args.speed,
-                                      seed=args.seed,
-                                      mood_name=args.mood,
-                                      timeline=timeline)
+    if _edl_events:
+        # §4: EDL text_events 轨(上游已规划的完整事件表)直接作事件源 → 跳过现场 plan_events
+        events, disposition = _edl_events, []   # EDL 恢复路径不重算 segment 处置(validate 容忍空 disposition)
+        print(f"[P0] text_events 来自 EDL 契约({len(events)} 条), 跳过现场生成")
+    else:
+        events, disposition = plan_events(segs, onsets, env_at, scenes, words,
+                                          hold_mode=args.hold_mode,
+                                          max_events=args.max_events,
+                                          total_dur=total_dur,
+                                          bg_video=run_dir / "run53_premium_final.mp4",
+                                          profile=MOOD_PROFILES.get(args.mood),
+                                          entropy=args.entropy,
+                                          speed=args.speed,
+                                          seed=args.seed,
+                                          mood_name=args.mood,
+                                          timeline=timeline)
     checks = validate(events, disposition, segs, onsets, total_dur)
+    if _edl_events:
+        checks["event_source"] = "edl_text_events"    # 诚实记账: 事件来自 EDL 契约, 非现场生成
+        checks["disposition_recomputed"] = False
     # 时间表对账 (显式记账: 命中/未命中, 未命中告警——否则用户以为指定了其实没生效)
     if timeline:
         matched_t = [round(e["t_in"], 2) for e in events if e.get("from_timeline")]
@@ -1587,7 +1644,8 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
     ver = os.environ.get("TEXT_OVERLAY_VER", "v2")            # v2=P1配方①④⑦样式 (v1已被git历史覆盖备份)
     out_aep = run_dir / f"run53_text_{ver}.aep"
-    jsx = build_jsx(events, out_aep)
+    nonce = f"{ver}-{int(time.time())}"
+    jsx = build_jsx(events, out_aep, nonce)
     (out_dir / "events.json").write_text(
         json.dumps({"events": events, "disposition": disposition,
                     "checks": checks, "hold_mode": args.hold_mode,
@@ -1641,19 +1699,26 @@ def main():
         sys.exit(1 if hard_fail else 0)
 
     # 执行模式: 文件协议 Bridge (硬约束: python .ae-mcp-bridge/send_bridge.py <jsx>)
+    log = ROOT / "tmp" / "ae_text_build.txt"
+    if log.exists():
+        log.unlink()          # 先删旧日志: 否则上一版留下的同文本日志会被当成本轮成功 (实测踩过)
     r = subprocess.run([sys.executable, str(ROOT / ".ae-mcp-bridge" / "send_bridge.py"),
                         str(jsx_p)], capture_output=True, text=True, timeout=420)
     print(r.stdout[-1500:] if r.stdout else "(bridge 无输出)")
     if r.returncode != 0:
         print(f"[ERR] send_bridge 失败 exit={r.returncode}")
         sys.exit(4)
-    log = ROOT / "tmp" / "ae_text_build.txt"
     if log.exists():
-        print("build:", log.read_text(encoding="utf-8")[:600])
         rep = log.read_text(encoding="utf-8")
+        print("build:", rep[:600])
         if "FATAL" in rep or "NOCOMP" in rep:
             print("[ERR] AE 执行报错 — 见 ae_text_build.txt")
             sys.exit(4)
+        if nonce not in rep:
+            print(f"[ERR] 日志未回显本轮 nonce ({nonce}) — 注入未生效 "
+                  "(AE 没跑 / 桥接断 / 跑的是别的脚本)")
+            sys.exit(4)
+        print(f"[OK] 注入回执校验通过 nonce={nonce}")
     else:
         print("[ERR] 未找到 ae_text_build.txt — AE 可能未执行 JSX")
         sys.exit(4)

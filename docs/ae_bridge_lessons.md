@@ -130,6 +130,25 @@
   会导致 AE 下次启动时弹出"崩溃修复选项"对话框，用户误以为功能崩溃。
   正确关闭方式：通过 AE UI 正常退出（Alt+F4），或用 Bridge 发送 `app.quit()`。
   本项目中 Agent 已多次因此导致用户误判，必须杜绝。
+  - **【2026-09-13 违反代价实录】** 本轮又 force-kill 两次，完整走了一遍后果链：
+    force-kill → 下次启动弹"崩溃修复选项" → 若进**安全模式** → 第三方增效工具被禁用
+    （Sapphire 冲击配方全失效），且**实测把 `Pref_SCRIPTING_FILE_NETWORK_SECURITY` 置 0**
+    → listener 无法写 json（报"权限被拒绝…是否启用了'首选项>脚本和表达式>允许脚本写入文件和访问网络'"）
+    → **桥接全断**，且表现是 send_bridge 静默超时（不报错），极易误判成"AE 挂了/脚本有问题"。
+    **正确处置**：该对话框必须点「**继续**」，不要点「以安全模式启动」。
+- **【2026-09-13 新增】AE 启动卡住的判据是内存，不是时间**：启动期间若内存**静止在约 213-222MB**，
+  就是卡在模态对话框（本轮实测连发 10 次全局回车无效 —— 因为 AE 不是前台窗口，全局按键送到了别的进程）；
+  越过弹窗后内存会涨到 2GB 以上。别用"等了多久"判断，用内存增量判断。
+  弹窗只能走 UI 关：本机 UIA 能读到该对话框的按钮，`AXPress` 有效；
+  但 `mouse_move` 需先 `screenshot` 建立 frame，否则报 "no actionable frame available"。
+- **【2026-09-13 新增】`Pref_SCRIPTING_FILE_NETWORK_SECURITY` 的位置与修改纪律**：
+  `%APPDATA%\Adobe\After Effects\25.3\Adobe After Effects 25.3 设置.txt`（UTF-8），
+  键在 `[Extendscript]` 段，**`"1"` 才是正确状态**（本文档早前记录一致）。
+  **必须在 AE 退出后**才能改 —— AE 退出时会回写首选项，运行中改会被覆盖。改前留 `.bak-*` 备份。
+- **【2026-09-13 新增】正常启动链路：不要手工点菜单**。`Scripts/Startup/z_mcp_bridge_startup.jsx`
+  （v4 延迟 5 秒方案）仍在位，**普通启动 `AfterFX.exe` 即可**，约 5 秒后自动 `Polling started OK`（本轮实测生效）。
+  注意启动日志里可能出现**两次** "AE MCP Auto Listener started" —— 这是本文档记录的既有双轮询冲突
+  （`mcp_bridge_panel.jsx` 二次 eval 同一 listener），与当轮改动无关。
 - **【P5 新增】Bridge 下发的 JSX 里禁止 alert()/模态操作**：ExtendScript 单线程，
   alert 会冻结整个轮询循环，表现为命令写入后永不应答（日志停在 "Executing" 无 Success）。
   恢复只能走 AE UI：关闭挂起对话框 → 菜单 文件 > 脚本 > 运行脚本文件 重新执行
