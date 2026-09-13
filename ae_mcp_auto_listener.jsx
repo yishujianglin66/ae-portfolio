@@ -199,6 +199,28 @@
     }
 
     function startMcpListener() {
+    // ===== 单实例哨兵 (2026-09-13) =====
+    // 背景: 本文件会被多个入口各自 eval 同一份代码 —— Startup 脚本
+    //   (Scripts/Startup/z_mcp_bridge_startup.jsx) 与 mcp_bridge_panel.jsx
+    //   (其内部 LISTENER_PATH 就指向本文件)。结果是同一 AE 进程里起两个轮询环,
+    //   抢读同一个 ae_command.json (docs/ae_bridge_lessons.md §1 记录的既有冲突);
+    //   启动日志里表现为连着出现两次 "AE MCP Auto Listener started"。
+    // 机制: $.global 在同一 AE 进程内跨 eval 持久, 而重启 AE 会重置它 ——
+    //   所以用布尔哨兵即可, 既挡住同进程重复加载, 又不会挡住换进程的正常重启。
+    if ($.global.__mcpListenerActive === true) {
+        try {
+            var _df = new File("C:/Users/Administrator/Desktop/AE-Knowledge-Vault"
+                               + "/.ae-mcp-bridge/ae_auto_listener.log");
+            _df.encoding = "UTF-8";
+            _df.open("a");
+            _df.writeln("[" + new Date().toString()
+                        + "] 已有轮询环在运行, 本次加载被单实例哨兵挡下 (duplicate suppressed)");
+            _df.close();
+        } catch (e0) {}
+        return;
+    }
+    $.global.__mcpListenerActive = true;
+
     // ===== File path constants =====
     var PROJ_ROOT =
         "C:/Users/Administrator/Desktop/AE-Knowledge-Vault";
