@@ -61,19 +61,29 @@ ZONES = [
     ("drop", 12.7, 27.0),
     ("outro", 27.0, 1e9),
 ]
+# ── v50 留白优先 (Boss 连续三轮"不好看" → 整帧复查后判断: 主因是**密度**, 不是单字好不好看) ──
+# 实测: v48/v49 的 30 秒里放了 25 次文字, 每秒一帧的序列几乎帧帧有字 (覆盖率 ~70%)。
+# 做法不是"少给拍点"(那会丢掉 Boss 认可的踩点感), 而是**短促命中 + 长留白**:
+#   保留大部分拍点, 但每次命中的保持时长大幅缩短, 让字"点一下就走", 空白拉长。
+# 预期覆盖率 ~70% → ~44% (按 hold 总和/总时长估算)。
+# 回退: 把 cap/hold 改回旧值即恢复 v49 的密度 (旧值见 git 历史)。
 ZONE_CFG = {
     #            最小间距  最大保持  事件上限
-    "intro": {"gap": 1.2, "hold": 2.5, "cap": 2},
-    "build": {"gap": 0.85, "hold": 2.2, "cap": 6},
-    "drop":  {"gap": 0.60, "hold": 0.95, "cap": 15},   # v39 cap 12→15: 供"补洞"使用 (见 MAX_GAP)
-    "outro": {"gap": 1.2, "hold": 2.5, "cap": 2},
+    "intro": {"gap": 1.6, "hold": 1.1, "cap": 2},
+    "build": {"gap": 1.10, "hold": 1.0, "cap": 4},
+    "drop":  {"gap": 0.75, "hold": 0.45, "cap": 10},
+    "outro": {"gap": 1.6, "hold": 1.2, "cap": 2},
 }
+# 留白优先时不要把空档都填满 (补洞本为高密度服务) → drop 的最大空档放宽
+MAX_GAP_V50 = 1.6
+# 文字在屏覆盖率的**区间门禁** (占比时长): 太少显得空, 太多显得挤。留白优先取 0.25-0.55。
+TEXT_COVERAGE_BAND = (0.25, 0.55)
 # v39 最大空档约束 (Boss: "几乎能跟上音乐节奏踩点, 继续推进")
 # 实测诊断: 强度贪心 + 0.60s 间距护栏 的交互会剪掉"紧邻已选强拍"的强拍 —— drop 区
 #   23.24→26.01 留下 2.77s 无字空档, 而其间 25.55 强度 0.81 (全片第 14 强) 竟未入选;
 #   16.78→18.62 同样留 1.84s 空档 (17.70 强度 0.71 未入选)。
 # 只约束 drop (高潮段): build 段的长保持是"收", 有意为之, 不动。
-MAX_GAP = {"intro": 99.0, "build": 99.0, "drop": 1.15, "outro": 99.0}
+MAX_GAP = {"intro": 99.0, "build": 99.0, "drop": MAX_GAP_V50, "outro": 99.0}
 BEAT_PULSE_THR = 0.55      # v39 保持期内脉冲入选阈值 (归一强度); 未达标则保底取最强 1 拍
 
 # ── v44 "字效预设" (Boss: "新的成品和以前没啥区别" → 承认在单一样式内调参已到感知阈值以下) ──
@@ -510,6 +520,17 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
 
     if max_events:
         picked = sorted(picked, key=lambda x: -x[1])[:int(max_events)]
+
+    # v50 时间线锚点优先: 用户在 data/text_overlay_timeline.json 里**显式指定**的时刻
+    #   不受密度上限/间距裁剪 —— 那是明确的创作意图。实测留白优先档会把 7 条里的 2 条裁掉
+    #   (13.07s 最強 / 14.01s BREAK), 由 main() 的对账门禁暴出; 此处补回。
+    for _it in (timeline or []):
+        _t = float(_it["t"])
+        if any(abs(_t - _pt) < 0.30 for _pt, _, _ in picked):
+            continue
+        if _shot_index(seg_bounds, _t) is None:
+            continue
+        picked.append((_t, 0.5, zone_of(_t)))
     picked.sort(key=lambda x: x[0])
 
     # 2) 逐事件生成 (t_in=onset, t_out 见 hold_mode)
@@ -1751,13 +1772,21 @@ def validate(events, disposition, segs, onsets, total_dur):
     checks["onset_align_pass"] = all(d <= ONSET_TOL + 1e-6 for d in dev)
     checks["min_hold"] = round(min(e["hold"] for e in events), 3) if events else None
     checks["min_hold_pass"] = all(e["hold"] >= 0.15 for e in events)
-    # 时间线覆盖 (事件窗并集 / 总时长)
+    # 文字在屏覆盖率 (事件窗时长总和 / 总时长)
+    # v50 正名与改判据: 旧实现把它叫 "timeline_coverage" 且要求 ≥0.80 —— 名字误导:
+    #   它算的不是"时间线指定条目命中率", 而是**文字在屏占比**, 于是把"文字必须占满 80% 时长"
+    #   写成了硬门禁, 等于禁止留白。Boss 连续三轮"不好看"的主因(密度)正是被这条锁死的。
+    #   现改为**区间门禁**: 太少则片子空, 太多则拥挤; 留白优先取 0.25-0.55。
+    #   (真正的时间线对账在 main() 的 timeline_specified/matched/unmatched)
     cov = 0.0
     for e in events:
         a, b = e["t_in"], e["t_out"]
         cov += max(0.0, b - a)
-    checks["timeline_coverage"] = round(cov / total_dur, 3)
-    checks["timeline_coverage_pass"] = checks["timeline_coverage"] >= 0.80
+    checks["text_coverage"] = round(cov / total_dur, 3)
+    checks["timeline_coverage"] = checks["text_coverage"]        # 兼容旧键名 (报告/脚本引用)
+    checks["text_coverage_band"] = list(TEXT_COVERAGE_BAND)
+    checks["timeline_coverage_pass"] = (TEXT_COVERAGE_BAND[0] <= checks["text_coverage"]
+                                        <= TEXT_COVERAGE_BAND[1])
     # segment 处置覆盖 (每个镜头要么挂事件要么显式跳过)
     checks["segments_total"] = len(segs)
     checks["segments_in_event"] = sum(1 for d in disposition if "event" in d)
@@ -1958,7 +1987,8 @@ def main():
     print(f"[P0] 分区分布: {zc}")
     print(f"[P0] 门禁: onset对齐≤2帧={checks['onset_align_pass']} "
           f"({checks['onset_align_max_frames']}帧) | 最小保持≥0.15s={checks['min_hold_pass']} "
-          f"({checks['min_hold']}s) | 时间线覆盖≥80%={checks['timeline_coverage_pass']} "
+          f"({checks['min_hold']}s) | 文字在屏覆盖∈[{TEXT_COVERAGE_BAND[0]},{TEXT_COVERAGE_BAND[1]}]="
+          f"{checks['timeline_coverage_pass']} "
           f"({checks['timeline_coverage']:.0%}) | 分区覆盖={checks['zones_pass']} "
           f"{checks['zones_covered']}")
     print(f"[P0] 镜头处置: {checks['segments_in_event']}/{checks['segments_total']} "
