@@ -755,8 +755,7 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             #   hollow(空心) 用"近黑描边" —— 空心字的辨识度来自"没有填充", 颜色越中性越好;
             #   invert(反相) 用**彩色填充** —— 承担"彩色"这一身份, 亮底用深红避免与青辉光撞色,
             #                暗底用琥珀金 (与 solid 的青拉开色相)。
-            _hollow_col = {"bright": [0.04, 0.05, 0.14], "mid": [0.06, 0.04, 0.10],
-                           "dark": [0.97, 0.97, 1.0]}[bg_class]
+            _hollow_dark = [0.04, 0.05, 0.14]      # 空心落在亮底时的近黑描边
             _inv_fill = {"bright": [0.62, 0.07, 0.13], "mid": [0.85, 0.35, 0.03],
                          "dark": [1.00, 0.72, 0.15]}[bg_class]
             _acc = {"bright": [0.10, 0.80, 1.0], "mid": [1.0, 0.66, 0.18],
@@ -766,11 +765,25 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             _light = [0.97, 0.97, 1.0]
 
             if look_name == "hollow":
-                # 空心: 去掉填充, 描边变粗并与背景反差; 光晕用强调色 (空心字配光晕最亮眼)
-                apply_fill = False
-                stroke_cfg = (_hollow_col, round(size * 0.075, 1))
-                if glow:
-                    glow_col = (_acc, [c * 0.20 for c in _acc])
+                # 空心描边色改用**字期中段亮度**判定, 而不是 bg_class (后者取字期内最亮时刻,
+                #   是给白字 + 深描边设计的保守策略)。理由: 空心只有一根描边, 它的取色必须
+                #   匹配"文字真正停在那儿"的那段背景; 用最亮时刻取色会让深色描边落到暗段上
+                #   (实测 #9 BREAK: 判 150 取近黑, 中段实际 76 → 深色叠深色 = 隐形)。
+                _lmin, _lmax = _region_luma_range(bg_video, t_in, hold, x, y)
+                _lmid = _region_luma(bg_video, t_in + 0.55 * hold, x, y)
+                _lmid = 128.0 if _lmid is None else _lmid
+                if (_lmax - _lmin) >= SPAN_EXTREME_DIFF:
+                    # 字期内亮度摆幅极端 (爆闪类镜头) → 任何单色都保不住, 降级为反相
+                    #   (实心彩色填充块 + 浅描边, 两种背景都能读)
+                    look_name = "invert"
+                else:
+                    apply_fill = False
+                    stroke_cfg = (([0.97, 0.97, 1.0] if _lmid < 140 else _hollow_dark),
+                                  round(size * 0.075, 1))
+                    if glow:
+                        glow_col = (_acc, [c * 0.20 for c in _acc])
+            if look_name == "hollow":
+                pass                                   # 已在上面的分支内完成设置
             elif look_name == "invert":
                 # 反相: 彩色填充 + 浅描边, 光晕收到 45% (避免与填充色打架/亮底过曝)
                 fill_cfg = _inv_fill
@@ -905,6 +918,26 @@ def _worst_region_luma(video, t_in, hold, x, y, w=520, h=320):
             for f in (0.12, 0.45, 0.80)]
     vals = [v for v in vals if v is not None]
     return max(vals) if vals else 128.0
+
+
+def _region_luma_range(video, t_in, hold, x, y, w=520, h=320):
+    """字期内该位置区域亮度的 (min, max), 采样点与 _worst_region_luma 一致。
+
+    为什么需要 min: 对**白字**取最亮时刻是正确策略 (深描边在任何背景都保读),
+    但**空心字**只有单一描边色 —— 若字期跨越明暗两端, 深色描边必在暗时刻隐形
+    (实测 #9 BREAK: bg_lum 判定 150 取近黑描边, 而渲染时刻背景仅 76 → 深色叠深色)。
+    故空心需知道"字期是否跨明暗", 据此决定能否用空心。
+    """
+    if not video or not Path(video).exists():
+        return 128.0, 128.0
+    vals = [_region_luma(video, t_in + f * hold, x, y, w, h)
+            for f in (0.12, 0.45, 0.80)]
+    vals = [v for v in vals if v is not None]
+    return (min(vals), max(vals)) if vals else (128.0, 128.0)
+
+
+# 空心降级判据: 字期内亮度摆幅超过此值 = 爆闪类镜头, 单色描边保不住 → 降级为反相
+SPAN_EXTREME_DIFF = 150.0
 
 
 def _pick_dark_pos(t_in, bg_video, fallback_i, hold=0.9):
