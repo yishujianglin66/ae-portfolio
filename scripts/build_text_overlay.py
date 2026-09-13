@@ -230,12 +230,12 @@ FONT_POOLS = {
 #   < 楷体 0.048 < 普惠体细 0.051 < 雅黑细 0.056; 拉丁 Lato-Hairline 0.007 最细)。
 LIGHT_POOLS = {
     "drop_calm": {
-        "jp":    ["AlibabaPuHuiTi_3_45_Light", "DengXian-Light", "MicrosoftJhengHeiLight",
-                  "YuGothic-Light", "MicrosoftYaHeiLight", "FangSong"],
-        "cn":    ["AlibabaPuHuiTi_3_45_Light", "DengXian-Light", "MicrosoftJhengHeiLight",
-                  "FangSong", "KaiTi", "MicrosoftYaHeiLight"],
+        "jp":    ["DengXian-Light", "AlibabaPuHuiTi_3_45_Light", "MicrosoftJhengHeiLight",
+                  "YuGothic-Light", "FangSong", "MicrosoftYaHeiLight"],
+        "cn":    ["DengXian-Light", "FangSong", "AlibabaPuHuiTi_3_45_Light",
+                  "MicrosoftJhengHeiLight", "KaiTi", "MicrosoftYaHeiLight"],
         # 拉丁细体按"越细越靠前": 无衬线为主, 衬线体 (Merriweather) 放末尾当变奏
-        "latin": ["BebasNeue-Light", "Kanit-Thin", "Lato-Light", "Lato-Hairline",
+        "latin": ["Lato-Hairline", "BebasNeue-Light", "Kanit-Thin", "Lato-Light",
                   "Inter-Light", "BrandonGrotesque-Light", "Antonio-Light", "Merriweather-Light"],
     },
 }
@@ -243,6 +243,9 @@ LIGHT_POOLS = {
 CALM_CREAM = [0.95, 0.93, 0.87]
 CALM_INK = [0.06, 0.06, 0.09]
 CALM_TRACKING = 90          # 克制档用较宽字距 (编辑排版感), 而非冲击档的展开动画
+# 极弱同色光晕 (threshold, radius, intensity): 与字同色、半径小、强度低 ——
+# 目的是"让字从画面里浮起来"而不是"发光"。冲击档是 (185,20,1.7) 的青色泛光, 两者量级差 ~6 倍。
+CALM_GLOW = (150, 11, 0.30)
 PUNCH_TOP_N = 3             # "偶发重音": 只给音乐局部强度最高的 N 个 drop 事件保留冲击处理
 CALM_SMALL_PX = 140         # 克制档小字号门限 (低于此值补细描边, 见可读性兜底)
 CALM_MIN_DL = 55.0          # 字色与局部背景的最小亮度差 (低于此值补细描边)
@@ -908,9 +911,22 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                 _lmid2 = 128.0 if _lmid2 is None else _lmid2
                 fill_cfg = CALM_INK if _lmid2 >= CALM_LIGHT_BG else CALM_CREAM
                 stroke_cfg = None
-                glow = None
+                # v48 极弱**同色**光晕 —— 但只给"暗底浅字"那一档。
+                #   实测得来的限制: 亮底深字若给光晕, 且 glow_col 留 None 就会落到 AE 的
+                #   默认泛光色 (白/黑), 在深字周围生成**白晕** → 字发浑、对比反而下降。
+                #   (这是我 v48 第一版的实际错误, 靠"干净素材暗像素 0 → 渲出 14349"的
+                #    逐帧差分定位到 #10 是深字, 才发现目视判读把深字看成了浅字。)
+                #   所以: 暗底浅字 → 同色淡晕(浮起来); 亮底深字 → 不加光晕(保持干净)。
+                if _lmid2 < CALM_LIGHT_BG:
+                    glow = CALM_GLOW
+                    # 单色光晕 (A=B): 若 B 取更暗的同色, Glo2 的 A→B 渐变会把**亮背景压暗**
+                    # (实测 #17 亮像素由 119,623 掉到 93,380 = 字周围多出一块发浑暗区)。
+                    # 光晕的作用是"让字浮起来", 单色即可, 不需要暗部衰减。
+                    glow_col = ([c * 0.85 for c in fill_cfg], [c * 0.85 for c in fill_cfg])
+                else:
+                    glow = None
+                    glow_col = None
                 glow2 = None
-                glow_col = None
                 shadow_cfg = None
                 bevel = None
                 chroma = False
