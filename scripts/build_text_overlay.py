@@ -92,6 +92,41 @@ LOOK_DESC = {
 SIZE_TIERS = (1.0, 0.60, 0.86)      # 循环档: 大 / 小 / 中  (小号是刻意留的"轻喊")
 SIZE_TIER_XL = 1.16                 # 音乐局部强度 ≥0.85 的最强拍升到此档
 XL_PROMOTE_LI = 0.85
+
+# ── v46 排版预设 (Boss: "效果不错继续下一步") ──
+# 上一版四个字效仍共用"水平单行"这一个排版框架 —— 那才是构图层面最后的单一。
+# 本版引入结构性排版, 但**保持单行为主** (周期 4 里占 2): 结构变化太频繁会伤可读性,
+# 目标是"偶尔一次构图级惊喜", 而不是每次都变形。
+LAYOUTS = ("single", "stack", "single", "vertical")
+LAYOUT_DESC = {
+    "single":   "单行 (基线)",
+    "stack":    "双行堆叠 — 字形块更高更窄, 轮廓完全不同",
+    "vertical": "竖排 (一字一行) — 汉字天然可读; 拉丁词自动降级为 stack",
+}
+LAYOUT_H_PEAK = 900.0               # 高度守卫: 弹性峰值 138% 下多行块必须落框内 (1080 留边)
+LAYOUT_LEAD_RATIO = 1.02            # 多行行距 = 字号 × 此值 (默认 auto leading 偏松)
+
+
+def _has_cjk(s: str) -> bool:
+    return any("\u3400" <= ch <= "\u9fff" or "\u3040" <= ch <= "\u30ff" for ch in s)
+
+
+def apply_layout(word: str, lay: str):
+    """把词排成指定版式 → (带换行的文本, 行数)。
+
+    AE 的 TextDocument 用 '\\r' 作换行符 (不是 '\\n')。
+    拉丁词不做一字一行 (B/R/E/A/K 会读不出), 自动降级为双行。
+    """
+    if len(word) < 2 or lay == "single":
+        return word, 1
+    if lay == "vertical":
+        if not _has_cjk(word):
+            lay = "stack"
+        else:
+            return "\r".join(word), len(word)
+    k = (len(word) + 1) // 2
+    return word[:k] + "\r" + word[k:], 2
+
 ZONE_END_GUARD = 0.35     # 锚点距分区结束 <0.35s 不选 (会被钳成不可读短事件)
 DROP_POS_CYCLE = [(960, 540), (700, 380), (1220, 700)]   # v9: 内收 (v8 实证 620/1300 宽字超框)
 ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 0.4 保覆盖)
@@ -734,18 +769,37 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         apply_fill = True
         rot_deg = 0.0
         look_name = None
+        layout_name = "single"
+        word_emit = w
+        n_lines = 1
         if zone == "drop":
             drop_ord += 1
             _vo = drop_ord
             look_name = LOOKS[(_vo - 1) % len(LOOKS)]
+            layout_name = LAYOUTS[(_vo - 1) % len(LAYOUTS)]
+            word_emit, n_lines = apply_layout(w, layout_name)
+            layout_name = "single" if n_lines == 1 else layout_name
             tier = SIZE_TIERS[(_vo - 1) % len(SIZE_TIERS)]
             if _li >= XL_PROMOTE_LI:
                 tier = SIZE_TIER_XL                           # 最强拍升档: 音量跟着音乐走
             size = max(60, int(round(size * tier)))
+            # v46 排版的高度守卫 —— **位置感知**: 约束不是"块高 ≤ 某个常数", 而是
+            #   "块的上下缘在弹性峰值 (138%) 下都留在安全框内", 即 peak_h ≤ 2*min(y-60, 1020-y)。
+            #   实测教训: 竖排 3 行放在 y=380 时, 块高 3×168 = 504 看似没问题, 但 ×1.38 峰值
+            #   达 869 → 上缘跑到 y=-54, 会被切掉 (只持续 ~0.1s, 但会被看见)。
+            if n_lines >= 3:
+                y = 540                                    # 竖排高块居中, 上下各留出余量
+            for _ in range(14):
+                _peak_h = size * 1.25 * n_lines * 1.38
+                _room = 2.0 * min(y - 60, 1020 - y)
+                if n_lines <= 1 or _peak_h <= min(_room, LAYOUT_H_PEAK):
+                    break
+                size = max(60, int(round(size * 0.92)))
             _trk = (80, 110, 145)[_vo % 3]                     # v9 记 250 会让长词在 punch 展开期超框
-            # 宽度守卫: 弹性峰值 138% × 跟踪展开后的估宽 必须落在安全框内 (防长词被切)
+            # 宽度守卫: 弹性峰值 138% × 跟踪展开后的估宽。多行时按**最长那一行**算 (不是整词长度)
+            _maxlen = max(len(s) for s in word_emit.split("\r"))
             def _peak_w(t):
-                return size * 0.62 * max(1, len(w)) * (1 + t / 1000.0) * 1.38
+                return size * 0.62 * max(1, _maxlen) * (1 + t / 1000.0) * 1.38
             while _trk > 0 and _peak_w(_trk) > 1780:
                 _trk -= 15
             track_cfg = _trk if _trk > 0 else None
@@ -800,7 +854,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
             "mood": mood, "energy": energy, "style_id": style_id,
-            "word": w, "size": size, "x": x, "y": y, "closeup": closeup,
+            "word": word_emit, "size": size, "x": x, "y": y, "closeup": closeup,
+            "layout": layout_name, "n_lines": n_lines,
             "font": font,
             "font_stack": pool,
             "script": scl,
@@ -996,6 +1051,7 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
         d["applyFill"] = bool(e.get("apply_fill", True))   # v44
         d["rot"] = float(e.get("rot", 0.0))                # v44
         d["look"] = e.get("look")                          # v44 (仅报告用)
+        d["nLines"] = int(e.get("n_lines", 1))              # v46 排版行数 (供行距设置)
         d["z"] = float(e.get("z", 0))
         d["beats"] = [[float(a), float(b)] for a, b in (e.get("beats") or [])]
         d["env_s"] = [[float(a), float(b)] for a, b in (e.get("env_s") or [])]
@@ -1098,6 +1154,14 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
             d.strokeWidth = strokeW; d.strokeOverFill = false;
           }}
         }} catch (se) {{ rep += "|STROKE"; }}
+        // v46 排版: 多行时收紧行距 (默认 auto leading 约 1.2 倍, 堆叠看起来散)
+        // 注: 换行符是 CR (AE TextDocument 口径), 已由 ev.word 自带, 此处只设行距
+        try {{
+          if (ev.nLines && ev.nLines > 1) {{
+            d.autoLeading = false;
+            d.leading = Math.round(ev.size * {LAYOUT_LEAD_RATIO});
+          }}
+        }} catch (le) {{ rep += "|LEAD"; }}
         d.justification = ParagraphJustification.CENTER_JUSTIFY;
         tp.property("ADBE Text Document").setValue(d);
       }}
@@ -1757,6 +1821,16 @@ def main():
                     "generated_by": "build_text_overlay.py P0"},
                    ensure_ascii=False, indent=1), encoding="utf-8")
     jsx_p = out_dir / f"text_overlay_{ver}.jsx"
+    # ── 语法自检 (v46 立) ──
+    # 起因: JSX 是 Python f-string 生成的, 注释里写 '\r' 会被 Python 解释成**真实回车**,
+    #   插进 JS 的 // 注释中间 → 注释被截断 → 后半截当代码 → ExtendScript 报
+    #   "SyntaxError: 未终止的字符串常数" (行号还是按监听器算的, 极难定位)。
+    # 不变量: 生成脚本里除行尾 CRLF 外不得出现裸 CR (文本换行在 JSON 字符串内是转义形式)。
+    for _ln, _line in enumerate(jsx.split("\n"), 1):
+        if "\r" in _line.rstrip("\r") or (_line.endswith("\r") is False and "\r" in _line):
+            _bad = _line.replace("\r", "<CR>")
+            print(f"[ERR] 生成脚本第 {_ln} 行含裸回车 (f-string 转义泄漏): {_bad[:160]}")
+            sys.exit(3)
     jsx_p.write_text(jsx, encoding="utf-8")
 
     # ── 报告 ──
