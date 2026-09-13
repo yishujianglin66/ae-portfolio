@@ -75,6 +75,23 @@ ZONE_CFG = {
 # 只约束 drop (高潮段): build 段的长保持是"收", 有意为之, 不动。
 MAX_GAP = {"intro": 99.0, "build": 99.0, "drop": 1.15, "outro": 99.0}
 BEAT_PULSE_THR = 0.55      # v39 保持期内脉冲入选阈值 (归一强度); 未达标则保底取最强 1 拍
+
+# ── v44 "字效预设" (Boss: "新的成品和以前没啥区别" → 承认在单一样式内调参已到感知阈值以下) ──
+# 实测依据: drop 15 次命中按 **(字号20px档 + 位置 + 光晕色)** 聚类只有 9 种、最大重复 3 次;
+#   按 (字体+精确字号+位置+填充色) 聚类则 15/15 各异 —— 说明前几轮优化的是"属性方差",
+#   而观众感知的是"外观种类"。位置 13/15 挤在三个点、发光色 12/15 是完全相同的青蓝。
+# 方案: 4 种**真正不同**的字效轮换 (每相邻两次必然不同款) + 字号三档拉开动态范围(极差 ~1.7x),
+#   并把"最强拍"升档到特大号 —— 让"音量"跟着音乐走, 而不是 15 次一样响。
+LOOKS = ("solid", "hollow", "invert", "tilt")
+LOOK_DESC = {
+    "solid":  "实心 (现状: 白字+深描边+冷光晕)",
+    "hollow": "空心 (无填充+粗反差描边+同色光晕)",
+    "invert": "反相 (彩色填充+浅描边+收光晕)",
+    "tilt":   "倾斜 (构图打破永远水平居中)",
+}
+SIZE_TIERS = (1.0, 0.60, 0.86)      # 循环档: 大 / 小 / 中  (小号是刻意留的"轻喊")
+SIZE_TIER_XL = 1.16                 # 音乐局部强度 ≥0.85 的最强拍升到此档
+XL_PROMOTE_LI = 0.85
 ZONE_END_GUARD = 0.35     # 锚点距分区结束 <0.35s 不选 (会被钳成不可读短事件)
 DROP_POS_CYCLE = [(960, 540), (700, 380), (1220, 700)]   # v9: 内收 (v8 实证 620/1300 宽字超框)
 ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 0.4 保覆盖)
@@ -707,28 +724,65 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
         if not _shimmer:
             chroma = False                                     # 通道分离只属 drop 时段
 
-        # ── v43 drop 段"逐次变款" (Boss: "继续推进") ──
-        # 实证依据 (drop 15 个事件实测): 入场 tracking 全 110、填充色全纯白、
-        #   13/15 的字号挤在 198-207 → "单一"不在特效, 在配色与处理。
-        # 关键区分 —— 哪些维度**不能**轮换: 光晕色与描边宽由背景亮度决定对比度
-        #   (亮底必须青辉光 + 粗描边; 早前已实证亮底白辉光物理不可见), 属受约束维度,
-        #   盲目轮换会牺牲可读性。所以只动三个不受对比度约束的自由维度:
-        #   ① 入场跟踪展开量 ② 字号微差 ③ 填充色温。
-        # 三档填充色的亮度均 ≥240 (纯白 255 / 暖白 247 / 冷白 243), 可读性不受影响。
+        # ── v44 字效预设 (取代 v43 的"微差变款"; 见文件头 LOOKS 的实证依据) ──
+        # 保留 v43 已验证的部分: 入场跟踪展开量轮换 + "弹性峰值不超框"宽度守卫。
+        # 新增: 4 种字效轮换 (相邻必不同) + 字号三档 + 最强拍升档。
+        # 关键区分仍成立: 光晕色/描边宽受背景对比度约束, 所以每种字效的**取色按 bg_class 选**,
+        #   而不是随意轮换色相 —— 轮换的是"字效结构"(有无填充/谁是被描边的那一方/是否倾斜)。
         fill_cfg = st["fill"]
         track_cfg = st["tracking"]
+        apply_fill = True
+        rot_deg = 0.0
+        look_name = None
         if zone == "drop":
             drop_ord += 1
             _vo = drop_ord
+            look_name = LOOKS[(_vo - 1) % len(LOOKS)]
+            tier = SIZE_TIERS[(_vo - 1) % len(SIZE_TIERS)]
+            if _li >= XL_PROMOTE_LI:
+                tier = SIZE_TIER_XL                           # 最强拍升档: 音量跟着音乐走
+            size = max(60, int(round(size * tier)))
             _trk = (80, 110, 145)[_vo % 3]                     # v9 记 250 会让长词在 punch 展开期超框
-            size = max(60, int(round(size * (1.05 if _vo % 2 else 1.0))))
-            fill_cfg = ([1.0, 1.0, 1.0], [1.0, 0.965, 0.90], [0.93, 0.965, 1.0])[_vo % 3]
             # 宽度守卫: 弹性峰值 138% × 跟踪展开后的估宽 必须落在安全框内 (防长词被切)
             def _peak_w(t):
                 return size * 0.62 * max(1, len(w)) * (1 + t / 1000.0) * 1.38
             while _trk > 0 and _peak_w(_trk) > 1780:
                 _trk -= 15
             track_cfg = _trk if _trk > 0 else None
+
+            # 按背景亮度取色。两种字效**必须用不同色相**, 否则"空心=蓝描边 / 反相=蓝填充"
+            # 读起来像同一种东西 (首版对比表实测暴露的问题):
+            #   hollow(空心) 用"近黑描边" —— 空心字的辨识度来自"没有填充", 颜色越中性越好;
+            #   invert(反相) 用**彩色填充** —— 承担"彩色"这一身份, 亮底用深红避免与青辉光撞色,
+            #                暗底用琥珀金 (与 solid 的青拉开色相)。
+            _hollow_col = {"bright": [0.04, 0.05, 0.14], "mid": [0.06, 0.04, 0.10],
+                           "dark": [0.97, 0.97, 1.0]}[bg_class]
+            _inv_fill = {"bright": [0.62, 0.07, 0.13], "mid": [0.85, 0.35, 0.03],
+                         "dark": [1.00, 0.72, 0.15]}[bg_class]
+            _acc = {"bright": [0.10, 0.80, 1.0], "mid": [1.0, 0.66, 0.18],
+                    "dark": [0.30, 0.90, 1.0]}[bg_class]
+            _deep = {"bright": [0.02, 0.30, 0.58], "mid": [0.52, 0.28, 0.02],
+                     "dark": [0.05, 0.50, 0.80]}[bg_class]
+            _light = [0.97, 0.97, 1.0]
+
+            if look_name == "hollow":
+                # 空心: 去掉填充, 描边变粗并与背景反差; 光晕用强调色 (空心字配光晕最亮眼)
+                apply_fill = False
+                stroke_cfg = (_hollow_col, round(size * 0.075, 1))
+                if glow:
+                    glow_col = (_acc, [c * 0.20 for c in _acc])
+            elif look_name == "invert":
+                # 反相: 彩色填充 + 浅描边, 光晕收到 45% (避免与填充色打架/亮底过曝)
+                fill_cfg = _inv_fill
+                stroke_cfg = (_light if bg_class != "bright" else [1.0, 1.0, 1.0],
+                              round(size * 0.032, 1))
+                if glow:
+                    glow = (glow[0], glow[1], round(glow[2] * 0.45, 3))
+                chroma = False
+            elif look_name == "tilt":
+                # 倾斜: 只动构图 (不碰颜色), 打破"永远水平居中"
+                # 注意: 用"第几次 tilt"定符号 —— 用 _vo%2 会失效 (tilt 恒落在偶数序数 → 永远同一方向)
+                rot_deg = 6.0 if (((_vo - 1) // len(LOOKS)) % 2 == 0) else -6.0
 
         ev = {
             "id": i, "t_in": t_in, "t_out": t_out, "hold": hold,
@@ -739,6 +793,9 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             "script": scl,
             "probe_font": font not in VERIFIED_FONTS,
             "fill": fill_cfg,
+            "apply_fill": apply_fill,     # v44 空心字效: false → 只描边不填充
+            "rot": rot_deg,               # v44 倾斜字效 (度, Z 轴)
+            "look": look_name,
             "stroke": stroke_cfg,
             "enter": enter,
             "glow": glow,
@@ -903,6 +960,9 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
         d["outer_w"] = float(e.get("outer_w", 0))
         d["inner_w"] = float(e.get("inner_w", 0))
         d["is3d"] = bool(e.get("is3d"))
+        d["applyFill"] = bool(e.get("apply_fill", True))   # v44
+        d["rot"] = float(e.get("rot", 0.0))                # v44
+        d["look"] = e.get("look")                          # v44 (仅报告用)
         d["z"] = float(e.get("z", 0))
         d["beats"] = [[float(a), float(b)] for a, b in (e.get("beats") or [])]
         d["env_s"] = [[float(a), float(b)] for a, b in (e.get("env_s") or [])]
@@ -996,7 +1056,8 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
         var d = tp.property("ADBE Text Document").value;
         d.font = ev.font; d.fontSize = ev.size;
         d.fillColor = [fillCol[0], fillCol[1], fillCol[2]];
-        d.applyFill = true;
+        // v44 空心字效: applyFill=false → 只渲染描边 (字形保持完整, 不是透明色)
+        d.applyFill = (ev.applyFill === undefined) ? true : ev.applyFill;
         try {{
           d.applyStroke = strokeW > 0;
           if (strokeW > 0) {{
@@ -1006,6 +1067,16 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
         }} catch (se) {{ rep += "|STROKE"; }}
         d.justification = ParagraphJustification.CENTER_JUSTIFY;
         tp.property("ADBE Text Document").setValue(d);
+      }}
+      function applyTilt(L, ev) {{
+        // v44 倾斜字效 (B.rotation 在 3D 层上的行为需实测 → 两种 matchName 都试, 并自报结果)
+        if (!ev.rot) return;
+        var rz = null;
+        try {{ rz = L.property("Transform").property("ADBE Rotate Z"); }} catch (e1) {{}}
+        if (!rz) {{ try {{ rz = L.property("Transform").property("ADBE Rotate"); }} catch (e2) {{}} }}
+        if (!rz) {{ try {{ rz = L.property("Transform").property("Rotation"); }} catch (e3) {{}} }}
+        if (rz) {{ try {{ rz.setValue(ev.rot); }} catch (e4) {{ rep += "|ROTSET"; }} }}
+        else {{ rep += "|ROTNONE"; }}
       }}
       function addKick(L, ev) {{
         // 入场砸入 → 保持 → 出场淡出 (opacity 0-100, 实证口径)
@@ -1085,6 +1156,7 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
           L = comp.layers.addText(ev.word);
           L.name = "TXT" + i + "_" + ev.word;
           setDoc(L, ev, ev.fill, ev.strokeColor, ev.strokeW);
+          applyTilt(L, ev);                                   // v44 倾斜字效 (仅该字效非 0)
           if (ev.is3d) {{ L.threeDLayer = true; }}
           L.position.setValue([ev.x, ev.y, ev.z]);
           L.inPoint = ev.t_in; L.outPoint = ev.t_out + 0.05;
