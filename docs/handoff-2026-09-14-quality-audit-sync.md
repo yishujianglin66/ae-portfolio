@@ -256,4 +256,32 @@ Phase A 的 4 个 advisory job 此前**从未实际执行**（无法从"CI 绿"�
 **环境提示（附加式安装，未动 uv.lock/无 git 足迹）**：本地已装 `pytest-cov` / `pytest-xdist`(execnet) /
 `pytest-timeout` / `mypy`。安装后已复验 pydantic 依赖链与 102 用例无回归（typing_extensions 4.16.0 / pydantic 2.13.5）。
 
+### §9.3 跨会话整合（第四轮：查询并行会话 → 清空遗留足迹）
+
+Boss 指示"查询相关会话进行整合推进"。用 `ReadSessionContext` + `.zcode/cli/log/zcode-2026-09-14.jsonl` 实测得**会话图谱**：
+
+| 会话 | 线 | 状态（2026-09-14 日志实测） |
+|---|---|---|
+| `sess_877e9a9d…` | 本会话 = 质量/EDL 线 | 今天全部 197 次工具调用都归此会话；11→13 commits |
+| `sess_67cd22f2…` | **文字线 v47–v50**（`build_text_overlay.py`） | 04:01 被 resume（698 msg/5 todos），**今日无工具调用**；交付物已提交至 `cd714ad`；**暂停于等 Boss 对视觉强化线（`build_master_polish.py`）的 go/no-go** |
+| `sess_b3e0cd86…` | — | 仅 model 切换（`deepseek-v4-pro`→`flash`），无工作；伴一条 `FOREIGN KEY constraint failed`（DB，非项目） |
+| `sess_549d0bfb…` / `sess_128a37d8…` | — | 仅 bootstrap 启动事件 |
+
+> 结论：**今日无并行会话产出未整合工作**；日志中 428 条 `hook.run.failed` 全部来自第三方插件
+> （`ai-plugins`/`agentforce-adlc` 的 PreToolUse/PostToolUse Bash hook），**与项目代码无关**。
+
+**整合动作 —— 工作区已清空（`git status --short` 为空）**：
+- `53e98f4` `chore(integration)`：入库 **09-11 同步会话明确委托给 ZCode** 的三项——
+  `scripts/make_r1_preview.py`（完整独立脚本）+ `.workbuddy/memory/2026-09-11.md`（541 行一手记忆）
+  + `.gitignore` 卫生（`!ae/archive/**` 例外会连带放行其 `__pycache__`，已补 `ae/archive/**/__pycache__/`）。
+  （委托原文见 `00-每日记录/2026-09-11_...md:96`；plan 18 行进展段此前已随 `5e61d54` 入库。）
+- `53979d8` `docs(text)`：补齐 5 份 09-10~09-12 遗留文档（mtime 静置 2–3 天，非活动 WIP）——
+  v1–v15 验收报告（DELIVERED）、09-11 多线进度同步记录（SYNC）、AE-Work 清理结案、文字高级化/特效调研进展段。
+  这批文档正是 `📝-计划文件-MOC` 已指向但正文未入库的引用目标 → 知识库引用闭合。
+- **结果：本次会话累计 13 commits；`git status --short` 现为**空**。** §2 **T7** 的"勿碰 ZCode 遗留"约束
+  至此**解除**（无任何会话再持有未提交 WIP）→ 后续可对 `build_text_overlay.py` / `make_r1_preview.py` 自由动手。
+
+**唯一待决策**：文字线的**视觉强化线**（改 `build_master_polish.py`，实测根因=基底素材噪、暖饱和、重动态模糊，
+非文字层）。文字线会话明确要求**不臆测 Boss 偏好**；Boss 未在三选项间选择前不宜开工。
+
 
