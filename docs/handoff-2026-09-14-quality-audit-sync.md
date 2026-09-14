@@ -239,19 +239,23 @@ Phase A 的 4 个 advisory job 此前**从未实际执行**（无法从"CI 绿"�
 - **pip-audit**：⚠️ 未本地校验（需网络 + 会拉入较多依赖，为不扰动已全绿的环境而跳过；CI 侧参数未改）。
 - **full-suite-sharded + coverage**：见 §9.1，已实跑验证。
 
-#### ⚠️ 新发现真缺陷（P1，未修，需产品决策）：`mastercut_agent` 的 `analyze_beat` 能力已坏
+#### ⚠️ 新发现真缺陷（P1）→ **已于同日修复重实现**：`mastercut_agent` 的 `analyze_beat` 能力
 
-- **现象（运行时实测）**：`agents/mastercut_agent.py::_stage_analyze_beat`（注册为 capability `analyze_beat`，
-  见 `_register_default_tools` line ~697，并在 `run_full_pipeline` line ~806 被调用）调用**已不存在的旧 API**：
-  - `BeatStrengthEngine().detect(bgm_path)` → **`AttributeError`**（现类只有 `classify_beats(beats_sec, downbeats_sec, ...)`）；
-  - `MusicDynamicsAnalyzer().analyze(bgm_path)` → 现签名是 `analyze(rms, times, total_duration, beats_sec, onsets_sec)`，
-    传路径字符串类型不符。
-- **影响**：任何调用 `execute("analyze_beat", ...)` 的路径都会**硬崩**（非静默错误）。
-- **未修原因**：修复需把"路径→音频数组"这段（用 `ae.beat_detector` + rms 提取）重新接上，
-  属**新增行为**且无音频夹具可验证——盲目写会重蹈审计 C4（未验证的集成）覆辙。**建议**：
-  用 `ae.beat_detector.BeatDetector` 取 beats + `core.beat_strength_engine.classify_beats` +
-  `core.music_dynamics.analyze(rms, times, ...)` 重实现，或先 `deregister` 该能力（避免假成功）。
-  已由 mypy beachhead 持续盯防（基线 3 errors 即此 3 处）。
+- **原现象（运行时实测复现）**：`agents/mastercut_agent.py::_stage_analyze_beat`（注册为 capability `analyze_beat`）
+  调用**已不存在的旧 API**：`BeatStrengthEngine().detect(bgm_path)` → `AttributeError`；
+  `MusicDynamicsAnalyzer().analyze(bgm_path)` 与现签名 `analyze(rms, times, total_duration, beats_sec, onsets_sec)` 类型不符。
+  任何 `execute("analyze_beat", ...)` 都硬崩。
+- **修复（Boss 授权后，2026-09-14）**：重实现为正确的三口数据流 ——
+  `ae.beat_detector.BeatDetector`（路径→拍点 time/strength/is_downbeat + onset）
+  → 逐帧 RMS/时间轴（librosa）→ `core.beat_strength_engine.classify_beats`（强/中/弱+BPM 统计）
+  → `core.music_dynamics.analyze(rms, times, total_duration, beats_sec, onsets_sec)`（high/mid/low 分段）。
+  输出契约保持兼容（`beat_count`/`beats[{time,strength}]`/`sections[{start,end,level,energy}]`）并**新增** `beat_strength` 统计。
+- **验证**：真实音乐 stem（`cache/stems/…/drums.wav`）→ 81 拍（15 强/32 中/34 弱，BPM 129.2，21 小节）+ 6 段；
+  注册能力端到端 `agent.execute("analyze_beat", …)` → `success=True` 且输出上述结构；
+  合成 click 轨 + 静音守卫回归测试 `tests/test_mastercut_analyze_beat.py`（2 passed）。
+- **副产物**：**mypy beachhead 由 3 errors 收敛到 0**（`Success: no issues found in 3 source files`）
+  → `quality-hardening.yml::mypy-advisory` 可择机由 `continue-on-error` 转 required（A2 ratchet 目标达成）。
+
 
 **环境提示（附加式安装，未动 uv.lock/无 git 足迹）**：本地已装 `pytest-cov` / `pytest-xdist`(execnet) /
 `pytest-timeout` / `mypy`。安装后已复验 pydantic 依赖链与 102 用例无回归（typing_extensions 4.16.0 / pydantic 2.13.5）。

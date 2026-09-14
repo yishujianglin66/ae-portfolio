@@ -122,23 +122,55 @@ class ToolRegistry:
 
 
 def _stage_analyze_beat(bgm_path: str, **kwargs) -> Dict[str, Any]:
-    """① BGM beat/dynamics analysis (beat_strength_engine + music_dynamics)."""
+    """① BGM beat/dynamics analysis.
+
+    数据流（2026-09-14 修复：旧 `BeatStrengthEngine.detect(path)` / `analyze(path)`
+    已不存在，调用即 AttributeError）：
+      ae.beat_detector.BeatDetector   路径 → 拍点(time/strength/is_downbeat) + onset
+      core.beat_strength_engine       拍点 → 强/中/弱分级(统计)
+      core.music_dynamics             逐帧 RMS → high/mid/low 动态分段
+    """
+    import librosa
+    import numpy as np
+
+    from ae.beat_detector import BeatDetector
     from core.beat_strength_engine import BeatStrengthEngine
     from core.music_dynamics import MusicDynamicsAnalyzer
 
-    engine = BeatStrengthEngine()
-    beats = engine.detect(bgm_path)
+    detector = BeatDetector()
+    beat_infos = detector.detect_beats(bgm_path)
+    onset_sec = np.asarray(detector.detect_onsets(bgm_path), dtype=float)
 
-    dyn = MusicDynamicsAnalyzer()
-    sections = dyn.analyze(bgm_path)
+    # 逐帧 RMS 与时间轴：分级与分段共用同一采样
+    hop_length = 512
+    y, sr = librosa.load(bgm_path, sr=22050, mono=True)
+    sr = int(sr)
+    rms = librosa.feature.rms(y=y, hop_length=hop_length)[0]
+    times = librosa.frames_to_time(np.arange(len(rms)), sr=sr, hop_length=hop_length)
+    total_duration = float(len(y)) / float(sr)
+
+    beats_sec = np.asarray([b.time for b in beat_infos], dtype=float)
+    downbeats_sec = np.asarray([b.time for b in beat_infos if b.is_downbeat], dtype=float)
+
+    strength_stats: Dict[str, Any] = {}
+    if beats_sec.size:
+        strength_stats = BeatStrengthEngine().classify_beats(
+            beats_sec, downbeats_sec,
+            rms_energy=rms, times=times, sr=sr, hop_length=hop_length,
+        ).statistics()
+
+    sections = MusicDynamicsAnalyzer().analyze(
+        rms, times, total_duration, beats_sec=beats_sec, onsets_sec=onset_sec,
+    )
 
     return {
-        "beat_count": len(beats),
-        "beats": [{"time": b.time, "strength": b.strength} for b in beats[:50]],  # first 50
+        "beat_count": len(beat_infos),
+        "beats": [{"time": b.time, "strength": b.strength} for b in beat_infos[:50]],  # first 50
         "sections": [
             {"start": s.start, "end": s.end, "level": s.level, "energy": s.energy_mean}
             for s in sections
         ],
+        "beat_strength": strength_stats,
     }
 
 

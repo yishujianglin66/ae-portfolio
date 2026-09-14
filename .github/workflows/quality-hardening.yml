@@ -34,10 +34,10 @@ jobs:
     # ⚠️ 必须加 --follow-imports=silent: 否则只点名 3 个文件仍会跟随 import 分析整个
     #     pipeline/ core/ 图 → 本地实测 1284 errors/148 文件(噪音, 永远无法"干净");
     #     silent 后只报这 3 个文件自身的错误。
-    # 基线(2026-09-14 本地实测, mypy 2.3.1): 3 errors, 全部集中在 mastercut_agent.py
-    #     _stage_analyze_beat 调用已不存在的旧 API(BeatStrengthEngine.detect / 
-    #     MusicDynamicsAnalyzer.analyze(bgm_path))——真实缺陷, 见 handoff §9.2。
-    #     其余 21 处(edl.py/inject_edl_tracks.py/mastercut report 注解)已修 → 基线 3。
+    # 基线(2026-09-14 本地实测, mypy 2.3.1): **0 errors** —— beachhead 已干净。
+    #     曾经 3 errors(mastercut_agent._stage_analyze_beat 调旧 API)已于同日修复重实现
+    #     (见 handoff §9.2 / tests/test_mastercut_analyze_beat.py)。
+    #     → 下一步可把本 job 由 continue-on-error 转 required(打破就红), 实现 A2 的 ratchet 目标。
     runs-on: ubuntu-latest
     timeout-minutes: 15
     continue-on-error: true
