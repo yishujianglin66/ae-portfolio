@@ -39,6 +39,10 @@ SHOULDERS = {
     "strong": "all='0/0 0.5/0.5 0.70/0.67 0.85/0.80 1/0.91'",
 }
 
+# 可选：对比自适应锐化（cas）。对**已锐**帧温和（8.5s lap 372→+35%），
+# 不像 unsharp 那样把已锐帧放大到 2.3x（易出光晕）；但对近乎无细节的帧无法无中生有。
+SHARPEN = {"none": None, "light": 0.4, "medium": 0.8}
+
 
 def _resolve_existing(raw: str, label: str) -> Path:
     """把 CLI 路径解析为 Path 并校验（拒绝空字节；输入必须已存在）。
@@ -60,6 +64,9 @@ def main() -> int:
     ap.add_argument("--crf", type=int, default=16, help="x264 CRF（默认 16，近无损）")
     ap.add_argument("--preset", default="medium", help="x264 preset（默认 medium）")
     ap.add_argument("--shoulder", choices=sorted(SHOULDERS), default="gentle")
+    ap.add_argument("--sharpen", choices=sorted(SHARPEN), default="none",
+                    help="对比自适应锐化 cas（默认 none；light/medium 供软片候选）")
+    ap.add_argument("--saturation", type=float, default=1.0, help="饱和度缩放（默认 1.0）")
     a = ap.parse_args()
 
     try:
@@ -70,8 +77,13 @@ def main() -> int:
         return 2
     dst.parent.mkdir(parents=True, exist_ok=True)
 
-    # vf 来自固定枚举（非用户拼接）；路径以列表元素传入, shell=False。
-    vf = "curves=" + SHOULDERS[a.shoulder]
+    # vf 由固定枚举 + 数值参数组成（非用户拼接的任意串）；路径以列表元素传入, shell=False。
+    vf_chain = ["curves=" + SHOULDERS[a.shoulder]]
+    if SHARPEN[a.sharpen] is not None:
+        vf_chain.append(f"cas=strength={SHARPEN[a.sharpen]}")
+    if a.saturation != 1.0:
+        vf_chain.append(f"eq=saturation={a.saturation}")
+    vf = ",".join(vf_chain)
     cmd = [
         "ffmpeg", "-y", "-v", "error", "-i", str(src),
         "-vf", vf,
@@ -79,7 +91,7 @@ def main() -> int:
         "-c:a", "copy",
         str(dst),
     ]
-    print(f"[grade] shoulder={a.shoulder}\n        {vf}")
+    print(f"[grade] shoulder={a.shoulder} sharpen={a.sharpen} sat={a.saturation}\n        {vf}")
     r = subprocess.run(  # noqa: S603 - 参数列表 + shell=False，无 shell 解析
         cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", shell=False
     )
