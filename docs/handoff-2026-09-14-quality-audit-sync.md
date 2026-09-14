@@ -222,4 +222,34 @@ $env:AEK_ENVIRONMENT="test"; $env:PYTHONIOENCODING="utf-8"
   本地为此装了 `pytest-cov` / `pytest-xdist`(含 execnet) / `pytest-timeout`（**附加式，未动 uv.lock，无 git 足迹**；
   三者本就在 pyproject dev deps / CI 安装列表内）。
 
+### §9.2 续推进（第三轮：校验 Phase A 未跑过的 advisory CI job + 发现真缺陷）
+
+Phase A 的 4 个 advisory job 此前**从未实际执行**（无法从"CI 绿"推断其有效）。逐个本地实跑：
+
+- **ruff-advisory**：✅ 有效。实测 **10,929 errors / 8,516 自动可修**，exit 1（continue-on-error 符合预期）。
+- **mypy-advisory**：❌ **原命令有缺陷** → 已修。原命令只点名 3 个文件、**缺 `--follow-imports=silent`**，
+  导致 mypy 仍跟随 import 分析整个 `pipeline/`+`core/` 图，**实测 1284 errors / 148 文件**（噪音，
+  永远无法成为"干净基线"，与 A2 设定的 ratchet 目标矛盾）。加 `--follow-imports=silent` 后只报目标文件自身错误。
+  同时修掉其中 21 处（`edl.py` ×2 注解 / `inject_edl_tracks.py` reconfigure union-attr / `mastercut_agent` 的
+  `report` dict 注解——后者一处注解清掉 20 条 `[index]`）。**基线收敛到 3 errors**。
+- **pip-audit**：⚠️ 未本地校验（需网络 + 会拉入较多依赖，为不扰动已全绿的环境而跳过；CI 侧参数未改）。
+- **full-suite-sharded + coverage**：见 §9.1，已实跑验证。
+
+#### ⚠️ 新发现真缺陷（P1，未修，需产品决策）：`mastercut_agent` 的 `analyze_beat` 能力已坏
+
+- **现象（运行时实测）**：`agents/mastercut_agent.py::_stage_analyze_beat`（注册为 capability `analyze_beat`，
+  见 `_register_default_tools` line ~697，并在 `run_full_pipeline` line ~806 被调用）调用**已不存在的旧 API**：
+  - `BeatStrengthEngine().detect(bgm_path)` → **`AttributeError`**（现类只有 `classify_beats(beats_sec, downbeats_sec, ...)`）；
+  - `MusicDynamicsAnalyzer().analyze(bgm_path)` → 现签名是 `analyze(rms, times, total_duration, beats_sec, onsets_sec)`，
+    传路径字符串类型不符。
+- **影响**：任何调用 `execute("analyze_beat", ...)` 的路径都会**硬崩**（非静默错误）。
+- **未修原因**：修复需把"路径→音频数组"这段（用 `ae.beat_detector` + rms 提取）重新接上，
+  属**新增行为**且无音频夹具可验证——盲目写会重蹈审计 C4（未验证的集成）覆辙。**建议**：
+  用 `ae.beat_detector.BeatDetector` 取 beats + `core.beat_strength_engine.classify_beats` +
+  `core.music_dynamics.analyze(rms, times, ...)` 重实现，或先 `deregister` 该能力（避免假成功）。
+  已由 mypy beachhead 持续盯防（基线 3 errors 即此 3 处）。
+
+**环境提示（附加式安装，未动 uv.lock/无 git 足迹）**：本地已装 `pytest-cov` / `pytest-xdist`(execnet) /
+`pytest-timeout` / `mypy`。安装后已复验 pydantic 依赖链与 102 用例无回归（typing_extensions 4.16.0 / pydantic 2.13.5）。
+
 

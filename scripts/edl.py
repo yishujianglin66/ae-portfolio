@@ -107,7 +107,7 @@ def build_edl(
     for s in sources or []:
         referenced.setdefault(s, None)
 
-    inputs = []
+    inputs: list[dict] = []
     for p in referenced:
         if not p or not Path(p).exists():
             inputs.append({"path": p, "sha1": None, "size_bytes": None,
@@ -234,7 +234,7 @@ def load_edl(path: str | Path, *, run_lint: bool = True) -> dict:
     run_lint=False 仅用于调试/迁移期读旧文件。
     """
     p = Path(path)
-    edl = json.loads(p.read_text(encoding="utf-8"))
+    edl: dict = json.loads(p.read_text(encoding="utf-8"))
     if run_lint:
         errs = lint_edl(edl)
         if errs:

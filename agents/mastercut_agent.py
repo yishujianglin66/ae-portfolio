@@ -791,7 +791,7 @@ class MasterCutAgent:
         out_dir = Path(output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        report = {
+        report: Dict[str, Any] = {
             "sources": sources,
             "bgm": bgm_path,
             "theme": theme,

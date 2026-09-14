@@ -31,6 +31,13 @@ jobs:
   mypy-advisory:
     # A2: 激活 pyproject 的 mypy 死配置。渐进式 beachhead —— 先从最新/已类型化的
     #     EDL 桥模块起(2026 最佳实践: 新码 strict, 老码 ratchet), 建干净基线后逐步扩至 core/。
+    # ⚠️ 必须加 --follow-imports=silent: 否则只点名 3 个文件仍会跟随 import 分析整个
+    #     pipeline/ core/ 图 → 本地实测 1284 errors/148 文件(噪音, 永远无法"干净");
+    #     silent 后只报这 3 个文件自身的错误。
+    # 基线(2026-09-14 本地实测, mypy 2.3.1): 3 errors, 全部集中在 mastercut_agent.py
+    #     _stage_analyze_beat 调用已不存在的旧 API(BeatStrengthEngine.detect / 
+    #     MusicDynamicsAnalyzer.analyze(bgm_path))——真实缺陷, 见 handoff §9.2。
+    #     其余 21 处(edl.py/inject_edl_tracks.py/mastercut report 注解)已修 → 基线 3。
     runs-on: ubuntu-latest
     timeout-minutes: 15
     continue-on-error: true
@@ -42,7 +49,7 @@ jobs:
       - name: install mypy
         run: python -m pip install --upgrade pip mypy
       - name: mypy beachhead (EDL 桥模块, report-only)
-        run: mypy scripts/edl.py scripts/inject_edl_tracks.py agents/mastercut_agent.py --ignore-missing-imports --check-untyped-defs
+        run: mypy scripts/edl.py scripts/inject_edl_tracks.py agents/mastercut_agent.py --ignore-missing-imports --check-untyped-defs --follow-imports=silent
 
   pip-audit:
     # A3: 依赖漏洞扫描(PyPA/OSV, 递归子依赖)。report-only 建基线; 修复后转 --strict 阻断。

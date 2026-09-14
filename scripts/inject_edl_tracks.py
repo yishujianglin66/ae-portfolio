@@ -108,10 +108,12 @@ def inject_edl_tracks(run_dir: Path, effects_file: str | None = None,
 def main() -> int:
     # Windows GBK 下 print 中文/符号到管道会崩 → CLI 入口强制 UTF-8 (放 main 不改导入方全局)
     for _s in (sys.stdout, sys.stderr):
-        try:
-            _s.reconfigure(encoding="utf-8", errors="replace")
-        except (AttributeError, ValueError):
-            pass
+        reconfigure = getattr(_s, "reconfigure", None)
+        if callable(reconfigure):
+            try:
+                reconfigure(encoding="utf-8", errors="replace")
+            except ValueError:
+                pass
     ap = argparse.ArgumentParser(
         prog="inject_edl_tracks.py",
         description="把 run 的 effects/text_events 折回 edl.json (事后回填, 幂等)")
