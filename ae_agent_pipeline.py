@@ -989,6 +989,11 @@ class AEAgentPipeline:
 
         operations = []
 
+        # 降级方案(TS 编译器不可用时)的输入：_generate_standalone_jsx 需要
+        # matchName/settings 形状的效果与 {propertyPath, keyframes} 形状的关键帧
+        fallback_effects = []
+        fallback_keyframes = []
+
         comp = planning.composition or {}
         operations.append({
             "op": "createComp",
@@ -1024,12 +1029,19 @@ class AEAgentPipeline:
                     break
             layer_ref = layer_refs[layer_idx] if layer_idx < len(layer_refs) else layer_refs[0]
 
+            match_name = fx.get("effectName", fx.get("matchName", ""))
+            settings = fx.get("settings", {})
             operations.append({
                 "op": "addEffect",
                 "layerRef": layer_ref,
-                "matchName": fx.get("effectName", fx.get("matchName", "")),
-                "settings": fx.get("settings", {}),
+                "matchName": match_name,
+                "settings": settings,
             })
+            if match_name:
+                fallback_effects.append({
+                    "matchName": match_name,
+                    "settings": settings,
+                })
 
         for ln, kf_list in kf_by_layer.items():
             layer_idx = 0
@@ -1063,12 +1075,33 @@ class AEAgentPipeline:
                     "propertyPath": "ADBE Transform/" + prop,
                     "keyframes": keyframe_list,
                 })
+                fallback_keyframes.append({
+                    "propertyPath": "ADBE Transform/" + prop,
+                    "keyframes": keyframe_list,
+                })
 
         result = self.ts_compiler._run_compiler({
             "version": "1.0",
             "operations": operations,
         })
-        result["method"] = "ts_compiler" if result.get("success") else "standalone_jsx"
+        if result.get("success"):
+            result["method"] = "ts_compiler"
+        else:
+            # TS 编译器不可用(cli.js 未构建/子进程失败)时降级为独立 JSX，
+            # 与 AETSCompilerClient.compile_from_planning 的降级行为保持一致；
+            # 否则调用方只会拿到 success=False 且无 jsx_code 的不可用结果。
+            self._logger.warning(
+                f"TS编译器规划编译失败，使用降级方案: {result.get('error', 'unknown')}"
+            )
+            result = {
+                "success": True,
+                "jsx_code": self.ts_compiler._generate_standalone_jsx(
+                    effects=fallback_effects,
+                    keyframes=fallback_keyframes,
+                ),
+                "method": "standalone_jsx",
+                "compile_error": result.get("error"),
+            }
         result["command_count"] = len(operations)
         return result
 

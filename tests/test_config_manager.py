@@ -1,4 +1,5 @@
 """配置管理器单元测试"""
+import contextlib
 import json
 import os
 import sys
@@ -15,6 +16,21 @@ from config.config_manager import (
     get_secret,
     reload_config,
 )
+
+
+@contextlib.contextmanager
+def _without_env(*names):
+    """临时移除指定环境变量，结束后恢复原状。
+
+    背景：外层环境（CI/本地 shell 常设 AEK_ENVIRONMENT=test）会经
+    _apply_env_overrides 覆盖 get_config() 的显式 environment 参数，
+    使"显式指定环境"的断言受调用方环境影响。此上下文保证断言只测本函数行为。
+    """
+    saved = {name: os.environ.pop(name) for name in names if name in os.environ}
+    try:
+        yield
+    finally:
+        os.environ.update(saved)
 
 
 class TestDeepMerge(unittest.TestCase):
@@ -81,19 +97,22 @@ class TestGetConfig(unittest.TestCase):
         self.assertIn("mcp_bridge", config)
 
     def test_development_environment(self):
-        reload_config()
-        config = get_config("development")
-        self.assertEqual(config["environment"], "development")
+        with _without_env("AEK_ENVIRONMENT"):
+            reload_config()
+            config = get_config("development")
+            self.assertEqual(config["environment"], "development")
 
     def test_test_environment(self):
-        reload_config()
-        config = get_config("test")
-        self.assertEqual(config["environment"], "test")
+        with _without_env("AEK_ENVIRONMENT"):
+            reload_config()
+            config = get_config("test")
+            self.assertEqual(config["environment"], "test")
 
     def test_production_environment(self):
-        reload_config()
-        config = get_config("production")
-        self.assertEqual(config["environment"], "production")
+        with _without_env("AEK_ENVIRONMENT"):
+            reload_config()
+            config = get_config("production")
+            self.assertEqual(config["environment"], "production")
 
     def test_env_override(self):
         reload_config()
