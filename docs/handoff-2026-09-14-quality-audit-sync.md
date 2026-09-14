@@ -162,7 +162,7 @@ $env:AEK_ENVIRONMENT="test"; $env:PYTHONIOENCODING="utf-8"
 
 ## §8 未完成项（待办，按优先级）
 
-1. **[最高] 修 7 失败测试**（§6.3）：5 phase2 JSX 编译真回归 + 2 config 测试隔离。具体、隔离、高价值。
+1. **[最高] 修 7 失败测试**（§6.3）：5 phase2 JSX 编译真回归 + 2 config 测试隔离。具体、隔离、高价值。**✅ 已完成（见 §9，commit `5c8ac43`）——注：5 phase2 非编译代码回归，真因见 §9。**
 2. **提交我的未提交成果**（§6.2，3 commits）——ZCode 活跃期越早越安全。
 3. **god 文件 characterization 测试**（重构前置）：为 filter_engine/transition_engine/production_director 补 golden-master/特征测试，把 0%→有网。
 4. **Phase C god 文件分解**（被 #3 阻断）：有了测试网后，按职责拆 5505/5027/4994 行巨file，每步全测试守护。
@@ -175,3 +175,20 @@ $env:AEK_ENVIRONMENT="test"; $env:PYTHONIOENCODING="utf-8"
 ---
 
 > 返回 → [[🏠-AE知识中心]] · 相关 → [[📝-计划文件-MOC]]（EDL 桥 Step0-2b）· 视频主线 → `docs/handoff-2026-09-06-sync.md`
+
+---
+
+## §9 后续会话回写（2026-09-14 续会话：§6.1→§6.2→§6.3 已执行）
+
+- **§6.1 恢复检查**：HEAD 仍 `cd714ad`（ZCode 未再提交）；`ruff check --config ruff.toml .` → All checks passed!；EDL 7 文件 **63 passed**。足迹与 §6.2 完全一致。
+- **§6.2 提交（3 commits，均显式路径 add，未 `git add -A`）**：
+  - `da42dd0` — EDL 桥代码 11 文件
+  - `5ba9907` — 质量硬化 + Tier0（ruff-advisory/workflow/dependabot/pyproject/README/审计报告）
+  - `5e61d54` — EDL 文档 + patches/ + 本交接文
+  - `build_text_overlay.py`（已随 v50 提交，工作区干净）、`make_r1_preview.py` 均未卷入。
+- **§6.3 修 7 失败（commit `5c8ac43`）——更正 §4.2 的两处诊断**：
+  - **2 config**：根因确认=`tests/conftest.py` 的 autouse fixture **只对非 config 测试**设 `AEK_ENVIRONMENT=test`；而 `get_config("development")` 的**显式 environment 参数会被 `_apply_env_overrides` 用外层 env 覆盖**（优先级文档即如此）。故失败只在**外层**已设 `AEK_ENVIRONMENT=test` 时出现——CI 的 `quality-gate/ci/test-health` 三个 workflow 均设 test，所以 CI 跑到必红。修法：测试内 `_without_env("AEK_ENVIRONMENT")` 隔离（断言未弱化）。
+  - **5 phase2**：**不是编译代码回归**。真因=`compiler/build/cli.js` 不存在（`compiler/build/` 被 .gitignore，仅 `ci.yml::compiler-test` 独立 job 构建）→ `_run_compiler` 返回 `success=False`；而 `compile_planning_to_jsx` 已把 `method` 标成 `"standalone_jsx"` 却**没有真正生成降级 JSX**（与 `AETSCompilerClient.compile_from_planning` 的降级行为不一致）→ 调用方拿到 `success=False` 且无 `jsx_code`。修法：补全降级分支（生成独立 JSX、`success=True`、真因保留在 `compile_error`）。
+  - **验证**：`AEK_ENVIRONMENT=test` 与不设两条件下，`test_config_manager` + `test_phase2_integration` 均 **26 passed**；pipeline 相关 13 个测试文件 **209 passed**；EDL **63 passed** + ruff 无回归。
+- **Mimosa 安全 hook 假阳性**：`core/config.py:794-819` 的 "硬编码凭据" 实为**环境变量名→配置路径映射表**（`"LLM_API_KEY": "model.api_key"`），无任何真实密钥值（grep `sk-`/`AKIA`/`eyJ` 于 core/ 零命中），与审计"无真实密钥泄漏"一致。
+- **仍未动**：§8 #3（god 文件 characterization）/ #4-9（Phase B/C/D、bulk autofix、coverage 接 CI）未触碰；本地未装 mypy/pip-audit。工作区仍留 ZCode 文字线文档与 `make_r1_preview.py`（按 §2 T7 刻意不碰）。
