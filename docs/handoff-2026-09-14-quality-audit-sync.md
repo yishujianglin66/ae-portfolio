@@ -210,6 +210,10 @@ $env:AEK_ENVIRONMENT="test"; $env:PYTHONIOENCODING="utf-8"
     故本批只覆盖接口面（该文件单测覆盖 3.35%，**整文件分解仍需更多集成级网**）。
   - **重要边界**：44% 只是确定性/门面表面的网；`filter_engine` 内大量 `generate_script` 分支与
     `transition_engine` 的 5 个软件引擎仍未覆盖 → **§8 #4 全量分解尚不安全**，需继续补网。
+  - **延伸批（ai/ 纯逻辑模块）**：`tests/test_ai_modules_characterization.py`（28 断言）——
+    `ai/clarification_engine.py` 0%→**94.5%**（槽位补全/阈值/问题生成全链）；
+    `ai/rhythm_reward.py` 0%→**29.0%**（踩拍打分族纯函数；`score_plan` 因 pickle 加载模型产物**非纯**，刻意不钉值）。
+    后续候选：`ai/shot_script.py`、`ai/style_bridge.py`、`ai/stage_critic.py`。
 - **§8 #7 coverage 接入 CI**（`quality-hardening.yml::full-suite-sharded`）：加
   `--cov --cov-branch --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=29`
   + 安装 `pytest-cov` + 上传 `coverage.xml`。source 由 pyproject `[tool.coverage.run]` 提供，

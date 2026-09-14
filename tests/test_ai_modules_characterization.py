@@ -16,6 +16,11 @@ from __future__ import annotations
 
 import pytest
 
+from ai.clarification_engine import (
+    ClarificationEngine,
+    clarification_engine,
+)
+from ai.nlu_parser import ConfidenceThresholds, Intent, IntentSlots, IntentType
 from ai.rhythm_reward import (
     _pairwise_accuracy,
     cut_features,
@@ -115,3 +120,120 @@ class TestPairwiseAccuracy:
     def test_single_group_with_one_item_has_no_pairs(self) -> None:
         acc, n_pairs = _pairwise_accuracy([1.0], [1.0], ["a"])
         assert n_pairs == 0
+
+
+# ============================================================================
+# ai/clarification_engine.py（0% 覆盖；纯槽位补全逻辑，无外部依赖）
+# ============================================================================
+
+
+def _intent(intent_type: str, confidence: float = 0.5, **slots) -> Intent:
+    return Intent(
+        type=intent_type,
+        confidence=confidence,
+        slots=IntentSlots(**slots),
+        rawInput="raw",
+    )
+
+
+class TestClarificationThresholds:
+    def test_confidence_threshold_constants(self) -> None:
+        assert ConfidenceThresholds.AUTO_EXECUTE == pytest.approx(0.7)
+        assert ConfidenceThresholds.NO_CLARIFICATION == pytest.approx(0.6)
+        assert ConfidenceThresholds.MIN_RECOGNITION == pytest.approx(0.3)
+
+    def test_unknown_always_needs_clarification(self) -> None:
+        engine = ClarificationEngine()
+        assert engine.needs_clarification(_intent(IntentType.UNKNOWN, confidence=0.99)) is True
+
+    def test_needs_clarification_below_threshold(self) -> None:
+        engine = ClarificationEngine()
+        assert engine.needs_clarification(_intent(IntentType.ADD_EFFECT, 0.59)) is True
+        assert engine.needs_clarification(_intent(IntentType.ADD_EFFECT, 0.60)) is False
+
+    def test_should_auto_execute_at_threshold(self) -> None:
+        engine = ClarificationEngine()
+        assert engine.should_auto_execute(_intent(IntentType.ADD_EFFECT, 0.69)) is False
+        assert engine.should_auto_execute(_intent(IntentType.ADD_EFFECT, 0.70)) is True
+
+
+class TestClarificationQuestionGeneration:
+    def test_add_effect_generates_three_questions_in_order(self) -> None:
+        questions = ClarificationEngine().generate_questions(_intent(IntentType.ADD_EFFECT))
+        assert [q.slot for q in questions] == ["effectName", "targetLayer", "color"]
+
+    def test_filled_slots_suppress_questions(self) -> None:
+        questions = ClarificationEngine().generate_questions(
+            _intent(IntentType.ADD_EFFECT, effectName="发光", targetLayer="图层001", color="青色")
+        )
+        assert questions == []
+
+    def test_templates_carry_options(self) -> None:
+        questions = ClarificationEngine().generate_questions(_intent(IntentType.ADD_EFFECT))
+        by_slot = {q.slot: q for q in questions}
+        assert by_slot["effectName"].options == []          # 自由文本槽
+        assert "选中图层" in by_slot["targetLayer"].options
+
+    def test_unknown_intent_single_optional_question(self) -> None:
+        questions = ClarificationEngine().generate_questions(_intent(IntentType.UNKNOWN))
+        assert len(questions) == 1
+        assert questions[0].slot == "rawInput"
+        assert questions[0].required is False
+
+    def test_reverse_analyze_has_no_questions(self) -> None:
+        assert ClarificationEngine().generate_questions(_intent(IntentType.REVERSE_ANALYZE)) == []
+
+
+class TestClarificationFlow:
+    def test_state_walk_and_final_slots(self) -> None:
+        engine = ClarificationEngine()
+        state = engine.create_state(_intent(IntentType.ADD_EFFECT))
+
+        assert engine.has_more_questions(state) is True
+        assert engine.get_next_question(state).slot == "effectName"
+
+        # 答案两端空白被 strip
+        engine.answer_question(state, "  发光  ")
+        assert state.answered_slots["effectName"] == "发光"
+        assert state.current_question_index == 1
+
+        engine.answer_question(state, "图层001")
+        engine.answer_question(state, "青色")
+        assert engine.has_more_questions(state) is False
+        assert engine.get_next_question(state) is None
+
+        final = engine.get_final_slots(state)
+        assert final.effectName == "发光"
+        assert final.targetLayer == "图层001"
+        assert final.color == "青色"
+
+    def test_answering_when_exhausted_is_noop(self) -> None:
+        engine = ClarificationEngine()
+        state = engine.create_state(_intent(IntentType.REVERSE_ANALYZE))  # 无问题
+        before = state.current_question_index
+        engine.answer_question(state, "x")
+        assert state.current_question_index == before
+        assert state.answered_slots == {}
+
+    def test_empty_answer_does_not_override_original_slot(self) -> None:
+        """get_final_slots 只在答案非空时覆盖（`if slot in ... and value`）。"""
+        engine = ClarificationEngine()
+        state = engine.create_state(_intent(IntentType.ADD_EFFECT, effectName="模糊"))
+        engine.answer_question(state, "   ")  # 空答案仅推进游标
+        assert engine.get_final_slots(state).effectName == "模糊"
+
+    def test_module_singleton_exists(self) -> None:
+        assert isinstance(clarification_engine, ClarificationEngine)
+
+
+class TestConfidenceGap:
+    def test_gap_weights_for_empty_slots(self) -> None:
+        gaps = ClarificationEngine().analyze_confidence_gap(_intent(IntentType.ADD_EFFECT))
+        assert gaps == {"effectName": 0.3, "targetLayer": 0.2, "color": 0.1, "temporal": 0.1}
+
+    def test_filled_slot_removes_its_gap(self) -> None:
+        gaps = ClarificationEngine().analyze_confidence_gap(
+            _intent(IntentType.ADD_EFFECT, color="青色")
+        )
+        assert "color" not in gaps
+        assert set(gaps) == {"effectName", "targetLayer", "temporal"}
