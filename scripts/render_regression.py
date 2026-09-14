@@ -167,6 +167,13 @@ def compare_to_baseline(
 
 
 def main() -> int:
+    # Windows GBK 下 print emoji 到管道会 UnicodeEncodeError → 仅 CLI 入口强制 UTF-8 输出
+    # (放 main() 而非模块级：避免 import 本模块的进程被改写全局 stdout)
+    for _s in (sys.stdout, sys.stderr):
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
     import argparse
     ap = argparse.ArgumentParser(description="帧级哈希回归比对")
     sub = ap.add_subparsers(dest="cmd", required=True)

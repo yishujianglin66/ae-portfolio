@@ -31,7 +31,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-EDL_SCHEMA_VERSION = "1.0"
+EDL_SCHEMA_VERSION = "1.1"                       # 1.0→1.1: 新增 effects/text_events/overlays 三轨(FORWARD 兼容)
+SUPPORTED_EDL_SCHEMA_VERSIONS = {"1.0", "1.1"}   # lint L1 接受的历史版本(BACKWARD 兼容旧 edl.json)
 HASH_CHUNK = 1 << 20  # 1MB 分块读文件算 SHA1
 
 
@@ -65,6 +66,9 @@ def build_edl(
     duration: float | None = None,
     fps: int = 24,
     resolution=(1920, 1080),
+    effects: list | None = None,       # v1.1 视觉特效轨(对齐 schemas/visual_effect_schema.json)
+    text_events: list | None = None,   # v1.1 文字事件轨(对齐 text_overlay/events.json)
+    overlays: list | None = None,      # v1.1 覆盖层轨(独立渲染的效果/木偶 alpha; video-use 式)
 ) -> dict:
     """从 production_report.json 构建 EDL。
 
@@ -94,6 +98,10 @@ def build_edl(
         })
     cut_points = [c["start_time"] for c in cuts[1:]]
 
+    # duration 未显式传入 → 从 cuts 末帧自动推导(避免 render.duration=None 传下游; Step1 实证发现#1)
+    if duration is None and cuts:
+        duration = round(max(c["end_time"] for c in cuts), 4)
+
     if bgm_path:
         referenced.setdefault(bgm_path, None)
     for s in sources or []:
@@ -108,7 +116,7 @@ def build_edl(
             inputs.append({"path": p, "sha1": _sha1_of(p),
                           "size_bytes": Path(p).stat().st_size})
 
-    return {
+    edl = {
         "schema_version": EDL_SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "production_report": str(pr_path),
@@ -128,6 +136,14 @@ def build_edl(
             "edl_schema": EDL_SCHEMA_VERSION,
         },
     }
+    # v1.1 三轨：仅当调用方显式传入才写入 —— 旧调用产出与 1.0 结构一致(最小惊讶 + FORWARD 兼容)
+    if effects is not None:
+        edl["effects"] = effects
+    if text_events is not None:
+        edl["text_events"] = text_events
+    if overlays is not None:
+        edl["overlays"] = overlays
+    return edl
 
 
 def save_edl(edl: dict, path: str | Path) -> Path:
@@ -147,9 +163,10 @@ def lint_edl(edl: dict, *, duration_tolerance: float = 1.5) -> list:
     """
     errs: list[str] = []
 
-    if edl.get("schema_version") != EDL_SCHEMA_VERSION:
-        errs.append(f"L1 schema_version {edl.get('schema_version')!r} "
-                    f"!= {EDL_SCHEMA_VERSION!r}")
+    _sv = edl.get("schema_version")
+    if _sv not in SUPPORTED_EDL_SCHEMA_VERSIONS:
+        errs.append(f"L1 schema_version {_sv!r} not in "
+                    f"{sorted(SUPPORTED_EDL_SCHEMA_VERSIONS)}")
 
     for inp in edl.get("inputs", []):
         if inp.get("missing") or inp.get("sha1") is None:
@@ -177,7 +194,52 @@ def lint_edl(edl: dict, *, duration_tolerance: float = 1.5) -> list:
             errs.append(f"L5 duration mismatch: declared {declared} "
                         f"vs timeline end {round(prev_end, 3)}")
 
+    # --- L7 (v1.1): 三轨校验 —— 时间不越界 + 必备字段 + effect.skill_id 必填 ---
+    _tend = prev_end  # cuts 循环后的时间线末端
+    _tol = duration_tolerance
+    for i, ov in enumerate(edl.get("overlays") or []):
+        st, du = ov.get("start_in_output"), ov.get("duration")
+        if not ov.get("file"):
+            errs.append(f"L7 overlay#{i} missing file")
+        if st is None or du is None:
+            errs.append(f"L7 overlay#{i} missing start_in_output/duration")
+            continue
+        if st < -1e-6 or du <= 0:
+            errs.append(f"L7 overlay#{i} invalid start/duration [{st},+{du}]")
+        elif _tend > 0 and st + du > _tend + _tol:
+            errs.append(f"L7 overlay#{i} exceeds timeline {st}+{du}>{round(_tend, 3)}")
+    for i, ef in enumerate(edl.get("effects") or []):
+        tr = ef.get("time_range") or {}
+        s, e = tr.get("start_sec"), tr.get("end_sec")
+        if s is None or e is None or not (s < e):
+            errs.append(f"L7 effect#{i} invalid time_range [{s},{e})")
+        elif _tend > 0 and e > _tend + _tol:
+            errs.append(f"L7 effect#{i} end {e} exceeds timeline {round(_tend, 3)}")
+        if not (ef.get("evidence_chain") or {}).get("skill_id"):
+            errs.append(f"L7 effect#{i} missing evidence_chain.skill_id")
+    for i, te in enumerate(edl.get("text_events") or []):
+        ti, to = te.get("t_in"), te.get("t_out")
+        if ti is None or to is None or not (ti < to):
+            errs.append(f"L7 text_event#{i} invalid t_in/t_out [{ti},{to})")
+        elif _tend > 0 and to > _tend + _tol:
+            errs.append(f"L7 text_event#{i} t_out {to} exceeds timeline {round(_tend, 3)}")
+
     return errs
+
+
+def load_edl(path: str | Path, *, run_lint: bool = True) -> dict:
+    """读取 edl.json 并跑 lint 契约闸门(fail-fast)。
+
+    数据契约"管线内嵌校验"(DEEP_RESEARCH [28]): 违约不向下游传播。
+    run_lint=False 仅用于调试/迁移期读旧文件。
+    """
+    p = Path(path)
+    edl = json.loads(p.read_text(encoding="utf-8"))
+    if run_lint:
+        errs = lint_edl(edl)
+        if errs:
+            raise ValueError(f"EDL lint FAIL ({len(errs)}): " + "; ".join(errs[:8]))
+    return edl
 
 
 def main() -> int:

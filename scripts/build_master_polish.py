@@ -29,6 +29,11 @@ from core.paths import aerender_exe  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# run 目录名 / tag 白名单 (路径安全: 严格 fullmatch 防遍历; 目录名重建自常量非拼接用户输入)
+# Step1.5: run_dir 放宽接受 R1 修复run (unified_r1_fixed_vN) → 让 EDL 桥能指向 R1 成果, 解 K3
+RUN_DIR_PATTERN = r"unified_(?:run\d+|r1_fixed_v\d+)"
+TAG_PATTERN = r"run\d+"
+
 # 效果配方 (v4: env=True 用 setValueAtTime 包络, 值会被剂量缩放)
 RECIPES = {
     "bloom":    {"m": "ADBE Glo2", "ps": [("ADBE Glo2-0002", 0.80),
@@ -795,6 +800,8 @@ def _parse_args():
     ap.add_argument("tag", help="tag, 白名单 run\\d+")
     ap.add_argument("--effects-json", dest="effects_json", default=None,
                     help="visual_effect_schema.json 兼容配置; 传入时取代内部 plan_effects 的 fx 规划")
+    ap.add_argument("--edl", dest="edl", default=None,
+                    help="edl.json 路径; 提供时先过 lint 契约闸门, 并在无 --effects-json 时用其 effects 轨")
     ap.add_argument("--dry-run", action="store_true",
                     help="只生成 plan + JSX 并落盘, 不调用 AE Bridge (离线验证用)")
     return ap.parse_args()
@@ -805,10 +812,10 @@ def main():
     import re as _re
     args = _parse_args()
     _raw = str(args.run_dir).replace("\\", "/").removeprefix("output/")
-    if not _re.fullmatch(r"unified_run\d+", _raw):
-        print(f"[ERR] 非法 run 目录名(白名单 unified_run\\d+): {_raw}")
+    if not _re.fullmatch(RUN_DIR_PATTERN, _raw):
+        print(f"[ERR] 非法 run 目录名(白名单 unified_run<N> | unified_r1_fixed_v<N>): {_raw}")
         sys.exit(2)
-    if not _re.fullmatch(r"run\d+", str(args.tag)):
+    if not _re.fullmatch(TAG_PATTERN, str(args.tag)):
         print(f"[ERR] 非法 tag(白名单 run\\d+): {args.tag}")
         sys.exit(2)
     run_dir = ROOT / "output" / _raw
@@ -820,13 +827,31 @@ def main():
     pr = json.loads(pr_p.read_text(encoding="utf-8"))
     segs = pr["script"]["segments"]
 
+    # Step1: --edl 数据契约闸门(读+lint, fail-fast)。仅显式传入才启用 → 无 --edl 时零行为变化(BACKWARD)
+    _edl = None
+    if args.edl:
+        from scripts.edl import load_edl
+        _edl_p = Path(args.edl)
+        if not _edl_p.exists():
+            print(f"[ERR] --edl 不存在: {_edl_p}")
+            sys.exit(2)
+        try:
+            _edl = load_edl(_edl_p)          # lint 失败抛 ValueError
+        except ValueError as _e:
+            print(f"[ERR] EDL 契约校验失败: {_e}")
+            sys.exit(2)
+
     inj_report = None
-    if args.effects_json:
+    _eff = None
+    if args.effects_json:                              # 优先级1: 显式文件(向后兼容)
         ej = Path(args.effects_json)
         if not ej.exists():
             print(f"[ERR] --effects-json 不存在: {ej}")
             sys.exit(2)
         _eff = json.loads(ej.read_text(encoding="utf-8"))
+    elif _edl is not None and _edl.get("effects"):     # 优先级2: EDL effects 轨(Step1 桥)
+        _eff = _edl["effects"]
+    if _eff is not None:
         if isinstance(_eff, dict):
             _eff = _eff.get("effects") or _eff.get("effect_configs") or [_eff]
         plan, bursts, inj_report = schema_effects_to_plan(_eff)

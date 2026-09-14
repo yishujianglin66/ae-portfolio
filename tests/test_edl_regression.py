@@ -23,7 +23,7 @@ import pytest
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from scripts.edl import build_edl, lint_edl, save_edl  # noqa: E402
+from scripts.edl import build_edl, lint_edl, save_edl, EDL_SCHEMA_VERSION  # noqa: E402
 from scripts.render_regression import (  # noqa: E402
     compare_to_baseline,
     make_baseline,
@@ -98,7 +98,7 @@ def test_edl_build_cuts_and_cut_points(tmp_path, sample_video):
     assert edl["cut_points"] == [1.0]          # 第二段起点即切点
     assert edl["render"]["style"] == "amv_highenergy"
     assert edl["render"]["duration"] == 2.5
-    assert edl["schema_version"] == "1.0"
+    assert edl["schema_version"] == EDL_SCHEMA_VERSION  # 版本无关(1.0→1.1 升级不再硬断言)
     # 素材哈希: unique 去重后只 1 个 input
     assert len(edl["inputs"]) == 1
     assert edl["inputs"][0]["sha1"] and len(edl["inputs"][0]["sha1"]) == 40
@@ -192,7 +192,8 @@ def test_cli_baseline_and_compare(sample_video, tmp_path):
     r2 = subprocess.run([sys.executable, str(PROJECT / "scripts" /
                         "render_regression.py"),
                          "compare", str(sample_video), str(base)],
-                        capture_output=True, text=True, timeout=300)
+                        capture_output=True, text=True, encoding="utf-8",
+                        errors="replace", timeout=300)
     assert r2.returncode == 0 and "PASS" in r2.stdout
 
 
@@ -205,5 +206,6 @@ def test_cli_compare_fail_exit_code(sample_video, brightened_video, tmp_path):
     r = subprocess.run([sys.executable, str(PROJECT / "scripts" /
                        "render_regression.py"),
                        "compare", str(brightened_video), str(base)],
-                      capture_output=True, text=True, timeout=300)
+                      capture_output=True, text=True, encoding="utf-8",
+                      errors="replace", timeout=300)
     assert r.returncode == 1 and "FAIL" in r.stdout

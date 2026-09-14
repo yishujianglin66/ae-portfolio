@@ -224,16 +224,22 @@ def _apply_effects_to_video(
     # run_dir / tag 推导 — 先过白名单, 否则子进程只会回一句含糊的 ERR
     if run_dir_name is None:
         run_dir_name = out_dir.name
-    if not _re.fullmatch(r"unified_run\d+", str(run_dir_name)):
+    from scripts.build_master_polish import RUN_DIR_PATTERN   # 单一真源(Step1.5), 避免三处白名单漂移
+    if not _re.fullmatch(RUN_DIR_PATTERN, str(run_dir_name)):
         return {
             "success": False,
-            "error": (f"output_dir 目录名 '{run_dir_name}' 不符合 build_master_polish.py "
-                      f"白名单 unified_run\\d+ — 无法定位 run 目录"),
+            "error": (f"output_dir 目录名 '{run_dir_name}' 不符合白名单 "
+                      f"unified_run<N> | unified_r1_fixed_v<N> — 无法定位 run 目录"),
             "effects_applied": 0,
             "effects_requested": len(effects),
         }
     if tag is None:
-        tag = str(run_dir_name).removeprefix("unified_")   # unified_run53 → run53
+        _derived = str(run_dir_name).removeprefix("unified_")   # unified_run53 → run53
+        if not _re.fullmatch(r"run\d+", _derived):
+            return {"success": False, "effects_applied": 0, "effects_requested": len(effects),
+                    "error": (f"run '{run_dir_name}' 无法自动派生合法 tag(得 '{_derived}'); "
+                              f"r1_fixed 类须显式传 tag=runN")}
+        tag = _derived
     if not _re.fullmatch(r"run\d+", str(tag)):
         return {
             "success": False,
@@ -308,6 +314,19 @@ def _apply_effects_to_video(
         result["stage"] = "dry_run"
         result["note"] = "schema→plan→JSX 链路已验证; 未调用 AE, 无渲染产物"
         return result
+
+    # Step2 §4: 特效已由 build_master_polish 应用到 AE → 事后回填 EDL 轨道(非侵入)
+    # 失败只记日志绝不阻断主流程(同 unified_edit EDL 块口径)。effects_file 无歧义(本函数自写)。
+    try:
+        from scripts.inject_edl_tracks import inject_edl_tracks
+        _inj = inject_edl_tracks(out_dir, effects_file=str(effects_json))
+        result["edl_inject"] = {"effects": _inj["effects_injected"],
+                                "text_events": _inj["text_events_injected"],
+                                "lint_errors": _inj["lint_errors"]}
+        logger.info(f"[edl-inject] effects={_inj['effects_injected']} "
+                    f"text_events={_inj['text_events_injected']} lint={len(_inj['lint_errors'])}")
+    except Exception as _ie:  # noqa: BLE001
+        logger.warning(f"[edl-inject 跳过] {_ie}")
 
     aep = out_dir / "polish" / "master.aep"
     if not aep.exists():
