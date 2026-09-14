@@ -191,4 +191,35 @@ $env:AEK_ENVIRONMENT="test"; $env:PYTHONIOENCODING="utf-8"
   - **5 phase2**：**不是编译代码回归**。真因=`compiler/build/cli.js` 不存在（`compiler/build/` 被 .gitignore，仅 `ci.yml::compiler-test` 独立 job 构建）→ `_run_compiler` 返回 `success=False`；而 `compile_planning_to_jsx` 已把 `method` 标成 `"standalone_jsx"` 却**没有真正生成降级 JSX**（与 `AETSCompilerClient.compile_from_planning` 的降级行为不一致）→ 调用方拿到 `success=False` 且无 `jsx_code`。修法：补全降级分支（生成独立 JSX、`success=True`、真因保留在 `compile_error`）。
   - **验证**：`AEK_ENVIRONMENT=test` 与不设两条件下，`test_config_manager` + `test_phase2_integration` 均 **26 passed**；pipeline 相关 13 个测试文件 **209 passed**；EDL **63 passed** + ruff 无回归。
 - **Mimosa 安全 hook 假阳性**：`core/config.py:794-819` 的 "硬编码凭据" 实为**环境变量名→配置路径映射表**（`"LLM_API_KEY": "model.api_key"`），无任何真实密钥值（grep `sk-`/`AKIA`/`eyJ` 于 core/ 零命中），与审计"无真实密钥泄漏"一致。
-- **仍未动**：§8 #3（god 文件 characterization）/ #4-9（Phase B/C/D、bulk autofix、coverage 接 CI）未触碰；本地未装 mypy/pip-audit。工作区仍留 ZCode 文字线文档与 `make_r1_preview.py`（按 §2 T7 刻意不碰）。
+- **仍未动**：§8 #4（god 文件分解/Phase C）、#5（Phase B bare-except）、#6（bulk autofix）、#9（Phase D）；本地未装 mypy/pip-audit。工作区仍留 ZCode 文字线文档与 `make_r1_preview.py`（按 §2 T7 刻意不碰）。
+
+### §9.1 续推进（本会话第二轮：§8 #3 characterization 安全网 + #7 coverage 接 CI）
+
+- **§8 #3 god 文件 characterization 安全网**（commits `bfb9934` + `cfab531`）：
+  纯新增测试文件 `tests/test_core_god_files_characterization.py`（65 条断言，无产品代码改动）。
+  把 4 个 god 文件的**当前可观察行为**固化为 golden-master，为后续分解建网：
+  - 覆盖提升（仅本文件，`--branch`）：`filter_engine.py` 0.00%→**48.55%** /
+    `text_animation_engine.py` 0.00%→**42.49%** / `transition_engine.py` 0.00%→**41.32%**
+    （三者合计 2811 语句 → 44.20%）。
+  - 含：34 缓动端点不变量 + 7 组黄金数值 + `generate_keyframes`；`FilterParam`/`FilterPreset`
+    契约（范围/归一化/强度锚缩放/深拷贝）；三端门面层（预设库 107/95、AI 推荐、跨软件统一 API、
+    FFmpeg 滤镜分区 34=25+9）；字体/排版（**仅钉 WCAG 返回结构**，不钉疑似缺陷的数值）。
+  - `ai/production_director.py`（+103 行）：钉死 `COLOR_PRESETS`/`SPEED_PRESETS`（drop 必须原速 1.0
+    铁律）/`XFADE_MAP`/`XFADE_GROUP_SIZE=8` + 三个数据结构契约 + `export_decision_log` 的 .md 分支。
+    ⚠️ 其公开面主要是 `render()`（需真实 ffmpeg/素材=集成层，由既有 9 个定向测试覆盖），
+    故本批只覆盖接口面（该文件单测覆盖 3.35%，**整文件分解仍需更多集成级网**）。
+  - **重要边界**：44% 只是确定性/门面表面的网；`filter_engine` 内大量 `generate_script` 分支与
+    `transition_engine` 的 5 个软件引擎仍未覆盖 → **§8 #4 全量分解尚不安全**，需继续补网。
+- **§8 #7 coverage 接入 CI**（`quality-hardening.yml::full-suite-sharded`）：加
+  `--cov --cov-branch --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=29`
+  + 安装 `pytest-cov` + 上传 `coverage.xml`。source 由 pyproject `[tool.coverage.run]` 提供，
+  故用 bare `--cov`（已实测取到 80104 语句）。至此 `fail_under=29` 从**死配置**变为**活 advisory 门**
+  （job 仍 `continue-on-error`，不阻断 ZCode）。
+- **本地全量实跑验证**（同 CI 参数，`-n2 --dist=loadscope` + coverage）：
+  **5621 passed / 0 failed / 37 skipped / 16 分 49 秒**，coverage **32.59%** > 29 地板，
+  `coverage.xml` 正常产出，pytest exit 0。⚠️ 对比 A5 基线（`7 failed / 5503 passed / 29.70%`）：
+  修完 7 失败后**全量套件已首次全绿**，且覆盖率升到 32.59%（新 characterization + 原失败用例现能跑完）。
+  本地为此装了 `pytest-cov` / `pytest-xdist`(含 execnet) / `pytest-timeout`（**附加式，未动 uv.lock，无 git 足迹**；
+  三者本就在 pyproject dev deps / CI 安装列表内）。
+
+
