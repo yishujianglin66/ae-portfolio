@@ -27,6 +27,16 @@ import math
 
 import pytest
 
+from ai.production_director import (
+    COLOR_PRESETS,
+    SPEED_PRESETS,
+    XFADE_GROUP_SIZE,
+    XFADE_MAP,
+    DirectorScript,
+    DirectorSegment,
+    RenderResult,
+    export_decision_log,
+)
 from core.filter_engine import (
     AEFilterEngine,
     FFmpegFilterEngine,
@@ -518,3 +528,96 @@ class TestTextFacadeLayerCharacterization:
         exported = api.export_to_software("Hi", TextSoftwareTarget.AFTER_EFFECTS)
         assert isinstance(created, str) and len(created) > 0
         assert isinstance(exported, str) and len(exported) > 0
+
+
+# ============================================================================
+# ai/production_director.py（5422 行，审计覆盖 ~10%）
+# 公开面主要是 render()（需真实 ffmpeg/素材，属集成层，由既有 9 个定向测试覆盖）；
+# 此处钉死**模块级预设表 + 数据结构契约 + 决策日志导出**——分解时必须保持不变。
+# ============================================================================
+
+
+class TestProductionDirectorCharacterization:
+    MOODS = {"intro", "build", "drop", "climax", "break", "outro"}
+    SEGMENT_DICT_KEYS = {
+        "index", "start_time", "end_time", "duration", "mood", "energy",
+        "source_file", "source_start", "text_overlay", "color_grade",
+        "transition", "speed", "transition_params", "zoompan_effect", "onset_times",
+    }
+
+    def test_color_presets_shape(self) -> None:
+        assert set(COLOR_PRESETS) == self.MOODS
+        for mood, preset in COLOR_PRESETS.items():
+            assert set(preset) == {"saturation", "contrast", "brightness"}, mood
+
+    def test_speed_presets_golden_values(self) -> None:
+        """变速档位钉死：drop 必须原速(=1.0)——卡点瞬间不能慢放(2026-08-12 v23 实测铁律)。"""
+        assert set(SPEED_PRESETS) == self.MOODS
+        assert SPEED_PRESETS["drop"] == pytest.approx(1.0)
+        assert SPEED_PRESETS["build"] == pytest.approx(1.3)
+        assert SPEED_PRESETS["break"] == pytest.approx(0.85)
+
+    def test_xfade_map_shape_and_known_entries(self) -> None:
+        assert XFADE_MAP["fade"] == ("fadeblack", 0.35)
+        assert XFADE_MAP["cross_dissolve"] == ("fade", 0.30)
+        for label, spec in XFADE_MAP.items():
+            assert isinstance(spec, tuple) and len(spec) == 2, label
+            assert isinstance(spec[0], str) and isinstance(spec[1], float), label
+
+    def test_xfade_group_size(self) -> None:
+        # 单条 xfade 链上限：超出分组后组间硬切
+        assert XFADE_GROUP_SIZE == 8
+
+    def test_director_segment_defaults(self) -> None:
+        seg = DirectorSegment(
+            index=0, start_time=0.0, end_time=1.0, duration=1.0, mood="intro",
+            energy=0.5, source_file="a.mp4", source_start=0.0, text_overlay=None,
+            color_grade="intro", transition="fade",
+        )
+        assert seg.speed == pytest.approx(1.0)
+        assert seg.transition_params is None
+        assert seg.zoompan_effect is None
+        assert seg.onset_times is None
+
+    def test_render_result_defaults(self) -> None:
+        result = RenderResult(output_path="out.mp4", success=True)
+        assert result.duration == pytest.approx(0.0)
+        assert result.resolution == (0, 0)
+        assert result.fps == 0
+        assert result.has_audio is False
+        assert result.content_verified is None
+        assert result.verification_reason == ""
+
+    def test_director_script_to_dict_shape(self) -> None:
+        script = DirectorScript(
+            title="T", total_duration=2.0, bgm_path="b.mp3", bgm_start_sec=0.0,
+            segments=[
+                DirectorSegment(
+                    index=0, start_time=0.0, end_time=2.0, duration=2.0, mood="drop",
+                    energy=0.9, source_file="a.mp4", source_start=1.0, text_overlay=None,
+                    color_grade="drop", transition="flash",
+                )
+            ],
+            metadata={"k": "v"},
+        )
+        d = script.to_dict()
+        assert set(d) == {"title", "total_duration", "bgm_path", "bgm_start_sec", "segments", "metadata"}
+        assert set(d["segments"][0]) == self.SEGMENT_DICT_KEYS
+        assert d["metadata"] == {"k": "v"}
+
+    def test_export_decision_log_markdown(self, tmp_path) -> None:
+        script = DirectorScript(
+            title="日志", total_duration=1.0, bgm_path="b.mp3", bgm_start_sec=0.0,
+            segments=[
+                DirectorSegment(
+                    index=0, start_time=0.0, end_time=1.0, duration=1.0, mood="intro",
+                    energy=0.4, source_file="a.mp4", source_start=0.0, text_overlay=None,
+                    color_grade="intro", transition="fade",
+                )
+            ],
+        )
+        out = export_decision_log(script, tmp_path / "log.md")
+        assert out.exists()
+        text = out.read_text(encoding="utf-8")
+        assert text.startswith("# 决策日志 — 日志")
+        assert "| 0 |" in text
