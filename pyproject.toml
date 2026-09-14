@@ -1,6 +1,6 @@
 [build-system]
 requires = ["setuptools>=68.0", "wheel"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "ae-knowledge-vault"
@@ -69,8 +69,11 @@ dev = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
     "pytest-asyncio>=0.23",
+    "pytest-xdist>=3.5",     # A4: 全量测试分片并行(CI 强制门)
     "flake8>=6.1",
-    "mypy>=1.7",
+    "mypy>=1.7",             # A2: 渐进类型检查(beachhead→core)
+    "ruff>=0.16",            # A1: advisory profile(ruff-advisory.toml)
+    "pip-audit>=2.7",        # A3: 依赖漏洞扫描(OSV)
     "httpx>=0.25",
 ]
 # 开源项目集成 (GitHub顶级开源项目)
@@ -192,7 +195,16 @@ filterwarnings = [
 # 覆盖率配置
 # ============================================================
 [tool.coverage.run]
+# T0.2 修复(2026-09-14, 审计发现 C3): 原 source 只列 ~17 个根模块, 遗漏代码主体
+# (core/ai/pipeline/integrations/agents, 含全部 god 文件) → 主体覆盖率从未被测量。
+# 现纳入核心库主包; scripts/(553 个 CLI 入口/一次性脚本)不计入单元覆盖, 由 e2e/集成测试覆盖。
+# ⚠️ 真实基线待 pytest-cov 就绪后测量(当前未装, 且 coverage 未被任何 CI 强制执行)。
 source = [
+    "core",
+    "ai",
+    "pipeline",
+    "integrations",
+    "agents",
     "ae_agent_pipeline",
     "ae_mcp_client",
     "effect_composer",
@@ -231,7 +243,7 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "@abstractmethod",
 ]
-fail_under = 60  # 初始阈值 60%，逐步提高
+fail_under = 29  # 实测基线(2026-09-14, 全量5503passed/7failed/18分): core/ai/pipeline/integrations/agents 真实覆盖 29.70%(77189语句/52551未覆盖, --branch)。设 29 为 ratchet 地板(略低于实测,不立即红),逐步上调。⚠️ god 文件几乎零覆盖(filter_engine/transition_engine/text_animation_engine=0%, production_director=10%)→分解前必须先补 characterization 测试。coverage 仍未被 CI 强制执行(待接入)。
 
 # ============================================================
 # flake8 配置 (通过 setup.cfg 或 .flake8)

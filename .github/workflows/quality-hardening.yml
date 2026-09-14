@@ -1,0 +1,99 @@
+name: Quality Hardening (Advisory)
+
+# Phase A (2026-09-14): advisory-first 质量硬化闸门 —— 全部 continue-on-error(不阻断合并)。
+# 目的: 为审计发现 C2(CI只强制~9/5593测试) / H2(lint闸门形同虚设+mypy死配置) /
+#       M5(无依赖漏洞门) 建立"可见的真实基线"; 债务 ratchet 清零后逐 job 转 required。
+# 隔离: 全 advisory, 不阻断任何并行会话(含 ZCode 文字线)的 push/PR。
+# 与现有 ci.yml / quality-gate.yml / test-health.yml 互补, 不替代。
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+jobs:
+  ruff-advisory:
+    # A1: 工业规则集(E/F/I/B/C4/C90/UP/RUF/S, 排除 CJK 噪音 RUF001-003) report-only
+    # 基线(2026-09-14): 核心库 11,102 条(~9000+ 自动可修; 高severity ~1500)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: ruff advisory (report-only, 不阻断)
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: "latest"
+          args: "check --config ruff-advisory.toml core ai pipeline integrations agents --statistics"
+
+  mypy-advisory:
+    # A2: 激活 pyproject 的 mypy 死配置。渐进式 beachhead —— 先从最新/已类型化的
+    #     EDL 桥模块起(2026 最佳实践: 新码 strict, 老码 ratchet), 建干净基线后逐步扩至 core/。
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: install mypy
+        run: python -m pip install --upgrade pip mypy
+      - name: mypy beachhead (EDL 桥模块, report-only)
+        run: mypy scripts/edl.py scripts/inject_edl_tracks.py agents/mastercut_agent.py --ignore-missing-imports --check-untyped-defs
+
+  pip-audit:
+    # A3: 依赖漏洞扫描(PyPA/OSV, 递归子依赖)。report-only 建基线; 修复后转 --strict 阻断。
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: install pip-audit
+        run: python -m pip install --upgrade pip pip-audit
+      - name: audit dependencies (report-only)
+        run: pip-audit -r requirements.txt --progress-spinner off -f json -o pip-audit-report.json || true
+      - name: upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+          if-no-files-found: warn
+
+  full-suite-sharded:
+    # A4: 全量测试分片门(现仅 ~9 文件被强制, 5584 从未在 CI 跑过)。
+    #     pytest-xdist -n2 --dist=loadscope(GH Actions 2 核; loadscope 保同模块 fixture 不跨进程)。
+    #     Windows spawn 注意: 主模块顶层重导入由 -p no:cacheprovider + AEK_ENVIRONMENT=test 缓解。
+    #     先 continue-on-error 摸清真实通过基线; 连续两周绿后转 required(解 C2)。
+    runs-on: windows-latest
+    timeout-minutes: 90
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: install deps
+        timeout-minutes: 30
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || pip install numpy pillow pydantic pydantic-settings
+          pip install pytest pytest-xdist pytest-timeout
+      - name: full suite sharded (baseline observation)
+        env:
+          AEK_ENVIRONMENT: test
+        run: |
+          python -m pytest -n 2 --dist=loadscope -q --timeout=300 -p no:cacheprovider --ignore=mcp-extension 2>&1 | Tee-Object full_sharded.txt
+      - name: upload result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-suite-sharded
+          path: full_sharded.txt
+          if-no-files-found: warn

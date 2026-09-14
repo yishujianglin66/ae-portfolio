@@ -10,11 +10,13 @@
 2. **规则蒸馏** —— 每轮验收通过的剪辑规则（铁律变速分档、kick/snare 鼓点→运镜映射、切点可见性标准、速度曲线锚、效果剂量）当场固化回编排决策；
 3. **管线记忆** —— 规则沉淀于 `data/evolution/render_history.jsonl` 与配方卡，走向"母版生规则、规则生自动出片"。
 
-## 当前状态（2026-09-05）
+## 当前状态（2026-09-14）
 
-- **主线**：母版 run53（30s 洛天依燃向 AMV），`unified_edit.py` 出片 + AE 精修已迭代 v2→v7，质量闸门 7/7，等用户验收速度曲线版后向全部变速镜头推广。
-- **工程平台**：五层架构（感知→理解→规划→执行→反馈）真实运转，历史 53 次 unified run 全链报告在 `output/`；测试套件 5,305 passed / 0 failed / 0 errors（08-27）。
-- **量化对标**：`scripts/score_reference_gap.py` 将成片与 `data/reference_top/` 13 条顶尖 AMV 参照做同口径评分（切点踩拍 81%±80ms、beat_hit_rate 0.77）。
+- **主线**：生产基线 run53（30s 洛天依燃向 AMV，v9，质量闸门 7/7，可回退）；**最佳候选 run61** `output/unified_run61/polish/master_hr.mp4`，**beat_hit_rate 0.8455**（超前三分位验收线 0.8193，v9 基线 0.7712），用户听感"比之前好"；规则库 R-2026-0002 active。
+- **工程平台**：五层架构（感知→理解→规划→执行→反馈）真实运转，历史 **78 次** unified run 全链报告在 `output/`；测试套件 **5,593 collected / 0 errors**（收集健康；CI 三闸门见 `.github/workflows/`）。
+- **最新里程碑**：**EDL 桥全线贯通**（解 K3「双链无桥」——R1 剪辑修复成果经 EDL 单一真源传导到视觉/文字双链，四段闭环 + 63 passed + 真实数据实证；详见 `09-计划文件/patches/Step0~2b`）。
+- **量化对标**：`scripts/score_reference_gap.py` 将成片与 `data/reference_top/` 13 条顶尖 AMV 参照做同口径评分（切点踩拍 81%±80ms）。
+- **权威进度**：视频主线以 `docs/handoff-2026-09-06-sync.md` 系列交接为准（`TASK_STATUS.md` 08-31 后冻结）；**质量线交接见 `docs/handoff-2026-09-14-quality-audit-sync.md`**（质量审计 + 补强 Phase A/A5 + EDL 桥收尾）；项目全景与审计见 `03-阶段报告/项目全景分析报告_2026-09-14.md`。
 
 ## 文档导航
 
@@ -23,7 +25,7 @@
 | [01-项目概览/📋-项目概览-MOC.md](01-项目概览/📋-项目概览-MOC.md) | 项目总览、主线与工程平台层结构 |
 | [🏠-AE知识中心.md](🏠-AE知识中心.md) | 知识体系全景（10-15 号知识库，891 篇 md / 约 1700 万字符） |
 | [TASK_STATUS.md](TASK_STATUS.md) | 工程平台任务看板（08-31 后冻结，视频主线见下） |
-| [docs/handoff-2026-09-05-sync.md](docs/handoff-2026-09-05-sync.md) | 最新交接文档（视频主线权威进度，系列含 09-01~09-05） |
+| [docs/handoff-2026-09-14-quality-audit-sync.md](docs/handoff-2026-09-14-quality-audit-sync.md) | **最新交接**（质量审计 + 补强 Phase A/A5 + EDL 桥收尾）；视频主线系列见 handoff-2026-09-06 |
 | [00-每日记录/](00-每日记录/) | 2026-07-20 起的开发日志 |
 | [02-开发文档/](02-开发文档/) | 开发手册、用户手册、编码规范 |
 

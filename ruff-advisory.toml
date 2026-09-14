@@ -1,0 +1,50 @@
+# ruff advisory profile (Phase A / A1, 2026-09-14)
+# 目的: 在 baseline 门(ruff.toml, 仅 E9/F7/F63/F82* 语法级)之上, 用工业标准规则集
+#       report-only 量化隐藏技术债, 建 ratchet 基线。审计发现 H2 的 remediation。
+# 策略: advisory(不阻断 CI); 逐规则清债后提升为 blocking。
+# 依据(2026 最佳实践): select=[E,F,I,B,C4,C90,UP,RUF,S]（S=bandit 子集, ruff 原生安全）
+#
+# ⚠️ CJK 项目关键: 必须 ignore RUF001/RUF002/RUF003(ambiguous-unicode) —— 否则中文
+#    注释/文档/字符串被误报为"歧义 unicode", 单核心库即 12,207 条纯噪音(非债务)。
+#
+# 基线(2026-09-14, 核心库 core/ai/pipeline/integrations/agents, 排除 CJK 噪音): 11,102 条
+#   · ~9000+ 为 UP006/UP045/UP035/I001/F541/UP015/RUF100/UP009/UP037 等自动可修现代化/风格
+#   · 高 severity 真实债(需人工): F401×480 / C901×271 / S110×214 / F841×117 / RUF013×106 /
+#     RUF012×100 / E402×81 / S310×79 / S607×72 / S324×35 / B023×23(良性,见下威胁分级) / B904×18 /
+#     E722×16 / S301×6(pickle) / S314×3(xml)
+#   · ratchet 路线: 先 `ruff check --fix`(安全修复)清 UP*/I001/F541 → 再逐规则人工清高severity
+#
+# ── 已核查威胁模型分级(2026-09-14, 读实际上下文, 诚实纠正严重度) ──
+#   · B023(23) 良性误报: 闭包均同迭代内立即调用/await(query_normalizer list(ex.map)、
+#     visual_eval_gateway await gather、production_director _env_step), late-binding 不成 bug。勿 churn 修。
+#   · S324 md5(35) 良性: 均为 path/内容指纹生成 ID(experience_harvester._make_id 等), 非安全用途;
+#     可选 usedforsecurity=False 作 FIPS 可移植硬化(个人 Win 管线, 低优先)。
+#   · S301 pickle(6) 低风险: 加载自产可信模型头(cnn_scorer/camera_movement_classifier), 非不可信输入;
+#     彻底修法(safetensors/torch weights_only)属较大重构, 暂缓。
+#   · S314 xml(3) 低风险: 解析本地 FCP XML(quality_gate._parse_xml_markers), Py3.7+ ET 默认不展开外部实体;
+#     defusedxml 为 defense-in-depth 硬化(需加依赖), 低优先。
+#   → 无关键可利用漏洞; 真正高价值债 = C901(271, 印证 god 文件) + S110/E722(异常吞噬) + 主体覆盖率未测。
+target-version = "py311"
+line-length = 120
+extend-exclude = [
+    "external", "openspec", "tmp", "test_output_opensource", ".workbuddy",
+    "archive", "mcp-extension", ".ae-mcp-bridge", "ae_additive_scripts",
+    "puppet-automation", "dev_scripts",
+]
+
+[lint]
+select = ["E", "F", "I", "B", "C4", "C90", "UP", "RUF", "S"]
+ignore = [
+    "E501",                          # 行长交给 formatter
+    "S101",                          # assert(测试合法)
+    "RUF001", "RUF002", "RUF003",    # CJK ambiguous-unicode 误报(见上, 12207 条噪音)
+]
+
+[lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "S311"]   # 测试允许 assert/假密钥/非加密随机
+
+[lint.mccabe]
+max-complexity = 15   # C901 复杂度阈值(工业常用 10-15)
+
+[lint.isort]
+known-first-party = ["core", "ai", "pipeline", "integrations", "agents", "scripts"]

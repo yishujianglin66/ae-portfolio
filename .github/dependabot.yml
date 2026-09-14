@@ -1,0 +1,30 @@
+# Phase A / A3 (2026-09-14): 依赖自动更新 —— 审计发现 M5(无依赖漏洞/更新门)。
+# 与 quality-hardening.yml 的 pip-audit(漏洞扫描)互补: dependabot 提更新 PR, pip-audit 扫已知 CVE。
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "python"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels: ["ci"]
+
+  - package-ecosystem: "npm"
+    directory: "/ae-dashboard"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["frontend"]
+
+  - package-ecosystem: "npm"
+    directory: "/compiler"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels: ["compiler"]
