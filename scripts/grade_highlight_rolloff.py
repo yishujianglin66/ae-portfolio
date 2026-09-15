@@ -57,6 +57,63 @@ def _resolve_existing(raw: str, label: str) -> Path:
     return p
 
 
+def build_filter_chain(shoulder: str = "gentle", sharpen: str = "none",
+                       saturation: float = 1.0) -> str:
+    """构造 ffmpeg `-vf` 链路。
+
+    全部成分来自固定枚举 + 数值参数（非任意串拼接），故无注入面。
+    """
+    if shoulder not in SHOULDERS:
+        raise ValueError(f"未知 shoulder: {shoulder}（可选 {sorted(SHOULDERS)}）")
+    if sharpen not in SHARPEN:
+        raise ValueError(f"未知 sharpen: {sharpen}（可选 {sorted(SHARPEN)}）")
+    chain = ["curves=" + SHOULDERS[shoulder]]
+    if SHARPEN[sharpen] is not None:
+        chain.append(f"cas=strength={SHARPEN[sharpen]}")
+    if saturation != 1.0:
+        chain.append(f"eq=saturation={saturation}")
+    return ",".join(chain)
+
+
+def apply_highlight_rolloff(
+    src,
+    dst,
+    *,
+    shoulder: str = "gentle",
+    sharpen: str = "none",
+    saturation: float = 1.0,
+    crf: int = 16,
+    preset: str = "medium",
+) -> Path:
+    """把 `src` 的高光过冲回收并写到 `dst`（**供管线 import 调用**，等价 CLI）。
+
+    参数经固定枚举校验；ffmpeg 以**参数列表**调用（shell=False），
+    路径仅作列表元素、不参与 shell 解析 → 无命令注入面。失败抛 RuntimeError。
+    """
+    if shoulder not in SHOULDERS:
+        raise ValueError(f"未知 shoulder: {shoulder}（可选 {sorted(SHOULDERS)}）")
+    if sharpen not in SHARPEN:
+        raise ValueError(f"未知 sharpen: {sharpen}（可选 {sorted(SHARPEN)}）")
+    s = _resolve_existing(str(src), "输入")
+    d = _resolve_existing(str(dst), "输出")
+    d.parent.mkdir(parents=True, exist_ok=True)
+
+    vf = build_filter_chain(shoulder, sharpen, saturation)
+    cmd = [
+        "ffmpeg", "-y", "-v", "error", "-i", str(s),
+        "-vf", vf,
+        "-c:v", "libx264", "-crf", str(int(crf)), "-preset", str(preset), "-pix_fmt", "yuv420p",
+        "-c:a", "copy",
+        str(d),
+    ]
+    r = subprocess.run(  # noqa: S603 - 参数列表 + shell=False，无 shell 解析
+        cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", shell=False
+    )
+    if r.returncode != 0:
+        raise RuntimeError(f"ffmpeg 失败: {r.stderr[-800:]}")
+    return d
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="高光过冲回收后级 (highlight rolloff)")
     ap.add_argument("input", help="输入视频")
@@ -69,35 +126,16 @@ def main() -> int:
     ap.add_argument("--saturation", type=float, default=1.0, help="饱和度缩放（默认 1.0）")
     a = ap.parse_args()
 
+    print(f"[grade] shoulder={a.shoulder} sharpen={a.sharpen} sat={a.saturation}\n"
+          f"        {build_filter_chain(a.shoulder, a.sharpen, a.saturation)}")
     try:
-        src = _resolve_existing(a.input, "输入")
-        dst = _resolve_existing(a.output, "输出")
-    except ValueError as e:
+        dst = apply_highlight_rolloff(
+            a.input, a.output, shoulder=a.shoulder, sharpen=a.sharpen,
+            saturation=a.saturation, crf=a.crf, preset=a.preset,
+        )
+    except (ValueError, RuntimeError) as e:
         print(f"[ERR] {e}")
         return 2
-    dst.parent.mkdir(parents=True, exist_ok=True)
-
-    # vf 由固定枚举 + 数值参数组成（非用户拼接的任意串）；路径以列表元素传入, shell=False。
-    vf_chain = ["curves=" + SHOULDERS[a.shoulder]]
-    if SHARPEN[a.sharpen] is not None:
-        vf_chain.append(f"cas=strength={SHARPEN[a.sharpen]}")
-    if a.saturation != 1.0:
-        vf_chain.append(f"eq=saturation={a.saturation}")
-    vf = ",".join(vf_chain)
-    cmd = [
-        "ffmpeg", "-y", "-v", "error", "-i", str(src),
-        "-vf", vf,
-        "-c:v", "libx264", "-crf", str(a.crf), "-preset", a.preset, "-pix_fmt", "yuv420p",
-        "-c:a", "copy",
-        str(dst),
-    ]
-    print(f"[grade] shoulder={a.shoulder} sharpen={a.sharpen} sat={a.saturation}\n        {vf}")
-    r = subprocess.run(  # noqa: S603 - 参数列表 + shell=False，无 shell 解析
-        cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", shell=False
-    )
-    if r.returncode != 0:
-        print(f"[ERR] ffmpeg 失败:\n{r.stderr[-800:]}")
-        return r.returncode
     print(f"[OK] {dst} ({dst.stat().st_size / 1e6:.1f} MB)")
     return 0
 
