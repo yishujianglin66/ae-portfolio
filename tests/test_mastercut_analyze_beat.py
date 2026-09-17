@@ -16,7 +16,11 @@ import wave
 import numpy as np
 import pytest
 
-from agents.mastercut_agent import _stage_analyze_beat
+# librosa 是声明依赖(requirements.txt)，但 CI 安装有失败回退分支(仅 numpy/pillow/pydantic)。
+# 缺失时显式 skip（原因可见于报告），而不是让用例 error —— 与 conftest 对重型可选依赖的策略一致。
+pytest.importorskip("librosa")
+
+from agents.mastercut_agent import _stage_analyze_beat  # noqa: E402  (需在 importorskip 之后)
 
 
 def _write_click_track(path, sr: int = 22050, duration: float = 6.0, bpm: int = 120) -> None:

@@ -71,6 +71,13 @@ RECIPES = {
 ENV_DECAY_S = 0.16   # 包络衰减时长 (~3帧@24fps)
 ENV_TAIL = 0.45      # 衰减后保持比例
 
+# 高光安全档 (2026-09-14 根因定位, handoff §9.4): 链路逐段实测过冲(hi% 0→14.7)由本脚本的
+# AE 效果层引入, plan 证据指向 CC Radial Fast Blur(被冲爆镜头挂 radial_soft/radial,
+# 且为主导效果 39/95 镜); dose(0.72-2.42) 会把基数 70/35 放大到有效 ~25-85。
+# 本档按该系数下调 radial/radial_soft 基数(burst_radial 是有意的瞬时转场闪光, 不动)。
+# 默认关闭 —— 属招牌观感, 需一次 AE 渲染视觉复验后才考虑转默认。
+HL_SAFE_RADIAL_SCALE = 0.7
+
 # v11: 垃圾窗口救援映射 — 底片窗口为源片水印卡/黑场 (报告↔底片镜头-源映射漂移的牺牲品),
 # 内容用显式映射 (经帧条目检), 不自动回落到报告分配 (映射不可靠)。
 RESCUE_MAP = {23.958: ("D:/AE-Work/resources/video/猫猫（一般）/素材/猫2.mp4", 109.0, 1.1)}
@@ -804,6 +811,9 @@ def _parse_args():
                     help="edl.json 路径; 提供时先过 lint 契约闸门, 并在无 --effects-json 时用其 effects 轨")
     ap.add_argument("--dry-run", action="store_true",
                     help="只生成 plan + JSX 并落盘, 不调用 AE Bridge (离线验证用)")
+    ap.add_argument("--hl-safe", action="store_true",
+                    help=f"高光安全档: radial/radial_soft 基数 ×{0.7} (对齐过冲根因, "
+                         f"默认关闭, 视觉复验后再定默认)")
     return ap.parse_args()
 
 
@@ -820,6 +830,15 @@ def main():
         sys.exit(2)
     run_dir = ROOT / "output" / _raw
     tag = args.tag
+    if args.hl_safe:
+        # 提前于 plan/build_jsx 生效(它们在调用点读取 RECIPES)
+        for _rk in ("radial", "radial_soft"):
+            RECIPES[_rk]["ps"] = [
+                (p, round(v * HL_SAFE_RADIAL_SCALE, 1)) for p, v in RECIPES[_rk]["ps"]
+            ]
+        print(f"[hl-safe] radial 基数 ×{HL_SAFE_RADIAL_SCALE} → "
+              f"radial={RECIPES['radial']['ps'][0][1]} "
+              f"radial_soft={RECIPES['radial_soft']['ps'][0][1]} (过冲根因修正, 待渲染复验)")
     pr_p = run_dir / "production_report.json"
     if not pr_p.exists():
         print(f"[ERR] 缺前置产物 {pr_p} — 需先跑 unified_edit 生成 production_report")
