@@ -1153,7 +1153,7 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
     遍历; 未打开则 app.open 回退 — ae_auto_render_orchestrator 实证)。
     """
     def _ev_js(e):
-        d = {k: e[k] for k in ("t_in", "t_out", "word", "size", "x", "y",
+        d = {k: e[k] for k in ("id", "t_in", "t_out", "word", "size", "x", "y",
                                "fill", "font", "enter")}
         if e.get("stroke"):
             d["strokeColor"], d["strokeW"] = e["stroke"]
@@ -1229,6 +1229,25 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
         return d
 
     evs_js = json.dumps([_ev_js(e) for e in events], separators=(",", ":"))
+    # v51 文字遮挡: 读置信门控后的 manifest (generate_occlusion_masks.py 产)
+    # 无 manifest → OCC={} → 所有事件跳过遮挡 (零行为变化)
+    occ_manifest_p = out_aep.parent / "text_overlay" / "occlusion" / "manifest.json"
+    occ_js = "{}"
+    # v52 默认**不启用**遮挡: 需显式 TEXT_OVERLAY_OCCLUSION=1。
+    #   理由(实测): v51 用 ISNet 在高饱和特效帧上产出的 mask 逐帧剧烈跳动
+    #   (覆盖率 0%↔42.8%, 白/包围盒 0.00-0.73), 反相遮罩会让文字忽隐忽现, 比不做更差。
+    #   门控已加"成团度 + 最小覆盖"两条硬判据, 但需重跑门控验证后才可开。
+    _occ_on = os.environ.get("TEXT_OVERLAY_OCCLUSION", "0") not in ("0", "false", "False")
+    if occ_manifest_p.exists() and _occ_on:
+        try:
+            _occ = json.loads(occ_manifest_p.read_text(encoding="utf-8"))
+            # 把相对路径补全为绝对路径 (AE 侧 File() 需要完整路径)
+            for _k in _occ:
+                _occ[_k]["dir"] = (out_aep.parent / _occ[_k]["dir"]).resolve().as_posix()
+            occ_js = json.dumps(_occ, separators=(",", ":"))
+            print(f"[P0] 文字遮挡: {len(_occ)} 个事件窗通过置信门控")
+        except Exception as _oe:
+            print(f"[P0] ⚠ 遮挡 manifest 读取失败, 跳过: {_oe}")
     aep_in = (ROOT / "output" / "unified_run53" / AEP_NAME).resolve().as_posix()
     log_p = (ROOT / "tmp" / "ae_text_build.txt").as_posix()
     # v43 注入回执 nonce: 每次构建唯一。AE 侧把它写在日志开头, 调用侧必须回读到同一个
@@ -1268,6 +1287,8 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
         }}
       }}
       var evs = {evs_js};
+      // v51 文字遮挡: 置信门控后的事件 → ISNet mask 序列 (generate_occlusion_masks.py 产)
+      var OCC = {occ_js};
       // ── W1 双描边 helper (2026-09-11) ─────────────────────────────────
       function setDoc(L, ev, fillCol, strokeCol, strokeW) {{
         var tp = L.property("Text");
@@ -1389,6 +1410,28 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
           addKick(L, ev);
           if (ev.enter == "punch_tracking") addTrack(L, ev);
           MV = L;
+          // ── v51 文字遮挡: ISNet mask 序列 + 轨道遮罩 (manifest 通过门控的事件才加载) ──
+          if (OCC[ev.id]) {{
+            try {{
+              var _m = OCC[ev.id];
+              var _mio = new ImportOptions();
+              _mio.file = new File(_m.dir + "/f_000.png");
+              try {{ _mio.sequence = true; }} catch (_me0) {{}}
+              var _mf = app.project.importFile(_mio);
+              // ① 序列帧率对齐: PNG 序列默认按 30fps 导入, 工程是 24fps →
+              //    不 conform 会逐帧漂移(28 帧累计 ~0.23s, 等于 5-6 帧错位)。
+              try {{ _mf.mainSource.conformFrameRate = 24; }} catch (_mc) {{}}
+              var _ml = comp.layers.add(_mf);
+              // ② 顺序: **先设 startTime 再设 in/out** ——
+              //    反过来的话 AE 会按素材时长重算, inPoint 被推走(实测 in 变成 9.34,
+              //    完全错过文字的 8.487-9.487 窗, 渲染零差异)。
+              _ml.startTime = _m.start;
+              _ml.inPoint = _m.start;
+              _ml.outPoint = _m.end;
+              _ml.name = "OCC" + i;
+              L.trackMatteType = TrackMatteType.ALPHA_INVERTED;  // 人物处文字被裁 (枚举实证 5014)
+            }} catch (_me) {{ rep += "|OCC" + i; }}
+          }}
         }}
         var tp = L.property("Text");
         try {{ addMove(MV, ev); }} catch (mve) {{ rep += "|MOVE" + i; }}
