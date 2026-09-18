@@ -208,6 +208,25 @@ Python 3.11（.venv）/ Node 22 / ComfyUI / FFmpeg / MCP / After Effects 脚本 
   53MB→811KB），只留 `sam2/` 推理包；冒烟验证 `build_sam2` 加载正常。
   依据：我加载的检查点是官方 CDN 直连下载的，且推理路径根本不 import training/。
 
+## 文字遮挡执行结果（2026-09-18 晚，链路全通）
+- **ISNet 正确模型仓库是 `skytnt/anime-seg`**（README 指向它；`anime-segmentation` 是数据集名，
+  猜它就 404）。167MB onnx 经 hf-mirror 直连下载（542s @ 0.3MB/s，Range 断点续传）。
+- **ISNet 质量**：干净源素材上正常（18.6%/9.0% 贴住角色）；成片上 43% 帧检出（多帧覆盖 35-96%），
+  失败集中在被剪辑处理破坏的镜头（火焰/特效/高糊段）——"细节损失在剪辑阶段"的第三个症状。
+  **架构决策=按事件窗置信门控**（覆盖≥阈值且窗内稳定才启用遮挡），不追求全帧。
+- **AE track matte 枚举名陷阱（实证）**：合法成员 `NO_TRACK_MATTE(5012)/ALPHA(5013)/
+  ALPHA_INVERTED(5014)/LUMA(5015)/LUMA_INVERTED(5016)`——**没有 `*_MATTE` 后缀成员**
+  （`ALPHA_INVERTED_MATTE`=undefined）。`layer.trackMatteType = TrackMatteType.ALPHA` 可写且
+  像素级生效（圆内绿/圆外黑验证过）。
+- **PNG 序列导入**：`ImportOptions.file` 必须指向**首帧真实文件**（f_000.png）+ `mio.sequence=true`，
+  不能用 `###` 占位符（"路径无效"）。
+- **端到端已通**：底片→ISNet 逐帧 mask→AE 三层(视频+文字+mask)→`trackMatteType=ALPHA_INVERTED`→
+  渲染。证据 `render/occlusion_e2e_proof.png`（文字下半段被人物剪影裁掉）。
+  ⚠️ e2e 测试合成用默认输出模块，与母版色彩管理不匹配（全帧像素偏移），数字对比不可信，
+  判读以目视为准；正式集成挂进管线合成即可消除。
+- **下一步**：集成进 build_text_overlay.py（逐事件窗 ISNet + 置信门控 + JSX 注入 mask 序列），
+  预估 2-3 小时（含 19 窗 × ~30 帧 × ~1s/帧推理 ≈ 10 分钟）。
+
 ## AE 启动 / 注入纪律（2026-09-13 立，均有实录代价）
 - **严禁 force-kill AE**（`Stop-Process -Force`/`taskkill /F`）。后果链：force-kill → 下次启动弹
   "崩溃修复选项" → 若进**安全模式** → 第三方增效被禁（Sapphire 配方全失效）**且实测把
