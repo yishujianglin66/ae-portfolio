@@ -16,10 +16,10 @@ integrations/scene_detector.py - 场景检测器 v1.0
     scenes = detector.detect("video.mp4")
     # [{"start": 0.0, "end": 12.5, "type": "action", "confidence": 0.85}, ...]
 """
-import os
 import logging
+import os
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class SceneSegment:
     scene_type: str = ""
     confidence: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "index": self.index,
             "start_time": self.start_time,
@@ -63,10 +63,10 @@ class SceneDetectResult:
     detector_type: str = ""
     scene_count: int = 0
     total_duration: float = 0.0
-    segments: List[SceneSegment] = field(default_factory=list)
+    segments: list[SceneSegment] = field(default_factory=list)
     fps: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "error": self.error,
@@ -118,7 +118,7 @@ class SceneDetector:
         self.threshold = threshold
         self.min_scene_len = min_scene_len
 
-    def detect(self, video_path: str) -> List[Dict[str, Any]]:
+    def detect(self, video_path: str) -> list[dict[str, Any]]:
         """检测视频场景
 
         Args:
@@ -149,10 +149,10 @@ class SceneDetector:
         # 最终回退：固定间隔分割
         return self._detect_fixed_split(video_path)
 
-    def _detect_pyscenedetect(self, video_path: str) -> List[Dict[str, Any]]:
+    def _detect_pyscenedetect(self, video_path: str) -> list[dict[str, Any]]:
         """使用 PySceneDetect 检测"""
         try:
-            from scenedetect import open_video, SceneManager
+            from scenedetect import SceneManager, open_video
             from scenedetect.detectors import ContentDetector
         except ImportError:
             logger.debug("SceneDetector: PySceneDetect not available")
@@ -197,10 +197,10 @@ class SceneDetector:
             logger.warning(f"SceneDetector [PySceneDetect] failed: {e}")
             return []
 
-    def _detect_ffmpeg(self, video_path: str) -> List[Dict[str, Any]]:
+    def _detect_ffmpeg(self, video_path: str) -> list[dict[str, Any]]:
         """使用 FFmpeg scene filter 检测"""
-        import subprocess
         import shutil
+        import subprocess
 
         ffmpeg = shutil.which("ffmpeg") or r"C:\ffmpeg\bin\ffmpeg.exe"
         if not os.path.isfile(ffmpeg):
@@ -255,7 +255,7 @@ class SceneDetector:
             logger.warning(f"SceneDetector [FFmpeg] failed: {e}")
             return []
 
-    def _detect_fixed_split(self, video_path: str) -> List[Dict[str, Any]]:
+    def _detect_fixed_split(self, video_path: str) -> list[dict[str, Any]]:
         """固定间隔分割（最终回退）"""
         total_dur = self._get_duration(video_path)
         if total_dur <= 0:
@@ -296,8 +296,8 @@ class SceneDetector:
     @staticmethod
     def _get_duration(video_path: str) -> float:
         """获取视频时长（秒）"""
-        import subprocess
         import shutil
+        import subprocess
 
         ffprobe = shutil.which("ffprobe") or r"C:\ffmpeg\bin\ffprobe.exe"
         if not os.path.isfile(ffprobe):

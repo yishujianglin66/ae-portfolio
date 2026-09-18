@@ -19,9 +19,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
-import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -37,9 +37,9 @@ class SearchResult:
     content: str
     score: float
     source_path: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "doc_id": self.doc_id,
             "title": self.title,
@@ -57,8 +57,8 @@ class Document:
     title: str
     content: str
     source_path: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    embedding: Optional[List[float]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    embedding: list[float] | None = None
 
 
 class ModelScopeEmbeddingClient:
@@ -70,7 +70,7 @@ class ModelScopeEmbeddingClient:
     BASE_URL = "https://modelscope.cn/openapi/v1"
     MODEL_NAME = "bge-m3"
 
-    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, base_url: str | None = None):
         self.api_key = api_key or os.environ.get("MODELSCOPE_API_KEY", "")
         self.base_url = (base_url or os.environ.get("MODELSCOPE_BASE_URL", self.BASE_URL)).rstrip("/")
         self.model_name = os.environ.get("MODELSCOPE_EMBEDDING_MODEL", self.MODEL_NAME)
@@ -84,7 +84,7 @@ class ModelScopeEmbeddingClient:
             "Content-Type": "application/json",
         })
 
-    def embed_texts(self, texts: List[str]) -> List[List[float]]:
+    def embed_texts(self, texts: list[str]) -> list[list[float]]:
         """
         批量生成文本向量
 
@@ -126,7 +126,7 @@ class ModelScopeEmbeddingClient:
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"API请求失败: {e}")
 
-    def embed_text(self, text: str) -> List[float]:
+    def embed_text(self, text: str) -> list[float]:
         """生成单个文本向量"""
         return self.embed_texts([text])[0]
 
@@ -140,17 +140,17 @@ class KnowledgeBaseSearcher:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        kb_root: Optional[str] = None,
-        index_file: Optional[str] = None,
+        api_key: str | None = None,
+        kb_root: str | None = None,
+        index_file: str | None = None,
     ):
         self.embedding_client = ModelScopeEmbeddingClient(api_key=api_key)
         self.kb_root = Path(kb_root) if kb_root else Path(__file__).parent.parent / "10-风格化剪辑知识库"
         self.index_file = Path(index_file) if index_file else self.kb_root.parent / ".kb_cache" / "vector_index.json"
 
         # 内存中的向量索引
-        self.documents: Dict[str, Document] = {}
-        self.embeddings: Dict[str, List[float]] = {}
+        self.documents: dict[str, Document] = {}
+        self.embeddings: dict[str, list[float]] = {}
 
         # 尝试加载已有索引
         self._load_index()
@@ -204,7 +204,7 @@ class KnowledgeBaseSearcher:
         """生成文档ID"""
         return hashlib.md5(content.encode("utf-8")).hexdigest()[:12]
 
-    def scan_knowledge_base(self, file_pattern: str = "*.md") -> List[Document]:
+    def scan_knowledge_base(self, file_pattern: str = "*.md") -> list[Document]:
         """
         扫描知识库目录，提取文档
 
@@ -297,7 +297,7 @@ class KnowledgeBaseSearcher:
         self._save_index()
         print(f"✓ 索引构建完成: {len(self.embeddings)} 个向量")
 
-    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+    def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         """计算余弦相似度"""
         if len(vec1) != len(vec2):
             return 0.0
@@ -316,7 +316,7 @@ class KnowledgeBaseSearcher:
         query: str,
         top_k: int = 5,
         min_score: float = 0.3,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """
         语义搜索
 
@@ -394,8 +394,8 @@ class KnowledgeBaseSearcher:
 
 # 便捷函数
 def create_searcher(
-    api_key: Optional[str] = None,
-    kb_root: Optional[str] = None,
+    api_key: str | None = None,
+    kb_root: str | None = None,
 ) -> KnowledgeBaseSearcher:
     """创建知识库搜索引擎"""
     return KnowledgeBaseSearcher(api_key=api_key, kb_root=kb_root)

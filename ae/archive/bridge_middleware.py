@@ -13,12 +13,12 @@ class MiddlewarePipeline:
     """中间件管道：顺序执行 process_command 钩子，透传语义。"""
 
     def __init__(self) -> None:
-        self._middlewares: List[Any] = []
+        self._middlewares: list[Any] = []
 
     def add(self, middleware: Any) -> None:
         self._middlewares.append(middleware)
 
-    def process_command(self, command: Any, handler: Optional[Callable] = None,
+    def process_command(self, command: Any, handler: Callable | None = None,
                         **kwargs: Any) -> Any:
         for mw in self._middlewares:
             hook = getattr(mw, "process_command", None)
@@ -46,7 +46,7 @@ class MetricsMiddleware:
         self.count += 1
         return None
 
-    def get_metrics(self) -> Dict[str, int]:
+    def get_metrics(self) -> dict[str, int]:
         return {"count": self.count, "errors": self.errors}
 
 
@@ -55,7 +55,7 @@ class RateLimitMiddleware:
                  **kwargs: Any) -> None:
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-        self._timestamps: List[float] = []
+        self._timestamps: list[float] = []
 
     def process_command(self, command: Any, **kwargs: Any) -> Any:
         now = time.time()

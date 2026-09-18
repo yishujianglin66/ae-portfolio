@@ -22,7 +22,6 @@ from typing import Any
 
 import pytest
 
-
 # ============================================================
 # Fixtures
 # ============================================================
@@ -63,7 +62,7 @@ def _make_iso(days_ago: float = 0.0) -> str:
 
 class TestRenderJobDataclass:
     def test_default_values(self):
-        from src.models.render_job import RenderJob, RENDER_STATUS_PENDING
+        from src.models.render_job import RENDER_STATUS_PENDING, RenderJob
 
         job = RenderJob(
             job_id="j1",

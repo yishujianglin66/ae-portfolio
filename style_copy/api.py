@@ -9,11 +9,12 @@ style_copy/api.py
   - style_copy/workflow.py 的工作流
 """
 
-import os
 import json
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from pydantic import BaseModel
+import os
 from typing import Dict, Optional
+
+from fastapi import APIRouter, BackgroundTasks, HTTPException
+from pydantic import BaseModel
 
 from style_copy.workflow import StyleCopyWorkflow
 
@@ -22,14 +23,14 @@ router = APIRouter(prefix="/api/style-copy", tags=["style-copy"])
 
 class StyleCopyRequest(BaseModel):
     input: str
-    work_dir: Optional[str] = None
+    work_dir: str | None = None
 
 
 class StyleCopyResponse(BaseModel):
     success: bool
     step: str
-    error: Optional[str] = None
-    data: Optional[Dict] = None
+    error: str | None = None
+    data: dict | None = None
 
 
 @router.post("/run", response_model=StyleCopyResponse)
@@ -109,8 +110,8 @@ def register(app):
 
 
 if __name__ == "__main__":
-    from fastapi import FastAPI
     import uvicorn
+    from fastapi import FastAPI
     
     app = FastAPI(title="Style Copy API")
     register(app)

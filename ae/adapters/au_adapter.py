@@ -19,7 +19,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
-from ae.au_mcp_client import AUMDPClient, SessionInfo, TrackInfo, ClipInfo
+from ae.au_mcp_client import AUMDPClient, ClipInfo, SessionInfo, TrackInfo
 
 logger = logging.getLogger(__name__)
 
@@ -42,72 +42,72 @@ class BaseAUAdapter(ABC):
         bit_depth: int = 16,
         num_tracks: int = 2,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建新会话。"""
         pass
 
     @abstractmethod
-    def open_session(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def open_session(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         """打开会话文件。"""
         pass
 
     @abstractmethod
-    def close_session(self, save_changes: bool = False) -> Dict[str, Any]:
+    def close_session(self, save_changes: bool = False) -> dict[str, Any]:
         """关闭当前会话。"""
         pass
 
     @abstractmethod
-    def save_session(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def save_session(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         """保存会话。"""
         pass
 
     @abstractmethod
-    def import_audio(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def import_audio(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         """导入音频文件。"""
         pass
 
     @abstractmethod
-    def create_track(self, name: str, track_type: str = "audio", **kwargs: Any) -> Dict[str, Any]:
+    def create_track(self, name: str, track_type: str = "audio", **kwargs: Any) -> dict[str, Any]:
         """创建轨道。"""
         pass
 
     @abstractmethod
-    def delete_track(self, track_index: int) -> Dict[str, Any]:
+    def delete_track(self, track_index: int) -> dict[str, Any]:
         """删除轨道。"""
         pass
 
     @abstractmethod
-    def set_track_properties(self, track_index: int, properties: Dict[str, Any]) -> Dict[str, Any]:
+    def set_track_properties(self, track_index: int, properties: dict[str, Any]) -> dict[str, Any]:
         """设置轨道属性。"""
         pass
 
     @abstractmethod
-    def list_tracks(self) -> List[TrackInfo]:
+    def list_tracks(self) -> list[TrackInfo]:
         """列出所有轨道。"""
         pass
 
     @abstractmethod
-    def list_clips(self, track_index: int) -> List[ClipInfo]:
+    def list_clips(self, track_index: int) -> list[ClipInfo]:
         """列出轨道上的所有剪辑。"""
         pass
 
     @abstractmethod
-    def add_clip(self, track_index: int, file_path: str, start_time: float = 0.0, **kwargs: Any) -> Dict[str, Any]:
+    def add_clip(self, track_index: int, file_path: str, start_time: float = 0.0, **kwargs: Any) -> dict[str, Any]:
         """添加音频剪辑到轨道。"""
         pass
 
     @abstractmethod
-    def remove_clip(self, track_index: int, clip_index: int) -> Dict[str, Any]:
+    def remove_clip(self, track_index: int, clip_index: int) -> dict[str, Any]:
         """移除剪辑。"""
         pass
 
     @abstractmethod
-    def split_clip(self, track_index: int, clip_index: int, split_time: float) -> Dict[str, Any]:
+    def split_clip(self, track_index: int, clip_index: int, split_time: float) -> dict[str, Any]:
         """分割剪辑。"""
         pass
 
     @abstractmethod
-    def trim_clip(self, track_index: int, clip_index: int, new_start: float, new_end: float) -> Dict[str, Any]:
+    def trim_clip(self, track_index: int, clip_index: int, new_start: float, new_end: float) -> dict[str, Any]:
         """修剪剪辑。"""
         pass
 
@@ -116,39 +116,39 @@ class BaseAUAdapter(ABC):
         self,
         track_index: int,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用效果到轨道。"""
         pass
 
     @abstractmethod
-    def remove_effect(self, track_index: int, effect_name: str) -> Dict[str, Any]:
+    def remove_effect(self, track_index: int, effect_name: str) -> dict[str, Any]:
         """移除轨道上的效果。"""
         pass
 
     @abstractmethod
-    def apply_normalization(self, track_index: int, target_db: float = -0.1) -> Dict[str, Any]:
+    def apply_normalization(self, track_index: int, target_db: float = -0.1) -> dict[str, Any]:
         """应用音频归一化。"""
         pass
 
     @abstractmethod
-    def apply_fade_in(self, track_index: int, clip_index: int, duration: float = 1.0) -> Dict[str, Any]:
+    def apply_fade_in(self, track_index: int, clip_index: int, duration: float = 1.0) -> dict[str, Any]:
         """应用淡入效果。"""
         pass
 
     @abstractmethod
-    def apply_fade_out(self, track_index: int, clip_index: int, duration: float = 1.0) -> Dict[str, Any]:
+    def apply_fade_out(self, track_index: int, clip_index: int, duration: float = 1.0) -> dict[str, Any]:
         """应用淡出效果。"""
         pass
 
     @abstractmethod
-    def adjust_volume(self, track_index: int, clip_index: int, gain_db: float) -> Dict[str, Any]:
+    def adjust_volume(self, track_index: int, clip_index: int, gain_db: float) -> dict[str, Any]:
         """调整剪辑音量。"""
         pass
 
     @abstractmethod
-    def remove_silence(self, track_index: int, clip_index: int, threshold_db: float = -60.0, min_duration: float = 0.1) -> Dict[str, Any]:
+    def remove_silence(self, track_index: int, clip_index: int, threshold_db: float = -60.0, min_duration: float = 0.1) -> dict[str, Any]:
         """移除剪辑中的静音部分。"""
         pass
 
@@ -160,7 +160,7 @@ class BaseAUAdapter(ABC):
         sample_rate: int = 44100,
         bit_depth: int = 16,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出会话。"""
         pass
 
@@ -172,7 +172,7 @@ class BaseAUAdapter(ABC):
         end_time: float,
         format: str = "wav",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出时间范围。"""
         pass
 
@@ -182,7 +182,7 @@ class BaseAUAdapter(ABC):
         pass
 
     @abstractmethod
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         """检测 Audition 是否存活。"""
         pass
 
@@ -192,17 +192,17 @@ class BaseAUAdapter(ABC):
         pass
 
     @abstractmethod
-    def execute_script(self, script_content: str) -> Dict[str, Any]:
+    def execute_script(self, script_content: str) -> dict[str, Any]:
         """执行 ExtendScript 脚本。"""
         pass
 
     @abstractmethod
-    def undo(self) -> Dict[str, Any]:
+    def undo(self) -> dict[str, Any]:
         """撤销上一步操作。"""
         pass
 
     @abstractmethod
-    def redo(self) -> Dict[str, Any]:
+    def redo(self) -> dict[str, Any]:
         """重做上一步操作。"""
         pass
 
@@ -215,14 +215,14 @@ class MCPClientAUAdapter(BaseAUAdapter):
 
     name = "au_mcp"
 
-    def __init__(self, client: Optional[AUMDPClient] = None, **client_kwargs) -> None:
+    def __init__(self, client: AUMDPClient | None = None, **client_kwargs) -> None:
         """初始化 MCP 客户端适配器。
 
         Args:
             client: 已初始化的 AUMDPClient 实例
             client_kwargs: 创建 AUMDPClient 时的参数
         """
-        self._client: Optional[AUMDPClient] = client
+        self._client: AUMDPClient | None = client
         self._client_kwargs = client_kwargs
 
     def _ensure_client(self) -> AUMDPClient:
@@ -238,7 +238,7 @@ class MCPClientAUAdapter(BaseAUAdapter):
         bit_depth: int = 16,
         num_tracks: int = 2,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_client().create_session(
             name=name,
             sample_rate=sample_rate,
@@ -247,70 +247,70 @@ class MCPClientAUAdapter(BaseAUAdapter):
             **kwargs,
         )
 
-    def open_session(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def open_session(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         return self._ensure_client().open_session(file_path, **kwargs)
 
-    def close_session(self, save_changes: bool = False) -> Dict[str, Any]:
+    def close_session(self, save_changes: bool = False) -> dict[str, Any]:
         return self._ensure_client().close_session(save_changes)
 
-    def save_session(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def save_session(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         return self._ensure_client().save_session(file_path, **kwargs)
 
-    def import_audio(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def import_audio(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         return self._ensure_client().import_audio(file_path, **kwargs)
 
-    def create_track(self, name: str, track_type: str = "audio", **kwargs: Any) -> Dict[str, Any]:
+    def create_track(self, name: str, track_type: str = "audio", **kwargs: Any) -> dict[str, Any]:
         return self._ensure_client().create_track(name, track_type, **kwargs)
 
-    def delete_track(self, track_index: int) -> Dict[str, Any]:
+    def delete_track(self, track_index: int) -> dict[str, Any]:
         return self._ensure_client().delete_track(track_index)
 
-    def set_track_properties(self, track_index: int, properties: Dict[str, Any]) -> Dict[str, Any]:
+    def set_track_properties(self, track_index: int, properties: dict[str, Any]) -> dict[str, Any]:
         return self._ensure_client().set_track_properties(track_index, properties)
 
-    def list_tracks(self) -> List[TrackInfo]:
+    def list_tracks(self) -> list[TrackInfo]:
         return self._ensure_client().list_tracks()
 
-    def list_clips(self, track_index: int) -> List[ClipInfo]:
+    def list_clips(self, track_index: int) -> list[ClipInfo]:
         return self._ensure_client().list_clips(track_index)
 
-    def add_clip(self, track_index: int, file_path: str, start_time: float = 0.0, **kwargs: Any) -> Dict[str, Any]:
+    def add_clip(self, track_index: int, file_path: str, start_time: float = 0.0, **kwargs: Any) -> dict[str, Any]:
         return self._ensure_client().add_clip(track_index, file_path, start_time, **kwargs)
 
-    def remove_clip(self, track_index: int, clip_index: int) -> Dict[str, Any]:
+    def remove_clip(self, track_index: int, clip_index: int) -> dict[str, Any]:
         return self._ensure_client().remove_clip(track_index, clip_index)
 
-    def split_clip(self, track_index: int, clip_index: int, split_time: float) -> Dict[str, Any]:
+    def split_clip(self, track_index: int, clip_index: int, split_time: float) -> dict[str, Any]:
         return self._ensure_client().split_clip(track_index, clip_index, split_time)
 
-    def trim_clip(self, track_index: int, clip_index: int, new_start: float, new_end: float) -> Dict[str, Any]:
+    def trim_clip(self, track_index: int, clip_index: int, new_start: float, new_end: float) -> dict[str, Any]:
         return self._ensure_client().trim_clip(track_index, clip_index, new_start, new_end)
 
     def apply_effect(
         self,
         track_index: int,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_client().apply_effect(track_index, effect_name, settings, **kwargs)
 
-    def remove_effect(self, track_index: int, effect_name: str) -> Dict[str, Any]:
+    def remove_effect(self, track_index: int, effect_name: str) -> dict[str, Any]:
         return self._ensure_client().remove_effect(track_index, effect_name)
 
-    def apply_normalization(self, track_index: int, target_db: float = -0.1) -> Dict[str, Any]:
+    def apply_normalization(self, track_index: int, target_db: float = -0.1) -> dict[str, Any]:
         return self._ensure_client().apply_normalization(track_index, target_db)
 
-    def apply_fade_in(self, track_index: int, clip_index: int, duration: float = 1.0) -> Dict[str, Any]:
+    def apply_fade_in(self, track_index: int, clip_index: int, duration: float = 1.0) -> dict[str, Any]:
         return self._ensure_client().apply_fade_in(track_index, clip_index, duration)
 
-    def apply_fade_out(self, track_index: int, clip_index: int, duration: float = 1.0) -> Dict[str, Any]:
+    def apply_fade_out(self, track_index: int, clip_index: int, duration: float = 1.0) -> dict[str, Any]:
         return self._ensure_client().apply_fade_out(track_index, clip_index, duration)
 
-    def adjust_volume(self, track_index: int, clip_index: int, gain_db: float) -> Dict[str, Any]:
+    def adjust_volume(self, track_index: int, clip_index: int, gain_db: float) -> dict[str, Any]:
         return self._ensure_client().adjust_volume(track_index, clip_index, gain_db)
 
-    def remove_silence(self, track_index: int, clip_index: int, threshold_db: float = -60.0, min_duration: float = 0.1) -> Dict[str, Any]:
+    def remove_silence(self, track_index: int, clip_index: int, threshold_db: float = -60.0, min_duration: float = 0.1) -> dict[str, Any]:
         return self._ensure_client().remove_silence(track_index, clip_index, threshold_db, min_duration)
 
     def export_session(
@@ -320,7 +320,7 @@ class MCPClientAUAdapter(BaseAUAdapter):
         sample_rate: int = 44100,
         bit_depth: int = 16,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_client().export_session(
             output_path=output_path,
             format=format,
@@ -336,7 +336,7 @@ class MCPClientAUAdapter(BaseAUAdapter):
         end_time: float,
         format: str = "wav",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_client().export_range(
             output_path=output_path,
             start_time=start_time,
@@ -348,19 +348,19 @@ class MCPClientAUAdapter(BaseAUAdapter):
     def get_session_info(self) -> SessionInfo:
         return self._ensure_client().get_session_info()
 
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         return self._ensure_client().ping()
 
     def is_alive(self) -> bool:
         return self._ensure_client().is_alive()
 
-    def execute_script(self, script_content: str) -> Dict[str, Any]:
+    def execute_script(self, script_content: str) -> dict[str, Any]:
         return self._ensure_client().execute_script(script_content)
 
-    def undo(self) -> Dict[str, Any]:
+    def undo(self) -> dict[str, Any]:
         return self._ensure_client().undo()
 
-    def redo(self) -> Dict[str, Any]:
+    def redo(self) -> dict[str, Any]:
         return self._ensure_client().redo()
 
     @property
@@ -383,9 +383,9 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
     def _ensure_engine(self):
         if self._engine is None:
             try:
-                import sys
                 import importlib.machinery
                 import importlib.util
+                import sys
                 from pathlib import Path
                 _project_root = Path(__file__).resolve().parent.parent.parent
                 _pa_dir = _project_root / "puppet-automation"
@@ -430,7 +430,7 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
         bit_depth: int = 16,
         num_tracks: int = 2,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="create_session",
             name=name,
@@ -440,28 +440,28 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
             **kwargs,
         )
 
-    def open_session(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def open_session(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         return self._ensure_engine().execute(action="open_session", file_path=file_path, **kwargs)
 
-    def close_session(self, save_changes: bool = False) -> Dict[str, Any]:
+    def close_session(self, save_changes: bool = False) -> dict[str, Any]:
         return self._ensure_engine().execute(action="close_session", save_changes=save_changes)
 
-    def save_session(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def save_session(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         return self._ensure_engine().execute(action="save_session", file_path=file_path, **kwargs)
 
-    def import_audio(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def import_audio(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         return self._ensure_engine().execute(action="import_audio", file_path=file_path, **kwargs)
 
-    def create_track(self, name: str, track_type: str = "audio", **kwargs: Any) -> Dict[str, Any]:
+    def create_track(self, name: str, track_type: str = "audio", **kwargs: Any) -> dict[str, Any]:
         return self._ensure_engine().execute(action="create_track", name=name, track_type=track_type, **kwargs)
 
-    def delete_track(self, track_index: int) -> Dict[str, Any]:
+    def delete_track(self, track_index: int) -> dict[str, Any]:
         return self._ensure_engine().execute(action="delete_track", track_index=track_index)
 
-    def set_track_properties(self, track_index: int, properties: Dict[str, Any]) -> Dict[str, Any]:
+    def set_track_properties(self, track_index: int, properties: dict[str, Any]) -> dict[str, Any]:
         return self._ensure_engine().execute(action="set_track_properties", track_index=track_index, properties=properties)
 
-    def list_tracks(self) -> List[TrackInfo]:
+    def list_tracks(self) -> list[TrackInfo]:
         result = self._ensure_engine().execute(action="list_tracks")
         tracks = result.get("tracks", [])
         return [
@@ -476,7 +476,7 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
             for t in tracks
         ]
 
-    def list_clips(self, track_index: int) -> List[ClipInfo]:
+    def list_clips(self, track_index: int) -> list[ClipInfo]:
         result = self._ensure_engine().execute(action="list_clips", track_index=track_index)
         clips = result.get("clips", [])
         return [
@@ -490,7 +490,7 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
             for c in clips
         ]
 
-    def add_clip(self, track_index: int, file_path: str, start_time: float = 0.0, **kwargs: Any) -> Dict[str, Any]:
+    def add_clip(self, track_index: int, file_path: str, start_time: float = 0.0, **kwargs: Any) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="add_clip",
             track_index=track_index,
@@ -499,10 +499,10 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
             **kwargs,
         )
 
-    def remove_clip(self, track_index: int, clip_index: int) -> Dict[str, Any]:
+    def remove_clip(self, track_index: int, clip_index: int) -> dict[str, Any]:
         return self._ensure_engine().execute(action="remove_clip", track_index=track_index, clip_index=clip_index)
 
-    def split_clip(self, track_index: int, clip_index: int, split_time: float) -> Dict[str, Any]:
+    def split_clip(self, track_index: int, clip_index: int, split_time: float) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="split_clip",
             track_index=track_index,
@@ -510,7 +510,7 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
             split_time=split_time,
         )
 
-    def trim_clip(self, track_index: int, clip_index: int, new_start: float, new_end: float) -> Dict[str, Any]:
+    def trim_clip(self, track_index: int, clip_index: int, new_start: float, new_end: float) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="trim_clip",
             track_index=track_index,
@@ -523,9 +523,9 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
         self,
         track_index: int,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="apply_effect",
             track_index=track_index,
@@ -534,13 +534,13 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
             **kwargs,
         )
 
-    def remove_effect(self, track_index: int, effect_name: str) -> Dict[str, Any]:
+    def remove_effect(self, track_index: int, effect_name: str) -> dict[str, Any]:
         return self._ensure_engine().execute(action="remove_effect", track_index=track_index, effect_name=effect_name)
 
-    def apply_normalization(self, track_index: int, target_db: float = -0.1) -> Dict[str, Any]:
+    def apply_normalization(self, track_index: int, target_db: float = -0.1) -> dict[str, Any]:
         return self._ensure_engine().execute(action="apply_normalization", track_index=track_index, target_db=target_db)
 
-    def apply_fade_in(self, track_index: int, clip_index: int, duration: float = 1.0) -> Dict[str, Any]:
+    def apply_fade_in(self, track_index: int, clip_index: int, duration: float = 1.0) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="apply_fade_in",
             track_index=track_index,
@@ -548,7 +548,7 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
             duration=duration,
         )
 
-    def apply_fade_out(self, track_index: int, clip_index: int, duration: float = 1.0) -> Dict[str, Any]:
+    def apply_fade_out(self, track_index: int, clip_index: int, duration: float = 1.0) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="apply_fade_out",
             track_index=track_index,
@@ -556,7 +556,7 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
             duration=duration,
         )
 
-    def adjust_volume(self, track_index: int, clip_index: int, gain_db: float) -> Dict[str, Any]:
+    def adjust_volume(self, track_index: int, clip_index: int, gain_db: float) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="adjust_volume",
             track_index=track_index,
@@ -564,7 +564,7 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
             gain_db=gain_db,
         )
 
-    def remove_silence(self, track_index: int, clip_index: int, threshold_db: float = -60.0, min_duration: float = 0.1) -> Dict[str, Any]:
+    def remove_silence(self, track_index: int, clip_index: int, threshold_db: float = -60.0, min_duration: float = 0.1) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="remove_silence",
             track_index=track_index,
@@ -580,7 +580,7 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
         sample_rate: int = 44100,
         bit_depth: int = 16,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="export_session",
             output_path=output_path,
@@ -597,7 +597,7 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
         end_time: float,
         format: str = "wav",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="export_range",
             output_path=output_path,
@@ -618,7 +618,7 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
             duration=info.get("duration", 0.0),
         )
 
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         return self._ensure_engine().execute(action="ping")
 
     def is_alive(self) -> bool:
@@ -628,13 +628,13 @@ class PuppetEngineAUAdapter(BaseAUAdapter):
         except Exception:
             return False
 
-    def execute_script(self, script_content: str) -> Dict[str, Any]:
+    def execute_script(self, script_content: str) -> dict[str, Any]:
         return self._ensure_engine().execute(action="execute_script", script_content=script_content)
 
-    def undo(self) -> Dict[str, Any]:
+    def undo(self) -> dict[str, Any]:
         return self._ensure_engine().execute(action="undo")
 
-    def redo(self) -> Dict[str, Any]:
+    def redo(self) -> dict[str, Any]:
         return self._ensure_engine().execute(action="redo")
 
     @property

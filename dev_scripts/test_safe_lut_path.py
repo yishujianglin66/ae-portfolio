@@ -1,9 +1,11 @@
 """测试 _safe_lut_path 中文路径转换 + 引擎基本功能"""
 import sys
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.davinci_fuscript import ResolveColorEngine, ColorGradeConfig, find_lut_for_preset
 from pathlib import Path
+
+from integrations.davinci_fuscript import ColorGradeConfig, ResolveColorEngine, find_lut_for_preset
 
 print("=" * 60)
 print("Test 1: _safe_lut_path 中文路径转换")
@@ -20,7 +22,7 @@ print(f"  [PASS] English path unchanged: {result}")
 # 测试2: None 应返回 None
 result = engine._safe_lut_path(None)
 assert result is None, f"None should return None: {result}"
-print(f"  [PASS] None returns None")
+print("  [PASS] None returns None")
 
 # 测试3: 中文路径应被复制到临时目录
 chinese_path = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\resources\luts\调色-COLOR_LUTs\电影感 _ Cinematic\Cinematic-1.cube"
@@ -31,7 +33,7 @@ if Path(chinese_path).exists():
     print(f"  安全路径: {result}")
     assert Path(result).exists(), f"Safe path should exist: {result}"
     assert "调色" not in result, f"Safe path should not contain Chinese: {result}"
-    print(f"  [PASS] Chinese path converted to safe path")
+    print("  [PASS] Chinese path converted to safe path")
 else:
     # 找第一个存在的 LUT 文件
     lut_dir = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\resources\luts")
@@ -41,8 +43,8 @@ else:
         print(f"  使用实际 LUT 文件: {first_cube}")
         result = engine._safe_lut_path(first_cube)
         print(f"  安全路径: {result}")
-        assert Path(result).exists(), f"Safe path should exist"
-        print(f"  [PASS] Chinese path converted to safe path")
+        assert Path(result).exists(), "Safe path should exist"
+        print("  [PASS] Chinese path converted to safe path")
     else:
         print("  [SKIP] No .cube files found in resources/luts")
 

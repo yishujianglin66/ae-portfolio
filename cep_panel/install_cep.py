@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Install CEP Panel for AE Knowledge Vault"""
-import os, sys, shutil, winreg
+import os
+import shutil
+import sys
+import winreg
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(ROOT, "com.ae.knowledgevault")

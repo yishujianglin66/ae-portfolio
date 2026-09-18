@@ -230,7 +230,7 @@ def upgrade_prototypes():
             "scene": scene, "mood": mood, "count": count
         })
     
-    _log(f"  Top10 场景-情绪组合:")
+    _log("  Top10 场景-情绪组合:")
     for sm in scene_mood_matrix[:10]:
         _log(f"    {sm['scene']}+{sm['mood']}: {sm['count']}")
     

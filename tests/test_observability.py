@@ -1,48 +1,49 @@
 """core.observability 单元测试 - 可观测性层核心逻辑"""
-import os
-import sys
 import asyncio
 import json
-import pytest
-import time
+import os
+import sys
 import tempfile
+import time
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.observability import (
-    LogLevel,
-    MetricType,
-    LogEntry,
-    Span,
-    MetricSample,
-    LogHandler,
     ConsoleLogHandler,
-    FileLogHandler,
-    Logger,
-    TraceExporter,
-    ConsoleTraceExporter,
-    FileTraceExporter,
-    Tracer,
-    MetricExporter,
     ConsoleMetricExporter,
-    PrometheusMetricExporter,
+    ConsoleTraceExporter,
+    FileLogHandler,
+    FileTraceExporter,
+    LogEntry,
+    Logger,
+    LogHandler,
+    LogLevel,
+    MetricExporter,
+    MetricSample,
     MetricsCollector,
+    MetricType,
     ObservabilityContext,
-    traced,
-    global_logger,
-    global_tracer,
-    global_metrics,
-    set_global_context,
+    PrometheusMetricExporter,
+    Span,
+    TraceExporter,
+    Tracer,
     create_context,
+    global_logger,
+    global_metrics,
+    global_tracer,
+    increment_counter,
+    log_critical,
     log_debug,
+    log_error,
     log_info,
     log_warning,
-    log_error,
-    log_critical,
-    increment_counter,
-    set_gauge,
     record_histogram,
     record_summary,
+    set_gauge,
+    set_global_context,
+    traced,
 )
 
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """简单测试 - 添加单个效果"""
-import json, time
+import json
+import time
 from pathlib import Path
 
 BRIDGE_CMD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_command.json")

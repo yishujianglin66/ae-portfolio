@@ -8,10 +8,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "13-素材获取与搜索" / "02-免费素材API"))
 
 from pexels_client import (
-    normalize_video_result,
-    normalize_photo_result,
     VALID_ORIENTATIONS,
     VALID_QUALITIES,
+    normalize_photo_result,
+    normalize_video_result,
 )
 
 

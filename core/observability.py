@@ -54,9 +54,9 @@ class LogEntry:
     level: LogLevel
     message: str
     logger_name: str
-    trace_id: Optional[str] = None
-    span_id: Optional[str] = None
-    extra: Dict[str, Any] = field(default_factory=dict)
+    trace_id: str | None = None
+    span_id: str | None = None
+    extra: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -64,13 +64,13 @@ class Span:
     """追踪 Span"""
     trace_id: str
     span_id: str
-    parent_span_id: Optional[str] = None
+    parent_span_id: str | None = None
     name: str = ""
     start_time: float = 0.0
     end_time: float = 0.0
     status: str = "running"
-    attributes: Dict[str, Any] = field(default_factory=dict)
-    events: List[Dict[str, Any]] = field(default_factory=list)
+    attributes: dict[str, Any] = field(default_factory=dict)
+    events: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def duration(self) -> float:
@@ -84,7 +84,7 @@ class MetricSample:
     type: MetricType
     value: float
     timestamp: float = 0.0
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
 
 # -----------------------------------------------------------------------------
@@ -151,7 +151,7 @@ class FileLogHandler(LogHandler):
 
 class Logger:
     """结构化日志器"""
-    def __init__(self, name: str, handlers: List[LogHandler] = None):
+    def __init__(self, name: str, handlers: list[LogHandler] = None):
         self._name = name
         self._handlers = handlers or [ConsoleLogHandler()]
         self._current_trace_id = None
@@ -205,13 +205,13 @@ class Logger:
 
 class TraceExporter:
     """追踪导出器接口"""
-    async def export(self, spans: List[Span]) -> None:
+    async def export(self, spans: list[Span]) -> None:
         pass
 
 
 class ConsoleTraceExporter(TraceExporter):
     """控制台追踪导出器"""
-    async def export(self, spans: List[Span]) -> None:
+    async def export(self, spans: list[Span]) -> None:
         for span in spans:
             print(f"[TRACE] {span.trace_id}/{span.span_id} {span.name} "
                   f"{span.duration:.2f}s {span.status}")
@@ -222,7 +222,7 @@ class FileTraceExporter(TraceExporter):
     def __init__(self, file_path: str):
         self._file_path = file_path
 
-    async def export(self, spans: List[Span]) -> None:
+    async def export(self, spans: list[Span]) -> None:
         with open(self._file_path, "a", encoding="utf-8") as f:
             for span in spans:
                 f.write(json.dumps({
@@ -238,12 +238,12 @@ class FileTraceExporter(TraceExporter):
 
 class Tracer:
     """分布式追踪器"""
-    def __init__(self, service_name: str, exporters: List[TraceExporter] = None):
+    def __init__(self, service_name: str, exporters: list[TraceExporter] = None):
         self._service_name = service_name
         self._exporters = exporters or [ConsoleTraceExporter()]
         self._current_trace_id = None
-        self._current_span: Optional[Span] = None
-        self._spans_to_export: List[Span] = []
+        self._current_span: Span | None = None
+        self._spans_to_export: list[Span] = []
         self._lock = asyncio.Lock()
 
     def start_span(self, name: str, parent_span: Span = None) -> Span:
@@ -304,13 +304,13 @@ class Tracer:
 
 class MetricExporter:
     """指标导出器接口"""
-    async def export(self, metrics: List[MetricSample]) -> None:
+    async def export(self, metrics: list[MetricSample]) -> None:
         pass
 
 
 class ConsoleMetricExporter(MetricExporter):
     """控制台指标导出器"""
-    async def export(self, metrics: List[MetricSample]) -> None:
+    async def export(self, metrics: list[MetricSample]) -> None:
         for metric in metrics:
             labels_str = ",".join(f"{k}={v}" for k, v in metric.labels.items())
             print(f"[METRIC] {metric.name} {metric.type.name} {metric.value:.4f} "
@@ -321,9 +321,9 @@ class PrometheusMetricExporter(MetricExporter):
     """Prometheus 格式指标导出器"""
     def __init__(self, file_path: str = "metrics.prom"):
         self._file_path = file_path
-        self._metrics_cache: Dict[str, MetricSample] = {}
+        self._metrics_cache: dict[str, MetricSample] = {}
 
-    async def export(self, metrics: List[MetricSample]) -> None:
+    async def export(self, metrics: list[MetricSample]) -> None:
         for metric in metrics:
             key = f"{metric.name}_{','.join(f'{k}={v}' for k, v in metric.labels.items())}"
             self._metrics_cache[key] = metric
@@ -338,10 +338,10 @@ class PrometheusMetricExporter(MetricExporter):
 
 class MetricsCollector:
     """指标收集器"""
-    def __init__(self, exporters: List[MetricExporter] = None):
+    def __init__(self, exporters: list[MetricExporter] = None):
         self._exporters = exporters or [ConsoleMetricExporter()]
-        self._counters: Dict[str, float] = {}
-        self._gauges: Dict[str, float] = {}
+        self._counters: dict[str, float] = {}
+        self._gauges: dict[str, float] = {}
         self._lock = asyncio.Lock()
 
     def increment(self, name: str, value: float = 1.0, **labels) -> None:
@@ -360,7 +360,7 @@ class MetricsCollector:
         """记录摘要"""
         _safe_async(self._record(MetricType.SUMMARY, name, value, labels))
 
-    async def _record(self, metric_type: MetricType, name: str, value: float, labels: Dict[str, str]) -> None:
+    async def _record(self, metric_type: MetricType, name: str, value: float, labels: dict[str, str]) -> None:
         sample = MetricSample(
             name=name,
             type=metric_type,
@@ -394,13 +394,13 @@ class ObservabilityContext:
         logger: Logger,
         tracer: Tracer,
         metrics: MetricsCollector,
-        trace_id: Optional[str] = None,
+        trace_id: str | None = None,
     ):
         self._logger = logger
         self._tracer = tracer
         self._metrics = metrics
         self._trace_id = trace_id or str(uuid.uuid4()).replace("-", "")[:16]
-        self._span_stack: List[Span] = []
+        self._span_stack: list[Span] = []
 
         # 绑定 trace_id
         self._logger.set_trace_id(self._trace_id)
@@ -519,12 +519,12 @@ def set_global_context(ctx: ObservabilityContext) -> None:
     _global_context = ctx
 
 
-def _get_global_context() -> Optional[ObservabilityContext]:
+def _get_global_context() -> ObservabilityContext | None:
     """获取全局可观测性上下文"""
     return _global_context
 
 
-def create_context(trace_id: Optional[str] = None) -> ObservabilityContext:
+def create_context(trace_id: str | None = None) -> ObservabilityContext:
     """创建新的可观测性上下文"""
     return ObservabilityContext(global_logger, global_tracer, global_metrics, trace_id)
 

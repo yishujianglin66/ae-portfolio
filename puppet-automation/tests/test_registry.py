@@ -5,9 +5,10 @@
 """
 from __future__ import annotations
 
-import pytest
-from unittest.mock import patch, MagicMock
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 def test_engine_classes_contains_core_engines():
@@ -38,7 +39,7 @@ def test_build_engine_registry_returns_dict(mock_logger):
 @patch("src.engines.registry.logger")
 def test_build_engine_registry_skips_failed_engines(mock_logger):
     """单个引擎初始化失败不应导致整体崩溃。"""
-    from src.engines.registry import build_engine_registry, ENGINE_CLASSES
+    from src.engines.registry import ENGINE_CLASSES, build_engine_registry
 
     # 至少应该能跑完不崩溃
     engines = build_engine_registry()

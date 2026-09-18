@@ -10,16 +10,17 @@
 """
 import json
 import os
+import shutil
 import sys
 import tempfile
 import threading
 import time
-import shutil
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from task_persistence import TaskPersistence, PersistenceConfig
+from task_persistence import PersistenceConfig, TaskPersistence
 
 
 @pytest.fixture
@@ -633,8 +634,8 @@ class TestSingleton:
     """单例模式测试"""
 
     def test_get_task_persistence_returns_same_instance(self, tmp_storage):
-        from task_persistence import _default_persistence, get_task_persistence
         import task_persistence as tp
+        from task_persistence import _default_persistence, get_task_persistence
 
         original = tp._default_persistence
         tp._default_persistence = None

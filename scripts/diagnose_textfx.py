@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """TextFX Showcase 工程诊断脚本 - 通过 Bridge 检查工程内部状态"""
-import json, time, sys
-from pathlib import Path
+import json
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_CMD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_command.json")
 BRIDGE_RESULT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_result.json")

@@ -1,6 +1,7 @@
 import os
-from PIL import Image
+
 import numpy as np
+from PIL import Image
 
 frames_dir = r"D:\AE-Work\视频素材库\frames"
 

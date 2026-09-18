@@ -4,13 +4,14 @@
 测试2类CNN + VLM专家模型的3类分类性能
 """
 
-import sys
-import os
 import json
+import os
+import sys
 import time
-import numpy as np
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
+
+import numpy as np
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent))
@@ -330,12 +331,12 @@ def main():
         print(f"Hierarchical 平均推理时间: {analysis['hierarchical_performance']['average_time']:.3f}s")
         print(f"准确率提升: {analysis['comparison']['accuracy_improvement']:.4f}")
         print(f"时间增加: {analysis['comparison']['time_increase']:.3f}s")
-        print(f"预期3类准确率范围: 0.50-0.60")
+        print("预期3类准确率范围: 0.50-0.60")
         
         if analysis['hierarchical_performance']['balanced_accuracy'] >= 0.50:
-            print(f"\n[OK] 分层架构测试成功：3类准确率达到预期标准")
+            print("\n[OK] 分层架构测试成功：3类准确率达到预期标准")
         else:
-            print(f"\n[WARNING] 分层架构测试：3类准确率低于预期阈值0.50")
+            print("\n[WARNING] 分层架构测试：3类准确率低于预期阈值0.50")
         
         # 保存报告
         print("\n5. Generating reports...")
@@ -349,7 +350,7 @@ def main():
             except:
                 pass  # 忽略删除失败的文件
         
-        print(f"\n分层架构测试完成！报告已保存至 hierarchical_test_report.json")
+        print("\n分层架构测试完成！报告已保存至 hierarchical_test_report.json")
         
         return analysis
         

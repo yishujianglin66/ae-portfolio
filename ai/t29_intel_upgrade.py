@@ -152,7 +152,7 @@ def migrate_all_intel_files():
             errors += 1
             _log(f"  错误: {f.name}: {e}")
     
-    _log(f"\n迁移完成:")
+    _log("\n迁移完成:")
     _log(f"  已升级: {migrated}")
     _log(f"  已跳过(已是v2): {skipped}")
     _log(f"  错误: {errors}")

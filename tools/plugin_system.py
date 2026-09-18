@@ -29,8 +29,8 @@ import inspect
 import json
 import os
 import sys
-import time
 import threading
+import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -81,9 +81,9 @@ class PluginMetadata:
     description: str = ""
     author: str = ""
     plugin_type: PluginType = PluginType.CUSTOM
-    dependencies: List[str] = field(default_factory=list)
-    config_schema: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
+    config_schema: dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
     homepage: str = ""
     license: str = "MIT"
 
@@ -100,7 +100,7 @@ class PluginBase:
 
     metadata: PluginMetadata
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self._config = config or {}
         self._enabled = False
         self._initialized = False
@@ -193,9 +193,9 @@ class EffectPlugin(PluginBase):
 
     def apply_effect(
         self,
-        layer_data: Dict[str, Any],
-        params: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        layer_data: dict[str, Any],
+        params: dict[str, Any],
+    ) -> dict[str, Any]:
         """应用效果
 
         Args:
@@ -207,7 +207,7 @@ class EffectPlugin(PluginBase):
         """
         raise NotImplementedError("子类必须实现 apply_effect")
 
-    def get_default_params(self) -> Dict[str, Any]:
+    def get_default_params(self) -> dict[str, Any]:
         """获取默认参数"""
         return {}
 
@@ -217,9 +217,9 @@ class WorkflowPlugin(PluginBase):
 
     def execute(
         self,
-        input_data: Dict[str, Any],
-        context: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        input_data: dict[str, Any],
+        context: dict[str, Any],
+    ) -> dict[str, Any]:
         """执行工作流
 
         Args:
@@ -231,7 +231,7 @@ class WorkflowPlugin(PluginBase):
         """
         raise NotImplementedError("子类必须实现 execute")
 
-    def get_stages(self) -> List[str]:
+    def get_stages(self) -> list[str]:
         """获取工作流阶段列表"""
         return []
 
@@ -241,9 +241,9 @@ class OutputPlugin(PluginBase):
 
     def render(
         self,
-        project_data: Dict[str, Any],
+        project_data: dict[str, Any],
         output_path: str,
-        options: Dict[str, Any],
+        options: dict[str, Any],
     ) -> str:
         """渲染输出
 
@@ -257,7 +257,7 @@ class OutputPlugin(PluginBase):
         """
         raise NotImplementedError("子类必须实现 render")
 
-    def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> list[str]:
         """获取支持的输出格式"""
         return ["mp4"]
 
@@ -268,8 +268,8 @@ class AnalyzerPlugin(PluginBase):
     def analyze(
         self,
         input_path: str,
-        options: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        options: dict[str, Any],
+    ) -> dict[str, Any]:
         """分析输入
 
         Args:
@@ -290,15 +290,15 @@ class AnalyzerPlugin(PluginBase):
 class PluginEntry:
     """插件注册项"""
     plugin_id: str
-    plugin_class: Type[PluginBase]
+    plugin_class: type[PluginBase]
     metadata: PluginMetadata
-    instance: Optional[PluginBase] = None
+    instance: PluginBase | None = None
     status: PluginStatus = PluginStatus.UNLOADED
-    loaded_at: Optional[float] = None
-    error: Optional[str] = None
-    config: Dict[str, Any] = field(default_factory=dict)
+    loaded_at: float | None = None
+    error: str | None = None
+    config: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "plugin_id": self.plugin_id,
             "name": self.metadata.name,
@@ -323,7 +323,7 @@ class HookManager:
     """事件钩子管理器"""
 
     def __init__(self):
-        self._hooks: Dict[str, List[Callable]] = {}
+        self._hooks: dict[str, list[Callable]] = {}
         self._lock = threading.RLock()
 
     def register(self, event: str, callback: Callable):
@@ -341,7 +341,7 @@ class HookManager:
                     cb for cb in self._hooks[event] if cb != callback
                 ]
 
-    def trigger(self, event: str, *args, **kwargs) -> List[Any]:
+    def trigger(self, event: str, *args, **kwargs) -> list[Any]:
         """触发钩子"""
         results = []
         with self._lock:
@@ -356,7 +356,7 @@ class HookManager:
 
         return results
 
-    def get_events(self) -> List[str]:
+    def get_events(self) -> list[str]:
         """获取所有已注册的事件"""
         with self._lock:
             return list(self._hooks.keys())
@@ -372,8 +372,8 @@ class PluginManager:
     提供插件的注册、发现、加载和管理能力。
     """
 
-    def __init__(self, plugin_dirs: Optional[List[str]] = None):
-        self._entries: Dict[str, PluginEntry] = {}
+    def __init__(self, plugin_dirs: list[str] | None = None):
+        self._entries: dict[str, PluginEntry] = {}
         self._plugin_dirs = plugin_dirs or []
         self._hook_manager = HookManager()
         self._lock = threading.RLock()
@@ -401,8 +401,8 @@ class PluginManager:
     def register_plugin(
         self,
         plugin_id: str,
-        plugin_class: Type[PluginBase],
-        metadata: Optional[PluginMetadata] = None,
+        plugin_class: type[PluginBase],
+        metadata: PluginMetadata | None = None,
     ) -> bool:
         """注册插件
 
@@ -456,7 +456,7 @@ class PluginManager:
     # 插件加载
     # --------------------------------------------------------------------
 
-    def load_plugin(self, plugin_id: str, config: Optional[Dict[str, Any]] = None) -> bool:
+    def load_plugin(self, plugin_id: str, config: dict[str, Any] | None = None) -> bool:
         """加载插件（创建实例）"""
         with self._lock:
             entry = self._entries.get(plugin_id)
@@ -553,7 +553,7 @@ class PluginManager:
     # 插件发现
     # --------------------------------------------------------------------
 
-    def discover_plugins(self) -> List[str]:
+    def discover_plugins(self) -> list[str]:
         """从插件目录发现插件
 
         Returns:
@@ -614,7 +614,7 @@ class PluginManager:
     # 插件获取
     # --------------------------------------------------------------------
 
-    def get_plugin(self, plugin_id: str) -> Optional[PluginBase]:
+    def get_plugin(self, plugin_id: str) -> PluginBase | None:
         """获取插件实例"""
         with self._lock:
             entry = self._entries.get(plugin_id)
@@ -627,7 +627,7 @@ class PluginManager:
 
             return None
 
-    def get_plugins_by_type(self, plugin_type: PluginType) -> List[PluginEntry]:
+    def get_plugins_by_type(self, plugin_type: PluginType) -> list[PluginEntry]:
         """按类型获取插件"""
         with self._lock:
             return [
@@ -635,12 +635,12 @@ class PluginManager:
                 if entry.metadata.plugin_type == plugin_type
             ]
 
-    def get_all_plugins(self) -> List[PluginEntry]:
+    def get_all_plugins(self) -> list[PluginEntry]:
         """获取所有插件"""
         with self._lock:
             return list(self._entries.values())
 
-    def get_enabled_plugins(self) -> List[PluginEntry]:
+    def get_enabled_plugins(self) -> list[PluginEntry]:
         """获取已启用的插件"""
         with self._lock:
             return [
@@ -667,7 +667,7 @@ class PluginManager:
     # 统计信息
     # --------------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计信息"""
         with self._lock:
             total = len(self._entries)
@@ -675,7 +675,7 @@ class PluginManager:
             loaded = sum(1 for e in self._entries.values() if e.status in (PluginStatus.LOADED, PluginStatus.ENABLED))
             errored = sum(1 for e in self._entries.values() if e.status == PluginStatus.ERROR)
 
-            type_counts: Dict[str, int] = {}
+            type_counts: dict[str, int] = {}
             for entry in self._entries.values():
                 t = entry.metadata.plugin_type.value
                 type_counts[t] = type_counts.get(t, 0) + 1
@@ -690,7 +690,7 @@ class PluginManager:
                 "hooks": len(self._hook_manager.get_events()),
             }
 
-    def list_plugins(self) -> List[Dict[str, Any]]:
+    def list_plugins(self) -> list[dict[str, Any]]:
         """列出所有插件信息"""
         with self._lock:
             return [entry.to_dict() for entry in self._entries.values()]
@@ -728,14 +728,14 @@ class CartoonOutlineEffect(EffectPlugin):
         },
     )
 
-    def get_default_params(self) -> Dict[str, Any]:
+    def get_default_params(self) -> dict[str, Any]:
         return {
             "edge_threshold": 0.5,
             "edge_thickness": 2,
             "color_levels": 4,
         }
 
-    def apply_effect(self, layer_data: Dict[str, Any], params: Dict[str, Any]) -> Dict[str, Any]:
+    def apply_effect(self, layer_data: dict[str, Any], params: dict[str, Any]) -> dict[str, Any]:
         default = self.get_default_params()
         merged = {**default, **params}
 
@@ -765,10 +765,10 @@ class WatercolorOutputPlugin(OutputPlugin):
         },
     )
 
-    def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> list[str]:
         return ["mp4", "png", "jpg"]
 
-    def render(self, project_data: Dict[str, Any], output_path: str, options: Dict[str, Any]) -> str:
+    def render(self, project_data: dict[str, Any], output_path: str, options: dict[str, Any]) -> str:
         _logger.info(f"水彩画渲染: {output_path}")
 
         os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
@@ -805,7 +805,7 @@ class BeatSyncAnalyzerPlugin(AnalyzerPlugin):
         },
     )
 
-    def analyze(self, input_path: str, options: Dict[str, Any]) -> Dict[str, Any]:
+    def analyze(self, input_path: str, options: dict[str, Any]) -> dict[str, Any]:
         _logger.info(f"节拍同步分析: {input_path}")
 
         sensitivity = options.get("sensitivity", 0.8)
@@ -827,10 +827,10 @@ class BeatSyncAnalyzerPlugin(AnalyzerPlugin):
 # 模块单例
 # ============================================================================
 
-_default_manager: Optional[PluginManager] = None
+_default_manager: PluginManager | None = None
 
 
-def get_plugin_manager(plugin_dirs: Optional[List[str]] = None) -> PluginManager:
+def get_plugin_manager(plugin_dirs: list[str] | None = None) -> PluginManager:
     """获取默认插件管理器实例"""
     global _default_manager
     if _default_manager is None:

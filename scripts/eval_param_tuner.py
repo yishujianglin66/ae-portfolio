@@ -44,8 +44,8 @@ def main() -> int:
     X = np.array([[float(r.get(f, 0.0)) for f in FEATURES] for r in rows])
     Y = np.array([[float(r.get(t, 0.0)) for t in TARGETS] for r in rows])
 
-    from sklearn.ensemble import GradientBoostingRegressor
     from scipy.stats import spearmanr
+    from sklearn.ensemble import GradientBoostingRegressor
 
     n = len(rows)
     # LOOCV: 每目标独立
@@ -89,7 +89,7 @@ def main() -> int:
     if summary[worst]["mae"] > 1.2 and (summary[worst]["spearman"] is None or summary[worst]["spearman"] < 0.3):
         print(f"⚠ {worst} 预测不准 → CNN 触发信号（视觉化维度, 参数数值表达不了）")
     else:
-        print(f"GBDT 各维度可接受, 继续用 GBDT; 再积累样本")
+        print("GBDT 各维度可接受, 继续用 GBDT; 再积累样本")
     return 0
 
 

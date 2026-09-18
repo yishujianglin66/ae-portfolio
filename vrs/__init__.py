@@ -17,16 +17,16 @@ VRS - Video Reverse-engineering System
 - vrs_iteration_optimizer: 迭代优化器
 """
 
-from vrs.vrs_orchestrator import VRSOrchestrator
-from vrs.video_effect_analyzer_v2 import VideoEffectAnalyzerV2
 from vrs.video_effect_analyzer_v1 import VideoEffectAnalyzer
-from vrs.video_reverse_engine import VideoReverseEngine
+from vrs.video_effect_analyzer_v2 import VideoEffectAnalyzerV2
 from vrs.video_reproduce_pipeline import VideoReproducePipeline
-from vrs.vrs_knowledge_rag import KnowledgeRAG
-from vrs.vrs_structure_inferrer import CompositionStructureInferrer
-from vrs.vrs_compiler_bridge import VRCompilerBridge
+from vrs.video_reverse_engine import VideoReverseEngine
 from vrs.vrs_audio_sync_analyzer import AudioSyncAnalyzer
+from vrs.vrs_compiler_bridge import VRCompilerBridge
 from vrs.vrs_iteration_optimizer import IterationOptimizer
+from vrs.vrs_knowledge_rag import KnowledgeRAG
+from vrs.vrs_orchestrator import VRSOrchestrator
+from vrs.vrs_structure_inferrer import CompositionStructureInferrer
 
 __all__ = [
     "VRSOrchestrator",

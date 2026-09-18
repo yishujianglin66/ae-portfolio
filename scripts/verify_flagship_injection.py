@@ -29,7 +29,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 def main() -> int:
     from core.experience_harvester import (
-        ExperienceHarvester, FlagshipManifestParser,
+        ExperienceHarvester,
+        FlagshipManifestParser,
     )
 
     output_root = PROJECT_ROOT / "output"

@@ -61,14 +61,14 @@ class LottieExporter:
 
     def create_animation(
         self,
-        layers: List[Dict[str, Any]],
+        layers: list[dict[str, Any]],
         output_path: str = "lottie_output.json",
         duration_sec: float = 3.0,
         fps: int = 30,
         width: int = 800,
         height: int = 600,
         bg_color: str = "#ffffff",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建 Lottie 动画
 
         Args:
@@ -338,7 +338,7 @@ class LottieExporter:
         return {"a": 0, "k": 0}
 
     @staticmethod
-    def _hex_to_lottie_color(hex_color: str) -> List[float]:
+    def _hex_to_lottie_color(hex_color: str) -> list[float]:
         hex_color = hex_color.lstrip("#")
         if len(hex_color) < 6:
             return [0.2, 0.2, 0.2]
@@ -347,7 +347,7 @@ class LottieExporter:
         b = int(hex_color[4:6], 16) / 255.0
         return [r, g, b]
 
-    def validate_lottie(self, lottie_path: str) -> Dict[str, Any]:
+    def validate_lottie(self, lottie_path: str) -> dict[str, Any]:
         """验证 Lottie JSON 文件"""
         try:
             with open(lottie_path, "r", encoding="utf-8") as f:

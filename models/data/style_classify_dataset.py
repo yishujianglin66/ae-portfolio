@@ -5,9 +5,9 @@
 参考 Antares 哲学：用高质量特征数据训练小模型，精悍够用
 """
 import json
+import logging
 import os
 import random
-import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -19,13 +19,13 @@ logger = logging.getLogger(__name__)
 @dataclass
 class StyleSample:
     """风格分类样本"""
-    features: List[float]
+    features: list[float]
     """特征向量（风格指纹）"""
     label: str
     """风格标签"""
     feature_dim: int = 0
     """特征维度"""
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
     """元数据"""
 
     def __post_init__(self):
@@ -81,8 +81,8 @@ class StyleClassifyDataset(BaseDataset):
             config: 数据集配置
         """
         super().__init__(config)
-        self._label_to_idx: Dict[str, int] = {}
-        self._idx_to_label: Dict[int, str] = {}
+        self._label_to_idx: dict[str, int] = {}
+        self._idx_to_label: dict[int, str] = {}
         self._feature_dim: int = 0
         self._build_label_mapping()
 
@@ -92,7 +92,7 @@ class StyleClassifyDataset(BaseDataset):
             self._label_to_idx[label] = idx
             self._idx_to_label[idx] = label
 
-    def load_data(self, data_path: str) -> List[StyleSample]:
+    def load_data(self, data_path: str) -> list[StyleSample]:
         """从 JSON 文件加载风格指纹数据
         
         Args:
@@ -117,7 +117,7 @@ class StyleClassifyDataset(BaseDataset):
         
         return samples
 
-    def _load_file(self, filepath: str) -> List[StyleSample]:
+    def _load_file(self, filepath: str) -> list[StyleSample]:
         """加载单个文件
         
         Args:
@@ -164,7 +164,7 @@ class StyleClassifyDataset(BaseDataset):
         
         return samples
 
-    def _dict_to_sample(self, data: Dict[str, Any]) -> Optional[StyleSample]:
+    def _dict_to_sample(self, data: dict[str, Any]) -> StyleSample | None:
         """将字典转换为 StyleSample
         
         Args:
@@ -202,7 +202,7 @@ class StyleClassifyDataset(BaseDataset):
         except Exception:
             return None
 
-    def preprocess(self, data: List[StyleSample]) -> List[StyleSample]:
+    def preprocess(self, data: list[StyleSample]) -> list[StyleSample]:
         """数据预处理
         
         标准化特征维度，归一化等。
@@ -238,7 +238,7 @@ class StyleClassifyDataset(BaseDataset):
         
         return processed
 
-    def _normalize_features(self, features: List[float]) -> List[float]:
+    def _normalize_features(self, features: list[float]) -> list[float]:
         """特征归一化（L2 归一化）
         
         Args:
@@ -278,7 +278,7 @@ class StyleClassifyDataset(BaseDataset):
         
         return True
 
-    def augment_sample(self, sample: StyleSample) -> List[StyleSample]:
+    def augment_sample(self, sample: StyleSample) -> list[StyleSample]:
         """数据增强 - 从单个样本生成多个变体
         
         增强策略：
@@ -311,7 +311,7 @@ class StyleClassifyDataset(BaseDataset):
         
         return augmented
 
-    def _add_gaussian_noise(self, sample: StyleSample) -> Optional[StyleSample]:
+    def _add_gaussian_noise(self, sample: StyleSample) -> StyleSample | None:
         """添加高斯噪声增强
         
         Args:
@@ -338,7 +338,7 @@ class StyleClassifyDataset(BaseDataset):
             logger.warning(f"Gaussian noise augmentation failed: {e}")
             return None
 
-    def _scale_features(self, sample: StyleSample) -> Optional[StyleSample]:
+    def _scale_features(self, sample: StyleSample) -> StyleSample | None:
         """特征缩放增强（模拟亮度/对比度变化）
         
         Args:
@@ -363,7 +363,7 @@ class StyleClassifyDataset(BaseDataset):
             logger.warning(f"Feature scale augmentation failed: {e}")
             return None
 
-    def _random_dropout(self, sample: StyleSample) -> Optional[StyleSample]:
+    def _random_dropout(self, sample: StyleSample) -> StyleSample | None:
         """随机特征丢弃增强
         
         Args:
@@ -392,7 +392,7 @@ class StyleClassifyDataset(BaseDataset):
             logger.warning(f"Feature dropout augmentation failed: {e}")
             return None
 
-    def get_label_distribution(self) -> Dict[str, int]:
+    def get_label_distribution(self) -> dict[str, int]:
         """获取标签分布统计
         
         Returns:
@@ -418,7 +418,7 @@ class StyleClassifyDataset(BaseDataset):
         """
         return self._label_to_idx.get(label, -1)
 
-    def idx_to_label(self, idx: int) -> Optional[str]:
+    def idx_to_label(self, idx: int) -> str | None:
         """索引转标签
         
         Args:

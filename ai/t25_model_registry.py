@@ -32,7 +32,7 @@ def _log(msg: str):
     print(f"[T25] {msg}", flush=True)
 
 
-def scan_models() -> List[Dict]:
+def scan_models() -> list[dict]:
     """扫描所有已训练模型"""
     models = []
 

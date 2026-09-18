@@ -1,6 +1,6 @@
-import subprocess
-import os
 import json
+import os
+import subprocess
 
 FFMPEG = json.load(open("c:/Users/Administrator/Desktop/AE-Knowledge-Vault/config/media-config.json", encoding="utf-8"))["tools"]["ffmpeg"]
 

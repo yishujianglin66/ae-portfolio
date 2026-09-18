@@ -9,8 +9,8 @@ test_pipeline_integration.py
   4. effect_knowledge_graph.recommend_style_enhanced
   5. AEAgentPipeline._enhance_with_nlu_parser 集成
 """
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -31,7 +31,7 @@ def assert_cond(condition, message):
 def test_nlu_parse_enhanced():
     """测试 NLUParser.parse_enhanced"""
     print("\n[Test] NLUParser.parse_enhanced")
-    from nlu_parser import NLUParser, IntentType
+    from nlu_parser import IntentType, NLUParser
 
     parser = NLUParser()
 
@@ -54,7 +54,7 @@ def test_nlu_parse_enhanced():
 def test_parameter_optimizer_enhanced():
     """测试 ParameterOptimizer.optimize_enhanced"""
     print("\n[Test] ParameterOptimizer.optimize_enhanced")
-    from parameter_optimizer import ParameterOptimizer, ParameterContext
+    from parameter_optimizer import ParameterContext, ParameterOptimizer
 
     optimizer = ParameterOptimizer()
 
@@ -84,10 +84,10 @@ def test_effect_knowledge_graph_enhanced():
     """测试 effect_knowledge_graph 增强版"""
     print("\n[Test] effect_knowledge_graph.search_effects_enhanced")
     from effect_knowledge_graph import (
-        search_effects_enhanced,
+        get_effect_count,
         recommend_style_enhanced,
         search_effects,
-        get_effect_count,
+        search_effects_enhanced,
     )
 
     # 1. 效果计数
@@ -117,6 +117,7 @@ def test_pipeline_understand_integration():
     """测试 AEAgentPipeline._enhance_with_nlu_parser 集成"""
     print("\n[Test] AEAgentPipeline._enhance_with_nlu_parser 集成")
     import logging
+
     from ae_agent_pipeline import AEAgentPipeline, UnderstandingResult
 
     # 使用 __new__ 创建实例（与 e2e 测试一致）

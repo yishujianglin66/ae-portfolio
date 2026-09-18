@@ -3,15 +3,16 @@
 ================================
 验证修复后的原生渲染能否输出 MP4 格式并保留 CDL 效果
 """
-import sys
 import os
+import sys
 import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.resolve_engine import ResolveAutomationEngine, CDLConfig
-
 import pytest
+
+from integrations.resolve_engine import CDLConfig, ResolveAutomationEngine
+
 pytestmark = pytest.mark.real_davinci  # 需真实 DaVinci Resolve 环境
 
 def test_native_render_with_transcode():
@@ -83,13 +84,13 @@ def test_native_render_with_transcode():
             print(f"{'='*70}")
             print(f"   Output: {output_path}")
             print(f"   Size: {size/1024/1024:.1f} MB")
-            print(f"   Format: MP4 (H.264)")
+            print("   Format: MP4 (H.264)")
             print(f"   Time: {elapsed:.1f}s")
             
             # 验证文件格式
             ext = os.path.splitext(output_path)[1].lower()
             if ext == '.mp4':
-                print(f"   [OK] Correct file extension: .mp4")
+                print("   [OK] Correct file extension: .mp4")
             else:
                 print(f"   [WARNING] Unexpected extension: {ext}")
             
@@ -98,17 +99,17 @@ def test_native_render_with_transcode():
             if os.path.exists(temp_mov):
                 print(f"   [WARNING] Temp file not cleaned up: {temp_mov}")
             else:
-                print(f"   [OK] Temp file cleaned up")
+                print("   [OK] Temp file cleaned up")
             
-            print(f"\nPlease verify:")
-            print(f"  1. File plays correctly in video player")
-            print(f"  2. CDL color grading is preserved (warm tones, high contrast)")
-            print(f"  3. Saturation is reduced (0.6x)")
-            print(f"  4. Quality matches the original .mov render")
+            print("\nPlease verify:")
+            print("  1. File plays correctly in video player")
+            print("  2. CDL color grading is preserved (warm tones, high contrast)")
+            print("  3. Saturation is reduced (0.6x)")
+            print("  4. Quality matches the original .mov render")
             
         else:
             print(f"\n[FAIL] Render failed or output too small: {size} bytes")
-            print(f"   Check Resolve UI for error messages")
+            print("   Check Resolve UI for error messages")
             
     except Exception as e:
         print(f"\n[ERROR] Render exception: {e}")

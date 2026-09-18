@@ -14,12 +14,12 @@ Style Migrator - 知识库驱动的智能风格迁移引擎
     match = migrator.match_style(fingerprint)
     jsx = migrator.generate_transfer_jsx(match, target_materials)
 """
+import json
 import os
 import sys
-import json
 import time
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
@@ -35,7 +35,7 @@ def log(msg: str, level: str = "INFO"):
 class StyleFingerprintExtractor:
     """从参考视频提取风格指纹"""
 
-    def extract(self, video_path: str) -> Dict[str, Any]:
+    def extract(self, video_path: str) -> dict[str, Any]:
         """提取完整风格指纹"""
         import cv2
         import numpy as np
@@ -207,7 +207,7 @@ class StyleFingerprintExtractor:
 
     def _generate_style_tags(self, brightness: float, saturation: float,
                              warmth: float, cut_rate: float,
-                             edge: float, bright_std: float) -> List[str]:
+                             edge: float, bright_std: float) -> list[str]:
         tags = []
         # 色彩标签
         if brightness < 40:
@@ -280,7 +280,7 @@ class KnowledgeBaseStyleMatcher:
             log(f"  知识库加载失败(非致命): {e}", "WARN")
             self._kb_recipes = {}
 
-    def match(self, fingerprint: Dict[str, Any]) -> Dict[str, Any]:
+    def match(self, fingerprint: dict[str, Any]) -> dict[str, Any]:
         """匹配最佳风格"""
         self._load_styles()
         self._load_kb_recipes()
@@ -317,7 +317,7 @@ class KnowledgeBaseStyleMatcher:
             "kb_transitions": self._kb_recipes.get("transitions", {}),
         }
 
-    def _score_style(self, template: Dict, tags: List[str],
+    def _score_style(self, template: dict, tags: list[str],
                      color_mood: str, rhythm: str, energy: str) -> float:
         score = 0.0
         keywords = template.get("keywords", [])
@@ -360,8 +360,8 @@ class KnowledgeBaseStyleMatcher:
 class StyleTransferJSXGenerator:
     """根据匹配结果生成风格迁移 JSX"""
 
-    def generate(self, match_result: Dict[str, Any],
-                 material_paths: List[str],
+    def generate(self, match_result: dict[str, Any],
+                 material_paths: list[str],
                  comp_name: str = "StyleTransfer") -> str:
         """生成风格迁移 JSX"""
         template = match_result.get("template", {})
@@ -406,21 +406,21 @@ class StyleTransferJSXGenerator:
             lines.append(f"  {op}.setValueAtTime({start + 0.3:.1f}, 100);")
             lines.append(f"  {op}.setValueAtTime({end - 0.3:.1f}, 100);")
             lines.append(f"  {op}.setValueAtTime({end:.1f}, 0);")
-            lines.append(f"}}")
+            lines.append("}")
         lines.append("")
 
         # 4. 应用风格效果
         effects = template.get("effects", [])
         if effects:
             lines.append(f"// --- Style Effects ({style_name}) ---")
-            lines.append(f"var adjLayer = comp.layers.addSolid([0.5,0.5,0.5], 'StyleAdj', W, H, 1, DUR);")
-            lines.append(f"adjLayer.adjustmentLayer = true;")
-            lines.append(f"adjLayer.moveToEnd();")
+            lines.append("var adjLayer = comp.layers.addSolid([0.5,0.5,0.5], 'StyleAdj', W, H, 1, DUR);")
+            lines.append("adjLayer.adjustmentLayer = true;")
+            lines.append("adjLayer.moveToEnd();")
             for fx in effects:
                 fx_name = fx.get("effectName", "")
                 settings = fx.get("settings", {})
                 if fx_name:
-                    lines.append(f"try {{")
+                    lines.append("try {")
                     lines.append(f"  var fx = adjLayer.Effects.addProperty('{fx_name}');")
                     for param, value in settings.items():
                         if isinstance(value, list):
@@ -430,7 +430,7 @@ class StyleTransferJSXGenerator:
                         else:
                             val_str = str(value)
                         lines.append(f"  try {{ fx.property('{param}').setValue({val_str}); }} catch(e) {{}}")
-                    lines.append(f"}} catch(e) {{}}")
+                    lines.append("} catch(e) {}")
             lines.append("")
 
         # 5. 文字风格 (根据 fingerprint 推断)
@@ -439,17 +439,17 @@ class StyleTransferJSXGenerator:
         text_color = "[1, 0.9, 0.7]" if warmth > 10 else "[0.9, 0.95, 1]" if warmth < -10 else "[1, 1, 1]"
         lines.append("// --- Text Style ---")
         lines.append(f"var title = comp.layers.addText('{style_name.upper()}');")
-        lines.append(f"var tdp = title.property('ADBE Text Properties').property('ADBE Text Document');")
-        lines.append(f"var td = tdp.value;")
-        lines.append(f"td.fontSize = 48;")
+        lines.append("var tdp = title.property('ADBE Text Properties').property('ADBE Text Document');")
+        lines.append("var td = tdp.value;")
+        lines.append("td.fontSize = 48;")
         lines.append(f"td.fillColor = {text_color};")
-        lines.append(f"td.justification = ParagraphJustification.CENTER_JUSTIFY;")
-        lines.append(f"tdp.setValue(td);")
-        lines.append(f"title.property('ADBE Transform Group').property('ADBE Position').setValue([W/2, H/2, 0]);")
-        lines.append(f"title.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0, 0);")
-        lines.append(f"title.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.5, 100);")
-        lines.append(f"title.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(3, 100);")
-        lines.append(f"title.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(3.5, 0);")
+        lines.append("td.justification = ParagraphJustification.CENTER_JUSTIFY;")
+        lines.append("tdp.setValue(td);")
+        lines.append("title.property('ADBE Transform Group').property('ADBE Position').setValue([W/2, H/2, 0]);")
+        lines.append("title.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0, 0);")
+        lines.append("title.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(0.5, 100);")
+        lines.append("title.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(3, 100);")
+        lines.append("title.property('ADBE Transform Group').property('ADBE Opacity').setValueAtTime(3.5, 0);")
         lines.append("")
 
         # 6. 结果
@@ -470,8 +470,8 @@ class StyleMigrator:
         self.generator = StyleTransferJSXGenerator()
 
     def migrate(self, reference_video: str,
-                target_materials: List[str] = None,
-                output_dir: str = None) -> Dict[str, Any]:
+                target_materials: list[str] = None,
+                output_dir: str = None) -> dict[str, Any]:
         """
         完整风格迁移流程。
 
@@ -534,7 +534,7 @@ class StyleMigrator:
             json.dump(report, f, ensure_ascii=False, indent=2)
 
         print("\n" + "=" * 60)
-        print(f"  风格迁移完成!")
+        print("  风格迁移完成!")
         print(f"  参考: {Path(reference_video).name}")
         print(f"  匹配: {match['style_name']} (score={match['style_score']})")
         print(f"  标签: {', '.join(fingerprint.get('style_tags', []))}")

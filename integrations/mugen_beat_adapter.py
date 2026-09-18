@@ -43,18 +43,18 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CutTimeline:
     """节奏切点时间轴"""
-    cut_points: List[float] = field(default_factory=list)  # 切点时间(秒)
-    beat_times: List[float] = field(default_factory=list)  # 原始节拍时间
+    cut_points: list[float] = field(default_factory=list)  # 切点时间(秒)
+    beat_times: list[float] = field(default_factory=list)  # 原始节拍时间
     bpm: float = 0.0                                       # 估算BPM
     events_speed: str = "1"                                # 切点速度
     total_duration: float = 0.0
     n_cuts: int = 0
     method: str = ""                                       # librosa / ffmpeg_energy
     error: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
-    def segment_durations(self) -> List[float]:
+    def segment_durations(self) -> list[float]:
         """每段时长"""
         if not self.cut_points:
             return []
@@ -95,7 +95,7 @@ class MugenBeatAdapter:
     def __init__(self, ffmpeg_bin: str = ""):
         self._ffmpeg = ffmpeg_bin or shutil.which("ffmpeg") or "ffmpeg"
         self._ffprobe = shutil.which("ffprobe") or "ffprobe"
-        self._librosa_available: Optional[bool] = None
+        self._librosa_available: bool | None = None
 
     @property
     def librosa_available(self) -> bool:
@@ -170,9 +170,9 @@ class MugenBeatAdapter:
     def screen_segments(
         self,
         video_path: str,
-        cut_points: List[float],
+        cut_points: list[float],
         min_contrast: float = 20.0,
-    ) -> List[SegmentQuality]:
+    ) -> list[SegmentQuality]:
         """筛选片段质量(借鉴 Mugen 的过滤逻辑)
         
         排除:
@@ -201,9 +201,9 @@ class MugenBeatAdapter:
     def suggest_cut_plan(
         self,
         audio_path: str,
-        video_paths: List[str],
+        video_paths: list[str],
         style: str = "energetic",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成完整的剪辑计划(供 plan 阶段使用)
         
         Args:
@@ -252,7 +252,7 @@ class MugenBeatAdapter:
     #  内部方法
     # ------------------------------------------------------------------
 
-    def _detect_beats_librosa(self, audio_path: str) -> Tuple[List[float], float]:
+    def _detect_beats_librosa(self, audio_path: str) -> tuple[list[float], float]:
         """使用 librosa 检测节拍"""
         try:
             import librosa
@@ -265,7 +265,7 @@ class MugenBeatAdapter:
             logger.debug(f"[Mugen] librosa beat detection failed: {e}")
             return [], 0.0
 
-    def _detect_beats_ffmpeg(self, audio_path: str) -> Tuple[List[float], float]:
+    def _detect_beats_ffmpeg(self, audio_path: str) -> tuple[list[float], float]:
         """降级: 使用 FFmpeg 提取音频能量，峰值检测模拟节拍"""
         try:
             # 提取 PCM 数据
@@ -328,8 +328,8 @@ class MugenBeatAdapter:
             return [], 0.0
 
     def _filter_by_energy(
-        self, audio_path: str, beat_times: List[float], threshold: float
-    ) -> List[float]:
+        self, audio_path: str, beat_times: list[float], threshold: float
+    ) -> list[float]:
         """过滤低能量节拍"""
         # 简化实现: 保留所有节拍(完整实现需要逐拍提取能量)
         # 在 librosa 模式下，beat_track 已经做了能量过滤
@@ -337,11 +337,11 @@ class MugenBeatAdapter:
 
     @staticmethod
     def _apply_speed(
-        beat_times: List[float],
+        beat_times: list[float],
         events_speed: str,
         offset: int,
         mode: str,
-    ) -> List[float]:
+    ) -> list[float]:
         """应用速度策略生成切点"""
         if not beat_times:
             return []

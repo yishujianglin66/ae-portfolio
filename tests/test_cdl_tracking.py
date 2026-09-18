@@ -3,15 +3,16 @@ CDL 效果保留验证测试
 =====================
 验证 Python 层追踪的 CDL 参数能否正确传递到 FFmpeg 渲染
 """
-import sys
 import os
+import sys
 import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.resolve_engine import ResolveAutomationEngine, CDLConfig
-
 import pytest
+
+from integrations.resolve_engine import CDLConfig, ResolveAutomationEngine
+
 pytestmark = pytest.mark.real_davinci  # 需真实 DaVinci Resolve 环境
 
 def test_cdl_tracking():
@@ -48,7 +49,7 @@ def test_cdl_tracking():
     )
     
     engine.apply_cdl(project_name, "CDL_TL", 1, strong_cdl)
-    print(f"Applied CDL:")
+    print("Applied CDL:")
     print(f"  Slope:   ({strong_cdl.slope[0]:.2f}, {strong_cdl.slope[1]:.2f}, {strong_cdl.slope[2]:.2f})")
     print(f"  Offset:  ({strong_cdl.offset[0]:.2f}, {strong_cdl.offset[1]:.2f}, {strong_cdl.offset[2]:.2f})")
     print(f"  Power:   ({strong_cdl.power[0]:.2f}, {strong_cdl.power[1]:.2f}, {strong_cdl.power[2]:.2f})")
@@ -105,8 +106,8 @@ def test_cdl_tracking():
     if exists and size > 100000:  # >100KB
         print(f"✅ FFmpeg render successful: {size/1024/1024:.1f} MB")
         print(f"   Output: {output_path}")
-        print(f"\n📺 Please play this video to verify color grading is applied:")
-        print(f"   Expected: Higher contrast, warmer tones, lower saturation")
+        print("\n📺 Please play this video to verify color grading is applied:")
+        print("   Expected: Higher contrast, warmer tones, lower saturation")
     else:
         print(f"❌ FFmpeg render failed or output too small: {size} bytes")
     

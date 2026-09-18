@@ -154,7 +154,7 @@ def main():
         print(f"  {label:<23} {orig:>6} {target:>6}  {action}")
     
     print(f"\n{'=' * 60}")
-    print(f"再平衡完成!")
+    print("再平衡完成!")
     print(f"  输出: {OUTPUT_PATH}")
     print(f"  总样本数: {len(balanced_samples)}")
     

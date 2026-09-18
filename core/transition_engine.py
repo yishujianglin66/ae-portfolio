@@ -26,14 +26,13 @@ Transition Engine - 跨平台过渡效果统一引擎
 
 from __future__ import annotations
 
-import math
 import json
+import math
 import random
+from dataclasses import asdict, dataclass, field
 from enum import Enum
-from dataclasses import dataclass, field, asdict
-from typing import Any, Dict, List, Optional, Tuple, Callable, Union
 from pathlib import Path
-
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # ===========================================================================
 # 1. 过渡分类系统
@@ -101,12 +100,12 @@ class TransitionPreset:
     style: TransitionStyle
     duration: float = 0.5
     easing: str = "ease_in_out"
-    software_support: List[SoftwareTarget] = field(default_factory=list)
-    params: Dict[str, Any] = field(default_factory=dict)
+    software_support: list[SoftwareTarget] = field(default_factory=list)
+    params: dict[str, Any] = field(default_factory=dict)
     description: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         result = asdict(self)
         result["category"] = self.category.value
@@ -115,7 +114,7 @@ class TransitionPreset:
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "TransitionPreset":
+    def from_dict(cls, data: dict[str, Any]) -> "TransitionPreset":
         """从字典创建预设"""
         data = data.copy()
         data["category"] = TransitionCategory(data["category"])
@@ -135,7 +134,7 @@ class EasingEngine:
     """
 
     def __init__(self) -> None:
-        self._easing_functions: Dict[str, Callable[[float], float]] = {
+        self._easing_functions: dict[str, Callable[[float], float]] = {
             "linear": self.linear,
             "ease_in": self.ease_in_quad,
             "ease_out": self.ease_out_quad,
@@ -207,7 +206,7 @@ class EasingEngine:
             return self.linear
         return func
 
-    def get_available_easings(self) -> List[str]:
+    def get_available_easings(self) -> list[str]:
         """获取所有可用的缓动类型名称"""
         return list(self._easing_functions.keys())
 
@@ -399,7 +398,7 @@ class EasingEngine:
     # -----------------------------------------------------------------------
 
     @staticmethod
-    def bezier_curve(t: float, p1: Tuple[float, float], p2: Tuple[float, float]) -> float:
+    def bezier_curve(t: float, p1: tuple[float, float], p2: tuple[float, float]) -> float:
         """三次贝塞尔曲线
 
         Args:
@@ -413,7 +412,7 @@ class EasingEngine:
         x1, y1 = p1
         x2, y2 = p2
 
-        def _cubic_bezier(tt: float) -> Tuple[float, float]:
+        def _cubic_bezier(tt: float) -> tuple[float, float]:
             cx = 3.0 * x1
             bx = 3.0 * (x2 - x1) - cx
             ax = 1.0 - cx - bx
@@ -493,7 +492,7 @@ class EasingEngine:
         end_value: float,
         frame_count: int,
         easing_type: str = "ease_in_out",
-    ) -> List[float]:
+    ) -> list[float]:
         """生成关键帧数值序列
 
         Args:
@@ -528,7 +527,7 @@ class AETransitionEngine:
     生成各种 AE 过渡效果的 JSX 脚本代码，支持 50+ 过渡类型。
     """
 
-    def __init__(self, easing_engine: Optional[EasingEngine] = None) -> None:
+    def __init__(self, easing_engine: EasingEngine | None = None) -> None:
         self.easing = easing_engine or EasingEngine()
         self.comp_width = 1920
         self.comp_height = 1080
@@ -582,7 +581,7 @@ class AETransitionEngine:
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建交叉淡化过渡"""
         end_time = start_time + duration
@@ -612,7 +611,7 @@ toLyr.property("Opacity").setEaseAtKey(2, KeyframeInterpolationType.{easing});
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建溶解过渡"""
         end_time = start_time + duration
@@ -645,7 +644,7 @@ fromLyr.property("Opacity").setValueAtTime({end_time}, 0);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建各种擦除过渡
 
@@ -670,12 +669,12 @@ fromLyr.property("Opacity").setValueAtTime({end_time}, 0);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Dict[str, Any],
+        params: dict[str, Any],
     ) -> str:
         wipe_type = params.get("wipe_type", "linear")
         return self.create_wipe_types(wipe_type, from_layer, to_layer, start_time, duration, params)
 
-    def _wipe_linear(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _wipe_linear(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         angle = p.get("angle", 90)
         feather = p.get("feather", 5)
@@ -690,7 +689,7 @@ fx.property("Wipe Angle").setValue({angle});
 fx.property("Feather").setValue({feather});
 """
 
-    def _wipe_radial(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _wipe_radial(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Radial Wipe Transition
@@ -705,7 +704,7 @@ fx.property("Wipe").setValue({p.get("wipe_direction", 0)});
 fx.property("Feather").setValue({p.get("feather", 5)});
 """
 
-    def _wipe_venetian(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _wipe_venetian(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Venetian Blinds Transition
@@ -719,7 +718,7 @@ fx.property("Width").setValue({p.get("width", 30)});
 fx.property("Feather").setValue({p.get("feather", 2)});
 """
 
-    def _wipe_gradient(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _wipe_gradient(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Gradient Wipe Transition
@@ -732,7 +731,7 @@ fx.property("Transition Softness").setValue({p.get("softness", 10)});
 fx.property("Gradient Placement").setValue({p.get("placement", 0)});
 """
 
-    def _wipe_iris(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _wipe_iris(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Iris Wipe Transition (Circle)
@@ -747,7 +746,7 @@ fx.property("Inner Radius").setValue({p.get("inner_radius", 50)});
 fx.property("Feather").setValue({p.get("feather", 5)});
 """
 
-    def _wipe_star(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _wipe_star(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         points = p.get("points", 5)
         return f"""
@@ -772,7 +771,7 @@ fx.property("Inner Color").setValue([1,1,1]);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建滑动类过渡
 
@@ -793,7 +792,7 @@ fx.property("Inner Color").setValue([1,1,1]);
     def _create_slide_by_preset(self, fl, tl, st, dur, p):
         return self.create_slide_types(p.get("slide_type", "push"), fl, tl, st, dur, p)
 
-    def _slide_push(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _slide_push(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         direction = p.get("direction", "right")
         offset_map = {
@@ -818,7 +817,7 @@ toLyr.property("Position").setValueAtTime({st}, [{self.comp_width/2 + ox}, {self
 toLyr.property("Position").setValueAtTime({et}, [{self.comp_width/2}, {self.comp_height/2}]);
 """
 
-    def _slide_slide(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _slide_slide(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         direction = p.get("direction", "left")
         offset_map = {
@@ -834,7 +833,7 @@ toLyr.property("Position").setValueAtTime({st}, [{self.comp_width/2 + ox}, {self
 toLyr.property("Position").setValueAtTime({et}, [{self.comp_width/2}, {self.comp_height/2}]);
 """
 
-    def _slide_split(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _slide_split(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Split Transition (split from center)
@@ -863,7 +862,7 @@ rightHalf.property("Position").setValueAtTime({st}, [{self.comp_width/2}, {self.
 rightHalf.property("Position").setValueAtTime({et}, [{self.comp_width/2 + self.comp_width/2}, {self.comp_height/2}]);
 """
 
-    def _slide_swap(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _slide_swap(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         mid_t = st + dur / 2
         return f"""
@@ -889,7 +888,7 @@ toLyr.property("Opacity").setValueAtTime({st}, 0);
 toLyr.property("Opacity").setValueAtTime({et}, 100);
 """
 
-    def _slide_rotate(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _slide_rotate(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Rotate Slide Transition
@@ -918,7 +917,7 @@ toLyr.property("Opacity").setValueAtTime({et}, 100);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建缩放过渡"""
         end_time = start_time + duration
@@ -965,7 +964,7 @@ toBlur.property("Blur Dimensions").setValue(1);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建 3D 过渡效果
 
@@ -985,7 +984,7 @@ toBlur.property("Blur Dimensions").setValue(1);
     def _create_3d_by_preset(self, fl, tl, st, dur, p):
         return self.create_3d_transitions(p.get("type", "cube_flip"), fl, tl, st, dur, p)
 
-    def _3d_cube_flip(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _3d_cube_flip(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // 3D Cube Flip Transition
@@ -1029,7 +1028,7 @@ toLyr.property("Opacity").setValueAtTime({st + dur/2}, 0);
 toLyr.property("Opacity").setValueAtTime({et}, 100);
 """
 
-    def _3d_page_turn(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _3d_page_turn(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Page Turn Transition (CC Page Turn style)
@@ -1056,7 +1055,7 @@ if (fx) {{
 }}
 """
 
-    def _3d_door(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _3d_door(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // 3D Door Transition
@@ -1079,7 +1078,7 @@ fromLyr.property("Y Rotation").setValueAtTime({et}, {p.get("rotation", -90)});
 toLyr.property("Opacity").setValue(100);
 """
 
-    def _3d_card_wipe(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _3d_card_wipe(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         rows = p.get("rows", 5)
         cols = p.get("columns", 5)
@@ -1111,7 +1110,7 @@ if (fx) {{
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建光效类过渡
 
@@ -1130,7 +1129,7 @@ if (fx) {{
     def _create_glow_by_preset(self, fl, tl, st, dur, p):
         return self.create_glow_transition(p.get("type", "light_leak"), fl, tl, st, dur, p)
 
-    def _glow_light_leak(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _glow_light_leak(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         mid_t = st + dur / 2
         return f"""
@@ -1162,7 +1161,7 @@ toLyr.property("Opacity").setValueAtTime({st}, 0);
 toLyr.property("Opacity").setValueAtTime({et}, 100);
 """
 
-    def _glow_optical_flare(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _glow_optical_flare(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         mid_t = st + dur / 2
         return f"""
@@ -1194,7 +1193,7 @@ toLyr.property("Opacity").setValueAtTime({st}, 0);
 toLyr.property("Opacity").setValueAtTime({et}, 100);
 """
 
-    def _glow_lens_flare(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _glow_lens_flare(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         return self._glow_optical_flare(fl, tl, st, dur, p)
 
     # -----------------------------------------------------------------------
@@ -1208,7 +1207,7 @@ toLyr.property("Opacity").setValueAtTime({et}, 100);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建粒子类过渡
 
@@ -1227,7 +1226,7 @@ toLyr.property("Opacity").setValueAtTime({et}, 100);
     def _create_particle_by_preset(self, fl, tl, st, dur, p):
         return self.create_particle_transition(p.get("type", "particle_dissolve"), fl, tl, st, dur, p)
 
-    def _particle_dissolve(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _particle_dissolve(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Particle Dissolve Transition (using Shatter)
@@ -1255,7 +1254,7 @@ fromLyr.property("Opacity").setValueAtTime({et}, 0);
 toLyr.property("Opacity").setValue(100);
 """
 
-    def _particle_pixel_polly(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _particle_pixel_polly(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Pixel Polly / Scatterize Transition
@@ -1284,7 +1283,7 @@ fromLyr.property("Opacity").setValueAtTime({et}, 0);
 toLyr.property("Opacity").setValue(100);
 """
 
-    def _particle_card_dance(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _particle_card_dance(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         return self._3d_card_wipe(fl, tl, st, dur, p)
 
     # -----------------------------------------------------------------------
@@ -1298,7 +1297,7 @@ toLyr.property("Opacity").setValue(100);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建扭曲类过渡
 
@@ -1317,7 +1316,7 @@ toLyr.property("Opacity").setValue(100);
     def _create_distort_by_preset(self, fl, tl, st, dur, p):
         return self.create_distort_transition(p.get("type", "turbulent_displace"), fl, tl, st, dur, p)
 
-    def _distort_displacement(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _distort_displacement(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Displacement Map Transition
@@ -1361,7 +1360,7 @@ toLyr.property("Opacity").setValueAtTime({st}, 0);
 toLyr.property("Opacity").setValueAtTime({et}, 100);
 """
 
-    def _distort_turbulent(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _distort_turbulent(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         mid_t = st + dur / 2
         return f"""
@@ -1396,7 +1395,7 @@ toLyr.property("Opacity").setValueAtTime({st}, 0);
 toLyr.property("Opacity").setValueAtTime({et}, 100);
 """
 
-    def _distort_warp(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _distort_warp(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Warp / Mesh Warp Transition
@@ -1429,7 +1428,7 @@ toLyr.property("Opacity").setValue(100);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建故障类过渡
 
@@ -1448,7 +1447,7 @@ toLyr.property("Opacity").setValue(100);
     def _create_glitch_by_preset(self, fl, tl, st, dur, p):
         return self.create_glitch_transition(p.get("type", "rgb_split"), fl, tl, st, dur, p)
 
-    def _glitch_rgb_split(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _glitch_rgb_split(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // RGB Split Glitch Transition
@@ -1501,7 +1500,7 @@ toLyr.property("Opacity").setValueAtTime({st}, 0);
 toLyr.property("Opacity").setValueAtTime({et}, 100);
 """
 
-    def _glitch_digital_noise(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _glitch_digital_noise(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         mid_t = st + dur / 2
         return f"""
@@ -1532,7 +1531,7 @@ toLyr.property("Opacity").setValueAtTime({st}, 0);
 toLyr.property("Opacity").setValueAtTime({et}, 100);
 """
 
-    def _glitch_vhs(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _glitch_vhs(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // VHS Glitch Transition
@@ -1585,7 +1584,7 @@ toLyr.property("Opacity").setValueAtTime({et}, 100);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建形状遮罩过渡
 
@@ -1605,7 +1604,7 @@ toLyr.property("Opacity").setValueAtTime({et}, 100);
     def _create_shape_by_preset(self, fl, tl, st, dur, p):
         return self.create_shape_transition(p.get("type", "circle"), fl, tl, st, dur, p)
 
-    def _shape_circle(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _shape_circle(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         max_radius = math.sqrt(self.comp_width**2 + self.comp_height**2) / 2 + 100
         return f"""
@@ -1641,7 +1640,7 @@ function ellipsePath(center, w, h) {{
 }}
 """
 
-    def _shape_diamond(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _shape_diamond(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         max_size = max(self.comp_width, self.comp_height)
         return f"""
@@ -1673,7 +1672,7 @@ mask.property("ADBE Mask Shape").setValueAtTime({et},
 mask.property("ADBE Mask Feather").setValue({p.get("feather", 15)});
 """
 
-    def _shape_heart(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _shape_heart(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Heart Shape Transition
@@ -1705,7 +1704,7 @@ mask.property("ADBE Mask Shape").setValueAtTime({et},
 mask.property("ADBE Mask Feather").setValue({p.get("feather", 10)});
 """
 
-    def _shape_custom(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _shape_custom(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         mask_path = p.get("mask_path", [])
         et = st + dur
         return f"""
@@ -1749,7 +1748,7 @@ mask.property("ADBE Mask Feather").setValue({p.get("feather", 5)});
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建文字过渡效果
 
@@ -1767,7 +1766,7 @@ mask.property("ADBE Mask Feather").setValue({p.get("feather", 5)});
     def _create_text_by_preset(self, fl, tl, st, dur, p):
         return self.create_text_transition(p.get("type", "typewriter_reveal"), fl, tl, st, dur, p)
 
-    def _text_typewriter(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _text_typewriter(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Typewriter Text Reveal Transition
@@ -1795,7 +1794,7 @@ fromLyr.property("Opacity").setValueAtTime({st}, 100);
 fromLyr.property("Opacity").setValueAtTime({et}, 0);
 """
 
-    def _text_wipe(self, fl: str, tl: str, st: float, dur: float, p: Dict) -> str:
+    def _text_wipe(self, fl: str, tl: str, st: float, dur: float, p: dict) -> str:
         et = st + dur
         return f"""
 // Text Wipe Transition (linear wipe on text layer)
@@ -1823,7 +1822,7 @@ toLyr.property("Opacity").setValue(100);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建颜色过渡（闪白/闪黑/色彩渐变）"""
         et = start_time + duration
@@ -1856,7 +1855,7 @@ toLyr.property("Opacity").setValueAtTime({et}, 100);
         to_layer: str,
         start_time: float,
         duration: float,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """创建运动模糊过渡"""
         et = start_time + duration
@@ -1890,7 +1889,7 @@ toLyr.property("Opacity").setValueAtTime({start_time}, 0);
 toLyr.property("Opacity").setValueAtTime({et}, 100);
 """
 
-    def generate_jsx_script(self, transitions: List[Dict[str, Any]]) -> str:
+    def generate_jsx_script(self, transitions: list[dict[str, Any]]) -> str:
         """生成完整的 AE JSX 脚本
 
         Args:
@@ -2045,7 +2044,7 @@ if (transition) {{
         self,
         from_clip: str,
         to_clip: str,
-        effect_chain: List[Dict[str, Any]],
+        effect_chain: list[dict[str, Any]],
         duration: float = 0.5,
     ) -> str:
         """创建自定义过渡（调整图层 + 效果链）
@@ -2107,7 +2106,7 @@ if (transition) {{
     def create_transition_preset(
         self,
         preset_name: str,
-        effects: List[Dict[str, Any]],
+        effects: list[dict[str, Any]],
         duration: float = 0.5,
     ) -> str:
         """创建自定义过渡预设"""
@@ -2151,7 +2150,7 @@ for (var i = 1; i < clipCount - 1; i++) {{
 }}
 """
 
-    def generate_pr_script(self, operations: List[Dict[str, Any]]) -> str:
+    def generate_pr_script(self, operations: list[dict[str, Any]]) -> str:
         """生成完整的 Premiere Pro 脚本"""
         script = """
 // Premiere Pro Transition Script
@@ -2298,7 +2297,7 @@ finally:
         Returns:
             Resolve Color 脚本
         """
-        return f'''
+        return '''
 # Resolve Color Page Transition Nodes
 import DaVinciResolveScript as dvr
 
@@ -2319,7 +2318,7 @@ if timeline:
     def generate_setting_file(
         self,
         transition_name: str,
-        nodes_config: Dict[str, Any],
+        nodes_config: dict[str, Any],
     ) -> str:
         """生成 Fusion .setting 文件内容
 
@@ -2339,7 +2338,7 @@ if timeline:
         }
         return json.dumps(setting, indent=2)
 
-    def generate_resolve_script(self, operations: List[Dict[str, Any]]) -> str:
+    def generate_resolve_script(self, operations: list[dict[str, Any]]) -> str:
         """生成完整的 Resolve Python 脚本"""
         script = '''
 # ============================================================
@@ -2390,10 +2389,10 @@ class BlenderTransitionEngine:
     def create_camera_transition(
         self,
         cam_name: str,
-        from_position: Tuple[float, float, float],
-        to_position: Tuple[float, float, float],
-        from_rotation: Tuple[float, float, float],
-        to_rotation: Tuple[float, float, float],
+        from_position: tuple[float, float, float],
+        to_position: tuple[float, float, float],
+        from_rotation: tuple[float, float, float],
+        to_rotation: tuple[float, float, float],
         start_frame: int,
         duration_frames: int,
         easing: str = "BEZIER",
@@ -2593,7 +2592,7 @@ if obj:
     pass
 '''
 
-    def generate_blender_script(self, operations: List[Dict[str, Any]]) -> str:
+    def generate_blender_script(self, operations: list[dict[str, Any]]) -> str:
         """生成完整的 Blender Python 脚本"""
         script = '''
 # ============================================================
@@ -2735,7 +2734,7 @@ class FFmpegTransitionEngine:
 
     def batch_transcode_with_transitions(
         self,
-        input_files: List[str],
+        input_files: list[str],
         output: str,
         transition_duration: float = 0.5,
         transition_type: str = "fade",
@@ -2795,7 +2794,7 @@ class FFmpegTransitionEngine:
 
     def generate_ffmpeg_command(
         self,
-        config: Dict[str, Any],
+        config: dict[str, Any],
     ) -> str:
         """根据配置生成 FFmpeg 命令
 
@@ -2833,7 +2832,7 @@ class PresetLibrary:
     """
 
     def __init__(self) -> None:
-        self._presets: Dict[str, TransitionPreset] = {}
+        self._presets: dict[str, TransitionPreset] = {}
         self._build_builtin_presets()
 
     def _build_builtin_presets(self) -> None:
@@ -4098,24 +4097,24 @@ class PresetLibrary:
         for preset in presets:
             self._presets[preset.id] = preset
 
-    def get_preset(self, preset_id: str) -> Optional[TransitionPreset]:
+    def get_preset(self, preset_id: str) -> TransitionPreset | None:
         """根据ID获取预设"""
         return self._presets.get(preset_id)
 
-    def list_all_presets(self) -> List[TransitionPreset]:
+    def list_all_presets(self) -> list[TransitionPreset]:
         """列出所有预设"""
         return list(self._presets.values())
 
     def search_presets(
         self,
-        category: Optional[TransitionCategory] = None,
-        style: Optional[TransitionStyle] = None,
-        software: Optional[SoftwareTarget] = None,
-        max_duration: Optional[float] = None,
-        min_duration: Optional[float] = None,
-        tags: Optional[List[str]] = None,
-        query: Optional[str] = None,
-    ) -> List[TransitionPreset]:
+        category: TransitionCategory | None = None,
+        style: TransitionStyle | None = None,
+        software: SoftwareTarget | None = None,
+        max_duration: float | None = None,
+        min_duration: float | None = None,
+        tags: list[str] | None = None,
+        query: str | None = None,
+    ) -> list[TransitionPreset]:
         """搜索预设
 
         Args:
@@ -4173,10 +4172,10 @@ class PresetLibrary:
     def get_recommendation(
         self,
         context: str = "default",
-        mood: Optional[str] = None,
-        scene_type: Optional[str] = None,
-        music_genre: Optional[str] = None,
-    ) -> List[Tuple[TransitionPreset, float]]:
+        mood: str | None = None,
+        scene_type: str | None = None,
+        music_genre: str | None = None,
+    ) -> list[tuple[TransitionPreset, float]]:
         """获取预设推荐
 
         Args:
@@ -4188,7 +4187,7 @@ class PresetLibrary:
         Returns:
             (预设, 置信度) 元组列表
         """
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
 
         mood_style_map = {
             "calm": TransitionStyle.SOFT,
@@ -4258,9 +4257,9 @@ class PresetLibrary:
 
         return ranked[:10]
 
-    def get_presets_by_category(self) -> Dict[TransitionCategory, List[TransitionPreset]]:
+    def get_presets_by_category(self) -> dict[TransitionCategory, list[TransitionPreset]]:
         """按分类组织预设"""
-        result: Dict[TransitionCategory, List[TransitionPreset]] = {}
+        result: dict[TransitionCategory, list[TransitionPreset]] = {}
         for preset in self._presets.values():
             if preset.category not in result:
                 result[preset.category] = []
@@ -4282,7 +4281,7 @@ class TransitionAI:
     基于音乐、场景、类型等上下文智能推荐过渡效果。
     """
 
-    def __init__(self, preset_library: Optional[PresetLibrary] = None) -> None:
+    def __init__(self, preset_library: PresetLibrary | None = None) -> None:
         self.library = preset_library or PresetLibrary()
 
     def recommend_by_music(
@@ -4291,7 +4290,7 @@ class TransitionAI:
         energy: float = 0.5,
         mood: str = "neutral",
         genre: str = "pop",
-    ) -> List[Tuple[TransitionPreset, float]]:
+    ) -> list[tuple[TransitionPreset, float]]:
         """基于音乐特征推荐过渡
 
         Args:
@@ -4331,7 +4330,7 @@ class TransitionAI:
         scene_type: str = "generic",
         motion_level: float = 0.5,
         scene_dynamics: str = "medium",
-    ) -> List[Tuple[TransitionPreset, float]]:
+    ) -> list[tuple[TransitionPreset, float]]:
         """基于场景内容推荐过渡
 
         Args:
@@ -4363,7 +4362,7 @@ class TransitionAI:
     def recommend_by_genre(
         self,
         video_genre: str = "vlog",
-    ) -> List[Tuple[TransitionPreset, float]]:
+    ) -> list[tuple[TransitionPreset, float]]:
         """基于视频类型推荐过渡
 
         Args:
@@ -4412,8 +4411,8 @@ class TransitionAI:
 
     def auto_pick_transition(
         self,
-        context: Dict[str, Any],
-    ) -> Tuple[Optional[TransitionPreset], float]:
+        context: dict[str, Any],
+    ) -> tuple[TransitionPreset | None, float]:
         """智能选择过渡
 
         Args:
@@ -4422,7 +4421,7 @@ class TransitionAI:
         Returns:
             (最佳预设, 置信度)
         """
-        all_scores: Dict[str, float] = {}
+        all_scores: dict[str, float] = {}
 
         if "bpm" in context or "mood" in context or "genre" in context:
             music_recs = self.recommend_by_music(
@@ -4459,10 +4458,10 @@ class TransitionAI:
 
     def beat_sync_transitions(
         self,
-        beat_times: List[float],
-        video_clips: List[Dict[str, Any]],
+        beat_times: list[float],
+        video_clips: list[dict[str, Any]],
         default_preset_id: str = "crossfade_standard",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """将过渡点同步到节拍
 
         Args:
@@ -4501,8 +4500,8 @@ class TransitionAI:
         total_duration: float,
         num_transitions: int,
         pattern: str = "even",
-        beat_times: Optional[List[float]] = None,
-    ) -> List[float]:
+        beat_times: list[float] | None = None,
+    ) -> list[float]:
         """生成过渡时间点映射
 
         Args:
@@ -4703,7 +4702,7 @@ class UnifiedTransitionAPI:
     def batch_apply(
         self,
         software: SoftwareTarget,
-        transitions: List[Dict[str, Any]],
+        transitions: list[dict[str, Any]],
     ) -> str:
         """批量应用过渡
 
@@ -4774,7 +4773,7 @@ class UnifiedTransitionAPI:
         self,
         preset: TransitionPreset,
         target_software: SoftwareTarget,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """转换预设到目标软件格式
 
         Args:
@@ -4823,7 +4822,7 @@ class UnifiedTransitionAPI:
         }
         return mapping.get(preset.id, "fade")
 
-    def _map_preset_to_pr(self, preset: TransitionPreset) -> Optional[str]:
+    def _map_preset_to_pr(self, preset: TransitionPreset) -> str | None:
         """将预设映射到 Premiere Pro 内置过渡"""
         mapping = {
             "crossfade_standard": "cross_dissolve",
@@ -4834,7 +4833,7 @@ class UnifiedTransitionAPI:
         }
         return mapping.get(preset.id)
 
-    def _map_preset_to_resolve(self, preset: TransitionPreset) -> Optional[str]:
+    def _map_preset_to_resolve(self, preset: TransitionPreset) -> str | None:
         """将预设映射到 DaVinci Resolve 内置过渡"""
         mapping = {
             "crossfade_standard": "Cross Dissolve",
@@ -4843,7 +4842,7 @@ class UnifiedTransitionAPI:
         }
         return mapping.get(preset.id)
 
-    def get_supported_software(self, preset_id: str) -> List[SoftwareTarget]:
+    def get_supported_software(self, preset_id: str) -> list[SoftwareTarget]:
         """获取预设支持的软件列表"""
         preset = self.preset_library.get_preset(preset_id)
         if not preset:
@@ -4853,12 +4852,12 @@ class UnifiedTransitionAPI:
     def auto_generate(
         self,
         software: SoftwareTarget,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         from_item: str,
         to_item: str,
         start_time: float,
         duration: float,
-    ) -> Tuple[str, Optional[TransitionPreset]]:
+    ) -> tuple[str, TransitionPreset | None]:
         """自动生成过渡代码
 
         使用AI推荐最佳预设并生成代码。
@@ -4942,14 +4941,14 @@ def main() -> None:
             duration=0.5,
         )
         print(f"    生成 JSX 代码长度: {len(jsx)} 字符")
-        print(f"    前3行预览:")
+        print("    前3行预览:")
         for line in jsx.strip().split("\n")[:3]:
             print(f"      {line.strip()}")
 
     print("\n【7】AI 智能推荐 (音乐: energetic/edm)...")
     ai = TransitionAI(library)
     recs = ai.recommend_by_music(bpm=128, energy=0.8, mood="energetic", genre="edm")
-    print(f"    Top 5 推荐:")
+    print("    Top 5 推荐:")
     for i, (preset, score) in enumerate(recs[:5], 1):
         print(f"      {i}. {preset.name:20s} (置信度: {score:.2f}, 分类: {preset.category.value})")
 

@@ -1,10 +1,10 @@
 """
 Param optimization model training script
 """
-import os
-import sys
 import json
 import logging
+import os
+import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -22,10 +22,10 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    from models.data.param_optim_dataset import ParamOptimDataset, DatasetConfig
-    from models.training.param_optim_trainer import ParamOptimTrainer, TrainingConfig
     from models.configs.param_optim_config import ParamOptimConfig
-    from models.deployment.model_registry import load_registry, ModelInfo
+    from models.data.param_optim_dataset import DatasetConfig, ParamOptimDataset
+    from models.deployment.model_registry import ModelInfo, load_registry
+    from models.training.param_optim_trainer import ParamOptimTrainer, TrainingConfig
 
     logger.info('===== Training Started =====')
 

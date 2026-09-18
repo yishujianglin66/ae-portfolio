@@ -9,12 +9,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "13-素材获取与搜索" / "03-AI语义搜索"))
 
 from vector_store import (
-    load_index,
-    save_index,
-    merge_indexes,
-    validate_index,
-    get_index_stats,
     clean_index,
+    get_index_stats,
+    load_index,
+    merge_indexes,
+    save_index,
+    validate_index,
 )
 
 

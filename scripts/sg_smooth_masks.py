@@ -1,8 +1,10 @@
 """M2-B (P3): SG 时域滤波压全链路 J500 — 对 refine 后 mask 沿时间轴 Savitzky-Golay 平滑"""
-import sys, time
+import sys
+import time
 from pathlib import Path
-import numpy as np
+
 import cv2
+import numpy as np
 
 try:
     from scipy.signal import savgol_filter

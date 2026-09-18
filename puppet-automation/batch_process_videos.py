@@ -1,8 +1,8 @@
 """Batch video processing script - 4K upscale + cinematic filters."""
 import asyncio
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
@@ -71,7 +71,7 @@ async def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Process videos
-    print(f"\n开始处理...")
+    print("\n开始处理...")
     service = BeatVideoService()
     
     styles = ["teal_orange", "warm_cinematic", "cool_mood", "vintage_film", "noir"]

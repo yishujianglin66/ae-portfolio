@@ -25,9 +25,9 @@ SALIENCY_SCRIPT = PROJECT_ROOT / "scripts" / "auto_saliency_rerun.py"
 
 
 def main():
-    print(f"[Watcher] 启动监控...")
+    print("[Watcher] 启动监控...")
     print(f"[Watcher] 等待 {RESULTS_FILE} 生成")
-    print(f"[Watcher] 批量重跑完成后将自动调用显著性重跑")
+    print("[Watcher] 批量重跑完成后将自动调用显著性重跑")
     print(f"[Watcher] 完成标记: {SALIENCY_DONE}")
     print()
 
@@ -40,12 +40,12 @@ def main():
         # 检查批量重跑是否完成
         if RESULTS_FILE.exists():
             print(f"[Watcher] 检测到结果文件! (耗时 {elapsed/60:.1f} 分钟)")
-            print(f"[Watcher] 等待 10 秒确保文件写入完成...")
+            print("[Watcher] 等待 10 秒确保文件写入完成...")
             time.sleep(10)
 
             # 检查显著性重跑是否已完成
             if SALIENCY_DONE.exists():
-                print(f"[Watcher] 显著性重跑已完成，退出")
+                print("[Watcher] 显著性重跑已完成，退出")
                 return
 
             # 启动显著性重跑
@@ -70,7 +70,7 @@ def main():
 
         # 检查超时（3 小时）
         if elapsed > 3 * 3600:
-            print(f"[Watcher] 超时（3 小时），退出")
+            print("[Watcher] 超时（3 小时），退出")
             return
 
         # 显示进度

@@ -15,7 +15,7 @@ import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, PropertyMock, patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -23,9 +23,9 @@ from career_growth_analyzer import (
     CareerGrowthEngine,
     DailyRecord,
     MonthlyReport,
+    generate_monthly_report,
     get_engine,
     record_day,
-    generate_monthly_report,
 )
 
 

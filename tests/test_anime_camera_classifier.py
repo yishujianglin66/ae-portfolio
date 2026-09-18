@@ -301,7 +301,7 @@ class TestSchemaAutoDetectionEdgeCases:
 
     def test_no_meta_json_falls_back_to_coarse_labels(self, tmp_path):
         """meta.json 不存在 → 使用默认 COARSE_LABELS，schema 自动为 coarse。"""
-        from models.anime_camera_classifier import AnimeCameraClassifier, COARSE_LABELS
+        from models.anime_camera_classifier import COARSE_LABELS, AnimeCameraClassifier
 
         model_dir = tmp_path / "no_meta_dir"
         model_dir.mkdir()
@@ -314,7 +314,7 @@ class TestSchemaAutoDetectionEdgeCases:
 
     def test_malformed_json_falls_back_to_coarse(self, tmp_path):
         """meta.json 语法损坏（JSONDecodeError）→ 回退 COARSE_LABELS。"""
-        from models.anime_camera_classifier import AnimeCameraClassifier, COARSE_LABELS
+        from models.anime_camera_classifier import COARSE_LABELS, AnimeCameraClassifier
 
         model_dir = tmp_path / "bad_json"
         model_dir.mkdir()
@@ -331,7 +331,7 @@ class TestSchemaAutoDetectionEdgeCases:
 
     def test_labels_not_a_list_falls_back(self, tmp_path):
         """meta.json 中 labels 字段不是 list → 回退 COARSE_LABELS。"""
-        from models.anime_camera_classifier import AnimeCameraClassifier, COARSE_LABELS
+        from models.anime_camera_classifier import COARSE_LABELS, AnimeCameraClassifier
 
         model_dir = tmp_path / "nonlist_labels"
         model_dir.mkdir()
@@ -399,8 +399,8 @@ class TestSchemaAutoDetectionEdgeCases:
     def test_meta_json_read_oserror_falls_back(self, tmp_path):
         """读取 meta.json 抛 OSError（权限/磁盘坏） → 回退 COARSE_LABELS。"""
         from models.anime_camera_classifier import (
-            AnimeCameraClassifier,
             COARSE_LABELS,
+            AnimeCameraClassifier,
         )
 
         model_dir = tmp_path / "oserror_dir"

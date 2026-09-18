@@ -28,7 +28,7 @@ class AEPluginService:
     封装 Saber、Optical Flares、Particular、Twitch、Element 3D 的 Python API。
     """
 
-    def __init__(self, ae_engine: Optional[AEEngine] = None):
+    def __init__(self, ae_engine: AEEngine | None = None):
         """初始化插件服务。
 
         Args:
@@ -99,13 +99,13 @@ class AEPluginService:
         glow_intensity: float = 80,
         glow_width: float = 20,
         core_thickness: float = 8,
-        glow_color: Optional[str] = None,
-        preset_type: Optional[str] = None,
+        glow_color: str | None = None,
+        preset_type: str | None = None,
         text_glow: bool = False,
         flicker_intensity: float = 0,
         flicker_speed: float = 0,
-        preset_file: Optional[str | Path] = None,
-        project_path: Optional[str | Path] = None,
+        preset_file: str | Path | None = None,
+        project_path: str | Path | None = None,
     ) -> EngineResult:
         """应用 Video Copilot Saber 发光效果。
 
@@ -128,7 +128,7 @@ class AEPluginService:
             EngineResult 包含执行结果
         """
         # 通过 resource_index_service 解析预设（支持名称查找）
-        resolved_preset_file: Optional[Path] = None
+        resolved_preset_file: Path | None = None
         if preset_file is not None:
             try:
                 resolved_preset_file = await self._resolve_preset_path(preset_file)
@@ -162,12 +162,12 @@ class AEPluginService:
         glow_intensity: float,
         glow_width: float,
         core_thickness: float,
-        glow_color: Optional[str],
-        preset_type: Optional[str],
+        glow_color: str | None,
+        preset_type: str | None,
         text_glow: bool,
         flicker_intensity: float,
         flicker_speed: float,
-        preset_file: Optional[str | Path],
+        preset_file: str | Path | None,
     ) -> str:
         """构建 Saber ExtendScript。"""
         glow_color_rgb = self._hex_to_rgb(glow_color) if glow_color else [0.2, 0.8, 1]
@@ -195,7 +195,7 @@ class AEPluginService:
         self,
         comp_name: str,
         layer_index: int,
-        position: Tuple[int, int] = None,
+        position: tuple[int, int] = None,
         brightness: float = 100,
         scale: float = 100,
         color: str = "#FFFFFF",
@@ -203,8 +203,8 @@ class AEPluginService:
         flicker: bool = False,
         flicker_speed: float = 0,
         audio_react: bool = False,
-        audio_source: Optional[str] = None,
-        project_path: Optional[str | Path] = None,
+        audio_source: str | None = None,
+        project_path: str | Path | None = None,
     ) -> EngineResult:
         """应用 Video Copilot Optical Flares 镜头光晕效果。
 
@@ -244,7 +244,7 @@ class AEPluginService:
         self,
         comp_name: str,
         layer_index: int,
-        position: Optional[Tuple[int, int]],
+        position: tuple[int, int] | None,
         brightness: float,
         scale: float,
         color: str,
@@ -252,7 +252,7 @@ class AEPluginService:
         flicker: bool,
         flicker_speed: float,
         audio_react: bool,
-        audio_source: Optional[str],
+        audio_source: str | None,
     ) -> str:
         """构建 Optical Flares ExtendScript。"""
         color_rgb = self._hex_to_rgb(color)
@@ -295,7 +295,7 @@ class AEPluginService:
         wind_z: float = 0,
         air_resistance: float = 0,
         motion_blur: bool = False,
-        project_path: Optional[str | Path] = None,
+        project_path: str | Path | None = None,
     ) -> EngineResult:
         """应用 Trapcode Particular 粒子效果。
 
@@ -395,11 +395,11 @@ class AEPluginService:
         self,
         comp_name: str,
         layer_index: int,
-        operators: List[str] = None,
+        operators: list[str] = None,
         amount: float = 20,
         speed: float = 5,
-        random_seed: Optional[int] = None,
-        project_path: Optional[str | Path] = None,
+        random_seed: int | None = None,
+        project_path: str | Path | None = None,
     ) -> EngineResult:
         """应用 Video Copilot Twitch 故障效果。
 
@@ -434,10 +434,10 @@ class AEPluginService:
         self,
         comp_name: str,
         layer_index: int,
-        operators: List[str],
+        operators: list[str],
         amount: float,
         speed: float,
-        random_seed: Optional[int],
+        random_seed: int | None,
     ) -> str:
         """构建 Twitch ExtendScript。"""
         args = {
@@ -456,18 +456,18 @@ class AEPluginService:
         self,
         comp_name: str,
         layer_index: int,
-        model_path: Optional[str | Path] = None,
+        model_path: str | Path | None = None,
         diffuse_color: str = "#FFFFFF",
         metallic: float = 0.0,
         roughness: float = 0.5,
-        emissive_color: Optional[str] = None,
+        emissive_color: str | None = None,
         emissive_intensity: float = 0.0,
-        particle_replicator_shape: Optional[str] = None,
-        particles_count: Optional[int] = None,
-        position_offset: Optional[Tuple[float, float, float]] = None,
-        rotation_offset: Optional[Tuple[float, float, float]] = None,
+        particle_replicator_shape: str | None = None,
+        particles_count: int | None = None,
+        position_offset: tuple[float, float, float] | None = None,
+        rotation_offset: tuple[float, float, float] | None = None,
         scale: float = 1.0,
-        project_path: Optional[str | Path] = None,
+        project_path: str | Path | None = None,
     ) -> EngineResult:
         """应用 Video Copilot Element 3D 模型效果。
 
@@ -511,16 +511,16 @@ class AEPluginService:
         self,
         comp_name: str,
         layer_index: int,
-        model_path: Optional[str | Path],
+        model_path: str | Path | None,
         diffuse_color: str,
         metallic: float,
         roughness: float,
-        emissive_color: Optional[str],
+        emissive_color: str | None,
         emissive_intensity: float,
-        particle_replicator_shape: Optional[str],
-        particles_count: Optional[int],
-        position_offset: Optional[Tuple[float, float, float]],
-        rotation_offset: Optional[Tuple[float, float, float]],
+        particle_replicator_shape: str | None,
+        particles_count: int | None,
+        position_offset: tuple[float, float, float] | None,
+        rotation_offset: tuple[float, float, float] | None,
         scale: float,
     ) -> str:
         """构建 Element 3D ExtendScript。"""
@@ -546,7 +546,7 @@ class AEPluginService:
 
     # ==================== 辅助方法 ====================
 
-    def _hex_to_rgb(self, hex_color: str) -> List[float]:
+    def _hex_to_rgb(self, hex_color: str) -> list[float]:
         """将十六进制颜色转换为 [0-1] 范围的 RGB 列表。
 
         Args:
@@ -566,8 +566,8 @@ class AEPluginService:
     def _generate_apply_script(
         self,
         effect_name: str,
-        args: Dict[str, Any],
-        match_names: List[str],
+        args: dict[str, Any],
+        match_names: list[str],
     ) -> str:
         """生成通用的插件效果应用脚本。
 
@@ -649,7 +649,7 @@ class AEPluginService:
     }});
 }})()'''
 
-    def _get_effect_param_setter(self, effect_name: str, args: Dict[str, Any]) -> str:
+    def _get_effect_param_setter(self, effect_name: str, args: dict[str, Any]) -> str:
         """获取特定效果类型的参数设置代码。
 
         Args:
@@ -804,7 +804,7 @@ class AEPluginService:
         comp_name: str,
         layer_index: int,
         preset_name: str,
-        project_path: Optional[str | Path] = None,
+        project_path: str | Path | None = None,
     ) -> EngineResult:
         """应用 Saber 预设效果。
 
@@ -842,7 +842,7 @@ class AEPluginService:
         layer_index: int,
         particle_type: str = "dust",
         intensity: str = "medium",
-        project_path: Optional[str | Path] = None,
+        project_path: str | Path | None = None,
     ) -> EngineResult:
         """应用战斗场景粒子预设（project_memory: 战斗场景粒子）。
 

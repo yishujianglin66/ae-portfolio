@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import torch
+
 from core.torch_runtime import infer_ctx
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -41,7 +42,7 @@ FALLBACK_LABELS = ["Static", "Motion", "Pull", "Push", "Multi_movement"]
 
 
 def load_model():
-    from transformers import VideoMAEImageProcessor, VideoMAEForVideoClassification
+    from transformers import VideoMAEForVideoClassification, VideoMAEImageProcessor
     proc = VideoMAEImageProcessor.from_pretrained(LOCAL_DIR)
     model = VideoMAEForVideoClassification.from_pretrained(LOCAL_DIR)
     model.eval()
@@ -75,7 +76,7 @@ def load_video_frames(video_path: str, n_frames: int = 16, target_size: int = 22
     return frames  # (T,3,224,224) 0-255
 
 
-def classify_video(proc, model, labels, video_path: str) -> Dict[str, Any]:
+def classify_video(proc, model, labels, video_path: str) -> dict[str, Any]:
     frames = load_video_frames(video_path)
     if frames is None:
         return {"video": str(video_path), "error": "too short / unreadable"}
@@ -114,7 +115,7 @@ def main() -> int:
     logger.info("model loaded: %s, labels=%s, device=%s",
                 MODEL_ID, labels, next(model.parameters()).device)
 
-    video_paths: List[Path] = []
+    video_paths: list[Path] = []
     if args.video:
         video_paths = [Path(args.video)]
     else:

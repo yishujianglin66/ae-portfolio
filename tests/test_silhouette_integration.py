@@ -3,8 +3,8 @@
 Silhouette 集成测试：验证 ae_agent_pipeline.py 中的
 IntentRouter 路由检测 + silhouette_operations 生成逻辑。
 """
-import sys
 import os
+import sys
 
 # 添加项目根目录到 path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 def make_pipeline():
     """创建 pipeline 实例（跳过重量级初始化）。"""
-    from ae_agent_pipeline import AEAgentPipeline, UnderstandingResult, PerceptionResult
+    from ae_agent_pipeline import AEAgentPipeline, PerceptionResult, UnderstandingResult
     pipe = AEAgentPipeline.__new__(AEAgentPipeline)
     # 只初始化测试需要的字段
     return pipe
@@ -51,7 +51,7 @@ def test_route_detection():
 
 def test_operation_generation():
     """测试 silhouette_operations 生成。"""
-    from ae_agent_pipeline import UnderstandingResult, PerceptionResult
+    from ae_agent_pipeline import PerceptionResult, UnderstandingResult
     pipe = make_pipeline()
 
     # 模拟 perception 含一个视频片段

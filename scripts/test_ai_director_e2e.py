@@ -19,8 +19,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from ai.ai_director import ScriptGenerator, ScriptToJSXTranslator  # noqa: E402
-from core.camera_language import (CameraLanguageLibrary, CAMERA_IDS,  # noqa: E402
-                                  CAMERA_IDS_ALL)
+from core.camera_language import CAMERA_IDS, CAMERA_IDS_ALL, CameraLanguageLibrary  # noqa: E402
 from core.director_scorer import DirectorQualityScorer  # noqa: E402
 
 PASS = 0

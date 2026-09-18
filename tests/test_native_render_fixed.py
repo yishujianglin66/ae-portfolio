@@ -3,15 +3,16 @@
 =====================
 验证修复后的原生渲染能否正确输出 MP4 格式并保留 CDL 效果
 """
-import sys
 import os
+import sys
 import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.resolve_engine import ResolveAutomationEngine, CDLConfig
-
 import pytest
+
+from integrations.resolve_engine import CDLConfig, ResolveAutomationEngine
+
 pytestmark = pytest.mark.real_davinci  # 需真实 DaVinci Resolve 环境
 
 def test_native_render_fixed():
@@ -71,26 +72,26 @@ def test_native_render_fixed():
         size = os.path.getsize(output_path) if exists else 0
         
         if exists and size > 100000:  # >100KB
-            print(f"\n[OK] Native render SUCCESSFUL!")
+            print("\n[OK] Native render SUCCESSFUL!")
             print(f"   Output: {output_path}")
             print(f"   Size: {size/1024/1024:.1f} MB")
-            print(f"   Format: MP4 (H.264)")
+            print("   Format: MP4 (H.264)")
             
             # 验证文件格式
             ext = os.path.splitext(output_path)[1].lower()
             if ext == '.mp4':
-                print(f"   [OK] Correct file extension: .mp4")
+                print("   [OK] Correct file extension: .mp4")
             else:
                 print(f"   [WARNING] Unexpected extension: {ext}")
             
-            print(f"\nPlease verify:")
-            print(f"  1. File plays correctly in video player")
-            print(f"  2. CDL color grading is preserved (warm tones, high contrast)")
-            print(f"  3. Saturation is reduced (0.6x)")
+            print("\nPlease verify:")
+            print("  1. File plays correctly in video player")
+            print("  2. CDL color grading is preserved (warm tones, high contrast)")
+            print("  3. Saturation is reduced (0.6x)")
             
         else:
             print(f"\n[FAIL] Native render failed or output too small: {size} bytes")
-            print(f"   Check Resolve UI for error messages")
+            print("   Check Resolve UI for error messages")
             
     except Exception as e:
         print(f"\n[ERROR] Render exception: {e}")

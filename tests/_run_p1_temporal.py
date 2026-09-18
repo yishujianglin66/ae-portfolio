@@ -8,7 +8,11 @@
 """
 from __future__ import annotations
 
-import sys, os, time, json, asyncio
+import asyncio
+import json
+import os
+import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\puppet-automation\src")
@@ -264,7 +268,7 @@ def quantify_temporal():
             alphas.append(a)
 
         if len(alphas) < 2:
-            print(f"    alpha 帧不足，跳过")
+            print("    alpha 帧不足，跳过")
             continue
 
         # === 指标1: 帧间 diff 均值（越小越稳定）===

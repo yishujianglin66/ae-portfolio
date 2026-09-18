@@ -9,13 +9,13 @@ ComfyUI 启动脚本
   py scripts/start_comfyui.py --check      # 仅检查环境
   py scripts/start_comfyui.py --port 8188  # 指定端口
 """
-import os
-import sys
+import argparse
 import json
-import time
+import os
 import signal
 import subprocess
-import argparse
+import sys
+import time
 from pathlib import Path
 
 # ComfyUI 根目录
@@ -160,7 +160,7 @@ def main():
     stats = wait_for_ready(port=args.port, timeout=120)
 
     if stats:
-        print(f"\n[ComfyUI] SERVICE READY!")
+        print("\n[ComfyUI] SERVICE READY!")
         print(json.dumps(stats, indent=2))
 
         # Test MCP Client
@@ -179,7 +179,7 @@ def main():
             print(f"  {COMFYUI_DIR / 'models' / 'checkpoints'}")
             print("  Example: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0")
     else:
-        print(f"\n[ERROR] ComfyUI did not start within timeout.")
+        print("\n[ERROR] ComfyUI did not start within timeout.")
         # Print recent output
         if proc.stdout:
             proc.terminate()

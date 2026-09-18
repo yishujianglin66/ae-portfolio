@@ -65,7 +65,7 @@ def generate_effects_jsx(effects: list, video_path: str, aep_path: str, out_mp4:
         envelope = eff.get("envelope", {})
 
         lines.append(f"  // === 特效 {i+1}/{len(effects)}: {etype} @ {start_t:.2f}s-{end_t:.2f}s ===")
-        lines.append(f"  try {{")
+        lines.append("  try {")
 
         if etype == "twixtor":
             # Twixtor 慢镜效果
@@ -273,9 +273,9 @@ def generate_effects_jsx(effects: list, video_path: str, aep_path: str, out_mp4:
             # Unknown effect type - skip with warning
             lines.append(f"  // [WARN] Unknown effect type: {etype}")
 
-        lines.append(f"  }} catch (e) {{")
+        lines.append("  } catch (e) {")
         lines.append(f"    // [SKIP] Effect {i+1} ({etype}) failed: \" + e.toString()")
-        lines.append(f"  }}")
+        lines.append("  }")
         lines.append("")
 
     # 渲染输出
@@ -290,10 +290,10 @@ def generate_effects_jsx(effects: list, video_path: str, aep_path: str, out_mp4:
     lines.append("  var renderSuccess = false;")
     lines.append("  try {")
     lines.append("    if (app.project.renderQueue.numItems > 0) {")
-    lines.append(f'      var rqItem = app.project.renderQueue.item(app.project.renderQueue.numItems);')
-    lines.append(f'      var om = rqItem.outputModule(1);')
+    lines.append('      var rqItem = app.project.renderQueue.item(app.project.renderQueue.numItems);')
+    lines.append('      var om = rqItem.outputModule(1);')
     lines.append(f'      om.file = new File("{mp4s}");')
-    lines.append(f'      rqItem.render = true;')
+    lines.append('      rqItem.render = true;')
     lines.append("      renderSuccess = true;")
     lines.append("    }")
     lines.append("  } catch (e) { errors.push('Render setup failed: ' + e.toString()); }")

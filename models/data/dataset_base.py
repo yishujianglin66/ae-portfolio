@@ -2,10 +2,10 @@
 数据集基类 - 定义统一的数据接口
 参考 Antares 哲学：高质量数据 > 大模型
 """
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Iterator, Tuple
-import logging
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class DatasetConfig:
     """数据集配置"""
     dataset_name: str = ""
     data_path: str = ""
-    max_samples: Optional[int] = None
+    max_samples: int | None = None
     test_split_ratio: float = 0.1
     val_split_ratio: float = 0.1
     seed: int = 42
@@ -37,7 +37,7 @@ class DatasetStats:
     min_length: int = 0
     invalid_samples: int = 0
     augmented_samples: int = 0
-    label_distribution: Dict[str, int] = field(default_factory=dict)
+    label_distribution: dict[str, int] = field(default_factory=dict)
 
 
 class BaseDataset(ABC):
@@ -54,13 +54,13 @@ class BaseDataset(ABC):
             config: 数据集配置
         """
         self.config = config
-        self._train_data: List[Any] = []
-        self._val_data: List[Any] = []
-        self._test_data: List[Any] = []
-        self._stats: Optional[DatasetStats] = None
+        self._train_data: list[Any] = []
+        self._val_data: list[Any] = []
+        self._test_data: list[Any] = []
+        self._stats: DatasetStats | None = None
 
     @abstractmethod
-    def load_data(self, data_path: str) -> List[Any]:
+    def load_data(self, data_path: str) -> list[Any]:
         """从文件加载原始数据
         
         Args:
@@ -72,7 +72,7 @@ class BaseDataset(ABC):
         pass
 
     @abstractmethod
-    def preprocess(self, data: List[Any]) -> List[Any]:
+    def preprocess(self, data: list[Any]) -> list[Any]:
         """数据预处理
         
         Args:
@@ -96,7 +96,7 @@ class BaseDataset(ABC):
         pass
 
     @abstractmethod
-    def augment_sample(self, sample: Any) -> List[Any]:
+    def augment_sample(self, sample: Any) -> list[Any]:
         """数据增强 - 从单个样本生成多个变体
         
         Args:
@@ -166,7 +166,7 @@ class BaseDataset(ABC):
         
         return stats
 
-    def _split_data(self, data: List[Any]) -> None:
+    def _split_data(self, data: list[Any]) -> None:
         """划分训练/验证/测试集
         
         Args:
@@ -186,7 +186,7 @@ class BaseDataset(ABC):
         self._val_data = shuffled[test_size:test_size + val_size]
         self._train_data = shuffled[test_size + val_size:]
 
-    def get_train_data(self) -> List[Any]:
+    def get_train_data(self) -> list[Any]:
         """获取训练数据
         
         Returns:
@@ -194,7 +194,7 @@ class BaseDataset(ABC):
         """
         return self._train_data
 
-    def get_val_data(self) -> List[Any]:
+    def get_val_data(self) -> list[Any]:
         """获取验证数据
         
         Returns:
@@ -202,7 +202,7 @@ class BaseDataset(ABC):
         """
         return self._val_data
 
-    def get_test_data(self) -> List[Any]:
+    def get_test_data(self) -> list[Any]:
         """获取测试数据
         
         Returns:
@@ -210,7 +210,7 @@ class BaseDataset(ABC):
         """
         return self._test_data
 
-    def get_stats(self) -> Optional[DatasetStats]:
+    def get_stats(self) -> DatasetStats | None:
         """获取数据集统计信息
         
         Returns:

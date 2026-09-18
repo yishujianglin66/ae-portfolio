@@ -1,10 +1,10 @@
-import os
-import sys
 import json
-import time
+import os
 import subprocess
+import sys
+import time
 from datetime import datetime
-from typing import List, Dict, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPT_DIR not in sys.path:
@@ -60,7 +60,7 @@ class AECommandClient:
     def __init__(self):
         self.command_id = 0
 
-    def send_command(self, command: str, args: Dict) -> Dict:
+    def send_command(self, command: str, args: dict) -> dict:
         self.command_id += 1
         
         cmd_data = {
@@ -101,7 +101,7 @@ class VideoGenerator:
     def __init__(self):
         self.client = AECommandClient()
 
-    def analyze_music(self, music_path: str) -> Dict:
+    def analyze_music(self, music_path: str) -> dict:
         import librosa
         y, sr = librosa.load(music_path, sr=None)
         
@@ -135,7 +135,7 @@ class VideoGenerator:
             "segments": segments.tolist()
         }
 
-    def analyze_clips(self, clip_paths: List[str]) -> List[Dict]:
+    def analyze_clips(self, clip_paths: list[str]) -> list[dict]:
         import cv2
         import numpy as np
         
@@ -196,7 +196,7 @@ class VideoGenerator:
         
         return clip_atoms
 
-    def match_audio_video(self, music_analysis: Dict, clip_atoms: List[Dict]) -> Dict:
+    def match_audio_video(self, music_analysis: dict, clip_atoms: list[dict]) -> dict:
         beat_times = music_analysis["beat_times"]
         tempo = music_analysis["tempo"]
         
@@ -237,7 +237,7 @@ class VideoGenerator:
             "beat_sync_points": [c["start_time"] for c in clip_order if c["beat_sync"]]
         }
 
-    def generate_timeline_plan(self, match_result: Dict, music_analysis: Dict) -> Dict:
+    def generate_timeline_plan(self, match_result: dict, music_analysis: dict) -> dict:
         plan = {
             "composition": {
                 "name": "AI Generated Video",
@@ -300,7 +300,7 @@ class VideoGenerator:
         
         return plan
 
-    def execute_in_ae(self, timeline_plan: Dict) -> Dict:
+    def execute_in_ae(self, timeline_plan: dict) -> dict:
         logger = VideoGenerationLogger(
             music_path=timeline_plan["layers"][-1]["source"],
             clip_paths=[l["source"] for l in timeline_plan["layers"] if l["type"] == "footage"],
@@ -343,7 +343,7 @@ class VideoGenerator:
 
         layer_index_map = {name: idx + 1 for idx, name in enumerate(layer_stack)}
 
-        def _resolve_layer_index(effect_or_kf: Dict) -> int:
+        def _resolve_layer_index(effect_or_kf: dict) -> int:
             ln = effect_or_kf.get("layerName")
             if ln and ln in layer_index_map:
                 return layer_index_map[ln]
@@ -375,13 +375,13 @@ class VideoGenerator:
 
     def generate_enhanced_timeline_plan(
         self,
-        match_result: Dict,
-        music_analysis: Dict,
+        match_result: dict,
+        music_analysis: dict,
         style: str = "cinematic",
         include_text: bool = True,
         include_transitions: bool = True,
         include_filters: bool = True
-    ) -> Dict:
+    ) -> dict:
         ensure_engines()
         
         base_plan = self.generate_timeline_plan(match_result, music_analysis)
@@ -450,9 +450,9 @@ class VideoGenerator:
 
     def apply_text_overlay(
         self,
-        timeline_plan: Dict,
-        text_items: List[Dict]
-    ) -> Dict:
+        timeline_plan: dict,
+        text_items: list[dict]
+    ) -> dict:
         """应用文字叠加层 - 支持标题、字幕、角标等多种文字元素"""
         text_engine = _get_engine("text")
         if not text_engine:
@@ -495,10 +495,10 @@ class VideoGenerator:
 
     def apply_smart_transitions(
         self,
-        timeline_plan: Dict,
+        timeline_plan: dict,
         transition_style: str = "cinematic",
         beat_synced: bool = True
-    ) -> Dict:
+    ) -> dict:
         transition_engine = _get_engine("transition")
         if not transition_engine:
             return timeline_plan
@@ -550,10 +550,10 @@ class VideoGenerator:
 
     def apply_style_filter_chain(
         self,
-        timeline_plan: Dict,
+        timeline_plan: dict,
         style: str = "cinematic",
         intensity: float = 0.7
-    ) -> Dict:
+    ) -> dict:
         filter_engine = _get_engine("filter")
         if not filter_engine:
             return timeline_plan
@@ -595,13 +595,13 @@ class VideoGenerator:
     def run_enhanced_pipeline(
         self,
         music_path: str,
-        clip_paths: List[str],
+        clip_paths: list[str],
         style: str = "cinematic",
         include_text: bool = True,
         include_transitions: bool = True,
         include_filters: bool = True,
-        text_overlays: Optional[List[Dict]] = None
-    ) -> Dict:
+        text_overlays: list[dict] | None = None
+    ) -> dict:
         """增强版流水线 - 集成四大引擎"""
         print("="*70)
         print("🚀 AI 增强视频生成流水线 (四引擎集成版)")
@@ -673,7 +673,7 @@ class VideoGenerator:
         
         return enhanced_result
 
-    def run_full_pipeline(self, music_path: str, clip_paths: List[str]) -> Dict:
+    def run_full_pipeline(self, music_path: str, clip_paths: list[str]) -> dict:
         print("="*60)
         print("🎬 AI 辅助视频生成端到端流程")
         print("="*60)
@@ -748,7 +748,7 @@ def main():
         music_exists = True
     
     if not existing_clips:
-        print(f"⚠️  未找到视频片段，将以演示模式运行")
+        print("⚠️  未找到视频片段，将以演示模式运行")
         clips_exist = False
     else:
         clips_exist = True

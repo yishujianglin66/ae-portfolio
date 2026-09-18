@@ -13,12 +13,11 @@ from typing import Any, Dict, List
 import cv2
 import numpy as np
 
-
 BLACK_THRESHOLD = 3.0
 LOW_BRIGHTNESS_THRESHOLD = 8.0
 
 
-def _frame_metrics(frame: np.ndarray) -> Dict[str, float]:
+def _frame_metrics(frame: np.ndarray) -> dict[str, float]:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     laplacian = cv2.Laplacian(gray, cv2.CV_64F)
     return {
@@ -30,15 +29,15 @@ def _frame_metrics(frame: np.ndarray) -> Dict[str, float]:
     }
 
 
-def _scan_segment(cap: cv2.VideoCapture, fps: float, start: float, end: float) -> Dict[str, Any]:
+def _scan_segment(cap: cv2.VideoCapture, fps: float, start: float, end: float) -> dict[str, Any]:
     start_frame = max(0, int(round(start * fps)))
     end_frame = max(start_frame, int(round(end * fps)))
     cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
-    metrics: List[Dict[str, float]] = []
-    black_frames: List[int] = []
-    low_frames: List[int] = []
+    metrics: list[dict[str, float]] = []
+    black_frames: list[int] = []
+    low_frames: list[int] = []
     previous_gray = None
-    diffs: List[float] = []
+    diffs: list[float] = []
     frame_index = start_frame
     while frame_index < end_frame:
         ok, frame = cap.read()
@@ -79,7 +78,7 @@ def _scan_segment(cap: cv2.VideoCapture, fps: float, start: float, end: float) -
     }
 
 
-def score_video(video_path: Path, report_path: Path, output_path: Path) -> Dict[str, Any]:
+def score_video(video_path: Path, report_path: Path, output_path: Path) -> dict[str, Any]:
     report = json.loads(report_path.read_text(encoding="utf-8"))
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():

@@ -20,8 +20,8 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Optional
 
-from knowledge_base.types import BlockType, MdBlock, EffectMapping
 from knowledge_base.table_extractor import TableExtractor
+from knowledge_base.types import BlockType, EffectMapping, MdBlock
 
 
 class EffectAdapter:
@@ -42,9 +42,9 @@ class EffectAdapter:
 
     def extract_from_blocks(
         self,
-        blocks: List[MdBlock],
+        blocks: list[MdBlock],
         source_file: str = "",
-    ) -> List[EffectMapping]:
+    ) -> list[EffectMapping]:
         """从 MdBlock 列表中提取效果映射。
 
         扫描所有 TABLE 块，查找包含"关键词"和"matchName"列的表格。
@@ -56,7 +56,7 @@ class EffectAdapter:
         Returns:
             EffectMapping 列表
         """
-        mappings: List[EffectMapping] = []
+        mappings: list[EffectMapping] = []
 
         for block in blocks:
             if block.block_type != BlockType.TABLE:
@@ -99,9 +99,9 @@ class EffectAdapter:
 
     def extract_from_text_blocks(
         self,
-        blocks: List[MdBlock],
+        blocks: list[MdBlock],
         source_file: str = "",
-    ) -> List[EffectMapping]:
+    ) -> list[EffectMapping]:
         """从文本块中提取效果映射（箭头格式）。
 
         匹配格式：
@@ -115,7 +115,7 @@ class EffectAdapter:
         Returns:
             EffectMapping 列表
         """
-        mappings: List[EffectMapping] = []
+        mappings: list[EffectMapping] = []
 
         for block in blocks:
             if block.block_type not in (BlockType.PARAGRAPH, BlockType.LIST):
@@ -137,7 +137,7 @@ class EffectAdapter:
 
         return mappings
 
-    def to_dict(self, mappings: List[EffectMapping]) -> Dict[str, str]:
+    def to_dict(self, mappings: list[EffectMapping]) -> dict[str, str]:
         """转换为 Dict[str, str] 格式。
 
         Args:
@@ -146,16 +146,16 @@ class EffectAdapter:
         Returns:
             keyword -> matchName 字典
         """
-        result: Dict[str, str] = {}
+        result: dict[str, str] = {}
         for m in mappings:
             result[m.keyword] = m.match_name
         return result
 
     def merge_with_fallback(
         self,
-        kb_mappings: List[EffectMapping],
-        fallback: Dict[str, str],
-    ) -> Dict[str, str]:
+        kb_mappings: list[EffectMapping],
+        fallback: dict[str, str],
+    ) -> dict[str, str]:
         """合并知识库映射与硬编码 fallback。
 
         知识库映射优先，fallback 补充缺失的条目。
@@ -167,13 +167,13 @@ class EffectAdapter:
         Returns:
             合并后的字典
         """
-        result: Dict[str, str] = dict(fallback)
+        result: dict[str, str] = dict(fallback)
         for m in kb_mappings:
             result[m.keyword] = m.match_name
         return result
 
     @staticmethod
-    def _find_column(headers: List[str], candidates: set[str]) -> Optional[str]:
+    def _find_column(headers: list[str], candidates: set[str]) -> str | None:
         """在表头中查找匹配候选名称的列。"""
         for h in headers:
             if h.lower().strip() in candidates:

@@ -29,8 +29,9 @@ from typing import List
 import cv2
 import numpy as np
 import torch
-from core.torch_runtime import infer_ctx, get_device
 from torchvision import transforms
+
+from core.torch_runtime import get_device, infer_ctx
 
 MIN_AREA_RATIO = 0.02  # 前景面积占比下限 (过滤全黑/噪声)
 MAX_AREA_RATIO = 0.85  # 前景面积占比上限 (过滤 BiRefNet 全图误判: 纯色背景+肤色接近时输出>85%前景)
@@ -70,7 +71,7 @@ def main() -> int:
     model = AutoModelForImageSegmentation.from_pretrained(
         args.model_dir, trust_remote_code=True, local_files_only=True).cuda().half().eval()
 
-    manifest: List[dict] = []
+    manifest: list[dict] = []
     t0 = time.time()
     for i in range(0, len(files), args.batch):
         batch = files[i:i + args.batch]

@@ -32,8 +32,8 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
-from ..base import BaseEngine, EngineResult  # noqa: E402
 from ...config.settings import get_settings
+from ..base import BaseEngine, EngineResult  # noqa: E402
 
 # Bridge Client 在项目根目录，延迟导入
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
@@ -48,7 +48,7 @@ class PremiereEngine(BaseEngine):
 
     def __init__(
         self,
-        executable_path: Optional[Path | str] = None,
+        executable_path: Path | str | None = None,
     ):
         self._settings = get_settings()
         self.premiere_path = self._resolve_executable(executable_path)
@@ -58,9 +58,9 @@ class PremiereEngine(BaseEngine):
 
         # 初始化 MCP Bridge Client（延迟导入，避免循环依赖）
         self._bridge_client = None
-        self._bridge_available: Optional[bool] = None  # None=未检测, True=在线, False=离线
+        self._bridge_available: bool | None = None  # None=未检测, True=在线, False=离线
 
-    def _resolve_executable(self, explicit: Optional[Path | str]) -> Optional[Path]:
+    def _resolve_executable(self, explicit: Path | str | None) -> Path | None:
         """解析可执行文件路径：显式参数 > settings配置 > 自动发现。"""
         # 1. 显式参数
         if explicit:
@@ -79,7 +79,7 @@ class PremiereEngine(BaseEngine):
         return self._find_premiere()
 
     @staticmethod
-    def _find_premiere() -> Optional[Path]:
+    def _find_premiere() -> Path | None:
         """自动发现 Premiere Pro 安装路径。"""
         possible_paths = [
             r"C:\Program Files\Adobe\Adobe Premiere Pro 2025\Adobe Premiere Pro.exe",
@@ -131,7 +131,7 @@ class PremiereEngine(BaseEngine):
         fps: float = 30.0,
         codec: str = "libx264",
         crf: int = 18,
-        audio_path: Optional[Path | str] = None,
+        audio_path: Path | str | None = None,
         frame_pattern: str = "frame_%06d.png",
     ) -> EngineResult:
         """FFmpeg 拼接 AE 渲染的 PNG 帧序列为视频（绕过 AME 编码）。
@@ -155,7 +155,7 @@ class PremiereEngine(BaseEngine):
         self,
         ae_project_path: Path | str,
         sequence_name: str,
-        comp_names: Optional[List[str]] = None,
+        comp_names: list[str] | None = None,
     ) -> EngineResult:
         """将AE合成导入Premiere序列（动态链接）。
 
@@ -203,10 +203,10 @@ class PremiereEngine(BaseEngine):
 
     async def auto_edit_sequence(
         self,
-        clips: List[Dict[str, Any]],
-        music_path: Optional[Path | str] = None,
+        clips: list[dict[str, Any]],
+        music_path: Path | str | None = None,
         music_bpm: float = 128.0,
-        beat_drop_offsets: Optional[List[float]] = None,
+        beat_drop_offsets: list[float] | None = None,
         output_sequence: str = "AutoEdit_01",
     ) -> EngineResult:
         """根据音乐节拍自动粗剪序列。
@@ -394,7 +394,7 @@ class PremiereEngine(BaseEngine):
     async def execute_script(
         self,
         script_content: str,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         **kwargs,
     ) -> EngineResult:
         """直接执行任意 ExtendScript 代码（通过 Bridge）。
@@ -407,7 +407,7 @@ class PremiereEngine(BaseEngine):
 
     async def import_media(
         self,
-        media_paths: List[Path | str],
+        media_paths: list[Path | str],
         bin_name: str = "Imported",
         **kwargs,
     ) -> EngineResult:
@@ -510,7 +510,7 @@ class PremiereEngine(BaseEngine):
         self,
         media_path: Path | str,
         track_index: int = 0,
-        start_time_ticks: Optional[int] = None,
+        start_time_ticks: int | None = None,
         start_time_seconds: float = 0.0,
         video_track: bool = True,
         audio_track: bool = True,
@@ -662,7 +662,7 @@ class PremiereEngine(BaseEngine):
     async def export_sequence(
         self,
         output_path: Path | str,
-        sequence_name: Optional[str] = None,
+        sequence_name: str | None = None,
         preset_name: str = "H.264 Match Source - High bitrate",
         **kwargs,
     ) -> EngineResult:
@@ -788,7 +788,7 @@ class PremiereEngine(BaseEngine):
         jsx_file.write_text(jsx_code, encoding="utf-8")
 
         logger.info(f"[Premiere] JSX prepared (fallback): {jsx_file}")
-        logger.info(f"[Premiere] Run manually: File > Scripts > Run Script File")
+        logger.info("[Premiere] Run manually: File > Scripts > Run Script File")
 
         return EngineResult(
             success=True,

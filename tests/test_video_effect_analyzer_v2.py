@@ -19,9 +19,10 @@ test_video_effect_analyzer_v2.py — VRS 视频效果分析器 v2 回归测试
 """
 import os
 import sys
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))

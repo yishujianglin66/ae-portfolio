@@ -11,10 +11,10 @@
 使用真实视频素材 D:/AE-Work/视频素材库/抖音_一拳超人_埼玉.mp4
 mock SilhouetteExecutor 和 AECommandClient 以验证命令传递。
 """
-import os
-import sys
 import json
 import logging
+import os
+import sys
 from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -39,9 +39,7 @@ def main():
     print(f"  ✓ 视频: {VIDEO_PATH}")
     print(f"  ✓ 音频: {AUDIO_PATH}")
 
-    from ae_agent_pipeline import (
-        AEAgentPipeline, PerceptionResult, UnderstandingResult
-    )
+    from ae_agent_pipeline import AEAgentPipeline, PerceptionResult, UnderstandingResult
 
     # 创建 pipeline（跳过重量级初始化）
     pipe = AEAgentPipeline.__new__(AEAgentPipeline)
@@ -112,7 +110,7 @@ def main():
         else:
             failed += 1
 
-    print(f"\n  Silhouette 操作详情:")
+    print("\n  Silhouette 操作详情:")
     print(f"  {json.dumps(planning.silhouette_operations, ensure_ascii=False, indent=2)}")
 
     # ------------------------------------------------------------------
@@ -165,7 +163,7 @@ def main():
     # Step 4: 完整数据流校验
     # ------------------------------------------------------------------
     print("\n[Step 4] 完整数据流校验")
-    print(f"  用户输入: '扣掉埼玉然后加发光'")
+    print("  用户输入: '扣掉埼玉然后加发光'")
     print(f"  → 路由: {understanding.route_type}")
     print(f"  → Silhouette 任务: {understanding.silhouette_task}")
     print(f"  → Silhouette 命令: {planning.silhouette_operations[0]['command']}")

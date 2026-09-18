@@ -64,11 +64,11 @@ class Event:
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     timestamp: float = field(default_factory=lambda: time.time())
     priority: EventPriority = EventPriority.NORMAL
-    payload: Dict[str, Any] = field(default_factory=dict)
-    correlation_id: Optional[str] = None  # 用于关联同一请求的所有事件
-    causation_id: Optional[str] = None    # 用于追踪事件因果关系
+    payload: dict[str, Any] = field(default_factory=dict)
+    correlation_id: str | None = None  # 用于关联同一请求的所有事件
+    causation_id: str | None = None    # 用于追踪事件因果关系
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "event_id": self.event_id,
             "category": self.category.value,
@@ -81,7 +81,7 @@ class Event:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Event":
+    def from_dict(cls, data: dict[str, Any]) -> "Event":
         return cls(
             event_id=data["event_id"],
             category=EventCategory(data["category"]),
@@ -241,13 +241,13 @@ class EventBus:
 
     def __init__(self, max_queue_size: int = 10000):
         self._logger = logging.getLogger(f"{__name__}.EventBus")
-        self._subscribers: Dict[Tuple[EventCategory, str], List[EventHandler]] = {}
-        self._category_subscribers: Dict[EventCategory, List[EventHandler]] = {}
-        self._global_subscribers: List[EventHandler] = []
+        self._subscribers: dict[tuple[EventCategory, str], list[EventHandler]] = {}
+        self._category_subscribers: dict[EventCategory, list[EventHandler]] = {}
+        self._global_subscribers: list[EventHandler] = []
         self._event_queue: asyncio.Queue = asyncio.Queue(maxsize=max_queue_size)
         self._running = False
-        self._worker_task: Optional[asyncio.Task] = None
-        self._event_store: List[Event] = []
+        self._worker_task: asyncio.Task | None = None
+        self._event_store: list[Event] = []
         self._max_store_size = 1000
         self._semaphore = asyncio.Semaphore(10)  # 限制并发处理数
 
@@ -273,7 +273,7 @@ class EventBus:
     def subscribe(
         self,
         event_category: EventCategory,
-        event_type: Optional[str] = None,
+        event_type: str | None = None,
         handler: Callable[[Event], Any] = None,
         *,
         priority: int = 0,
@@ -297,7 +297,7 @@ class EventBus:
         self,
         handler: Callable[[Event], Any],
         event_category: EventCategory,
-        event_type: Optional[str],
+        event_type: str | None,
         priority: int,
         is_async: bool,
     ) -> None:
@@ -374,9 +374,9 @@ class EventBus:
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
-    def _get_handlers(self, event: Event) -> List[EventHandler]:
+    def _get_handlers(self, event: Event) -> list[EventHandler]:
         """获取事件的所有处理者"""
-        handlers: List[EventHandler] = []
+        handlers: list[EventHandler] = []
 
         # 精确匹配: (category, type)
         key = (event.category, event.event_type)
@@ -402,7 +402,7 @@ class EventBus:
         if len(self._event_store) > self._max_store_size:
             self._event_store.pop(0)
 
-    def get_event_history(self, limit: int = 100) -> List[Event]:
+    def get_event_history(self, limit: int = 100) -> list[Event]:
         """获取事件历史"""
         return list(reversed(self._event_store[-limit:]))
 
@@ -416,9 +416,9 @@ class EventBus:
 
     async def replay_events(
         self,
-        events: List[Event],
+        events: list[Event],
         skip_errors: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """重放事件"""
         results = {"success": 0, "failed": 0, "errors": []}
         for event in events:
@@ -438,7 +438,7 @@ class EventBus:
     # 统计信息
     # -------------------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取事件总线统计信息"""
         return {
             "queue_size": self._event_queue.qsize(),

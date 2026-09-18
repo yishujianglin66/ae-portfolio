@@ -11,24 +11,25 @@
 - 混合使用 TransformConfig
 - 原生 vs FFmpeg 渲染对比验证
 """
-import sys
 import os
-import time
 import subprocess
+import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
+import pytest
+
 from integrations.resolve_engine import (
-    ResolveAutomationEngine,
     CDLConfig,
-    SpeedCurve,
+    ItemEffect,
     KenBurnsConfig,
+    ResolveAutomationEngine,
+    SpeedCurve,
     TransformConfig,
-    ItemEffect
 )
 
-import pytest
 pytestmark = pytest.mark.real_davinci  # 需真实 DaVinci Resolve + 真实素材环境
 
 
@@ -191,7 +192,7 @@ def test_advanced_workflow():
         
         # 应用 CDL
         engine.apply_cdl(project_name, "AdvancedTL", idx, cdl)
-        print(f"    [OK] CDL applied")
+        print("    [OK] CDL applied")
         
         # 应用 Transform
         engine.set_transform(project_name, idx, transform)
@@ -235,7 +236,7 @@ def test_advanced_workflow():
         # 验证原生渲染输出
         native_verify = verify_video_with_ffprobe(native_result)
         if native_verify['valid']:
-            print(f"[OK] Video validation passed:")
+            print("[OK] Video validation passed:")
             print(f"     Duration: {native_verify['duration']:.2f}s")
             print(f"     Size: {native_verify['size_mb']:.1f} MB")
             if native_verify['video_stream']:
@@ -277,7 +278,7 @@ def test_advanced_workflow():
         # 验证 FFmpeg 渲染输出
         ffmpeg_verify = verify_video_with_ffprobe(ffmpeg_result)
         if ffmpeg_verify['valid']:
-            print(f"[OK] Video validation passed:")
+            print("[OK] Video validation passed:")
             print(f"     Duration: {ffmpeg_verify['duration']:.2f}s")
             print(f"     Size: {ffmpeg_verify['size_mb']:.1f} MB")
             if ffmpeg_verify['video_stream']:
@@ -327,14 +328,14 @@ def test_advanced_workflow():
             native_v['video_stream']['height'] == ffmpeg_v['video_stream']['height']
         )
         
-        print(f"\n[一致性检查]")
+        print("\n[一致性检查]")
         print(f"  时长差异: {duration_diff:.3f}s ({'✅ PASS' if duration_diff < 0.1 else '❌ FAIL'})")
         print(f"  分辨率一致: {'✅ PASS' if resolution_match else '❌ FAIL'}")
         
         if duration_diff < 0.1 and resolution_match:
-            print(f"\n[OK] 两种渲染方案输出一致！")
+            print("\n[OK] 两种渲染方案输出一致！")
         else:
-            print(f"\n[WARN] 两种渲染方案存在差异，需要进一步调查")
+            print("\n[WARN] 两种渲染方案存在差异，需要进一步调查")
     
     # ================================================================
     # Step 7: 清理

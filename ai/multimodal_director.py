@@ -50,17 +50,17 @@ class EditScript:
     def __init__(self):
         self.title: str = ""
         self.total_duration: float = 0.0
-        self.style: Dict[str, str] = {}
-        self.segments: List[Dict[str, Any]] = []
+        self.style: dict[str, str] = {}
+        self.segments: list[dict[str, Any]] = []
         self.bgm_path: str = ""
-        self.metadata: Dict[str, Any] = {}
+        self.metadata: dict[str, Any] = {}
 
-    def add_segment(self, segment: Dict[str, Any]):
+    def add_segment(self, segment: dict[str, Any]):
         """添加一个镜头段落"""
         self.segments.append(segment)
         self.total_duration += segment.get("duration", 0)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "title": self.title,
             "total_duration": self.total_duration,
@@ -150,7 +150,7 @@ class MultimodalDirector:
         self._scene_detector = None
         self._intel_engine = None
         self._material_index = None
-        self._selected_materials: List[str] = []   # 严格选择后的候选素材
+        self._selected_materials: list[str] = []   # 严格选择后的候选素材
 
     @property
     def agent(self):
@@ -208,7 +208,7 @@ class MultimodalDirector:
                 log(f"素材智能识别引擎加载失败: {e}", "WARN")
         return self._intel_engine
 
-    def _ensure_material_index(self, materials: List[str], target_ip: str = "",
+    def _ensure_material_index(self, materials: list[str], target_ip: str = "",
                                strict: bool = True, allow_mixed: bool = False):
         """确保素材索引已构建，并执行严格素材选择"""
         if self._material_index is not None and not target_ip:
@@ -237,7 +237,7 @@ class MultimodalDirector:
                         raise RuntimeError(
                             f"严格模式: 无任何素材匹配目标IP《{target_ip}》，"
                             f"拒绝降级到无关素材。请提供真实素材后重试。")
-                    log(f"非严格模式: 无匹配素材，使用全部素材", "WARN")
+                    log("非严格模式: 无匹配素材，使用全部素材", "WARN")
                 else:
                     self._selected_materials = matched
         except RuntimeError:
@@ -250,9 +250,9 @@ class MultimodalDirector:
     # ----------------------------------------------------------------
 
     def direct_from_text(self, description: str,
-                         available_materials: Optional[List[str]] = None,
+                         available_materials: list[str] | None = None,
                          target_duration: float = 120.0,
-                         cinematic_params: Optional[Dict] = None,
+                         cinematic_params: dict | None = None,
                          target_ip: str = "",
                          strict: bool = True,
                          allow_mixed: bool = False) -> EditScript:
@@ -288,8 +288,8 @@ class MultimodalDirector:
 
         return script
 
-    def direct_from_cinematic(self, cinematic_recommendation: Dict,
-                              available_materials: Optional[List[str]] = None) -> EditScript:
+    def direct_from_cinematic(self, cinematic_recommendation: dict,
+                              available_materials: list[str] | None = None) -> EditScript:
         """从 CinematicIntelligence 的推荐结果生成剧本
 
         Args:
@@ -332,7 +332,7 @@ class MultimodalDirector:
         return script
 
     def direct_from_video(self, video_path: str,
-                          available_materials: Optional[List[str]] = None) -> EditScript:
+                          available_materials: list[str] | None = None) -> EditScript:
         """从参考视频学习风格并生成剧本"""
         log(f"视频导演模式: {video_path}")
 
@@ -348,9 +348,9 @@ class MultimodalDirector:
 
         return script
 
-    def direct_from_images(self, image_paths: List[str],
+    def direct_from_images(self, image_paths: list[str],
                            description: str = "",
-                           available_materials: Optional[List[str]] = None) -> EditScript:
+                           available_materials: list[str] | None = None) -> EditScript:
         """从参考图片提取风格并生成剧本"""
         log(f"图片导演模式: {len(image_paths)} 张图片")
 
@@ -367,7 +367,7 @@ class MultimodalDirector:
 
     def direct_from_music(self, music_path: str,
                           description: str = "",
-                          available_materials: Optional[List[str]] = None,
+                          available_materials: list[str] | None = None,
                           target_ip: str = "",
                           strict: bool = True,
                           allow_mixed: bool = False) -> EditScript:
@@ -395,16 +395,16 @@ class MultimodalDirector:
     def direct_mixed(self,
                      text: str = "",
                      video: str = "",
-                     images: Optional[List[str]] = None,
+                     images: list[str] | None = None,
                      music: str = "",
-                     available_materials: Optional[List[str]] = None,
+                     available_materials: list[str] | None = None,
                      target_duration: float = 120.0) -> EditScript:
         """混合输入模式 — 综合所有输入源生成剧本"""
         log(f"混合导演模式: text={bool(text)}, video={bool(video)}, "
             f"images={len(images) if images else 0}, music={bool(music)}")
 
         # 收集所有分析结果
-        context: Dict[str, Any] = {}
+        context: dict[str, Any] = {}
 
         if text:
             plan = self._generate_plan_from_text(text, target_duration)
@@ -439,7 +439,7 @@ class MultimodalDirector:
     #  内部方法: 分析层
     # ----------------------------------------------------------------
 
-    def _generate_plan_from_text(self, description: str, target_duration: float) -> Dict:
+    def _generate_plan_from_text(self, description: str, target_duration: float) -> dict:
         """用LLM从文字描述生成分镜计划"""
         prompt = f"""你是一个专业视频剪辑导演。请根据以下描述，生成一个完整的视频剪辑分镜计划。
 
@@ -487,7 +487,7 @@ class MultimodalDirector:
         # 降级: 使用内置模板
         return self._fallback_plan(description, target_duration)
 
-    def _analyze_reference_video(self, video_path: str) -> Dict:
+    def _analyze_reference_video(self, video_path: str) -> dict:
         """分析参考视频的风格和内容"""
         analyzer = self.visual_analyzer
         if not analyzer:
@@ -500,7 +500,7 @@ class MultimodalDirector:
             log(f"视频分析失败: {e}", "WARN")
             return {"mood": "epic", "pace": "fast", "color_tone": "cool"}
 
-    def _analyze_reference_images(self, image_paths: List[str], description: str = "") -> Dict:
+    def _analyze_reference_images(self, image_paths: list[str], description: str = "") -> dict:
         """分析参考图片的视觉风格"""
         analyzer = self.visual_analyzer
         if not analyzer:
@@ -514,7 +514,7 @@ class MultimodalDirector:
             log(f"图片分析失败: {e}", "WARN")
             return {"mood": "epic", "color_tone": "cool"}
 
-    def _analyze_music(self, music_path: str) -> Dict:
+    def _analyze_music(self, music_path: str) -> dict:
         """分析音乐的情绪和节拍"""
         mapper = self.beat_mapper
         if not mapper:
@@ -537,9 +537,9 @@ class MultimodalDirector:
     #  内部方法: 构建层
     # ----------------------------------------------------------------
 
-    def _build_script_from_plan(self, plan: Dict,
-                                materials: Optional[List[str]] = None,
-                                override_params: Optional[Dict] = None,
+    def _build_script_from_plan(self, plan: dict,
+                                materials: list[str] | None = None,
+                                override_params: dict | None = None,
                                 target_ip: str = "") -> EditScript:
         """从分镜计划构建剧本 — 智能素材匹配"""
         script = EditScript()
@@ -594,8 +594,8 @@ class MultimodalDirector:
 
         return script
 
-    def _build_script_from_analysis(self, analysis: Dict,
-                                    materials: Optional[List[str]] = None) -> EditScript:
+    def _build_script_from_analysis(self, analysis: dict,
+                                    materials: list[str] | None = None) -> EditScript:
         """从视觉分析结果构建剧本"""
         mood = analysis.get("mood", "epic")
         pace = analysis.get("pace", "fast")
@@ -629,8 +629,8 @@ class MultimodalDirector:
 
         return script
 
-    def _build_script_from_style(self, style: Dict,
-                                 materials: Optional[List[str]] = None) -> EditScript:
+    def _build_script_from_style(self, style: dict,
+                                 materials: list[str] | None = None) -> EditScript:
         """从风格描述构建剧本"""
         script = EditScript()
         script.style = {
@@ -652,9 +652,9 @@ class MultimodalDirector:
             })
         return script
 
-    def _build_script_from_music(self, music_analysis: Dict,
+    def _build_script_from_music(self, music_analysis: dict,
                                  description: str = "",
-                                 materials: Optional[List[str]] = None,
+                                 materials: list[str] | None = None,
                                  target_ip: str = "") -> EditScript:
         """从音乐分析结果构建节拍驱动的剧本 — 智能素材匹配"""
         script = EditScript()
@@ -706,8 +706,8 @@ class MultimodalDirector:
 
         return script
 
-    def _synthesize_script(self, context: Dict,
-                           materials: Optional[List[str]] = None) -> EditScript:
+    def _synthesize_script(self, context: dict,
+                           materials: list[str] | None = None) -> EditScript:
         """综合多源分析结果生成最终剧本"""
         # 优先级: video_analysis > text_plan > image_style > music
         plan = context.get("text_plan", {})
@@ -752,7 +752,7 @@ class MultimodalDirector:
         else:
             return "character_intro"
 
-    def _fallback_plan(self, description: str, target_duration: float) -> Dict:
+    def _fallback_plan(self, description: str, target_duration: float) -> dict:
         """降级方案: 不依赖LLM的内置分镜"""
         return {
             "title": description[:30],
@@ -773,7 +773,7 @@ class MultimodalDirector:
             ],
         }
 
-    def _extract_json(self, text: str) -> Optional[str]:
+    def _extract_json(self, text: str) -> str | None:
         """从LLM响应中提取JSON"""
         import re
         # 尝试匹配 ```json ... ```

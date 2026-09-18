@@ -108,7 +108,7 @@ class PluginManager:
 
         logger.info(f"[PluginManager] Registered plugin: {plugin.name} v{plugin.version}")
 
-    def unregister(self, name: str) -> Optional[BasePlugin]:
+    def unregister(self, name: str) -> BasePlugin | None:
         """Unregister and cleanup a plugin by name.
 
         Returns the plugin instance if found, None otherwise.
@@ -238,13 +238,13 @@ class PluginManager:
         self,
         hook_name: str,
         ctx: PluginContext,
-    ) -> Optional[Any]:
+    ) -> Any | None:
         """Run a named hook on all enabled hook plugins in priority order.
 
         For ``after_phase`` hooks, the first non-None return value
         (a modified PhaseResult) is returned.
         """
-        result: Optional[Any] = None
+        result: Any | None = None
         for plugin in self.hook_plugins:
             if not plugin.enabled:
                 continue
@@ -261,7 +261,7 @@ class PluginManager:
                 )
         return result
 
-    async def run_filters(self, ctx: PluginContext) -> Optional[Any]:
+    async def run_filters(self, ctx: PluginContext) -> Any | None:
         """Run filter plugins for the current phase in priority order.
 
         Returns the final (possibly modified) PhaseResult.
@@ -281,7 +281,7 @@ class PluginManager:
                 logger.error(f"[PluginManager] Filter '{f.name}' failed: {e}")
         return result
 
-    def get_phase_plugin(self, phase_value: str) -> Optional[PhasePlugin]:
+    def get_phase_plugin(self, phase_value: str) -> PhasePlugin | None:
         """Get the phase plugin for a given phase value."""
         return self._phase_plugins.get(phase_value)
 
@@ -289,7 +289,7 @@ class PluginManager:
     # State queries
     # ============================================================
 
-    def get_plugin(self, name: str) -> Optional[BasePlugin]:
+    def get_plugin(self, name: str) -> BasePlugin | None:
         """Get a plugin by name."""
         return self._plugins.get(name)
 

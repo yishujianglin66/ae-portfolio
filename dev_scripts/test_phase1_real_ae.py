@@ -14,19 +14,19 @@ Phase 1 端到端流水线 - 实机验证脚本
     python tests/test_phase1_real_ae.py --full
 """
 
+import argparse
+import json
 import os
 import sys
-import json
 import time
-import argparse
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ae_mcp_client import AECommandClient
 from ae_command_generator import AECommandGenerator
-from ae_agent_pipeline import AEAgentPipeline
+from ae_mcp_client import AECommandClient
 
+from ae_agent_pipeline import AEAgentPipeline
 
 # ==================== 配置 ====================
 
@@ -85,9 +85,9 @@ def check_environment():
     # 检查签名密钥
     secret_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", "mcp_secret")
     if os.path.exists(secret_file):
-        print(f"  ✅ 签名密钥文件存在")
+        print("  ✅ 签名密钥文件存在")
     else:
-        print(f"  ⚠️  签名密钥文件不存在（测试将关闭签名验证）")
+        print("  ⚠️  签名密钥文件不存在（测试将关闭签名验证）")
     
     print(f"\n  环境检查完成: {'通过' if not issues else '发现 ' + str(len(issues)) + ' 个问题'}")
     
@@ -109,10 +109,10 @@ def step_test_create_comp(client, comp_name):
     
     success = result.get("success") or result.get("status") == "success"
     if success:
-        print(f"  ✅ 合成创建成功")
+        print("  ✅ 合成创建成功")
         print(f"     消息: {result.get('message', '')}")
     else:
-        print(f"  ❌ 合成创建失败")
+        print("  ❌ 合成创建失败")
         print(f"     错误: {result.get('message', result.get('error', 'Unknown'))}")
     
     return success
@@ -135,10 +135,10 @@ def step_test_import_footage(client, clip_files):
     
     success = result.get("success") or result.get("status") == "success"
     if success:
-        print(f"  ✅ 素材导入成功")
+        print("  ✅ 素材导入成功")
         print(f"     消息: {result.get('message', '')}")
     else:
-        print(f"  ❌ 素材导入失败")
+        print("  ❌ 素材导入失败")
         print(f"     错误: {result.get('message', result.get('error', 'Unknown'))}")
     
     return success, clip_path
@@ -157,10 +157,10 @@ def step_test_place_footage(client, comp_name, clip_path):
     
     success = result.get("success") or result.get("status") == "success"
     if success:
-        print(f"  ✅ 素材放置成功")
+        print("  ✅ 素材放置成功")
         print(f"     消息: {result.get('message', '')}")
     else:
-        print(f"  ❌ 素材放置失败")
+        print("  ❌ 素材放置失败")
         print(f"     错误: {result.get('message', result.get('error', 'Unknown'))}")
     
     return success
@@ -182,10 +182,10 @@ def step_test_apply_effect(client, comp_name):
     
     success = result.get("success") or result.get("status") == "success"
     if success:
-        print(f"  ✅ 效果应用成功")
+        print("  ✅ 效果应用成功")
         print(f"     消息: {result.get('message', '')}")
     else:
-        print(f"  ❌ 效果应用失败")
+        print("  ❌ 效果应用失败")
         print(f"     错误: {result.get('message', result.get('error', 'Unknown'))}")
     
     return success
@@ -221,10 +221,10 @@ def step_test_set_keyframe(client, comp_name):
     success = success1 and success2
     
     if success:
-        print(f"  ✅ 关键帧设置成功（2个关键帧）")
+        print("  ✅ 关键帧设置成功（2个关键帧）")
         print(f"     消息: {result2.get('message', '')}")
     else:
-        print(f"  ❌ 关键帧设置失败")
+        print("  ❌ 关键帧设置失败")
         print(f"     KF1: {result1.get('message', result1.get('error', ''))}")
         print(f"     KF2: {result2.get('message', result2.get('error', ''))}")
     
@@ -249,10 +249,10 @@ def step_test_render(client, comp_name):
     
     success = result.get("success") or result.get("status") == "success"
     if success:
-        print(f"  ✅ 渲染已启动")
+        print("  ✅ 渲染已启动")
         print(f"     消息: {result.get('message', '')}")
     else:
-        print(f"  ❌ 渲染启动失败")
+        print("  ❌ 渲染启动失败")
         print(f"     错误: {result.get('message', result.get('error', 'Unknown'))}")
     
     return success

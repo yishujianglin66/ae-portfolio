@@ -2,12 +2,12 @@ import logging
 import os
 import re
 import time
-from logging.handlers import RotatingFileHandler
 from datetime import datetime, timedelta
-from typing import Optional, Dict
+from logging.handlers import RotatingFileHandler
+from typing import Dict, Optional
 
 # 全局 logger 实例缓存，防止重复创建 handler
-_LOGGER_CACHE: Dict[str, "MediaLogger"] = {}
+_LOGGER_CACHE: dict[str, "MediaLogger"] = {}
 
 # 跨日期日志文件保留天数（超过此天数的旧日志自动删除）
 DEFAULT_RETENTION_DAYS = 14
@@ -127,13 +127,13 @@ class MediaLogger:
     def warning(self, message: str, **kwargs):
         self.logger.warning(message, extra=kwargs)
 
-    def error(self, message: str, exception: Optional[Exception] = None, **kwargs):
+    def error(self, message: str, exception: Exception | None = None, **kwargs):
         if exception:
             self.logger.error(f"{message}: {str(exception)}", exc_info=True, extra=kwargs)
         else:
             self.logger.error(message, extra=kwargs)
 
-    def critical(self, message: str, exception: Optional[Exception] = None, **kwargs):
+    def critical(self, message: str, exception: Exception | None = None, **kwargs):
         if exception:
             self.logger.critical(f"{message}: {str(exception)}", exc_info=True, extra=kwargs)
         else:

@@ -10,18 +10,22 @@
   6. JSX 片段生成（图层索引合法性）与契约注入 merge_jsx
   7. compose() 与 JsxProjectBuilder 合并端到端
 """
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
 
-from core.composition_tree import build_template, validate_composition_tree
 from core.beatlock import (
-    BeatGrid, BeatLock, BeatAnchor, BeatLockResult, compose,
     ACTION_TYPES,
+    BeatAnchor,
+    BeatGrid,
+    BeatLock,
+    BeatLockResult,
+    compose,
 )
+from core.composition_tree import build_template, validate_composition_tree
 from core.synthesis_orchestrator import JsxProjectBuilder
 
 

@@ -40,7 +40,7 @@ class FakeHighFrameRateService:
         sharpen_amount: float = 1.5,
         upscale_4k: bool = True,
         preserve_audio: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Apply fake high frame rate: real interpolation + visual enhancement.
 
         Args:
@@ -218,7 +218,7 @@ class FakeHighFrameRateService:
         output_dir: str | Path,
         target_fps: int = 60,
         mode: str = "smart",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Batch apply fake HFR to all videos in a directory."""
         input_dir = Path(input_dir)
         output_dir = Path(output_dir)
@@ -245,7 +245,7 @@ class FakeHighFrameRateService:
         self,
         platform: str = "douyin",
         content_type: str = "general",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get optimal settings for different platforms and content types."""
         platform_profiles = {
             "douyin": {"target_fps": 60, "mode": "smart", "blur_strength": 0.3, "blend_alpha": 0.3, "sharpen_amount": 1.5},

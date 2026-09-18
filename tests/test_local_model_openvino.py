@@ -166,7 +166,7 @@ class TestOVDispatch:
 class TestLLMGatewayLocal:
     @pytest.mark.asyncio
     async def test_chat_routes_to_local_openvino_when_base_url_says_so(self):
-        from core.llm_gateway import LLMGateway, LLMConfig, LLMResponse
+        from core.llm_gateway import LLMConfig, LLMGateway, LLMResponse
 
         cfg = LLMConfig(
             base_url="local://openvino/qwen2-1.5b",
@@ -192,7 +192,7 @@ class TestLLMGatewayLocal:
 
     @pytest.mark.asyncio
     async def test_fallback_provider_chain_lands_on_local_openvino(self):
-        from core.llm_gateway import LLMGateway, LLMConfig, LLMResponse
+        from core.llm_gateway import LLMConfig, LLMGateway, LLMResponse
 
         primary_fail = LLMResponse(
             success=False, provider="primary", error="primary network down"

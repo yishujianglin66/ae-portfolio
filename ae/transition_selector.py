@@ -35,10 +35,9 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from .timeline_ir import IRTransitionType
-
 
 # ================================================================
 #  枚举定义
@@ -75,7 +74,7 @@ class TransitionRule:
     style: StyleCategory
     relation: ContentRelation
     primary: IRTransitionType
-    alternatives: List[IRTransitionType] = field(default_factory=list)
+    alternatives: list[IRTransitionType] = field(default_factory=list)
     min_duration: float = 0.15
     max_duration: float = 1.0
     default_duration: float = 0.5
@@ -102,7 +101,7 @@ class TransitionSelector:
     """
 
     # 风格 → 默认转场映射
-    STYLE_TRANSITION_MAP: Dict[str, List[IRTransitionType]] = {
+    STYLE_TRANSITION_MAP: dict[str, list[IRTransitionType]] = {
         "dynamic_cut": [
             IRTransitionType.CUT,
             IRTransitionType.WHIP_PAN_RIGHT,
@@ -141,7 +140,7 @@ class TransitionSelector:
     }
 
     # 风格名映射到 StyleCategory
-    STYLE_ALIASES: Dict[str, StyleCategory] = {
+    STYLE_ALIASES: dict[str, StyleCategory] = {
         "dynamic_cut": StyleCategory.DYNAMIC,
         "fast_beat": StyleCategory.DYNAMIC,
         "smooth_flow": StyleCategory.SMOOTH,
@@ -152,7 +151,7 @@ class TransitionSelector:
         "minimal": StyleCategory.MINIMAL,
     }
 
-    def __init__(self, seed: Optional[int] = None, rules: Optional[List[TransitionRule]] = None):
+    def __init__(self, seed: int | None = None, rules: list[TransitionRule] | None = None):
         """
         Args:
             seed: 随机种子 (用于可复现的转场选择)
@@ -167,11 +166,11 @@ class TransitionSelector:
 
     def select_for_sequence(
         self,
-        clips: List[str],
+        clips: list[str],
         style: str = "dynamic_cut",
-        relations: Optional[List[ContentRelation]] = None,
+        relations: list[ContentRelation] | None = None,
         bpm: float = 120.0,
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """
         为素材序列选择转场。
 
@@ -187,7 +186,7 @@ class TransitionSelector:
         if len(clips) <= 1:
             return {clips[0]: "cut"} if clips else {}
 
-        transition_map: Dict[str, str] = {}
+        transition_map: dict[str, str] = {}
         first_clip = clips[0]
         transition_map[first_clip] = "cut"  # 第一个片段无需入转场
 
@@ -207,7 +206,7 @@ class TransitionSelector:
         self,
         style: str = "dynamic_cut",
         relation: ContentRelation = ContentRelation.CONTINUOUS,
-        duration: Optional[float] = None,
+        duration: float | None = None,
     ) -> IRTransitionType:
         """
         选择单个转场。
@@ -226,7 +225,7 @@ class TransitionSelector:
         self,
         style: str = "dynamic_cut",
         relation: ContentRelation = ContentRelation.CONTINUOUS,
-    ) -> Tuple[IRTransitionType, float]:
+    ) -> tuple[IRTransitionType, float]:
         """
         选择转场并推荐时长。
 
@@ -299,7 +298,7 @@ class TransitionSelector:
     # ----------------------------------------------------------
 
     @staticmethod
-    def _build_default_rules() -> List[TransitionRule]:
+    def _build_default_rules() -> list[TransitionRule]:
         """构建默认转场规则表"""
         D = StyleCategory.DYNAMIC
         S = StyleCategory.SMOOTH
@@ -413,7 +412,7 @@ class TransitionSelector:
     #  工具方法
     # ----------------------------------------------------------
 
-    def list_available_transitions(self, style: Optional[str] = None) -> List[str]:
+    def list_available_transitions(self, style: str | None = None) -> list[str]:
         """列出可用转场"""
         if style:
             candidates = self.STYLE_TRANSITION_MAP.get(style, [])
@@ -427,12 +426,12 @@ class TransitionSelector:
         """动态添加转场规则"""
         self.rules.append(rule)
 
-    def get_rules_for_style(self, style: str) -> List[TransitionRule]:
+    def get_rules_for_style(self, style: str) -> list[TransitionRule]:
         """获取某风格的所有规则"""
         style_cat = self._resolve_style(style)
         return [r for r in self.rules if r.style == style_cat]
 
-    def to_pr_transition(self, ir_type: IRTransitionType) -> Optional[str]:
+    def to_pr_transition(self, ir_type: IRTransitionType) -> str | None:
         """
         将 IRTransitionType 映射到 PR TransitionType。
 

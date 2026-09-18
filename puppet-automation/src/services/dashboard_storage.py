@@ -177,7 +177,7 @@ class DashboardStorage:
     # ========== Projects ==========
 
     async def list_projects(
-        self, status: Optional[str] = None, page: int = 1, page_size: int = 50
+        self, status: str | None = None, page: int = 1, page_size: int = 50
     ) -> dict[str, Any]:
         """分页获取项目列表。"""
         def _query(conn: sqlite3.Connection):
@@ -206,7 +206,7 @@ class DashboardStorage:
 
         return await _run_async(_query)
 
-    async def get_project(self, project_id: str) -> Optional[dict[str, Any]]:
+    async def get_project(self, project_id: str) -> dict[str, Any] | None:
         """获取单个项目。"""
         def _query(conn: sqlite3.Connection):
             row = conn.execute(
@@ -256,7 +256,7 @@ class DashboardStorage:
 
         return await _run_async(_insert)
 
-    async def update_project(self, project_id: str, data: dict[str, Any]) -> Optional[dict[str, Any]]:
+    async def update_project(self, project_id: str, data: dict[str, Any]) -> dict[str, Any] | None:
         """更新项目。"""
         now = _now_iso()
 
@@ -312,7 +312,7 @@ class DashboardStorage:
     # ========== History ==========
 
     async def list_history(
-        self, limit: int = 50, offset: int = 0, result: Optional[str] = None
+        self, limit: int = 50, offset: int = 0, result: str | None = None
     ) -> dict[str, Any]:
         """获取历史记录。"""
         def _query(conn: sqlite3.Connection):

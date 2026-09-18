@@ -56,7 +56,7 @@ def close_pr_graceful():
 
 def launch_pr_with_script(script_path: Path) -> bool:
     """启动 PR 并运行脚本。"""
-    print(f"\n启动 Premiere Pro 并运行脚本...")
+    print("\n启动 Premiere Pro 并运行脚本...")
     print(f"  脚本: {script_path}")
 
     if not script_path.exists():

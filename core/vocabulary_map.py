@@ -22,13 +22,15 @@ Phase 4 - 自然语言→解析词汇映射库 (Python 版)
 
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 # 复用现有数据类（向后兼容）
 from effect_description_parser import (
-    VocabRef, ColorRef, IntensityRef, TemporalRef,
+    ColorRef,
+    IntensityRef,
+    TemporalRef,
+    VocabRef,
 )
-
 
 # ============================================================================
 # 词汇映射条目
@@ -39,9 +41,9 @@ class VocabMapEntry:
     """词汇映射条目（对齐 TS VocabMapEntry）"""
     vocab_id: str           # 词汇 ID（VT-XXX / KF-XXX）
     vocab_name: str         # 词汇名
-    suggested_effect: Optional[str] = None  # 建议的效果 matchName
+    suggested_effect: str | None = None  # 建议的效果 matchName
     confidence: float = 0.0
-    keywords: List[str] = None              # 同义关键词列表
+    keywords: list[str] = None              # 同义关键词列表
 
     def __post_init__(self):
         if self.keywords is None:
@@ -52,7 +54,7 @@ class VocabMapEntry:
 # 模糊类视觉特征词 (VT-001 ~ VT-010)
 # ============================================================================
 
-BLUR_VOCAB: List[VocabMapEntry] = [
+BLUR_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-001", "均匀模糊扩散", "ADBE Gaussian Blur 2", 0.85,
                   ["模糊", "柔化", "虚化", "blur", "gaussian", "高斯模糊",
                    "soffen", "soften", "高斯柔化"]),
@@ -87,7 +89,7 @@ BLUR_VOCAB: List[VocabMapEntry] = [
 # 发光类视觉特征词 (VT-101 ~ VT-106)
 # ============================================================================
 
-GLOW_VOCAB: List[VocabMapEntry] = [
+GLOW_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-101", "边缘发光", "ADBE Glo2", 0.80,
                   ["发光", "辉光", "glow", "边缘光",
                    "rim light", "outline glow", "光晕"]),
@@ -112,7 +114,7 @@ GLOW_VOCAB: List[VocabMapEntry] = [
 # 扭曲类视觉特征词 (VT-201 ~ VT-206)
 # ============================================================================
 
-DISTORT_VOCAB: List[VocabMapEntry] = [
+DISTORT_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-201", "流体扭曲", "ADBE Turbulent Displace", 0.85,
                   ["流体扭曲", "湍流", "turbulent",
                    "热浪", "水波", "波动扭曲"]),
@@ -136,7 +138,7 @@ DISTORT_VOCAB: List[VocabMapEntry] = [
 # 色彩类视觉特征词 (VT-301+)
 # ============================================================================
 
-COLOR_VOCAB: List[VocabMapEntry] = [
+COLOR_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-301", "暖色调偏移", "ADBE Color Balance", 0.80,
                   ["暖色", "暖调", "warm", "暖色调", "偏暖"]),
     VocabMapEntry("VT-302", "冷色调偏移", "ADBE Color Balance", 0.80,
@@ -162,7 +164,7 @@ COLOR_VOCAB: List[VocabMapEntry] = [
 # 粒子类视觉特征词 (VT-401+)
 # ============================================================================
 
-PARTICLE_VOCAB: List[VocabMapEntry] = [
+PARTICLE_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-401", "离散点状元素", "ACP Particular", 0.88,
                   ["粒子", "particle", "particular",
                    "点状元素", "颗粒"]),
@@ -178,7 +180,7 @@ PARTICLE_VOCAB: List[VocabMapEntry] = [
 # 转场类视觉特征词 (VT-501+)
 # ============================================================================
 
-TRANSITION_VOCAB: List[VocabMapEntry] = [
+TRANSITION_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-501", "淡入淡出", "ADBE Opacity", 0.90,
                   ["淡入", "淡出", "fade", "dissolve", "渐隐"]),
     VocabMapEntry("VT-502", "位移转场", "ADBE Transform", 0.82,
@@ -195,7 +197,7 @@ TRANSITION_VOCAB: List[VocabMapEntry] = [
 # 文字类视觉特征词 (VT-601+)
 # ============================================================================
 
-TEXT_VOCAB: List[VocabMapEntry] = [
+TEXT_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-601", "文字弹入", "ADBE Text", 0.85,
                   ["弹入", "bounce in", "弹性入场", "弹簧"]),
     VocabMapEntry("VT-602", "文字打字机", "ADBE Text", 0.88,
@@ -207,7 +209,7 @@ TEXT_VOCAB: List[VocabMapEntry] = [
 # 噪波与颗粒类视觉特征词 (VT-701+)
 # ============================================================================
 
-NOISE_GRAIN_VOCAB: List[VocabMapEntry] = [
+NOISE_GRAIN_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-701", "分形噪波", "ADBE Fractal Noise", 0.88,
                   ["分形噪波", "fractal noise", "噪波",
                    "noise", "噪声", "分形噪声"]),
@@ -227,7 +229,7 @@ NOISE_GRAIN_VOCAB: List[VocabMapEntry] = [
 # 通道与键控类视觉特征词 (VT-801+)
 # ============================================================================
 
-KEYING_VOCAB: List[VocabMapEntry] = [
+KEYING_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-801", "颜色键控", "ADBE Color Key", 0.88,
                   ["抠像", "键控", "key", "color key",
                    "抠图", "色键"]),
@@ -249,7 +251,7 @@ KEYING_VOCAB: List[VocabMapEntry] = [
 # 风格化类视觉特征词 (VT-901+)
 # ============================================================================
 
-STYLIZE_VOCAB: List[VocabMapEntry] = [
+STYLIZE_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-901", "马赛克", "ADBE Mosaic", 0.90,
                   ["马赛克", "mosaic", "打码",
                    "像素化", "pixelate"]),
@@ -273,7 +275,7 @@ STYLIZE_VOCAB: List[VocabMapEntry] = [
 # 透视与3D类视觉特征词 (VT-1001+)
 # ============================================================================
 
-PERSPECTIVE_VOCAB: List[VocabMapEntry] = [
+PERSPECTIVE_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-1001", "投影效果", "ADBE Drop Shadow", 0.88,
                   ["投影", "阴影", "drop shadow",
                    "影子", "阴影效果"]),
@@ -298,7 +300,7 @@ PERSPECTIVE_VOCAB: List[VocabMapEntry] = [
 # 生成与绘制类视觉特征词 (VT-1101+)
 # ============================================================================
 
-GENERATE_VOCAB: List[VocabMapEntry] = [
+GENERATE_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("VT-1101", "颜色填充", "ADBE Fill", 0.85,
                   ["填充", "fill", "纯色填充", "颜色填充"]),
     VocabMapEntry("VT-1102", "渐变过渡", "ADBE Ramp", 0.82,
@@ -322,7 +324,7 @@ GENERATE_VOCAB: List[VocabMapEntry] = [
 # 关键帧动画类词汇 (KF-010+)
 # ============================================================================
 
-KEYFRAME_VOCAB: List[VocabMapEntry] = [
+KEYFRAME_VOCAB: list[VocabMapEntry] = [
     VocabMapEntry("KF-010", "弹性缓入", "ADBE Glo2", 0.80,
                   ["弹入", "弹性", "bounce", "spring", "回弹"]),
     VocabMapEntry("KF-011", "线性渐入", "ADBE Opacity", 0.85,
@@ -339,7 +341,7 @@ KEYFRAME_VOCAB: List[VocabMapEntry] = [
 # 全部词汇表（合并）
 # ============================================================================
 
-ALL_VOCAB: List[VocabMapEntry] = (
+ALL_VOCAB: list[VocabMapEntry] = (
     BLUR_VOCAB + GLOW_VOCAB + DISTORT_VOCAB + COLOR_VOCAB +
     PARTICLE_VOCAB + TRANSITION_VOCAB + TEXT_VOCAB +
     NOISE_GRAIN_VOCAB + KEYING_VOCAB + STYLIZE_VOCAB +
@@ -347,11 +349,11 @@ ALL_VOCAB: List[VocabMapEntry] = (
 )
 
 # 按 vocab_id 建立快速查找索引
-_VOCAB_BY_ID: Dict[str, VocabMapEntry] = {e.vocab_id: e for e in ALL_VOCAB}
+_VOCAB_BY_ID: dict[str, VocabMapEntry] = {e.vocab_id: e for e in ALL_VOCAB}
 
 # 预编译关键词扫描索引（lower → entry）
 # 一个关键词可能对应多个 entry（如 "模糊" 同时匹配 VT-001 等）
-_KW_TO_ENTRIES: Dict[str, List[VocabMapEntry]] = {}
+_KW_TO_ENTRIES: dict[str, list[VocabMapEntry]] = {}
 for _entry in ALL_VOCAB:
     for _kw in _entry.keywords:
         _kw_lower = _kw.lower()
@@ -374,11 +376,11 @@ _VOCAB_SCAN_RE = re.compile(
 @dataclass
 class ColorMapEntry:
     keyword: str
-    rgb: List[float]
+    rgb: list[float]
     temperature: str  # "warm" | "cool" | "neutral"
 
 
-COLOR_MAP: List[ColorMapEntry] = [
+COLOR_MAP: list[ColorMapEntry] = [
     ColorMapEntry("暖色", [1.0, 0.7, 0.3], "warm"),
     ColorMapEntry("暖金", [1.0, 0.8, 0.4], "warm"),
     ColorMapEntry("橙", [1.0, 0.5, 0.0], "warm"),
@@ -403,7 +405,7 @@ COLOR_MAP: List[ColorMapEntry] = [
     ColorMapEntry("黑色", [0.0, 0.0, 0.0], "neutral"),
 ]
 
-_COLOR_KW_LOOKUP: Dict[str, ColorMapEntry] = {
+_COLOR_KW_LOOKUP: dict[str, ColorMapEntry] = {
     e.keyword.lower(): e for e in COLOR_MAP
 }
 _SORTED_COLOR_KW = sorted(_COLOR_KW_LOOKUP.keys(), key=len, reverse=True)
@@ -427,7 +429,7 @@ class IntensityMapEntry:
     value: float  # Python 用的 value (0-1)
 
 
-INTENSITY_MAP: List[IntensityMapEntry] = [
+INTENSITY_MAP: list[IntensityMapEntry] = [
     IntensityMapEntry("轻微", "subtle", 0.4, 0.3),
     IntensityMapEntry("微微", "subtle", 0.3, 0.2),
     IntensityMapEntry("稍", "subtle", 0.5, 0.3),
@@ -465,7 +467,7 @@ INTENSITY_MAP: List[IntensityMapEntry] = [
     IntensityMapEntry("very", "extreme", 2.0, 1.0),
 ]
 
-_INTENSITY_KW_LOOKUP: Dict[str, IntensityMapEntry] = {
+_INTENSITY_KW_LOOKUP: dict[str, IntensityMapEntry] = {
     e.keyword.lower(): e for e in INTENSITY_MAP
 }
 _SORTED_INTENSITY_KW = sorted(_INTENSITY_KW_LOOKUP.keys(), key=len, reverse=True)
@@ -485,11 +487,11 @@ _INTENSITY_SCAN_RE = re.compile(
 class TemporalMapEntry:
     keyword: str
     position: str  # "start" | "end" | "middle" | "custom"
-    at_time: Optional[float] = None    # 秒；-1 表示末尾，-0.5 表示中点
-    duration: Optional[float] = None   # 秒
+    at_time: float | None = None    # 秒；-1 表示末尾，-0.5 表示中点
+    duration: float | None = None   # 秒
 
 
-TEMPORAL_MAP: List[TemporalMapEntry] = [
+TEMPORAL_MAP: list[TemporalMapEntry] = [
     TemporalMapEntry("开头", "start", at_time=0),
     TemporalMapEntry("开始", "start", at_time=0),
     TemporalMapEntry("起点", "start", at_time=0),
@@ -508,7 +510,7 @@ TEMPORAL_MAP: List[TemporalMapEntry] = [
     TemporalMapEntry("持续5秒", "custom", duration=5),
 ]
 
-_TEMPORAL_KW_LOOKUP: Dict[str, TemporalMapEntry] = {
+_TEMPORAL_KW_LOOKUP: dict[str, TemporalMapEntry] = {
     e.keyword.lower(): e for e in TEMPORAL_MAP
 }
 _SORTED_TEMPORAL_KW = sorted(_TEMPORAL_KW_LOOKUP.keys(), key=len, reverse=True)
@@ -522,7 +524,7 @@ _TEMPORAL_SCAN_RE = re.compile(
 # 公共 API
 # ============================================================================
 
-def find_vocab(keyword: str) -> List[VocabRef]:
+def find_vocab(keyword: str) -> list[VocabRef]:
     """查找词汇映射（精确匹配）
 
     对齐 TS findVocab。返回所有匹配的 VocabRef（可能有多个）。
@@ -532,7 +534,7 @@ def find_vocab(keyword: str) -> List[VocabRef]:
     Returns:
         匹配到的词汇引用列表
     """
-    refs: List[VocabRef] = []
+    refs: list[VocabRef] = []
     kw_lower = keyword.lower()
     entries = _KW_TO_ENTRIES.get(kw_lower)
     if entries:
@@ -547,7 +549,7 @@ def find_vocab(keyword: str) -> List[VocabRef]:
     return refs
 
 
-def scan_vocab(text: str) -> List[VocabRef]:
+def scan_vocab(text: str) -> list[VocabRef]:
     """在文本中扫描所有词汇（子串匹配）
 
     对齐 TS scanVocab。使用预编译的正则扫描，长关键词优先匹配。
@@ -558,7 +560,7 @@ def scan_vocab(text: str) -> List[VocabRef]:
     Returns:
         匹配到的所有词汇引用列表
     """
-    refs: List[VocabRef] = []
+    refs: list[VocabRef] = []
     seen_ids: set = set()
     for m in _VOCAB_SCAN_RE.finditer(text):
         kw_lower = m.group(1).lower()
@@ -579,7 +581,7 @@ def scan_vocab(text: str) -> List[VocabRef]:
     return refs
 
 
-def scan_colors(text: str) -> List[ColorRef]:
+def scan_colors(text: str) -> list[ColorRef]:
     """在文本中扫描颜色
 
     对齐 TS scanColors。返回所有匹配的 ColorRef。
@@ -589,7 +591,7 @@ def scan_colors(text: str) -> List[ColorRef]:
     Returns:
         匹配到的颜色引用列表
     """
-    refs: List[ColorRef] = []
+    refs: list[ColorRef] = []
     seen_keywords: set = set()
     for m in _COLOR_SCAN_RE.finditer(text):
         kw_lower = m.group(1).lower()
@@ -605,7 +607,7 @@ def scan_colors(text: str) -> List[ColorRef]:
     return refs
 
 
-def scan_intensity(text: str) -> List[IntensityRef]:
+def scan_intensity(text: str) -> list[IntensityRef]:
     """在文本中扫描强度
 
     对齐 TS scanIntensity。返回 Python 现有 IntensityRef (keyword + value)。
@@ -616,7 +618,7 @@ def scan_intensity(text: str) -> List[IntensityRef]:
     Returns:
         匹配到的强度引用列表
     """
-    refs: List[IntensityRef] = []
+    refs: list[IntensityRef] = []
     seen_keywords: set = set()
     for m in _INTENSITY_SCAN_RE.finditer(text):
         kw_lower = m.group(1).lower()
@@ -631,7 +633,7 @@ def scan_intensity(text: str) -> List[IntensityRef]:
     return refs
 
 
-def scan_temporal(text: str) -> List[TemporalRef]:
+def scan_temporal(text: str) -> list[TemporalRef]:
     """在文本中扫描时间
 
     对齐 TS scanTemporal。返回 Python 现有 TemporalRef (keyword + position)。
@@ -642,7 +644,7 @@ def scan_temporal(text: str) -> List[TemporalRef]:
     Returns:
         匹配到的时间引用列表
     """
-    refs: List[TemporalRef] = []
+    refs: list[TemporalRef] = []
     seen_keywords: set = set()
     for m in _TEMPORAL_SCAN_RE.finditer(text):
         kw_lower = m.group(1).lower()
@@ -661,7 +663,7 @@ def scan_temporal(text: str) -> List[TemporalRef]:
 # 元信息查询 API（TS 端有但 Python 端原本缺失）
 # ============================================================================
 
-def get_intensity_details(keyword: str) -> Optional[IntensityMapEntry]:
+def get_intensity_details(keyword: str) -> IntensityMapEntry | None:
     """查询强度的 level/scale/value 元信息
 
     Args:
@@ -672,7 +674,7 @@ def get_intensity_details(keyword: str) -> Optional[IntensityMapEntry]:
     return _INTENSITY_KW_LOOKUP.get(keyword.lower())
 
 
-def get_temporal_details(keyword: str) -> Optional[TemporalMapEntry]:
+def get_temporal_details(keyword: str) -> TemporalMapEntry | None:
     """查询时间的 atTime/duration 元信息
 
     Args:
@@ -701,18 +703,18 @@ def get_intensity_level(value: float) -> str:
         return "extreme"
 
 
-def get_vocab_by_id(vocab_id: str) -> Optional[VocabMapEntry]:
+def get_vocab_by_id(vocab_id: str) -> VocabMapEntry | None:
     """根据 vocab_id 查询词条"""
     return _VOCAB_BY_ID.get(vocab_id)
 
 
-def get_suggested_effect(vocab_id: str) -> Optional[str]:
+def get_suggested_effect(vocab_id: str) -> str | None:
     """根据 vocab_id 查询建议的效果 matchName"""
     entry = _VOCAB_BY_ID.get(vocab_id)
     return entry.suggested_effect if entry else None
 
 
-def get_vocab_stats() -> Dict[str, Any]:
+def get_vocab_stats() -> dict[str, Any]:
     """获取词汇统计
 
     对齐 TS getVocabStats。
@@ -740,12 +742,12 @@ def get_vocab_stats() -> Dict[str, Any]:
     }
 
 
-def list_all_keywords() -> List[str]:
+def list_all_keywords() -> list[str]:
     """列出所有关键词（用于调试/测试）"""
     return list(_KW_TO_ENTRIES.keys())
 
 
-def list_vocab_by_category(category: str) -> List[VocabMapEntry]:
+def list_vocab_by_category(category: str) -> list[VocabMapEntry]:
     """按类别列出词汇
 
     Args:

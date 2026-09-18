@@ -16,9 +16,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
-from core.torch_runtime import infer_ctx, get_device
 from torchvision import transforms
 from transformers import AutoModelForImageSegmentation
+
+from core.torch_runtime import get_device, infer_ctx
 
 VIMEO = Path("/root/autodl-pub/Vimeo-90k")
 SEQ_DIR = VIMEO / "vimeo_septuplet" / "sequences"  # 每组 7 帧

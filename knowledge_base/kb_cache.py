@@ -36,14 +36,14 @@ class KbCache:
             cache_dir: 缓存目录路径。为空则不持久化。
         """
         self._cache_dir = cache_dir
-        self._entries: Dict[str, Dict[str, Any]] = {}
+        self._entries: dict[str, dict[str, Any]] = {}
         # entry: {file_path: {"data": ..., "mtime": float, "cached_at": float}}
 
         if cache_dir:
             os.makedirs(cache_dir, exist_ok=True)
             self.load()
 
-    def get(self, file_path: str, mtime: Optional[float] = None) -> Optional[Dict[str, Any]]:
+    def get(self, file_path: str, mtime: float | None = None) -> dict[str, Any] | None:
         """获取缓存数据。
 
         Args:
@@ -64,7 +64,7 @@ class KbCache:
 
         return entry.get("data")
 
-    def set(self, file_path: str, data: Dict[str, Any], mtime: float = 0.0) -> None:
+    def set(self, file_path: str, data: dict[str, Any], mtime: float = 0.0) -> None:
         """设置缓存数据。
 
         Args:

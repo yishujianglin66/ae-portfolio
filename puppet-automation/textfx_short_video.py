@@ -5,8 +5,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.engines.ffmpeg.engine import FFmpegEngine
 from src.config import settings
+from src.engines.ffmpeg.engine import FFmpegEngine
 
 INPUT = Path(r"D:\AE-Work\output\TextFX_Showcase.mp4")
 OUTPUT = Path(r"D:\AE-Work\output\deliver\TextFX_Showcase_Short_60fps.mp4")

@@ -142,7 +142,7 @@ def main():
 
     # 10. 多IP语料工厂
     try:
-        from ai.t31_multi_ip_corpus import load_config, RECOMMENDED_IPS
+        from ai.t31_multi_ip_corpus import RECOMMENDED_IPS, load_config
         config = load_config()
         n_ips_config = len(config.get("ips", {}))
         config_path = ROOT / "config" / "multi_ip_corpus.json"
@@ -153,7 +153,7 @@ def main():
 
     # 11. 均衡采样LoRA重训
     try:
-        from ai.t32_balanced_lora_retrain import balanced_sample, MAX_PER_IP
+        from ai.t32_balanced_lora_retrain import MAX_PER_IP, balanced_sample
         # 模拟均衡采样
         test_entries = [{"ip": f"ip{i % 3}", "frame_path": ""} for i in range(100)]
         sampled = balanced_sample(test_entries, max_per_ip=20, min_per_ip=5)

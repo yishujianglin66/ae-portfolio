@@ -35,8 +35,8 @@ class RotoService:
 
     def __init__(
         self,
-        sam2_engine: Optional[SAM2Engine] = None,
-        silhouette_engine: Optional[SilhouetteEngine] = None,
+        sam2_engine: SAM2Engine | None = None,
+        silhouette_engine: SilhouetteEngine | None = None,
     ):
         """初始化联合抠像服务.
 
@@ -54,7 +54,7 @@ class RotoService:
         output_dir: Path | str,
         mode: Literal["sam2_only", "silhouette_only", "hybrid"] = "hybrid",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """自动抠像主入口 - 支持三种模式.
 
         Args:
@@ -103,9 +103,9 @@ class RotoService:
 
         logger.info(f"[Roto] Starting auto_roto, mode={mode}, video={video_path}")
 
-        details: Dict[str, Any] = {}
-        mask_path: Optional[Path] = None
-        alpha_path: Optional[Path] = None
+        details: dict[str, Any] = {}
+        mask_path: Path | None = None
+        alpha_path: Path | None = None
         quality_score = 0.0
 
         try:
@@ -205,7 +205,7 @@ class RotoService:
         video_path: Path | str,
         output_dir: Path | str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """调用 SAM2 引擎进行自动分割.
 
         输出每帧 mask PNG 序列，并进行质量评估。
@@ -272,9 +272,9 @@ class RotoService:
         self,
         mask_dir: Path | str,
         output_dir: Path | str,
-        video_path: Optional[Path | str] = None,
+        video_path: Path | str | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """调用 Silhouette 引擎精修 mask.
 
         进行贝塞尔曲线简化、边缘羽化、运动模糊等精修处理。
@@ -351,7 +351,7 @@ class RotoService:
     def evaluate_quality(
         self,
         mask_path: Path | str,
-        reference: Optional[Path | str] = None,
+        reference: Path | str | None = None,
     ) -> float:
         """计算 mask 质量分（边缘锐度、连通性、噪声等）.
 
@@ -407,7 +407,7 @@ class RotoService:
             logger.warning(f"[Roto] Quality evaluation failed: {e}")
             return 0.0
 
-    def generate_roto_report(self, result: Dict[str, Any]) -> str:
+    def generate_roto_report(self, result: dict[str, Any]) -> str:
         """生成抠像报告（质量、耗时、参数）.
 
         Args:
@@ -514,7 +514,7 @@ class RotoService:
         video_path: Path,
         output_dir: Path,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Hybrid 模式完整流水线：SAM2 粗分 → 形状导出 → Silhouette 精修 → Alpha 渲染.
 
         Args:
@@ -525,8 +525,8 @@ class RotoService:
         Returns:
             包含 pipeline 结果的字典
         """
-        details: Dict[str, Any] = {}
-        current_masks: Optional[Path] = None
+        details: dict[str, Any] = {}
+        current_masks: Path | None = None
 
         stage1_dir = output_dir / "01_sam2_masks"
         stage2_dir = output_dir / "02_shapes"

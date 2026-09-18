@@ -10,7 +10,11 @@
    quality_gate / fx(fusion/beats 触发)
 4. pipeline_result.json 落盘可复核
 """
-import sys, os, json, glob, time
+import glob
+import json
+import os
+import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -28,7 +32,7 @@ assert mp4s, "no real mp4 materials"
 
 # ---------- 2. 导入 ----------
 print("\n[2] Importing UnifiedPipeline...")
-from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig
+from pipeline.unified_pipeline import PipelineConfig, UnifiedPipeline
 
 # ---------- 3. 配置（真实素材 + ffmpeg + 完整智能链路） ----------
 print("\n[3] Configuring...")

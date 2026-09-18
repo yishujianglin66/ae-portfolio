@@ -2,8 +2,8 @@
 """P1 知识库注入验证: KB → plan → execute
 验证知识库推荐能正确注入到 plan 阶段的 effect_stack。
 """
-import sys
 import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -35,7 +35,7 @@ def main():
     # 2. 测试 plan 阶段 KB 注入
     print("\n[2] Testing KB injection in plan stage...")
     try:
-        from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig
+        from pipeline.unified_pipeline import PipelineConfig, UnifiedPipeline
         
         config = PipelineConfig(
             input_topic="高燃混剪",

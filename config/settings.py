@@ -67,7 +67,7 @@ class Settings:
 
         # --- 日志 ---
         self.log_level: str = os.environ.get("LOG_LEVEL", "INFO" if self.is_production else "DEBUG")
-        self.log_file: Optional[str] = str(self.logs_dir / "api.log") if self.is_production else None
+        self.log_file: str | None = str(self.logs_dir / "api.log") if self.is_production else None
 
     def _ensure_dirs(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)

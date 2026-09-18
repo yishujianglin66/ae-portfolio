@@ -20,7 +20,7 @@ class JSXCodeConfig:
     base_model: str = "codellama/CodeLlama-7b-hf"
     """推荐基座模型（7B 起步，LoRA 微调后可达大模型效果）"""
     
-    alternative_base_models: List[str] = field(default_factory=lambda: [
+    alternative_base_models: list[str] = field(default_factory=lambda: [
         "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
         "Qwen/Qwen2.5-Coder-1.5B",
         "codellama/CodeLlama-7b-Instruct-hf",
@@ -45,7 +45,7 @@ class JSXCodeConfig:
     lora_dropout: float = 0.05
     """LoRA dropout"""
     
-    lora_target_modules: List[str] = field(default_factory=lambda: [
+    lora_target_modules: list[str] = field(default_factory=lambda: [
         "q_proj", "v_proj", "k_proj", "o_proj",
         "gate_proj", "up_proj", "down_proj",
     ])
@@ -99,7 +99,7 @@ class JSXCodeConfig:
     data_augmentation: bool = True
     """是否启用数据增强"""
     
-    augmentation_types: List[str] = field(default_factory=lambda: [
+    augmentation_types: list[str] = field(default_factory=lambda: [
         "variable_renaming",
         "comment_addition",
         "comment_removal",
@@ -111,7 +111,7 @@ class JSXCodeConfig:
     syntax_validation: bool = True
     """是否启用语法校验过滤"""
     
-    evaluation_metrics: List[str] = field(default_factory=lambda: [
+    evaluation_metrics: list[str] = field(default_factory=lambda: [
         "syntax_accuracy",
         "functional_correctness",
         "code_bleu",
@@ -120,7 +120,7 @@ class JSXCodeConfig:
     ])
     """评估指标列表"""
     
-    pass_at_k: List[int] = field(default_factory=lambda: [1, 5, 10])
+    pass_at_k: list[int] = field(default_factory=lambda: [1, 5, 10])
     """pass@k 评估指标"""
     
     estimated_training_cost_usd: float = 5.0

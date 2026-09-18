@@ -33,8 +33,8 @@ from ..models.layer_pipeline import (
     LayerStats,
     OutputFormat,
     PipelineRenderResult,
-    RenderPipeline,
     RendererType,
+    RenderPipeline,
 )
 
 
@@ -46,10 +46,10 @@ class LayerRenderService:
 
     def __init__(
         self,
-        ae_engine: Optional[AEEngine] = None,
-        blender_engine: Optional[BlenderEngine] = None,
-        ffmpeg_engine: Optional[FFmpegEngine] = None,
-        cache_dir: Optional[Path] = None,
+        ae_engine: AEEngine | None = None,
+        blender_engine: BlenderEngine | None = None,
+        ffmpeg_engine: FFmpegEngine | None = None,
+        cache_dir: Path | None = None,
     ):
         """初始化分层渲染服务.
 
@@ -99,7 +99,7 @@ class LayerRenderService:
 
         logger.info(f"开始渲染管线: {pipeline.name}, 输出: {output_path}")
 
-        layer_outputs: Dict[str, LayerRenderResult] = {}
+        layer_outputs: dict[str, LayerRenderResult] = {}
         cache_hits = 0
         cache_misses = 0
 
@@ -209,7 +209,7 @@ class LayerRenderService:
         self,
         layer_config: LayerConfig,
         work_dir: Path | str,
-        cache_dir: Optional[Path | str] = None,
+        cache_dir: Path | str | None = None,
         resolution: tuple[int, int] = (1920, 1080),
         fps: float = 30.0,
         duration: float = 10.0,
@@ -322,7 +322,7 @@ class LayerRenderService:
 
     async def composite_layers(
         self,
-        layer_outputs: List[LayerRenderResult],
+        layer_outputs: list[LayerRenderResult],
         output_path: Path | str,
         output_format: OutputFormat = OutputFormat.PNG_SEQUENCE,
         composite_renderer: RendererType = RendererType.FFMPEG,
@@ -402,7 +402,7 @@ class LayerRenderService:
         self,
         layer_config: LayerConfig,
         cache_dir: Path | str,
-    ) -> Optional[Path]:
+    ) -> Path | None:
         """检查该层是否有缓存可复用.
 
         Args:
@@ -463,7 +463,7 @@ class LayerRenderService:
     def build_from_preset(
         self,
         preset: PipelinePreset | str,
-        name: Optional[str] = None,
+        name: str | None = None,
         resolution: tuple[int, int] = (1920, 1080),
         fps: float = 30.0,
         duration: float = 10.0,
@@ -635,7 +635,7 @@ class LayerRenderService:
     def get_layer_stats(
         self,
         pipeline: RenderPipeline,
-    ) -> Dict[str, LayerStats]:
+    ) -> dict[str, LayerStats]:
         """获取各层统计信息（渲染时间、文件大小等）.
 
         Args:
@@ -644,7 +644,7 @@ class LayerRenderService:
         Returns:
             图层名称 -> LayerStats 字典
         """
-        stats: Dict[str, LayerStats] = {}
+        stats: dict[str, LayerStats] = {}
 
         for layer in pipeline.layers:
             file_size = 0
@@ -737,7 +737,7 @@ class LayerRenderService:
                     output_path=output_dir,
                     metadata={"comp_name": comp_name, "mode": "script_only"},
                 )
-                logger.warning(f"未提供 project_path，AE 渲染跳过，仅创建合成结构")
+                logger.warning("未提供 project_path，AE 渲染跳过，仅创建合成结构")
 
             return render_result
 
@@ -776,7 +776,7 @@ class LayerRenderService:
     async def _ae_build_background(
         self,
         comp_name: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         total_frames: int,
     ) -> None:
         """构建 AE 背景层."""
@@ -796,7 +796,7 @@ class LayerRenderService:
     async def _ae_build_subject(
         self,
         comp_name: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         total_frames: int,
     ) -> None:
         """构建 AE 主体层."""
@@ -817,7 +817,7 @@ class LayerRenderService:
     async def _ae_build_midground(
         self,
         comp_name: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         total_frames: int,
     ) -> None:
         """构建 AE 中间层."""
@@ -827,7 +827,7 @@ class LayerRenderService:
     async def _ae_build_particles(
         self,
         comp_name: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         total_frames: int,
     ) -> None:
         """构建 AE 粒子层."""
@@ -846,7 +846,7 @@ class LayerRenderService:
     async def _ae_build_light(
         self,
         comp_name: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         total_frames: int,
     ) -> None:
         """构建 AE 光效层."""
@@ -865,11 +865,11 @@ class LayerRenderService:
     async def _ae_build_adjustment(
         self,
         comp_name: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         total_frames: int,
     ) -> None:
         """构建 AE 调整层."""
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
 
         if params.get("lut"):
             effects.append({"effectName": "ADBE Lumetri", "params": {}})
@@ -1010,7 +1010,7 @@ class LayerRenderService:
 
     async def _composite_with_ffmpeg(
         self,
-        layer_outputs: List[LayerRenderResult],
+        layer_outputs: list[LayerRenderResult],
         output_path: Path,
         output_format: OutputFormat,
         resolution: tuple[int, int],
@@ -1133,7 +1133,7 @@ class LayerRenderService:
 
     async def _composite_with_ae(
         self,
-        layer_outputs: List[LayerRenderResult],
+        layer_outputs: list[LayerRenderResult],
         output_path: Path,
         output_format: OutputFormat,
         resolution: tuple[int, int],

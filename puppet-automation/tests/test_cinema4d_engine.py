@@ -10,10 +10,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from src.config import settings
-from src.engines.cinema4d import Cinema4DEngine
 from src.engines.base import EngineResult
+from src.engines.cinema4d import Cinema4DEngine
 
 
 class TestCinema4DEngine:

@@ -43,7 +43,6 @@ from ..models.render_job import (
     _utc_now_iso,
 )
 
-
 # ============================================================
 # 表结构 DDL
 # ============================================================
@@ -113,7 +112,7 @@ class RenderJobRepository:
 
     def __init__(
         self,
-        db_path: Optional[Path | str] = None,
+        db_path: Path | str | None = None,
     ) -> None:
         """初始化仓库。
 
@@ -125,7 +124,7 @@ class RenderJobRepository:
         if db_path is None:
             db_path = settings.render_db_path
         self.db_path = Path(db_path) if not str(db_path) == ":memory:" else db_path
-        self._conn: Optional[aiosqlite.Connection] = None
+        self._conn: aiosqlite.Connection | None = None
         self._write_lock: asyncio.Lock = asyncio.Lock()
         self._connected: bool = False
 
@@ -265,7 +264,7 @@ class RenderJobRepository:
     # ------------------------------------------------------------------
     # Read
     # ------------------------------------------------------------------
-    async def get_job(self, job_id: str) -> Optional[RenderJob]:
+    async def get_job(self, job_id: str) -> RenderJob | None:
         """根据 job_id 查询任务，不存在返回 None。"""
         self._ensure_connected()
         assert self._conn is not None
@@ -281,8 +280,8 @@ class RenderJobRepository:
 
     async def list_jobs(
         self,
-        status: Optional[str] = None,
-        project_path: Optional[str] = None,
+        status: str | None = None,
+        project_path: str | None = None,
         days: int = 7,
         limit: int = 50,
         offset: int = 0,
@@ -346,7 +345,7 @@ class RenderJobRepository:
     # ------------------------------------------------------------------
     # Update
     # ------------------------------------------------------------------
-    async def update_job(self, job_id: str, **fields: Any) -> Optional[RenderJob]:
+    async def update_job(self, job_id: str, **fields: Any) -> RenderJob | None:
         """更新任务字段。
 
         Args:

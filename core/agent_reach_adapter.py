@@ -21,10 +21,10 @@ import hashlib
 import json
 import sqlite3
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Optional, List
+from typing import Any, List, Optional
 
 from loguru import logger
 
@@ -40,7 +40,7 @@ class SearchResult:
     snippet: str = ""
     platform: str = "web"  # web / bilibili / youtube / reddit / x / github
     score: float = 0.0  # 相关性分数 0-1
-    published_at: Optional[str] = None
+    published_at: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
@@ -56,7 +56,7 @@ class SearchResponse:
     total_count: int = 0
     cached: bool = False
     elapsed_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -77,7 +77,7 @@ class SearchResponse:
 class SearchCache:
     """SQLite-based search result cache with TTL support."""
 
-    def __init__(self, cache_path: Optional[Path] = None, ttl_hours: int = 24):
+    def __init__(self, cache_path: Path | None = None, ttl_hours: int = 24):
         self._path = Path(cache_path) if cache_path else Path("cache/search_cache.db")
         self._path.parent.mkdir(parents=True, exist_ok=True)
         self._ttl = timedelta(hours=ttl_hours)
@@ -99,7 +99,7 @@ class SearchCache:
         raw = f"{query}|{platform}|{max_results}"
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
-    def get(self, query: str, platform: str, max_results: int) -> Optional[dict]:
+    def get(self, query: str, platform: str, max_results: int) -> dict | None:
         key = self._make_key(query, platform, max_results)
         now = datetime.now(timezone.utc)
         with sqlite3.connect(str(self._path)) as conn:
@@ -423,7 +423,7 @@ class AgentReachAdapter:
     async def search_style_references(
         self,
         style_label: str,
-        keywords: Optional[list[str]] = None,
+        keywords: list[str] | None = None,
         max_results_per_platform: int = 3,
     ) -> dict[str, Any]:
         """
@@ -481,7 +481,7 @@ class AgentReachAdapter:
         }
 
     def _build_style_queries(
-        self, style_label: str, keywords: Optional[list[str]]
+        self, style_label: str, keywords: list[str] | None
     ) -> dict[str, str]:
         """为不同平台构建搜索查询"""
         kw_str = " ".join(keywords) if keywords else ""

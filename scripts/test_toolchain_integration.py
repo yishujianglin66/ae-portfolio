@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Frontend-Backend Integration Test"""
 import sys
+
 sys.path.insert(0, ".")
 
-from toolchain_api import get_toolchain_manager
 from fastapi.testclient import TestClient
+from toolchain_api import get_toolchain_manager
+
 from api_server import app
 
 client = TestClient(app)

@@ -16,16 +16,15 @@ RotoService 单元测试 - SAM2 + Silhouette 联合抠像工作流服务
 """
 
 import asyncio
+import importlib
+import importlib.util
+import os
+import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
-
-import os
-import sys
-import types
-import importlib
-import importlib.util
 
 # 添加项目根目录和puppet-automation到路径
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

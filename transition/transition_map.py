@@ -27,7 +27,6 @@ Phase 3 - 抽象转场类型 → AE 可执行操作映射库
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-
 __all__ = [
     "TransitionMapEntry",
     "TRANSITION_MAP",
@@ -40,7 +39,7 @@ __all__ = [
 # ---------------------------------------------------------------------------
 # 缓动类型映射：pipeline 内部命名 → compiler EasingType
 # ---------------------------------------------------------------------------
-EASE_TYPE_MAP: Dict[str, str] = {
+EASE_TYPE_MAP: dict[str, str] = {
     "linear": "linear",
     "easeIn": "ease_in",
     "easeOut": "ease_out",
@@ -72,9 +71,9 @@ class TransitionMapEntry:
                     {ref, layerType, name, color, width, height, ...}
         description: 该转场的文字说明
     """
-    ae_effects: List[Dict[str, Any]] = field(default_factory=list)
-    keyframes: List[Dict[str, Any]] = field(default_factory=list)
-    layers: List[Dict[str, Any]] = field(default_factory=list)
+    ae_effects: list[dict[str, Any]] = field(default_factory=list)
+    keyframes: list[dict[str, Any]] = field(default_factory=list)
+    layers: list[dict[str, Any]] = field(default_factory=list)
     description: str = ""
 
 
@@ -82,7 +81,7 @@ class TransitionMapEntry:
 # 转场映射表（7 种抽象转场类型 → AE 操作模板）
 # ---------------------------------------------------------------------------
 
-TRANSITION_MAP: Dict[str, TransitionMapEntry] = {
+TRANSITION_MAP: dict[str, TransitionMapEntry] = {
 
     # 1. 交叉淡化：fromLayer 淡出 + toLayer 淡入
     "crossfade": TransitionMapEntry(
@@ -335,7 +334,7 @@ TRANSITION_MAP: Dict[str, TransitionMapEntry] = {
 # 核心转换 API
 # ---------------------------------------------------------------------------
 
-def _resolve_ease(ease_type: Optional[str]) -> Optional[Dict[str, Any]]:
+def _resolve_ease(ease_type: str | None) -> dict[str, Any] | None:
     """将 pipeline 缓动命名转换为 compiler EasingType 结构
 
     Args:
@@ -357,7 +356,7 @@ def _abs_time(rel: float, start_time: float, duration: float) -> float:
     return round(start_time + rel * duration, 4)
 
 
-def transition_to_ae_ops(transition: dict) -> List[dict]:
+def transition_to_ae_ops(transition: dict) -> list[dict]:
     """将单条转场元数据转换为 AE 可执行操作列表
 
     转场元数据格式（来自 ae_agent_pipeline._create_transitions）：
@@ -402,19 +401,19 @@ def transition_to_ae_ops(transition: dict) -> List[dict]:
     ease_type = transition.get("easeType")
 
     # 符号引用 → 实际图层名
-    layer_ref_map: Dict[str, str] = {
+    layer_ref_map: dict[str, str] = {
         _FROM_LAYER: from_layer,
         _TO_LAYER: to_layer,
     }
-    created_layer_refs: Dict[str, str] = {}  # ref → name（本转场新建的图层）
+    created_layer_refs: dict[str, str] = {}  # ref → name（本转场新建的图层）
 
-    ops: List[dict] = []
+    ops: list[dict] = []
 
     # 1) 创建额外图层（如黑色 Solid）
     for layer_def in entry.layers:
         ref = layer_def.get("ref", "")
         name = layer_def.get("name", ref or "Solid")
-        op: Dict[str, Any] = {
+        op: dict[str, Any] = {
             "op": "addLayer",
             "ref": ref,
             "layerType": layer_def.get("layerType", "solid"),
@@ -461,7 +460,7 @@ def transition_to_ae_ops(transition: dict) -> List[dict]:
         resolved_keyframes = []
         for kf in kf_group.get("keyframes", []):
             rel_time = float(kf.get("time", 0.0))
-            resolved: Dict[str, Any] = {
+            resolved: dict[str, Any] = {
                 "time": _abs_time(rel_time, start_time, duration),
                 "value": kf.get("value"),
             }
@@ -485,7 +484,7 @@ def transition_to_ae_ops(transition: dict) -> List[dict]:
     return ops
 
 
-def get_all_transition_types() -> List[str]:
+def get_all_transition_types() -> list[str]:
     """获取所有支持的抽象转场类型"""
     return list(TRANSITION_MAP.keys())
 
@@ -511,7 +510,7 @@ if __name__ == "__main__":
         "duration": 0.5,
         "easeType": "easeInOut",
     }
-    print(f"\n抽样转换 crossfade (start=2.0, dur=0.5):")
+    print("\n抽样转换 crossfade (start=2.0, dur=0.5):")
     for op in transition_to_ae_ops(sample):
         print(f"  {op}")
 
@@ -524,6 +523,6 @@ if __name__ == "__main__":
         "duration": 1.0,
         "easeType": "easeInOut",
     }
-    print(f"\n抽样转换 fade_to_black (start=5.0, dur=1.0):")
+    print("\n抽样转换 fade_to_black (start=5.0, dur=1.0):")
     for op in transition_to_ae_ops(sample_ftb):
         print(f"  {op}")

@@ -17,14 +17,14 @@ v2.0 — 集成感知层完整的自动化剪辑能力:
 # ================================================================
 #  基础模块 (始终可用)
 # ================================================================
-from .preset_system import *
 from .preset_executor import *
+from .preset_system import *
 
 # ================================================================
 #  感知层 (可选依赖)
 # ================================================================
 try:
-    from .scene_detector import SceneDetector, SceneCut, SceneMetadata, DetectionMethod
+    from .scene_detector import DetectionMethod, SceneCut, SceneDetector, SceneMetadata
 except ImportError:
     pass
 
@@ -34,12 +34,12 @@ except ImportError:
     pass
 
 try:
-    from .beat_detector import BeatDetector, BeatInfo, MusicStructure, ClipSuggestion
+    from .beat_detector import BeatDetector, BeatInfo, ClipSuggestion, MusicStructure
 except ImportError:
     pass
 
 try:
-    from .whisper_subtitle import WhisperSubtitleEngine, TranscribeResult, SubtitleSegment, WordTiming
+    from .whisper_subtitle import SubtitleSegment, TranscribeResult, WhisperSubtitleEngine, WordTiming
 except ImportError:
     pass
 
@@ -47,12 +47,12 @@ except ImportError:
 #  编排层
 # ================================================================
 try:
-    from .timeline_composer import TimelineComposer, Timeline, Track, ClipItem, TimelineStyle, TrackType
+    from .timeline_composer import ClipItem, Timeline, TimelineComposer, TimelineStyle, Track, TrackType
 except ImportError:
     pass
 
 try:
-    from .audio_processor import AudioProcessor, AudioFade, AudioTrackConfig, AudioMixResult
+    from .audio_processor import AudioFade, AudioMixResult, AudioProcessor, AudioTrackConfig
 except ImportError:
     pass
 
@@ -60,7 +60,7 @@ except ImportError:
 #  GPU渲染层
 # ================================================================
 try:
-    from .gl_transition_renderer import GLTransitionRenderer, GLTransitionAdapter, GL_TRANSITION_TABLE
+    from .gl_transition_renderer import GL_TRANSITION_TABLE, GLTransitionAdapter, GLTransitionRenderer
 except ImportError:
     pass
 
@@ -68,12 +68,12 @@ except ImportError:
 #  AI增强层
 # ================================================================
 try:
-    from .frame_interpolator import FrameInterpolator, InterpolationResult, SlowMotionConfig, InterpolationMethod
+    from .frame_interpolator import FrameInterpolator, InterpolationMethod, InterpolationResult, SlowMotionConfig
 except ImportError:
     pass
 
 try:
-    from .object_detector import ObjectDetector, DetectionBox, FrameDetection, VideoDetectionResult
+    from .object_detector import DetectionBox, FrameDetection, ObjectDetector, VideoDetectionResult
 except ImportError:
     pass
 
@@ -81,17 +81,17 @@ except ImportError:
 #  基础设施层
 # ================================================================
 try:
-    from .distributed_renderer import DistributedRenderer, RenderTask, RenderBatch, RenderFarmAdapter
+    from .distributed_renderer import DistributedRenderer, RenderBatch, RenderFarmAdapter, RenderTask
 except ImportError:
     pass
 
 try:
-    from .live_preview import LivePreview, PreviewMode, PreviewConfig, PreviewOverlay, FrameBuffer
+    from .live_preview import FrameBuffer, LivePreview, PreviewConfig, PreviewMode, PreviewOverlay
 except ImportError:
     pass
 
 try:
-    from .perception_pipeline_loader import inject_perception_layer, register_enhanced_perception, quick_init_perception
+    from .perception_pipeline_loader import inject_perception_layer, quick_init_perception, register_enhanced_perception
 except ImportError:
     pass
 

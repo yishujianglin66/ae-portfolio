@@ -42,7 +42,6 @@ from integrations.ae_to_davinci_pipeline import (  # noqa: E402
     quick_pipeline,
 )
 
-
 # 是否启用模拟模式（不调用真实 AE/DaVinci）
 MOCK_MODE = True
 
@@ -368,7 +367,7 @@ EXAMPLES = {
 }
 
 
-def main(argv: Optional[list] = None) -> int:
+def main(argv: list | None = None) -> int:
     parser = argparse.ArgumentParser(description="AE → DaVinci 协作链路示例")
     parser.add_argument(
         "--example",

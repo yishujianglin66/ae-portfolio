@@ -15,12 +15,12 @@ PremiereProMCP 一键配置脚本
     py -3.12 setup_premiere_mcp.py --force   # 强制覆盖已有插件
 """
 
-import os
-import sys
-import json
-import shutil
-import tempfile
 import io
+import json
+import os
+import shutil
+import sys
+import tempfile
 
 # 修复 Windows 控制台中文编码
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
@@ -431,7 +431,7 @@ def print_summary(results: dict):
   5. 在 QoderCN 中调用 ping 工具验证连通性
 """)
     else:
-        print(f"""
+        print("""
   ⚠️ 部分配置未完成，请检查上方 [FAIL] 项并修复后重新运行。
 """)
 

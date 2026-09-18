@@ -1,14 +1,15 @@
 """Bridge Health Monitor 单元测试。"""
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from ae.bridge_health import (
     BridgeHealthMonitor,
-    HealthReport,
     HealthCheckItem,
+    HealthReport,
 )
 
 

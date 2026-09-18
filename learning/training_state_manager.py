@@ -1,8 +1,8 @@
-import os
-import json
 import hashlib
+import json
+import os
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Union
+from typing import Any, Dict, List, Optional, Union
 
 STATE_DIR = r"D:\AE-Work\训练归档\状态存储"
 SESSIONS_DIR = os.path.join(STATE_DIR, "sessions")
@@ -14,7 +14,7 @@ class TrainingStateManager:
     def __init__(self, project_name: str = "AE-Knowledge-Vault"):
         self.project_name = project_name
         self.current_session_id = self._generate_session_id()
-        self.state: Dict[str, Any] = {
+        self.state: dict[str, Any] = {
             "project_name": project_name,
             "session_id": self.current_session_id,
             "creation_time": datetime.now().isoformat(),
@@ -48,7 +48,7 @@ class TrainingStateManager:
     def _get_state_file_path(self) -> str:
         return os.path.join(SESSIONS_DIR, f"{self.current_session_id}.json")
     
-    def _get_last_state_file(self) -> Optional[str]:
+    def _get_last_state_file(self) -> str | None:
         files = sorted(
             [f for f in os.listdir(SESSIONS_DIR) if f.endswith(".json")],
             reverse=True
@@ -69,7 +69,7 @@ class TrainingStateManager:
             except Exception as e:
                 print(f"⚠️ 加载上次状态失败: {e}")
     
-    def _merge_state(self, saved_state: Dict):
+    def _merge_state(self, saved_state: dict):
         for key in ["training_progress", "model_states", "learning_metrics", 
                     "execution_history", "user_preferences", "system_config",
                     "cache", "templates", "confidence_adjustments", "default_values"]:
@@ -94,7 +94,7 @@ class TrainingStateManager:
         print(f"💾 状态已保存: {file_path}")
         return file_path
     
-    def save_checkpoint(self, checkpoint_name: str, extra_data: Dict = None) -> str:
+    def save_checkpoint(self, checkpoint_name: str, extra_data: dict = None) -> str:
         checkpoint = {
             "checkpoint_name": checkpoint_name,
             "session_id": self.current_session_id,
@@ -125,7 +125,7 @@ class TrainingStateManager:
             print(f"⚠️ 加载检查点失败: {e}")
             return False
     
-    def record_execution(self, execution_data: Dict):
+    def record_execution(self, execution_data: dict):
         execution_record = {
             "id": execution_data.get("id", f"exec_{datetime.now().timestamp()}"),
             "timestamp": datetime.now().isoformat(),
@@ -142,13 +142,13 @@ class TrainingStateManager:
             "updated_at": datetime.now().isoformat()
         }
     
-    def update_model_state(self, model_name: str, model_data: Dict):
+    def update_model_state(self, model_name: str, model_data: dict):
         self.state["model_states"][model_name] = {
             "data": model_data,
             "updated_at": datetime.now().isoformat()
         }
     
-    def update_metrics(self, metrics: Dict):
+    def update_metrics(self, metrics: dict):
         for name, value in metrics.items():
             if isinstance(value, dict):
                 self.state["learning_metrics"][name] = value
@@ -158,10 +158,10 @@ class TrainingStateManager:
                     "updated_at": datetime.now().isoformat()
                 }
     
-    def add_template(self, template: Dict):
+    def add_template(self, template: dict):
         self.state["templates"].append(template)
     
-    def add_confidence_adjustment(self, adjustment: Dict):
+    def add_confidence_adjustment(self, adjustment: dict):
         self.state["confidence_adjustments"].append(adjustment)
     
     def update_default_value(self, effect_match_name: str, param_name: str, value: Any):
@@ -190,7 +190,7 @@ class TrainingStateManager:
             "ttl_seconds": ttl_seconds
         }
     
-    def get_cached_result(self, cache_key: str) -> Optional[Any]:
+    def get_cached_result(self, cache_key: str) -> Any | None:
         entry = self.state["cache"].get(cache_key)
         if not entry:
             return None
@@ -203,7 +203,7 @@ class TrainingStateManager:
         
         return entry["result"]
     
-    def get_state_summary(self) -> Dict:
+    def get_state_summary(self) -> dict:
         return {
             "project_name": self.state["project_name"],
             "session_id": self.state["session_id"],
@@ -240,7 +240,7 @@ class TrainingStateManager:
         }
         print("🔄 状态已重置")
     
-    def get_all_sessions(self, limit: int = 10) -> List[str]:
+    def get_all_sessions(self, limit: int = 10) -> list[str]:
         files = sorted(
             [f for f in os.listdir(SESSIONS_DIR) if f.startswith("ses_") and f.endswith(".json")],
             reverse=True

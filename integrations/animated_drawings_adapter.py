@@ -54,13 +54,13 @@ class AnimatedDrawingsAdapter:
         "idle", "wave", "kick", "swing_dance",
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._source_available = _AD_DIR.is_dir()
         self._simulate = not self._source_available
         self._env_check = self._check_environment()
 
-    def _check_environment(self) -> Dict[str, Any]:
+    def _check_environment(self) -> dict[str, Any]:
         checks = {
             "source_cloned": self._source_available,
             "simulate_mode": self._simulate,
@@ -76,10 +76,10 @@ class AnimatedDrawingsAdapter:
     def check_available(self) -> bool:
         return self._source_available and self._env_check.get("dep_torch", False)
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
 
         if operation == "check_environment":
@@ -92,7 +92,7 @@ class AnimatedDrawingsAdapter:
             return self._animate_drawing(params)
         return {"status": "error", "message": f"Unknown operation: {operation}"}
 
-    def _get_model_info(self) -> Dict[str, Any]:
+    def _get_model_info(self) -> dict[str, Any]:
         return {
             "status": "success",
             "model_name": "AnimatedDrawings",
@@ -108,7 +108,7 @@ class AnimatedDrawingsAdapter:
             ],
         }
 
-    def _animate_drawing(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _animate_drawing(self, params: dict[str, Any]) -> dict[str, Any]:
         image_path = params.get("image_path", "")
         motion = params.get("motion", "walk")
         output_path = params.get("output_path", "")

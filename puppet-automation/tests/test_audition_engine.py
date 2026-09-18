@@ -1,13 +1,12 @@
 """Tests for AuditionEngine."""
 from __future__ import annotations
 
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 import pytest
-
-from src.engines.base import BaseEngine
 from src.engines.audition import AuditionEngine
+from src.engines.base import BaseEngine
 
 
 class TestAuditionEngine:

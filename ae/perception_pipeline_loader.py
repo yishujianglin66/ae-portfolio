@@ -13,7 +13,7 @@ WhisperSubtitleEngine 等）注入到现有 Pipeline 中。
 from __future__ import annotations
 
 import logging
-from typing import Optional, Any
+from typing import Any, Optional
 
 logger = logging.getLogger("perception_loader")
 
@@ -28,7 +28,7 @@ def inject_perception_layer(pipeline: Any) -> None:
     """
     # 1. SceneDetector (PySceneDetect 场景分割)
     try:
-        from ae.scene_detector import SceneDetector, DetectionMethod
+        from ae.scene_detector import DetectionMethod, SceneDetector
         pipeline.scene_detector = SceneDetector(method=DetectionMethod.ADAPTIVE)
         pipeline._has_scene_detector = True
         logger.info("✓ SceneDetector (PySceneDetect) 已注入")
@@ -74,7 +74,7 @@ def inject_perception_layer(pipeline: Any) -> None:
 
     # 5. GLTransitionRenderer (GPU转场渲染)
     try:
-        from ae.gl_transition_renderer import GLTransitionRenderer, GLTransitionAdapter
+        from ae.gl_transition_renderer import GLTransitionAdapter, GLTransitionRenderer
         pipeline.gl_transition_renderer = GLTransitionRenderer()
         pipeline.gl_transition_adapter = GLTransitionAdapter()
         pipeline._has_gl_transitions = True

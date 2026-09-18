@@ -4,7 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 # 防止 HuggingFace Hub 网络请求导致测试超时
 os.environ["HF_HUB_OFFLINE"] = "1"
@@ -107,6 +107,7 @@ class TestHybridSearch(unittest.TestCase):
     def test_hybrid_search_weights(self):
         """联合搜索应正确融合语义和音频权重"""
         import json
+
         import numpy as np
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:

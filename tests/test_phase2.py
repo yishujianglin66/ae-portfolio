@@ -2,12 +2,12 @@
 Phase2 模块单元测试
 覆盖: ae_ts_compiler_client.py, keyframe_animation_generator.py, beat_keyframe_mapper.py
 """
-import os
-import sys
 import json
+import os
 import re
+import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -18,25 +18,24 @@ if PROJECT_ROOT not in sys.path:
 
 from ae_ts_compiler_client import (
     AETSCompilerClient,
+    _format_jsx_value,
     _iso_now,
     _json_str,
-    _format_jsx_value,
     _map_easing_type,
 )
-from keyframe_animation_generator import (
-    KeyframeAnimationGenerator,
-    KeyframePoint,
-    AnimationTemplate,
-    EASE_PRESETS,
-)
 from beat_keyframe_mapper import (
-    BeatKeyframeMapper,
     Beat,
+    BeatKeyframeMapper,
     KeyframeMapping,
     MappingResult,
     parse_beats_from_features,
 )
-
+from keyframe_animation_generator import (
+    EASE_PRESETS,
+    AnimationTemplate,
+    KeyframeAnimationGenerator,
+    KeyframePoint,
+)
 
 # ============================================================
 # 夹具

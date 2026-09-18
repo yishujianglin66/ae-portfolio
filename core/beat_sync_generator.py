@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """音乐卡点视频生成器 - 使用素材库音乐和视频自动生成卡点视频"""
 
+import json
 import os
 import sys
-import json
 import time
 from pathlib import Path
 
@@ -141,7 +141,7 @@ def plan_timeline(analysis_result, clips):
     
     print(f"  总节拍数: {len(beat_times)}")
     print(f"  生成场景数: {len(scenes)}")
-    print(f"  场景详情:")
+    print("  场景详情:")
     for scene in scenes[:5]:
         print(f"    Scene {scene['id']}: {scene['start_time']:.2f}s - {scene['end_time']:.2f}s ({scene['duration']:.2f}s) - {scene['clip_name']}")
     
@@ -271,7 +271,7 @@ def export_video(composition_result):
         
         print(f"  ✅ 导出脚本已生成: {export_script}")
         print(f"  ✅ 输出路径: {output_path}")
-        print(f"  ℹ️  请在AE中运行导出脚本完成渲染")
+        print("  ℹ️  请在AE中运行导出脚本完成渲染")
         
         return {
             "success": True,
@@ -314,7 +314,7 @@ def generate_report(results):
     
     if results.get("timeline_plan"):
         scenes = results["timeline_plan"]["scenes"]
-        print(f"\n时间轴详情:")
+        print("\n时间轴详情:")
         print(f"  BPM: {results['timeline_plan']['tempo']:.1f}")
         print(f"  音乐长度: {results['timeline_plan']['duration']:.1f}s")
         print(f"  场景数: {len(scenes)}")

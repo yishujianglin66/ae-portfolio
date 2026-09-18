@@ -47,17 +47,26 @@ import json
 import logging
 import os
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Callable
+from typing import Any, Callable, Dict, List, Optional
 
 from .timeline_ir import (
-    IRSequence, IRTrack, IRClip, IREffect, IRTransition,
-    IRTrackType, IRTransitionType, IREffectCategory,
-    validate_ir, IRValidationResult,
-    export_to_pr_json, export_to_ae_jsx, export_to_json,
+    IRClip,
+    IREffect,
+    IREffectCategory,
+    IRSequence,
+    IRTrack,
+    IRTrackType,
+    IRTransition,
+    IRTransitionType,
+    IRValidationResult,
     export_timeline_summary,
+    export_to_ae_jsx,
+    export_to_json,
+    export_to_pr_json,
+    validate_ir,
 )
 
 logger = logging.getLogger(__name__)
@@ -102,80 +111,80 @@ class PipelineStep(str, Enum):
 @dataclass
 class SceneReport:
     """场景检测报告"""
-    cuts: List[Dict[str, Any]] = field(default_factory=list)
+    cuts: list[dict[str, Any]] = field(default_factory=list)
     shot_count: int = 0
     avg_shot_duration: float = 0.0
     method: str = "unknown"
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class BeatReport:
     """节拍分析报告"""
-    beats: List[float] = field(default_factory=list)  # 节拍时间列表
+    beats: list[float] = field(default_factory=list)  # 节拍时间列表
     bpm: float = 0.0
-    downbeats: List[float] = field(default_factory=list)
-    sections: List[Dict[str, Any]] = field(default_factory=list)  # 歌曲段落
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    downbeats: list[float] = field(default_factory=list)
+    sections: list[dict[str, Any]] = field(default_factory=list)  # 歌曲段落
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class SubtitleReport:
     """字幕生成报告"""
-    segments: List[Dict[str, Any]] = field(default_factory=list)
+    segments: list[dict[str, Any]] = field(default_factory=list)
     language: str = "zh"
     confidence: float = 0.0
-    word_timings: List[Dict[str, Any]] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    word_timings: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class OrchestrationReport:
     """编排报告"""
     timeline_style: str = "dynamic_cut"
-    clip_order: List[str] = field(default_factory=list)
-    transition_map: Dict[str, str] = field(default_factory=dict)  # clip_id -> transition_type
-    effect_suggestions: List[Dict[str, Any]] = field(default_factory=list)
-    subtitle_style: Dict[str, Any] = field(default_factory=dict)
-    creative_analysis: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    clip_order: list[str] = field(default_factory=list)
+    transition_map: dict[str, str] = field(default_factory=dict)  # clip_id -> transition_type
+    effect_suggestions: list[dict[str, Any]] = field(default_factory=list)
+    subtitle_style: dict[str, Any] = field(default_factory=dict)
+    creative_analysis: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class PipelineContext:
     """管道上下文 — 阶段间数据传递"""
-    media_paths: List[str] = field(default_factory=list)
-    audio_path: Optional[str] = None
+    media_paths: list[str] = field(default_factory=list)
+    audio_path: str | None = None
     creative_description: str = ""
-    output_dir: Optional[str] = None
+    output_dir: str | None = None
 
     # 阶段结果
-    scene_report: Optional[SceneReport] = None
-    beat_report: Optional[BeatReport] = None
-    subtitle_report: Optional[SubtitleReport] = None
-    orchestration_report: Optional[OrchestrationReport] = None
+    scene_report: SceneReport | None = None
+    beat_report: BeatReport | None = None
+    subtitle_report: SubtitleReport | None = None
+    orchestration_report: OrchestrationReport | None = None
 
     # IR
-    ir_sequence: Optional[IRSequence] = None
-    ir_validation: Optional[IRValidationResult] = None
+    ir_sequence: IRSequence | None = None
+    ir_validation: IRValidationResult | None = None
 
     # 导出产物
-    pr_json: Optional[Dict[str, Any]] = None
-    ae_jsx: Optional[str] = None
-    ir_json: Optional[str] = None
+    pr_json: dict[str, Any] | None = None
+    ae_jsx: str | None = None
+    ir_json: str | None = None
 
     # 状态
     current_stage: PipelineStage = PipelineStage.IDLE
-    completed_steps: List[PipelineStep] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    completed_steps: list[PipelineStep] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     # 时间统计
     start_time: float = 0.0
-    stage_timings: Dict[str, float] = field(default_factory=dict)
+    stage_timings: dict[str, float] = field(default_factory=dict)
 
     # Checkpoint
-    checkpoint_path: Optional[str] = None
+    checkpoint_path: str | None = None
 
     def log_stage_start(self, stage: PipelineStage) -> None:
         self.current_stage = stage
@@ -235,13 +244,13 @@ class PipelineContext:
 class PipelineResult:
     """管道执行结果"""
     success: bool = False
-    ir_sequence: Optional[IRSequence] = None
-    pr_json: Optional[Dict[str, Any]] = None
-    ae_jsx: Optional[str] = None
-    ir_json: Optional[str] = None
+    ir_sequence: IRSequence | None = None
+    pr_json: dict[str, Any] | None = None
+    ae_jsx: str | None = None
+    ir_json: str | None = None
     timeline_summary: str = ""
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     total_duration: float = 0.0
 
 
@@ -271,7 +280,7 @@ class E2EPipeline:
         enable_subtitles: bool = True,
         enable_creative_planning: bool = True,
         output_format: str = "all",  # "pr" | "ae" | "json" | "all"
-        checkpoint_dir: Optional[str] = None,
+        checkpoint_dir: str | None = None,
     ):
         self.enable_scene_detection = enable_scene_detection
         self.enable_beat_analysis = enable_beat_analysis
@@ -282,10 +291,10 @@ class E2EPipeline:
 
     def run(
         self,
-        media_paths: List[str],
-        audio_path: Optional[str] = None,
+        media_paths: list[str],
+        audio_path: str | None = None,
         creative_description: str = "",
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         resume: bool = False,
     ) -> PipelineResult:
         """
@@ -599,7 +608,7 @@ class E2EPipeline:
     #  Sub-methods (可被子类覆盖或注入具体实现)
     # ----------------------------------------------------------
 
-    def _detect_scenes(self, media_paths: List[str]) -> SceneReport:
+    def _detect_scenes(self, media_paths: list[str]) -> SceneReport:
         """场景检测 — 尝试加载 PySceneDetect，失败回退
 
         IR 适配层：无论 detector 返回 List[SceneCut]（ae.scene_detector）
@@ -688,7 +697,7 @@ class E2EPipeline:
         except Exception:
             return SubtitleReport()
 
-    def _plan_creatively(self, ctx: PipelineContext) -> Dict[str, Any]:
+    def _plan_creatively(self, ctx: PipelineContext) -> dict[str, Any]:
         """AI 创意规划"""
         try:
             from .ai_creative_planner import AICreativePlanner
@@ -699,7 +708,7 @@ class E2EPipeline:
             return {"style": "auto", "source": "fallback"}
 
     def _layout_timeline(
-        self, ctx: PipelineContext, creative_analysis: Dict[str, Any]
+        self, ctx: PipelineContext, creative_analysis: dict[str, Any]
     ) -> OrchestrationReport:
         """时间线布局编排"""
         try:
@@ -893,10 +902,10 @@ def _flatten_clips(sequence: IRSequence):
 # ================================================================
 
 def quick_run(
-    media_paths: List[str],
-    audio_path: Optional[str] = None,
+    media_paths: list[str],
+    audio_path: str | None = None,
     description: str = "",
-    output_dir: Optional[str] = None,
+    output_dir: str | None = None,
 ) -> PipelineResult:
     """
     快速运行 E2E 管道。

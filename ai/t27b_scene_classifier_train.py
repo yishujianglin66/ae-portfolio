@@ -13,18 +13,18 @@ from __future__ import annotations
 import json
 import sys
 import time
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset
-from torchvision import transforms, models
 from PIL import Image
-import numpy as np
+from torch.utils.data import DataLoader, Dataset
+from torchvision import models, transforms
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))

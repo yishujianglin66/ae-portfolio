@@ -1,9 +1,9 @@
 """Tests for data models and enums."""
 from __future__ import annotations
 
-import pytest
 from datetime import datetime
 
+import pytest
 from src.models.pipeline import (
     AudioAnalysis,
     DetectionResult,

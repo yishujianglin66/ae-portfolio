@@ -13,8 +13,8 @@ from __future__ import annotations
 import json
 import re
 import sys
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -27,11 +27,11 @@ class ParsedQuery:
     semantic_query: str = ""
     
     # 音频特征
-    target_bpm: Optional[float] = None
-    bpm_range: Optional[tuple] = None
-    mood: Optional[str] = None
-    mood_score: Optional[float] = None
-    genre: Optional[str] = None
+    target_bpm: float | None = None
+    bpm_range: tuple | None = None
+    mood: str | None = None
+    mood_score: float | None = None
+    genre: str | None = None
     
     # 素材类型
     media_type: str = "video"  # video, audio, image
@@ -39,13 +39,13 @@ class ParsedQuery:
     # 质量要求
     quality: str = "medium"  # low, medium, high, 4k
     watermark_free: bool = False
-    duration_range: Optional[tuple] = None
+    duration_range: tuple | None = None
     
     # 平台偏好
-    preferred_platforms: List[str] = field(default_factory=list)
+    preferred_platforms: list[str] = field(default_factory=list)
     
     # 关键词标签
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     
     # 置信度
     confidence: float = 0.0
@@ -652,7 +652,7 @@ class SemanticParser:
         
         return cleaned
     
-    def _extract_bpm(self, text: str) -> Optional[Dict[str, Any]]:
+    def _extract_bpm(self, text: str) -> dict[str, Any] | None:
         """提取BPM值或范围"""
         # 精确BPM值
         bpm_match = re.search(r"(\d{2,3})\s*BPM|BPM\s*(\d{2,3})", text, flags=re.IGNORECASE)
@@ -668,7 +668,7 @@ class SemanticParser:
         
         return None
     
-    def _extract_mood(self, text: str) -> Optional[Dict[str, Any]]:
+    def _extract_mood(self, text: str) -> dict[str, Any] | None:
         """提取情绪"""
         best_mood = None
         best_score = 0.0
@@ -684,7 +684,7 @@ class SemanticParser:
         
         return None
     
-    def _extract_genre(self, text: str) -> Optional[str]:
+    def _extract_genre(self, text: str) -> str | None:
         """提取曲风（优先匹配更长更具体的关键词）"""
         best_genre = None
         best_len = 0
@@ -696,14 +696,14 @@ class SemanticParser:
         
         return best_genre
     
-    def _extract_media_type(self, text: str) -> Optional[str]:
+    def _extract_media_type(self, text: str) -> str | None:
         """提取素材类型"""
         for kw, media_type in self.MEDIA_TYPE_KEYWORDS.items():
             if kw in text:
                 return media_type
         return None
     
-    def _extract_quality(self, text: str) -> Optional[str]:
+    def _extract_quality(self, text: str) -> str | None:
         """提取质量要求"""
         for kw, quality in self.QUALITY_KEYWORDS.items():
             if kw in text:
@@ -715,7 +715,7 @@ class SemanticParser:
         watermark_keywords = ["无水印", "去水印", "无标识", "纯净", "高清无水印"]
         return any(kw in text for kw in watermark_keywords)
     
-    def _extract_platforms(self, text: str) -> List[str]:
+    def _extract_platforms(self, text: str) -> list[str]:
         """提取平台偏好（去重）"""
         platforms = []
         seen = set()
@@ -725,7 +725,7 @@ class SemanticParser:
                 seen.add(platform)
         return platforms
     
-    def _extract_tags(self, text: str) -> List[str]:
+    def _extract_tags(self, text: str) -> list[str]:
         """提取关键词标签"""
         tags = []
         

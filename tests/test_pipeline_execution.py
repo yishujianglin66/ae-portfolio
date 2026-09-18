@@ -1,11 +1,13 @@
 import os
 import sys
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ae_agent_pipeline import AEAgentPipeline, PlanningResult, ExecutionResult
+from ae_agent_pipeline import AEAgentPipeline, ExecutionResult, PlanningResult
+
 
 def test_pipeline_execution_with_mock():
     """测试使用模拟MCP客户端的执行流程"""

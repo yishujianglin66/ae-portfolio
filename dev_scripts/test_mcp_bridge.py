@@ -1,4 +1,6 @@
-import json, os, time
+import json
+import os
+import time
 
 CMD_FILE = r"C:\Users\Administrator\Documents\ae-mcp-bridge\ae_command.json"
 RESULT_FILE = r"C:\Users\Administrator\Documents\ae-mcp-bridge\ae_mcp_result.json"

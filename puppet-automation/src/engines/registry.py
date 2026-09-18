@@ -15,12 +15,12 @@ from .blender import BlenderEngine
 from .cinema4d import Cinema4DEngine
 from .davinci import DavinciEngine
 from .ffmpeg import FFmpegEngine
+from .matting import MattingEngine
 from .media_encoder import MediaEncoderEngine
 from .moviepy import MoviePyEngine
 from .openmontage import OpenMontageEngine
 from .photoshop import PhotoshopEngine
 from .premiere import PremiereEngine
-from .matting import MattingEngine
 from .rife import RifeEngine
 from .sadtalker import SadTalkerEngine
 from .sam2 import SAM2Engine

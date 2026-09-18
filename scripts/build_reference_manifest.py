@@ -172,7 +172,7 @@ def main() -> int:
         "",
         f"- 分层分布：{', '.join(f'{k} {v}' for k, v in sorted(tiers.items(), key=lambda x: -x[1]))}",
         f"- 画质档位：{', '.join(f'{k} {v}' for k, v in sorted(qualities.items(), key=lambda x: -x[1]))}",
-        f"  （`low`/`sd480` 为老资源，评估时可用 `quality` 字段筛除，避免拉低对标基线）",
+        "  （`low`/`sd480` 为老资源，评估时可用 `quality` 字段筛除，避免拉低对标基线）",
         f"- 分辨率：{', '.join(f'{k} × {v}' for k, v in sorted(res.items(), key=lambda x: -x[1]))}",
         f"- 帧率：{', '.join(f'{k} × {v}' for k, v in fps_band.items())}",
         f"- 时长：{min(durs):.0f}s ~ {max(durs):.0f}s（中位 {sorted(durs)[len(durs)//2]:.0f}s）"

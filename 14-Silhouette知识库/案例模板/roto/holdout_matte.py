@@ -11,8 +11,9 @@
 # 工作流:
 #   前景 Roto → 遮挡遮罩 → 背景 Roto → 最终输出
 
-from fx import *
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=30.0,
@@ -83,12 +84,12 @@ def create_pipeline(source_path, output_path, frame_rate=30.0,
     # 背景 Roto → 输出
     roto_background.outputs[0].connect(out_node.inputs[0])
 
-    print(f"[SILHOUETTE] 遮挡遮罩流程已创建")
+    print("[SILHOUETTE] 遮挡遮罩流程已创建")
     print(f"[SILHOUETTE] 源素材: {source_path}")
     print(f"[SILHOUETTE] 输出路径: {output_path}")
     print(f"[SILHOUETTE] 前景模糊: {foreground_blur}")
     print(f"[SILHOUETTE] 背景模糊: {background_blur}")
-    print(f"[SILHOUETTE] 节点关系: 前景 → 背景的 occlusion 输入")
+    print("[SILHOUETTE] 节点关系: 前景 → 背景的 occlusion 输入")
 
     return roto_foreground, roto_background
 
@@ -169,7 +170,7 @@ def create_multi_layer_holdout(source_path, output_path, layers_config,
     # 最后一层 → 输出
     roto_nodes[-1].outputs[0].connect(out_node.inputs[0])
 
-    print(f"[SILHOUETTE] 多层遮挡遮罩已创建")
+    print("[SILHOUETTE] 多层遮挡遮罩已创建")
     print(f"[SILHOUETTE] 层数: {len(layers_config)}")
     for i, layer in enumerate(layers_config):
         print(f"  层 {i+1}: {layer['name']} (blur={layer.get('blur', 0.5)})")
@@ -269,7 +270,7 @@ def invert_holdout(roto_node, frame_range=None):
         current = roto_node.property("matte.invert").getValue(0)
         roto_node.property("matte.invert").setValue(not current, 0)
 
-    print(f"[SILHOUETTE] 遮挡遮罩已反转")
+    print("[SILHOUETTE] 遮挡遮罩已反转")
 
 
 if __name__ == "__main__":

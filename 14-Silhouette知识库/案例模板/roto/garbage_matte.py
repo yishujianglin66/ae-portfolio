@@ -11,8 +11,9 @@
 # 工作流:
 #   垃圾遮罩（粗略） → 精细 Roto（精确） → 最终输出
 
-from fx import *
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=30.0,
@@ -88,7 +89,7 @@ def create_pipeline(source_path, output_path, frame_rate=30.0,
     src.outputs[0].connect(roto.inputs[1])
     roto.outputs[0].connect(out_node.inputs[0])
 
-    print(f"[SILHOUETTE] 垃圾遮罩流程已创建")
+    print("[SILHOUETTE] 垃圾遮罩流程已创建")
     print(f"[SILHOUETTE] 源素材: {source_path}")
     print(f"[SILHOUETTE] 输出路径: {output_path}")
     print(f"[SILHOUETTE] 遮罩类型: {matte_type}")
@@ -227,7 +228,7 @@ def link_to_fine_roto(garbage_roto, fine_roto):
     # 垃圾遮罩输出连接到精细 Roto 的 obey_matte 输入（索引 0）
     garbage_roto.outputs[0].connect(fine_roto.inputs[0])
 
-    print(f"[SILHOUETTE] 垃圾遮罩已连接到精细 Roto")
+    print("[SILHOUETTE] 垃圾遮罩已连接到精细 Roto")
     print(f"  {garbage_roto.label} → {fine_roto.label} (obey_matte)")
 
 

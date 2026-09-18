@@ -8,21 +8,22 @@
 4. 色彩科学工作流（LUT + 色轮 + 色彩匹配）
 5. 关键帧动画系统（zoom/x/y/rotation/opacity，多插值模式）
 """
-import sys
 import os
-import time
 import subprocess
+import sys
+import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
+import pytest
+
 from integrations.resolve_engine import (
-    ResolveAutomationEngine,
-    TransitionConfig,
     ColorWheelConfig,
     Keyframe,
+    ResolveAutomationEngine,
+    TransitionConfig,
 )
 
-import pytest
 pytestmark = pytest.mark.real_davinci  # 需真实 DaVinci Resolve + 真实素材环境
 
 OUTPUT_DIR = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\output_production"

@@ -50,7 +50,6 @@ from effect_knowledge_graph import (
     EffectParameter,
 )
 
-
 # ============================================================================
 # 数据类
 # ============================================================================
@@ -62,7 +61,7 @@ class EffectParams:
 
     matchName: str
     displayName: str
-    settings: Dict[str, Any]  # value: number | string | list[number]
+    settings: dict[str, Any]  # value: number | string | list[number]
     confidence: float
 
 
@@ -90,11 +89,11 @@ class BaseGenerator(ABC):
         self.context: GeneratorContext = context if context is not None else GeneratorContext()
 
     @abstractmethod
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         """根据修饰词生成效果参数"""
         raise NotImplementedError
 
-    def _get_intensity_scale(self, intensity_refs: List[Dict]) -> float:
+    def _get_intensity_scale(self, intensity_refs: list[dict]) -> float:
         """从强度修饰词列表计算总缩放系数（各 value 相乘）"""
         if not intensity_refs:
             return 1.0
@@ -117,7 +116,7 @@ class BaseGenerator(ABC):
 class GlowGenerator(BaseGenerator):
     """发光效果生成器，支持 neon/cyberpunk/soft/dreamy/strong 五种预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         color_refs = modifiers.get("color", [])
         color = color_refs[0] if color_refs else None
@@ -125,7 +124,7 @@ class GlowGenerator(BaseGenerator):
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Glow Threshold": self._clamp(preset["base"]["threshold"] * scale_factor, 0, 100),
             "Glow Radius": self._clamp(preset["base"]["radius"] * scale_factor, 0, 200),
             "Glow Intensity": self._clamp(preset["base"]["intensity"] * scale_factor, 0, 10),
@@ -147,7 +146,7 @@ class GlowGenerator(BaseGenerator):
             confidence=0.85,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         # 中文风格名归一化为英文 key
         style_map = {
             "霓虹": "neon",
@@ -207,7 +206,7 @@ class GlowGenerator(BaseGenerator):
 class ColorKeyGenerator(BaseGenerator):
     """颜色键控生成器，支持绿幕/蓝幕/红幕"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         color_refs = modifiers.get("color", [])
         color = color_refs[0] if color_refs else None
@@ -216,7 +215,7 @@ class ColorKeyGenerator(BaseGenerator):
         tolerance = self._clamp(20 * intensity_scale, 5, 80)
         edge_feather = self._clamp(1.0 * intensity_scale, 0, 10)
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Key Color": color.get("rgb", [0, 1, 0]) if color else [0, 1, 0],
             "Color Tolerance": tolerance,
             "Edge Feather": edge_feather,
@@ -249,7 +248,7 @@ class ColorKeyGenerator(BaseGenerator):
 class CCParticleWorldGenerator(BaseGenerator):
     """CC 粒子世界生成器，支持 fire/snow/sparkle/smoke/explosion 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         color_refs = modifiers.get("color", [])
         color = color_refs[0] if color_refs else None
@@ -258,7 +257,7 @@ class CCParticleWorldGenerator(BaseGenerator):
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Birth Rate": self._clamp(base["birthRate"] * scale_factor, 0, 1000),
             "Longevity": self._clamp(base["longevity"] / scale_factor if scale_factor else base["longevity"], 0.1, 10),
             "Position X": base["posX"],
@@ -279,7 +278,7 @@ class CCParticleWorldGenerator(BaseGenerator):
             confidence=0.82,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "fire": {
                 "base": {"birthRate": 150, "longevity": 1.5, "posX": 0.5, "posY": 0.8,
@@ -334,7 +333,7 @@ class CCParticleWorldGenerator(BaseGenerator):
 class FractalNoiseGenerator(BaseGenerator):
     """分形噪波生成器，支持 clouds/fire/water/electric/smoke 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
@@ -343,7 +342,7 @@ class FractalNoiseGenerator(BaseGenerator):
         contrast = self._clamp(base["contrast"] * scale_factor, 0, 100)
         brightness = self._clamp(base["brightness"], -100, 100)
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Fractal Type": base["fractalType"],
             "Noise Type": base["noiseType"],
             "Contrast": contrast,
@@ -366,7 +365,7 @@ class FractalNoiseGenerator(BaseGenerator):
             confidence=0.78,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "clouds": {
                 "base": {"fractalType": "Turbulence", "noiseType": "Soft Linear",
@@ -415,7 +414,7 @@ class FractalNoiseGenerator(BaseGenerator):
 class RampGenerator(BaseGenerator):
     """渐变生成器，支持 sunset/cyberpunk/gradient/radial/warmcool 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         color_refs = modifiers.get("color", [])
         color1 = color_refs[0] if len(color_refs) > 0 else None
         color2 = color_refs[1] if len(color_refs) > 1 else None
@@ -423,7 +422,7 @@ class RampGenerator(BaseGenerator):
         preset = self._get_preset(modifiers.get("style", ""))
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Start of Ramp": base["startPoint"],
             "Start Color": color1.get("rgb", preset["colors"]["start"]) if color1 else preset["colors"]["start"],
             "End of Ramp": base["endPoint"],
@@ -439,7 +438,7 @@ class RampGenerator(BaseGenerator):
             confidence=0.85,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "sunset": {
                 "base": {"startPoint": [0.5, 0], "endPoint": [0.5, 1], "shape": "Linear Ramp", "scatter": 0},
@@ -482,13 +481,13 @@ class RampGenerator(BaseGenerator):
 class GaussianBlurGenerator(BaseGenerator):
     """高斯模糊生成器，支持 soft/medium/strong/motionblur/horizontal/vertical 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Blurriness": self._clamp(base["blurriness"] * scale_factor, 0, 500),
             "Blur Dimensions": base["dimensions"],
         }
@@ -500,7 +499,7 @@ class GaussianBlurGenerator(BaseGenerator):
             confidence=0.88,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "soft": {"base": {"blurriness": 3, "dimensions": 3}, "scale": 0.6},
             "medium": {"base": {"blurriness": 10, "dimensions": 3}, "scale": 1.0},
@@ -526,13 +525,13 @@ class GaussianBlurGenerator(BaseGenerator):
 class DirectionalBlurGenerator(BaseGenerator):
     """方向模糊生成器，支持 horizontal/vertical/diagonal/motionblur 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Blur Length": self._clamp(base["blurLength"] * scale_factor, 0, 500),
             "Direction": base["direction"],
         }
@@ -544,7 +543,7 @@ class DirectionalBlurGenerator(BaseGenerator):
             confidence=0.86,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "horizontal": {"base": {"blurLength": 20, "direction": 90}, "scale": 1.0},
             "vertical": {"base": {"blurLength": 20, "direction": 0}, "scale": 1.0},
@@ -568,13 +567,13 @@ class DirectionalBlurGenerator(BaseGenerator):
 class HueSaturationGenerator(BaseGenerator):
     """色相/饱和度生成器，支持 vibrant/desaturated/warmshift/coolshift 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Channel Control": base["channelControl"],
             "Master Hue": self._clamp(base["masterHue"] * scale_factor, 0, 360),
             "Master Saturation": self._clamp(base["masterSaturation"] * scale_factor, -100, 100),
@@ -588,7 +587,7 @@ class HueSaturationGenerator(BaseGenerator):
             confidence=0.87,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "vibrant": {"base": {"channelControl": 0, "masterHue": 0,
                                  "masterSaturation": 30, "masterLightness": 0}, "scale": 1.0},
@@ -617,13 +616,13 @@ class HueSaturationGenerator(BaseGenerator):
 class LevelsGenerator(BaseGenerator):
     """色阶生成器，支持 highcontrast/bright/dark/cinematic/fade 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Input Black": self._clamp(base["inputBlack"] * scale_factor, 0, 255),
             "Input White": self._clamp(base["inputWhite"], 0, 255),
             "Gamma": self._clamp(base["gamma"], 0.1, 10),
@@ -638,7 +637,7 @@ class LevelsGenerator(BaseGenerator):
             confidence=0.84,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "highcontrast": {"base": {"inputBlack": 20, "inputWhite": 235, "gamma": 1.0,
                                       "outputBlack": 0, "outputWhite": 255}, "scale": 1.0},
@@ -669,13 +668,13 @@ class LevelsGenerator(BaseGenerator):
 class ColorBalanceGenerator(BaseGenerator):
     """色彩平衡生成器，支持 warm/cool/vintage/cinematic/tealorange 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Shadow Red Balance": self._clamp(base["shadowR"] * scale_factor, -100, 100),
             "Shadow Green Balance": self._clamp(base["shadowG"] * scale_factor, -100, 100),
             "Shadow Blue Balance": self._clamp(base["shadowB"] * scale_factor, -100, 100),
@@ -694,7 +693,7 @@ class ColorBalanceGenerator(BaseGenerator):
             confidence=0.86,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "warm": {"base": {"shadowR": 20, "shadowG": 5, "shadowB": -10,
                               "midR": 5, "midG": 0, "midB": -5,
@@ -731,7 +730,7 @@ class ColorBalanceGenerator(BaseGenerator):
 class DropShadowGenerator(BaseGenerator):
     """投影生成器，支持 subtle/medium/dramatic/neon 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         color_refs = modifiers.get("color", [])
         color = color_refs[0] if color_refs else None
@@ -739,7 +738,7 @@ class DropShadowGenerator(BaseGenerator):
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Shadow Color": color.get("rgb", base["shadowColor"]) if color else base["shadowColor"],
             "Opacity": self._clamp(base["opacity"] * scale_factor, 0, 255),
             "Direction": base["direction"],
@@ -754,7 +753,7 @@ class DropShadowGenerator(BaseGenerator):
             confidence=0.90,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "subtle": {"base": {"shadowColor": [0, 0, 0], "opacity": 80,
                                 "direction": 135, "distance": 2, "softness": 5}, "scale": 0.5},
@@ -783,12 +782,12 @@ class DropShadowGenerator(BaseGenerator):
 class FillGenerator(BaseGenerator):
     """填充生成器，支持 red/green/blue/white/black/yellow 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         color_refs = modifiers.get("color", [])
         color = color_refs[0] if color_refs else None
         preset = self._get_preset(modifiers.get("style", ""))
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Color": color.get("rgb", preset["base"]["color"]) if color else preset["base"]["color"],
         }
 
@@ -799,7 +798,7 @@ class FillGenerator(BaseGenerator):
             confidence=0.92,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "red": {"base": {"color": [1, 0, 0]}},
             "green": {"base": {"color": [0, 0.8, 0.2]}},
@@ -825,7 +824,7 @@ class FillGenerator(BaseGenerator):
 class StrokeGenerator(BaseGenerator):
     """描边生成器，支持 thin/thick/soft/animated 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         color_refs = modifiers.get("color", [])
         color = color_refs[0] if color_refs else None
@@ -833,7 +832,7 @@ class StrokeGenerator(BaseGenerator):
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Color": color.get("rgb", base["color"]) if color else base["color"],
             "Brush Size": self._clamp(base["brushSize"] * scale_factor, 1, 100),
             "Brush Hardness": self._clamp(base["brushHardness"], 0, 1),
@@ -849,7 +848,7 @@ class StrokeGenerator(BaseGenerator):
             confidence=0.84,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "thin": {"base": {"color": [1, 1, 1], "brushSize": 2, "brushHardness": 0.95,
                              "opacity": 100, "start": 0, "end": 100}, "scale": 0.5},
@@ -878,13 +877,13 @@ class StrokeGenerator(BaseGenerator):
 class NoiseGenerator(BaseGenerator):
     """噪波生成器，支持 filmgrain/heavy/interference/subtle 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Amount of Noise": self._clamp(base["amount"] * scale_factor, 0, 100),
             "Noise Type": base["noiseType"],
             "Clipping": base["clipping"],
@@ -897,7 +896,7 @@ class NoiseGenerator(BaseGenerator):
             confidence=0.83,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "filmgrain": {"base": {"amount": 4, "noiseType": 1, "clipping": 0}, "scale": 0.6},
             "heavy": {"base": {"amount": 30, "noiseType": 0, "clipping": 0}, "scale": 1.5},
@@ -921,13 +920,13 @@ class NoiseGenerator(BaseGenerator):
 class SharpenGenerator(BaseGenerator):
     """锐化生成器，支持 subtle/medium/strong/ultra 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Sharpen Amount": self._clamp(base["amount"] * scale_factor, 0, 100),
         }
 
@@ -938,7 +937,7 @@ class SharpenGenerator(BaseGenerator):
             confidence=0.85,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "subtle": {"base": {"amount": 10}, "scale": 0.5},
             "medium": {"base": {"amount": 25}, "scale": 1.0},
@@ -962,13 +961,13 @@ class SharpenGenerator(BaseGenerator):
 class TexturizeGenerator(BaseGenerator):
     """纹理化生成器，支持 subtle/medium/strong/grunge 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Texture Layer": base["textureLayer"],
             "Texture Placement": base["texturePlacement"],
             "Texture Contrast": self._clamp(base["contrast"] * scale_factor, 0, 200),
@@ -983,7 +982,7 @@ class TexturizeGenerator(BaseGenerator):
             confidence=0.75,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "subtle": {"base": {"textureLayer": 1, "texturePlacement": 0, "contrast": 50,
                                "brightness": 0, "compositeOp": 1}, "scale": 0.5},
@@ -1012,7 +1011,7 @@ class TexturizeGenerator(BaseGenerator):
 class RoughenEdgesGenerator(BaseGenerator):
     """粗糙边缘生成器，支持 rough/spiky/rusty/organic 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         color_refs = modifiers.get("color", [])
         color = color_refs[0] if color_refs else None
@@ -1020,7 +1019,7 @@ class RoughenEdgesGenerator(BaseGenerator):
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Edge Type": base["edgeType"],
             "Edge Color": color.get("rgb", base["edgeColor"]) if color else base["edgeColor"],
             "Border": self._clamp(base["border"] * scale_factor, 0, 200),
@@ -1038,7 +1037,7 @@ class RoughenEdgesGenerator(BaseGenerator):
             confidence=0.80,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "rough": {"base": {"edgeType": 1, "edgeColor": [0.5, 0.5, 0.5], "border": 20,
                               "edgeSharpness": 1, "fractalInfluence": 0.5, "scale": 100,
@@ -1072,13 +1071,13 @@ class RoughenEdgesGenerator(BaseGenerator):
 class CCLensGenerator(BaseGenerator):
     """CC 镜头生成器，支持 fisheye/wideangle/barrel/pincushion 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Size": self._clamp(base["size"] * scale_factor, 0, 300),
             "Curvature": self._clamp(base["curvature"] * scale_factor, -100, 100),
         }
@@ -1090,7 +1089,7 @@ class CCLensGenerator(BaseGenerator):
             confidence=0.82,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "fisheye": {"base": {"size": 100, "curvature": 80}, "scale": 1.0},
             "wideangle": {"base": {"size": 120, "curvature": 40}, "scale": 0.8},
@@ -1114,13 +1113,13 @@ class CCLensGenerator(BaseGenerator):
 class OpticsCompensationGenerator(BaseGenerator):
     """光学补偿生成器，支持 mild/moderate/strong/reverse 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Field of View (FOV)": self._clamp(base["fov"] * scale_factor, 1, 200),
             "Reverse Lens Distortion": base["reverseLens"],
             "FOV Orientation": base["fovOrientation"],
@@ -1133,7 +1132,7 @@ class OpticsCompensationGenerator(BaseGenerator):
             confidence=0.83,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "mild": {"base": {"fov": 15, "reverseLens": 0, "fovOrientation": 0}, "scale": 0.5},
             "moderate": {"base": {"fov": 30, "reverseLens": 0, "fovOrientation": 0}, "scale": 1.0},
@@ -1157,13 +1156,13 @@ class OpticsCompensationGenerator(BaseGenerator):
 class SimpleChokerGenerator(BaseGenerator):
     """简单抑制生成器，支持 shrink/expand/tight/loose/subtle 预设"""
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         preset = self._get_preset(modifiers.get("style", ""))
         scale_factor = intensity_scale * preset["scale"]
         base = preset["base"]
 
-        settings: Dict[str, Any] = {
+        settings: dict[str, Any] = {
             "Choke Matte": self._clamp(base["chokeMatte"] * scale_factor, -200, 200),
         }
 
@@ -1174,7 +1173,7 @@ class SimpleChokerGenerator(BaseGenerator):
             confidence=0.88,
         )
 
-    def _get_preset(self, style: str) -> Dict:
+    def _get_preset(self, style: str) -> dict:
         presets = {
             "shrink": {"base": {"chokeMatte": 5}, "scale": 1.0},
             "expand": {"base": {"chokeMatte": -5}, "scale": 1.0},
@@ -1208,13 +1207,13 @@ class UniversalEffectGenerator(BaseGenerator):
             raise ValueError(f"Effect not found in knowledge graph: {match_name}")
         self.effect_node: EffectNode = node
 
-    def generate(self, modifiers: Dict) -> EffectParams:
+    def generate(self, modifiers: dict) -> EffectParams:
         intensity_scale = self._get_intensity_scale(modifiers.get("intensity", []))
         color_refs = modifiers.get("color", [])
         color = color_refs[0] if color_refs else None
         style = modifiers.get("style", "") or ""
 
-        settings: Dict[str, Any] = {}
+        settings: dict[str, Any] = {}
         for param in self.effect_node.parameters:
             settings[param.name] = self._generate_param_value(param, intensity_scale, color, style)
 
@@ -1231,7 +1230,7 @@ class UniversalEffectGenerator(BaseGenerator):
         self,
         param: EffectParameter,
         intensity_scale: float,
-        color: Optional[Dict],
+        color: dict | None,
         style: str,
     ) -> Any:
         """根据参数类型生成单个参数值"""
@@ -1274,7 +1273,7 @@ class UniversalEffectGenerator(BaseGenerator):
         lower_name = param_name.lower()
         return any(kw in lower_name for kw in color_keywords)
 
-    def _get_enum_override(self, param_name: str, style: str) -> Optional[str]:
+    def _get_enum_override(self, param_name: str, style: str) -> str | None:
         """根据风格覆盖枚举值"""
         style_lower = style.lower()
         param_lower = param_name.lower()
@@ -1301,10 +1300,10 @@ class UniversalEffectGenerator(BaseGenerator):
 
     def _apply_style_overrides(
         self,
-        settings: Dict[str, Any],
+        settings: dict[str, Any],
         style: str,
         intensity_scale: float,
-        color: Optional[Dict],
+        color: dict | None,
     ) -> None:
         """根据风格整体缩放数值参数"""
         style_lower = style.lower()
@@ -1316,7 +1315,7 @@ class UniversalEffectGenerator(BaseGenerator):
         elif "extreme" in style_lower or "massive" in style_lower or "极端" in style:
             self._scale_all_number_params(settings, 2.0)
 
-    def _scale_all_number_params(self, settings: Dict[str, Any], factor: float) -> None:
+    def _scale_all_number_params(self, settings: dict[str, Any], factor: float) -> None:
         """对所有带 intensity_scale 的数值参数按因子缩放"""
         for param in self.effect_node.parameters:
             if param.param_type == "number" and param.intensity_scale and param.intensity_scale > 0:
@@ -1334,7 +1333,7 @@ class UniversalEffectGenerator(BaseGenerator):
 # SPECIALIZED_GENERATORS - 专用效果生成器映射（20 个）
 # ============================================================================
 
-SPECIALIZED_GENERATORS: Dict[str, type] = {
+SPECIALIZED_GENERATORS: dict[str, type] = {
     "ADBE Glo2": GlowGenerator,
     "ADBE Color Key": ColorKeyGenerator,
     "CC Particle World": CCParticleWorldGenerator,
@@ -1361,7 +1360,7 @@ SPECIALIZED_GENERATORS: Dict[str, type] = {
 # ALL_EFFECT_MATCHNAMES - 所有 20 个专用效果的 matchName
 # ============================================================================
 
-ALL_EFFECT_MATCHNAMES: List[str] = list(SPECIALIZED_GENERATORS.keys())
+ALL_EFFECT_MATCHNAMES: list[str] = list(SPECIALIZED_GENERATORS.keys())
 
 
 def _get_generator_class(match_name: str) -> type:
@@ -1389,7 +1388,7 @@ def _build_universal_subclass(match_name: str) -> type:
 # 专用生成器优先；知识图谱中的其余效果使用通用生成器
 # ============================================================================
 
-GENERATOR_REGISTRY: Dict[str, type] = {}
+GENERATOR_REGISTRY: dict[str, type] = {}
 for _match_name in EFFECT_KNOWLEDGE_GRAPH.keys():
     GENERATOR_REGISTRY[_match_name] = _get_generator_class(_match_name)
 
@@ -1405,7 +1404,7 @@ class EffectGeneratorFactory:
     def __init__(self, context: GeneratorContext = None):
         self.context: GeneratorContext = context if context is not None else GeneratorContext()
         # 生成器实例缓存：规范化名称 -> BaseGenerator
-        self._generators: Dict[str, BaseGenerator] = {}
+        self._generators: dict[str, BaseGenerator] = {}
         self._init_all_generators()
 
     def _init_all_generators(self) -> None:
@@ -1440,7 +1439,7 @@ class EffectGeneratorFactory:
         """根据 matchName 获取生成器实例"""
         return self.get_generator(match_name)
 
-    def list_available_generators(self) -> List[str]:
+    def list_available_generators(self) -> list[str]:
         """列出所有可用效果的 matchName"""
         return list(EFFECT_KNOWLEDGE_GRAPH.keys())
 
@@ -1448,18 +1447,18 @@ class EffectGeneratorFactory:
         """返回可用效果总数"""
         return len(EFFECT_KNOWLEDGE_GRAPH)
 
-    def get_effects_by_category(self, category: str) -> List[str]:
+    def get_effects_by_category(self, category: str) -> list[str]:
         """按类别筛选效果 matchName 列表"""
         return [
             name for name, node in EFFECT_KNOWLEDGE_GRAPH.items()
             if node.category == category
         ]
 
-    def generate_effect(self, effect_name: str, modifiers: Dict) -> EffectParams:
+    def generate_effect(self, effect_name: str, modifiers: dict) -> EffectParams:
         """根据效果名生成效果参数"""
         return self.get_generator(effect_name).generate(modifiers)
 
-    def generate_effect_by_match_name(self, match_name: str, modifiers: Dict) -> EffectParams:
+    def generate_effect_by_match_name(self, match_name: str, modifiers: dict) -> EffectParams:
         """根据 matchName 生成效果参数"""
         return self.get_generator_by_match_name(match_name).generate(modifiers)
 

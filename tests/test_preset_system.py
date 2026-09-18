@@ -7,13 +7,14 @@
     py -3.12 -m pytest tests/test_preset_system.py -v
 """
 
-import pytest
 import json
-from typing import Dict, Any
+from typing import Any, Dict
 
-from ae.preset_system import PresetSystem, Preset
-from ae.preset_executor import PresetExecutor, PresetLibrary, initialize_default_combinations
+import pytest
+
 from ae.ai_creative_planner import AICreativePlanner
+from ae.preset_executor import PresetExecutor, PresetLibrary, initialize_default_combinations
+from ae.preset_system import Preset, PresetSystem
 
 
 class TestPresetSystem:

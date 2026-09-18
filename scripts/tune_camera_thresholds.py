@@ -39,7 +39,7 @@ GRID = {
 }
 
 
-def classify(stats: Dict[str, float], th: Dict[str, float]) -> Tuple[str, float]:
+def classify(stats: dict[str, float], th: dict[str, float]) -> tuple[str, float]:
     disp = stats["total_disp"]
     h_con = stats["h_consistency"]
     v_con = stats["v_consistency"]
@@ -76,8 +76,8 @@ def classify(stats: Dict[str, float], th: Dict[str, float]) -> Tuple[str, float]
     return "complex", 0.3
 
 
-def clip_label(segs: List[Dict[str, Any]], global_stats: Dict[str, float],
-               th: Dict[str, float]) -> str:
+def clip_label(segs: list[dict[str, Any]], global_stats: dict[str, float],
+               th: dict[str, float]) -> str:
     """3段投票 + 平局→全局判定 (与分类器 classify_video 一致)。"""
     per = [classify(s["flow_stats"], th)[0] for s in segs]
     votes = Counter(per)
@@ -100,7 +100,7 @@ def main() -> int:
     combos = list(itertools.product(*(GRID[k] for k in keys)))
     print(f"网格组合: {len(combos)}")
 
-    best: List[Tuple[float, Dict[str, float]]] = []
+    best: list[tuple[float, dict[str, float]]] = []
     for combo in combos:
         th = dict(zip(keys, combo))
         exact = fam = 0
@@ -132,7 +132,7 @@ def main() -> int:
     winner = best[0][1]
     # 用胜者阈值做逐类诊断
     n = 0
-    cm: Dict[str, Counter] = defaultdict(Counter)
+    cm: dict[str, Counter] = defaultdict(Counter)
     for r in rows:
         segs = r.get("per_segment") or []
         if not segs:
@@ -140,7 +140,7 @@ def main() -> int:
         n += 1
         pred = clip_label(segs, r["flow_stats"], winner)
         cm[r["vlm_label"]][pred] += 1
-    report: Dict[str, Any] = {
+    report: dict[str, Any] = {
         "tuned_on": "flow_vlm_eval.jsonl (544 条 VLM 高置信分层抽样)",
         "objective": "VLM 置信度加权精确一致率 (0.95x2 / 0.92x1.5 / 0.85x1)",
         "thresholds": winner,
@@ -152,7 +152,7 @@ def main() -> int:
     OUT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n胜者阈值: {winner}")
     print(f"加权精确一致: {best[0][0] / best[0][3]:.4f} | 运动族一致: {best[0][2] / best[0][3]:.4f}")
-    print(f"\n=== 胜者阈值混淆矩阵 (行=VLM, 列=光流) ===")
+    print("\n=== 胜者阈值混淆矩阵 (行=VLM, 列=光流) ===")
     order = sorted(set(cm) | {p for c in cm.values() for p in c})
     corner = "VLM\\FLOW"  # f-string 表达式内不能含反斜杠 (Py3.11 SyntaxError)
     print(f"{corner:<10} " + " ".join(f"{l:>10}" for l in order))

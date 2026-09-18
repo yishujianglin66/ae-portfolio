@@ -4,9 +4,9 @@
 基于音乐节拍的精确关键帧位置映射算法，支持动态规划匹配和贝塞尔曲线插值
 """
 
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple
 import math
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass
@@ -35,7 +35,7 @@ class KeyframeMapping:
 @dataclass
 class MappingResult:
     """完整映射结果"""
-    mappings: List[KeyframeMapping]
+    mappings: list[KeyframeMapping]
     beat_count: int
     keyframe_count: int
     average_offset_ms: float
@@ -43,7 +43,7 @@ class MappingResult:
     coverage: float  # 节拍覆盖率 (0-1)
 
 
-def parse_beats_from_features(audio_features: Dict) -> List[Beat]:
+def parse_beats_from_features(audio_features: dict) -> list[Beat]:
     """
     从音频分析结果中提取节拍信息
 
@@ -64,7 +64,7 @@ def parse_beats_from_features(audio_features: Dict) -> List[Beat]:
     energy_times = energy_curve.get("times", [])
 
     # 构建时间->能量查找
-    energy_map: Dict[float, float] = {}
+    energy_map: dict[float, float] = {}
     if energy_times and energy_values:
         for t, v in zip(energy_times, energy_values):
             energy_map[round(float(t), 3)] = float(v)
@@ -73,7 +73,7 @@ def parse_beats_from_features(audio_features: Dict) -> List[Beat]:
     max_energy = max(energy_values) if energy_values else 0.1
     energy_range = max_energy - avg_energy if max_energy > avg_energy else 0.1
 
-    beats: List[Beat] = []
+    beats: list[Beat] = []
     beats_per_measure = 4
     seconds_per_beat = 60.0 / bpm if bpm > 0 else 0.5
 
@@ -127,8 +127,8 @@ class BeatKeyframeMapper:
 
     def map_beats_to_keyframes(
         self,
-        beats: List[Beat],
-        target_events: List[Dict],
+        beats: list[Beat],
+        target_events: list[dict],
         strategy: str = "dynamic_programming",
     ) -> MappingResult:
         """
@@ -187,9 +187,9 @@ class BeatKeyframeMapper:
     # 策略实现
     # ------------------------------------------------------------------
 
-    def _map_nearest(self, beats: List[Beat], targets: List[Dict]) -> List[KeyframeMapping]:
+    def _map_nearest(self, beats: list[Beat], targets: list[dict]) -> list[KeyframeMapping]:
         """最近邻匹配：每个目标事件匹配最近的节拍"""
-        mappings: List[KeyframeMapping] = []
+        mappings: list[KeyframeMapping] = []
         max_offset_s = self.precision_ms * 5 / 1000.0
 
         for target in targets:
@@ -225,7 +225,7 @@ class BeatKeyframeMapper:
 
         return mappings
 
-    def _map_dynamic_programming(self, beats: List[Beat], targets: List[Dict]) -> List[KeyframeMapping]:
+    def _map_dynamic_programming(self, beats: list[Beat], targets: list[dict]) -> list[KeyframeMapping]:
         """
         动态规划匹配：最小化总偏移量的全局最优解
 
@@ -274,7 +274,7 @@ class BeatKeyframeMapper:
                         choice[i][j] = 1
 
         # 3. 回溯得到最优匹配
-        match_pairs: List[Tuple[int, int]] = []  # (beat_index, target_index)
+        match_pairs: list[tuple[int, int]] = []  # (beat_index, target_index)
         i, j = n, m
         while i > 0 and j > 0:
             if choice[i][j] == 1:
@@ -286,7 +286,7 @@ class BeatKeyframeMapper:
         match_pairs.reverse()
 
         # 4. 构建映射结果
-        mappings: List[KeyframeMapping] = []
+        mappings: list[KeyframeMapping] = []
         for bi, ti in match_pairs:
             beat = beats[bi]
             target = targets[ti]
@@ -309,15 +309,15 @@ class BeatKeyframeMapper:
 
         return mappings
 
-    def _map_downbeat_priority(self, beats: List[Beat], targets: List[Dict]) -> List[KeyframeMapping]:
+    def _map_downbeat_priority(self, beats: list[Beat], targets: list[dict]) -> list[KeyframeMapping]:
         """强拍优先匹配：优先匹配强拍，剩余目标匹配弱拍"""
         max_offset_s = self.precision_ms * 5 / 1000.0
 
         downbeats = [b for b in beats if b.is_downbeat]
         weakbeats = [b for b in beats if not b.is_downbeat]
 
-        mappings: List[KeyframeMapping] = []
-        used_beats: Dict[int, bool] = {}  # beat_number -> used
+        mappings: list[KeyframeMapping] = []
+        used_beats: dict[int, bool] = {}  # beat_number -> used
         matched_targets: set = set()
 
         # 第一轮：强拍匹配
@@ -387,12 +387,12 @@ class BeatKeyframeMapper:
         mappings.sort(key=lambda m: m.time)
         return mappings
 
-    def _map_energy_based(self, beats: List[Beat], targets: List[Dict]) -> List[KeyframeMapping]:
+    def _map_energy_based(self, beats: list[Beat], targets: list[dict]) -> list[KeyframeMapping]:
         """基于能量曲线匹配：高能量目标匹配高能量节拍"""
         max_offset_s = self.precision_ms * 5 / 1000.0
 
         # 给每个目标计算能量等级
-        def target_energy(target: Dict) -> float:
+        def target_energy(target: dict) -> float:
             return target.get("energy", target.get("intensity", 0.5))
 
         # 按能量对节拍和目标分别排序
@@ -400,7 +400,7 @@ class BeatKeyframeMapper:
         targets_with_idx = [(i, t) for i, t in enumerate(targets)]
         targets_sorted = sorted(targets_with_idx, key=lambda x: -target_energy(x[1]))
 
-        mappings: List[KeyframeMapping] = []
+        mappings: list[KeyframeMapping] = []
         used_beats: set = set()
 
         for idx, target in targets_sorted:
@@ -453,11 +453,11 @@ class BeatKeyframeMapper:
 
     def generate_beat_synced_timeline(
         self,
-        beats: List[Beat],
+        beats: list[Beat],
         total_duration: float,
-        clip_events: List[Dict],
+        clip_events: list[dict],
         style: str = "default",
-    ) -> Dict:
+    ) -> dict:
         """
         生成节拍同步的完整时间线
 
@@ -503,7 +503,7 @@ class BeatKeyframeMapper:
         result = self.map_beats_to_keyframes(effective_beats, target_events, strategy)
 
         # 构建完整时间线
-        timeline: List[Dict] = []
+        timeline: list[dict] = []
         for m in result.mappings:
             timeline.append({
                 "time": round(m.time, 4),
@@ -551,12 +551,12 @@ class BeatKeyframeMapper:
         }
 
     def _adjust_beats_for_style(
-        self, beats: List[Beat], style: str, total_duration: float
-    ) -> List[Beat]:
+        self, beats: list[Beat], style: str, total_duration: float
+    ) -> list[Beat]:
         """根据风格预设调整节拍列表"""
         if style == "off_beat":
             # 反拍：在每个节拍之间插入一个偏移节拍
-            adjusted: List[Beat] = []
+            adjusted: list[Beat] = []
             for i in range(len(beats) - 1):
                 mid_time = (beats[i].time + beats[i + 1].time) / 2.0
                 adjusted.append(Beat(
@@ -602,7 +602,7 @@ class BeatKeyframeMapper:
         peak_value: float,
         base_value: float,
         sample_rate: int = 30,
-    ) -> List[Tuple[float, float]]:
+    ) -> list[tuple[float, float]]:
         """
         计算贝塞尔包络线
 
@@ -625,7 +625,7 @@ class BeatKeyframeMapper:
         num_attack = max(2, int(attack_s / dt))
         num_decay = max(2, int(decay_s / dt))
 
-        samples: List[Tuple[float, float]] = []
+        samples: list[tuple[float, float]] = []
 
         # Attack phase: 贝塞尔从 base_value 到 peak_value
         # 控制点: P0=(0, base), P1=(0.3*attack, peak), P2=(attack, peak)
@@ -661,9 +661,9 @@ class BeatKeyframeMapper:
 
     def optimize_keyframe_density(
         self,
-        keyframes: List[KeyframeMapping],
+        keyframes: list[KeyframeMapping],
         min_interval_ms: float = 50,
-    ) -> List[KeyframeMapping]:
+    ) -> list[KeyframeMapping]:
         """
         优化关键帧密度
         如果两个关键帧间隔太近，合并或删除冗余关键帧
@@ -672,7 +672,7 @@ class BeatKeyframeMapper:
             return []
 
         sorted_kf = sorted(keyframes, key=lambda k: k.time)
-        result: List[KeyframeMapping] = [sorted_kf[0]]
+        result: list[KeyframeMapping] = [sorted_kf[0]]
 
         for kf in sorted_kf[1:]:
             prev = result[-1]
@@ -692,7 +692,7 @@ class BeatKeyframeMapper:
     # 映射质量验证
     # ------------------------------------------------------------------
 
-    def validate_mapping(self, result: MappingResult) -> Dict:
+    def validate_mapping(self, result: MappingResult) -> dict:
         """
         验证映射结果质量
         返回: {
@@ -704,7 +704,7 @@ class BeatKeyframeMapper:
             "coverage": float
         }
         """
-        issues: List[str] = []
+        issues: list[str] = []
         max_allowed_offset = self.precision_ms * 5
 
         if not result.mappings:

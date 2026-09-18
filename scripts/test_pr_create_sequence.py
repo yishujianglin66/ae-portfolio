@@ -1,9 +1,11 @@
 """测试 PR 创建序列。"""
-import sys
 import pathlib
+import sys
+
 sys.path.insert(0, str(pathlib.Path("puppet-automation").resolve()))
 
 import asyncio
+
 from src.engines.premiere.pr_bridge_client import PRBridgeClient
 
 

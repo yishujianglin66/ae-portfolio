@@ -16,9 +16,10 @@ Phase 2-3 感知层增强 — 基于 ffmpeg-python 的素材预处理模块
 对齐文件: ae_agent_pipeline.py perceive() / scene_detector.py
 """
 from __future__ import annotations
+
 import os
-import subprocess
 import shutil
+import subprocess
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -87,7 +88,7 @@ class MediaInfo:
     format_name: str = ""
     file_size: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "error": self.error,
@@ -126,11 +127,11 @@ class PreprocessResult:
     operation: str = ""
     input_path: str = ""
     output_path: str = ""
-    output_paths: List[str] = field(default_factory=list)
+    output_paths: list[str] = field(default_factory=list)
     duration: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "error": self.error,
@@ -157,7 +158,7 @@ class MediaPreprocessor:
         thumbs_result = pp.extract_thumbnails("video.mp4", "thumbs/")
     """
 
-    def __init__(self, ffmpeg_path: Optional[str] = None):
+    def __init__(self, ffmpeg_path: str | None = None):
         """
         Args:
             ffmpeg_path: 自定义 ffmpeg 二进制路径（默认从 PATH 查找）
@@ -413,8 +414,8 @@ class MediaPreprocessor:
         video_path: str,
         output_dir: str,
         interval: float = 1.0,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
+        width: int | None = None,
+        height: int | None = None,
         filename_pattern: str = "thumb_%04d.jpg",
     ) -> PreprocessResult:
         """从视频中按间隔抽取缩略图
@@ -447,8 +448,8 @@ class MediaPreprocessor:
             )
 
         try:
-            import time as _time
             import glob as _glob
+            import time as _time
             start = _time.time()
             stream = ffmpeg.input(video_path)
             vf_kwargs = {"fps": 1.0 / interval if interval > 0 else 1.0}
@@ -491,7 +492,7 @@ class MediaPreprocessor:
 
     def _extract_thumbnails_via_cli(
         self, video_path: str, output_pattern: str,
-        interval: float, width: Optional[int], height: Optional[int],
+        interval: float, width: int | None, height: int | None,
     ) -> PreprocessResult:
         """使用 ffmpeg CLI 抽帧（降级方案）"""
         if not self.ffmpeg_path:
@@ -502,8 +503,8 @@ class MediaPreprocessor:
                 input_path=video_path,
             )
         try:
-            import time as _time
             import glob as _glob
+            import time as _time
             start = _time.time()
             cmd = [self.ffmpeg_path, "-y", "-i", video_path,
                    "-vf", f"fps={1.0/interval if interval > 0 else 1.0}"]
@@ -555,9 +556,9 @@ class MediaPreprocessor:
         audio_codec: str = "aac",
         crf: int = 23,
         preset: str = "medium",
-        width: Optional[int] = None,
-        height: Optional[int] = None,
-        fps: Optional[float] = None,
+        width: int | None = None,
+        height: int | None = None,
+        fps: float | None = None,
     ) -> PreprocessResult:
         """视频转码
 
@@ -649,7 +650,7 @@ class MediaPreprocessor:
     def _transcode_via_cli(
         self, input_path: str, output_path: str,
         video_codec: str, audio_codec: str, crf: int, preset: str,
-        width: Optional[int], height: Optional[int], fps: Optional[float],
+        width: int | None, height: int | None, fps: float | None,
     ) -> PreprocessResult:
         """使用 ffmpeg CLI 转码（降级方案）"""
         if not self.ffmpeg_path:

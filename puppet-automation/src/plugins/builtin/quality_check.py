@@ -8,12 +8,12 @@ from __future__ import annotations
 
 from typing import Optional
 
-from src.plugins.base import HookPlugin, PluginContext, PluginPriority
 from src.models.pipeline import (
     PhaseResult,
     PipelinePhase,
     TaskStatus,
 )
+from src.plugins.base import HookPlugin, PluginContext, PluginPriority
 
 
 class QualityCheckPlugin(HookPlugin):
@@ -35,7 +35,7 @@ class QualityCheckPlugin(HookPlugin):
     def priority(self) -> PluginPriority:
         return PluginPriority.HIGH
 
-    async def after_phase(self, ctx: PluginContext) -> Optional[PhaseResult]:
+    async def after_phase(self, ctx: PluginContext) -> PhaseResult | None:
         """Check phase output quality and add warnings if needed."""
         if not ctx.phase_result or not ctx.phase:
             return None

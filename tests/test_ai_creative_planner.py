@@ -7,23 +7,24 @@ AI 创意规划引擎测试用例
     py -3.12 -m pytest tests/test_ai_creative_planner.py -v
 """
 
-import pytest
 import json
-from typing import Dict, Any
+from typing import Any, Dict
+
+import pytest
 
 from ae.ai_creative_planner import AICreativePlanner
 from ae.creative_patterns import (
     CREATIVE_PATTERNS,
     find_patterns_by_keyword,
-    get_pattern_by_name,
     generate_task_graph,
-)
-from ae.prompt_templates import (
-    get_template,
-    list_templates,
-    build_creative_analysis_prompt,
+    get_pattern_by_name,
 )
 from ae.creative_planner_bridge import CreativePlannerBridge
+from ae.prompt_templates import (
+    build_creative_analysis_prompt,
+    get_template,
+    list_templates,
+)
 
 
 class TestCreativePatterns:

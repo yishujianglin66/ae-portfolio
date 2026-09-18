@@ -21,15 +21,15 @@
     print(answer)
 """
 
-import os
-import sys
-import json
-import re
-import time
 import hashlib
-from typing import Dict, Any, List, Optional, Tuple
-from pathlib import Path
+import json
+import os
+import re
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 try:
     import requests
@@ -91,8 +91,8 @@ class KnowledgeBaseQA:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        kb_root: Optional[str] = None,
+        api_key: str | None = None,
+        kb_root: str | None = None,
         model: str = "pro",
     ):
         self.api_key = api_key or os.environ.get("DEEPSEEK_API_KEY", "")
@@ -111,10 +111,10 @@ class KnowledgeBaseQA:
         # 缓存
         self._cache_dir = self.kb_root / ".cache"
         self._cache_dir.mkdir(exist_ok=True)
-        self._context_cache: Optional[str] = None
-        self._loaded_files: List[str] = []
+        self._context_cache: str | None = None
+        self._loaded_files: list[str] = []
 
-    def scan_knowledge_base(self) -> Dict[str, Any]:
+    def scan_knowledge_base(self) -> dict[str, Any]:
         """扫描知识库，返回结构信息"""
         stats = {
             "total_files": 0,
@@ -153,9 +153,9 @@ class KnowledgeBaseQA:
 
     def build_context(
         self,
-        query: Optional[str] = None,
+        query: str | None = None,
         max_tokens: int = None,
-        include_files: List[str] = None,
+        include_files: list[str] = None,
     ) -> str:
         """
         构建上下文，读取知识库文档
@@ -252,10 +252,10 @@ class KnowledgeBaseQA:
     def ask(
         self,
         question: str,
-        context: Optional[str] = None,
-        model: Optional[str] = None,
+        context: str | None = None,
+        model: str | None = None,
         stream: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         回答问题
 
@@ -330,7 +330,7 @@ class KnowledgeBaseQA:
         result = self.ask(question)
         return result.get("answer", result.get("error", "无回答"))
 
-    def _search_by_keywords(self, keywords: List[str]) -> List[Path]:
+    def _search_by_keywords(self, keywords: list[str]) -> list[Path]:
         """关键词搜索"""
         matched = []
 
@@ -347,7 +347,7 @@ class KnowledgeBaseQA:
         matched.sort(key=lambda x: x[1], reverse=True)
         return [m[0] for m in matched]
 
-    def _extract_keywords(self, text: str) -> List[str]:
+    def _extract_keywords(self, text: str) -> list[str]:
         """提取关键词"""
         # 停用词
         stop_words = {"的", "是", "在", "了", "和", "与", "或", "如何", "怎么", "什么", "为什么"}
@@ -363,7 +363,7 @@ class KnowledgeBaseQA:
 
         return list(set(keywords))[:10]
 
-    def _extract_sources(self, content: str) -> List[str]:
+    def _extract_sources(self, content: str) -> list[str]:
         """从回答中提取来源引用"""
         # 匹配 markdown 链接
         pattern = r'\[([^\]]+)\]\(([^)]+\.md)\)'
@@ -396,7 +396,7 @@ class KnowledgeBaseQA:
         completion = usage.get("completion_tokens", 0) / 1_000_000
         return prompt * in_price + completion * out_price
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取知识库统计"""
         return self.scan_knowledge_base()
 
@@ -437,11 +437,11 @@ def main():
 
     if args.stats:
         stats = qa.scan_knowledge_base()
-        print(f"知识库统计：")
+        print("知识库统计：")
         print(f"  总文件数: {stats['total_files']}")
         print(f"  总大小: {stats['total_size'] / 1024 / 1024:.2f} MB")
         print(f"  估算Token: {stats['total_tokens']:,}")
-        print(f"\n目录分布：")
+        print("\n目录分布：")
         for dir_name, info in stats["by_directory"].items():
             print(f"  {dir_name}: {info['files']} 文件, {info['size'] / 1024:.1f} KB")
         return
@@ -462,7 +462,7 @@ def main():
 
     if result["success"]:
         print(result["answer"])
-        print(f"\n---")
+        print("\n---")
         print(f"加载文件: {result['loaded_files']}")
         print(f"耗时: {result['duration']:.1f}s")
         print(f"费用: ¥{result['cost']:.4f}")

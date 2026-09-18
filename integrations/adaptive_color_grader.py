@@ -37,12 +37,12 @@ class GradingStyle:
     colorbalance: str = ""         # colorbalance= 参数串
     temperature: float = 0.0       # 色温偏移 (-0.1~0.1, 正=暖, 负=冷)
     gamma: float = 1.0             # eq=gamma=
-    suitable_for: Dict[str, Any] = field(default_factory=dict)
+    suitable_for: dict[str, Any] = field(default_factory=dict)
     # 适用条件: brightness_range, motion_range, color_temp_hint
 
 
 # 7 种调色风格
-GRADING_STYLES: Dict[str, GradingStyle] = {
+GRADING_STYLES: dict[str, GradingStyle] = {
     "cinematic_warm": GradingStyle(
         name="cinematic_warm",
         saturation=1.15, contrast=1.05, brightness=0.01,
@@ -103,7 +103,7 @@ GRADING_STYLES: Dict[str, GradingStyle] = {
 # 条件键: src_dark (亮度<0.25), src_bright (亮度>0.65),
 #         src_cool (色温<0), src_warm (色温>0),
 #         src_high_sat (饱和度>140), src_low_sat (饱和度<100)
-CONFLICT_RULES: List[Dict[str, Any]] = [
+CONFLICT_RULES: list[dict[str, Any]] = [
     # 暗场景不用高饱和（会噪点爆炸）
     {"condition": "src_dark", "penalize": ["high_contrast", "neon_glow"], "weight": 0.3},
     # 冷色原片不叠暖色滤镜（色彩脏）
@@ -219,7 +219,7 @@ class AdaptiveColorGrader:
             logger.warning(f"镜头色彩分析失败 shot#{shot_index}: {e}")
         return info
 
-    def analyze_shots(self, shot_paths: List[str], cut_times: List[float]) -> List[ShotColorInfo]:
+    def analyze_shots(self, shot_paths: list[str], cut_times: list[float]) -> list[ShotColorInfo]:
         """批量分析多个镜头的色彩特征。"""
         results = []
         for i, path in enumerate(shot_paths):
@@ -234,7 +234,7 @@ class AdaptiveColorGrader:
     # ------------------------------------------------------------------
 
     def select_best_style(self, shot: ShotColorInfo,
-                          mood: str = "") -> Tuple[str, float]:
+                          mood: str = "") -> tuple[str, float]:
         """为单个镜头选择最佳调色风格。
 
         基于镜头色彩特征 + 情绪标签，对每种风格打分，
@@ -297,7 +297,7 @@ class AdaptiveColorGrader:
     # ------------------------------------------------------------------
 
     def compute_adaptive_params(self, shot: ShotColorInfo,
-                                 style_name: str) -> Dict[str, float]:
+                                 style_name: str) -> dict[str, float]:
         """根据镜头特征和选定风格，计算最终调色参数。
 
         包含冲突修正：如果镜头特征与风格参数冲突，自动降低强度。
@@ -346,8 +346,8 @@ class AdaptiveColorGrader:
     #  4. 生成逐镜头 ffmpeg filter graph
     # ------------------------------------------------------------------
 
-    def compute_grading_plan(self, shots: List[ShotColorInfo],
-                              mood: str = "") -> List[Dict[str, Any]]:
+    def compute_grading_plan(self, shots: list[ShotColorInfo],
+                              mood: str = "") -> list[dict[str, Any]]:
         """为所有镜头生成调色方案。
 
         Returns:
@@ -369,7 +369,7 @@ class AdaptiveColorGrader:
                          f"sat={params['saturation']:.2f} contrast={params['contrast']:.2f}")
         return plan
 
-    def build_per_shot_filter(self, plan: List[Dict[str, Any]],
+    def build_per_shot_filter(self, plan: list[dict[str, Any]],
                                total_duration: float) -> str:
         """生成逐镜头 ffmpeg filter graph 字符串。
 
@@ -415,7 +415,7 @@ class AdaptiveColorGrader:
         return filter_str
 
     @staticmethod
-    def _params_to_vf(params: Dict[str, Any]) -> str:
+    def _params_to_vf(params: dict[str, Any]) -> str:
         """将调色参数转换为 ffmpeg -vf 字符串。"""
         parts = []
         sat = params.get("saturation", 1.0)

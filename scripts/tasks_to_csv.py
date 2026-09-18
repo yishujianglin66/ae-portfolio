@@ -38,16 +38,15 @@ import csv
 import json
 import os
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
 
 # 北京时区（项目本地时区）
 CN_TZ = timezone(timedelta(hours=8))
 
 
-def _to_iso(ts: Optional[float]) -> str:
+def _to_iso(ts: float | None) -> str:
     """Unix 时间戳转 ISO8601 字符串（北京时区）"""
     if not ts:
         return ""
@@ -57,7 +56,7 @@ def _to_iso(ts: Optional[float]) -> str:
         return ""
 
 
-def _safe_get(d: Optional[Dict[str, Any]], *keys, default: Any = "") -> Any:
+def _safe_get(d: dict[str, Any] | None, *keys, default: Any = "") -> Any:
     """安全嵌套取值"""
     cur = d
     for k in keys:
@@ -69,7 +68,7 @@ def _safe_get(d: Optional[Dict[str, Any]], *keys, default: Any = "") -> Any:
     return cur
 
 
-def flatten_task(task: Dict[str, Any]) -> Dict[str, Any]:
+def flatten_task(task: dict[str, Any]) -> dict[str, Any]:
     """将单条嵌套任务记录扁平化为单行字典"""
     result = task.get("result", {}) or {}
     stages_results = result.get("stage_results", {}) or {}
@@ -135,7 +134,7 @@ def flatten_task(task: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def load_tasks(input_path: str) -> List[Dict[str, Any]]:
+def load_tasks(input_path: str) -> list[dict[str, Any]]:
     """加载 tasks.json，返回任务列表"""
     path = Path(input_path)
     if not path.exists():
@@ -153,7 +152,7 @@ def load_tasks(input_path: str) -> List[Dict[str, Any]]:
         raise ValueError(f"无法识别的任务数据格式: {type(data)}")
 
 
-def export_csv(rows: List[Dict[str, Any]], output_path: str) -> int:
+def export_csv(rows: list[dict[str, Any]], output_path: str) -> int:
     """导出 CSV 文件，返回写入的行数"""
     if not rows:
         # 仍创建空文件带表头
@@ -172,7 +171,7 @@ def export_csv(rows: List[Dict[str, Any]], output_path: str) -> int:
     return len(rows)
 
 
-def export_jsonl(rows: List[Dict[str, Any]], output_path: str) -> int:
+def export_jsonl(rows: list[dict[str, Any]], output_path: str) -> int:
     """导出 JSONL 文件（每行一个 JSON 对象），返回写入的行数"""
     os.makedirs(os.path.dirname(os.path.abspath(output_path)) or ".", exist_ok=True)
 
@@ -183,7 +182,7 @@ def export_jsonl(rows: List[Dict[str, Any]], output_path: str) -> int:
     return len(rows)
 
 
-def export_markdown_summary(rows: List[Dict[str, Any]], output_path: str) -> int:
+def export_markdown_summary(rows: list[dict[str, Any]], output_path: str) -> int:
     """导出 Markdown 摘要报告（含基础统计），返回任务数"""
     from collections import Counter
 

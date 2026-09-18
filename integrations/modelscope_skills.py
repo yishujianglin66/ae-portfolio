@@ -36,13 +36,13 @@ class VideoAnalysisResult:
     duration: float = 0.0
     scene_count: int = 0
     avg_shot_duration: float = 0.0
-    style_tags: List[str] = field(default_factory=list)
-    color_palette: List[str] = field(default_factory=list)
+    style_tags: list[str] = field(default_factory=list)
+    color_palette: list[str] = field(default_factory=list)
     motion_intensity: str = "medium"  # low/medium/high
-    scene_types: List[str] = field(default_factory=list)  # closeup/wide/action/dialogue
-    raw_response: Dict[str, Any] = field(default_factory=dict)
+    scene_types: list[str] = field(default_factory=list)  # closeup/wide/action/dialogue
+    raw_response: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "video_path": self.video_path,
             "duration": self.duration,
@@ -59,9 +59,9 @@ class VideoAnalysisResult:
 class StyleMatchResult:
     """风格匹配结果"""
     input_style: str
-    matched_templates: List[Dict[str, Any]] = field(default_factory=list)
+    matched_templates: list[dict[str, Any]] = field(default_factory=list)
     confidence: float = 0.0
-    suggestions: List[str] = field(default_factory=list)
+    suggestions: list[str] = field(default_factory=list)
 
 
 class ModelScopeSkillsClient:
@@ -73,7 +73,7 @@ class ModelScopeSkillsClient:
 
     BASE_URL = "https://modelscope.cn/openapi/v1"
     
-    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, base_url: str | None = None):
         self.api_key = api_key or os.environ.get("MODELSCOPE_API_KEY", "")
         self.base_url = (base_url or os.environ.get("MODELSCOPE_BASE_URL", self.BASE_URL)).rstrip("/")
         
@@ -88,7 +88,7 @@ class ModelScopeSkillsClient:
             "Content-Type": "application/json",
         })
     
-    def _request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
+    def _request(self, method: str, endpoint: str, **kwargs) -> dict[str, Any]:
         """发送API请求"""
         url = f"{self.base_url}{endpoint}"
         try:
@@ -167,7 +167,7 @@ class ModelScopeSkillsClient:
         self, 
         image_path: str, 
         top_k: int = 5
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         识别图片/视频帧的风格
         
@@ -198,7 +198,7 @@ class ModelScopeSkillsClient:
         negative_prompt: str = "",
         size: str = "1024x1024",
         style: str = "auto",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         文生图
         
@@ -230,7 +230,7 @@ class ModelScopeSkillsClient:
     def analyze_audio(
         self,
         audio_path: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         音频分析（BGM识别、节奏检测）
         
@@ -257,9 +257,9 @@ class ModelScopeSkillsClient:
     
     def batch_analyze_videos(
         self,
-        video_paths: List[str],
-        output_dir: Optional[str] = None,
-    ) -> List[VideoAnalysisResult]:
+        video_paths: list[str],
+        output_dir: str | None = None,
+    ) -> list[VideoAnalysisResult]:
         """
         批量分析视频
         
@@ -297,8 +297,8 @@ class ModelScopeSkillsClient:
     
     def match_style_to_templates(
         self,
-        style_tags: List[str],
-        template_db_path: Optional[str] = None,
+        style_tags: list[str],
+        template_db_path: str | None = None,
     ) -> StyleMatchResult:
         """
         根据风格标签匹配AE特效模板
@@ -325,7 +325,7 @@ class ModelScopeSkillsClient:
 
 
 # 便捷函数
-def create_client(api_key: Optional[str] = None) -> ModelScopeSkillsClient:
+def create_client(api_key: str | None = None) -> ModelScopeSkillsClient:
     """创建魔搭Skills客户端"""
     return ModelScopeSkillsClient(api_key=api_key)
 
@@ -338,7 +338,7 @@ if __name__ == "__main__":
     
     try:
         client = create_client()
-        print(f"✓ 客户端创建成功")
+        print("✓ 客户端创建成功")
         print(f"  API Base URL: {client.base_url}")
         
         # 测试视频分析（需要实际视频文件）

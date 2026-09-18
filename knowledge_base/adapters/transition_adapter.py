@@ -16,8 +16,8 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Optional
 
-from knowledge_base.types import BlockType, MdBlock, TransitionRecipe
 from knowledge_base.table_extractor import TableExtractor
+from knowledge_base.types import BlockType, MdBlock, TransitionRecipe
 
 
 class TransitionAdapter:
@@ -44,9 +44,9 @@ class TransitionAdapter:
 
     def extract_from_blocks(
         self,
-        blocks: List[MdBlock],
+        blocks: list[MdBlock],
         source_file: str = "",
-    ) -> List[TransitionRecipe]:
+    ) -> list[TransitionRecipe]:
         """从 MdBlock 列表中提取转场配方。
 
         扫描所有 TABLE 块，查找包含"类型"和"效果"列的表格。
@@ -58,7 +58,7 @@ class TransitionAdapter:
         Returns:
             TransitionRecipe 列表
         """
-        recipes: List[TransitionRecipe] = []
+        recipes: list[TransitionRecipe] = []
 
         for block in blocks:
             if block.block_type != BlockType.TABLE:
@@ -94,7 +94,7 @@ class TransitionAdapter:
                 if effect_col:
                     effect_match = row.columns.get(effect_col, "").strip()
 
-                params: Dict[str, Any] = {}
+                params: dict[str, Any] = {}
                 if params_col:
                     params_str = row.columns.get(params_col, "").strip()
                     params = self._parse_params(params_str)
@@ -111,9 +111,9 @@ class TransitionAdapter:
 
     def extract_from_text_blocks(
         self,
-        blocks: List[MdBlock],
+        blocks: list[MdBlock],
         source_file: str = "",
-    ) -> List[TransitionRecipe]:
+    ) -> list[TransitionRecipe]:
         """从文本块中提取转场配方。
 
         匹配格式：
@@ -126,7 +126,7 @@ class TransitionAdapter:
         Returns:
             TransitionRecipe 列表
         """
-        recipes: List[TransitionRecipe] = []
+        recipes: list[TransitionRecipe] = []
 
         for block in blocks:
             if block.block_type not in (BlockType.PARAGRAPH, BlockType.LIST):
@@ -164,7 +164,7 @@ class TransitionAdapter:
 
         return recipes
 
-    def to_dict(self, recipes: List[TransitionRecipe]) -> Dict[str, Dict[str, Any]]:
+    def to_dict(self, recipes: list[TransitionRecipe]) -> dict[str, dict[str, Any]]:
         """转换为 Dict[str, Dict[str, Any]] 格式。
 
         Args:
@@ -173,9 +173,9 @@ class TransitionAdapter:
         Returns:
             与 TRANSITION_IMPL_MAP 格式兼容的字典
         """
-        result: Dict[str, Dict[str, Any]] = {}
+        result: dict[str, dict[str, Any]] = {}
         for r in recipes:
-            entry: Dict[str, Any] = {
+            entry: dict[str, Any] = {
                 "display_name": r.display_name,
                 "effect_match": r.effect_match,
             }
@@ -188,9 +188,9 @@ class TransitionAdapter:
 
     def merge_with_fallback(
         self,
-        kb_recipes: List[TransitionRecipe],
-        fallback: Dict[str, Dict[str, Any]],
-    ) -> Dict[str, Dict[str, Any]]:
+        kb_recipes: list[TransitionRecipe],
+        fallback: dict[str, dict[str, Any]],
+    ) -> dict[str, dict[str, Any]]:
         """合并知识库配方与硬编码 fallback。
 
         Args:
@@ -200,9 +200,9 @@ class TransitionAdapter:
         Returns:
             合并后的字典
         """
-        result: Dict[str, Dict[str, Any]] = dict(fallback)
+        result: dict[str, dict[str, Any]] = dict(fallback)
         for r in kb_recipes:
-            entry: Dict[str, Any] = {
+            entry: dict[str, Any] = {
                 "display_name": r.display_name,
                 "effect_match": r.effect_match,
             }
@@ -223,9 +223,9 @@ class TransitionAdapter:
         return text.lower().strip("_")
 
     @staticmethod
-    def _parse_params(params_str: str) -> Dict[str, Any]:
+    def _parse_params(params_str: str) -> dict[str, Any]:
         """解析参数字符串 "key1=val1, key2=val2"。"""
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if not params_str:
             return params
 
@@ -247,14 +247,14 @@ class TransitionAdapter:
         return params
 
     @staticmethod
-    def _find_column(headers: List[str], candidates: set[str]) -> Optional[str]:
+    def _find_column(headers: list[str], candidates: set[str]) -> str | None:
         """在表头中查找匹配候选名称的列。"""
         for h in headers:
             if h.lower().strip() in candidates:
                 return h
         return None
 
-    def _find_effect_column(self, headers: List[str]) -> Optional[str]:
+    def _find_effect_column(self, headers: list[str]) -> str | None:
         """查找效果列：先精确匹配，再子串匹配（ae + 关键词），最后宽松匹配任何AE列。"""
         # 精确匹配
         exact = self._find_column(headers, self._EFFECT_COLS)
@@ -272,7 +272,7 @@ class TransitionAdapter:
                 return h
         return None
 
-    def _find_type_column(self, headers: List[str]) -> Optional[str]:
+    def _find_type_column(self, headers: list[str]) -> str | None:
         """查找类型列：先精确匹配，再子串匹配（包含转场 + 分类/类型）。"""
         exact = self._find_column(headers, self._TYPE_COLS)
         if exact:

@@ -1,10 +1,15 @@
 """E2E 验证：PySceneDetect + Resolve 多段调色全流程"""
-import sys, os, time, tempfile, shutil, ctypes
+import ctypes
+import os
+import shutil
+import sys
+import tempfile
+import time
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.davinci_fuscript import (
-    ResolveColorEngine, ColorGradeConfig, find_lut_for_preset, DCTL_PRESET_MAP
-)
+from integrations.davinci_fuscript import DCTL_PRESET_MAP, ColorGradeConfig, ResolveColorEngine, find_lut_for_preset
+
 
 def get_long_path(short_path):
     buf = ctypes.create_unicode_buffer(1024)
@@ -46,7 +51,7 @@ else:
     scenes = []
 
 # Step 3: 自动生成预设映射
-print(f"\n[3/5] Auto segment presets:")
+print("\n[3/5] Auto segment presets:")
 preset_cycle = ["cinematic", "filmic", "opendrt", "primal", "saturation", "shadow-contrast"]
 segment_presets = {}
 if scenes:
@@ -57,10 +62,10 @@ if scenes:
 else:
     # Fallback: use filename-based presets
     segment_presets = {"V15": "primal"}
-    print(f"    Fallback: V15 -> primal")
+    print("    Fallback: V15 -> primal")
 
 # Step 4: Resolve 多段调色 + 渲染
-print(f"\n[4/5] Resolve multi-segment grade + render...")
+print("\n[4/5] Resolve multi-segment grade + render...")
 config = ColorGradeConfig(
     preset="cinematic",
     brightness=1.05,
@@ -86,6 +91,7 @@ with open(script_path, "w", encoding="utf-8") as f:
     f.write(lua_script)
 
 import subprocess
+
 proc = subprocess.run(
     [str(engine.fuscript_path), "-lua", script_path],
     capture_output=True, text=True, timeout=300,
@@ -103,7 +109,7 @@ if proc.stderr.strip():
 shutil.rmtree(script_dir, ignore_errors=True)
 
 # Step 5: 验证输出
-print(f"\n[5/5] Output verification:")
+print("\n[5/5] Output verification:")
 output_found = False
 for f in os.listdir(output_dir):
     fp = os.path.join(output_dir, f)

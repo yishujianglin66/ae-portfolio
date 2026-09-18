@@ -11,7 +11,12 @@ PR 已完成剪辑（导入+时间轴排列+保存），现在由 Resolve 完成
 - 一次编码（无 PR→Resolve 转码损失）
 - 调色环节本来就走 Resolve，这是设计中的正确路径
 """
-import sys, io, os, time, json, subprocess
+import io
+import json
+import os
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
@@ -21,7 +26,7 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='repla
 PROJECT_ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from integrations.davinci_fuscript import ResolveColorEngine, ColorGradeConfig
+from integrations.davinci_fuscript import ColorGradeConfig, ResolveColorEngine
 
 # ============================================================
 # Configuration
@@ -45,7 +50,7 @@ for p in media_files:
 # ============================================================
 # Step 1: Initialize Resolve Engine
 # ============================================================
-print(f"\n[Step 1] 初始化 Resolve 引擎...")
+print("\n[Step 1] 初始化 Resolve 引擎...")
 try:
     engine = ResolveColorEngine(resolve_home=r"D:\DaVinci Resolve")
     print(f"  ✓ fuscript: {engine.fuscript_path}")
@@ -56,12 +61,12 @@ except FileNotFoundError as e:
 # ============================================================
 # Step 2: Launch Resolve
 # ============================================================
-print(f"\n[Step 2] 启动 DaVinci Resolve...")
+print("\n[Step 2] 启动 DaVinci Resolve...")
 launched = engine.launch_resolve(wait_timeout=90)
 if launched:
-    print(f"  ✓ Resolve 已启动")
+    print("  ✓ Resolve 已启动")
 else:
-    print(f"  ✗ Resolve 启动失败")
+    print("  ✗ Resolve 启动失败")
     sys.exit(1)
 
 # Wait for Resolve to fully initialize
@@ -70,7 +75,7 @@ time.sleep(5)
 # ============================================================
 # Step 3: Create project + Import + Timeline + Color Grade + Render
 # ============================================================
-print(f"\n[Step 3] 创建项目 + 导入 + 调色 + 渲染...")
+print("\n[Step 3] 创建项目 + 导入 + 调色 + 渲染...")
 project_name = f"PR_FullAuto_{int(time.time())}"
 output_dir = str(OUTPUT_DIR)
 
@@ -78,7 +83,7 @@ output_dir = str(OUTPUT_DIR)
 config = ColorGradeConfig(preset="cinematic")
 
 print(f"  项目: {project_name}")
-print(f"  预设: cinematic")
+print("  预设: cinematic")
 print(f"  输出: {output_dir}")
 print(f"  素材: {len(media_paths)} clips")
 
@@ -94,7 +99,7 @@ result = engine.create_project(
 # ============================================================
 # Step 4: Report Results
 # ============================================================
-print(f"\n[Step 4] 结果报告")
+print("\n[Step 4] 结果报告")
 print(f"  成功: {result.success}")
 print(f"  项目: {result.project_name}")
 print(f"  时间线: {result.timeline_name}")
@@ -105,18 +110,18 @@ print(f"  输出: {result.output_path}")
 print(f"  耗时: {result.duration:.1f}s")
 
 if result.errors:
-    print(f"  错误:")
+    print("  错误:")
     for e in result.errors:
         print(f"    - {e}")
 
 if result.stdout:
-    print(f"\n  --- Resolve 输出 (最后 1000 字符) ---")
+    print("\n  --- Resolve 输出 (最后 1000 字符) ---")
     print(f"  {result.stdout[-1000:]}")
 
 # ============================================================
 # Step 5: Verify Output
 # ============================================================
-print(f"\n[Step 5] 验证输出文件...")
+print("\n[Step 5] 验证输出文件...")
 output_files = list(OUTPUT_DIR.glob("*.mp4")) + list(OUTPUT_DIR.glob("*.mov"))
 recent_outputs = [f for f in output_files if time.time() - f.stat().st_mtime < 600]
 
@@ -126,8 +131,8 @@ if recent_outputs:
         print(f"  ✓ {f.name} ({size/1024/1024:.2f} MB)")
         if size > 10240:
             print(f"\n{'='*70}")
-            print(f"  ✓✓✓ 全链路成功!")
-            print(f"  PR剪辑 → Resolve调色 → 渲染输出")
+            print("  ✓✓✓ 全链路成功!")
+            print("  PR剪辑 → Resolve调色 → 渲染输出")
             print(f"  文件: {f}")
             print(f"  大小: {size/1024/1024:.2f} MB")
             print(f"{'='*70}")
@@ -147,7 +152,7 @@ if recent_outputs:
             meta_file.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
             sys.exit(0)
 else:
-    print(f"  ✗ 未找到输出文件")
+    print("  ✗ 未找到输出文件")
     # Check Resolve's default output location
     default_out = Path(r"C:\Users\Administrator\Documents\Resolve")
     if default_out.exists():
@@ -155,5 +160,5 @@ else:
         for f in resolve_files[:3]:
             print(f"  Resolve 默认输出: {f} ({f.stat().st_size/1024/1024:.2f} MB)")
 
-print(f"\n  管线执行完毕")
+print("\n  管线执行完毕")
 sys.exit(0 if result.success else 1)

@@ -2,10 +2,11 @@
 # Nuke格式导出模板 - 生成Nuke兼容的遮罩与跟踪数据
 # 适用于Silhouette到Nuke的工作流对接
 
-from fx import *
-import os
 import json
+import os
 import time
+
+from fx import *
 
 
 def create_pipeline(
@@ -216,13 +217,13 @@ def create_pipeline(
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
 
-    print(f"\n=== Nuke导出管线创建完成 ===")
+    print("\n=== Nuke导出管线创建完成 ===")
     print(f"输出目录: {output_dir}")
     print(f"遮罩层: {len(roto_layers)}")
     print(f"跟踪: {'是' if export_tracking else '否'}")
     print(f"形状: {'是' if export_shapes else '否'}")
     print(f"清单: {manifest_path}")
-    print(f"\n下一步: 绘制Roto形状，执行跟踪，渲染输出")
+    print("\n下一步: 绘制Roto形状，执行跟踪，渲染输出")
 
     return proj, session
 

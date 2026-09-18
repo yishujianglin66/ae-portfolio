@@ -70,7 +70,7 @@ class PRMCPAdapter:
         "get_pr_status",
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._bridge_available = self._check_bridge()
         self._adobe_mcp_available = self._check_adobe_mcp()
@@ -91,10 +91,10 @@ class PRMCPAdapter:
     def check_available(self) -> bool:
         return self._available
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """执行操作，自动选择最优通道"""
         params = params or {}
         start = time.time()
@@ -113,7 +113,7 @@ class PRMCPAdapter:
                 "duration_ms": (time.time() - start) * 1000,
             }
 
-    def _dispatch(self, operation: str, params: Dict) -> Dict:
+    def _dispatch(self, operation: str, params: dict) -> dict:
         """根据操作分发到对应通道"""
 
         # ── 系统/状态类 ──
@@ -426,7 +426,7 @@ class PRMCPAdapter:
 
     # ── 通道实现 ──
 
-    def _bridge_command(self, command: str, **kwargs) -> Dict:
+    def _bridge_command(self, command: str, **kwargs) -> dict:
         """通过 PR Bridge 文件轮询发送命令"""
         if not self._bridge_available:
             return self._bridge_fallback(command, **kwargs)
@@ -463,7 +463,7 @@ class PRMCPAdapter:
             "note": "PR may not be running or CEP plugin not installed",
         }
 
-    def _bridge_fallback(self, command: str, **kwargs) -> Dict:
+    def _bridge_fallback(self, command: str, **kwargs) -> dict:
         """Bridge 不可用时的降级"""
         return {
             "status": "degraded",
@@ -473,7 +473,7 @@ class PRMCPAdapter:
             "note": "Install CEP plugin or start PR with Bridge enabled",
         }
 
-    def _jsx_execute(self, jsx_code: str) -> Dict:
+    def _jsx_execute(self, jsx_code: str) -> dict:
         """通过 Adobe MCP 的 ExtendScript 通道执行"""
         if not self._adobe_mcp_available:
             return {
@@ -509,7 +509,7 @@ class PRMCPAdapter:
             except Exception:
                 pass
 
-    def _get_bridge_status(self) -> Dict:
+    def _get_bridge_status(self) -> dict:
         """获取 Bridge 状态"""
         cmd_exists = (BRIDGE_DIR / "pr_command.json").exists()
         result_exists = (BRIDGE_DIR / "pr_result.json").exists()
@@ -523,7 +523,7 @@ class PRMCPAdapter:
             "adobe_mcp_available": self._adobe_mcp_available,
         }
 
-    def _get_pr_status(self) -> Dict:
+    def _get_pr_status(self) -> dict:
         """获取 PR 运行状态"""
         running = False
         try:
@@ -547,14 +547,14 @@ class PRMCPAdapter:
             },
         }
 
-    def _execute_extendscript(self, params: Dict) -> Dict:
+    def _execute_extendscript(self, params: dict) -> dict:
         """直接执行用户提供的 ExtendScript 代码"""
         jsx_code = params.get("jsx_code", "")
         if not jsx_code:
             return {"status": "error", "error": "jsx_code parameter required"}
         return self._jsx_execute(jsx_code)
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         return {
             "total_operations": len(self.SUPPORTED_OPERATIONS),
             "bridge_available": self._bridge_available,

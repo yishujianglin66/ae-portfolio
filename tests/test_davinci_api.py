@@ -1,5 +1,9 @@
 """单独测试 DaVinci Resolve API 连接（延长等待）"""
-import os, sys, time, ctypes, subprocess
+import ctypes
+import os
+import subprocess
+import sys
+import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
@@ -20,7 +24,7 @@ def is_running(name):
 
 # 启动 Resolve
 if not is_running("Resolve.exe"):
-    print(f"Starting Resolve...")
+    print("Starting Resolve...")
     subprocess.Popen([RESOLVE_EXE], shell=True)
     print("Process launched, waiting...")
 else:

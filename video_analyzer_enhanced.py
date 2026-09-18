@@ -9,12 +9,13 @@
 5. 构图分析 - 主体位置、三分法、对称检测
 6. 镜头类型识别 - 全景/中景/近景/特写自动识别
 """
-import os
 import json
 import math
-import numpy as np
-from typing import Dict, List, Optional, Tuple
+import os
 from datetime import datetime
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
 
 try:
     import cv2
@@ -23,7 +24,7 @@ except ImportError:
     CV2_AVAILABLE = False
 
 try:
-    from scenedetect import detect, ContentDetector
+    from scenedetect import ContentDetector, detect
     SCENEDETECT_AVAILABLE = True
 except ImportError:
     SCENEDETECT_AVAILABLE = False
@@ -48,7 +49,7 @@ class EnhancedVideoAnalyzer:
                 self._enable_cache = False
                 self._fingerprint = None
 
-    def analyze_video(self, video_path: str, sample_interval: int = 5, detail_level: str = "standard") -> Dict:
+    def analyze_video(self, video_path: str, sample_interval: int = 5, detail_level: str = "standard") -> dict:
         if not os.path.exists(video_path):
             return {"success": False, "error": f"文件不存在: {video_path}"}
 
@@ -124,7 +125,7 @@ class EnhancedVideoAnalyzer:
 
         return result
     
-    def _get_basic_info(self, video_path: str) -> Dict:
+    def _get_basic_info(self, video_path: str) -> dict:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             return {"error": "无法打开视频"}
@@ -158,7 +159,7 @@ class EnhancedVideoAnalyzer:
         elif w >= 854: return "480p"
         else: return "SD"
     
-    def _sample_frames_enhanced(self, video_path: str, interval: int = 5) -> List[Dict]:
+    def _sample_frames_enhanced(self, video_path: str, interval: int = 5) -> list[dict]:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             return []
@@ -298,7 +299,7 @@ class EnhancedVideoAnalyzer:
         else:
             return "static"
     
-    def _analyze_single_frame_composition(self, frame: np.ndarray, width: int, height: int) -> Dict:
+    def _analyze_single_frame_composition(self, frame: np.ndarray, width: int, height: int) -> dict:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
         edges = cv2.Canny(gray, 50, 150)
@@ -361,7 +362,7 @@ class EnhancedVideoAnalyzer:
         else:
             return "extreme_wide"
     
-    def _detect_scenes_enhanced(self, video_path: str) -> List[Dict]:
+    def _detect_scenes_enhanced(self, video_path: str) -> list[dict]:
         if SCENEDETECT_AVAILABLE:
             try:
                 scenes = detect(video_path, ContentDetector(threshold=27.0))
@@ -383,7 +384,7 @@ class EnhancedVideoAnalyzer:
         
         return self._detect_scenes_opencv(video_path)
     
-    def _detect_scenes_opencv(self, video_path: str) -> List[Dict]:
+    def _detect_scenes_opencv(self, video_path: str) -> list[dict]:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             return []
@@ -444,7 +445,7 @@ class EnhancedVideoAnalyzer:
         
         return scenes
     
-    def _analyze_transitions_enhanced(self, frames_data: List[Dict]) -> List[Dict]:
+    def _analyze_transitions_enhanced(self, frames_data: list[dict]) -> list[dict]:
         transitions = []
         
         for i in range(1, len(frames_data)):
@@ -510,7 +511,7 @@ class EnhancedVideoAnalyzer:
         
         return transitions
     
-    def _analyze_color_features(self, frames_data: List[Dict]) -> Dict:
+    def _analyze_color_features(self, frames_data: list[dict]) -> dict:
         if not frames_data:
             return {}
         
@@ -620,7 +621,7 @@ class EnhancedVideoAnalyzer:
         else:
             return "标准/自然风格"
     
-    def _analyze_motion_features(self, frames_data: List[Dict]) -> Dict:
+    def _analyze_motion_features(self, frames_data: list[dict]) -> dict:
         if len(frames_data) < 2:
             return {"avg_motion": 0, "motion_style": "static"}
         
@@ -694,7 +695,7 @@ class EnhancedVideoAnalyzer:
             "motion_variance": round(float(np.std(motions)), 2)
         }
     
-    def _analyze_composition(self, frames_data: List[Dict]) -> Dict:
+    def _analyze_composition(self, frames_data: list[dict]) -> dict:
         if not frames_data:
             return {}
         
@@ -721,7 +722,7 @@ class EnhancedVideoAnalyzer:
             "composition_type_distribution": comp_type_counts
         }
     
-    def _detect_shot_types(self, video_path: str) -> List[Dict]:
+    def _detect_shot_types(self, video_path: str) -> list[dict]:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             return []
@@ -758,7 +759,7 @@ class EnhancedVideoAnalyzer:
         
         return shot_types
     
-    def _classify_shot_type(self, frame: np.ndarray, width: int, height: int) -> Dict:
+    def _classify_shot_type(self, frame: np.ndarray, width: int, height: int) -> dict:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
         edges = cv2.Canny(gray, 50, 150)
@@ -785,7 +786,7 @@ class EnhancedVideoAnalyzer:
         
         return {"type": "unknown", "confidence": 0.3, "reason": "无法检测主体"}
     
-    def _detect_visual_effects(self, frames_data: List[Dict]) -> Dict:
+    def _detect_visual_effects(self, frames_data: list[dict]) -> dict:
         if not frames_data:
             return {}
         
@@ -861,7 +862,7 @@ class EnhancedVideoAnalyzer:
             "flash_count": flash_frames
         }
     
-    def _analyze_rhythm(self, scenes: List[Dict], motion_features: Dict) -> Dict:
+    def _analyze_rhythm(self, scenes: list[dict], motion_features: dict) -> dict:
         if not scenes:
             return {"rhythm": "unknown"}
         
@@ -910,7 +911,7 @@ class EnhancedVideoAnalyzer:
         }
         return coordination_map.get((rhythm, motion_level), 0.5)
     
-    def _generate_ae_parameters(self, analysis: Dict) -> Dict:
+    def _generate_ae_parameters(self, analysis: dict) -> dict:
         ae_params = {
             "composition": {
                 "width": analysis.get("basic_info", {}).get("width", 1920),

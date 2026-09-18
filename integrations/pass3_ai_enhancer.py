@@ -38,17 +38,17 @@ class AIStrategyRecommendation:
     strategy_id: str
     confidence: float
     reasoning: str
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    alternatives: List[str] = field(default_factory=list)
+    parameters: dict[str, Any] = field(default_factory=dict)
+    alternatives: list[str] = field(default_factory=list)
 
 
 @dataclass
 class AICausalAnalysis:
     """AI 因果分析结果"""
     root_cause: str
-    causal_chain: List[str]
+    causal_chain: list[str]
     confidence: float
-    recommendations: List[str] = field(default_factory=list)
+    recommendations: list[str] = field(default_factory=list)
     counterfactual: str = ""
 
 
@@ -81,9 +81,9 @@ class Pass3AIEnhancer:
 从执行历史中提炼可复用规则，格式化为条件-动作对。
 输出格式: JSON {"rules": [{"name": "...", "condition": "...", "action": "...", "confidence": 0.0-1.0}]}"""
 
-    def __init__(self, client: Optional[ModelScopeClient] = None):
+    def __init__(self, client: ModelScopeClient | None = None):
         self.client = client or get_client()
-        self._cache: Dict[str, Any] = {}
+        self._cache: dict[str, Any] = {}
 
     # ------------------------------------------------------------------
     # 策略推荐 (MetaStrategyEngine 增强)
@@ -92,8 +92,8 @@ class Pass3AIEnhancer:
     def recommend_strategy(
         self,
         task_type: str,
-        context: Dict[str, Any],
-        history: Optional[List[Dict]] = None,
+        context: dict[str, Any],
+        history: list[dict] | None = None,
     ) -> AIStrategyRecommendation:
         """LLM 驱动的策略推荐"""
         prompt = f"""任务类型: {task_type}
@@ -135,7 +135,7 @@ class Pass3AIEnhancer:
 
     def analyze_failure(
         self,
-        error_info: Dict[str, Any],
+        error_info: dict[str, Any],
         execution_log: str = "",
     ) -> AICausalAnalysis:
         """AI 辅助的失败根因分析"""
@@ -177,9 +177,9 @@ class Pass3AIEnhancer:
 
     def distill_rules(
         self,
-        episodes: List[Dict[str, Any]],
+        episodes: list[dict[str, Any]],
         min_confidence: float = 0.6,
-    ) -> List[AIRuleSuggestion]:
+    ) -> list[AIRuleSuggestion]:
         """从执行历史中蒸馏可复用规则"""
         prompt = f"""以下是 {len(episodes)} 条执行历史:
 {json.dumps(episodes[:10], ensure_ascii=False, indent=2)[:3000]}
@@ -219,7 +219,7 @@ class Pass3AIEnhancer:
         self,
         frame_path: str,
         analysis_type: str = "quality",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """使用视觉模型分析视频帧"""
         prompts = {
             "quality": "评估这个视频帧的质量：清晰度、色彩、构图。输出JSON: {score: 0-10, issues: [...]}",
@@ -238,7 +238,7 @@ class Pass3AIEnhancer:
     # 工具方法
     # ------------------------------------------------------------------
 
-    def _extract_json(self, text: str) -> Dict[str, Any]:
+    def _extract_json(self, text: str) -> dict[str, Any]:
         """从 LLM 输出中提取 JSON"""
         # 尝试直接解析
         try:
@@ -265,7 +265,7 @@ class Pass3AIEnhancer:
 
         raise ValueError(f"No JSON found in: {text[:100]}...")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """检查 AI 增强器健康状态"""
         client_health = self.client.health_check()
         return {
@@ -278,7 +278,7 @@ class Pass3AIEnhancer:
 # 全局单例
 # ---------------------------------------------------------------------------
 
-_global_enhancer: Optional[Pass3AIEnhancer] = None
+_global_enhancer: Pass3AIEnhancer | None = None
 
 
 def get_enhancer() -> Pass3AIEnhancer:

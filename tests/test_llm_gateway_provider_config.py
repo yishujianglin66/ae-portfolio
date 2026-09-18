@@ -15,8 +15,9 @@ test_llm_gateway_provider_config.py — LLM Gateway Provider 配置回归测试
 """
 import os
 import sys
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -35,8 +36,8 @@ def fixture_url(host: str) -> str:
     return f"http://{host}.com/v1"
 
 from core.llm_gateway import (
-    LLMGateway,
     LLMConfig,
+    LLMGateway,
     configure_from_env,
 )
 

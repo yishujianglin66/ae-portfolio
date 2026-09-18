@@ -7,9 +7,14 @@ t37_download_extract_train.py - 自动下载动漫资源 → 提取帧 → 扩�
 3. ffmpeg 提取关键帧
 4. 合并到训练数据集
 """
-import os, sys, json, time, subprocess, shutil
-from pathlib import Path
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 PROJECT_ROOT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
@@ -102,7 +107,7 @@ def download_via_ytdlp(url, output_dir):
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=600,
                           creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
         if r.returncode == 0:
-            log(f"  下载完成")
+            log("  下载完成")
             return True
         else:
             log(f"  yt-dlp 失败: {r.stderr[:200]}", "ERROR")
@@ -125,7 +130,7 @@ def extract_frames(video_path, output_dir, ip_name, fps=1, max_frames=200):
         "-q:v", "2",
         "-frames:v", str(max_frames),
         "-y",
-        str(output_dir / f"frame_%06d.jpg")
+        str(output_dir / "frame_%06d.jpg")
     ]
     try:
         r = subprocess.run(cmd, capture_output=True, timeout=300,
@@ -177,7 +182,7 @@ def search_bilibili_anime(keyword):
                     log(f"  - {title[:50]}")
             return results
         else:
-            log(f"  B站搜索无结果", "WARN")
+            log("  B站搜索无结果", "WARN")
     except Exception as e:
         log(f"  B站搜索失败: {e}", "ERROR")
     return []
@@ -212,7 +217,7 @@ def download_bilibili_video(url, output_dir):
                 if sz > 1024 * 1024:  # > 1MB
                     log(f"  下载完成: {f.name} ({sz/1024/1024:.1f}MB)")
                     return str(f)
-            log(f"  下载完成但未找到文件", "WARN")
+            log("  下载完成但未找到文件", "WARN")
         else:
             log(f"  下载失败: {r.stderr[:200]}", "ERROR")
     except Exception as e:
@@ -254,7 +259,7 @@ def main():
                 search_map[ip_name] = (keyword, cn_name)
     
     # 搜索 + 下载
-    print(f"\n[2/4] 搜索动漫资源...")
+    print("\n[2/4] 搜索动漫资源...")
     downloaded_videos = []
     
     for ip_name, (keyword, cn_name) in search_map.items():
@@ -288,7 +293,7 @@ def main():
         time.sleep(1)  # 避免请求过快
     
     # 检查aria2下载完成的文件
-    print(f"\n[3/4] 检查下载完成的文件...")
+    print("\n[3/4] 检查下载完成的文件...")
     time.sleep(5)  # 等待aria2写入
     for ip_name in search_map:
         ip_dir = DOWNLOAD_DIR / ip_name
@@ -311,7 +316,7 @@ def main():
     print(f"\n  共获取 {len(downloaded_videos)} 个视频")
     
     # 提取帧
-    print(f"\n[4/4] 提取帧...")
+    print("\n[4/4] 提取帧...")
     total_new_frames = 0
     frame_stats = {}
     
@@ -329,12 +334,12 @@ def main():
     print(f"  新增帧数: {total_new_frames}")
     
     if frame_stats:
-        print(f"\n  各IP新增帧数:")
+        print("\n  各IP新增帧数:")
         for ip, cnt in sorted(frame_stats.items()):
             print(f"    {ip}: +{cnt}")
     
     # 更新后统计
-    print(f"\n  更新后各IP总帧数:")
+    print("\n  更新后各IP总帧数:")
     if CORPUS_DIR.exists():
         for d in sorted(CORPUS_DIR.iterdir()):
             if d.is_dir():

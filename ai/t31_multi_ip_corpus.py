@@ -172,7 +172,7 @@ def probe_duration(path: str) -> float:
         return 0
 
 
-def detect_scenes(video_path: str, thr: float = 0.35) -> List[float]:
+def detect_scenes(video_path: str, thr: float = 0.35) -> list[float]:
     try:
         r = subprocess.run(
             [FFMPEG, "-i", video_path, "-vf", f"select='gt(scene,{thr})'",
@@ -186,8 +186,8 @@ def detect_scenes(video_path: str, thr: float = 0.35) -> List[float]:
         return []
 
 
-def extract_keyframes(video_path: str, shots: List[tuple], vid_id: str,
-                      ip_dir: Path, settings: dict) -> List[dict]:
+def extract_keyframes(video_path: str, shots: list[tuple], vid_id: str,
+                      ip_dir: Path, settings: dict) -> list[dict]:
     """从镜头段提取关键帧"""
     frames_dir = ip_dir / "frames"
     frames_dir.mkdir(parents=True, exist_ok=True)

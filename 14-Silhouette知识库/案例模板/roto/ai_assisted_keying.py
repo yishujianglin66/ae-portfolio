@@ -15,9 +15,10 @@
 #   - ProductNet: 产品抠图
 #   - GenericSeg: 通用分割
 
-from fx import *
-import os
 import json
+import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=30.0,
@@ -113,7 +114,7 @@ def create_pipeline(source_path, output_path, frame_rate=30.0,
     roto_ai.outputs[0].connect(roto_refine.inputs[1])
     roto_refine.outputs[0].connect(out_node.inputs[0])
 
-    print(f"[SILHOUETTE] AI辅助抠像流程已创建")
+    print("[SILHOUETTE] AI辅助抠像流程已创建")
     print(f"[SILHOUETTE] 源素材: {source_path}")
     print(f"[SILHOUETTE] 输出路径: {output_path}")
     print(f"[SILHOUETTE] AI模型: {model_type}")
@@ -166,7 +167,7 @@ def run_ai_inference(roto_node, frame_range, model_type="portrait"):
 
     model_info = models.get(model_type, models["generic"])
 
-    print(f"[SILHOUETTE] AI 推理开始")
+    print("[SILHOUETTE] AI 推理开始")
     print(f"  模型: {model_info['name']}")
     print(f"  描述: {model_info['description']}")
     print(f"  精度: {model_info['accuracy']:.0%}")
@@ -187,7 +188,7 @@ def run_ai_inference(roto_node, frame_range, model_type="portrait"):
         })
 
     success_count = len([r for r in results if r["status"] == "success"])
-    print(f"\n[SILHOUETTE] AI 推理完成")
+    print("\n[SILHOUETTE] AI 推理完成")
     print(f"  成功: {success_count}/{len(results)}")
     print(f"  平均置信度: "
           f"{sum(r['confidence'] for r in results)/len(results):.2%}")
@@ -250,7 +251,7 @@ def evaluate_tracking_quality(tracker_node, frame_range):
         else:
             quality_report["failed"] += 1
 
-    print(f"[SILHOUETTE] 跟踪质量评估:")
+    print("[SILHOUETTE] 跟踪质量评估:")
     print(f"  高质量: {quality_report['high_quality']} 帧")
     print(f"  中质量: {quality_report['medium_quality']} 帧")
     print(f"  低质量: {quality_report['low_quality']} 帧")

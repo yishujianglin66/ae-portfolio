@@ -11,14 +11,14 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from models.data.dataset_base import DatasetConfig  # noqa: E402
 from models.data.movieshots_dataset import (  # noqa: E402
     MOVEMENT_TO_PROJECT,
-    MovieShotsDataset,
     MovieShotSample,
+    MovieShotsDataset,
     _iter_movieshots_json,
     build_label_stats,
 )
-from models.data.dataset_base import DatasetConfig  # noqa: E402
 
 
 def _write_v1(tmp: str) -> str:

@@ -20,13 +20,13 @@ Phase 5 - 失败恢复策略模块
 对齐 TS: compiler/src/phase5/failure-recovery.ts
 依赖: effect_name_map.py (find_by_match_name, get_by_category, EffectMapEntry)
 """
+import asyncio
+import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Any
-import time
-import asyncio
-from effect_name_map import find_by_match_name, get_by_category, EffectMapEntry
+from typing import Any, Dict, List, Optional
 
+from effect_name_map import EffectMapEntry, find_by_match_name, get_by_category
 
 __all__ = [
     "ErrorCode",
@@ -82,7 +82,7 @@ class ExpectedProperty:
     """期望属性"""
     name: str
     value: Any
-    tolerance: Optional[float] = None
+    tolerance: float | None = None
 
 
 @dataclass
@@ -90,23 +90,23 @@ class ExpectedParameters:
     """期望参数"""
     comp_name: str
     layer_index: int
-    effect_match_name: Optional[str] = None
-    effect_name: Optional[str] = None
-    properties: List[ExpectedProperty] = field(default_factory=list)
-    keyframes: List[Any] = field(default_factory=list)
+    effect_match_name: str | None = None
+    effect_name: str | None = None
+    properties: list[ExpectedProperty] = field(default_factory=list)
+    keyframes: list[Any] = field(default_factory=list)
 
 
 @dataclass
 class ExecutionResult:
     """执行结果"""
     success: bool
-    error_code: Optional[str] = None
-    error_message: Optional[str] = None
-    effect_index: Optional[int] = None
-    keyframes_added: Optional[int] = None
-    effect_name: Optional[str] = None
-    raw_response: Optional[str] = None
-    execution_time_ms: Optional[float] = None
+    error_code: str | None = None
+    error_message: str | None = None
+    effect_index: int | None = None
+    keyframes_added: int | None = None
+    effect_name: str | None = None
+    raw_response: str | None = None
+    execution_time_ms: float | None = None
 
 
 @dataclass
@@ -115,30 +115,30 @@ class ParameterMismatch:
     param: str
     expected: Any
     actual: Any
-    deviation: Optional[float] = None
+    deviation: float | None = None
 
 
 @dataclass
 class RecoveryAction:
     """恢复动作"""
     action: str
-    alternative: Optional[str] = None
-    adjusted_params: Optional[ExpectedParameters] = None
-    timeout: Optional[int] = None
-    delay: Optional[int] = None
-    max_retries: Optional[int] = None
-    message: Optional[str] = None
+    alternative: str | None = None
+    adjusted_params: ExpectedParameters | None = None
+    timeout: int | None = None
+    delay: int | None = None
+    max_retries: int | None = None
+    message: str | None = None
 
 
 @dataclass
 class FailureRecoveryOptions:
     """失败恢复选项（所有字段 None 表示使用默认值）"""
-    default_timeout: Optional[int] = None
-    timeout_backoff_factor: Optional[float] = None
-    max_timeout: Optional[int] = None
-    initial_retry_delay: Optional[int] = None
-    retry_backoff_factor: Optional[float] = None
-    max_retries: Optional[int] = None
+    default_timeout: int | None = None
+    timeout_backoff_factor: float | None = None
+    max_timeout: int | None = None
+    initial_retry_delay: int | None = None
+    retry_backoff_factor: float | None = None
+    max_retries: int | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -155,7 +155,7 @@ class RetryCounter:
     def __init__(self, max_retries: int = 3, global_max_retries: int = 5):
         self._max_retries = max_retries
         self._global_max_retries = global_max_retries
-        self._counts: Dict[str, int] = {}
+        self._counts: dict[str, int] = {}
 
     def get_count(self, request_id: str) -> int:
         """获取指定请求的重试次数"""
@@ -199,8 +199,8 @@ class FailureRecovery:
 
     def __init__(
         self,
-        options: Optional[FailureRecoveryOptions] = None,
-        retry_counter: Optional[RetryCounter] = None,
+        options: FailureRecoveryOptions | None = None,
+        retry_counter: RetryCounter | None = None,
     ):
         opts = options or FailureRecoveryOptions()
         # 应用默认值
@@ -228,7 +228,7 @@ class FailureRecovery:
         max_retries = (
             opts.max_retries if opts.max_retries is not None else 3
         )
-        self._options: Dict[str, Any] = {
+        self._options: dict[str, Any] = {
             "default_timeout": default_timeout,
             "timeout_backoff_factor": timeout_backoff_factor,
             "max_timeout": max_timeout,
@@ -243,7 +243,7 @@ class FailureRecovery:
         self,
         execution: ExecutionResult,
         expected: ExpectedParameters,
-        request_id: Optional[str] = None,
+        request_id: str | None = None,
     ) -> RecoveryAction:
         """处理执行失败，返回恢复动作"""
         error_code = execution.error_code or ErrorCode.UNKNOWN.value
@@ -326,7 +326,7 @@ class FailureRecovery:
                 message="效果未安装且无法确定替代方案，"
                         "请安装对应插件或选择其他效果",
             )
-        current_entry: Optional[EffectMapEntry] = find_by_match_name(
+        current_entry: EffectMapEntry | None = find_by_match_name(
             expected.effect_match_name
         )
         if not current_entry:
@@ -364,7 +364,7 @@ class FailureRecovery:
         self, expected: ExpectedParameters
     ) -> RecoveryAction:
         """处理参数超出范围错误：自动调整数值（正值乘 0.9，负值乘 1.1）"""
-        adjusted_props: List[ExpectedProperty] = []
+        adjusted_props: list[ExpectedProperty] = []
         for p in expected.properties:
             # bool 是 int 的子类，需排除；仅调整数值类型
             if isinstance(p.value, (int, float)) and not isinstance(p.value, bool):
@@ -444,14 +444,14 @@ class FailureRecovery:
     @staticmethod
     def build_adjusted_params(
         expected: ExpectedParameters,
-        mismatches: List[ParameterMismatch],
+        mismatches: list[ParameterMismatch],
     ) -> ExpectedParameters:
         """根据参数不匹配信息构建调整后的参数
 
         遍历 expected.properties，若某属性在 mismatches 中存在且 actual 非 None，
         则使用 actual 值替换；否则保持原值。tolerance 等元信息保留。
         """
-        adjusted_props: List[ExpectedProperty] = []
+        adjusted_props: list[ExpectedProperty] = []
         for p in expected.properties:
             mismatch = next(
                 (m for m in mismatches if m.param == p.name), None

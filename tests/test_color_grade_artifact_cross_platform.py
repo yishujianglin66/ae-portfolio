@@ -7,9 +7,9 @@
 - AE -> Artifact -> Resolve
 - Artifact 序列化/反序列化
 """
-import sys
-import os
 import json
+import os
+import sys
 import tempfile
 from pathlib import Path
 
@@ -18,12 +18,12 @@ import pytest
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
 from integrations.davinci_fuscript import (
-    ResolveColorEngine,
+    FFMPEG_COLOR_PRESETS,
+    RESOLVE_PRESETS,
     ColorGradeArtifact,
     ColorGradeConfig,
     ColorWheelParams,
-    RESOLVE_PRESETS,
-    FFMPEG_COLOR_PRESETS,
+    ResolveColorEngine,
 )
 
 

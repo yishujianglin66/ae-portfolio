@@ -78,7 +78,7 @@ class VisionReplicateEngine:
         return self._pipeline
 
     def execute(self, video_path: str, output_dir: str = "output/replicate",
-                **kwargs) -> Dict:
+                **kwargs) -> dict:
         """执行VISION复刻"""
         log(f"[VISION] 开始复刻: {video_path}")
         result = {"capability": self.name, "status": "running", "steps": []}
@@ -152,7 +152,7 @@ class AIGCNativeWorkflow:
 
     def execute(self, prompt: str, output_dir: str = "output_director/materials",
                 num_images: int = 3, num_videos: int = 1,
-                search_first: bool = True, **kwargs) -> Dict:
+                search_first: bool = True, **kwargs) -> dict:
         """执行AIGC原生生成"""
         log(f"[AIGC] 零素材生成: {prompt[:50]}...")
         result = {"capability": self.name, "status": "running", "steps": []}
@@ -239,7 +239,7 @@ class StyleTransferEngine:
 
     def execute(self, source_video: str, style_reference: str = "",
                 style_description: str = "",
-                output_dir: str = "output/style_transfer", **kwargs) -> Dict:
+                output_dir: str = "output/style_transfer", **kwargs) -> dict:
         """执行风格迁移"""
         log(f"[风格迁移] 源: {source_video}")
         result = {"capability": self.name, "status": "running", "steps": []}
@@ -283,7 +283,7 @@ class StyleTransferEngine:
         log("[风格迁移] 完成")
         return result
 
-    def _description_to_style(self, desc: str) -> Dict:
+    def _description_to_style(self, desc: str) -> dict:
         """将文字描述转换为风格参数"""
         style_map = {
             "赛博朋克": {"color_tone": "neon_cool", "contrast": "high", "saturation": "high"},
@@ -329,9 +329,9 @@ class CinematicEditEngine:
             self._director = MultimodalDirector()
         return self._director
 
-    def execute(self, materials: List[str] = None, music: str = "",
+    def execute(self, materials: list[str] = None, music: str = "",
                 description: str = "", target_duration: float = 120.0,
-                output_dir: str = "output/cinematic", **kwargs) -> Dict:
+                output_dir: str = "output/cinematic", **kwargs) -> dict:
         """执行智能剪辑"""
         log(f"[智能剪辑] 素材: {len(materials or [])}个, 音乐: {bool(music)}")
         result = {"capability": self.name, "status": "running", "steps": []}
@@ -426,7 +426,7 @@ class FrontierSystem:
     """
 
     def __init__(self):
-        self._engines: Dict[str, Any] = {}
+        self._engines: dict[str, Any] = {}
         self._init_engines()
 
     def _init_engines(self):
@@ -459,7 +459,7 @@ class FrontierSystem:
     #  统一入口
     # ----------------------------------------------------------------
 
-    def execute(self, task_description: str, **inputs) -> Dict:
+    def execute(self, task_description: str, **inputs) -> dict:
         """统一入口 — 根据任务描述自动路由到合适的能力
         
         Args:
@@ -497,7 +497,7 @@ class FrontierSystem:
         return "multimodal_direct"
 
     def _execute_capability(self, capability: str, description: str,
-                            **inputs) -> Dict:
+                            **inputs) -> dict:
         """执行指定能力"""
         if capability == "vision_replicate":
             video = inputs.pop("video", "")
@@ -531,12 +531,12 @@ class FrontierSystem:
     #  显式调用接口
     # ----------------------------------------------------------------
 
-    def vision_replicate(self, video_path: str, **kwargs) -> Dict:
+    def vision_replicate(self, video_path: str, **kwargs) -> dict:
         """VISION自动复刻"""
         engine = self._get_engine("vision_replicate")
         return engine.execute(video_path, **kwargs)
 
-    def multimodal_direct(self, description: str, **kwargs) -> Dict:
+    def multimodal_direct(self, description: str, **kwargs) -> dict:
         """多模态导演"""
         director = self._get_engine("multimodal_direct")
         materials = kwargs.get("materials")
@@ -571,20 +571,20 @@ class FrontierSystem:
             "script_path": str(script_path),
         }
 
-    def aigc_native(self, prompt: str, **kwargs) -> Dict:
+    def aigc_native(self, prompt: str, **kwargs) -> dict:
         """AIGC原生工作流"""
         engine = self._get_engine("aigc_native")
         return engine.execute(prompt, **kwargs)
 
     def style_transfer(self, source: str, style_ref: str = "",
-                       style_description: str = "", **kwargs) -> Dict:
+                       style_description: str = "", **kwargs) -> dict:
         """风格迁移"""
         engine = self._get_engine("style_transfer")
         return engine.execute(source, style_ref, style_description, **kwargs)
 
-    def cinematic_edit(self, materials: List[str] = None,
+    def cinematic_edit(self, materials: list[str] = None,
                        music: str = "", description: str = "",
-                       **kwargs) -> Dict:
+                       **kwargs) -> dict:
         """智能剪辑"""
         engine = self._get_engine("cinematic_edit")
         return engine.execute(materials, music, description, **kwargs)
@@ -593,7 +593,7 @@ class FrontierSystem:
     #  系统状态
     # ----------------------------------------------------------------
 
-    def status(self) -> Dict:
+    def status(self) -> dict:
         """返回系统状态"""
         return {
             "system": "FrontierSystem v1.0",

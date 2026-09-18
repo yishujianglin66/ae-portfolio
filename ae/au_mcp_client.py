@@ -25,23 +25,23 @@ Audition MCP 客户端封装 v1.0
 """
 from __future__ import annotations
 
-import time
 import logging
 import threading
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from ae.archive.bridge_protocol import (
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_POLL_INTERVAL,
+    DEFAULT_TTL_MS,
     BridgeClient,
-    BridgeResponse,
     BridgeMetadata,
+    BridgeResponse,
     CommandStatus,
     ErrorCode,
     Priority,
-    DEFAULT_TTL_MS,
-    DEFAULT_POLL_INTERVAL,
-    DEFAULT_MAX_RETRIES,
 )
 
 # Bridge 默认目录收口到 core/paths.py（AEK_AU_BRIDGE_DIR 可覆盖）
@@ -60,8 +60,8 @@ class AUMCPError(Exception):
     def __init__(
         self,
         message: str = "Audition MCP 操作失败",
-        error_code: Optional[ErrorCode] = None,
-        details: Optional[Dict[str, Any]] = None,
+        error_code: ErrorCode | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         self.message = message
         self.error_code = error_code
@@ -101,7 +101,7 @@ class AUNotFoundError(AUMCPError):
     pass
 
 
-_ERROR_CODE_TO_EXCEPTION: Dict[ErrorCode, type[AUMCPError]] = {
+_ERROR_CODE_TO_EXCEPTION: dict[ErrorCode, type[AUMCPError]] = {
     ErrorCode.AE_NOT_RUNNING: AUConnectionError,
     ErrorCode.AE_NOT_RESPONDING: AUConnectionError,
     ErrorCode.IO_ERROR: AUConnectionError,
@@ -172,7 +172,7 @@ class ClientStats:
     avg_latency_ms: float = 0.0
     min_latency_ms: float = 0.0
     max_latency_ms: float = 0.0
-    last_call_time: Optional[float] = None
+    last_call_time: float | None = None
 
 
 class AUMDPClient:
@@ -190,8 +190,8 @@ class AUMDPClient:
         self,
         bridge_dir: str = _DEFAULT_BRIDGE_DIR,
         signature_enabled: bool = True,
-        secret: Optional[str] = None,
-        secret_file: Optional[str] = None,
+        secret: str | None = None,
+        secret_file: str | None = None,
         poll_interval: float = DEFAULT_POLL_INTERVAL,
         max_retries: int = DEFAULT_MAX_RETRIES,
         base_delay_ms: float = 100,
@@ -217,19 +217,19 @@ class AUMDPClient:
         self._default_ttl_ms = default_ttl_ms
         self._stats = ClientStats()
         self._stats_lock = threading.Lock()
-        self._last_heartbeat_time: Optional[float] = None
+        self._last_heartbeat_time: float | None = None
 
     def _execute(
         self,
         command: str,
-        params: Optional[Dict[str, Any]] = None,
-        ttl: Optional[int] = None,
-        priority: Optional[Priority] = None,
-        idempotency_key: Optional[str] = None,
-        metadata: Optional[BridgeMetadata] = None,
-        progress_callback: Optional[Any] = None,
+        params: dict[str, Any] | None = None,
+        ttl: int | None = None,
+        priority: Priority | None = None,
+        idempotency_key: str | None = None,
+        metadata: BridgeMetadata | None = None,
+        progress_callback: Any | None = None,
         raise_on_error: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         start_time = time.time()
 
         cmd_data = {
@@ -240,7 +240,7 @@ class AUMDPClient:
             "idempotency_key": idempotency_key,
         }
 
-        def _bridge_handler(cmd: Dict[str, Any]) -> BridgeResponse:
+        def _bridge_handler(cmd: dict[str, Any]) -> BridgeResponse:
             return self._bridge.send_command(
                 command=cmd["command"],
                 params=cmd["params"],
@@ -292,7 +292,7 @@ class AUMDPClient:
 
             self._stats.last_call_time = time.time()
 
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         """检测 Audition 是否存活。"""
         try:
             result = self._execute("ping", {})
@@ -347,7 +347,7 @@ class AUMDPClient:
         bit_depth: int = 16,
         num_tracks: int = 2,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建新会话。
 
         Args:
@@ -368,7 +368,7 @@ class AUMDPClient:
         params.update(kwargs)
         return self._execute("createSession", params)
 
-    def open_session(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def open_session(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         """打开会话文件。
 
         Args:
@@ -379,7 +379,7 @@ class AUMDPClient:
         """
         return self._execute("openSession", {"filePath": file_path, **kwargs})
 
-    def close_session(self, save_changes: bool = False) -> Dict[str, Any]:
+    def close_session(self, save_changes: bool = False) -> dict[str, Any]:
         """关闭当前会话。
 
         Args:
@@ -390,7 +390,7 @@ class AUMDPClient:
         """
         return self._execute("closeSession", {"saveChanges": save_changes})
 
-    def save_session(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def save_session(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         """保存会话。
 
         Args:
@@ -401,7 +401,7 @@ class AUMDPClient:
         """
         return self._execute("saveSession", {"filePath": file_path, **kwargs})
 
-    def import_audio(self, file_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def import_audio(self, file_path: str, **kwargs: Any) -> dict[str, Any]:
         """导入音频文件。
 
         Args:
@@ -412,7 +412,7 @@ class AUMDPClient:
         """
         return self._execute("importAudio", {"filePath": file_path, **kwargs})
 
-    def list_tracks(self) -> List[TrackInfo]:
+    def list_tracks(self) -> list[TrackInfo]:
         """列出所有轨道。"""
         result = self._execute("listTracks")
         tracks = result.get("tracks", [])
@@ -433,7 +433,7 @@ class AUMDPClient:
         name: str,
         track_type: str = "audio",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建轨道。
 
         Args:
@@ -450,7 +450,7 @@ class AUMDPClient:
         params.update(kwargs)
         return self._execute("createTrack", params)
 
-    def delete_track(self, track_index: int) -> Dict[str, Any]:
+    def delete_track(self, track_index: int) -> dict[str, Any]:
         """删除轨道。
 
         Args:
@@ -464,8 +464,8 @@ class AUMDPClient:
     def set_track_properties(
         self,
         track_index: int,
-        properties: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any],
+    ) -> dict[str, Any]:
         """设置轨道属性。
 
         Args:
@@ -484,7 +484,7 @@ class AUMDPClient:
             {"trackIndex": track_index, "properties": properties},
         )
 
-    def list_clips(self, track_index: int) -> List[ClipInfo]:
+    def list_clips(self, track_index: int) -> list[ClipInfo]:
         """列出轨道上的所有剪辑。
 
         Args:
@@ -512,7 +512,7 @@ class AUMDPClient:
         file_path: str,
         start_time: float = 0.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """添加音频剪辑到轨道。
 
         Args:
@@ -531,7 +531,7 @@ class AUMDPClient:
         params.update(kwargs)
         return self._execute("addClip", params)
 
-    def remove_clip(self, track_index: int, clip_index: int) -> Dict[str, Any]:
+    def remove_clip(self, track_index: int, clip_index: int) -> dict[str, Any]:
         """移除剪辑。
 
         Args:
@@ -543,7 +543,7 @@ class AUMDPClient:
         """
         return self._execute("removeClip", {"trackIndex": track_index, "clipIndex": clip_index})
 
-    def split_clip(self, track_index: int, clip_index: int, split_time: float) -> Dict[str, Any]:
+    def split_clip(self, track_index: int, clip_index: int, split_time: float) -> dict[str, Any]:
         """分割剪辑。
 
         Args:
@@ -565,7 +565,7 @@ class AUMDPClient:
         clip_index: int,
         new_start: float,
         new_end: float,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """修剪剪辑。
 
         Args:
@@ -586,9 +586,9 @@ class AUMDPClient:
         self,
         track_index: int,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用效果到轨道。
 
         Args:
@@ -607,7 +607,7 @@ class AUMDPClient:
         params.update(kwargs)
         return self._execute("applyEffect", params)
 
-    def remove_effect(self, track_index: int, effect_name: str) -> Dict[str, Any]:
+    def remove_effect(self, track_index: int, effect_name: str) -> dict[str, Any]:
         """移除轨道上的效果。
 
         Args:
@@ -619,7 +619,7 @@ class AUMDPClient:
         """
         return self._execute("removeEffect", {"trackIndex": track_index, "effectName": effect_name})
 
-    def apply_normalization(self, track_index: int, target_db: float = -0.1) -> Dict[str, Any]:
+    def apply_normalization(self, track_index: int, target_db: float = -0.1) -> dict[str, Any]:
         """应用音频归一化。
 
         Args:
@@ -631,7 +631,7 @@ class AUMDPClient:
         """
         return self._execute("applyNormalization", {"trackIndex": track_index, "targetDb": target_db})
 
-    def apply_fade_in(self, track_index: int, clip_index: int, duration: float = 1.0) -> Dict[str, Any]:
+    def apply_fade_in(self, track_index: int, clip_index: int, duration: float = 1.0) -> dict[str, Any]:
         """应用淡入效果。
 
         Args:
@@ -647,7 +647,7 @@ class AUMDPClient:
             {"trackIndex": track_index, "clipIndex": clip_index, "duration": duration},
         )
 
-    def apply_fade_out(self, track_index: int, clip_index: int, duration: float = 1.0) -> Dict[str, Any]:
+    def apply_fade_out(self, track_index: int, clip_index: int, duration: float = 1.0) -> dict[str, Any]:
         """应用淡出效果。
 
         Args:
@@ -668,7 +668,7 @@ class AUMDPClient:
         track_index: int,
         clip_index: int,
         gain_db: float,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """调整剪辑音量。
 
         Args:
@@ -690,7 +690,7 @@ class AUMDPClient:
         clip_index: int,
         threshold_db: float = -60.0,
         min_duration: float = 0.1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """移除剪辑中的静音部分。
 
         Args:
@@ -714,7 +714,7 @@ class AUMDPClient:
         sample_rate: int = 44100,
         bit_depth: int = 16,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出会话。
 
         Args:
@@ -742,7 +742,7 @@ class AUMDPClient:
         end_time: float,
         format: str = "wav",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出时间范围。
 
         Args:
@@ -763,7 +763,7 @@ class AUMDPClient:
         params.update(kwargs)
         return self._execute("exportRange", params)
 
-    def set_cursor_position(self, time: float) -> Dict[str, Any]:
+    def set_cursor_position(self, time: float) -> dict[str, Any]:
         """设置播放头位置。
 
         Args:
@@ -774,31 +774,31 @@ class AUMDPClient:
         """
         return self._execute("setCursorPosition", {"time": time})
 
-    def get_cursor_position(self) -> Dict[str, Any]:
+    def get_cursor_position(self) -> dict[str, Any]:
         """获取播放头位置。"""
         return self._execute("getCursorPosition")
 
-    def play(self) -> Dict[str, Any]:
+    def play(self) -> dict[str, Any]:
         """开始播放。"""
         return self._execute("play")
 
-    def pause(self) -> Dict[str, Any]:
+    def pause(self) -> dict[str, Any]:
         """暂停播放。"""
         return self._execute("pause")
 
-    def stop(self) -> Dict[str, Any]:
+    def stop(self) -> dict[str, Any]:
         """停止播放。"""
         return self._execute("stop")
 
-    def undo(self) -> Dict[str, Any]:
+    def undo(self) -> dict[str, Any]:
         """撤销。"""
         return self._execute("undo")
 
-    def redo(self) -> Dict[str, Any]:
+    def redo(self) -> dict[str, Any]:
         """重做。"""
         return self._execute("redo")
 
-    def execute_script(self, script: str) -> Dict[str, Any]:
+    def execute_script(self, script: str) -> dict[str, Any]:
         """执行 ES 脚本代码。
 
         Args:

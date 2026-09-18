@@ -28,8 +28,8 @@ PROJECT_ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 sys.path.insert(0, str(PROJECT_ROOT / "puppet-automation"))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-from src.engines.sam2.engine import SAM2Engine
 from saliency_prompt import find_prompts_with_visualization
+from src.engines.sam2.engine import SAM2Engine
 
 FFMPEG = r"C:\ffmpeg\bin\ffmpeg.exe"
 FFPROBE = r"C:\ffmpeg\bin\ffprobe.exe"
@@ -106,7 +106,7 @@ async def rerun_with_saliency(
     if not prompts:
         return {"stem": stem, "success": False, "error": "显著性检测未找到候选点"}
 
-    print(f"  显著性 prompt:")
+    print("  显著性 prompt:")
     for i, p in enumerate(prompts):
         print(f"    [{i+1}] x={p['x']}, y={p['y']}, score={p['score']}")
 

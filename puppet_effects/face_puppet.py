@@ -11,7 +11,6 @@ import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
-
 # ============================================================================
 # 数据类
 # ============================================================================
@@ -41,7 +40,7 @@ class FacePuppetConfig:
     eye_scale: float = 1.0
     mouth_scale: float = 1.0
     eye_spacing: float = 1.0
-    color: List[float] = field(default_factory=lambda: [0.2, 0.1, 0.05, 1.0])
+    color: list[float] = field(default_factory=lambda: [0.2, 0.1, 0.05, 1.0])
     button_texture: bool = True
     stitch_count: int = 8
 
@@ -58,7 +57,7 @@ class FacePuppetEffect:
     并支持表情限制表达式。
     """
 
-    _presets: Dict[str, FacePuppetConfig] = None
+    _presets: dict[str, FacePuppetConfig] = None
 
     # ------------------------------------------------------------------------
     # 公共方法
@@ -68,9 +67,9 @@ class FacePuppetEffect:
     def generate_face_puppet(
         config: FacePuppetConfig,
         layer_name: str,
-        face_data: Dict[str, Any] = None,
+        face_data: dict[str, Any] = None,
         duration: float = 5.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成面部木偶化效果
 
         Args:
@@ -85,10 +84,10 @@ class FacePuppetEffect:
         Returns:
             包含 effects, keyframes, layers, expressions 的字典
         """
-        effects: List[Dict[str, Any]] = []
-        keyframes: List[Dict[str, Any]] = []
-        layers: List[Dict[str, Any]] = []
-        expressions: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
+        keyframes: list[dict[str, Any]] = []
+        layers: list[dict[str, Any]] = []
+        expressions: list[dict[str, Any]] = []
 
         if face_data is None:
             face_data = FacePuppetEffect.estimate_face_from_bbox({
@@ -160,7 +159,7 @@ class FacePuppetEffect:
         }
 
     @staticmethod
-    def get_presets() -> Dict[str, FacePuppetConfig]:
+    def get_presets() -> dict[str, FacePuppetConfig]:
         """获取预设配置
 
         Returns:
@@ -192,7 +191,7 @@ class FacePuppetEffect:
         return presets[preset_name]
 
     @staticmethod
-    def estimate_face_from_bbox(bbox: Dict[str, float]) -> Dict[str, Any]:
+    def estimate_face_from_bbox(bbox: dict[str, float]) -> dict[str, Any]:
         """从人脸边界框估算面部特征点位置（无跟踪数据时的降级方案）
 
         Args:
@@ -243,9 +242,9 @@ class FacePuppetEffect:
     @staticmethod
     def _generate_button_eye(
         config: FacePuppetConfig,
-        eye_pos: Dict[str, float],
+        eye_pos: dict[str, float],
         side: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成单只纽扣眼的效果列表
 
         Args:
@@ -256,7 +255,7 @@ class FacePuppetEffect:
         Returns:
             AE 效果列表
         """
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
         ex = eye_pos.get("x", 500.0)
         ey = eye_pos.get("y", 350.0)
 
@@ -430,8 +429,8 @@ class FacePuppetEffect:
     @staticmethod
     def _generate_stitched_mouth(
         config: FacePuppetConfig,
-        mouth_pos: Dict[str, float],
-    ) -> List[Dict[str, Any]]:
+        mouth_pos: dict[str, float],
+    ) -> list[dict[str, Any]]:
         """生成缝线嘴的效果列表
 
         Args:
@@ -441,7 +440,7 @@ class FacePuppetEffect:
         Returns:
             AE 效果列表
         """
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
 
         mx = mouth_pos.get("x", 600.0)
         my = mouth_pos.get("y", 500.0)
@@ -587,8 +586,8 @@ class FacePuppetEffect:
     @staticmethod
     def _generate_porcelain_skin(
         config: FacePuppetConfig,
-        face_bbox: Dict[str, float],
-    ) -> List[Dict[str, Any]]:
+        face_bbox: dict[str, float],
+    ) -> list[dict[str, Any]]:
         """生成瓷化皮肤的效果列表
 
         Args:
@@ -598,7 +597,7 @@ class FacePuppetEffect:
         Returns:
             AE 效果列表
         """
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
 
         fx = face_bbox.get("x", 400.0)
         fy = face_bbox.get("y", 200.0)
@@ -685,8 +684,8 @@ class FacePuppetEffect:
     @staticmethod
     def _generate_face_joints(
         config: FacePuppetConfig,
-        face_data: Dict[str, Any],
-    ) -> List[Dict[str, Any]]:
+        face_data: dict[str, Any],
+    ) -> list[dict[str, Any]]:
         """生成面部关节点效果
 
         Args:
@@ -696,7 +695,7 @@ class FacePuppetEffect:
         Returns:
             AE 效果列表
         """
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
 
         jaw = face_data.get("jaw", {"x": 600, "y": 650})
         nose = face_data.get("nose", {"x": 600, "y": 450})
@@ -769,8 +768,8 @@ class FacePuppetEffect:
     def _generate_expression_limits(
         config: FacePuppetConfig,
         layer_name: str,
-        face_data: Dict[str, Any],
-    ) -> List[Dict[str, Any]]:
+        face_data: dict[str, Any],
+    ) -> list[dict[str, Any]]:
         """生成表情限制表达式
 
         Args:
@@ -781,7 +780,7 @@ class FacePuppetEffect:
         Returns:
             表达式列表
         """
-        expressions: List[Dict[str, Any]] = []
+        expressions: list[dict[str, Any]] = []
 
         expressions.append({
             "layer_name": layer_name,
@@ -814,13 +813,13 @@ class FacePuppetEffect:
     # ------------------------------------------------------------------------
 
     @staticmethod
-    def _init_presets() -> Dict[str, FacePuppetConfig]:
+    def _init_presets() -> dict[str, FacePuppetConfig]:
         """初始化预设配置库
 
         Returns:
             预设名称到 FacePuppetConfig 的映射
         """
-        presets: Dict[str, FacePuppetConfig] = {}
+        presets: dict[str, FacePuppetConfig] = {}
 
         presets["classic_button"] = FacePuppetConfig(
             style="all",
@@ -952,7 +951,7 @@ if __name__ == "__main__":
     if result["effects"]:
         effect_names = [e.get("displayName", e.get("effectName", "?")) 
                        for e in result["effects"]]
-        print(f"  效果列表:")
+        print("  效果列表:")
         for name in effect_names:
             print(f"    - {name}")
 

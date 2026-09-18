@@ -29,7 +29,7 @@ def main():
     channel = AERenderChannel(out_dir=str(OUT_DIR))
 
     # Use polish_pass for efficient whole-video enhancement
-    print(f"\n[AE Polish] Applying Glow + Noise to entire video...")
+    print("\n[AE Polish] Applying Glow + Noise to entire video...")
     print(f"  Input: {VIDEO_IN}")
     print(f"  Output: {OUT_DIR}")
 
@@ -43,7 +43,7 @@ def main():
             print(f"  File size: {p.stat().st_size / (1024*1024):.1f} MB")
         return 0
     else:
-        print(f"\n[FAIL] Polish failed")
+        print("\n[FAIL] Polish failed")
         failures = channel.get_failures()
         if failures:
             print("\nFailure details:")

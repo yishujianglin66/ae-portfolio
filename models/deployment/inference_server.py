@@ -3,11 +3,12 @@
 与 llm_gateway 的适配层预留
 参考 Antares 哲学：高效推理，精悍够用
 """
+import logging
 import os
 import time
-import logging
-from typing import Any, Dict, List, Optional, Tuple, Callable
 from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
 from core.torch_runtime import infer_ctx
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ class InferenceResult:
     """是否命中缓存"""
     model_name: str = ""
     """使用的模型名称"""
-    error: Optional[str] = None
+    error: str | None = None
     """错误信息（如果有）"""
 
 
@@ -76,8 +77,8 @@ class InferenceServer:
         self.config = config
         self._model = None
         self._tokenizer = None
-        self._cache: Dict[str, InferenceResult] = {}
-        self._cache_order: List[str] = []
+        self._cache: dict[str, InferenceResult] = {}
+        self._cache_order: list[str] = []
         self._stats = {
             'total_requests': 0,
             'cache_hits': 0,
@@ -207,7 +208,7 @@ class InferenceServer:
         
         return result
 
-    def batch_infer(self, prompts: List[str], **kwargs) -> List[InferenceResult]:
+    def batch_infer(self, prompts: list[str], **kwargs) -> list[InferenceResult]:
         """批量推理
         
         Args:
@@ -280,7 +281,7 @@ class InferenceServer:
             logger.error(f"Inference failed: {e}")
             return InferenceResult(error=str(e))
 
-    def _do_batch_infer(self, batch: List[str], **kwargs) -> List[InferenceResult]:
+    def _do_batch_infer(self, batch: list[str], **kwargs) -> list[InferenceResult]:
         """执行批量推理
         
         Args:
@@ -379,7 +380,7 @@ effect.property("ADBE Gaussian Blur 2-0001").setValue(10);"""
         else:
             return "OK"
 
-    def _make_cache_key(self, prompt: str, kwargs: Dict[str, Any]) -> str:
+    def _make_cache_key(self, prompt: str, kwargs: dict[str, Any]) -> str:
         """生成缓存键
         
         Args:
@@ -415,7 +416,7 @@ effect.property("ADBE Gaussian Blur 2-0001").setValue(10);"""
         self._cache_order.clear()
         logger.info("Cache cleared")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计信息
         
         Returns:
@@ -441,7 +442,7 @@ effect.property("ADBE Gaussian Blur 2-0001").setValue(10);"""
         
         return stats
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查
         
         Returns:

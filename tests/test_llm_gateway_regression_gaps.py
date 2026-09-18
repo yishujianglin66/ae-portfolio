@@ -11,11 +11,11 @@ LLM 网关回归测试 - 覆盖高风险缺口
 5. Provider 健康跟踪半开探测（Circuit Breaker Half-Open）
 6. configure_from_env 环境变量优先级与回填
 """
-import sys
-import os
 import json
+import os
+import sys
 import time
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -23,14 +23,14 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.llm_gateway import (
-    _sanitize_log_text,
-    LLMGateway,
     LLMConfig,
+    LLMGateway,
     LLMResponse,
+    ModelTier,
     ProviderHealth,
     ProviderStatus,
-    ModelTier,
     TokenCompressor,
+    _sanitize_log_text,
 )
 
 

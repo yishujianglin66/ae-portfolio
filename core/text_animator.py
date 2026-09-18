@@ -2,7 +2,7 @@
 
 基于文字动画知识库，提供多种文字动画效果的 JSX 生成
 """
-from typing import Dict, List, Tuple, Any, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class TextAnimationGenerator:
@@ -12,9 +12,9 @@ class TextAnimationGenerator:
         self.width = 576
         self.height = 768
     
-    def create_text_layer_jsx(self, text: str, position: Tuple[float, float],
-                             font_size: int = 36, font_color: Tuple[float, float, float] = (1, 1, 1),
-                             stroke_color: Optional[Tuple[float, float, float]] = None,
+    def create_text_layer_jsx(self, text: str, position: tuple[float, float],
+                             font_size: int = 36, font_color: tuple[float, float, float] = (1, 1, 1),
+                             stroke_color: tuple[float, float, float] | None = None,
                              stroke_width: float = 0,
                              font_name: str = "Source Han Sans SC",
                              justify: str = "center") -> str:
@@ -66,7 +66,7 @@ class TextAnimationGenerator:
 '''
         return jsx
     
-    def fade_in_out(self, text: str, position: Tuple[float, float],
+    def fade_in_out(self, text: str, position: tuple[float, float],
                     start_time: float, duration: float,
                     font_size: int = 36, fade_time: float = 0.3,
                     **kwargs) -> str:
@@ -98,7 +98,7 @@ class TextAnimationGenerator:
 '''
         return jsx
     
-    def scale_pulse(self, text: str, position: Tuple[float, float],
+    def scale_pulse(self, text: str, position: tuple[float, float],
                     start_time: float, duration: float,
                     font_size: int = 48, pulse_period: float = 1.0,
                     pulse_scale: float = 1.1, **kwargs) -> str:
@@ -165,7 +165,7 @@ class TextAnimationGenerator:
         
         return jsx
     
-    def slide_from_direction(self, text: str, position: Tuple[float, float],
+    def slide_from_direction(self, text: str, position: tuple[float, float],
                             start_time: float, duration: float,
                             direction: str = "bottom", distance: float = 100,
                             font_size: int = 32, fade_time: float = 0.3,
@@ -220,7 +220,7 @@ class TextAnimationGenerator:
 '''
         return jsx
     
-    def per_character_fade(self, text: str, position: Tuple[float, float],
+    def per_character_fade(self, text: str, position: tuple[float, float],
                           start_time: float, duration: float,
                           font_size: int = 40, char_delay: float = 0.05,
                           **kwargs) -> str:
@@ -289,7 +289,7 @@ class TextAnimationGenerator:
 '''
 
 
-def generate_mv_texts(duration: float, bpm: float = 120) -> List[Dict[str, Any]]:
+def generate_mv_texts(duration: float, bpm: float = 120) -> list[dict[str, Any]]:
     """生成 MV 风格的文字动画配置
     
     Args:
@@ -381,7 +381,7 @@ def generate_mv_texts(duration: float, bpm: float = 120) -> List[Dict[str, Any]]
     return texts
 
 
-def build_text_jsx(text_configs: List[Dict[str, Any]], width: int = 576,
+def build_text_jsx(text_configs: list[dict[str, Any]], width: int = 576,
                    height: int = 768) -> str:
     """根据文字配置列表生成完整的 JSX 代码
     

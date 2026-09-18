@@ -34,10 +34,10 @@ class FusionResult:
     n_beatnet_beats: int = 0
     n_aligned: int = 0                  # 项目拍中与 BeatNet 对齐的数量
     alignment_rate: float = 0.0         # n_aligned / n_project_beats
-    fused_beats: List[Dict[str, Any]] = field(default_factory=list)
-    downbeat_times: List[float] = field(default_factory=list)
+    fused_beats: list[dict[str, Any]] = field(default_factory=list)
+    downbeat_times: list[float] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "tempo_project": self.tempo_project,
             "tempo_beatnet": self.tempo_beatnet,
@@ -53,7 +53,7 @@ class FusionResult:
 
 def _nearest_beat(beatnet_beats: Sequence[float],
                   beat_numbers: Sequence[int],
-                  t: float) -> Optional[tuple]:
+                  t: float) -> tuple | None:
     """找离 t 最近的 BeatNet 拍 (时间, 编号), 超容差返回 None。"""
     if not beatnet_beats:
         return None

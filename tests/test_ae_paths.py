@@ -1,4 +1,8 @@
-import json, time, os, sys
+import json
+import os
+import sys
+import time
+
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 cmd_path = 'C:/Users/Administrator/Desktop/AE-Knowledge-Vault/.ae-mcp-bridge/ae_command.json'

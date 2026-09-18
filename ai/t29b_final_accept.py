@@ -19,11 +19,12 @@ from typing import Dict, List
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+from collections import Counter, defaultdict
+
 import numpy as np
 import torch
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
-from collections import Counter, defaultdict
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -251,7 +252,7 @@ def run_final_accept():
     
     _log(f"\n{'='*60}")
     _log("最终验收结果:")
-    _log(f"  kNN精度对比:")
+    _log("  kNN精度对比:")
     _log(f"    ViT-B-32 原始:  {knn_results.get('vitb32_raw', 'N/A')}")
     _log(f"    ViT-L-14 原始:  {knn_results.get('vitl14_raw', 'N/A')}")
     _log(f"    ViT-L-14 LoRA:  {knn_results.get('vitl14_lora', 'N/A')}")

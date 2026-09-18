@@ -37,16 +37,16 @@ class ComfyUIEngine:
     def __init__(
         self,
         base_url: str = "http://127.0.0.1:8188",
-        output_dir: Optional[Path] = None,
-        input_dir: Optional[Path] = None,
+        output_dir: Path | None = None,
+        input_dir: Path | None = None,
         timeout: int = 600,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.output_dir = Path(output_dir) if output_dir else Path("data/comfyui_output")
         self.input_dir = Path(input_dir) if input_dir else Path("data/comfyui_input")
         self.timeout = timeout
-        self._client: Optional[httpx.AsyncClient] = None
-        self._available: Optional[bool] = None
+        self._client: httpx.AsyncClient | None = None
+        self._available: bool | None = None
 
     @property
     def client(self) -> httpx.AsyncClient:
@@ -152,7 +152,7 @@ class ComfyUIEngine:
     async def queue_prompt(
         self,
         workflow: dict[str, Any],
-        client_id: Optional[str] = None,
+        client_id: str | None = None,
     ) -> str:
         """Queue a workflow prompt. Returns the prompt_id."""
         client_id = client_id or str(uuid.uuid4())
@@ -201,7 +201,7 @@ class ComfyUIEngine:
     async def run_workflow(
         self,
         workflow: dict[str, Any],
-        output_dir: Optional[Path] = None,
+        output_dir: Path | None = None,
     ) -> EngineResult:
         """Run a ComfyUI workflow and download outputs.
 
@@ -270,7 +270,7 @@ class ComfyUIEngine:
         subfolder: str,
         img_type: str,
         save_dir: Path,
-    ) -> Optional[Path]:
+    ) -> Path | None:
         """Download an output image from ComfyUI."""
         params = {"filename": filename, "subfolder": subfolder, "type": img_type}
         try:
@@ -291,7 +291,7 @@ class ComfyUIEngine:
         self,
         image_path: Path | str,
         overwrite: bool = True,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Upload an image to ComfyUI input folder.
 
         Returns the filename that can be used in LoadImage nodes.
@@ -338,7 +338,7 @@ class ComfyUIEngine:
     def find_node_by_class(
         workflow: dict[str, Any],
         class_type: str,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Find first node ID with given class_type."""
         for node_id, node_config in workflow.items():
             if node_config.get("class_type") == class_type:
@@ -518,13 +518,13 @@ class ComfyUIEngine:
     # 便捷方法
     # ============================================================
 
-    async def txt2img(self, prompt: str, output_dir: Optional[Path] = None, **kwargs: Any) -> EngineResult:
+    async def txt2img(self, prompt: str, output_dir: Path | None = None, **kwargs: Any) -> EngineResult:
         """文生图。"""
         workflow = self.build_txt2img_workflow(prompt, **kwargs)
         return await self.run_workflow(workflow, output_dir=output_dir)
 
     async def img2img(
-        self, image_path: Path | str, prompt: str, output_dir: Optional[Path] = None, **kwargs: Any
+        self, image_path: Path | str, prompt: str, output_dir: Path | None = None, **kwargs: Any
     ) -> EngineResult:
         """图生图（自动上传图片）。"""
         image_path = Path(image_path)
@@ -536,7 +536,7 @@ class ComfyUIEngine:
 
     async def controlnet_generate(
         self, image_path: Path | str, prompt: str, control_type: str = "canny",
-        output_dir: Optional[Path] = None, **kwargs: Any
+        output_dir: Path | None = None, **kwargs: Any
     ) -> EngineResult:
         """ControlNet 生成。"""
         image_path = Path(image_path)
@@ -547,7 +547,7 @@ class ComfyUIEngine:
         return await self.run_workflow(workflow, output_dir=output_dir)
 
     async def batch_generate(
-        self, prompts: list[str], output_dir: Optional[Path] = None, **kwargs: Any
+        self, prompts: list[str], output_dir: Path | None = None, **kwargs: Any
     ) -> list[EngineResult]:
         """批量文生图。"""
         results = []

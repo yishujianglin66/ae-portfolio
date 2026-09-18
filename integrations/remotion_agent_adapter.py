@@ -74,15 +74,15 @@ class RemotionAgentAdapter:
         "social_media_card",   # 社交媒体卡片
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._remotion_available = _REMOTION_DIR.is_dir()
         self._openmontage_remotion = _OPENMONTAGE_REMOTION.is_dir()
         self._simulate = not (self._remotion_available or self._openmontage_remotion)
         self._env_check = self._check_environment()
 
-    def _check_environment(self) -> Dict[str, Any]:
-        checks: Dict[str, Any] = {
+    def _check_environment(self) -> dict[str, Any]:
+        checks: dict[str, Any] = {
             "remotion_project": self._remotion_available,
             "openmontage_remotion": self._openmontage_remotion,
             "simulate_mode": self._simulate,
@@ -138,10 +138,10 @@ class RemotionAgentAdapter:
             and (self._remotion_available or self._openmontage_remotion)
         )
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
 
         handlers = {
@@ -158,7 +158,7 @@ class RemotionAgentAdapter:
             return handler()
         return {"status": "error", "message": f"Unknown operation: {operation}"}
 
-    def _list_templates(self) -> Dict[str, Any]:
+    def _list_templates(self) -> dict[str, Any]:
         return {
             "status": "success",
             "templates": [
@@ -167,7 +167,7 @@ class RemotionAgentAdapter:
             ],
         }
 
-    def _get_model_info(self) -> Dict[str, Any]:
+    def _get_model_info(self) -> dict[str, Any]:
         return {
             "status": "success",
             "name": "Remotion Agent Skills",
@@ -189,7 +189,7 @@ class RemotionAgentAdapter:
             },
         }
 
-    def _generate_mg_animation(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_mg_animation(self, params: dict[str, Any]) -> dict[str, Any]:
         """生成 MG 动画
 
         Args:
@@ -262,11 +262,11 @@ class RemotionAgentAdapter:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def _render_component(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _render_component(self, params: dict[str, Any]) -> dict[str, Any]:
         """渲染已有组件"""
         return self._generate_mg_animation(params)
 
-    def _create_project(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_project(self, params: dict[str, Any]) -> dict[str, Any]:
         """创建 Remotion 项目"""
         project_name = params.get("project_name", "mg-animation")
         target_dir = _EXTERNAL_DIR / "remotion"
@@ -299,7 +299,7 @@ class RemotionAgentAdapter:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def _generate_component_template(self, spec: Dict[str, Any]) -> str:
+    def _generate_component_template(self, spec: dict[str, Any]) -> str:
         """生成 Remotion 组件代码模板"""
         anim_type = spec.get("type", "typography")
         data = spec.get("data", [])
@@ -425,5 +425,5 @@ export const GeneratedAnimation: React.FC<{{}}> = () => {{
         return styles.get(style, "#4fc3f7")
 
 
-def get_adapter(config: Optional[Dict[str, Any]] = None) -> RemotionAgentAdapter:
+def get_adapter(config: dict[str, Any] | None = None) -> RemotionAgentAdapter:
     return RemotionAgentAdapter(config)

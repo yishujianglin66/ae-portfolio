@@ -4,9 +4,9 @@
 支持多种分词器后端的优雅降级。
 """
 import json
-import re
-from typing import List, Dict, Any, Optional, Tuple
 import logging
+import re
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +39,8 @@ class TokenizerUtils:
         self.truncation_side = truncation_side
         self._tokenizer = None
         self._backend = "none"
-        self._vocab: Dict[str, int] = {}
-        self._inv_vocab: Dict[int, str] = {}
+        self._vocab: dict[str, int] = {}
+        self._inv_vocab: dict[int, str] = {}
         self._pad_token_id = 0
         self._eos_token_id = 1
         self._bos_token_id = 2
@@ -139,11 +139,11 @@ class TokenizerUtils:
         self,
         text: str,
         add_special_tokens: bool = True,
-        max_length: Optional[int] = None,
+        max_length: int | None = None,
         padding: bool = False,
         truncation: bool = True,
-        return_tensors: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        return_tensors: str | None = None,
+    ) -> dict[str, Any]:
         """编码文本为 token IDs
         
         Args:
@@ -183,7 +183,7 @@ class TokenizerUtils:
         max_length: int,
         padding: bool,
         truncation: bool,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """简单的字符级编码
         
         Args:
@@ -231,7 +231,7 @@ class TokenizerUtils:
     
     def decode(
         self,
-        token_ids: List[int],
+        token_ids: list[int],
         skip_special_tokens: bool = True,
     ) -> str:
         """解码 token IDs 为文本
@@ -250,7 +250,7 @@ class TokenizerUtils:
     
     def _simple_decode(
         self,
-        token_ids: List[int],
+        token_ids: list[int],
         skip_special_tokens: bool,
     ) -> str:
         """简单的字符级解码
@@ -280,12 +280,12 @@ class TokenizerUtils:
     
     def batch_encode(
         self,
-        texts: List[str],
+        texts: list[str],
         add_special_tokens: bool = True,
-        max_length: Optional[int] = None,
+        max_length: int | None = None,
         padding: bool = True,
         truncation: bool = True,
-    ) -> Dict[str, List]:
+    ) -> dict[str, list]:
         """批量编码
         
         Args:

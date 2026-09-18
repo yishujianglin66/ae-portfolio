@@ -6,14 +6,15 @@
   3. execute 阶段按 effect_stack 应用滤镜, 输出真实 MP4
   4. 输出视频与参考视频风格一致 (色温/饱和度方向一致)
 """
-import pytest
-
 import asyncio
 import json
 import subprocess
 import sys
 import time
 from pathlib import Path
+
+import pytest
+
 pytestmark = pytest.mark.real_e2e
 
 
@@ -48,12 +49,12 @@ def test_style_transfer_e2e():
 
     reference_video = str(vids[0])  # 风格来源
     target_video = str(vids[1])     # 目标素材
-    print(f"\n[1] 素材:")
+    print("\n[1] 素材:")
     print(f"    参考(风格源): {Path(reference_video).name[:50]} ({Path(reference_video).stat().st_size//1024}KB)")
     print(f"    目标(待处理): {Path(target_video).name[:50]} ({Path(target_video).stat().st_size//1024}KB)")
 
     # 2. VRS CV-only 分析参考视频
-    print(f"\n[2] VRS CV-only 分析参考视频...")
+    print("\n[2] VRS CV-only 分析参考视频...")
     from vrs.vrs_real_analyzer import VRSRealAnalyzer
     analyzer = VRSRealAnalyzer(num_frames=12)
     vrs_result = asyncio.run(analyzer.analyze(reference_video))
@@ -70,8 +71,8 @@ def test_style_transfer_e2e():
         return False
 
     # 3. 通过管线执行风格迁移
-    print(f"\n[3] 管线执行风格迁移 (reference_video → materials)...")
-    from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig
+    print("\n[3] 管线执行风格迁移 (reference_video → materials)...")
+    from pipeline.unified_pipeline import PipelineConfig, UnifiedPipeline
 
     output_dir = str(Path(__file__).resolve().parent.parent / "output" / "p2_style_transfer_test")
     config = PipelineConfig(
@@ -164,7 +165,7 @@ def test_style_transfer_e2e():
     else:
         checks.append(("codec == h264", False))
 
-    print(f"\n[5] 验证结果:")
+    print("\n[5] 验证结果:")
     all_pass = True
     for desc, ok in checks:
         status = "PASS" if ok else "FAIL"
@@ -174,13 +175,13 @@ def test_style_transfer_e2e():
 
     print(f"\n{'='*70}")
     if all_pass:
-        print(f"[RESULT] P2 风格迁移闭环 E2E PASS")
+        print("[RESULT] P2 风格迁移闭环 E2E PASS")
         print(f"  参考视频: {Path(reference_video).name[:40]}")
         print(f"  风格标签: {vrs_result.get('style_tags', [])}")
         print(f"  输出: {output_path}")
         print(f"  大小: {file_size//1024}KB")
     else:
-        print(f"[RESULT] P2 风格迁移闭环 E2E FAIL")
+        print("[RESULT] P2 风格迁移闭环 E2E FAIL")
         if result.get("error"):
             print(f"  错误: {result['error']}")
     print(f"{'='*70}")

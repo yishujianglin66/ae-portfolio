@@ -16,14 +16,19 @@ Phase 4 → Phase 3 衔接层（Python 版）
   - keyframes[].keyframes: KeyframeSpec 数组，每个有 frame/value/easing/bezier
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Any, Optional, Union
-from datetime import datetime
 import re
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
 
 from effect_description_parser import (
-    EffectDescription, VocabRef, IntensityRef, ColorRef, TemporalRef,
-    get_style_recipe, VOCAB_EFFECTS,
+    VOCAB_EFFECTS,
+    ColorRef,
+    EffectDescription,
+    IntensityRef,
+    TemporalRef,
+    VocabRef,
+    get_style_recipe,
 )
 
 # Intent 类型常量：优先从 nlu_parser 导入，失败时降级为本地常量（duck typing 兼容）
@@ -48,9 +53,9 @@ except ImportError:
 class KeyframeSpec:
     """关键帧规格"""
     frame: int
-    value: Union[float, List[float]]
+    value: Union[float, list[float]]
     easing: str = "linear"
-    bezier: Optional[List[float]] = None  # [x1, y1, x2, y2]
+    bezier: list[float] | None = None  # [x1, y1, x2, y2]
 
 
 @dataclass
@@ -58,10 +63,10 @@ class EffectEntry:
     """效果条目"""
     effect_id: str
     effect_name: str  # 用户友好英文名（如 "Gaussian Blur"）
-    start_frame: Optional[int] = None
-    end_frame: Optional[int] = None
+    start_frame: int | None = None
+    end_frame: int | None = None
     confidence: float = 0.0
-    evidence: List[str] = field(default_factory=list)
+    evidence: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -69,8 +74,8 @@ class ParameterEntry:
     """参数条目"""
     effect_id: str
     parameter: str
-    value: Union[float, str, bool, List[float]]
-    value_range: Optional[List[float]] = None  # [min, max]
+    value: Union[float, str, bool, list[float]]
+    value_range: list[float] | None = None  # [min, max]
     confidence: float = 0.0
 
 
@@ -80,8 +85,8 @@ class TimelineEntry:
     effect_id: str
     start_frame: int
     end_frame: int
-    duration_frames: Optional[int] = None
-    duration_seconds: Optional[float] = None
+    duration_frames: int | None = None
+    duration_seconds: float | None = None
 
 
 @dataclass
@@ -89,8 +94,8 @@ class KeyframeEntry:
     """关键帧条目"""
     effect_id: str
     parameter: str
-    keyframes: List[KeyframeSpec]
-    keyframe_count: Optional[int] = None
+    keyframes: list[KeyframeSpec]
+    keyframe_count: int | None = None
 
 
 @dataclass
@@ -98,21 +103,21 @@ class VisualFeature:
     """视觉特征"""
     term_id: str
     term_name: str
-    time_range: Optional[List[float]] = None
-    intensity: Optional[float] = None
-    confidence: Optional[float] = None
+    time_range: list[float] | None = None
+    intensity: float | None = None
+    confidence: float | None = None
 
 
 @dataclass
 class AnalysisReport:
     """分析报告（对齐 Phase3 report-to-ops.ts schema）"""
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    visual_features: List[VisualFeature] = field(default_factory=list)
-    effects: List[EffectEntry] = field(default_factory=list)
-    parameters: List[ParameterEntry] = field(default_factory=list)
-    timeline: List[TimelineEntry] = field(default_factory=list)
-    keyframes: List[KeyframeEntry] = field(default_factory=list)
-    confidence: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    visual_features: list[VisualFeature] = field(default_factory=list)
+    effects: list[EffectEntry] = field(default_factory=list)
+    parameters: list[ParameterEntry] = field(default_factory=list)
+    timeline: list[TimelineEntry] = field(default_factory=list)
+    keyframes: list[KeyframeEntry] = field(default_factory=list)
+    confidence: dict[str, Any] | None = None
 
 
 # ============================================================================
@@ -131,7 +136,7 @@ _DEFAULT_COMP = {
 # matchName → 用户友好显示名映射
 # ============================================================================
 
-_MATCH_NAME_TO_DISPLAY: Dict[str, str] = {
+_MATCH_NAME_TO_DISPLAY: dict[str, str] = {
     "ADBE Gaussian Blur 2": "Gaussian Blur",
     "ADBE Glo2": "Glow",
     "ADBE Directional Blur": "Directional Blur",
@@ -187,12 +192,12 @@ def _vocab_ref_to_effect_entry(ref: VocabRef) -> EffectEntry:
 # 根据效果 matchName 推断默认参数
 # ============================================================================
 
-def _infer_default_params(ref: VocabRef, intensity_scale: float) -> List[dict]:
+def _infer_default_params(ref: VocabRef, intensity_scale: float) -> list[dict]:
     """根据 ref.suggestedEffect 推断默认参数（参考 TS 端 inferDefaultParams）。
 
     返回字典列表，每项含 parameter / value / value_range。
     """
-    params: List[dict] = []
+    params: list[dict] = []
     effect = ref.suggestedEffect
 
     if effect == "ADBE Gaussian Blur 2":
@@ -280,7 +285,7 @@ def _temporal_to_frame_range(position: str, total_frames: int) -> tuple:
 # 根据动画类型推断关键帧（对齐 TS 端 inferKeyframesForAnim）
 # ============================================================================
 
-def _infer_keyframes_for_anim(anim_type: str, context: Optional[Dict]) -> Optional[KeyframeEntry]:
+def _infer_keyframes_for_anim(anim_type: str, context: dict | None) -> KeyframeEntry | None:
     """根据动画类型推断关键帧。
 
     返回 KeyframeEntry（parameter + keyframes），无法识别时返回 None。
@@ -373,7 +378,7 @@ def _infer_keyframes_for_anim(anim_type: str, context: Optional[Dict]) -> Option
 # ============================================================================
 
 def intent_to_report(intent, description: EffectDescription,
-                     context: Optional[Dict] = None) -> AnalysisReport:
+                     context: dict | None = None) -> AnalysisReport:
     """Intent + EffectDescription → AnalysisReport。
 
     这是 Phase 4 → Phase 3 的关键转换。
@@ -388,11 +393,11 @@ def intent_to_report(intent, description: EffectDescription,
     返回：
       AnalysisReport
     """
-    effects: List[EffectEntry] = []
-    parameters: List[ParameterEntry] = []
-    keyframes: List[KeyframeEntry] = []
-    timeline: List[TimelineEntry] = []
-    visual_features: List[VisualFeature] = []
+    effects: list[EffectEntry] = []
+    parameters: list[ParameterEntry] = []
+    keyframes: list[KeyframeEntry] = []
+    timeline: list[TimelineEntry] = []
+    visual_features: list[VisualFeature] = []
 
     # 综合置信度
     total_confidence = intent.confidence
@@ -545,7 +550,7 @@ def intent_to_report(intent, description: EffectDescription,
                                      f"{_DEFAULT_COMP['width']}x{_DEFAULT_COMP['height']}")
     video_file = (context or {}).get("video_file", "nlu_input")
 
-    metadata: Dict[str, Any] = {
+    metadata: dict[str, Any] = {
         "video_file": video_file,
         "duration": f"{duration}s",
         "frame_rate": frame_rate,

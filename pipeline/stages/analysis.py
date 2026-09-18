@@ -10,8 +10,8 @@ pipeline/stages/analysis.py - 分析阶段
 from __future__ import annotations
 
 import json
-import os
 import logging
+import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -39,7 +39,7 @@ class AnalysisStage:
     def __init__(self, config):
         self.config = config
 
-    def run(self, previous_data: Dict) -> Dict:
+    def run(self, previous_data: dict) -> dict:
         """执行分析阶段"""
         perceive = previous_data.get("perceive", {})
         videos = perceive.get("videos", [])
@@ -77,7 +77,7 @@ class AnalysisStage:
 
         return result
 
-    def _detect_scenes(self, path: str) -> List[Dict]:
+    def _detect_scenes(self, path: str) -> list[dict]:
         """场景检测"""
         if not path or not os.path.isfile(path):
             return []
@@ -102,7 +102,7 @@ class AnalysisStage:
             logger.debug(f"Scene detection failed for {path}: {e}")
             return []
 
-    def _analyze_beats(self, path: str) -> List[Dict]:
+    def _analyze_beats(self, path: str) -> list[dict]:
         """节拍分析 (使用 librosa 或降级为 ffprobe BPM 估算)"""
         if not path or not os.path.isfile(path):
             return []
@@ -120,7 +120,9 @@ class AnalysisStage:
             pass
         # 降级: 基于时长的均匀节拍估算
         try:
-            import subprocess, json
+            import json
+            import subprocess
+
             from pipeline.stages import resolve_ffprobe
             ffprobe = resolve_ffprobe(self.config)
             r = subprocess.run(
@@ -141,7 +143,7 @@ class AnalysisStage:
             logger.debug(f"Beat analysis failed for {path}: {e}")
         return []
 
-    def _build_mood_curve(self, scenes: List, beats: List) -> List[Dict]:
+    def _build_mood_curve(self, scenes: list, beats: list) -> list[dict]:
         """构建情绪曲线"""
         curve = []
         # 基于场景切换频率和节拍密度估算情绪强度
@@ -175,12 +177,12 @@ class BeatAnalysisResult:
     """节拍分析结果"""
     success: bool
     bpm: float = 0.0
-    beats: List[float] = field(default_factory=list)
-    drops: List[float] = field(default_factory=list)
+    beats: list[float] = field(default_factory=list)
+    drops: list[float] = field(default_factory=list)
     duration_s: float = 0.0
-    beats_json_path: Optional[str] = None
-    waveform_png_path: Optional[str] = None
-    errors: List[str] = field(default_factory=list)
+    beats_json_path: str | None = None
+    waveform_png_path: str | None = None
+    errors: list[str] = field(default_factory=list)
     elapsed_s: float = 0.0
 
 
@@ -307,7 +309,7 @@ class BeatAnalysisStage:
 
     def _detect_drops(
         self, y, sr, librosa, np, min_drops: int
-    ) -> List[float]:
+    ) -> list[float]:
         """检测 drop 点（基于 onset 强度 + 频谱通量峰值）
 
         策略：
@@ -342,7 +344,7 @@ class BeatAnalysisStage:
         return drop_times
 
     def _render_waveform(
-        self, y, sr, drops: List[float], beats: List[float], output_path: Path
+        self, y, sr, drops: list[float], beats: list[float], output_path: Path
     ) -> None:
         """渲染波形图 + drop/beat 标记"""
         try:
@@ -367,7 +369,7 @@ class BeatAnalysisStage:
 
             ax.set_xlabel("Time (s)")
             ax.set_ylabel("Amplitude")
-            ax.set_title(f"Waveform + Drops (red) / Beats (gray)")
+            ax.set_title("Waveform + Drops (red) / Beats (gray)")
             ax.set_xlim(0, len(y) / sr)
 
             plt.tight_layout()

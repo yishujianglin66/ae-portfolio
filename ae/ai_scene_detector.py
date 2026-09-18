@@ -53,11 +53,11 @@ import math
 import os
 import sys
 import urllib.request
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
+import warnings
 from dataclasses import dataclass, field
 from enum import Enum
-import warnings
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 try:
     from loguru import logger
@@ -96,9 +96,9 @@ class Shot:
     shot_type: ShotType = ShotType.CUT
     confidence: float = 0.0
     thumbnail_frame: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "index": self.index,
             "start_frame": self.start_frame,
@@ -165,8 +165,8 @@ class AISceneDetector:
         self.fps = fps
         self.auto_download = bool(auto_download)
         self._model = None
-        self._degraded_reason: Optional[str] = None
-        self._backend: Optional[str] = None  # transnetv2_pkg / onnxruntime / torch
+        self._degraded_reason: str | None = None
+        self._backend: str | None = None  # transnetv2_pkg / onnxruntime / torch
         self._transnet_available = self._check_transnet()
         self._load_transnet_model()
 
@@ -174,7 +174,7 @@ class AISceneDetector:
     #  权重路径解析与下载
     # ----------------------------------------------------------------
     @staticmethod
-    def _find_weights_path() -> Optional[Path]:
+    def _find_weights_path() -> Path | None:
         """查找本地真实 TransNetV2 权重文件。
 
         支持的环境变量与缓存路径（按优先级）：
@@ -210,7 +210,7 @@ class AISceneDetector:
         return None
 
     @staticmethod
-    def _get_cache_dir() -> Optional[Path]:
+    def _get_cache_dir() -> Path | None:
         """返回可写的权重缓存目录，找不到返回 None。"""
         for d in AISceneDetector._CACHE_DIR_CANDIDATES:
             try:
@@ -223,7 +223,7 @@ class AISceneDetector:
                 continue
         return None
 
-    def _try_download_weights(self) -> Optional[Path]:
+    def _try_download_weights(self) -> Path | None:
         """下载 TransNetV2 权重到本地缓存（支持断点续传）。
 
         仅在 ``enable_ai=True`` 时调用。下载失败返回 None，由上层降级。
@@ -280,7 +280,7 @@ class AISceneDetector:
     #  后端检测
     # ----------------------------------------------------------------
     @staticmethod
-    def _detect_available_backend() -> Optional[str]:
+    def _detect_available_backend() -> str | None:
         """检测可用的 TransNetV2 推理后端。
 
         返回:
@@ -312,7 +312,7 @@ class AISceneDetector:
         return self._backend is not None
 
     @staticmethod
-    def _find_transnet_architecture() -> Optional[Path]:
+    def _find_transnet_architecture() -> Path | None:
         """查找 TransNetV2 官方架构代码（transnetv2.py）。
 
         不从零复制架构，仅引用用户克隆的官方仓库。
@@ -522,8 +522,8 @@ class AISceneDetector:
 
     def _extract_transnet_features(self, frames: list) -> Any:
         """从帧序列提取 TransNetV2 特征"""
-        import numpy as np
         import cv2
+        import numpy as np
 
         if len(frames) < 16:
             return None
@@ -538,7 +538,7 @@ class AISceneDetector:
         batch = np.array(features, dtype=np.float32) / 255.0
         return np.expand_dims(batch, axis=0)  # [1, N, 27, 48, 3]
 
-    def detect(self, video_path: str) -> List[Shot]:
+    def detect(self, video_path: str) -> list[Shot]:
         """
         检测视频中的所有镜头。
 
@@ -561,7 +561,7 @@ class AISceneDetector:
                 shot.metadata["degraded"] = self._degraded_reason or "transnetv2_unavailable"
         return shots
 
-    def _detect_transnet(self, video_path: str) -> List[Shot]:
+    def _detect_transnet(self, video_path: str) -> list[Shot]:
         """TransNetV2 深度学习检测（基于真实权重和后端推理）。
 
         根据 ``self._backend`` 分发到不同推理路径：
@@ -625,7 +625,7 @@ class AISceneDetector:
         shots = self._predictions_to_shots(all_predictions, actual_fps)
         return shots
 
-    def _infer_batch(self, frames: list, backend: str) -> List[float]:
+    def _infer_batch(self, frames: list, backend: str) -> list[float]:
         """对一批帧进行 TransNetV2 推理，返回每帧的转场概率。
 
         Args:
@@ -671,7 +671,7 @@ class AISceneDetector:
 
         return preds
 
-    def _detect_with_transnetv2_pkg(self, video_path: str) -> List[Shot]:
+    def _detect_with_transnetv2_pkg(self, video_path: str) -> list[Shot]:
         """使用 transnetv2 pip 包的 predict_images 接口进行检测。"""
         import cv2
         import numpy as np
@@ -708,7 +708,7 @@ class AISceneDetector:
 
         return self._predictions_to_shots(preds, actual_fps)
 
-    def _predictions_to_shots(self, predictions: List[float], fps: float) -> List[Shot]:
+    def _predictions_to_shots(self, predictions: list[float], fps: float) -> list[Shot]:
         """将 TransNetV2 预测转为 Shot 列表"""
         import numpy as np
 
@@ -772,7 +772,7 @@ class AISceneDetector:
 
         return shots
 
-    def _detect_fallback(self, video_path: str) -> List[Shot]:
+    def _detect_fallback(self, video_path: str) -> list[Shot]:
         """回退到 PySceneDetect + 传统方法"""
         from .scene_detector import SceneDetector
 
@@ -796,7 +796,7 @@ class AISceneDetector:
 
         return shots
 
-    def detect_transitions(self, video_path: str) -> List[ShotTransition]:
+    def detect_transitions(self, video_path: str) -> list[ShotTransition]:
         """专门检测转场类型和位置"""
         import cv2
         import numpy as np
@@ -847,7 +847,7 @@ class AISceneDetector:
         cap.release()
         return transitions
 
-    def detect_scene_types(self, video_path: str) -> List[Dict]:
+    def detect_scene_types(self, video_path: str) -> list[dict]:
         """
         对每个镜头进行类型分类。
 

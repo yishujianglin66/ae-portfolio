@@ -7,11 +7,15 @@
 用法: python scripts/rescore_fine.py
 """
 from __future__ import annotations
-import json, sys, time
+
+import json
+import sys
+import time
 from pathlib import Path
+
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
-from core.visual_scorer import _call_qwen_vl, _frame_to_b64, _PROMPT
+from core.visual_scorer import _PROMPT, _call_qwen_vl, _frame_to_b64
 
 SAMPLES = PROJECT / "data" / "param_tuning" / "train_samples.jsonl"
 

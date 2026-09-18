@@ -10,7 +10,7 @@ AI 创意规划引擎 - Bridge 协议集成
 from __future__ import annotations
 
 import json
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 try:
     from ae.ai_creative_planner import AICreativePlanner
@@ -31,7 +31,7 @@ class CreativePlannerBridge:
             llm_api_key=llm_api_key,
         )
 
-    async def handle_command(self, command: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_command(self, command: str, params: dict[str, Any]) -> dict[str, Any]:
         """
         处理创意规划相关的 Bridge 命令
 
@@ -78,7 +78,7 @@ class CreativePlannerBridge:
                 "error": str(e),
             }
 
-    async def _handle_analyze_creative(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_analyze_creative(self, params: dict[str, Any]) -> dict[str, Any]:
         """
         分析创意描述
 
@@ -98,7 +98,7 @@ class CreativePlannerBridge:
 
         return result
 
-    async def _handle_generate_task_graph(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_generate_task_graph(self, params: dict[str, Any]) -> dict[str, Any]:
         """
         生成任务图
 
@@ -124,7 +124,7 @@ class CreativePlannerBridge:
 
         return task_graph
 
-    async def _handle_execute_creative(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_execute_creative(self, params: dict[str, Any]) -> dict[str, Any]:
         """
         执行创意任务图
 
@@ -144,7 +144,7 @@ class CreativePlannerBridge:
             "execution": execution_result,
         }
 
-    async def _handle_optimize_parameters(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_optimize_parameters(self, params: dict[str, Any]) -> dict[str, Any]:
         """
         优化参数
 
@@ -164,7 +164,7 @@ class CreativePlannerBridge:
             "reasoning": "参数优化完成",
         }
 
-    async def _handle_apply_creative_pattern(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_apply_creative_pattern(self, params: dict[str, Any]) -> dict[str, Any]:
         """
         应用创意模式
 
@@ -197,7 +197,7 @@ class CreativePlannerBridge:
             "execution": execution_result,
         }
 
-    def get_available_patterns(self) -> Dict[str, Any]:
+    def get_available_patterns(self) -> dict[str, Any]:
         """获取所有可用的创意模式"""
         patterns = self._planner.list_available_patterns()
         return {"patterns": patterns}
@@ -206,14 +206,14 @@ class CreativePlannerBridge:
     # 预设系统命令处理器
     # ============================================================
 
-    async def _handle_list_presets(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_list_presets(self, params: dict[str, Any]) -> dict[str, Any]:
         """列出所有预设分类"""
         if not hasattr(self._planner, "preset_system"):
             return {"error": "预设系统未启用"}
         info = self._planner.preset_system.get_category_info()
         return {"categories": info}
 
-    async def _handle_list_category_presets(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_list_category_presets(self, params: dict[str, Any]) -> dict[str, Any]:
         """按分类列出预设"""
         category = params.get("category", "")
         if not hasattr(self._planner, "preset_system"):
@@ -230,7 +230,7 @@ class CreativePlannerBridge:
                 })
         return {"category": category, "presets": preset_list, "count": len(preset_list)}
 
-    async def _handle_search_presets(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_search_presets(self, params: dict[str, Any]) -> dict[str, Any]:
         """搜索预设"""
         keyword = params.get("keyword", "")
         if not hasattr(self._planner, "preset_system"):
@@ -250,7 +250,7 @@ class CreativePlannerBridge:
             "count": len(results),
         }
 
-    async def _handle_get_preset_info(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_get_preset_info(self, params: dict[str, Any]) -> dict[str, Any]:
         """获取预设详细信息"""
         preset_name = params.get("presetName", "")
         if not hasattr(self._planner, "preset_system"):
@@ -260,7 +260,7 @@ class CreativePlannerBridge:
             return info
         return {"error": f"预设不存在: {preset_name}"}
 
-    async def _handle_execute_preset(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_execute_preset(self, params: dict[str, Any]) -> dict[str, Any]:
         """执行单个预设"""
         preset_name = params.get("presetName", "")
         override_params = params.get("params", {})
@@ -271,7 +271,7 @@ class CreativePlannerBridge:
         )
         return result
 
-    async def _handle_execute_preset_chain(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_execute_preset_chain(self, params: dict[str, Any]) -> dict[str, Any]:
         """执行预设链"""
         preset_names = params.get("presetNames", [])
         shared_params = params.get("sharedParams", {})
@@ -282,7 +282,7 @@ class CreativePlannerBridge:
         )
         return result
 
-    async def _handle_execute_combination(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_execute_combination(self, params: dict[str, Any]) -> dict[str, Any]:
         """执行预设组合"""
         combo_name = params.get("combinationName", "")
         override_params = params.get("params", {})
@@ -297,7 +297,7 @@ class CreativePlannerBridge:
         )
         return {"combination": combo_name, "description": combo.description, **result}
 
-    async def _handle_list_combinations(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _handle_list_combinations(self, params: dict[str, Any]) -> dict[str, Any]:
         """列出预设组合"""
         if not hasattr(self._planner, "preset_library"):
             return {"error": "预设系统未启用"}

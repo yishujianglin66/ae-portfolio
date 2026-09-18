@@ -80,11 +80,11 @@ class CrawlResult:
     platform: str = ""
     keyword: str = ""
     status: str = "pending"
-    items: List[Dict[str, Any]] = field(default_factory=list)
+    items: list[dict[str, Any]] = field(default_factory=list)
     total_count: int = 0
     output_file: str = ""
     duration_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
     used_fallback: bool = False
 
 
@@ -108,7 +108,7 @@ class MediaCrawlerAdapter:
 
     TOOL_NAME = "media_crawler"
 
-    SUPPORTED_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    SUPPORTED_OPERATIONS: dict[str, dict[str, Any]] = {
         # 小红书
         "xhs_search": {"platform": "xhs", "desc": "搜索小红书笔记"},
         "xhs_creator": {"platform": "xhs", "desc": "采集创作者主页"},
@@ -129,7 +129,7 @@ class MediaCrawlerAdapter:
         "zhihu_search": {"platform": "zhihu", "desc": "搜索知乎问答/文章"},
     }
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._crawler_dir = Path(self.config.get("crawler_dir", str(MEDIA_CRAWLER_DIR)))
         self._output_format = self.config.get("output_format", "json")
@@ -155,11 +155,11 @@ class MediaCrawlerAdapter:
             logger.warning("[MediaCrawler] playwright not installed")
             return False
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         """列出所有支持的操作"""
         return list(self.SUPPORTED_OPERATIONS.keys())
 
-    def list_platforms(self) -> List[str]:
+    def list_platforms(self) -> list[str]:
         """列出所有支持的平台"""
         return [p.value for p in CrawlPlatform]
 
@@ -238,8 +238,8 @@ class MediaCrawlerAdapter:
         )
 
     def fetch_multi_platform(self, keyword: str,
-                             platforms: Optional[List[str]] = None,
-                             max_per_platform: int = 30) -> List[CrawlResult]:
+                             platforms: list[str] | None = None,
+                             max_per_platform: int = 30) -> list[CrawlResult]:
         """多平台并行采集
 
         Args:
@@ -273,7 +273,7 @@ class MediaCrawlerAdapter:
 
     def _crawl_platform(self, platform: str, crawl_type: str,
                         keyword: str, max_count: int,
-                        extra_args: Optional[Dict] = None) -> CrawlResult:
+                        extra_args: dict | None = None) -> CrawlResult:
         """调用 MediaCrawler 采集指定平台
 
         降级策略:
@@ -329,7 +329,7 @@ class MediaCrawlerAdapter:
 
     def _run_crawler_subprocess(self, platform: str, crawl_type: str,
                                 keyword: str, max_count: int,
-                                extra_args: Optional[Dict] = None) -> Optional[List[Dict]]:
+                                extra_args: dict | None = None) -> list[dict] | None:
         """通过 subprocess 调用 MediaCrawler"""
         if not self.check_available():
             return None
@@ -379,7 +379,7 @@ class MediaCrawlerAdapter:
             return None
 
     def _run_crawler_import(self, platform: str, crawl_type: str,
-                            keyword: str, max_count: int) -> Optional[List[Dict]]:
+                            keyword: str, max_count: int) -> list[dict] | None:
         """通过 Python import 直接调用 MediaCrawler API"""
         try:
             crawler_path = str(self._crawler_dir)
@@ -396,7 +396,7 @@ class MediaCrawlerAdapter:
             logger.debug("[MediaCrawler] import mode not available: %s", e)
             return None
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> CrawlResult:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> CrawlResult:
         """统一执行接口
 
         Args:
@@ -423,12 +423,12 @@ class MediaCrawlerAdapter:
 
 # ── 便捷函数 ─────────────────────────────────────────────────────────────
 
-def get_adapter(config: Optional[Dict[str, Any]] = None) -> MediaCrawlerAdapter:
+def get_adapter(config: dict[str, Any] | None = None) -> MediaCrawlerAdapter:
     """获取 MediaCrawlerAdapter 实例"""
     return MediaCrawlerAdapter(config)
 
 
-def quick_test() -> Dict[str, Any]:
+def quick_test() -> dict[str, Any]:
     """快速验证测试"""
     adapter = get_adapter()
     return {

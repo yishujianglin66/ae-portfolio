@@ -40,8 +40,8 @@ class MemoryEntry:
     id: int = 0
     category: str = ""
     key: str = ""
-    content: Dict[str, Any] = field(default_factory=dict)
-    tags: List[str] = field(default_factory=list)
+    content: dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
     confidence: float = 0.5
     created_at: float = 0.0
     accessed_at: float = 0.0
@@ -62,7 +62,7 @@ class MemoryStore:
     5. 衰减机制：长时间未访问的记忆降低权重
     """
 
-    def __init__(self, db_path: Optional[str] = None):
+    def __init__(self, db_path: str | None = None):
         self._logger = logging.getLogger(f"{__name__}.MemoryStore")
 
         if db_path is None:
@@ -71,7 +71,7 @@ class MemoryStore:
             db_path = os.path.join(db_dir, "memory.db")
 
         self._db_path = db_path
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
         self._init_db()
 
     def _init_db(self) -> None:
@@ -149,8 +149,8 @@ class MemoryStore:
         self,
         category: str,
         key: str,
-        content: Dict[str, Any],
-        tags: Optional[List[str]] = None,
+        content: dict[str, Any],
+        tags: list[str] | None = None,
         confidence: float = 0.5,
     ) -> int:
         """
@@ -189,7 +189,7 @@ class MemoryStore:
         self._logger.debug(f"记忆已存储: [{category}] {key} (id={memory_id})")
         return memory_id or 0
 
-    def recall(self, category: str, key: str) -> Optional[MemoryEntry]:
+    def recall(self, category: str, key: str) -> MemoryEntry | None:
         """精确检索记忆"""
         row = self._conn.execute(
             "SELECT * FROM memories WHERE category = ? AND key = ?",
@@ -218,9 +218,9 @@ class MemoryStore:
     def search(
         self,
         query: str,
-        category: Optional[str] = None,
+        category: str | None = None,
         limit: int = 10,
-    ) -> List[MemoryEntry]:
+    ) -> list[MemoryEntry]:
         """
         全文检索记忆
 
@@ -229,7 +229,7 @@ class MemoryStore:
             category: 限定类别（None 则搜索全部）
             limit: 返回数量上限
         """
-        results: List[MemoryEntry] = []
+        results: list[MemoryEntry] = []
 
         # 尝试 FTS5 搜索
         try:
@@ -349,7 +349,7 @@ class MemoryStore:
         task_keyword: str = "",
         limit: int = 5,
         min_confidence: float = 0.3,
-    ) -> List[MemoryEntry]:
+    ) -> list[MemoryEntry]:
         """
         获取相关经验
 
@@ -382,7 +382,7 @@ class MemoryStore:
     # 统计
     # -------------------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取记忆系统统计"""
         row = self._conn.execute(
             "SELECT COUNT(*) as count, "

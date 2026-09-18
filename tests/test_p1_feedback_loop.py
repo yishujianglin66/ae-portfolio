@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig, StageResult, StageStatus
+from pipeline.unified_pipeline import PipelineConfig, StageResult, StageStatus, UnifiedPipeline
 
 
 def test_quality_gate_triggers_retry():

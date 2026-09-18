@@ -18,7 +18,7 @@ import logging
 import os
 from typing import Any, Dict, List, Optional
 
-from knowledge_base.types import BlockType, MdBlock, EffectMapping
+from knowledge_base.types import BlockType, EffectMapping, MdBlock
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ _EFFECT_EXTRACTION_PROMPT = """\
 class LlmExtractor:
     """LLM 知识提取器。"""
 
-    def __init__(self, llm_client: Optional[Any] = None) -> None:
+    def __init__(self, llm_client: Any | None = None) -> None:
         """初始化。
 
         Args:
@@ -55,7 +55,7 @@ class LlmExtractor:
         self,
         block: MdBlock,
         source_file: str = "",
-    ) -> List[EffectMapping]:
+    ) -> list[EffectMapping]:
         """从单个块中提取效果映射。
 
         仅处理 PARAGRAPH 和 LIST 类型的块。
@@ -90,9 +90,9 @@ class LlmExtractor:
 
     def batch_extract_effects(
         self,
-        blocks: List[MdBlock],
+        blocks: list[MdBlock],
         source_file: str = "",
-    ) -> List[EffectMapping]:
+    ) -> list[EffectMapping]:
         """批量提取多个块的效果映射。
 
         Args:
@@ -102,7 +102,7 @@ class LlmExtractor:
         Returns:
             EffectMapping 列表
         """
-        all_items: List[EffectMapping] = []
+        all_items: list[EffectMapping] = []
         for block in blocks:
             items = self.extract_effects(block, source_file=source_file)
             all_items.extend(items)
@@ -139,7 +139,7 @@ class LlmExtractor:
             logger.warning("LLM gateway call failed: %s", e)
             return ""
 
-    def _parse_response(self, response: str, source_file: str) -> List[EffectMapping]:
+    def _parse_response(self, response: str, source_file: str) -> list[EffectMapping]:
         """解析 LLM 响应为 EffectMapping 列表。
 
         Args:
@@ -158,7 +158,7 @@ class LlmExtractor:
         if not isinstance(data, list):
             return []
 
-        items: List[EffectMapping] = []
+        items: list[EffectMapping] = []
         for entry in data:
             if not isinstance(entry, dict):
                 continue

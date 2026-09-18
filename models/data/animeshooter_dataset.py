@@ -84,7 +84,7 @@ class AnimeShotSample:
     start_time: str = ""          # 原始 "MM:SS" (段内相对)
     end_time: str = ""
     is_prologue_or_epilogue: bool = False
-    characters: List[str] = field(default_factory=list)
+    characters: list[str] = field(default_factory=list)
     scene: str = ""
     narrative_caption: str = ""
     descriptive_caption: str = ""
@@ -96,9 +96,9 @@ class AnimeShotSample:
     end_sec: float = 0.0
     duration_sec: float = 0.0
     video_path: str = ""          # 下载后填充
-    movement_label: Optional[str] = None  # 待 VLM 预标注 (None=未标)
+    movement_label: str | None = None  # 待 VLM 预标注 (None=未标)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "schema": SCHEMA,
             "video_id": self.video_id,
@@ -122,7 +122,7 @@ class AnimeShotSample:
         }
 
 
-def _iter_annotation_json(path: str) -> List[AnimeShotSample]:
+def _iter_annotation_json(path: str) -> list[AnimeShotSample]:
     """读取单个 AnimeShooter 逐视频 JSON, 返回镜头候选列表。
 
     JSON 结构: {video_id or "video ID": {url, fps, segments: [...]}}
@@ -143,7 +143,7 @@ def _iter_annotation_json(path: str) -> List[AnimeShotSample]:
     fps = float(data.get("fps") or 0.0)
     segments = data.get("segments") or []
 
-    samples: List[AnimeShotSample] = []
+    samples: list[AnimeShotSample] = []
     for si, seg in enumerate(segments):
         if not isinstance(seg, dict):
             continue
@@ -186,9 +186,9 @@ def _iter_annotation_json(path: str) -> List[AnimeShotSample]:
     return samples
 
 
-def _iter_zip(path: str) -> List[AnimeShotSample]:
+def _iter_zip(path: str) -> list[AnimeShotSample]:
     """从 zip 内逐 JSON 解析 (dataset_anime_shooter.zip)。"""
-    samples: List[AnimeShotSample] = []
+    samples: list[AnimeShotSample] = []
     with zipfile.ZipFile(path) as zf:
         for name in zf.namelist():
             if not name.lower().endswith(".json"):
@@ -203,7 +203,7 @@ def _iter_zip(path: str) -> List[AnimeShotSample]:
     return samples
 
 
-def _parse_json_obj(data: Dict[str, Any], video_id_hint: str = "") -> List[AnimeShotSample]:
+def _parse_json_obj(data: dict[str, Any], video_id_hint: str = "") -> list[AnimeShotSample]:
     """从已加载的 JSON dict 解析 (复用 _iter_annotation_json 的核心逻辑)。"""
     if isinstance(data, dict):
         keys = [k for k in data.keys() if k not in ("url", "fps", "segments",
@@ -216,7 +216,7 @@ def _parse_json_obj(data: Dict[str, Any], video_id_hint: str = "") -> List[Anime
     fps = float(data.get("fps") or 0.0)
     segments = data.get("segments") or []
 
-    samples: List[AnimeShotSample] = []
+    samples: list[AnimeShotSample] = []
     for si, seg in enumerate(segments):
         if not isinstance(seg, dict):
             continue
@@ -265,8 +265,8 @@ class AnimeShooterDataset(BaseDataset):
 
     # ── 加载 ────────────────────────────────────────────────────────────
 
-    def load_data(self, data_path: str) -> List[AnimeShotSample]:
-        samples: List[AnimeShotSample] = []
+    def load_data(self, data_path: str) -> list[AnimeShotSample]:
+        samples: list[AnimeShotSample] = []
 
         if os.path.isdir(data_path):
             for fn in sorted(os.listdir(data_path)):
@@ -304,7 +304,7 @@ class AnimeShooterDataset(BaseDataset):
 
     # ── 预处理 / 校验 / 增强 ────────────────────────────────────────────
 
-    def preprocess(self, data: List[AnimeShotSample]) -> List[AnimeShotSample]:
+    def preprocess(self, data: list[AnimeShotSample]) -> list[AnimeShotSample]:
         """过滤无效镜头 (无时长 / 时长异常 0.3-60s)。"""
         out = []
         for s in data:
@@ -319,13 +319,13 @@ class AnimeShooterDataset(BaseDataset):
     def validate_sample(self, sample: AnimeShotSample) -> bool:
         return sample.video_id != "" and sample.duration_sec > 0
 
-    def augment_sample(self, sample: AnimeShotSample) -> List[AnimeShotSample]:
+    def augment_sample(self, sample: AnimeShotSample) -> list[AnimeShotSample]:
         """镜头候选不做增强 (运镜标注后由训练侧做视频变换)。"""
         return []
 
     # ── 导出 ────────────────────────────────────────────────────────────
 
-    def to_jsonl(self, out_path: str, samples: Optional[List[AnimeShotSample]] = None) -> int:
+    def to_jsonl(self, out_path: str, samples: list[AnimeShotSample] | None = None) -> int:
         """导出镜头候选 JSONL (movement_label 留 null, 供 VLM 预标注)。"""
         if samples is None:
             samples = self._train_data + self._val_data + self._test_data
@@ -335,7 +335,7 @@ class AnimeShooterDataset(BaseDataset):
         return len(samples)
 
 
-def build_shot_stats(samples: List[AnimeShotSample]) -> Dict[str, Any]:
+def build_shot_stats(samples: list[AnimeShotSample]) -> dict[str, Any]:
     """统计镜头候选: 总量 / 视频数 / 平均时长 / 时长分布。"""
     from collections import Counter
     n_videos = len({s.video_id for s in samples})

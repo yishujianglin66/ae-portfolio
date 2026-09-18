@@ -34,7 +34,7 @@ except ImportError:
     _logger = logging.getLogger("workflow-batch")
 
 try:
-    from batch_queue import BatchQueue, TaskStatus, ProgressContext, get_default_queue
+    from batch_queue import BatchQueue, ProgressContext, TaskStatus, get_default_queue
     _BATCH_AVAILABLE = True
 except ImportError:
     _BATCH_AVAILABLE = False
@@ -46,7 +46,7 @@ except ImportError:
     _RESOURCE_AVAILABLE = False
 
 try:
-    from task_persistence import TaskPersistence, PersistenceConfig, get_task_persistence
+    from task_persistence import PersistenceConfig, TaskPersistence, get_task_persistence
     _PERSISTENCE_AVAILABLE = True
 except ImportError:
     _PERSISTENCE_AVAILABLE = False
@@ -61,7 +61,7 @@ class WorkflowStage:
     """工作流阶段"""
     name: str
     description: str = ""
-    func: Optional[Callable[..., Any]] = None
+    func: Callable[..., Any] | None = None
     timeout: float = 300.0
     retry_count: int = 1
     required: bool = True
@@ -79,23 +79,23 @@ class WorkflowTask:
     workflow_type: str = "puppet_style"
     input_path: str = ""
     output_dir: str = ""
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
     priority: int = 5
     status: str = "pending"
     current_stage: int = 0
     total_stages: int = 0
     progress: float = 0.0
     progress_message: str = ""
-    stages: List[Dict[str, Any]] = field(default_factory=list)
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
+    stages: list[dict[str, Any]] = field(default_factory=list)
+    result: dict[str, Any] | None = None
+    error: str | None = None
     created_at: float = field(default_factory=time.time)
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    started_at: float | None = None
+    completed_at: float | None = None
     duration: float = 0.0
     mode: str = "auto"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "task_id": self.task_id,
             "name": self.name,
@@ -132,20 +132,20 @@ class WorkflowBatchIntegration:
 
     def __init__(
         self,
-        queue: Optional[BatchQueue] = None,
-        resource_manager: Optional[ResourceManager] = None,
-        persistence: Optional[TaskPersistence] = None,
+        queue: BatchQueue | None = None,
+        resource_manager: ResourceManager | None = None,
+        persistence: TaskPersistence | None = None,
     ):
         self._queue = queue or (get_default_queue() if _BATCH_AVAILABLE else None)
         self._resource_manager = resource_manager or (get_resource_manager() if _RESOURCE_AVAILABLE else None)
         self._persistence = persistence or (get_task_persistence() if _PERSISTENCE_AVAILABLE else None)
-        self._workflow_tasks: Dict[str, WorkflowTask] = {}
+        self._workflow_tasks: dict[str, WorkflowTask] = {}
 
     # --------------------------------------------------------------------
     # 工作流定义
     # --------------------------------------------------------------------
 
-    def get_puppet_style_stages(self, config: Dict[str, Any]) -> List[WorkflowStage]:
+    def get_puppet_style_stages(self, config: dict[str, Any]) -> list[WorkflowStage]:
         """获取木偶风格化工作流阶段"""
         auto_detect = config.get("auto_detect", True)
         use_resolve = config.get("use_resolve", False)
@@ -212,9 +212,9 @@ class WorkflowBatchIntegration:
         quality: str = "high",
         mode: str = "auto",
         priority: int = 5,
-        on_progress: Optional[Callable[[WorkflowTask], None]] = None,
-        on_complete: Optional[Callable[[WorkflowTask], None]] = None,
-        on_failure: Optional[Callable[[WorkflowTask], None]] = None,
+        on_progress: Callable[[WorkflowTask], None] | None = None,
+        on_complete: Callable[[WorkflowTask], None] | None = None,
+        on_failure: Callable[[WorkflowTask], None] | None = None,
     ) -> WorkflowTask:
         """提交木偶风格化工作流
 
@@ -354,11 +354,11 @@ class WorkflowBatchIntegration:
 
     def _execute_puppet_workflow(
         self,
-        config: Dict[str, Any],
-        stages: List[WorkflowStage],
+        config: dict[str, Any],
+        stages: list[WorkflowStage],
         progress_callback: Callable[[int, float, str], None],
         check_cancel: Callable[[], bool],
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """执行木偶风格化工作流（模拟实现）"""
         input_path = config.get("input_path", "")
         output_dir = config.get("output_dir", "")
@@ -366,7 +366,7 @@ class WorkflowBatchIntegration:
         auto_detect = config.get("auto_detect", True)
         mode = config.get("mode", "simulate")
 
-        stage_results: Dict[str, Any] = {}
+        stage_results: dict[str, Any] = {}
 
         for i, stage in enumerate(stages):
             if check_cancel():
@@ -430,7 +430,7 @@ class WorkflowBatchIntegration:
             ],
         }
 
-    def _stage_media_analysis(self, input_path: str, mode: str) -> Dict[str, Any]:
+    def _stage_media_analysis(self, input_path: str, mode: str) -> dict[str, Any]:
         """阶段: 媒体分析"""
         if mode == "simulate":
             time.sleep(0.2)
@@ -452,7 +452,7 @@ class WorkflowBatchIntegration:
         except Exception as e:
             return {"simulated": True, "error": str(e)}
 
-    def _stage_pose_detection(self, input_path: str, mode: str) -> Dict[str, Any]:
+    def _stage_pose_detection(self, input_path: str, mode: str) -> dict[str, Any]:
         """阶段: 姿态检测"""
         if mode == "simulate":
             time.sleep(0.3)
@@ -472,7 +472,7 @@ class WorkflowBatchIntegration:
         except Exception as e:
             return {"simulated": True, "error": str(e)}
 
-    def _stage_style_generation(self, style: str, auto_detect: bool, mode: str) -> Dict[str, Any]:
+    def _stage_style_generation(self, style: str, auto_detect: bool, mode: str) -> dict[str, Any]:
         """阶段: 风格化生成"""
         if mode == "simulate":
             time.sleep(0.4)
@@ -493,7 +493,7 @@ class WorkflowBatchIntegration:
         except Exception as e:
             return {"simulated": True, "error": str(e)}
 
-    def _stage_ae_integration(self, output_dir: str, style: str, mode: str) -> Dict[str, Any]:
+    def _stage_ae_integration(self, output_dir: str, style: str, mode: str) -> dict[str, Any]:
         """阶段: AE集成"""
         if mode == "simulate":
             time.sleep(0.3)
@@ -514,7 +514,7 @@ class WorkflowBatchIntegration:
         except Exception as e:
             return {"simulated": True, "error": str(e)}
 
-    def _stage_color_grading(self, output_dir: str, mode: str) -> Dict[str, Any]:
+    def _stage_color_grading(self, output_dir: str, mode: str) -> dict[str, Any]:
         """阶段: 调色"""
         if mode == "simulate":
             time.sleep(0.2)
@@ -535,7 +535,7 @@ class WorkflowBatchIntegration:
         except Exception as e:
             return {"simulated": True, "error": str(e)}
 
-    def _stage_output_render(self, output_dir: str, style: str, mode: str) -> Dict[str, Any]:
+    def _stage_output_render(self, output_dir: str, style: str, mode: str) -> dict[str, Any]:
         """阶段: 渲染输出"""
         if mode == "simulate":
             time.sleep(0.3)
@@ -558,7 +558,7 @@ class WorkflowBatchIntegration:
 
     def submit_batch_puppet_workflow(
         self,
-        input_files: List[str],
+        input_files: list[str],
         output_base_dir: str,
         style: str = "wood",
         auto_detect: bool = True,
@@ -566,8 +566,8 @@ class WorkflowBatchIntegration:
         mode: str = "auto",
         priority: int = 5,
         max_concurrent: int = 2,
-        on_batch_complete: Optional[Callable[[List[WorkflowTask]], None]] = None,
-    ) -> List[WorkflowTask]:
+        on_batch_complete: Callable[[list[WorkflowTask]], None] | None = None,
+    ) -> list[WorkflowTask]:
         """批量提交木偶风格化工作流
 
         Args:
@@ -584,7 +584,7 @@ class WorkflowBatchIntegration:
         Returns:
             工作流任务列表
         """
-        tasks: List[WorkflowTask] = []
+        tasks: list[WorkflowTask] = []
         remaining = len(input_files)
         import threading
         lock = threading.Lock()
@@ -622,7 +622,7 @@ class WorkflowBatchIntegration:
     # 任务查询
     # --------------------------------------------------------------------
 
-    def get_workflow_task(self, task_id: str) -> Optional[WorkflowTask]:
+    def get_workflow_task(self, task_id: str) -> WorkflowTask | None:
         """获取工作流任务"""
         task = self._workflow_tasks.get(task_id)
         if task:
@@ -637,13 +637,13 @@ class WorkflowBatchIntegration:
 
         return None
 
-    def get_all_workflow_tasks(self) -> List[WorkflowTask]:
+    def get_all_workflow_tasks(self) -> list[WorkflowTask]:
         """获取所有工作流任务"""
         tasks = list(self._workflow_tasks.values())
         tasks.sort(key=lambda t: t.created_at, reverse=True)
         return tasks
 
-    def get_tasks_by_status(self, status: str) -> List[WorkflowTask]:
+    def get_tasks_by_status(self, status: str) -> list[WorkflowTask]:
         """按状态获取任务"""
         return [t for t in self._workflow_tasks.values() if t.status == status]
 
@@ -651,10 +651,10 @@ class WorkflowBatchIntegration:
     # 统计信息
     # --------------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计信息"""
         tasks = self.get_all_workflow_tasks()
-        status_counts: Dict[str, int] = {}
+        status_counts: dict[str, int] = {}
         for t in tasks:
             status_counts[t.status] = status_counts.get(t.status, 0) + 1
 
@@ -677,7 +677,7 @@ class WorkflowBatchIntegration:
 # 模块单例
 # ============================================================================
 
-_default_integration: Optional[WorkflowBatchIntegration] = None
+_default_integration: WorkflowBatchIntegration | None = None
 
 
 def get_workflow_batch_integration() -> WorkflowBatchIntegration:
@@ -697,8 +697,8 @@ if __name__ == "__main__":
     print("  工作流编排器 - 批处理队列集成演示")
     print("=" * 70)
 
-    import tempfile
     import shutil
+    import tempfile
 
     tmp_dir = tempfile.mkdtemp(prefix="wf_batch_demo_")
     print(f"\n临时目录: {tmp_dir}")
@@ -731,7 +731,7 @@ if __name__ == "__main__":
         print(f"\n  任务已提交: {wf_task.task_id}")
         print(f"  任务名称: {wf_task.name}")
         print(f"  总阶段数: {wf_task.total_stages}")
-        print(f"  阶段列表:")
+        print("  阶段列表:")
         for i, stage in enumerate(wf_task.stages):
             print(f"    {i+1}. {stage['name']} - {stage['description']}")
 
@@ -814,7 +814,7 @@ if __name__ == "__main__":
 
         stats = integration.get_stats()
         print(f"\n  总任务数: {stats['total_tasks']}")
-        print(f"  状态分布:")
+        print("  状态分布:")
         for status, count in stats['status_counts'].items():
             print(f"    {status}: {count}")
         print(f"  平均耗时: {stats['avg_duration']:.2f}s")
@@ -826,4 +826,4 @@ if __name__ == "__main__":
 
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
-        print(f"\n临时目录已清理")
+        print("\n临时目录已清理")

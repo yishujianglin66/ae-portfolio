@@ -6,8 +6,8 @@ software_sdk/adapters/davinci_adapter.py - DaVinci Resolve 适配器
 """
 from __future__ import annotations
 
-import os
 import logging
+import os
 import subprocess
 from typing import Any, Dict, List, Optional
 
@@ -34,8 +34,8 @@ class DaVinciAdapter(BaseSoftwareAdapter):
 
     def __init__(
         self,
-        config: Optional[SoftwareConfig] = None,
-        logger: Optional[logging.Logger] = None,
+        config: SoftwareConfig | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         if config is None:
             config = SoftwareConfig(software=SoftwareType.DAVINCI_RESOLVE)
@@ -143,7 +143,7 @@ class DaVinciAdapter(BaseSoftwareAdapter):
         finally:
             self._mark_task_end()
 
-    def _apply_lut(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _apply_lut(self, params: dict[str, Any]) -> dict[str, Any]:
         """应用 LUT。"""
         lut_path = params.get("lut_path", "")
         self.logger.info(f"Applying LUT: {lut_path}")
@@ -151,30 +151,30 @@ class DaVinciAdapter(BaseSoftwareAdapter):
             return self._apply_lut_via_api(lut_path, params)
         return {"success": True, "action": "apply_lut", "lut": lut_path}
 
-    def _color_grade(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _color_grade(self, params: dict[str, Any]) -> dict[str, Any]:
         """调色。"""
         self.logger.info("Color grading...")
         return {"success": True, "action": "color_grade", "params": params}
 
-    def _batch_grade(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _batch_grade(self, params: dict[str, Any]) -> dict[str, Any]:
         """批量调色。"""
         self.logger.info("Batch color grading...")
         return {"success": True, "action": "batch_grade", "params": params}
 
-    def _export_drx(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_drx(self, params: dict[str, Any]) -> dict[str, Any]:
         """导出 DRX 项目。"""
         output = params.get("output", "project.drx")
         self.logger.info(f"Exporting DRX: {output}")
         return {"success": True, "action": "export_drx", "output": output}
 
-    def _render(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _render(self, params: dict[str, Any]) -> dict[str, Any]:
         """渲染输出。"""
         self.logger.info("Rendering in DaVinci Resolve...")
         return {"success": True, "action": "render", "params": params}
 
     def _apply_lut_via_api(
-        self, lut_path: str, params: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, lut_path: str, params: dict[str, Any]
+    ) -> dict[str, Any]:
         """通过 API 应用 LUT。"""
         try:
             project_manager = self._resolve_api.GetProjectManager()
@@ -196,7 +196,7 @@ class DaVinciAdapter(BaseSoftwareAdapter):
             return {"success": False, "error": str(e)}
 
     @staticmethod
-    def _common_paths() -> List[str]:
+    def _common_paths() -> list[str]:
         """DaVinci Resolve 常见安装路径。"""
         return [
             r"D:\DaVinci Resolve\Resolve.exe",

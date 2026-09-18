@@ -19,7 +19,11 @@ sys.path.insert(0, str(ROOT))
 
 from ai.r3_benchmark_v2 import HELD_OUT_QUERIES
 from ai.r3_query_norm_eval import (
-    IP_UNIVERSE, SYSTEM_PROMPT, _log, load_api_key, run_retrieval,
+    IP_UNIVERSE,
+    SYSTEM_PROMPT,
+    _log,
+    load_api_key,
+    run_retrieval,
 )
 from ai.t11_hybrid_search import TEST_QUERIES
 

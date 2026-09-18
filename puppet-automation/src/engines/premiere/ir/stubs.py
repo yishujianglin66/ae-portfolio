@@ -11,10 +11,9 @@ Timeline IR 数据存根 — 当 ae.timeline_ir 不可用时的最小回退实�
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Dict, List, Any, Optional
-
+from typing import Any, Dict, List, Optional
 
 # ================================================================
 #  枚举定义
@@ -81,13 +80,13 @@ class IREffect:
     """IR 特效 — 应用于一段 Clip 区间的视觉/音频效果"""
     name: str
     category: IREffectCategory = IREffectCategory.COLOR
-    match_name: Optional[str] = None
-    params: Dict[str, Any] = field(default_factory=dict)
-    keyframes: Optional[List[Dict[str, Any]]] = None
+    match_name: str | None = None
+    params: dict[str, Any] = field(default_factory=dict)
+    keyframes: list[dict[str, Any]] | None = None
     enabled: bool = True
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {
             "name": self.name,
             "category": self.category.value,
             "params": self.params,
@@ -106,11 +105,11 @@ class IRTransition:
     type: IRTransitionType = IRTransitionType.CUT
     duration: float = 0.0
     alignment: str = "center"
-    params: Dict[str, Any] = field(default_factory=dict)
-    easing: Optional[str] = None
+    params: dict[str, Any] = field(default_factory=dict)
+    easing: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {
             "type": self.type.value,
             "duration": self.duration,
             "alignment": self.alignment,
@@ -131,7 +130,7 @@ class IRMarker:
     duration_seconds: float = 0.0
     color: str = "blue"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "time_seconds": self.time_seconds,
             "name": self.name,
@@ -148,9 +147,9 @@ class IRClip:
     source_path: str
 
     source_start: float = 0.0
-    source_end: Optional[float] = None
+    source_end: float | None = None
     timeline_in: float = 0.0
-    timeline_out: Optional[float] = None
+    timeline_out: float | None = None
 
     scale: float = 1.0
     position_x: float = 0.5
@@ -164,20 +163,20 @@ class IRClip:
 
     speed: float = 1.0
     is_reversed: bool = False
-    freeze_frame_at: Optional[float] = None
+    freeze_frame_at: float | None = None
 
-    transition_in: Optional[IRTransition] = None
-    transition_out: Optional[IRTransition] = None
+    transition_in: IRTransition | None = None
+    transition_out: IRTransition | None = None
 
-    effects: List[IREffect] = field(default_factory=list)
+    effects: list[IREffect] = field(default_factory=list)
 
     track_index: int = 0
     track_type: IRTrackType = IRTrackType.VIDEO
-    label: Optional[str] = None
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    label: str | None = None
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    children: Optional[List[IRClip]] = None
+    children: list[IRClip] | None = None
 
     @property
     def duration(self) -> float:
@@ -187,8 +186,8 @@ class IRClip:
         src_dur = (self.source_end or 0) - self.source_start
         return max(0.0, src_dur / max(self.speed, 0.01))
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {
             "id": self.id,
             "source_path": self.source_path,
             "source_start": self.source_start,
@@ -238,10 +237,10 @@ class IRTrack:
     index: int
     type: IRTrackType = IRTrackType.VIDEO
     name: str = ""
-    clips: List[IRClip] = field(default_factory=list)
+    clips: list[IRClip] = field(default_factory=list)
     muted: bool = False
     locked: bool = False
-    target_language: Optional[str] = None
+    target_language: str | None = None
 
     @property
     def total_duration(self) -> float:
@@ -253,7 +252,7 @@ class IRTrack:
             for c in self.clips
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "index": self.index,
             "type": self.type.value,
@@ -275,11 +274,11 @@ class IRSequence:
     sample_rate: int = 48000
     audio_channels: int = 2
 
-    tracks: List[IRTrack] = field(default_factory=list)
-    master_audio_track: Optional[IRTrack] = None
+    tracks: list[IRTrack] = field(default_factory=list)
+    master_audio_track: IRTrack | None = None
 
-    markers: List[Dict[str, Any]] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    markers: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def total_duration(self) -> float:
@@ -289,7 +288,7 @@ class IRSequence:
             return 0.0
         return max(durations)
 
-    def get_track(self, index: int, track_type: Optional[IRTrackType] = None) -> Optional[IRTrack]:
+    def get_track(self, index: int, track_type: IRTrackType | None = None) -> IRTrack | None:
         """按索引/类型查找轨道"""
         for t in self.tracks:
             if t.index == index:
@@ -297,9 +296,9 @@ class IRSequence:
                     return t
         return None
 
-    def get_clips_by_type(self, track_type: IRTrackType) -> List[IRClip]:
+    def get_clips_by_type(self, track_type: IRTrackType) -> list[IRClip]:
         """获取某类型轨道中的所有片段"""
-        clips: List[IRClip] = []
+        clips: list[IRClip] = []
         for t in self.tracks:
             if t.type == track_type:
                 clips.extend(t.clips)
@@ -313,8 +312,8 @@ class IRSequence:
         self.tracks.append(track)
         self.tracks.sort(key=lambda t: t.index)
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {
             "name": self.name,
             "width": self.width,
             "height": self.height,
@@ -349,8 +348,8 @@ class IRValidationError(Exception):
 class IRValidationResult:
     """校验结果容器"""
     def __init__(self):
-        self.errors: List[IRValidationError] = []
-        self.warnings: List[str] = []
+        self.errors: list[IRValidationError] = []
+        self.warnings: list[str] = []
 
     @property
     def is_valid(self) -> bool:
@@ -371,7 +370,7 @@ class IRValidationResult:
             )
 
     def summary(self) -> str:
-        lines: List[str] = []
+        lines: list[str] = []
         if self.is_valid:
             lines.append("IR 校验通过 ✓")
         else:
@@ -408,7 +407,7 @@ def validate_ir(sequence: IRSequence) -> IRValidationResult:
     if not sequence.tracks:
         result.add_warning("序列没有轨道")
 
-    seen_indices: Dict[int, str] = {}
+    seen_indices: dict[int, str] = {}
     for track in sequence.tracks:
         if track.index in seen_indices:
             result.add_error(
@@ -439,7 +438,7 @@ def validate_ir(sequence: IRSequence) -> IRValidationResult:
     return result
 
 
-def export_to_pr_json(sequence: IRSequence, sequence_name: Optional[str] = None) -> Dict[str, Any]:
+def export_to_pr_json(sequence: IRSequence, sequence_name: str | None = None) -> dict[str, Any]:
     """
     将 IRSequence 导出为 Premiere Pro MCP 兼容格式（存根实现）。
 
@@ -452,12 +451,12 @@ def export_to_pr_json(sequence: IRSequence, sequence_name: Optional[str] = None)
     """
     name = sequence_name or sequence.name or "IR_Sequence"
 
-    clips: List[Dict[str, Any]] = []
-    audio_clips: List[Dict[str, Any]] = []
+    clips: list[dict[str, Any]] = []
+    audio_clips: list[dict[str, Any]] = []
 
     for track in sequence.tracks:
         for c in track.clips:
-            item: Dict[str, Any] = {
+            item: dict[str, Any] = {
                 "media_path": c.source_path,
                 "track_index": c.track_index + 1,
                 "timeline_in": round(c.timeline_in, 3),
@@ -475,7 +474,7 @@ def export_to_pr_json(sequence: IRSequence, sequence_name: Optional[str] = None)
             else:
                 clips.append(item)
 
-    payload: Dict[str, Any] = {
+    payload: dict[str, Any] = {
         "sequence_name": name,
         "width": sequence.width,
         "height": sequence.height,
@@ -497,7 +496,7 @@ def export_to_ae_jsx(sequence: IRSequence) -> str:
     Returns:
         ExtendScript 源码字符串
     """
-    lines: List[str] = []
+    lines: list[str] = []
     lines.append("// Auto-generated by Premiere IR Stubs (ae.timeline_ir not available)")
     lines.append(f"// Sequence: {sequence.name}")
     lines.append("")

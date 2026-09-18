@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import statistics
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -53,14 +53,14 @@ class CaseResult:
     category: str
     status: TestStatus
     duration_seconds: float = 0.0
-    error_message: Optional[str] = None
-    error_type: Optional[str] = None
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    error_message: str | None = None
+    error_type: str | None = None
+    metrics: dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(
         default_factory=lambda: datetime.now().isoformat(timespec="milliseconds")
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "category": self.category,
@@ -86,8 +86,8 @@ class SuiteReport:
     failed_tests: int = 0
     skipped_tests: int = 0
     error_tests: int = 0
-    results: List[CaseResult] = field(default_factory=list)
-    summary_metrics: Dict[str, Any] = field(default_factory=dict)
+    results: list[CaseResult] = field(default_factory=list)
+    summary_metrics: dict[str, Any] = field(default_factory=dict)
 
     @property
     def pass_rate(self) -> float:
@@ -115,18 +115,18 @@ class SuiteReport:
         return statistics.mean(r.duration_seconds for r in completed)
 
     @property
-    def error_distribution(self) -> Dict[str, int]:
+    def error_distribution(self) -> dict[str, int]:
         """错误类型分布。"""
-        dist: Dict[str, int] = {}
+        dist: dict[str, int] = {}
         for r in self.results:
             if r.status == TestStatus.FAILED and r.error_type:
                 dist[r.error_type] = dist.get(r.error_type, 0) + 1
         return dist
 
     @property
-    def latency_stats(self) -> Dict[str, float]:
+    def latency_stats(self) -> dict[str, float]:
         """延迟统计（从 metrics 中聚合）。"""
-        all_latencies: List[float] = []
+        all_latencies: list[float] = []
         for r in self.results:
             if "latency_ms" in r.metrics:
                 all_latencies.append(r.metrics["latency_ms"])
@@ -142,7 +142,7 @@ class SuiteReport:
             "p99_ms": sorted_lat[int(len(sorted_lat) * 0.99)],
         }
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "suite_name": self.suite_name,
             "category": self.category.value,
@@ -266,11 +266,11 @@ class StabilityTestSuite:
         self.report.end_time = time.time()
         return self.report
 
-    def save_report(self, output_dir: Path, formats: List[str]) -> List[Path]:
+    def save_report(self, output_dir: Path, formats: list[str]) -> list[Path]:
         """保存报告到多种格式。"""
         output_dir.mkdir(parents=True, exist_ok=True)
         report = self.finish()
-        paths: List[Path] = []
+        paths: list[Path] = []
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -290,7 +290,7 @@ class StabilityTestSuite:
 def measure_latency(
     func: Callable[[], Any],
     iterations: int = 100,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """测量函数执行延迟。
 
     Args:
@@ -300,7 +300,7 @@ def measure_latency(
     Returns:
         延迟统计字典
     """
-    durations: List[float] = []
+    durations: list[float] = []
     errors = 0
     start_total = time.time()
 
@@ -357,9 +357,9 @@ class HistoricalComparator:
     def __init__(self, history_dir: Path) -> None:
         self.history_dir = history_dir
 
-    def load_history(self, category: TestCategory) -> List[SuiteReport]:
+    def load_history(self, category: TestCategory) -> list[SuiteReport]:
         """加载某分类的历史报告。"""
-        reports: List[SuiteReport] = []
+        reports: list[SuiteReport] = []
         pattern = f"report_{category.value}_*.json"
         for path in sorted(self.history_dir.glob(pattern)):
             try:
@@ -382,7 +382,7 @@ class HistoricalComparator:
                 continue
         return reports
 
-    def compare(self, current: SuiteReport, category: TestCategory) -> Dict[str, Any]:
+    def compare(self, current: SuiteReport, category: TestCategory) -> dict[str, Any]:
         """对比当前报告与历史数据。"""
         history = self.load_history(category)
         if not history:

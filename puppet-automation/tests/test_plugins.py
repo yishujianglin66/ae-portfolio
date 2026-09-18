@@ -11,20 +11,10 @@ Covers:
 """
 
 import asyncio
-import pytest
 from pathlib import Path
 from typing import Optional
 
-from src.plugins.base import (
-    BasePlugin,
-    HookPlugin,
-    PhasePlugin,
-    FilterPlugin,
-    PluginContext,
-    PluginPriority,
-    PluginState,
-)
-from src.plugins.manager import PluginManager
+import pytest
 from src.models.pipeline import (
     PhaseResult,
     PipelineJob,
@@ -32,7 +22,16 @@ from src.models.pipeline import (
     PipelineState,
     TaskStatus,
 )
-
+from src.plugins.base import (
+    BasePlugin,
+    FilterPlugin,
+    HookPlugin,
+    PhasePlugin,
+    PluginContext,
+    PluginPriority,
+    PluginState,
+)
+from src.plugins.manager import PluginManager
 
 # ============================================================
 # Test fixtures
@@ -553,8 +552,8 @@ class TestOrchestratorPluginIntegration:
     async def test_plugins_fire_during_pipeline(self, tmp_path):
         """Plugins should fire when running pipeline through orchestrator."""
         from src.orchestrator.pipeline import PipelineOrchestrator
-        from src.plugins.manager import PluginManager
         from src.plugins.base import HookPlugin, PluginContext, PluginPriority
+        from src.plugins.manager import PluginManager
 
         # Custom tracking plugin
         class TrackerPlugin(HookPlugin):

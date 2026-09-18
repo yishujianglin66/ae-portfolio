@@ -31,7 +31,7 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-CAMERA_LABELS: List[str] = [
+CAMERA_LABELS: list[str] = [
     "static", "pan_left", "pan_right", "zoom_in", "zoom_out",
     "tilt_up", "tilt_down", "zoom_back", "diag_pan", "orbit",
     "push", "complex", "unknown",
@@ -63,7 +63,7 @@ _ENTROPY_COMPLEX = 0.80          # 旧 0.75
 _FALLBACK_CONF = 0.10            # 旧 0.15
 
 
-def _track_and_analyze(frames: List[np.ndarray]) -> Dict[str, float]:
+def _track_and_analyze(frames: list[np.ndarray]) -> dict[str, float]:
     """LK 稀疏光流跟踪 + 运动模式分析。支持特征点重检测。"""
     if len(frames) < 3:
         return _empty_stats()
@@ -79,10 +79,10 @@ def _track_and_analyze(frames: List[np.ndarray]) -> Dict[str, float]:
     feat_params = dict(maxCorners=_MAX_TRACK_POINTS, qualityLevel=0.01,
                        minDistance=7, blockSize=7)
 
-    all_dx: List[float] = []
-    all_dy: List[float] = []
-    all_pos_x: List[float] = []
-    all_pos_y: List[float] = []
+    all_dx: list[float] = []
+    all_dy: list[float] = []
+    all_pos_x: list[float] = []
+    all_pos_y: list[float] = []
 
     prev_gray = grays[0]
     p0 = cv2.goodFeaturesToTrack(prev_gray, mask=None, **feat_params)
@@ -200,7 +200,7 @@ def _track_and_analyze(frames: List[np.ndarray]) -> Dict[str, float]:
     }
 
 
-def _empty_stats() -> Dict[str, float]:
+def _empty_stats() -> dict[str, float]:
     return {
         "mean_dx": 0.0, "mean_dy": 0.0, "mean_radial": 0.0,
         "h_consistency": 0.0, "v_consistency": 0.0,
@@ -209,7 +209,7 @@ def _empty_stats() -> Dict[str, float]:
     }
 
 
-def _classify_from_stats(stats: Dict[str, float]) -> Tuple[str, float]:
+def _classify_from_stats(stats: dict[str, float]) -> tuple[str, float]:
     """从跟踪统计判定运镜类型。
 
     检测顺序 (关键!):
@@ -282,7 +282,7 @@ def _classify_from_stats(stats: Dict[str, float]) -> Tuple[str, float]:
 
 def _sample_frames(cap, idx_start: int, idx_end: int, span_frames: int,
                    max_frames: int, target_fps: float,
-                   fps: float) -> List[np.ndarray]:
+                   fps: float) -> list[np.ndarray]:
     """顺序读取 [idx_start, idx_end) 帧并按步长采样缩放 — 两个读帧入口的公共实现。
 
     顺序 read + 跳帧: 4K 长 GOP 视频上 cap.set 随机 seek 每次都要解
@@ -290,7 +290,7 @@ def _sample_frames(cap, idx_start: int, idx_end: int, span_frames: int,
     _read_frames_range 因块小才允许起点 seek 一次。
     """
     frame_step = max(1, max(int(fps / target_fps), span_frames // max_frames))
-    frames: List[np.ndarray] = []
+    frames: list[np.ndarray] = []
     idx = idx_start
     keep_counter = frame_step
     while idx < idx_end and len(frames) < max_frames:
@@ -306,7 +306,7 @@ def _sample_frames(cap, idx_start: int, idx_end: int, span_frames: int,
 
 
 def _read_frames(video_path: str, max_frames: int = _MAX_FRAMES,
-                 target_fps: float = _SAMPLE_FPS) -> List[np.ndarray]:
+                 target_fps: float = _SAMPLE_FPS) -> list[np.ndarray]:
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         return []
@@ -321,7 +321,7 @@ def _read_frames(video_path: str, max_frames: int = _MAX_FRAMES,
         cap.release()
 
 
-def classify_segment(frames: List[np.ndarray]) -> Dict[str, Any]:
+def classify_segment(frames: list[np.ndarray]) -> dict[str, Any]:
     if len(frames) < 3:
         return {"label": "unknown", "confidence": 0.0, "flow_stats": _empty_stats()}
     stats = _track_and_analyze(frames)
@@ -329,8 +329,8 @@ def classify_segment(frames: List[np.ndarray]) -> Dict[str, Any]:
     return {"label": label, "confidence": conf, "flow_stats": stats}
 
 
-def _aggregate_votes(per_segment: List[Dict[str, Any]],
-                     global_stats: Dict[str, Any]) -> Tuple[str, float]:
+def _aggregate_votes(per_segment: list[dict[str, Any]],
+                     global_stats: dict[str, Any]) -> tuple[str, float]:
     """段落投票聚合 — classify_video 与 classify_video_cached 的唯一实现。
 
     平局守卫 (2026-08-15): 3 段投票 1/1/1 时 Counter.most_common 取首段,
@@ -351,7 +351,7 @@ def _aggregate_votes(per_segment: List[Dict[str, Any]],
     return dominant, final_conf
 
 
-def classify_video(video_path: str, n_segments: int = 3) -> Dict[str, Any]:
+def classify_video(video_path: str, n_segments: int = 3) -> dict[str, Any]:
     path = Path(video_path)
     if not path.exists():
         return {"dominant": "unknown", "confidence": 0.0,
@@ -377,7 +377,7 @@ def classify_video(video_path: str, n_segments: int = 3) -> Dict[str, Any]:
 
 def _read_frames_range(video_path: str, start_sec: float, end_sec: float,
                        max_frames: int = _MAX_FRAMES,
-                       target_fps: float = _SAMPLE_FPS) -> List[np.ndarray]:
+                       target_fps: float = _SAMPLE_FPS) -> list[np.ndarray]:
     """读时间范围内的帧 (块级读帧, 供分段缓存使用)。
 
     与 _read_frames 相同采样策略; seek 到范围起点后顺序读 (块小, seek 成本可控)。
@@ -404,7 +404,7 @@ def _read_frames_range(video_path: str, start_sec: float, end_sec: float,
 _BLOCK_CACHE_SCHEMA = 1
 
 
-def classify_video_cached(video_path: str, seg_sec: float = 5.0) -> Dict[str, Any]:
+def classify_video_cached(video_path: str, seg_sec: float = 5.0) -> dict[str, Any]:
     """分段缓存版运镜分类 — 素材裁切后未变时间段复用 (2026-08-14)。
 
     块划分/指纹与 core.temporal_segment_cache 完全一致 (同一视频同样切块),
@@ -433,7 +433,7 @@ def classify_video_cached(video_path: str, seg_sec: float = 5.0) -> Dict[str, An
     _cache_root = Path(__file__).resolve().parent.parent / "cache" / "camera_segments" / "blocks"
     os.makedirs(_cache_root, exist_ok=True)
 
-    per_segment: List[Dict[str, Any]] = []
+    per_segment: list[dict[str, Any]] = []
     hit_blocks = 0
     for seg in segments:
         fp = seg["fp"]
@@ -476,7 +476,7 @@ def classify_video_cached(video_path: str, seg_sec: float = 5.0) -> Dict[str, An
 
     # 全局 flow_stats: 各块统计的算术平均 (近似全帧统计, 可观测性用途)
     stat_keys = [k for k in per_segment[0]["flow_stats"]]
-    global_stats: Dict[str, float] = {}
+    global_stats: dict[str, float] = {}
     for k in stat_keys:
         vals = [s["flow_stats"].get(k, 0.0) for s in per_segment]
         global_stats[k] = round(float(np.mean(vals)), 4)
@@ -496,7 +496,7 @@ def classify_video_cached(video_path: str, seg_sec: float = 5.0) -> Dict[str, An
     }
 
 
-def batch_classify(video_paths: Sequence[str]) -> List[Dict[str, Any]]:
+def batch_classify(video_paths: Sequence[str]) -> list[dict[str, Any]]:
     results = []
     for vp in video_paths:
         r = classify_video(vp)

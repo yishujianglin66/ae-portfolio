@@ -51,7 +51,7 @@ FIX_SUGGESTIONS = {
 class FlagshipStageError(Exception):
     """阶段级失败：携带规格 §0.4 八类错误分类，供顶层统一生成 postmortem。"""
 
-    def __init__(self, stage: str, category: str, error: str, completed: Optional[dict] = None):
+    def __init__(self, stage: str, category: str, error: str, completed: dict | None = None):
         super().__init__(error)
         self.stage = stage
         self.category = category if category in FAILURE_CATEGORIES else "BRIDGE_DOWN"
@@ -67,7 +67,7 @@ def engine_fallback_enabled() -> bool:
     return os.environ.get("AEKV_ENGINE_FALLBACK", "0") == "1"
 
 
-def classify_failure(stage: str, exc: Optional[BaseException] = None, logs: str = "") -> str:
+def classify_failure(stage: str, exc: BaseException | None = None, logs: str = "") -> str:
     """将一次失败归类到规格 §0.4 八类之一（关键词启发式，引擎不可用默认 BRIDGE_DOWN）。"""
     text = f"{stage} {exc} {logs}".lower()
     # 注意：具体类别须排在泛化类别(BRIDGE_DOWN)之前，否则会被提前命中
@@ -96,7 +96,7 @@ def write_postmortem(
     category: str,
     stage: str,
     error: str,
-    completed: Optional[dict] = None,
+    completed: dict | None = None,
 ) -> Path:
     """生成规格 §0.4 合规的 postmortem.md（含八类分类 + 修复建议）。"""
     category = category if category in FAILURE_CATEGORIES else "BRIDGE_DOWN"

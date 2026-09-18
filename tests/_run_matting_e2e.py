@@ -1,7 +1,13 @@
-import sys, os, asyncio, json, time
+import asyncio
+import json
+import os
+import sys
+import time
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\puppet-automation\src")
 
 from pathlib import Path
+
 from engines.matting.engine import MattingEngine
 
 TEST_IMG = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\tests\output\matting_e2e\portrait_test_input.jpg")
@@ -41,7 +47,8 @@ async def main():
 res = asyncio.run(main())
 
 try:
-    import cv2, numpy as np
+    import cv2
+    import numpy as np
     print()
     print("===== Alpha 质量量化 =====")
     header = ["model", "contrast", "soft_pix", "fg>95%", "bg<5%", "sharpness", "lat_s"]

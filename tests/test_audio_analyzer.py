@@ -4,11 +4,11 @@ AudioAnalyzer 单元测试 - 覆盖纯函数分析逻辑
 测试目标: _detect_key, _infer_mood, _infer_genre, _calculate_similarity, _calculate_mode_score
 """
 
-import unittest
-import sys
-import os
-import json
 import importlib.util
+import json
+import os
+import sys
+import unittest
 from pathlib import Path
 
 # 添加项目根目录到路径

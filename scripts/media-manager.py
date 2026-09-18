@@ -1,9 +1,9 @@
-import os
 import json
+import os
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
-from datetime import datetime
 
 CONFIG_PATH = Path(__file__).parent / "config" / "media-config.json"
 PROJECT_ROOT = Path(__file__).parent
@@ -31,121 +31,121 @@ class MediaManager:
             os.makedirs(dir_path, exist_ok=True)
 
     def download(self, url: str, type: str = "video", quality: str = "best",
-                 output_dir: Optional[str] = None) -> Dict:
+                 output_dir: str | None = None) -> dict:
         from media_fetcher import MediaFetcher
         fetcher = MediaFetcher()
         return fetcher.download_video(url, output_dir=output_dir, 
                                       audio_only=(type == "audio"), quality=quality)
 
-    def download_bgm(self, url: str) -> Dict:
+    def download_bgm(self, url: str) -> dict:
         return self.download(url, type="audio")
 
-    def download_batch(self, urls: List[str], type: str = "video") -> List[Dict]:
+    def download_batch(self, urls: list[str], type: str = "video") -> list[dict]:
         from media_fetcher import MediaFetcher
         fetcher = MediaFetcher()
         return fetcher.download_batch(urls, audio_only=(type == "audio"))
 
-    def download_douyin(self, url: str, audio_only: bool = False) -> Dict:
+    def download_douyin(self, url: str, audio_only: bool = False) -> dict:
         from douyin_downloader import DouyinDownloader
         downloader = DouyinDownloader()
         return downloader.download_video(url, audio_only=audio_only)
 
-    def search_douyin(self, keyword: str, max_results: int = 5, audio_only: bool = False) -> List[Dict]:
+    def search_douyin(self, keyword: str, max_results: int = 5, audio_only: bool = False) -> list[dict]:
         from douyin_downloader import DouyinDownloader
         downloader = DouyinDownloader()
         return downloader.search_and_download(keyword, max_results=max_results, audio_only=audio_only)
 
-    def download_douyin_bgm(self, url: str) -> Dict:
+    def download_douyin_bgm(self, url: str) -> dict:
         return self.download_douyin(url, audio_only=True)
 
-    def extract_audio(self, video_path: str, format: str = "mp3", bitrate: str = None) -> Dict:
+    def extract_audio(self, video_path: str, format: str = "mp3", bitrate: str = None) -> dict:
         from ffmpeg_toolkit import FFmpegToolkit
         toolkit = FFmpegToolkit()
         return toolkit.extract_audio(video_path, format=format, bitrate=bitrate)
 
     def clip_video(self, input_file: str, start_time: float, duration: float,
-                   output_file: Optional[str] = None) -> Dict:
+                   output_file: str | None = None) -> dict:
         from ffmpeg_toolkit import FFmpegToolkit
         toolkit = FFmpegToolkit()
         return toolkit.extract_video_segment(input_file, start_time, duration, output_file)
 
     def clip_audio(self, input_file: str, start_time: float, duration: float,
-                   output_file: Optional[str] = None) -> Dict:
+                   output_file: str | None = None) -> dict:
         from ffmpeg_toolkit import FFmpegToolkit
         toolkit = FFmpegToolkit()
         return toolkit.extract_audio_segment(input_file, start_time, duration, output_file)
 
-    def get_media_info(self, file_path: str) -> Dict:
+    def get_media_info(self, file_path: str) -> dict:
         from ffmpeg_toolkit import FFmpegToolkit
         toolkit = FFmpegToolkit()
         return toolkit.get_media_info(file_path)
 
-    def analyze_audio(self, audio_path: str) -> Dict:
+    def analyze_audio(self, audio_path: str) -> dict:
         from audio_analyzer import AudioAnalyzer
         analyzer = AudioAnalyzer()
         return analyzer.analyze_audio(audio_path)
 
-    def generate_beat_map(self, audio_path: str) -> Dict:
+    def generate_beat_map(self, audio_path: str) -> dict:
         from audio_analyzer import AudioAnalyzer
         analyzer = AudioAnalyzer()
         return analyzer.generate_beat_map(audio_path)
 
-    def search_library(self, keyword: str, media_type: Optional[str] = None,
-                       max_results: int = 20) -> List[Dict]:
+    def search_library(self, keyword: str, media_type: str | None = None,
+                       max_results: int = 20) -> list[dict]:
         from media_search import MediaSearchEngine
         engine = MediaSearchEngine()
         results = engine.search_by_keyword(keyword, media_type=media_type, max_results=max_results)
         return [r.to_dict() for r in results]
 
-    def search_online(self, query: str, platform: Optional[str] = None,
-                      max_results: int = 10) -> List[Dict]:
+    def search_online(self, query: str, platform: str | None = None,
+                      max_results: int = 10) -> list[dict]:
         from media_search import MediaSearchEngine
         engine = MediaSearchEngine()
         return engine.search_online(query, platform=platform, max_results=max_results)
 
-    def find_bgm(self, video_duration: float, mood: Optional[str] = None,
-                 bpm: Optional[float] = None, max_results: int = 5) -> List[Dict]:
+    def find_bgm(self, video_duration: float, mood: str | None = None,
+                 bpm: float | None = None, max_results: int = 5) -> list[dict]:
         from media_search import MediaSearchEngine
         engine = MediaSearchEngine()
         results = engine.find_bgm_for_video(video_duration, mood=mood, 
                                             target_bpm=bpm, max_results=max_results)
         return [r.to_dict() for r in results]
 
-    def search_by_mood(self, mood: str, max_results: int = 10) -> List[Dict]:
+    def search_by_mood(self, mood: str, max_results: int = 10) -> list[dict]:
         from media_search import MediaSearchEngine
         engine = MediaSearchEngine()
         results = engine.search_by_mood(mood, max_results=max_results)
         return [r.to_dict() for r in results]
 
     def search_by_bpm(self, target_bpm: float, tolerance: float = 10,
-                      max_results: int = 10) -> List[Dict]:
+                      max_results: int = 10) -> list[dict]:
         from media_search import MediaSearchEngine
         engine = MediaSearchEngine()
         results = engine.search_by_bpm(target_bpm, tolerance=tolerance, max_results=max_results)
         return [r.to_dict() for r in results]
 
-    def get_library_stats(self) -> Dict:
+    def get_library_stats(self) -> dict:
         from media_search import MediaSearchEngine
         engine = MediaSearchEngine()
         return engine.get_library_stats()
 
-    def validate_douyin_cookie(self) -> Dict:
+    def validate_douyin_cookie(self) -> dict:
         from douyin_downloader import DouyinDownloader
         downloader = DouyinDownloader()
         return downloader.validate_cookie()
 
-    def auto_manage_cookies(self) -> Dict:
+    def auto_manage_cookies(self) -> dict:
         from douyin_downloader import DouyinDownloader
         downloader = DouyinDownloader()
         return downloader.auto_manage_cookies()
 
-    def batch_extract_audio(self, video_directory: str = None) -> List[Dict]:
+    def batch_extract_audio(self, video_directory: str = None) -> list[dict]:
         from douyin_downloader import DouyinDownloader
         downloader = DouyinDownloader()
         return downloader.batch_extract_audio(video_directory)
 
     def download_trending(self, count: int = 5, platform: str = "douyin",
-                         audio_only: bool = False) -> List[Dict]:
+                         audio_only: bool = False) -> list[dict]:
         if platform == "douyin":
             from douyin_downloader import DouyinDownloader
             downloader = DouyinDownloader()
@@ -158,7 +158,7 @@ class MediaManager:
     # ============================================================
     
     def extract_bgm_from_url(self, url: str, format: str = "mp3", 
-                             clip_start: float = None, clip_duration: float = None) -> Dict:
+                             clip_start: float = None, clip_duration: float = None) -> dict:
         """
         从视频链接提取BGM的完整流程：
         URL → 下载视频 → 提取音频 → (可选)截取片段 → 返回音频路径
@@ -217,7 +217,7 @@ class MediaManager:
         result["success"] = True
         return result
     
-    def extract_bgm_from_douyin(self, url: str, format: str = "mp3") -> Dict:
+    def extract_bgm_from_douyin(self, url: str, format: str = "mp3") -> dict:
         """
         从抖音视频提取BGM（使用抖音专用下载器）
         """
@@ -264,7 +264,7 @@ class MediaManager:
     #  参考视频效果分析 → AE参数生成
     # ============================================================
     
-    def analyze_video_effect(self, video_path: str, detail_level: str = "standard") -> Dict:
+    def analyze_video_effect(self, video_path: str, detail_level: str = "standard") -> dict:
         """
         分析参考视频的剪辑效果，生成AE参数表
         :param video_path: 视频文件路径
@@ -275,7 +275,7 @@ class MediaManager:
         analyzer = VideoEffectAnalyzer()
         return analyzer.analyze_video(video_path, detail_level=detail_level)
     
-    def analyze_video_from_url(self, url: str, detail_level: str = "standard") -> Dict:
+    def analyze_video_from_url(self, url: str, detail_level: str = "standard") -> dict:
         """
         从URL下载参考视频并分析效果：URL → 下载 → 分析 → 返回AE参数
         :param url: 视频链接
@@ -317,7 +317,7 @@ class MediaManager:
         
         return result
     
-    def generate_ae_script_from_analysis(self, analysis: Dict) -> str:
+    def generate_ae_script_from_analysis(self, analysis: dict) -> str:
         """
         从分析结果生成AE ExtendScript脚本
         :param analysis: analyze_video_effect的返回结果
@@ -329,24 +329,24 @@ class MediaManager:
         script_lines = []
         
         # 创建合成
-        script_lines.append(f'// 自动生成的AE脚本 - 基于视频效果分析')
-        script_lines.append(f'var comp = app.project.items.addComp(')
-        script_lines.append(f'  "Analyzed Comp",')
+        script_lines.append('// 自动生成的AE脚本 - 基于视频效果分析')
+        script_lines.append('var comp = app.project.items.addComp(')
+        script_lines.append('  "Analyzed Comp",')
         script_lines.append(f'  {comp.get("width", 1920)},')
         script_lines.append(f'  {comp.get("height", 1080)},')
-        script_lines.append(f'  1,')
+        script_lines.append('  1,')
         script_lines.append(f'  {comp.get("duration", 10)},')
         script_lines.append(f'  {comp.get("fps", 30)}')
-        script_lines.append(f');')
+        script_lines.append(');')
         
         # 添加调整层
         for adj in ae_params.get("adjustment_layers", []):
             script_lines.append(f'// {adj["name"]}')
             script_lines.append(f'var adjLayer = comp.layers.addSolid([0.5,0.5,0.5], "{adj["name"]}", {comp.get("width", 1920)}, {comp.get("height", 1080)}, 1);')
-            script_lines.append(f'adjLayer.adjustmentLayer = true;')
+            script_lines.append('adjLayer.adjustmentLayer = true;')
             if adj.get("effect") == "Lumetri Color":
                 params = adj.get("params", {})
-                script_lines.append(f'var lumetri = adjLayer.Effects.addProperty("ADBE Lumetri");')
+                script_lines.append('var lumetri = adjLayer.Effects.addProperty("ADBE Lumetri");')
                 if "temperature" in params:
                     script_lines.append(f'lumetri.property("Temperature").setValue({params["temperature"]});')
                 if "tint" in params:
@@ -364,11 +364,11 @@ class MediaManager:
                 script_lines.append(f'// Expression: {params["expression"]}')
             elif params.get("property") == "Gaussian Blur":
                 script_lines.append(f'var effectLayer = comp.layers.addSolid([0,0,0], "{eff["name"]}", {comp.get("width", 1920)}, {comp.get("height", 1080)}, 1);')
-                script_lines.append(f'var blur = effectLayer.Effects.addProperty("ADBE Gaussian Blur 2");')
+                script_lines.append('var blur = effectLayer.Effects.addProperty("ADBE Gaussian Blur 2");')
                 script_lines.append(f'blur.property("Blurriness").setValue({params.get("blurriness", 20)});')
             elif params.get("property") == "Glow":
                 script_lines.append(f'var effectLayer = comp.layers.addSolid([0,0,0], "{eff["name"]}", {comp.get("width", 1920)}, {comp.get("height", 1080)}, 1);')
-                script_lines.append(f'var glow = effectLayer.Effects.addProperty("ADBE Glo2");')
+                script_lines.append('var glow = effectLayer.Effects.addProperty("ADBE Glo2");')
                 script_lines.append(f'glow.property("Intensity").setValue({params.get("intensity", 80)});')
                 script_lines.append(f'glow.property("Radius").setValue({params.get("radius", 30)});')
         
@@ -380,7 +380,7 @@ class MediaManager:
         return "\n".join(script_lines)
 
     def complete_workflow(self, url: str, clip_start: float = None, clip_duration: float = None,
-                         extract_audio_flag: bool = False, analyze_flag: bool = False) -> Dict:
+                         extract_audio_flag: bool = False, analyze_flag: bool = False) -> dict:
         result = {
             "steps": [],
             "final_files": []
@@ -431,8 +431,8 @@ class MediaManager:
         result["success"] = True
         return result
 
-    def find_and_download_bgm(self, mood: str, duration: float, bpm: Optional[float] = None,
-                              source: str = "library") -> Dict:
+    def find_and_download_bgm(self, mood: str, duration: float, bpm: float | None = None,
+                              source: str = "library") -> dict:
         if source == "library":
             bgm_list = self.find_bgm(duration, mood=mood, bpm=bpm)
             if bgm_list:

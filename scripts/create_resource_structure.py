@@ -138,7 +138,7 @@ def main() -> None:
                 encoding="utf-8",
             )
 
-    print(f"\n=== 完成 ===")
+    print("\n=== 完成 ===")
     print(f"  新建目录: {created_count} 个")
     print(f"  已存在目录: {existed_count} 个")
     print(f"  资源库根目录: {RES_ROOT}")

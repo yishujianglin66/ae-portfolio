@@ -14,10 +14,10 @@ PR MCP Bridge 自动化测试脚本
 from __future__ import annotations
 
 import json
-import time
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 # 项目路径
@@ -98,7 +98,7 @@ def test_create_sequence(client: PremiereMCP, name: str = "AutoTest_Seq") -> dic
 def test_execute_script_file(client: PremiereMCP) -> dict:
     """测试执行卡点剪辑脚本。"""
     script_path = PROJECT_ROOT / "solo_leveling_pr_beat_edit.jsx"
-    print(f"\n[测试4] 执行卡点剪辑脚本...")
+    print("\n[测试4] 执行卡点剪辑脚本...")
     print(f"  脚本路径: {script_path}")
     
     if not script_path.exists():

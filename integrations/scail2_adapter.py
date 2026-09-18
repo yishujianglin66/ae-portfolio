@@ -71,15 +71,15 @@ class SCAIL2Adapter:
         "audio_driven",      # 音频驱动 (需配合 MuseTalk)
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._source_available = _SCAIL2_DIR.is_dir()
         self._simulate = not self._source_available
         self._env_check = self._check_environment()
 
-    def _check_environment(self) -> Dict[str, Any]:
+    def _check_environment(self) -> dict[str, Any]:
         """检查运行环境"""
-        checks: Dict[str, Any] = {
+        checks: dict[str, Any] = {
             "source_cloned": self._source_available,
             "simulate_mode": self._simulate,
         }
@@ -122,10 +122,10 @@ class SCAIL2Adapter:
             and self._env_check.get("dep_diffusers", False)
         )
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """执行操作
 
         Args:
@@ -150,7 +150,7 @@ class SCAIL2Adapter:
         else:
             return {"status": "error", "message": f"Unknown operation: {operation}"}
 
-    def _list_capabilities(self) -> Dict[str, Any]:
+    def _list_capabilities(self) -> dict[str, Any]:
         return {
             "status": "success",
             "character_types": self.CHARACTER_TYPES,
@@ -161,7 +161,7 @@ class SCAIL2Adapter:
             "zero_shot": True,
         }
 
-    def _get_model_info(self) -> Dict[str, Any]:
+    def _get_model_info(self) -> dict[str, Any]:
         return {
             "status": "success",
             "model_name": "SCAIL-2",
@@ -183,7 +183,7 @@ class SCAIL2Adapter:
             },
         }
 
-    def _estimate_vram(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _estimate_vram(self, params: dict[str, Any]) -> dict[str, Any]:
         """估算 VRAM 需求"""
         resolution = params.get("resolution", "512x512")
         num_frames = params.get("num_frames", 60)
@@ -217,7 +217,7 @@ class SCAIL2Adapter:
             },
         }
 
-    def _animate_character(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _animate_character(self, params: dict[str, Any]) -> dict[str, Any]:
         """角色动画生成
 
         Args:
@@ -307,6 +307,6 @@ class SCAIL2Adapter:
 
 # ── 集成注册入口 ──────────────────────────────────────────────────
 
-def get_adapter(config: Optional[Dict[str, Any]] = None) -> SCAIL2Adapter:
+def get_adapter(config: dict[str, Any] | None = None) -> SCAIL2Adapter:
     """工厂函数，供 integration_registry 调用"""
     return SCAIL2Adapter(config)

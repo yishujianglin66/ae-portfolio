@@ -201,7 +201,9 @@ def main() -> int:
     print("  [STEP-2] 运行 UnifiedPipeline 七阶段")
     print("=" * 78)
     from pipeline.unified_pipeline import (
-        UnifiedPipeline, PipelineConfig, PipelineResult,
+        PipelineConfig,
+        PipelineResult,
+        UnifiedPipeline,
     )
 
     ref_video = materials[0][0]  # 用第一个素材作为 reference_video
@@ -288,7 +290,7 @@ def main() -> int:
         _print_check("perceive.videos >= 2", perceive_ok,
                      f"len={len(perceive_videos)}")
     else:
-        print(f"    [FAIL] perceive 阶段结果缺失")
+        print("    [FAIL] perceive 阶段结果缺失")
 
     # ====================================================================
     # 5. execute 阶段 — 多素材混剪核心验证
@@ -342,7 +344,7 @@ def main() -> int:
                           f"unique={len(set(source_files))}")
         exec_ok = c1 and c2 and c3 and c4 and c5 and c6
     else:
-        print(f"    [FAIL] execute 阶段结果缺失或无 data")
+        print("    [FAIL] execute 阶段结果缺失或无 data")
 
     # ====================================================================
     # 6. verify 阶段分数验证
@@ -369,7 +371,7 @@ def main() -> int:
         _print_check(f"score > {MIN_VERIFY_SCORE}",
                      verify_ok, f"score={quality_score}")
     else:
-        print(f"    [FAIL] verify 阶段结果缺失或无 data")
+        print("    [FAIL] verify 阶段结果缺失或无 data")
 
     # ====================================================================
     # 7. 输出视频 ffprobe 元数据验证

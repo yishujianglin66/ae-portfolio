@@ -44,7 +44,7 @@ class WhisperEngine(BaseEngine):
     def __init__(
         self,
         executable_path: Path | str = sys.executable,
-        model_dir: Optional[Path] = None,
+        model_dir: Path | None = None,
     ):
         self.model_dir = model_dir or _DEFAULT_MODEL_DIR
         self.model_dir.mkdir(parents=True, exist_ok=True)
@@ -79,7 +79,7 @@ class WhisperEngine(BaseEngine):
         self,
         audio_path: Path | str,
         model: str = "base",
-        language: Optional[str] = "zh",
+        language: str | None = "zh",
         word_level: bool = False,
     ) -> EngineResult:
         """语音转文字。
@@ -239,7 +239,7 @@ class WhisperEngine(BaseEngine):
         audio_path: Path | str,
         output_srt: Path | str,
         model: str = "base",
-        language: Optional[str] = "zh",
+        language: str | None = "zh",
         max_line_length: int = 40,
         max_lines: int = 2,
     ) -> EngineResult:

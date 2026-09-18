@@ -30,23 +30,6 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from integrations.davinci_color_grading import (  # noqa: E402
-    CURVE_TYPES,
-    NODE_TYPE_LAYER,
-    NODE_TYPE_OUTSIDE,
-    NODE_TYPE_PARALLEL,
-    NODE_TYPE_SERIAL,
-    ColorBalanceType,
-    ColorGrader,
-    ColorGradingPreset,
-    ColorGradingError,
-    ColorWheelChannel,
-    ColorWheelValues,
-    CurveType,
-    NodeType,
-    ResolveNotFoundError,
-    InvalidNodeError,
-)
 from integrations.color_presets import (  # noqa: E402
     BUILTIN_PRESETS,
     PRESETS_DIR,
@@ -59,6 +42,23 @@ from integrations.color_presets import (  # noqa: E402
     presets_by_tag,
     save_preset_to_file,
 )
+from integrations.davinci_color_grading import (  # noqa: E402
+    CURVE_TYPES,
+    NODE_TYPE_LAYER,
+    NODE_TYPE_OUTSIDE,
+    NODE_TYPE_PARALLEL,
+    NODE_TYPE_SERIAL,
+    ColorBalanceType,
+    ColorGrader,
+    ColorGradingError,
+    ColorGradingPreset,
+    ColorWheelChannel,
+    ColorWheelValues,
+    CurveType,
+    InvalidNodeError,
+    NodeType,
+    ResolveNotFoundError,
+)
 from integrations.davinci_color_lua import (  # noqa: E402
     build_apply_lut_lua,
     build_apply_preset_lua,
@@ -70,7 +70,6 @@ from integrations.davinci_color_lua import (  # noqa: E402
     build_qualifier_lua,
     build_set_color_wheel_lua,
 )
-
 
 # ============================================================================
 # Fixtures

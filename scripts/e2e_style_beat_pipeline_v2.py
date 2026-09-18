@@ -18,7 +18,13 @@ v1→v2 关键升级：
      --materials-dir C:\\VinlandClips --segments 10
 """
 from __future__ import annotations
-import argparse, json, subprocess, sys, time, math
+
+import argparse
+import json
+import math
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -42,8 +48,8 @@ def stage0_env():
         try: importlib.import_module(m); res[m] = True
         except: res[m] = False
     try:
-        from video.style_migrator import StyleFingerprintExtractor, KnowledgeBaseStyleMatcher
         from audio.beat_orchestrator import BeatOrchestrator
+        from video.style_migrator import KnowledgeBaseStyleMatcher, StyleFingerprintExtractor
         res["style_migrator"] = res["beat_orchestrator"] = True
     except: res["style_migrator"] = res["beat_orchestrator"] = False
     ok = all(res.values())
@@ -54,7 +60,7 @@ def stage0_env():
 # S1 深度风格分析（复用 StyleMigrator 完整链）
 # ================================================================
 def stage1_deep_style(reference: Path) -> dict:
-    from video.style_migrator import StyleFingerprintExtractor, KnowledgeBaseStyleMatcher
+    from video.style_migrator import KnowledgeBaseStyleMatcher, StyleFingerprintExtractor
     fp = StyleFingerprintExtractor().extract(str(reference))
     match = KnowledgeBaseStyleMatcher().match(fp)
     tpl = match["template"]
@@ -92,7 +98,8 @@ def _template_to_grade(tpl: dict, color: dict) -> dict:
 # S2 音乐段落分析（复用 BeatOrchestrator）
 # ================================================================
 def stage2_music_structure(bgm: Path, out_dir: Path) -> dict:
-    import librosa, numpy as np
+    import librosa
+    import numpy as np
     y, sr = librosa.load(str(bgm), sr=22050, mono=True)
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
     bpm = float(np.atleast_1d(tempo)[0])
@@ -127,7 +134,8 @@ def stage2_music_structure(bgm: Path, out_dir: Path) -> dict:
 # S3 智能素材选择（内容评分+能量匹配）
 # ================================================================
 def stage3_smart_select(materials: list, sections: list, n_per_section: int) -> dict:
-    import cv2, numpy as np
+    import cv2
+    import numpy as np
     scored = []
     for m in materials:
         cap = cv2.VideoCapture(str(m))
@@ -358,7 +366,8 @@ def ffprobe_stats(path):
     return json.loads(r.stdout) if r.returncode == 0 else {}
 
 def verify_cuts(final, plan):
-    import cv2, numpy as np
+    import cv2
+    import numpy as np
     cap = cv2.VideoCapture(str(final))
     td, sd = plan["transition_duration"], plan["segment_duration"]
     cut_times, t = [], sd - td / 2
@@ -385,7 +394,8 @@ def verify_cuts(final, plan):
     return {"ratio": round(ratio, 3), "pass": bool(ok)}
 
 def verify_style(nograde, final, out_dir):
-    from PIL import Image; import numpy as np
+    import numpy as np
+    from PIL import Image
     ev = out_dir / "evidence"; ev.mkdir(exist_ok=True)
     shots = {}
     for nm, src in (("nograde", nograde), ("graded", final)):
@@ -401,7 +411,8 @@ def verify_style(nograde, final, out_dir):
             "evidence": [str(shots["nograde"]), str(shots["graded"])]}
 
 def verify_camera(seg_file, camera, out_dir):
-    import cv2, numpy as np
+    import cv2
+    import numpy as np
     cap = cv2.VideoCapture(str(seg_file))
     nf = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     cap.set(cv2.CAP_PROP_POS_FRAMES, 0); _, f0 = cap.read()

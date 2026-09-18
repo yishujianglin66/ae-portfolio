@@ -16,12 +16,12 @@ integrations/audio_analyzer.py - 音频分析器 v1.0
     bpm, energy, mood = analyzer.analyze("video.mp4")
     # bpm=128, energy=0.75, mood="energetic"
 """
+import logging
 import os
 import subprocess
 import sys
-import logging
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class AudioAnalyzer:
     def __init__(self, ffmpeg_bin: str = ""):
         self.ffmpeg_bin = ffmpeg_bin or self._find_ffmpeg()
 
-    def analyze(self, media_path: str) -> Tuple[float, float, str]:
+    def analyze(self, media_path: str) -> tuple[float, float, str]:
         """分析音频文件
 
         Args:
@@ -81,7 +81,7 @@ class AudioAnalyzer:
         logger.warning("AudioAnalyzer: all methods failed, using defaults")
         return 120.0, 0.5, "cinematic"
 
-    def analyze_full(self, media_path: str) -> Dict[str, Any]:
+    def analyze_full(self, media_path: str) -> dict[str, Any]:
         """完整分析（返回所有指标）"""
         bpm, energy, mood = self.analyze(media_path)
         return {
@@ -92,7 +92,7 @@ class AudioAnalyzer:
             "media_path": media_path,
         }
 
-    def _analyze_librosa(self, media_path: str) -> Optional[Tuple[float, float, str]]:
+    def _analyze_librosa(self, media_path: str) -> tuple[float, float, str] | None:
         """使用 librosa 精确分析"""
         try:
             import librosa
@@ -125,7 +125,7 @@ class AudioAnalyzer:
             logger.warning(f"AudioAnalyzer [librosa] failed: {e}")
             return None
 
-    def _analyze_ffmpeg(self, media_path: str) -> Optional[Tuple[float, float, str]]:
+    def _analyze_ffmpeg(self, media_path: str) -> tuple[float, float, str] | None:
         """使用 FFmpeg astats 快速估算"""
         if not self.ffmpeg_bin:
             return None

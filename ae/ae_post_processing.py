@@ -10,9 +10,10 @@
 
 使用方式：在AE中打开项目后运行此脚本，或通过puppet-automation调用
 """
-import sys
 import os
+import sys
 from pathlib import Path
+
 
 def run_ae_post_processing(project_path, render_dir, output_path):
     """

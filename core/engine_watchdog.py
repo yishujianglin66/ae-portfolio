@@ -32,7 +32,7 @@ ENGINE_PROCESS_NAME = {
     "media_encoder": "adobe media encoder.exe",
 }
 
-_WATCHDOG_THREAD: Optional[threading.Thread] = None
+_WATCHDOG_THREAD: threading.Thread | None = None
 _WATCHDOG_STOP = threading.Event()
 
 
@@ -60,7 +60,7 @@ class EngineHealthRegistry:
 
     def __init__(self):
         self._lock = threading.Lock()
-        self._states: Dict[str, _EngineState] = {}
+        self._states: dict[str, _EngineState] = {}
 
     def _state(self, name: str) -> _EngineState:
         s = self._states.get(name)
@@ -114,7 +114,7 @@ class EngineHealthRegistry:
                 "updated_ts": s.updated_ts,
             }
 
-    def snapshot(self) -> Dict[str, dict]:
+    def snapshot(self) -> dict[str, dict]:
         with self._lock:
             return {k: dict(self._state(k).__dict__) for k in self._states}
 
@@ -133,7 +133,7 @@ class ResourceQuota:
     def __init__(self, max_concurrent: int = 2):
         self.max_concurrent = max_concurrent
         self._sem = threading.Semaphore(max_concurrent)
-        self._locks: Dict[str, threading.RLock] = {}
+        self._locks: dict[str, threading.RLock] = {}
         self._locks_guard = threading.Lock()
         self._active = 0
         self._active_lock = threading.Lock()
@@ -189,7 +189,7 @@ def get_engine_health(engine_name: str) -> dict:
     return ENGINE_HEALTH.get(engine_name)
 
 
-def all_engine_health() -> Dict[str, dict]:
+def all_engine_health() -> dict[str, dict]:
     """取全部已登记引擎健康快照。"""
     return ENGINE_HEALTH.snapshot()
 
@@ -483,7 +483,7 @@ def bridge_restart_enabled() -> bool:
     return os.environ.get("AEKV_BRIDGE_RESTART") == "1"
 
 
-def _bridge_launch_spec(engine_name: str) -> Optional[dict]:
+def _bridge_launch_spec(engine_name: str) -> dict | None:
     """从仓库根 .mcp.json 读取该引擎桥进程的启动规格（command/args/cwd/marker）。
 
     以 .mcp.json 为唯一事实源，避免硬编码用户专属 python 路径；读取失败则禁用。
@@ -516,7 +516,7 @@ def _bridge_launch_spec(engine_name: str) -> Optional[dict]:
         return None
 
 
-def find_bridge_pids(engine_name: str) -> List[int]:
+def find_bridge_pids(engine_name: str) -> list[int]:
     """按唯一脚本子串（marker）精确定位桥进程 PID，杜绝按 python.exe 歧义名误杀。"""
     spec = _bridge_launch_spec(engine_name)
     if not spec:
@@ -581,7 +581,7 @@ def restart_bridge(engine_name: str) -> bool:
 # 引擎发现 / 拉起
 # ============================================================================
 
-def discover_exe(engine_name: str) -> Optional[str]:
+def discover_exe(engine_name: str) -> str | None:
     """发现引擎可执行文件：优先 adobe_discovery，回退硬编码路径。"""
     try:
         from core.adobe_discovery import find_adobe_exe
@@ -597,7 +597,7 @@ def discover_exe(engine_name: str) -> Optional[str]:
     return None
 
 
-def launch_engine(engine_name: str, exe: Optional[str] = None) -> bool:
+def launch_engine(engine_name: str, exe: str | None = None) -> bool:
     """拉起引擎进程（Startup 脚本会自动加载 Bridge）。"""
     target = exe or discover_exe(engine_name)
     if not target or not os.path.exists(target):
@@ -637,7 +637,7 @@ def probe_bridge(is_available: Callable[[], bool], timeout: float = 120.0) -> bo
 
 def ensure_ready(
     engine_name: str,
-    is_available: Optional[Callable[[], bool]] = None,
+    is_available: Callable[[], bool] | None = None,
     timeout: float = 120.0,
 ) -> bool:
     """确保引擎就绪（P3：配额 + 双检锁 + 健康注册表）：

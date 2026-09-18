@@ -48,7 +48,7 @@ async def main() -> None:
         else:
             print("  索引尚未初始化，开始构建...")
             await resource_index_service.refresh_index()
-            print(f"  索引构建完成")
+            print("  索引构建完成")
             summary = resource_index_service.get_index_summary()
             print(f"  资源总数: {resource_index_service.get_total_count()}")
             for cat, count in sorted(summary.items()):

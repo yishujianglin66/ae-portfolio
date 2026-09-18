@@ -17,13 +17,12 @@ from core.health_checker import (
     ASCII_SAFE_PATTERN,
     CheckItem,
     EngineStatus,
-    HealthChecker,
     HealthCheckConfig,
+    HealthChecker,
     HealthReport,
-    run_health_check,
     _get_default_engine_paths,
+    run_health_check,
 )
-
 
 # ============================================================================
 #  Fixtures

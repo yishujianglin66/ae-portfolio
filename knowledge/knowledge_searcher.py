@@ -23,13 +23,13 @@
     recommendations = searcher.recommend("设备维护技术员", context="新能源行业")
 """
 
-import os
 import json
+import os
 import time
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -41,7 +41,7 @@ class KnowledgeItem:
     summary: str
     author: str = ""
     publish_date: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     relevance_score: float = 0.0
 
 
@@ -85,7 +85,7 @@ class KnowledgeSearcher:
         for platform in self.PLATFORM_URLS.keys():
             (self.cache_dir / platform).mkdir(parents=True, exist_ok=True)
     
-    def search(self, query: str, platforms: List[str] = None, max_results: int = 5) -> Dict[str, List[KnowledgeItem]]:
+    def search(self, query: str, platforms: list[str] = None, max_results: int = 5) -> dict[str, list[KnowledgeItem]]:
         """搜索知识
         
         Args:
@@ -114,7 +114,7 @@ class KnowledgeSearcher:
         
         return results
     
-    def _search_platform(self, platform: str, query: str, max_results: int) -> List[KnowledgeItem]:
+    def _search_platform(self, platform: str, query: str, max_results: int) -> list[KnowledgeItem]:
         """搜索单个平台"""
         # 构建搜索URL
         search_url = self.PLATFORM_URLS[platform].format(query=query)
@@ -132,7 +132,7 @@ class KnowledgeSearcher:
         
         return items
     
-    def recommend(self, position: str, context: str = "", keywords: List[str] = None) -> Dict[str, Any]:
+    def recommend(self, position: str, context: str = "", keywords: list[str] = None) -> dict[str, Any]:
         """智能推荐知识
         
         根据职位和上下文推荐相关学习内容。
@@ -176,7 +176,7 @@ class KnowledgeSearcher:
         
         return recommendations
     
-    def _get_recommended_platforms(self, category: str) -> List[str]:
+    def _get_recommended_platforms(self, category: str) -> list[str]:
         """根据类别获取推荐平台"""
         platform_map = {
             "专业技能": ["知乎", "知网", "小红书"],
@@ -186,7 +186,7 @@ class KnowledgeSearcher:
         }
         return platform_map.get(category, ["知乎", "小红书"])
     
-    def _generate_learning_paths(self, position: str) -> List[Dict[str, Any]]:
+    def _generate_learning_paths(self, position: str) -> list[dict[str, Any]]:
         """生成学习路径"""
         paths = []
         
@@ -228,7 +228,7 @@ class KnowledgeSearcher:
         
         return paths
     
-    def _save_search_results(self, query: str, results: Dict[str, List[KnowledgeItem]]):
+    def _save_search_results(self, query: str, results: dict[str, list[KnowledgeItem]]):
         """保存搜索结果"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"search_{timestamp}_{query[:20]}.json"
@@ -255,7 +255,7 @@ class KnowledgeSearcher:
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     
-    def get_search_history(self) -> List[Dict[str, Any]]:
+    def get_search_history(self) -> list[dict[str, Any]]:
         """获取搜索历史"""
         history = []
         
@@ -268,7 +268,7 @@ class KnowledgeSearcher:
         
         return sorted(history, key=lambda x: x.get("timestamp", ""), reverse=True)
     
-    def quick_search(self, topic: str) -> Dict[str, str]:
+    def quick_search(self, topic: str) -> dict[str, str]:
         """快速搜索 - 返回各平台搜索链接
         
         Args:
@@ -297,17 +297,17 @@ def get_searcher() -> KnowledgeSearcher:
     return _searcher
 
 
-def search_knowledge(query: str, platforms: List[str] = None) -> Dict[str, List[KnowledgeItem]]:
+def search_knowledge(query: str, platforms: list[str] = None) -> dict[str, list[KnowledgeItem]]:
     """快捷函数：搜索知识"""
     return get_searcher().search(query, platforms)
 
 
-def recommend_learning(position: str, context: str = "") -> Dict[str, Any]:
+def recommend_learning(position: str, context: str = "") -> dict[str, Any]:
     """快捷函数：推荐学习内容"""
     return get_searcher().recommend(position, context)
 
 
-def quick_search(topic: str) -> Dict[str, str]:
+def quick_search(topic: str) -> dict[str, str]:
     """快捷函数：快速获取搜索链接"""
     return get_searcher().quick_search(topic)
 
@@ -324,15 +324,15 @@ if __name__ == "__main__":
     print("\n智能推荐测试（设备维护技术员）：")
     recommendations = searcher.recommend("设备维护技术员", "新能源锂电池")
     
-    print(f"\n匹配关键词：")
+    print("\n匹配关键词：")
     for kw in recommendations["matched_keywords"]:
         print(f"  - [{kw['category']}] {kw['keyword']}")
     
-    print(f"\n推荐搜索：")
+    print("\n推荐搜索：")
     for sq in recommendations["search_queries"][:3]:
         print(f"  - {sq['query']} -> {sq['platforms']}")
     
-    print(f"\n学习路径：")
+    print("\n学习路径：")
     for path in recommendations["learning_paths"]:
         print(f"\n  【{path['name']}】")
         for step in path["steps"]:

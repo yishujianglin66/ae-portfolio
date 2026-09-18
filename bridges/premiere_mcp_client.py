@@ -66,7 +66,7 @@ class PremiereMCP:
         cmd_file.write_text(json.dumps(cmd_data, ensure_ascii=False), encoding="utf-8")
         return cmd_id
 
-    def _read_result(self, cmd_id: str) -> Optional[Dict[str, Any]]:
+    def _read_result(self, cmd_id: str) -> dict[str, Any] | None:
         result_file = self.bridge_dir / f"result_{cmd_id}.json"
         if not result_file.exists():
             return None
@@ -78,7 +78,7 @@ class PremiereMCP:
         except (json.JSONDecodeError, IOError):
             return None
 
-    def _send_command(self, action: str, **params) -> Dict[str, Any]:
+    def _send_command(self, action: str, **params) -> dict[str, Any]:
         cmd_id = self._write_command(action, **params)
         keepalive_file = self.bridge_dir / f".keepalive_{cmd_id}"
         try:
@@ -117,22 +117,22 @@ class PremiereMCP:
                 pass
             raise
 
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         return self._send_command("ping")
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         return self._send_command("getInfo")
 
-    def get_project_info(self) -> Dict[str, Any]:
+    def get_project_info(self) -> dict[str, Any]:
         return self._send_command("getProjectInfo")
 
-    def import_media(self, files: list) -> Dict[str, Any]:
+    def import_media(self, files: list) -> dict[str, Any]:
         return self._send_command("importMedia", files=files)
 
-    def create_sequence(self, name: str) -> Dict[str, Any]:
+    def create_sequence(self, name: str) -> dict[str, Any]:
         return self._send_command("createSequence", name=name)
 
-    def add_clip_to_track(self, clip_name: str, track: int = 0, start_time: float = 0) -> Dict[str, Any]:
+    def add_clip_to_track(self, clip_name: str, track: int = 0, start_time: float = 0) -> dict[str, Any]:
         return self._send_command(
             "addClipToTrack",
             clipName=clip_name,
@@ -140,7 +140,7 @@ class PremiereMCP:
             startTime=start_time
         )
 
-    def apply_transition(self, clip_index: int, track: int = 0, transition: str = "Cross Dissolve", duration: float = 0.5) -> Dict[str, Any]:
+    def apply_transition(self, clip_index: int, track: int = 0, transition: str = "Cross Dissolve", duration: float = 0.5) -> dict[str, Any]:
         return self._send_command(
             "applyTransition",
             clipIndex=clip_index,
@@ -149,7 +149,7 @@ class PremiereMCP:
             duration=duration
         )
 
-    def add_effect(self, clip_index: int, effect: str = "Lumetri Color", track: int = 0) -> Dict[str, Any]:
+    def add_effect(self, clip_index: int, effect: str = "Lumetri Color", track: int = 0) -> dict[str, Any]:
         return self._send_command(
             "addEffect",
             clipIndex=clip_index,
@@ -157,14 +157,14 @@ class PremiereMCP:
             track=track
         )
 
-    def save_project(self) -> Dict[str, Any]:
+    def save_project(self) -> dict[str, Any]:
         return self._send_command("saveProject")
 
-    def execute_script(self, script: str) -> Dict[str, Any]:
+    def execute_script(self, script: str) -> dict[str, Any]:
         """执行任意 JSX 脚本（无需重启 PR 即可使用）。"""
         return self._send_command("executeScript", script=script)
 
-    def execute_script_file(self, script_path: str) -> Dict[str, Any]:
+    def execute_script_file(self, script_path: str) -> dict[str, Any]:
         """执行脚本文件（通过 executeScript 实现）。"""
         script_file = Path(script_path)
         if not script_file.exists():
@@ -172,11 +172,11 @@ class PremiereMCP:
         script_content = script_file.read_text(encoding="utf-8")
         return self.execute_script(script_content)
 
-    def reload_handlers(self) -> Dict[str, Any]:
+    def reload_handlers(self) -> dict[str, Any]:
         """重新加载所有 handler 文件（无需重启 PR）。"""
         return self._send_command("reloadHandlers")
 
-    def register_handler(self, script_path: str) -> Dict[str, Any]:
+    def register_handler(self, script_path: str) -> dict[str, Any]:
         """通过执行外部脚本动态注册 handler（无需重启 PR）。"""
         return self._send_command("registerHandler", scriptPath=script_path)
 

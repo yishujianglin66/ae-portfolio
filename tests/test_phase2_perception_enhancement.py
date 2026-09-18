@@ -10,25 +10,38 @@ Phase 2 感知层增强模块测试
 """
 import os
 import sys
+from unittest.mock import MagicMock, PropertyMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, PropertyMock
 
 PROJECT_ROOT = str(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from scene_detector import (
-    SceneSegment, SceneDetectResult, SceneDetector, detect_scenes,
+from audio_analyzer_librosa import (
+    AudioAnalysisResult,
+    BeatInfo,
+    LibrosaAudioAnalyzer,
+    analyze_audio,
 )
 from audio_analyzer_librosa import (
-    BeatInfo, AudioSegment as LibrosaAudioSegment,
-    AudioAnalysisResult, LibrosaAudioAnalyzer, analyze_audio,
+    AudioSegment as LibrosaAudioSegment,
 )
 from media_preprocessor import (
-    MediaInfo, PreprocessResult, MediaPreprocessor,
-    get_media_info, extract_audio, extract_thumbnails, transcode,
+    MediaInfo,
+    MediaPreprocessor,
+    PreprocessResult,
+    extract_audio,
+    extract_thumbnails,
+    get_media_info,
+    transcode,
 )
-
+from scene_detector import (
+    SceneDetector,
+    SceneDetectResult,
+    SceneSegment,
+    detect_scenes,
+)
 
 # ============================================================
 # SceneDetector 测试

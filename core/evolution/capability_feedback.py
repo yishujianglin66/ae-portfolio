@@ -8,10 +8,10 @@
 """
 
 import json
-import os
 import logging
+import os
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class CapabilityFeedbackLoop:
         )
     """
 
-    def __init__(self, registry_path: Optional[str] = None):
+    def __init__(self, registry_path: str | None = None):
         self._path = registry_path or _REGISTRY_PATH
         self._registry = self._load()
 
@@ -51,7 +51,7 @@ class CapabilityFeedbackLoop:
     #  加载 / 保存
     # ------------------------------------------------------------------
 
-    def _load(self) -> Dict[str, Any]:
+    def _load(self) -> dict[str, Any]:
         """从 JSON 文件加载能力注册表。"""
         if os.path.exists(self._path):
             try:
@@ -64,7 +64,7 @@ class CapabilityFeedbackLoop:
         return self._default_registry()
 
     @staticmethod
-    def _default_registry() -> Dict[str, Any]:
+    def _default_registry() -> dict[str, Any]:
         """生成默认空注册表。"""
         presets = [
             "scale_bounce", "slide_left", "slide_right", "rotate_3d",
@@ -113,11 +113,11 @@ class CapabilityFeedbackLoop:
 
     def record_run(
         self,
-        presets_used: List[str],
-        fonts_used: List[str],
+        presets_used: list[str],
+        fonts_used: list[str],
         eval_score: float,
-        grading_styles: Optional[List[str]] = None,
-        techniques_used: Optional[List[str]] = None,
+        grading_styles: list[str] | None = None,
+        techniques_used: list[str] | None = None,
     ) -> None:
         """记录一次管线运行的结果，更新注册表中的统计数据。
 
@@ -197,7 +197,7 @@ class CapabilityFeedbackLoop:
     #  查询与推荐
     # ------------------------------------------------------------------
 
-    def get_preset_weights(self) -> Dict[str, float]:
+    def get_preset_weights(self) -> dict[str, float]:
         """获取预设推荐权重（基于历史表现）。
 
         从未使用过的预设获得默认权重 1.0（鼓励探索），
@@ -206,7 +206,7 @@ class CapabilityFeedbackLoop:
         Returns:
             {preset_key: weight} 权重越高越推荐
         """
-        weights: Dict[str, float] = {}
+        weights: dict[str, float] = {}
         for key, entry in self._registry["presets"].items():
             if entry["usages"] == 0:
                 # 未使用 → 探索权重
@@ -217,7 +217,7 @@ class CapabilityFeedbackLoop:
                 weights[key] = 0.4 * entry["avg_score"] + 0.6 * success_rate
         return weights
 
-    def get_coverage_stats(self) -> Dict[str, Any]:
+    def get_coverage_stats(self) -> dict[str, Any]:
         """获取预设覆盖率统计。
 
         Returns:
@@ -243,9 +243,9 @@ class CapabilityFeedbackLoop:
                         for k, v in presets.items()},
         }
 
-    def get_font_recommendations(self) -> Dict[str, float]:
+    def get_font_recommendations(self) -> dict[str, float]:
         """获取字体推荐权重。"""
-        weights: Dict[str, float] = {}
+        weights: dict[str, float] = {}
         for font, entry in self._registry["fonts"].items():
             if entry["usages"] == 0:
                 weights[font] = 1.0
@@ -253,9 +253,9 @@ class CapabilityFeedbackLoop:
                 weights[font] = entry["avg_score"]
         return weights
 
-    def get_grading_style_recommendations(self) -> Dict[str, float]:
+    def get_grading_style_recommendations(self) -> dict[str, float]:
         """获取调色风格推荐权重。"""
-        weights: Dict[str, float] = {}
+        weights: dict[str, float] = {}
         for style, entry in self._registry.get("color_grading_styles", {}).items():
             if entry["usages"] == 0:
                 weights[style] = 1.0
@@ -279,7 +279,7 @@ class CapabilityFeedbackLoop:
         return EMA_ALPHA * new_value + (1 - EMA_ALPHA) * old_value
 
     @property
-    def registry(self) -> Dict[str, Any]:
+    def registry(self) -> dict[str, Any]:
         """暴露原始注册表（只读访问）。"""
         return self._registry
 
@@ -288,11 +288,11 @@ class CapabilityFeedbackLoop:
 #  全局单例入口
 # ============================================================================
 
-_global_capability_feedback: Optional[CapabilityFeedbackLoop] = None
+_global_capability_feedback: CapabilityFeedbackLoop | None = None
 
 
 def get_capability_feedback(
-    registry_path: Optional[str] = None,
+    registry_path: str | None = None,
 ) -> CapabilityFeedbackLoop:
     """获取全局能力反馈闭环单例。
 

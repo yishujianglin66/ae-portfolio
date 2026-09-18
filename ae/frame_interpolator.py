@@ -29,10 +29,10 @@ import json
 import math
 import os
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -104,12 +104,12 @@ class FrameInterpolator:
         self.device = device
         self.tile_size = tile_size
         self._model = None
-        self._degraded_reason: Optional[str] = None
+        self._degraded_reason: str | None = None
         self._rife_available = self._check_rife()
         self._load_rife_model()
 
     @staticmethod
-    def _find_rife_weights() -> Optional[Path]:
+    def _find_rife_weights() -> Path | None:
         override = os.environ.get("AEKV_RIFE_WEIGHTS")
         if override:
             p = Path(override)
@@ -159,7 +159,7 @@ class FrameInterpolator:
         input_path: str,
         output_path: str,
         factor: float = 2.0,
-        target_fps: Optional[float] = None,
+        target_fps: float | None = None,
     ) -> InterpolationResult:
         """
         视频帧插值/慢动作生成。
@@ -173,9 +173,10 @@ class FrameInterpolator:
         Returns:
             InterpolationResult
         """
+        import time
+
         import cv2
         import numpy as np
-        import time
 
         start_time = time.time()
 
@@ -260,9 +261,9 @@ class FrameInterpolator:
         若模型不可用（本模块未内置 RIFE 架构，通常不会加载成功），
         诚实降级到帧混合插值，不制造随机光流扭曲。
         """
-        import torch
-        import numpy as np
         import cv2
+        import numpy as np
+        import torch
 
         model = self._load_rife_model()
         if model is None:
@@ -323,8 +324,8 @@ class FrameInterpolator:
 
     def _interpolate_blend(self, frames: list, factor: float) -> list:
         """帧混合插值 (CPU fallback)"""
-        import numpy as np
         import cv2
+        import numpy as np
 
         output = []
         for i in range(len(frames) - 1):
@@ -388,9 +389,9 @@ class FrameInterpolator:
     def generate_time_remap_data(
         self,
         clip_duration: float,
-        slow_segments: List[Dict[str, float]],  # [{"start": 1.0, "end": 2.0, "speed": 0.5}]
+        slow_segments: list[dict[str, float]],  # [{"start": 1.0, "end": 2.0, "speed": 0.5}]
         original_fps: float = 30.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         生成时间重映射关键帧数据 (用于 PR/AE Time Remap)。
 

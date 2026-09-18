@@ -18,7 +18,7 @@ class AEEngine(BaseEngine):
 
     name = "after_effects"
 
-    def __init__(self, executable_path: Optional[Path | str] = None):
+    def __init__(self, executable_path: Path | str | None = None):
         path = Path(executable_path) if executable_path else settings.aerender_path
         super().__init__(path)
         # AfterFX.exe — ExtendScript 执行入口（aerender 不支持运行脚本）
@@ -33,8 +33,8 @@ class AEEngine(BaseEngine):
         output_path: Path | str,
         output_module: str = "H.264",
         render_settings: str = "Best Settings",
-        multiprocess: Optional[int] = None,
-        multi_machine: Optional[int] = None,
+        multiprocess: int | None = None,
+        multi_machine: int | None = None,
     ) -> EngineResult:
         """Render AE composition via aerender CLI.
 
@@ -91,7 +91,7 @@ class AEEngine(BaseEngine):
     async def run_script(
         self,
         script_content: str,
-        project_path: Optional[Path | str] = None,
+        project_path: Path | str | None = None,
         timeout: float = 30.0,
     ) -> EngineResult:
         """Execute ExtendScript via MCP Bridge (primary) or AfterFX.exe (fallback).
@@ -161,7 +161,7 @@ class AEEngine(BaseEngine):
 
     def _run_script_via_bridge(
         self, script_content: str, timeout: float = 30.0
-    ) -> tuple[bool, str, Optional[str], Optional[str]]:
+    ) -> tuple[bool, str, str | None, str | None]:
         """通过 MCP Bridge 文件轮询协议执行 ExtendScript。
 
         协议: 写入 ae_command.json → AE listener 轮询执行 → 写入 ae_result.json
@@ -345,7 +345,7 @@ class AEEngine(BaseEngine):
         height: int,
         fps: float,
         duration: float,
-        project_path: Optional[Path | str] = None,
+        project_path: Path | str | None = None,
     ) -> EngineResult:
         """创建合成。
 
@@ -393,10 +393,10 @@ class AEEngine(BaseEngine):
     async def import_footage(
         self,
         footage_path: Path | str,
-        comp_name: Optional[str] = None,
+        comp_name: str | None = None,
         as_sequence: bool = False,
-        position: Optional[int] = None,
-        project_path: Optional[Path | str] = None,
+        position: int | None = None,
+        project_path: Path | str | None = None,
     ) -> EngineResult:
         """导入素材到项目，可选添加到合成。
 
@@ -508,8 +508,8 @@ class AEEngine(BaseEngine):
         comp_name: str,
         layer_type: str,
         name: str,
-        position: Optional[int] = None,
-        project_path: Optional[Path | str] = None,
+        position: int | None = None,
+        project_path: Path | str | None = None,
         **kwargs: Any,
     ) -> EngineResult:
         """在合成中添加图层。
@@ -627,8 +627,8 @@ class AEEngine(BaseEngine):
         comp_name: str,
         layer_index: int,
         effect_name: str,
-        params: Optional[Dict[str, Any]] = None,
-        project_path: Optional[Path | str] = None,
+        params: dict[str, Any] | None = None,
+        project_path: Path | str | None = None,
     ) -> EngineResult:
         """为图层添加效果。
 
@@ -734,8 +734,8 @@ class AEEngine(BaseEngine):
         comp_name: str,
         layer_index: int,
         property_path: str,
-        keyframes: List[Dict[str, Any]],
-        project_path: Optional[Path | str] = None,
+        keyframes: list[dict[str, Any]],
+        project_path: Path | str | None = None,
     ) -> EngineResult:
         """设置属性关键帧。
 
@@ -867,7 +867,7 @@ class AEEngine(BaseEngine):
         comp_name: str,
         layer_index: int,
         preset_path: Path | str,
-        project_path: Optional[Path | str] = None,
+        project_path: Path | str | None = None,
     ) -> EngineResult:
         """应用效果预设。
 
@@ -958,7 +958,7 @@ class AEEngine(BaseEngine):
         comp_name: str,
         layer_index: int,
         mode: str,
-        project_path: Optional[Path | str] = None,
+        project_path: Path | str | None = None,
     ) -> EngineResult:
         """设置图层混合模式。
 
@@ -1063,7 +1063,7 @@ class AEEngine(BaseEngine):
         comp_name: str,
         layer_index: int,
         matte_type: str,
-        project_path: Optional[Path | str] = None,
+        project_path: Path | str | None = None,
     ) -> EngineResult:
         """设置轨道遮罩类型。
 
@@ -1154,9 +1154,9 @@ class AEEngine(BaseEngine):
         self,
         comp_name: str,
         name: str,
-        effects: Optional[List[Dict[str, Any]]] = None,
-        position: Optional[int] = None,
-        project_path: Optional[Path | str] = None,
+        effects: list[dict[str, Any]] | None = None,
+        position: int | None = None,
+        project_path: Path | str | None = None,
     ) -> EngineResult:
         """添加调整图层。
 
@@ -1340,14 +1340,14 @@ class AEEngine(BaseEngine):
         self,
         comp_name: str,
         subtitle_path: Path | str,
-        project_path: Optional[Path | str] = None,
+        project_path: Path | str | None = None,
         font_family: str = "Arial",
         font_size: int = 48,
-        font_color: Optional[List[float]] = None,
-        stroke_color: Optional[List[float]] = None,
+        font_color: list[float] | None = None,
+        stroke_color: list[float] | None = None,
         stroke_width: float = 2.0,
         glow_enabled: bool = True,
-        glow_color: Optional[List[float]] = None,
+        glow_color: list[float] | None = None,
         glow_radius: float = 15.0,
         position_y: float = 0.85,
     ) -> EngineResult:
@@ -1536,7 +1536,7 @@ class AEEngine(BaseEngine):
         comp_name: str,
         output_path: Path | str,
         format_type: str = "srt",
-        project_path: Optional[Path | str] = None,
+        project_path: Path | str | None = None,
     ) -> EngineResult:
         """从 AE 合成导出字幕。
 
@@ -1659,7 +1659,8 @@ class AEEngine(BaseEngine):
 
         try:
             import whisper
-            from ae.subtitle_system import SubtitleSystem, SubtitleGenerator
+
+            from ae.subtitle_system import SubtitleGenerator, SubtitleSystem
             
             subtitle_system = SubtitleSystem()
             subtitles = await subtitle_system.generate_subtitles_from_audio(
@@ -1793,8 +1794,8 @@ class AEEngine(BaseEngine):
         width: int = 1920,
         height: int = 1080,
         fps: int = 24,
-        source_video: Optional[Path | str] = None,
-        preset_path: Optional[Path | str] = None,
+        source_video: Path | str | None = None,
+        preset_path: Path | str | None = None,
         **kwargs,
     ) -> EngineResult:
         """通过 Bridge 创建合成并渲染为 .mov（旗舰管线 S3 专用）。

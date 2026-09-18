@@ -25,7 +25,7 @@ import random
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -41,7 +41,7 @@ def probe_duration(video_path: str) -> float:
         return 0.0
 
 
-def generate_concat_video(video_paths: List[str], output_path: str,
+def generate_concat_video(video_paths: list[str], output_path: str,
                           black_duration: float = 2.0,
                           resolution: tuple = (1920, 1080),
                           fps: int = 24):
@@ -106,7 +106,7 @@ def generate_concat_video(video_paths: List[str], output_path: str,
         print(f"  完成: {dur:.1f}s, {size:.1f}MB")
 
 
-def _fallback_concat(video_paths: List[str], output_path: str, black_dur: float):
+def _fallback_concat(video_paths: list[str], output_path: str, black_dur: float):
     """降级方案：生成 concat 文件列表"""
     concat_file = Path(output_path).parent / "_concat_list.txt"
     with open(concat_file, "w") as f:
@@ -128,8 +128,8 @@ def _fallback_concat(video_paths: List[str], output_path: str, black_dur: float)
     ], capture_output=True, timeout=300)
 
 
-def generate_rating_sheet(video_paths: List[str], labels: List[str],
-                          output_dir: Path, n_raters: int = 3) -> Dict:
+def generate_rating_sheet(video_paths: list[str], labels: list[str],
+                          output_dir: Path, n_raters: int = 3) -> dict:
     """生成随机化评分表"""
     n = len(video_paths)
     # 生成随机 ID（A, B, C... 打乱）
@@ -176,7 +176,7 @@ def generate_rating_sheet(video_paths: List[str], labels: List[str],
     return sheet
 
 
-def generate_html_form(sheet: Dict, output_path: Path):
+def generate_html_form(sheet: dict, output_path: Path):
     """生成 HTML 评分表单"""
     dims = sheet["dimensions"]
     mapping = sheet["video_mapping"]
@@ -287,7 +287,7 @@ def main():
             print(f"[ERROR] 视频不存在: {v}")
             sys.exit(1)
 
-    print(f"=== HMS 双盲评测生成 ===")
+    print("=== HMS 双盲评测生成 ===")
     print(f"视频数: {len(videos)}")
     for v, l in zip(videos, labels):
         dur = probe_duration(str(v))
@@ -303,11 +303,11 @@ def main():
 
     # 2. 拼接视频
     concat_path = output_dir / "concat_blind.mp4"
-    print(f"\n生成拼接视频...")
+    print("\n生成拼接视频...")
     generate_concat_video(shuffled_videos, str(concat_path))
 
     # 3. 生成评分表
-    print(f"\n生成评分表...")
+    print("\n生成评分表...")
     sheet = generate_rating_sheet(shuffled_videos, shuffled_labels, output_dir, args.raters)
     sheet_path = output_dir / "rating_sheet.json"
     sheet_path.write_text(json.dumps(sheet, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -317,7 +317,7 @@ def main():
     html_path = output_dir / "rating_form.html"
     generate_html_form(sheet, html_path)
 
-    print(f"\n=== 完成 ===")
+    print("\n=== 完成 ===")
     print(f"拼接视频: {concat_path}")
     print(f"评分表:   {sheet_path}")
     print(f"评分表单: {html_path}")

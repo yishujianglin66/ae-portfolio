@@ -204,7 +204,7 @@ with open(r"{marker_path}", "w") as f:
     f.write(f"frames: {frames_output}\\n")
 '''
 
-    def __init__(self, executable_path: Optional[Path | str] = None):
+    def __init__(self, executable_path: Path | str | None = None):
         path = Path(executable_path) if executable_path else settings.blender_path
         super().__init__(path)
 
@@ -379,7 +379,7 @@ with open(r"{marker_path}", "w") as f:
     async def run_script(
         self,
         script_content: str,
-        blend_file: Optional[Path | str] = None,
+        blend_file: Path | str | None = None,
         background: bool = True,
     ) -> EngineResult:
         """Run a custom Blender Python script.
@@ -950,7 +950,7 @@ with open(r"{marker_path_escaped}", "w") as f:
         self,
         output_dir: Path | str,
         style: str = "anime",
-        model_path: Optional[Path | str] = None,
+        model_path: Path | str | None = None,
         resolution: tuple[int, int] = (1920, 1080),
         frame_start: int = 1,
         frame_end: int = 60,

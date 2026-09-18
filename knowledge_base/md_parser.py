@@ -32,7 +32,7 @@ class MdParser:
     _UL_RE = re.compile(r"^[\s]*[-*+]\s+(.+)$")
     _OL_RE = re.compile(r"^[\s]*\d+\.\s+(.+)$")
 
-    def parse(self, text: str) -> List[MdBlock]:
+    def parse(self, text: str) -> list[MdBlock]:
         """解析 Markdown 文本为 MdBlock 列表。
 
         Args:
@@ -44,7 +44,7 @@ class MdParser:
         if not text or not text.strip():
             return []
 
-        blocks: List[MdBlock] = []
+        blocks: list[MdBlock] = []
         lines = text.split("\n")
         i = 0
         n = len(lines)
@@ -62,7 +62,7 @@ class MdParser:
             m_code = self._CODE_FENCE_RE.match(stripped)
             if m_code:
                 lang = m_code.group(1) or ""
-                code_lines: List[str] = []
+                code_lines: list[str] = []
                 i += 1
                 while i < n:
                     if self._CODE_FENCE_RE.match(lines[i].strip()):
@@ -98,7 +98,7 @@ class MdParser:
 
             # 表格 | ... | ... |
             if self._TABLE_ROW_RE.match(stripped):
-                table_lines: List[str] = [stripped]
+                table_lines: list[str] = [stripped]
                 i += 1
                 while i < n and self._TABLE_ROW_RE.match(lines[i].strip()):
                     table_lines.append(lines[i].strip())
@@ -111,7 +111,7 @@ class MdParser:
 
             # 列表 - item 或 1. item
             if self._UL_RE.match(stripped) or self._OL_RE.match(stripped):
-                list_lines: List[str] = [stripped]
+                list_lines: list[str] = [stripped]
                 i += 1
                 while i < n:
                     s = lines[i].strip()
@@ -129,7 +129,7 @@ class MdParser:
                 continue
 
             # 段落（收集连续非空行）
-            para_lines: List[str] = [stripped]
+            para_lines: list[str] = [stripped]
             i += 1
             while i < n:
                 s = lines[i].strip()
@@ -155,7 +155,7 @@ class MdParser:
 
         return blocks
 
-    def parse_file(self, file_path: str) -> List[MdBlock]:
+    def parse_file(self, file_path: str) -> list[MdBlock]:
         """从文件解析 Markdown。
 
         Args:

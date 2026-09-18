@@ -17,12 +17,11 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
-
-import logging
 
 from core.torch_runtime import infer_ctx
 
@@ -53,7 +52,7 @@ class LocalModelConfig:
     max_length: int = 512
     batch_size: int = 8
     precision: str = "fp32"  # fp32, fp16, int8
-    cache_dir: Optional[str] = None
+    cache_dir: str | None = None
     
     trust_remote_code: bool = True
     use_fast_tokenizer: bool = True
@@ -67,7 +66,7 @@ class LocalModelResponse:
     """本地模型响应"""
     success: bool = True
     content: str = ""
-    embeddings: Optional[List[List[float]]] = None
+    embeddings: list[list[float]] | None = None
     latency_ms: float = 0.0
     error: str = ""
     model_type: str = ""
@@ -93,7 +92,7 @@ class LocalModelAdapter:
         self._model: Any = None
         self._tokenizer: Any = None
         self._initialized: bool = False
-        self._init_error: Optional[str] = None
+        self._init_error: str | None = None
         
         # 性能统计
         self._total_calls: int = 0
@@ -108,7 +107,7 @@ class LocalModelAdapter:
     def is_generation_model(self) -> bool:
         return "qwen" in self.config.model_type.value.lower()
 
-    async def _check_openvino_ready(self) -> Tuple[bool, str]:
+    async def _check_openvino_ready(self) -> tuple[bool, str]:
         try:
             def _import():
                 import importlib
@@ -174,8 +173,9 @@ class LocalModelAdapter:
                         load_kwargs["load_in_8bit"] = True
                     elif self.config.ov_compile_precision == "int4":
                         try:
-                            from optimum.intel.openvino import quantize
                             import tempfile
+
+                            from optimum.intel.openvino import quantize
                             base_model = OVModelForCausalLM.from_pretrained(
                                 self.config.model_path,
                                 device=ov_device,
@@ -295,7 +295,7 @@ class LocalModelAdapter:
         else:
             return await self._init_generation_model()
 
-    async def initialize(self) -> Tuple[bool, str]:
+    async def initialize(self) -> tuple[bool, str]:
         if self._initialized:
             return True, ""
 
@@ -374,8 +374,8 @@ class LocalModelAdapter:
     async def _init_generation_model(self) -> bool:
         """初始化生成模型"""
         try:
-            from transformers import AutoModelForCausalLM, AutoTokenizer
             import torch
+            from transformers import AutoModelForCausalLM, AutoTokenizer
             
             self._tokenizer = AutoTokenizer.from_pretrained(
                 self.config.model_path,
@@ -414,7 +414,7 @@ class LocalModelAdapter:
             logger.error(f"生成模型初始化失败: {e}")
             return False
     
-    async def embed(self, texts: List[str]) -> LocalModelResponse:
+    async def embed(self, texts: list[str]) -> LocalModelResponse:
         """文本嵌入
         
         Args:
@@ -439,7 +439,7 @@ class LocalModelAdapter:
             return await self._embed_openvino(texts)
 
         try:
-            embeddings: List[List[float]] = []
+            embeddings: list[list[float]] = []
             
             if hasattr(self._model, 'encode'):
                 # sentence-transformers
@@ -584,7 +584,7 @@ class LocalModelAdapter:
                 model_type=self.config.model_type.value
             )
     
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取使用统计"""
         avg_latency = (
             self._total_latency_ms / self._total_calls 
@@ -609,7 +609,7 @@ class LocalModelAdapter:
 class LocalModelRegistry:
     """本地模型注册中心 - 管理多个本地模型实例"""
     
-    _instances: Dict[str, LocalModelAdapter] = {}
+    _instances: dict[str, LocalModelAdapter] = {}
     
     @classmethod
     def register(cls, name: str, config: LocalModelConfig) -> LocalModelAdapter:
@@ -622,12 +622,12 @@ class LocalModelRegistry:
         return adapter
     
     @classmethod
-    def get(cls, name: str) -> Optional[LocalModelAdapter]:
+    def get(cls, name: str) -> LocalModelAdapter | None:
         """获取模型"""
         return cls._instances.get(name)
     
     @classmethod
-    async def initialize_all(cls) -> Dict[str, Tuple[bool, str]]:
+    async def initialize_all(cls) -> dict[str, tuple[bool, str]]:
         """初始化所有模型"""
         results = {}
         for name, adapter in cls._instances.items():
@@ -636,7 +636,7 @@ class LocalModelRegistry:
         return results
     
     @classmethod
-    def get_all_stats(cls) -> Dict[str, Dict[str, Any]]:
+    def get_all_stats(cls) -> dict[str, dict[str, Any]]:
         """获取所有模型统计"""
         return {name: adapter.get_stats() for name, adapter in cls._instances.items()}
 
@@ -667,7 +667,7 @@ DEFAULT_MODELS = {
 }
 
 
-def get_default_model(name: str) -> Optional[LocalModelAdapter]:
+def get_default_model(name: str) -> LocalModelAdapter | None:
     """获取预定义模型"""
     config = DEFAULT_MODELS.get(name)
     if config:

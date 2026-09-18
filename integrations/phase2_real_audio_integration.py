@@ -5,10 +5,10 @@ Phase 2: 真实音频分析 → 节拍关键帧映射 → AE Bridge 写入
 将 beat_keyframe_mapper.py 与 AE Bridge 打通，实现真正的音画同步。
 """
 
-import os
-import sys
 import json
 import math
+import os
+import sys
 
 # 确保项目根目录在路径中
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -305,7 +305,7 @@ def run_phase2_pipeline(
     if not features:
         return False
 
-    print(f"\n[2/4] 节拍映射: 生成关键帧")
+    print("\n[2/4] 节拍映射: 生成关键帧")
     keyframes = generate_keyframes_from_beats(features, style=style)
     if not keyframes:
         return False
@@ -313,7 +313,7 @@ def run_phase2_pipeline(
     print(f"\n[3/4] AE Bridge: 写入 {len(keyframes)} 个关键帧")
     result = write_keyframes_to_ae(keyframes, comp_name, layer_name)
 
-    print(f"\n[4/4] 完成!")
+    print("\n[4/4] 完成!")
     print(f"  - 音频: {audio_path}")
     print(f"  - 关键帧: {len(keyframes)}")
     print(f"  - 合成: {comp_name} -> {layer_name}")

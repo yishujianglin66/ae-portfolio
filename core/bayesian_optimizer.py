@@ -71,16 +71,16 @@ class ParameterSpec:
     min_val: float = 0.0
     max_val: float = 1.0
     default_val: float = 0.5
-    enum_values: List[str] = field(default_factory=list)
+    enum_values: list[str] = field(default_factory=list)
     description: str = ""
 
 
 @dataclass
 class ParameterConstraints:
     """参数约束集"""
-    hard_bounds: Dict[str, Tuple[float, float]] = field(default_factory=dict)
-    soft_preferences: Dict[str, float] = field(default_factory=dict)  # param -> preferred value
-    linked_params: List[Tuple[str, str, str]] = field(default_factory=list)  # (p1, p2, relation)
+    hard_bounds: dict[str, tuple[float, float]] = field(default_factory=dict)
+    soft_preferences: dict[str, float] = field(default_factory=dict)  # param -> preferred value
+    linked_params: list[tuple[str, str, str]] = field(default_factory=list)  # (p1, p2, relation)
 
 
 @dataclass
@@ -88,16 +88,16 @@ class StyleVector:
     """风格上下文向量"""
     style_name: str = ""
     mood: str = ""               # e.g. "energetic", "cinematic", "minimal"
-    color_palette: List[str] = field(default_factory=list)
+    color_palette: list[str] = field(default_factory=list)
     intensity: float = 0.5       # 0=subtle, 1=intense
     target_platform: str = ""    # e.g. "bilibili", "douyin"
-    reference_params: Dict[str, float] = field(default_factory=dict)
+    reference_params: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
 class ParameterSuggestion:
     """参数推荐"""
-    params: Dict[str, float]
+    params: dict[str, float]
     expected_quality: float = 0.0
     expected_render_time: float = 0.0
     expected_file_size: float = 0.0
@@ -109,7 +109,7 @@ class ParameterSuggestion:
 @dataclass
 class Observation:
     """参数观测结果"""
-    params: Dict[str, float]
+    params: dict[str, float]
     quality: float               # 0-100
     render_time: float           # 秒
     file_size: float             # MB
@@ -122,16 +122,16 @@ class TransferResult:
     """跨效果迁移结果"""
     source_effect: str
     target_effect: str
-    transferred_params: Dict[str, float]
+    transferred_params: dict[str, float]
     transfer_confidence: float = 0.0
-    correlation_matrix: Optional[np.ndarray] = None
+    correlation_matrix: np.ndarray | None = None
 
 
 @dataclass
 class ParetoPoint:
     """帕累托前沿上的点"""
-    params: Dict[str, float]
-    objectives: Tuple[float, float, float]  # (quality, -render_time, -file_size)
+    params: dict[str, float]
+    objectives: tuple[float, float, float]  # (quality, -render_time, -file_size)
     observation: Observation
 
 
@@ -184,8 +184,8 @@ class ParetoSolution:
         objectives: 各目标的取值 {obj_name: value}
         is_pareto: 是否在帕累托前沿上
     """
-    params: Dict[str, float] = field(default_factory=dict)
-    objectives: Dict[str, float] = field(default_factory=dict)
+    params: dict[str, float] = field(default_factory=dict)
+    objectives: dict[str, float] = field(default_factory=dict)
     is_pareto: bool = True
 
 
@@ -200,10 +200,10 @@ class ParetoFront:
         best_per_objective: 每个目标单独最优的解 {obj_name: ParetoSolution}
         n_evaluations: 总评估次数
     """
-    solutions: List[ParetoSolution] = field(default_factory=list)
-    pareto_solutions: List[ParetoSolution] = field(default_factory=list)
+    solutions: list[ParetoSolution] = field(default_factory=list)
+    pareto_solutions: list[ParetoSolution] = field(default_factory=list)
     hypervolume: float = 0.0
-    best_per_objective: Dict[str, ParetoSolution] = field(default_factory=dict)
+    best_per_objective: dict[str, ParetoSolution] = field(default_factory=dict)
     n_evaluations: int = 0
 
 
@@ -212,7 +212,7 @@ class ParetoFront:
 # ============================================================================
 
 # AE 常用效果参数空间
-PARAMETER_SPACES: Dict[str, List[ParameterSpec]] = {
+PARAMETER_SPACES: dict[str, list[ParameterSpec]] = {
     "Glow": [
         ParameterSpec("glow_threshold", "float", 0.0, 100.0, 50.0,
                       description="Glow threshold (brightness cutoff)"),
@@ -317,7 +317,7 @@ PARAMETER_SPACES: Dict[str, List[ParameterSpec]] = {
 # - 模糊类（FastBlur/TurbulentDisperse/MotionBlur）：半径/方向/采样
 # - 调色类（ColorBalance/Curves/CurvesAdvanced）：亮度+对比度+饱和度
 # - 暗角（Vignette）：量+半径+羽化，与模糊类有弱相关（都作用于周边）
-EFFECT_SIMILARITY: Dict[str, Dict[str, float]] = {
+EFFECT_SIMILARITY: dict[str, dict[str, float]] = {
     # ---------- 发光类 ----------
     "Glow": {
         "CC_StarGlow": 0.85,  # 结构几乎一致：threshold+radius+intensity+colors
@@ -480,10 +480,10 @@ class GaussianProcessRegressor:
         self._signal_variance = signal_variance
         
         # 训练数据
-        self._X: Optional[np.ndarray] = None
-        self._y: Optional[np.ndarray] = None
-        self._K_inv: Optional[np.ndarray] = None
-        self._alpha: Optional[np.ndarray] = None
+        self._X: np.ndarray | None = None
+        self._y: np.ndarray | None = None
+        self._K_inv: np.ndarray | None = None
+        self._alpha: np.ndarray | None = None
         self._fitted = False
     
     def _matern52_kernel(self, X1: np.ndarray, X2: np.ndarray) -> np.ndarray:
@@ -556,7 +556,7 @@ class GaussianProcessRegressor:
                 self._fitted = False
     
     def predict(self, X_new: np.ndarray, return_std: bool = True
-                ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+                ) -> tuple[np.ndarray, np.ndarray | None]:
         """预测
         
         Args:
@@ -618,7 +618,7 @@ class EHVIAcquisition:
     其中 HV 是超体积指标
     """
     
-    def __init__(self, reference_point: Tuple[float, float, float] = (0.0, -100.0, -1000.0)):
+    def __init__(self, reference_point: tuple[float, float, float] = (0.0, -100.0, -1000.0)):
         """
         Args:
             reference_point: 参考点（帕累托前沿的下界）
@@ -629,7 +629,7 @@ class EHVIAcquisition:
     def compute_ehvi(
         self,
         X_candidates: np.ndarray,
-        models: Tuple[GaussianProcessRegressor, GaussianProcessRegressor, GaussianProcessRegressor],
+        models: tuple[GaussianProcessRegressor, GaussianProcessRegressor, GaussianProcessRegressor],
         pareto_front: np.ndarray,
         n_samples: int = 100
     ) -> np.ndarray:
@@ -833,18 +833,18 @@ class BayesianParameterOptimizer:
         self._data_dir.mkdir(parents=True, exist_ok=True)
         
         # 每个效果一个组的 GP 模型
-        self._models: Dict[str, Tuple[GaussianProcessRegressor,
+        self._models: dict[str, tuple[GaussianProcessRegressor,
                                        GaussianProcessRegressor,
                                        GaussianProcessRegressor]] = {}
         
         # 观测历史: effect_name -> List[Observation]
-        self._observations: Dict[str, List[Observation]] = {}
+        self._observations: dict[str, list[Observation]] = {}
         
         # 帕累托前沿: effect_name -> List[ParetoPoint]
-        self._pareto_fronts: Dict[str, List[ParetoPoint]] = {}
+        self._pareto_fronts: dict[str, list[ParetoPoint]] = {}
         
         # 跨效果迁移矩阵
-        self._transfer_cache: Dict[str, np.ndarray] = {}
+        self._transfer_cache: dict[str, np.ndarray] = {}
         
         # EHVI 采集函数
         self._acquisition = EHVIAcquisition()
@@ -859,10 +859,10 @@ class BayesianParameterOptimizer:
     def recommend(
         self,
         effect_name: str,
-        style_context: Optional[StyleVector] = None,
-        constraints: Optional[ParameterConstraints] = None,
+        style_context: StyleVector | None = None,
+        constraints: ParameterConstraints | None = None,
         n_suggestions: int = 3
-    ) -> List[ParameterSuggestion]:
+    ) -> list[ParameterSuggestion]:
         """贝叶斯优化推荐
         
         Args:
@@ -929,11 +929,11 @@ class BayesianParameterOptimizer:
     def _cold_start_recommend(
         self,
         effect_name: str,
-        specs: List[ParameterSpec],
-        style_context: Optional[StyleVector],
-        constraints: Optional[ParameterConstraints],
+        specs: list[ParameterSpec],
+        style_context: StyleVector | None,
+        constraints: ParameterConstraints | None,
         n: int
-    ) -> List[ParameterSuggestion]:
+    ) -> list[ParameterSuggestion]:
         """冷启动推荐（无观测数据）"""
         suggestions = []
         
@@ -970,8 +970,8 @@ class BayesianParameterOptimizer:
         return suggestions[:n]
     
     def _try_transfer(
-        self, target_effect: str, specs: List[ParameterSpec]
-    ) -> Optional[TransferResult]:
+        self, target_effect: str, specs: list[ParameterSpec]
+    ) -> TransferResult | None:
         """尝试从相似效果迁移参数"""
         similarities = EFFECT_SIMILARITY.get(target_effect, {})
         if not similarities:
@@ -999,7 +999,7 @@ class BayesianParameterOptimizer:
     def observe(
         self,
         effect_name: str,
-        params: Dict[str, float],
+        params: dict[str, float],
         quality: float,
         render_time: float,
         file_size: float,
@@ -1173,7 +1173,7 @@ class BayesianParameterOptimizer:
         
         return overlap / max(total, 1)
     
-    def _find_spec(self, effect_name: str, param_name: str) -> Optional[ParameterSpec]:
+    def _find_spec(self, effect_name: str, param_name: str) -> ParameterSpec | None:
         """查找参数规格"""
         for spec in PARAMETER_SPACES.get(effect_name, []):
             if spec.name == param_name:
@@ -1187,9 +1187,9 @@ class BayesianParameterOptimizer:
     def _get_or_build_models(
         self,
         effect_name: str,
-        obs_list: List[Observation],
-        specs: List[ParameterSpec]
-    ) -> Tuple[GaussianProcessRegressor, GaussianProcessRegressor, GaussianProcessRegressor]:
+        obs_list: list[Observation],
+        specs: list[ParameterSpec]
+    ) -> tuple[GaussianProcessRegressor, GaussianProcessRegressor, GaussianProcessRegressor]:
         """获取或构建 GP 代理模型"""
         if effect_name in self._models and len(obs_list) <= 3:
             return self._models[effect_name]
@@ -1225,7 +1225,7 @@ class BayesianParameterOptimizer:
         self._models[effect_name] = models
         return models
     
-    def _params_to_vector(self, params: Dict[str, float], specs: List[ParameterSpec]) -> np.ndarray:
+    def _params_to_vector(self, params: dict[str, float], specs: list[ParameterSpec]) -> np.ndarray:
         """参数字典 → 归一化向量"""
         vec = []
         for spec in specs:
@@ -1234,7 +1234,7 @@ class BayesianParameterOptimizer:
             vec.append(np.clip(norm, 0.0, 1.0))
         return np.array(vec)
     
-    def _vector_to_params(self, vec: np.ndarray, specs: List[ParameterSpec]) -> Dict[str, float]:
+    def _vector_to_params(self, vec: np.ndarray, specs: list[ParameterSpec]) -> dict[str, float]:
         """归一化向量 → 参数字典"""
         params = {}
         for i, spec in enumerate(specs):
@@ -1247,10 +1247,10 @@ class BayesianParameterOptimizer:
     
     def _generate_candidates(
         self,
-        specs: List[ParameterSpec],
+        specs: list[ParameterSpec],
         n: int,
-        constraints: Optional[ParameterConstraints] = None,
-        style_context: Optional[StyleVector] = None
+        constraints: ParameterConstraints | None = None,
+        style_context: StyleVector | None = None
     ) -> np.ndarray:
         """生成候选参数点"""
         dim = len(specs)
@@ -1268,8 +1268,8 @@ class BayesianParameterOptimizer:
         return candidates
     
     def _latin_hypercube(
-        self, specs: List[ParameterSpec], n: int
-    ) -> List[np.ndarray]:
+        self, specs: list[ParameterSpec], n: int
+    ) -> list[np.ndarray]:
         """拉丁超立方采样"""
         dim = len(specs)
         samples = []
@@ -1291,9 +1291,9 @@ class BayesianParameterOptimizer:
         return [result[i] for i in range(n)]
     
     def _apply_style_adjustment(
-        self, params: Dict[str, float], specs: List[ParameterSpec],
+        self, params: dict[str, float], specs: list[ParameterSpec],
         style: StyleVector
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """根据风格调整参数"""
         adjusted = dict(params)
         
@@ -1313,8 +1313,8 @@ class BayesianParameterOptimizer:
         return adjusted
     
     def _apply_constraints(
-        self, params: Dict[str, float], constraints: ParameterConstraints
-    ) -> Dict[str, float]:
+        self, params: dict[str, float], constraints: ParameterConstraints
+    ) -> dict[str, float]:
         """应用参数约束"""
         constrained = dict(params)
         for param_name, (lo, hi) in constraints.hard_bounds.items():
@@ -1323,14 +1323,14 @@ class BayesianParameterOptimizer:
         return constrained
     
     def _build_pareto_front(
-        self, effect_name: str, obs_list: List[Observation]
-    ) -> List[ParetoPoint]:
+        self, effect_name: str, obs_list: list[Observation]
+    ) -> list[ParetoPoint]:
         """构建帕累托前沿"""
         return self._pareto_fronts.get(effect_name, [])
     
     def _default_suggestions(
         self, effect_name: str, n: int
-    ) -> List[ParameterSuggestion]:
+    ) -> list[ParameterSuggestion]:
         """默认推荐（未知效果）"""
         specs = PARAMETER_SPACES.get(effect_name, [])
         suggestions = []
@@ -1420,7 +1420,7 @@ class BayesianParameterOptimizer:
     #  统计
     # ----------------------------------------------------------------
     
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取优化器统计信息"""
         return {
             "tracked_effects": len(self._observations),
@@ -1429,7 +1429,7 @@ class BayesianParameterOptimizer:
             "built_models": len(self._models),
         }
     
-    def get_pareto_front(self, effect_name: str) -> List[ParetoPoint]:
+    def get_pareto_front(self, effect_name: str) -> list[ParetoPoint]:
         """获取指定效果的帕累托前沿"""
         return self._pareto_fronts.get(effect_name, [])
 
@@ -1483,12 +1483,12 @@ class BayesianParameterOptimizer:
 
     def multi_objective_optimize(
         self,
-        param_specs: List["ParamSpec"],
-        objective_specs: List["ObjectiveSpec"],
-        objective_fn: "Callable[[Dict[str, float]], Dict[str, float]]",
+        param_specs: list["ParamSpec"],
+        objective_specs: list["ObjectiveSpec"],
+        objective_fn: "Callable[[dict[str, float]], dict[str, float]]",
         n_iterations: int = 30,
         n_initial_samples: int = 5,
-        seed: Optional[int] = None,
+        seed: int | None = None,
     ) -> "ParetoFront":
         """多目标贝叶斯优化
 
@@ -1533,10 +1533,10 @@ class BayesianParameterOptimizer:
             np.random.seed(seed)
 
         # Step 1: 初始采样 (拉丁超立方 + 评估)
-        X_obs: List[np.ndarray] = []
-        y_obs: Dict[str, List[float]] = {obj.name: [] for obj in objective_specs}
-        params_obs: List[Dict[str, float]] = []
-        objectives_obs: List[Dict[str, float]] = []
+        X_obs: list[np.ndarray] = []
+        y_obs: dict[str, list[float]] = {obj.name: [] for obj in objective_specs}
+        params_obs: list[dict[str, float]] = []
+        objectives_obs: list[dict[str, float]] = []
 
         # 拉丁超立方初始采样
         initial_samples = self._lhs_generic(param_specs, n_initial_samples)
@@ -1583,7 +1583,7 @@ class BayesianParameterOptimizer:
             X_norm = (X_arr - x_mean) / x_std
 
             # 为每个目标构建 GP
-            gp_models: Dict[str, GaussianProcessRegressor] = {}
+            gp_models: dict[str, GaussianProcessRegressor] = {}
             for obj in objective_specs:
                 y = np.array(y_obs[obj.name])
                 gp = GaussianProcessRegressor()
@@ -1629,7 +1629,7 @@ class BayesianParameterOptimizer:
                 y_obs[obj.name].append(float(next_obj.get(obj.name, 0.0)))
 
         # Step 3: 计算帕累托前沿
-        solutions: List[ParetoSolution] = []
+        solutions: list[ParetoSolution] = []
         for i in range(len(params_obs)):
             solutions.append(ParetoSolution(
                 params=params_obs[i],
@@ -1653,7 +1653,7 @@ class BayesianParameterOptimizer:
         )
 
         # 各目标单独最优
-        best_per_objective: Dict[str, ParetoSolution] = {}
+        best_per_objective: dict[str, ParetoSolution] = {}
         for obj in objective_specs:
             if not solutions:
                 continue
@@ -1677,9 +1677,9 @@ class BayesianParameterOptimizer:
 
     def _lhs_generic(
         self,
-        param_specs: List["ParamSpec"],
+        param_specs: list["ParamSpec"],
         n: int,
-    ) -> List[np.ndarray]:
+    ) -> list[np.ndarray]:
         """通用拉丁超立方采样 (基于归一化空间 [0,1])"""
         dim = len(param_specs)
         if dim == 0 or n <= 0:
@@ -1692,7 +1692,7 @@ class BayesianParameterOptimizer:
             # 打乱该维度
             np.random.shuffle(result[:, j])
         # 转换回参数原始范围
-        samples: List[np.ndarray] = []
+        samples: list[np.ndarray] = []
         for i in range(n):
             vec = np.array([
                 param_specs[j].low +
@@ -1705,10 +1705,10 @@ class BayesianParameterOptimizer:
     def _vec_to_params_generic(
         self,
         vec: np.ndarray,
-        param_specs: List["ParamSpec"],
-    ) -> Dict[str, float]:
+        param_specs: list["ParamSpec"],
+    ) -> dict[str, float]:
         """向量 → 参数字典 (通用版)"""
-        params: Dict[str, float] = {}
+        params: dict[str, float] = {}
         for i, spec in enumerate(param_specs):
             if i >= len(vec):
                 params[spec.name] = spec.default
@@ -1721,9 +1721,9 @@ class BayesianParameterOptimizer:
 
     def _extract_pareto_solutions(
         self,
-        solutions: List["ParetoSolution"],
-        objective_specs: List["ObjectiveSpec"],
-    ) -> List["ParetoSolution"]:
+        solutions: list["ParetoSolution"],
+        objective_specs: list["ObjectiveSpec"],
+    ) -> list["ParetoSolution"]:
         """提取帕累托最优解
 
         帕累托支配规则 (假设所有目标都已转为 maximize 方向):
@@ -1739,7 +1739,7 @@ class BayesianParameterOptimizer:
 
         # 预处理: 把每个解的目标值转为统一的 maximize 方向
         # direction_to_sign[name] = +1 if maximize else -1
-        sign: Dict[str, float] = {}
+        sign: dict[str, float] = {}
         for obj in objective_specs:
             sign[obj.name] = 1.0 if obj.direction == "maximize" else -1.0
 
@@ -1770,8 +1770,8 @@ class BayesianParameterOptimizer:
 
     def _compute_hv_generic(
         self,
-        pareto_solutions: List["ParetoSolution"],
-        objective_specs: List["ObjectiveSpec"],
+        pareto_solutions: list["ParetoSolution"],
+        objective_specs: list["ObjectiveSpec"],
     ) -> float:
         """计算超体积指标 (2D 精确, 高维 MC 近似)
 
@@ -1783,7 +1783,7 @@ class BayesianParameterOptimizer:
         if not pareto_solutions or not objective_specs:
             return 0.0
 
-        sign: Dict[str, float] = {}
+        sign: dict[str, float] = {}
         for obj in objective_specs:
             sign[obj.name] = 1.0 if obj.direction == "maximize" else -1.0
 
@@ -1839,7 +1839,7 @@ class BayesianParameterOptimizer:
 #  全局单例
 # ============================================================================
 
-_global_optimizer: Optional[BayesianParameterOptimizer] = None
+_global_optimizer: BayesianParameterOptimizer | None = None
 
 
 def get_optimizer(data_dir: str | None = None) -> BayesianParameterOptimizer:

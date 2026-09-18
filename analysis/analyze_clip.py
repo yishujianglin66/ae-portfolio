@@ -1,5 +1,5 @@
-import os
 import json
+import os
 import subprocess
 from datetime import datetime
 
@@ -118,7 +118,7 @@ with open(output_report, 'w', encoding='utf-8') as f:
     json.dump(clip_analysis, f, ensure_ascii=False, indent=2)
 
 print(f"📊 剪辑分析报告已生成: {output_report}")
-print(f"\n视频信息:")
+print("\n视频信息:")
 print(f"  时长: {clip_analysis['video_info']['duration']}")
 print(f"  分辨率: {clip_analysis['video_info']['resolution']} ({clip_analysis['video_info']['aspect_ratio']})")
 print(f"  帧率: {clip_analysis['video_info']['fps']}")

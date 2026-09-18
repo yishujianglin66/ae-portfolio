@@ -4,7 +4,12 @@ t37d_reextract_more_frames.py - 从现有视频资源提取更多帧
 之前只用了 fps=1，现在用 fps=2 + 多分辨率裁剪来扩充训练数据。
 同时利用MaterialSearcher已下载的视频。
 """
-import os, sys, json, time, subprocess, shutil
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 CORPUS_DIR = Path(r"D:\multi_ip_corpus")
@@ -113,7 +118,7 @@ def main():
     ip_new = {}
     
     # ── Part 1: 从 D:\AE-Work\resources\video 提取 ──
-    print(f"\n[Part 1] 扫描 D:\\AE-Work\\resources\\video")
+    print("\n[Part 1] 扫描 D:\\AE-Work\\resources\\video")
     
     all_videos = []
     for root, dirs, files in os.walk(VIDEO_DIR):
@@ -162,7 +167,7 @@ def main():
             log(f"  +{added} 帧 (fps={fps}, max={max_f})")
     
     # ── Part 2: 从 MaterialSearcher 已下载的视频提取 ──
-    print(f"\n[Part 2] 扫描 MaterialSearcher 下载目录")
+    print("\n[Part 2] 扫描 MaterialSearcher 下载目录")
     
     if MAT_DIR.exists():
         mat_videos = []
@@ -224,7 +229,7 @@ def main():
     for ip, cnt in sorted(ip_new.items()):
         print(f"  {ip}: +{cnt}")
     
-    print(f"\n[更新后各IP总帧数]")
+    print("\n[更新后各IP总帧数]")
     after_total = 0
     for d in sorted(CORPUS_DIR.iterdir()):
         if d.is_dir():

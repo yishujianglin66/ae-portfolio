@@ -64,7 +64,7 @@ def fail(msg: str) -> None:
     sys.exit(1)
 
 
-def read_csv(path: Path) -> Tuple[List[str], List[Dict[str, str]]]:
+def read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     if not path.exists():
         fail(f"文件不存在: {path}")
     with path.open(encoding="utf-8-sig", newline="") as f:
@@ -74,7 +74,7 @@ def read_csv(path: Path) -> Tuple[List[str], List[Dict[str, str]]]:
         return list(rd.fieldnames), list(rd)
 
 
-def load_gold(path: Path) -> Tuple[List[str], List[Dict[str, str]]]:
+def load_gold(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     cols, rows = read_csv(path)
     for need in ("index", "shot_id", "human_direction"):
         if need not in cols:
@@ -82,7 +82,7 @@ def load_gold(path: Path) -> Tuple[List[str], List[Dict[str, str]]]:
     return cols, rows
 
 
-def answered_stats(rows: List[Dict[str, str]]) -> Tuple[int, int, int]:
+def answered_stats(rows: list[dict[str, str]]) -> tuple[int, int, int]:
     """返回 (已答数, unsure 数, 总数)。"""
     answered = [r for r in rows if r["human_direction"].strip()]
     unsure = sum(1 for r in answered if r["human_direction"].strip() == "unsure")
@@ -112,7 +112,7 @@ def cmd_import(args: argparse.Namespace) -> int:
             fail(f"作答 CSV 缺列 {need} (实有 {acols})")
 
     errors, seen = [], set()
-    plan: List[Tuple[Dict[str, str], str, str]] = []
+    plan: list[tuple[dict[str, str], str, str]] = []
     for i, a in enumerate(arows, 2):
         idx, shot, label = a["index"].strip(), a["shot_id"].strip(), a["human_direction"].strip()
         if idx in seen:
@@ -189,8 +189,8 @@ def cmd_report(args: argparse.Namespace) -> int:
     return 0
 
 
-def _pairs(gold_rows: List[Dict[str, str]],
-           preds: Dict[str, str]) -> Tuple[List[Tuple[str, str]], int, int]:
+def _pairs(gold_rows: list[dict[str, str]],
+           preds: dict[str, str]) -> tuple[list[tuple[str, str]], int, int]:
     """返回 ([(gold, pred)] 已答且非unsure且预测覆盖, unsure 数, 未覆盖数)。"""
     pairs, n_unsure, n_missing = [], 0, 0
     for r in gold_rows:
@@ -208,7 +208,7 @@ def _pairs(gold_rows: List[Dict[str, str]],
     return pairs, n_unsure, n_missing
 
 
-def _bootstrap_ci(pairs: List[Tuple[str, str]]) -> Tuple[float, float, float]:
+def _bootstrap_ci(pairs: list[tuple[str, str]]) -> tuple[float, float, float]:
     acc = sum(1 for g, p in pairs if g == p) / len(pairs)
     rng = random.Random(BOOT_SEED)
     n = len(pairs)
@@ -221,7 +221,7 @@ def _bootstrap_ci(pairs: List[Tuple[str, str]]) -> Tuple[float, float, float]:
     return acc, lo, hi
 
 
-def _eval_pairs(name: str, pairs: List[Tuple[str, str]],
+def _eval_pairs(name: str, pairs: list[tuple[str, str]],
                 n_unsure: int, n_missing: int, n_gold_decisive: int) -> None:
     print(f"评估对象: {name}")
     print(f"  样本: gold 决定性 {n_gold_decisive} | 参与评估 {len(pairs)}"
@@ -230,7 +230,7 @@ def _eval_pairs(name: str, pairs: List[Tuple[str, str]],
         fail(f"可评估样本 {len(pairs)} < 20, 不足以出指标。")
 
     acc, lo, hi = _bootstrap_ci(pairs)
-    recalls: Dict[str, List[float]] = {}
+    recalls: dict[str, list[float]] = {}
     per_gold = Counter(g for g, _ in pairs)
     for c in per_gold:
         hits = sum(1 for g, p in pairs if g == c and p == c)
@@ -283,7 +283,7 @@ def cmd_eval(args: argparse.Namespace) -> int:
     if args.pred_col not in pcols:
         fail(f"预测列 '{args.pred_col}' 不存在 (实有 {pcols})")
 
-    preds: Dict[str, str] = {}
+    preds: dict[str, str] = {}
     bad: Counter = Counter()
     for r in prows:
         v = r[args.pred_col].strip()
@@ -309,7 +309,7 @@ def cmd_vlm(args: argparse.Namespace) -> int:
     if "vlm_direction" not in cols:
         fail("gold CSV 无 vlm_direction 列, 无法自评。")
 
-    preds: Dict[str, str] = {}
+    preds: dict[str, str] = {}
     remapped: Counter = Counter()
     bad: Counter = Counter()
     for r in gold_rows:
@@ -377,8 +377,8 @@ def cmd_consensus(args: argparse.Namespace) -> int:
             if need not in cols:
                 fail(f"{path} 缺列 {need} (实有 {cols})")
 
-    def keyed(rows: List[Dict[str, str]], path: Path) -> Dict[str, Tuple[str, str]]:
-        d: Dict[str, Tuple[str, str]] = {}
+    def keyed(rows: list[dict[str, str]], path: Path) -> dict[str, tuple[str, str]]:
+        d: dict[str, tuple[str, str]] = {}
         for r in rows:
             idx, lab = r["index"].strip(), r["human_direction"].strip()
             if not lab:

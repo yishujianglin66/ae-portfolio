@@ -54,9 +54,9 @@ class ColorBridgeResult:
     cdl_contrast: float = 1.0            # 0.0 ~ 4.0 (1.0 = 中性)
     cdl_brightness: float = 0.0          # -1.0 ~ 1.0 (0.0 = 中性)
     # DaVinci Resolve 色轮 (shadows/midtones/highlights RGB 偏移)
-    color_wheel_shadows: Tuple[float, float, float] = (0.0, 0.0, 0.0)
-    color_wheel_midtones: Tuple[float, float, float] = (0.0, 0.0, 0.0)
-    color_wheel_highlights: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    color_wheel_shadows: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    color_wheel_midtones: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    color_wheel_highlights: tuple[float, float, float] = (0.0, 0.0, 0.0)
     # ffmpeg eq 参数 (降级用)
     ffmpeg_eq_saturation: float = 1.0    # 0.0 ~ 4.0
     ffmpeg_eq_contrast: float = 1.0      # 0.0 ~ 4.0
@@ -66,8 +66,8 @@ class ColorBridgeResult:
     ae_brightness: float = 0.0           # -100 ~ 100 (ADBE Brightness & Contrast 2 -0001)
     ae_contrast: float = 0.0             # -100 ~ 100 (ADBE Brightness & Contrast 2 -0002)
     # 诊断信息
-    source_profile: Dict[str, float] = field(default_factory=dict)
-    notes: List[str] = field(default_factory=list)
+    source_profile: dict[str, float] = field(default_factory=dict)
+    notes: list[str] = field(default_factory=list)
 
 
 class ColorProfileAdapter:
@@ -86,7 +86,7 @@ class ColorProfileAdapter:
     NEUTRAL_SATURATION = 50.0
     NEUTRAL_CONTRAST = 50.0
 
-    def convert(self, color_profile: Dict[str, float]) -> ColorBridgeResult:
+    def convert(self, color_profile: dict[str, float]) -> ColorBridgeResult:
         """将 StyleSpec.color_profile 转换为跨软件色彩参数。
 
         Args:
@@ -183,7 +183,7 @@ class TransitionMapper:
     """
 
     # 完整映射表: source_label → {resolve, ae_matchname, xfade, duration}
-    TRANSITION_TABLE: Dict[str, Dict[str, Any]] = {
+    TRANSITION_TABLE: dict[str, dict[str, Any]] = {
         "cut": {
             "resolve": "",
             "ae_matchname": "",
@@ -247,7 +247,7 @@ class TransitionMapper:
     }
 
     # 情绪驱动的转场时长微调系数
-    MOOD_DURATION_SCALE: Dict[str, float] = {
+    MOOD_DURATION_SCALE: dict[str, float] = {
         "intro": 1.5,     # intro 转场偏长
         "build": 1.0,
         "drop": 0.6,      # drop 转场极短（卡点）
@@ -260,7 +260,7 @@ class TransitionMapper:
         self,
         label: str,
         mood: str = "build",
-        duration_override: Optional[float] = None,
+        duration_override: float | None = None,
     ) -> TransitionBridgeResult:
         """将 ffmpeg 转场标签转换为跨软件转场参数。
 
@@ -296,8 +296,8 @@ class TransitionMapper:
 
     def map_transition_sequence(
         self,
-        segments: List[Any],
-    ) -> List[TransitionBridgeResult]:
+        segments: list[Any],
+    ) -> list[TransitionBridgeResult]:
         """批量转换段落序列的转场。"""
         results = []
         for seg in segments:
@@ -323,7 +323,7 @@ class SpeedBridgeResult:
     resolve_retime_process: int = 0         # 0=Project, 1=Nearest, 2=Optical Flow
     # Resolve SpeedCurve (变速曲线)
     resolve_has_curve: bool = False
-    resolve_curve_points: List[Tuple[float, float]] = field(default_factory=list)
+    resolve_curve_points: list[tuple[float, float]] = field(default_factory=list)
     # ffmpeg setpts 因子
     ffmpeg_setpts_factor: float = 1.0       # setpts = 1/speed * PTS
     # 诊断
@@ -343,7 +343,7 @@ class SpeedCurveAdapter:
     """
 
     # ProductionDirector SPEED_PRESETS 对照表
-    MOOD_SPEED_PRESETS: Dict[str, float] = {
+    MOOD_SPEED_PRESETS: dict[str, float] = {
         "intro": 0.85,     # 慢放蓄力
         "build": 1.0,      # 原速推进
         "drop": 0.7,       # 明显慢放（打击感）
@@ -354,7 +354,7 @@ class SpeedCurveAdapter:
 
     # 情绪 → 变速曲线控制点 [(time_pos, speed)]
     # 用于 Resolve dynamic_speed_ramp()
-    MOOD_SPEED_CURVES: Dict[str, List[Tuple[float, float]]] = {
+    MOOD_SPEED_CURVES: dict[str, list[tuple[float, float]]] = {
         "intro": [(0.0, 1.0), (0.5, 0.85), (1.0, 0.85)],       # 渐入慢放
         "build": [(0.0, 1.0), (1.0, 1.0)],                       # 匀速
         "drop": [(0.0, 1.2), (0.3, 0.7), (0.7, 0.7), (1.0, 1.0)],  # 先快后慢
@@ -366,7 +366,7 @@ class SpeedCurveAdapter:
     def convert(
         self,
         mood: str = "build",
-        speed_override: Optional[float] = None,
+        speed_override: float | None = None,
         use_curve: bool = True,
     ) -> SpeedBridgeResult:
         """将情绪段落转换为变速参数。
@@ -407,8 +407,8 @@ class SpeedCurveAdapter:
 
     def convert_style_spec_speed(
         self,
-        speed_segments: List[Dict[str, float]],
-    ) -> List[SpeedBridgeResult]:
+        speed_segments: list[dict[str, float]],
+    ) -> list[SpeedBridgeResult]:
         """将 StyleSpec.speed_segments 转换为变速参数序列。
 
         Args:
@@ -452,24 +452,24 @@ class StyleBridge:
         self.transition_mapper = TransitionMapper()
         self.speed_adapter = SpeedCurveAdapter()
 
-    def color_to_cdl(self, color_profile: Dict[str, float]) -> ColorBridgeResult:
+    def color_to_cdl(self, color_profile: dict[str, float]) -> ColorBridgeResult:
         """快捷方法: color_profile → CDL"""
         return self.color_adapter.convert(color_profile)
 
     def map_transition(self, label: str, mood: str = "build",
-                     duration_override: Optional[float] = None) -> TransitionBridgeResult:
+                     duration_override: float | None = None) -> TransitionBridgeResult:
         """快捷方法: 转场标签 → 跨软件转场"""
         return self.transition_mapper.map_transition(label, mood, duration_override)
 
-    def speed_for_mood(self, mood: str, speed_override: Optional[float] = None) -> SpeedBridgeResult:
+    def speed_for_mood(self, mood: str, speed_override: float | None = None) -> SpeedBridgeResult:
         """快捷方法: 情绪 → 变速参数"""
         return self.speed_adapter.convert(mood, speed_override)
 
     def script_to_resolve_timeline(
         self,
-        script_dict: Dict[str, Any],
-        style_spec: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict[str, Any]]:
+        script_dict: dict[str, Any],
+        style_spec: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
         """将 DirectorScript.to_dict() 转换为 Resolve 时间线片段序列。
 
         Args:

@@ -1,9 +1,12 @@
 # Silhouette Roto 端到端测试 - 基于真实 API
 import pytest
+
 pytest.importorskip("fx")
-from fx import *
 import os
 import traceback
+
+from fx import *
+
 
 class TestRotoE2E(Action):
 	def __init__(self):
@@ -76,8 +79,8 @@ class TestRotoE2E(Action):
 					continue
 			
 			if roto_node is None:
-				f.write(f"\n[5] Could not create Roto node by type name\n")
-				f.write(f"    Will try addNode or createObject\n")
+				f.write("\n[5] Could not create Roto node by type name\n")
+				f.write("    Will try addNode or createObject\n")
 				try:
 					roto_node = addNode("RotoNode")
 					f.write(f"[5] addNode('RotoNode') created: {roto_node}\n")
@@ -97,32 +100,32 @@ class TestRotoE2E(Action):
 				try:
 					# 方法1: Pipe
 					pipe = Pipe(src.outputs[0], roto_node.inputs[0])
-					f.write(f"\n[7] Pipe Source→Roto created\n")
+					f.write("\n[7] Pipe Source→Roto created\n")
 				except Exception as e:
 					f.write(f"\n[7] Pipe failed: {e}\n")
 					# 方法2: connect
 					try:
 						src.outputs[0].connect(roto_node.inputs[0])
-						f.write(f"[7] connect() method worked\n")
+						f.write("[7] connect() method worked\n")
 					except Exception as e2:
 						f.write(f"[7] connect() also failed: {e2}\n")
 			
 			if roto_node and out_node:
 				try:
 					pipe2 = Pipe(roto_node.outputs[0], out_node.inputs[0])
-					f.write(f"[7] Pipe Roto→Output created\n")
+					f.write("[7] Pipe Roto→Output created\n")
 				except Exception as e:
 					f.write(f"[7] Pipe Roto→Output failed: {e}\n")
 			
 			# Step 8: 尝试添加节点到 Session
 			try:
 				session.addNode(src)
-				f.write(f"\n[8] Source added to session\n")
+				f.write("\n[8] Source added to session\n")
 			except Exception as e:
 				f.write(f"[8] addNode(src) failed: {e}\n")
 				try:
 					session.addItem(src)
-					f.write(f"[8] addItem(src) worked\n")
+					f.write("[8] addItem(src) worked\n")
 				except Exception as e2:
 					f.write(f"[8] addItem also failed: {e2}\n")
 			
@@ -146,7 +149,7 @@ class TestRotoE2E(Action):
 			# Step 11: 列出所有节点类型（用 getNodeInfo）
 			try:
 				node_types = getNodes()
-				f.write(f"\n[11] All node types:\n")
+				f.write("\n[11] All node types:\n")
 				for nt in node_types:
 					f.write(f"    {nt}\n")
 			except Exception as e:

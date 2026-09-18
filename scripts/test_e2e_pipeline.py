@@ -12,11 +12,11 @@ ae_agent_pipeline 端到端验证测试 (B3)
     python test_e2e_pipeline.py
     python test_e2e_pipeline.py --audio path/to/audio.mp3
 """
+import argparse
+import json
 import os
 import sys
-import json
 import time
-import argparse
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent

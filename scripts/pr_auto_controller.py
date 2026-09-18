@@ -10,10 +10,10 @@ PR 全自动控制器 - 通过 Startup 桥接脚本控制 Premiere Pro
 from __future__ import annotations
 
 import json
+import shutil
+import tempfile
 import time
 from pathlib import Path
-import tempfile
-import shutil
 
 PR_INSTALL_DIR = Path(r"D:\Pr25\Adobe Premiere Pro 2025")
 STARTUP_DIR = PR_INSTALL_DIR / "Scripts" / "Startup"
@@ -203,7 +203,7 @@ def run_full_auto_edit():
         print(f"  ✓ 转场 {i+1}")
 
     # 应用调色
-    print(f"\n【步骤 6】应用调色效果...")
+    print("\n【步骤 6】应用调色效果...")
     for i in range(len(clip_files)):
         ctrl.add_effect(i, effect="Lumetri Color", track=0)
     print(f"  ✓ 已添加 Lumetri Color 到 {len(clip_files)} 个剪辑")

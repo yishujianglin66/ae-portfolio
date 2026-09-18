@@ -13,12 +13,12 @@ from __future__ import annotations
 import logging
 from typing import Dict, List, Optional
 
+from software_sdk.base import BaseSoftwareAdapter
 from software_sdk.types import (
     ConnectionStatus,
     SoftwareCapability,
     SoftwareType,
 )
-from software_sdk.base import BaseSoftwareAdapter
 
 
 class SoftwareRegistry:
@@ -31,8 +31,8 @@ class SoftwareRegistry:
     - 批量连接/断开
     """
 
-    def __init__(self, logger: Optional[logging.Logger] = None) -> None:
-        self._adapters: Dict[SoftwareType, BaseSoftwareAdapter] = {}
+    def __init__(self, logger: logging.Logger | None = None) -> None:
+        self._adapters: dict[SoftwareType, BaseSoftwareAdapter] = {}
         self.logger = logger or logging.getLogger("software_sdk.registry")
 
     def register(
@@ -67,7 +67,7 @@ class SoftwareRegistry:
             del self._adapters[software_type]
             self.logger.info(f"Unregistered adapter: {software_type.value}")
 
-    def get(self, software_type: SoftwareType) -> Optional[BaseSoftwareAdapter]:
+    def get(self, software_type: SoftwareType) -> BaseSoftwareAdapter | None:
         """获取软件适配器。
 
         Args:
@@ -89,7 +89,7 @@ class SoftwareRegistry:
         """
         return software_type in self._adapters
 
-    def list_available(self) -> List[SoftwareType]:
+    def list_available(self) -> list[SoftwareType]:
         """列出所有已注册的软件类型。
 
         Returns:
@@ -100,7 +100,7 @@ class SoftwareRegistry:
     def get_by_capability(
         self,
         capability: SoftwareCapability,
-    ) -> List[BaseSoftwareAdapter]:
+    ) -> list[BaseSoftwareAdapter]:
         """按能力查找适配器。
 
         Args:
@@ -109,20 +109,20 @@ class SoftwareRegistry:
         Returns:
             具有该能力的适配器列表
         """
-        result: List[BaseSoftwareAdapter] = []
+        result: list[BaseSoftwareAdapter] = []
         for adapter in self._adapters.values():
             caps = adapter.get_capabilities()
             if caps.has_capability(capability):
                 result.append(adapter)
         return result
 
-    def connect_all(self) -> Dict[SoftwareType, bool]:
+    def connect_all(self) -> dict[SoftwareType, bool]:
         """连接所有已注册的软件。
 
         Returns:
             软件类型 -> 连接结果
         """
-        results: Dict[SoftwareType, bool] = {}
+        results: dict[SoftwareType, bool] = {}
         for sw_type, adapter in self._adapters.items():
             try:
                 results[sw_type] = adapter.connect()
@@ -131,13 +131,13 @@ class SoftwareRegistry:
                 results[sw_type] = False
         return results
 
-    def disconnect_all(self) -> Dict[SoftwareType, bool]:
+    def disconnect_all(self) -> dict[SoftwareType, bool]:
         """断开所有已注册的软件。
 
         Returns:
             软件类型 -> 断开结果
         """
-        results: Dict[SoftwareType, bool] = {}
+        results: dict[SoftwareType, bool] = {}
         for sw_type, adapter in self._adapters.items():
             try:
                 results[sw_type] = adapter.disconnect()
@@ -146,7 +146,7 @@ class SoftwareRegistry:
                 results[sw_type] = False
         return results
 
-    def get_connected(self) -> List[BaseSoftwareAdapter]:
+    def get_connected(self) -> list[BaseSoftwareAdapter]:
         """获取所有已连接的适配器。
 
         Returns:
@@ -157,7 +157,7 @@ class SoftwareRegistry:
             if adapter.get_status().status == ConnectionStatus.CONNECTED
         ]
 
-    def get_available_for_task(self) -> List[SoftwareType]:
+    def get_available_for_task(self) -> list[SoftwareType]:
         """获取可以接受任务的软件列表。
 
         Returns:

@@ -32,7 +32,6 @@ from ae.unified_ae_client import (
     UnifiedAEClient,
 )
 
-
 # ---------------------------------------------------------------------------
 # 示例 1：基础通道自动选择
 # ---------------------------------------------------------------------------
@@ -148,7 +147,7 @@ class _FailingAdapter(BaseAEAdapter):
     def is_available(self) -> bool:
         return True
 
-    def create_composition(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_composition(self, **kwargs: Any) -> dict[str, Any]:
         return {"success": False, "error": self.fail_message, "channel": self.name}
 
 
@@ -160,7 +159,7 @@ class _SucceedingAdapter(BaseAEAdapter):
     def is_available(self) -> bool:
         return True
 
-    def create_composition(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_composition(self, **kwargs: Any) -> dict[str, Any]:
         return {
             "success": True,
             "channel": self.name,
@@ -255,7 +254,7 @@ def example_6_dependency_injection() -> None:
         def is_available(self) -> bool:
             return True
 
-        def create_composition(self, **kwargs: Any) -> Dict[str, Any]:
+        def create_composition(self, **kwargs: Any) -> dict[str, Any]:
             call_log.append(("create_composition", kwargs))
             return {"success": True, "channel": "mock", "mock": True}
 
@@ -287,7 +286,7 @@ def example_7_channel_selector() -> None:
     print("=" * 70)
 
     # 模拟一个 puppet 不健康、MCP 健康的场景
-    stats: Dict[AEChannel, AEChannelStats] = {
+    stats: dict[AEChannel, AEChannelStats] = {
         AEChannel.PUPPET: AEChannelStats(
             total_calls=5,
             success_count=1,

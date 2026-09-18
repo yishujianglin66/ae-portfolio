@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import logging
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -68,7 +68,7 @@ class VersionDecision:
     reason: str = ""
     timestamp: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -104,7 +104,7 @@ class VersionManager:
     def create_version(
         self,
         scope: str,
-        config_snapshot: Optional[Dict[str, Any]] = None,
+        config_snapshot: dict[str, Any] | None = None,
         source_run_id: str = "",
         parent_version: str = "",
     ) -> str:
@@ -152,7 +152,7 @@ class VersionManager:
         self,
         version_id: str,
         score: float,
-        breakdown: Optional[Dict[str, Any]] = None,
+        breakdown: dict[str, Any] | None = None,
         run_id: str = "",
     ) -> None:
         """记录一次评测得分到版本目录"""
@@ -203,7 +203,7 @@ class VersionManager:
         version_id: str,
         score: float,
         run_id: str = "",
-        breakdown: Optional[Dict[str, Any]] = None,
+        breakdown: dict[str, Any] | None = None,
     ) -> VersionDecision:
         """记录得分并做出接受/回退决策（PenguinHarness 核心逻辑）
 
@@ -293,7 +293,7 @@ class VersionManager:
         """统计该 scope 最近连续回退次数（从日志尾部往前数）"""
         if not self._decision_log.exists():
             return 0
-        records: List[Dict[str, Any]] = []
+        records: list[dict[str, Any]] = []
         try:
             import json
             with open(self._decision_log, "r", encoding="utf-8") as f:
@@ -321,7 +321,7 @@ class VersionManager:
     #  查询与审计
     # ----------------------------------------------------------------
 
-    def history(self, scope: Optional[str] = None) -> List[Dict[str, Any]]:
+    def history(self, scope: str | None = None) -> list[dict[str, Any]]:
         """获取所有版本的摘要历史"""
         result = []
         for vdir in sorted(self._data_dir.iterdir()):
@@ -340,7 +340,7 @@ class VersionManager:
             })
         return result
 
-    def get_config_snapshot(self, version_id: str) -> Dict[str, Any]:
+    def get_config_snapshot(self, version_id: str) -> dict[str, Any]:
         """读取版本配置快照（供回退后恢复）"""
         return read_json(self._data_dir / version_id / "config.json", {}) or {}
 
@@ -364,7 +364,7 @@ class VersionManager:
 #  全局单例
 # ============================================================================
 
-_global_vm: Optional[VersionManager] = None
+_global_vm: VersionManager | None = None
 
 
 def get_version_manager(

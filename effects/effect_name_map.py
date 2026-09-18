@@ -13,8 +13,7 @@ Phase 3 - 效果名 → matchName 映射库
 对齐 TS: compiler/src/phase3/effect-name-map.ts
 """
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
-
+from typing import Any, Dict, List, Optional
 
 __all__ = [
     "EffectMapEntry",
@@ -38,15 +37,15 @@ class EffectMapEntry:
     display_name: str
     category: str  # blur|glow|distort|color|particle|transition|text|3d|light
     source: str    # native|sapphire|boris|trapcode|vc|other
-    aliases: List[str] = field(default_factory=list)
-    param_map: Dict[str, str] = field(default_factory=dict)
+    aliases: list[str] = field(default_factory=list)
+    param_map: dict[str, str] = field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
 # 完整的效果映射表（与决策树章节对应）
 # ---------------------------------------------------------------------------
 
-EFFECT_MAP: Dict[str, EffectMapEntry] = {
+EFFECT_MAP: dict[str, EffectMapEntry] = {
     # ========== 模糊类（EI-001 ~ EI-099） ==========
     "Gaussian Blur": EffectMapEntry(
         match_name="ADBE Gaussian Blur 2",
@@ -491,7 +490,7 @@ EFFECT_MAP: Dict[str, EffectMapEntry] = {
 # 查询 API
 # ---------------------------------------------------------------------------
 
-def find_by_name(name: str) -> Optional[EffectMapEntry]:
+def find_by_name(name: str) -> EffectMapEntry | None:
     """通过显示名查找效果映射
 
     Args:
@@ -516,7 +515,7 @@ def find_by_name(name: str) -> Optional[EffectMapEntry]:
     return None
 
 
-def find_by_match_name(match_name: str) -> Optional[EffectMapEntry]:
+def find_by_match_name(match_name: str) -> EffectMapEntry | None:
     """通过 matchName 查找效果映射"""
     if not match_name:
         return None
@@ -526,20 +525,20 @@ def find_by_match_name(match_name: str) -> Optional[EffectMapEntry]:
     return None
 
 
-def get_all_effect_names() -> List[str]:
+def get_all_effect_names() -> list[str]:
     """获取所有效果名列表"""
     return list(EFFECT_MAP.keys())
 
 
-def get_by_category(category: str) -> List[EffectMapEntry]:
+def get_by_category(category: str) -> list[EffectMapEntry]:
     """获取指定类别的所有效果"""
     return [entry for entry in EFFECT_MAP.values() if entry.category == category]
 
 
-def get_stats() -> Dict[str, Any]:
+def get_stats() -> dict[str, Any]:
     """统计信息"""
-    by_category: Dict[str, int] = {}
-    by_source: Dict[str, int] = {}
+    by_category: dict[str, int] = {}
+    by_source: dict[str, int] = {}
     for entry in EFFECT_MAP.values():
         by_category[entry.category] = by_category.get(entry.category, 0) + 1
         by_source[entry.source] = by_source.get(entry.source, 0) + 1

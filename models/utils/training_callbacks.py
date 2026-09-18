@@ -2,13 +2,13 @@
 训练回调工具集
 提供日志记录、早停、检查点、指标收集等训练回调。
 """
-import os
 import json
+import logging
+import os
 import time
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any, Optional, Callable
 from dataclasses import dataclass, field
-import logging
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +84,7 @@ class TrainingCallback(ABC):
         """
         pass
     
-    def on_log(self, step: int, epoch: int, logs: Dict[str, float], **kwargs) -> None:
+    def on_log(self, step: int, epoch: int, logs: dict[str, float], **kwargs) -> None:
         """记录日志时调用
         
         Args:
@@ -94,7 +94,7 @@ class TrainingCallback(ABC):
         """
         pass
     
-    def on_evaluate(self, step: int, epoch: int, metrics: Dict[str, float], **kwargs) -> None:
+    def on_evaluate(self, step: int, epoch: int, metrics: dict[str, float], **kwargs) -> None:
         """评估结束时调用
         
         Args:
@@ -138,7 +138,7 @@ class LoggingCallback(TrainingCallback):
         self.log_dir = log_dir
         self.log_file = log_file
         self.log_every_steps = log_every_steps
-        self._log_history: List[Dict] = []
+        self._log_history: list[dict] = []
         self._start_time = 0.0
     
     def on_training_start(self, step: int, epoch: int, **kwargs) -> None:
@@ -174,7 +174,7 @@ class LoggingCallback(TrainingCallback):
             f"LR: {lr:.2e} | Speed: {steps_per_sec:.2f} steps/s"
         )
     
-    def on_evaluate(self, step: int, epoch: int, metrics: Dict[str, float], **kwargs) -> None:
+    def on_evaluate(self, step: int, epoch: int, metrics: dict[str, float], **kwargs) -> None:
         """评估结束时记录"""
         metrics_str = " | ".join(f"{k}: {v:.4f}" for k, v in metrics.items())
         logger.info(f"Eval at step {step} | {metrics_str}")
@@ -196,7 +196,7 @@ class LoggingCallback(TrainingCallback):
         logger.info(f"Training completed in {elapsed:.2f}s, logs saved to {log_path}")
     
     @property
-    def log_history(self) -> List[Dict]:
+    def log_history(self) -> list[dict]:
         """获取历史日志"""
         return self._log_history
 
@@ -243,7 +243,7 @@ class EarlyStoppingCallback(TrainingCallback):
         else:
             return value > self.best_value + self.min_delta
     
-    def on_evaluate(self, step: int, epoch: int, metrics: Dict[str, float], **kwargs) -> None:
+    def on_evaluate(self, step: int, epoch: int, metrics: dict[str, float], **kwargs) -> None:
         """评估后检查是否需要早停"""
         if self.monitor not in metrics:
             logger.warning(f"Monitor metric '{self.monitor}' not found in metrics")
@@ -308,7 +308,7 @@ class CheckpointCallback(TrainingCallback):
         self.mode = mode
         
         self.best_value = float("inf") if mode == "min" else float("-inf")
-        self._checkpoints: List[str] = []
+        self._checkpoints: list[str] = []
         self.best_checkpoint_path = ""
     
     def _is_better(self, value: float) -> bool:
@@ -330,7 +330,7 @@ class CheckpointCallback(TrainingCallback):
         if step % self.save_every_steps == 0 and step > 0:
             self._save_checkpoint(step, epoch, "checkpoint")
     
-    def on_evaluate(self, step: int, epoch: int, metrics: Dict[str, float], **kwargs) -> None:
+    def on_evaluate(self, step: int, epoch: int, metrics: dict[str, float], **kwargs) -> None:
         """评估后保存最佳模型"""
         if not self.save_best_only:
             return
@@ -390,18 +390,18 @@ class MetricsCallback(TrainingCallback):
     def __init__(self):
         """初始化指标回调"""
         super().__init__()
-        self._train_metrics: List[Dict] = []
-        self._eval_metrics: List[Dict] = []
+        self._train_metrics: list[dict] = []
+        self._eval_metrics: list[dict] = []
         self._train_start_time = 0.0
         self._epoch_start_time = 0.0
     
     @property
-    def train_metrics(self) -> List[Dict]:
+    def train_metrics(self) -> list[dict]:
         """训练指标历史"""
         return self._train_metrics
     
     @property
-    def eval_metrics(self) -> List[Dict]:
+    def eval_metrics(self) -> list[dict]:
         """评估指标历史"""
         return self._eval_metrics
     
@@ -429,7 +429,7 @@ class MetricsCallback(TrainingCallback):
         }
         self._train_metrics.append(metrics)
     
-    def on_evaluate(self, step: int, epoch: int, metrics: Dict[str, float], **kwargs) -> None:
+    def on_evaluate(self, step: int, epoch: int, metrics: dict[str, float], **kwargs) -> None:
         """评估结束记录评估指标"""
         eval_entry = {
             "step": step,
@@ -438,7 +438,7 @@ class MetricsCallback(TrainingCallback):
         }
         self._eval_metrics.append(eval_entry)
     
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """获取训练总结
         
         Returns:

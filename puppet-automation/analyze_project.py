@@ -1,7 +1,9 @@
 import asyncio
 import json
+
 from src.config.settings import settings
 from src.engines.ae.engine import AEEngine
+
 
 async def analyze_project(project_path, output_file):
     engine = AEEngine()

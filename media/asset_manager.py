@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """素材管理器 - 全网免费素材搜索、下载、收藏、管理"""
 
-import os
-import sys
+import hashlib
 import json
-import time
+import os
 import re
 import sqlite3
-import hashlib
-import requests
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime
+import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from urllib.parse import urlparse, unquote
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import unquote, urlparse
+
+import requests
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
@@ -49,7 +50,7 @@ class AssetManager:
         self._register_providers()
         self._init_post_processor()
 
-    def sync_local_library(self) -> Dict:
+    def sync_local_library(self) -> dict:
         """同步本地素材库到数据库"""
         print("🔄 同步本地素材库...")
         
@@ -77,7 +78,7 @@ class AssetManager:
         print(f"✅ 同步完成，共 {synced_count} 个素材")
         return {"success": True, "synced_count": synced_count}
 
-    def search_local(self, query: str, media_type: str = "all") -> Dict:
+    def search_local(self, query: str, media_type: str = "all") -> dict:
         """搜索本地素材库"""
         results = []
 
@@ -124,7 +125,7 @@ class AssetManager:
             self.ae_client = None
 
         try:
-            from topaz_integration import TopazEnhancer, TopazConfig
+            from topaz_integration import TopazConfig, TopazEnhancer
             self.topaz_enhancer = TopazEnhancer()
         except Exception:
             self.topaz_enhancer = None
@@ -202,7 +203,7 @@ class AssetManager:
         self.search_providers.append(VidevoProvider())
         self.search_providers.append(FreeSoundProvider())
 
-    def search(self, query: str, media_type: str = "all", limit: int = 20, include_local: bool = True) -> Dict:
+    def search(self, query: str, media_type: str = "all", limit: int = 20, include_local: bool = True) -> dict:
         """全网搜索素材"""
         print(f"🔍 搜索: '{query}' ({media_type})")
 
@@ -269,7 +270,7 @@ class AssetManager:
             "errors": errors
         }
 
-    def _deduplicate(self, results: List[Dict]) -> List[Dict]:
+    def _deduplicate(self, results: list[dict]) -> list[dict]:
         seen_titles = set()
         deduped = []
         for r in results:
@@ -279,7 +280,7 @@ class AssetManager:
                 deduped.append(r)
         return deduped
 
-    def download_all(self, results: List[Dict], force: bool = False) -> Dict:
+    def download_all(self, results: list[dict], force: bool = False) -> dict:
         """批量下载搜索结果"""
         downloaded = []
         skipped = []
@@ -303,7 +304,7 @@ class AssetManager:
             "download_count": len(downloaded)
         }
 
-    def download(self, item: Dict, force: bool = False) -> Dict:
+    def download(self, item: dict, force: bool = False) -> dict:
         """下载单个素材"""
         url = item.get("url")
         title = item.get("title", "untitled")
@@ -358,7 +359,7 @@ class AssetManager:
                 "title": title
             }
 
-    def _save_to_db(self, item: Dict, download_path: str):
+    def _save_to_db(self, item: dict, download_path: str):
         conn = sqlite3.connect(str(self.db_path))
         c = conn.cursor()
 
@@ -389,7 +390,7 @@ class AssetManager:
         conn.commit()
         conn.close()
 
-    def download_from_url(self, url: str, title: str = None, media_type: str = "video") -> Dict:
+    def download_from_url(self, url: str, title: str = None, media_type: str = "video") -> dict:
         """从直接链接下载素材"""
         print(f"📥 直接下载链接: {url}")
 
@@ -458,7 +459,7 @@ class AssetManager:
                 "title": title
             }
 
-    def download_from_urls(self, urls: List[str], media_type: str = "video") -> Dict:
+    def download_from_urls(self, urls: list[str], media_type: str = "video") -> dict:
         """批量从直接链接下载素材"""
         results = []
         for url in urls:
@@ -476,7 +477,7 @@ class AssetManager:
             "download_count": len(downloaded)
         }
 
-    def analyze_url(self, url: str) -> Dict:
+    def analyze_url(self, url: str) -> dict:
         """分析URL类型和提取信息"""
         parsed = urlparse(url)
         domain = parsed.netloc.lower()
@@ -542,7 +543,7 @@ class AssetManager:
             "author": author
         }
 
-    def fetch_creator_info(self, platform: str, creator_id: str) -> Dict:
+    def fetch_creator_info(self, platform: str, creator_id: str) -> dict:
         """获取创作者信息"""
         if platform == "bilibili":
             return self._fetch_bilibili_creator(creator_id)
@@ -551,7 +552,7 @@ class AssetManager:
         else:
             return {"success": False, "error": f"不支持的平台: {platform}"}
 
-    def _fetch_bilibili_creator(self, uid: str) -> Dict:
+    def _fetch_bilibili_creator(self, uid: str) -> dict:
         """获取B站创作者信息"""
         try:
             url = f"https://api.bilibili.com/x/space/wbi/acc/info?mid={uid}"
@@ -577,21 +578,21 @@ class AssetManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _fetch_youtube_creator(self, channel_id: str) -> Dict:
+    def _fetch_youtube_creator(self, channel_id: str) -> dict:
         """获取YouTube创作者信息"""
         return {
             "success": False,
             "error": "YouTube API需要认证，无法获取信息"
         }
 
-    def search_creator_videos(self, platform: str, creator_id: str, limit: int = 10) -> Dict:
+    def search_creator_videos(self, platform: str, creator_id: str, limit: int = 10) -> dict:
         """搜索创作者视频"""
         if platform == "bilibili":
             return self._search_bilibili_videos(creator_id, limit)
         else:
             return {"success": False, "error": f"不支持的平台: {platform}"}
 
-    def _search_bilibili_videos(self, uid: str, limit: int = 10) -> Dict:
+    def _search_bilibili_videos(self, uid: str, limit: int = 10) -> dict:
         """搜索B站用户视频"""
         try:
             url = f"https://api.bilibili.com/x/space/wbi/arc/search?mid={uid}&ps={limit}&pn=1"
@@ -660,7 +661,7 @@ class AssetManager:
         conn.close()
         return c.rowcount > 0
 
-    def get_favorites(self, media_type: str = None) -> List[Dict]:
+    def get_favorites(self, media_type: str = None) -> list[dict]:
         """获取收藏列表"""
         conn = sqlite3.connect(str(self.db_path))
         c = conn.cursor()
@@ -675,7 +676,7 @@ class AssetManager:
 
         return [self._row_to_dict(row) for row in rows]
 
-    def get_downloaded(self, media_type: str = None) -> List[Dict]:
+    def get_downloaded(self, media_type: str = None) -> list[dict]:
         """获取已下载列表"""
         conn = sqlite3.connect(str(self.db_path))
         c = conn.cursor()
@@ -690,7 +691,7 @@ class AssetManager:
 
         return [self._row_to_dict(row) for row in rows]
 
-    def _row_to_dict(self, row) -> Dict:
+    def _row_to_dict(self, row) -> dict:
         return {
             "id": row[0],
             "title": row[1],
@@ -715,7 +716,7 @@ class AssetManager:
             "created_at": row[20]
         }
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """获取统计信息"""
         conn = sqlite3.connect(str(self.db_path))
         c = conn.cursor()
@@ -745,7 +746,7 @@ class AssetManager:
             "platform_stats": platform_stats
         }
 
-    def enhance_video(self, input_path: str, output_dir: str = None) -> Dict:
+    def enhance_video(self, input_path: str, output_dir: str = None) -> dict:
         """使用Topaz Video AI增强视频"""
         if not self.topaz_enhancer or not self.topaz_enhancer.is_available():
             return {"success": False, "error": "Topaz Video AI不可用"}
@@ -777,7 +778,7 @@ class AssetManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def color_grade_video(self, input_path: str, output_dir: str = None) -> Dict:
+    def color_grade_video(self, input_path: str, output_dir: str = None) -> dict:
         """使用DaVinci Resolve调色"""
         if not self.davinci_colorist or not self.davinci_colorist.is_available():
             return {"success": False, "error": "DaVinci Resolve不可用"}
@@ -809,7 +810,7 @@ class AssetManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def import_to_ae(self, file_path: str, composition_name: str = None) -> Dict:
+    def import_to_ae(self, file_path: str, composition_name: str = None) -> dict:
         """导入素材到AE合成"""
         if not self.ae_client:
             return {"success": False, "error": "AE MCP Bridge不可用"}
@@ -844,7 +845,7 @@ class AssetManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def process_workflow(self, input_path: str, workflow: str = "default") -> Dict:
+    def process_workflow(self, input_path: str, workflow: str = "default") -> dict:
         """完整后期处理工作流"""
         print(f"🔄 启动工作流: {workflow}")
 
@@ -881,7 +882,7 @@ class SearchProvider:
     name = "base"
     supported_types = []
 
-    def search(self, query: str, media_type: str, limit: int) -> Dict:
+    def search(self, query: str, media_type: str, limit: int) -> dict:
         return {"items": []}
 
 
@@ -889,7 +890,7 @@ class PixabayProvider(SearchProvider):
     name = "pixabay"
     supported_types = ["image", "video"]
 
-    def search(self, query: str, media_type: str, limit: int) -> Dict:
+    def search(self, query: str, media_type: str, limit: int) -> dict:
         api_key = os.environ.get("PIXABAY_API_KEY", "")
         if not api_key:
             _logger.warning("Pixabay API Key 未配置（环境变量 PIXABAY_API_KEY），跳过搜索")
@@ -932,7 +933,7 @@ class PexelsProvider(SearchProvider):
     name = "pexels"
     supported_types = ["image", "video"]
 
-    def search(self, query: str, media_type: str, limit: int) -> Dict:
+    def search(self, query: str, media_type: str, limit: int) -> dict:
         api_key = os.environ.get("PEXELS_API_KEY", "")
 
         if not api_key:
@@ -986,7 +987,7 @@ class JamendoProvider(SearchProvider):
     name = "jamendo"
     supported_types = ["audio"]
 
-    def search(self, query: str, media_type: str, limit: int) -> Dict:
+    def search(self, query: str, media_type: str, limit: int) -> dict:
         client_id = os.environ.get("JAMENDO_CLIENT_ID", "")
 
         if not client_id:
@@ -1028,7 +1029,7 @@ class UnsplashProvider(SearchProvider):
     name = "unsplash"
     supported_types = ["image"]
 
-    def search(self, query: str, media_type: str, limit: int) -> Dict:
+    def search(self, query: str, media_type: str, limit: int) -> dict:
         api_key = os.environ.get("UNSPLASH_ACCESS_KEY", "")
 
         if not api_key:
@@ -1071,7 +1072,7 @@ class VidevoProvider(SearchProvider):
     name = "videvo"
     supported_types = ["video", "audio"]
 
-    def search(self, query: str, media_type: str, limit: int) -> Dict:
+    def search(self, query: str, media_type: str, limit: int) -> dict:
         endpoint = f"https://www.videvo.net/api/v2/{'videos' if media_type == 'video' else 'audio'}"
 
         params = {
@@ -1115,7 +1116,7 @@ class FreeSoundProvider(SearchProvider):
     name = "freesound"
     supported_types = ["audio"]
 
-    def search(self, query: str, media_type: str, limit: int) -> Dict:
+    def search(self, query: str, media_type: str, limit: int) -> dict:
         api_key = os.environ.get("FREESOUND_API_KEY", "")
 
         if not api_key:
@@ -1161,7 +1162,7 @@ def main():
     manager = AssetManager()
 
     stats = manager.get_stats()
-    print(f"\n📊 当前素材库统计:")
+    print("\n📊 当前素材库统计:")
     print(f"   总素材: {stats['total_assets']}")
     print(f"   已下载: {stats['downloaded_count']}")
     print(f"   收藏: {stats['favorite_count']}")
@@ -1291,9 +1292,9 @@ def main():
                 workflow = input("选择工作流 [default/video/full/color/ae]: ").strip() or "default"
                 result = manager.process_workflow(downloaded[idx]["download_path"], workflow)
                 if result["success"]:
-                    print(f"✅ 工作流完成")
+                    print("✅ 工作流完成")
                 else:
-                    print(f"部分步骤失败")
+                    print("部分步骤失败")
 
         elif choice == "11":
             url = input("输入下载链接: ").strip()

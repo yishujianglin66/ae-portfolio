@@ -42,7 +42,6 @@ from loguru import logger
 
 from ..config import settings
 
-
 # ============================================================
 # 系统提示词 — 意图识别 + 参数提取
 # ============================================================
@@ -135,7 +134,7 @@ class AIPlannerService:
     若网关未配置或不可用，``plan()`` 抛出 ``LLMUnavailableError``。
     """
 
-    def __init__(self, gateway: Optional[Any] = None) -> None:
+    def __init__(self, gateway: Any | None = None) -> None:
         """初始化服务。
 
         Args:
@@ -190,7 +189,7 @@ class AIPlannerService:
         Raises:
             LLMUnavailableError: LLM 网关未配置或所有 Provider 不可用
         """
-        from core.llm_gateway import TaskType, LLMUnavailableError
+        from core.llm_gateway import LLMUnavailableError, TaskType
 
         gateway = self._get_gateway()
         if gateway is None:
@@ -253,14 +252,14 @@ class AIPlannerService:
         if not isinstance(raw, dict):
             raw = {}
 
-        def _opt_str(key: str) -> Optional[str]:
+        def _opt_str(key: str) -> str | None:
             v = raw.get(key)
             if v is None:
                 return None
             s = str(v).strip()
             return s or None
 
-        def _opt_float(key: str) -> Optional[float]:
+        def _opt_float(key: str) -> float | None:
             v = raw.get(key)
             if v is None:
                 return None

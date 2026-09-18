@@ -11,13 +11,14 @@ test_adobe_mcp_manager.py — Adobe MCP Manager 安全与集成测试
 注意：由于 adobe_mcp_manager 和 adobe_universal_bridge 模块仅在
 最新的 git 提交中添加，这些测试在模块缺失时会被跳过。
 """
+import json
 import os
 import sys
-import json
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent

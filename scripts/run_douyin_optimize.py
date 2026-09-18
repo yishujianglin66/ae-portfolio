@@ -18,7 +18,12 @@
   python run_douyin_optimize.py <input.mp4> [--fps 48] [--sharp 1.0]
   默认: 2x AI补帧 → unsharp=5:5:1.0 → 高码率导出 → 独立产物
 """
-import argparse, json, os, re, subprocess, sys
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
 
 FFMPEG = "C:/ffmpeg/bin/ffmpeg.exe"
 FFPROBE = "C:/ffmpeg/bin/ffprobe.exe"
@@ -81,7 +86,7 @@ def main():
     br = ffprobe(dst, "bit_rate")
     sz = os.path.getsize(dst) / 1048576
     print(f"[4/4] 产物: {os.path.basename(dst)} | {sz:.1f}MB | {nb}帧 | {br}bps")
-    print(f"      抖音建议: 竖屏9:16 + 分辨率≥1080 + 码率≥3Mbps 效果最佳")
+    print("      抖音建议: 竖屏9:16 + 分辨率≥1080 + 码率≥3Mbps 效果最佳")
 
 
 if __name__ == "__main__":

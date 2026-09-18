@@ -18,6 +18,7 @@ Phase 2-1 感知层增强 — 基于 PySceneDetect 的镜头分割模块
 对齐文件: ae_agent_pipeline.py perceive() / transition_map.py
 """
 from __future__ import annotations
+
 import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
@@ -37,7 +38,7 @@ __all__ = [
 
 # 检测依赖可用性（不抛异常）
 try:
-    from scenedetect import detect, ContentDetector, SceneManager, open_video
+    from scenedetect import ContentDetector, SceneManager, detect, open_video
     from scenedetect.detectors import AdaptiveDetector, ThresholdDetector
     _SCENEDETECT_AVAILABLE = True
 except ImportError:  # pragma: no cover - 依赖未安装的路径
@@ -81,7 +82,7 @@ class SceneSegment:
     end_frame: int = 0
     frame_count: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "index": self.index,
             "start_time": round(self.start_time, 4),
@@ -114,11 +115,11 @@ class SceneDetectResult:
     detector_type: str = ""
     scene_count: int = 0
     total_duration: float = 0.0
-    segments: List[SceneSegment] = field(default_factory=list)
+    segments: list[SceneSegment] = field(default_factory=list)
     fps: float = 0.0
     from_cache: bool = False
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "error": self.error,
@@ -156,7 +157,7 @@ class SceneDetector:
         threshold: float = 27.0,
         min_scene_len: int = 15,
         enable_cache: bool = True,
-        cache_dir: Optional[str] = None,
+        cache_dir: str | None = None,
     ):
         """
         Args:
@@ -260,7 +261,7 @@ class SceneDetector:
             )
 
         # 转换为 SceneSegment 列表
-        segments: List[SceneSegment] = []
+        segments: list[SceneSegment] = []
         for idx, (start, end) in enumerate(scene_list):
             start_time = start.get_seconds()
             end_time = end.get_seconds()
@@ -302,8 +303,8 @@ class SceneDetector:
         return result
 
     def detect_batch(
-        self, video_paths: List[str], max_workers: Optional[int] = None
-    ) -> Dict[str, SceneDetectResult]:
+        self, video_paths: list[str], max_workers: int | None = None
+    ) -> dict[str, SceneDetectResult]:
         """批量镜头分割
 
         Args:
@@ -321,7 +322,7 @@ class SceneDetector:
             return {p: self.detect(p) for p in video_paths}
 
         import concurrent.futures
-        results: Dict[str, SceneDetectResult] = {}
+        results: dict[str, SceneDetectResult] = {}
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as exe:
             future_to_path = {
                 exe.submit(self.detect, p): p for p in video_paths

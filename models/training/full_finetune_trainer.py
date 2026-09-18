@@ -3,8 +3,8 @@
 用于需要全量参数更新的场景（通常参数量较大）
 参考 Antares 哲学：优先使用 LoRA 等高效微调方式，全量微调作为备选
 """
-import os
 import logging
+import os
 from typing import Any, Dict, Optional
 
 from .trainer_base import BaseTrainer, TrainingConfig, TrainingResult
@@ -56,7 +56,7 @@ class FullFinetuneTrainer(BaseTrainer):
             train_data: 训练数据
             eval_data: 评估数据，可选
         """
-        logger.info(f"Loading dataset for full fine-tuning (framework mode)")
+        logger.info("Loading dataset for full fine-tuning (framework mode)")
         self._train_dataset = train_data
         self._eval_dataset = eval_data
         self._fire_callback("on_dataset_loaded",
@@ -65,7 +65,7 @@ class FullFinetuneTrainer(BaseTrainer):
 
     def load_base_model(self) -> None:
         """加载基座模型"""
-        logger.info(f"Loading base model for full fine-tuning (framework mode)")
+        logger.info("Loading base model for full fine-tuning (framework mode)")
         logger.info("Full fine-tuning requires significant GPU memory. "
                    "Consider using LoRA for parameter-efficient fine-tuning.")
         self._fire_callback("on_model_loaded", simulated=True)
@@ -101,7 +101,7 @@ class FullFinetuneTrainer(BaseTrainer):
         self._end_training()
         return result
 
-    def evaluate(self) -> Dict[str, float]:
+    def evaluate(self) -> dict[str, float]:
         """评估模型
         
         Returns:

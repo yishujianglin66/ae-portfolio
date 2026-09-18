@@ -15,11 +15,10 @@ Silhouette fx API 模拟器 v2.0
 - Action: 脚本通过 Action 类注册到菜单
 """
 
+import json
 import os
 import time
-import json
 from typing import Any, Dict, List, Optional
-
 
 # ============================================================
 # 基础类型
@@ -66,7 +65,7 @@ class Property:
     def __init__(self, name: str, type_str: str = "number"):
         self.name = name
         self._type = type_str
-        self._values: Dict[int, Any] = {}
+        self._values: dict[int, Any] = {}
         self._default: Any = self._get_default(type_str)
     
     def _get_default(self, type_str: str) -> Any:
@@ -111,9 +110,9 @@ class Port:
     def __init__(self, name: str, direction: str = "input"):
         self.name = name
         self.direction = direction  # "input" or "output"
-        self._source: Optional['Port'] = None
-        self._targets: List['Port'] = []
-        self._node: Optional['Node'] = None
+        self._source: 'Port' | None = None
+        self._targets: list['Port'] = []
+        self._node: 'Node' | None = None
     
     @property
     def source(self) -> Optional['Port']:
@@ -194,9 +193,9 @@ class Node:
     def __init__(self, type_str: str = "Node"):
         self.type = type_str
         self.label = type_str.replace("Node", "") if type_str.endswith("Node") else type_str
-        self.inputs: List[Port] = []
-        self.outputs: List[Port] = []
-        self._properties: Dict[str, Property] = {}
+        self.inputs: list[Port] = []
+        self.outputs: list[Port] = []
+        self._properties: dict[str, Property] = {}
         self._parent = None
         
         config = _NODE_PORT_CONFIGS.get(type_str, {
@@ -244,7 +243,7 @@ class Object:
     def __init__(self, type_str: str = "Object", label: str = ""):
         self.type = type_str
         self.label = label or type_str
-        self._properties: Dict[str, Property] = {}
+        self._properties: dict[str, Property] = {}
         self._parent = None
     
     @property
@@ -276,7 +275,7 @@ class Session(Object):
         self.width: int = 1920
         self.height: int = 1080
         self.frameRate: float = 30.0
-        self._nodes: List[Node] = []
+        self._nodes: list[Node] = []
     
     def addNode(self, node: Node) -> None:
         if node not in self._nodes:
@@ -289,7 +288,7 @@ class Session(Object):
             node._parent = None
     
     @property
-    def nodes(self) -> List[Node]:
+    def nodes(self) -> list[Node]:
         return list(self._nodes)
     
     def __repr__(self):
@@ -299,8 +298,8 @@ class Session(Object):
 class Project(Object):
     def __init__(self):
         super().__init__("Project", "Project")
-        self._items: List[Object] = []
-        self._sessions: List[Session] = []
+        self._items: list[Object] = []
+        self._sessions: list[Session] = []
     
     def addItem(self, item: Object) -> None:
         self._items.append(item)
@@ -309,11 +308,11 @@ class Project(Object):
             self._sessions.append(item)
     
     @property
-    def sessions(self) -> List[Session]:
+    def sessions(self) -> list[Session]:
         return list(self._sessions)
     
     @property
-    def items(self) -> List[Object]:
+    def items(self) -> list[Object]:
         return list(self._items)
     
     def __repr__(self):
@@ -330,15 +329,15 @@ versionMajor = 2026
 versionMinor = 0
 buildNumber = 1234
 
-_active_project: Optional[Project] = None
-_active_session: Optional[Session] = None
+_active_project: Project | None = None
+_active_session: Session | None = None
 
 
-def activeProject() -> Optional[Project]:
+def activeProject() -> Project | None:
     return _active_project
 
 
-def activeSession() -> Optional[Session]:
+def activeSession() -> Session | None:
     return _active_session
 
 
@@ -350,18 +349,18 @@ def activate(item: Object) -> None:
         _active_session = item
 
 
-def addNode(node: Node, session: Optional[Session] = None) -> Node:
+def addNode(node: Node, session: Session | None = None) -> Node:
     s = session or _active_session
     if s:
         s.addNode(node)
     return node
 
 
-def getNodes() -> List[str]:
+def getNodes() -> list[str]:
     return list(_NODE_PORT_CONFIGS.keys())
 
 
-def getNodeInfo(node_type: str) -> Dict[str, Any]:
+def getNodeInfo(node_type: str) -> dict[str, Any]:
     config = _NODE_PORT_CONFIGS.get(node_type, {"inputs": [], "outputs": []})
     return {
         "type": node_type,
@@ -385,14 +384,14 @@ class Action:
         return True
 
 
-_actions: List[Action] = []
+_actions: list[Action] = []
 
 
 def addAction(action: Action) -> None:
     _actions.append(action)
 
 
-def getActions() -> List[Action]:
+def getActions() -> list[Action]:
     return list(_actions)
 
 
@@ -400,7 +399,7 @@ def getActions() -> List[Action]:
 # 辅助：打印所有可用符号
 # ============================================================
 
-def list_available() -> List[str]:
+def list_available() -> list[str]:
     symbols = []
     for name in globals():
         if not name.startswith('_'):

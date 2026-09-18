@@ -1,12 +1,12 @@
-from dataclasses import dataclass, field
-from typing import Dict, Any, Optional, List, Tuple, Callable
-from pathlib import Path
-import re
 import json
 import os
 import random
+import re
 import time
 from collections import defaultdict
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # 关键词->matchName 映射从 effect_registry 统一导入（单一数据源）
 from effects.effect_registry import KEYWORD_TO_EFFECT_MAP
@@ -14,24 +14,24 @@ from effects.effect_registry import KEYWORD_TO_EFFECT_MAP
 
 @dataclass
 class ParameterContext:
-    effect_name: Optional[str] = None
-    layer_type: Optional[str] = None
-    style_name: Optional[str] = None
-    color_temperature: Optional[str] = None
+    effect_name: str | None = None
+    layer_type: str | None = None
+    style_name: str | None = None
+    color_temperature: str | None = None
     intensity: float = 0.5
-    adjust_direction: Optional[str] = None
-    adjust_amount: Optional[str] = None
+    adjust_direction: str | None = None
+    adjust_amount: str | None = None
 
 
 @dataclass
 class OptimizedParameters:
     effect_name: str
-    settings: Dict[str, Any]
+    settings: dict[str, Any]
     confidence: float
-    adjustments: List[Dict[str, Any]] = field(default_factory=list)
+    adjustments: list[dict[str, Any]] = field(default_factory=list)
 
 
-EFFECT_PARAMETER_TEMPLATES: Dict[str, Dict[str, Any]] = {
+EFFECT_PARAMETER_TEMPLATES: dict[str, dict[str, Any]] = {
     "ADBE Gaussian Blur 2": {
         "defaults": {"Blurriness": 20.0},
         "intensity_scale": {"Blurriness": 50.0},
@@ -125,7 +125,7 @@ EFFECT_PARAMETER_TEMPLATES: Dict[str, Dict[str, Any]] = {
 }
 
 
-STYLE_PARAMETER_OVERRIDES: Dict[str, List[Tuple[str, Dict[str, Any]]]] = {
+STYLE_PARAMETER_OVERRIDES: dict[str, list[tuple[str, dict[str, Any]]]] = {
     "赛博朋克": [
         ("ADBE Curves", {"preset": "cyberpunk_cyan_magenta"}),
         ("ADBE Glo2", {"Glow Radius": 30.0, "Glow Intensity": 1.2}),
@@ -236,7 +236,7 @@ class ParameterOptimizer:
 
         # 2. 尝试导入 LLM 网关和记忆系统
         try:
-            from core.llm_gateway import llm_gateway, TaskType
+            from core.llm_gateway import TaskType, llm_gateway
             from core.memory_store import memory_store
         except ImportError:
             return local_result
@@ -331,7 +331,7 @@ class ParameterOptimizer:
 
         return local_result
 
-    def _resolve_effect_name(self, context: ParameterContext) -> Optional[str]:
+    def _resolve_effect_name(self, context: ParameterContext) -> str | None:
         if context.effect_name:
             normalized = context.effect_name.lower()
             if normalized in KEYWORD_TO_EFFECT_MAP:
@@ -348,7 +348,7 @@ class ParameterOptimizer:
 
         return None
 
-    def _apply_intensity(self, settings: Dict[str, Any], template: Dict[str, Any], intensity: float) -> List[Dict[str, Any]]:
+    def _apply_intensity(self, settings: dict[str, Any], template: dict[str, Any], intensity: float) -> list[dict[str, Any]]:
         adjustments = []
         scale = template.get("intensity_scale", {})
         for param, max_value in scale.items():
@@ -364,7 +364,7 @@ class ParameterOptimizer:
                 })
         return adjustments
 
-    def _apply_color_temperature(self, settings: Dict[str, Any], template: Dict[str, Any], temperature: str) -> List[Dict[str, Any]]:
+    def _apply_color_temperature(self, settings: dict[str, Any], template: dict[str, Any], temperature: str) -> list[dict[str, Any]]:
         adjustments = []
         temp_settings = {}
         if temperature.lower() == "warm" or temperature == "暖色":
@@ -384,7 +384,7 @@ class ParameterOptimizer:
 
         return adjustments
 
-    def _apply_style_overrides(self, settings: Dict[str, Any], effect_name: str, style_name: str) -> List[Dict[str, Any]]:
+    def _apply_style_overrides(self, settings: dict[str, Any], effect_name: str, style_name: str) -> list[dict[str, Any]]:
         adjustments = []
         overrides = STYLE_PARAMETER_OVERRIDES.get(style_name.lower())
         if overrides:
@@ -401,7 +401,7 @@ class ParameterOptimizer:
                         settings[param] = value
         return adjustments
 
-    def _apply_adjustment(self, settings: Dict[str, Any], direction: str, amount: str) -> List[Dict[str, Any]]:
+    def _apply_adjustment(self, settings: dict[str, Any], direction: str, amount: str) -> list[dict[str, Any]]:
         adjustments = []
         amount_value = self._parse_amount(amount)
 
@@ -458,7 +458,7 @@ class ParameterOptimizer:
 
         return min(score, 1.0)
 
-    def suggest_effects_for_style(self, style_name: str) -> List[Tuple[str, Dict[str, Any]]]:
+    def suggest_effects_for_style(self, style_name: str) -> list[tuple[str, dict[str, Any]]]:
         return STYLE_PARAMETER_OVERRIDES.get(style_name.lower(), [])
 
 
@@ -471,18 +471,18 @@ class FeedbackRecord:
     """参数反馈记录"""
     record_id: str
     effect_name: str
-    style_name: Optional[str]
-    parameters: Dict[str, Any]
+    style_name: str | None
+    parameters: dict[str, Any]
     rating: float  # 0.0 - 1.0 用户评分
-    adjustment: Optional[Dict[str, Any]] = None  # 用户手动调整后的参数
+    adjustment: dict[str, Any] | None = None  # 用户手动调整后的参数
     timestamp: float = field(default_factory=time.time)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class FeedbackStore:
     """反馈存储器 - 持久化到磁盘，支持按效果/风格查询"""
 
-    def __init__(self, storage_path: Optional[str] = None):
+    def __init__(self, storage_path: str | None = None):
         if storage_path is None:
             storage_path = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
@@ -490,7 +490,7 @@ class FeedbackStore:
                 "param_feedback.json"
             )
         self._storage_path = storage_path
-        self._records: List[FeedbackRecord] = []
+        self._records: list[FeedbackRecord] = []
         self._load()
 
     def _load(self):
@@ -538,11 +538,11 @@ class FeedbackStore:
 
     def query(
         self,
-        effect_name: Optional[str] = None,
-        style_name: Optional[str] = None,
+        effect_name: str | None = None,
+        style_name: str | None = None,
         min_rating: float = 0.0,
         limit: int = 100,
-    ) -> List[FeedbackRecord]:
+    ) -> list[FeedbackRecord]:
         """查询反馈记录"""
         results = self._records
         if effect_name:
@@ -558,9 +558,9 @@ class FeedbackStore:
     def get_best_params(
         self,
         effect_name: str,
-        style_name: Optional[str] = None,
+        style_name: str | None = None,
         min_rating: float = 0.7,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """获取评分最高的参数组合"""
         records = self.query(
             effect_name=effect_name,
@@ -576,7 +576,7 @@ class FeedbackStore:
             return None
 
         # 收集所有数值参数
-        param_values: Dict[str, List[Tuple[float, float]]] = defaultdict(list)
+        param_values: dict[str, list[tuple[float, float]]] = defaultdict(list)
         for rec in records:
             params = rec.adjustment if rec.adjustment else rec.parameters
             for param, value in params.items():
@@ -609,7 +609,7 @@ class ParameterTuner:
 
     def __init__(
         self,
-        feedback_store: Optional[FeedbackStore] = None,
+        feedback_store: FeedbackStore | None = None,
         exploration_rate: float = 0.3,
     ):
         self._feedback = feedback_store or FeedbackStore()
@@ -618,11 +618,11 @@ class ParameterTuner:
     def suggest(
         self,
         effect_name: str,
-        base_params: Dict[str, Any],
-        style_name: Optional[str] = None,
+        base_params: dict[str, Any],
+        style_name: str | None = None,
         strategy: str = "bayesian",
-        param_ranges: Optional[Dict[str, Tuple[float, float]]] = None,
-    ) -> Dict[str, Any]:
+        param_ranges: dict[str, tuple[float, float]] | None = None,
+    ) -> dict[str, Any]:
         """生成下一组探索参数
 
         Args:
@@ -646,10 +646,10 @@ class ParameterTuner:
 
     def _explore(
         self,
-        base_params: Dict[str, Any],
-        param_ranges: Dict[str, Tuple[float, float]],
+        base_params: dict[str, Any],
+        param_ranges: dict[str, tuple[float, float]],
         strategy: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """探索阶段 - 生成新参数组合"""
         new_params = dict(base_params)
 
@@ -685,10 +685,10 @@ class ParameterTuner:
     def _exploit(
         self,
         effect_name: str,
-        base_params: Dict[str, Any],
-        style_name: Optional[str],
-        param_ranges: Dict[str, Tuple[float, float]],
-    ) -> Dict[str, Any]:
+        base_params: dict[str, Any],
+        style_name: str | None,
+        param_ranges: dict[str, tuple[float, float]],
+    ) -> dict[str, Any]:
         """利用阶段 - 使用历史最优参数"""
         best = self._feedback.get_best_params(effect_name, style_name)
         if best:
@@ -707,8 +707,8 @@ class ParameterTuner:
         return base_params
 
     def _infer_ranges(
-        self, params: Dict[str, Any]
-    ) -> Dict[str, Tuple[float, float]]:
+        self, params: dict[str, Any]
+    ) -> dict[str, tuple[float, float]]:
         """从当前参数推断合理范围"""
         ranges = {}
         for param, value in params.items():
@@ -724,11 +724,11 @@ class ParameterTuner:
     def record_feedback(
         self,
         effect_name: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         rating: float,
-        style_name: Optional[str] = None,
-        adjustment: Optional[Dict[str, Any]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        style_name: str | None = None,
+        adjustment: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """记录参数反馈"""
         record = FeedbackRecord(
@@ -754,8 +754,8 @@ class StylePresetEvolver:
 
     def __init__(
         self,
-        feedback_store: Optional[FeedbackStore] = None,
-        preset_dir: Optional[str] = None,
+        feedback_store: FeedbackStore | None = None,
+        preset_dir: str | None = None,
     ):
         self._feedback = feedback_store or FeedbackStore()
         if preset_dir is None:
@@ -765,7 +765,7 @@ class StylePresetEvolver:
                 "evolved_presets"
             )
         self._preset_dir = preset_dir
-        self._generations: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+        self._generations: dict[str, list[dict[str, Any]]] = defaultdict(list)
         self._load_generations()
 
     def _load_generations(self):
@@ -796,9 +796,9 @@ class StylePresetEvolver:
     def evolve_style(
         self,
         style_name: str,
-        base_preset: List[Tuple[str, Dict[str, Any]]],
+        base_preset: list[tuple[str, dict[str, Any]]],
         min_feedback: int = 5,
-    ) -> Optional[List[Tuple[str, Dict[str, Any]]]]:
+    ) -> list[tuple[str, dict[str, Any]]] | None:
         """基于反馈进化风格预设
 
         Args:
@@ -809,7 +809,7 @@ class StylePresetEvolver:
         Returns:
             进化后的预设列表，或 None 表示反馈不足
         """
-        evolved: List[Tuple[str, Dict[str, Any]]] = []
+        evolved: list[tuple[str, dict[str, Any]]] = []
         total_feedback = 0
 
         for effect_name, base_params in base_preset:
@@ -850,7 +850,7 @@ class StylePresetEvolver:
 
         return evolved
 
-    def get_latest_generation(self, style_name: str) -> Optional[Dict[str, Any]]:
+    def get_latest_generation(self, style_name: str) -> dict[str, Any] | None:
         """获取最新一代预设"""
         gens = self._generations.get(style_name, [])
         if gens:
@@ -935,9 +935,9 @@ class EnhancedParameterOptimizer(ParameterOptimizer):
     def suggest_next_trial(
         self,
         context: ParameterContext,
-        current_params: Dict[str, Any],
+        current_params: dict[str, Any],
         strategy: str = "bayesian",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """建议下一组试验参数（用于 A/B 测试）"""
         effect_name = self._resolve_effect_name(context)
         if not effect_name:
@@ -952,10 +952,10 @@ class EnhancedParameterOptimizer(ParameterOptimizer):
     def record_feedback(
         self,
         effect_name: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         rating: float,
-        style_name: Optional[str] = None,
-        adjustment: Optional[Dict[str, Any]] = None,
+        style_name: str | None = None,
+        adjustment: dict[str, Any] | None = None,
     ):
         """记录用户对参数的反馈"""
         self._tuner.record_feedback(
@@ -970,7 +970,7 @@ class EnhancedParameterOptimizer(ParameterOptimizer):
         self,
         style_name: str,
         min_feedback: int = 5,
-    ) -> Optional[List[Tuple[str, Dict[str, Any]]]]:
+    ) -> list[tuple[str, dict[str, Any]]] | None:
         """进化指定风格的预设"""
         base_preset = self.suggest_effects_for_style(style_name)
         if not base_preset:

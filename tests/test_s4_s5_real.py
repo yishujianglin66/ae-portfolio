@@ -23,7 +23,7 @@ class TestPREditStageUnit:
 
     def test_import(self):
         """模块可导入"""
-        from pipeline.stages.pr_edit import PREditStage, PREditResult, S4_TOTAL_TIMEOUT
+        from pipeline.stages.pr_edit import S4_TOTAL_TIMEOUT, PREditResult, PREditStage
         assert S4_TOTAL_TIMEOUT == 600.0
 
     @pytest.mark.asyncio
@@ -147,7 +147,7 @@ class TestDaVinciGradeStageUnit:
 
     def test_import(self):
         """模块可导入"""
-        from pipeline.stages.davinci_grade import DaVinciGradeStage, DaVinciGradeResult
+        from pipeline.stages.davinci_grade import DaVinciGradeResult, DaVinciGradeStage
         assert DaVinciGradeResult is not None
 
     @pytest.mark.asyncio

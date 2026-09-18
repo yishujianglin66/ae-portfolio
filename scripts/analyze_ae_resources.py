@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 async def analyze_ae_resources():
     """调用 LLM 分析 AE 资源完整性"""
-    from core.llm_gateway import chat_with_routing, TaskType
+    from core.llm_gateway import TaskType, chat_with_routing
 
     # 读取扫描结果
     ae_scan_path = Path("D:/AE-Work/ae25_plugin_scan.txt")

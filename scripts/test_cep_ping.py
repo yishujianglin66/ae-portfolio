@@ -1,9 +1,12 @@
 """快速测试 CEP 是否还活着"""
-import asyncio, sys
+import asyncio
+import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve() / "puppet-automation"))
 from src.engines.premiere.pr_bridge_client import PRBridgeClient, PRBridgeError
+
 
 async def main():
     c = PRBridgeClient()

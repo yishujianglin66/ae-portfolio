@@ -18,14 +18,14 @@ import asyncio
 import sys
 from pathlib import Path
 from typing import Any, Dict
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from vrs.vrs_orchestrator import VRSOrchestrator, DEFAULT_OPTIONS
+from vrs.vrs_orchestrator import DEFAULT_OPTIONS, VRSOrchestrator
 
 
 @pytest.fixture
@@ -52,9 +52,9 @@ class TestDetailLevelMapping:
         expected_frames: int,
     ) -> None:
         """quick=12, standard=18, full=24 帧映射。"""
-        captured_num_frames: Dict[str, int] = {}
+        captured_num_frames: dict[str, int] = {}
 
-        async def fake_analyze(self_real, video_path: str) -> Dict[str, Any]:
+        async def fake_analyze(self_real, video_path: str) -> dict[str, Any]:
             # 捕获 VRSRealAnalyzer 构造时传入的 num_frames
             return {"success": True, "source": "real_opencv_analysis"}
 
@@ -63,7 +63,7 @@ class TestDetailLevelMapping:
             def __init__(self_inner, num_frames: int = 18) -> None:
                 captured_num_frames["value"] = num_frames
 
-            async def analyze(self_inner, video_path: str) -> Dict[str, Any]:
+            async def analyze(self_inner, video_path: str) -> dict[str, Any]:
                 return {
                     "success": True,
                     "source": "real_opencv_analysis",
@@ -84,13 +84,13 @@ class TestDetailLevelMapping:
         self, orchestrator: VRSOrchestrator
     ) -> None:
         """显式 num_frames 覆盖 detail_level 的映射值。"""
-        captured: Dict[str, int] = {}
+        captured: dict[str, int] = {}
 
         class FakeVRSRealAnalyzer:
             def __init__(self_inner, num_frames: int = 18) -> None:
                 captured["value"] = num_frames
 
-            async def analyze(self_inner, video_path: str) -> Dict[str, Any]:
+            async def analyze(self_inner, video_path: str) -> dict[str, Any]:
                 return {"success": True, "source": "real_opencv_analysis"}
 
         with patch("vrs.vrs_real_analyzer.VRSRealAnalyzer", FakeVRSRealAnalyzer):
@@ -106,13 +106,13 @@ class TestDetailLevelMapping:
         self, orchestrator: VRSOrchestrator
     ) -> None:
         """未知 detail_level → num_frames_map.get(detail_level, 18) → 18。"""
-        captured: Dict[str, int] = {}
+        captured: dict[str, int] = {}
 
         class FakeVRSRealAnalyzer:
             def __init__(self_inner, num_frames: int = 18) -> None:
                 captured["value"] = num_frames
 
-            async def analyze(self_inner, video_path: str) -> Dict[str, Any]:
+            async def analyze(self_inner, video_path: str) -> dict[str, Any]:
                 return {"success": True}
 
         with patch("vrs.vrs_real_analyzer.VRSRealAnalyzer", FakeVRSRealAnalyzer):
@@ -127,13 +127,13 @@ class TestDetailLevelMapping:
         self, orchestrator: VRSOrchestrator
     ) -> None:
         """options=None → 使用 self.config 的默认 detail_level=standard → 18 帧。"""
-        captured: Dict[str, int] = {}
+        captured: dict[str, int] = {}
 
         class FakeVRSRealAnalyzer:
             def __init__(self_inner, num_frames: int = 18) -> None:
                 captured["value"] = num_frames
 
-            async def analyze(self_inner, video_path: str) -> Dict[str, Any]:
+            async def analyze(self_inner, video_path: str) -> dict[str, Any]:
                 return {"success": True}
 
         with patch("vrs.vrs_real_analyzer.VRSRealAnalyzer", FakeVRSRealAnalyzer):
@@ -170,7 +170,7 @@ class TestSuccessPath:
             def __init__(self_inner, num_frames: int = 18) -> None:
                 pass
 
-            async def analyze(self_inner, video_path: str) -> Dict[str, Any]:
+            async def analyze(self_inner, video_path: str) -> dict[str, Any]:
                 return expected_result
 
         with patch("vrs.vrs_real_analyzer.VRSRealAnalyzer", FakeVRSRealAnalyzer):
@@ -185,13 +185,13 @@ class TestSuccessPath:
         self, orchestrator: VRSOrchestrator
     ) -> None:
         """video_path 为 Path 对象时 → 转为 str 后传给 VRSRealAnalyzer。"""
-        captured_path: Dict[str, str] = {}
+        captured_path: dict[str, str] = {}
 
         class FakeVRSRealAnalyzer:
             def __init__(self_inner, num_frames: int = 18) -> None:
                 pass
 
-            async def analyze(self_inner, video_path: str) -> Dict[str, Any]:
+            async def analyze(self_inner, video_path: str) -> dict[str, Any]:
                 captured_path["value"] = video_path
                 return {"success": True}
 
@@ -262,7 +262,7 @@ class TestExceptionHandling:
             def __init__(self_inner, num_frames: int = 18) -> None:
                 pass
 
-            async def analyze(self_inner, video_path: str) -> Dict[str, Any]:
+            async def analyze(self_inner, video_path: str) -> dict[str, Any]:
                 raise IOError("video file corrupted")
 
         with patch("vrs.vrs_real_analyzer.VRSRealAnalyzer", FailingAnalyzer):

@@ -10,12 +10,12 @@ import asyncio
 from pathlib import Path
 from typing import Optional
 
-from src.plugins.base import FilterPlugin, PluginContext, PluginPriority
 from src.models.pipeline import (
     PhaseResult,
     PipelinePhase,
     TaskStatus,
 )
+from src.plugins.base import FilterPlugin, PluginContext, PluginPriority
 
 
 class WatermarkPlugin(FilterPlugin):
@@ -140,7 +140,7 @@ class WatermarkPlugin(FilterPlugin):
                 watermarked_path.replace(output_file)
                 metadata["watermarked"] = True
                 metadata["watermark_text"] = self._text
-                logger.info(f"[Plugin:Watermark] Watermark applied successfully")
+                logger.info("[Plugin:Watermark] Watermark applied successfully")
             else:
                 logger.warning(
                     f"[Plugin:Watermark] ffmpeg failed (rc={proc.returncode}): "

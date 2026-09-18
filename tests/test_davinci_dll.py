@@ -1,5 +1,8 @@
 """测试 DaVinci fusionscript DLL 加载 - 添加 DLL 搜索路径"""
-import os, sys, ctypes, subprocess
+import ctypes
+import os
+import subprocess
+import sys
 
 resolve_dir = r"D:\DaVinci Resolve"
 
@@ -20,7 +23,7 @@ for mod in list(sys.modules.keys()):
 print("=== Test 1: Import with DLL path ===")
 try:
     import DaVinciResolveScript
-    print(f"  Import OK!")
+    print("  Import OK!")
     resolve = DaVinciResolveScript.scriptapp("Resolve")
     print(f"  Resolve: {resolve}")
 except Exception as e:
@@ -42,6 +45,7 @@ with open(dll_path, "rb") as f:
 
 # Find imported DLL names in PE import table
 import re
+
 # Look for common DLL names
 dll_names = set(re.findall(b'([\\w]+\\.dll)', data, re.IGNORECASE))
 print(f"  DLLs referenced in fusionscript.dll ({len(dll_names)}):")

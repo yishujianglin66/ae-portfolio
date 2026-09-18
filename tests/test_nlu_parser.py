@@ -16,15 +16,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
 from nlu_parser import (
-    NLUParser,
+    ConfidenceThresholds,
     Intent,
     IntentSlots,
     IntentType,
-    ConfidenceThresholds,
+    NLUParser,
     ProjectContext,
     nlu_parser,
 )
-
 
 # ============================================================================
 # parse() — ADD_EFFECT

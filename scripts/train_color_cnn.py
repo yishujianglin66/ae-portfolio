@@ -24,7 +24,7 @@ import numpy as np
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 from scripts.train_param_tuner import FEATURES  # noqa: E402
 
 
@@ -133,7 +133,7 @@ def main() -> int:
 
     print(f"\n=== color_harmony CNN 评分头 (LOOCV, {n} 样本) ===")
     print(f"MAE: {mae:.3f} | Spearman: {rho:.3f} | 方向一致: {dir_acc:.2f}")
-    print(f"\n对比 GBDT:   MAE 0.84 | Spearman 0.128 | 方向一致 0.56")
+    print("\n对比 GBDT:   MAE 0.84 | Spearman 0.128 | 方向一致 0.56")
     print(f"提升: Spearman {0.128:.3f}→{rho:.3f}, 方向一致 {0.56:.2f}→{dir_acc:.2f}")
     return 0
 

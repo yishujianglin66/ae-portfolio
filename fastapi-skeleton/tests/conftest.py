@@ -5,12 +5,11 @@
 因此真实的 app.db 完全不被触碰——测试干净、可重复、可并行。
 """
 import pytest_asyncio
+from app.database import Base, get_session
+from app.main import app
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
-
-from app.database import Base, get_session
-from app.main import app
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 

@@ -2,10 +2,10 @@
 基准测试套件 - 标准测试集管理、多模型对比、评估报告生成
 Antares 式的"精悍够用"量化：成本-效果分析
 """
-import os
 import json
-import time
 import logging
+import os
+import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -22,13 +22,13 @@ class BenchmarkResult:
     特别关注 Antares 式的成本效益分析。
     """
     benchmark_name: str = ""
-    models: List[str] = field(default_factory=list)
-    datasets: List[str] = field(default_factory=list)
-    results: Dict[str, Dict[str, EvaluationResult]] = field(default_factory=dict)
+    models: list[str] = field(default_factory=list)
+    datasets: list[str] = field(default_factory=list)
+    results: dict[str, dict[str, EvaluationResult]] = field(default_factory=dict)
     """results[model_name][dataset_name] = EvaluationResult"""
-    cost_effectiveness_ranking: List[Tuple[str, float]] = field(default_factory=list)
+    cost_effectiveness_ranking: list[tuple[str, float]] = field(default_factory=list)
     """按成本效益比排序的模型列表 [(model_name, score), ...]"""
-    summary: Dict[str, Any] = field(default_factory=dict)
+    summary: dict[str, Any] = field(default_factory=dict)
 
     def generate_report(self) -> str:
         """生成基准测试报告
@@ -74,7 +74,7 @@ class BenchmarkResult:
                     lines.append(f"    Time: {result.evaluation_time_seconds:.2f}s")
                     lines.append(f"    Params: {result.params_million:.2f}M")
                     lines.append(f"    Cost-effectiveness: {result.cost_effectiveness:.4f}")
-                    lines.append(f"    Metrics:")
+                    lines.append("    Metrics:")
                     for metric_name, metric_value in sorted(result.metrics.items()):
                         lines.append(f"      {metric_name}: {metric_value:.4f}")
                     lines.append("")
@@ -151,9 +151,9 @@ class BenchmarkSuite:
         """
         self.benchmark_name = benchmark_name
         self.output_dir = output_dir
-        self._evaluators: Dict[str, BaseEvaluator] = {}
-        self._datasets: Dict[str, Any] = {}
-        self._models: Dict[str, str] = {}
+        self._evaluators: dict[str, BaseEvaluator] = {}
+        self._datasets: dict[str, Any] = {}
+        self._models: dict[str, str] = {}
 
     def register_dataset(self, name: str, dataset: Any) -> None:
         """注册测试数据集
@@ -188,8 +188,8 @@ class BenchmarkSuite:
     def run_benchmark(
         self,
         evaluator_type: str,
-        datasets: Optional[List[str]] = None,
-        models: Optional[List[str]] = None,
+        datasets: list[str] | None = None,
+        models: list[str] | None = None,
     ) -> BenchmarkResult:
         """运行基准测试
         
@@ -267,7 +267,7 @@ class BenchmarkSuite:
         new_evaluator = evaluator_class(template.config)
         return new_evaluator
 
-    def _calculate_ranking(self, benchmark_result: BenchmarkResult) -> List[Tuple[str, float]]:
+    def _calculate_ranking(self, benchmark_result: BenchmarkResult) -> list[tuple[str, float]]:
         """计算成本效益排名
         
         Antares 核心指标：综合考虑各数据集上的效果与模型成本。
@@ -295,7 +295,7 @@ class BenchmarkSuite:
         ranking = sorted(model_scores.items(), key=lambda x: x[1], reverse=True)
         return ranking
 
-    def _generate_summary(self, benchmark_result: BenchmarkResult) -> Dict[str, Any]:
+    def _generate_summary(self, benchmark_result: BenchmarkResult) -> dict[str, Any]:
         """生成摘要信息
         
         Args:
@@ -318,7 +318,7 @@ class BenchmarkSuite:
         model_b: str,
         dataset: str,
         primary_metric: str = "accuracy",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """比较两个模型在特定数据集上的表现
         
         Args:

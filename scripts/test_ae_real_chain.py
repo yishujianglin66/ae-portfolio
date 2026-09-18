@@ -33,7 +33,6 @@ sys.path.insert(0, str(PUPPET_ROOT))
 from src.config import settings  # noqa: E402
 from src.engines.ae.engine import AEEngine  # noqa: E402
 
-
 OUTPUT_DIR = PROJECT_ROOT / "output" / "ae_real_chain_test"
 AEP_PATH = OUTPUT_DIR / "ae_real_chain_test.aep"
 MP4_PATH = OUTPUT_DIR / "ae_real_chain_test.mp4"
@@ -96,11 +95,11 @@ async def main() -> int:
     ping_script = '(function(){ return JSON.stringify({pong:true, ver:app.version, bridge:"test"}); })();'
     ping_result = await engine.run_script(ping_script)
     if ping_result.success:
-        log(f"  OK: Bridge ping success")
+        log("  OK: Bridge ping success")
         log(f"  method: {ping_result.metadata.get('method', 'unknown')}")
         log(f"  stdout: {ping_result.metadata.get('stdout', '')[:200]}")
     else:
-        log(f"  FAIL: Bridge ping failed")
+        log("  FAIL: Bridge ping failed")
         log(f"  error: {ping_result.error}")
         log(f"  error_code: {ping_result.error_code}")
         log("  尝试 AfterFX.exe 兜底路径...")
@@ -121,14 +120,14 @@ async def main() -> int:
         duration=3.0,  # 3秒，加快渲染
     )
     if create_result.success:
-        log(f"  OK: 工程创建成功")
+        log("  OK: 工程创建成功")
         log(f"  projectPath: {create_result.metadata.get('projectPath', '')}")
         log(f"  compName: {create_result.metadata.get('compName', '')}")
         log(f"  aep exists: {AEP_PATH.exists()}")
         if AEP_PATH.exists():
             log(f"  aep size: {AEP_PATH.stat().st_size} bytes")
     else:
-        log(f"  FAIL: 工程创建失败")
+        log("  FAIL: 工程创建失败")
         log(f"  error: {create_result.error}")
         log(f"  error_code: {create_result.error_code}")
         log(f"  metadata: {create_result.metadata}")
@@ -145,12 +144,12 @@ async def main() -> int:
         height=1080,
     )
     if layer_result.success:
-        log(f"  OK: 固态层添加成功")
+        log("  OK: 固态层添加成功")
         log(f"  layerIndex: {layer_result.metadata.get('layerIndex')}")
         log(f"  layerName: {layer_result.metadata.get('layerName')}")
         layer_index = layer_result.metadata.get("layerIndex", 1)
     else:
-        log(f"  FAIL: 固态层添加失败")
+        log("  FAIL: 固态层添加失败")
         log(f"  error: {layer_result.error}")
         log(f"  metadata: {layer_result.metadata}")
         layer_index = 1  # 继续尝试
@@ -164,12 +163,12 @@ async def main() -> int:
         params={"ADBE Gaussian Blur 2-0001": 50.0},  # Blur Radius
     )
     if effect_result.success:
-        log(f"  OK: 效果添加成功")
+        log("  OK: 效果添加成功")
         log(f"  effectName: {effect_result.metadata.get('effectName')}")
         log(f"  appliedKeys: {effect_result.metadata.get('appliedKeys')}")
         log(f"  failedKeys: {effect_result.metadata.get('failedKeys')}")
     else:
-        log(f"  WARN: 效果添加失败 (非致命)")
+        log("  WARN: 效果添加失败 (非致命)")
         log(f"  error: {effect_result.error}")
         log(f"  metadata: {effect_result.metadata}")
 
@@ -181,10 +180,10 @@ async def main() -> int:
         name="Title Text",
     )
     if text_result.success:
-        log(f"  OK: 文本图层添加成功")
+        log("  OK: 文本图层添加成功")
         log(f"  layerIndex: {text_result.metadata.get('layerIndex')}")
     else:
-        log(f"  WARN: 文本图层添加失败 (非致命)")
+        log("  WARN: 文本图层添加失败 (非致命)")
         log(f"  error: {text_result.error}")
 
     # ---- Step 7: 保存工程 ----
@@ -206,7 +205,7 @@ async def main() -> int:
             if save_data.get("error"):
                 log(f"  FAIL: 保存失败: {save_data.get('message')}")
             else:
-                log(f"  OK: 工程已保存")
+                log("  OK: 工程已保存")
                 log(f"  path: {save_data.get('path', '')}")
                 log(f"  numItems: {save_data.get('numItems', 0)}")
                 log(f"  aep size: {AEP_PATH.stat().st_size} bytes")
@@ -214,7 +213,7 @@ async def main() -> int:
             log(f"  WARN: 保存结果解析失败: {e}")
             log(f"  stdout: {save_result.metadata.get('stdout', '')[:200]}")
     else:
-        log(f"  FAIL: 保存脚本执行失败")
+        log("  FAIL: 保存脚本执行失败")
         log(f"  error: {save_result.error}")
 
     if not AEP_PATH.exists():
@@ -281,12 +280,12 @@ async def main() -> int:
         log(f"  returncode: {proc.returncode}")
         if proc.stdout:
             stdout_lines = proc.stdout.strip().split("\n")
-            log(f"  stdout (last 25 lines):")
+            log("  stdout (last 25 lines):")
             for line in stdout_lines[-25:]:
                 log(f"    {line}")
         if proc.stderr:
             stderr_lines = proc.stderr.strip().split("\n")
-            log(f"  stderr (last 10 lines):")
+            log("  stderr (last 10 lines):")
             for line in stderr_lines[-10:]:
                 log(f"    {line}")
 
@@ -317,7 +316,7 @@ async def main() -> int:
             log(f"  ffmpeg returncode: {proc3.returncode}")
             if proc3.stderr:
                 stderr_lines = proc3.stderr.strip().split("\n")
-                log(f"  ffmpeg stderr (last 5 lines):")
+                log("  ffmpeg stderr (last 5 lines):")
                 for line in stderr_lines[-5:]:
                     log(f"    {line}")
         else:
@@ -343,7 +342,7 @@ async def main() -> int:
             log(f"  fallback returncode: {proc2.returncode}")
             if proc2.stdout:
                 stdout_lines = proc2.stdout.strip().split("\n")
-                log(f"  fallback stdout (last 15 lines):")
+                log("  fallback stdout (last 15 lines):")
                 for line in stdout_lines[-15:]:
                     log(f"    {line}")
             if avi_path.exists() and avi_path.stat().st_size > 0:

@@ -32,13 +32,19 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict
 
-
 # 把项目根目录加入 sys.path，便于独立运行
 PROJECT_ROOT = Path(__file__).resolve().parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 
+from integrations.color_presets import (  # noqa: E402
+    BUILTIN_PRESETS,
+    get_preset,
+    list_preset_names,
+    load_preset_from_file,
+    save_preset_to_file,
+)
 from integrations.davinci_color_grading import (  # noqa: E402
     ColorBalanceType,
     ColorGrader,
@@ -49,14 +55,6 @@ from integrations.davinci_color_grading import (  # noqa: E402
     NodeType,
     ResolveNotFoundError,
 )
-from integrations.color_presets import (  # noqa: E402
-    BUILTIN_PRESETS,
-    get_preset,
-    list_preset_names,
-    load_preset_from_file,
-    save_preset_to_file,
-)
-
 
 # ============================================================================
 # Mock Resolve 工具（用于无 Resolve 环境演示）
@@ -316,10 +314,10 @@ def demo_10_lua_fallback(tmp_dir: Path) -> None:
     print("=" * 60)
 
     from integrations.davinci_color_lua import (
-        build_apply_preset_lua,
-        build_set_color_wheel_lua,
         build_apply_lut_lua,
+        build_apply_preset_lua,
         build_full_grading_lua,
+        build_set_color_wheel_lua,
     )
 
     preset = get_preset("cinematic_teal_orange")

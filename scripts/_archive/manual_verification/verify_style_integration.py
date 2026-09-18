@@ -34,7 +34,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message
 logger = logging.getLogger(__name__)
 
 
-async def test_model_loading() -> Dict[str, Any]:
+async def test_model_loading() -> dict[str, Any]:
     """测试模型加载"""
     print("\n" + "=" * 60)
     print("测试 1: 模型加载")
@@ -50,12 +50,12 @@ async def test_model_loading() -> Dict[str, Any]:
         
         load_time_ms = (time.time() - start_time) * 1000
         
-        print(f"  ✓ 模型加载成功")
+        print("  ✓ 模型加载成功")
         print(f"  ✓ 参数数量: {model_info.get('param_count', 0):,}")
         print(f"  ✓ 加载时间: {load_time_ms:.1f}ms")
         
         if load_time_ms > 1000:
-            print(f"  ⚠ 警告: 加载时间超过1000ms阈值")
+            print("  ⚠ 警告: 加载时间超过1000ms阈值")
         
         return {
             "success": True,
@@ -68,7 +68,7 @@ async def test_model_loading() -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-async def test_video_analysis() -> Dict[str, Any]:
+async def test_video_analysis() -> dict[str, Any]:
     """测试视频分析"""
     print("\n" + "=" * 60)
     print("测试 2: 视频分析（降级模式）")
@@ -82,7 +82,7 @@ async def test_video_analysis() -> Dict[str, Any]:
         style_result = await analyze_video_style("test_video.mp4", enable_vision=False)
         analysis_time_ms = (time.time() - start_time) * 1000
         
-        print(f"  ✓ 分析完成")
+        print("  ✓ 分析完成")
         print(f"  ✓ 风格: {style_result.get('style')}")
         print(f"  ✓ 置信度: {style_result.get('confidence', 0):.2%}")
         print(f"  ✓ 特征维度: {len(style_result.get('features', []))}")
@@ -101,7 +101,7 @@ async def test_video_analysis() -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-async def test_param_mapping(style_result: Dict[str, Any]) -> Dict[str, Any]:
+async def test_param_mapping(style_result: dict[str, Any]) -> dict[str, Any]:
     """测试参数映射"""
     print("\n" + "=" * 60)
     print("测试 3: 参数映射")
@@ -120,13 +120,13 @@ async def test_param_mapping(style_result: Dict[str, Any]) -> Dict[str, Any]:
         effects_count = len(atomic_params.get("effects", []))
         adjustments_count = len(atomic_params.get("adjustments", {}))
         
-        print(f"  ✓ 映射完成")
+        print("  ✓ 映射完成")
         print(f"  ✓ 效果数量: {effects_count}")
         print(f"  ✓ 调整项数量: {adjustments_count}")
         print(f"  ✓ 映射时间: {mapping_time_ms:.1f}ms")
         
         if effects_count == 0:
-            print(f"  ⚠ 警告: 未生成任何效果参数")
+            print("  ⚠ 警告: 未生成任何效果参数")
             return {"success": False, "error": "效果参数为空"}
         
         # 打印效果详情
@@ -149,7 +149,7 @@ async def test_param_mapping(style_result: Dict[str, Any]) -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-async def test_jsx_generation(atomic_params: Dict[str, Any]) -> Dict[str, Any]:
+async def test_jsx_generation(atomic_params: dict[str, Any]) -> dict[str, Any]:
     """测试JSX生成"""
     print("\n" + "=" * 60)
     print("测试 4: JSX脚本生成")
@@ -189,11 +189,11 @@ async def test_jsx_generation(atomic_params: Dict[str, Any]) -> Dict[str, Any]:
             name = effect.get("name", "Unknown")
             jsx_lines.extend([
                 f"    // Apply {effect.get('displayName', name)}",
-                f"    for (var i = 0; i < selectedLayers.length; i++) {{",
-                f"        try {{",
+                "    for (var i = 0; i < selectedLayers.length; i++) {",
+                "        try {",
                 f"            var effect = selectedLayers[i].Effects.addProperty('{name}');",
-                f"        }} catch (e) {{}}",
-                f"    }}",
+                "        } catch (e) {}",
+                "    }",
                 "",
             ])
         
@@ -210,7 +210,7 @@ async def test_jsx_generation(atomic_params: Dict[str, Any]) -> Dict[str, Any]:
         has_endundo = "endUndoGroup" in jsx_code
         has_effects = any(e.get("name") in jsx_code for e in effects)
         
-        print(f"  ✓ JSX生成完成")
+        print("  ✓ JSX生成完成")
         print(f"  ✓ 代码长度: {len(jsx_code)}字节")
         print(f"  ✓ 包含函数定义: {has_function}")
         print(f"  ✓ 包含UndoGroup: {has_endundo}")
@@ -238,7 +238,7 @@ async def test_jsx_generation(atomic_params: Dict[str, Any]) -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-async def test_workflow_integration() -> Dict[str, Any]:
+async def test_workflow_integration() -> dict[str, Any]:
     """测试工作流集成"""
     print("\n" + "=" * 60)
     print("测试 5: 工作流集成")
@@ -246,12 +246,13 @@ async def test_workflow_integration() -> Dict[str, Any]:
     
     try:
         from core.style_workflow_integration import create_style_workflow_tasks
+
         from core.workflow_orchestrator import TaskType
         
         # 创建任务
         tasks = create_style_workflow_tasks("test_video.mp4", enable_vision=False)
         
-        print(f"  ✓ 任务创建成功")
+        print("  ✓ 任务创建成功")
         print(f"  ✓ 任务数量: {len(tasks)}")
         
         for task_id, task_def in tasks.items():
@@ -268,7 +269,7 @@ async def test_workflow_integration() -> Dict[str, Any]:
         )
         
         if not has_style_task or not has_param_task:
-            print(f"  ✗ 缺少必要的任务类型")
+            print("  ✗ 缺少必要的任务类型")
             return {"success": False, "error": "任务类型不完整"}
         
         print(f"  ✓ 包含风格分类任务: {has_style_task}")
@@ -286,7 +287,7 @@ async def test_workflow_integration() -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-async def run_all_tests() -> Dict[str, Any]:
+async def run_all_tests() -> dict[str, Any]:
     """运行所有测试"""
     print("\n" + "=" * 70)
     print(" 风格分类模型完整集成测试 - Video → Style → Params → JSX")

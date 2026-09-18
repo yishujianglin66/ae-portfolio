@@ -1,13 +1,13 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class TestNLUParser(unittest.TestCase):
     def test_parse_add_effect(self):
-        from nlu_parser import NLUParser, IntentType
+        from nlu_parser import IntentType, NLUParser
         
         parser = NLUParser()
         
@@ -26,7 +26,7 @@ class TestNLUParser(unittest.TestCase):
         self.assertEqual(intent.slots.targetLayer, "text")
 
     def test_parse_create_anim(self):
-        from nlu_parser import NLUParser, IntentType
+        from nlu_parser import IntentType, NLUParser
         
         parser = NLUParser()
         
@@ -40,7 +40,7 @@ class TestNLUParser(unittest.TestCase):
         self.assertGreater(intent.confidence, 0.7)
 
     def test_parse_adjust_param(self):
-        from nlu_parser import NLUParser, IntentType
+        from nlu_parser import IntentType, NLUParser
         
         parser = NLUParser()
         
@@ -55,7 +55,7 @@ class TestNLUParser(unittest.TestCase):
         self.assertEqual(intent.slots.adjustDirection, "decrease")
 
     def test_parse_create_layer(self):
-        from nlu_parser import NLUParser, IntentType
+        from nlu_parser import IntentType, NLUParser
         
         parser = NLUParser()
         
@@ -69,7 +69,7 @@ class TestNLUParser(unittest.TestCase):
         self.assertEqual(intent.slots.targetLayer, "adjustment")
 
     def test_parse_style_combo(self):
-        from nlu_parser import NLUParser, IntentType
+        from nlu_parser import IntentType, NLUParser
         
         parser = NLUParser()
         
@@ -83,7 +83,7 @@ class TestNLUParser(unittest.TestCase):
         self.assertEqual(intent.slots.styleName, "cinematic")
 
     def test_parse_reverse_analyze(self):
-        from nlu_parser import NLUParser, IntentType
+        from nlu_parser import IntentType, NLUParser
         
         parser = NLUParser()
         
@@ -303,7 +303,7 @@ class TestClarificationEngine(unittest.TestCase):
 
 class TestParameterOptimizer(unittest.TestCase):
     def test_optimize(self):
-        from parameter_optimizer import ParameterOptimizer, ParameterContext
+        from parameter_optimizer import ParameterContext, ParameterOptimizer
         
         optimizer = ParameterOptimizer()
         
@@ -319,7 +319,7 @@ class TestParameterOptimizer(unittest.TestCase):
         self.assertGreater(result.confidence, 0.5)
 
     def test_resolve_effect_name(self):
-        from parameter_optimizer import ParameterOptimizer, ParameterContext
+        from parameter_optimizer import ParameterContext, ParameterOptimizer
         
         optimizer = ParameterOptimizer()
         
@@ -333,7 +333,7 @@ class TestParameterOptimizer(unittest.TestCase):
         self.assertEqual(optimizer._resolve_effect_name(ctx3), "ADBE Gaussian Blur 2")
 
     def test_apply_intensity(self):
-        from parameter_optimizer import ParameterOptimizer, ParameterContext
+        from parameter_optimizer import ParameterContext, ParameterOptimizer
         
         optimizer = ParameterOptimizer()
         
@@ -347,7 +347,7 @@ class TestParameterOptimizer(unittest.TestCase):
         self.assertGreater(settings.get("Glow Intensity", 0), 0.5)
 
     def test_apply_color_temperature(self):
-        from parameter_optimizer import ParameterOptimizer, ParameterContext
+        from parameter_optimizer import ParameterContext, ParameterOptimizer
         
         optimizer = ParameterOptimizer()
         
@@ -362,7 +362,7 @@ class TestParameterOptimizer(unittest.TestCase):
         self.assertIsNotNone(glow_color)
 
     def test_apply_style_overrides(self):
-        from parameter_optimizer import ParameterOptimizer, ParameterContext
+        from parameter_optimizer import ParameterContext, ParameterOptimizer
         
         optimizer = ParameterOptimizer()
         

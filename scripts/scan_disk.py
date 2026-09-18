@@ -2,9 +2,9 @@
 Usage: python scripts/scan_disk.py <root> [--depth N] [--out result.json]
 Read-only: never modifies anything.
 """
+import json
 import os
 import sys
-import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 

@@ -62,9 +62,9 @@ class RenderPreset:
     quality: int = 18             # CRF 值 (越低质量越高)
     audio_codec: str = "aac"
     audio_bitrate: str = "320k"
-    custom_args: Dict[str, Any] = field(default_factory=dict)
+    custom_args: dict[str, Any] = field(default_factory=dict)
 
-    def to_ffmpeg_args(self, input_path: str, output_path: str) -> List[str]:
+    def to_ffmpeg_args(self, input_path: str, output_path: str) -> list[str]:
         """转换为 FFmpeg 命令参数"""
         w, h = self.resolution.split("x")
         args = [
@@ -92,13 +92,13 @@ class RenderJob:
     preset: RenderPreset = field(default_factory=lambda: RenderPreset(name="default"))
     status: RenderStatus = RenderStatus.QUEUED
     progress: float = 0.0
-    start_time: Optional[float] = None
-    end_time: Optional[float] = None
+    start_time: float | None = None
+    end_time: float | None = None
     error: str = ""
     file_size: int = 0
     render_mode: str = "resolve"  # resolve / ffmpeg / simulate
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "job_id": self.job_id,
             "timeline_name": self.timeline_name,
@@ -155,11 +155,11 @@ class RenderQueueManager:
     """DaVinci Resolve 渲染队列管理器"""
 
     def __init__(self):
-        self._jobs: Dict[str, RenderJob] = {}
+        self._jobs: dict[str, RenderJob] = {}
         self._resolve_api = None
         self._resolve_available = False
         self._ffmpeg_available = False
-        self._callbacks: Dict[str, List[Callable]] = {
+        self._callbacks: dict[str, list[Callable]] = {
             "on_start": [],
             "on_progress": [],
             "on_complete": [],
@@ -201,7 +201,7 @@ class RenderQueueManager:
         output_path: str = "",
         input_path: str = "",
         preset_name: str = "H.264 Master",
-        custom_preset: Optional[RenderPreset] = None,
+        custom_preset: RenderPreset | None = None,
     ) -> str:
         """添加渲染任务到队列。
 
@@ -247,11 +247,11 @@ class RenderQueueManager:
             return True
         return False
 
-    def get_job(self, job_id: str) -> Optional[RenderJob]:
+    def get_job(self, job_id: str) -> RenderJob | None:
         """获取任务状态"""
         return self._jobs.get(job_id)
 
-    def list_jobs(self, status: Optional[RenderStatus] = None) -> List[RenderJob]:
+    def list_jobs(self, status: RenderStatus | None = None) -> list[RenderJob]:
         """列出所有任务"""
         jobs = list(self._jobs.values())
         if status:
@@ -270,7 +270,7 @@ class RenderQueueManager:
     #  渲染执行
     # ----------------------------------------------------------------
 
-    def start_render(self, job_id: Optional[str] = None) -> bool:
+    def start_render(self, job_id: str | None = None) -> bool:
         """开始渲染。
 
         Args:
@@ -429,18 +429,18 @@ class RenderQueueManager:
     #  进度监控
     # ----------------------------------------------------------------
 
-    def monitor_progress(self, job_id: str) -> Dict:
+    def monitor_progress(self, job_id: str) -> dict:
         """监控单个任务进度"""
         job = self._jobs.get(job_id)
         if not job:
             return {"error": "Job not found"}
         return job.to_dict()
 
-    def monitor_all(self) -> List[Dict]:
+    def monitor_all(self) -> list[dict]:
         """监控所有任务进度"""
         return [j.to_dict() for j in self._jobs.values()]
 
-    def wait_for_completion(self, job_id: str, timeout: float = 600) -> Dict:
+    def wait_for_completion(self, job_id: str, timeout: float = 600) -> dict:
         """等待任务完成"""
         start = time.time()
         while time.time() - start < timeout:
@@ -479,11 +479,11 @@ class RenderQueueManager:
     #  预设管理
     # ----------------------------------------------------------------
 
-    def list_presets(self) -> List[str]:
+    def list_presets(self) -> list[str]:
         """列出所有可用预设"""
         return list(BUILTIN_PRESETS.keys())
 
-    def get_preset(self, name: str) -> Optional[RenderPreset]:
+    def get_preset(self, name: str) -> RenderPreset | None:
         """获取预设配置"""
         return BUILTIN_PRESETS.get(name)
 
@@ -500,7 +500,7 @@ def quick_render(
     input_path: str,
     output_path: str,
     preset: str = "H.264 Master",
-) -> Dict:
+) -> dict:
     """快捷渲染函数"""
     rq = RenderQueueManager()
     job_id = rq.add_render_job(

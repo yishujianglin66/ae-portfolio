@@ -26,7 +26,7 @@ def detect_shots(
     video_path: str,
     threshold: float = 27.0,
     min_scene_len: int = 15,
-) -> List[Dict[str, float]]:
+) -> list[dict[str, float]]:
     """检测视频中的镜头边界。
 
     Args:
@@ -44,7 +44,7 @@ def detect_shots(
         return []
 
     try:
-        from scenedetect import detect, ContentDetector
+        from scenedetect import ContentDetector, detect
     except ImportError:
         logger.warning("PySceneDetect not installed, shot detection disabled")
         return []
@@ -58,7 +58,7 @@ def detect_shots(
         logger.warning(f"Shot detection failed for {video_path}: {e}")
         return []
 
-    shots: List[Dict[str, float]] = []
+    shots: list[dict[str, float]] = []
     for scene in scene_list:
         start_sec = scene[0].seconds if hasattr(scene[0], 'seconds') else scene[0].get_seconds()
         end_sec = scene[1].seconds if hasattr(scene[1], 'seconds') else scene[1].get_seconds()
@@ -85,7 +85,7 @@ def detect_shots(
 def material_summary(
     video_path: str,
     threshold: float = 27.0,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """素材结构摘要 — 镜头数/总时长/平均镜头时长/最短最长镜头。
 
     Args:

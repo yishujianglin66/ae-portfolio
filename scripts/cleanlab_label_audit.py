@@ -39,15 +39,15 @@ cleanlab_label_audit.py — 动漫运镜分类标签清洗 (Confident Learning +
 from __future__ import annotations
 
 import argparse
+import contextlib
 import io
 import json
 import logging
-import contextlib
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
-import shutil
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -55,11 +55,11 @@ from typing import Any, Dict, List, Optional, Tuple
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 # ─── 六类运镜 (与 train_anime_camera_v5.py SIX_LABELS / SIX_MAP 一致) ───
 # v3 是 v1+v2+本地新标合并, 可能含细粒度方向, 需折叠到 6 类规范标签
-SIX_MAP: Dict[str, Optional[str]] = {
+SIX_MAP: dict[str, str | None] = {
     "static": "static",
     "pan_left": "pan_left", "pan_right": "pan_right",
     "tilt_up": "tilt_orbit", "tilt_down": "tilt_orbit", "orbit": "tilt_orbit",
@@ -67,8 +67,8 @@ SIX_MAP: Dict[str, Optional[str]] = {
     "zoom_out": "pull_out", "zoom_back": "pull_out",
     "complex": None,  # 复合运动, 不参与清洗
 }
-SIX_LABELS: List[str] = ["static", "pan_left", "pan_right", "tilt_orbit", "push_in", "pull_out"]
-LABEL_TO_IDX: Dict[str, int] = {l: i for i, l in enumerate(SIX_LABELS)}
+SIX_LABELS: list[str] = ["static", "pan_left", "pan_right", "tilt_orbit", "push_in", "pull_out"]
+LABEL_TO_IDX: dict[str, int] = {l: i for i, l in enumerate(SIX_LABELS)}
 
 # ─── 抽帧配置 ───
 FRAMES_PER_CLIP = 3            # 每镜头抽 3 帧 (25/50/75%), CLIP 嵌入取均值 → 1 条/镜头
@@ -77,7 +77,7 @@ FFMPEG = "ffmpeg"
 _NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 # ─── CLIP 模型名映射 (openai/clip-vit-base-patch32 对应 ViT-B/32) ───
-CLIP_MODEL_MAP: Dict[str, str] = {
+CLIP_MODEL_MAP: dict[str, str] = {
     "ViT-B/32": "openai/clip-vit-base-patch32",
     "ViT-B/16": "openai/clip-vit-base-patch16",
     "ViT-L/14": "openai/clip-vit-large-patch14",
@@ -96,13 +96,13 @@ def setup_logging() -> logging.Logger:
 # ═══════════════════════════════════════════════════════════════════════
 # Step 0: 存在性闸门 (证据闸门 1 + 2)
 # ═══════════════════════════════════════════════════════════════════════
-def load_labels(path: Path, limit: int, logger: logging.Logger) -> List[Dict[str, Any]]:
+def load_labels(path: Path, limit: int, logger: logging.Logger) -> list[dict[str, Any]]:
     """读取 jsonl 标签文件。支持单文件; 空/坏行跳过。"""
     if not path.exists():
         logger.error("标签文件不存在: %s", path)
         logger.error("请先生成 v3 合并标签, 或通过 --labels 指定其他路径。")
         sys.exit(2)
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:
@@ -118,7 +118,7 @@ def load_labels(path: Path, limit: int, logger: logging.Logger) -> List[Dict[str
     return rows
 
 
-def step0_existence_gate(rows: List[Dict[str, Any]], logger: logging.Logger) -> None:
+def step0_existence_gate(rows: list[dict[str, Any]], logger: logging.Logger) -> None:
     """证据闸门 1 (存在性) + 闸门 2 (首行证据): 打印真实标签分布与首行字段。"""
     n = len(rows)
     print("\n" + "=" * 70)
@@ -146,7 +146,7 @@ def step0_existence_gate(rows: List[Dict[str, Any]], logger: logging.Logger) -> 
         print(f"  {k:<14s} {c:>6d}  ({100 * c / n:5.1f}%)")
 
     # 折叠到 6 类后的分布
-    folded: List[Optional[str]] = []
+    folded: list[str | None] = []
     for r in rows:
         folded.append(SIX_MAP.get(r.get("movement_label", ""), "__UNKNOWN__"))
     folded_counter = Counter(folded)
@@ -191,7 +191,7 @@ def _probe_duration(clip_path: str) -> float:
 
 
 def extract_frames(clip_path: str, n_frames: int = FRAMES_PER_CLIP,
-                   short_side: int = 336) -> List[bytes]:
+                   short_side: int = 336) -> list[bytes]:
     """抽 n 帧 JPEG (均匀采样时长, 含头不含尾 0..0.98), 返回字节列表。
 
     short_side=336 匹配 CLIP 默认输入, 减少后处理 resize 开销。
@@ -202,7 +202,7 @@ def extract_frames(clip_path: str, n_frames: int = FRAMES_PER_CLIP,
     if dur <= 0:
         dur = 2.0
     ts = [dur * min(0.98, i / max(1, n_frames - 1)) for i in range(n_frames)]
-    frames: List[bytes] = []
+    frames: list[bytes] = []
     tmp = Path(tempfile.mkdtemp(prefix="cla_frame_"))
     try:
         for i, t in enumerate(ts):
@@ -220,7 +220,7 @@ def extract_frames(clip_path: str, n_frames: int = FRAMES_PER_CLIP,
     return frames
 
 
-def load_clip_model(model_alias: str, logger: logging.Logger) -> Tuple[Any, Any, str]:
+def load_clip_model(model_alias: str, logger: logging.Logger) -> tuple[Any, Any, str]:
     """加载 CLIP 模型与处理器 (transformers)。返回 (model, processor, device)。"""
     try:
         import torch
@@ -263,21 +263,21 @@ def _compute_oklab_stats(img: "Image.Image") -> "np.ndarray":
 
 
 def compute_clip_embeddings(
-    rows: List[Dict[str, Any]],
+    rows: list[dict[str, Any]],
     model_alias: str,
     logger: logging.Logger,
     batch_size: int = 32,
 ) -> "np.ndarray":
     """对每个镜头抽 FRAMES_PER_CLIP 帧 → CLIP 图像嵌入取均值 + OKLAB 色彩统计 → (N, 518) 特征矩阵。"""
     import numpy as np
-    from PIL import Image
     import torch
+    from PIL import Image
 
     model, processor, device = load_clip_model(model_alias, logger)
     clip_dim = model.config.projection_dim
     oklab_dim = 6
     feat_dim = clip_dim + oklab_dim
-    feats: List["np.ndarray"] = []
+    feats: list["np.ndarray"] = []
     n = len(rows)
     t0 = __import__("time").time()
     skipped = 0
@@ -323,7 +323,7 @@ def compute_clip_embeddings(
 # ═══════════════════════════════════════════════════════════════════════
 def compute_oof_pred_probs(
     features: "np.ndarray",
-    label_idx: List[int],
+    label_idx: list[int],
     n_splits: int,
     logger: logging.Logger,
 ) -> "np.ndarray":
@@ -384,11 +384,11 @@ def compute_oof_pred_probs(
 
 
 def step1_confident_learning(
-    rows: List[Dict[str, Any]],
-    labels: List[str],
+    rows: list[dict[str, Any]],
+    labels: list[str],
     pred_probs: "np.ndarray",
     logger: logging.Logger,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Confident Learning 第一轮: find_label_issues + get_label_quality_scores。"""
     import numpy as np
     from cleanlab.filter import find_label_issues
@@ -422,7 +422,7 @@ def step1_confident_learning(
 
     # 构建每样本详情 (rank: 0=最可疑)
     rank_of = {int(idx): r for r, idx in enumerate(issue_indices_ranked)}
-    per_sample: List[Dict[str, Any]] = []
+    per_sample: list[dict[str, Any]] = []
     for i, r in enumerate(rows):
         given = labels[i]
         pred_cls = int(pred_probs[i].argmax())
@@ -455,12 +455,12 @@ def step1_confident_learning(
 # Step 2: Datalab 全数据体检
 # ═══════════════════════════════════════════════════════════════════════
 def step2_datalab(
-    rows: List[Dict[str, Any]],
+    rows: list[dict[str, Any]],
     features: "np.ndarray",
-    labels: List[str],
+    labels: list[str],
     pred_probs: "np.ndarray",
     logger: logging.Logger,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Datalab 全数据体检: outliers / near-duplicates / IID 违反 / 低质图像。"""
     import numpy as np
     from cleanlab import Datalab
@@ -487,14 +487,14 @@ def step2_datalab(
     print(report_text)
 
     # 2. 汇总 issue_summary (DataFrame -> list of dict)
-    summary: List[Dict[str, Any]] = []
+    summary: list[dict[str, Any]] = []
     try:
         summary = lab.issue_summary.to_dict(orient="records")
     except Exception as exc:  # noqa: BLE001
         logger.warning("issue_summary 序列化失败: %s", exc)
 
     # 3. 逐 issue 类型抽取 get_issues() 明细
-    issues_by_type: Dict[str, Any] = {}
+    issues_by_type: dict[str, Any] = {}
     try:
         for issue_type in lab.list_possible_issue_types():
             try:
@@ -532,14 +532,14 @@ def step2_datalab(
 # Step 3: 输出清洗后标签 + 报告
 # ═══════════════════════════════════════════════════════════════════════
 def step3_write_outputs(
-    rows: List[Dict[str, Any]],
-    labels: List[str],
-    cl_result: Dict[str, Any],
-    datalab_result: Dict[str, Any],
+    rows: list[dict[str, Any]],
+    labels: list[str],
+    cl_result: dict[str, Any],
+    datalab_result: dict[str, Any],
     out_dir: Path,
     drop_ratio: float,
     logger: logging.Logger,
-) -> Dict[str, Path]:
+) -> dict[str, Path]:
     """写 clean_labels.jsonl + label_issues_report.json + datalab_report.json。
 
     drop 逻辑: 按 cleanlab_quality_score 升序, 丢弃最低 floor(N*drop_ratio) 个。
@@ -647,15 +647,15 @@ def _json_default(obj: Any) -> Any:
 # ═══════════════════════════════════════════════════════════════════════
 # 主流程
 # ═══════════════════════════════════════════════════════════════════════
-def normalize_to_six(rows: List[Dict[str, Any]],
-                     logger: logging.Logger) -> Tuple[List[Dict[str, Any]], List[str]]:
+def normalize_to_six(rows: list[dict[str, Any]],
+                     logger: logging.Logger) -> tuple[list[dict[str, Any]], list[str]]:
     """把 movement_label 折叠到 6 类规范标签 (SIX_MAP)。
 
     跳过 complex / 未知方向 / 无 clip_path 的样本, 并打印过滤统计。
     返回: (有效 rows, 6 类 label 列表)
     """
-    kept: List[Dict[str, Any]] = []
-    labels: List[str] = []
+    kept: list[dict[str, Any]] = []
+    labels: list[str] = []
     skipped = Counter()
     for r in rows:
         d = r.get("movement_label", "")

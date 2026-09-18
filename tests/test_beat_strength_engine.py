@@ -19,9 +19,9 @@ import numpy as np
 import pytest
 
 from core.beat_strength_engine import (
-    BeatStrength,
-    BeatInfo,
     BeatClassificationResult,
+    BeatInfo,
+    BeatStrength,
     BeatStrengthEngine,
 )
 

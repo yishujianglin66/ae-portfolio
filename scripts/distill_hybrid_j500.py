@@ -1,6 +1,9 @@
 """混合通道 J500 残余诊断结论蒸馏（2026-08-14 二轮）"""
 from __future__ import annotations
-import sys, time, json
+
+import json
+import sys
+import time
 from pathlib import Path
 
 ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")

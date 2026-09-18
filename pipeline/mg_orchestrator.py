@@ -50,8 +50,8 @@ class MGSegment:
     segment_type: str           # title/data_chart/transition/ending/typography
     subtype: str = ""
     duration_sec: float = 3.0
-    content: Dict[str, Any] = field(default_factory=dict)
-    style_override: Optional[Dict[str, Any]] = None
+    content: dict[str, Any] = field(default_factory=dict)
+    style_override: dict[str, Any] | None = None
     render_backend: str = "pillow_ffmpeg"
     transition_in: str = "fade"
     transition_out: str = "fade"
@@ -62,9 +62,9 @@ class MGPlan:
     """MG 动画编排计划"""
     title: str = ""
     total_duration_sec: float = 30.0
-    segments: List[MGSegment] = field(default_factory=list)
-    global_style: Dict[str, Any] = field(default_factory=dict)
-    resolution: List[int] = field(default_factory=lambda: [1920, 1080])
+    segments: list[MGSegment] = field(default_factory=list)
+    global_style: dict[str, Any] = field(default_factory=dict)
+    resolution: list[int] = field(default_factory=lambda: [1920, 1080])
     fps: int = 30
     output_format: str = "mp4"  # mp4/lottie/gif
 
@@ -106,15 +106,15 @@ class MGOrchestrator:
         },
     }
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         from core.mg_template_engine import MGTemplateEngine
         self._engine = MGTemplateEngine(config)
 
     def plan(
         self,
-        style_spec: Dict[str, Any],
-        content: Dict[str, Any],
+        style_spec: dict[str, Any],
+        content: dict[str, Any],
     ) -> MGPlan:
         """将 StyleSpec + 内容 → MG 编排计划
 
@@ -159,10 +159,10 @@ class MGOrchestrator:
 
     def produce(
         self,
-        style_spec: Dict[str, Any],
-        content: Dict[str, Any],
+        style_spec: dict[str, Any],
+        content: dict[str, Any],
         output_path: str = "output_mg.mp4",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """端到端 MG 动画生产
 
         Args:
@@ -224,7 +224,7 @@ class MGOrchestrator:
             "lottie": lottie_result,
         }
 
-    def _build_segment_content(self, seg_type: str, content: Dict[str, Any], idx: int) -> Dict[str, Any]:
+    def _build_segment_content(self, seg_type: str, content: dict[str, Any], idx: int) -> dict[str, Any]:
         """为每种片段类型构建内容"""
         data_list = content.get("data", [])
 
@@ -246,7 +246,7 @@ class MGOrchestrator:
             return {"text": content.get("ending_text", content.get("title", "Thank You"))}
         return {}
 
-    def _render_segment(self, seg: MGSegment, output_path: str, plan: MGPlan) -> Dict[str, Any]:
+    def _render_segment(self, seg: MGSegment, output_path: str, plan: MGPlan) -> dict[str, Any]:
         """渲染单个 MG 片段"""
         spec = {
             "type": seg.segment_type,
@@ -261,7 +261,7 @@ class MGOrchestrator:
         }
         return self._engine.render(spec, output_path, backend=seg.render_backend)
 
-    def _concat_segments(self, segments: List[str], output_path: str, fps: int) -> Dict[str, Any]:
+    def _concat_segments(self, segments: list[str], output_path: str, fps: int) -> dict[str, Any]:
         """使用 FFmpeg 拼接片段"""
         # 创建 concat 文件列表
         with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, prefix="mg_concat_") as f:

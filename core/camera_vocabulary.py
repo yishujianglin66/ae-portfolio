@@ -32,7 +32,7 @@ from typing import Dict, List, Set
 # ── CameraBench 34 原语 (按维度分组) ─────────────────────────────────────
 
 # 方向 (含静态组, 26 个)
-DIRECTION_TO_PROJECT: Dict[str, str] = {
+DIRECTION_TO_PROJECT: dict[str, str] = {
     # 静态组
     "static": "static",
     "no-motion": "static",
@@ -60,12 +60,12 @@ DIRECTION_TO_PROJECT: Dict[str, str] = {
 }
 
 # 静态组 (多标签里可能并列出现, 如 ["no-motion", "static"])
-STATIC_LABELS: Set[str] = {"static", "no-motion", "minor-motion"}
+STATIC_LABELS: set[str] = {"static", "no-motion", "minor-motion"}
 
 # 跟拍 tracking → 基准轴 (与显式方向合并; 无显式方向时的兜底轴)
 #   side/pan-tracking → pan; tilt-tracking → tilt; arc-tracking → orbit
 #   aerial/tail/lead-tracking 方向多义 → complex
-TRACKING_TO_AXIS: Dict[str, str] = {
+TRACKING_TO_AXIS: dict[str, str] = {
     "side-tracking": "pan",
     "pan-tracking": "pan",
     "tilt-tracking": "tilt",
@@ -76,7 +76,7 @@ TRACKING_TO_AXIS: Dict[str, str] = {
 }
 
 # 项目标签 → 规范轴 (用于多标签合并判断: pan_left/pan_right 同属 pan 轴)
-LABEL_TO_AXIS: Dict[str, str] = {
+LABEL_TO_AXIS: dict[str, str] = {
     "static": "static",
     "pan_left": "pan", "pan_right": "pan",
     "tilt_up": "tilt", "tilt_down": "tilt",
@@ -87,13 +87,13 @@ LABEL_TO_AXIS: Dict[str, str] = {
 }
 
 # 速度 / 稳定 / 复杂度 (独立维度, 不参与方向映射, 但保留给 Step 4)
-SPEED_LABELS: Set[str] = {"regular-speed", "slow-speed", "fast-speed"}
-STABILITY_LABELS: Set[str] = {"no-shaking", "minimal-shaking",
+SPEED_LABELS: set[str] = {"regular-speed", "slow-speed", "fast-speed"}
+STABILITY_LABELS: set[str] = {"no-shaking", "minimal-shaking",
                               "unsteady", "very-unsteady"}
-COMPLEXITY_LABELS: Set[str] = {"complex-motion"}
+COMPLEXITY_LABELS: set[str] = {"complex-motion"}
 
 # 全部 34 原语
-CAMERABENCH_LABELS: List[str] = (
+CAMERABENCH_LABELS: list[str] = (
     sorted(DIRECTION_TO_PROJECT) + sorted(TRACKING_TO_AXIS)
     + sorted(SPEED_LABELS | STABILITY_LABELS | COMPLEXITY_LABELS)
 )
@@ -101,7 +101,7 @@ CAMERABENCH_LABELS: List[str] = (
 # ── Step 4 VLM 预标注 schema 建议 (多维) ────────────────────────────────
 
 # 比单一扁平标签信息量更足: 方向 + 速度 + 稳定 三维, 直接沿用 CameraBench 原语名
-ANNOTATION_LABEL_SCHEMA: Dict[str, List[str]] = {
+ANNOTATION_LABEL_SCHEMA: dict[str, list[str]] = {
     "direction": [
         "static", "pan_left", "pan_right", "tilt_up", "tilt_down",
         "zoom_in", "zoom_out", "push", "zoom_back", "orbit", "complex",
@@ -111,7 +111,7 @@ ANNOTATION_LABEL_SCHEMA: Dict[str, List[str]] = {
 }
 
 
-def map_camerabench_to_project(labels: List[str]) -> str:
+def map_camerabench_to_project(labels: list[str]) -> str:
     """把 CameraBench 多标签映射为项目扁平标签 (方向为主)。
 
     规则 (优先级从高到低):
@@ -125,8 +125,8 @@ def map_camerabench_to_project(labels: List[str]) -> str:
     if not labels:
         return "unknown"
 
-    specific_dirs: List[str] = []   # 显式方向 → 项目标签
-    tracking_axes: List[str] = []   # 跟拍 → 规范轴
+    specific_dirs: list[str] = []   # 显式方向 → 项目标签
+    tracking_axes: list[str] = []   # 跟拍 → 规范轴
 
     for lb in labels:
         if lb in DIRECTION_TO_PROJECT:
@@ -140,7 +140,7 @@ def map_camerabench_to_project(labels: List[str]) -> str:
         specific_dirs = ["static"]
 
     # 所有涉及到的规范轴 (方向 + 跟拍)
-    axes: Set[str] = {LABEL_TO_AXIS[d] for d in specific_dirs}
+    axes: set[str] = {LABEL_TO_AXIS[d] for d in specific_dirs}
     axes.update(a for a in tracking_axes if a != "complex")
 
     if not axes:
@@ -164,7 +164,7 @@ def map_camerabench_to_project(labels: List[str]) -> str:
     return "complex"
 
 
-def map_camerabench_multi(labels: List[str]) -> Dict[str, str]:
+def map_camerabench_multi(labels: list[str]) -> dict[str, str]:
     """把 CameraBench 多标签拆为多维 schema (方向 + 速度 + 稳定)。"""
     direction = map_camerabench_to_project(labels)
     speed = next((l for l in labels if l in SPEED_LABELS), "regular-speed")

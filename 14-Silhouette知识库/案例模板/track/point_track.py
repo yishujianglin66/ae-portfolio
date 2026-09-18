@@ -1,9 +1,10 @@
 # Point Tracking Template
 # 点跟踪模板 - 适用于单点/多点跟踪、特征点跟踪
 
-from fx import *
 import json
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=24.0):

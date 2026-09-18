@@ -279,11 +279,13 @@ def main() -> int:
               f"{m.get('duration',0):.1f}s {m.get('size_kb')}KB  ({desc})")
 
     if len(materials) < 2:
-        print(f"  [FATAL] 真实素材不足 2 个")
+        print("  [FATAL] 真实素材不足 2 个")
         return 2
 
     from pipeline.unified_pipeline import (
-        UnifiedPipeline, PipelineConfig, PipelineResult,
+        PipelineConfig,
+        PipelineResult,
+        UnifiedPipeline,
     )
 
     cfg = PipelineConfig(
@@ -371,7 +373,7 @@ def main() -> int:
                 final_video = str(cands[0])
 
     if not final_video or not Path(final_video).exists():
-        print(f"  [FAIL] 找不到最终输出视频")
+        print("  [FAIL] 找不到最终输出视频")
         return 3
 
     print(f"  [OUTPUT] {final_video}")
@@ -446,13 +448,13 @@ def main() -> int:
 
     # 直接 FFmpeg 基线对比
     print("\n  [直接 FFmpeg 编码对比 (同源视频, 9s)]")
-    print(f"  +----------------+----------------+----------------+")
-    print(f"  | 指标           | OLD (crf23+fast)| NEW (crf18+slow)|")
-    print(f"  +----------------+----------------+----------------+")
+    print("  +----------------+----------------+----------------+")
+    print("  | 指标           | OLD (crf23+fast)| NEW (crf18+slow)|")
+    print("  +----------------+----------------+----------------+")
     print(f"  | 分辨率         | {b_probe.get('width')}x{b_probe.get('height'):<8d} | {h_probe.get('width')}x{h_probe.get('height'):<8d} |")
     print(f"  | 码率           | {b_probe.get('bit_rate',0)//1000}kbps{'':<6s} | {h_probe.get('bit_rate',0)//1000}kbps{'':<6s} |")
     print(f"  | 文件大小       | {b_probe.get('size_kb')}KB{'':<6s} | {h_probe.get('size_kb')}KB{'':<6s} |")
-    print(f"  +----------------+----------------+----------------+")
+    print("  +----------------+----------------+----------------+")
 
     # ====================================================================
     # 最终结论
@@ -470,7 +472,7 @@ def main() -> int:
         print(f"  [{'PASS' if ok else 'FAIL'}] {name}")
     passed = all(all_checks.values())
     print(f"\n  ===> 总体结论: {'PASS' if passed else 'FAIL'}")
-    print(f"  ===> 截帧文件:")
+    print("  ===> 截帧文件:")
     print(f"       修改前 (640x480 crf23): {baseline_png}")
     print(f"       修改后 (1080p  crf18): {hq_png}")
     print(f"       管线输出截帧:           {pipeline_png}")

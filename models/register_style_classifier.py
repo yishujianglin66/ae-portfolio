@@ -2,14 +2,14 @@
 """
 注册风格分类模型到模型仓库
 """
-import sys
 import os
+import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from models.deployment.model_registry import load_registry, ModelInfo
+from models.deployment.model_registry import ModelInfo, load_registry
 
 
 def main():
@@ -57,7 +57,7 @@ def main():
     print(f"✅ 模型注册成功: {model_id}")
     
     models = registry.list_models(model_type="style_classify")
-    print(f"\n📊 已注册的风格分类模型:")
+    print("\n📊 已注册的风格分类模型:")
     for m in models:
         print(f"  - {m.model_name}:{m.model_version} ({m.status})")
         print(f"    准确率: {m.eval_metrics.get('accuracy', 'N/A'):.4f}")

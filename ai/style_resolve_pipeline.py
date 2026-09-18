@@ -56,7 +56,7 @@ from typing import Any, Dict, List, Optional, Tuple
 _PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
-from ai.style_bridge import StyleBridge, ColorBridgeResult, TransitionBridgeResult, SpeedBridgeResult
+from ai.style_bridge import ColorBridgeResult, SpeedBridgeResult, StyleBridge, TransitionBridgeResult
 
 logger = logging.getLogger(__name__)
 
@@ -73,11 +73,11 @@ class ResolveTimelineItem:
     source_start: float = 0.0          # 素材内起始时间
     duration: float = 0.0              # 段落时长（变速后）
     speed: float = 1.0                 # 播放速度
-    speed_curve: Optional[List[Tuple[float, float]]] = None
+    speed_curve: list[tuple[float, float]] | None = None
     retime_process: int = 0            # 0=Project, 1=Nearest, 2=OpticalFlow
     transition: str = ""               # Resolve 转场名
     transition_duration: float = 0.0
-    color_cdl: Dict[str, float] = field(default_factory=lambda: {"saturation": 1.0, "contrast": 1.0, "brightness": 0.0})
+    color_cdl: dict[str, float] = field(default_factory=lambda: {"saturation": 1.0, "contrast": 1.0, "brightness": 0.0})
     mood: str = "build"
     energy: float = 0.5
     text_overlay: str = ""
@@ -95,8 +95,8 @@ class ResolveTimelinePlan:
     total_duration: float = 0.0
     bgm_path: str = ""
     bgm_start_sec: float = 0.0
-    items: List[ResolveTimelineItem] = field(default_factory=list)
-    color_profile: Dict[str, float] = field(default_factory=dict)
+    items: list[ResolveTimelineItem] = field(default_factory=list)
+    color_profile: dict[str, float] = field(default_factory=dict)
     style_source: str = ""             # "style_spec" / "director_script"
 
 
@@ -115,9 +115,9 @@ class StyleResolvePipeline:
 
     def __init__(self):
         self.bridge = StyleBridge()
-        self._resolve_available: Optional[bool] = None
-        self._ae_available: Optional[bool] = None
-        self.last_report: Dict[str, Any] = {}
+        self._resolve_available: bool | None = None
+        self._ae_available: bool | None = None
+        self.last_report: dict[str, Any] = {}
 
     # ------------------------------------------------------------------
     # 环境检测
@@ -127,7 +127,7 @@ class StyleResolvePipeline:
         if self._resolve_available is not None:
             return self._resolve_available
         try:
-            from integrations.resolve_engine import ResolveAutomationEngine, FUSCRIPT_PATH
+            from integrations.resolve_engine import FUSCRIPT_PATH, ResolveAutomationEngine
             self._resolve_available = os.path.exists(FUSCRIPT_PATH)
             logger.info(f"Resolve 检测: {'在线' if self._resolve_available else '离线'} "
                         f"(fuscript: {FUSCRIPT_PATH})")
@@ -153,7 +153,7 @@ class StyleResolvePipeline:
     # ------------------------------------------------------------------
     # StyleSpec 加载
     # ------------------------------------------------------------------
-    def load_style_spec(self, style_spec_path: str) -> Dict[str, Any]:
+    def load_style_spec(self, style_spec_path: str) -> dict[str, Any]:
         """加载风格规格书 JSON。
 
         支持两种格式:
@@ -196,10 +196,10 @@ class StyleResolvePipeline:
     # ------------------------------------------------------------------
     def build_timeline_plan(
         self,
-        video_sources: List[str],
+        video_sources: list[str],
         bgm_path: str,
-        style_spec: Optional[Dict[str, Any]] = None,
-        target_duration: Optional[float] = None,
+        style_spec: dict[str, Any] | None = None,
+        target_duration: float | None = None,
         fps: int = 30,
     ) -> ResolveTimelinePlan:
         """从 StyleSpec + 素材列表生成 Resolve 时间线计划。
@@ -290,11 +290,11 @@ class StyleResolvePipeline:
     # ------------------------------------------------------------------
     def run_with_style(
         self,
-        video_sources: List[str],
+        video_sources: list[str],
         bgm_path: str,
-        style_spec_path: Optional[str] = None,
+        style_spec_path: str | None = None,
         output_path: str = "",
-        target_duration: Optional[float] = None,
+        target_duration: float | None = None,
         fps: int = 30,
         force_ffmpeg: bool = False,
     ) -> str:
@@ -378,7 +378,7 @@ class StyleResolvePipeline:
         fps: int,
     ) -> str:
         """Resolve 三段式管线: Resolve(剪辑+变速) → AE(文字) → Resolve(调色+混音)"""
-        from integrations.resolve_engine import ResolveAutomationEngine, CDLConfig
+        from integrations.resolve_engine import CDLConfig, ResolveAutomationEngine
 
         engine = ResolveAutomationEngine(timeout=600)
         work = os.path.join(tempfile.gettempdir(), f"style_resolve_{uuid.uuid4().hex[:8]}")
@@ -489,7 +489,7 @@ class StyleResolvePipeline:
         self,
         plan: ResolveTimelinePlan,
         output_path: str,
-        style_spec: Optional[Dict[str, Any]],
+        style_spec: dict[str, Any] | None,
         fps: int,
     ) -> str:
         """ffmpeg 降级管线 — 使用 ProductionDirector 原路径"""
@@ -638,7 +638,7 @@ class StyleResolvePipeline:
     # ------------------------------------------------------------------
     # 工具方法
     # ------------------------------------------------------------------
-    def _get_media_duration(self, path: str) -> Optional[float]:
+    def _get_media_duration(self, path: str) -> float | None:
         """获取媒体文件时长"""
         try:
             r = subprocess.run(

@@ -67,9 +67,9 @@ class AdaptiveFallbackSelector:
         self._is_test_env = env_test
         self.history_file = Path(history_file)
         self.history_file.parent.mkdir(parents=True, exist_ok=True)
-        self._success_rates: Dict[str, Dict] = {}  # path -> {success, total, last_error}
+        self._success_rates: dict[str, dict] = {}  # path -> {success, total, last_error}
         # P2.4: 可解释性日志 (path_id -> choice_detail)
-        self._explain_log: Dict[str, Dict[str, Any]] = {}
+        self._explain_log: dict[str, dict[str, Any]] = {}
         self._load_history()
     
     def _load_history(self):
@@ -94,7 +94,7 @@ class AdaptiveFallbackSelector:
         self,
         failed_stage: str,
         error: Exception,
-        available_paths: Optional[List[str]] = None,
+        available_paths: list[str] | None = None,
         exploration_rate: float = 0.1,
     ) -> str:
         """选择最优降级路径
@@ -166,7 +166,7 @@ class AdaptiveFallbackSelector:
         
         return False
     
-    def update_success_rate(self, path: str, success: bool, error: Optional[Exception] = None):
+    def update_success_rate(self, path: str, success: bool, error: Exception | None = None):
         """更新路径成功率（增量学习）
 
         Args:
@@ -205,7 +205,7 @@ class AdaptiveFallbackSelector:
         rate = self._get_success_rate(path)
         logger.debug(f"[FallbackSelector] Updated '{path}': success_rate={rate:.0%}")
     
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """获取降级路径统计"""
         stats = {}
         for path, data in self._success_rates.items():
@@ -227,8 +227,8 @@ class AdaptiveFallbackSelector:
         self,
         stage: str,
         error: Exception,
-        candidates: List["EngineCandidate"],
-        context: Optional[Dict[str, Any]] = None,
+        candidates: list["EngineCandidate"],
+        context: dict[str, Any] | None = None,
     ) -> str:
         """基于引擎元数据与历史成功率选择降级路径
         
@@ -273,7 +273,7 @@ class AdaptiveFallbackSelector:
         registry = self._get_engine_registry()
 
         # 3. 评分每个候选
-        scored: List[tuple] = []
+        scored: list[tuple] = []
         for cand in candidates:
             path_id = getattr(cand, "path_id", str(cand))
             engine_name = getattr(cand, "engine_name", "")
@@ -370,7 +370,7 @@ class AdaptiveFallbackSelector:
         )
         return selected_path
 
-    def explain_choice(self, path_id: str) -> Dict[str, Any]:
+    def explain_choice(self, path_id: str) -> dict[str, Any]:
         """解释某次选择决策 (可解释性)
         
         Args:
@@ -389,7 +389,7 @@ class AdaptiveFallbackSelector:
         """
         return dict(self._explain_log.get(path_id, {}))
 
-    def list_recent_choices(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def list_recent_choices(self, limit: int = 10) -> list[dict[str, Any]]:
         """列出最近的选择记录 (按时间倒序)"""
         sorted_choices = sorted(
             self._explain_log.values(),
@@ -408,8 +408,8 @@ class AdaptiveFallbackSelector:
             return None
 
     def _read_strategy_preference(
-        self, stage: str, context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        self, stage: str, context: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """读取 MetaStrategyEngine 的策略偏好 (graceful degrade)
         
         Args:
@@ -448,7 +448,7 @@ class AdaptiveFallbackSelector:
 
 
 # 全局降级选择器实例
-_fallback_selector: Optional[AdaptiveFallbackSelector] = None
+_fallback_selector: AdaptiveFallbackSelector | None = None
 
 
 def get_fallback_selector() -> AdaptiveFallbackSelector:

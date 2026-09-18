@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Test batch keyframe writing via executeAtomScript"""
-from ae_mcp_client import AECommandClient
 import json
+
+from ae_mcp_client import AECommandClient
 
 c = AECommandClient(signature_enabled=False, timeout=30)
 

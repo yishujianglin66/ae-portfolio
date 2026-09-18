@@ -16,7 +16,6 @@ from typing import Any, Dict, List, Optional
 import yaml
 from loguru import logger
 
-
 # OpenMontage 项目根目录（如果存在）
 OPENMONTAGE_ROOT = Path(
     r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\external\OpenMontage"
@@ -40,12 +39,12 @@ class StageDefinition:
     """单个阶段定义（从 yaml manifest 解析）。"""
 
     name: str
-    skill: Optional[str] = None
-    produces: List[str] = field(default_factory=list)
+    skill: str | None = None
+    produces: list[str] = field(default_factory=list)
     checkpoint_required: bool = False
-    review_focus: List[str] = field(default_factory=list)
-    success_criteria: List[str] = field(default_factory=list)
-    raw: Dict[str, Any] = field(default_factory=dict)
+    review_focus: list[str] = field(default_factory=list)
+    success_criteria: list[str] = field(default_factory=list)
+    raw: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -54,10 +53,10 @@ class StageResult:
 
     stage_name: str
     status: PipelineStatus
-    artifacts: Dict[str, Any] = field(default_factory=dict)
+    artifacts: dict[str, Any] = field(default_factory=dict)
     started_at: float = 0.0
     finished_at: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
     notes: str = ""
 
     @property
@@ -74,10 +73,10 @@ class PipelineManifest:
     description: str
     category: str
     stability: str
-    stages: List[StageDefinition] = field(default_factory=list)
+    stages: list[StageDefinition] = field(default_factory=list)
     reference_input_supported: bool = False
-    required_skills: List[str] = field(default_factory=list)
-    raw: Dict[str, Any] = field(default_factory=dict)
+    required_skills: list[str] = field(default_factory=list)
+    raw: dict[str, Any] = field(default_factory=dict)
 
 
 class OpenMontagePipelineRuntime:
@@ -86,13 +85,13 @@ class OpenMontagePipelineRuntime:
     负责加载 yaml manifest、编排阶段执行、产出 artifacts。
     """
 
-    def __init__(self, pipeline_dir: Optional[Path] = None):
+    def __init__(self, pipeline_dir: Path | None = None):
         self.pipeline_dir = pipeline_dir or PIPELINE_DEFS_DIR
-        self._cache: Dict[str, PipelineManifest] = {}
-        self._runs: Dict[str, List[StageResult]] = {}
+        self._cache: dict[str, PipelineManifest] = {}
+        self._runs: dict[str, list[StageResult]] = {}
         logger.info(f"OpenMontage 流水线运行时初始化: {self.pipeline_dir}")
 
-    def list_pipelines(self) -> List[str]:
+    def list_pipelines(self) -> list[str]:
         """列出所有可用的流水线。"""
         if not self.pipeline_dir.exists():
             logger.warning(f"Pipeline 目录不存在: {self.pipeline_dir}")
@@ -137,7 +136,7 @@ class OpenMontagePipelineRuntime:
         logger.info(f"已加载流水线: {manifest.name} (v{manifest.version}, {len(manifest.stages)} 阶段)")
         return manifest
 
-    def load_all(self) -> List[PipelineManifest]:
+    def load_all(self) -> list[PipelineManifest]:
         """加载所有流水线。"""
         manifests = []
         for name in self.list_pipelines():
@@ -148,7 +147,7 @@ class OpenMontagePipelineRuntime:
         logger.info(f"共加载 {len(manifests)} 个流水线")
         return manifests
 
-    def get_pipeline_info(self, name: str) -> Dict[str, Any]:
+    def get_pipeline_info(self, name: str) -> dict[str, Any]:
         """获取流水线概要信息。"""
         manifest = self.load_pipeline(name)
         return {
@@ -173,7 +172,7 @@ class OpenMontagePipelineRuntime:
         self,
         pipeline_name: str,
         stage_name: str,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> StageResult:
         """执行单个阶段（驱动 Agent 完成工作）。
 
@@ -220,8 +219,8 @@ class OpenMontagePipelineRuntime:
         self,
         manifest: PipelineManifest,
         stage: StageDefinition,
-        context: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        context: dict[str, Any],
+    ) -> dict[str, Any]:
         """阶段执行逻辑（默认实现：返回结构化模板）。
 
         各阶段的具体业务逻辑由 Agent 驱动完成，这里提供结构化输出。
@@ -240,6 +239,6 @@ class OpenMontagePipelineRuntime:
             }
         return artifacts
 
-    def get_run_history(self, run_id: str) -> List[StageResult]:
+    def get_run_history(self, run_id: str) -> list[StageResult]:
         """获取运行历史。"""
         return self._runs.get(run_id, [])

@@ -7,9 +7,9 @@
   3. 调用 optimize_with_feedback 验证反馈数据被读取并影响参数
   4. 对比有反馈 vs 无反馈的参数差异
 """
-import sys
-import os
 import json
+import os
+import sys
 
 # 设置路径
 PROJECT_ROOT = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault"
@@ -23,7 +23,7 @@ def cleanup():
     """清理旧反馈文件，确保测试干净"""
     if os.path.isfile(FEEDBACK_FILE):
         os.remove(FEEDBACK_FILE)
-        print(f"[清理] 已删除旧反馈文件")
+        print("[清理] 已删除旧反馈文件")
 
 def step1_write_feedback():
     """模拟 _trigger_param_feedback 写入"""
@@ -58,7 +58,7 @@ def step1_write_feedback():
         print(f"  ✅ 记录数: {count}")
         return count > 0
     else:
-        print(f"\n  ❌ 反馈文件未创建!")
+        print("\n  ❌ 反馈文件未创建!")
         return False
 
 def step2_verify_readback():
@@ -76,7 +76,7 @@ def step2_verify_readback():
     result_with_fb = optimizer.optimize_with_feedback(ctx_glow, use_feedback=True)
     result_no_fb = optimizer.optimize_with_feedback(ctx_glow, use_feedback=False)
 
-    print(f"\n  [Glow 效果]")
+    print("\n  [Glow 效果]")
     print(f"  无反馈优化: {result_no_fb.settings}")
     print(f"  有反馈优化: {result_with_fb.settings}")
     print(f"  无反馈置信度: {result_no_fb.confidence}")
@@ -94,9 +94,9 @@ def step2_verify_readback():
                     print(f"  📊 {key}: {v1} → {v2} (反馈影响)")
 
     if has_diff:
-        print(f"\n  ✅ 反馈数据确实影响了参数优化结果！")
+        print("\n  ✅ 反馈数据确实影响了参数优化结果！")
     else:
-        print(f"\n  ⚠️ 参数无差异，可能反馈数据与规则表值接近")
+        print("\n  ⚠️ 参数无差异，可能反馈数据与规则表值接近")
 
     # 检查 adjustments 中是否有 feedback_weighted 标记
     fb_adjustments = [a for a in result_with_fb.adjustments if a.get("reason") == "feedback_weighted"]
@@ -110,13 +110,13 @@ def step2_verify_readback():
     result_blur_fb = optimizer.optimize_with_feedback(ctx_blur, use_feedback=True)
     result_blur_no = optimizer.optimize_with_feedback(ctx_blur, use_feedback=False)
 
-    print(f"\n  [Blur 效果]")
+    print("\n  [Blur 效果]")
     print(f"  无反馈: Blurriness={result_blur_no.settings.get('Blurriness')}")
     print(f"  有反馈: Blurriness={result_blur_fb.settings.get('Blurriness')}")
 
     blur_diff = (result_blur_fb.settings.get('Blurriness', 0) != result_blur_no.settings.get('Blurriness', 0))
     if blur_diff:
-        print(f"  ✅ Blur 参数被反馈修正！")
+        print("  ✅ Blur 参数被反馈修正！")
 
     return has_diff or blur_diff or len(fb_adjustments) > 0
 
@@ -126,7 +126,7 @@ def step3_multi_round():
     print(" Step 3: 多轮积累验证（模拟管线连续运行）")
     print("=" * 60)
 
-    from parameter_optimizer import enhanced_optimizer, EnhancedParameterOptimizer, ParameterContext
+    from parameter_optimizer import EnhancedParameterOptimizer, ParameterContext, enhanced_optimizer
 
     # 再追加2轮高评分反馈
     for i in range(2):
@@ -141,7 +141,7 @@ def step3_multi_round():
     ctx = ParameterContext(effect_name="ADBE Glo2", style_name="cyberpunk")
     result = optimizer.optimize_with_feedback(ctx, use_feedback=True)
 
-    print(f"  追加2轮高评分(0.95)反馈后:")
+    print("  追加2轮高评分(0.95)反馈后:")
     print(f"  Glow Radius = {result.settings.get('Glow Radius')}")
     print(f"  Glow Intensity = {result.settings.get('Glow Intensity')}")
     print(f"  置信度 = {result.confidence}")
@@ -157,7 +157,7 @@ def step3_multi_round():
         data = json.load(f)
     total = len(data.get("records", []))
     print(f"\n  反馈总记录数: {total}")
-    print(f"  ✅ 多轮积累正常" if total >= 5 else f"  ❌ 记录数不足")
+    print("  ✅ 多轮积累正常" if total >= 5 else "  ❌ 记录数不足")
     return total >= 5
 
 def main():

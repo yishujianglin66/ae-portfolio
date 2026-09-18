@@ -180,7 +180,7 @@ def main():
     # 写 Excel（带样式和汇总表）
     OUT_XLSX = PROJECT_ROOT / "data" / "output" / "入库清单.xlsx"
     from openpyxl import Workbook
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
     wb = Workbook()
     ws = wb.active
@@ -249,7 +249,7 @@ def main():
 
     wb.save(OUT_XLSX)
 
-    print(f"\n完成! 写入:")
+    print("\n完成! 写入:")
     print(f"  CSV:  {OUT_CSV}")
     print(f"  MD:   {OUT_MD}")
     print(f"  XLSX: {OUT_XLSX}")

@@ -20,17 +20,17 @@ AutoDownloader - 自动化下载调度器
     result = downloader.download("magnet:?xt=urn:btih:xxx", output_dir="D:/AE-Work/素材")
 """
 
-import os
-import sys
 import json
-import time
+import os
 import subprocess
+import sys
 import threading
+import time
 import urllib.request
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -56,7 +56,7 @@ class EngineType(Enum):
 class DownloadTask:
     url: str
     output_dir: str
-    filename: Optional[str] = None
+    filename: str | None = None
     engine: EngineType = EngineType.ARIA2
     status: str = "pending"  # pending, downloading, completed, failed
     progress: float = 0.0
@@ -65,9 +65,9 @@ class DownloadTask:
     error: str = ""
     gid: str = ""  # aria2 download ID
     start_time: float = field(default_factory=time.time)
-    end_time: Optional[float] = None
+    end_time: float | None = None
     
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "url": self.url,
             "output_dir": self.output_dir,
@@ -95,7 +95,7 @@ class Aria2RPC:
         self.url = f"http://127.0.0.1:{port}/jsonrpc"
         self._id_counter = 0
     
-    def _call(self, method: str, params: List = None) -> Dict:
+    def _call(self, method: str, params: list = None) -> dict:
         """调用 JSON-RPC 方法"""
         self._id_counter += 1
         payload = {
@@ -119,7 +119,7 @@ class Aria2RPC:
         except Exception as e:
             return {"error": str(e)}
     
-    def add_uri(self, uri: str, options: Dict = None) -> str:
+    def add_uri(self, uri: str, options: dict = None) -> str:
         """添加下载任务"""
         params = [[uri]]
         if options:
@@ -127,7 +127,7 @@ class Aria2RPC:
         result = self._call("aria2.addUri", params)
         return result.get("result", "")
     
-    def add_torrent(self, torrent_path: str, options: Dict = None) -> str:
+    def add_torrent(self, torrent_path: str, options: dict = None) -> str:
         """添加BT种子"""
         import base64
         with open(torrent_path, "rb") as f:
@@ -136,12 +136,12 @@ class Aria2RPC:
         result = self._call("aria2.addTorrent", params)
         return result.get("result", "")
     
-    def tell_status(self, gid: str) -> Dict:
+    def tell_status(self, gid: str) -> dict:
         """查询任务状态"""
         result = self._call("aria2.tellStatus", [gid])
         return result.get("result", {})
     
-    def tell_active(self) -> List:
+    def tell_active(self) -> list:
         """查询活跃任务"""
         result = self._call("aria2.tellActive", [])
         return result.get("result", [])
@@ -161,7 +161,7 @@ class Aria2RPC:
         result = self._call("aria2.unpause", [gid])
         return "result" in result
     
-    def get_global_stat(self) -> Dict:
+    def get_global_stat(self) -> dict:
         """获取全局统计"""
         result = self._call("aria2.getGlobalStat", [])
         return result.get("result", {})
@@ -177,8 +177,8 @@ class Aria2Engine:
     DEFAULT_PORT = 6800
     
     def __init__(self):
-        self.process: Optional[subprocess.Popen] = None
-        self.rpc: Optional[Aria2RPC] = None
+        self.process: subprocess.Popen | None = None
+        self.rpc: Aria2RPC | None = None
         self._started = False
     
     def is_available(self) -> bool:
@@ -281,7 +281,7 @@ class Aria2Engine:
         
         return task
     
-    def check_progress(self, gid: str) -> Dict:
+    def check_progress(self, gid: str) -> dict:
         """检查下载进度"""
         if not self.rpc:
             return {"status": "error", "error": "RPC未连接"}
@@ -415,7 +415,7 @@ class AutoDownloader:
         self.filecxx = FileCxxEngine()
         
         # 任务历史
-        self.tasks: List[DownloadTask] = []
+        self.tasks: list[DownloadTask] = []
     
     def download(self, url: str, output_dir: str = None, 
                  filename: str = None, engine: EngineType = None) -> DownloadTask:
@@ -452,7 +452,7 @@ class AutoDownloader:
         self.tasks.append(task)
         return task
     
-    def download_batch(self, urls: List[str], output_dir: str = None) -> List[DownloadTask]:
+    def download_batch(self, urls: list[str], output_dir: str = None) -> list[DownloadTask]:
         """批量下载"""
         tasks = []
         for url in urls:
@@ -469,7 +469,7 @@ class AutoDownloader:
         """下载 HTTP 链接"""
         return self.download(url, output_dir, filename)
     
-    def wait_all(self, timeout: int = 7200) -> List[DownloadTask]:
+    def wait_all(self, timeout: int = 7200) -> list[DownloadTask]:
         """等待所有任务完成"""
         results = []
         for task in self.tasks:
@@ -503,7 +503,7 @@ class AutoDownloader:
         # 默认 aria2
         return EngineType.ARIA2
     
-    def get_status(self) -> Dict:
+    def get_status(self) -> dict:
         """获取所有任务状态"""
         return {
             "total": len(self.tasks),
@@ -521,7 +521,7 @@ class AutoDownloader:
 # ================================================================
 #  便捷函数
 # ================================================================
-def quick_download(url: str, output_dir: str = None) -> Dict:
+def quick_download(url: str, output_dir: str = None) -> dict:
     """快速下载 (同步)"""
     downloader = AutoDownloader()
     try:

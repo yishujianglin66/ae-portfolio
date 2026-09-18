@@ -7,9 +7,10 @@ all endpoints without requiring a running ComfyUI server.
 from __future__ import annotations
 
 import json
-import pytest
-import httpx
 from pathlib import Path
+
+import httpx
+import pytest
 from fastapi.testclient import TestClient
 
 

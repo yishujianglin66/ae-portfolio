@@ -19,12 +19,11 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set
 
 from effect_description_parser import (
-    EffectDescription,
-    VocabRef,
-    IntensityRef,
     ColorRef,
+    EffectDescription,
+    IntensityRef,
+    VocabRef,
 )
-
 
 # ============================================================================
 # 数据类
@@ -34,7 +33,7 @@ from effect_description_parser import (
 class ParameterMapping:
     """单个效果的参数映射结果。"""
     matchName: str
-    settings: Dict[str, Any]  # value: number | string | list[number]
+    settings: dict[str, Any]  # value: number | string | list[number]
     confidence: float
 
 
@@ -53,7 +52,7 @@ class MapperContext:
 # 每个模板包含：matchName / defaultSettings / parameterRange / intensityScale
 # ============================================================================
 
-EFFECT_TEMPLATES: Dict[str, Dict[str, Any]] = {
+EFFECT_TEMPLATES: dict[str, dict[str, Any]] = {
     # ------------------------------------------------------------------
     # 发光类
     # ------------------------------------------------------------------
@@ -341,7 +340,7 @@ class ParameterMapper:
         """初始化映射器，可传入自定义上下文。"""
         self.context = context if context is not None else MapperContext()
 
-    def map(self, description: EffectDescription) -> List[ParameterMapping]:
+    def map(self, description: EffectDescription) -> list[ParameterMapping]:
         """
         将 EffectDescription 中的效果/风格关键词映射为具体参数。
 
@@ -350,8 +349,8 @@ class ParameterMapper:
           2. 按 matchName 去重
           3. 同样处理 styleKeywords
         """
-        mappings: List[ParameterMapping] = []
-        seen_match_names: Set[str] = set()
+        mappings: list[ParameterMapping] = []
+        seen_match_names: set[str] = set()
 
         # 处理效果关键词
         for vocab_ref in description.effectKeywords:
@@ -407,12 +406,12 @@ class ParameterMapper:
 
     def _apply_modifiers(
         self,
-        settings: Dict[str, Any],
-        intensity_keywords: List[IntensityRef],
-        color_keywords: List[ColorRef],
-        intensity_scale: Dict[str, float],
-        parameter_range: Dict[str, Dict[str, float]],
-    ) -> Dict[str, Any]:
+        settings: dict[str, Any],
+        intensity_keywords: list[IntensityRef],
+        color_keywords: list[ColorRef],
+        intensity_scale: dict[str, float],
+        parameter_range: dict[str, dict[str, float]],
+    ) -> dict[str, Any]:
         """
         应用全部修饰词：强度 → 颜色 → 范围约束。
 
@@ -428,9 +427,9 @@ class ParameterMapper:
 
     def _apply_intensity(
         self,
-        settings: Dict[str, Any],
-        intensity_keywords: List[IntensityRef],
-        intensity_scale: Dict[str, float],
+        settings: dict[str, Any],
+        intensity_keywords: list[IntensityRef],
+        intensity_scale: dict[str, float],
     ) -> None:
         """
         对 intensityScale 中列出的参数，乘以总强度系数。
@@ -451,8 +450,8 @@ class ParameterMapper:
 
     def _apply_color(
         self,
-        settings: Dict[str, Any],
-        color_keywords: List[ColorRef],
+        settings: dict[str, Any],
+        color_keywords: list[ColorRef],
     ) -> None:
         """
         根据颜色关键词设置相关颜色参数。
@@ -486,8 +485,8 @@ class ParameterMapper:
 
     def _apply_range(
         self,
-        settings: Dict[str, Any],
-        parameter_range: Dict[str, Dict[str, float]],
+        settings: dict[str, Any],
+        parameter_range: dict[str, dict[str, float]],
     ) -> None:
         """
         对 parameterRange 中列出的参数，clamp 到 [min, max] 区间。

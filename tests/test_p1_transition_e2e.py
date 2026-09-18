@@ -8,14 +8,15 @@
 
 验证方法: 直接调用管线内部方法, 用真实素材执行, 检查真实产物。
 """
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
 import pytest
 
-import sys
-import os
-import json
-import time
-import subprocess
-from pathlib import Path
 pytestmark = pytest.mark.real_e2e
 
 
@@ -75,7 +76,7 @@ def test_xfade_transition_e2e():
         print(f"    {Path(v).name[:50]} ({Path(v).stat().st_size//1024}KB, {dur})")
 
     # 2. 构建管线配置 (带 transition_plan)
-    from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig
+    from pipeline.unified_pipeline import PipelineConfig, UnifiedPipeline
 
     output_dir = str(ROOT / "output" / "p1_transition_test")
     config = PipelineConfig(
@@ -137,7 +138,7 @@ def test_xfade_transition_e2e():
     print(f"    耗时: {elapsed:.1f}s")
 
     # 5. 验证结果
-    print(f"\n[3] 执行结果:")
+    print("\n[3] 执行结果:")
     print(f"    execution_mode: {result.get('execution_mode')}")
     print(f"    mix_method: {result.get('mix_method')}")
     print(f"    output_path: {result.get('output_path', result.get('project_path', ''))}")
@@ -193,7 +194,7 @@ def test_xfade_transition_e2e():
         checks.append(("codec == h264", False))
 
     # 打印验证结果
-    print(f"\n[4] 验证结果:")
+    print("\n[4] 验证结果:")
     all_pass = True
     for desc, ok in checks:
         status = "PASS" if ok else "FAIL"
@@ -204,13 +205,13 @@ def test_xfade_transition_e2e():
     # 总结
     print(f"\n{'='*70}")
     if all_pass:
-        print(f"[RESULT] P1 转场库 E2E 验证 PASS")
+        print("[RESULT] P1 转场库 E2E 验证 PASS")
         print(f"  输出: {output_path}")
         print(f"  大小: {file_size//1024}KB, 时长: {total_dur:.1f}s")
         print(f"  转场: {result.get('transitions_applied', [])}")
         print(f"  方法: {mix_method}")
     else:
-        print(f"[RESULT] P1 转场库 E2E 验证 FAIL")
+        print("[RESULT] P1 转场库 E2E 验证 FAIL")
         if result.get("error"):
             print(f"  错误: {result['error']}")
         if result.get("error_code"):

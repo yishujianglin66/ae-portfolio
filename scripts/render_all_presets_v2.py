@@ -9,9 +9,14 @@
   --create-only : 只创建合成不渲染
   --verify-one : 创建第一个预设后验证动画属性
 """
-import json, time, sys, os, re, argparse
-from pathlib import Path
+import argparse
+import json
+import os
+import re
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -336,9 +341,9 @@ def main():
     total = len(presets)
 
     print(f"\n{'='*60}")
-    print(f"  ALL PRESETS RENDER v2 (animation fix)")
+    print("  ALL PRESETS RENDER v2 (animation fix)")
     print(f"  {total} presets x {DURATION}s = {total*DURATION/60:.1f} min video")
-    print(f"  FIX: direct code injection (no eval)")
+    print("  FIX: direct code injection (no eval)")
     print(f"{'='*60}\n")
 
     # === Phase 1: 创建带动画的合成 ===
@@ -380,7 +385,7 @@ def main():
         if animators > 0 or keyframes > 0 or effects > 0:
             print(f"  ANIMATION CONFIRMED: {animators} animators, {keyframes} keyframes, {effects} effects")
         else:
-            print(f"  WARNING: No animation detected!")
+            print("  WARNING: No animation detected!")
 
     # === Phase 2: 总合成 + 渲染 ===
     if not args.create_only and len(created) > 0:

@@ -22,7 +22,6 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # 共享 Mock 适配器
 # ---------------------------------------------------------------------------
@@ -37,23 +36,23 @@ class _MockAdapter:
         available: bool = True,
         success: bool = True,
         latency_ms: float = 1.0,
-        error: Optional[str] = None,
+        error: str | None = None,
     ) -> None:
         self.name = name
         self._available = available
         self._success = success
         self._latency_ms = latency_ms
         self._error = error
-        self.calls: List[Dict[str, Any]] = []
+        self.calls: list[dict[str, Any]] = []
 
     def is_available(self) -> bool:
         return self._available
 
     # 完整 API 集
-    def create_composition(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_composition(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("create_composition", kwargs)
 
-    def list_compositions(self, **kwargs: Any) -> List[Dict[str, Any]]:
+    def list_compositions(self, **kwargs: Any) -> list[dict[str, Any]]:
         self.calls.append({"method": "list_compositions", "kwargs": kwargs})
         if not self._success:
             return []
@@ -62,59 +61,59 @@ class _MockAdapter:
             {"name": "MockComp_2", "id": 2, "width": 1280, "height": 720},
         ]
 
-    def create_text_layer(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_text_layer(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("create_text_layer", kwargs)
 
-    def create_solid_layer(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_solid_layer(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("create_solid_layer", kwargs)
 
-    def create_shape_layer(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_shape_layer(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("create_shape_layer", kwargs)
 
-    def add_adjustment_layer(self, **kwargs: Any) -> Dict[str, Any]:
+    def add_adjustment_layer(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("add_adjustment_layer", kwargs)
 
-    def set_layer_properties(self, **kwargs: Any) -> Dict[str, Any]:
+    def set_layer_properties(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("set_layer_properties", kwargs)
 
-    def set_blend_mode(self, **kwargs: Any) -> Dict[str, Any]:
+    def set_blend_mode(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("set_blend_mode", kwargs)
 
-    def set_track_matte(self, **kwargs: Any) -> Dict[str, Any]:
+    def set_track_matte(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("set_track_matte", kwargs)
 
-    def set_parent_layer(self, **kwargs: Any) -> Dict[str, Any]:
+    def set_parent_layer(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("set_parent_layer", kwargs)
 
-    def set_layer_keyframe(self, **kwargs: Any) -> Dict[str, Any]:
+    def set_layer_keyframe(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("set_layer_keyframe", kwargs)
 
-    def set_keyframe_easing(self, **kwargs: Any) -> Dict[str, Any]:
+    def set_keyframe_easing(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("set_keyframe_easing", kwargs)
 
-    def set_layer_expression(self, **kwargs: Any) -> Dict[str, Any]:
+    def set_layer_expression(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("set_layer_expression", kwargs)
 
-    def apply_effect(self, **kwargs: Any) -> Dict[str, Any]:
+    def apply_effect(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("apply_effect", kwargs)
 
-    def apply_effect_template(self, **kwargs: Any) -> Dict[str, Any]:
+    def apply_effect_template(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("apply_effect_template", kwargs)
 
-    def batch_add_effects(self, **kwargs: Any) -> Dict[str, Any]:
+    def batch_add_effects(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("batch_add_effects", kwargs)
 
-    def set_layer_mask(self, **kwargs: Any) -> Dict[str, Any]:
+    def set_layer_mask(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("set_layer_mask", kwargs)
 
-    def render(self, **kwargs: Any) -> Dict[str, Any]:
+    def render(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("render", kwargs)
 
-    def execute_atom_script(self, **kwargs: Any) -> Dict[str, Any]:
+    def execute_atom_script(self, **kwargs: Any) -> dict[str, Any]:
         return self._invoke("execute_atom_script", kwargs)
 
     # 内部
-    def _invoke(self, method: str, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    def _invoke(self, method: str, kwargs: dict[str, Any]) -> dict[str, Any]:
         self.calls.append({"method": method, "kwargs": kwargs})
         if self._latency_ms > 0:
             time.sleep(self._latency_ms / 1000.0)
@@ -649,7 +648,7 @@ class TestThreadSafety:
             default_channel=AEChannel.PUPPET,
         )
 
-        errors: List[Exception] = []
+        errors: list[Exception] = []
 
         def worker(i: int) -> None:
             try:
@@ -716,4 +715,4 @@ class TestExamplesScript:
 
     def test_adapters_init(self) -> None:
         """确保 adapters 包可被导入。"""
-        from ae.adapters import PuppetEngineAdapter, BaseAEAdapter  # noqa: F401
+        from ae.adapters import BaseAEAdapter, PuppetEngineAdapter  # noqa: F401

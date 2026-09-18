@@ -13,11 +13,11 @@
 """
 from __future__ import annotations
 
-import sys
-import os
 import json
-import time
+import os
 import subprocess
+import sys
+import time
 import traceback
 from pathlib import Path
 
@@ -106,7 +106,10 @@ def main() -> int:
 
     # 2. 构造管线配置
     from pipeline.unified_pipeline import (
-        UnifiedPipeline, PipelineConfig, PipelineResult, StageStatus,
+        PipelineConfig,
+        PipelineResult,
+        StageStatus,
+        UnifiedPipeline,
     )
     cfg = PipelineConfig(
         input_topic=INPUT_TOPIC,
@@ -196,7 +199,7 @@ def main() -> int:
 
         # 核心断言: execution_mode 必须是 real_mix (不再是 ae_bridge 空壳)
         if exec_mode == "real_mix":
-            print(f"    [PASS] execution_mode == 'real_mix' (真混剪已触发)")
+            print("    [PASS] execution_mode == 'real_mix' (真混剪已触发)")
         else:
             print(f"    [WARN] execution_mode={exec_mode!r} (期望 'real_mix')")
 
@@ -207,13 +210,13 @@ def main() -> int:
             print(f"    output exists   : YES  ext={ext}  size={size_kb}KB")
             if ext in {".mp4", ".mov", ".mkv", ".avi", ".webm"} and size_kb > 5:
                 exec_ok = True
-                print(f"    [PASS] execute 输出为真实视频文件 (非 .aep 空壳)")
+                print("    [PASS] execute 输出为真实视频文件 (非 .aep 空壳)")
             else:
-                print(f"    [FAIL] 输出非视频格式或过小")
+                print("    [FAIL] 输出非视频格式或过小")
         else:
             print(f"    [FAIL] execute 输出文件不存在: {exec_output!r}")
     else:
-        print(f"    [FAIL] execute 阶段结果缺失")
+        print("    [FAIL] execute 阶段结果缺失")
 
     # 6. ffprobe 验证 execute 输出
     print("\n" + "=" * 72)
@@ -256,7 +259,7 @@ def main() -> int:
                 print(f"    [{mark}] {k}")
             ffprobe_ok = all(checks.values())
     else:
-        print(f"    [SKIP] execute 无有效输出, 跳过 ffprobe 验证")
+        print("    [SKIP] execute 无有效输出, 跳过 ffprobe 验证")
 
     # 7. VideoQualityAssessor 评分
     print("\n" + "=" * 72)
@@ -285,7 +288,7 @@ def main() -> int:
             mark = "PASS" if quality_ok else "FAIL"
             print(f"    [{mark}] score({quality_score:.1f}) > 30.0")
     else:
-        print(f"    [SKIP] execute 无有效输出, 跳过质量评分")
+        print("    [SKIP] execute 无有效输出, 跳过质量评分")
 
     # 8. 对比: 混剪输出 vs 原参考视频 (证明非简单截取)
     print("\n" + "=" * 72)
@@ -326,7 +329,7 @@ def main() -> int:
         mark = "PASS" if diff_ok else "FAIL"
         print(f"    [{mark}] 非简单截取 (effects>=2 或 segments>=2 或 concat 方法)")
     else:
-        print(f"    [SKIP] 无法对比")
+        print("    [SKIP] 无法对比")
 
     # 9. 最终判定
     print("\n" + "=" * 72)

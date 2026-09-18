@@ -3,10 +3,9 @@
 提供场景管理、转场生成、镜头运动和时间线编排功能
 """
 
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
 import math
-
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 TRANSITION_TYPES = {
     "crossfade": "交叉淡入淡出",
@@ -56,8 +55,8 @@ class Scene:
     duration: float
     layer_name: str = ""
     start_time: float = 0.0
-    effects: List[Dict] = field(default_factory=list)
-    camera_moves: List[CameraMove] = field(default_factory=list)
+    effects: list[dict] = field(default_factory=list)
+    camera_moves: list[CameraMove] = field(default_factory=list)
 
 
 @dataclass
@@ -74,8 +73,8 @@ class SceneOrchestrator:
         self.fps = fps
         self.comp_width = comp_width
         self.comp_height = comp_height
-        self.scenes: List[Scene] = []
-        self.transitions: List[Transition] = []
+        self.scenes: list[Scene] = []
+        self.transitions: list[Transition] = []
         self._scene_counter = 0
 
     def add_scene(self, scene: Scene) -> Scene:
@@ -99,7 +98,7 @@ class SceneOrchestrator:
         last_scene = self.scenes[-1]
         return last_scene.start_time + last_scene.duration
 
-    def generate_transitions(self, transition_type: str, duration: float = 0.5) -> List[Transition]:
+    def generate_transitions(self, transition_type: str, duration: float = 0.5) -> list[Transition]:
         self.transitions = []
         if transition_type not in TRANSITION_TYPES:
             raise ValueError(f"Unknown transition type: {transition_type}. "
@@ -122,7 +121,7 @@ class SceneOrchestrator:
 
         return self.transitions
 
-    def apply_camera_move(self, scene: Scene, move: CameraMove, layer_name: str = "") -> List[Dict]:
+    def apply_camera_move(self, scene: Scene, move: CameraMove, layer_name: str = "") -> list[dict]:
         keyframes = []
         target_layer = layer_name or scene.layer_name
         start_time = scene.start_time
@@ -161,7 +160,7 @@ class SceneOrchestrator:
         return keyframes
 
     def _gen_scale_keyframes(self, layer_name: str, start_time: float, duration: float,
-                              start_scale: float, end_scale: float) -> List[Dict]:
+                              start_scale: float, end_scale: float) -> list[dict]:
         return [
             {
                 "layerName": layer_name,
@@ -180,7 +179,7 @@ class SceneOrchestrator:
         ]
 
     def _gen_position_x_keyframes(self, layer_name: str, start_time: float, duration: float,
-                                   start_x: float, end_x: float) -> List[Dict]:
+                                   start_x: float, end_x: float) -> list[dict]:
         center_x = self.comp_width / 2
         return [
             {
@@ -200,7 +199,7 @@ class SceneOrchestrator:
         ]
 
     def _gen_position_y_keyframes(self, layer_name: str, start_time: float, duration: float,
-                                   start_y: float, end_y: float) -> List[Dict]:
+                                   start_y: float, end_y: float) -> list[dict]:
         center_y = self.comp_height / 2
         return [
             {
@@ -220,7 +219,7 @@ class SceneOrchestrator:
         ]
 
     def _gen_shake_keyframes(self, layer_name: str, start_time: float, duration: float,
-                              amplitude: float, frequency: float) -> List[Dict]:
+                              amplitude: float, frequency: float) -> list[dict]:
         keyframes = []
         if frequency <= 0 or amplitude <= 0:
             return keyframes
@@ -248,7 +247,7 @@ class SceneOrchestrator:
 
         return keyframes
 
-    def generate_timeline(self) -> List[Dict]:
+    def generate_timeline(self) -> list[dict]:
         timeline = []
 
         for scene in self.scenes:
@@ -277,7 +276,7 @@ class SceneOrchestrator:
         timeline.sort(key=lambda x: x["startTime"])
         return timeline
 
-    def generate_transition_keyframes(self) -> List[Dict]:
+    def generate_transition_keyframes(self) -> list[dict]:
         keyframes = []
 
         for transition in self.transitions:
@@ -310,7 +309,7 @@ class SceneOrchestrator:
 
         return keyframes
 
-    def _crossfade_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> List[Dict]:
+    def _crossfade_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> list[dict]:
         return [
             {"layerName": from_layer, "propertyName": "Opacity", "time": round(start, 3), "value": 100, "easeType": "linear"},
             {"layerName": from_layer, "propertyName": "Opacity", "time": round(start + dur, 3), "value": 0, "easeType": "linear"},
@@ -318,7 +317,7 @@ class SceneOrchestrator:
             {"layerName": to_layer, "propertyName": "Opacity", "time": round(start + dur, 3), "value": 100, "easeType": "linear"},
         ]
 
-    def _blur_transition_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> List[Dict]:
+    def _blur_transition_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> list[dict]:
         half = dur / 2
         kfs = []
         kfs.append({"layerName": from_layer, "propertyName": "Opacity", "time": round(start, 3), "value": 100, "easeType": "linear"})
@@ -334,7 +333,7 @@ class SceneOrchestrator:
                     "time": round(start + dur, 3), "value": 0, "easeType": "linear"})
         return kfs
 
-    def _slide_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float, direction: str) -> List[Dict]:
+    def _slide_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float, direction: str) -> list[dict]:
         offset = self.comp_width if direction == "left" else -self.comp_width
         center_x = self.comp_width / 2
         center_y = self.comp_height / 2
@@ -349,7 +348,7 @@ class SceneOrchestrator:
              "value": [center_x, center_y], "easeType": "linear"},
         ]
 
-    def _zoom_transition_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> List[Dict]:
+    def _zoom_transition_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> list[dict]:
         return [
             {"layerName": from_layer, "propertyName": "Scale", "time": round(start, 3),
              "value": [100, 100], "easeType": "linear"},
@@ -369,15 +368,15 @@ class SceneOrchestrator:
              "value": 100, "easeType": "linear"},
         ]
 
-    def _wipe_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float, direction: str) -> List[Dict]:
+    def _wipe_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float, direction: str) -> list[dict]:
         kfs = []
         kfs.extend(self._crossfade_keyframes(from_layer, to_layer, start, dur))
         return kfs
 
-    def _dissolve_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> List[Dict]:
+    def _dissolve_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> list[dict]:
         return self._crossfade_keyframes(from_layer, to_layer, start, dur)
 
-    def _flash_white_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> List[Dict]:
+    def _flash_white_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> list[dict]:
         half = dur / 2
         return [
             {"layerName": from_layer, "propertyName": "Opacity", "time": round(start, 3), "value": 100, "easeType": "linear"},
@@ -389,7 +388,7 @@ class SceneOrchestrator:
             {"layerName": "Adjustment_Flash", "propertyName": "Opacity", "time": round(start + dur, 3), "value": 0, "easeType": "linear"},
         ]
 
-    def _scale_up_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> List[Dict]:
+    def _scale_up_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> list[dict]:
         return [
             {"layerName": from_layer, "propertyName": "Scale", "time": round(start, 3),
              "value": [100, 100], "easeType": "linear"},
@@ -409,10 +408,10 @@ class SceneOrchestrator:
              "value": 100, "easeType": "linear"},
         ]
 
-    def _page_turn_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> List[Dict]:
+    def _page_turn_keyframes(self, from_layer: str, to_layer: str, start: float, dur: float) -> list[dict]:
         return self._crossfade_keyframes(from_layer, to_layer, start, dur)
 
-    def to_planning_result(self) -> Dict:
+    def to_planning_result(self) -> dict:
         keyframes = []
         layers = []
         effects = []

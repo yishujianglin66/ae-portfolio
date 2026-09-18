@@ -12,12 +12,12 @@
 输出格式: MP4 (H.264/AAC)
 """
 
-import os
-import sys
 import json
-import time
+import os
 import random
 import subprocess
+import sys
+import time
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -83,7 +83,7 @@ class TestVideoGenerator:
             是否成功
         """
         if not self.is_ffmpeg_available():
-            print(f"  ❌ ffmpeg 不可用")
+            print("  ❌ ffmpeg 不可用")
             return False
         
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -256,7 +256,7 @@ class TestVideoGenerator:
             print(f"  ❌ 生成失败: {e}")
             return False
     
-    def generate_test_batch(self, output_dir: str, styles: list = None) -> Dict:
+    def generate_test_batch(self, output_dir: str, styles: list = None) -> dict:
         """批量生成测试视频"""
         if styles is None:
             styles = ["simple", "animated", "scene_change", "motion_blur"]
@@ -346,7 +346,7 @@ def main():
         print("  - all: 批量生成所有风格")
         return
     
-    print(f"\n配置:")
+    print("\n配置:")
     print(f"  输出目录: {args.output}")
     print(f"  时长: {args.duration}秒")
     print(f"  分辨率: {args.width}x{args.height}")
@@ -373,11 +373,11 @@ def main():
         }
     
     if results["success"]:
-        print(f"\n✅ 所有视频生成成功!")
+        print("\n✅ 所有视频生成成功!")
         for item in results["generated"]:
             print(f"  - {item['style']}: {os.path.basename(item['path'])} ({item['size']} bytes)")
     else:
-        print(f"\n❌ 生成失败")
+        print("\n❌ 生成失败")
         if results.get("error"):
             print(f"  错误: {results['error']}")
         if results.get("failed"):

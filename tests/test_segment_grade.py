@@ -3,19 +3,20 @@
 测试 ColorGradeConfig.segment_presets 分段调色能力，
 包括 Lua 脚本生成、预设查找和安全 LUT 路径。
 """
-import sys
-import os
-import tempfile
 import ctypes
+import os
+import sys
+import tempfile
+
 import pytest
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
 from integrations.davinci_fuscript import (
-    ResolveColorEngine,
-    ColorGradeConfig,
-    find_lut_for_preset,
     RESOLVE_PRESETS,
+    ColorGradeConfig,
+    ResolveColorEngine,
+    find_lut_for_preset,
 )
 
 

@@ -14,20 +14,19 @@ from unittest.mock import patch
 
 import pytest
 
-from core.quality_gate import (
-    QualityContext,
-    QualityGate,
-    FrameLuminanceRule,
-    BeatAlignmentRule,
-    GradeNodeRule,
-)
 from core.failure_postmortem import (
+    FLAGSHIP_FIX_TEMPLATES,
     FlagshipErrorCode,
     classify_error,
     get_fix_recommendation,
-    FLAGSHIP_FIX_TEMPLATES,
 )
-
+from core.quality_gate import (
+    BeatAlignmentRule,
+    FrameLuminanceRule,
+    GradeNodeRule,
+    QualityContext,
+    QualityGate,
+)
 
 # ============================================================================
 #  QG-1 帧亮度规则

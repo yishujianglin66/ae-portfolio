@@ -20,7 +20,6 @@ from software_sdk.types import (
     Task,
 )
 
-
 # =============================================================================
 # Manim 适配器
 # =============================================================================
@@ -35,13 +34,13 @@ class ManimAdapter(BaseSoftwareAdapter):
 
     def __init__(
         self,
-        config: Optional[SoftwareConfig] = None,
-        logger: Optional[logging.Logger] = None,
+        config: SoftwareConfig | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         if config is None:
             config = SoftwareConfig(software=SoftwareType.MANIM)
         super().__init__(config, logger)
-        self._manim_available: Optional[bool] = None
+        self._manim_available: bool | None = None
 
     def _initialize_capabilities(self) -> SoftwareCapabilities:
         return SoftwareCapabilities(
@@ -97,7 +96,7 @@ class ManimAdapter(BaseSoftwareAdapter):
         finally:
             self._mark_task_end()
 
-    def _generate_animation(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_animation(self, params: dict[str, Any]) -> dict[str, Any]:
         scene_name = params.get("scene", "AnimationScene")
         script = params.get("script", "")
         output = params.get("output", "output.mp4")
@@ -123,7 +122,7 @@ class ManimAdapter(BaseSoftwareAdapter):
 
         return {"success": True, "action": "generate_animation", "scene": scene_name}
 
-    def _render_scene(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _render_scene(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"success": True, "action": "render_scene", "params": params}
 
 
@@ -141,8 +140,8 @@ class TouchDesignerAdapter(BaseSoftwareAdapter):
 
     def __init__(
         self,
-        config: Optional[SoftwareConfig] = None,
-        logger: Optional[logging.Logger] = None,
+        config: SoftwareConfig | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         if config is None:
             config = SoftwareConfig(software=SoftwareType.TOUCHDESIGNER)
@@ -211,14 +210,14 @@ class TouchDesignerAdapter(BaseSoftwareAdapter):
         finally:
             self._mark_task_end()
 
-    def _send_osc(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _send_osc(self, params: dict[str, Any]) -> dict[str, Any]:
         address = params.get("address", "/test")
         value = params.get("value", 1.0)
         self.logger.info(f"OSC: {address} = {value}")
         return {"success": True, "action": "send_osc", "address": address, "value": value}
 
     @staticmethod
-    def _common_paths() -> List[str]:
+    def _common_paths() -> list[str]:
         return [
             r"C:\Program Files\Derivative\TouchDesigner\bin\TouchDesigner.exe",
             r"C:\Program Files (x86)\Derivative\TouchDesigner\bin\TouchDesigner.exe",
@@ -239,8 +238,8 @@ class AbletonLiveAdapter(BaseSoftwareAdapter):
 
     def __init__(
         self,
-        config: Optional[SoftwareConfig] = None,
-        logger: Optional[logging.Logger] = None,
+        config: SoftwareConfig | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         if config is None:
             config = SoftwareConfig(software=SoftwareType.ABLETON_LIVE)
@@ -305,7 +304,7 @@ class AbletonLiveAdapter(BaseSoftwareAdapter):
             self._mark_task_end()
 
     @staticmethod
-    def _common_paths() -> List[str]:
+    def _common_paths() -> list[str]:
         return [
             r"C:\ProgramData\Ableton\Live*\Ableton Live.exe",
             r"C:\Program Files\Ableton\Live*\Ableton Live.exe",

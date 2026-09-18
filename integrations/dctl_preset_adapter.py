@@ -59,9 +59,9 @@ class DCTLPresetAdapter:
         "get_preset_info", "apply_dctl_to_clip", "scan_dctl_dirs",
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
-        self._dctl_index: Dict[str, Path] = {}
+        self._dctl_index: dict[str, Path] = {}
         self._scan_index()
 
     def _scan_index(self):
@@ -77,10 +77,10 @@ class DCTLPresetAdapter:
     def check_available(self) -> bool:
         return len(self._dctl_index) > 0
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
         start = time.time()
         try:
@@ -111,7 +111,7 @@ class DCTLPresetAdapter:
                 "duration_ms": (time.time() - start) * 1000,
             }
 
-    def _list_files(self, params: Dict) -> Dict:
+    def _list_files(self, params: dict) -> dict:
         collection_filter = params.get("collection")
         files = []
         for key, path in self._dctl_index.items():
@@ -126,7 +126,7 @@ class DCTLPresetAdapter:
             })
         return {"files": files, "count": len(files)}
 
-    def _list_presets(self) -> Dict:
+    def _list_presets(self) -> dict:
         presets = []
         for name, (collection, pattern) in DCTL_PRESET_MAP.items():
             dctl_path = self._find_dctl_file(collection, pattern)
@@ -139,7 +139,7 @@ class DCTLPresetAdapter:
             })
         return {"presets": presets, "count": len(presets)}
 
-    def _find_dctl(self, params: Dict) -> Dict:
+    def _find_dctl(self, params: dict) -> dict:
         query = params.get("query", "").lower()
         matches = []
         for key, path in self._dctl_index.items():
@@ -147,7 +147,7 @@ class DCTLPresetAdapter:
                 matches.append({"key": key, "path": str(path)})
         return {"matches": matches, "count": len(matches)}
 
-    def _get_preset_info(self, params: Dict) -> Dict:
+    def _get_preset_info(self, params: dict) -> dict:
         preset_name = params.get("preset_name")
         if preset_name not in DCTL_PRESET_MAP:
             return {"status": "error", "error": f"Unknown preset: {preset_name}"}
@@ -168,7 +168,7 @@ class DCTLPresetAdapter:
             info["description"] = " ".join(desc_lines)[:200]
         return info
 
-    def _apply_dctl(self, params: Dict) -> Dict:
+    def _apply_dctl(self, params: dict) -> dict:
         preset_name = params.get("preset_name")
         clip_name = params.get("clip_name", "current")
         if preset_name not in DCTL_PRESET_MAP:
@@ -202,7 +202,7 @@ class DCTLPresetAdapter:
         except Exception as e:
             return {"preset": preset_name, "dctl": str(dctl_path), "applied": False, "note": str(e)[:100]}
 
-    def _scan_dirs(self) -> Dict:
+    def _scan_dirs(self) -> dict:
         dirs_info = {}
         for name, path in DCTL_DIRS.items():
             if path.is_dir():
@@ -212,14 +212,14 @@ class DCTLPresetAdapter:
                 dirs_info[name] = {"path": str(path), "exists": False, "dctl_count": 0}
         return {"directories": dirs_info, "total_indexed": len(self._dctl_index)}
 
-    def _find_dctl_file(self, collection: str, pattern: str) -> Optional[Path]:
+    def _find_dctl_file(self, collection: str, pattern: str) -> Path | None:
         """查找匹配的 DCTL 文件"""
         for key, path in self._dctl_index.items():
             if key.startswith(collection) and pattern.lower() in path.stem.lower():
                 return path
         return None
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         return {
             "total_dctl_files": len(self._dctl_index),
             "presets_mapped": len(DCTL_PRESET_MAP),

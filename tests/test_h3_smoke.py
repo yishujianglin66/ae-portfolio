@@ -74,7 +74,7 @@ class TestKeyInstances:
         assert len(ex._allowed_roots) >= 5
 
     def test_llm_gateway(self):
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
         g = LLMGateway(LLMConfig())
         assert g is not None
         # _stats 新字段齐全
@@ -87,7 +87,7 @@ class TestKeyInstances:
         assert g._provider_health["minimax_h3"].total_video_seconds == 0.0
 
     def test_formal_spec_has_h3video(self):
-        from core.formal_spec import H3VideoSpec, FORMAL_INVARIANTS
+        from core.formal_spec import FORMAL_INVARIANTS, H3VideoSpec
         inv = H3VideoSpec()
         assert inv.name == "H3VideoSpec"
         # 至少 1 个不变量

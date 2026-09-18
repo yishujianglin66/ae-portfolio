@@ -4,9 +4,10 @@ SadTalker 推理包装器
 放在项目目录中，通过 venv Python 执行。
 解决 basicsr 1.4.2 与 torchvision >=0.18 的兼容性问题。
 """
-import sys
 import os
+import sys
 import types
+
 
 # ============================================================
 # 1. 兼容性补丁：必须在导入 basicsr 之前执行

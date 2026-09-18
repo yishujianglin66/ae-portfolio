@@ -25,8 +25,8 @@ class TransitionSpec:
     """单个转场类型的量化规格。"""
 
     def __init__(self, code: str, name_zh: str, kind: str, ebu_class: str,
-                 xfade: Optional[str], default_dur: float,
-                 rhythm_fit: List[str], notes: str = "") -> None:
+                 xfade: str | None, default_dur: float,
+                 rhythm_fit: list[str], notes: str = "") -> None:
         self.code = code
         self.name_zh = name_zh
         self.kind = kind
@@ -36,7 +36,7 @@ class TransitionSpec:
         self.rhythm_fit = list(rhythm_fit)
         self.notes = notes
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "code": self.code, "name_zh": self.name_zh, "kind": self.kind,
             "ebu_class": self.ebu_class, "xfade": self.xfade,
@@ -46,7 +46,7 @@ class TransitionSpec:
 
 
 # 转场分类法 (与 production_director.XFADE_MAP 值对齐)
-TRANSITION_TAXONOMY: List[TransitionSpec] = [
+TRANSITION_TAXONOMY: list[TransitionSpec] = [
     TransitionSpec("CUT", "硬切", "cut", "hard-cut", None, 0.0,
                    ["beat", "impact", "drop"], "漫剪铁律: 爆发段硬切卡点"),
     TransitionSpec("FADE_BLACK", "淡黑", "dissolve", "fade", "fadeblack", 0.35,
@@ -77,41 +77,41 @@ TRANSITION_TAXONOMY: List[TransitionSpec] = [
                    ["impact", "build"], "挤压变形推进"),
 ]
 
-_BY_CODE: Dict[str, TransitionSpec] = {t.code: t for t in TRANSITION_TAXONOMY}
-_BY_XFADE: Dict[str, TransitionSpec] = {
+_BY_CODE: dict[str, TransitionSpec] = {t.code: t for t in TRANSITION_TAXONOMY}
+_BY_XFADE: dict[str, TransitionSpec] = {
     t.xfade: t for t in TRANSITION_TAXONOMY if t.xfade
 }
 
 
-def get_transition(code: str) -> Optional[TransitionSpec]:
+def get_transition(code: str) -> TransitionSpec | None:
     """按类型码取转场规格。"""
     return _BY_CODE.get(code.upper())
 
 
-def by_xfade(xfade_name: str) -> Optional[TransitionSpec]:
+def by_xfade(xfade_name: str) -> TransitionSpec | None:
     """按 ffmpeg xfade 滤镜名反查。"""
     return _BY_XFADE.get(xfade_name)
 
 
-def list_transitions(kind: Optional[str] = None) -> List[TransitionSpec]:
+def list_transitions(kind: str | None = None) -> list[TransitionSpec]:
     """列出全部转场 (可按 kind 过滤: cut/dissolve/wipe/motion/stylize)。"""
     if kind is None:
         return list(TRANSITION_TAXONOMY)
     return [t for t in TRANSITION_TAXONOMY if t.kind == kind]
 
 
-def list_for_rhythm(rhythm: str) -> List[TransitionSpec]:
+def list_for_rhythm(rhythm: str) -> list[TransitionSpec]:
     """按节奏场景取适用转场 (beat/impact/breathe/structural/hard_stop/...)。"""
     return [t for t in TRANSITION_TAXONOMY if rhythm in t.rhythm_fit]
 
 
-def validate_xfade_consistency(xfade_map: Dict[str, tuple]) -> List[str]:
+def validate_xfade_consistency(xfade_map: dict[str, tuple]) -> list[str]:
     """校验分类法与生产 XFADE_MAP 的一致性, 返回不一致清单 (空=一致)。
 
     xfade_map: production_director.XFADE_MAP (标签 → (滤镜名, 时长秒))。
     校验对象是滤镜名与时长 (分类法按滤镜语义定义, 不绑定标签)。
     """
-    problems: List[str] = []
+    problems: list[str] = []
     known_filters = {v[0]: v[1] for v in xfade_map.values()}
     for spec in TRANSITION_TAXONOMY:
         if spec.xfade is None:

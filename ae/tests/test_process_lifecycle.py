@@ -127,7 +127,7 @@ class TestProcessLifecycle:
             ae_process_manager.start_ae_with_listener()
             time.sleep(15)
 
-        restart_results: List[bool] = []
+        restart_results: list[bool] = []
         for i in range(5):
             try:
                 result = ae_process_manager.restart_ae()

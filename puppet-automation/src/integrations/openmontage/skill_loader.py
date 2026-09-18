@@ -14,7 +14,6 @@ from loguru import logger
 
 from .pipeline_runtime import OPENMONTAGE_ROOT
 
-
 SKILLS_DIR = OPENMONTAGE_ROOT / "skills"
 SKILL_INDEX = SKILLS_DIR / "INDEX.md"
 
@@ -27,10 +26,10 @@ class Skill:
     layer: str  # core / creative / meta
     path: Path
     description: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     content: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "layer": self.layer,
@@ -44,12 +43,12 @@ class Skill:
 class SkillLoader:
     """技能加载器。"""
 
-    def __init__(self, skills_dir: Optional[Path] = None):
+    def __init__(self, skills_dir: Path | None = None):
         self.skills_dir = skills_dir or SKILLS_DIR
-        self._skills: Dict[str, Skill] = {}
+        self._skills: dict[str, Skill] = {}
         logger.info(f"技能加载器初始化: {self.skills_dir}")
 
-    def list_skills(self) -> List[Skill]:
+    def list_skills(self) -> list[Skill]:
         """列出所有技能。"""
         if self._skills:
             return list(self._skills.values())
@@ -64,7 +63,7 @@ class SkillLoader:
                     self._skills[skill.name] = skill
         return list(self._skills.values())
 
-    def _parse_skill(self, path: Path, layer: str) -> Optional[Skill]:
+    def _parse_skill(self, path: Path, layer: str) -> Skill | None:
         """解析单个技能 markdown 文件。"""
         try:
             content = path.read_text(encoding="utf-8")
@@ -74,7 +73,7 @@ class SkillLoader:
 
         name = path.stem
         description = ""
-        tags: List[str] = []
+        tags: list[str] = []
 
         lines = content.split("\n")
         in_frontmatter = False
@@ -100,7 +99,7 @@ class SkillLoader:
             content=content,
         )
 
-    def get_skill(self, name: str) -> Optional[Skill]:
+    def get_skill(self, name: str) -> Skill | None:
         """按名称获取技能。"""
         for skill in self.list_skills():
             if skill.name == name:
@@ -110,8 +109,8 @@ class SkillLoader:
     def search_skills(
         self,
         keyword: str,
-        layer: Optional[str] = None,
-    ) -> List[Skill]:
+        layer: str | None = None,
+    ) -> list[Skill]:
         """搜索技能。"""
         keyword_lower = keyword.lower()
         results = []
@@ -126,14 +125,14 @@ class SkillLoader:
                 results.append(skill)
         return results
 
-    def get_layer_skills(self, layer: str) -> List[Skill]:
+    def get_layer_skills(self, layer: str) -> list[Skill]:
         """获取指定层级的所有技能。"""
         return [s for s in self.list_skills() if s.layer == layer]
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取技能统计信息。"""
         skills = self.list_skills()
-        by_layer: Dict[str, int] = {}
+        by_layer: dict[str, int] = {}
         for skill in skills:
             by_layer[skill.layer] = by_layer.get(skill.layer, 0) + 1
         return {

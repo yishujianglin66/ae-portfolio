@@ -14,8 +14,8 @@ import os
 import shutil
 import subprocess
 import sys
-import time
 import tempfile
+import time
 from pathlib import Path
 
 import cv2
@@ -377,7 +377,7 @@ def main():
     total_masks_now = len(list(MASKS_DIR.glob("mask_*.png")))
     print(f"\n\n  推理完成！当前 mask 数量: {total_masks_now}/{EXPECTED}")
     print(f"  总耗时: {total_dt/3600:.2f} 小时")
-    print(f"\n下一步：将海贼王加入 redo_alpha_mov.py 的 TARGETS 并运行，合成透明 MOV + QC")
+    print("\n下一步：将海贼王加入 redo_alpha_mov.py 的 TARGETS 并运行，合成透明 MOV + QC")
     final = {
         "name": NAME,
         "expected": EXPECTED,

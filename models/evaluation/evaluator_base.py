@@ -2,11 +2,11 @@
 评估器基类 - 定义模型评估的统一接口
 参考 Antares 哲学：量化评估，精悍够用
 """
+import logging
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-import time
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +16,8 @@ class EvaluationConfig:
     """评估配置"""
     eval_name: str = ""
     batch_size: int = 8
-    max_samples: Optional[int] = None
-    metric_names: List[str] = field(default_factory=list)
+    max_samples: int | None = None
+    metric_names: list[str] = field(default_factory=list)
     """要计算的指标名称列表，为空则计算全部"""
     output_dir: str = "./eval_output"
     save_results: bool = True
@@ -34,7 +34,7 @@ class EvaluationResult:
     eval_name: str = ""
     model_name: str = ""
     dataset_name: str = ""
-    metrics: Dict[str, float] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
     """评估指标字典"""
     total_samples: int = 0
     evaluation_time_seconds: float = 0.0
@@ -42,7 +42,7 @@ class EvaluationResult:
     """成本效益比（Antares 核心指标），越高越好"""
     params_million: float = 0.0
     """模型参数量（百万）"""
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
     """详细信息，如混淆矩阵、示例等"""
 
     def summary(self) -> str:
@@ -115,7 +115,7 @@ class BaseEvaluator(ABC):
         pass
 
     @abstractmethod
-    def calculate_metrics(self, predictions: List[Any], references: List[Any]) -> Dict[str, float]:
+    def calculate_metrics(self, predictions: list[Any], references: list[Any]) -> dict[str, float]:
         """计算评估指标
         
         Args:
@@ -158,8 +158,8 @@ class BaseEvaluator(ABC):
             result: 评估结果
         """
         try:
-            import os
             import json
+            import os
             
             os.makedirs(self.config.output_dir, exist_ok=True)
             

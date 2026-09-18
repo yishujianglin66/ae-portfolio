@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """AE 效果名称测试 - 测试中英文效果名"""
-import json, time, sys
-from pathlib import Path
+import json
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_CMD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_command.json")
 BRIDGE_RESULT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_result.json")

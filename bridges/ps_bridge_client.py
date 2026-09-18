@@ -19,9 +19,9 @@ Python 端 Photoshop MCP Bridge 通信客户端。
 """
 from __future__ import annotations
 
+import json
 import os
 import time
-import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -40,11 +40,11 @@ class PSBridgeClient(AEBridgeClient):
 
     def __init__(
         self,
-        bridge_dir: Optional[str | Path] = None,
+        bridge_dir: str | Path | None = None,
         timeout: int = 15,
         poll_interval: float = 0.3,
         signature_enabled: bool = False,
-        secret: Optional[str] = None,
+        secret: str | None = None,
     ):
         # 默认使用项目根目录下的 .ps-mcp-bridge/
         if bridge_dir is None:
@@ -78,7 +78,7 @@ class PSBridgeClient(AEBridgeClient):
         except OSError:
             return ""
 
-    def _is_result_ready(self, result: Dict[str, Any]) -> bool:
+    def _is_result_ready(self, result: dict[str, Any]) -> bool:
         """判断结果是否就绪：status 字段为 success/error 即就绪。"""
         return result.get("status") in ("success", "error")
 
@@ -89,9 +89,9 @@ class PSBridgeClient(AEBridgeClient):
     def send_command(
         self,
         command: str,
-        script: Optional[str] = None,
-        timeout: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        script: str | None = None,
+        timeout: int | None = None,
+    ) -> dict[str, Any]:
         """发送命令到 Photoshop 并等待结果。
 
         Args:
@@ -109,7 +109,7 @@ class PSBridgeClient(AEBridgeClient):
         self.clear_result()
 
         # 构建命令
-        cmd_data: Dict[str, Any] = {
+        cmd_data: dict[str, Any] = {
             "command": command,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "processed": False,
@@ -135,19 +135,19 @@ class PSBridgeClient(AEBridgeClient):
 
         return result
 
-    def ping(self, timeout: int = 5) -> Dict[str, Any]:
+    def ping(self, timeout: int = 5) -> dict[str, Any]:
         """发送 Ping 命令，检测 Bridge 是否在线。"""
         return self.send_command("ping", timeout=timeout)
 
-    def get_document_info(self, timeout: int = 5) -> Dict[str, Any]:
+    def get_document_info(self, timeout: int = 5) -> dict[str, Any]:
         """获取当前 Photoshop 文档信息。"""
         return self.send_command("getDocumentInfo", timeout=timeout)
 
-    def list_layers(self, timeout: int = 5) -> Dict[str, Any]:
+    def list_layers(self, timeout: int = 5) -> dict[str, Any]:
         """列出所有图层。"""
         return self.send_command("listLayers", timeout=timeout)
 
-    def execute_script(self, script: str, timeout: int = 15) -> Dict[str, Any]:
+    def execute_script(self, script: str, timeout: int = 15) -> dict[str, Any]:
         """执行 ExtendScript 代码。
 
         Args:

@@ -53,7 +53,7 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 # ── 目标清单 ─────────────────────────────────────────────────────────────
 
 # 40 部高知名度动漫 (镜头语言规范, OP/ED 制作精良)
-OPED_TARGETS: List[Tuple[str, List[str]]] = [
+OPED_TARGETS: list[tuple[str, list[str]]] = [
     ("进击的巨人", ["进击的巨人 NCOP", "进击的巨人 OP"]),
     ("鬼灭之刃", ["鬼灭之刃 NCOP", "鬼灭之刃 OP"]),
     ("咒术回战", ["咒术回战 NCOP", "咒术回战 OP"]),
@@ -97,7 +97,7 @@ OPED_TARGETS: List[Tuple[str, List[str]]] = [
 ]
 
 # 漫剪/AMV 搜索词 (运镜密集)
-AMV_TERMS: List[Tuple[str, List[str]]] = [
+AMV_TERMS: list[tuple[str, list[str]]] = [
     ("通用燃向", ["动漫 燃向混剪", "动漫 AMV 高燃", "动画 MAD 燃"]),
     ("进击的巨人", ["进击的巨人 AMV", "进击的巨人 燃向"]),
     ("鬼灭之刃", ["鬼灭之刃 AMV"]),
@@ -131,7 +131,7 @@ _MIXIN_TAB = [46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27,
               21, 56, 59, 6, 63, 57, 62, 11, 36, 20, 34, 44, 52]
 
 
-def _http_json(url: str, headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+def _http_json(url: str, headers: dict[str, str] | None = None) -> dict[str, Any]:
     h = {"User-Agent": UA, "Referer": "https://www.bilibili.com"}
     if headers:
         h.update(headers)
@@ -140,7 +140,7 @@ def _http_json(url: str, headers: Optional[Dict[str, str]] = None) -> Dict[str, 
         return json.loads(r.read().decode("utf-8"))
 
 
-def _fetch_session(force: bool = False) -> Dict[str, str]:
+def _fetch_session(force: bool = False) -> dict[str, str]:
     """获取并缓存 buvid3/4 + wbi 密钥 (会话级, 风控前提)。"""
     if not force and SESSION_CACHE.exists():
         try:
@@ -163,7 +163,7 @@ def _fetch_session(force: bool = False) -> Dict[str, str]:
     return session
 
 
-def _wbi_sign(params: Dict[str, Any], session: Dict[str, str]) -> Dict[str, Any]:
+def _wbi_sign(params: dict[str, Any], session: dict[str, str]) -> dict[str, Any]:
     """WBI 签名: wts + 排序编码 + 过滤特殊字符 + md5。
 
     注意: 必须用 quote_via=urllib.parse.quote (空格→%20), 默认 quote_plus
@@ -181,7 +181,7 @@ def _wbi_sign(params: Dict[str, Any], session: Dict[str, str]) -> Dict[str, Any]
 
 
 def bili_search(keyword: str, page_size: int = 20, page: int = 1,
-                session: Optional[Dict[str, str]] = None) -> List[Dict[str, Any]]:
+                session: dict[str, str] | None = None) -> list[dict[str, Any]]:
     """WBI 签名的 B站视频搜索 (order=click 高播放优先)。"""
     session = session or _fetch_session()
     params = _wbi_sign({"search_type": "video", "keyword": keyword,
@@ -206,7 +206,7 @@ def bili_search(keyword: str, page_size: int = 20, page: int = 1,
 
 # ── 下载 ─────────────────────────────────────────────────────────────────
 
-def download_bv(bvid: str, out_dir: Path, max_height: int = 720) -> Optional[str]:
+def download_bv(bvid: str, out_dir: Path, max_height: int = 720) -> str | None:
     """yt-dlp 下载 BV 视频 (720p 免 cookie), 返回文件路径。"""
     from yt_dlp import YoutubeDL
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -246,14 +246,14 @@ def _load_done_bvids() -> set:
     return done
 
 
-def _append_manifest(entry: Dict[str, Any]) -> None:
+def _append_manifest(entry: dict[str, Any]) -> None:
     with MANIFEST.open("a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
-def _pick_candidates(results: List[Dict[str, Any]], dur_range: Tuple[int, int],
+def _pick_candidates(results: list[dict[str, Any]], dur_range: tuple[int, int],
                      done: set, want: int, prefer: str = "",
-                     exclude: Tuple[str, ...] = ()) -> List[Dict[str, Any]]:
+                     exclude: tuple[str, ...] = ()) -> list[dict[str, Any]]:
     """筛选时长 + 去重 + 排除噪音, prefer 命中标题的排前面。"""
     picked = []
     for r in results:
@@ -270,7 +270,7 @@ def _pick_candidates(results: List[Dict[str, Any]], dur_range: Tuple[int, int],
     return picked[:want]
 
 
-def run_collect(mode: str, dry_run: bool, limit: int) -> Dict[str, Any]:
+def run_collect(mode: str, dry_run: bool, limit: int) -> dict[str, Any]:
     session = _fetch_session()
     done = _load_done_bvids()
     print(f"[collect] mode={mode} dry_run={dry_run} 已下载 {len(done)} 条")

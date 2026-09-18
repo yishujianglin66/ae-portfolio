@@ -35,7 +35,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "puppet-automation" / "src"))
 # 中的连锁相对导入。
 # ---------------------------------------------------------------------------
 
-_impl_cache: Dict[str, Any] = {}
+_impl_cache: dict[str, Any] = {}
 
 
 def _register_shim() -> None:
@@ -370,7 +370,7 @@ class TestServiceSchema(unittest.TestCase):
         mod = _get_impl()
         BlenderNLService = mod.BlenderNLService
 
-        unavailable_bundle: Dict[str, Any] = {
+        unavailable_bundle: dict[str, Any] = {
             "chat_with_routing": None,
             "chat": None,
             "TaskType": None,

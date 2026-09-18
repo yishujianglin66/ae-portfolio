@@ -42,8 +42,8 @@ from ae.tests.test_mcp_tools_validation import (  # noqa: E402
     CATEGORY_DEFINITIONS,
     CATEGORY_DISPLAY_NAMES,
     MCPToolValidationSuite,
-    ToolValidator,
     ToolValidationResult,
+    ToolValidator,
     ValidationReport,
 )
 
@@ -253,7 +253,7 @@ def datetime_safe_now():
     return datetime.now()
 
 
-def _parse_categories(args: argparse.Namespace) -> Optional[List[str]]:
+def _parse_categories(args: argparse.Namespace) -> list[str] | None:
     """根据 args 决定运行的分类列表。"""
     if args.all:
         return list(CATEGORY_DEFINITIONS.keys())

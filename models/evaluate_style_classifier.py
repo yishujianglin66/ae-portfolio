@@ -2,9 +2,9 @@
 """
 评估风格分类模型 - 使用完整数据集进行多维度评估
 """
-import sys
 import json
 import math
+import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -12,17 +12,17 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from train_style_classifier import (
-    STYLE_LABELS,
     FEATURE_NAMES,
-    load_dataset,
-    preprocess_features,
-    normalize_features,
+    STYLE_LABELS,
     StyleClassifier,
+    load_dataset,
     load_model,
+    normalize_features,
+    preprocess_features,
 )
 
 
-def calculate_metrics(predictions: List[int], labels: List[int], num_classes: int) -> Dict:
+def calculate_metrics(predictions: list[int], labels: list[int], num_classes: int) -> dict:
     """计算多维度评估指标"""
     metrics = {}
     
@@ -90,7 +90,7 @@ def calculate_metrics(predictions: List[int], labels: List[int], num_classes: in
     return metrics, per_class
 
 
-def build_confusion_matrix(predictions: List[int], labels: List[int], num_classes: int) -> Dict:
+def build_confusion_matrix(predictions: list[int], labels: list[int], num_classes: int) -> dict:
     """构建混淆矩阵"""
     matrix = {}
     for i in range(num_classes):

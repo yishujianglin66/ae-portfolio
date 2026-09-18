@@ -6,14 +6,14 @@
 from __future__ import annotations
 
 import json
-import sys
 import os
-from pathlib import Path
-from typing import List, Dict, Any, Optional
+import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
-def load_index(index_path: str) -> Dict[str, Any]:
+def load_index(index_path: str) -> dict[str, Any]:
     """
     加载索引文件
 
@@ -27,7 +27,7 @@ def load_index(index_path: str) -> Dict[str, Any]:
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "index_data": {}
     }
@@ -55,8 +55,8 @@ def load_index(index_path: str) -> Dict[str, Any]:
 
 def save_index(
     index_path: str,
-    index_data: Dict[str, Any]
-) -> Dict[str, Any]:
+    index_data: dict[str, Any]
+) -> dict[str, Any]:
     """
     保存索引文件
 
@@ -71,7 +71,7 @@ def save_index(
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "index_path": index_path
     }
@@ -99,7 +99,7 @@ def save_index(
     return result
 
 
-def merge_indexes(index_paths: List[str]) -> Dict[str, Any]:
+def merge_indexes(index_paths: list[str]) -> dict[str, Any]:
     """
     合并多个索引文件
 
@@ -115,7 +115,7 @@ def merge_indexes(index_paths: List[str]) -> Dict[str, Any]:
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "merged_index": {},
         "total_items": 0,
@@ -129,7 +129,7 @@ def merge_indexes(index_paths: List[str]) -> Dict[str, Any]:
             return result
 
         # 创建合并后的索引结构
-        merged_index: Dict[str, Any] = {
+        merged_index: dict[str, Any] = {
             "index_version": "1.0",
             "model": "clip-ViT-L-14",
             "build_time": datetime.now().isoformat(),
@@ -174,7 +174,7 @@ def merge_indexes(index_paths: List[str]) -> Dict[str, Any]:
     return result
 
 
-def validate_index(index_path: str) -> Dict[str, Any]:
+def validate_index(index_path: str) -> dict[str, Any]:
     """
     验证索引文件完整性
 
@@ -191,7 +191,7 @@ def validate_index(index_path: str) -> Dict[str, Any]:
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "valid_items": 0,
         "invalid_items": 0,
@@ -255,7 +255,7 @@ def validate_index(index_path: str) -> Dict[str, Any]:
     return result
 
 
-def get_index_stats(index_path: str) -> Dict[str, Any]:
+def get_index_stats(index_path: str) -> dict[str, Any]:
     """
     获取索引统计信息
 
@@ -276,7 +276,7 @@ def get_index_stats(index_path: str) -> Dict[str, Any]:
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "stats": {}
     }
@@ -294,7 +294,7 @@ def get_index_stats(index_path: str) -> Dict[str, Any]:
         file_size = os.path.getsize(index_path)
 
         # 统计信息
-        stats: Dict[str, Any] = {
+        stats: dict[str, Any] = {
             "total_files": len(index_data.get("items", [])),
             "vector_dim": 512,  # CLIP标准维度
             "build_time": index_data.get("build_time", ""),
@@ -328,7 +328,7 @@ def get_index_stats(index_path: str) -> Dict[str, Any]:
     return result
 
 
-def clean_index(index_path: str) -> Dict[str, Any]:
+def clean_index(index_path: str) -> dict[str, Any]:
     """
     清理索引中的失效项（文件不存在）
 
@@ -343,7 +343,7 @@ def clean_index(index_path: str) -> Dict[str, Any]:
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "removed_items": 0,
         "remaining_items": 0
@@ -406,7 +406,7 @@ def main() -> None:
         input_json = json.loads(sys.argv[2])
         action = input_json.get("action", "")
 
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
 
         if action == "load_index":
             index_path = input_json.get("index_path", "")

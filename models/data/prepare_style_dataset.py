@@ -27,9 +27,9 @@ class StyleDatasetBuilder:
     """风格分类数据集构建器"""
 
     def __init__(self):
-        self.samples: List[Dict[str, Any]] = []
+        self.samples: list[dict[str, Any]] = []
 
-    def load_style_cards(self) -> List[Dict[str, Any]]:
+    def load_style_cards(self) -> list[dict[str, Any]]:
         """加载所有风格卡片"""
         cards = []
         if not STYLE_CARDS_DIR.exists():
@@ -47,7 +47,7 @@ class StyleDatasetBuilder:
         logger.info(f"加载 {len(cards)} 个风格卡片")
         return cards
 
-    def card_to_text(self, card: Dict[str, Any]) -> str:
+    def card_to_text(self, card: dict[str, Any]) -> str:
         """将风格卡片转换为可嵌入的文本描述"""
         parts = []
 
@@ -105,7 +105,7 @@ class StyleDatasetBuilder:
 
         return " | ".join(parts)
 
-    def extract_features(self, card: Dict[str, Any]) -> Dict[str, Any]:
+    def extract_features(self, card: dict[str, Any]) -> dict[str, Any]:
         """提取数值特征向量"""
         return {
             "visual_variance": card.get("visual_variance", 0),
@@ -122,7 +122,7 @@ class StyleDatasetBuilder:
             "num_text_fx": len(card.get("text_fx", [])),
         }
 
-    def build_from_cards(self) -> List[Dict[str, Any]]:
+    def build_from_cards(self) -> list[dict[str, Any]]:
         """从风格卡片构建数据集"""
         cards = self.load_style_cards()
         samples = []
@@ -172,7 +172,7 @@ class StyleDatasetBuilder:
         logger.info(f"从风格卡片构建 {len(samples)} 个样本 ({len(cards)} 风格 × 3 增强)")
         return samples
 
-    def build_from_templates(self) -> List[Dict[str, Any]]:
+    def build_from_templates(self) -> list[dict[str, Any]]:
         """从风格模板构建额外样本"""
         tpl_path = STYLE_TEMPLATES_DIR / "templates.json"
         if not tpl_path.exists():
@@ -240,8 +240,8 @@ class StyleDatasetBuilder:
         """保存统计信息"""
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-        label_counts: Dict[str, int] = {}
-        source_counts: Dict[str, int] = {}
+        label_counts: dict[str, int] = {}
+        source_counts: dict[str, int] = {}
         for s in self.samples:
             label = s.get("label", "unknown")
             source = s.get("source", "unknown")

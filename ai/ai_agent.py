@@ -29,13 +29,14 @@ AI Agent - M3助手的多模型协作层
     text = agent.translate("Hello", "中文")        # 翻译模型
 """
 
+import base64
+import json
 import os
 import sys
-import json
 import time
-import base64
-from typing import Optional, Dict, Any, List, Callable
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
+
 
 # 加载项目根目录 .env / .env.doubao 配置到环境变量
 # (2026-08-15 修复: 原逻辑只加载 ai/.env.doubao — 该文件不存在,
@@ -87,7 +88,7 @@ except ImportError:
 _load_env_files()
 
 try:
-    from model_router import select_model, select_for_prompt, TaskCategory, get_model_name, get_model_provider
+    from model_router import TaskCategory, get_model_name, get_model_provider, select_for_prompt, select_model
     ROUTER_AVAILABLE = True
 except ImportError:
     ROUTER_AVAILABLE = False
@@ -100,7 +101,8 @@ PRO_MODEL = "deepseek-v4-pro"
 # 豆包模型可用性检查
 DOUBAO_AVAILABLE = False
 try:
-    from doubao_client import DoubaoClient, is_available as doubao_is_available
+    from doubao_client import DoubaoClient
+    from doubao_client import is_available as doubao_is_available
     if doubao_is_available():
         DOUBAO_AVAILABLE = True
 except ImportError:
@@ -228,7 +230,7 @@ class V4Agent:
     3. DeepSeek V4 (原生)
     """
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.api_key = api_key or os.environ.get("DEEPSEEK_API_KEY", "")
         self.base_url = API_BASE
         self.provider = "deepseek"
@@ -291,7 +293,7 @@ class V4Agent:
             return False
     
     def ask(self, question: str, model: str = "pro", max_tokens: int = 4096,
-            reasoning_effort: Optional[str] = None) -> str:
+            reasoning_effort: str | None = None) -> str:
         """问V4一个问题（默认Pro模型，效果优先）
         
         Args:
@@ -399,14 +401,14 @@ class V4Agent:
     def chat_with_tools(
         self,
         message: str,
-        tools: Optional[List[Dict[str, Any]]] = None,
-        tool_executor: Optional[Callable[[str, Dict[str, Any]], Dict[str, Any]]] = None,
+        tools: list[dict[str, Any]] | None = None,
+        tool_executor: Callable[[str, dict[str, Any]], dict[str, Any]] | None = None,
         model: str = "pro",
         max_iterations: int = 5,
         max_tokens: int = 4096,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         temperature: float = 0.7,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """原生 V4 Tool Calling 对接 - 完整工具调用循环
 
         注意：原生 Function Calling 能力当前统一网关（llm_gateway）尚未覆盖，
@@ -445,13 +447,13 @@ class V4Agent:
         """
         model_name = self._resolve_model_name(model)
 
-        messages: List[Dict[str, Any]] = [
+        messages: list[dict[str, Any]] = [
             {"role": "system", "content": system_prompt or SYSTEM_PROMPT}
         ]
         messages.extend(self.history)
         messages.append({"role": "user", "content": message})
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "model": model_name,
             "messages": messages,
             "temperature": temperature,
@@ -465,7 +467,7 @@ class V4Agent:
         if model == "flash" and self.provider == "deepseek":
             payload["reasoning_effort"] = "high"
 
-        all_tool_calls: List[Dict[str, Any]] = []
+        all_tool_calls: list[dict[str, Any]] = []
         total_usage = {
             "prompt_tokens": 0,
             "completion_tokens": 0,
@@ -845,6 +847,7 @@ class V4Agent:
         # 优先走统一网关（视觉多模态；网关未配置/调用失败时继续降级链）
         try:
             import asyncio
+
             from core.llm_gateway import llm_gateway
             asyncio.get_running_loop()  # 已有运行循环则不能 asyncio.run，直接跳过网关
         except RuntimeError:
@@ -931,7 +934,7 @@ class V4Agent:
         with open(path, "rb") as f:
             return base64.b64encode(f.read()).decode("utf-8")
     
-    def generate_image(self, prompt: str, size: str = "1024x1024") -> Dict[str, Any]:
+    def generate_image(self, prompt: str, size: str = "1024x1024") -> dict[str, Any]:
         """图像生成 - 使用ARK图像生成模型
 
         注意：图像生成能力当前为临时直连 ARK API，待统一网关扩展图像生成后迁移。
@@ -967,7 +970,7 @@ class V4Agent:
         
         raise RuntimeError("ARK未配置，请设置 DOUBAO_API_KEY 环境变量")
     
-    def execute_tool(self, tool_name: str, **kwargs) -> Dict[str, Any]:
+    def execute_tool(self, tool_name: str, **kwargs) -> dict[str, Any]:
         """执行工具（集成工具执行引擎）"""
         try:
             try:
@@ -981,7 +984,7 @@ class V4Agent:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    def orchestrate(self, user_request: str) -> Dict[str, Any]:
+    def orchestrate(self, user_request: str) -> dict[str, Any]:
         """模型驱动的工具编排 - 使用V4分析并执行工具链"""
         try:
             try:
@@ -1007,7 +1010,7 @@ class V4Agent:
         return prompt * pricing["input"] + completion * pricing["output"]
 
     @staticmethod
-    def _lookup_pricing(model: str) -> Dict[str, float]:
+    def _lookup_pricing(model: str) -> dict[str, float]:
         """按 精确匹配 → 前缀匹配 → 默认低价(turbo) 查找模型单价"""
         default = MODEL_PRICING["__default__"]
         if not model:
@@ -1026,13 +1029,14 @@ class V4Agent:
         return default
 
     def _ask_via_gateway(self, prompt: str, system_prompt: str,
-                         temperature: float, max_tokens: int) -> Optional[str]:
+                         temperature: float, max_tokens: int) -> str | None:
         """通过 llm_gateway 统一网关调用（同步上下文桥接异步网关）
 
         import 失败或已有运行中的事件循环时返回 None，由上层降级到直连 ARK。
         """
         try:
             import asyncio
+
             from core.llm_gateway import llm_gateway
         except Exception:
             return None
@@ -1065,7 +1069,7 @@ class V4Agent:
                         f"{usage['total_tokens']} tokens | ¥{cost:.4f}]")
         return response.content
 
-    def list_available_models(self) -> Dict[str, List[str]]:
+    def list_available_models(self) -> dict[str, list[str]]:
         """列出当前可用的模型列表"""
         models = {
             "native_deepseek": {
@@ -1102,11 +1106,11 @@ def plan(task: str) -> str:
     """快捷任务规划"""
     return get_agent().plan(task)
 
-def execute_tool(tool_name: str, **kwargs) -> Dict[str, Any]:
+def execute_tool(tool_name: str, **kwargs) -> dict[str, Any]:
     """快捷工具执行"""
     return get_agent().execute_tool(tool_name, **kwargs)
 
-def orchestrate(user_request: str) -> Dict[str, Any]:
+def orchestrate(user_request: str) -> dict[str, Any]:
     """快捷工具编排（模型驱动）"""
     return get_agent().orchestrate(user_request)
 

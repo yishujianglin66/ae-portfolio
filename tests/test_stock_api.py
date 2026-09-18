@@ -32,7 +32,6 @@ from pipeline.stock_footage import (
     VideoResult,
 )
 
-
 # ============================================================================
 # Fixtures
 # ============================================================================
@@ -192,7 +191,7 @@ class TestDedupAndSort:
 
         # 在 download 之前打断 — 用空 download_url 让 _download_video 全返回 None
         # 但 search_and_download 会先 sort + uniq 再调用下载，这正是我们要测的
-        order_seen: List[str] = []
+        order_seen: list[str] = []
 
         original_download = mock_client._download_video
         def fake_dl(result: VideoResult):

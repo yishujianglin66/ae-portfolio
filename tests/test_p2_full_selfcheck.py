@@ -90,9 +90,10 @@ class TestP2BlenderNoDuplicate:
 
     def test_blender_single_export_camera_data(self):
         """确认 export_camera_data 只有一个定义。"""
-        from src.engines.blender import BlenderEngine
         # 检查方法签名包含 camera_name 参数（L808版本的签名）
         import inspect
+
+        from src.engines.blender import BlenderEngine
         sig = inspect.signature(BlenderEngine.export_camera_data)
         params = list(sig.parameters.keys())
         assert "camera_name" in params, \
@@ -187,10 +188,10 @@ class TestCrossEngineBridgeIntegration:
     def test_all_bridges_importable(self):
         from bridges import (
             BlenderAEBridge,
-            TopazDaVinciBridge,
-            SilhouetteAEBridge,
             C4DAEBridge,
             PipelineOrchestrator,
+            SilhouetteAEBridge,
+            TopazDaVinciBridge,
         )
         assert all([
             BlenderAEBridge,
@@ -211,15 +212,15 @@ class TestEngineAvailableFlags:
 
     def test_all_engines_have_available(self):
         from src.engines.ae import AEEngine
-        from src.engines.premiere import PremiereEngine
-        from src.engines.photoshop import PhotoshopEngine
-        from src.engines.ffmpeg import FFmpegEngine
-        from src.engines.davinci import DavinciEngine
         from src.engines.blender import BlenderEngine
-        from src.engines.topaz import TopazEngine
-        from src.engines.silhouette import SilhouetteEngine
         from src.engines.cinema4d import Cinema4DEngine
+        from src.engines.davinci import DavinciEngine
+        from src.engines.ffmpeg import FFmpegEngine
         from src.engines.media_encoder import MediaEncoderEngine
+        from src.engines.photoshop import PhotoshopEngine
+        from src.engines.premiere import PremiereEngine
+        from src.engines.silhouette import SilhouetteEngine
+        from src.engines.topaz import TopazEngine
 
         engines = [
             AEEngine, PremiereEngine, PhotoshopEngine, FFmpegEngine,

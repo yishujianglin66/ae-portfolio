@@ -127,7 +127,7 @@ class TestPersistence:
             path = hub.save_cache()
             assert Path(path).is_file()
             hub2 = MultimodalFusionHub(data_dir=str(Path(tmp) / "hub"))
-            cache: Dict[str, Any] = hub2.load_cache()
+            cache: dict[str, Any] = hub2.load_cache()
             assert cache["key"] == {"value": 1}
 
     def test_load_missing_cache_returns_empty(self) -> None:

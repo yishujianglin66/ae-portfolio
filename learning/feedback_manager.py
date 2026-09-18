@@ -10,13 +10,13 @@
 4. 模式库管理 - 存储和检索成功的配置模式
 5. A/B测试支持 - 记录不同策略的对比结果
 """
-import os
+import hashlib
 import json
 import math
-import hashlib
+import os
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass, field
 
 
 @dataclass
@@ -24,12 +24,12 @@ class ExecutionRecord:
     record_id: str = ""
     timestamp: str = ""
     pipeline_id: str = ""
-    input_config: Dict = field(default_factory=dict)
-    perception_result: Dict = field(default_factory=dict)
-    understanding_result: Dict = field(default_factory=dict)
-    planning_result: Dict = field(default_factory=dict)
-    execution_result: Dict = field(default_factory=dict)
-    feedback_result: Dict = field(default_factory=dict)
+    input_config: dict = field(default_factory=dict)
+    perception_result: dict = field(default_factory=dict)
+    understanding_result: dict = field(default_factory=dict)
+    planning_result: dict = field(default_factory=dict)
+    execution_result: dict = field(default_factory=dict)
+    feedback_result: dict = field(default_factory=dict)
     duration: float = 0.0
     success: bool = False
 
@@ -40,9 +40,9 @@ class PatternEntry:
     category: str = ""
     mood: str = ""
     style: str = ""
-    effect_config: Dict = field(default_factory=dict)
-    keyframe_config: List[Dict] = field(default_factory=list)
-    transition_config: List[Dict] = field(default_factory=list)
+    effect_config: dict = field(default_factory=dict)
+    keyframe_config: list[dict] = field(default_factory=list)
+    transition_config: list[dict] = field(default_factory=list)
     usage_count: int = 0
     success_rate: float = 0.0
     confidence_score: float = 0.5
@@ -58,7 +58,7 @@ class ConfidenceEntry:
     total_executions: int = 0
     successful_executions: int = 0
     average_confidence: float = 0.5
-    confidence_history: List[Dict] = field(default_factory=list)
+    confidence_history: list[dict] = field(default_factory=list)
     calibrated_score: float = 0.5
 
 
@@ -72,8 +72,8 @@ class FeedbackManager:
         
         self._init_directories()
         
-        self.patterns: Dict[str, PatternEntry] = {}
-        self.confidence_store: Dict[str, ConfidenceEntry] = {}
+        self.patterns: dict[str, PatternEntry] = {}
+        self.confidence_store: dict[str, ConfidenceEntry] = {}
         
         self._load_patterns()
         self._load_confidence()
@@ -85,12 +85,12 @@ class FeedbackManager:
 
     def record_execution(self, 
                         pipeline_id: str,
-                        input_config: Dict,
-                        perception_result: Dict,
-                        understanding_result: Dict,
-                        planning_result: Dict,
-                        execution_result: Dict,
-                        feedback_result: Dict,
+                        input_config: dict,
+                        perception_result: dict,
+                        understanding_result: dict,
+                        planning_result: dict,
+                        execution_result: dict,
+                        feedback_result: dict,
                         duration: float = 0.0) -> str:
         """
         记录一次完整的执行结果
@@ -122,7 +122,7 @@ class FeedbackManager:
         timestamp = datetime.now().isoformat()
         return hashlib.md5(timestamp.encode()).hexdigest()[:16]
 
-    def _dataclass_to_dict(self, obj) -> Dict:
+    def _dataclass_to_dict(self, obj) -> dict:
         if hasattr(obj, '__dataclass_fields__'):
             result = {}
             for field_name in obj.__dataclass_fields__:
@@ -293,7 +293,7 @@ class FeedbackManager:
                 except:
                     pass
 
-    def get_pattern(self, mood: str, style: str) -> Optional[PatternEntry]:
+    def get_pattern(self, mood: str, style: str) -> PatternEntry | None:
         """
         获取特定情绪和风格的模式配置
         """
@@ -316,7 +316,7 @@ class FeedbackManager:
         
         return 0.5
 
-    def suggest_optimization(self, mood: str, style: str) -> Dict:
+    def suggest_optimization(self, mood: str, style: str) -> dict:
         """
         根据历史数据提供优化建议
         """
@@ -370,7 +370,7 @@ class FeedbackManager:
         
         return suggestions
 
-    def get_performance_summary(self) -> Dict:
+    def get_performance_summary(self) -> dict:
         """
         获取整体性能摘要
         """
@@ -419,7 +419,7 @@ class FeedbackManager:
             "confidence_entries": len(self.confidence_store)
         }
 
-    def _load_all_records(self) -> List[ExecutionRecord]:
+    def _load_all_records(self) -> list[ExecutionRecord]:
         records = []
         for filename in os.listdir(self.records_dir):
             if filename.endswith(".json") and not filename.startswith("."):
@@ -432,7 +432,7 @@ class FeedbackManager:
                     pass
         return records
 
-    def create_ab_test(self, test_name: str, variant_a: Dict, variant_b: Dict) -> str:
+    def create_ab_test(self, test_name: str, variant_a: dict, variant_b: dict) -> str:
         """
         创建A/B测试
         """
@@ -455,7 +455,7 @@ class FeedbackManager:
         
         return test_id
 
-    def record_ab_test_result(self, test_id: str, variant: str, success: bool, metrics: Dict):
+    def record_ab_test_result(self, test_id: str, variant: str, success: bool, metrics: dict):
         """
         记录A/B测试结果
         """
@@ -493,7 +493,7 @@ class FeedbackManager:
         
         return False
 
-    def _analyze_ab_test(self, test_data: Dict) -> Dict:
+    def _analyze_ab_test(self, test_data: dict) -> dict:
         results_a = test_data["results_a"]
         results_b = test_data["results_b"]
         
@@ -539,22 +539,22 @@ def main():
     
     summary = manager.get_performance_summary()
     
-    print(f"\n📈 总体统计")
+    print("\n📈 总体统计")
     print(f"  总执行次数: {summary['total_executions']}")
     print(f"  成功次数: {summary['successful_executions']}")
     print(f"  失败次数: {summary['failure_executions']}")
     print(f"  成功率: {summary['overall_success_rate']:.2%}")
     print(f"  平均耗时: {summary['average_duration']:.2f}秒")
     
-    print(f"\n🎯 情绪统计")
+    print("\n🎯 情绪统计")
     for mood, stats in summary['mood_stats'].items():
         print(f"  {mood}: {stats['success']}/{stats['total']} ({stats['success_rate']:.2%})")
     
-    print(f"\n🎨 风格统计")
+    print("\n🎨 风格统计")
     for style, stats in summary['style_stats'].items():
         print(f"  {style}: {stats['success']}/{stats['total']} ({stats['success_rate']:.2%})")
     
-    print(f"\n📚 模式库")
+    print("\n📚 模式库")
     print(f"  已保存模式数: {summary['pattern_count']}")
     print(f"  置信度记录数: {summary['confidence_entries']}")
     

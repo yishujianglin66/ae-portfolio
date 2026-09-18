@@ -7,9 +7,13 @@ All API usage validated via diagnostics:
 - 2D layers: Position/Anchor take exactly 2-element arrays
 - Ramp: 0001=startPos, 0002=startColor, 0003=endPos, 0004=endColor, 0005=shape(2=radial)
 """
-import json, time, sys, os, glob
-from pathlib import Path
+import glob
+import json
+import os
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_DIR = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge")
 CMD_FILE = BRIDGE_DIR / "ae_command.json"

@@ -334,7 +334,7 @@ def main():
     args = parser.parse_args()
 
     print("TextFX 效果兼容性验证")
-    print(f"AE 目标版本: AE 2025 (25.3)")
+    print("AE 目标版本: AE 2025 (25.3)")
     print(f"验证效果数: {len(EFFECTS)}")
     print()
 

@@ -161,7 +161,7 @@ def _safe_filename(name: str, max_length: int = 100) -> str:
     return cleaned or "douyin_video"
 
 
-def _parse_netscape_cookie(cookie_path: str) -> Dict[str, str]:
+def _parse_netscape_cookie(cookie_path: str) -> dict[str, str]:
     """解析 Netscape 格式 cookie 文件。
 
     Args:
@@ -170,7 +170,7 @@ def _parse_netscape_cookie(cookie_path: str) -> Dict[str, str]:
     Returns:
         cookie 字典 {name: value}
     """
-    cookies: Dict[str, str] = {}
+    cookies: dict[str, str] = {}
     if not os.path.exists(cookie_path):
         return cookies
 
@@ -190,7 +190,7 @@ def _parse_netscape_cookie(cookie_path: str) -> Dict[str, str]:
     return cookies
 
 
-def _parse_cookie_string(cookie_str: str) -> Dict[str, str]:
+def _parse_cookie_string(cookie_str: str) -> dict[str, str]:
     """解析 cookie 字符串（key=value; key=value 格式）。
 
     Args:
@@ -199,7 +199,7 @@ def _parse_cookie_string(cookie_str: str) -> Dict[str, str]:
     Returns:
         cookie 字典
     """
-    cookies: Dict[str, str] = {}
+    cookies: dict[str, str] = {}
     if not cookie_str:
         return cookies
     for item in cookie_str.split(";"):
@@ -212,7 +212,7 @@ def _parse_cookie_string(cookie_str: str) -> Dict[str, str]:
     return cookies
 
 
-def _cookies_to_header(cookies: Dict[str, str]) -> str:
+def _cookies_to_header(cookies: dict[str, str]) -> str:
     """将 cookie 字典转换为 HTTP Cookie 头格式。
 
     Args:
@@ -225,9 +225,9 @@ def _cookies_to_header(cookies: Dict[str, str]) -> str:
 
 
 def _resolve_cookie_source(
-    cookie: Optional[str] = None,
-    cookie_path: Optional[str] = None,
-) -> Tuple[Dict[str, str], Optional[str]]:
+    cookie: str | None = None,
+    cookie_path: str | None = None,
+) -> tuple[dict[str, str], str | None]:
     """从多种来源解析 cookie。
 
     优先级（从高到低）：
@@ -254,7 +254,7 @@ def _resolve_cookie_source(
         return _parse_cookie_string(env_cookie), None
 
     # 尝试用户指定的路径
-    candidates: List[str] = []
+    candidates: list[str] = []
     if cookie_path:
         candidates.append(cookie_path)
     
@@ -278,7 +278,7 @@ def _resolve_cookie_source(
     return {}, None
 
 
-def _validate_cookies_dict(cookies: Dict[str, str]) -> Dict[str, Any]:
+def _validate_cookies_dict(cookies: dict[str, str]) -> dict[str, Any]:
     """校验 cookie 字典是否包含必需字段。
 
     Args:
@@ -314,9 +314,9 @@ class DouyinDownloaderPro:
 
     def __init__(
         self,
-        cookie: Optional[str] = None,
-        cookie_path: Optional[str] = None,
-        proxy: Optional[str] = None,
+        cookie: str | None = None,
+        cookie_path: str | None = None,
+        proxy: str | None = None,
     ) -> None:
         """初始化下载器。
 
@@ -333,7 +333,7 @@ class DouyinDownloaderPro:
 
     # ---------- 请求辅助 ----------
 
-    def _build_headers(self, extra: Optional[Dict[str, str]] = None) -> Dict[str, str]:
+    def _build_headers(self, extra: dict[str, str] | None = None) -> dict[str, str]:
         """构建请求头。
 
         Args:
@@ -354,10 +354,10 @@ class DouyinDownloaderPro:
         method: str,
         url: str,
         *,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
         follow_redirects: bool = True,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> httpx.Response:
         """带重试的 HTTP 请求。
 
@@ -375,7 +375,7 @@ class DouyinDownloaderPro:
         Raises:
             NetworkError: 网络请求失败
         """
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
         merged_headers = self._build_headers(headers)
         request_timeout = timeout or REQUEST_TIMEOUT
 
@@ -410,7 +410,7 @@ class DouyinDownloaderPro:
         self,
         url: str,
         output_path: str,
-        headers: Optional[Dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
     ) -> str:
         """异步流式下载文件。
 
@@ -425,7 +425,7 @@ class DouyinDownloaderPro:
         Raises:
             NetworkError: 下载失败
         """
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
         merged_headers = self._build_headers(headers)
 
         for attempt in range(1, MAX_RETRIES + 1):
@@ -455,7 +455,7 @@ class DouyinDownloaderPro:
 
     # ---------- 核心功能 ----------
 
-    async def parse_share_url(self, share_url: str) -> Dict[str, Any]:
+    async def parse_share_url(self, share_url: str) -> dict[str, Any]:
         """解析抖音短链接，跟踪重定向获取完整 URL 和 video_id。
 
         Args:
@@ -469,7 +469,7 @@ class DouyinDownloaderPro:
             - success: 是否成功
             - error: 错误信息（失败时）
         """
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "original_url": share_url,
             "final_url": None,
             "video_id": None,
@@ -531,8 +531,8 @@ class DouyinDownloaderPro:
     async def get_video_info(
         self,
         video_id_or_url: str,
-        cookie: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        cookie: str | None = None,
+    ) -> dict[str, Any]:
         """获取视频元数据。
 
         Args:
@@ -556,7 +556,7 @@ class DouyinDownloaderPro:
             - create_time: 创建时间戳
             - error: 错误信息（失败时）
         """
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "video_id": None,
             "title": "",
@@ -694,10 +694,10 @@ class DouyinDownloaderPro:
     async def download_video(
         self,
         url: str,
-        output_dir: Optional[str] = None,
-        cookie: Optional[str] = None,
+        output_dir: str | None = None,
+        cookie: str | None = None,
         watermark_free: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """下载抖音视频。
 
         Args:
@@ -719,7 +719,7 @@ class DouyinDownloaderPro:
         if output_dir is None:
             output_dir = DEFAULT_OUTPUT_DIR
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "file_path": None,
             "title": "",
@@ -784,9 +784,9 @@ class DouyinDownloaderPro:
     async def download_bgm(
         self,
         url: str,
-        output_dir: Optional[str] = None,
-        cookie: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        output_dir: str | None = None,
+        cookie: str | None = None,
+    ) -> dict[str, Any]:
         """下载视频并提取音频为 MP3。
 
         流程：下载无水印视频 → FFmpeg 提取音频
@@ -809,7 +809,7 @@ class DouyinDownloaderPro:
         if output_dir is None:
             output_dir = DEFAULT_BGM_DIR
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "file_path": None,
             "video_path": None,
@@ -823,7 +823,7 @@ class DouyinDownloaderPro:
         # 临时目录用于存放中间视频
         temp_dir = os.path.join(output_dir, ".tmp")
         os.makedirs(temp_dir, exist_ok=True)
-        video_path: Optional[str] = None
+        video_path: str | None = None
 
         try:
             # 步骤1：下载视频
@@ -911,8 +911,8 @@ class DouyinDownloaderPro:
     # ---------- Cookie 管理 ----------
 
     def validate_cookie(
-        self, cookie_path: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, cookie_path: str | None = None
+    ) -> dict[str, Any]:
         """验证 Cookie 文件有效性。
 
         检查关键字段：ttwid（必需）、sessionid 等（可选）
@@ -933,7 +933,7 @@ class DouyinDownloaderPro:
         """
         path = cookie_path or self.used_cookie_path or DEFAULT_COOKIE_PATH
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "valid": False,
             "cookie_path": path,
             "has_required_fields": False,
@@ -963,8 +963,8 @@ class DouyinDownloaderPro:
         return result
 
     def auto_manage_cookies(
-        self, cookie_path: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, cookie_path: str | None = None
+    ) -> dict[str, Any]:
         """自动检测 Cookie 状态，如失效则提示刷新。
 
         Args:
@@ -1035,14 +1035,14 @@ def _sanitize_error(error_msg: str) -> str:
     for pattern in _SENSITIVE_PATTERNS:
         sanitized = re.sub(
             rf'({pattern}\s*[=:]\s*)[^\s,;"\}}]+',
-            rf'\1[REDACTED]',
+            r'\1[REDACTED]',
             sanitized,
             flags=re.IGNORECASE,
         )
     return sanitized
 
 
-def _handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
+def _handle_request(request: dict[str, Any]) -> dict[str, Any]:
     """处理 --json-input 协议请求。
 
     Args:
@@ -1058,7 +1058,7 @@ def _handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
         return {"success": False, "error": "缺少 func 字段"}
 
     # 初始化下载器
-    init_kwargs: Dict[str, Any] = {}
+    init_kwargs: dict[str, Any] = {}
     if "cookie" in params:
         init_kwargs["cookie"] = params.pop("cookie")
     if "cookie_path" in params:

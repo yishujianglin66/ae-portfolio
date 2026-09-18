@@ -23,7 +23,6 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-
 # ── Trapcode Particular 模板 ────────────────────────────────────────
 # 真机探测的参数索引（_partdeep_*.txt 逐条对应; 中文版 AE）
 # 注意 96/97 的区分: 96="Particle Type"(英文组标签, 不可设值),
@@ -60,15 +59,15 @@ _PARTICULAR_TEMPLATES = {
 
 
 def particular_jsx(var: str, template: str = "spark",
-                   t_hit: Optional[float] = None,
+                   t_hit: float | None = None,
                    duration: float = 5.0,
-                   sprite: Optional[str] = None,
+                   sprite: str | None = None,
                    comp_var: str = "comp",
                    psize_scale: float = 1.0,
                    glow_mult: float = 1.0,
                    pps_mult: float = 1.0,
-                   tint_black: Optional[List[float]] = None,
-                   tint_white: Optional[List[float]] = None) -> str:
+                   tint_black: list[float] | None = None,
+                   tint_white: list[float] | None = None) -> str:
     """Trapcode Particular 粒子层（含物理 + 贴图精灵）。
 
     sprite: 特效贴图路径 — 传入则导入为引导层并设为粒子精灵
@@ -86,7 +85,7 @@ def particular_jsx(var: str, template: str = "spark",
     psize = round(P["psize"] * psize_scale, 2)
     pps = int(P["pps"] * pps_mult)
     tag = var.replace("layer", "P")
-    lines: List[str] = [
+    lines: list[str] = [
         f'    var _pt{tag} = {var}.property("ADBE Effect Parade").addProperty("tc Particular");',
         f'    if (_pt{tag}) {{',
         f'        var _pps{tag} = _pt{tag}.property({I["pps"]});   // 粒子/秒',
@@ -111,7 +110,7 @@ def particular_jsx(var: str, template: str = "spark",
         from pathlib import Path as _P
         sp_js = str(_P(sprite).resolve()).replace("\\", "/")
         lines += [
-            f'        try {{',
+            '        try {',
             f'            var _sp{tag} = {comp_var}.layers.add(app.project.importFile('
             f'new ImportOptions(new File("{sp_js}"))));',
             f'            _sp{tag}.guideLayer = true;   // 引导层不直接渲染, 供精灵引用',
@@ -130,24 +129,24 @@ def particular_jsx(var: str, template: str = "spark",
             f'                _tint{tag}.property(2).setValue({tint_white or [1.0, 0.72, 0.15, 1]});'
             f'   // 白→主色',
             f'                _tint{tag}.property(3).setValue(100);                    // Amount 全染',
-            f'            }}',
-            f'            // 更亮: 外部 Glow 增强',
+            '            }',
+            '            // 更亮: 外部 Glow 增强',
             f'            var _glow{tag} = {var}.property("ADBE Effect Parade").addProperty("ADBE Glo2");',
             f'            if (_glow{tag}) {{',
             f'                _glow{tag}.property(3).setValue(14.0);   // 半径',
             f'                _glow{tag}.property(4).setValue({round(4.5 * glow_mult, 2)});'
             f'  // 强度(×glow_mult)',
-            f'            }}',
-            f'            // 粒子内部辉光(真机读回: glowSize=300/glowOp=25 已生效)',
-            f'            // 拖尾: Echo 残影(真机探测 ADBE Echo: 时间=1/数量=2/强度=3/衰减=4)',
+            '            }',
+            '            // 粒子内部辉光(真机读回: glowSize=300/glowOp=25 已生效)',
+            '            // 拖尾: Echo 残影(真机探测 ADBE Echo: 时间=1/数量=2/强度=3/衰减=4)',
             f'            var _echo{tag} = {var}.property("ADBE Effect Parade").addProperty("ADBE Echo");',
             f'            if (_echo{tag}) {{',
             f'                _echo{tag}.property(1).setValue(0.10);   // 残影时间 100ms',
             f'                _echo{tag}.property(2).setValue(10);     // 残影数量 10 个',
             f'                _echo{tag}.property(3).setValue(1.0);    // 起始强度',
             f'                _echo{tag}.property(4).setValue(0.4);    // 衰减(更长拖尾)',
-            f'            }}',
-            f'        }} catch(_e) {{ }} // 精灵失败退回默认粒子',
+            '            }',
+            '        } catch(_e) { } // 精灵失败退回默认粒子',
         ]
     lines.append('    }')
     return "\n".join(lines)
@@ -156,8 +155,8 @@ def particular_jsx(var: str, template: str = "spark",
 # ── Sapphire S_Shake（真抖动引擎, 替代 wiggle 表达式的专业版） ──────
 
 def s_shake_jsx(var: str, amplitude: float = 0.5, frequency: float = 20.0,
-                drift: float = 0.1, t_start: Optional[float] = None,
-                t_end: Optional[float] = None) -> str:
+                drift: float = 0.1, t_start: float | None = None,
+                t_end: float | None = None) -> str:
     """S_Shake 专业抖动: 比原生 wiggle 多 Drift(漂移)/Z Dist(纵深) — 手持感更真。
 
     时间窗: Amplitude 关键帧控制生效区间(窗口外归零)。
@@ -199,7 +198,7 @@ def badtv_jsx(var: str, t_start: float = 1.0, t_end: float = 1.3,
         f'        _bt{tag}.property(5).setValue({scan});    // Scan Distortion',
         f'        _bt{tag}.property(9).setValue({noise});   // Noise',
         f'        _bt{tag}.property(10).setValue(1);        // Scanline Overlay on',
-        f'    }}',
+        '    }',
     ])
 
 

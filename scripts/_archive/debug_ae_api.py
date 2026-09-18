@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """AE 调试工具 - 检查 layer 对象属性和效果 API"""
-import json, time, sys
-from pathlib import Path
+import json
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_CMD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_command.json")
 BRIDGE_RESULT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_result.json")

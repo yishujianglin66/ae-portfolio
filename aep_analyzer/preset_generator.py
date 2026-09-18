@@ -24,7 +24,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # 效果参数知识库：从实机验证的 AE 效果参数范围（二进制提取 + 文档固化）
 # ---------------------------------------------------------------------------
 
-EFFECT_PARAM_KB: Dict[str, Dict[str, Any]] = {
+EFFECT_PARAM_KB: dict[str, dict[str, Any]] = {
     "ADBE Fractal Noise": {
         "display_name": "Fractal Noise",
         "params": {
@@ -157,7 +157,7 @@ EFFECT_PARAM_KB: Dict[str, Dict[str, Any]] = {
 # 风格模式配方（从 9 个 AEP 工程逆向提取的实机验证配方）
 # ---------------------------------------------------------------------------
 
-STYLE_RECIPES: Dict[str, Dict[str, Any]] = {
+STYLE_RECIPES: dict[str, dict[str, Any]] = {
     "cyberpunk_neon": {
         "display_name": "赛博朋克/霓虹风格",
         "description": "Exposure + Lumetri调色 + Fractal Noise纹理 + Glow发光 + Turbulent Displace扭曲",
@@ -239,7 +239,7 @@ def _js_value(val: Any) -> str:
     return f"'{val}'"
 
 
-def _generate_effect_jsx(effect_def: Dict[str, Any], layer_var: str = "L") -> str:
+def _generate_effect_jsx(effect_def: dict[str, Any], layer_var: str = "L") -> str:
     """为单个效果生成 JSX 添加+设参代码。"""
     match_name = effect_def["matchName"]
     overrides = effect_def.get("param_overrides", {})
@@ -247,7 +247,7 @@ def _generate_effect_jsx(effect_def: Dict[str, Any], layer_var: str = "L") -> st
     display = kb.get("display_name", match_name.split(" ")[-1] if " " in match_name else match_name)
     params = kb.get("params", {})
 
-    lines: List[str] = []
+    lines: list[str] = []
     lines.append(f"// Effect: {display} ({match_name})")
     lines.append(f"var _ef = {layer_var}.property('ADBE Effect Parade').addProperty('{match_name}');")
 
@@ -289,7 +289,7 @@ def generate_style_preset_jsx(
     if not recipe:
         raise ValueError(f"Unknown recipe: {recipe_key}")
 
-    effect_jsx_parts: List[str] = []
+    effect_jsx_parts: list[str] = []
     for effect_def in recipe["effect_chain"]:
         effect_jsx_parts.append(_generate_effect_jsx(effect_def))
 
@@ -330,7 +330,7 @@ return JSON.stringify(_r);
 def generate_preset_entry(
     recipe_key: str,
     category: str = "style_reverse",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """生成单个预设条目（兼容 text_animation_presets.json 格式）。"""
     recipe = STYLE_RECIPES[recipe_key]
     jsx = generate_style_preset_jsx(recipe_key)
@@ -356,8 +356,8 @@ def generate_preset_entry(
 
 def generate_full_preset_json(
     output_path: str = "",
-    recipe_keys: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    recipe_keys: list[str] | None = None,
+) -> dict[str, Any]:
     """生成完整的风格预设 JSON（兼容 text_animation_presets.json 格式）。
 
     Args:
@@ -372,7 +372,7 @@ def generate_full_preset_json(
 
     presets = [generate_preset_entry(k) for k in recipe_keys]
 
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "version": "1.0",
         "description": f"逆向工程提取的风格预设 ({len(presets)} 个)",
         "generated_at": datetime.now().isoformat(),
@@ -399,9 +399,9 @@ def generate_full_preset_json(
 # ---------------------------------------------------------------------------
 
 def detect_matching_styles(
-    effect_chain: List[str],
+    effect_chain: list[str],
     threshold: float = 0.6,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """根据效果链匹配最接近的风格配方。
 
     Args:
@@ -412,7 +412,7 @@ def detect_matching_styles(
         匹配的风格列表，按匹配度排序
     """
     chain_set = set(effect_chain)
-    matches: List[Dict[str, Any]] = []
+    matches: list[dict[str, Any]] = []
 
     for key, recipe in STYLE_RECIPES.items():
         recipe_effects = {e["matchName"] for e in recipe["effect_chain"]}

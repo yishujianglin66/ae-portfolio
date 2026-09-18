@@ -75,11 +75,11 @@ class StabilityTestConfig:
                 Path.home() / "Documents" / "ae-mcp-bridge-test",
             )
         )
-        self.ae_exe_path: Optional[Path] = None
+        self.ae_exe_path: Path | None = None
         ae_exe = os.environ.get("AE_TEST_AE_EXE_PATH", "")
         if ae_exe:
             self.ae_exe_path = Path(ae_exe)
-        self.listener_script: Optional[Path] = None
+        self.listener_script: Path | None = None
         listener = os.environ.get("AE_TEST_LISTENER_SCRIPT", "")
         if listener:
             self.listener_script = Path(listener)
@@ -119,7 +119,7 @@ class StabilityTestConfig:
         """获取带倍率的超时时间。"""
         return base_seconds * self.timeout_multiplier
 
-    def ensure_output_dirs(self) -> Dict[str, Path]:
+    def ensure_output_dirs(self) -> dict[str, Path]:
         """确保输出目录存在。"""
         dirs = {
             "root": self.output_dir,
@@ -344,7 +344,7 @@ def ae_process_manager(test_config: StabilityTestConfig):
 
     from ae.ae_process_manager import AEProcessManager
 
-    kwargs: Dict[str, Any] = {}
+    kwargs: dict[str, Any] = {}
     if test_config.ae_exe_path:
         kwargs["ae_exe_path"] = str(test_config.ae_exe_path)
     if test_config.listener_script:
@@ -381,7 +381,7 @@ def test_logger(
     test_config: StabilityTestConfig,
     test_artifacts_dir: Path,
     request: pytest.FixtureRequest,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """测试日志收集器。
 
     收集测试执行过程中的日志，失败时自动保存。
@@ -402,7 +402,7 @@ def test_logger(
     fh.setFormatter(formatter)
     logger.addHandler(fh)
 
-    log_info: Dict[str, Any] = {
+    log_info: dict[str, Any] = {
         "logger": logger,
         "log_file": log_file,
         "start_time": time.time(),
@@ -448,7 +448,7 @@ def pytest_runtest_makereport(item, call):
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             diag_file = diag_dir / f"{test_name}_{timestamp}.json"
 
-            diagnostics: Dict[str, Any] = {
+            diagnostics: dict[str, Any] = {
                 "test_name": test_name,
                 "test_path": str(item.fspath),
                 "timestamp": timestamp,

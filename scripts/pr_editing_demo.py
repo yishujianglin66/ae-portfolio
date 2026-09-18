@@ -43,24 +43,24 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "puppet-automation" / "src"))
 
-from ae.pr_transition_system import (
-    TransitionType,
-    TransitionDirection,
-    TransitionParam,
-    PremiereTransitionSystem,
-)
 from ae.pr_advanced_editing import (
-    EditMode,
-    MotionDirection,
-    WhipPanParam,
-    DynamicZoomParam,
-    SpeedRampParam,
-    KeyframePoint,
-    KeyframeAnimationParam,
     AdvancedEditParam,
+    DynamicZoomParam,
+    EditMode,
+    KeyframeAnimationParam,
+    KeyframePoint,
+    MotionDirection,
     PremiereAdvancedEditing,
+    SpeedRampParam,
+    WhipPanParam,
 )
 from ae.pr_preset_converter import PRPresetConverter
+from ae.pr_transition_system import (
+    PremiereTransitionSystem,
+    TransitionDirection,
+    TransitionParam,
+    TransitionType,
+)
 
 
 class PREditingDemo:

@@ -18,7 +18,7 @@ from typing import Any, Dict, List
 # 默认输出路径
 _DEFAULT_OUTPUT_DIR = "D:/AE-Work/output"
 
-COMPOSITION_PRESETS: Dict[str, Dict[str, Any]] = {
+COMPOSITION_PRESETS: dict[str, dict[str, Any]] = {
     # ==================================================================
     # 竖屏音乐视频
     # ==================================================================
@@ -303,12 +303,12 @@ COMPOSITION_PRESETS: Dict[str, Dict[str, Any]] = {
 }
 
 
-def get_preset_names() -> List[str]:
+def get_preset_names() -> list[str]:
     """获取所有预设名称列表"""
     return list(COMPOSITION_PRESETS.keys())
 
 
-def get_preset(name: str) -> Dict[str, Any]:
+def get_preset(name: str) -> dict[str, Any]:
     """获取指定预设配置
 
     Args:
@@ -320,7 +320,7 @@ def get_preset(name: str) -> Dict[str, Any]:
     return COMPOSITION_PRESETS.get(name, {})
 
 
-def list_presets() -> List[Dict[str, Any]]:
+def list_presets() -> list[dict[str, Any]]:
     """列出所有预设的摘要信息"""
     result = []
     for key, cfg in COMPOSITION_PRESETS.items():

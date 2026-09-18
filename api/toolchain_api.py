@@ -20,28 +20,36 @@ from __future__ import annotations
 import time
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Query, Depends, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 try:
     from toolchain_manager import (
-        ToolchainManager, ToolInfo, ToolResult, WorkflowResult,
-        ToolCategory, ToolStatus, ExecutionMode,
+        ExecutionMode,
+        ToolCategory,
+        ToolchainManager,
+        ToolInfo,
+        ToolResult,
+        ToolStatus,
+        WorkflowResult,
     )
     _TOOLCHAIN_AVAILABLE = True
-    _manager: Optional[ToolchainManager] = None
+    _manager: ToolchainManager | None = None
 except ImportError:
     _TOOLCHAIN_AVAILABLE = False
     _manager = None
 
 try:
     from auth_system import (
-        AuthManager, Role,
+        AuthManager,
+        Role,
+    )
+    from auth_system import (
         get_auth_manager as _get_auth_manager,
     )
     _AUTH_AVAILABLE = True
-    _auth: Optional[AuthManager] = _auth if '_auth' in globals() else None
+    _auth: AuthManager | None = _auth if '_auth' in globals() else None
 except ImportError:
     _AUTH_AVAILABLE = False
     _auth = None
@@ -50,7 +58,7 @@ _security = HTTPBearer(auto_error=False)
 
 
 def require_auth(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(_security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(_security),
 ):
     """认证依赖 - 要求已登录
 
@@ -96,22 +104,22 @@ class ToolStatusResponse(BaseModel):
     status: str
     description: str
     executable_path: str = ""
-    capabilities: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    capabilities: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ToolListResponse(BaseModel):
     """工具列表响应"""
     total: int
-    categories: Dict[str, int]
-    tools: List[ToolStatusResponse]
+    categories: dict[str, int]
+    tools: list[ToolStatusResponse]
 
 
 class ToolExecuteRequest(BaseModel):
     """工具执行请求"""
     tool_name: str = Field(..., description="工具名称")
     operation: str = Field(..., description="操作名称")
-    params: Dict[str, Any] = Field(default_factory=dict, description="操作参数")
+    params: dict[str, Any] = Field(default_factory=dict, description="操作参数")
     mode: str = Field("auto", description="执行模式: real, simulate, auto")
 
 
@@ -120,12 +128,12 @@ class ToolExecuteResponse(BaseModel):
     success: bool
     tool_name: str
     operation: str
-    output_path: Optional[str] = None
-    output_data: Dict[str, Any] = Field(default_factory=dict)
+    output_path: str | None = None
+    output_data: dict[str, Any] = Field(default_factory=dict)
     error: str = ""
     duration_ms: float = 0
     mode_used: str = "simulate"
-    log: List[str] = Field(default_factory=list)
+    log: list[str] = Field(default_factory=list)
 
 
 class WorkflowExecuteRequest(BaseModel):
@@ -134,7 +142,7 @@ class WorkflowExecuteRequest(BaseModel):
     input_path: str = Field(..., description="输入文件路径")
     output_path: str = Field(..., description="输出文件路径")
     mode: str = Field("auto", description="执行模式")
-    steps: Optional[List[str]] = Field(None, description="指定执行步骤")
+    steps: list[str] | None = Field(None, description="指定执行步骤")
 
 
 class WorkflowExecuteResponse(BaseModel):
@@ -142,17 +150,17 @@ class WorkflowExecuteResponse(BaseModel):
     workflow_name: str
     status: str
     total_duration_ms: float = 0
-    output_files: List[str] = Field(default_factory=list)
+    output_files: list[str] = Field(default_factory=list)
     error: str = ""
     summary: str = ""
-    steps: List[ToolExecuteResponse] = Field(default_factory=list)
+    steps: list[ToolExecuteResponse] = Field(default_factory=list)
 
 
 class WorkflowDetailResponse(BaseModel):
     """工作流详情响应"""
     workflow_name: str
     step_count: int
-    steps: List[Dict[str, Any]] = Field(default_factory=list)
+    steps: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ============================================================================
@@ -205,7 +213,7 @@ async def list_engines():
 
 
 @router.get("/tools", response_model=ToolListResponse)
-async def list_tools(category: Optional[str] = Query(None, description="按分类筛选")):
+async def list_tools(category: str | None = Query(None, description="按分类筛选")):
     """列出所有工具"""
     if not _TOOLCHAIN_AVAILABLE:
         raise HTTPException(status_code=503, detail="工具链模块不可用")
@@ -283,7 +291,7 @@ async def execute_tool(
 async def execute_tool_by_name(
     tool_name: str,
     operation: str = Query(..., description="操作名称"),
-    params: Optional[Dict[str, Any]] = None,
+    params: dict[str, Any] | None = None,
     mode: str = Query("auto", description="执行模式"),
     user: Any = Depends(require_auth),
 ):

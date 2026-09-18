@@ -1,10 +1,11 @@
 """
 Param optimization model evaluation script
 """
-import os
-import sys
 import json
 import logging
+import os
+import sys
+
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    from models.data.param_optim_dataset import ParamOptimDataset, DatasetConfig, STYLE_LABELS
+    from models.data.param_optim_dataset import STYLE_LABELS, DatasetConfig, ParamOptimDataset
     from models.training.param_optim_trainer import ParamOptimTrainer, TrainingConfig
 
     logger.info('===== Evaluation Started =====')

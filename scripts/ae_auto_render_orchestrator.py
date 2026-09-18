@@ -18,6 +18,7 @@
 # ============================================================
 
 import argparse
+import glob
 import json
 import os
 import re
@@ -31,8 +32,7 @@ import threading
 import time
 import traceback
 import uuid
-import glob
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
@@ -83,9 +83,9 @@ class StepResult:
     elapsed_ms: float = 0.0
     retry_count: int = 0
     jsx_cmd: str = ""  # 执行的 JSX 命令摘要
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
         d["status"] = self.status.value
         return d
@@ -102,8 +102,8 @@ class RenderConfig:
     skip_existing: bool = False
     timeout_minutes: int = 30
     use_work_area: bool = False
-    custom_render_settings: Optional[Dict[str, Any]] = None
-    custom_output_module: Optional[Dict[str, Any]] = None
+    custom_render_settings: dict[str, Any] | None = None
+    custom_output_module: dict[str, Any] | None = None
 
 
 @dataclass
@@ -140,20 +140,20 @@ class OrchestratorReport:
     render_method: str = ""  # "aerender_cli" / "bridge_extendscript" / "manual_fallback"
 
     # 错误与诊断
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    steps_details: List[Dict] = field(default_factory=list)
-    phase_timeline: List[Dict] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    steps_details: list[dict] = field(default_factory=list)
+    phase_timeline: list[dict] = field(default_factory=list)
 
     # 环境信息
     ae_version: str = ""
     ae_path: str = ""
     aerender_path: str = ""
     bridge_connected: bool = False
-    plugin_missing: List[Dict] = field(default_factory=list)
-    system_info: Dict[str, str] = field(default_factory=dict)
+    plugin_missing: list[dict] = field(default_factory=list)
+    system_info: dict[str, str] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
         d["phase"] = self.phase.value
         return d
@@ -271,7 +271,7 @@ class AEInstallDetector:
     """自动检测 AE 和 aerender 的安装路径"""
 
     @staticmethod
-    def find_ae_path() -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    def find_ae_path() -> tuple[str | None, str | None, str | None]:
         """
         返回 (afterfx_path, support_dir, aerender_path)
         """
@@ -368,7 +368,7 @@ class AEBridgeClient:
         self._connected = False
         self._session_prefix = uuid.uuid4().hex[:8]
         self._cmd_seq = 0
-        self._response_cache: Dict[str, Any] = {}
+        self._response_cache: dict[str, Any] = {}
 
     # ---- 连接管理 ----
 
@@ -398,9 +398,9 @@ class AEBridgeClient:
     def execute_atom_script(
         self,
         jsx_code: str,
-        timeout_sec: Optional[float] = None,
+        timeout_sec: float | None = None,
         retry: int = 0,
-    ) -> Tuple[bool, Dict[str, Any]]:
+    ) -> tuple[bool, dict[str, Any]]:
         """
         执行 AtomScript（JSX）并返回结果。
 
@@ -463,7 +463,7 @@ class AEBridgeClient:
 
     def execute_atom_script_checked(
         self, jsx_code: str, description: str = "", timeout_sec: float = 60.0
-    ) -> Tuple[bool, Dict[str, Any]]:
+    ) -> tuple[bool, dict[str, Any]]:
         """
         执行 AtomScript，自动添加 try/catch 包裹。
         返回 (success, result)
@@ -517,7 +517,7 @@ class AEBridgeClient:
             time.sleep(0.3 * (attempt + 1))
         return False
 
-    def _read_result(self, cmd_id: str) -> Optional[Dict[str, Any]]:
+    def _read_result(self, cmd_id: str) -> dict[str, Any] | None:
         """尝试读取结果文件"""
         if not os.path.isfile(BRIDGE_RESULT_FILE):
             return None
@@ -584,7 +584,7 @@ class AEProjectManager:
         self.bridge = bridge
         self._loaded_project = ""
 
-    def get_project_info(self) -> Dict[str, Any]:
+    def get_project_info(self) -> dict[str, Any]:
         """获取当前项目信息"""
         jsx = textwrap.dedent("""\
         var info = {
@@ -632,7 +632,7 @@ class AEProjectManager:
         except json.JSONDecodeError:
             return {}
 
-    def open_project(self, project_path: str) -> Tuple[bool, Dict[str, Any]]:
+    def open_project(self, project_path: str) -> tuple[bool, dict[str, Any]]:
         """打开 AE 项目文件"""
         escaped = project_path.replace("\\", "\\\\").replace("'", "\\'")
         jsx = textwrap.dedent(f"""\
@@ -660,7 +660,7 @@ class AEProjectManager:
             self._loaded_project = project_path
         return ok, res
 
-    def save_project(self, save_path: Optional[str] = None) -> Tuple[bool, str]:
+    def save_project(self, save_path: str | None = None) -> tuple[bool, str]:
         """保存当前项目"""
         if save_path:
             escaped = save_path.replace("\\", "\\\\").replace("'", "\\'")
@@ -680,7 +680,7 @@ class AEProjectManager:
         msg = res.get("data", "") if ok else res.get("error", "save failed")
         return ok, str(msg)
 
-    def close_project(self, save: bool = True) -> Tuple[bool, str]:
+    def close_project(self, save: bool = True) -> tuple[bool, str]:
         """关闭项目（含清理）"""
         jsx = textwrap.dedent(f"""\
         try {{
@@ -706,7 +706,7 @@ class AEProjectManager:
         msg = res.get("data", "") if ok else res.get("error", "close failed")
         return ok, str(msg)
 
-    def find_composition(self, comp_name: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    def find_composition(self, comp_name: str | None = None) -> dict[str, Any] | None:
         """查找指定名称的合成，未指定则返回第一个"""
         info = self.get_project_info()
         comps = info.get("compositions", [])
@@ -751,7 +751,7 @@ class AEStepExecutor:
 
     def __init__(self, bridge: AEBridgeClient):
         self.bridge = bridge
-        self.created_comps: List[str] = []
+        self.created_comps: list[str] = []
         self.active_comp: str = ""
 
     def get_active_comp_name(self) -> str:
@@ -765,7 +765,7 @@ class AEStepExecutor:
                 return name
         return self.active_comp
 
-    def execute_step(self, step: Dict[str, Any]) -> Tuple[StepResult, Optional[Dict]]:
+    def execute_step(self, step: dict[str, Any]) -> tuple[StepResult, dict | None]:
         """
         执行单个复刻步骤
 
@@ -788,7 +788,7 @@ class AEStepExecutor:
         t0 = time.time()
 
         # 调度到具体处理器
-        handlers: Dict[str, Callable[[Dict], Tuple[bool, Any]]] = {
+        handlers: dict[str, Callable[[dict], tuple[bool, Any]]] = {
             "new_composition": self._step_new_composition,
             "new_solid": self._step_new_solid,
             "new_text_layer": self._step_new_text_layer,
@@ -840,7 +840,7 @@ class AEStepExecutor:
 
     # ============ 步骤处理器 ============
 
-    def _step_new_composition(self, p: dict) -> Tuple[bool, Any]:
+    def _step_new_composition(self, p: dict) -> tuple[bool, Any]:
         name = p.get("name", "Comp")
         w = p.get("width", 1920)
         h = p.get("height", 1080)
@@ -863,7 +863,7 @@ class AEStepExecutor:
         self.active_comp = name
         return ok, res
 
-    def _step_new_solid(self, p: dict) -> Tuple[bool, Any]:
+    def _step_new_solid(self, p: dict) -> tuple[bool, Any]:
         name = p.get("name", "Solid")
         color = p.get("color", [0.5, 0.5, 0.5])
         w = p.get("width", 1920)
@@ -886,7 +886,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"new_solid: {name}")
 
-    def _step_new_text_layer(self, p: dict) -> Tuple[bool, Any]:
+    def _step_new_text_layer(self, p: dict) -> tuple[bool, Any]:
         text = p.get("text", "Sample Text")
         comp_name = p.get("comp", self.active_comp)
         font = p.get("font", "Arial")
@@ -913,7 +913,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"new_text: {text[:30]}")
 
-    def _step_new_shape_layer(self, p: dict) -> Tuple[bool, Any]:
+    def _step_new_shape_layer(self, p: dict) -> tuple[bool, Any]:
         comp_name = p.get("comp", self.active_comp)
         shape_type = p.get("shape", "rect")
         size = p.get("size", [200, 200])
@@ -948,7 +948,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, "new_shape_layer")
 
-    def _step_new_null_layer(self, p: dict) -> Tuple[bool, Any]:
+    def _step_new_null_layer(self, p: dict) -> tuple[bool, Any]:
         name = p.get("name", "Null")
         comp_name = p.get("comp", self.active_comp)
         jsx = textwrap.dedent(f"""\
@@ -966,7 +966,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"new_null: {name}")
 
-    def _step_new_adjust_layer(self, p: dict) -> Tuple[bool, Any]:
+    def _step_new_adjust_layer(self, p: dict) -> tuple[bool, Any]:
         name = p.get("name", "Adjustment")
         comp_name = p.get("comp", self.active_comp)
         jsx = textwrap.dedent(f"""\
@@ -985,7 +985,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"new_adjust: {name}")
 
-    def _step_set_property(self, p: dict) -> Tuple[bool, Any]:
+    def _step_set_property(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         prop_path = p.get("property", "")
         value = json.dumps(p.get("value", 0))
@@ -1015,7 +1015,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"set_prop: {prop_path}")
 
-    def _step_add_keyframe(self, p: dict) -> Tuple[bool, Any]:
+    def _step_add_keyframe(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         prop_path = p.get("property", "")
         value = json.dumps(p.get("value", 0))
@@ -1044,7 +1044,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"keyframe: {prop_path}@{time_sec}")
 
-    def _step_add_effect(self, p: dict) -> Tuple[bool, Any]:
+    def _step_add_effect(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         effect_match_name = p.get("effect", "")
         comp_name = p.get("comp", self.active_comp)
@@ -1072,7 +1072,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"add_effect: {effect_match_name}")
 
-    def _step_set_expression(self, p: dict) -> Tuple[bool, Any]:
+    def _step_set_expression(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         prop_path = p.get("property", "")
         expression = p.get("expression", "").replace("\\", "\\\\").replace("'", "\\'")
@@ -1100,7 +1100,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"expression: {prop_path}")
 
-    def _step_set_3d(self, p: dict) -> Tuple[bool, Any]:
+    def _step_set_3d(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         comp_name = p.get("comp", self.active_comp)
         jsx = textwrap.dedent(f"""\
@@ -1123,7 +1123,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"set_3d: {layer_name}")
 
-    def _step_set_blending(self, p: dict) -> Tuple[bool, Any]:
+    def _step_set_blending(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         mode = p.get("mode", 3)  # 默认 Normal=3
         comp_name = p.get("comp", self.active_comp)
@@ -1148,7 +1148,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"blending: {layer_name}={mode}")
 
-    def _step_set_opacity(self, p: dict) -> Tuple[bool, Any]:
+    def _step_set_opacity(self, p: dict) -> tuple[bool, Any]:
         return self._step_set_property({
             "layer": p.get("layer", ""),
             "property": "ADBE Transform Group/ADBE Opacity",
@@ -1156,7 +1156,7 @@ class AEStepExecutor:
             "comp": p.get("comp", self.active_comp),
         })
 
-    def _step_add_text_animation(self, p: dict) -> Tuple[bool, Any]:
+    def _step_add_text_animation(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         animator_name = p.get("animator", "Animator 1")
         prop_name = p.get("add_property", "ADBE Text Opacity")
@@ -1198,7 +1198,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"text_anim: {animator_name}")
 
-    def _step_duplicate_layer(self, p: dict) -> Tuple[bool, Any]:
+    def _step_duplicate_layer(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         comp_name = p.get("comp", self.active_comp)
         jsx = textwrap.dedent(f"""\
@@ -1220,7 +1220,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"duplicate: {layer_name}")
 
-    def _step_rename_layer(self, p: dict) -> Tuple[bool, Any]:
+    def _step_rename_layer(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         new_name = p.get("new_name", "Renamed")
         comp_name = p.get("comp", self.active_comp)
@@ -1243,7 +1243,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"rename: {layer_name}->{new_name}")
 
-    def _step_set_layer_pos(self, p: dict) -> Tuple[bool, Any]:
+    def _step_set_layer_pos(self, p: dict) -> tuple[bool, Any]:
         pos = p.get("position", [960, 540])
         return self._step_set_property({
             "layer": p.get("layer", ""),
@@ -1252,7 +1252,7 @@ class AEStepExecutor:
             "comp": p.get("comp", self.active_comp),
         })
 
-    def _step_set_in_point(self, p: dict) -> Tuple[bool, Any]:
+    def _step_set_in_point(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         time_sec = p.get("time", 0.0)
         comp_name = p.get("comp", self.active_comp)
@@ -1275,7 +1275,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"set_in: {layer_name}={time_sec}")
 
-    def _step_set_out_point(self, p: dict) -> Tuple[bool, Any]:
+    def _step_set_out_point(self, p: dict) -> tuple[bool, Any]:
         layer_name = p.get("layer", "")
         time_sec = p.get("time", 5.0)
         comp_name = p.get("comp", self.active_comp)
@@ -1298,7 +1298,7 @@ class AEStepExecutor:
         """)
         return self.bridge.execute_atom_script_checked(jsx, f"set_out: {layer_name}={time_sec}")
 
-    def _step_set_scale(self, p: dict) -> Tuple[bool, Any]:
+    def _step_set_scale(self, p: dict) -> tuple[bool, Any]:
         scale = p.get("value", [100, 100])
         return self._step_set_property({
             "layer": p.get("layer", ""),
@@ -1307,7 +1307,7 @@ class AEStepExecutor:
             "comp": p.get("comp", self.active_comp),
         })
 
-    def _step_set_rotation(self, p: dict) -> Tuple[bool, Any]:
+    def _step_set_rotation(self, p: dict) -> tuple[bool, Any]:
         rot = p.get("value", 0)
         return self._step_set_property({
             "layer": p.get("layer", ""),
@@ -1316,7 +1316,7 @@ class AEStepExecutor:
             "comp": p.get("comp", self.active_comp),
         })
 
-    def _step_run_jsx(self, p: dict) -> Tuple[bool, Any]:
+    def _step_run_jsx(self, p: dict) -> tuple[bool, Any]:
         jsx = p.get("code", "return 'empty jsx';")
         return self.bridge.execute_atom_script_checked(jsx, "custom_jsx")
 
@@ -1335,10 +1335,10 @@ class AERenderManager:
     2. Bridge ExtendScript — 配置 RQ，由用户手动渲染（回退）
     """
 
-    def __init__(self, bridge: AEBridgeClient, aerender_path: Optional[str] = None):
+    def __init__(self, bridge: AEBridgeClient, aerender_path: str | None = None):
         self.bridge = bridge
         self.aerender_path = aerender_path
-        self._render_process: Optional[subprocess.Popen] = None
+        self._render_process: subprocess.Popen | None = None
         self._render_start_time: float = 0.0
 
     @property
@@ -1347,7 +1347,7 @@ class AERenderManager:
 
     def configure_render_queue_bridge(
         self, comp_name: str, config: RenderConfig
-    ) -> Tuple[bool, Dict[str, Any]]:
+    ) -> tuple[bool, dict[str, Any]]:
         """
         通过 Bridge 配置渲染队列
 
@@ -1455,9 +1455,9 @@ class AERenderManager:
         )
 
     def render_via_aerender(
-        self, config: RenderConfig, comp_name: str, project_path: Optional[str] = None,
-        progress_callback: Optional[Callable[[str, float], None]] = None,
-    ) -> Tuple[bool, Dict[str, Any]]:
+        self, config: RenderConfig, comp_name: str, project_path: str | None = None,
+        progress_callback: Callable[[str, float], None] | None = None,
+    ) -> tuple[bool, dict[str, Any]]:
         """
         通过 aerender CLI 执行渲染
 
@@ -1534,7 +1534,7 @@ class AERenderManager:
             return False, {"error": f"Failed to start aerender: {e}", "type": "launch_error"}
 
         # 监控渲染进度（解析 stdout）
-        output_lines: List[str] = []
+        output_lines: list[str] = []
         last_progress = 0.0
         render_success = False
 
@@ -1607,8 +1607,8 @@ class AERenderManager:
 
     def render_via_bridge(
         self, config: RenderConfig,
-        progress_callback: Optional[Callable[[str, float], None]] = None,
-    ) -> Tuple[bool, Dict[str, Any]]:
+        progress_callback: Callable[[str, float], None] | None = None,
+    ) -> tuple[bool, dict[str, Any]]:
         """
         通过 Bridge ExtendScript 直接调用 app.project.renderQueue.render()
 
@@ -1682,9 +1682,9 @@ class AERenderManager:
         }
 
     def render(
-        self, comp_name: str, config: RenderConfig, project_path: Optional[str] = None,
-        progress_callback: Optional[Callable[[str, float], None]] = None,
-    ) -> Tuple[bool, Dict[str, Any]]:
+        self, comp_name: str, config: RenderConfig, project_path: str | None = None,
+        progress_callback: Callable[[str, float], None] | None = None,
+    ) -> tuple[bool, dict[str, Any]]:
         """
         统一渲染入口：优先 aerender CLI，回退 Bridge
         """
@@ -1737,7 +1737,7 @@ class AERenderManager:
         return False
 
     @staticmethod
-    def _parse_aerender_progress(line: str) -> Optional[float]:
+    def _parse_aerender_progress(line: str) -> float | None:
         """解析 aerender 输出的进度信息"""
         # "PROGRESS:  0:00:00:05 (1): 10%"
         # "PROGRESS:  0:00:00:10 (10): 50%"
@@ -1950,19 +1950,19 @@ class AEOrchestrator:
             title=f"AE 自动化复刻渲染报告 - {timestamp_iso()}",
             start_time=timestamp_iso(),
         )
-        self._phase_start: Dict[str, float] = {}
+        self._phase_start: dict[str, float] = {}
         self._start_time = time.time()
 
         # 组件（延迟初始化）
-        self.bridge: Optional[AEBridgeClient] = None
-        self.project_mgr: Optional[AEProjectManager] = None
-        self.step_executor: Optional[AEStepExecutor] = None
-        self.render_mgr: Optional[AERenderManager] = None
+        self.bridge: AEBridgeClient | None = None
+        self.project_mgr: AEProjectManager | None = None
+        self.step_executor: AEStepExecutor | None = None
+        self.render_mgr: AERenderManager | None = None
 
         # AE 路径
-        self.ae_path: Optional[str] = None
-        self.aerender_path: Optional[str] = None
-        self.ae_support_dir: Optional[str] = None
+        self.ae_path: str | None = None
+        self.aerender_path: str | None = None
+        self.ae_support_dir: str | None = None
 
         # 信号处理
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -2113,8 +2113,8 @@ class AEOrchestrator:
     # ========== 阶段 4: 执行复刻步骤 ==========
 
     def phase_execute_steps(
-        self, steps: Optional[List[Dict]] = None,
-        progress_callback: Optional[Callable[[int, int, str], None]] = None,
+        self, steps: list[dict] | None = None,
+        progress_callback: Callable[[int, int, str], None] | None = None,
     ) -> bool:
         """
         执行复刻步骤集
@@ -2198,7 +2198,7 @@ class AEOrchestrator:
     # ========== 阶段 5: 配置渲染 ==========
 
     def phase_configure_render(
-        self, comp_name: str, config: Optional[RenderConfig] = None
+        self, comp_name: str, config: RenderConfig | None = None
     ) -> bool:
         """配置渲染队列"""
         self._enter_phase(AEPhase.CONFIGURING_RENDER)
@@ -2234,8 +2234,8 @@ class AEOrchestrator:
     # ========== 阶段 6: 执行渲染 ==========
 
     def phase_render(
-        self, comp_name: str, config: Optional[RenderConfig] = None,
-        project_path: Optional[str] = None,
+        self, comp_name: str, config: RenderConfig | None = None,
+        project_path: str | None = None,
     ) -> bool:
         """执行渲染并监控进度"""
         self._enter_phase(AEPhase.RENDERING)
@@ -2317,10 +2317,10 @@ class AEOrchestrator:
 
     def run(
         self,
-        project_path: Optional[str] = None,
-        comp_name: Optional[str] = None,
-        steps: Optional[List[Dict]] = None,
-        render_config: Optional[RenderConfig] = None,
+        project_path: str | None = None,
+        comp_name: str | None = None,
+        steps: list[dict] | None = None,
+        render_config: RenderConfig | None = None,
     ) -> OrchestratorReport:
         """
         执行完整自动化流程
@@ -2427,7 +2427,7 @@ class AEOrchestrator:
         except (IOError, OSError) as e:
             print(f"⚠️ 无法写入 Markdown 报告: {e}")
 
-        print(f"\n📊 报告已保存:")
+        print("\n📊 报告已保存:")
         print(f"   JSON: {report_json}")
         print(f"   MD:   {report_md}")
 
@@ -2449,8 +2449,8 @@ class AEOrchestrator:
             "",
             "## 环境信息",
             "",
-            f"| 项目 | 值 |",
-            f"|------|-----|",
+            "| 项目 | 值 |",
+            "|------|-----|",
             f"| AE 路径 | `{r.ae_path}` |",
             f"| AE 版本 | {r.ae_version} |",
             f"| aerender | {'✅ 可用' if r.aerender_path else '❌ 不可用'} |",
@@ -2462,8 +2462,8 @@ class AEOrchestrator:
             "",
             "## 项目信息",
             "",
-            f"| 项目 | 值 |",
-            f"|------|-----|",
+            "| 项目 | 值 |",
+            "|------|-----|",
             f"| 项目文件 | `{r.project_file}` |",
             f"| 加载成功 | {'✅' if r.project_loaded else '❌'} |",
             f"| 目标合成 | `{r.composition_name}` |",
@@ -2473,8 +2473,8 @@ class AEOrchestrator:
             "",
             "## 复刻步骤统计",
             "",
-            f"| 指标 | 数值 |",
-            f"|------|------|",
+            "| 指标 | 数值 |",
+            "|------|------|",
             f"| 总步骤 | {r.total_steps} |",
             f"| ✅ 通过 | {r.steps_passed} |",
             f"| ❌ 失败 | {r.steps_failed} |",
@@ -2503,8 +2503,8 @@ class AEOrchestrator:
             "",
             "## 渲染信息",
             "",
-            f"| 项目 | 值 |",
-            f"|------|-----|",
+            "| 项目 | 值 |",
+            "|------|-----|",
             f"| 渲染成功 | {'✅ 成功' if r.render_success else '❌ 失败'} |",
             f"| 渲染方法 | `{r.render_method}` |",
             f"| 输出路径 | `{r.render_output_path}` |",
@@ -2620,7 +2620,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_steps_from_file(step_file: str) -> Optional[List[Dict]]:
+def load_steps_from_file(step_file: str) -> list[dict] | None:
     """从 JSON 文件加载步骤"""
     try:
         with open(step_file, "r", encoding="utf-8") as f:

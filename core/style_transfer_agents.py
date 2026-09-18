@@ -22,11 +22,11 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -66,10 +66,10 @@ class AgentResult:
     role: AgentRole
     success: bool = True
     content: str = ""
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     latency_ms: float = 0.0
     error: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -78,10 +78,10 @@ class TaskDefinition:
     task_id: str
     task_type: str
     description: str
-    input_data: Dict[str, Any] = field(default_factory=dict)
-    assigned_agents: List[AgentRole] = field(default_factory=list)
+    input_data: dict[str, Any] = field(default_factory=dict)
+    assigned_agents: list[AgentRole] = field(default_factory=list)
     execution_mode: str = "parallel"  # parallel, sequential, mixed
-    dependencies: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
 
 
 class BaseAgent:
@@ -97,7 +97,7 @@ class BaseAgent:
         """执行任务"""
         raise NotImplementedError
     
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计信息"""
         avg_latency = (
             self._total_latency_ms / self._execution_count
@@ -127,7 +127,7 @@ def _task_llm_enabled(task: TaskDefinition) -> bool:
     return bool(task.input_data.get("_use_llm")) or _agents_llm_enabled()
 
 
-def _load_agent_prompt(role_value: str) -> Tuple[str, str]:
+def _load_agent_prompt(role_value: str) -> tuple[str, str]:
     """加载外置 Prompt（Optimizer 可修改）
 
     Returns:
@@ -145,7 +145,7 @@ async def _call_agent_llm(
     task_type_name: str,
     system_prompt: str,
     message: str,
-) -> Tuple[Optional[str], int, float]:
+) -> tuple[str | None, int, float]:
     """调用 LLMGateway（真实执行路径）
 
     Returns:
@@ -173,7 +173,7 @@ async def _call_agent_llm(
         return None, 0, 0.0
 
 
-def _parse_json_content(content: str) -> Optional[Dict[str, Any]]:
+def _parse_json_content(content: str) -> dict[str, Any] | None:
     """从 LLM 输出解析 JSON 对象（容忍 markdown 包裹）"""
     if not content:
         return None
@@ -216,8 +216,8 @@ class StyleAnalysisAgent(BaseAgent):
         
         try:
             input_data = task.input_data
-            metadata: Dict[str, Any] = {"execution_path": "fallback"}
-            result_data: Optional[Dict[str, Any]] = None
+            metadata: dict[str, Any] = {"execution_path": "fallback"}
+            result_data: dict[str, Any] | None = None
 
             # P2: 真实执行路径 — LLM 风格分析（opt-in）
             if _task_llm_enabled(task):
@@ -307,7 +307,7 @@ class CodeGenerationAgent(BaseAgent):
         try:
             input_data = task.input_data
             style_data = input_data.get("style_analysis", {})
-            metadata: Dict[str, Any] = {"execution_path": "fallback"}
+            metadata: dict[str, Any] = {"execution_path": "fallback"}
             jsx_code = ""
 
             # P2: 真实执行路径 — LLM 生成 JSX（opt-in）
@@ -359,7 +359,7 @@ class CodeGenerationAgent(BaseAgent):
                 error=str(e)
             )
     
-    def _generate_jsx(self, style_data: Dict[str, Any]) -> str:
+    def _generate_jsx(self, style_data: dict[str, Any]) -> str:
         """生成JSX代码"""
         # 基于风格数据生成代码
         presets = style_data.get("ae_effect_presets", [])
@@ -401,8 +401,8 @@ class ParameterOptimizationAgent(BaseAgent):
         
         try:
             input_data = task.input_data
-            metadata: Dict[str, Any] = {"execution_path": "fallback"}
-            optimized_params: Optional[Dict[str, Any]] = None
+            metadata: dict[str, Any] = {"execution_path": "fallback"}
+            optimized_params: dict[str, Any] | None = None
 
             # P2: 真实执行路径 — LLM 参数寻优（opt-in）
             if _task_llm_enabled(task):
@@ -481,7 +481,7 @@ class QualityReviewAgent(BaseAgent):
         try:
             input_data = task.input_data
             jsx_code = input_data.get("jsx_code", "")
-            metadata: Dict[str, Any] = {"execution_path": "fallback"}
+            metadata: dict[str, Any] = {"execution_path": "fallback"}
             
             # 确定性质量检查（始终执行，不受 LLM 开关影响）
             issues = []
@@ -542,7 +542,7 @@ class MultiAgentOrchestrator:
     """多智能体编排器"""
     
     def __init__(self):
-        self.agents: Dict[AgentRole, BaseAgent] = {}
+        self.agents: dict[AgentRole, BaseAgent] = {}
         self._register_default_agents()
     
     def _register_default_agents(self):
@@ -556,9 +556,9 @@ class MultiAgentOrchestrator:
         """注册自定义智能体"""
         self.agents[role] = agent
     
-    async def execute_task(self, task: TaskDefinition) -> Dict[str, AgentResult]:
+    async def execute_task(self, task: TaskDefinition) -> dict[str, AgentResult]:
         """执行任务"""
-        results: Dict[str, AgentResult] = {}
+        results: dict[str, AgentResult] = {}
         
         if task.execution_mode == "parallel":
             results = await self._execute_parallel(task)
@@ -569,12 +569,12 @@ class MultiAgentOrchestrator:
         
         return results
     
-    async def _execute_parallel(self, task: TaskDefinition) -> Dict[str, AgentResult]:
+    async def _execute_parallel(self, task: TaskDefinition) -> dict[str, AgentResult]:
         """并行执行"""
         results = {}
 
         # 记录 tasks 列表中每个位置对应的 role，避免索引错位
-        task_role_map: List[AgentRole] = []
+        task_role_map: list[AgentRole] = []
         tasks = []
         for role in task.assigned_agents:
             if role in self.agents:
@@ -598,7 +598,7 @@ class MultiAgentOrchestrator:
 
         return results
     
-    async def _execute_sequential(self, task: TaskDefinition) -> Dict[str, AgentResult]:
+    async def _execute_sequential(self, task: TaskDefinition) -> dict[str, AgentResult]:
         """串行执行"""
         results = {}
         
@@ -617,7 +617,7 @@ class MultiAgentOrchestrator:
         
         return results
     
-    async def _execute_mixed(self, task: TaskDefinition) -> Dict[str, AgentResult]:
+    async def _execute_mixed(self, task: TaskDefinition) -> dict[str, AgentResult]:
         """混合执行（部分并行、部分串行）"""
         # 简化实现：先并行执行分析类任务，再串行执行生成类任务
         analysis_roles = [AgentRole.STYLE_ANALYSIS, AgentRole.PARAMETER_OPTIMIZATION]
@@ -650,7 +650,7 @@ class MultiAgentOrchestrator:
         
         return results
     
-    def get_all_stats(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_stats(self) -> dict[str, dict[str, Any]]:
         """获取所有智能体统计"""
         return {
             role.value: agent.get_stats()
@@ -665,7 +665,7 @@ class MultiAgentOrchestrator:
         audio_path: str = "",
         jsx: str = "",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """一站式产出入口 (UnifiedPipeline._execute_with_agents 调用)
 
         【P3-D 修复】历史缺陷: 本方法不存在 → AttributeError → 每次静默降级
@@ -696,7 +696,7 @@ class MultiAgentOrchestrator:
             execution_mode="sequential",
         )
 
-        phases: Dict[str, Any] = {}
+        phases: dict[str, Any] = {}
         success = True
         try:
             results = await self.execute_task(task)
@@ -722,7 +722,7 @@ class MultiAgentOrchestrator:
 
 
 # 便捷函数
-async def run_style_transfer_pipeline(video_path: str) -> Dict[str, Any]:
+async def run_style_transfer_pipeline(video_path: str) -> dict[str, Any]:
     """运行风格迁移流水线"""
     orchestrator = MultiAgentOrchestrator()
     
@@ -788,6 +788,7 @@ if __name__ == "__main__":
 
 from core.llm_gateway import LLMGateway  # 暴露给 unittest.mock.patch 使用
 
+
 class PlannerParseError(Exception):
     """规划结果解析异常"""
     pass
@@ -798,8 +799,8 @@ class SubTaskPlan:
     task_id: str
     description: str
     agent_role: AgentRole
-    dependencies: List[str] = field(default_factory=list)
-    input_hints: Dict[str, Any] = field(default_factory=dict)
+    dependencies: list[str] = field(default_factory=list)
+    input_hints: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -807,7 +808,7 @@ class ReActStep:
     step: int
     thought: str
     action: str
-    action_input: Dict[str, Any]
+    action_input: dict[str, Any]
     observation: str = ""
     success: bool = True
 
@@ -876,12 +877,12 @@ class AgenticPlanner:
             self._orchestrator = WorkflowOrchestrator(max_concurrent_tasks=5, enable_security=False)
         return self._orchestrator
 
-    async def auto_execute(self, high_level_task: str, global_input: Dict=None) -> Tuple[bool, Dict, List[ReActStep]]:
+    async def auto_execute(self, high_level_task: str, global_input: dict=None) -> tuple[bool, dict, list[ReActStep]]:
         global_input = global_input or {}
-        react_trace: List[ReActStep] = []
+        react_trace: list[ReActStep] = []
         step_counter = 0
         success = False
-        combined_results: Dict[str, Any] = {}
+        combined_results: dict[str, Any] = {}
 
         step_counter += 1
         react_trace.append(ReActStep(
@@ -970,7 +971,7 @@ class AgenticPlanner:
 
         return success, combined_results, react_trace
 
-    async def plan(self, high_level_task: str, mode: str = "default") -> List[SubTaskPlan]:
+    async def plan(self, high_level_task: str, mode: str = "default") -> list[SubTaskPlan]:
         """拆解高层任务为子任务图
 
         Args:
@@ -1002,7 +1003,7 @@ class AgenticPlanner:
                 parsed = json.loads(content)
                 if not isinstance(parsed, list):
                     raise ValueError("解析结果不是列表")
-                sub_tasks: List[SubTaskPlan] = []
+                sub_tasks: list[SubTaskPlan] = []
                 for item in parsed:
                     role_val = item.get("agent_role", "")
                     if isinstance(role_val, str):
@@ -1026,8 +1027,9 @@ class AgenticPlanner:
                 last_error = e
         raise PlannerParseError(f"规划JSON解析失败: {last_error}")
 
-    def build_workflow_tasks(self, sub_tasks: List[SubTaskPlan], global_input: Dict) -> List[Any]:
-        from core.workflow_orchestrator import TaskDefinition as WF_TaskDefinition, TaskType as WF_TaskType
+    def build_workflow_tasks(self, sub_tasks: list[SubTaskPlan], global_input: dict) -> list[Any]:
+        from core.workflow_orchestrator import TaskDefinition as WF_TaskDefinition
+        from core.workflow_orchestrator import TaskType as WF_TaskType
 
         task_defs = []
         for st in sub_tasks:
@@ -1085,7 +1087,7 @@ class AgenticPlanner:
             ))
         return task_defs
 
-    async def execute_plan(self, sub_tasks: List[SubTaskPlan], global_input: Dict) -> Tuple[bool, Dict]:
+    async def execute_plan(self, sub_tasks: list[SubTaskPlan], global_input: dict) -> tuple[bool, dict]:
         orch = self._get_orchestrator()
         orch._tasks_def = []
         orch._task_dependencies = {}
@@ -1098,7 +1100,7 @@ class AgenticPlanner:
 
         results_map = await orch.run_and_collect(global_input=global_input)
 
-        combined: Dict[str, Any] = {}
+        combined: dict[str, Any] = {}
         failed_task_id = ""
         first_error = ""
 
@@ -1134,7 +1136,7 @@ class AgenticPlanner:
 
         return all_ok, combined
 
-    async def reflect(self, high_level_task: str, failed_subtask_id: str, error_msg: str, old_plan: List[SubTaskPlan]) -> Tuple[str, List[SubTaskPlan]]:
+    async def reflect(self, high_level_task: str, failed_subtask_id: str, error_msg: str, old_plan: list[SubTaskPlan]) -> tuple[str, list[SubTaskPlan]]:
         llm = self._get_llm()
         old_plan_json = json.dumps([
             {
@@ -1184,7 +1186,7 @@ class AgenticPlanner:
             else:
                 raise
 
-        sub_tasks: List[SubTaskPlan] = []
+        sub_tasks: list[SubTaskPlan] = []
         for item in parsed:
             role_val = item.get("agent_role", "")
             if isinstance(role_val, str):

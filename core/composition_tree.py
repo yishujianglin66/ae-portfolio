@@ -34,7 +34,7 @@ class EffectRef:
     """效果引用：matchName 直通或 combo 组合"""
     kind: str  # "match" | "combo"
     value: str  # matchName 或组合名（neon_glow/cyber_glow/hologram/fire_ice/color_grade）
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -43,7 +43,7 @@ class AnimationSpec:
     preset: str                      # 关键帧动画器预设名
     duration_ms: int = 500
     easing: str = "ease_out"
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -53,11 +53,11 @@ class LayerSpec:
     type: str                        # LAYER_TYPES
     name: str = ""
     z_index: int = 0
-    time_range: List[float] = field(default_factory=lambda: [0.0, 5.0])
-    effects: List[EffectRef] = field(default_factory=list)
-    animations: Dict[str, AnimationSpec] = field(default_factory=dict)  # phase -> spec
-    content: Dict[str, Any] = field(default_factory=dict)  # type 相关：text/颜色/素材路径
-    children: List["LayerSpec"] = field(default_factory=list)  # 预留：父子绑定（track matte 等）
+    time_range: list[float] = field(default_factory=lambda: [0.0, 5.0])
+    effects: list[EffectRef] = field(default_factory=list)
+    animations: dict[str, AnimationSpec] = field(default_factory=dict)  # phase -> spec
+    content: dict[str, Any] = field(default_factory=dict)  # type 相关：text/颜色/素材路径
+    children: list["LayerSpec"] = field(default_factory=list)  # 预留：父子绑定（track matte 等）
 
 
 @dataclass
@@ -69,16 +69,16 @@ class CompositionTree:
     height: int = 1080
     fps: int = 30
     duration: float = 5.0
-    layers: List[LayerSpec] = field(default_factory=list)
-    beat_events: List[Dict[str, Any]] = field(default_factory=list)  # {time, beat_type, layer_id}
-    meta: Dict[str, Any] = field(default_factory=dict)
+    layers: list[LayerSpec] = field(default_factory=list)
+    beat_events: list[dict[str, Any]] = field(default_factory=list)  # {time, beat_type, layer_id}
+    meta: dict[str, Any] = field(default_factory=dict)
 
 
 # ── schema 校验 ─────────────────────────────────────────────────────
-def validate_composition_tree(tree: CompositionTree) -> Dict[str, Any]:
+def validate_composition_tree(tree: CompositionTree) -> dict[str, Any]:
     """合成树校验（执行前把关；警告不阻断，错误阻断）"""
-    errors: List[str] = []
-    warnings: List[str] = []
+    errors: list[str] = []
+    warnings: list[str] = []
 
     if tree.style_card not in STYLE_CARDS + EXTENDED_STYLE_CARDS:
         errors.append(f"style_card {tree.style_card} 不在 {STYLE_CARDS + EXTENDED_STYLE_CARDS}")
@@ -130,8 +130,8 @@ def validate_composition_tree(tree: CompositionTree) -> Dict[str, Any]:
 
 # ── 模板工厂（3 pilot 风格） ────────────────────────────────────────
 def _text_layer(lid: str, text: str, z: int, start: float, end: float,
-                effects: List[EffectRef], entrance: str, size: int = 96,
-                colors: Optional[Dict[str, str]] = None) -> LayerSpec:
+                effects: list[EffectRef], entrance: str, size: int = 96,
+                colors: dict[str, str] | None = None) -> LayerSpec:
     colors = colors or {"main": "#FFFFFF", "glow": "#FFD700", "accent": "#FFFFFF"}
     return LayerSpec(
         id=lid, type="text", name=text, z_index=z,

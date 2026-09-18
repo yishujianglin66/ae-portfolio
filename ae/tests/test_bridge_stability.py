@@ -38,7 +38,7 @@ class TestBridgeLatency:
         - P95 延迟 < 2000ms
         """
         iterations = 100
-        durations: List[float] = []
+        durations: list[float] = []
         errors = 0
 
         for i in range(iterations):
@@ -98,10 +98,10 @@ class TestBridgeLatency:
             "large": "x" * 10000,
         }
 
-        results: Dict[str, Dict[str, float]] = {}
+        results: dict[str, dict[str, float]] = {}
 
         for size_name, payload in payload_sizes.items():
-            durations: List[float] = []
+            durations: list[float] = []
             for _ in range(10):
                 start = time.time()
                 response = bridge_client.send_command(
@@ -146,8 +146,8 @@ class TestBridgeConcurrency:
         """
         num_threads = 2
         commands_per_thread = 5
-        results: List[bool] = []
-        errors: List[str] = []
+        results: list[bool] = []
+        errors: list[str] = []
         lock = threading.Lock()
 
         def worker(thread_id: int) -> None:
@@ -203,7 +203,7 @@ class TestBridgeConcurrency:
         验证连续发送的命令是否按顺序执行和返回。
         """
         num_commands = 20
-        responses: List[int] = []
+        responses: list[int] = []
 
         for i in range(num_commands):
             response = bridge_client.send_command(
@@ -240,7 +240,7 @@ class TestBridgeRetry:
             shutil.rmtree(bridge_dir, ignore_errors=True)
         bridge_dir.mkdir(parents=True, exist_ok=True)
 
-        def always_ok(params: Dict[str, Any]) -> Dict[str, Any]:
+        def always_ok(params: dict[str, Any]) -> dict[str, Any]:
             return {"ok": True}
 
         server = BridgeServer(
@@ -288,7 +288,7 @@ class TestBridgeRetry:
             shutil.rmtree(bridge_dir, ignore_errors=True)
         bridge_dir.mkdir(parents=True, exist_ok=True)
 
-        def always_fail(params: Dict[str, Any]) -> Dict[str, Any]:
+        def always_fail(params: dict[str, Any]) -> dict[str, Any]:
             # 使用可重试的错误码来触发重试
             from ae.bridge_protocol import BridgeError
             raise BridgeError(
@@ -394,7 +394,7 @@ class TestBridgeSoak:
         interval = 0.05  # 每 50ms 一个命令
         total = int(duration_seconds / interval)
 
-        durations: List[float] = []
+        durations: list[float] = []
         errors = 0
         start_time = time.time()
         count = 0
@@ -503,7 +503,7 @@ class TestBridgeProtocol:
             shutil.rmtree(bridge_dir, ignore_errors=True)
         bridge_dir.mkdir(parents=True, exist_ok=True)
 
-        def slow_handler(params: Dict[str, Any]) -> Dict[str, Any]:
+        def slow_handler(params: dict[str, Any]) -> dict[str, Any]:
             time.sleep(0.5)  # 慢处理
             return {"done": True}
 

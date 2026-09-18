@@ -1,5 +1,9 @@
 """精灵路径探测 v2: 路径 hex 编码规避转义, ASCII 文件名复制到临时位置"""
-import json, time, uuid, os, shutil
+import json
+import os
+import shutil
+import time
+import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent

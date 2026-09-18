@@ -91,7 +91,7 @@ def main():
         print(f"  首帧 shape: {first_frame.shape}")
 
     # 4. 显著性分析
-    print(f"\n显著性分析:")
+    print("\n显著性分析:")
     from saliency_prompt import find_prompts_with_visualization
     vis_png = TEMP / "seg0_saliency.png"
     prompts, _ = find_prompts_with_visualization(seg, vis_png, num_points=3, frame_idx=0)
@@ -114,8 +114,9 @@ def main():
             print(f"  使用画面中心点: ({w//2}, {h//2})")
 
     # 5. SAM2 推理
-    print(f"\nSAM2 推理:")
+    print("\nSAM2 推理:")
     import asyncio
+
     from src.engines.sam2.engine import SAM2Engine
 
     async def run():

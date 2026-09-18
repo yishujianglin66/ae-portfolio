@@ -62,7 +62,7 @@ class ResolveToolResult:
     status: str  # success / failed / degraded / unavailable
     channel: str  # python_api / fuscript_lua / simulated
     result: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     duration_ms: float = 0.0
 
 
@@ -103,7 +103,7 @@ class ResolveMCPAdapter:
         "start_project_render",
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._resolve_api = None  # Python API 实例
         self._resolve_engine = None  # fuscript Lua 引擎实例
@@ -142,11 +142,11 @@ class ResolveMCPAdapter:
         """检查是否有任何可用通道"""
         return self._channel is not None
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         """列出所有支持的工具"""
         return self.TOOL_NAMES
 
-    def list_apps(self) -> List[str]:
+    def list_apps(self) -> list[str]:
         """列出应用 (Resolve)"""
         return ["davinci_resolve"]
 
@@ -154,7 +154,7 @@ class ResolveMCPAdapter:
         """获取当前通道"""
         return self._channel or "unavailable"
 
-    def execute(self, tool: str, params: Optional[Dict[str, Any]] = None) -> ResolveToolResult:
+    def execute(self, tool: str, params: dict[str, Any] | None = None) -> ResolveToolResult:
         """执行工具调用"""
         params = params or {}
         start = time.time()
@@ -200,7 +200,7 @@ class ResolveMCPAdapter:
 
     # ── Python API 通道 ──────────────────────────────────────────
 
-    def _execute_python_api(self, tool: str, params: Dict) -> Any:
+    def _execute_python_api(self, tool: str, params: dict) -> Any:
         api = self._resolve_api
         if tool == "refresh":
             api.refresh()
@@ -309,7 +309,7 @@ class ResolveMCPAdapter:
 
     # ── fuscript Lua 通道 ────────────────────────────────────────
 
-    def _execute_fuscript(self, tool: str, params: Dict) -> Any:
+    def _execute_fuscript(self, tool: str, params: dict) -> Any:
         """通过 resolve_engine.py 的 fuscript Lua 通道执行"""
         engine = self._resolve_engine
 
@@ -423,7 +423,7 @@ class ResolveMCPAdapter:
         # 其他工具返回降级提示
         return {"tool": tool, "channel": "fuscript_lua", "note": "basic support"}
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """获取适配器状态摘要"""
         return {
             "channel": self._channel,

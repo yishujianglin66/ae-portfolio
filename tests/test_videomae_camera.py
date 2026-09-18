@@ -38,7 +38,8 @@ class TestClassifierGracefulDegradation:
 
     def test_unreadable_video(self):
         from models.camera.videomae_camera import (
-            VideoMAECameraClassifier, _read_frames_cv2,
+            VideoMAECameraClassifier,
+            _read_frames_cv2,
         )
         assert _read_frames_cv2(r"Z:\no\such\video.mp4") is None
         clf = VideoMAECameraClassifier(model_dir=r"Z:\no\such\dir")
@@ -170,7 +171,8 @@ class TestKandinskyMultilabel:
 
     def _make_clf(self, monkeypatch, logits):
         from models.camera.videomae_camera import (
-            KANDINSKY_TO_PROJECT, VideoMAECameraClassifier,
+            KANDINSKY_TO_PROJECT,
+            VideoMAECameraClassifier,
         )
 
         class FakeModel:
@@ -235,10 +237,11 @@ class TestKandinskyMultilabel:
         assert res is None
 
     def test_kandinsky_map_covers_all_classes(self):
-        from models.camera.videomae_camera import (
-            KANDINSKY_TO_PROJECT, get_kandinsky_classifier,
-        )
         from core.camera_movement_classifier import CAMERA_LABELS
+        from models.camera.videomae_camera import (
+            KANDINSKY_TO_PROJECT,
+            get_kandinsky_classifier,
+        )
         # 18 运镜类 + 3 镜头类全映射, 且映射值均在项目词汇表内
         assert len(KANDINSKY_TO_PROJECT) >= 21
         for v in KANDINSKY_TO_PROJECT.values():

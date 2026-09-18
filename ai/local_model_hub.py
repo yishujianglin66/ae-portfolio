@@ -42,7 +42,7 @@ SCENE_TO_CONTENT_TAG = {
 class LocalModelHub:
     """懒加载单例 — 首次调用时才加载权重, 线程安全"""
 
-    _instance: Optional["LocalModelHub"] = None
+    _instance: "LocalModelHub" | None = None
     _lock = threading.Lock()
 
     def __new__(cls):
@@ -57,7 +57,7 @@ class LocalModelHub:
             return
         self._initialized = True
         self._scene_model = None
-        self._scene_classes: List[str] = []
+        self._scene_classes: list[str] = []
         self._scene_transform = None
         self._scene_load_failed = False
         self._rhythm_bundle = None
@@ -94,7 +94,7 @@ class LocalModelHub:
             self._scene_load_failed = True
 
     def classify_video_scene(self, video_path: str,
-                             n_frames: int = 8) -> Optional[Dict]:
+                             n_frames: int = 8) -> dict | None:
         """对视频均匀采样n帧做场景分类, 返回主导场景。
 
         Returns:
@@ -109,9 +109,9 @@ class LocalModelHub:
             return None
         try:
             import cv2
+            import numpy as np
             import torch
             from PIL import Image
-            import numpy as np
 
             cap = cv2.VideoCapture(str(video_path))
             total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -119,8 +119,8 @@ class LocalModelHub:
                 cap.release()
                 return None
             idxs = np.linspace(0, total - 1, min(n_frames, total)).astype(int)
-            votes: Dict[str, int] = {}
-            probs_sum: Dict[str, float] = {}
+            votes: dict[str, int] = {}
+            probs_sum: dict[str, float] = {}
             for fi in idxs:
                 cap.set(cv2.CAP_PROP_POS_FRAMES, int(fi))
                 ok, frame = cap.read()
@@ -168,7 +168,7 @@ class LocalModelHub:
             print(f"[LocalModelHub] 节奏奖励模型加载失败, 降级跳过: {e}")
             self._rhythm_load_failed = True
 
-    def score_cut_plan(self, cuts: List[float], beats: List[float],
+    def score_cut_plan(self, cuts: list[float], beats: list[float],
                        duration: float) -> float:
         """对候选切点方案打分(预测踩拍质量, 0~1)。
         与 ai.rhythm_reward.score_plan 逻辑一致, 但缓存模型避免重复IO。
@@ -181,7 +181,8 @@ class LocalModelHub:
             return 0.0
         try:
             import numpy as np
-            from ai.rhythm_reward import cut_features, FEATURE_KEYS
+
+            from ai.rhythm_reward import FEATURE_KEYS, cut_features
             model, calib = self._rhythm_bundle
             feats = cut_features(list(cuts), list(beats), float(duration))
             x = np.array([[feats[k] for k in FEATURE_KEYS]])
@@ -193,7 +194,7 @@ class LocalModelHub:
             print(f"[LocalModelHub] 节奏打分失败, 降级跳过: {e}")
             return 0.0
 
-    def status(self) -> Dict:
+    def status(self) -> dict:
         """诊断用: 各产物接入状态"""
         return {
             "scene_classifier": {

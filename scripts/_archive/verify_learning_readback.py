@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """验证pipeline_runs回读"""
-import sys, json
+import json
+import sys
+
 sys.stdout.reconfigure(encoding='utf-8')
 sys.path.insert(0, '.')
 from pathlib import Path
@@ -20,6 +22,7 @@ if runs_dir.exists():
 # 测试harvester
 print("\n--- Testing harvester ---")
 from core.experience_harvester import StructuredDataParser
+
 p = StructuredDataParser('data')
 runs = p.parse_pipeline_runs()
 print(f"Harvester found {len(runs)} pipeline runs")

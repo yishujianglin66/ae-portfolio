@@ -28,14 +28,14 @@ class PREditResult:
     """S4 阶段执行结果。"""
 
     success: bool
-    timeline_xml: Optional[Path] = None
+    timeline_xml: Path | None = None
     sequence_name: str = "FlagshipEdit"
     clips_imported: int = 0
     markers_added: int = 0
     bpm: float = 0.0
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     elapsed_s: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 # S4 总超时（秒）
@@ -66,7 +66,7 @@ class PREditStage:
 
     async def run(
         self,
-        video_paths: List[Path | str],
+        video_paths: list[Path | str],
         beats_json_path: Path | str,
         output_dir: Path | str,
         sequence_name: str = "FlagshipEdit",

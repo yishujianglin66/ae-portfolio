@@ -5,16 +5,15 @@ from dataclasses import dataclass, field
 import pytest
 
 from core.llm_gateway import (
+    TASK_TIER_MAP,
     LLMResponse,
     LLMUnavailableError,
     ModelTier,
-    TASK_TIER_MAP,
     TaskType,
     ThinkingBudget,
     ThinkingUpgradePolicy,
     chat_with_thinking_upgrade,
 )
-
 
 # ---------------------------------------------------------------------------
 # 保留的原有合法测试（含 M1 / H1 相关断言更新）

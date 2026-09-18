@@ -57,7 +57,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 STD_47507 = "GB/T 47507-2026《人工智能 可信赖 通则》"
 STD_45652 = "GB/T 45652-2025《网络安全技术 生成式人工智能预训练和优化训练数据安全规范》"
 
-STANDARD_MAP: Dict[str, List[Dict[str, str]]] = {
+STANDARD_MAP: dict[str, list[dict[str, str]]] = {
     "gate1": [
         {"standard": STD_47507, "dimension": "可问责/可追溯",
          "basis": "结论所依赖产物必须可核验存在, 支撑事后追溯"},
@@ -107,10 +107,10 @@ class GateResult:
     gate: str                     # gate1..gate5
     name: str
     passed: bool
-    checks: List[Dict[str, Any]] = field(default_factory=list)
-    standards: List[Dict[str, str]] = field(default_factory=list)
+    checks: list[dict[str, Any]] = field(default_factory=list)
+    standards: list[dict[str, str]] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "gate": self.gate, "name": self.name, "passed": self.passed,
             "checks": self.checks, "standards": self.standards,
@@ -120,15 +120,15 @@ class GateResult:
 @dataclass
 class AuditSpec:
     title: str = "证据闸门合规审计"
-    files: List[str] = field(default_factory=list)
+    files: list[str] = field(default_factory=list)
     label_file: str = ""
     label_field: str = "label"
-    expected_classes: List[str] = field(default_factory=list)
+    expected_classes: list[str] = field(default_factory=list)
     num_classes: int = 0
-    manifest: List[Dict[str, str]] = field(default_factory=list)
+    manifest: list[dict[str, str]] = field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "AuditSpec":
+    def from_dict(cls, d: dict[str, Any]) -> "AuditSpec":
         known = {f for f in cls.__dataclass_fields__}  # type: ignore[attr-defined]
         return cls(**{k: v for k, v in d.items() if k in known})
 
@@ -155,8 +155,8 @@ def _count_lines(path: Path) -> int:
     return n
 
 
-def _load_jsonl_labels(path: Path, label_field: str) -> List[str]:
-    labels: List[str] = []
+def _load_jsonl_labels(path: Path, label_field: str) -> list[str]:
+    labels: list[str] = []
     with path.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -177,14 +177,14 @@ def _load_jsonl_labels(path: Path, label_field: str) -> List[str]:
 # ────────────────────────────────────────────────────────────────────────────
 def gate1_existence(spec: AuditSpec) -> GateResult:
     """🚪1 存在性: 声明的全部产物必须存在 (大小/行数实测)"""
-    checks: List[Dict[str, Any]] = []
+    checks: list[dict[str, Any]] = []
     ok = True
     for fp in spec.files:
         p = Path(fp)
         if not p.is_absolute():
             p = PROJECT_ROOT / p
         if p.exists():
-            entry: Dict[str, Any] = {"file": str(p.name), "status": "OK",
+            entry: dict[str, Any] = {"file": str(p.name), "status": "OK",
                                      "size_bytes": p.stat().st_size}
             if p.suffix == ".jsonl":
                 entry["lines"] = _count_lines(p)
@@ -200,7 +200,7 @@ def gate1_existence(spec: AuditSpec) -> GateResult:
 
 def gate2_first_line(spec: AuditSpec) -> GateResult:
     """🚪2 首行证据: 真实首行字段 + 实测分布"""
-    checks: List[Dict[str, Any]] = []
+    checks: list[dict[str, Any]] = []
     if not spec.label_file:
         return GateResult("gate2", GATE_NAMES["gate2"], True,
                           [{"status": "SKIP", "reason": "no label_file"}],
@@ -213,8 +213,8 @@ def gate2_first_line(spec: AuditSpec) -> GateResult:
                           [{"status": "MISS", "file": str(p)}],
                           STANDARD_MAP["gate2"])
 
-    first_line: Optional[str] = None
-    fields: List[str] = []
+    first_line: str | None = None
+    fields: list[str] = []
     with p.open("r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -246,7 +246,7 @@ def gate2_first_line(spec: AuditSpec) -> GateResult:
 
 def gate3_alignment(spec: AuditSpec) -> GateResult:
     """🚪3 三对齐: 模型签名(类数) × 数据签名(类名集合) × 类名清单"""
-    checks: List[Dict[str, Any]] = []
+    checks: list[dict[str, Any]] = []
     if not spec.expected_classes or not spec.label_file:
         return GateResult("gate3", GATE_NAMES["gate3"], True,
                           [{"status": "SKIP",
@@ -278,12 +278,12 @@ def gate3_alignment(spec: AuditSpec) -> GateResult:
 
 
 def gate4_snapshot(spec: AuditSpec, out_dir: Path,
-                   prev: Optional[Dict[str, Any]]) -> GateResult:
+                   prev: dict[str, Any] | None) -> GateResult:
     """🚪4 快照失效: 产物哈希 + 时间戳; 哈希变化 → 旧结论待重测"""
-    checks: List[Dict[str, Any]] = []
+    checks: list[dict[str, Any]] = []
     now = datetime.now().isoformat(timespec="seconds")
-    hashes: Dict[str, str] = {}
-    changed: List[str] = []
+    hashes: dict[str, str] = {}
+    changed: list[str] = []
     prev_hashes = (prev or {}).get("hashes", {})
 
     for fp in spec.files:
@@ -326,7 +326,7 @@ def gate4_snapshot(spec: AuditSpec, out_dir: Path,
 
 def gate5_manifest(spec: AuditSpec) -> GateResult:
     """🚪5 PLAN/READY 分级: 清单条目必须显式分级, 禁止混用"""
-    checks: List[Dict[str, Any]] = []
+    checks: list[dict[str, Any]] = []
     if not spec.manifest:
         return GateResult("gate5", GATE_NAMES["gate5"], True,
                           [{"status": "SKIP", "reason": "no manifest"}],
@@ -340,7 +340,7 @@ def gate5_manifest(spec: AuditSpec) -> GateResult:
                            "reason": f"level={level!r} 非法, 必须为 PLAN/READY"})
             ok = False
             continue
-        row: Dict[str, Any] = {"item": item, "level": level, "status": "OK"}
+        row: dict[str, Any] = {"item": item, "level": level, "status": "OK"}
         # READY 条目若附文件, 必须存在 (与闸门1交叉核验)
         if level == "READY" and entry.get("file"):
             p = Path(entry["file"])
@@ -358,12 +358,12 @@ def gate5_manifest(spec: AuditSpec) -> GateResult:
 # ────────────────────────────────────────────────────────────────────────────
 # 主流程与报告
 # ────────────────────────────────────────────────────────────────────────────
-def run_audit(spec: AuditSpec, out_dir: Path) -> Dict[str, Any]:
+def run_audit(spec: AuditSpec, out_dir: Path) -> dict[str, Any]:
     """执行五道闸门审计, 写报告到 out_dir, 返回汇总 dict"""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    prev_snapshot: Optional[Dict[str, Any]] = None
+    prev_snapshot: dict[str, Any] | None = None
     prev_path = out_dir / "snapshot.json"
     if prev_path.exists():
         try:
@@ -400,7 +400,7 @@ def run_audit(spec: AuditSpec, out_dir: Path) -> Dict[str, Any]:
     return report
 
 
-def _render_markdown(report: Dict[str, Any]) -> str:
+def _render_markdown(report: dict[str, Any]) -> str:
     lines = [
         f"# {report['title']} — 证据闸门合规报告",
         "",
@@ -430,7 +430,7 @@ def _render_markdown(report: Dict[str, Any]) -> str:
 # ────────────────────────────────────────────────────────────────────────────
 # 内置示例规格
 # ────────────────────────────────────────────────────────────────────────────
-EXAMPLE_SPECS: Dict[str, Dict[str, Any]] = {
+EXAMPLE_SPECS: dict[str, dict[str, Any]] = {
     "camera4": {
         "title": "运镜分类 v6 4元类标签集合规审计",
         "files": [
@@ -452,7 +452,7 @@ EXAMPLE_SPECS: Dict[str, Dict[str, Any]] = {
 }
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(

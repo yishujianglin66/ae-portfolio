@@ -28,35 +28,34 @@ Photoshop MCP 客户端封装 v1.0
 
 from __future__ import annotations
 
-import time
 import logging
 import threading
+import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
+from ae.archive.bridge_middleware import (
+    LoggingMiddleware,
+    MetricsMiddleware,
+    MiddlewarePipeline,
+    RateLimitMiddleware,
+    RetryMiddleware,
+    ValidationMiddleware,
+)
 from ae.archive.bridge_protocol import (
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_POLL_INTERVAL,
+    DEFAULT_TTL_MS,
     BridgeClient,
     BridgeCommand,
-    BridgeResponse,
-    BridgeProgress,
     BridgeMetadata,
+    BridgeProgress,
+    BridgeResponse,
     CommandStatus,
     ErrorCode,
     Priority,
-    DEFAULT_TTL_MS,
-    DEFAULT_POLL_INTERVAL,
-    DEFAULT_MAX_RETRIES,
-)
-
-from ae.archive.bridge_middleware import (
-    MiddlewarePipeline,
-    LoggingMiddleware,
-    MetricsMiddleware,
-    RateLimitMiddleware,
-    ValidationMiddleware,
-    RetryMiddleware,
 )
 
 # Bridge 默认目录收口到 core/paths.py（AEK_PS_BRIDGE_DIR 可覆盖）
@@ -86,8 +85,8 @@ class PSMCPError(Exception):
     def __init__(
         self,
         message: str = "PS MCP 操作失败",
-        error_code: Optional[ErrorCode] = None,
-        details: Optional[Dict[str, Any]] = None,
+        error_code: ErrorCode | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         self.message = message
         self.error_code = error_code
@@ -143,7 +142,7 @@ class PSNotFoundError(PSMCPError):
 # 错误码到异常的映射
 # ============================================================================
 
-_ERROR_CODE_TO_EXCEPTION: Dict[ErrorCode, Type[PSMCPError]] = {
+_ERROR_CODE_TO_EXCEPTION: dict[ErrorCode, type[PSMCPError]] = {
     ErrorCode.AE_NOT_RUNNING: PSConnectionError,
     ErrorCode.AE_NOT_RESPONDING: PSConnectionError,
     ErrorCode.IO_ERROR: PSConnectionError,
@@ -219,7 +218,7 @@ class ClientStats:
     avg_latency_ms: float = 0.0
     min_latency_ms: float = 0.0
     max_latency_ms: float = 0.0
-    last_call_time: Optional[float] = None
+    last_call_time: float | None = None
 
 
 # ============================================================================
@@ -286,8 +285,8 @@ class PSMDPClient:
         self,
         bridge_dir: str = _DEFAULT_BRIDGE_DIR,
         signature_enabled: bool = True,
-        secret: Optional[str] = None,
-        secret_file: Optional[str] = None,
+        secret: str | None = None,
+        secret_file: str | None = None,
         poll_interval: float = DEFAULT_POLL_INTERVAL,
         max_retries: int = DEFAULT_MAX_RETRIES,
         base_delay_ms: float = 100,
@@ -298,7 +297,7 @@ class PSMDPClient:
         default_ttl_ms: int = DEFAULT_TTL_MS,
         enable_middleware: bool = True,
         max_requests_per_minute: int = 100,
-        middleware_pipeline: Optional[MiddlewarePipeline] = None,
+        middleware_pipeline: MiddlewarePipeline | None = None,
         enforce_response_signature: bool = False,
         anti_replay_window_seconds: int = 300,
     ) -> None:
@@ -339,11 +338,11 @@ class PSMDPClient:
         self._default_ttl_ms = default_ttl_ms
         self._stats = ClientStats()
         self._stats_lock = threading.Lock()
-        self._last_heartbeat_time: Optional[float] = None
+        self._last_heartbeat_time: float | None = None
         self._heartbeat_interval: float = 30.0
 
         self._middleware_enabled = enable_middleware
-        self._metrics_middleware: Optional[MetricsMiddleware] = None
+        self._metrics_middleware: MetricsMiddleware | None = None
 
         if enable_middleware:
             if middleware_pipeline is not None:
@@ -355,7 +354,7 @@ class PSMDPClient:
 
         self._enforce_response_signature = enforce_response_signature
         self._anti_replay_window = anti_replay_window_seconds
-        self._seen_command_ids: Dict[str, float] = {}
+        self._seen_command_ids: dict[str, float] = {}
         self._anti_replay_lock = threading.Lock()
 
     def _create_default_pipeline(self, max_requests_per_minute: int) -> MiddlewarePipeline:
@@ -431,14 +430,14 @@ class PSMDPClient:
     def _execute(
         self,
         command: str,
-        params: Optional[Dict[str, Any]] = None,
-        ttl: Optional[int] = None,
-        priority: Optional[Priority] = None,
-        idempotency_key: Optional[str] = None,
-        metadata: Optional[BridgeMetadata] = None,
-        progress_callback: Optional[Callable[[BridgeProgress], None]] = None,
+        params: dict[str, Any] | None = None,
+        ttl: int | None = None,
+        priority: Priority | None = None,
+        idempotency_key: str | None = None,
+        metadata: BridgeMetadata | None = None,
+        progress_callback: Callable[[BridgeProgress], None] | None = None,
         raise_on_error: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """执行命令并返回结果。"""
         start_time = time.time()
 
@@ -450,7 +449,7 @@ class PSMDPClient:
             "idempotency_key": idempotency_key,
         }
 
-        def _bridge_handler(cmd: Dict[str, Any]) -> BridgeResponse:
+        def _bridge_handler(cmd: dict[str, Any]) -> BridgeResponse:
             return self._bridge.send_command(
                 command=cmd["command"],
                 params=cmd["params"],
@@ -513,7 +512,7 @@ class PSMDPClient:
     # 连接状态与心跳
     # ------------------------------------------------------------------------
 
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         """检测 PS 是否存活。
 
         Returns:
@@ -571,7 +570,7 @@ class PSMDPClient:
     # 查询类方法
     # ------------------------------------------------------------------------
 
-    def get_document_info(self) -> Dict[str, Any]:
+    def get_document_info(self) -> dict[str, Any]:
         """获取当前文档信息。
 
         Returns:
@@ -579,7 +578,7 @@ class PSMDPClient:
         """
         return self._execute("getDocumentInfo")
 
-    def list_documents(self) -> List[DocumentInfo]:
+    def list_documents(self) -> list[DocumentInfo]:
         """列出所有打开的文档。
 
         Returns:
@@ -603,8 +602,8 @@ class PSMDPClient:
     def get_layer_info(
         self,
         document_name: str,
-        layer_name: Optional[str] = None,
-    ) -> Union[LayerInfo, List[LayerInfo]]:
+        layer_name: str | None = None,
+    ) -> Union[LayerInfo, list[LayerInfo]]:
         """获取图层信息。
 
         Args:
@@ -655,8 +654,8 @@ class PSMDPClient:
         height: int = 1080,
         resolution: float = 72.0,
         color_mode: str = "RGB",
-        background_color: Optional[List[float]] = None,
-    ) -> Dict[str, Any]:
+        background_color: list[float] | None = None,
+    ) -> dict[str, Any]:
         """创建新文档。
 
         Args:
@@ -681,7 +680,7 @@ class PSMDPClient:
             params["backgroundColor"] = background_color
         return self._execute("createDocument", params)
 
-    def open_document(self, file_path: str) -> Dict[str, Any]:
+    def open_document(self, file_path: str) -> dict[str, Any]:
         """打开文档。
 
         Args:
@@ -692,7 +691,7 @@ class PSMDPClient:
         """
         return self._execute("openDocument", {"filePath": file_path})
 
-    def close_document(self, document_name: str, save_changes: bool = False) -> Dict[str, Any]:
+    def close_document(self, document_name: str, save_changes: bool = False) -> dict[str, Any]:
         """关闭文档。
 
         Args:
@@ -707,7 +706,7 @@ class PSMDPClient:
             {"documentName": document_name, "saveChanges": save_changes},
         )
 
-    def save_document(self, document_name: str, file_path: Optional[str] = None) -> Dict[str, Any]:
+    def save_document(self, document_name: str, file_path: str | None = None) -> dict[str, Any]:
         """保存文档。
 
         Args:
@@ -717,7 +716,7 @@ class PSMDPClient:
         Returns:
             操作结果
         """
-        params: Dict[str, Any] = {"documentName": document_name}
+        params: dict[str, Any] = {"documentName": document_name}
         if file_path:
             params["filePath"] = file_path
         return self._execute("saveDocument", params)
@@ -728,7 +727,7 @@ class PSMDPClient:
         file_path: str,
         format: str = "PNG",
         quality: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出文档。
 
         Args:
@@ -757,9 +756,9 @@ class PSMDPClient:
     def create_layer(
         self,
         document_name: str,
-        layer_name: Optional[str] = None,
+        layer_name: str | None = None,
         layer_type: str = "pixel",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建图层。
 
         Args:
@@ -770,7 +769,7 @@ class PSMDPClient:
         Returns:
             新建图层信息
         """
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "documentName": document_name,
             "layerType": layer_type,
         }
@@ -778,7 +777,7 @@ class PSMDPClient:
             params["layerName"] = layer_name
         return self._execute("createLayer", params)
 
-    def delete_layer(self, document_name: str, layer_name: str) -> Dict[str, Any]:
+    def delete_layer(self, document_name: str, layer_name: str) -> dict[str, Any]:
         """删除图层。
 
         Args:
@@ -797,8 +796,8 @@ class PSMDPClient:
         self,
         document_name: str,
         layer_name: str,
-        new_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        new_name: str | None = None,
+    ) -> dict[str, Any]:
         """复制图层。
 
         Args:
@@ -821,8 +820,8 @@ class PSMDPClient:
         self,
         document_name: str,
         layer_name: str,
-        properties: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any],
+    ) -> dict[str, Any]:
         """设置图层属性。
 
         Args:
@@ -851,7 +850,7 @@ class PSMDPClient:
         document_name: str,
         layer_name: str,
         blend_mode: Union[BlendMode, str],
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """设置图层混合模式。
 
         Args:
@@ -881,8 +880,8 @@ class PSMDPClient:
         document_name: str,
         layer_name: str,
         filter_name: str,
-        properties: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """应用滤镜。
 
         Args:
@@ -894,7 +893,7 @@ class PSMDPClient:
         Returns:
             操作结果
         """
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "documentName": document_name,
             "layerName": layer_name,
             "filterName": filter_name,
@@ -903,7 +902,7 @@ class PSMDPClient:
             params["properties"] = properties
         return self._execute("applyFilter", params)
 
-    def remove_filter(self, document_name: str, layer_name: str, filter_name: str) -> Dict[str, Any]:
+    def remove_filter(self, document_name: str, layer_name: str, filter_name: str) -> dict[str, Any]:
         """移除滤镜。
 
         Args:
@@ -934,7 +933,7 @@ class PSMDPClient:
         left: int = 0,
         width: int = 100,
         height: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建选区。
 
         Args:
@@ -961,10 +960,10 @@ class PSMDPClient:
     def fill_selection(
         self,
         document_name: str,
-        color: List[float],
+        color: list[float],
         blend_mode: str = "NORMAL",
         opacity: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """填充选区。
 
         Args:
@@ -990,11 +989,11 @@ class PSMDPClient:
     # 撤销/重做
     # ------------------------------------------------------------------------
 
-    def undo(self) -> Dict[str, Any]:
+    def undo(self) -> dict[str, Any]:
         """撤销上一步操作。"""
         return self._execute("undo", {})
 
-    def redo(self) -> Dict[str, Any]:
+    def redo(self) -> dict[str, Any]:
         """重做上一步操作。"""
         return self._execute("redo", {})
 
@@ -1002,7 +1001,7 @@ class PSMDPClient:
     # 脚本执行
     # ------------------------------------------------------------------------
 
-    def execute_script(self, script_content: str) -> Dict[str, Any]:
+    def execute_script(self, script_content: str) -> dict[str, Any]:
         """执行 ExtendScript 脚本。
 
         Args:
@@ -1023,7 +1022,7 @@ class PSMDPClient:
         with self._stats_lock:
             return self._stats
 
-    def get_stats_dict(self) -> Dict[str, Any]:
+    def get_stats_dict(self) -> dict[str, Any]:
         """获取统计信息字典。"""
         s = self.stats
         return {

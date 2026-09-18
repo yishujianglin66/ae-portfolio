@@ -3,8 +3,9 @@ pytest 共享 fixture 与测试配置
 """
 import os
 import sys
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
 
 # 确保项目根目录在 Python 路径中
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

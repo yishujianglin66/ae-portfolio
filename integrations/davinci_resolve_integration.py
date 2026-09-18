@@ -22,17 +22,17 @@ CLI 工具: Resolve.exe
 - simulate: 模拟执行，生成模拟结果（用于测试和流程验证）
 - auto    : 优先真实模式，失败自动降级到模拟模式
 """
-import os
-import sys
 import json
-import time
+import os
 import subprocess
+import sys
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple, Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from core.config import ConfigManager
 
@@ -82,7 +82,7 @@ class ColorGradeNode:
     """
     node_type: str = "primary"
     name: str = "Node"
-    settings: Dict[str, Any] = field(default_factory=dict)
+    settings: dict[str, Any] = field(default_factory=dict)
     enabled: bool = True
 
 
@@ -113,7 +113,7 @@ class ResolveColorConfig:
     output_format: str = "mp4"
     render_quality: int = 90
     use_lut: str = ""
-    nodes: List[Dict[str, Any]] = field(default_factory=list)
+    nodes: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
@@ -136,13 +136,13 @@ class ResolveColorResult:
     output_path: str = ""
     duration: float = 0.0
     nodes_applied: int = 0
-    color_grade_summary: Dict[str, Any] = field(default_factory=dict)
-    error: Optional[str] = None
+    color_grade_summary: dict[str, Any] = field(default_factory=dict)
+    error: str | None = None
     mode: str = "simulate"
     preset: str = ""
 
 
-RESOLVE_PRESETS: Dict[str, Dict[str, Any]] = {
+RESOLVE_PRESETS: dict[str, dict[str, Any]] = {
     "default": {
         "description": "默认轻微调色，自然色彩增强",
         "nodes": [
@@ -482,7 +482,7 @@ RESOLVE_PRESETS: Dict[str, Dict[str, Any]] = {
 # 借鉴 video-editing-skill 项目的 FFmpeg filter 链调色方案
 # 当 DaVinci Resolve 不可用时，自动降级到 FFmpeg 滤镜链调色
 
-FFMPEG_COLOR_PRESETS: Dict[str, Dict[str, Any]] = {
+FFMPEG_COLOR_PRESETS: dict[str, dict[str, Any]] = {
     "natural": {
         "description": "自然色彩增强（轻微饱和度+对比度提升）",
         "ffmpeg_filter": (
@@ -581,11 +581,11 @@ class ColorGradeArtifact:
     preset_name: str = ""
     source: str = "auto"
     created_at: str = ""
-    nodes: List[Dict[str, Any]] = field(default_factory=list)
+    nodes: list[dict[str, Any]] = field(default_factory=list)
     ffmpeg_filter: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "version": self.version,
             "preset_name": self.preset_name,
@@ -600,7 +600,7 @@ class ColorGradeArtifact:
         return json.dumps(self.to_dict(), indent=indent, ensure_ascii=False)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ColorGradeArtifact":
+    def from_dict(cls, data: dict[str, Any]) -> "ColorGradeArtifact":
         return cls(
             version=data.get("version", "1.0"),
             preset_name=data.get("preset_name", ""),
@@ -630,7 +630,7 @@ class DavinciColorist:
     支持真实模式、模拟模式和自动降级模式。
     """
 
-    def __init__(self, config: Optional[ResolveColorConfig] = None):
+    def __init__(self, config: ResolveColorConfig | None = None):
         """初始化 DavinciColorist。
 
         Args:
@@ -647,7 +647,7 @@ class DavinciColorist:
         print(f"[DavinciColorist] FFmpeg available: {self._ffmpeg_available}")
         print(f"[DavinciColorist] Executable: {self._exe_path}")
 
-    def _find_resolve_exe(self) -> Optional[Path]:
+    def _find_resolve_exe(self) -> Path | None:
         """查找 DaVinci Resolve 可执行文件。
 
         Returns:
@@ -711,11 +711,11 @@ class DavinciColorist:
         """
         return self._available
 
-    def get_available_presets(self) -> List[str]:
+    def get_available_presets(self) -> list[str]:
         """获取所有可用调色预设名称（Resolve + FFmpeg）。"""
         return list(RESOLVE_PRESETS.keys()) + list(FFMPEG_COLOR_PRESETS.keys())
 
-    def apply_preset(self, preset_name: str) -> List[ColorGradeNode]:
+    def apply_preset(self, preset_name: str) -> list[ColorGradeNode]:
         """根据预设名称生成节点配置列表。
 
         Args:
@@ -754,7 +754,7 @@ class DavinciColorist:
                 f"Available: {list(RESOLVE_PRESETS.keys()) + list(FFMPEG_COLOR_PRESETS.keys())}"
             )
 
-    def _get_video_info(self, video_path: str) -> Dict[str, Any]:
+    def _get_video_info(self, video_path: str) -> dict[str, Any]:
         """获取视频基本信息（分辨率、帧率、时长等）。
 
         Args:
@@ -783,7 +783,7 @@ class DavinciColorist:
     def estimate_duration(
         self,
         input_path: str,
-        config: Optional[ResolveColorConfig] = None,
+        config: ResolveColorConfig | None = None,
     ) -> float:
         """估算调色处理时间（基于视频时长和节点复杂度）。
 
@@ -819,8 +819,8 @@ class DavinciColorist:
 
     def _build_color_grade_summary(
         self,
-        nodes: List[ColorGradeNode],
-    ) -> Dict[str, Any]:
+        nodes: list[ColorGradeNode],
+    ) -> dict[str, Any]:
         """根据节点配置生成调色摘要。
 
         Args:
@@ -861,9 +861,9 @@ class DavinciColorist:
     def color_grade(
         self,
         input_path: str,
-        output_path: Optional[str] = None,
-        config: Optional[ResolveColorConfig] = None,
-        callback: Optional[Callable[[float, str], None]] = None,
+        output_path: str | None = None,
+        config: ResolveColorConfig | None = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> ResolveColorResult:
         """主方法：对视频进行调色。
 
@@ -986,7 +986,7 @@ class DavinciColorist:
                 resolve_home = str(self._exe_path.parent) if self._exe_path else None
                 engine = ResolveColorEngine(resolve_home)
                 if engine.check_resolve_running():
-                    print(f"[DavinciColorist] fuscript.exe connected to Resolve successfully")
+                    print("[DavinciColorist] fuscript.exe connected to Resolve successfully")
                     self._fuscript_available = True
                     return True
             except Exception as e:
@@ -1035,7 +1035,7 @@ class DavinciColorist:
         programdata_script_api = Path(program_data) / "Blackmagic Design" / "DaVinci Resolve" / "Support" / "Developer" / "Scripting"
         
         # 3. 构造所有 Scripting Modules 候选路径
-        script_api_candidates: List[Path] = []
+        script_api_candidates: list[Path] = []
         
         # 3.1 各安装目录下的 Scripting/Modules
         for install_dir in resolve_install_candidates:
@@ -1072,7 +1072,7 @@ class DavinciColorist:
                 continue
         
         # 5. fusionscript.dll 探测（Resolve Python API 库的实际实现）
-        fusionscript_candidates: List[Path] = []
+        fusionscript_candidates: list[Path] = []
         for install_dir in resolve_install_candidates:
             fusionscript_candidates.extend([
                 install_dir / "fusionscript.dll",
@@ -1094,7 +1094,7 @@ class DavinciColorist:
                 continue
         
         # 6. python_get_resolve.py 注入路径（常见辅助脚本）
-        python_get_resolve_paths: List[Path] = []
+        python_get_resolve_paths: list[Path] = []
         for install_dir in resolve_install_candidates:
             python_get_resolve_paths.extend([
                 install_dir / "Support" / "Developer" / "Scripting" / "Examples" / "Python" / "python_get_resolve.py",
@@ -1184,8 +1184,8 @@ class DavinciColorist:
         input_path: str,
         output_path: str,
         config: ResolveColorConfig,
-        nodes: List[ColorGradeNode],
-        callback: Optional[Callable[[float, str], None]] = None,
+        nodes: list[ColorGradeNode],
+        callback: Callable[[float, str], None] | None = None,
     ) -> ResolveColorResult:
         """真实模式：通过 fuscript.exe + Lua 自动化执行调色。
 
@@ -1227,7 +1227,7 @@ class DavinciColorist:
             if callback:
                 callback(0.05, "通过 fuscript.exe 连接 DaVinci Resolve...")
 
-            from integrations.davinci_fuscript import ResolveColorEngine, ColorGradeConfig
+            from integrations.davinci_fuscript import ColorGradeConfig, ResolveColorEngine
             engine = ResolveColorEngine(str(self._exe_path.parent))
 
             if not engine.check_resolve_running():
@@ -1301,7 +1301,7 @@ class DavinciColorist:
         input_path: str,
         output_path: str,
         config: ResolveColorConfig,
-        nodes: List[ColorGradeNode],
+        nodes: list[ColorGradeNode],
     ) -> str:
         """生成 DaVinci Resolve Python 脚本。
 
@@ -1340,7 +1340,7 @@ class DavinciColorist:
             "    clip = timeline.GetItemInTrack(1, 1, 1)",
             "    if clip:",
             "        grade = clip.GetClipColorGrade()",
-            f"        num_nodes = grade.GetNumberOfNodes()",
+            "        num_nodes = grade.GetNumberOfNodes()",
         ]
 
         for i, node in enumerate(nodes):
@@ -1401,8 +1401,8 @@ class DavinciColorist:
         input_path: str,
         output_path: str,
         config: ResolveColorConfig,
-        nodes: List[ColorGradeNode],
-        callback: Optional[Callable[[float, str], None]] = None,
+        nodes: list[ColorGradeNode],
+        callback: Callable[[float, str], None] | None = None,
     ) -> ResolveColorResult:
         """模拟模式：不真正调用 Resolve，生成模拟结果。
 
@@ -1480,7 +1480,7 @@ class DavinciColorist:
         input_path: str,
         output_path: str,
         preset_name: str,
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> ResolveColorResult:
         """通过 FFmpeg 滤镜链执行调色（Resolve 不可用时的降级方案）。
 
@@ -1549,10 +1549,10 @@ class DavinciColorist:
     def color_grade_with_artifact(
         self,
         input_path: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
         preset: str = "default",
-        artifact_path: Optional[str] = None,
-    ) -> Tuple[ResolveColorResult, Optional[ColorGradeArtifact]]:
+        artifact_path: str | None = None,
+    ) -> tuple[ResolveColorResult, ColorGradeArtifact | None]:
         """调色并生成 color_grade.v1 artifact。
 
         Args:
@@ -1606,8 +1606,8 @@ class DavinciColorist:
         self,
         original_path: str,
         graded_path: str,
-        metrics: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        metrics: list[str] | None = None,
+    ) -> dict[str, Any]:
         """自评估：比较原始视频和调色后视频的质量差异。
 
         使用 FFmpeg/FFprobe 提取统计指标进行评估。
@@ -1623,7 +1623,7 @@ class DavinciColorist:
         if metrics is None:
             metrics = ["brightness_delta", "contrast_delta", "saturation_delta", "file_size_ratio"]
 
-        eval_result: Dict[str, Any] = {
+        eval_result: dict[str, Any] = {
             "original": original_path,
             "graded": graded_path,
             "metrics": {},
@@ -1632,7 +1632,7 @@ class DavinciColorist:
             "issues": [],
         }
 
-        def _probe_stat(path: str) -> Dict[str, Any]:
+        def _probe_stat(path: str) -> dict[str, Any]:
             try:
                 cmd = [
                     "ffprobe", "-v", "quiet",
@@ -1686,11 +1686,11 @@ class DavinciColorist:
 
     def batch_color_grade(
         self,
-        input_paths: List[str],
-        output_dir: Optional[str] = None,
-        preset: Optional[str] = None,
-        callback: Optional[Callable[[int, int, ResolveColorResult], None]] = None,
-    ) -> List[ResolveColorResult]:
+        input_paths: list[str],
+        output_dir: str | None = None,
+        preset: str | None = None,
+        callback: Callable[[int, int, ResolveColorResult], None] | None = None,
+    ) -> list[ResolveColorResult]:
         """批量调色。
 
         Args:
@@ -1885,7 +1885,7 @@ def _run_self_tests():
         if attrs_ok:
             print(f"  ✓ ColorGradeNode 包含所有必需属性 ({len(required_attrs)} 个)")
         else:
-            print(f"  ✗ ColorGradeNode 缺少必需属性")
+            print("  ✗ ColorGradeNode 缺少必需属性")
         results.append(("node_dataclass", attrs_ok))
     except Exception as e:
         print(f"  ✗ ColorGradeNode 错误: {e}")
@@ -1903,7 +1903,7 @@ def _run_self_tests():
         if attrs_ok:
             print(f"  ✓ ResolveColorConfig 包含所有必需属性 ({len(required_attrs)} 个)")
         else:
-            print(f"  ✗ ResolveColorConfig 缺少必需属性")
+            print("  ✗ ResolveColorConfig 缺少必需属性")
         results.append(("config_dataclass", attrs_ok))
     except Exception as e:
         print(f"  ✗ ResolveColorConfig 错误: {e}")
@@ -1920,7 +1920,7 @@ def _run_self_tests():
         if attrs_ok:
             print(f"  ✓ ResolveColorResult 包含所有必需属性 ({len(required_attrs)} 个)")
         else:
-            print(f"  ✗ ResolveColorResult 缺少必需属性")
+            print("  ✗ ResolveColorResult 缺少必需属性")
         results.append(("result_dataclass", attrs_ok))
     except Exception as e:
         print(f"  ✗ ResolveColorResult 错误: {e}")
@@ -1929,7 +1929,7 @@ def _run_self_tests():
     print("\n[测试 5/10] 检查 DavinciColorist 初始化...")
     try:
         colorist = DavinciColorist(config=ResolveColorConfig(mode="simulate"))
-        print(f"  ✓ DavinciColorist 初始化成功")
+        print("  ✓ DavinciColorist 初始化成功")
         print(f"    - Mode: {colorist.config.mode}")
         print(f"    - Available: {colorist.is_available()}")
         results.append(("colorist_init", True))
@@ -1955,10 +1955,10 @@ def _run_self_tests():
                     print(f"    - {n.name} ({n.node_type}, enabled={n.enabled})")
                 results.append(("presets_apply", True))
             else:
-                print(f"  ✗ 预设节点配置错误")
+                print("  ✗ 预设节点配置错误")
                 results.append(("presets_apply", False))
         else:
-            print(f"  ✗ 预设列表为空或数量不足")
+            print("  ✗ 预设列表为空或数量不足")
             results.append(("presets_apply", False))
     except Exception as e:
         print(f"  ✗ 预设测试错误: {e}")
@@ -1983,7 +1983,7 @@ def _run_self_tests():
         )
 
         if result.success and Path(result.output_path).exists():
-            print(f"  ✓ 模拟模式调色成功")
+            print("  ✓ 模拟模式调色成功")
             print(f"    - 应用节点数: {result.nodes_applied}")
             print(f"    - 模式: {result.mode}")
             print(f"    - 预设: {result.preset}")
@@ -2009,7 +2009,7 @@ def _run_self_tests():
             print(f"    - Nodes: {len(config.nodes)}")
             results.append(("preset_create", True))
         else:
-            print(f"  ✗ 预设参数不匹配")
+            print("  ✗ 预设参数不匹配")
             results.append(("preset_create", False))
     except Exception as e:
         print(f"  ✗ create_config_from_preset 错误: {e}")
@@ -2026,12 +2026,12 @@ def _run_self_tests():
             tree = ET.parse(output_path)
             root = tree.getroot()
             nodes_found = root.findall(".//Node")
-            print(f"  ✓ DRX 文件生成成功")
+            print("  ✓ DRX 文件生成成功")
             print(f"    - 文件路径: {output_path}")
             print(f"    - 节点数量: {len(nodes_found)}")
             results.append(("drx_generation", True))
         else:
-            print(f"  ✗ DRX 文件生成失败")
+            print("  ✗ DRX 文件生成失败")
             results.append(("drx_generation", False))
     except Exception as e:
         print(f"  ✗ generate_drx_file 错误: {e}")

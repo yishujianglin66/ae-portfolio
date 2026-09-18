@@ -59,16 +59,20 @@ except ImportError:
     _STOCK_AVAILABLE = False
 
 # FFmpeg/FFprobe 路径解析（避免裸 "ffmpeg" 字符串，支持自定义路径配置）
-from pipeline.stages import resolve_ffmpeg, resolve_ffprobe
-
 # 中途自评节点（TEMPO macro-step critic 思想，方案文档 P0-1）
-from pipeline.midstep_critic import StageCritic, CriticAbortError
+from pipeline.midstep_critic import CriticAbortError, StageCritic
+from pipeline.stages import resolve_ffmpeg, resolve_ffprobe
 
 # 真实引擎调度器（Phase 1+ 升级：引擎在线时真实执行，否则 FFmpeg 降级）
 try:
     from pipeline.engine_task_dispatcher import (
-        get_dispatcher, ExecutionMode, TaskResult,
-        AETaskDispatcher, PRTaskDispatcher, ResolveTaskDispatcher, AMETaskDispatcher,
+        AETaskDispatcher,
+        AMETaskDispatcher,
+        ExecutionMode,
+        PRTaskDispatcher,
+        ResolveTaskDispatcher,
+        TaskResult,
+        get_dispatcher,
     )
     _DISPATCHER_AVAILABLE = True
 except ImportError:
@@ -76,9 +80,11 @@ except ImportError:
 
 # P1 一致性收口：故障策略（降级 opt-in + 八类 postmortem，规格 §0.4）
 from core.pipeline_fault_policy import (
-    engine_fallback_enabled, classify_failure, write_postmortem, FlagshipStageError,
+    FlagshipStageError,
+    classify_failure,
+    engine_fallback_enabled,
+    write_postmortem,
 )
-
 
 # ============================================================================
 #  工具函数
@@ -88,7 +94,7 @@ from core.pipeline_fault_policy import (
 COMP_DURATIONS = (5.0, 7.0, 5.0)
 
 
-def run_cmd(cmd: List[str], timeout: float = 300) -> subprocess.CompletedProcess:
+def run_cmd(cmd: list[str], timeout: float = 300) -> subprocess.CompletedProcess:
     """执行子进程命令，返回 CompletedProcess（stdout/stderr 为 str）。
 
     P0-1 稳定性加固：超时或异常时按进程组树杀，避免 aerender/ffmpeg
@@ -130,7 +136,7 @@ def run_cmd(cmd: List[str], timeout: float = 300) -> subprocess.CompletedProcess
     return subprocess.CompletedProcess(cmd, proc.returncode, out, err)
 
 
-def _terminate_child_tree(proc: "Optional[subprocess.Popen]") -> None:
+def _terminate_child_tree(proc: "subprocess.Popen | None") -> None:
     """跨平台按进程树杀（含 aerender 派生的 ffmpeg 子进程）。"""
     if proc is None or proc.pid is None:
         return
@@ -152,7 +158,7 @@ def _terminate_child_tree(proc: "Optional[subprocess.Popen]") -> None:
         logger.warning(f"[CMD] 子进程树清理失败 (pid={pid}): {e}")
 
 
-def ffprobe_json(path: Path) -> Dict[str, Any]:
+def ffprobe_json(path: Path) -> dict[str, Any]:
     """获取视频的 ffprobe JSON 元数据。"""
     proc = run_cmd([
         resolve_ffprobe(), "-v", "quiet", "-print_format", "json",
@@ -172,7 +178,7 @@ def md5_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def emit_event(events_path: Path, event: str, payload: Optional[Dict[str, Any]] = None) -> None:
+def emit_event(events_path: Path, event: str, payload: dict[str, Any] | None = None) -> None:
     """events.jsonl 事件流：追加一条结构化事件（OpenHands 事件流思想，观测层统一入口）。"""
     entry = {"ts": round(time.time(), 3), "event": event, **(payload or {})}
     try:
@@ -182,7 +188,7 @@ def emit_event(events_path: Path, event: str, payload: Optional[Dict[str, Any]] 
         logger.warning(f"[Events] 事件写入失败: {e}")
 
 
-def write_manifest_safe(run_dir: Path, manifest: Dict[str, Any]) -> None:
+def write_manifest_safe(run_dir: Path, manifest: dict[str, Any]) -> None:
     """容错写入 manifest.json：目录自愈 + 镜像到 reports/flagship_runs/。
 
     修复：并行外部进程可能在经验回灌期间删除 run 目录，导致末尾写
@@ -207,7 +213,7 @@ def write_manifest_safe(run_dir: Path, manifest: Dict[str, Any]) -> None:
 
 def critic_gate(
     critic: "StageCritic", events_path: Path, stage: str,
-    artifacts: Dict[str, Any], context: Optional[Dict[str, Any]] = None,
+    artifacts: dict[str, Any], context: dict[str, Any] | None = None,
 ):
     """执行一次阶段边界自评并把裁决写入事件流，abort 时抛出 CriticAbortError。"""
     verdict = critic.evaluate(stage, artifacts, context)
@@ -221,7 +227,7 @@ def critic_gate(
 #  素材生成
 # ============================================================================
 
-def generate_test_assets(output_dir: Path) -> Dict[str, Path]:
+def generate_test_assets(output_dir: Path) -> dict[str, Path]:
     """用 FFmpeg 生成真实测试素材：3 条 5s 彩色视频 + 1 条 15s 带节拍 WAV。
 
     视频：不同颜色的 testsrc + 文字叠加，确保有视觉变化（非静帧）
@@ -247,7 +253,7 @@ def generate_test_assets(output_dir: Path) -> Dict[str, Path]:
         # 使用 testsrc2 + 动态效果确保帧间有变化
         cmd = [
             resolve_ffmpeg(), "-y",
-            "-f", "lavfi", "-i", f"testsrc2=size=1920x1080:rate=24:duration=5",
+            "-f", "lavfi", "-i", "testsrc2=size=1920x1080:rate=24:duration=5",
             "-vf", (
                 f"drawtext=text='{label}':fontsize=144:fontcolor=white:"
                 f"x=(w-text_w)/2:y=(h-text_h)/2:"
@@ -265,7 +271,7 @@ def generate_test_assets(output_dir: Path) -> Dict[str, Path]:
             cmd_simple = [
                 resolve_ffmpeg(), "-y",
                 "-f", "lavfi", "-i",
-                f"testsrc2=size=1920x1080:rate=24:duration=5",
+                "testsrc2=size=1920x1080:rate=24:duration=5",
                 "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p",
                 str(out),
             ]
@@ -303,7 +309,7 @@ def generate_test_assets(output_dir: Path) -> Dict[str, Path]:
     return assets
 
 
-def download_real_assets(output_dir: Path) -> Dict[str, Path]:
+def download_real_assets(output_dir: Path) -> dict[str, Path]:
     """从 Pexels/Pixabay 下载真实无水印视频素材 + 生成音频。
 
     下载 3 条高质量视频（分别对应 Intro/Main/Outro），
@@ -381,9 +387,9 @@ def download_real_assets(output_dir: Path) -> Dict[str, Path]:
 #  S0: 健康检查
 # ============================================================================
 
-def stage_s0_health(run_dir: Path) -> Dict[str, Any]:
+def stage_s0_health(run_dir: Path) -> dict[str, Any]:
     """S0 环境健康检查。"""
-    from core.health_checker import HealthChecker, HealthCheckConfig
+    from core.health_checker import HealthCheckConfig, HealthChecker
 
     config = HealthCheckConfig(min_disk_free_gb=10.0, check_bridge=True)
     checker = HealthChecker(config)
@@ -408,7 +414,7 @@ def stage_s0_health(run_dir: Path) -> Dict[str, Any]:
 #  S1: 素材规范化
 # ============================================================================
 
-def stage_s1_normalize(run_dir: Path, assets: Dict[str, Path]) -> Dict[str, Any]:
+def stage_s1_normalize(run_dir: Path, assets: dict[str, Path]) -> dict[str, Any]:
     """S1 素材规范化：3 视频 → 1920×1080 H.264 24fps + 1 WAV。"""
     out_dir = run_dir / "S1_assets"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -472,7 +478,7 @@ def stage_s1_normalize(run_dir: Path, assets: Dict[str, Path]) -> Dict[str, Any]
 #  S2: 节拍分析
 # ============================================================================
 
-def stage_s2_beat(run_dir: Path, audio_path: Path) -> Dict[str, Any]:
+def stage_s2_beat(run_dir: Path, audio_path: Path) -> dict[str, Any]:
     """S2 节拍分析：Librosa beat_track + drop 检测。"""
     import librosa
     import numpy as np
@@ -558,7 +564,7 @@ def stage_s2_beat(run_dir: Path, audio_path: Path) -> Dict[str, Any]:
 #  S3: AE 合成渲染
 # ============================================================================
 
-def stage_s3_ae_composite(run_dir: Path, source_videos: List[Path]) -> Dict[str, Any]:
+def stage_s3_ae_composite(run_dir: Path, source_videos: list[Path]) -> dict[str, Any]:
     """S3 AE 木偶风格化合成：3 段 .mov 渲染。
 
     优先尝试 AE Bridge/aerender；不可用时使用 FFmpeg 合成等效产物
@@ -601,8 +607,8 @@ def stage_s3_ae_composite(run_dir: Path, source_videos: List[Path]) -> Dict[str,
 
 
 def _s3_native_ae(
-    out_dir: Path, renders_dir: Path, comp_defs: List
-) -> Optional[Dict[str, Any]]:
+    out_dir: Path, renders_dir: Path, comp_defs: list
+) -> dict[str, Any] | None:
     """S3 AE 真实引擎路径：Bridge 创建合成 + aerender 渲染。
 
     优先级:
@@ -718,8 +724,8 @@ def _s3_textfx_effect_jsx(brightness: float) -> str:
 
 def _s3_ae_bridge_path(
     ae_disp: Any, aep_path: Path, renders_dir: Path,
-    comp_defs: List, renders: List, effects_applied: List,
-) -> Optional[Dict[str, Any]]:
+    comp_defs: list, renders: list, effects_applied: list,
+) -> dict[str, Any] | None:
     """S3 AE Bridge 创建 + Bridge 渲染路径（不依赖 aerender 模板）"""
     # Step 1: 通过 Bridge 创建合成
     for comp_name, duration, src_video, brightness in comp_defs:
@@ -844,9 +850,9 @@ def _s3_ae_bridge_path(
 
 
 def _s3_ae_cli_path(
-    aerender: Path, afterfx: Optional[Path], aep_path: Path, renders_dir: Path,
-    comp_defs: List, renders: List, effects_applied: List,
-) -> Optional[Dict[str, Any]]:
+    aerender: Path, afterfx: Path | None, aep_path: Path, renders_dir: Path,
+    comp_defs: list, renders: list, effects_applied: list,
+) -> dict[str, Any] | None:
     """S3 aerender CLI 路径：用 AfterFX.exe 执行 JSX 创建合成 + aerender 渲染
 
     注意：aerender 在此版本中不支持 -r 参数，改用 AfterFX.exe -r 执行脚本。
@@ -904,7 +910,7 @@ def _s3_ae_cli_path(
     # 执行创建脚本（使用 AfterFX.exe -r，因为 aerender 不支持 -r 参数）
     if afterfx and afterfx.exists():
         cmd_create = [str(afterfx), "-r", str(script_file)]
-        logger.info(f"[S3] AfterFX CLI: 执行创建脚本...")
+        logger.info("[S3] AfterFX CLI: 执行创建脚本...")
     else:
         logger.warning("[S3] AfterFX.exe 未找到，尝试 aerender -r（可能失败）")
         cmd_create = [str(aerender), "-r", str(script_file), "-close", "DO_NOT_SAVE_CHANGES"]
@@ -1011,8 +1017,8 @@ def _s3_ae_cli_path(
 
 
 def _s3_ffmpeg_fallback(
-    out_dir: Path, renders_dir: Path, comp_defs: List
-) -> Dict[str, Any]:
+    out_dir: Path, renders_dir: Path, comp_defs: list
+) -> dict[str, Any]:
     """S3 FFmpeg 降级路径（原始实现，真实视频处理）。"""
     renders = []
     ae_used = False
@@ -1128,13 +1134,13 @@ def _ensure_ae_bridge_ready(timeout: float = 120.0) -> bool:
     )
 
 
-def find_resolve_exe() -> Optional[Path]:
+def find_resolve_exe() -> Path | None:
     """自动发现 Resolve.exe（修复：单一硬编码路径导致已安装也误报“未找到”）。
 
     发现顺序：settings 中央配置（支持 AEKV_DAVINCI_PATH 环境变量覆盖）
     → 常见安装路径候选 → Windows 注册表 Uninstall 条目。
     """
-    candidates: List[Path] = []
+    candidates: list[Path] = []
     # 1. 中央 settings
     try:
         from puppet_automation.src.config.settings import get_settings
@@ -1243,7 +1249,7 @@ def _ensure_resolve_ready(timeout: float = 120.0) -> bool:
         resolve_exe = find_resolve_exe()
         if resolve_exe is None:
             return False
-        logger.info(f"[Resolve] 启动 Resolve.exe...")
+        logger.info("[Resolve] 启动 Resolve.exe...")
         try:
             subprocess.Popen(
                 [str(resolve_exe)],
@@ -1317,7 +1323,7 @@ def _ensure_pr_bridge_ready(timeout: float = 120.0) -> bool:
 
     # 如果 PR 未运行，启动它（安装位置自动发现，降级 settings/已知候选路径）
     if not pr_running:
-        pr_exe: Optional[Path] = None
+        pr_exe: Path | None = None
         try:
             from puppet_automation.src.config.settings import get_settings
             pr_exe = get_settings().premiere_path
@@ -1337,7 +1343,7 @@ def _ensure_pr_bridge_ready(timeout: float = 120.0) -> bool:
         if not pr_exe.exists():
             logger.warning(f"[PR] Adobe Premiere Pro.exe 未找到: {pr_exe}")
             return False
-        logger.info(f"[PR] 启动 Adobe Premiere Pro.exe...")
+        logger.info("[PR] 启动 Adobe Premiere Pro.exe...")
         try:
             subprocess.Popen(
                 [str(pr_exe)],
@@ -1374,7 +1380,7 @@ def _ensure_pr_bridge_ready(timeout: float = 120.0) -> bool:
 #  S4: PR 卡点粗剪
 # ============================================================================
 
-def stage_s4_premiere(run_dir: Path, renders: List[Path], beats_json: Path) -> Dict[str, Any]:
+def stage_s4_premiere(run_dir: Path, renders: list[Path], beats_json: Path) -> dict[str, Any]:
     """S4 PR 卡点粗剪 + 导出 timeline.xml。
 
     优先 PR Bridge；不可用时程序化生成 FCP XML（标准格式，PR 可直接导入）。
@@ -1385,7 +1391,7 @@ def stage_s4_premiere(run_dir: Path, renders: List[Path], beats_json: Path) -> D
     xml_path = out_dir / "timeline.xml"
 
     if xml_path.exists() and xml_path.stat().st_size > 100:
-        logger.info(f"[S4] 已存在: timeline.xml")
+        logger.info("[S4] 已存在: timeline.xml")
         return {"timeline_xml": str(xml_path), "execution_mode": "cached"}
 
     # 读取 beats
@@ -1439,9 +1445,9 @@ def stage_s4_premiere(run_dir: Path, renders: List[Path], beats_json: Path) -> D
 
 
 def _s4_native_pr(
-    out_dir: Path, xml_path: Path, renders: List[Path],
-    drops: List[float], bpm: float,
-) -> Optional[Dict[str, Any]]:
+    out_dir: Path, xml_path: Path, renders: list[Path],
+    drops: list[float], bpm: float,
+) -> dict[str, Any] | None:
     """S4 PR 真实引擎路径：Bridge 创建序列/上轨/标记/导出 XML。
 
     Returns:
@@ -1566,7 +1572,7 @@ def _s4_native_pr(
     }
 
 
-def _generate_fcp_xml(renders: List[Path], drops: List[float], fps: float, duration: float) -> str:
+def _generate_fcp_xml(renders: list[Path], drops: list[float], fps: float, duration: float) -> str:
     """生成 FCP7 XML 格式时间线（PR/DaVinci 标准导入格式）。"""
     ticks_per_sec = 254016000000  # PR ticks
 
@@ -1647,7 +1653,7 @@ def _generate_fcp_xml(renders: List[Path], drops: List[float], fps: float, durat
 #  S5: DaVinci 调色
 # ============================================================================
 
-def stage_s5_davinci(run_dir: Path, renders: List[Path]) -> Dict[str, Any]:
+def stage_s5_davinci(run_dir: Path, renders: list[Path]) -> dict[str, Any]:
     """S5 DaVinci 调色：≥3 节点（含 LUT）+ 渲染 graded.mov。
 
     优先 DaVinci Scripting API；不可用时使用 FFmpeg 真实调色处理。
@@ -1684,8 +1690,8 @@ def stage_s5_davinci(run_dir: Path, renders: List[Path]) -> Dict[str, Any]:
 
 
 def _s5_native_resolve(
-    out_dir: Path, graded_path: Path, renders: List[Path]
-) -> Optional[Dict[str, Any]]:
+    out_dir: Path, graded_path: Path, renders: list[Path]
+) -> dict[str, Any] | None:
     """S5 DaVinci 真实引擎路径：三步流程（创建时间线 → 节点图 → 渲染）。
 
     使用 ResolveColorEngine 的独立方法逐步执行：
@@ -1824,8 +1830,8 @@ def _s5_native_resolve(
 
 
 def _s5_ffmpeg_fallback(
-    out_dir: Path, graded_path: Path, renders: List[Path]
-) -> Dict[str, Any]:
+    out_dir: Path, graded_path: Path, renders: list[Path]
+) -> dict[str, Any]:
     """S5 FFmpeg 降级路径（原始实现，真实颜色科学处理）。"""
     concat_list = out_dir / "concat.txt"
     # 修复：concat demuxer 相对路径以 concat.txt 所在目录为基准，必须用绝对路径
@@ -1899,7 +1905,7 @@ def _s5_ffmpeg_fallback(
 #  S6: AME 导出
 # ============================================================================
 
-def stage_s6_export(run_dir: Path, graded_mov: Path, audio_path: Optional[Path] = None) -> Dict[str, Any]:
+def stage_s6_export(run_dir: Path, graded_mov: Path, audio_path: Path | None = None) -> dict[str, Any]:
     """S6 最终导出：H.264 1920×1080 24fps + 音频 → final.mp4。
 
     优先 AME；不可用时使用 FFmpeg（同为真实 H.264 编码）。
@@ -2002,7 +2008,7 @@ def stage_s6_export(run_dir: Path, graded_mov: Path, audio_path: Optional[Path] 
 
 def _s6_native_ame(
     out_dir: Path, final_path: Path, graded_mov: Path
-) -> Optional[Dict[str, Any]]:
+) -> dict[str, Any] | None:
     """S6 AME 真实引擎路径：通过 AME 编码导出。
 
     Returns:
@@ -2061,7 +2067,7 @@ QG_STAGE_TRACE_MAP = {
 }
 
 
-def _trace_introduction(check_name: str, critic_reports: Optional[List[Dict[str, Any]]]) -> Optional[str]:
+def _trace_introduction(check_name: str, critic_reports: list[dict[str, Any]] | None) -> str | None:
     """回溯失败原子项的引入阶段：若该阶段 critic 已有相关失败原子项，
     说明问题在阶段边界就已恶化（可回溯到引入点）。"""
     if not critic_reports:
@@ -2087,9 +2093,9 @@ def stage_s7_quality_gate(
     final_mp4: Path,
     beats_json: Path,
     timeline_xml: Path,
-    grade_meta: Dict[str, Any],
-    critic_reports: Optional[List[Dict[str, Any]]] = None,
-) -> Dict[str, Any]:
+    grade_meta: dict[str, Any],
+    critic_reports: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     """S7 质量门：QG-1~QG-5 全量验证 + 原子检查项拆解。"""
     import cv2
     import numpy as np
@@ -2099,7 +2105,7 @@ def stage_s7_quality_gate(
 
     report_path = out_dir / "quality_gate_report.json"
     checks = []
-    atomic_checks: List[Dict[str, Any]] = []
+    atomic_checks: list[dict[str, Any]] = []
 
     def add_atomic(gate: str, name: str, passed: bool, value: Any, threshold: str) -> None:
         atomic_checks.append({
@@ -2276,8 +2282,8 @@ def _last_attempted_stage(manifest: dict) -> str:
 
 def run_flagship_pipeline(
     inject_blackframe: bool = False,
-    resume_from: Optional[str] = None,
-    run_id: Optional[str] = None,
+    resume_from: str | None = None,
+    run_id: str | None = None,
 ) -> None:
     """执行旗舰管线 S0→S7 全链路（支持断点续跑）。
 
@@ -2291,7 +2297,7 @@ def run_flagship_pipeline(
     _sidx = STAGE_ORDER.index
 
     # ---- 断点续跑：复用 run_dir + 加载既有 manifest ----
-    prior: Dict[str, Any] = {}
+    prior: dict[str, Any] = {}
     if run_id:
         run_dir = PROJECT_ROOT / "output" / run_id
         if not run_dir.exists():
@@ -2319,7 +2325,7 @@ def run_flagship_pipeline(
         start_stage = "S0"
     logger.info(f"[Resume] 续跑起点: {start_stage}")
 
-    def _restore(stage_id: str) -> Dict[str, Any]:
+    def _restore(stage_id: str) -> dict[str, Any]:
         """从既有 manifest 还原某阶段产物（去掉耗时元字段）。"""
         rec = prior_stages.get(stage_id)
         if not rec:
@@ -2341,7 +2347,7 @@ def run_flagship_pipeline(
 
     t_start = time.time()
     # 预填已完成阶段，保证 manifest 连续
-    manifest: Dict[str, Any] = {
+    manifest: dict[str, Any] = {
         "run_id": run_id, "stages": dict(prior_stages), "resumed_from": resume_from,
     }
     events_path = run_dir / "events.jsonl"
@@ -2350,7 +2356,7 @@ def run_flagship_pipeline(
         "run_id": run_id, "inject_blackframe": inject_blackframe, "resume_from": resume_from,
     })
 
-    def _inject_blackframe_fault(renders: List[Path]) -> None:
+    def _inject_blackframe_fault(renders: list[Path]) -> None:
         """故障注入：把渲染产物替换为恒定黑帧视频（模拟 S3 渲染故障）。"""
         logger.warning("[FaultInjection] 向 S3 产物注入黑帧故障...")
         for r in renders:

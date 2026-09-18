@@ -2,11 +2,11 @@
 模型注册中心 - 模型版本管理、元数据管理、上线/下线、A/B测试支持
 参考 Antares 哲学：精悍够用，小步快跑，持续迭代
 """
-import os
 import json
-import time
 import logging
-from dataclasses import dataclass, field, asdict
+import os
+import time
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -35,7 +35,7 @@ class ModelInfo:
     """参数量（百万）"""
     train_samples: int = 0
     """训练样本数"""
-    eval_metrics: Dict[str, float] = field(default_factory=dict)
+    eval_metrics: dict[str, float] = field(default_factory=dict)
     """评估指标"""
     cost_effectiveness: float = 0.0
     """成本效益比（Antares 核心指标）"""
@@ -49,9 +49,9 @@ class ModelInfo:
     """状态：staging, production, deprecated, archived"""
     description: str = ""
     """模型描述"""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     """标签"""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     """额外元数据"""
 
     def __post_init__(self):
@@ -71,7 +71,7 @@ class ModelRegistry:
     参考 Antares 哲学：小步快跑，持续迭代，用数据驱动模型升级。
     """
 
-    def __init__(self, registry_path: Optional[str] = None):
+    def __init__(self, registry_path: str | None = None):
         """初始化模型注册中心
 
         Args:
@@ -84,14 +84,14 @@ class ModelRegistry:
                 Path(__file__).resolve().parent.parent.parent
                 / "data" / "model_lifecycle")
         self.registry_path = registry_path
-        self._models: Dict[str, Dict[str, ModelInfo]] = {}
-        self._production_models: Dict[str, str] = {}
-        self._ab_tests: Dict[str, Dict[str, Any]] = {}
+        self._models: dict[str, dict[str, ModelInfo]] = {}
+        self._production_models: dict[str, str] = {}
+        self._ab_tests: dict[str, dict[str, Any]] = {}
 
         os.makedirs(self.registry_path, exist_ok=True)
         self._load_registry()
 
-    def sync_from_inventory(self, inventory_path: Optional[str] = None) -> Dict[str, int]:
+    def sync_from_inventory(self, inventory_path: str | None = None) -> dict[str, int]:
         """从资产清单 (models/model_registry.json) 同步到生命周期注册中心。
 
         两层分工 (2026-08-14 统一方案):
@@ -225,7 +225,7 @@ class ModelRegistry:
         logger.info(f"Registered model: {model_id}")
         return model_id
 
-    def get_model(self, model_name: str, version: Optional[str] = None) -> Optional[ModelInfo]:
+    def get_model(self, model_name: str, version: str | None = None) -> ModelInfo | None:
         """获取模型信息
         
         Args:
@@ -249,7 +249,7 @@ class ModelRegistry:
         
         return self._models[model_name].get(version)
 
-    def _get_latest_version(self, model_name: str) -> Optional[str]:
+    def _get_latest_version(self, model_name: str) -> str | None:
         """获取最新版本号
         
         Args:
@@ -265,7 +265,7 @@ class ModelRegistry:
         versions.sort(reverse=True)
         return versions[0]
 
-    def list_models(self, model_type: Optional[str] = None, status: Optional[str] = None) -> List[ModelInfo]:
+    def list_models(self, model_type: str | None = None, status: str | None = None) -> list[ModelInfo]:
         """列出模型
         
         Args:
@@ -287,7 +287,7 @@ class ModelRegistry:
         
         return result
 
-    def list_versions(self, model_name: str) -> List[str]:
+    def list_versions(self, model_name: str) -> list[str]:
         """列出模型的所有版本
         
         Args:
@@ -375,7 +375,7 @@ class ModelRegistry:
         logger.info(f"Archived {model_name}:{version}")
         return True
 
-    def get_production_model(self, model_name: str) -> Optional[ModelInfo]:
+    def get_production_model(self, model_name: str) -> ModelInfo | None:
         """获取生产环境模型
         
         Args:
@@ -396,7 +396,7 @@ class ModelRegistry:
         model_name: str,
         version_a: str,
         version_b: str,
-        traffic_split: Tuple[float, float] = (0.5, 0.5),
+        traffic_split: tuple[float, float] = (0.5, 0.5),
     ) -> bool:
         """启动 A/B 测试
         
@@ -437,7 +437,7 @@ class ModelRegistry:
         logger.info(f"Started A/B test: {test_name}")
         return True
 
-    def stop_ab_test(self, test_name: str, winner: Optional[str] = None) -> Dict[str, Any]:
+    def stop_ab_test(self, test_name: str, winner: str | None = None) -> dict[str, Any]:
         """停止 A/B 测试
         
         Args:
@@ -461,7 +461,7 @@ class ModelRegistry:
         
         return test_info
 
-    def get_ab_test(self, test_name: str) -> Optional[Dict[str, Any]]:
+    def get_ab_test(self, test_name: str) -> dict[str, Any] | None:
         """获取 A/B 测试信息
         
         Args:
@@ -476,7 +476,7 @@ class ModelRegistry:
         self,
         model_type: str,
         metric: str = "cost_effectiveness",
-    ) -> Optional[ModelInfo]:
+    ) -> ModelInfo | None:
         """获取最佳模型（基于指定指标）
         
         Antares 哲学：选择成本效益比最高的模型，而不是单纯效果最好的。
@@ -513,7 +513,7 @@ class ModelRegistry:
         return best_model
 
 
-def load_registry(registry_path: Optional[str] = None,
+def load_registry(registry_path: str | None = None,
                   sync: bool = False) -> "ModelRegistry":
     """以稳定默认路径 (data/model_lifecycle) 加载生命周期注册中心。
 

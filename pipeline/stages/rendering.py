@@ -5,9 +5,9 @@ pipeline/stages/rendering.py - 渲染阶段
 """
 from __future__ import annotations
 
+import logging
 import os
 import time
-import logging
 from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ class RenderingStage:
     def __init__(self, config):
         self.config = config
 
-    def run(self, previous_data: Dict) -> Dict:
+    def run(self, previous_data: dict) -> dict:
         """执行渲染阶段"""
         execute = previous_data.get("execute", {})
         project_path = execute.get("project_path", "")
@@ -91,13 +91,13 @@ class RenderingStage:
             return result
 
         # 4. 全部失败
-        logger.warning(f"[RENDER-PATH4] all render paths failed")
+        logger.warning("[RENDER-PATH4] all render paths failed")
         result["status"] = "pending_manual_render"
         result["error"] = "No render engine available. Project saved for manual render."
         result["project_path"] = project_path
         return result
 
-    def _render_aerender(self, project: str, comp: str, output: str) -> Dict:
+    def _render_aerender(self, project: str, comp: str, output: str) -> dict:
         """用 aerender 命令行渲染"""
         try:
             from rendering.ae_render_engine import AERenderEngine
@@ -115,7 +115,7 @@ class RenderingStage:
             logger.debug(f"aerender failed: {e}")
             return {"success": False, "error": str(e)}
 
-    def _render_ffmpeg(self, output_path: str, previous_data: Dict) -> Dict:
+    def _render_ffmpeg(self, output_path: str, previous_data: dict) -> dict:
         """FFmpeg 渲染 — 生成占位视频或使用已有素材"""
         import subprocess
         perceive = previous_data.get("perceive", {})
@@ -160,7 +160,7 @@ class RenderingStage:
                     logger.info(f"FFmpeg render: {output_path}")
                     return {"success": True, "output_path": output_path}
                 else:
-                    logger.warning(f"[RENDER-FF] footage render produced invalid file, falling back to placeholder")
+                    logger.warning("[RENDER-FF] footage render produced invalid file, falling back to placeholder")
             except Exception as e:
                 logger.debug(f"FFmpeg render from footage failed: {e}")
 
@@ -172,7 +172,7 @@ class RenderingStage:
             cmd = [
                 ffmpeg, "-y",
                 "-f", "lavfi", "-i", f"color=c=black:s=1920x1080:d={total_dur}:r=30",
-                "-f", "lavfi", "-i", f"anullsrc=r=44100:cl=stereo",
+                "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
                 "-t", str(total_dur),
                 "-c:v", "libx264", "-preset", "slow", "-crf", "18",
                 "-b:v", "4M", "-maxrate", "8M", "-bufsize", "16M",
@@ -190,7 +190,7 @@ class RenderingStage:
                 # 标记为占位视频, 供下游质量门检测降级
                 return {"success": True, "output_path": output_path, "placeholder": True}
             else:
-                logger.warning(f"[RENDER-FF] placeholder produced invalid file")
+                logger.warning("[RENDER-FF] placeholder produced invalid file")
         except Exception as e:
             logger.debug(f"FFmpeg placeholder failed: {e}")
 

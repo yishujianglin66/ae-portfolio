@@ -134,9 +134,9 @@ class Transition:
     """状态转换定义"""
     from_state: Enum
     to_state: Enum
-    event: Optional[str] = None
-    guard: Optional[Callable[[Any], bool]] = None
-    action: Optional[Callable[[Any], Any]] = None
+    event: str | None = None
+    guard: Callable[[Any], bool] | None = None
+    action: Callable[[Any], Any] | None = None
     priority: int = 0
 
 
@@ -153,11 +153,11 @@ class StateContext:
     pika_status: PikaStatus = PikaStatus.IDLE
     blender_status: BlenderStatus = BlenderStatus.IDLE
     ffmpeg_status: FFmpegStatus = FFmpegStatus.IDLE
-    start_time: Optional[float] = None
-    end_time: Optional[float] = None
-    error: Optional[Exception] = None
+    start_time: float | None = None
+    end_time: float | None = None
+    error: Exception | None = None
     progress: float = 0.0
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
 
 
 class StateListener:
@@ -175,10 +175,10 @@ class PipelineStateMachine:
     def __init__(self):
         self._logger = logging.getLogger(f"{__name__}.PipelineStateMachine")
         self._context = StateContext(pipeline_id=str(uuid.uuid4()))
-        self._listeners: List[StateListener] = []
+        self._listeners: list[StateListener] = []
 
         # 顶层状态转换表
-        self._top_transitions: List[Transition] = [
+        self._top_transitions: list[Transition] = [
             Transition(PipelineStatus.IDLE, PipelineStatus.RUNNING, event="start"),
             Transition(PipelineStatus.RUNNING, PipelineStatus.PAUSED, event="pause"),
             Transition(PipelineStatus.PAUSED, PipelineStatus.RUNNING, event="resume"),
@@ -191,7 +191,7 @@ class PipelineStateMachine:
         ]
 
         # 阶段状态转换表
-        self._phase_transitions: List[Transition] = [
+        self._phase_transitions: list[Transition] = [
             Transition(PipelinePhase.IDLE, PipelinePhase.PERCEPTION, event="start"),
             Transition(PipelinePhase.PERCEPTION, PipelinePhase.UNDERSTANDING, event="perception_done"),
             Transition(PipelinePhase.UNDERSTANDING, PipelinePhase.PLANNING, event="understanding_done"),
@@ -206,7 +206,7 @@ class PipelineStateMachine:
         ]
 
         # Silhouette 子状态转换表
-        self._silhouette_transitions: List[Transition] = [
+        self._silhouette_transitions: list[Transition] = [
             Transition(SilhouetteStatus.IDLE, SilhouetteStatus.ROUTING, event="silhouette_start"),
             Transition(SilhouetteStatus.ROUTING, SilhouetteStatus.WAITING, event="silhouette_routed"),
             Transition(SilhouetteStatus.WAITING, SilhouetteStatus.PROCESSING, event="silhouette_start_process"),
@@ -219,7 +219,7 @@ class PipelineStateMachine:
         ]
 
         # AE 子状态转换表
-        self._ae_transitions: List[Transition] = [
+        self._ae_transitions: list[Transition] = [
             Transition(AEStatus.IDLE, AEStatus.COMPILING, event="ae_compile"),
             Transition(AEStatus.COMPILING, AEStatus.EXECUTING, event="ae_compiled"),
             Transition(AEStatus.EXECUTING, AEStatus.RENDERING, event="ae_executed"),
@@ -232,7 +232,7 @@ class PipelineStateMachine:
         ]
 
         # Topaz 子状态转换表
-        self._topaz_transitions: List[Transition] = [
+        self._topaz_transitions: list[Transition] = [
             Transition(TopazStatus.IDLE, TopazStatus.LOADING, event="topaz_start"),
             Transition(TopazStatus.LOADING, TopazStatus.ENHANCING, event="topaz_loaded"),
             Transition(TopazStatus.ENHANCING, TopazStatus.EXPORTING, event="topaz_enhanced"),
@@ -245,7 +245,7 @@ class PipelineStateMachine:
         ]
 
         # Runway 子状态转换表
-        self._runway_transitions: List[Transition] = [
+        self._runway_transitions: list[Transition] = [
             Transition(RunwayStatus.IDLE, RunwayStatus.REQUESTING, event="runway_start"),
             Transition(RunwayStatus.REQUESTING, RunwayStatus.GENERATING, event="runway_requested"),
             Transition(RunwayStatus.GENERATING, RunwayStatus.DOWNLOADING, event="runway_generated"),
@@ -258,7 +258,7 @@ class PipelineStateMachine:
         ]
 
         # Pika 子状态转换表
-        self._pika_transitions: List[Transition] = [
+        self._pika_transitions: list[Transition] = [
             Transition(PikaStatus.IDLE, PikaStatus.REQUESTING, event="pika_start"),
             Transition(PikaStatus.REQUESTING, PikaStatus.GENERATING, event="pika_requested"),
             Transition(PikaStatus.GENERATING, PikaStatus.DOWNLOADING, event="pika_generated"),
@@ -271,7 +271,7 @@ class PipelineStateMachine:
         ]
 
         # Blender 子状态转换表
-        self._blender_transitions: List[Transition] = [
+        self._blender_transitions: list[Transition] = [
             Transition(BlenderStatus.IDLE, BlenderStatus.LAUNCHING, event="blender_start"),
             Transition(BlenderStatus.LAUNCHING, BlenderStatus.RENDERING, event="blender_launched"),
             Transition(BlenderStatus.RENDERING, BlenderStatus.EXPORTING, event="blender_rendered"),
@@ -284,7 +284,7 @@ class PipelineStateMachine:
         ]
 
         # FFmpeg 子状态转换表
-        self._ffmpeg_transitions: List[Transition] = [
+        self._ffmpeg_transitions: list[Transition] = [
             Transition(FFmpegStatus.IDLE, FFmpegStatus.TRANSCODING, event="ffmpeg_start"),
             Transition(FFmpegStatus.TRANSCODING, FFmpegStatus.FILTERING, event="ffmpeg_transcoded"),
             Transition(FFmpegStatus.FILTERING, FFmpegStatus.COMPLETED, event="ffmpeg_filtered"),
@@ -326,7 +326,7 @@ class PipelineStateMachine:
     # 状态转换 API
     # -------------------------------------------------------------------------
 
-    def trigger(self, event: str, data: Dict[str, Any] = None) -> bool:
+    def trigger(self, event: str, data: dict[str, Any] = None) -> bool:
         """触发状态转换"""
         data = data or {}
         self._logger.debug(f"Triggering event: {event}")
@@ -386,7 +386,7 @@ class PipelineStateMachine:
 
     def _try_transition(
         self,
-        transitions: List[Transition],
+        transitions: list[Transition],
         event: str,
         state_attr: str,
     ) -> bool:
@@ -429,7 +429,7 @@ class PipelineStateMachine:
     # 生命周期 API
     # -------------------------------------------------------------------------
 
-    def start(self, pipeline_id: Optional[str] = None) -> None:
+    def start(self, pipeline_id: str | None = None) -> None:
         """启动工作流"""
         if pipeline_id:
             self._context.pipeline_id = pipeline_id
@@ -469,23 +469,23 @@ class PipelineStateMachine:
     # 阶段完成 API
     # -------------------------------------------------------------------------
 
-    def phase_perception_done(self, data: Dict[str, Any] = None) -> None:
+    def phase_perception_done(self, data: dict[str, Any] = None) -> None:
         self._context.progress = 0.2
         self.trigger("perception_done", data)
 
-    def phase_understanding_done(self, data: Dict[str, Any] = None) -> None:
+    def phase_understanding_done(self, data: dict[str, Any] = None) -> None:
         self._context.progress = 0.4
         self.trigger("understanding_done", data)
 
-    def phase_planning_done(self, data: Dict[str, Any] = None) -> None:
+    def phase_planning_done(self, data: dict[str, Any] = None) -> None:
         self._context.progress = 0.6
         self.trigger("planning_done", data)
 
-    def phase_execution_done(self, data: Dict[str, Any] = None) -> None:
+    def phase_execution_done(self, data: dict[str, Any] = None) -> None:
         self._context.progress = 0.8
         self.trigger("execution_done", data)
 
-    def phase_feedback_done(self, data: Dict[str, Any] = None) -> None:
+    def phase_feedback_done(self, data: dict[str, Any] = None) -> None:
         self._context.progress = 1.0
         self.trigger("feedback_done", data)
         self.complete()
@@ -494,19 +494,19 @@ class PipelineStateMachine:
     # Silhouette 子状态 API
     # -------------------------------------------------------------------------
 
-    def silhouette_start(self, data: Dict[str, Any] = None) -> None:
+    def silhouette_start(self, data: dict[str, Any] = None) -> None:
         self.trigger("silhouette_start", data)
 
-    def silhouette_routed(self, data: Dict[str, Any] = None) -> None:
+    def silhouette_routed(self, data: dict[str, Any] = None) -> None:
         self.trigger("silhouette_routed", data)
 
-    def silhouette_start_process(self, data: Dict[str, Any] = None) -> None:
+    def silhouette_start_process(self, data: dict[str, Any] = None) -> None:
         self.trigger("silhouette_start_process", data)
 
-    def silhouette_done(self, data: Dict[str, Any] = None) -> None:
+    def silhouette_done(self, data: dict[str, Any] = None) -> None:
         self.trigger("silhouette_done", data)
 
-    def silhouette_fallback(self, data: Dict[str, Any] = None) -> None:
+    def silhouette_fallback(self, data: dict[str, Any] = None) -> None:
         self.trigger("silhouette_fallback", data)
 
     def silhouette_fail(self, error: Exception) -> None:
@@ -517,22 +517,22 @@ class PipelineStateMachine:
     # AE 子状态 API
     # -------------------------------------------------------------------------
 
-    def ae_compile(self, data: Dict[str, Any] = None) -> None:
+    def ae_compile(self, data: dict[str, Any] = None) -> None:
         self.trigger("ae_compile", data)
 
-    def ae_compiled(self, data: Dict[str, Any] = None) -> None:
+    def ae_compiled(self, data: dict[str, Any] = None) -> None:
         self.trigger("ae_compiled", data)
 
-    def ae_execute(self, data: Dict[str, Any] = None) -> None:
+    def ae_execute(self, data: dict[str, Any] = None) -> None:
         self.trigger("ae_executing", data)
 
-    def ae_executed(self, data: Dict[str, Any] = None) -> None:
+    def ae_executed(self, data: dict[str, Any] = None) -> None:
         self.trigger("ae_executed", data)
 
-    def ae_render(self, data: Dict[str, Any] = None) -> None:
+    def ae_render(self, data: dict[str, Any] = None) -> None:
         self.trigger("ae_render", data)
 
-    def ae_rendered(self, data: Dict[str, Any] = None) -> None:
+    def ae_rendered(self, data: dict[str, Any] = None) -> None:
         self.trigger("ae_rendered", data)
 
     def ae_fail(self, phase: str, error: Exception) -> None:
@@ -548,16 +548,16 @@ class PipelineStateMachine:
     # Topaz 子状态 API
     # -------------------------------------------------------------------------
 
-    def topaz_start(self, data: Dict[str, Any] = None) -> None:
+    def topaz_start(self, data: dict[str, Any] = None) -> None:
         self.trigger("topaz_start", data)
 
-    def topaz_loaded(self, data: Dict[str, Any] = None) -> None:
+    def topaz_loaded(self, data: dict[str, Any] = None) -> None:
         self.trigger("topaz_loaded", data)
 
-    def topaz_enhanced(self, data: Dict[str, Any] = None) -> None:
+    def topaz_enhanced(self, data: dict[str, Any] = None) -> None:
         self.trigger("topaz_enhanced", data)
 
-    def topaz_exported(self, data: Dict[str, Any] = None) -> None:
+    def topaz_exported(self, data: dict[str, Any] = None) -> None:
         self.trigger("topaz_exported", data)
 
     def topaz_fail(self, phase: str, error: Exception) -> None:
@@ -573,16 +573,16 @@ class PipelineStateMachine:
     # Runway 子状态 API
     # -------------------------------------------------------------------------
 
-    def runway_start(self, data: Dict[str, Any] = None) -> None:
+    def runway_start(self, data: dict[str, Any] = None) -> None:
         self.trigger("runway_start", data)
 
-    def runway_requested(self, data: Dict[str, Any] = None) -> None:
+    def runway_requested(self, data: dict[str, Any] = None) -> None:
         self.trigger("runway_requested", data)
 
-    def runway_generated(self, data: Dict[str, Any] = None) -> None:
+    def runway_generated(self, data: dict[str, Any] = None) -> None:
         self.trigger("runway_generated", data)
 
-    def runway_downloaded(self, data: Dict[str, Any] = None) -> None:
+    def runway_downloaded(self, data: dict[str, Any] = None) -> None:
         self.trigger("runway_downloaded", data)
 
     def runway_fail(self, phase: str, error: Exception) -> None:
@@ -598,16 +598,16 @@ class PipelineStateMachine:
     # Pika 子状态 API
     # -------------------------------------------------------------------------
 
-    def pika_start(self, data: Dict[str, Any] = None) -> None:
+    def pika_start(self, data: dict[str, Any] = None) -> None:
         self.trigger("pika_start", data)
 
-    def pika_requested(self, data: Dict[str, Any] = None) -> None:
+    def pika_requested(self, data: dict[str, Any] = None) -> None:
         self.trigger("pika_requested", data)
 
-    def pika_generated(self, data: Dict[str, Any] = None) -> None:
+    def pika_generated(self, data: dict[str, Any] = None) -> None:
         self.trigger("pika_generated", data)
 
-    def pika_downloaded(self, data: Dict[str, Any] = None) -> None:
+    def pika_downloaded(self, data: dict[str, Any] = None) -> None:
         self.trigger("pika_downloaded", data)
 
     def pika_fail(self, phase: str, error: Exception) -> None:
@@ -623,16 +623,16 @@ class PipelineStateMachine:
     # Blender 子状态 API
     # -------------------------------------------------------------------------
 
-    def blender_start(self, data: Dict[str, Any] = None) -> None:
+    def blender_start(self, data: dict[str, Any] = None) -> None:
         self.trigger("blender_start", data)
 
-    def blender_launched(self, data: Dict[str, Any] = None) -> None:
+    def blender_launched(self, data: dict[str, Any] = None) -> None:
         self.trigger("blender_launched", data)
 
-    def blender_rendered(self, data: Dict[str, Any] = None) -> None:
+    def blender_rendered(self, data: dict[str, Any] = None) -> None:
         self.trigger("blender_rendered", data)
 
-    def blender_exported(self, data: Dict[str, Any] = None) -> None:
+    def blender_exported(self, data: dict[str, Any] = None) -> None:
         self.trigger("blender_exported", data)
 
     def blender_fail(self, phase: str, error: Exception) -> None:
@@ -648,13 +648,13 @@ class PipelineStateMachine:
     # FFmpeg 子状态 API
     # -------------------------------------------------------------------------
 
-    def ffmpeg_start(self, data: Dict[str, Any] = None) -> None:
+    def ffmpeg_start(self, data: dict[str, Any] = None) -> None:
         self.trigger("ffmpeg_start", data)
 
-    def ffmpeg_transcoded(self, data: Dict[str, Any] = None) -> None:
+    def ffmpeg_transcoded(self, data: dict[str, Any] = None) -> None:
         self.trigger("ffmpeg_transcoded", data)
 
-    def ffmpeg_filtered(self, data: Dict[str, Any] = None) -> None:
+    def ffmpeg_filtered(self, data: dict[str, Any] = None) -> None:
         self.trigger("ffmpeg_filtered", data)
 
     def ffmpeg_fail(self, phase: str, error: Exception) -> None:
@@ -696,7 +696,7 @@ class PipelineStateMachine:
     # 状态持久化
     # -------------------------------------------------------------------------
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为字典"""
         return {
             "pipeline_id": self._context.pipeline_id,
@@ -717,7 +717,7 @@ class PipelineStateMachine:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "PipelineStateMachine":
+    def from_dict(cls, data: dict[str, Any]) -> "PipelineStateMachine":
         """从字典恢复"""
         sm = cls()
         sm._context.pipeline_id = data["pipeline_id"]
@@ -774,7 +774,7 @@ class PipelineStateMachine:
     # 统计信息
     # -------------------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取状态机统计信息"""
         duration = 0.0
         if self._context.start_time:

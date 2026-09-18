@@ -20,18 +20,21 @@ Note:
 """
 
 import argparse
-import cv2
-import numpy as np
-import re
-import torch
-from core.torch_runtime import infer_ctx
-from pathlib import Path
-import sys
-import time
 import json
 
 # Set HF mirror
 import os
+import re
+import sys
+import time
+from pathlib import Path
+
+import cv2
+import numpy as np
+import torch
+
+from core.torch_runtime import infer_ctx
+
 os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 os.environ["HF_HUB_DISABLE_XET"] = "1"
 
@@ -100,17 +103,18 @@ class VLMExpertModel:
         print(f"Loading VLM model: {self.model_name}")
         
         try:
-            from transformers import Qwen2_5_VLForConditionalGeneration as model_cls
-            from transformers import AutoProcessor
-            
             # Set download timeout via environment
             import os
+
+            from transformers import AutoProcessor
+            from transformers import Qwen2_5_VLForConditionalGeneration as model_cls
             os.environ['HF_HUB_DOWNLOAD_TIMEOUT'] = str(timeout_seconds)
             os.environ['HF_HUB_DISABLE_XET'] = '1'
             
             # Check if model is cached locally first
-            from huggingface_hub import try_to_load_from_cache
             import tempfile
+
+            from huggingface_hub import try_to_load_from_cache
             model_name = self.model_name
             cached = False
             try:
@@ -127,7 +131,7 @@ class VLMExpertModel:
                 pass
             
             if not cached:
-                print(f"Model not found in local cache. Use --no-vlm for 2-class mode.")
+                print("Model not found in local cache. Use --no-vlm for 2-class mode.")
                 print(f"To download: huggingface-cli download {model_name}")
                 raise RuntimeError(f"VLM model {model_name} not cached locally")
             

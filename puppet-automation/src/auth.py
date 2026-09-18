@@ -18,12 +18,11 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
-
 # ============================================================
 # 工具函数
 # ============================================================
 
-def hash_password(pwd: str, salt: Optional[str] = None) -> str:
+def hash_password(pwd: str, salt: str | None = None) -> str:
     """带随机盐的 SHA-256 密码哈希，格式：``<salt>$<digest>``。
 
     与纯 SHA-256 相比，相同密码在不同盐下产生不同哈希，
@@ -55,7 +54,7 @@ def verify_password(pwd: str, stored: str) -> bool:
 # 用户数据（内存存储，开发环境默认账号）
 # ============================================================
 
-_USERS: Dict[str, Dict[str, Any]] = {}
+_USERS: dict[str, dict[str, Any]] = {}
 
 if os.environ.get("AE_DEV_ACCOUNTS", "").strip() == "1":
     import warnings
@@ -104,10 +103,10 @@ if os.environ.get("AE_DEV_ACCOUNTS", "").strip() == "1":
     })
 
 # Session Token 存储（access_token 和 refresh_token）
-_TOKEN_STORE: Dict[str, Dict[str, Any]] = {}
+_TOKEN_STORE: dict[str, dict[str, Any]] = {}
 
 
-def verify_user(username: str, password: str) -> Optional[Dict[str, Any]]:
+def verify_user(username: str, password: str) -> dict[str, Any] | None:
     """验证用户名密码，返回用户 dict 或 None。"""
     user = _USERS.get(username)
     if not user:
@@ -119,7 +118,7 @@ def verify_user(username: str, password: str) -> Optional[Dict[str, Any]]:
     return user
 
 
-def make_user_response(user: Dict[str, Any]) -> Dict[str, Any]:
+def make_user_response(user: dict[str, Any]) -> dict[str, Any]:
     """生成安全的用户响应（不含 password_hash）。"""
     return {
         "user_id": user["user_id"],
@@ -132,7 +131,7 @@ def make_user_response(user: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def create_session_tokens(user: Dict[str, Any]) -> Dict[str, str]:
+def create_session_tokens(user: dict[str, Any]) -> dict[str, str]:
     """为用户创建 access_token 和 refresh_token，存入 _TOKEN_STORE。"""
     access_token = secrets.token_hex(32)
     refresh_token = secrets.token_hex(32)
@@ -158,7 +157,7 @@ def create_session_tokens(user: Dict[str, Any]) -> Dict[str, str]:
     }
 
 
-def verify_user_token(token: str, refresh: bool = False) -> Optional[Dict[str, Any]]:
+def verify_user_token(token: str, refresh: bool = False) -> dict[str, Any] | None:
     """验证用户 session token，返回 session dict 或 None。
 
     Args:
@@ -192,12 +191,12 @@ def revoke_token(token: str) -> None:
     _TOKEN_STORE.pop(token, None)
 
 
-def get_user(username: str) -> Optional[Dict[str, Any]]:
+def get_user(username: str) -> dict[str, Any] | None:
     """按用户名获取用户。"""
     return _USERS.get(username)
 
 
-def list_users() -> list[Dict[str, Any]]:
+def list_users() -> list[dict[str, Any]]:
     """列出所有用户（不包含 password_hash）。"""
     return [make_user_response(u) for u in _USERS.values()]
 
@@ -207,8 +206,8 @@ def create_user(
     password: str,
     email: str = "",
     role: str = "viewer",
-    permissions: Optional[list[str]] = None,
-) -> Dict[str, Any]:
+    permissions: list[str] | None = None,
+) -> dict[str, Any]:
     """创建新用户。"""
     if username in _USERS:
         raise ValueError(f"用户名 '{username}' 已存在")
@@ -226,7 +225,7 @@ def create_user(
     return make_user_response(user)
 
 
-def update_user(username: str, **kwargs) -> Optional[Dict[str, Any]]:
+def update_user(username: str, **kwargs) -> dict[str, Any] | None:
     """更新用户信息。"""
     user = _USERS.get(username)
     if not user:

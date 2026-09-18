@@ -39,7 +39,6 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
-
 # ============================================================================
 #  数据结构
 # ============================================================================
@@ -49,9 +48,9 @@ class ExportCDResult:
     """C+D 导出管线结果。"""
 
     success: bool = False
-    output_path: Optional[Path] = None
-    intermediate_path: Optional[Path] = None
-    frames_dir: Optional[Path] = None
+    output_path: Path | None = None
+    intermediate_path: Path | None = None
+    frames_dir: Path | None = None
     stage_c1_ok: bool = False
     stage_c2_ok: bool = False
     stage_d_ok: bool = False
@@ -59,8 +58,8 @@ class ExportCDResult:
     grade_style: str = ""
     total_frames: int = 0
     elapsed_seconds: float = 0.0
-    errors: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 # ============================================================================
@@ -108,10 +107,10 @@ class ExportFinalCD:
         project_path: Path | str,
         comp_name: str,
         output_path: Path | str,
-        audio_path: Optional[Path | str] = None,
+        audio_path: Path | str | None = None,
         grade_style: str = "cinematic",
         skip_grade: bool = False,
-        multiprocess: Optional[int] = None,
+        multiprocess: int | None = None,
     ) -> ExportCDResult:
         """执行 C+D 完整导出流程。
 
@@ -139,7 +138,7 @@ class ExportFinalCD:
         result.frames_dir = frames_dir
 
         # ── Stage C1: AE → PNG 序列 ──────────────────────────────────
-        logger.info(f"[C+D] Stage C1: AE aerender PNG 渲染开始")
+        logger.info("[C+D] Stage C1: AE aerender PNG 渲染开始")
         logger.info(f"  project={project_path}  comp={comp_name}")
         logger.info(f"  frames_dir={frames_dir}")
 
@@ -165,7 +164,7 @@ class ExportFinalCD:
 
         # ── Stage C2: FFmpeg 合成 → 中间视频 ─────────────────────────
         intermediate_path = output_path.with_stem(output_path.stem + "_intermediate")
-        logger.info(f"[C+D] Stage C2: FFmpeg 合成开始")
+        logger.info("[C+D] Stage C2: FFmpeg 合成开始")
 
         c2_result = await self._stage_c2_ffmpeg_assemble(
             frames_dir=frames_dir,
@@ -264,7 +263,7 @@ class ExportFinalCD:
         project_path: Path | str,
         comp_name: str,
         frames_dir: Path | str,
-        multiprocess: Optional[int] = None,
+        multiprocess: int | None = None,
     ):
         """通过 aerender CLI 渲染合成到 PNG 帧序列。
 
@@ -293,7 +292,7 @@ class ExportFinalCD:
         self,
         frames_dir: Path | str,
         output_path: Path | str,
-        audio_path: Optional[Path | str] = None,
+        audio_path: Path | str | None = None,
     ):
         """FFmpeg 将 PNG 帧序列合成为视频，可选混入音频。"""
         ff = self._get_engine("ffmpeg")
@@ -337,7 +336,7 @@ class ExportFinalCD:
     #  引擎获取（延迟导入 + 缓存）
     # ------------------------------------------------------------------
 
-    _engines_cache: Dict[str, Any] = {}
+    _engines_cache: dict[str, Any] = {}
 
     @classmethod
     def _ensure_puppet_path(cls):

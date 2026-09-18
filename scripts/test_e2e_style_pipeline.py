@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message
 logger = logging.getLogger(__name__)
 
 
-async def run_e2e_test(video_path: str, output_dir: str = "output/e2e_test") -> Dict[str, Any]:
+async def run_e2e_test(video_path: str, output_dir: str = "output/e2e_test") -> dict[str, Any]:
     """运行端到端测试
     
     Args:
@@ -93,7 +93,7 @@ async def run_e2e_test(video_path: str, output_dir: str = "output/e2e_test") -> 
     stage2_start = time.time()
     
     try:
-        from core.style_preset_adapter import style_to_atomic_params, generate_compiler_input
+        from core.style_preset_adapter import generate_compiler_input, style_to_atomic_params
         
         # 生成原子参数（核心输出）
         atomic_params = style_to_atomic_params(
@@ -180,7 +180,7 @@ async def run_e2e_test(video_path: str, output_dir: str = "output/e2e_test") -> 
     return result
 
 
-def generate_demo_jsx(style_result: Dict[str, Any], params: Dict[str, Any]) -> str:
+def generate_demo_jsx(style_result: dict[str, Any], params: dict[str, Any]) -> str:
     """生成演示JSX代码"""
     style = style_result.get("style", "cinematic")
     confidence = style_result.get("confidence", 0)

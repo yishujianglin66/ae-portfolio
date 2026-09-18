@@ -3,16 +3,16 @@
 包含分类、代码生成、模型评估等多种指标，
 以及 Antares 哲学核心的成本效益比分析。
 """
+import logging
 import math
 import time
 from collections import Counter
-from typing import List, Dict, Any, Optional, Tuple, Callable
-import logging
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
 
-def accuracy(y_true: List[int], y_pred: List[int]) -> float:
+def accuracy(y_true: list[int], y_pred: list[int]) -> float:
     """计算准确率
     
     Args:
@@ -31,7 +31,7 @@ def accuracy(y_true: List[int], y_pred: List[int]) -> float:
     return correct / len(y_true)
 
 
-def precision(y_true: List[int], y_pred: List[int], average: str = "macro") -> float:
+def precision(y_true: list[int], y_pred: list[int], average: str = "macro") -> float:
     """计算精确率
     
     Args:
@@ -77,7 +77,7 @@ def precision(y_true: List[int], y_pred: List[int], average: str = "macro") -> f
         return sum(precisions) / len(precisions) if precisions else 0.0
 
 
-def recall(y_true: List[int], y_pred: List[int], average: str = "macro") -> float:
+def recall(y_true: list[int], y_pred: list[int], average: str = "macro") -> float:
     """计算召回率
     
     Args:
@@ -123,7 +123,7 @@ def recall(y_true: List[int], y_pred: List[int], average: str = "macro") -> floa
         return sum(recalls) / len(recalls) if recalls else 0.0
 
 
-def f1_score(y_true: List[int], y_pred: List[int], average: str = "macro") -> float:
+def f1_score(y_true: list[int], y_pred: list[int], average: str = "macro") -> float:
     """计算 F1 分数
     
     Args:
@@ -143,7 +143,7 @@ def f1_score(y_true: List[int], y_pred: List[int], average: str = "macro") -> fl
     return 2 * p * r / (p + r)
 
 
-def _ngrams(tokens: List[str], n: int) -> Counter:
+def _ngrams(tokens: list[str], n: int) -> Counter:
     """生成 n-gram 计数
     
     Args:
@@ -260,7 +260,7 @@ def code_bleu_score(reference: str, hypothesis: str) -> float:
     return final_score
 
 
-def count_parameters(model: Any = None, params_dict: Optional[Dict] = None) -> float:
+def count_parameters(model: Any = None, params_dict: dict | None = None) -> float:
     """统计模型参数量（百万）
     
     支持 PyTorch 模型或手动传入参数字典。
@@ -291,10 +291,10 @@ def count_parameters(model: Any = None, params_dict: Optional[Dict] = None) -> f
 
 def inference_benchmark(
     inference_fn: Callable,
-    test_inputs: List[Any],
+    test_inputs: list[Any],
     num_runs: int = 10,
     warmup_runs: int = 3,
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """推理性能基准测试
     
     Args:
@@ -370,7 +370,7 @@ def cost_effectiveness_ratio(
     params_million: float,
     training_cost_usd: float = 0.0,
     inference_latency_ms: float = 0.0,
-    weights: Optional[Dict[str, float]] = None,
+    weights: dict[str, float] | None = None,
 ) -> float:
     """成本效益比 — Antares 哲学核心指标
     
@@ -427,8 +427,8 @@ def cost_effectiveness_ratio(
 
 
 def top_k_accuracy(
-    y_true: List[int],
-    y_scores: List[List[float]],
+    y_true: list[int],
+    y_scores: list[list[float]],
     k: int = 5,
 ) -> float:
     """Top-K 准确率
@@ -454,10 +454,10 @@ def top_k_accuracy(
 
 
 def confusion_matrix(
-    y_true: List[int],
-    y_pred: List[int],
-    num_classes: Optional[int] = None,
-) -> List[List[int]]:
+    y_true: list[int],
+    y_pred: list[int],
+    num_classes: int | None = None,
+) -> list[list[int]]:
     """计算混淆矩阵
     
     Args:

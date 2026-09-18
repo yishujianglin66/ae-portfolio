@@ -30,7 +30,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-
 # -----------------------------------------------------------------------------
 # 弱 Token 集合 — 单一定义源（canonical source）
 # -----------------------------------------------------------------------------
@@ -73,11 +72,11 @@ class PermissionType(Enum):
 class SecurityContext:
     """安全上下文 — 随任务传递的安全信息"""
     security_level: SecurityLevel = SecurityLevel.LOW
-    required_permissions: List[PermissionType] = field(default_factory=list)
-    sandbox_id: Optional[str] = None
-    allowed_paths: List[str] = field(default_factory=list)
-    max_execution_time_ms: Optional[int] = None
-    max_memory_mb: Optional[int] = None
+    required_permissions: list[PermissionType] = field(default_factory=list)
+    sandbox_id: str | None = None
+    allowed_paths: list[str] = field(default_factory=list)
+    max_execution_time_ms: int | None = None
+    max_memory_mb: int | None = None
 
 
 @dataclass
@@ -93,7 +92,7 @@ class AuditLogEntry:
     input_hash: str = ""
     output_hash: str = ""
     duration_ms: float = 0.0
-    resources_used: Dict[str, Any] = field(default_factory=dict)
+    resources_used: dict[str, Any] = field(default_factory=dict)
     details: str = ""
 
 
@@ -102,9 +101,9 @@ class SecurityScanResult:
     """安全扫描结果"""
     passed: bool = True
     risk_level: str = "low"
-    warnings: List[str] = field(default_factory=list)
-    violations: List[str] = field(default_factory=list)
-    blocked_patterns: List[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    violations: list[str] = field(default_factory=list)
+    blocked_patterns: list[str] = field(default_factory=list)
     scan_duration_ms: float = 0.0
 
 
@@ -121,13 +120,13 @@ class SecurityManager:
 
     def __init__(self, default_security_level: SecurityLevel = SecurityLevel.LOW):
         self._default_level = default_security_level
-        self._audit_logs: List[AuditLogEntry] = []
+        self._audit_logs: list[AuditLogEntry] = []
         self._violation_count = 0
         self._circuit_breaker_tripped = False
         self._circuit_breaker_threshold = 5
         self._dangerous_patterns = self._init_dangerous_patterns()
 
-    def _init_dangerous_patterns(self) -> Dict[str, List[str]]:
+    def _init_dangerous_patterns(self) -> dict[str, list[str]]:
         """初始化危险模式检测规则"""
         return {
             "jsx": [
@@ -269,7 +268,7 @@ class SecurityManager:
         result.scan_duration_ms = (time.time() - start_time) * 1000
         return result
 
-    def scan_path(self, path: str, allowed_paths: List[str]) -> SecurityScanResult:
+    def scan_path(self, path: str, allowed_paths: list[str]) -> SecurityScanResult:
         """路径安全扫描 — 防止路径遍历
 
         Args:
@@ -354,15 +353,15 @@ class SecurityManager:
         self._circuit_breaker_tripped = False
         self._violation_count = 0
 
-    def get_audit_stats(self) -> Dict[str, Any]:
+    def get_audit_stats(self) -> dict[str, Any]:
         """获取审计统计信息
 
         Returns:
             统计信息字典
         """
         try:
-            by_action: Dict[str, int] = {}
-            by_status: Dict[str, int] = {}
+            by_action: dict[str, int] = {}
+            by_status: dict[str, int] = {}
 
             for entry in self._audit_logs:
                 by_action[entry.action] = by_action.get(entry.action, 0) + 1
@@ -386,10 +385,10 @@ class SecurityManager:
 
     def get_audit_logs(
         self,
-        action: Optional[str] = None,
-        status: Optional[str] = None,
+        action: str | None = None,
+        status: str | None = None,
         limit: int = 100,
-    ) -> List[AuditLogEntry]:
+    ) -> list[AuditLogEntry]:
         """获取审计日志（支持过滤）
 
         Args:
@@ -432,7 +431,7 @@ class SecurityManager:
 # 全局实例
 # -----------------------------------------------------------------------------
 
-_global_security_manager: Optional[SecurityManager] = None
+_global_security_manager: SecurityManager | None = None
 _global_security_manager_lock = threading.Lock()
 
 
@@ -460,14 +459,14 @@ def reset_security_manager() -> None:
 # -----------------------------------------------------------------------------
 # Phase B: L1-L5 安全护栏（RiskGuard）
 # -----------------------------------------------------------------------------
-from enum import IntEnum
-from pathlib import Path
-from dataclasses import asdict
 import asyncio
 import inspect
 import json
 import logging
 import tempfile
+from dataclasses import asdict
+from enum import IntEnum
+from pathlib import Path
 from typing import Awaitable, Callable, Tuple
 
 
@@ -488,13 +487,13 @@ class RiskLevel(IntEnum):
 class RiskAssessment:
     """单任务风险评估结果。"""
     risk_level: RiskLevel
-    reasons: List[str]
+    reasons: list[str]
     requires_sandbox: bool
     requires_approval: bool
     requires_audit_chain: bool
     requires_second_confirm: bool
-    allowed_paths: List[str] = field(default_factory=list)
-    forbidden_paths: List[str] = field(default_factory=list)
+    allowed_paths: list[str] = field(default_factory=list)
+    forbidden_paths: list[str] = field(default_factory=list)
     max_execution_time_ms: int = 300_000
     max_memory_mb: int = 4096
 
@@ -506,8 +505,8 @@ class ApprovalRequest:
     task_id: str
     task_type: str
     risk_level: RiskLevel
-    reasons: List[str]
-    args_preview: Dict[str, Any]
+    reasons: list[str]
+    args_preview: dict[str, Any]
     requested_at: float
     timeout_seconds: int = 300
 
@@ -527,7 +526,7 @@ class RiskAssessor:
     """基于任务类型、路径和操作关键词评估风险。"""
     # C1 修复: 补齐 TaskType 全部 29 个枚举成员映射,
     # 未覆盖的字符串类型默认 L3(fail-closed, 见 assess)。
-    DEFAULT_RISK_MAP: Dict[str, RiskLevel] = {
+    DEFAULT_RISK_MAP: dict[str, RiskLevel] = {
         # L1 只读/纯感知
         "perception": RiskLevel.L1_READONLY,
         "style_classification": RiskLevel.L1_READONLY,
@@ -595,11 +594,11 @@ class RiskAssessor:
     _FILENAME_RE = re.compile(r"^[^\s/\\]{1,200}$")
     _EXT_SUFFIX_RE = re.compile(r"\.(env|ini|cfg|json|txt|log|yaml|yml|py|js|jsx|mov|mp4|aep|psd|png|jpg|jpeg|mp3|wav|aif|exr|dpx|xml|csv|zip|tar|gz)$", re.IGNORECASE)
 
-    def __init__(self, workspace_root: Optional[Path] = None):
+    def __init__(self, workspace_root: Path | None = None):
         self._workspace = Path(workspace_root or Path.cwd())
         self._logger = logging.getLogger(f"{__name__}.RiskAssessor")
 
-    def assess(self, task_type: str, task_args: Dict[str, Any]) -> RiskAssessment:
+    def assess(self, task_type: str, task_args: dict[str, Any]) -> RiskAssessment:
         # C1(b) 修复: 未知类型默认 L3(fail-closed), 不再默认 L2。
         if task_type in self.DEFAULT_RISK_MAP:
             level = self.DEFAULT_RISK_MAP[task_type]
@@ -611,7 +610,7 @@ class RiskAssessor:
         reasons = [f"task_type={task_type} -> L{level.value}"]
         return self._build_assessment(level, reasons, task_args)
 
-    def _build_assessment(self, level: RiskLevel, reasons: List[str], task_args: Dict[str, Any]) -> RiskAssessment:
+    def _build_assessment(self, level: RiskLevel, reasons: list[str], task_args: dict[str, Any]) -> RiskAssessment:
         """评估辅助: 叠加路径/动作/付费信号后构造最终 RiskAssessment。"""
         paths = self._extract_paths(task_args or {})
         user_hits = [p for p in paths if self._is_user_data(p)]
@@ -701,7 +700,7 @@ class RiskAssessor:
         return False
 
     @classmethod
-    def _extract_paths(cls, args: Any) -> List[str]:
+    def _extract_paths(cls, args: Any) -> list[str]:
         """C2(a) 修复: 递归提取所有 str / pathlib.Path 值(含嵌套 dict/list/tuple)。
 
         提取规则:
@@ -709,7 +708,7 @@ class RiskAssessor:
         - 含路径分隔符(/ 或 \\)的字符串;
         - 纯文件名(如 ".env" / "secret.txt" / "delete_me.mp4")作为可疑文件路径提取。
         """
-        paths: List[str] = []
+        paths: list[str] = []
         seen: set[str] = set()
 
         def _looks_like_path(text: str) -> bool:
@@ -762,8 +761,8 @@ class SandboxPolicy:
         self._resource_limits = {"max_execution_time_ms": 300_000, "max_memory_mb": 4096, "max_cpu_percent": 80}
         self._logger = logging.getLogger(f"{__name__}.SandboxPolicy")
 
-    def validate_paths(self, paths: List[str]) -> Tuple[bool, List[str]]:
-        violations: List[str] = []
+    def validate_paths(self, paths: list[str]) -> tuple[bool, list[str]]:
+        violations: list[str] = []
         roots = [root.resolve() for root in self._allowed_roots]
         for raw_path in paths:
             path = Path(raw_path).resolve()
@@ -774,7 +773,7 @@ class SandboxPolicy:
                 violations.append(raw_path)
         return not violations, violations
 
-    async def wrap_execution(self, task_fn: Callable[..., Any], task_args: Dict[str, Any], assessment: RiskAssessment) -> Any:
+    async def wrap_execution(self, task_fn: Callable[..., Any], task_args: dict[str, Any], assessment: RiskAssessment) -> Any:
         """C2(b/c/d) 修复: 路径级沙箱包装。
 
         - 无路径参数的 L3 任务(纯计算)记录 debug 后放行, 不进沙箱路径校验;
@@ -803,7 +802,7 @@ class SandboxPolicy:
 
 class ApprovalPolicy:
     """L4/L5 人工审批策略。"""
-    def __init__(self, callback: Optional[Callable[[ApprovalRequest], Awaitable[ApprovalResult]]] = None):
+    def __init__(self, callback: Callable[[ApprovalRequest], Awaitable[ApprovalResult]] | None = None):
         self._callback = callback or self._default_callback
         self._logger = logging.getLogger(f"{__name__}.ApprovalPolicy")
 
@@ -835,7 +834,7 @@ class ApprovalPolicy:
 # H2 修复: 模块级共享锁(按日志文件绝对路径 key, 进程内单例)。
 # 不同 AuditChain 实例(如每个 WorkflowOrchestrator 各建一个)并发写
 # 同一文件时共享同一把锁, 避免交错写入破坏哈希链。
-_AUDIT_CHAIN_LOCKS: Dict[str, threading.Lock] = {}
+_AUDIT_CHAIN_LOCKS: dict[str, threading.Lock] = {}
 _AUDIT_CHAIN_LOCKS_GUARD = threading.Lock()
 
 
@@ -885,7 +884,7 @@ class AuditChain:
             return "0" * 64
 
     @staticmethod
-    def _hash(prev_hash: str, entry: Dict[str, Any], timestamp: float) -> str:
+    def _hash(prev_hash: str, entry: dict[str, Any], timestamp: float) -> str:
         canonical_entry = json.dumps(entry, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         payload = f"{prev_hash}|{canonical_entry}|{timestamp}"
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
@@ -918,7 +917,7 @@ class AuditChain:
             self._prev_hash = current_hash
             return current_hash
 
-    def verify_chain(self, expect_last_hash: Optional[str] = None) -> Tuple[bool, List[str]]:
+    def verify_chain(self, expect_last_hash: str | None = None) -> tuple[bool, list[str]]:
         """M4 修复: 校验链完整性, 并区分文件缺失 / 空文件 / 截断。
 
         Args:
@@ -929,7 +928,7 @@ class AuditChain:
         """
         if not self._path.exists():
             return False, ["audit_chain 文件不存在"]
-        violations: List[str] = []
+        violations: list[str] = []
         previous = "0" * 64
         try:
             text = self._path.read_text(encoding="utf-8")

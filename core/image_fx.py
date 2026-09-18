@@ -38,13 +38,13 @@ BEAT_FX_MAP = {
 }
 
 
-def _pool(category: str) -> List[str]:
+def _pool(category: str) -> list[str]:
     idx = json.loads(FX_INDEX.read_text(encoding="utf-8"))
     return idx.get(category, [])
 
 
 def pick_fx_layer(category: str, t_hit: float = 0.0, duration: float = 0.6,
-                  seed: int = 42, z_index: int = 5) -> Optional[object]:
+                  seed: int = 42, z_index: int = 5) -> object | None:
     """类别 → 随机选一张贴图构造 footage 图层。无资产返回 None。"""
     from core.composition_tree import LayerSpec
     pool = _pool(category)
@@ -64,8 +64,8 @@ def pick_fx_layer(category: str, t_hit: float = 0.0, duration: float = 0.6,
     )
 
 
-def pick_fx_layers(beat_events: List[dict], seed: int = 42,
-                   max_layers: int = 4) -> List[object]:
+def pick_fx_layers(beat_events: list[dict], seed: int = 42,
+                   max_layers: int = 4) -> list[object]:
     """节拍事件 → 贴图图层批量 (每 beat_type 按偏好池选类, 上限防过载)。"""
     layers = []
     rng = random.Random(seed)

@@ -99,7 +99,7 @@ class SceneAwareScorer:
         scene_w = SCENE_MOOD_WEIGHTS.get(scene, {})
         return scene_w.get(mood, DEFAULT_WEIGHTS.copy())
     
-    def dim_scene_fit(self, cuts: List[float], duration: float,
+    def dim_scene_fit(self, cuts: list[float], duration: float,
                       scene_type: str, mood: str = "") -> float:
         """场景适配度: 切点模式是否符合该场景类型的理想特征。
         
@@ -155,9 +155,9 @@ class SceneAwareScorer:
         
         return float(0.4 * duration_score + 0.3 * density_score + 0.3 * consistency)
     
-    def score(self, cuts: List[float], beats: List[float], duration: float,
+    def score(self, cuts: list[float], beats: list[float], duration: float,
               scene_type: str = "", mood: str = "",
-              wav_path: str = "") -> Dict[str, float]:
+              wav_path: str = "") -> dict[str, float]:
         """综合评分: 场景感知的多维度评分。
         
         Returns:
@@ -203,8 +203,8 @@ class SceneAwareScorer:
             "mood": mood,
         }
     
-    def rank_plans(self, plans: Dict[str, dict], scene_type: str = "",
-                   mood: str = "", wav_path: str = "") -> List[dict]:
+    def rank_plans(self, plans: dict[str, dict], scene_type: str = "",
+                   mood: str = "", wav_path: str = "") -> list[dict]:
         """对多个剪辑方案排序(场景感知版)。
         
         plans: {name: {"cuts": [...], "beats": [...], "duration": float}}

@@ -32,7 +32,6 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Dict, Tuple
 
-
 # ============================================================================
 # 内容类型枚举（与 minimal_creative_loop 中 re-export 保持一致）
 # ============================================================================
@@ -142,7 +141,7 @@ SYSTEM_PROMPT_CREATIVE_PLANNING: str = """你是 AE 视频自动化专家。给�
 # 内容类型附加模板
 # ============================================================================
 
-CONTENT_TYPE_TEMPLATES: Dict[ContentType, str] = {
+CONTENT_TYPE_TEMPLATES: dict[ContentType, str] = {
     ContentType.TEXT_ANIMATION: """# 内容类型：文字动画
 - 核心：字体选择、节奏、动效、转场
 - 推荐图层结构：背景层 + 文字层（1-3 个），可加 adjustment 层做全局调色
@@ -189,7 +188,7 @@ CONTENT_TYPE_TEMPLATES: Dict[ContentType, str] = {
 # 风格描述
 # ============================================================================
 
-STYLE_DESCRIPTIONS: Dict[StylePreset, str] = {
+STYLE_DESCRIPTIONS: dict[StylePreset, str] = {
     StylePreset.CARTOON: """# 风格：卡通
 - 颜色：高饱和、原色为主（红/黄/蓝/绿）
 - 字体：圆润、卡通体（如 Source Han Sans Rounded）
@@ -258,7 +257,7 @@ STYLE_DESCRIPTIONS: Dict[StylePreset, str] = {
 # 风格 → DaVinci 调色预设映射
 # ============================================================================
 
-STYLE_PRESET_MAP: Dict[StylePreset, str] = {
+STYLE_PRESET_MAP: dict[StylePreset, str] = {
     StylePreset.CARTOON: "high_key_bright",
     StylePreset.CINEMATIC: "cinematic_teal_orange",
     StylePreset.NEON: "music_video_punch",
@@ -302,9 +301,9 @@ def build_user_prompt(
     content_type: ContentType,
     style: StylePreset,
     duration: float,
-    resolution: Tuple[int, int],
+    resolution: tuple[int, int],
     frame_rate: float,
-    additional_context: Dict[str, Any] | None = None,
+    additional_context: dict[str, Any] | None = None,
 ) -> str:
     """拼装用户提示词。
 

@@ -4,12 +4,12 @@
 Adobe MCP Bridge 安全测试
 验证签名验证机制是否正确启用
 """
-import json
-import hmac
 import hashlib
+import hmac
+import json
 import tempfile
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
 def generate_hmac_sha256_signature(secret: str, data: dict) -> str:
@@ -85,9 +85,9 @@ def test_signature_validation():
                 print(f"✗ {bridge_file}: 签名验证未启用（安全漏洞！）")
 
             if "function verifySignature(data)" in content and "HMAC-SHA256" in content:
-                print(f"  ✓ 完整HMAC实现已注入")
+                print("  ✓ 完整HMAC实现已注入")
             else:
-                print(f"  ✗ HMAC实现缺失（安全漏洞！）")
+                print("  ✗ HMAC实现缺失（安全漏洞！）")
         else:
             print(f"⚠ {bridge_file}: 文件不存在")
 

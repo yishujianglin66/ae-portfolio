@@ -15,7 +15,7 @@ PROJECT_ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "video"))
 
-from style_migration_executor import MCPBridgeClient, AELauncher
+from style_migration_executor import AELauncher, MCPBridgeClient
 
 AERENDER = r"C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\aerender.exe"
 OUTPUT_AEP = r"D:\AE-Work\StyleMigration_Neon_v2.aep"
@@ -219,10 +219,10 @@ def main():
     print("\n" + "=" * 70)
     if Path(OUTPUT_MP4).exists():
         size_mb = Path(OUTPUT_MP4).stat().st_size / (1024 * 1024)
-        print(f"  [PASS] 渲染完成!")
+        print("  [PASS] 渲染完成!")
         print(f"  输出: {OUTPUT_MP4}")
         print(f"  大小: {size_mb:.2f} MB")
-        print(f"  帧范围: 1-60")
+        print("  帧范围: 1-60")
     else:
         print("  [FAIL] 渲染失败，输出文件不存在")
     print("=" * 70)

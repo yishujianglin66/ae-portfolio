@@ -4,6 +4,7 @@
 给出量化判定。任何一个门槛失败都返回非零 exit code，供 CI 使用。
 """
 from __future__ import annotations
+
 import json
 import subprocess
 import sys

@@ -18,9 +18,9 @@ r"""T23b: CLIP ViT-L-14 LoRA对比学习微调 — 基于新底座的大规模�
 from __future__ import annotations
 
 import json
+import random
 import sys
 import time
-import random
 from collections import Counter
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -29,7 +29,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
@@ -91,7 +91,7 @@ class ContrastiveDataset(Dataset):
         return img, label
 
 
-def prepare_contrastive_data(golden_videos: set) -> Tuple:
+def prepare_contrastive_data(golden_videos: set) -> tuple:
     """准备对比学习数据(排除黄金集帧)"""
     all_entries = []
 
@@ -330,7 +330,7 @@ def run_t23b_lora():
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     _log(f"\n{'='*60}")
-    _log(f"T23b ViT-L-14 LoRA微调完成")
+    _log("T23b ViT-L-14 LoRA微调完成")
     _log(f"   模型: {model_path}")
     _log(f"   报告: {report_path}")
     _log(f"{'='*60}")

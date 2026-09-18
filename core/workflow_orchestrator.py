@@ -38,11 +38,11 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 # 安全护栏组件（从 4b8aa81 移植，2026-08-27）：缺失时降级为无护栏，不阻断导入
 try:
     from core.security import (
-        AuditLogEntry,
-        SecurityManager,
         ApprovalRequest,
-        SecurityError,
+        AuditLogEntry,
         RiskLevel,
+        SecurityError,
+        SecurityManager,
     )
 except ImportError:
     AuditLogEntry = None
@@ -126,14 +126,14 @@ class TaskDefinition:
     task_type: TaskType
     name: str
     func: Callable[..., Any]
-    args: Dict[str, Any] = field(default_factory=dict)
-    dependencies: List[str] = field(default_factory=list)
+    args: dict[str, Any] = field(default_factory=dict)
+    dependencies: list[str] = field(default_factory=list)
     retry_count: int = 0
     retry_delay_ms: int = 2000
-    timeout_ms: Optional[int] = None
+    timeout_ms: int | None = None
     max_parallel: int = 1
     skip_on_failure: bool = False
-    fallback_func: Optional[Callable[..., Any]] = None
+    fallback_func: Callable[..., Any] | None = None
 
 
 @dataclass
@@ -143,10 +143,10 @@ class TaskInstance:
     instance_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
-    error: Optional[Exception] = None
+    error: Exception | None = None
     retry_attempts: int = 0
-    start_time: Optional[float] = None
-    end_time: Optional[float] = None
+    start_time: float | None = None
+    end_time: float | None = None
     duration: float = 0.0
 
 
@@ -155,12 +155,12 @@ class WorkflowContext:
     """工作流上下文"""
     workflow_id: str
     status: WorkflowStatus = WorkflowStatus.IDLE
-    tasks: Dict[str, TaskInstance] = field(default_factory=dict)
-    start_time: Optional[float] = None
-    end_time: Optional[float] = None
+    tasks: dict[str, TaskInstance] = field(default_factory=dict)
+    start_time: float | None = None
+    end_time: float | None = None
     progress: float = 0.0
-    data: Dict[str, Any] = field(default_factory=dict)
-    error: Optional[Exception] = None
+    data: dict[str, Any] = field(default_factory=dict)
+    error: Exception | None = None
 
 
 class WorkflowOrchestrator:
@@ -170,17 +170,17 @@ class WorkflowOrchestrator:
         self._logger = logging.getLogger(f"{__name__}.WorkflowOrchestrator")
         self._max_concurrent = max_concurrent_tasks
         self._semaphore = asyncio.Semaphore(max_concurrent_tasks)
-        self._context: Optional[WorkflowContext] = None
+        self._context: WorkflowContext | None = None
         self._running = False
-        self._tasks_def: List[TaskDefinition] = []
-        self._task_dependencies: Dict[str, Set[str]] = {}
-        self._task_dependents: Dict[str, Set[str]] = {}
-        self._completed_tasks: Set[str] = set()
-        self._failed_tasks: Set[str] = set()
-        self._progress_callbacks: List[Callable[[float, Dict], None]] = []
+        self._tasks_def: list[TaskDefinition] = []
+        self._task_dependencies: dict[str, set[str]] = {}
+        self._task_dependents: dict[str, set[str]] = {}
+        self._completed_tasks: set[str] = set()
+        self._failed_tasks: set[str] = set()
+        self._progress_callbacks: list[Callable[[float, dict], None]] = []
         # L1-L5 RiskGuard 初始化（从 4b8aa81 移植，2026-08-27）
         self._enable_security = enable_security and SecurityManager is not None
-        self._security_manager: Optional[Any] = (
+        self._security_manager: Any | None = (
             SecurityManager() if self._enable_security else None
         )
         self._risk_assessor = None
@@ -211,12 +211,12 @@ class WorkflowOrchestrator:
                 self._task_dependents[dep_id] = set()
             self._task_dependents[dep_id].add(task_def.task_id)
 
-    def add_tasks(self, tasks: List[TaskDefinition]) -> None:
+    def add_tasks(self, tasks: list[TaskDefinition]) -> None:
         """批量添加任务"""
         for task in tasks:
             self.add_task(task)
 
-    def get_task_def(self, task_id: str) -> Optional[TaskDefinition]:
+    def get_task_def(self, task_id: str) -> TaskDefinition | None:
         """获取任务定义"""
         for task in self._tasks_def:
             if task.task_id == task_id:
@@ -227,7 +227,7 @@ class WorkflowOrchestrator:
     # 依赖分析
     # -------------------------------------------------------------------------
 
-    def _analyze_dependencies(self) -> List[str]:
+    def _analyze_dependencies(self) -> list[str]:
         """分析任务依赖，返回执行顺序拓扑排序"""
         in_degree = {task.task_id: len(task.dependencies) for task in self._tasks_def}
         queue = [task.task_id for task in self._tasks_def if in_degree[task.task_id] == 0]
@@ -248,7 +248,7 @@ class WorkflowOrchestrator:
 
         return result
 
-    def _get_ready_tasks(self) -> List[str]:
+    def _get_ready_tasks(self) -> list[str]:
         """获取当前就绪的任务（所有依赖已完成或可跳过失败）"""
         ready = []
         for task_def in self._tasks_def:
@@ -279,7 +279,7 @@ class WorkflowOrchestrator:
     # 工作流执行
     # -------------------------------------------------------------------------
 
-    async def run(self, workflow_id: str = None, initial_data: Dict[str, Any] = None) -> WorkflowContext:
+    async def run(self, workflow_id: str = None, initial_data: dict[str, Any] = None) -> WorkflowContext:
         """执行工作流"""
         self._workflow_id = workflow_id or str(uuid.uuid4())
         self._context = WorkflowContext(
@@ -517,7 +517,7 @@ class WorkflowOrchestrator:
         self._context.status = WorkflowStatus.CANCELLED
         self._logger.info(f"工作流取消: {self._workflow_id}")
 
-    def add_progress_callback(self, callback: Callable[[float, Dict], None]) -> None:
+    def add_progress_callback(self, callback: Callable[[float, dict], None]) -> None:
         """添加进度回调"""
         self._progress_callbacks.append(callback)
 
@@ -526,14 +526,14 @@ class WorkflowOrchestrator:
     # -------------------------------------------------------------------------
 
     @property
-    def context(self) -> Optional[WorkflowContext]:
+    def context(self) -> WorkflowContext | None:
         return self._context
 
     @property
     def is_running(self) -> bool:
         return self._running
 
-    def get_task_status(self, task_id: str) -> Optional[TaskStatus]:
+    def get_task_status(self, task_id: str) -> TaskStatus | None:
         """获取任务状态"""
         if not self._context:
             return None
@@ -547,7 +547,7 @@ class WorkflowOrchestrator:
         instance = self._context.tasks.get(task_id)
         return instance.result if instance else None
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取工作流统计信息"""
         if not self._context:
             return {"status": "IDLE"}
@@ -580,7 +580,7 @@ class WorkflowOrchestrator:
     # 预设工作流模板
     # -------------------------------------------------------------------------
 
-    def build_default_pipeline(self, pipeline_funcs: Dict[str, Callable]) -> None:
+    def build_default_pipeline(self, pipeline_funcs: dict[str, Callable]) -> None:
         """构建默认 AE Agent 工作流"""
         self._tasks_def = []
 
@@ -831,7 +831,7 @@ class WorkflowOrchestrator:
     # 工作流持久化
     # -------------------------------------------------------------------------
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为字典"""
         if not self._context:
             return {}
@@ -986,8 +986,8 @@ class WorkflowOrchestrator:
         action: str,
         status: str,
         result: Any,
-        error: Optional[Exception],
-        start_time: Optional[float],
+        error: Exception | None,
+        start_time: float | None,
     ) -> None:
         """审计链统一写入辅助(成功 completed / 拒绝 denied / 失败 failed)。
 
@@ -1020,7 +1020,7 @@ class WorkflowOrchestrator:
         self,
         task_def: TaskDefinition,
         instance: TaskInstance,
-        sandbox_dir: Optional[str] = None,
+        sandbox_dir: str | None = None,
     ) -> Any:
         """沙箱内执行任务，保留依赖结果和 context 注入。
 
@@ -1057,7 +1057,7 @@ class WorkflowOrchestrator:
     def _sanitize_args(args: Any) -> Any:
         """递归脱敏嵌套 dict/list/tuple 中的敏感字段为 \"***REDACTED***\"。"""
         if isinstance(args, dict):
-            out: Dict[str, Any] = {}
+            out: dict[str, Any] = {}
             for key, value in args.items():
                 lowered = str(key).lower()
                 if any(
@@ -1105,11 +1105,11 @@ class StageRecord:
     stage_id: str
     status: str = "pending"  # pending / running / passed / failed / skipped
     elapsed_s: float = 0.0
-    output_paths: List[str] = field(default_factory=list)
-    error: Optional[str] = None
-    error_code: Optional[str] = None
-    started_at: Optional[float] = None
-    finished_at: Optional[float] = None
+    output_paths: list[str] = field(default_factory=list)
+    error: str | None = None
+    error_code: str | None = None
+    started_at: float | None = None
+    finished_at: float | None = None
 
 
 @dataclass
@@ -1120,8 +1120,8 @@ class RunManifest:
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
     overall_status: str = "pending"  # pending / running / passed / failed / resumed
-    stages: Dict[str, StageRecord] = field(default_factory=dict)
-    input_config: Dict[str, Any] = field(default_factory=dict)
+    stages: dict[str, StageRecord] = field(default_factory=dict)
+    input_config: dict[str, Any] = field(default_factory=dict)
     total_elapsed_s: float = 0.0
 
     def to_json(self) -> str:
@@ -1168,7 +1168,7 @@ class DAGOrchestrator:
     def __init__(
         self,
         run_dir: "Path",
-        run_id: Optional[str] = None,
+        run_id: str | None = None,
         pipeline_name: str = "flagship_e2e",
         max_retry: int = 1,
     ):
@@ -1181,7 +1181,7 @@ class DAGOrchestrator:
         self.max_retry = max_retry
 
         # DAG 定义
-        self._stages: Dict[str, Dict[str, Any]] = {}  # stage_id -> {func, deps}
+        self._stages: dict[str, dict[str, Any]] = {}  # stage_id -> {func, deps}
         self._manifest = RunManifest(
             run_id=self.run_id,
             pipeline_name=pipeline_name,
@@ -1196,7 +1196,7 @@ class DAGOrchestrator:
         self,
         stage_id: str,
         func: Callable,
-        deps: Optional[List[str]] = None,
+        deps: list[str] | None = None,
     ) -> None:
         """定义一个阶段及其依赖
 
@@ -1212,7 +1212,7 @@ class DAGOrchestrator:
     # 执行
     # ------------------------------------------------------------------
 
-    async def execute(self, resume_from: Optional[str] = None) -> RunManifest:
+    async def execute(self, resume_from: str | None = None) -> RunManifest:
         """执行 DAG。
 
         Args:
@@ -1351,7 +1351,7 @@ class DAGOrchestrator:
     # 内部方法
     # ------------------------------------------------------------------
 
-    def _topological_sort(self) -> List[str]:
+    def _topological_sort(self) -> list[str]:
         """Kahn 拓扑排序"""
         in_degree = {sid: len(info["deps"]) for sid, info in self._stages.items()}
         queue = [sid for sid, deg in in_degree.items() if deg == 0]
@@ -1390,7 +1390,7 @@ def create_orchestrator(max_concurrent: int = 5) -> WorkflowOrchestrator:
 
 def create_dag_orchestrator(
     run_dir: "Path",
-    run_id: Optional[str] = None,
+    run_id: str | None = None,
     pipeline_name: str = "flagship_e2e",
 ) -> DAGOrchestrator:
     """创建旗舰管线 DAG 编排器"""

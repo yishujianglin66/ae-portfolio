@@ -45,11 +45,11 @@ class InputSpecification:
     video_count: int = 0
     image_count: int = 0
     audio_count: int = 0
-    avg_resolution: Tuple[int, int] = (1920, 1080)
+    avg_resolution: tuple[int, int] = (1920, 1080)
     total_duration_sec: float = 0.0
     total_file_size_mb: float = 0.0
     has_reference_video: bool = False
-    codecs: List[str] = field(default_factory=list)
+    codecs: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -62,10 +62,10 @@ class PipelineConfig:
     use_davinci_render: bool = True
     use_ae_render: bool = True
     use_ffmpeg_fallback: bool = True
-    publish_platforms: List[str] = field(default_factory=list)
+    publish_platforms: list[str] = field(default_factory=list)
     effects_count: int = 0
     transitions_count: int = 0
-    target_resolution: Tuple[int, int] = (1920, 1080)
+    target_resolution: tuple[int, int] = (1920, 1080)
     target_fps: int = 30
 
 
@@ -80,8 +80,8 @@ class StagePrediction:
     predicted_quality: float = 0.0        # 预测质量分数(0-100)
     predicted_memory_mb: float = 0.0      # 预测内存峰值(MB)
     predicted_disk_mb: float = 0.0        # 预测磁盘占用(MB)
-    risk_factors: List[str] = field(default_factory=list)
-    optimization_suggestions: List[str] = field(default_factory=list)
+    risk_factors: list[str] = field(default_factory=list)
+    optimization_suggestions: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -92,8 +92,8 @@ class ExecutionPrediction:
     total_predicted_disk_mb: float = 0.0
     overall_success_rate: float = 0.0
     predicted_output_quality: float = 0.0
-    stage_predictions: List[StagePrediction] = field(default_factory=list)
-    critical_path: List[str] = field(default_factory=list)
+    stage_predictions: list[StagePrediction] = field(default_factory=list)
+    critical_path: list[str] = field(default_factory=list)
     config_id: str = ""
     timestamp: float = 0.0
 
@@ -102,18 +102,18 @@ class ExecutionPrediction:
 class BottleneckReport:
     """瓶颈分析报告"""
     primary_bottleneck: str = ""
-    secondary_bottlenecks: List[str] = field(default_factory=list)
+    secondary_bottlenecks: list[str] = field(default_factory=list)
     bottleneck_reason: str = ""
-    optimization_strategies: List[Dict[str, str]] = field(default_factory=list)
+    optimization_strategies: list[dict[str, str]] = field(default_factory=list)
     estimated_improvement: float = 0.0    # 优化后预期改善比例
 
 
 @dataclass
 class ConfigComparison:
     """配置对比结果"""
-    configs: List[PipelineConfig] = field(default_factory=list)
-    predictions: List[ExecutionPrediction] = field(default_factory=list)
-    pareto_optimal_indices: List[int] = field(default_factory=list)
+    configs: list[PipelineConfig] = field(default_factory=list)
+    predictions: list[ExecutionPrediction] = field(default_factory=list)
+    pareto_optimal_indices: list[int] = field(default_factory=list)
     recommendation: str = ""
 
 
@@ -158,9 +158,9 @@ class UncertaintyReport:
     ci_lower: float = 0.0
     ci_upper: float = 0.0
     n_samples: int = 0
-    per_stage: Dict[str, "UncertaintyReport"] = field(default_factory=dict)
+    per_stage: dict[str, "UncertaintyReport"] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为字典 (用于持久化)"""
         return {
             "metric_name": self.metric_name,
@@ -192,13 +192,13 @@ class SensitivityResult:
         n_samples: 采样次数
     """
     output_name: str = ""
-    parameter_sensitivities: Dict[str, float] = field(default_factory=dict)
+    parameter_sensitivities: dict[str, float] = field(default_factory=dict)
     most_sensitive_param: str = ""
     least_sensitive_param: str = ""
     method: str = "finite_diff"
     n_samples: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为字典"""
         return {
             "output_name": self.output_name,
@@ -215,7 +215,7 @@ class WhatIfScenario:
     """What-If 分析的单个场景"""
     name: str = ""
     description: str = ""
-    config_changes: Dict[str, Any] = field(default_factory=dict)
+    config_changes: dict[str, Any] = field(default_factory=dict)
     predicted_total_duration: float = 0.0
     predicted_success_rate: float = 0.0
     predicted_quality: float = 0.0
@@ -234,10 +234,10 @@ class WhatIfResult:
         best_scenario: 综合最优的场景
         worst_scenario: 综合最差的场景
     """
-    baseline: Optional[ExecutionPrediction] = None
-    scenarios: List[WhatIfScenario] = field(default_factory=list)
-    best_scenario: Optional[WhatIfScenario] = None
-    worst_scenario: Optional[WhatIfScenario] = None
+    baseline: ExecutionPrediction | None = None
+    scenarios: list[WhatIfScenario] = field(default_factory=list)
+    best_scenario: WhatIfScenario | None = None
+    worst_scenario: WhatIfScenario | None = None
 
 
 # ============================================================================
@@ -256,7 +256,7 @@ class StagePredictor:
     STAGES = ["perceive", "analyze", "plan", "execute", "render", "verify", "learn"]
     
     # 各阶段基础耗时估计（秒）
-    BASE_DURATIONS: Dict[str, float] = {
+    BASE_DURATIONS: dict[str, float] = {
         "perceive": 15.0,
         "analyze": 20.0,
         "plan": 10.0,
@@ -267,7 +267,7 @@ class StagePredictor:
     }
     
     # 各阶段基础成功率
-    BASE_SUCCESS_RATES: Dict[str, float] = {
+    BASE_SUCCESS_RATES: dict[str, float] = {
         "perceive": 0.95,
         "analyze": 0.90,
         "plan": 0.92,
@@ -279,12 +279,12 @@ class StagePredictor:
     
     def __init__(self):
         # 历史观测数据: stage -> List[ExecutionObservation]
-        self._observations: Dict[str, List[ExecutionObservation]] = {
+        self._observations: dict[str, list[ExecutionObservation]] = {
             stage: [] for stage in self.STAGES
         }
         # 贝叶斯先验参数
-        self._duration_params: Dict[str, Tuple[float, float]] = {}  # stage -> (mean, var)
-        self._success_params: Dict[str, Tuple[float, float]] = {}   # stage -> (alpha, beta)
+        self._duration_params: dict[str, tuple[float, float]] = {}  # stage -> (mean, var)
+        self._success_params: dict[str, tuple[float, float]] = {}   # stage -> (alpha, beta)
         
         # 初始化先验
         for stage in self.STAGES:
@@ -299,7 +299,7 @@ class StagePredictor:
         stage_name: str,
         input_spec: InputSpecification,
         config: PipelineConfig
-    ) -> Tuple[float, float]:
+    ) -> tuple[float, float]:
         """预测阶段耗时
         
         Returns:
@@ -363,7 +363,7 @@ class StagePredictor:
         input_spec: InputSpecification,
         config: PipelineConfig,
         causal_failure_prob: float = 0.0
-    ) -> Tuple[float, float]:
+    ) -> tuple[float, float]:
         """预测阶段成功率
         
         Args:
@@ -416,7 +416,7 @@ class StagePredictor:
         stage_name: str,
         input_spec: InputSpecification,
         config: PipelineConfig
-    ) -> Tuple[float, float]:
+    ) -> tuple[float, float]:
         """预测资源消耗
         
         Returns:
@@ -475,7 +475,7 @@ class PipelineDigitalTwin:
         self._causal_engine = None
         
         # 历史预测记录
-        self._prediction_history: List[Dict] = []
+        self._prediction_history: list[dict] = []
         
         # 加载持久化数据
         self._load_state()
@@ -631,7 +631,7 @@ class PipelineDigitalTwin:
     
     def _identify_risk_factors(
         self, stage_name: str, input_spec: InputSpecification, config: PipelineConfig
-    ) -> List[str]:
+    ) -> list[str]:
         """识别风险因子"""
         risks = []
         
@@ -659,8 +659,8 @@ class PipelineDigitalTwin:
     
     def _generate_optimization_suggestions(
         self, stage_name: str, duration: float, success_rate: float,
-        risk_factors: List[str]
-    ) -> List[str]:
+        risk_factors: list[str]
+    ) -> list[str]:
         """生成优化建议"""
         suggestions = []
         
@@ -778,9 +778,9 @@ class PipelineDigitalTwin:
     
     async def compare_configs(
         self,
-        configs: List[PipelineConfig],
+        configs: list[PipelineConfig],
         input_spec: InputSpecification,
-        objectives: List[str] = None
+        objectives: list[str] = None
     ) -> ConfigComparison:
         """多目标配置方案对比"""
         if objectives is None:
@@ -820,7 +820,7 @@ class PipelineDigitalTwin:
             recommendation=recommendation
         )
     
-    def _find_pareto_indices(self, obj_matrix: np.ndarray) -> List[int]:
+    def _find_pareto_indices(self, obj_matrix: np.ndarray) -> list[int]:
         """找到帕累托最优配置的索引"""
         n = len(obj_matrix)
         is_pareto = np.ones(n, dtype=bool)
@@ -1038,7 +1038,7 @@ class PipelineDigitalTwin:
         except Exception as e:
             logger.warning(f"[DigitalTwin] Load state failed: {e}")
     
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取统计信息"""
         return {
             "prediction_history_size": len(self._prediction_history),
@@ -1062,7 +1062,7 @@ class PipelineDigitalTwin:
         config: PipelineConfig,
         n_samples: int = 100,
         metric: str = "total_duration",
-        seed: Optional[int] = None,
+        seed: int | None = None,
     ) -> UncertaintyReport:
         """不确定性量化 (Monte Carlo dropout-style)
 
@@ -1098,9 +1098,9 @@ class PipelineDigitalTwin:
             )
 
         # 收集各阶段预测分布参数
-        stage_dists: Dict[str, Tuple[float, float]] = {}  # (mean, std) for duration
-        stage_sr_dists: Dict[str, Tuple[float, float]] = {}  # (mean, std) for success rate
-        stage_quality_dists: Dict[str, Tuple[float, float]] = {}
+        stage_dists: dict[str, tuple[float, float]] = {}  # (mean, std) for duration
+        stage_sr_dists: dict[str, tuple[float, float]] = {}  # (mean, std) for success rate
+        stage_quality_dists: dict[str, tuple[float, float]] = {}
 
         for stage in self.STAGES:
             dur_mean, dur_std = predictor.predict_duration(stage, input_spec, config)
@@ -1115,8 +1115,8 @@ class PipelineDigitalTwin:
             stage_quality_dists[stage] = (q, max(q * 0.1, 1.0))  # 假设 10% 相对不确定性
 
         # MC 采样
-        samples: List[float] = []
-        per_stage_samples: Dict[str, List[float]] = {
+        samples: list[float] = []
+        per_stage_samples: dict[str, list[float]] = {
             stage: [] for stage in self.STAGES
         }
 
@@ -1151,7 +1151,7 @@ class PipelineDigitalTwin:
 
         arr = np.array(samples)
         # 各阶段不确定性
-        per_stage_reports: Dict[str, UncertaintyReport] = {}
+        per_stage_reports: dict[str, UncertaintyReport] = {}
         for stage in self.STAGES:
             stage_arr = np.array(per_stage_samples[stage])
             per_stage_reports[stage] = self._build_uq_report(
@@ -1226,7 +1226,7 @@ class PipelineDigitalTwin:
         )
 
         # 待分析的参数: 从 input_spec 和 config 中提取数值参数
-        params_to_test: List[Tuple[str, float, str, Any]] = []
+        params_to_test: list[tuple[str, float, str, Any]] = []
         # input_spec 参数
         params_to_test.append(("material_count", float(input_spec.material_count), "input_spec", input_spec))
         params_to_test.append(("video_count", float(input_spec.video_count), "input_spec", input_spec))
@@ -1240,7 +1240,7 @@ class PipelineDigitalTwin:
         params_to_test.append(("target_fps", float(config.target_fps), "config", config))
         params_to_test.append(("max_quality_iterations", float(config.max_quality_iterations), "config", config))
 
-        sensitivities: Dict[str, float] = {}
+        sensitivities: dict[str, float] = {}
 
         for param_name, base_val, source, owner in params_to_test:
             if base_val == 0:
@@ -1381,7 +1381,7 @@ class PipelineDigitalTwin:
         self,
         input_spec: InputSpecification,
         baseline_config: PipelineConfig,
-        scenarios: List[Tuple[str, Dict[str, Any]]],
+        scenarios: list[tuple[str, dict[str, Any]]],
     ) -> WhatIfResult:
         """What-If 分析
 
@@ -1410,7 +1410,7 @@ class PipelineDigitalTwin:
         baseline_sr = baseline.overall_success_rate
         baseline_q = baseline.predicted_output_quality
 
-        results: List[WhatIfScenario] = []
+        results: list[WhatIfScenario] = []
         for name, changes in scenarios:
             modified = self._copy_config(baseline_config)
             for field_name, value in changes.items():
@@ -1453,7 +1453,7 @@ class PipelineDigitalTwin:
 #  全局单例
 # ============================================================================
 
-_global_twin: Optional[PipelineDigitalTwin] = None
+_global_twin: PipelineDigitalTwin | None = None
 
 
 def get_digital_twin(data_dir: str = PipelineDigitalTwin.DEFAULT_DATA_DIR

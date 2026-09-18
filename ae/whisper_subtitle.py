@@ -27,10 +27,10 @@ import json
 import math
 import os
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -55,7 +55,7 @@ class SubtitleSegment:
     end: float
     text: str
     confidence: float = 0.0
-    words: List[WordTiming] = field(default_factory=list)
+    words: list[WordTiming] = field(default_factory=list)
     speaker: str = ""
 
 
@@ -65,8 +65,8 @@ class TranscribeResult:
     language: str
     language_probability: float
     duration: float
-    segments: List[SubtitleSegment]
-    words: List[WordTiming] = field(default_factory=list)
+    segments: list[SubtitleSegment]
+    words: list[WordTiming] = field(default_factory=list)
 
 
 # ================================================================
@@ -275,8 +275,8 @@ class WhisperSubtitleEngine:
     def align_word_level(
         self,
         audio_path: str,
-        segments: List[SubtitleSegment],
-    ) -> List[SubtitleSegment]:
+        segments: list[SubtitleSegment],
+    ) -> list[SubtitleSegment]:
         """
         词级对齐 — 将字幕精确对齐到音频波形。
 
@@ -361,8 +361,8 @@ class WhisperSubtitleEngine:
         lines = [
             "[Script Info]",
             "ScriptType: v4.00+",
-            f"PlayResX: 1920",
-            f"PlayResY: 1080",
+            "PlayResX: 1920",
+            "PlayResY: 1080",
             "",
             "[V4+ Styles]",
             "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
@@ -388,7 +388,7 @@ class WhisperSubtitleEngine:
         result: TranscribeResult,
         style: str = "default",
         output_path: str = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出为 PremiereProMCP 字幕轨道 JSON"""
         style_config = self.PRESET_STYLES.get(style, self.PRESET_STYLES["default"])
 
@@ -424,7 +424,7 @@ class WhisperSubtitleEngine:
         result: TranscribeResult,
         style: str = "default",
         output_path: str = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出为 AE MCP 文本图层 JSON，含动画预设"""
         style_config = self.PRESET_STYLES.get(style, self.PRESET_STYLES["default"])
 
@@ -495,13 +495,13 @@ class WhisperSubtitleEngine:
         return "&HFFFFFF"
 
     @staticmethod
-    def _hex_to_rgb(hex_color: str) -> List[int]:
+    def _hex_to_rgb(hex_color: str) -> list[int]:
         hex_color = hex_color.lstrip("#")
         if len(hex_color) == 6:
             return [int(hex_color[i:i+2], 16) for i in (0, 2, 4)]
         return [255, 255, 255]
 
-    def get_available_languages(self) -> List[str]:
+    def get_available_languages(self) -> list[str]:
         """返回支持的语言代码列表"""
         return [
             "en", "zh", "ja", "ko", "fr", "de", "es", "pt", "it", "ru",

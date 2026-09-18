@@ -1,9 +1,10 @@
 # High Precision Tracking Template
 # 高精度跟踪模板 - 适用于复杂运动、高精度要求的跟踪任务
 
-from fx import *
 import json
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=24.0):

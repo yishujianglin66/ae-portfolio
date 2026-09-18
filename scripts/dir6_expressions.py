@@ -1,9 +1,13 @@
 """Direction 6: Keyframe Motion Curves + Expression-Driven Animation
 Elastic, overshoot, wiggle, loopOut, sine wave expressions.
 """
-import json, time, sys, os, glob
-from pathlib import Path
+import glob
+import json
+import os
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_DIR = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge")
 CMD_FILE = BRIDGE_DIR / "ae_command.json"

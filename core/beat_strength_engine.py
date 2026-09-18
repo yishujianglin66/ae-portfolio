@@ -63,26 +63,26 @@ class BeatInfo:
 @dataclass
 class BeatClassificationResult:
     """节拍分级结果"""
-    beats: List[BeatInfo]                    # 所有拍点
-    strong_beats: List[BeatInfo]             # 强拍
-    medium_beats: List[BeatInfo]             # 中拍
-    weak_beats: List[BeatInfo]               # 弱拍
+    beats: list[BeatInfo]                    # 所有拍点
+    strong_beats: list[BeatInfo]             # 强拍
+    medium_beats: list[BeatInfo]             # 中拍
+    weak_beats: list[BeatInfo]               # 弱拍
     total_beats: int = 0
     bpm: float = 0.0
     bar_count: int = 0
     
-    def get_beat_at_time(self, t: float, tolerance: float = 0.05) -> Optional[BeatInfo]:
+    def get_beat_at_time(self, t: float, tolerance: float = 0.05) -> BeatInfo | None:
         """获取指定时间最近的拍点信息"""
         for b in self.beats:
             if abs(b.time_sec - t) <= tolerance:
                 return b
         return None
     
-    def get_beats_in_range(self, start: float, end: float) -> List[BeatInfo]:
+    def get_beats_in_range(self, start: float, end: float) -> list[BeatInfo]:
         """获取时间范围内的所有拍点"""
         return [b for b in self.beats if start <= b.time_sec < end]
     
-    def statistics(self) -> Dict[str, Any]:
+    def statistics(self) -> dict[str, Any]:
         """返回统计信息"""
         return {
             "total": self.total_beats,
@@ -130,9 +130,9 @@ class BeatStrengthEngine:
     # 主接口: 分级
     # ────────────────────────────────────────────────────────────────
     def classify_beats(self, beats_sec: np.ndarray, downbeats_sec: np.ndarray,
-                       onset_envelope: Optional[np.ndarray] = None,
-                       rms_energy: Optional[np.ndarray] = None,
-                       times: Optional[np.ndarray] = None,
+                       onset_envelope: np.ndarray | None = None,
+                       rms_energy: np.ndarray | None = None,
+                       times: np.ndarray | None = None,
                        sr: int = 44100, hop_length: int = 512) -> BeatClassificationResult:
         """对所有拍点进行强弱分级
         
@@ -183,7 +183,7 @@ class BeatStrengthEngine:
         bar_count = int(np.ceil(len(beats_sec) / beats_per_bar))
 
         # 逐拍分级
-        classified: List[BeatInfo] = []
+        classified: list[BeatInfo] = []
         for i, t in enumerate(beats_sec):
             is_downbeat = round(t, 4) in downbeat_set
             bar_pos = i % beats_per_bar
@@ -253,8 +253,8 @@ class BeatStrengthEngine:
     # 素材-节拍匹配: 根据强弱选择不同等级的素材
     # ────────────────────────────────────────────────────────────────
     def assign_materials(self, result: BeatClassificationResult,
-                         scored_segments: List[Any],
-                         min_segments_per_level: int = 3) -> Dict[BeatStrength, List[Any]]:
+                         scored_segments: list[Any],
+                         min_segments_per_level: int = 3) -> dict[BeatStrength, list[Any]]:
         """根据节拍强弱分配不同评分等级的素材
         
         策略:
@@ -339,6 +339,7 @@ if __name__ == "__main__":
     
     # beat_this检测
     from beat_this.inference import Audio2Beats
+
     from core.torch_runtime import get_device
     model = Audio2Beats(device=get_device())
     result = model(y, sr)
@@ -360,7 +361,7 @@ if __name__ == "__main__":
     
     stats = classified.statistics()
     print(f"\n分级结果: {stats}")
-    print(f"\n逐拍详情:")
+    print("\n逐拍详情:")
     print(f"{'#':>3s} {'时间':>8s} {'等级':>6s} {'评分':>6s} {'DB':>3s} {'onset':>6s} {'energy':>6s}")
     print("-" * 50)
     for b in classified.beats:

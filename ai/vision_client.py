@@ -40,12 +40,12 @@
     新代码请勿直接 import，请改用 core.llm_gateway.llm_gateway.chat()。
 """
 
+import base64
 import os
 import sys
-import base64
 from enum import Enum
-from typing import Optional, Dict, Any, List, Union
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 try:
     import requests
@@ -84,7 +84,7 @@ class VisionClient:
     
     BASE_URL = "https://api.siliconflow.cn/v1"
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.api_key = api_key or os.environ.get("SILICONFLOW_API_KEY", "")
         if not self.api_key:
             print("警告: 未设置 SILICONFLOW_API_KEY，视觉功能不可用")
@@ -106,7 +106,7 @@ class VisionClient:
         with open(path, "rb") as f:
             return base64.b64encode(f.read()).decode("utf-8")
     
-    def _build_image_content(self, image_input: str) -> Dict[str, Any]:
+    def _build_image_content(self, image_input: str) -> dict[str, Any]:
         """构建图像内容（支持URL和本地路径）"""
         if image_input.startswith("http://") or image_input.startswith("https://"):
             return {"type": "image_url", "image_url": {"url": image_input}}
@@ -200,7 +200,7 @@ class VisionClient:
     def generate_image(self, 
                       prompt: str,
                       size: str = "1024x1024",
-                      model: str = VisionModel.KOLORS.value) -> Dict[str, Any]:
+                      model: str = VisionModel.KOLORS.value) -> dict[str, Any]:
         """生成图片
         
         Args:
@@ -242,7 +242,7 @@ class VisionClient:
             }
         raise RuntimeError(f"图像生成失败: {result}")
     
-    def batch_analyze(self, images: List[str], prompt: str) -> List[str]:
+    def batch_analyze(self, images: list[str], prompt: str) -> list[str]:
         """批量分析多张图片"""
         results = []
         for img in images:

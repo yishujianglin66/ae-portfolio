@@ -12,8 +12,7 @@ from typing import Any, Dict, List
 from pipeline.unified_pipeline import StageResult, StageStatus, _paths_ffmpeg
 
 
-
-def run_verify(self) -> Dict:
+def run_verify(self) -> dict:
     """质检阶段 (v2 新增)：VideoQualityAssessor 真实评分 + VMAF 感知质量评估
         + FeedbackExecutor.execute_multi_pass 多轮自动优化
 
@@ -37,7 +36,7 @@ def run_verify(self) -> Dict:
     vmaf_result = self._assess_vmaf_quality(output_path)
 
     # 【P0-1】优先使用 VideoQualityAssessor (ffprobe + OpenCV 真实分析)
-    qa_result: Dict[str, Any]
+    qa_result: dict[str, Any]
     try:
         from pipeline.video_quality_assessor import VideoQualityAssessor
         assessor = VideoQualityAssessor(
@@ -84,7 +83,7 @@ def run_verify(self) -> Dict:
         # 异常样本但 VMAF 有值时，仅记录原始VMAF数据，不产出合成 score（仍保持 None）
 
     # 【P1-多轮自动优化】初始分不达标 + 反馈闭环启用 → 触发 execute_multi_pass
-    optimization_history: List[Dict[str, Any]] = []
+    optimization_history: list[dict[str, Any]] = []
     optimization_applied = False
     optimization_reasoning = ""
     error_code = ""
@@ -182,7 +181,7 @@ def run_verify(self) -> Dict:
             )
             ref_path = self.config.reference_video or ""
 
-            def _quality_report_fn(video_path: str) -> Dict[str, Any]:
+            def _quality_report_fn(video_path: str) -> dict[str, Any]:
                 """execute_multi_pass 期望的质检回调: (filepath) -> report dict
                 report 需含 score/checks/suggestions, VQA.assess 已兼容。"""
                 return vqa_for_pass.assess(

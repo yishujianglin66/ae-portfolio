@@ -14,8 +14,8 @@ AE-Knowledge-Vault 端到端测试脚本
 """
 from __future__ import annotations
 
-import sys
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -66,16 +66,16 @@ class DeploymentTest:
                     status = result.get("status", "unknown")
 
                     if status == "success":
-                        self._record(f"{name} Bridge", "PASS", f"Bridge 在线")
+                        self._record(f"{name} Bridge", "PASS", "Bridge 在线")
                         self.passed += 1
                     elif status == "timeout":
-                        self._record(f"{name} Bridge", "SKIP", f"Bridge 离线（软件未运行）")
+                        self._record(f"{name} Bridge", "SKIP", "Bridge 离线（软件未运行）")
                         self.skipped += 1
                     else:
                         self._record(f"{name} Bridge", "WARN", f"状态: {status}")
                         self.skipped += 1
                 else:
-                    self._record(f"{name} Bridge", "SKIP", f"客户端初始化成功（无 ping 方法）")
+                    self._record(f"{name} Bridge", "SKIP", "客户端初始化成功（无 ping 方法）")
                     self.skipped += 1
 
                 logger.info(f"  {name} Bridge: OK ({getattr(client, 'command_file', 'n/a')})")

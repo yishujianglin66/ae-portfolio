@@ -4,27 +4,28 @@ effect_composition_engine.py - 效果组合推理引擎
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
 from effect_knowledge_graph import (
+    CATEGORIES,
     EFFECT_KNOWLEDGE_GRAPH,
     EFFECT_RELATIONS,
     EffectNode,
     EffectRelation,
-    CATEGORIES,
+    get_effect_by_match_name,
     get_synergy_effects,
     search_effects,
-    get_effect_by_match_name,
 )
 
 
 @dataclass
 class CompositionResult:
-    effects: List[Dict[str, Any]] = field(default_factory=list)
+    effects: list[dict[str, Any]] = field(default_factory=list)
     confidence: float = 0.0
-    reasoning: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    synergies: List[Dict[str, Any]] = field(default_factory=list)
-    conflicts: List[Dict[str, Any]] = field(default_factory=list)
+    reasoning: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    synergies: list[dict[str, Any]] = field(default_factory=list)
+    conflicts: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
@@ -35,7 +36,7 @@ class EffectRecommendation:
     confidence: float
     reason: str
     synergy_score: float = 0.0
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 
 class EffectCompositionEngine:
@@ -48,10 +49,10 @@ class EffectCompositionEngine:
 
     def _build_relation_index(self):
         """构建关系索引"""
-        self.synergy_index: Dict[str, List[EffectRelation]] = {}
-        self.mutex_index: Dict[str, List[EffectRelation]] = {}
-        self.prereq_index: Dict[str, List[EffectRelation]] = {}
-        self.post_index: Dict[str, List[EffectRelation]] = {}
+        self.synergy_index: dict[str, list[EffectRelation]] = {}
+        self.mutex_index: dict[str, list[EffectRelation]] = {}
+        self.prereq_index: dict[str, list[EffectRelation]] = {}
+        self.post_index: dict[str, list[EffectRelation]] = {}
 
         for rel in self.relations:
             idx_map = {
@@ -68,7 +69,7 @@ class EffectCompositionEngine:
 
     def compose_from_keywords(
         self,
-        keywords: List[str],
+        keywords: list[str],
         intensity: float = 1.0,
         max_effects: int = 5,
         layer_name: str = "layer_001",
@@ -142,9 +143,9 @@ class EffectCompositionEngine:
 
     def recommend_effects(
         self,
-        keywords: List[str],
+        keywords: list[str],
         limit: int = 10,
-    ) -> List[EffectRecommendation]:
+    ) -> list[EffectRecommendation]:
         """
         推荐效果
         
@@ -155,7 +156,7 @@ class EffectCompositionEngine:
         Returns:
             推荐列表
         """
-        scores: Dict[str, Dict[str, Any]] = {}
+        scores: dict[str, dict[str, Any]] = {}
 
         for keyword in keywords:
             keyword_lower = keyword.lower()
@@ -280,7 +281,7 @@ class EffectCompositionEngine:
         return score * effect.confidence
 
     def _calculate_synergy_bonus(
-        self, match_name: str, other_names: List[str]
+        self, match_name: str, other_names: list[str]
     ) -> float:
         """计算协同加成"""
         bonus = 0.0
@@ -292,9 +293,9 @@ class EffectCompositionEngine:
 
     def _select_effects(
         self,
-        recommendations: List[EffectRecommendation],
+        recommendations: list[EffectRecommendation],
         max_effects: int,
-    ) -> List[EffectRecommendation]:
+    ) -> list[EffectRecommendation]:
         """选择效果，保证类别多样性"""
         selected = []
         used_categories = set()
@@ -311,7 +312,7 @@ class EffectCompositionEngine:
 
         return selected
 
-    def _detect_conflicts(self, effect_names: List[str]) -> List[Dict[str, Any]]:
+    def _detect_conflicts(self, effect_names: list[str]) -> list[dict[str, Any]]:
         """检测效果冲突"""
         conflicts = []
         for i, name_a in enumerate(effect_names):
@@ -330,8 +331,8 @@ class EffectCompositionEngine:
         return conflicts
 
     def _resolve_conflicts(
-        self, effect_names: List[str], conflicts: List[Dict[str, Any]]
-    ) -> List[str]:
+        self, effect_names: list[str], conflicts: list[dict[str, Any]]
+    ) -> list[str]:
         """解决冲突，保留置信度更高的效果"""
         to_remove = set()
         for conflict in conflicts:
@@ -347,7 +348,7 @@ class EffectCompositionEngine:
 
         return [n for n in effect_names if n not in to_remove]
 
-    def _find_synergies(self, effect_names: List[str]) -> List[Dict[str, Any]]:
+    def _find_synergies(self, effect_names: list[str]) -> list[dict[str, Any]]:
         """发现协同效果组合"""
         synergies = []
         for i, name_a in enumerate(effect_names):
@@ -367,7 +368,7 @@ class EffectCompositionEngine:
 
     def _generate_default_settings(
         self, effect: EffectNode, intensity: float
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成默认参数设置"""
         settings = {}
 
@@ -400,7 +401,7 @@ class EffectCompositionEngine:
 
         return settings
 
-    def _order_effects(self, effects: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _order_effects(self, effects: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         效果排序 - 按照标准AE效果应用顺序
         
@@ -426,10 +427,10 @@ class EffectCompositionEngine:
 
     def _generate_reasoning(
         self,
-        selected: List[EffectRecommendation],
-        synergies: List[Dict[str, Any]],
-        keywords: List[str],
-    ) -> List[str]:
+        selected: list[EffectRecommendation],
+        synergies: list[dict[str, Any]],
+        keywords: list[str],
+    ) -> list[str]:
         """生成推理解释"""
         reasoning = []
 
@@ -453,15 +454,15 @@ class EffectCompositionEngine:
 
         return reasoning
 
-    def get_categories(self) -> Dict[str, str]:
+    def get_categories(self) -> dict[str, str]:
         """获取类别列表"""
         return CATEGORIES.copy()
 
-    def get_effects_by_category(self, category: str) -> List[EffectNode]:
+    def get_effects_by_category(self, category: str) -> list[EffectNode]:
         """按类别获取效果"""
         return [e for e in self.graph.values() if e.category == category]
 
-    def analyze_combination(self, effect_names: List[str]) -> Dict[str, Any]:
+    def analyze_combination(self, effect_names: list[str]) -> dict[str, Any]:
         """分析现有效果组合"""
         synergies = self._find_synergies(effect_names)
         conflicts = self._detect_conflicts(effect_names)
@@ -493,9 +494,9 @@ class EffectCompositionEngine:
 
     def enhance_combination(
         self,
-        effect_names: List[str],
+        effect_names: list[str],
         max_additions: int = 3,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """增强现有效果组合，推荐添加的效果"""
         suggestions = []
         existing_set = set(effect_names)

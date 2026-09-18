@@ -29,7 +29,7 @@ class TableExtractor:
     _ESCAPED_PIPE_RE = re.compile(r"\\\|")
     _PIPE_PLACEHOLDER = "\x00PIPE\x00"
 
-    def extract(self, block: MdBlock) -> List[TableRow]:
+    def extract(self, block: MdBlock) -> list[TableRow]:
         """从单个 TABLE 块中提取行数据。
 
         Args:
@@ -57,7 +57,7 @@ class TableExtractor:
             data_start = 2
 
         # 解析数据行
-        rows: List[TableRow] = []
+        rows: list[TableRow] = []
         for line in lines[data_start:]:
             line = line.strip()
             if not line or self._is_separator(line):
@@ -67,7 +67,7 @@ class TableExtractor:
                 continue
 
             # 构建 columns 字典
-            columns: Dict[str, str] = {}
+            columns: dict[str, str] = {}
             for idx, header in enumerate(headers):
                 if idx < len(cells):
                     columns[header] = cells[idx]
@@ -77,7 +77,7 @@ class TableExtractor:
 
         return rows
 
-    def extract_all(self, blocks: List[MdBlock]) -> List[List[TableRow]]:
+    def extract_all(self, blocks: list[MdBlock]) -> list[list[TableRow]]:
         """从多个块中提取所有表格。
 
         Args:
@@ -86,7 +86,7 @@ class TableExtractor:
         Returns:
             每个表格对应一个 List[TableRow]，外层列表按出现顺序排列
         """
-        result: List[List[TableRow]] = []
+        result: list[list[TableRow]] = []
         for block in blocks:
             if block.block_type == BlockType.TABLE:
                 rows = self.extract(block)
@@ -94,7 +94,7 @@ class TableExtractor:
                     result.append(rows)
         return result
 
-    def _parse_row(self, line: str) -> List[str]:
+    def _parse_row(self, line: str) -> list[str]:
         """解析表格行，返回单元格内容列表。"""
         # 处理转义管道符
         line = self._ESCAPED_PIPE_RE.sub(self._PIPE_PLACEHOLDER, line)
@@ -110,7 +110,7 @@ class TableExtractor:
         cells = line.split("|")
 
         # 清理每个单元格
-        result: List[str] = []
+        result: list[str] = []
         for cell in cells:
             # 恢复转义管道符
             cell = cell.replace(self._PIPE_PLACEHOLDER, "|")

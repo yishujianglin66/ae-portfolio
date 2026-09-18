@@ -316,9 +316,9 @@ class TestGapD_ExplicitJWTSecretNotRandomized:
         monkeypatch.setenv("AEK_ENVIRONMENT", "development")
         monkeypatch.setenv("AE_VAULT_SECRET_KEY", self.EXPLICIT_KEY)
 
-        from config.settings import Settings
-
         import warnings
+
+        from config.settings import Settings
 
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")

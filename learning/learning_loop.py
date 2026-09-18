@@ -18,7 +18,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
-
 # ---------------------------------------------------------------------------
 # 数据类定义
 # ---------------------------------------------------------------------------
@@ -29,11 +28,11 @@ class ExecutionResult:
     """执行结果"""
 
     success: bool
-    error_code: Optional[str] = None
-    error_message: Optional[str] = None
-    effect_index: Optional[int] = None
-    effect_name: Optional[str] = None
-    execution_time_ms: Optional[float] = None
+    error_code: str | None = None
+    error_message: str | None = None
+    effect_index: int | None = None
+    effect_name: str | None = None
+    execution_time_ms: float | None = None
 
 
 @dataclass
@@ -42,7 +41,7 @@ class ExpectedProperty:
 
     name: str
     value: Any
-    tolerance: Optional[float] = None
+    tolerance: float | None = None
 
 
 @dataclass
@@ -51,10 +50,10 @@ class ExpectedParameters:
 
     comp_name: str
     layer_index: int
-    effect_match_name: Optional[str] = None
-    effect_name: Optional[str] = None
-    properties: List[ExpectedProperty] = field(default_factory=list)
-    keyframes: Optional[List[Any]] = None
+    effect_match_name: str | None = None
+    effect_name: str | None = None
+    properties: list[ExpectedProperty] = field(default_factory=list)
+    keyframes: list[Any] | None = None
 
 
 @dataclass
@@ -64,7 +63,7 @@ class ParameterMismatch:
     param: str
     expected: Any
     actual: Any
-    deviation: Optional[float] = None
+    deviation: float | None = None
 
 
 @dataclass
@@ -72,8 +71,8 @@ class VerificationResult:
     """校验结果"""
 
     passed: bool
-    mismatches: List[ParameterMismatch] = field(default_factory=list)
-    reason: Optional[str] = None
+    mismatches: list[ParameterMismatch] = field(default_factory=list)
+    reason: str | None = None
     deviation_score: float = 0.0
 
 
@@ -89,10 +88,10 @@ class FinalParam:
 class UserFeedback:
     """用户反馈"""
 
-    satisfied: Optional[bool] = None
-    adjusted: Optional[bool] = None
-    undone: Optional[bool] = None
-    final_params: Optional[List[FinalParam]] = None
+    satisfied: bool | None = None
+    adjusted: bool | None = None
+    undone: bool | None = None
+    final_params: list[FinalParam] | None = None
 
 
 @dataclass
@@ -106,11 +105,11 @@ class ExecutionRecord:
     expected: ExpectedParameters
     execution: ExecutionResult
     verification: VerificationResult
-    user_satisfied: Optional[bool] = None
-    user_adjusted: Optional[bool] = None
-    user_undone: Optional[bool] = None
-    final_params: Optional[List[FinalParam]] = None
-    reasoning_path: Optional[List[str]] = None
+    user_satisfied: bool | None = None
+    user_adjusted: bool | None = None
+    user_undone: bool | None = None
+    final_params: list[FinalParam] | None = None
+    reasoning_path: list[str] | None = None
 
 
 @dataclass
@@ -121,18 +120,18 @@ class ParameterTemplate:
     source: str  # "auto-learned" | "manual" | "preset"
     effect_match_name: str
     effect_name: str
-    parameters: Dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, Any] = field(default_factory=dict)
     user_rating: str = "neutral"  # "positive" | "negative" | "neutral"
     usage_count: int = 0
     last_used: str = ""
-    source_input: Optional[str] = None
+    source_input: str | None = None
 
 
 @dataclass
 class ConfidenceAdjustment:
     """推理路径置信度调整"""
 
-    reasoning_path: List[str]
+    reasoning_path: list[str]
     direction: str  # "boost" | "penalize"
     delta: float
     reason: str
@@ -159,9 +158,9 @@ class LearningMetrics:
 class LearningLoopOptions:
     """学习循环配置项"""
 
-    learning_rate: Optional[float] = None
-    boost_delta: Optional[float] = None
-    penalize_delta: Optional[float] = None
+    learning_rate: float | None = None
+    boost_delta: float | None = None
+    penalize_delta: float | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -177,7 +176,7 @@ class CaseStore(ABC):
         ...
 
     @abstractmethod
-    def find_templates(self, effect_match_name: str) -> List[ParameterTemplate]:
+    def find_templates(self, effect_match_name: str) -> list[ParameterTemplate]:
         ...
 
     @abstractmethod
@@ -185,7 +184,7 @@ class CaseStore(ABC):
         ...
 
     @abstractmethod
-    def get_all_templates(self) -> List[ParameterTemplate]:
+    def get_all_templates(self) -> list[ParameterTemplate]:
         ...
 
 
@@ -207,7 +206,7 @@ class DefaultValueStore(ABC):
         ...
 
     @abstractmethod
-    def get_all(self, effect_match_name: str) -> Dict[str, Any]:
+    def get_all(self, effect_match_name: str) -> dict[str, Any]:
         ...
 
 
@@ -220,12 +219,12 @@ class MemoryCaseStore(CaseStore):
     """基于内存的案例存储实现"""
 
     def __init__(self) -> None:
-        self._templates: Dict[str, ParameterTemplate] = {}
+        self._templates: dict[str, ParameterTemplate] = {}
 
     def add_template(self, template: ParameterTemplate) -> None:
         self._templates[template.id] = template
 
-    def find_templates(self, effect_match_name: str) -> List[ParameterTemplate]:
+    def find_templates(self, effect_match_name: str) -> list[ParameterTemplate]:
         matched = [
             t for t in self._templates.values()
             if t.effect_match_name == effect_match_name
@@ -238,7 +237,7 @@ class MemoryCaseStore(CaseStore):
             t.usage_count += 1
             t.last_used = datetime.now().isoformat()
 
-    def get_all_templates(self) -> List[ParameterTemplate]:
+    def get_all_templates(self) -> list[ParameterTemplate]:
         return list(self._templates.values())
 
 
@@ -250,7 +249,7 @@ class MemoryDefaultValueStore(DefaultValueStore):
 
     def __init__(self) -> None:
         # key -> (value, weight)
-        self._store: Dict[str, Tuple[Any, float]] = {}
+        self._store: dict[str, tuple[Any, float]] = {}
 
     def get(self, effect_match_name: str, param_name: str) -> Any:
         entry = self._store.get(f"{effect_match_name}.{param_name}")
@@ -282,8 +281,8 @@ class MemoryDefaultValueStore(DefaultValueStore):
         else:
             self._store[key] = (actual_value, learning_rate)
 
-    def get_all(self, effect_match_name: str) -> Dict[str, Any]:
-        result: Dict[str, Any] = {}
+    def get_all(self, effect_match_name: str) -> dict[str, Any]:
+        result: dict[str, Any] = {}
         prefix = f"{effect_match_name}."
         for key, entry in self._store.items():
             if key.startswith(prefix):
@@ -307,9 +306,9 @@ class LearningLoop:
 
     def __init__(
         self,
-        case_store: Optional[CaseStore] = None,
-        default_value_store: Optional[DefaultValueStore] = None,
-        options: Optional[LearningLoopOptions] = None,
+        case_store: CaseStore | None = None,
+        default_value_store: DefaultValueStore | None = None,
+        options: LearningLoopOptions | None = None,
     ) -> None:
         self._case_store: CaseStore = (
             case_store if case_store is not None else MemoryCaseStore()
@@ -319,8 +318,8 @@ class LearningLoop:
             if default_value_store is not None
             else MemoryDefaultValueStore()
         )
-        self._confidence_adjustments: List[ConfidenceAdjustment] = []
-        self._execution_records: List[ExecutionRecord] = []
+        self._confidence_adjustments: list[ConfidenceAdjustment] = []
+        self._execution_records: list[ExecutionRecord] = []
         self._learning_rate: float = (
             0.3 if options is None or options.learning_rate is None
             else options.learning_rate
@@ -345,8 +344,8 @@ class LearningLoop:
         expected: ExpectedParameters,
         execution: ExecutionResult,
         verification: VerificationResult,
-        user_feedback: Optional[UserFeedback] = None,
-        reasoning_path: Optional[List[str]] = None,
+        user_feedback: UserFeedback | None = None,
+        reasoning_path: list[str] | None = None,
     ) -> ExecutionRecord:
         """记录一次执行并触发相应学习策略"""
         record = ExecutionRecord(
@@ -413,7 +412,7 @@ class LearningLoop:
             ))
 
     def _learn_from_deviation(
-        self, record: ExecutionRecord, final_params: List[FinalParam]
+        self, record: ExecutionRecord, final_params: list[FinalParam]
     ) -> None:
         """偏差学习：计算参数偏差 → 更新默认值建议"""
         expected = record.expected
@@ -483,10 +482,10 @@ class LearningLoop:
 
     @staticmethod
     def _props_to_object(
-        props: List[ExpectedProperty]
-    ) -> Dict[str, Any]:
+        props: list[ExpectedProperty]
+    ) -> dict[str, Any]:
         """将属性列表转换为参数字典"""
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         for p in props:
             result[p.name] = p.value
         return result
@@ -558,10 +557,10 @@ class LearningLoop:
         )
         return recent_success - earlier_success
 
-    def get_execution_records(self) -> List[ExecutionRecord]:
+    def get_execution_records(self) -> list[ExecutionRecord]:
         return list(self._execution_records)
 
-    def get_confidence_adjustments(self) -> List[ConfidenceAdjustment]:
+    def get_confidence_adjustments(self) -> list[ConfidenceAdjustment]:
         return list(self._confidence_adjustments)
 
     def get_case_store(self) -> CaseStore:

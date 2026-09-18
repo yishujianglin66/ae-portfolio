@@ -9,12 +9,12 @@ from pathlib import Path
 import pytest
 
 from scripts.edl import (
-    build_edl,
-    lint_edl,
-    save_edl,
-    load_edl,
     EDL_SCHEMA_VERSION,
     SUPPORTED_EDL_SCHEMA_VERSIONS,
+    build_edl,
+    lint_edl,
+    load_edl,
+    save_edl,
 )
 
 

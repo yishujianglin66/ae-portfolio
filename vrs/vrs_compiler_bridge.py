@@ -31,7 +31,7 @@ from loguru import logger
 # 参考 compiler/src/phase3/effect-name-map.ts，扩展覆盖任务要求的全部类别
 # =====================================================================
 
-EFFECT_MATCHNAME_MAP: Dict[str, Dict[str, Any]] = {
+EFFECT_MATCHNAME_MAP: dict[str, dict[str, Any]] = {
     # ==================== 模糊类 ====================
     "高斯模糊": {"matchName": "ADBE Gaussian Blur 2", "category": "blur", "params": {"Blurriness": "Blurriness", "Blur Dimensions": "Blur Dimensions"}},
     "Gaussian Blur": {"matchName": "ADBE Gaussian Blur 2", "category": "blur", "params": {"Blurriness": "Blurriness", "Blur Dimensions": "Blur Dimensions"}},
@@ -225,7 +225,7 @@ EFFECT_MATCHNAME_MAP: Dict[str, Dict[str, Any]] = {
 # 缓动类型映射（用户友好名 → 编译器 EasingType）
 # =====================================================================
 
-EASING_TYPE_MAP: Dict[str, str] = {
+EASING_TYPE_MAP: dict[str, str] = {
     "linear": "linear",
     "easeIn": "ease_in",
     "ease_in": "ease_in",
@@ -252,7 +252,7 @@ class VRCompilerBridge:
 
     def __init__(
         self,
-        compiler_client: Optional[Any] = None,
+        compiler_client: Any | None = None,
         default_comp_name: str = "VRS Reproduction Comp",
         default_width: int = 1920,
         default_height: int = 1080,
@@ -279,8 +279,8 @@ class VRCompilerBridge:
 
         # 内部状态
         self._op_counter = 0
-        self._layer_ref_map: Dict[int, str] = {}  # layer_index → ref_id
-        self._effect_ref_map: Dict[str, str] = {}  # effect_uid → ref_id
+        self._layer_ref_map: dict[int, str] = {}  # layer_index → ref_id
+        self._effect_ref_map: dict[str, str] = {}  # effect_uid → ref_id
 
     # ================================================================
     #  公开 API
@@ -306,7 +306,7 @@ class VRCompilerBridge:
         self._layer_ref_map.clear()
         self._effect_ref_map.clear()
 
-        operations: List[Dict[str, Any]] = []
+        operations: list[dict[str, Any]] = []
 
         # 提取基础信息（合成参数）
         comp_info = self._extract_composition_info(analysis_result)
@@ -328,7 +328,7 @@ class VRCompilerBridge:
             layer_ref = layer["ref"]
             self._layer_ref_map[layer["index"]] = layer_ref
             layer_type = layer.get("type", "solid")
-            op: Dict[str, Any] = {
+            op: dict[str, Any] = {
                 "op": "addLayer",
                 "ref": layer_ref,
                 "compRef": comp_ref,
@@ -415,8 +415,8 @@ class VRCompilerBridge:
         return compiler_input
 
     def build_operations_from_effects(
-        self, effects: list, layers: Optional[List[Dict[str, Any]]] = None
-    ) -> List[Dict[str, Any]]:
+        self, effects: list, layers: list[dict[str, Any]] | None = None
+    ) -> list[dict[str, Any]]:
         """将效果列表转换为原子操作序列。
 
         每个效果映射为：
@@ -439,7 +439,7 @@ class VRCompilerBridge:
             操作列表，每个操作遵循 compiler/src/types.ts 的 AddEffectOp/SetKeyframeOp 格式
         """
         layers = layers or []
-        operations: List[Dict[str, Any]] = []
+        operations: list[dict[str, Any]] = []
 
         for idx, fx in enumerate(effects):
             if not isinstance(fx, dict):
@@ -523,7 +523,7 @@ class VRCompilerBridge:
             effect_uid = f"{match_name}@layer{layer_index}@{idx}"
             self._effect_ref_map[effect_uid] = fx_ref
 
-            add_effect_op: Dict[str, Any] = {
+            add_effect_op: dict[str, Any] = {
                 "op": "addEffect",
                 "ref": fx_ref,
                 "layerRef": layer_ref,
@@ -596,9 +596,9 @@ class VRCompilerBridge:
         effect_name: str,
         layer_index: int,
         time_sec: float,
-        params: Dict[str, Any],
-        layers: Optional[List[Dict[str, Any]]] = None,
-    ) -> List[Dict[str, Any]]:
+        params: dict[str, Any],
+        layers: list[dict[str, Any]] | None = None,
+    ) -> list[dict[str, Any]]:
         """生成转场效果操作序列。
 
         闪白/闪黑转场不通过 addEffect 实现，而是通过：
@@ -626,7 +626,7 @@ class VRCompilerBridge:
         layers = layers or []
 
         # 查找转场类型
-        transition_type: Optional[str] = None
+        transition_type: str | None = None
         entry = EFFECT_MATCHNAME_MAP.get(effect_name)
         if entry:
             transition_type = entry.get("transition_type")
@@ -762,7 +762,7 @@ class VRCompilerBridge:
         # 2. 设置混合模式
         # 3. 设置不透明度关键帧（0 → 100 → 0 形成闪烁）
         # ============================================================
-        ops: List[Dict[str, Any]] = []
+        ops: list[dict[str, Any]] = []
         solid_ref = self._next_ref("solid")
 
         # 1. 添加固态层（带起止时间，仅在转场期间存在）
@@ -816,7 +816,7 @@ class VRCompilerBridge:
         transitions: list,
         speed_changes: list,
         motion: dict,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """将转场、速度变化、相机运动转换为关键帧操作。
 
         支持缓动类型：linear / easeIn / easeOut / easeInOut
@@ -829,7 +829,7 @@ class VRCompilerBridge:
         Returns:
             setKeyframe 操作列表
         """
-        operations: List[Dict[str, Any]] = []
+        operations: list[dict[str, Any]] = []
 
         # 转场关键帧（属性：Opacity 或 Transition Completion）
         for tr in transitions or []:
@@ -1060,14 +1060,14 @@ class VRCompilerBridge:
         """
         compiler_input = self.convert_analysis_to_compiler_input(analysis_result)
         comp_name = self.default_comp_name
-        commands: List[Dict[str, Any]] = []
+        commands: list[dict[str, Any]] = []
 
         # 收集每个图层的效果，便于使用 batch-add-effects
-        layer_effects: Dict[int, List[Dict[str, Any]]] = {}
-        layer_keyframes: Dict[int, List[Dict[str, Any]]] = {}
+        layer_effects: dict[int, list[dict[str, Any]]] = {}
+        layer_keyframes: dict[int, list[dict[str, Any]]] = {}
 
         # 建立 layer_ref → index 反向映射
-        ref_to_index: Dict[str, int] = {}
+        ref_to_index: dict[str, int] = {}
         for op in compiler_input["operations"]:
             if op.get("op") == "addLayer":
                 ref = op.get("ref", "")
@@ -1216,7 +1216,7 @@ class VRCompilerBridge:
     #  内部辅助方法
     # ================================================================
 
-    def _get_compiler_client(self) -> Optional[Any]:
+    def _get_compiler_client(self) -> Any | None:
         """懒加载 ae_ts_compiler_client.AETSCompilerClient 实例。"""
         if self._compiler_client is not None:
             return self._compiler_client
@@ -1239,7 +1239,7 @@ class VRCompilerBridge:
         self._op_counter += 1
         return f"{prefix}_{self._op_counter:03d}"
 
-    def _lookup_matchname(self, name: str) -> Optional[str]:
+    def _lookup_matchname(self, name: str) -> str | None:
         """从名称查找 matchName（支持中英文别名）。"""
         if not name:
             return None
@@ -1257,7 +1257,7 @@ class VRCompilerBridge:
                 return entry["matchName"]
         return None
 
-    def _extract_composition_info(self, analysis: dict) -> Dict[str, Any]:
+    def _extract_composition_info(self, analysis: dict) -> dict[str, Any]:
         """提取合成信息，支持简单格式和 VRS 多阶段格式。"""
         # VRS 多阶段格式：stages.layer_stack.compositions
         stages = analysis.get("stages") or {}
@@ -1283,9 +1283,9 @@ class VRCompilerBridge:
             "duration": float(basic.get("duration", self.default_duration)),
         }
 
-    def _extract_layers(self, analysis: dict) -> List[Dict[str, Any]]:
+    def _extract_layers(self, analysis: dict) -> list[dict[str, Any]]:
         """提取图层列表。"""
-        layers: List[Dict[str, Any]] = []
+        layers: list[dict[str, Any]] = []
 
         # VRS 多阶段格式：stages.layer_stack.layers
         stages = analysis.get("stages") or {}
@@ -1337,7 +1337,7 @@ class VRCompilerBridge:
 
         return layers
 
-    def _extract_motion(self, analysis: dict) -> Dict[str, Any]:
+    def _extract_motion(self, analysis: dict) -> dict[str, Any]:
         """提取运动分析信息。"""
         # 简单格式：motion_analysis
         motion = analysis.get("motion_analysis")
@@ -1349,7 +1349,7 @@ class VRCompilerBridge:
         visual_analysis = stages.get("visual_analysis") or {}
         frames = visual_analysis.get("frames") or []
 
-        camera_motions: List[str] = []
+        camera_motions: list[str] = []
         for frame in frames:
             consensus = frame.get("consensus") or {}
             cm = consensus.get("camera_movement", "")
@@ -1377,7 +1377,7 @@ class VRCompilerBridge:
             "speed_changes": [],
         }
 
-    def _extract_visual_effects(self, analysis: dict) -> List[Dict[str, Any]]:
+    def _extract_visual_effects(self, analysis: dict) -> list[dict[str, Any]]:
         """提取视觉效果列表。"""
         # 简单格式：visual_effects.detected_effects
         vfx = analysis.get("visual_effects") or {}
@@ -1399,10 +1399,10 @@ class VRCompilerBridge:
         return result
 
     def _build_color_grading_ops(
-        self, analysis: dict, layers: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+        self, analysis: dict, layers: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """构建调色操作（Lumetri Color）。"""
-        ops: List[Dict[str, Any]] = []
+        ops: list[dict[str, Any]] = []
 
         # 简单格式：color_grading.ae_lumetri_params
         color = analysis.get("color_grading") or {}
@@ -1429,7 +1429,7 @@ class VRCompilerBridge:
             adj_layer_ref = self._find_or_create_adjustment_layer(layers, "调色调整层", ops)
             fx_ref = self._next_ref("fx")
             # 将 color nodes 转换为 Lumetri 参数
-            lumetri_settings: Dict[str, Any] = {}
+            lumetri_settings: dict[str, Any] = {}
             for node in nodes:
                 tool = node.get("tool", "")
                 value = node.get("value", "")
@@ -1459,10 +1459,10 @@ class VRCompilerBridge:
         return ops
 
     def _build_transition_ops(
-        self, analysis: dict, layers: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+        self, analysis: dict, layers: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """构建转场操作。"""
-        ops: List[Dict[str, Any]] = []
+        ops: list[dict[str, Any]] = []
         transitions = analysis.get("transitions") or []
         # 转场通常应用在主体图层上
         target_layer_ref = layers[0]["ref"] if layers else "layer_001"
@@ -1499,10 +1499,10 @@ class VRCompilerBridge:
         return ops
 
     def _build_speed_change_ops(
-        self, motion: dict, layers: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+        self, motion: dict, layers: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """构建速度变化操作（timeRemap 关键帧）。"""
-        ops: List[Dict[str, Any]] = []
+        ops: list[dict[str, Any]] = []
         speed_changes = motion.get("speed_changes") or []
         target_layer_ref = layers[0]["ref"] if layers else "layer_001"
 
@@ -1516,10 +1516,10 @@ class VRCompilerBridge:
         return ops
 
     def _build_camera_motion_ops(
-        self, motion: dict, layers: List[Dict[str, Any]], comp_info: dict
-    ) -> List[Dict[str, Any]]:
+        self, motion: dict, layers: list[dict[str, Any]], comp_info: dict
+    ) -> list[dict[str, Any]]:
         """构建相机运动操作（缩放/位移关键帧）。"""
-        ops: List[Dict[str, Any]] = []
+        ops: list[dict[str, Any]] = []
         target_layer_ref = layers[0]["ref"] if layers else "layer_001"
 
         # 委托给 build_keyframe_operations
@@ -1540,16 +1540,16 @@ class VRCompilerBridge:
         return ops
 
     def _build_plugin_ops_from_visual_analysis(
-        self, analysis: dict, layers: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+        self, analysis: dict, layers: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """从 VRS 多阶段格式的视觉分析中提取插件效果。"""
-        ops: List[Dict[str, Any]] = []
+        ops: list[dict[str, Any]] = []
         stages = analysis.get("stages") or {}
         visual_analysis = stages.get("visual_analysis") or {}
         frames = visual_analysis.get("frames") or []
 
         # 收集所有 possible_plugins
-        plugins_counter: Dict[str, int] = {}
+        plugins_counter: dict[str, int] = {}
         for frame in frames:
             consensus = frame.get("consensus") or {}
             for plugin in consensus.get("possible_plugins", []):
@@ -1581,7 +1581,7 @@ class VRCompilerBridge:
                 # 过滤非数值参数
                 settings = self._sanitize_params(key_params)
 
-                op: Dict[str, Any] = {
+                op: dict[str, Any] = {
                     "op": "addEffect",
                     "ref": fx_ref,
                     "layerRef": target_layer_ref,
@@ -1612,7 +1612,7 @@ class VRCompilerBridge:
 
         return ops
 
-    def _parse_ae_parameters_raw(self, raw_str: str) -> List[Dict[str, Any]]:
+    def _parse_ae_parameters_raw(self, raw_str: str) -> list[dict[str, Any]]:
         """解析 stages.ae_parameters.raw JSON 字符串。
 
         raw 字段可能包含 ```json ... ``` 包裹的 JSON 字符串。
@@ -1650,15 +1650,15 @@ class VRCompilerBridge:
     def _build_keyframe_op(
         self,
         layer_ref: str,
-        fx_ref: Optional[str],
-        keyframes: List[Dict[str, Any]],
+        fx_ref: str | None,
+        keyframes: list[dict[str, Any]],
         default_property: str,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """构建单个 setKeyframe 操作。"""
         if not keyframes:
             return None
 
-        normalized_kfs: List[Dict[str, Any]] = []
+        normalized_kfs: list[dict[str, Any]] = []
         for kf in keyframes:
             if not isinstance(kf, dict):
                 continue
@@ -1668,7 +1668,7 @@ class VRCompilerBridge:
                 continue
 
             easing = kf.get("easing")
-            easing_obj: Optional[Dict[str, Any]] = None
+            easing_obj: dict[str, Any] | None = None
             if easing:
                 # easing 可能是字符串或 dict
                 if isinstance(easing, str):
@@ -1685,7 +1685,7 @@ class VRCompilerBridge:
                         "outInfluence": easing.get("outInfluence", easing.get("out_influence", 33)),
                     }
 
-            kf_entry: Dict[str, Any] = {
+            kf_entry: dict[str, Any] = {
                 "time": float(kf_time),
                 "value": kf_value,
             }
@@ -1696,7 +1696,7 @@ class VRCompilerBridge:
         if not normalized_kfs:
             return None
 
-        op: Dict[str, Any] = {
+        op: dict[str, Any] = {
             "op": "setKeyframe",
             "ref": self._next_ref("kf"),
             "layerRef": layer_ref,
@@ -1709,7 +1709,7 @@ class VRCompilerBridge:
         return op
 
     def _find_or_create_adjustment_layer(
-        self, layers: List[Dict[str, Any]], name: str, ops: List[Dict[str, Any]]
+        self, layers: list[dict[str, Any]], name: str, ops: list[dict[str, Any]]
     ) -> str:
         """查找或创建调整层。"""
         for layer in layers:
@@ -1741,7 +1741,7 @@ class VRCompilerBridge:
         return ref
 
     def _resolve_layer_ref(
-        self, layer_index: int, layers: List[Dict[str, Any]]
+        self, layer_index: int, layers: list[dict[str, Any]]
     ) -> str:
         """解析图层引用 ID。"""
         # 优先从映射表查找
@@ -1811,11 +1811,11 @@ class VRCompilerBridge:
         }
         return mapping.get(mode.lower(), "normal")
 
-    def _sanitize_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _sanitize_params(self, params: dict[str, Any]) -> dict[str, Any]:
         """过滤参数，只保留原子值（number/string/bool/array of numbers）。"""
         if not isinstance(params, dict):
             return {}
-        clean: Dict[str, Any] = {}
+        clean: dict[str, Any] = {}
         for k, v in params.items():
             if isinstance(v, bool):
                 clean[k] = v
@@ -1836,7 +1836,7 @@ class VRCompilerBridge:
                     clean[k] = arr
         return clean
 
-    def _parse_numeric(self, value: Any, default: Optional[float] = None) -> Optional[float]:
+    def _parse_numeric(self, value: Any, default: float | None = None) -> float | None:
         """尝试解析数值。"""
         if isinstance(value, (int, float)):
             return float(value)
@@ -1850,7 +1850,7 @@ class VRCompilerBridge:
                     return default
         return default
 
-    def _sort_operations(self, operations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _sort_operations(self, operations: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """按 layer_index → time → dependency 排序操作。
 
         排序规则：
@@ -1862,7 +1862,7 @@ class VRCompilerBridge:
         if not operations:
             return operations
 
-        def sort_key(op: Dict[str, Any]) -> Tuple[int, int, float, str]:
+        def sort_key(op: dict[str, Any]) -> tuple[int, int, float, str]:
             op_type = op.get("op", "")
             ref = op.get("ref", "")
             layer_ref = op.get("layerRef", "")
@@ -1905,9 +1905,9 @@ class VRCompilerBridge:
 
 def convert_analysis_file(
     analysis_path: str | Path,
-    output_path: Optional[str | Path] = None,
-    bridge: Optional[VRCompilerBridge] = None,
-) -> Dict[str, Any]:
+    output_path: str | Path | None = None,
+    bridge: VRCompilerBridge | None = None,
+) -> dict[str, Any]:
     """便捷函数：从文件加载分析结果并转换为 CompilerInput。
 
     Args:
@@ -1938,9 +1938,9 @@ def convert_analysis_file(
     return compiler_input
 
 
-def get_effect_map_stats() -> Dict[str, Any]:
+def get_effect_map_stats() -> dict[str, Any]:
     """获取效果映射表统计信息。"""
-    by_category: Dict[str, int] = {}
+    by_category: dict[str, int] = {}
     unique_matchnames: set = set()
     for entry in EFFECT_MATCHNAME_MAP.values():
         cat = entry.get("category", "other")
@@ -1970,7 +1970,7 @@ if __name__ == "__main__":
 
     # 1. 输出映射表统计
     stats = get_effect_map_stats()
-    print(f"\n[1] 效果映射表统计:")
+    print("\n[1] 效果映射表统计:")
     print(f"    总条目数: {stats['total_entries']}")
     print(f"    唯一 matchName 数: {stats['unique_matchnames']}")
     print(f"    分类分布: {stats['by_category']}")
@@ -1989,11 +1989,11 @@ if __name__ == "__main__":
     print(f"    提供商: {analysis.get('providers', [])}")
 
     # 3. 转换为 CompilerInput
-    print(f"\n[3] 转换为 CompilerInput...")
+    print("\n[3] 转换为 CompilerInput...")
     bridge = VRCompilerBridge()
     compiler_input = bridge.convert_analysis_to_compiler_input(analysis)
 
-    op_types: Dict[str, int] = {}
+    op_types: dict[str, int] = {}
     for op in compiler_input["operations"]:
         t = op.get("op", "unknown")
         op_types[t] = op_types.get(t, 0) + 1
@@ -2008,7 +2008,7 @@ if __name__ == "__main__":
     print(f"    CompilerInput 已保存: {compiler_input_file}")
 
     # 5. 调用编译器生成 JSX
-    print(f"\n[4] 调用编译器生成 ExtendScript...")
+    print("\n[4] 调用编译器生成 ExtendScript...")
     compile_result = bridge.compile_to_script(compiler_input)
 
     print(f"    编译成功: {compile_result['success']}")
@@ -2025,11 +2025,11 @@ if __name__ == "__main__":
     print(f"    JSX 脚本已保存: {output_jsx}")
 
     # 7. 生成 MCP 命令序列
-    print(f"\n[5] 生成 MCP 命令序列...")
+    print("\n[5] 生成 MCP 命令序列...")
     mcp_commands = bridge.compile_analysis_to_mcp_commands(analysis)
     print(f"    MCP 命令数: {len(mcp_commands)}")
 
-    cmd_types: Dict[str, int] = {}
+    cmd_types: dict[str, int] = {}
     for cmd in mcp_commands:
         t = cmd.get("tool", "unknown")
         cmd_types[t] = cmd_types.get(t, 0) + 1
@@ -2045,7 +2045,7 @@ if __name__ == "__main__":
     # [6] 闪白/闪黑转场专项测试（使用 vrs_demo/01_cv_analysis.json）
     # 验证 MATCHNAME_MAP 扩展后，闪白/闪黑不再被跳过
     # ================================================================
-    print(f"\n[6] 闪白/闪黑转场专项测试...")
+    print("\n[6] 闪白/闪黑转场专项测试...")
     cv_analysis_file = project_root / "output" / "vrs_demo" / "01_cv_analysis.json"
     if not cv_analysis_file.is_file():
         print(f"    [SKIP] 测试数据不存在: {cv_analysis_file}")
@@ -2077,7 +2077,7 @@ if __name__ == "__main__":
         cv_compiler_input = cv_bridge.convert_analysis_to_compiler_input(cv_analysis)
 
         # 统计操作类型分布
-        cv_op_types: Dict[str, int] = {}
+        cv_op_types: dict[str, int] = {}
         for op in cv_compiler_input["operations"]:
             t = op.get("op", "unknown")
             cv_op_types[t] = cv_op_types.get(t, 0) + 1
@@ -2104,10 +2104,10 @@ if __name__ == "__main__":
                 print(f"    [WARN] 闪白/闪黑操作数与原始数不符: "
                       f"{len(solid_layers)}/{flash_total}")
         else:
-            print(f"    [SKIP] 原始数据无 flash 效果")
+            print("    [SKIP] 原始数据无 flash 效果")
 
         # 打印前 20 个操作预览
-        print(f"\n    前 20 个操作预览:")
+        print("\n    前 20 个操作预览:")
         for i, op in enumerate(cv_compiler_input["operations"][:20]):
             op_type = op.get("op", "?")
             ref = op.get("ref", "")

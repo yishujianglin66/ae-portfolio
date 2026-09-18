@@ -24,8 +24,8 @@ _BRIDGES_DIR = os.path.join(PROJECT_ROOT, "bridges")
 if _BRIDGES_DIR not in sys.path:
     sys.path.insert(0, _BRIDGES_DIR)
 
-from unified_bridge_base import UnifiedBridgeBase  # noqa: E402
 from ps_bridge_client import PSBridgeClient  # noqa: E402
+from unified_bridge_base import UnifiedBridgeBase  # noqa: E402
 
 # 部署目标路径
 PS_SCRIPTS_DIR = Path(r"D:\ps\Adobe Photoshop 2025\Presets\Scripts")

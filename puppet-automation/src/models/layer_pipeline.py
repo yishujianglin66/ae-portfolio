@@ -16,7 +16,6 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-
 # ============================================================
 # Enums
 # ============================================================
@@ -100,9 +99,9 @@ class LayerConfig(BaseModel):
     opacity: float = 100.0
     blend_mode: BlendMode = BlendMode.NORMAL
     params: dict[str, Any] = Field(default_factory=dict)
-    source_path: Optional[str] = None
-    output_path: Optional[str] = None
-    cache_key: Optional[str] = None
+    source_path: str | None = None
+    output_path: str | None = None
+    cache_key: str | None = None
 
 
 class RenderPipeline(BaseModel):
@@ -128,10 +127,10 @@ class RenderPipeline(BaseModel):
     output_fps: float = 30.0
     duration: float = 10.0
     cache_enabled: bool = True
-    cache_dir: Optional[str] = None
-    work_dir: Optional[str] = None
+    cache_dir: str | None = None
+    work_dir: str | None = None
     composite_renderer: RendererType = RendererType.FFMPEG
-    preset: Optional[PipelinePreset] = None
+    preset: PipelinePreset | None = None
 
     def get_sorted_layers(self) -> list[LayerConfig]:
         """获取按 z_index 排序的图层列表（从下到上）.
@@ -166,13 +165,13 @@ class LayerRenderResult(BaseModel):
     """
     layer_name: str
     success: bool = True
-    output_path: Optional[str] = None
+    output_path: str | None = None
     duration_seconds: float = 0.0
     file_size_bytes: int = 0
     frame_count: int = 0
     cache_hit: bool = False
     metadata: dict[str, Any] = Field(default_factory=dict)
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class PipelineRenderResult(BaseModel):
@@ -191,13 +190,13 @@ class PipelineRenderResult(BaseModel):
     """
     pipeline_name: str
     success: bool = True
-    output_path: Optional[str] = None
+    output_path: str | None = None
     total_duration_seconds: float = 0.0
     layer_results: dict[str, LayerRenderResult] = Field(default_factory=dict)
     cache_hits: int = 0
     cache_misses: int = 0
     metadata: dict[str, Any] = Field(default_factory=dict)
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class LayerStats(BaseModel):

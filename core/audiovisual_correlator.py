@@ -34,10 +34,10 @@ class SyncAnalysisResult:
     video_path: str = ""; audio_path: str = ""; duration: float = 0.0
     sync_score: float = 0.0; avg_deviation_ms: float = 0.0
     median_deviation_ms: float = 0.0; max_deviation_ms: float = 0.0
-    alignments: List[BeatCutAlignment] = field(default_factory=list)
+    alignments: list[BeatCutAlignment] = field(default_factory=list)
     on_beat_count: int = 0; off_beat_count: int = 0
-    off_beat_segments: List[OffBeatSegment] = field(default_factory=list)
-    suggestions: List[CutSuggestion] = field(default_factory=list)
+    off_beat_segments: list[OffBeatSegment] = field(default_factory=list)
+    suggestions: list[CutSuggestion] = field(default_factory=list)
     sync_quality: str = "unknown"  # excellent/good/fair/poor
     total_beats: int = 0; total_cuts: int = 0; tolerance_ms: float = 100.0
 
@@ -53,10 +53,10 @@ class AudioVisualCorrelator:
         self._beat_model = None  # beat_this 懒加载
 
     # ── 公开接口 ─────────────────────────────────────────────
-    def analyze_sync(self, beat_times: List[float],
-                     cut_times: Optional[List[float]] = None,
-                     shot_structure: Optional[Any] = None,
-                     motion_profile: Optional[Any] = None,
+    def analyze_sync(self, beat_times: list[float],
+                     cut_times: list[float] | None = None,
+                     shot_structure: Any | None = None,
+                     motion_profile: Any | None = None,
                      video_path: str = "", audio_path: str = "",
                      duration: float = 0.0) -> SyncAnalysisResult:
         """分析音视频同步质量"""
@@ -87,8 +87,8 @@ class AudioVisualCorrelator:
             sync_quality=quality, total_beats=len(beat_times),
             total_cuts=len(cut_times), tolerance_ms=self._tolerance_ms)
 
-    def measure_sync_quality(self, beat_times: List[float],
-                             cut_times: List[float]) -> Dict[str, float]:
+    def measure_sync_quality(self, beat_times: list[float],
+                             cut_times: list[float]) -> dict[str, float]:
         """快速同步质量 {sync_score, avg_deviation_ms, on_beat_ratio}"""
         aligns = self._align(beat_times, cut_times)
         score, avg_d, _, _ = self._metrics(aligns)
@@ -96,9 +96,9 @@ class AudioVisualCorrelator:
         return {"sync_score": round(score, 4), "avg_deviation_ms": round(avg_d, 2),
                 "on_beat_ratio": round(on / max(len(aligns), 1), 4)}
 
-    def find_best_cut_times(self, beat_times: List[float],
-                            current_cuts: List[float],
-                            max_shift_ms=200.0) -> List[float]:
+    def find_best_cut_times(self, beat_times: list[float],
+                            current_cuts: list[float],
+                            max_shift_ms=200.0) -> list[float]:
         """将切点吸附到最近节拍（max_shift_ms 范围内）"""
         mx = max_shift_ms / 1000.0
         opt = []
@@ -111,7 +111,7 @@ class AudioVisualCorrelator:
         return sorted(set(opt))
 
     # ── 内部 ─────────────────────────────────────────────────
-    def _align(self, beats: List[float], cuts: List[float]) -> List[BeatCutAlignment]:
+    def _align(self, beats: list[float], cuts: list[float]) -> list[BeatCutAlignment]:
         ca = np.array(cuts)
         result = []
         for bt in beats:
@@ -123,19 +123,19 @@ class AudioVisualCorrelator:
                 deviation_ms=round(d_ms, 2), is_on_beat=d_ms <= self._tolerance_ms))
         return result
 
-    def _metrics(self, aligns: List[BeatCutAlignment]) -> Tuple[float, float, float, float]:
+    def _metrics(self, aligns: list[BeatCutAlignment]) -> tuple[float, float, float, float]:
         if not aligns:
             return 0.0, 0.0, 0.0, 0.0
         ds = np.array([a.deviation_ms for a in aligns])
         on = sum(1 for d in ds if d <= self._tolerance_ms)
         return on / len(aligns), float(np.mean(ds)), float(np.median(ds)), float(np.max(ds))
 
-    def _off_beat_segs(self, aligns: List[BeatCutAlignment],
-                       duration: float) -> List[OffBeatSegment]:
+    def _off_beat_segs(self, aligns: list[BeatCutAlignment],
+                       duration: float) -> list[OffBeatSegment]:
         offs = [a for a in aligns if not a.is_on_beat]
         if not offs:
             return []
-        segs: List[OffBeatSegment] = []
+        segs: list[OffBeatSegment] = []
         s0, devs = offs[0].beat_time, [offs[0].deviation_ms]
         for i in range(1, len(offs)):
             p, c = offs[i-1], offs[i]
@@ -150,14 +150,14 @@ class AudioVisualCorrelator:
         return segs
 
     @staticmethod
-    def _mk_off(s: float, e: float, devs: List[float]) -> OffBeatSegment:
+    def _mk_off(s: float, e: float, devs: list[float]) -> OffBeatSegment:
         avg = float(np.mean(devs))
         sev = "severe" if avg > 300 else "moderate" if avg > 150 else "mild"
         return OffBeatSegment(start_time=round(s, 3), end_time=round(e, 3),
                               duration=round(e - s, 3), avg_deviation_ms=round(avg, 2),
                               severity=sev)
 
-    def _suggestions(self, aligns, beats, cuts) -> List[CutSuggestion]:
+    def _suggestions(self, aligns, beats, cuts) -> list[CutSuggestion]:
         sugs = []
         for c in cuts:
             devs = [(abs(c - b), b) for b in beats]
@@ -180,13 +180,13 @@ class AudioVisualCorrelator:
         return "poor"
 
     @staticmethod
-    def _extract_cuts(ss: Any) -> List[float]:
+    def _extract_cuts(ss: Any) -> list[float]:
         if not hasattr(ss, "shots"):
             return []
         return [s.start_time for s in ss.shots if hasattr(s, "start_time")]
 
     # ── beat_this GPU 节拍检测 ─────────────────────────────────
-    def detect_beats(self, audio_path: str, device: str = "cuda") -> Dict[str, List[float]]:
+    def detect_beats(self, audio_path: str, device: str = "cuda") -> dict[str, list[float]]:
         """beat_this 神经网络节拍检测（精度远高于 librosa onset）
 
         Returns: {"beats": [...], "downbeats": [...]}

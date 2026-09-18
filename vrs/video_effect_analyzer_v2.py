@@ -307,9 +307,9 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def __init__(
         self,
-        config_path: Optional[str] = None,
+        config_path: str | None = None,
         max_image_size: int = 1024,
-        frames_output_dir: Optional[str] = None,
+        frames_output_dir: str | None = None,
         enable_vision: bool = True,
     ) -> None:
         """初始化 V2 分析器。
@@ -331,7 +331,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
         )
 
         # 感知哈希 → VISION 分析结果缓存
-        self._vision_cache: Dict[str, Dict[str, Any]] = {}
+        self._vision_cache: dict[str, dict[str, Any]] = {}
 
         # LLM 网关可用性（懒检测）
         self._llm_checked: bool = False
@@ -360,7 +360,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
         self,
         video_path: str,
         detail_level: str = "full",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """深度分析入口 - 整合 CV + VISION + 知识库。
 
         Args:
@@ -376,7 +376,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
         logger.info(f"开始深度分析: {video_path_str} (detail={detail_level})")
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "video_path": video_path_str,
             "filename": os.path.basename(video_path_str),
@@ -408,7 +408,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
             return result
 
         # -------- 第 2 步：VISION 层分析 --------
-        vision_result: Dict[str, Any] = {
+        vision_result: dict[str, Any] = {
             "enabled": self.enable_vision,
             "available": False,
             "key_frames": [],
@@ -473,9 +473,9 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
     async def _run_vision_pipeline(
         self,
         video_path: str,
-        cv_result: Dict[str, Any],
+        cv_result: dict[str, Any],
         detail_level: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """执行 VISION 分析流水线：选帧 → 抽帧 → 批量分析 → 汇总。"""
         frames_data = cv_result.get("frames_data", [])
         # 原版 _sample_frames 不返回 frames_data 字段，从 total_frames_sampled 重建
@@ -509,7 +509,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
         logger.info(f"关键帧已落盘: {len(frame_paths)} 张 -> {self.frames_output_dir}")
 
         # 3. 批量 VISION 分析（网格拼图模式）
-        batch_analyses: List[Dict[str, Any]] = []
+        batch_analyses: list[dict[str, Any]] = []
         if len(frame_paths) > 1:
             batches = self._chunk_batches(frame_paths, self._BATCH_MAX_FRAMES)
             for batch_idx, batch in enumerate(batches):
@@ -520,7 +520,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
                 batch_analyses.append(analysis)
 
         # 4. 对未进入批次的单帧（或批次为 1）做单帧精分析
-        frame_analyses: List[Dict[str, Any]] = []
+        frame_analyses: list[dict[str, Any]] = []
         # 若帧数少，直接单帧分析更精确
         if len(frame_paths) <= 2:
             for fp in frame_paths:
@@ -557,10 +557,10 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def _select_key_frames(
         self,
-        frames_data: List[Dict[str, Any]],
-        scenes: List[Dict[str, Any]],
-        transitions: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        frames_data: list[dict[str, Any]],
+        scenes: list[dict[str, Any]],
+        transitions: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """智能选帧 - 从 CV 结果中选出转场前后、效果变化的关键帧。
 
         策略：
@@ -583,7 +583,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
         # 用 standard 作为默认（frames_data 本身已是采样后的）
         interval_sec = self._VISION_SAMPLE_INTERVAL.get("standard", 3.0)
 
-        selected: Dict[int, Dict[str, Any]] = {}
+        selected: dict[int, dict[str, Any]] = {}
 
         # 1. 等间隔采样
         last_selected_time = -1e9
@@ -661,10 +661,10 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
     async def _extract_frames_to_disk(
         self,
         video_path: str,
-        key_frames: List[Dict[str, Any]],
+        key_frames: list[dict[str, Any]],
         output_dir: Path,
         video_stem: str,
-    ) -> List[str]:
+    ) -> list[str]:
         """从视频中抽取指定 frame_idx 的帧，保存为 PNG。
 
         Args:
@@ -684,7 +684,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
             c if c.isalnum() or c in "-_" else "_" for c in video_stem
         ).strip("_") or "video"
 
-        def _extract_sync() -> List[str]:
+        def _extract_sync() -> list[str]:
             import cv2
             import numpy as np
 
@@ -693,7 +693,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
                 logger.error(f"无法打开视频抽帧: {video_path}")
                 return []
 
-            paths: List[str] = [""] * len(key_frames)
+            paths: list[str] = [""] * len(key_frames)
             try:
                 frame_idx = 0
                 while frame_idx < max(target_indices.keys(), default=-1) + 1:
@@ -728,7 +728,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
     async def _analyze_frame_with_vision(
         self,
         frame_path: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """单帧 VISION 分析，返回效果类型/强度/插件判断。
 
         Args:
@@ -869,8 +869,8 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     async def _analyze_frames_batch(
         self,
-        frame_paths: List[str],
-    ) -> Dict[str, Any]:
+        frame_paths: list[str],
+    ) -> dict[str, Any]:
         """批量 VISION 分析 - 网格拼图模式，降低成本。
 
         将多帧合成为一张网格图，单次 LLM 调用分析全部帧。
@@ -898,7 +898,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
         # 缓存命中检查（全部命中则跳过 LLM 调用）
         phashes = [self._compute_phash(fp) for fp in frame_paths]
         all_cached = True
-        per_frame: List[Dict[str, Any]] = []
+        per_frame: list[dict[str, Any]] = []
         for fp, ph in zip(frame_paths, phashes):
             hit = None
             if ph:
@@ -1094,9 +1094,9 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def _merge_cv_vision_results(
         self,
-        cv_result: Dict[str, Any],
-        vision_result: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        cv_result: dict[str, Any],
+        vision_result: dict[str, Any],
+    ) -> dict[str, Any]:
         """融合 CV 和 VISION 分析结果。
 
         Args:
@@ -1106,7 +1106,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
         Returns:
             融合后的结果，含 enhanced_ae_parameters / enhanced_prompts / confidence_map
         """
-        merged: Dict[str, Any] = {
+        merged: dict[str, Any] = {
             "cv_summary": {
                 "grading_style": cv_result.get("color_grading", {}).get("grading_style", ""),
                 "rhythm": cv_result.get("rhythm_analysis", {}).get("rhythm", ""),
@@ -1181,7 +1181,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
                 raw = f.read()
         return base64.b64encode(raw).decode("ascii")
 
-    def _create_grid_image(self, image_paths: List[str]) -> str:
+    def _create_grid_image(self, image_paths: list[str]) -> str:
         """将多帧合成为网格拼图，返回 base64 字符串。"""
         if not image_paths:
             raise ValueError("image_paths 为空")
@@ -1198,7 +1198,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
         cell_size = max(128, self.max_image_size // max(cols, rows))
 
         # 加载并缩放每帧
-        thumbnails: List[Any] = []
+        thumbnails: list[Any] = []
         for fp in image_paths:
             with Image.open(fp) as img:
                 if img.mode not in ("RGB", "L"):
@@ -1259,7 +1259,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
     # 辅助方法：VISION 响应解析
     # -------------------------------------------------------------------------
 
-    def _parse_vision_response(self, content: str) -> Dict[str, Any]:
+    def _parse_vision_response(self, content: str) -> dict[str, Any]:
         """解析 VISION 返回的 JSON 内容，容错处理。"""
         if not content:
             return {"effects": [], "parse_error": "empty_content"}
@@ -1306,7 +1306,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
         self,
         content: str,
         expected_count: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """解析批量 VISION 响应。"""
         parsed = self._parse_vision_response(content)
         # 批量响应的 per_frame 字段
@@ -1330,11 +1330,11 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def _aggregate_effects(
         self,
-        batch_analyses: List[Dict[str, Any]],
-        frame_analyses: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        batch_analyses: list[dict[str, Any]],
+        frame_analyses: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """聚合所有帧的效果识别结果，按效果类型合并并取最高置信度。"""
-        effect_map: Dict[str, Dict[str, Any]] = {}
+        effect_map: dict[str, dict[str, Any]] = {}
 
         # 从批次提取
         for batch in batch_analyses:
@@ -1361,8 +1361,8 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def _merge_effect_into(
         self,
-        effect_map: Dict[str, Dict[str, Any]],
-        eff: Dict[str, Any],
+        effect_map: dict[str, dict[str, Any]],
+        eff: dict[str, Any],
     ) -> None:
         """将单个效果合并进聚合 map。"""
         eff_type = eff.get("type") or eff.get("name") or "unknown"
@@ -1386,14 +1386,14 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def _aggregate_blend_modes(
         self,
-        batch_analyses: List[Dict[str, Any]],
-        frame_analyses: List[Dict[str, Any]],
-    ) -> List[str]:
+        batch_analyses: list[dict[str, Any]],
+        frame_analyses: list[dict[str, Any]],
+    ) -> list[str]:
         """聚合所有帧检测到的混合模式（去重）。"""
-        modes: List[str] = []
+        modes: list[str] = []
         seen = set()
 
-        def _collect(fr: Dict[str, Any]) -> None:
+        def _collect(fr: dict[str, Any]) -> None:
             for m in fr.get("blend_modes_detected", []) or []:
                 # 兼容新格式：元素可能是 {"mode": "SCREEN"} 字典
                 if isinstance(m, dict):
@@ -1413,13 +1413,13 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def _aggregate_style_tags(
         self,
-        batch_analyses: List[Dict[str, Any]],
-        frame_analyses: List[Dict[str, Any]],
-    ) -> List[str]:
+        batch_analyses: list[dict[str, Any]],
+        frame_analyses: list[dict[str, Any]],
+    ) -> list[str]:
         """聚合所有帧的风格标签（按出现频次降序）。"""
-        tag_count: Dict[str, int] = {}
+        tag_count: dict[str, int] = {}
 
-        def _collect(fr: Dict[str, Any]) -> None:
+        def _collect(fr: dict[str, Any]) -> None:
             for t in fr.get("style_tags", []) or []:
                 tag_count[t] = tag_count.get(t, 0) + 1
 
@@ -1433,11 +1433,11 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def _build_merged_summary(
         self,
-        effects: List[Dict[str, Any]],
-        cv_result: Dict[str, Any],
+        effects: list[dict[str, Any]],
+        cv_result: dict[str, Any],
     ) -> str:
         """构建 CV + VISION 融合的整体描述。"""
-        parts: List[str] = []
+        parts: list[str] = []
         if effects:
             top = effects[:3]
             names = [e.get("name") or e.get("type", "?") for e in top]
@@ -1459,9 +1459,9 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def _enhance_ae_parameters(
         self,
-        base_params: Dict[str, Any],
-        vision_effects: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        base_params: dict[str, Any],
+        vision_effects: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         """在原版 AE 参数表基础上叠加 VISION 识别的效果。"""
         enhanced = json.loads(json.dumps(base_params))  # 深拷贝
         if "effects" not in enhanced:
@@ -1498,10 +1498,10 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def _enhance_prompts(
         self,
-        base_prompts: Dict[str, Any],
-        vision_effects: List[Dict[str, Any]],
-        style_tags: List[str],
-    ) -> Dict[str, Any]:
+        base_prompts: dict[str, Any],
+        vision_effects: list[dict[str, Any]],
+        style_tags: list[str],
+    ) -> dict[str, Any]:
         """增强 MCP 提示词，加入 VISION 识别的效果与风格。"""
         enhanced = json.loads(json.dumps(base_prompts))
 
@@ -1519,7 +1519,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
         enhanced["style_description"] = style_desc
 
         mcp_prompt = enhanced.get("mcp_prompt", "")
-        vision_lines: List[str] = []
+        vision_lines: list[str] = []
         for eff in vision_effects:
             if eff.get("confidence", 0) < 0.5:
                 continue
@@ -1545,9 +1545,9 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     def _build_confidence_map(
         self,
-        cv_result: Dict[str, Any],
-        vision_effects: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        cv_result: dict[str, Any],
+        vision_effects: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         """构建置信度映射：CV 量化指标 + VISION 语义判断的交叉验证。"""
         cv_effects = cv_result.get("visual_effects", {}).get("detected_effects", [])
         cv_types = {e.get("type") for e in cv_effects if e.get("type")}
@@ -1602,7 +1602,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
             )
         return self._llm_usable
 
-    def _reconstruct_frames_data(self, cv_result: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _reconstruct_frames_data(self, cv_result: dict[str, Any]) -> list[dict[str, Any]]:
         """从 CV 结果重建 frames_data（原版未保留时）。
 
         原版 _sample_frames 不写入 cv_result，这里基于 scenes/transitions
@@ -1613,7 +1613,7 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
         duration = basic.get("duration", 0)
         total_sampled = cv_result.get("total_frames_sampled", 0)
 
-        frames: List[Dict[str, Any]] = []
+        frames: list[dict[str, Any]] = []
         if total_sampled > 0 and duration > 0:
             interval_sec = duration / total_sampled
             for i in range(total_sampled):
@@ -1633,15 +1633,15 @@ class VideoEffectAnalyzerV2(VideoEffectAnalyzer):
 
     @staticmethod
     def _chunk_batches(
-        items: List[Any],
+        items: list[Any],
         chunk_size: int,
-    ) -> List[List[Any]]:
+    ) -> list[list[Any]]:
         """将列表切分为多个批次。"""
         if chunk_size <= 0:
             return [items]
         return [items[i : i + chunk_size] for i in range(0, len(items), chunk_size)]
 
-    def get_vision_stats(self) -> Dict[str, Any]:
+    def get_vision_stats(self) -> dict[str, Any]:
         """获取 VISION 调用统计。"""
         return {
             "vision_stats": dict(self._vision_stats),

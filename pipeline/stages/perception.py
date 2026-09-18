@@ -5,10 +5,10 @@ pipeline/stages/perception.py - 感知阶段
 """
 from __future__ import annotations
 
-import os
 import glob
-import time
 import logging
+import os
+import time
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -25,7 +25,7 @@ class PerceptionStage:
     def __init__(self, config):
         self.config = config
 
-    def run(self, previous_data: Dict) -> Dict:
+    def run(self, previous_data: dict) -> dict:
         """执行感知阶段"""
         result = {
             "materials": [],
@@ -74,7 +74,7 @@ class PerceptionStage:
 
         return result
 
-    def _scan_directory(self, directory: str) -> List[Dict]:
+    def _scan_directory(self, directory: str) -> list[dict]:
         """扫描目录下所有媒体文件"""
         files = []
         for root, dirs, filenames in os.walk(directory):
@@ -92,10 +92,11 @@ class PerceptionStage:
                     })
         return files
 
-    def _probe_video(self, path: str) -> Dict:
+    def _probe_video(self, path: str) -> dict:
         """用ffprobe提取视频元数据"""
         try:
             import subprocess
+
             from pipeline.stages import resolve_ffprobe
             ffprobe = resolve_ffprobe(self.config)
             cmd = [
@@ -130,7 +131,7 @@ class PerceptionStage:
             pass
         return {}
 
-    def _quick_analyze(self, path: str) -> Dict:
+    def _quick_analyze(self, path: str) -> dict:
         """快速视觉分析（采样几帧）"""
         try:
             from analysis.visual_content_analyzer import VisualContentAnalyzer

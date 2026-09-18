@@ -30,8 +30,8 @@ import mimetypes
 import os
 import shutil
 import time
-import uuid
 import urllib.request
+import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -98,7 +98,7 @@ class HanddrawnComfyUIAdapter:
 
     DEFAULT_CHECKPOINT = "sd_xl_base_1.0.safetensors"
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.base_url = self.config.get(
             "comfyui_url", os.environ.get("COMFYUI_URL", "http://127.0.0.1:8188")
@@ -129,12 +129,12 @@ class HanddrawnComfyUIAdapter:
         style: str,
         input_image: str,
         output_prefix: str = "handdrawn",
-        checkpoint: Optional[str] = None,
+        checkpoint: str | None = None,
         denoise: float = 0.75,
         steps: int = 20,
         cfg: float = 7.0,
-        seed: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        seed: int | None = None,
+    ) -> dict[str, Any]:
         """从模板构建可提交的工作流 JSON (纯本地, 无需服务端)"""
         if style not in self.STYLE_PROMPTS:
             raise ValueError(
@@ -199,8 +199,8 @@ class HanddrawnComfyUIAdapter:
         return result.get("name", image_path.name)
 
     def _queue_and_wait(
-        self, workflow: Dict[str, Any], max_wait: int = 600
-    ) -> Dict[str, Any]:
+        self, workflow: dict[str, Any], max_wait: int = 600
+    ) -> dict[str, Any]:
         data = json.dumps({"prompt": workflow}).encode("utf-8")
         req = urllib.request.Request(
             f"{self.base_url}/prompt", data=data,
@@ -225,9 +225,9 @@ class HanddrawnComfyUIAdapter:
             time.sleep(3)
         raise TimeoutError(f"ComfyUI 任务超时 ({max_wait}s): {prompt_id}")
 
-    def _download_output(self, entry: Dict[str, Any], output_path: Path) -> Optional[Path]:
+    def _download_output(self, entry: dict[str, Any], output_path: Path) -> Path | None:
         """从历史条目中提取图片并下载"""
-        images: List[Dict[str, str]] = []
+        images: list[dict[str, str]] = []
         for outputs in entry.get("outputs", {}).values():
             for img in outputs.get("images", []):
                 images.append(img)
@@ -246,7 +246,7 @@ class HanddrawnComfyUIAdapter:
     # ------------------------------------------------------------------
     #  执行入口
     # ------------------------------------------------------------------
-    def execute(self, operation: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any]) -> dict[str, Any]:
         if operation not in self.SUPPORTED_OPERATIONS:
             return {"status": "error", "error": f"不支持的操作: {operation}"}
 
@@ -278,9 +278,9 @@ class HanddrawnComfyUIAdapter:
             return self._batch_stylize(params)
         return {"status": "error", "error": "未实现的操作"}
 
-    def _env_report(self) -> Dict[str, Any]:
+    def _env_report(self) -> dict[str, Any]:
         online = self._ping_server()
-        report: Dict[str, Any] = {
+        report: dict[str, Any] = {
             "server_url": self.base_url,
             "server_online": online,
             "simulate_mode": not online,
@@ -302,7 +302,7 @@ class HanddrawnComfyUIAdapter:
                 report["checkpoints"] = []
         return report
 
-    def _stylize_image(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _stylize_image(self, params: dict[str, Any]) -> dict[str, Any]:
         style = params.get("style", "pencil_sketch")
         input_image = params.get("input_image", "")
         output_path = Path(params.get("output_path", "output_handdrawn.png"))
@@ -346,9 +346,9 @@ class HanddrawnComfyUIAdapter:
             logger.exception("[ComfyUI手绘] 风格化失败")
             return {"status": "error", "error": str(e)}
 
-    def _batch_stylize(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _batch_stylize(self, params: dict[str, Any]) -> dict[str, Any]:
         """批量风格化: 关键帧序列 → 风格化序列"""
-        frames: List[str] = params.get("frames", [])
+        frames: list[str] = params.get("frames", [])
         style = params.get("style", "pencil_sketch")
         out_dir = Path(params.get("output_dir", "output_handdrawn_frames"))
         if not frames:

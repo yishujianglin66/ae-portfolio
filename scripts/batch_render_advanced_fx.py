@@ -2,9 +2,12 @@
 """高级特效预设批量渲染验证 - 18个新预设
 通过AE Bridge创建合成 -> 保存工程 -> aerender渲染
 """
-import json, time, sys, os
-from pathlib import Path
+import json
+import os
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 

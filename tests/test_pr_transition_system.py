@@ -8,11 +8,12 @@
 """
 
 import pytest
+
 from ae.pr_transition_system import (
-    TransitionType,
+    PremiereTransitionSystem,
     TransitionDirection,
     TransitionParam,
-    PremiereTransitionSystem,
+    TransitionType,
 )
 
 

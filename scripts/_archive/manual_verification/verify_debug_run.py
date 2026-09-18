@@ -1,9 +1,15 @@
 """Debug: 启动 Resolve 并运行 Lua 脚本，捕获完整输出"""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.davinci_fuscript import ResolveColorEngine, ColorGradeConfig, find_lut_for_preset
-import tempfile, subprocess, time, shutil
+import shutil
+import subprocess
+import tempfile
+import time
+
+from integrations.davinci_fuscript import ColorGradeConfig, ResolveColorEngine, find_lut_for_preset
 
 engine = ResolveColorEngine()
 
@@ -45,7 +51,7 @@ script_path = os.path.join(script_dir, "script.lua")
 with open(script_path, "w", encoding="utf-8") as f:
     f.write(lua_script)
 
-print(f"\nRunning fuscript...")
+print("\nRunning fuscript...")
 print("=" * 60)
 
 proc = subprocess.run(

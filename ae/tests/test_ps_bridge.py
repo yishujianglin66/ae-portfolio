@@ -49,7 +49,7 @@ class TestPSProcessManager:
 
     def test_ps_metrics(self):
         """测试获取 PS 进程指标。"""
-        from ae.ps_process_manager import PSProcessManager, PSMetrics
+        from ae.ps_process_manager import PSMetrics, PSProcessManager
 
         manager = PSProcessManager()
         metrics = manager.get_ps_metrics()
@@ -120,7 +120,7 @@ class TestPSMcpClient:
 
     def test_ps_client_stats(self):
         """测试客户端统计信息。"""
-        from ae.ps_mcp_client import PSMDPClient, ClientStats
+        from ae.ps_mcp_client import ClientStats, PSMDPClient
 
         client = PSMDPClient(
             bridge_dir=r"C:\Users\Administrator\Documents\ps-mcp-bridge",
@@ -149,11 +149,11 @@ class TestPSMcpClient:
     def test_ps_client_exceptions(self):
         """测试异常类导入。"""
         from ae.ps_mcp_client import (
-            PSMCPError,
-            PSConnectionError,
             PSCommandError,
-            PSTimeoutError,
+            PSConnectionError,
+            PSMCPError,
             PSNotFoundError,
+            PSTimeoutError,
         )
 
         assert PSMCPError is not None
@@ -207,8 +207,8 @@ class TestPSAdapter:
         from ae.adapters.ps_adapter import (
             BasePSAdapter,
             MCPClientPSAdapter,
-            PuppetEnginePSAdapter,
             PSAdapterFactory,
+            PuppetEnginePSAdapter,
         )
 
         assert BasePSAdapter is not None
@@ -218,7 +218,7 @@ class TestPSAdapter:
 
     def test_ps_adapter_factory_mcp(self):
         """测试工厂创建 MCP 适配器。"""
-        from ae.adapters.ps_adapter import PSAdapterFactory, MCPClientPSAdapter
+        from ae.adapters.ps_adapter import MCPClientPSAdapter, PSAdapterFactory
 
         adapter = PSAdapterFactory.create("mcp")
         assert isinstance(adapter, MCPClientPSAdapter)
@@ -265,8 +265,8 @@ class TestPSIntegration:
         from ae.adapters import (
             BasePSAdapter,
             MCPClientPSAdapter,
-            PuppetEnginePSAdapter,
             PSAdapterFactory,
+            PuppetEnginePSAdapter,
         )
 
         assert BasePSAdapter is not None

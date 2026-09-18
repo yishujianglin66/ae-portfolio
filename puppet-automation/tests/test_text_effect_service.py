@@ -1,10 +1,10 @@
 """Tests for TextEffectService."""
-import pytest
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.services.text_effect_service import TextEffectService
+import pytest
 from src.engines.base import EngineResult
+from src.services.text_effect_service import TextEffectService
 
 
 @pytest.fixture

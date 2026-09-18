@@ -148,7 +148,7 @@ def print_summary():
         ("启动 PR", f'& "{PR_INSTALL_DIR / "Adobe Premiere Pro.exe"}"'),
         ("安装 Bridge 脚本", f'python "{SCRIPTS_DIR / "pr_auto_controller.py"}"'),
         ("运行自动化测试", f'python "{SCRIPTS_DIR / "auto_test_pr_bridge.py"}"'),
-        ("执行卡点剪辑脚本", f'python -c "from premiere_mcp_client import PremiereMCP; client=PremiereMCP(); print(client.execute_script_file(\'solo_leveling_pr_beat_edit.jsx\'))"'),
+        ("执行卡点剪辑脚本", 'python -c "from premiere_mcp_client import PremiereMCP; client=PremiereMCP(); print(client.execute_script_file(\'solo_leveling_pr_beat_edit.jsx\'))"'),
     ]
     
     for name, cmd in commands:

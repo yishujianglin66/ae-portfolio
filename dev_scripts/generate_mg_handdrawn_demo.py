@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """生成 MG动画 + 手书动画演示产物"""
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 os.makedirs("output_production", exist_ok=True)
@@ -9,6 +11,7 @@ os.makedirs("output_production", exist_ok=True)
 print("=" * 60)
 print("[1/3] MG Template Engine → 数据图表动画 MP4")
 from core.mg_template_engine import MGTemplateEngine
+
 engine = MGTemplateEngine()
 
 result = engine.render(
@@ -34,6 +37,7 @@ print(f"  结果: {result}")
 # 2. Lottie JSON 导出
 print("\n[2/3] Lottie Exporter → MG 动画 JSON")
 from core.lottie_exporter import LottieExporter
+
 exporter = LottieExporter()
 result2 = exporter.create_animation(
     layers=[
@@ -56,9 +60,10 @@ print(f"  验证: valid={validation['valid']}, 分辨率={validation['resolution
 
 # 3. 手绘风格化
 print("\n[3/3] HanddrawnStyler → 手绘风格化图像")
-from core.handdrawn_styler import HanddrawnStyler
 import numpy as np
 from PIL import Image
+
+from core.handdrawn_styler import HanddrawnStyler
 
 # 创建渐变测试图像
 arr = np.zeros((512, 512, 3), dtype=np.uint8)
@@ -67,7 +72,7 @@ for y in range(512):
         arr[y, x] = [int(255 * x / 512), int(255 * y / 512), 128]
 img = Image.fromarray(arr)
 img.save("output_production/test_input_gradient.png")
-print(f"  输入: 512x512 渐变图像")
+print("  输入: 512x512 渐变图像")
 
 styler = HanddrawnStyler()
 for style in ["pencil_sketch", "ink_drawing", "comic", "watercolor"]:
@@ -82,6 +87,7 @@ for style in ["pencil_sketch", "ink_drawing", "comic", "watercolor"]:
 # 4. MG 编排器端到端
 print("\n[BONUS] MGOrchestrator → 编排多段 MG 动画")
 from pipeline.mg_orchestrator import MGOrchestrator
+
 orch = MGOrchestrator()
 result3 = orch.produce(
     style_spec={"type": "corporate", "duration": 4},

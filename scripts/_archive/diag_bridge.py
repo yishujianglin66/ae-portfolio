@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """精确诊断Bridge通信 - 逐步排查"""
-import json, time, sys
-from pathlib import Path
+import json
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -18,7 +20,7 @@ def test_send(label, code, wait=30):
     cmd = {"command": "runScript", "args": {"code": code},
            "timestamp": datetime.now().isoformat(), "status": "pending"}
     BRIDGE_CMD.write_text(json.dumps(cmd, ensure_ascii=False), encoding="utf-8")
-    print(f"  命令已写入, 等待响应...")
+    print("  命令已写入, 等待响应...")
     
     time.sleep(2)
     for i in range(wait):

@@ -89,12 +89,14 @@ def main() -> int:
         picks = sorted(keep.glob("*.jpg"))
 
     import cv2
+
     from core.cnn_scorer import encode_frames
     groups: dict = {}
     embs = {}
-    from core.cnn_scorer import _load_clip
     import torch
-    from core.torch_runtime import infer_ctx, get_device
+
+    from core.cnn_scorer import _load_clip
+    from core.torch_runtime import get_device, infer_ctx
     model, preprocess = _load_clip()
     from PIL import Image
 

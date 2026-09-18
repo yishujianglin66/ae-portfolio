@@ -15,7 +15,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
 
-
 # ============================================================================
 # 数据类定义（对齐 types.ts）
 # ============================================================================
@@ -24,8 +23,8 @@ from typing import Any, List, Optional, Union
 class ExpectedProperty:
     """预期属性（对齐 ExpectedParameters.properties 元素）"""
     name: str
-    value: Union[float, str, bool, List[float]]
-    tolerance: Optional[float] = None
+    value: Union[float, str, bool, list[float]]
+    tolerance: float | None = None
 
 
 @dataclass
@@ -33,7 +32,7 @@ class KeyframeSpec:
     """关键帧规格（对齐 ExpectedParameters.keyframes 元素）"""
     property: str
     time: float
-    value: Union[float, List[float]]
+    value: Union[float, list[float]]
 
 
 @dataclass
@@ -41,23 +40,23 @@ class ExpectedParameters:
     """预期参数（对齐 ExpectedParameters）"""
     comp_name: str
     layer_index: int
-    effect_match_name: Optional[str] = None
-    effect_name: Optional[str] = None
-    properties: List[ExpectedProperty] = field(default_factory=list)
-    keyframes: List[KeyframeSpec] = field(default_factory=list)
+    effect_match_name: str | None = None
+    effect_name: str | None = None
+    properties: list[ExpectedProperty] = field(default_factory=list)
+    keyframes: list[KeyframeSpec] = field(default_factory=list)
 
 
 @dataclass
 class ExecutionResult:
     """执行结果（对齐 ExecutionResult）"""
     success: bool
-    error_code: Optional[str] = None
-    error_message: Optional[str] = None
-    effect_index: Optional[int] = None
-    keyframes_added: Optional[int] = None
-    effect_name: Optional[str] = None
-    raw_response: Optional[str] = None
-    execution_time_ms: Optional[float] = None
+    error_code: str | None = None
+    error_message: str | None = None
+    effect_index: int | None = None
+    keyframes_added: int | None = None
+    effect_name: str | None = None
+    raw_response: str | None = None
+    execution_time_ms: float | None = None
 
 
 @dataclass
@@ -66,7 +65,7 @@ class ParameterMismatch:
     param: str
     expected: Any
     actual: Any
-    deviation: Optional[float] = None
+    deviation: float | None = None
 
 
 @dataclass
@@ -74,16 +73,16 @@ class ActualProperty:
     """实际属性（对齐 ActualProperty）"""
     name: str
     value: Any
-    type: Optional[str] = None
+    type: str | None = None
 
 
 @dataclass
 class VerificationResult:
     """验证结果（对齐 VerificationResult）"""
     passed: bool
-    mismatches: List[ParameterMismatch] = field(default_factory=list)
-    reason: Optional[str] = None
-    actual_properties: List[ActualProperty] = field(default_factory=list)
+    mismatches: list[ParameterMismatch] = field(default_factory=list)
+    reason: str | None = None
+    actual_properties: list[ActualProperty] = field(default_factory=list)
     deviation_score: float = 0.0
 
 
@@ -104,8 +103,8 @@ class McpClient(ABC):
         self,
         comp_name: str,
         layer_index: int,
-        effect_index: Optional[int] = None,
-    ) -> Optional[List[ActualProperty]]:
+        effect_index: int | None = None,
+    ) -> list[ActualProperty] | None:
         """调用 MCP get-effect-properties 工具
 
         Args:
@@ -126,8 +125,8 @@ class MockMcpClient(McpClient):
         self,
         comp_name: str,
         layer_index: int,
-        effect_index: Optional[int] = None,
-    ) -> Optional[List[ActualProperty]]:
+        effect_index: int | None = None,
+    ) -> list[ActualProperty] | None:
         return None
 
 
@@ -144,10 +143,10 @@ class RealMcpClient(McpClient):
         self,
         comp_name: str,
         layer_index: int,
-        effect_index: Optional[int] = None,
+        effect_index: int | None = None,
         layer_name: str = "",
         effect_name: str = "",
-    ) -> Optional[List[ActualProperty]]:
+    ) -> list[ActualProperty] | None:
         if not self._ae_client:
             return None
 
@@ -165,7 +164,7 @@ class RealMcpClient(McpClient):
             if not props_dict:
                 return None
 
-            actual_props: List[ActualProperty] = []
+            actual_props: list[ActualProperty] = []
             for prop_name, prop_data in props_dict.items():
                 if isinstance(prop_data, dict):
                     actual_props.append(ActualProperty(
@@ -199,7 +198,7 @@ class ResultVerifier:
 
     def __init__(
         self,
-        mcp_client: Optional[McpClient] = None,
+        mcp_client: McpClient | None = None,
         default_tolerance: float = 0.01,
     ) -> None:
         self._mcp_client: McpClient = mcp_client or MockMcpClient()
@@ -275,11 +274,11 @@ class ResultVerifier:
 
     def _compare_parameters(
         self,
-        expected: List[ExpectedProperty],
-        actual: List[ActualProperty],
-    ) -> List[ParameterMismatch]:
+        expected: list[ExpectedProperty],
+        actual: list[ActualProperty],
+    ) -> list[ParameterMismatch]:
         """对比预期参数和实际参数"""
-        mismatches: List[ParameterMismatch] = []
+        mismatches: list[ParameterMismatch] = []
 
         for expected_prop in expected:
             # 查找对应的实际属性
@@ -319,7 +318,7 @@ class ResultVerifier:
 
     def _values_match(
         self,
-        expected: Union[float, str, bool, List[float]],
+        expected: Union[float, str, bool, list[float]],
         actual: Any,
         tolerance: float,
     ) -> bool:
@@ -342,7 +341,7 @@ class ResultVerifier:
 
     def _calculate_deviation(
         self,
-        expected: Union[float, str, bool, List[float]],
+        expected: Union[float, str, bool, list[float]],
         actual: Any,
     ) -> float:
         """计算单个参数的偏差"""
@@ -364,9 +363,9 @@ class ResultVerifier:
 
     def _calculate_deviation_score(
         self,
-        expected: List[ExpectedProperty],
-        actual: List[ActualProperty],
-        mismatches: List[ParameterMismatch],
+        expected: list[ExpectedProperty],
+        actual: list[ActualProperty],
+        mismatches: list[ParameterMismatch],
     ) -> float:
         """计算综合偏差度（0-1）
 
@@ -404,8 +403,8 @@ class ResultVerifier:
 
     def verify_silhouette_output(
         self,
-        silhouette_artifacts: List[dict],
-        expected_comp: Optional[dict] = None,
+        silhouette_artifacts: list[dict],
+        expected_comp: dict | None = None,
     ) -> "SilhouetteVerificationResult":
         """验证 Silhouette 产出
 
@@ -471,8 +470,8 @@ class SilhouetteVerificationResult:
     pending_count: int = 0
     failure_count: int = 0
     verified_files: int = 0
-    warnings: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
 
 # ============================================================================

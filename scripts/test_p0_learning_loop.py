@@ -2,9 +2,9 @@
 """P0 学习闭环验证: PersistentLearningLoop 真实写入+读取
 验证 learn 阶段正确写入学习记录，且下次运行能读取。
 """
-import sys
-import os
 import json
+import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -43,13 +43,13 @@ def main():
     # 3. 测试写入
     print("\n[3] Testing PersistentLearningLoop write...")
     try:
-        from learning.persistent_learning_loop import PersistentLearningLoop
         from learning.learning_loop import (
+            ExecutionResult,
             ExpectedParameters,
             ExpectedProperty,
-            ExecutionResult,
             VerificationResult,
         )
+        from learning.persistent_learning_loop import PersistentLearningLoop
         
         learner = PersistentLearningLoop()
         

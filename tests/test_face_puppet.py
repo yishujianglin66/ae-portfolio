@@ -1,7 +1,8 @@
 """puppet_effects.face_puppet 单元测试 - 面部木偶化效果模块"""
+import math
 import os
 import sys
-import math
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

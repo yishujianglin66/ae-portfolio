@@ -1,11 +1,12 @@
 """PR 桥接连接测试脚本 — 验证 CEP 插件桥接是否在线。"""
-import sys
 import pathlib
+import sys
 
 # 添加路径
 sys.path.insert(0, str(pathlib.Path("puppet-automation").resolve()))
 
 import asyncio
+
 from src.engines.premiere.pr_bridge_client import PRBridgeClient, PRBridgeError
 
 
@@ -22,7 +23,7 @@ async def test():
     try:
         info = await client.ping()
         data = info.get("data", {})
-        print(f"✅ 桥接在线!")
+        print("✅ 桥接在线!")
         print(f"   PR 版本: {data.get('appVersion', 'unknown')}")
         print(f"   项目: {data.get('project', '无')}")
         print(f"   序列: {data.get('sequence', '无')}")
@@ -39,7 +40,7 @@ async def test():
             for s in seqs:
                 print(f"     - {s['name']} (V{s['videoTracks']} A{s['audioTracks']})")
         else:
-            print(f"   序列: 无")
+            print("   序列: 无")
 
         return True
 

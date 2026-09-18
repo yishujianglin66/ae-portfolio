@@ -19,7 +19,6 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
-
 # ---------------------------------------------------------------------------
 # Puppet-Automation shim 导入（与 bridges/blender_ae_bridge.py 保持一致）
 # ---------------------------------------------------------------------------
@@ -237,7 +236,7 @@ ERROR_FEEDBACK_TEMPLATE = """
 # ---------------------------------------------------------------------------
 
 # 高危调用黑名单（正则，匹配单词边界，避免误伤 bpy 正常代码）
-_DANGEROUS_PATTERNS: List[tuple[str, str]] = [
+_DANGEROUS_PATTERNS: list[tuple[str, str]] = [
     (r"\bexec\s*\(", "禁止使用 exec() 动态执行代码"),
     (r"\beval\s*\(", "禁止使用 eval() 动态求值"),
     (r"\bcompile\s*\(", "禁止使用 compile() 编译代码"),
@@ -268,7 +267,7 @@ _OPEN_PATTERN = re.compile(
 class SafetyCheckResult:
     """安全审查结果。"""
     passed: bool
-    violations: List[str] = field(default_factory=list)
+    violations: list[str] = field(default_factory=list)
 
     @property
     def error_message(self) -> str:
@@ -288,7 +287,7 @@ def _safety_check(generated_code: str) -> SafetyCheckResult:
     Returns:
         SafetyCheckResult(passed, violations)
     """
-    violations: List[str] = []
+    violations: list[str] = []
 
     if not generated_code or not generated_code.strip():
         violations.append("生成的代码为空")
@@ -325,7 +324,7 @@ class BlenderNLResult:
     stderr: str = ""
     error: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "status": self.status,
             "generated_code": self.generated_code,
@@ -353,9 +352,9 @@ class BlenderNLService:
 
     def __init__(
         self,
-        blender_engine: Optional[Any] = None,
-        llm_gateway_bundle: Optional[Dict[str, Any]] = None,
-        knowledge_api_dir: Optional[Path | str] = None,
+        blender_engine: Any | None = None,
+        llm_gateway_bundle: dict[str, Any] | None = None,
+        knowledge_api_dir: Path | str | None = None,
     ) -> None:
         """初始化服务。
 
@@ -367,7 +366,7 @@ class BlenderNLService:
         self._blender_engine = blender_engine
         self._llm_bundle = llm_gateway_bundle
         self._knowledge_api_dir = Path(knowledge_api_dir) if knowledge_api_dir else None
-        self._api_few_shot_cached: Optional[str] = None
+        self._api_few_shot_cached: str | None = None
         logger.info("BlenderNLService initialized")
 
     # ------------------------------------------------------------------
@@ -388,7 +387,7 @@ class BlenderNLService:
         return self._blender_engine
 
     @property
-    def llm_bundle(self) -> Optional[Dict[str, Any]]:
+    def llm_bundle(self) -> dict[str, Any] | None:
         """延迟获取 LLM 网关 bundle。"""
         if self._llm_bundle is None:
             self._llm_bundle = _load_llm_gateway()
@@ -433,9 +432,9 @@ class BlenderNLService:
     def _build_prompt(
         self,
         command: str,
-        scene_context: Optional[str],
-        previous_code: Optional[str] = None,
-        previous_error: Optional[str] = None,
+        scene_context: str | None,
+        previous_code: str | None = None,
+        previous_error: str | None = None,
     ) -> tuple[str, str]:
         """构建 system prompt 与用户消息。
 
@@ -593,7 +592,7 @@ class BlenderNLService:
             script_file.write_text(script_content, encoding="utf-8")
 
             # 尝试从 settings 或环境变量获取 blender 路径
-            blender_exe: Optional[str] = None
+            blender_exe: str | None = None
             try:
                 _ensure_puppet_automation_shim()
                 from puppet_automation.src.config import settings
@@ -639,7 +638,7 @@ class BlenderNLService:
     async def execute(
         self,
         command: str,
-        scene_context: Optional[str] = None,
+        scene_context: str | None = None,
         max_attempts: int = 2,
     ) -> BlenderNLResult:
         """自然语言 → Blender 执行主流程。
@@ -659,8 +658,8 @@ class BlenderNLService:
             )
 
         max_attempts = max(1, min(max_attempts, 5))  # 限制 1~5 次
-        previous_code: Optional[str] = None
-        previous_error: Optional[str] = None
+        previous_code: str | None = None
+        previous_error: str | None = None
 
         for attempt in range(1, max_attempts + 1):
             logger.info(f"[BlenderNLService] 第 {attempt}/{max_attempts} 次尝试")
@@ -745,7 +744,7 @@ class BlenderNLService:
 # 模块级便捷函数
 # ---------------------------------------------------------------------------
 
-_default_service: Optional[BlenderNLService] = None
+_default_service: BlenderNLService | None = None
 
 
 def get_default_service() -> BlenderNLService:
@@ -762,7 +761,7 @@ def get_default_service() -> BlenderNLService:
 
 async def nl_execute(
     command: str,
-    scene_context: Optional[str] = None,
+    scene_context: str | None = None,
     max_attempts: int = 2,
 ) -> BlenderNLResult:
     """便捷函数：调用默认服务执行自然语言指令。"""

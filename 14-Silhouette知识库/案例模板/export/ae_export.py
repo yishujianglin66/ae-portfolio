@@ -1,9 +1,11 @@
 # AE Export Template
 # AE导出模板 - 生成AE兼容的输出数据
 
-from fx import *
 import json
 import os
+
+from fx import *
+
 
 def export_to_ae(source_path, output_dir, export_type="matte", comp_size=[1920, 1080]):
     output_dir = os.path.abspath(output_dir)

@@ -2,11 +2,12 @@
 # 跟踪数据导出模板 - 生成多格式跟踪数据（AE/Nuke/Boujou/JSON）
 # 适用于将Silhouette跟踪数据传递到下游合成软件
 
-from fx import *
-import os
 import json
-import time
 import math
+import os
+import time
+
+from fx import *
 
 
 def create_pipeline(
@@ -177,7 +178,7 @@ def create_pipeline(
         json.dump(report, f, indent=2, ensure_ascii=False)
     print(f"  报告: {report_path}")
 
-    print(f"\n=== 跟踪数据导出完成 ===")
+    print("\n=== 跟踪数据导出完成 ===")
     print(f"输出目录: {tracking_dir}")
     print(f"导出格式: {', '.join(export_formats)}")
     print(f"跟踪点数: {len(track_points)}")

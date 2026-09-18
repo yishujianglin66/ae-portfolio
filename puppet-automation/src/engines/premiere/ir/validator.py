@@ -25,18 +25,26 @@ IR 校验模块 — Premiere 时间线 IR 数据的完整性与合规性检查
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 # 尝试从 IR 模块导入，优先从 ae.timeline_ir 取
 try:
     from ae.timeline_ir import (
-        IRSequence, IRTrack, IRClip, IRTransition,
-        IRTrackType, IRTransitionType,
+        IRClip,
+        IRSequence,
+        IRTrack,
+        IRTrackType,
+        IRTransition,
+        IRTransitionType,
     )
 except ImportError:
     from .stubs import (
-        IRSequence, IRTrack, IRClip, IRTransition,
-        IRTrackType, IRTransitionType,
+        IRClip,
+        IRSequence,
+        IRTrack,
+        IRTrackType,
+        IRTransition,
+        IRTransitionType,
     )
 
 
@@ -59,14 +67,14 @@ class ValidationIssue:
         severity: str,
         code: str,
         message: str,
-        location: Optional[Dict[str, Any]] = None,
+        location: dict[str, Any] | None = None,
     ):
         self.severity = severity
         self.code = code
         self.message = message
         self.location = location or {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "severity": self.severity,
             "code": self.code,
@@ -82,7 +90,7 @@ class ValidationIssue:
 #  校验函数
 # ================================================================
 
-def _check_sequence_params(seq: IRSequence, issues: List[ValidationIssue]) -> None:
+def _check_sequence_params(seq: IRSequence, issues: list[ValidationIssue]) -> None:
     """检查序列基本参数。"""
     if not seq.name or not seq.name.strip():
         issues.append(ValidationIssue(
@@ -121,9 +129,9 @@ def _check_sequence_params(seq: IRSequence, issues: List[ValidationIssue]) -> No
         ))
 
 
-def _check_track_indices(seq: IRSequence, issues: List[ValidationIssue]) -> None:
+def _check_track_indices(seq: IRSequence, issues: list[ValidationIssue]) -> None:
     """检查轨道索引的唯一性和连续性。"""
-    seen_indices: Dict[int, str] = {}
+    seen_indices: dict[int, str] = {}
     for track in seq.tracks:
         if track.index in seen_indices:
             issues.append(ValidationIssue(
@@ -156,7 +164,7 @@ def _check_track_indices(seq: IRSequence, issues: List[ValidationIssue]) -> None
                 ))
 
 
-def _check_clip_duration(clip: IRClip, prefix: str, issues: List[ValidationIssue]) -> None:
+def _check_clip_duration(clip: IRClip, prefix: str, issues: list[ValidationIssue]) -> None:
     """检查片段时长合法性。"""
     duration = clip.duration
     if duration <= 0:
@@ -172,7 +180,7 @@ def _check_clip_duration(clip: IRClip, prefix: str, issues: List[ValidationIssue
         ))
 
 
-def _check_clip_time(clip: IRClip, prefix: str, issues: List[ValidationIssue]) -> None:
+def _check_clip_time(clip: IRClip, prefix: str, issues: list[ValidationIssue]) -> None:
     """检查片段时间属性合法性。"""
     if clip.timeline_in < 0:
         issues.append(ValidationIssue(
@@ -222,7 +230,7 @@ def _check_clip_time(clip: IRClip, prefix: str, issues: List[ValidationIssue]) -
         ))
 
 
-def _check_clip_source_file(clip: IRClip, prefix: str, issues: List[ValidationIssue]) -> None:
+def _check_clip_source_file(clip: IRClip, prefix: str, issues: list[ValidationIssue]) -> None:
     """检查源文件存在性。"""
     if not clip.source_path or not clip.source_path.strip():
         issues.append(ValidationIssue(
@@ -247,7 +255,7 @@ def _check_clip_source_file(clip: IRClip, prefix: str, issues: List[ValidationIs
         ))
 
 
-def _check_clip_transform(clip: IRClip, prefix: str, issues: List[ValidationIssue]) -> None:
+def _check_clip_transform(clip: IRClip, prefix: str, issues: list[ValidationIssue]) -> None:
     """检查片段变换属性合法性。"""
     if clip.speed <= 0:
         issues.append(ValidationIssue(
@@ -317,7 +325,7 @@ def _check_clip_transform(clip: IRClip, prefix: str, issues: List[ValidationIssu
         ))
 
 
-def _check_transition(clip: IRClip, prefix: str, issues: List[ValidationIssue]) -> None:
+def _check_transition(clip: IRClip, prefix: str, issues: list[ValidationIssue]) -> None:
     """检查转场合法性。"""
     duration = clip.duration
 
@@ -398,7 +406,7 @@ def _check_transition(clip: IRClip, prefix: str, issues: List[ValidationIssue]) 
             ))
 
 
-def _check_time_overlap(seq: IRSequence, issues: List[ValidationIssue]) -> None:
+def _check_time_overlap(seq: IRSequence, issues: list[ValidationIssue]) -> None:
     """检查同一轨道内片段的时间重叠"""
     for track in seq.tracks:
         clips_sorted = sorted(track.clips, key=lambda c: c.timeline_in)
@@ -441,7 +449,7 @@ def _check_time_overlap(seq: IRSequence, issues: List[ValidationIssue]) -> None:
                 ))
 
 
-def _check_markers(seq: IRSequence, issues: List[ValidationIssue]) -> None:
+def _check_markers(seq: IRSequence, issues: list[ValidationIssue]) -> None:
     """检查标记时间边界。"""
     total_duration = seq.total_duration
     for i, marker in enumerate(seq.markers):
@@ -466,7 +474,7 @@ def _check_markers(seq: IRSequence, issues: List[ValidationIssue]) -> None:
             ))
 
 
-def _check_fps_consistency(seq: IRSequence, issues: List[ValidationIssue]) -> None:
+def _check_fps_consistency(seq: IRSequence, issues: list[ValidationIssue]) -> None:
     """检查各轨道的帧率一致性（基于 timeline_in 的帧对齐）。"""
     # 使用序列帧率作为基准
     fps = seq.frame_rate
@@ -498,7 +506,7 @@ def _check_fps_consistency(seq: IRSequence, issues: List[ValidationIssue]) -> No
 #  公共 API
 # ================================================================
 
-def validate_ir(sequence: IRSequence) -> List[Dict[str, Any]]:
+def validate_ir(sequence: IRSequence) -> list[dict[str, Any]]:
     """校验 IRSequence 的完整性与合规性。
 
     返回一个包含所有发现问题的问题字典列表，每个问题包含：
@@ -540,7 +548,7 @@ def validate_ir(sequence: IRSequence) -> List[Dict[str, Any]]:
     Returns:
         问题字典列表，按 severity 排序（error > warning > info）
     """
-    issues: List[ValidationIssue] = []
+    issues: list[ValidationIssue] = []
 
     # 序列级别检查
     _check_sequence_params(sequence, issues)

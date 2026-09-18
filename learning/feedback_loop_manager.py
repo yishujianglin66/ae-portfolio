@@ -11,10 +11,9 @@
 5. 学习摘要 - 统计整体执行表现和各意图类型的表现
 """
 import uuid
-from datetime import datetime
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
-
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 ERROR_RECOVERY_STRATEGIES = {
     "EFFECT_NOT_FOUND": {
@@ -68,7 +67,7 @@ ERROR_RECOVERY_STRATEGIES = {
 @dataclass
 class VerificationResult:
     passed: bool = False
-    mismatches: List[Dict] = field(default_factory=list)
+    mismatches: list[dict] = field(default_factory=list)
     match_score: float = 0.0
     details: str = ""
 
@@ -79,30 +78,30 @@ class ExecutionRecord:
     user_input: str = ""
     intent_type: str = ""
     success: bool = False
-    expected: Dict = field(default_factory=dict)
-    actual: Optional[Dict] = None
+    expected: dict = field(default_factory=dict)
+    actual: dict | None = None
     error_message: str = ""
     error_code: str = ""
     timestamp: str = ""
     confidence_before: float = 0.5
     confidence_after: float = 0.5
     user_adjusted: bool = False
-    final_params: Optional[Dict] = None
+    final_params: dict | None = None
 
 
 class FeedbackLoopManager:
     def __init__(self, confidence_threshold: float = 0.6):
         self.confidence_threshold = confidence_threshold
-        self.records: List[ExecutionRecord] = []
-        self._intent_history: Dict[str, Dict[str, int]] = {}
+        self.records: list[ExecutionRecord] = []
+        self._intent_history: dict[str, dict[str, int]] = {}
 
     def record_execution(
         self,
         user_input: str,
         intent_type: str,
         success: bool,
-        expected: Dict,
-        actual: Optional[Dict],
+        expected: dict,
+        actual: dict | None,
         error_message: str = "",
         error_code: str = "",
         base_confidence: float = 0.5
@@ -142,8 +141,8 @@ class FeedbackLoopManager:
 
     def verify_parameters(
         self,
-        expected: Dict,
-        actual: Optional[Dict],
+        expected: dict,
+        actual: dict | None,
         tolerance: float = 0.01
     ) -> VerificationResult:
         mismatches = []
@@ -250,7 +249,7 @@ class FeedbackLoopManager:
             details=details
         )
 
-    def get_success_rate(self, intent_type: Optional[str] = None) -> float:
+    def get_success_rate(self, intent_type: str | None = None) -> float:
         if intent_type:
             history = self._intent_history.get(intent_type)
             if not history or history["total"] == 0:
@@ -263,7 +262,7 @@ class FeedbackLoopManager:
         successful = sum(1 for r in self.records if r.success)
         return successful / total
 
-    def suggest_recovery(self, error_code: str, context: Optional[Dict] = None) -> Dict:
+    def suggest_recovery(self, error_code: str, context: dict | None = None) -> dict:
         strategy = ERROR_RECOVERY_STRATEGIES.get(error_code)
 
         if not strategy:
@@ -306,7 +305,7 @@ class FeedbackLoopManager:
                 base_adjustment *= 1.5
             return max(-0.08, base_adjustment)
 
-    def get_learning_summary(self) -> Dict:
+    def get_learning_summary(self) -> dict:
         total = len(self.records)
         successful = sum(1 for r in self.records if r.success)
         failed = total - successful
@@ -353,5 +352,5 @@ class FeedbackLoopManager:
             "unique_intents": list(unique_intents)
         }
 
-    def get_recent_records(self, limit: int = 10) -> List[ExecutionRecord]:
+    def get_recent_records(self, limit: int = 10) -> list[ExecutionRecord]:
         return self.records[-limit:] if limit > 0 else []

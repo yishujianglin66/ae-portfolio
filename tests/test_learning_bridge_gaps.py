@@ -14,8 +14,8 @@
 """
 import os
 import sys
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock
 
@@ -24,12 +24,11 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from learning.learning_bridge import (
-    LearningBridge,
-    EnhancementReport,
     EffectEnhancement,
+    EnhancementReport,
+    LearningBridge,
     diagnose_learning_systems,
 )
-
 
 # ============================================================================
 # Fixtures
@@ -60,7 +59,7 @@ def bridge_with_all_sources():
     @dataclass
     class FakeTemplate:
         id: str
-        parameters: Dict[str, Any]
+        parameters: dict[str, Any]
         usage_count: int = 5
 
     def _find_templates(key):
@@ -128,7 +127,7 @@ def bridge_with_all_sources():
     fake_ms = MagicMock()
     @dataclass
     class FakeMemEntry:
-        content: Dict[str, Any]
+        content: dict[str, Any]
 
     def _recall(category, key):
         # 当 matchName="" 时，memory_key = effect_name = "Glow"（else branch）

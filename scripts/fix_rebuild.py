@@ -7,9 +7,13 @@ Strategy: full-screen continuous motion + bright colors + verified matchName/ind
 - Fractal Noise: 0004=Contrast, 0010=Scale, 0013=OffsetTurbulence, 0023=Evolution
 - Text: .value modify approach; 2D=[x,y]; never iterate app.effects
 """
-import json, time, sys, os, glob
-from pathlib import Path
+import glob
+import json
+import os
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_DIR = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge")
 CMD_FILE = BRIDGE_DIR / "ae_command.json"

@@ -15,12 +15,12 @@ Essentia 特性（参考 github.com/MTG/essentia）：
 from __future__ import annotations
 
 import json
-import sys
-import os
 import math
-from pathlib import Path
-from typing import Dict, List, Optional, Any
+import os
+import sys
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -50,7 +50,7 @@ class AudioFeatureSet:
     # 曲风特征
     genre: str = ""
     genre_confidence: float = 0.0
-    genre_probabilities: Dict[str, float] = field(default_factory=dict)
+    genre_probabilities: dict[str, float] = field(default_factory=dict)
     
     # 音色特征
     spectral_centroid: float = 0.0
@@ -65,14 +65,14 @@ class AudioFeatureSet:
     energy: float = 0.0
     
     # 音色指纹
-    mfccs: List[float] = field(default_factory=list)
-    chroma: List[float] = field(default_factory=list)
+    mfccs: list[float] = field(default_factory=list)
+    chroma: list[float] = field(default_factory=list)
     
     # 元信息
     extractor: str = "unknown"  # essentia, librosa, fallback
     extraction_time_ms: float = 0.0
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "file_path": self.file_path,
             "duration": round(self.duration, 2),
@@ -144,8 +144,9 @@ class EssentiaExtractor:
             return features
         
         try:
-            import essentia.standard as es
             import time
+
+            import essentia.standard as es
             start_time = time.time()
             
             # 加载音频
@@ -258,8 +259,9 @@ class LibrosaExtractor:
             return features
         
         try:
-            import librosa
             import time
+
+            import librosa
             start_time = time.time()
             
             y, sr = librosa.load(audio_path, sr=44100)
@@ -350,7 +352,7 @@ class AudioFeatureExtractor:
         # 都不可用
         return AudioFeatureSet(file_path=audio_path, extractor="none_available")
     
-    def extract_batch(self, audio_paths: List[str]) -> List[Dict[str, Any]]:
+    def extract_batch(self, audio_paths: list[str]) -> list[dict[str, Any]]:
         """批量提取音频特征"""
         results = []
         for path in audio_paths:
@@ -358,7 +360,7 @@ class AudioFeatureExtractor:
             results.append(features.to_dict())
         return results
     
-    def get_engine_info(self) -> Dict[str, Any]:
+    def get_engine_info(self) -> dict[str, Any]:
         """获取当前可用的引擎信息"""
         return {
             "essentia_available": self.essentia.is_available(),
@@ -381,7 +383,7 @@ def main() -> None:
         input_json = json.loads(sys.argv[2])
         action = input_json.get("action", "")
         
-        result: Dict[str, Any] = {"success": False}
+        result: dict[str, Any] = {"success": False}
         
         if action == "extract":
             audio_path = input_json.get("audio_path", "")

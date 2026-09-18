@@ -26,16 +26,16 @@ from typing import Any, Dict, List, Optional
 class AEToBlenderBridge:
     """AE 工程到 Blender 场景的转换器。"""
 
-    def __init__(self, project_root: Optional[Path] = None) -> None:
+    def __init__(self, project_root: Path | None = None) -> None:
         self.project_root = project_root or Path(__file__).resolve().parent.parent
-        self._ae_data: Dict[str, Any] = {}
-        self._script_lines: List[str] = []
+        self._ae_data: dict[str, Any] = {}
+        self._script_lines: list[str] = []
 
     def convert(
         self,
         ae_json_path: str,
         output_script_path: str,
-        image_base_dir: Optional[str] = None,
+        image_base_dir: str | None = None,
     ) -> str:
         """将 AE 分析 JSON 转换为 Blender Python 脚本。
 
@@ -107,7 +107,7 @@ class AEToBlenderBridge:
             f"scene.render.fps_base = {1.0 if fps == int(fps) else 1.001:.3f}",
             f"scene.frame_end = int({dur} * {int(fps)})",
             "",
-            f"# 项目信息（自定义属性）",
+            "# 项目信息（自定义属性）",
             f'scene["ae_project_name"] = "{project.get("name", "untitled")}"',
             f'scene["ae_total_comps"] = {stats.get("totalComps", 0)}',
             f'scene["ae_total_layers"] = {stats.get("totalLayers", 0)}',
@@ -226,7 +226,7 @@ class AEToBlenderBridge:
                     f"try: {child_var}.parent = {parent_var_name}"
                 )
                 self._script_lines.append(
-                    f"except: pass  # parent may not exist"
+                    "except: pass  # parent may not exist"
                 )
             self._script_lines.append("")
 
@@ -268,7 +268,7 @@ class AEToBlenderBridge:
             "",
         ])
 
-    def _find_main_composition(self) -> Optional[Dict[str, Any]]:
+    def _find_main_composition(self) -> dict[str, Any] | None:
         """找到主合成（通常是最终输出合成）。"""
         comps = self._ae_data.get("compositions", [])
         if not comps:

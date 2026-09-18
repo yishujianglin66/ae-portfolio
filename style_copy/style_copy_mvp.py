@@ -10,21 +10,20 @@
   py -3.12 style_copy/style_copy_mvp.py --prompt "电影感暖色调快节奏胶片颗粒" --output output/style_out.mp4
   py -3.12 style_copy/style_copy_mvp.py --prompt "..." --input 源视频.mp4 --output 输出.mp4
 """
-import os
-import sys
-import json
-import shutil
 import argparse
+import json
+import os
+import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 import bootstrap  # noqa: E402
-
+from style_copy.ffmpeg_generator import FFmpegCommandGenerator  # noqa: E402
 from style_copy.style_analyzer import get_analyzer  # noqa: E402
 from style_copy.tool_orchestrator import ToolOrchestrator  # noqa: E402
-from style_copy.ffmpeg_generator import FFmpegCommandGenerator  # noqa: E402
 
 
 def _ffmpeg_bin() -> str:

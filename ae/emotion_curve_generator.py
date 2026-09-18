@@ -20,10 +20,10 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -61,15 +61,15 @@ class EmotionSegment:
     duration: float       # 时长
     avg_emotion: float    # 平均情绪值
     peak_emotion: float   # 峰值情绪
-    visual_style: Dict[str, Any]  # 视觉风格参数
+    visual_style: dict[str, Any]  # 视觉风格参数
 
 
 @dataclass
 class EmotionCurve:
     """情绪曲线"""
     duration: float                           # 总时长
-    points: List[EmotionPoint]                # 情绪点列表
-    segments: List[EmotionSegment]            # 段落列表
+    points: list[EmotionPoint]                # 情绪点列表
+    segments: list[EmotionSegment]            # 段落列表
     avg_emotion: float                        # 平均情绪值
     peak_time: float                          # 峰值时间
     overall_level: str                        # 整体情绪等级
@@ -139,7 +139,7 @@ class EmotionCurveGenerator:
     def generate(
         self,
         audio_path: str,
-        target_duration: Optional[float] = None,
+        target_duration: float | None = None,
         start_time: float = 0.0,
     ) -> EmotionCurve:
         """
@@ -199,7 +199,7 @@ class EmotionCurveGenerator:
             overall_level=overall_level,
         )
 
-    def _extract_features(self, y, sr: int) -> Dict:
+    def _extract_features(self, y, sr: int) -> dict:
         """提取音频特征"""
         import librosa
         import numpy as np
@@ -234,10 +234,10 @@ class EmotionCurveGenerator:
 
     def _generate_points(
         self,
-        features: Dict,
+        features: dict,
         duration: float,
         start_time: float,
-    ) -> List[EmotionPoint]:
+    ) -> list[EmotionPoint]:
         """生成情绪点"""
         import numpy as np
 
@@ -305,9 +305,9 @@ class EmotionCurveGenerator:
 
     def _segment_curve(
         self,
-        points: List[EmotionPoint],
+        points: list[EmotionPoint],
         duration: float,
-    ) -> List[EmotionSegment]:
+    ) -> list[EmotionSegment]:
         """划分段落"""
         import numpy as np
 
@@ -375,7 +375,7 @@ class EmotionCurveGenerator:
 
 def generate_emotion_curve(
     audio_path: str,
-    target_duration: Optional[float] = None,
+    target_duration: float | None = None,
     start_time: float = 0.0,
 ) -> EmotionCurve:
     """快速生成情绪曲线"""

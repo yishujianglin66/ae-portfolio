@@ -8,12 +8,12 @@ ExitCode=0 且 七个阶段都标记为 DONE 视为成功
 """
 from __future__ import annotations
 
+import json
 import sys
 import time
-import json
 import traceback
-from pathlib import Path
 from dataclasses import asdict
+from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -59,7 +59,10 @@ def main() -> int:
 
     # 1. 构造配置
     from pipeline.unified_pipeline import (
-        UnifiedPipeline, PipelineConfig, PipelineResult, StageStatus,
+        PipelineConfig,
+        PipelineResult,
+        StageStatus,
+        UnifiedPipeline,
     )
     cfg = PipelineConfig(
         input_topic=INPUT_TOPIC,

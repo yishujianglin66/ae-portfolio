@@ -1,9 +1,11 @@
 """端到端验证：auto_grade + 中文路径 LUT + Fusion 调色"""
 import sys
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.davinci_fuscript import ResolveColorEngine, ColorGradeConfig
 from pathlib import Path
+
+from integrations.davinci_fuscript import ColorGradeConfig, ResolveColorEngine
 
 # 使用项目中的测试图片
 test_frame = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\frames\frame_001.png"

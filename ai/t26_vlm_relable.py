@@ -19,12 +19,12 @@ Phase 2b: 全量标注(可断点续传)
 from __future__ import annotations
 
 import base64
+import io
 import json
 import os
+import random
 import sys
 import time
-import random
-import io
 from collections import Counter
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -92,7 +92,7 @@ class OpenAIAnnotator:
         self.model = VLM_MODEL
         self._cost = 0.0
     
-    def annotate(self, img_path: str) -> Optional[dict]:
+    def annotate(self, img_path: str) -> dict | None:
         """标注单帧, 返回解析后的JSON或None"""
         try:
             # 读取图片并编码为base64
@@ -163,7 +163,7 @@ class TeacherAnnotator:
             for p in pseudo:
                 self._cache[Path(p["frame_path"]).name] = p
     
-    def annotate(self, img_path: str) -> Optional[dict]:
+    def annotate(self, img_path: str) -> dict | None:
         """从T20伪标签获取教师标注"""
         frame_name = Path(img_path).name
         entry = self._cache.get(frame_name)
@@ -178,7 +178,7 @@ class TeacherAnnotator:
 
 
 # ---------------------------------------------------------------- 仲裁逻辑
-def consensus_vote(results: Dict[str, Optional[dict]]) -> dict:
+def consensus_vote(results: dict[str, dict | None]) -> dict:
     """三通道投票仲裁, 返回最终标签"""
     votes = {}
     annotators_detail = {}
@@ -222,7 +222,7 @@ def consensus_vote(results: Dict[str, Optional[dict]]) -> dict:
 
 
 # ---------------------------------------------------------------- 数据准备
-def load_pseudolabel_frames() -> List[dict]:
+def load_pseudolabel_frames() -> list[dict]:
     """加载T20伪标签帧列表"""
     if not PSEUDO_LABELS.exists():
         _log(f"伪标签不存在: {PSEUDO_LABELS}")
@@ -232,7 +232,7 @@ def load_pseudolabel_frames() -> List[dict]:
     return pseudo
 
 
-def sample_frames(pseudo: List[dict], n: int, seed: int = 42) -> List[dict]:
+def sample_frames(pseudo: list[dict], n: int, seed: int = 42) -> list[dict]:
     """分层抽样: 按置信度区间均匀采样"""
     random.seed(seed)
     
@@ -341,7 +341,7 @@ def run_sample_annotation(n_frames: int = SAMPLE_SIZE):
     
     # 分歧分析
     if disagreed > 0:
-        _log(f"\n  分歧样本(前10):")
+        _log("\n  分歧样本(前10):")
         for r in results:
             if r["agree"] is False:
                 _log(f"    {r['frame_name'][:40]:40s} | 教师={r['teacher_ip']:15s}(conf={r['teacher_confidence']:.2f}) VLM={r['vlm_ip']:15s}(conf={r['vlm_confidence']:.2f})")

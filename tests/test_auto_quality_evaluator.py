@@ -6,8 +6,10 @@
 import asyncio
 import shutil
 import subprocess
-import pytest
 from pathlib import Path
+
+import pytest
+
 from core.self_evolution_engine import AutoQualityEvaluator
 
 HAS_FFMPEG = shutil.which("ffmpeg") is not None

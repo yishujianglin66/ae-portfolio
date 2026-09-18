@@ -50,7 +50,7 @@ class RenderProgress:
     # 内部字段：用于计算 fps 与 ETA
     _first_frame_at: float = field(default=0.0, repr=False)
     _last_frame_at: float = field(default=0.0, repr=False)
-    _frame_history: List[tuple] = field(default_factory=list, repr=False)
+    _frame_history: list[tuple] = field(default_factory=list, repr=False)
 
     @property
     def percent(self) -> float:
@@ -94,8 +94,8 @@ class RenderProgressParser:
         self,
         total_frames: int = 0,
         *,
-        job_id: Optional[str] = None,
-        repository: Optional["RenderJobRepository"] = None,
+        job_id: str | None = None,
+        repository: "RenderJobRepository" | None = None,
     ) -> None:
         """初始化解析器。
 
@@ -112,13 +112,13 @@ class RenderProgressParser:
         self._last_completed: bool = False
         self.job_id = job_id
         self.repository = repository
-        self._last_persisted_status: Optional[str] = None
+        self._last_persisted_status: str | None = None
         self._last_persisted_frame: int = -1
 
     # ------------------------------------------------------------------
     # 行解析
     # ------------------------------------------------------------------
-    def parse_line(self, line: str) -> Optional[RenderProgress]:
+    def parse_line(self, line: str) -> RenderProgress | None:
         """解析一行 aerender 输出。
 
         Args:
@@ -255,7 +255,7 @@ class RenderProgressParser:
                     )
 
     @staticmethod
-    def _parse_timecode(code: str) -> Optional[float]:
+    def _parse_timecode(code: str) -> float | None:
         """解析 aerender 的时间码为秒。
 
         支持两种格式：
@@ -307,7 +307,7 @@ class RenderProgressParser:
             self._schedule_persist()
         return self.progress
 
-    def reset(self, total_frames: Optional[int] = None) -> None:
+    def reset(self, total_frames: int | None = None) -> None:
         """重置解析器状态，准备新一轮渲染。
 
         Args:
@@ -343,7 +343,7 @@ class RenderProgressParser:
             return True
         return False
 
-    def _schedule_persist(self, failure_reason: Optional[str] = None) -> None:
+    def _schedule_persist(self, failure_reason: str | None = None) -> None:
         """异步调度持久化，不阻塞解析。
 
         若当前没有事件循环（同步上下文），跳过持久化并记录一次 debug 日志。
@@ -363,7 +363,7 @@ class RenderProgressParser:
                 f"(job_id={self.job_id})"
             )
 
-    async def _persist_now(self, failure_reason: Optional[str] = None) -> None:
+    async def _persist_now(self, failure_reason: str | None = None) -> None:
         """实际执行持久化，调用 repository.update_job。"""
         if self.repository is None or not self.job_id:
             return

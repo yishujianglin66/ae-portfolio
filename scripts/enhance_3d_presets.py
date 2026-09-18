@@ -11,9 +11,14 @@
 
 用法: py -3.12 scripts/enhance_3d_presets.py [--render-compare]
 """
-import json, time, sys, os, re, argparse
-from pathlib import Path
+import argparse
+import json
+import os
+import re
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 

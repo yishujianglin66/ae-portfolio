@@ -1,8 +1,16 @@
 """全流程 E2E：导入多帧 → 调色 → 渲染输出（修复路径）"""
-import sys, os, time, tempfile, shutil, subprocess, ctypes
+import ctypes
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.davinci_fuscript import ResolveColorEngine, ColorGradeConfig, find_lut_for_preset
+from integrations.davinci_fuscript import ColorGradeConfig, ResolveColorEngine, find_lut_for_preset
+
 
 def get_long_path(short_path):
     """将 8.3 短路径转为长路径"""
@@ -79,7 +87,7 @@ for line in lua_script.split('\n'):
     if in_render and 'Pipeline Complete' in line:
         break
 
-print(f"\n  Running fuscript...")
+print("\n  Running fuscript...")
 print("=" * 60)
 
 proc = subprocess.run(
@@ -111,7 +119,7 @@ if output_files:
     for fp, size in output_files:
         print(f"  📹 {fp} ({size / 1024:.1f} KB)")
 else:
-    print(f"\n⚠️ 输出目录为空，检查 Resolve 默认渲染位置...")
+    print("\n⚠️ 输出目录为空，检查 Resolve 默认渲染位置...")
     # 检查 Resolve 默认输出
     default_dirs = [
         os.path.expanduser("~/Documents"),

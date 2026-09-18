@@ -215,7 +215,7 @@ def main():
         return
 
     # Step 2: 增强真实样本
-    print(f"\n[2] 增强真实样本 (30x per sample)...")
+    print("\n[2] 增强真实样本 (30x per sample)...")
     augmented_real = []
     for sample in real_samples:
         augmented_real.extend(augment_real_sample(sample, n_augments=30))
@@ -227,7 +227,7 @@ def main():
     print(f"  增强标签分布: {dict(aug_labels)}")
 
     # Step 3: 加载现有平衡数据集
-    print(f"\n[3] 加载现有平衡训练集...")
+    print("\n[3] 加载现有平衡训练集...")
     balanced_samples = load_balanced_dataset()
     print(f"  平衡数据集样本: {len(balanced_samples)}")
 
@@ -254,7 +254,7 @@ def main():
 
     # 最终标签分布
     final_labels = Counter(s["label"] for s in combined)
-    print(f"\n  最终标签分布 (top-10):")
+    print("\n  最终标签分布 (top-10):")
     for label, count in final_labels.most_common(10):
         print(f"    {label}: {count}")
 

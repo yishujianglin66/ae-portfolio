@@ -47,7 +47,6 @@ from pipeline.minimal_creative_loop import (  # noqa: E402
     quick_generate,
 )
 
-
 # 是否启用模拟模式（不调用真实 AE/DaVinci/LLM）
 MOCK_MODE = True
 
@@ -60,10 +59,10 @@ class MockUnifiedAEClient:
     """模拟 AE 客户端：所有方法返回成功响应，并记录调用历史。"""
 
     def __init__(self) -> None:
-        self.calls: List[Dict[str, Any]] = []
+        self.calls: list[dict[str, Any]] = []
         self._layer_counter = 0
 
-    def _record(self, method: str, **kwargs: Any) -> Dict[str, Any]:
+    def _record(self, method: str, **kwargs: Any) -> dict[str, Any]:
         self._layer_counter += 1
         self.calls.append({"method": method, "args": kwargs})
         return {
@@ -71,31 +70,31 @@ class MockUnifiedAEClient:
             "data": {"layer_index": self._layer_counter},
         }
 
-    def create_composition(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_composition(self, **kwargs: Any) -> dict[str, Any]:
         return self._record("create_composition", **kwargs)
 
-    def create_text_layer(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_text_layer(self, **kwargs: Any) -> dict[str, Any]:
         return self._record("create_text_layer", **kwargs)
 
-    def create_solid_layer(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_solid_layer(self, **kwargs: Any) -> dict[str, Any]:
         return self._record("create_solid_layer", **kwargs)
 
-    def create_shape_layer(self, **kwargs: Any) -> Dict[str, Any]:
+    def create_shape_layer(self, **kwargs: Any) -> dict[str, Any]:
         return self._record("create_shape_layer", **kwargs)
 
-    def add_adjustment_layer(self, **kwargs: Any) -> Dict[str, Any]:
+    def add_adjustment_layer(self, **kwargs: Any) -> dict[str, Any]:
         return self._record("add_adjustment_layer", **kwargs)
 
-    def set_layer_keyframe(self, **kwargs: Any) -> Dict[str, Any]:
+    def set_layer_keyframe(self, **kwargs: Any) -> dict[str, Any]:
         return self._record("set_layer_keyframe", **kwargs)
 
-    def apply_effect(self, **kwargs: Any) -> Dict[str, Any]:
+    def apply_effect(self, **kwargs: Any) -> dict[str, Any]:
         return self._record("apply_effect", **kwargs)
 
-    def get_layer_info(self, **kwargs: Any) -> Dict[str, Any]:
+    def get_layer_info(self, **kwargs: Any) -> dict[str, Any]:
         return self._record("get_layer_info", **kwargs)
 
-    def render(self, **kwargs: Any) -> Dict[str, Any]:
+    def render(self, **kwargs: Any) -> dict[str, Any]:
         out = Path(kwargs.get("output_path", "output/mock.mp4"))
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_bytes(b"MOCK_MOV" * 1024)
@@ -106,7 +105,7 @@ class MockAEToDavinciPipeline:
     """模拟 AE→DaVinci 链路：返回成功的 PipelineResult。"""
 
     def __init__(self) -> None:
-        self.calls: List[Dict[str, Any]] = []
+        self.calls: list[dict[str, Any]] = []
 
     def run_with_preset(
         self,
@@ -138,11 +137,11 @@ class MockAEToDavinciPipeline:
 class MockLLMGateway:
     """模拟 LLM 网关：返回一个固定的 CreativePlan JSON。"""
 
-    def __init__(self, plan_json: Dict[str, Any] | None = None) -> None:
-        self.calls: List[Dict[str, Any]] = []
+    def __init__(self, plan_json: dict[str, Any] | None = None) -> None:
+        self.calls: list[dict[str, Any]] = []
         self._plan_json = plan_json or self._default_plan()
 
-    def _default_plan(self) -> Dict[str, Any]:
+    def _default_plan(self) -> dict[str, Any]:
         return {
             "comp_name": "MockCinema",
             "duration": 10.0,
@@ -216,7 +215,7 @@ class FailingLLMGateway:
         return await self.chat(**kwargs)
 
 
-def build_mock_loop(plan_json: Dict[str, Any] | None = None) -> MinimalCreativeLoop:
+def build_mock_loop(plan_json: dict[str, Any] | None = None) -> MinimalCreativeLoop:
     """构造一个使用 Mock 依赖的 MinimalCreativeLoop。"""
     if not MOCK_MODE:
         return MinimalCreativeLoop()

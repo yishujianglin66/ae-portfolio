@@ -64,13 +64,13 @@ class TaskResult:
     """引擎任务执行结果"""
     success: bool
     mode: ExecutionMode
-    data: Dict[str, Any] = field(default_factory=dict)
-    error: Optional[str] = None
+    data: dict[str, Any] = field(default_factory=dict)
+    error: str | None = None
     duration_s: float = 0.0
     retries: int = 0
-    engine_version: Optional[str] = None
+    engine_version: str | None = None
 
-    def to_manifest_dict(self) -> Dict[str, Any]:
+    def to_manifest_dict(self) -> dict[str, Any]:
         """转换为可写入 manifest.json 的字典"""
         d = {
             "execution_mode": self.mode.value,
@@ -114,7 +114,7 @@ class BridgeDispatcher:
         self.poll_interval = poll_interval
         self.default_timeout = default_timeout
         self.max_retries = max_retries
-        self._cached_available: Optional[bool] = None
+        self._cached_available: bool | None = None
         self._cache_time: float = 0.0
         self._cache_ttl: float = 15.0
 
@@ -152,7 +152,7 @@ class BridgeDispatcher:
     def dispatch_script(
         self,
         script: str,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         command: str = "runScript",
         args_key: str = "code",
     ) -> TaskResult:
@@ -230,11 +230,11 @@ class BridgeDispatcher:
 
     def _send_command_raw(
         self,
-        cmd_data: Optional[Dict] = None,
-        command: Optional[str] = None,
-        args: Optional[Dict] = None,
+        cmd_data: dict | None = None,
+        command: str | None = None,
+        args: dict | None = None,
         timeout: float = 30.0,
-    ) -> Optional[Dict]:
+    ) -> dict | None:
         """写入命令文件并轮询等待结果
 
         支持两种调用方式:
@@ -286,7 +286,7 @@ class BridgeDispatcher:
 
         return None
 
-    def _extract_result_data(self, result: Dict, command: str) -> Dict[str, Any]:
+    def _extract_result_data(self, result: dict, command: str) -> dict[str, Any]:
         """从 Bridge 响应中提取有效数据"""
         # AE 协议: {command, status, result: {success, data: {result: "..."}}}
         result_obj = result.get("result", {})
@@ -311,7 +311,7 @@ class BridgeDispatcher:
                 return {"raw_result": raw}
         return {"raw_result": str(raw)}
 
-    def _extract_error(self, result: Dict) -> str:
+    def _extract_error(self, result: dict) -> str:
         """从 Bridge 响应中提取错误信息"""
         result_obj = result.get("result", {})
         if isinstance(result_obj, dict):
@@ -344,16 +344,16 @@ class AETaskDispatcher(BridgeDispatcher):
             default_timeout=60.0,
             max_retries=2,
         )
-        self._aerender_path: Optional[Path] = None
+        self._aerender_path: Path | None = None
 
-    def dispatch_script(self, script: str, timeout: Optional[float] = None, **kw) -> TaskResult:
+    def dispatch_script(self, script: str, timeout: float | None = None, **kw) -> TaskResult:
         """AE 使用 runScript + args.code 协议"""
         return super().dispatch_script(
             script=script, timeout=timeout,
             command="runScript", args_key="code",
         )
 
-    def find_aerender(self) -> Optional[Path]:
+    def find_aerender(self) -> Path | None:
         """查找 aerender.exe 路径（使用全面自动探测）"""
         if self._aerender_path and self._aerender_path.exists():
             return self._aerender_path
@@ -618,7 +618,7 @@ class PRTaskDispatcher(BridgeDispatcher):
             max_retries=2,
         )
 
-    def dispatch_script(self, script: str, timeout: Optional[float] = None, **kw) -> TaskResult:
+    def dispatch_script(self, script: str, timeout: float | None = None, **kw) -> TaskResult:
         """PR 使用 executeScript + script 字段协议"""
         return super().dispatch_script(
             script=script, timeout=timeout,
@@ -635,7 +635,7 @@ class ResolveTaskDispatcher:
 
     def __init__(self):
         self.app_name = "Resolve"
-        self._resolve_available: Optional[bool] = None
+        self._resolve_available: bool | None = None
         self._cache_time: float = 0.0
         self._engine = None
 
@@ -700,7 +700,7 @@ class ResolveTaskDispatcher:
 
     def dispatch_grade(
         self,
-        input_paths: List[Path],
+        input_paths: list[Path],
         output_dir: Path,
         preset: str = "cinematic",
         node_count: int = 4,
@@ -776,7 +776,7 @@ class AMETaskDispatcher:
 
     def __init__(self):
         self.app_name = "AME"
-        self._ame_available: Optional[bool] = None
+        self._ame_available: bool | None = None
         self._cache_time: float = 0.0
         self.watch_folder = PROJECT_ROOT / "output" / "me_watch_folder"
 
@@ -784,7 +784,7 @@ class AMETaskDispatcher:
     # 安装检测（修复：历史上仅靠进程探测，已安装未运行即误报“未安装”）
     # ------------------------------------------------------------------
 
-    def find_exe(self) -> Optional[Path]:
+    def find_exe(self) -> Path | None:
         """发现 AME exe 路径（环境变量/候选路径/快捷方式/注册表）"""
         try:
             from core.adobe_discovery import find_adobe_exe
@@ -985,7 +985,7 @@ class AMETaskDispatcher:
 #  调度器工厂
 # ============================================================================
 
-_dispatchers: Dict[str, Any] = {}
+_dispatchers: dict[str, Any] = {}
 
 
 def get_dispatcher(engine_name: str) -> Any:
@@ -1011,11 +1011,11 @@ def get_dispatcher(engine_name: str) -> Any:
     return _dispatchers[engine_name]
 
 
-def detect_all_engines() -> Dict[str, Dict[str, Any]]:
+def detect_all_engines() -> dict[str, dict[str, Any]]:
     """检测所有引擎可用性（区分 运行中 / 已安装 / 未安装）"""
-    status: Dict[str, Dict[str, Any]] = {}
+    status: dict[str, dict[str, Any]] = {}
     for name in ("after_effects", "premiere", "davinci", "media_encoder"):
-        entry: Dict[str, Any] = {"running": False, "installed": False}
+        entry: dict[str, Any] = {"running": False, "installed": False}
         try:
             d = get_dispatcher(name)
             entry["running"] = bool(d.is_available())

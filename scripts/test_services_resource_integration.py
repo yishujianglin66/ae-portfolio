@@ -68,8 +68,8 @@ async def test_text_effect_service_font_resolution():
 
 async def test_color_grading_service_lut_resolution():
     """测试 ColorGradingService._resolve_lut_path 与 apply_lut_by_name."""
-    from src.services.color_grading_service import ColorGradingService
     from src.engines.base import EngineResult
+    from src.services.color_grading_service import ColorGradingService
 
     mock_ae = MagicMock()
     mock_ae.run_script = AsyncMock()
@@ -150,9 +150,9 @@ async def main():
     # 1. 测试导入
     print("\n--- Step 1: Import check ---")
     try:
-        from src.services.text_effect_service import TextEffectService
         from src.services.color_grading_service import ColorGradingService
         from src.services.resource_index_service import resource_index_service
+        from src.services.text_effect_service import TextEffectService
         print("  Imports OK")
         print(f"  TextEffectService: {TextEffectService}")
         print(f"  ColorGradingService: {ColorGradingService}")

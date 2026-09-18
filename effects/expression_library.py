@@ -18,7 +18,6 @@ Phase 4 - AE 表达式模板库与参数化生成器
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
-
 __all__ = [
     "ExpressionTemplate",
     "ExpressionCategory",
@@ -51,8 +50,8 @@ class ExpressionParam:
     display_name: str
     param_type: str = "float"  # float / int / bool / string
     default: Any = 0.0
-    min_value: Optional[float] = None
-    max_value: Optional[float] = None
+    min_value: float | None = None
+    max_value: float | None = None
     description: str = ""
 
 
@@ -65,9 +64,9 @@ class ExpressionTemplate:
     display_name: str
     description: str = ""
     template: str = ""
-    params: List[ExpressionParam] = field(default_factory=list)
+    params: list[ExpressionParam] = field(default_factory=list)
     target_property: str = ""  # 适用的属性路径，如 "Transform/Position"
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     bpm_sensitive: bool = False  # 是否与 BPM 相关
 
 
@@ -75,7 +74,7 @@ class ExpressionTemplate:
 # 模板库
 # ---------------------------------------------------------------------------
 
-EXPRESSION_TEMPLATES: List[ExpressionTemplate] = [
+EXPRESSION_TEMPLATES: list[ExpressionTemplate] = [
     # ===== motion: 运动类 =====
 
     ExpressionTemplate(
@@ -359,7 +358,7 @@ EXPRESSION_TEMPLATES: List[ExpressionTemplate] = [
 # 查询 API
 # ---------------------------------------------------------------------------
 
-def list_categories() -> List[str]:
+def list_categories() -> list[str]:
     """返回所有分类"""
     return [
         ExpressionCategory.MOTION,
@@ -371,12 +370,12 @@ def list_categories() -> List[str]:
     ]
 
 
-def list_templates_by_category(category: str) -> List[ExpressionTemplate]:
+def list_templates_by_category(category: str) -> list[ExpressionTemplate]:
     """按分类返回模板列表"""
     return [t for t in EXPRESSION_TEMPLATES if t.category == category]
 
 
-def find_template(template_id: str) -> Optional[ExpressionTemplate]:
+def find_template(template_id: str) -> ExpressionTemplate | None:
     """根据 ID 查找模板"""
     for t in EXPRESSION_TEMPLATES:
         if t.id == template_id:
@@ -384,7 +383,7 @@ def find_template(template_id: str) -> Optional[ExpressionTemplate]:
     return None
 
 
-def find_templates_by_tag(tag: str) -> List[ExpressionTemplate]:
+def find_templates_by_tag(tag: str) -> list[ExpressionTemplate]:
     """按标签搜索模板"""
     tag_lower = tag.lower()
     return [
@@ -395,7 +394,7 @@ def find_templates_by_tag(tag: str) -> List[ExpressionTemplate]:
     ]
 
 
-def find_template_by_intent(intent_keywords: List[str]) -> Optional[ExpressionTemplate]:
+def find_template_by_intent(intent_keywords: list[str]) -> ExpressionTemplate | None:
     """根据意图关键词推荐最匹配的模板"""
     best_score = 0
     best_template = None
@@ -418,7 +417,7 @@ def find_template_by_intent(intent_keywords: List[str]) -> Optional[ExpressionTe
 # 表达式生成 API
 # ---------------------------------------------------------------------------
 
-def generate_expression(template_id: str, params: Optional[Dict[str, Any]] = None) -> str:
+def generate_expression(template_id: str, params: dict[str, Any] | None = None) -> str:
     """根据模板 ID 和参数生成表达式字符串
 
     Args:
@@ -450,9 +449,9 @@ def generate_expression(template_id: str, params: Optional[Dict[str, Any]] = Non
 
 
 def generate_expression_by_intent(
-    intent_keywords: List[str],
-    bpm: Optional[float] = None,
-) -> Tuple[Optional[str], Optional[str]]:
+    intent_keywords: list[str],
+    bpm: float | None = None,
+) -> tuple[str | None, str | None]:
     """根据意图关键词自动选择模板并生成表达式
 
     Returns:

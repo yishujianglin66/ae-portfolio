@@ -5,9 +5,10 @@
 """
 
 import json
-import pytest
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
+import pytest
 
 
 class TestSubtitleSystem:
@@ -97,8 +98,9 @@ Dialogue: 0,0:00:02.00,0:00:04.00,Default,,0,0,0,,ASS字幕第二句
 
     def test_subtitle_item_to_dict(self):
         """测试字幕项转字典"""
-        from ae.subtitle_system import SubtitleItem
         from dataclasses import asdict
+
+        from ae.subtitle_system import SubtitleItem
 
         item = SubtitleItem(index=1, start_time=0.0, end_time=2.0, text="测试")
         d = asdict(item)

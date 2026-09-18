@@ -26,8 +26,8 @@ import numpy as np
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from scripts.m2_auto_iterate import render_tree  # noqa: E402
 from core.visual_scorer import score_video  # noqa: E402
+from scripts.m2_auto_iterate import render_tree  # noqa: E402
 
 OUT_DIR = PROJECT / "output" / "m2_iteration"
 SAMPLES = OUT_DIR / "train_samples.jsonl"
@@ -52,7 +52,7 @@ BG_COLORS = {
 
 def build_color_tree(combo: dict):
     """色彩控制变量树: 固定粒子尺寸/文字/节奏, 只变色彩。"""
-    from core.composition_tree import LayerSpec, CompositionTree
+    from core.composition_tree import CompositionTree, LayerSpec
     pc = PARTICLE_COLORS[combo["pcolor"]]
     bg = BG_COLORS[combo["bg"]]
     tree = CompositionTree(

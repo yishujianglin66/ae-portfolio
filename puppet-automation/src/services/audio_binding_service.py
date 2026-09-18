@@ -47,13 +47,13 @@ FREQUENCY_BANDS = {
 class BeatKeyframeTemplate:
     """节拍关键帧模板."""
     beat_type: str  # strong_beat | weak_beat
-    keyframes: List[Dict[str, Any]]  # [{time_offset, value, ease_type}, ...]
+    keyframes: list[dict[str, Any]]  # [{time_offset, value, ease_type}, ...]
 
 
 class AudioBindingService:
     """音频效果绑定服务 - 实现音频驱动效果参数变化."""
 
-    def __init__(self, ae_engine: AEEngine, analyzer_path: Optional[Path] = None):
+    def __init__(self, ae_engine: AEEngine, analyzer_path: Path | None = None):
         """初始化音频绑定服务.
 
         Args:
@@ -124,7 +124,7 @@ if (!comp) {{
         result = await self.ae_engine.run_script(script)
 
         if result.success:
-            logger.success(f"[AudioBinding] Audio Controller 创建成功")
+            logger.success("[AudioBinding] Audio Controller 创建成功")
         else:
             logger.error(f"[AudioBinding] Audio Controller 创建失败: {result.error}")
 
@@ -137,7 +137,7 @@ if (!comp) {{
         effect_name: str,
         property_name: str,
         frequency_band: str,
-        expression_modifiers: Optional[Dict[str, Any]] = None,
+        expression_modifiers: dict[str, Any] | None = None,
     ) -> EngineResult:
         """将效果属性绑定到指定频段.
 
@@ -228,7 +228,7 @@ if (!comp) {{
     def _generate_binding_expression(
         self,
         slider_name: str,
-        modifiers: Dict[str, Any]
+        modifiers: dict[str, Any]
     ) -> str:
         """生成效果绑定表达式.
 
@@ -283,7 +283,7 @@ if (!comp) {{
         frequency_band: str = "global",
         frame_rate: float = 30.0,
         smooth_window: int = 5,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """从音频文件生成指定频段的关键帧数据.
 
         Args:
@@ -333,7 +333,7 @@ if (!comp) {{
         smooth_window: int,
         librosa,
         np,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """分析指定频段能量（内部同步方法）.
 
         Args:
@@ -402,7 +402,7 @@ if (!comp) {{
         layer_index: int,
         property_path: str,
         beat_type: str,
-        beat_times: List[float],
+        beat_times: list[float],
         base_value: float = 100.0,
         amplitude: float = 20.0,
     ) -> EngineResult:
@@ -465,10 +465,10 @@ if (!comp) {{
     def _generate_beat_keyframes(
         self,
         beat_type: str,
-        beat_times: List[float],
+        beat_times: list[float],
         base_value: float,
         amplitude: float,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成节拍关键帧数据.
 
         Args:
@@ -548,7 +548,7 @@ if (!comp) {{
         comp_name: str,
         layer_index: int,
         property_path: str,
-        keyframes: List[Dict[str, Any]],
+        keyframes: list[dict[str, Any]],
     ) -> str:
         """构建关键帧应用脚本.
 
@@ -634,7 +634,7 @@ if (!comp) {{
 '''
         return script
 
-    async def create_v4_binding_preset(self, comp_name: str) -> Dict[str, EngineResult]:
+    async def create_v4_binding_preset(self, comp_name: str) -> dict[str, EngineResult]:
         """创建 V4 推荐绑定预设.
 
         V4 推荐绑定规则：
@@ -700,7 +700,7 @@ if (!comp) {{
         self,
         audio_path: Path,
         frame_rate: float = 30.0,
-    ) -> Dict[str, List[Dict[str, Any]]]:
+    ) -> dict[str, list[dict[str, Any]]]:
         """分析音频并生成所有频段的关键帧数据.
 
         Args:

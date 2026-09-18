@@ -71,13 +71,13 @@ class MoviePyEngine(BaseEngine):
 
     async def quick_compose(
         self,
-        clips: List[Dict[str, Any]],
+        clips: list[dict[str, Any]],
         output_path: Path | str,
         transitions: str = "fade",  # fade/none/crossfade
         transition_duration: float = 0.5,
-        resolution: Optional[str] = None,
+        resolution: str | None = None,
         fps: int = 30,
-        audio_path: Optional[Path] = None,
+        audio_path: Path | None = None,
     ) -> EngineResult:
         """快速多片段合成。
 
@@ -140,13 +140,13 @@ class MoviePyEngine(BaseEngine):
 
     def _compose_sync(
         self,
-        clips: List[Dict[str, Any]],
+        clips: list[dict[str, Any]],
         output_path: Path,
         transitions: str,
         transition_duration: float,
-        resolution: Optional[str],
+        resolution: str | None,
         fps: int,
-        audio_path: Optional[Path],
+        audio_path: Path | None,
     ) -> bool:
         """同步合成（在线程中执行）。"""
         mp = self._moviepy

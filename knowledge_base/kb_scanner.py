@@ -23,15 +23,15 @@ knowledge_base/kb_scanner.py - 增强版知识库效果扫描器
 """
 from __future__ import annotations
 
+import json
 import os
 import re
-import json
 import struct
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
-from dataclasses import dataclass, field
-from loguru import logger
 
+from loguru import logger
 
 # 项目根目录 + 多知识库目录支持
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -59,9 +59,9 @@ class EffectInfo:
     category: str = "other"
     plugin_package: str = ""
     description: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
-    usage_scenarios: List[str] = field(default_factory=list)
-    default_presets: List[Dict[str, Any]] = field(default_factory=list)
+    params: dict[str, Any] = field(default_factory=dict)
+    usage_scenarios: list[str] = field(default_factory=list)
+    default_presets: list[dict[str, Any]] = field(default_factory=list)
     source: str = ""  # kb / plugin / aep / generated
     confidence: float = 0.8
 
@@ -73,15 +73,15 @@ class PluginPackage:
     vendor: str
     version: str = ""
     install_path: Path = None
-    effects: List[EffectInfo] = field(default_factory=list)
-    aex_files: List[Path] = field(default_factory=list)
+    effects: list[EffectInfo] = field(default_factory=list)
+    aex_files: list[Path] = field(default_factory=list)
 
 
 # ============================================================================
 # 效果分类规则
 # ============================================================================
 
-_CATEGORY_KEYWORDS: Dict[str, List[str]] = {
+_CATEGORY_KEYWORDS: dict[str, list[str]] = {
     "color": [
         "color", "colour", "色调", "颜色", "调色", "lut", "grade", "grading",
         "balance", "平衡", "hue", "色相", "saturation", "饱和度", "curves", "曲线",
@@ -189,7 +189,7 @@ _CATEGORY_KEYWORDS: Dict[str, List[str]] = {
 # 常见 AE 插件安装路径（Windows）
 # ============================================================================
 
-_DEFAULT_PLUGIN_PATHS: List[Path] = [
+_DEFAULT_PLUGIN_PATHS: list[Path] = [
     Path(r"C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\Plug-ins"),
     Path(r"C:\Program Files\Adobe\Adobe After Effects 2024\Support Files\Plug-ins"),
     Path(r"C:\Program Files\Adobe\Adobe After Effects 2023\Support Files\Plug-ins"),
@@ -223,9 +223,9 @@ class KBScanner:
 
     def __init__(
         self,
-        kb_dir: Optional[Path] = None,
-        kb_dirs: Optional[List[Path]] = None,
-        plugin_paths: Optional[List[Path]] = None,
+        kb_dir: Path | None = None,
+        kb_dirs: list[Path] | None = None,
+        plugin_paths: list[Path] | None = None,
     ) -> None:
         """初始化扫描器（支持多目录聚合）。
 
@@ -236,7 +236,7 @@ class KBScanner:
         """
         # 多目录聚合：向后兼容 + 默认全量
         if kb_dirs:
-            self._kb_dirs: List[Path] = [Path(d) for d in kb_dirs]
+            self._kb_dirs: list[Path] = [Path(d) for d in kb_dirs]
         elif kb_dir is not None:
             self._kb_dirs = [Path(kb_dir)]
         else:
@@ -246,9 +246,9 @@ class KBScanner:
         self._kb_dir = self._kb_dirs[0] if self._kb_dirs else _DEFAULT_KB_DIRS[0]
         self._plugin_paths = plugin_paths or _DEFAULT_PLUGIN_PATHS
 
-        self._effects: Dict[str, EffectInfo] = {}
-        self._plugin_packages: Dict[str, PluginPackage] = {}
-        self._kb_files: List[Path] = []
+        self._effects: dict[str, EffectInfo] = {}
+        self._plugin_packages: dict[str, PluginPackage] = {}
+        self._kb_files: list[Path] = []
 
         logger.info(f"KBScanner 初始化完成（多目录模式，{len(self._kb_dirs)}个知识库）")
         logger.debug(f"  知识库目录: {[str(d) for d in self._kb_dirs]}")
@@ -289,7 +289,7 @@ class KBScanner:
     # 公共 API - 知识库扫描
     # ========================================================================
 
-    def scan_knowledge_base(self) -> Dict[str, EffectInfo]:
+    def scan_knowledge_base(self) -> dict[str, EffectInfo]:
         """扫描所有知识库目录中的 Markdown 文件提取效果信息（多目录聚合）。
 
         Returns:
@@ -333,7 +333,7 @@ class KBScanner:
         logger.info(f"知识库扫描完成，提取到 {effects_count} 个新效果（累计 {len(self._effects)}）")
         return dict(self._effects)
 
-    def _extract_effects_from_md(self, md_file: Path) -> List[EffectInfo]:
+    def _extract_effects_from_md(self, md_file: Path) -> list[EffectInfo]:
         """从单个 Markdown 文件提取效果信息。
 
         Args:
@@ -342,7 +342,7 @@ class KBScanner:
         Returns:
             EffectInfo 列表
         """
-        effects: List[EffectInfo] = []
+        effects: list[EffectInfo] = []
 
         try:
             content = md_file.read_text(encoding="utf-8", errors="ignore")
@@ -360,7 +360,7 @@ class KBScanner:
             r"(FCP[\w\s]+)",
         ]
 
-        found: Set[str] = set()
+        found: set[str] = set()
         for pattern in patterns:
             for match in re.finditer(pattern, content):
                 name = match.group(1).strip()
@@ -428,7 +428,7 @@ class KBScanner:
     # 公共 API - 插件目录扫描
     # ========================================================================
 
-    def scan_plugins(self, generate_missing: bool = True) -> Dict[str, PluginPackage]:
+    def scan_plugins(self, generate_missing: bool = True) -> dict[str, PluginPackage]:
         """扫描 AE 插件目录提取效果名称。
 
         扫描 AEX/DLL 文件，尝试从二进制文件中提取效果名称。
@@ -519,7 +519,7 @@ class KBScanner:
         else:
             return "Unknown"
 
-    def _extract_effects_from_aex(self, aex_file: Path) -> List[EffectInfo]:
+    def _extract_effects_from_aex(self, aex_file: Path) -> list[EffectInfo]:
         """从 AEX 文件中提取效果名称。
 
         通过搜索二进制文件中的可读字符串来尝试提取效果名称。
@@ -531,7 +531,7 @@ class KBScanner:
         Returns:
             EffectInfo 列表
         """
-        effects: List[EffectInfo] = []
+        effects: list[EffectInfo] = []
 
         try:
             file_size = aex_file.stat().st_size
@@ -588,9 +588,9 @@ class KBScanner:
         return effects
 
     @staticmethod
-    def _extract_strings(data: bytes, min_length: int = 4) -> List[str]:
+    def _extract_strings(data: bytes, min_length: int = 4) -> list[str]:
         """从二进制数据中提取可读字符串。"""
-        strings: List[str] = []
+        strings: list[str] = []
         current = bytearray()
 
         for byte in data:
@@ -610,7 +610,7 @@ class KBScanner:
     # 公共 API - AEP 项目扫描
     # ========================================================================
 
-    def scan_effects_from_aep(self, aep_path: Path) -> List[EffectInfo]:
+    def scan_effects_from_aep(self, aep_path: Path) -> list[EffectInfo]:
         """从 AEP 项目文件提取使用的效果。
 
         AEP 文件是二进制格式，这里使用启发式方法搜索效果名称。
@@ -624,7 +624,7 @@ class KBScanner:
         """
         logger.info(f"扫描 AEP 项目: {aep_path.name}")
 
-        effects: List[EffectInfo] = []
+        effects: list[EffectInfo] = []
 
         if not aep_path.exists():
             logger.warning(f"AEP 文件不存在: {aep_path}")
@@ -635,7 +635,7 @@ class KBScanner:
             strings = self._extract_strings(data, min_length=3)
 
             known_effects = set(self._effects.keys())
-            found: Set[str] = set()
+            found: set[str] = set()
 
             for s in strings:
                 s_lower = s.lower()
@@ -701,9 +701,9 @@ class KBScanner:
 
         return generated
 
-    def _get_plugin_effects_database(self) -> Dict[str, List[Dict[str, Any]]]:
+    def _get_plugin_effects_database(self) -> dict[str, list[dict[str, Any]]]:
         """获取插件效果数据库（模拟数据，用于达到 5000+ 目标）。"""
-        db: Dict[str, List[Dict[str, Any]]] = {}
+        db: dict[str, list[dict[str, Any]]] = {}
 
         # Adobe 内置效果
         adobe_effects = self._generate_adobe_builtin_effects()
@@ -767,7 +767,7 @@ class KBScanner:
 
         return db
 
-    def _generate_adobe_builtin_effects(self) -> List[Dict[str, Any]]:
+    def _generate_adobe_builtin_effects(self) -> list[dict[str, Any]]:
         """生成 Adobe 内置效果列表（约 250+）。"""
         effects = []
 
@@ -940,7 +940,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_cc_effects(self) -> List[Dict[str, Any]]:
+    def _generate_cc_effects(self) -> list[dict[str, Any]]:
         """生成 Cycore FX (CC) 效果列表（约 80+）。"""
         effects = []
 
@@ -1020,7 +1020,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_trapcode_effects(self) -> List[Dict[str, Any]]:
+    def _generate_trapcode_effects(self) -> list[dict[str, Any]]:
         """生成 Trapcode Suite 效果列表（约 100+）。"""
         effects = []
 
@@ -1075,7 +1075,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_magic_bullet_effects(self) -> List[Dict[str, Any]]:
+    def _generate_magic_bullet_effects(self) -> list[dict[str, Any]]:
         """生成 Magic Bullet Suite 效果列表（约 80+）。"""
         effects = []
 
@@ -1127,7 +1127,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_universe_effects(self) -> List[Dict[str, Any]]:
+    def _generate_universe_effects(self) -> list[dict[str, Any]]:
         """生成 Red Giant Universe 效果列表（约 150+）。"""
         effects = []
 
@@ -1217,7 +1217,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_bcc_effects(self) -> List[Dict[str, Any]]:
+    def _generate_bcc_effects(self) -> list[dict[str, Any]]:
         """生成 Boris Continuum Complete 效果列表（约 500+）。"""
         effects = []
 
@@ -1434,7 +1434,7 @@ class KBScanner:
         }
         return mapping.get(bcc_category, "other")
 
-    def _generate_sapphire_effects(self) -> List[Dict[str, Any]]:
+    def _generate_sapphire_effects(self) -> list[dict[str, Any]]:
         """生成 Sapphire 蓝宝石插件效果列表（约 300+）。"""
         effects = []
 
@@ -1633,7 +1633,7 @@ class KBScanner:
         }
         return mapping.get(category, "other")
 
-    def _generate_videocopilot_effects(self) -> List[Dict[str, Any]]:
+    def _generate_videocopilot_effects(self) -> list[dict[str, Any]]:
         """生成 Video Copilot 插件效果列表（约 50+）。"""
         effects = []
 
@@ -1680,7 +1680,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_revision_effects(self) -> List[Dict[str, Any]]:
+    def _generate_revision_effects(self) -> list[dict[str, Any]]:
         """生成 REVision FX 插件效果列表（约 100+）。"""
         effects = []
 
@@ -1726,7 +1726,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_rowbyte_effects(self) -> List[Dict[str, Any]]:
+    def _generate_rowbyte_effects(self) -> list[dict[str, Any]]:
         """生成 Rowbyte 插件效果列表（约 80+）。"""
         effects = []
 
@@ -1767,7 +1767,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_digital_anarchy_effects(self) -> List[Dict[str, Any]]:
+    def _generate_digital_anarchy_effects(self) -> list[dict[str, Any]]:
         """生成 Digital Anarchy 插件效果列表（约 60+）。"""
         effects = []
 
@@ -1807,7 +1807,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_mettle_effects(self) -> List[Dict[str, Any]]:
+    def _generate_mettle_effects(self) -> list[dict[str, Any]]:
         """生成 Mettle 插件效果列表（约 50+）。"""
         effects = []
 
@@ -1845,7 +1845,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_zaxwerks_effects(self) -> List[Dict[str, Any]]:
+    def _generate_zaxwerks_effects(self) -> list[dict[str, Any]]:
         """生成 Zaxwerks 插件效果列表（约 50+）。"""
         effects = []
 
@@ -1884,7 +1884,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_stardust_effects(self) -> List[Dict[str, Any]]:
+    def _generate_stardust_effects(self) -> list[dict[str, Any]]:
         """生成 Superluminal Stardust 插件效果列表（约 60+）。"""
         effects = []
 
@@ -1914,7 +1914,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_other_effects(self) -> List[Dict[str, Any]]:
+    def _generate_other_effects(self) -> list[dict[str, Any]]:
         """生成其他插件效果列表（约 1000+）。"""
         effects = []
 
@@ -1986,8 +1986,8 @@ class KBScanner:
         base_name: str,
         category: str,
         count: int,
-        params: List[str],
-    ) -> List[Dict[str, Any]]:
+        params: list[str],
+    ) -> list[dict[str, Any]]:
         """生成效果变体。"""
         variants = []
         for i in range(count):
@@ -2003,7 +2003,7 @@ class KBScanner:
             })
         return variants
 
-    def _generate_preset_packs(self) -> List[Dict[str, Any]]:
+    def _generate_preset_packs(self) -> list[dict[str, Any]]:
         """生成预设包效果列表（约 200+）。"""
         presets = []
 
@@ -2032,7 +2032,7 @@ class KBScanner:
 
         return presets
 
-    def _generate_more_effects(self) -> List[Dict[str, Any]]:
+    def _generate_more_effects(self) -> list[dict[str, Any]]:
         """生成更多效果以扩充数量（约 2500+）。"""
         effects = []
 
@@ -2547,7 +2547,7 @@ class KBScanner:
 
         return effects
 
-    def _generate_extra_effect_variants(self) -> List[Dict[str, Any]]:
+    def _generate_extra_effect_variants(self) -> list[dict[str, Any]]:
         """生成额外的效果变体（约 1500+）。"""
         variants = []
 
@@ -2655,7 +2655,7 @@ class KBScanner:
     # 结果获取
     # ========================================================================
 
-    def get_all_effects(self) -> Dict[str, EffectInfo]:
+    def get_all_effects(self) -> dict[str, EffectInfo]:
         """获取所有扫描到的效果。
 
         Returns:
@@ -2663,7 +2663,7 @@ class KBScanner:
         """
         return dict(self._effects)
 
-    def get_effects_by_category(self, category: str) -> List[EffectInfo]:
+    def get_effects_by_category(self, category: str) -> list[EffectInfo]:
         """按分类获取效果列表。
 
         Args:
@@ -2677,7 +2677,7 @@ class KBScanner:
             if e.category == category
         ]
 
-    def get_plugin_packages(self) -> Dict[str, PluginPackage]:
+    def get_plugin_packages(self) -> dict[str, PluginPackage]:
         """获取插件包信息。
 
         Returns:
@@ -2685,23 +2685,23 @@ class KBScanner:
         """
         return dict(self._plugin_packages)
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取扫描统计信息。
 
         Returns:
             统计数据字典
         """
-        category_counts: Dict[str, int] = {}
+        category_counts: dict[str, int] = {}
         for effect in self._effects.values():
             cat = effect.category
             category_counts[cat] = category_counts.get(cat, 0) + 1
 
-        source_counts: Dict[str, int] = {}
+        source_counts: dict[str, int] = {}
         for effect in self._effects.values():
             src = effect.source
             source_counts[src] = source_counts.get(src, 0) + 1
 
-        plugin_counts: Dict[str, int] = {}
+        plugin_counts: dict[str, int] = {}
         for effect in self._effects.values():
             pkg = effect.plugin_package or "Unknown"
             plugin_counts[pkg] = plugin_counts.get(pkg, 0) + 1

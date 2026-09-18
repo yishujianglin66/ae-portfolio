@@ -334,7 +334,7 @@ def main() -> int:
     print(f"cut_visibility_v2 = {r['cut_visibility_v2']}")
     print(f"  p25={r['p25']} p50={r['p50']} p75={r['p75']} min={r['min']}")
     print(f"冻结率 = {r['frozen_rate']}（{r['frozen_count']} 处）")
-    print(f"\n最弱 10 刀:")
+    print("\n最弱 10 刀:")
     print(f"  {'t':>8}{'帧号':>7}{'v2':>9}{'最小对':>9}{'ahash':>7}")
     for c in r["weak_cuts"][:10]:
         print(f"  {c['t']:>8.3f}{c['frame']:>7}{c['vis']:>9.4f}"

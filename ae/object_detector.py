@@ -27,10 +27,10 @@ import json
 import math
 import os
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -47,11 +47,11 @@ class DetectionBox:
     y1: int
     x2: int
     y2: int
-    track_id: Optional[int] = None
+    track_id: int | None = None
     class_id: int = 0
 
     @property
-    def center(self) -> Tuple[float, float]:
+    def center(self) -> tuple[float, float]:
         return ((self.x1 + self.x2) / 2, (self.y1 + self.y2) / 2)
 
     @property
@@ -66,7 +66,7 @@ class DetectionBox:
     def height(self) -> int:
         return self.y2 - self.y1
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "class": self.class_name,
             "confidence": round(self.confidence, 3),
@@ -82,8 +82,8 @@ class FrameDetection:
     """单帧检测结果"""
     frame_index: int
     timestamp: float
-    detections: List[DetectionBox]
-    dominant_subject: Optional[DetectionBox] = None
+    detections: list[DetectionBox]
+    dominant_subject: DetectionBox | None = None
     face_count: int = 0
     person_count: int = 0
 
@@ -95,8 +95,8 @@ class VideoDetectionResult:
     total_frames: int
     analyzed_frames: int
     fps: float
-    frames: List[FrameDetection]
-    summary: Dict[str, Any] = field(default_factory=dict)
+    frames: list[FrameDetection]
+    summary: dict[str, Any] = field(default_factory=dict)
 
 
 # ================================================================
@@ -181,7 +181,7 @@ class ObjectDetector:
     def detect(
         self,
         video_path: str,
-        classes: List[str] = None,       # 限定检测类别
+        classes: list[str] = None,       # 限定检测类别
         max_frames: int = 300,
     ) -> VideoDetectionResult:
         """
@@ -216,7 +216,7 @@ class ObjectDetector:
 
         frame_idx = 0
         analyzed = 0
-        tracker_data: Dict[int, List[Tuple[int, int, int, int]]] = {}
+        tracker_data: dict[int, list[tuple[int, int, int, int]]] = {}
 
         while frame_idx < actual_frames and analyzed < max_frames:
             cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
@@ -266,8 +266,8 @@ class ObjectDetector:
         self,
         model: Any,
         frame: Any,
-        classes: List[str] = None,
-    ) -> List[DetectionBox]:
+        classes: list[str] = None,
+    ) -> list[DetectionBox]:
         """对单帧执行检测"""
         if model is None:
             return []
@@ -277,7 +277,7 @@ class ObjectDetector:
         else:
             return self._detect_opencv(model, frame, classes)
 
-    def _detect_yolo(self, model, frame, classes=None) -> List[DetectionBox]:
+    def _detect_yolo(self, model, frame, classes=None) -> list[DetectionBox]:
         """YOLOv8 检测"""
         import numpy as np
 
@@ -316,7 +316,7 @@ class ObjectDetector:
 
         return detections
 
-    def _detect_opencv(self, model, frame, classes=None) -> List[DetectionBox]:
+    def _detect_opencv(self, model, frame, classes=None) -> list[DetectionBox]:
         """OpenCV DNN 检测"""
         import numpy as np
 
@@ -346,13 +346,13 @@ class ObjectDetector:
 
         return detections
 
-    def _generate_summary(self, results: List[FrameDetection]) -> Dict[str, Any]:
+    def _generate_summary(self, results: list[FrameDetection]) -> dict[str, Any]:
         """生成检测摘要"""
         if not results:
             return {"object_count": 0, "primary_subjects": []}
 
         all_classes = {}
-        all_detections: List[DetectionBox] = []
+        all_detections: list[DetectionBox] = []
 
         for r in results:
             all_detections.extend(r.detections)
@@ -387,7 +387,7 @@ class ObjectDetector:
         frame_detection: FrameDetection,
         frame_width: int = 1920,
         frame_height: int = 1080,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         自动构图建议 — 基于检测结果给出裁剪/平移建议。
 

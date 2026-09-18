@@ -364,8 +364,8 @@ class TestHanddrawnStyler:
             pytest.skip("Pillow not available")
 
         # 创建测试图像
-        from PIL import Image
         import numpy as np
+        from PIL import Image
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # 创建测试图像
@@ -588,8 +588,8 @@ class TestEndToEnd:
         if not styler._pil_available:
             pytest.skip("Pillow not available")
 
-        from PIL import Image
         import numpy as np
+        from PIL import Image
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # 创建测试图像
@@ -657,8 +657,8 @@ class TestComfyUIHanddrawnAdapter:
         with tempfile.TemporaryDirectory() as tmpdir:
             inp = os.path.join(tmpdir, "in.png")
             # 生成一个真实的小图像文件 (满足存在性检查)
-            from PIL import Image
             import numpy as np
+            from PIL import Image
             Image.fromarray(
                 np.zeros((64, 64, 3), dtype=np.uint8)
             ).save(inp)

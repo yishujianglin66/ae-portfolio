@@ -8,10 +8,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "13-素材获取与搜索" / "01-下载器"))
 
 from bilibili_downloader import (
-    _safe_filename,
-    _parse_yt_dlp_info,
-    _sanitize_error,
     QUALITY_MAP,
+    _parse_yt_dlp_info,
+    _safe_filename,
+    _sanitize_error,
 )
 
 

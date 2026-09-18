@@ -20,22 +20,23 @@ video_reverse_engine.py
   - 代码生成: GPT-Luna (代码专精)
 """
 
-import os
-import sys
-import json
-import time
 import base64
 import hashlib
+import json
+import os
 import subprocess
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
+import sys
+import time
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # 确保项目根目录在路径中
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 import requests
+
 
 # ===== 环境变量加载 =====
 def _load_env():
@@ -79,7 +80,7 @@ class ModelConfig:
     ARK_URL = "https://ark.cn-beijing.volces.com/api/v3"
     
     @classmethod
-    def get_available_providers(cls) -> List[str]:
+    def get_available_providers(cls) -> list[str]:
         """获取可用的API提供商列表"""
         providers = []
         if cls.CLAUDE_KEY:
@@ -117,8 +118,8 @@ class MultiModelCaller:
                 "Content-Type": "application/json",
             })
     
-    def call_model(self, provider: str, model: str, messages: List[Dict],
-                   max_tokens: int = 4096, temperature: float = 0.7) -> Dict:
+    def call_model(self, provider: str, model: str, messages: list[dict],
+                   max_tokens: int = 4096, temperature: float = 0.7) -> dict:
         """调用单个模型"""
         url_map = {
             "claude": f"{ModelConfig.CLAUDE_URL}/chat/completions",
@@ -160,7 +161,7 @@ class MultiModelCaller:
             return {"error": str(e), "provider": provider, "model": model}
     
     def call_vision(self, provider: str, model: str, prompt: str,
-                    image_base64: str, max_tokens: int = 4096) -> Dict:
+                    image_base64: str, max_tokens: int = 4096) -> dict:
         """调用视觉模型分析图片"""
         messages = [{
             "role": "user",
@@ -171,8 +172,8 @@ class MultiModelCaller:
         }]
         return self.call_model(provider, model, messages, max_tokens=max_tokens)
     
-    def multi_model_vote(self, prompt: str, providers: List[str] = None,
-                         max_tokens: int = 4096) -> Dict:
+    def multi_model_vote(self, prompt: str, providers: list[str] = None,
+                         max_tokens: int = 4096) -> dict:
         """多模型投票 - 并行调用多个模型，交叉验证"""
         if providers is None:
             providers = ModelConfig.get_available_providers()
@@ -196,7 +197,7 @@ class MultiModelCaller:
         
         return self._merge_results(results)
     
-    def _merge_results(self, results: Dict) -> Dict:
+    def _merge_results(self, results: dict) -> dict:
         """合并多模型结果"""
         if not results:
             return {"error": "所有模型调用失败"}
@@ -259,7 +260,7 @@ class SmartFrameExtractor:
         self.ffmpeg = ffmpeg_path
     
     def extract_keyframes(self, video_path: str, max_frames: int = 12,
-                          output_dir: str = None) -> List[str]:
+                          output_dir: str = None) -> list[str]:
         """提取关键帧 - 基于场景变化检测"""
         if not os.path.exists(video_path):
             raise FileNotFoundError(f"视频不存在: {video_path}")
@@ -284,7 +285,7 @@ class SmartFrameExtractor:
         return frame_paths
     
     def _extract_scene_based(self, video_path: str, output_dir: str,
-                              max_frames: int) -> List[str]:
+                              max_frames: int) -> list[str]:
         """基于场景变化提取关键帧"""
         output_pattern = os.path.join(output_dir, "scene_%03d.jpg")
         # 使用Windows短路径避免中文编码问题
@@ -310,7 +311,7 @@ class SmartFrameExtractor:
         return frames[:max_frames]
     
     def _extract_uniform(self, video_path: str, output_dir: str,
-                          max_frames: int) -> List[str]:
+                          max_frames: int) -> list[str]:
         """均匀采样提取帧"""
         safe_video = self._get_safe_path(video_path)
         # 先获取视频时长
@@ -383,7 +384,7 @@ class VideoReverseEngine:
         # 加载AE效果知识图谱
         self.effect_kb = self._load_effect_kb()
     
-    def _load_effect_kb(self) -> Dict:
+    def _load_effect_kb(self) -> dict:
         """加载AE效果知识库"""
         kb = {"builtin_effects": [], "third_party_plugins": []}
         
@@ -396,10 +397,10 @@ class VideoReverseEngine:
         
         return kb
     
-    def analyze(self, video_path: str, deep_analysis: bool = True) -> Dict:
+    def analyze(self, video_path: str, deep_analysis: bool = True) -> dict:
         """完整视频逆向分析"""
         print(f"\n{'='*60}")
-        print(f"  视频技术逆向分析引擎")
+        print("  视频技术逆向分析引擎")
         print(f"{'='*60}")
         print(f"  视频: {video_path}")
         print(f"  可用模型: {', '.join(self.providers)}")
@@ -472,12 +473,12 @@ class VideoReverseEngine:
         result["summary"] = self._generate_summary(result)
         
         print(f"\n{'='*60}")
-        print(f"  分析完成!")
+        print("  分析完成!")
         print(f"{'='*60}")
         
         return result
     
-    def _multi_model_visual_analysis(self, frame_paths: List[str]) -> Dict:
+    def _multi_model_visual_analysis(self, frame_paths: list[str]) -> dict:
         """多模型投票视觉分析"""
         prompt = """你是专业视频特效分析师。请深度分析这张视频帧，识别所有视觉技术和特效。
 
@@ -536,7 +537,7 @@ class VideoReverseEngine:
         
         return results
     
-    def _infer_ae_parameters(self, visual_analysis: Dict, frame_paths: List[str]) -> Dict:
+    def _infer_ae_parameters(self, visual_analysis: dict, frame_paths: list[str]) -> dict:
         """推断AE效果参数"""
         # 收集所有识别到的效果
         all_effects = set()
@@ -612,7 +613,7 @@ class VideoReverseEngine:
         
         return {"effects": list(all_effects), "error": result.get("error")}
     
-    def _infer_layer_stack(self, visual_analysis: Dict) -> Dict:
+    def _infer_layer_stack(self, visual_analysis: dict) -> dict:
         """推断图层堆栈"""
         prompt = """根据视频帧的视觉分析结果，推断AE图层堆栈结构。
 
@@ -680,7 +681,7 @@ class VideoReverseEngine:
         
         return {"error": result.get("error")}
     
-    def _infer_color_params(self, frame_paths: List[str]) -> Dict:
+    def _infer_color_params(self, frame_paths: list[str]) -> dict:
         """推断调色参数"""
         if not frame_paths:
             return {"error": "无帧可分析"}
@@ -728,7 +729,7 @@ class VideoReverseEngine:
         
         return {"error": result.get("error")}
     
-    def _analyze_rhythm(self, video_path: str, frames: List[str]) -> Dict:
+    def _analyze_rhythm(self, video_path: str, frames: list[str]) -> dict:
         """分析视频节奏"""
         prompt = """根据视频关键帧数量和分布，推断视频节奏特征。输出JSON:
 {
@@ -777,7 +778,7 @@ class VideoReverseEngine:
         
         return {"bpm": "N/A", "pace": "unknown"}
     
-    def _generate_reproduction_plan(self, analysis: Dict) -> Dict:
+    def _generate_reproduction_plan(self, analysis: dict) -> dict:
         """生成智能复现方案"""
         prompt = """你是视频特效复现专家。根据以下视频逆向分析结果，生成一个完整的复现方案。
 
@@ -845,7 +846,7 @@ class VideoReverseEngine:
         
         return {"error": result.get("error")}
     
-    def _generate_summary(self, result: Dict) -> Dict:
+    def _generate_summary(self, result: dict) -> dict:
         """生成分析摘要"""
         summary = {
             "total_stages": len(result.get("stages", {})),
@@ -869,7 +870,7 @@ class VideoReverseEngine:
         }
         return summary
     
-    def save_report(self, result: Dict, output_path: str = None) -> str:
+    def save_report(self, result: dict, output_path: str = None) -> str:
         """保存分析报告"""
         if output_path is None:
             output_path = os.path.join(
@@ -890,7 +891,7 @@ class VideoReverseEngine:
         
         return output_path
     
-    def _generate_markdown_report(self, result: Dict, output_path: str):
+    def _generate_markdown_report(self, result: dict, output_path: str):
         """生成Markdown报告"""
         lines = [
             "# 视频技术逆向分析报告",
@@ -947,7 +948,7 @@ class VideoReverseEngine:
         color = stages.get("color_params", {})
         lines.extend([
             "## 5. 调色参数",
-            f"```json",
+            "```json",
             json.dumps(color, indent=2, ensure_ascii=False, default=str)[:500],
             "```",
             "",

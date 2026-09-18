@@ -4,8 +4,8 @@
 """
 import json
 import sys
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # 设置编码
 sys.stdout.reconfigure(encoding='utf-8')
@@ -15,6 +15,7 @@ sys.stderr.reconfigure(encoding='utf-8')
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.camera_movement_classifier import classify_video
+
 
 def process_review_queue():
     """处理人工复核队列"""
@@ -83,7 +84,7 @@ def process_review_queue():
     changed = sum(1 for r in results if r['label_changed'])
     
     print(f"\n{'='*60}")
-    print(f"✅ 处理完成")
+    print("✅ 处理完成")
     print(f"   总样本: {len(samples)}")
     print(f"   成功: {processed}")
     print(f"   失败: {errors}")
@@ -94,7 +95,7 @@ def process_review_queue():
     # 输出标签分布
     from collections import Counter
     label_dist = Counter(r['reviewed_label'] for r in results)
-    print(f"\n📊 标签分布:")
+    print("\n📊 标签分布:")
     for label, count in sorted(label_dist.items(), key=lambda x: -x[1]):
         print(f"   {label}: {count} ({count/processed*100:.1f}%)")
 

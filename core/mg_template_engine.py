@@ -70,7 +70,7 @@ class MGAnimationSpec:
     """MG 动画规格书"""
     anim_type: str = "typography"       # typography/data_chart/shape/transition
     subtype: str = ""                   # bar/line/pie/circle/rect/wipe/zoom
-    data: List[Dict[str, Any]] = field(default_factory=list)
+    data: list[dict[str, Any]] = field(default_factory=list)
     text: str = ""
     style: MGStyle = field(default_factory=MGStyle)
     duration_sec: float = 5.0
@@ -78,7 +78,7 @@ class MGAnimationSpec:
     width: int = 1920
     height: int = 1080
     easing: str = "ease_out"           # linear/ease_in/ease_out/ease_in_out/spring
-    extra: Dict[str, Any] = field(default_factory=dict)
+    extra: dict[str, Any] = field(default_factory=dict)
 
 
 # ============================================================================
@@ -127,7 +127,7 @@ class MGTemplateEngine:
     SUPPORTED_TYPES = ["typography", "data_chart", "shape", "transition", "infographic"]
     RENDER_BACKENDS = ["pillow_ffmpeg", "remotion", "motion_canvas"]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._default_backend = "pillow_ffmpeg"
         self._ffmpeg_available = self._check_ffmpeg()
@@ -143,10 +143,10 @@ class MGTemplateEngine:
 
     def render(
         self,
-        spec: Dict[str, Any],
+        spec: dict[str, Any],
         output_path: str = "output_mg.mp4",
         backend: str = "auto",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """渲染 MG 动画
 
         Args:
@@ -177,7 +177,7 @@ class MGTemplateEngine:
         else:
             return {"status": "error", "message": f"Unknown backend: {backend}"}
 
-    def list_templates(self) -> Dict[str, Any]:
+    def list_templates(self) -> dict[str, Any]:
         """列出所有可用模板"""
         return {
             "status": "success",
@@ -211,7 +211,7 @@ class MGTemplateEngine:
             "backends": self.RENDER_BACKENDS,
         }
 
-    def _parse_spec(self, spec: Dict[str, Any]) -> MGAnimationSpec:
+    def _parse_spec(self, spec: dict[str, Any]) -> MGAnimationSpec:
         """解析动画规格书"""
         style_data = spec.get("style", {})
         if isinstance(style_data, dict):
@@ -247,7 +247,7 @@ class MGTemplateEngine:
 
     # ── Pillow + FFmpeg 渲染 ──────────────────────────────────────────
 
-    def _render_pillow_ffmpeg(self, spec: MGAnimationSpec, output_path: str) -> Dict[str, Any]:
+    def _render_pillow_ffmpeg(self, spec: MGAnimationSpec, output_path: str) -> dict[str, Any]:
         """使用 Pillow 逐帧渲染 + FFmpeg 编码"""
         if not self._ffmpeg_available:
             return {"status": "error", "message": "FFmpeg not available"}
@@ -392,7 +392,7 @@ class MGTemplateEngine:
 
     # ── Remotion 渲染 ──────────────────────────────────────────────
 
-    def _render_remotion(self, spec: MGAnimationSpec, output_path: str) -> Dict[str, Any]:
+    def _render_remotion(self, spec: MGAnimationSpec, output_path: str) -> dict[str, Any]:
         """通过 Remotion 渲染"""
         from integrations.remotion_agent_adapter import RemotionAgentAdapter
         adapter = RemotionAgentAdapter()
@@ -414,7 +414,7 @@ class MGTemplateEngine:
             "height": spec.height,
         })
 
-    def _render_motion_canvas(self, spec: MGAnimationSpec, output_path: str) -> Dict[str, Any]:
+    def _render_motion_canvas(self, spec: MGAnimationSpec, output_path: str) -> dict[str, Any]:
         """通过 Motion Canvas 渲染 (预留)"""
         return {
             "status": "success",
@@ -436,7 +436,7 @@ class MGTemplateEngine:
 
     # ── Lottie JSON 导出 ──────────────────────────────────────────
 
-    def export_lottie(self, spec: Dict[str, Any]) -> Dict[str, Any]:
+    def export_lottie(self, spec: dict[str, Any]) -> dict[str, Any]:
         """将 MG 动画规格书导出为 Lottie JSON
 
         Returns:
@@ -456,7 +456,7 @@ class MGTemplateEngine:
             "file_path": output_path,
         }
 
-    def _spec_to_lottie(self, spec: MGAnimationSpec) -> Dict[str, Any]:
+    def _spec_to_lottie(self, spec: MGAnimationSpec) -> dict[str, Any]:
         """将 MGAnimationSpec 转为 Lottie JSON 格式"""
         total_frames = int(spec.duration_sec * spec.fps)
 
@@ -487,7 +487,7 @@ class MGTemplateEngine:
 
         return lottie
 
-    def _lottie_text_layer(self, spec: MGAnimationSpec, total_frames: int) -> Dict:
+    def _lottie_text_layer(self, spec: MGAnimationSpec, total_frames: int) -> dict:
         """生成 Lottie 文字图层"""
         return {
             "ddd": 0,
@@ -525,7 +525,7 @@ class MGTemplateEngine:
             "op": total_frames,
         }
 
-    def _lottie_shape_layer(self, spec: MGAnimationSpec, data: dict, idx: int, total_frames: int) -> Dict:
+    def _lottie_shape_layer(self, spec: MGAnimationSpec, data: dict, idx: int, total_frames: int) -> dict:
         """生成 Lottie 形状图层"""
         padding = spec.style.padding
         n = max(len(spec.data), 1)
@@ -562,7 +562,7 @@ class MGTemplateEngine:
         }
 
     @staticmethod
-    def _hex_to_rgb(hex_color: str) -> List[float]:
+    def _hex_to_rgb(hex_color: str) -> list[float]:
         """#RRGGBB → [r, g, b] (0~1 范围)"""
         hex_color = hex_color.lstrip("#")
         r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)

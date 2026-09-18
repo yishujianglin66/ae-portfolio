@@ -8,9 +8,10 @@ TextEffectService 使用示例
 import asyncio
 from pathlib import Path
 
+from src.engines.ae.engine import AEEngine
+
 # 导入服务
 from src.services.text_effect_service import TextEffectService
-from src.engines.ae.engine import AEEngine
 
 
 async def example_1_create_simple_title():
@@ -56,7 +57,7 @@ async def example_2_create_full_title_system():
     )
 
     if result.success:
-        print(f"✓ 完整文字系统创建成功")
+        print("✓ 完整文字系统创建成功")
         print(f"  图层架构: {result.metadata['architecture']}")
         print(f"  创建图层数: {result.metadata['layers_created']}")
     else:
@@ -86,7 +87,7 @@ async def example_3_apply_neon_effect():
     )
 
     if result.success:
-        print(f"✓ 霓虹效果应用成功")
+        print("✓ 霓虹效果应用成功")
 
 
 async def example_4_apply_text_animation():
@@ -110,7 +111,7 @@ async def example_4_apply_text_animation():
     )
 
     if result.success:
-        print(f"✓ 打字机动画应用成功")
+        print("✓ 打字机动画应用成功")
 
 
 async def example_5_combined_workflow():
@@ -164,7 +165,7 @@ async def example_5_combined_workflow():
         duration=1.5,
     )
 
-    print(f"✓ 组合工作流完成")
+    print("✓ 组合工作流完成")
 
 
 async def example_6_style_presets():

@@ -64,15 +64,15 @@ class MuseTalkAdapter:
     # 支持的视频格式
     VIDEO_FORMATS = [".mp4", ".avi", ".mov", ".mkv"]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._source_available = _MUSETALK_DIR.is_dir()
         self._simulate = not self._source_available
         self._env_check = self._check_environment()
 
-    def _check_environment(self) -> Dict[str, Any]:
+    def _check_environment(self) -> dict[str, Any]:
         """检查运行环境"""
-        checks: Dict[str, Any] = {
+        checks: dict[str, Any] = {
             "source_cloned": self._source_available,
             "simulate_mode": self._simulate,
         }
@@ -124,10 +124,10 @@ class MuseTalkAdapter:
             and self._env_check.get("ffmpeg_ok", False)
         )
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
 
         handlers = {
@@ -144,7 +144,7 @@ class MuseTalkAdapter:
             return handler()
         return {"status": "error", "message": f"Unknown operation: {operation}"}
 
-    def _list_models(self) -> Dict[str, Any]:
+    def _list_models(self) -> dict[str, Any]:
         return {
             "status": "success",
             "models": [
@@ -163,7 +163,7 @@ class MuseTalkAdapter:
             ],
         }
 
-    def _get_model_info(self) -> Dict[str, Any]:
+    def _get_model_info(self) -> dict[str, Any]:
         return {
             "status": "success",
             "model_name": "MuseTalk",
@@ -184,7 +184,7 @@ class MuseTalkAdapter:
             },
         }
 
-    def _estimate_vram(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _estimate_vram(self, params: dict[str, Any]) -> dict[str, Any]:
         resolution = params.get("resolution", "512x512")
         w, h = map(int, resolution.split("x")) if "x" in resolution else (512, 512)
 
@@ -200,7 +200,7 @@ class MuseTalkAdapter:
             "note": "MuseTalk VRAM 需求低，4GB GPU 即可运行",
         }
 
-    def _lip_sync(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _lip_sync(self, params: dict[str, Any]) -> dict[str, Any]:
         """音频驱动唇同步
 
         Args:
@@ -274,7 +274,7 @@ class MuseTalkAdapter:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def _batch_lip_sync(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _batch_lip_sync(self, params: dict[str, Any]) -> dict[str, Any]:
         """批量唇同步"""
         items = params.get("items", [])
         results = []
@@ -292,5 +292,5 @@ class MuseTalkAdapter:
         }
 
 
-def get_adapter(config: Optional[Dict[str, Any]] = None) -> MuseTalkAdapter:
+def get_adapter(config: dict[str, Any] | None = None) -> MuseTalkAdapter:
     return MuseTalkAdapter(config)

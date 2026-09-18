@@ -17,8 +17,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Header, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
 
 from ..config import settings
@@ -30,7 +30,7 @@ WEAK_TOKENS = {"", "change-me-in-production", "dev-token-change-me", "default-to
 
 
 def _validate_token(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(_security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(_security),
 ) -> bool:
     """MCP Gateway Bearer Token 认证。
 
@@ -103,7 +103,7 @@ class MCPRegistry:
         self._tools[tool.name] = tool
         logger.debug(f"MCP: Registered tool [{tool.name}]")
 
-    def get_tool(self, name: str) -> Optional[MCPTool]:
+    def get_tool(self, name: str) -> MCPTool | None:
         """Get tool by name."""
         return self._tools.get(name)
 

@@ -10,15 +10,14 @@ Filter Engine - 跨软件滤镜/效果系统集成引擎
 
 from __future__ import annotations
 
-import json
 import hashlib
-from enum import Enum
-from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional, Tuple, Union, Any, Callable
+import json
 from abc import ABC, abstractmethod
-from pathlib import Path
 from copy import deepcopy
-
+from dataclasses import asdict, dataclass, field
+from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # =============================================================================
 # 异常处理
@@ -178,15 +177,15 @@ class FilterPreset:
     name: str
     category: FilterCategory
     style: FilterStyle
-    software_support: List[SoftwareType]
-    params: Dict[str, FilterParam] = field(default_factory=dict)
+    software_support: list[SoftwareType]
+    params: dict[str, FilterParam] = field(default_factory=dict)
     intensity: float = 1.0
     description: str = ""
     author: str = ""
     version: str = "1.0.0"
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "id": self.id,
@@ -203,7 +202,7 @@ class FilterPreset:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "FilterPreset":
+    def from_dict(cls, data: dict[str, Any]) -> "FilterPreset":
         """从字典创建预设"""
         params = {
             k: FilterParam(**v) for k, v in data.get("params", {}).items()
@@ -244,9 +243,9 @@ class FilterChainItem:
     preset: FilterPreset
     opacity: float = 100.0
     blend_mode: BlendMode = BlendMode.NORMAL
-    mask: Optional[str] = None
+    mask: str | None = None
     enabled: bool = True
-    animation_keyframes: Dict[str, List[Tuple[float, Any]]] = field(default_factory=dict)
+    animation_keyframes: dict[str, list[tuple[float, Any]]] = field(default_factory=dict)
 
 
 @dataclass
@@ -266,25 +265,25 @@ class BaseFilterEngine(ABC):
     """滤镜引擎抽象基类"""
 
     def __init__(self):
-        self._filters: Dict[str, Dict[str, Any]] = {}
-        self._software_type: Optional[SoftwareType] = None
+        self._filters: dict[str, dict[str, Any]] = {}
+        self._software_type: SoftwareType | None = None
 
     @abstractmethod
-    def apply_filter(self, filter_name: str, params: Optional[Dict[str, Any]] = None) -> Any:
+    def apply_filter(self, filter_name: str, params: dict[str, Any] | None = None) -> Any:
         """应用单个滤镜"""
         pass
 
     @abstractmethod
-    def apply_filter_chain(self, filters: List[Tuple[str, Dict[str, Any]]]) -> Any:
+    def apply_filter_chain(self, filters: list[tuple[str, dict[str, Any]]]) -> Any:
         """应用滤镜链"""
         pass
 
     @abstractmethod
-    def generate_script(self, filters: List[Tuple[str, Dict[str, Any]]], **kwargs) -> str:
+    def generate_script(self, filters: list[tuple[str, dict[str, Any]]], **kwargs) -> str:
         """生成脚本代码"""
         pass
 
-    def get_available_filters(self, category: Optional[FilterCategory] = None) -> List[str]:
+    def get_available_filters(self, category: FilterCategory | None = None) -> list[str]:
         """获取可用滤镜列表"""
         if category is None:
             return list(self._filters.keys())
@@ -293,13 +292,13 @@ class BaseFilterEngine(ABC):
             if info.get("category") == category
         ]
 
-    def get_filter_info(self, filter_name: str) -> Dict[str, Any]:
+    def get_filter_info(self, filter_name: str) -> dict[str, Any]:
         """获取滤镜信息"""
         if filter_name not in self._filters:
             raise FilterNotFoundError(f"滤镜未找到: {filter_name}")
         return self._filters[filter_name]
 
-    def validate_params(self, filter_name: str, params: Dict[str, Any]) -> bool:
+    def validate_params(self, filter_name: str, params: dict[str, Any]) -> bool:
         """验证滤镜参数"""
         info = self.get_filter_info(filter_name)
         default_params = info.get("params", {})
@@ -308,12 +307,12 @@ class BaseFilterEngine(ABC):
                 raise InvalidParameterError(f"未知参数: {key}")
         return True
 
-    def _get_default_params(self, filter_name: str) -> Dict[str, Any]:
+    def _get_default_params(self, filter_name: str) -> dict[str, Any]:
         """获取默认参数"""
         info = self.get_filter_info(filter_name)
         return {k: v["default"] for k, v in info.get("params", {}).items()}
 
-    def _merge_params(self, filter_name: str, override_params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _merge_params(self, filter_name: str, override_params: dict[str, Any] | None = None) -> dict[str, Any]:
         """合并默认参数和覆盖参数"""
         params = self._get_default_params(filter_name)
         if override_params:
@@ -1375,7 +1374,7 @@ class AEFilterEngine(BaseFilterEngine):
             },
         })
 
-    def apply_filter(self, filter_name: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def apply_filter(self, filter_name: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """
         应用AE滤镜
 
@@ -1397,7 +1396,7 @@ class AEFilterEngine(BaseFilterEngine):
             "info": self._filters[filter_name],
         }
 
-    def apply_filter_chain(self, filters: List[Tuple[str, Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    def apply_filter_chain(self, filters: list[tuple[str, dict[str, Any]]]) -> list[dict[str, Any]]:
         """
         应用AE滤镜链
 
@@ -1409,7 +1408,7 @@ class AEFilterEngine(BaseFilterEngine):
         """
         return [self.apply_filter(name, params) for name, params in filters]
 
-    def generate_script(self, filters: List[Tuple[str, Dict[str, Any]]], layer_name: str = "activeLayer", **kwargs) -> str:
+    def generate_script(self, filters: list[tuple[str, dict[str, Any]]], layer_name: str = "activeLayer", **kwargs) -> str:
         """
         生成AE JSX脚本代码
 
@@ -1453,43 +1452,43 @@ class AEFilterEngine(BaseFilterEngine):
         script_lines.append("// 脚本执行完毕")
         return "\n".join(script_lines)
 
-    def get_color_correction_filters(self) -> List[str]:
+    def get_color_correction_filters(self) -> list[str]:
         """获取色彩校正滤镜列表"""
         return self.get_available_filters(FilterCategory.COLOR_CORRECTION)
 
-    def get_blur_sharpen_filters(self) -> List[str]:
+    def get_blur_sharpen_filters(self) -> list[str]:
         """获取模糊锐化滤镜列表"""
         return self.get_available_filters(FilterCategory.BLUR_SHARPEN)
 
-    def get_distort_filters(self) -> List[str]:
+    def get_distort_filters(self) -> list[str]:
         """获取扭曲滤镜列表"""
         return self.get_available_filters(FilterCategory.DISTORT)
 
-    def get_stylize_filters(self) -> List[str]:
+    def get_stylize_filters(self) -> list[str]:
         """获取风格化滤镜列表"""
         return self.get_available_filters(FilterCategory.STYLIZE)
 
-    def get_generate_filters(self) -> List[str]:
+    def get_generate_filters(self) -> list[str]:
         """获取生成类滤镜列表"""
         return self.get_available_filters(FilterCategory.GENERATE)
 
-    def get_keying_filters(self) -> List[str]:
+    def get_keying_filters(self) -> list[str]:
         """获取抠像滤镜列表"""
         return self.get_available_filters(FilterCategory.KEYING)
 
-    def get_perspective_filters(self) -> List[str]:
+    def get_perspective_filters(self) -> list[str]:
         """获取透视滤镜列表"""
         return self.get_available_filters(FilterCategory.PERSPECTIVE)
 
-    def get_simulation_filters(self) -> List[str]:
+    def get_simulation_filters(self) -> list[str]:
         """获取模拟/粒子滤镜列表"""
         return self.get_available_filters(FilterCategory.SIMULATION)
 
-    def get_transition_filters(self) -> List[str]:
+    def get_transition_filters(self) -> list[str]:
         """获取转场滤镜列表"""
         return self.get_available_filters(FilterCategory.TRANSITION)
 
-    def get_noise_grain_filters(self) -> List[str]:
+    def get_noise_grain_filters(self) -> list[str]:
         """获取噪点颗粒滤镜列表"""
         return self.get_available_filters(FilterCategory.NOISE_GRAIN)
 
@@ -2171,7 +2170,7 @@ class PSFilterEngine(BaseFilterEngine):
             },
         })
 
-    def apply_filter(self, filter_name: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def apply_filter(self, filter_name: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """应用PS滤镜"""
         if filter_name not in self._filters:
             raise FilterNotFoundError(f"PS滤镜未找到: {filter_name}")
@@ -2183,11 +2182,11 @@ class PSFilterEngine(BaseFilterEngine):
             "info": self._filters[filter_name],
         }
 
-    def apply_filter_chain(self, filters: List[Tuple[str, Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    def apply_filter_chain(self, filters: list[tuple[str, dict[str, Any]]]) -> list[dict[str, Any]]:
         """应用PS滤镜链"""
         return [self.apply_filter(name, params) for name, params in filters]
 
-    def generate_script(self, filters: List[Tuple[str, Dict[str, Any]]], **kwargs) -> str:
+    def generate_script(self, filters: list[tuple[str, dict[str, Any]]], **kwargs) -> str:
         """生成Photoshop JSX脚本"""
         script_lines = [
             "// Auto-generated Photoshop Filter Script",
@@ -2205,15 +2204,15 @@ class PSFilterEngine(BaseFilterEngine):
         script_lines.append("// 脚本执行完毕")
         return "\n".join(script_lines)
 
-    def get_artistic_filters(self) -> List[str]:
+    def get_artistic_filters(self) -> list[str]:
         """获取艺术效果滤镜"""
         return [k for k, v in self._filters.items() if v.get("subcategory") == "artistic"]
 
-    def get_sketch_filters(self) -> List[str]:
+    def get_sketch_filters(self) -> list[str]:
         """获取素描滤镜"""
         return [k for k, v in self._filters.items() if v.get("subcategory") == "sketch"]
 
-    def get_texture_filters(self) -> List[str]:
+    def get_texture_filters(self) -> list[str]:
         """获取纹理滤镜"""
         return [k for k, v in self._filters.items() if v.get("subcategory") == "texture"]
 
@@ -2645,7 +2644,7 @@ class ResolveFilterEngine(BaseFilterEngine):
         }
         self._filters.update(color_nodes)
 
-    def apply_filter(self, filter_name: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def apply_filter(self, filter_name: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """应用Resolve滤镜"""
         if filter_name not in self._filters:
             raise FilterNotFoundError(f"Resolve滤镜未找到: {filter_name}")
@@ -2657,11 +2656,11 @@ class ResolveFilterEngine(BaseFilterEngine):
             "info": self._filters[filter_name],
         }
 
-    def apply_filter_chain(self, filters: List[Tuple[str, Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    def apply_filter_chain(self, filters: list[tuple[str, dict[str, Any]]]) -> list[dict[str, Any]]:
         """应用Resolve滤镜链"""
         return [self.apply_filter(name, params) for name, params in filters]
 
-    def generate_script(self, filters: List[Tuple[str, Dict[str, Any]]], **kwargs) -> str:
+    def generate_script(self, filters: list[tuple[str, dict[str, Any]]], **kwargs) -> str:
         """生成Resolve Python脚本"""
         script_lines = [
             "# Auto-generated DaVinci Resolve Filter Script",
@@ -2683,7 +2682,7 @@ class ResolveFilterEngine(BaseFilterEngine):
         script_lines.append("# 脚本执行完毕")
         return "\n".join(script_lines)
 
-    def generate_setting_file(self, filters: List[Tuple[str, Dict[str, Any]]], node_tree_type: str = "fusion") -> str:
+    def generate_setting_file(self, filters: list[tuple[str, dict[str, Any]]], node_tree_type: str = "fusion") -> str:
         """
         生成Fusion .setting文件
 
@@ -2696,14 +2695,14 @@ class ResolveFilterEngine(BaseFilterEngine):
         """
         setting_lines = [
             "{\n",
-            f'   Tools = ordered() {{',
+            '   Tools = ordered() {',
         ]
 
         for i, (filter_name, params) in enumerate(filters):
             node_id = f"Node{i+1}"
             setting_lines.append(f'      {node_id} = {{')
             setting_lines.append(f'         Name = "{filter_name}",')
-            setting_lines.append(f'         Inputs = {{')
+            setting_lines.append('         Inputs = {')
             for param_name, param_value in params.items():
                 if isinstance(param_value, str):
                     setting_lines.append(f'            {param_name} = {{ Input = Value( "{param_value}" ) }},')
@@ -2713,14 +2712,14 @@ class ResolveFilterEngine(BaseFilterEngine):
                     setting_lines.append(f'            {param_name} = {{ Input = {{ {", ".join(str(v) for v in param_value)} }} }},')
                 else:
                     setting_lines.append(f'            {param_name} = {{ Input = Value( {param_value} ) }},')
-            setting_lines.append(f'         }},')
-            setting_lines.append(f'      }},')
+            setting_lines.append('         },')
+            setting_lines.append('      },')
 
         setting_lines.append('   },')
         setting_lines.append('}')
         return "\n".join(setting_lines)
 
-    def generate_resolve_script(self, filters: List[Tuple[str, Dict[str, Any]]], target: str = "clip") -> str:
+    def generate_resolve_script(self, filters: list[tuple[str, dict[str, Any]]], target: str = "clip") -> str:
         """
         生成Resolve API脚本
 
@@ -2733,15 +2732,15 @@ class ResolveFilterEngine(BaseFilterEngine):
         """
         return self.generate_script(filters)
 
-    def get_resolve_fx_filters(self) -> List[str]:
+    def get_resolve_fx_filters(self) -> list[str]:
         """获取Resolve FX滤镜"""
         return [k for k, v in self._filters.items() if v.get("type") == "resolve_fx"]
 
-    def get_fusion_filters(self) -> List[str]:
+    def get_fusion_filters(self) -> list[str]:
         """获取Fusion滤镜"""
         return [k for k, v in self._filters.items() if v.get("type") == "fusion"]
 
-    def get_color_page_filters(self) -> List[str]:
+    def get_color_page_filters(self) -> list[str]:
         """获取调色页节点"""
         return [k for k, v in self._filters.items() if v.get("type") == "color_page"]
 
@@ -3246,7 +3245,7 @@ class BlenderFilterEngine(BaseFilterEngine):
         }
         self._filters.update(geometry_node_effects)
 
-    def apply_filter(self, filter_name: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def apply_filter(self, filter_name: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """应用Blender滤镜"""
         if filter_name not in self._filters:
             raise FilterNotFoundError(f"Blender滤镜未找到: {filter_name}")
@@ -3258,11 +3257,11 @@ class BlenderFilterEngine(BaseFilterEngine):
             "info": self._filters[filter_name],
         }
 
-    def apply_filter_chain(self, filters: List[Tuple[str, Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    def apply_filter_chain(self, filters: list[tuple[str, dict[str, Any]]]) -> list[dict[str, Any]]:
         """应用Blender滤镜链"""
         return [self.apply_filter(name, params) for name, params in filters]
 
-    def generate_script(self, filters: List[Tuple[str, Dict[str, Any]]], **kwargs) -> str:
+    def generate_script(self, filters: list[tuple[str, dict[str, Any]]], **kwargs) -> str:
         """生成Blender Python脚本"""
         script_lines = [
             "import bpy",
@@ -3309,7 +3308,7 @@ class BlenderFilterEngine(BaseFilterEngine):
         script_lines.append("# 脚本执行完毕")
         return "\n".join(script_lines)
 
-    def generate_blender_script(self, filters: List[Tuple[str, Dict[str, Any]]], context: str = "compositor") -> str:
+    def generate_blender_script(self, filters: list[tuple[str, dict[str, Any]]], context: str = "compositor") -> str:
         """
         生成Blender脚本
 
@@ -3322,15 +3321,15 @@ class BlenderFilterEngine(BaseFilterEngine):
         """
         return self.generate_script(filters, context=context)
 
-    def get_compositor_filters(self) -> List[str]:
+    def get_compositor_filters(self) -> list[str]:
         """获取合成器滤镜"""
         return [k for k, v in self._filters.items() if v.get("type") == "compositor"]
 
-    def get_shader_effects(self) -> List[str]:
+    def get_shader_effects(self) -> list[str]:
         """获取着色器效果"""
         return [k for k, v in self._filters.items() if v.get("type") == "shader"]
 
-    def get_geometry_node_effects(self) -> List[str]:
+    def get_geometry_node_effects(self) -> list[str]:
         """获取几何节点效果"""
         return [k for k, v in self._filters.items() if v.get("type") == "geometry_node"]
 
@@ -3821,7 +3820,7 @@ class FFmpegFilterEngine(BaseFilterEngine):
         }
         self._filters.update(audio_filters)
 
-    def apply_filter(self, filter_name: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def apply_filter(self, filter_name: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         """应用FFmpeg滤镜"""
         if filter_name not in self._filters:
             raise FilterNotFoundError(f"FFmpeg滤镜未找到: {filter_name}")
@@ -3834,11 +3833,11 @@ class FFmpegFilterEngine(BaseFilterEngine):
             "ffmpeg_string": self._build_filter_string(filter_name, merged_params),
         }
 
-    def apply_filter_chain(self, filters: List[Tuple[str, Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    def apply_filter_chain(self, filters: list[tuple[str, dict[str, Any]]]) -> list[dict[str, Any]]:
         """应用FFmpeg滤镜链"""
         return [self.apply_filter(name, params) for name, params in filters]
 
-    def _build_filter_string(self, filter_name: str, params: Dict[str, Any]) -> str:
+    def _build_filter_string(self, filter_name: str, params: dict[str, Any]) -> str:
         """构建FFmpeg滤镜字符串"""
         info = self._filters.get(filter_name, {})
         ffmpeg_filter = info.get("ffmpeg_filter", filter_name)
@@ -3855,8 +3854,8 @@ class FFmpegFilterEngine(BaseFilterEngine):
         self,
         input_file: str,
         output_file: str,
-        video_filters: Optional[List[Tuple[str, Dict[str, Any]]]] = None,
-        audio_filters: Optional[List[Tuple[str, Dict[str, Any]]]] = None,
+        video_filters: list[tuple[str, dict[str, Any]]] | None = None,
+        audio_filters: list[tuple[str, dict[str, Any]]] | None = None,
         **kwargs
     ) -> str:
         """
@@ -3897,7 +3896,7 @@ class FFmpegFilterEngine(BaseFilterEngine):
         cmd_parts.append(f'"{output_file}"')
         return " ".join(cmd_parts)
 
-    def generate_script(self, filters: List[Tuple[str, Dict[str, Any]]], **kwargs) -> str:
+    def generate_script(self, filters: list[tuple[str, dict[str, Any]]], **kwargs) -> str:
         """生成FFmpeg命令（作为脚本）"""
         input_file = kwargs.get("input_file", "input.mp4")
         output_file = kwargs.get("output_file", "output.mp4")
@@ -3905,10 +3904,10 @@ class FFmpegFilterEngine(BaseFilterEngine):
 
     def generate_complex_filter_graph(
         self,
-        inputs: List[str],
-        outputs: List[str],
-        filter_chains: List[List[Tuple[str, Dict[str, Any]]]],
-        connections: Optional[List[Tuple[str, str]]] = None,
+        inputs: list[str],
+        outputs: list[str],
+        filter_chains: list[list[tuple[str, dict[str, Any]]]],
+        connections: list[tuple[str, str]] | None = None,
     ) -> str:
         """
         生成复杂的FFmpeg滤镜图
@@ -3938,11 +3937,11 @@ class FFmpegFilterEngine(BaseFilterEngine):
 
         return ";".join(graph_parts)
 
-    def get_video_filters(self) -> List[str]:
+    def get_video_filters(self) -> list[str]:
         """获取视频滤镜"""
         return [k for k, v in self._filters.items() if v.get("type") == "video"]
 
-    def get_audio_filters(self) -> List[str]:
+    def get_audio_filters(self) -> list[str]:
         """获取音频滤镜"""
         return [k for k, v in self._filters.items() if v.get("type") == "audio"]
 
@@ -3961,7 +3960,7 @@ class FilterChain:
 
     def __init__(self, name: str = "default_chain"):
         self.name = name
-        self._filters: List[FilterChainItem] = []
+        self._filters: list[FilterChainItem] = []
         self._enabled: bool = True
 
     def add_filter(
@@ -3969,8 +3968,8 @@ class FilterChain:
         preset: FilterPreset,
         opacity: float = 100.0,
         blend_mode: BlendMode = BlendMode.NORMAL,
-        mask: Optional[str] = None,
-        index: Optional[int] = None,
+        mask: str | None = None,
+        index: int | None = None,
     ) -> int:
         """
         添加滤镜到链中
@@ -4019,7 +4018,7 @@ class FilterChain:
             return self._filters[index]
         raise IndexError(f"滤镜索引超出范围: {index}")
 
-    def reorder_filters(self, new_order: List[int]) -> None:
+    def reorder_filters(self, new_order: list[int]) -> None:
         """
         重新排序滤镜
 
@@ -4057,7 +4056,7 @@ class FilterChain:
         item = self.get_filter(index)
         item.blend_mode = blend_mode
 
-    def set_mask(self, index: int, mask: Optional[str]) -> None:
+    def set_mask(self, index: int, mask: str | None) -> None:
         """设置指定滤镜的蒙版"""
         item = self.get_filter(index)
         item.mask = mask
@@ -4089,11 +4088,11 @@ class FilterChain:
         item.animation_keyframes[param_name].append((frame, value))
         item.animation_keyframes[param_name].sort(key=lambda x: x[0])
 
-    def get_filters(self) -> List[FilterChainItem]:
+    def get_filters(self) -> list[FilterChainItem]:
         """获取所有滤镜项"""
         return self._filters.copy()
 
-    def get_enabled_filters(self) -> List[FilterChainItem]:
+    def get_enabled_filters(self) -> list[FilterChainItem]:
         """获取所有启用的滤镜"""
         return [f for f in self._filters if f.enabled]
 
@@ -4139,7 +4138,7 @@ class FilterChain:
             result._filters.append(new_item)
         return result
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "name": self.name,
@@ -4158,7 +4157,7 @@ class FilterChain:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "FilterChain":
+    def from_dict(cls, data: dict[str, Any]) -> "FilterChain":
         """从字典创建滤镜链"""
         chain = cls(data.get("name", "default_chain"))
         chain._enabled = data.get("enabled", True)
@@ -4188,7 +4187,7 @@ class FilterPresetLibrary:
     """
 
     def __init__(self):
-        self._presets: Dict[str, FilterPreset] = {}
+        self._presets: dict[str, FilterPreset] = {}
         self._init_builtin_presets()
 
     def _init_builtin_presets(self) -> None:
@@ -4686,19 +4685,19 @@ class FilterPresetLibrary:
             raise FilterNotFoundError(f"预设未找到: {preset_id}")
         return self._presets[preset_id].copy()
 
-    def get_all_presets(self) -> List[FilterPreset]:
+    def get_all_presets(self) -> list[FilterPreset]:
         """获取所有预设"""
         return [p.copy() for p in self._presets.values()]
 
     def search_presets(
         self,
-        category: Optional[FilterCategory] = None,
-        style: Optional[FilterStyle] = None,
-        software: Optional[SoftwareType] = None,
-        keyword: Optional[str] = None,
+        category: FilterCategory | None = None,
+        style: FilterStyle | None = None,
+        software: SoftwareType | None = None,
+        keyword: str | None = None,
         min_intensity: float = 0.0,
         max_intensity: float = 1.0,
-    ) -> List[FilterPreset]:
+    ) -> list[FilterPreset]:
         """
         搜索预设
 
@@ -4735,15 +4734,15 @@ class FilterPresetLibrary:
             results.append(preset.copy())
         return results
 
-    def get_style_presets(self, style: FilterStyle) -> List[FilterPreset]:
+    def get_style_presets(self, style: FilterStyle) -> list[FilterPreset]:
         """获取指定风格的所有预设"""
         return self.search_presets(style=style)
 
-    def get_category_presets(self, category: FilterCategory) -> List[FilterPreset]:
+    def get_category_presets(self, category: FilterCategory) -> list[FilterPreset]:
         """获取指定分类的所有预设"""
         return self.search_presets(category=category)
 
-    def get_preset_categories(self) -> Dict[str, int]:
+    def get_preset_categories(self) -> dict[str, int]:
         """获取预设分类统计"""
         categories = {}
         for preset in self._presets.values():
@@ -4751,7 +4750,7 @@ class FilterPresetLibrary:
             categories[cat_name] = categories.get(cat_name, 0) + 1
         return categories
 
-    def get_preset_styles(self) -> Dict[str, int]:
+    def get_preset_styles(self) -> dict[str, int]:
         """获取预设风格统计"""
         styles = {}
         for preset in self._presets.values():
@@ -4800,11 +4799,11 @@ class FilterAI:
     智能强度调整、滤镜链建议和质量评估。
     """
 
-    def __init__(self, preset_library: Optional[FilterPresetLibrary] = None):
+    def __init__(self, preset_library: FilterPresetLibrary | None = None):
         self.preset_library = preset_library or FilterPresetLibrary()
         self._scene_style_map = self._build_scene_style_map()
 
-    def _build_scene_style_map(self) -> Dict[SceneType, List[FilterStyle]]:
+    def _build_scene_style_map(self) -> dict[SceneType, list[FilterStyle]]:
         """构建场景-风格映射表"""
         return {
             SceneType.PORTRAIT: [FilterStyle.SOFT, FilterStyle.WARM, FilterStyle.CINEMATIC, FilterStyle.FILM],
@@ -4822,9 +4821,9 @@ class FilterAI:
     def recommend_by_scene(
         self,
         scene_type: SceneType,
-        software: Optional[SoftwareType] = None,
+        software: SoftwareType | None = None,
         top_n: int = 5,
-    ) -> List[FilterRecommendation]:
+    ) -> list[FilterRecommendation]:
         """
         基于场景类型推荐滤镜
 
@@ -4862,9 +4861,9 @@ class FilterAI:
     def recommend_by_style(
         self,
         style: FilterStyle,
-        software: Optional[SoftwareType] = None,
+        software: SoftwareType | None = None,
         top_n: int = 10,
-    ) -> List[FilterRecommendation]:
+    ) -> list[FilterRecommendation]:
         """
         基于视觉风格推荐滤镜
 
@@ -4894,7 +4893,7 @@ class FilterAI:
 
     def auto_color_correct(
         self,
-        image_analysis: Optional[Dict[str, Any]] = None,
+        image_analysis: dict[str, Any] | None = None,
     ) -> FilterPreset:
         """
         自动色彩校正建议
@@ -4971,7 +4970,7 @@ class FilterAI:
     def intensity_adjust(
         self,
         preset: FilterPreset,
-        source_analysis: Dict[str, Any],
+        source_analysis: dict[str, Any],
     ) -> float:
         """
         基于素材的智能强度调整
@@ -5005,9 +5004,9 @@ class FilterAI:
     def filter_chain_suggest(
         self,
         scene_type: SceneType,
-        style: Optional[FilterStyle] = None,
+        style: FilterStyle | None = None,
         length: int = 3,
-    ) -> List[FilterPreset]:
+    ) -> list[FilterPreset]:
         """
         建议多滤镜组合链
 
@@ -5050,8 +5049,8 @@ class FilterAI:
     def quality_assess(
         self,
         filter_chain: FilterChain,
-        source_analysis: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        source_analysis: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         评估滤镜质量和伪影风险
 
@@ -5108,7 +5107,7 @@ class FilterAI:
         self,
         filter_chain: FilterChain,
         artifact_risk: float,
-    ) -> List[str]:
+    ) -> list[str]:
         """生成质量改进建议"""
         suggestions = []
 
@@ -5144,7 +5143,7 @@ class UnifiedFilterAPI:
     """
 
     def __init__(self):
-        self._engines: Dict[SoftwareType, BaseFilterEngine] = {}
+        self._engines: dict[SoftwareType, BaseFilterEngine] = {}
         self._preset_library = FilterPresetLibrary()
         self._ai = FilterAI(self._preset_library)
         self._init_engines()
@@ -5178,7 +5177,7 @@ class UnifiedFilterAPI:
             raise SoftwareNotSupportedError(f"不支持的软件: {software.value}")
         return self._engines[software]
 
-    def get_available_software(self) -> List[SoftwareType]:
+    def get_available_software(self) -> list[SoftwareType]:
         """获取可用的软件列表"""
         return list(self._engines.keys())
 
@@ -5186,8 +5185,8 @@ class UnifiedFilterAPI:
         self,
         software: SoftwareType,
         filter_name: str,
-        params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         统一API - 应用单个滤镜
 
@@ -5205,8 +5204,8 @@ class UnifiedFilterAPI:
     def apply_filter_chain(
         self,
         software: SoftwareType,
-        filters: List[Tuple[str, Dict[str, Any]]],
-    ) -> List[Dict[str, Any]]:
+        filters: list[tuple[str, dict[str, Any]]],
+    ) -> list[dict[str, Any]]:
         """
         统一API - 应用滤镜链
 
@@ -5223,7 +5222,7 @@ class UnifiedFilterAPI:
     def generate_script(
         self,
         software: SoftwareType,
-        filters: List[Tuple[str, Dict[str, Any]]],
+        filters: list[tuple[str, dict[str, Any]]],
         **kwargs,
     ) -> str:
         """
@@ -5311,8 +5310,8 @@ class UnifiedFilterAPI:
         self,
         software: SoftwareType,
         filter_name: str,
-        param_variations: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        param_variations: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """
         批量应用滤镜（不同参数变体）
 
@@ -5336,7 +5335,7 @@ class UnifiedFilterAPI:
         self,
         preset: FilterPreset,
         software: SoftwareType,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         验证预设与软件的兼容性
 
@@ -5396,7 +5395,7 @@ def main():
     preset_library = unified_api.get_preset_library()
     ai = unified_api.get_ai()
 
-    print(f"[1] 系统状态")
+    print("[1] 系统状态")
     print("-" * 50)
     available_software = unified_api.get_available_software()
     print(f"  可用软件引擎: {len(available_software)} 个")
@@ -5405,21 +5404,21 @@ def main():
     print(f"  内置预设总数: {len(preset_library)} 个")
     print()
 
-    print(f"[2] 预设分类统计")
+    print("[2] 预设分类统计")
     print("-" * 50)
     categories = preset_library.get_preset_categories()
     for cat, count in sorted(categories.items()):
         print(f"  {cat}: {count} 个")
     print()
 
-    print(f"[3] 预设风格统计")
+    print("[3] 预设风格统计")
     print("-" * 50)
     styles = preset_library.get_preset_styles()
     for style, count in sorted(styles.items()):
         print(f"  {style}: {count} 个")
     print()
 
-    print(f"[4] 电影风格预设示例")
+    print("[4] 电影风格预设示例")
     print("-" * 50)
     cinematic_presets = preset_library.get_style_presets(FilterStyle.CINEMATIC)
     for i, preset in enumerate(cinematic_presets[:5], 1):
@@ -5427,7 +5426,7 @@ def main():
         print(f"     {preset.description[:50]}...")
     print()
 
-    print(f"[5] AI场景推荐 - 人像场景")
+    print("[5] AI场景推荐 - 人像场景")
     print("-" * 50)
     recommendations = ai.recommend_by_scene(SceneType.PORTRAIT, top_n=3)
     for i, rec in enumerate(recommendations, 1):
@@ -5435,7 +5434,7 @@ def main():
         print(f"     置信度: {rec.confidence:.2%} | {rec.reason}")
     print()
 
-    print(f"[6] 滤镜链演示 - 创建电影风格滤镜链")
+    print("[6] 滤镜链演示 - 创建电影风格滤镜链")
     print("-" * 50)
     chain = FilterChain("cinematic_look")
     cine_presets = preset_library.get_style_presets(FilterStyle.CINEMATIC)
@@ -5449,17 +5448,17 @@ def main():
         print(f"    {i+1}. {item.preset.name} | 不透明度: {item.opacity}% | 混合: {item.blend_mode.value}")
     print()
 
-    print(f"[7] 质量评估")
+    print("[7] 质量评估")
     print("-" * 50)
     quality = ai.quality_assess(chain)
     print(f"  质量评分: {quality['quality_score']}/100")
     print(f"  伪影风险: {quality['artifact_risk']} ({quality['risk_level']})")
-    print(f"  改进建议:")
+    print("  改进建议:")
     for suggestion in quality["suggestions"]:
         print(f"    - {suggestion}")
     print()
 
-    print(f"[8] AE脚本生成示例")
+    print("[8] AE脚本生成示例")
     print("-" * 50)
     try:
         ae_engine = unified_api.get_engine(SoftwareType.AFTER_EFFECTS)
@@ -5471,7 +5470,7 @@ def main():
         print(f"  跳过: {e}")
     print()
 
-    print(f"[9] FFmpeg命令生成示例")
+    print("[9] FFmpeg命令生成示例")
     print("-" * 50)
     try:
         ffmpeg_engine = unified_api.get_engine(SoftwareType.FFMPEG)
@@ -5488,7 +5487,7 @@ def main():
         print(f"  跳过: {e}")
     print()
 
-    print(f"[10] 搜索预设 - 模糊")
+    print("[10] 搜索预设 - 模糊")
     print("-" * 50)
     search_results = preset_library.search_presets(keyword="模糊")
     print(f"  找到 {len(search_results)} 个匹配预设")

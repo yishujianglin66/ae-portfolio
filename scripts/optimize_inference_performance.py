@@ -4,16 +4,18 @@
 针对2类CNN分类器进行性能优化
 """
 
-import sys
 import os
+import sys
 import time
-import numpy as np
-import cv2
-import torch
-from core.torch_runtime import infer_ctx
-import psutil
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
+
+import cv2
+import numpy as np
+import psutil
+import torch
+
+from core.torch_runtime import infer_ctx
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent))
@@ -38,7 +40,7 @@ def create_test_video(filename, duration=3, fps=8, width=128, height=128):
     
     out.release()
 
-def benchmark_original_classifier(video_path: str, model_path: str) -> Tuple[float, float]:
+def benchmark_original_classifier(video_path: str, model_path: str) -> tuple[float, float]:
     """基准测试：原始分类器性能"""
     from models.camera_classifier.camera_classifier_2class import CameraClassifier2Class
     
@@ -75,7 +77,7 @@ def benchmark_original_classifier(video_path: str, model_path: str) -> Tuple[flo
     
     return avg_time, avg_memory
 
-def optimize_frame_extraction(video_path: str, n_frames: int = 8) -> List[np.ndarray]:
+def optimize_frame_extraction(video_path: str, n_frames: int = 8) -> list[np.ndarray]:
     """优化的帧提取方法"""
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
@@ -126,10 +128,11 @@ def optimize_frame_extraction(video_path: str, n_frames: int = 8) -> List[np.nda
     cap.release()
     return ordered_frames
 
-def optimized_predict(video_path: str, model_path: str) -> Tuple[str, float, str]:
+def optimized_predict(video_path: str, model_path: str) -> tuple[str, float, str]:
     """优化的预测函数"""
-    from models.camera_classifier.camera_classifier_2class import CameraClassifier2Class, SmallMotionCNN
     import torch.nn.functional as F
+
+    from models.camera_classifier.camera_classifier_2class import CameraClassifier2Class, SmallMotionCNN
     
     # 加载模型
     device = torch.device('cpu')
@@ -170,7 +173,7 @@ def optimized_predict(video_path: str, model_path: str) -> Tuple[str, float, str
     labels = ['static', 'motion']
     return labels[pred_idx], confidence, 'optimized_cnn'
 
-def benchmark_optimized_classifier(video_path: str, model_path: str) -> Tuple[float, float]:
+def benchmark_optimized_classifier(video_path: str, model_path: str) -> tuple[float, float]:
     """基准测试：优化后分类器性能"""
     
     # 预热
@@ -200,10 +203,11 @@ def benchmark_optimized_classifier(video_path: str, model_path: str) -> Tuple[fl
     
     return avg_time, avg_memory
 
-def test_batch_inference(video_path: str, model_path: str, batch_sizes: List[int] = [1, 5, 10]):
+def test_batch_inference(video_path: str, model_path: str, batch_sizes: list[int] = [1, 5, 10]):
     """测试批处理推理性能"""
-    from models.camera_classifier.camera_classifier_2class import CameraClassifier2Class
     import torch
+
+    from models.camera_classifier.camera_classifier_2class import CameraClassifier2Class
     
     results = {}
     
@@ -275,7 +279,7 @@ def main():
         time_improvement = ((orig_avg_time - opt_avg_time) / orig_avg_time) * 100
         memory_improvement = ((orig_avg_memory - opt_avg_memory) / orig_avg_memory) * 100
         
-        print(f"\nPerformance improvements:")
+        print("\nPerformance improvements:")
         print(f"  Time: {time_improvement:+.1f}% ({orig_avg_time:.3f}s → {opt_avg_time:.3f}s)")
         print(f"  Memory: {memory_improvement:+.1f}% ({orig_avg_memory:.1f}MB → {opt_avg_memory:.1f}MB)")
         
@@ -297,15 +301,15 @@ def main():
             'improvement': bool(time_improvement > 0)
         }
         
-        print(f"\n优化目标达成情况:")
+        print("\n优化目标达成情况:")
         print(f"  时间目标(<1s): {'[OK]' if success_flags['time_target'] else '[FAIL]'}")
         print(f"  内存目标(<500MB): {'[OK]' if success_flags['memory_target'] else '[FAIL]'}")
         print(f"  性能提升: {'[OK]' if success_flags['improvement'] else '[FAIL]'}")
         
         if success_flags['time_target']:
-            print(f"\n[OK] 推理速度优化成功：达到<1秒/视频的目标")
+            print("\n[OK] 推理速度优化成功：达到<1秒/视频的目标")
         else:
-            print(f"\n[WARNING] 推理速度未达到<1秒目标")
+            print("\n[WARNING] 推理速度未达到<1秒目标")
         
         # 保存优化报告
         optimization_report = {
@@ -342,7 +346,7 @@ def main():
         with open('optimization_report.json', 'w', encoding='utf-8') as f:
             json.dump(optimization_report, f, indent=2, ensure_ascii=False)
         
-        print(f"\n优化报告已保存至 optimization_report.json")
+        print("\n优化报告已保存至 optimization_report.json")
         
         # 清理测试文件
         try:

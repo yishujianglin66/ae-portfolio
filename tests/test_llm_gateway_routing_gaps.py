@@ -461,7 +461,7 @@ class TestNvidiaLocalStub:
 
         gw = _make_gateway()
         # 配置一个最小可用 Provider，使 chat_with_routing 走多 Provider 路径
-        from core.llm_gateway import ProviderHealth, LLMResponse
+        from core.llm_gateway import LLMResponse, ProviderHealth
         gw._config.providers = {
             "claude": {
                 "base_url": "https://claude.test/v1", "api_key": "sk-c",
@@ -491,7 +491,7 @@ class TestNvidiaLocalStub:
                 del os.environ[k]
 
         gw = _make_gateway()
-        from core.llm_gateway import ProviderHealth, LLMResponse
+        from core.llm_gateway import LLMResponse, ProviderHealth
         gw._config.providers = {
             "claude": {
                 "base_url": "https://claude.test/v1", "api_key": "sk-c",

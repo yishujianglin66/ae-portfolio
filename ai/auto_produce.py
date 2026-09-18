@@ -19,9 +19,9 @@ sys.stdout.reconfigure(encoding="utf-8")
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
-from ai.shot_script import ShotScript, ShotUnit, SpeedSegment, TextOverlay, create_shot_script
-from ai.resolve_executor import ResolveExecutor
 from ai.ae_executor import AEExecutor
+from ai.resolve_executor import ResolveExecutor
+from ai.shot_script import ShotScript, ShotUnit, SpeedSegment, TextOverlay, create_shot_script
 
 # 情绪曲线模板: (mood, scene_type, speed_range)
 EMOTION_CURVE = [
@@ -44,7 +44,7 @@ TEXT_TEMPLATES = [
 CORPUS_META_PATH = Path(r"D:\aot_corpus\corpus_meta.json")
 
 
-def _load_corpus_shots(theme: str, duration_target: float) -> List[Dict]:
+def _load_corpus_shots(theme: str, duration_target: float) -> list[dict]:
     """从语料库提取真实镜头时间码，按情绪曲线编排至目标时长。"""
     if not CORPUS_META_PATH.exists():
         return _fallback_shots(theme, duration_target)
@@ -55,7 +55,7 @@ def _load_corpus_shots(theme: str, duration_target: float) -> List[Dict]:
         return _fallback_shots(theme, duration_target)
 
     # 收集所有可用镜头(带时间码)
-    all_shots: List[Dict] = []
+    all_shots: list[dict] = []
     for vid in videos:
         vid_name = vid.get("name", "")
         for fr in vid.get("frames", []):
@@ -76,7 +76,7 @@ def _load_corpus_shots(theme: str, duration_target: float) -> List[Dict]:
 
     # 按情绪曲线选镜头
     random.seed(42)  # 可复现
-    selected: List[Dict] = []
+    selected: list[dict] = []
     total_dur = 0.0
     curve_idx = 0
 
@@ -107,7 +107,7 @@ def _load_corpus_shots(theme: str, duration_target: float) -> List[Dict]:
     return selected
 
 
-def _fallback_shots(theme: str, duration_target: float) -> List[Dict]:
+def _fallback_shots(theme: str, duration_target: float) -> list[dict]:
     """无真实语料时的降级演示数据。"""
     lib_dir = _PROJECT_ROOT / "data" / "real_amv_test"
     sources = [f.name for f in lib_dir.glob("*.mp4") if not f.name.startswith("DL_")]
@@ -139,7 +139,7 @@ def auto_produce(
     theme: str = "",
     duration_target: float = 90.0,
     dry_run: bool = True,
-) -> Dict:
+) -> dict:
     """零点击端到端生产
 
     Args:
@@ -257,7 +257,7 @@ def auto_produce(
     if errors:
         print(f"  ⚠️ 校验发现 {len(errors)} 个问题: {errors}")
     else:
-        print(f"  ✅ ShotScript校验通过")
+        print("  ✅ ShotScript校验通过")
 
     # 保存ShotScript
     output_dir = _PROJECT_ROOT / "output"
@@ -330,7 +330,7 @@ def auto_produce(
     if report["success"]:
         print(f"✅ 端到端生产完成 | 主题: {theme} | 模式: {'dry_run' if dry_run else '实际执行'}")
     else:
-        print(f"❌ 端到端生产失败")
+        print("❌ 端到端生产失败")
     print("=" * 70)
 
     # 保存报告

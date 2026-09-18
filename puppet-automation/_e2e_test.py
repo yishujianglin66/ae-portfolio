@@ -3,13 +3,14 @@
 === AE Knowledge Vault - Production E2E Verification ===
 Tests actual video processing through the live API.
 """
-import requests
-import subprocess
-import tempfile
 import shutil
+import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
+
+import requests
 
 BASE = "http://localhost:8000"
 MCP_TOKEN = "dev-token-change-me"

@@ -10,13 +10,13 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.evidence_gate_compliance_audit import (  # noqa: E402
     AuditSpec,
+    _sha256,
     gate1_existence,
     gate2_first_line,
     gate3_alignment,
     gate4_snapshot,
     gate5_manifest,
     run_audit,
-    _sha256,
 )
 
 

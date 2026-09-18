@@ -3,9 +3,13 @@
 AE已安装插件全量扫描 v2 (修复Bridge响应检测)
 =============================================
 """
-import json, time, sys, os, uuid
-from pathlib import Path
+import json
+import os
+import sys
+import time
+import uuid
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -211,7 +215,7 @@ def main():
         time.sleep(1)
     
     # Step 3: 整理输出
-    print(f"\n[3/3] 整理输出...")
+    print("\n[3/3] 整理输出...")
     
     available_plugins = [r for r in all_results if r["available"]]
     unavailable_plugins = [r for r in all_results if not r["available"]]
@@ -248,11 +252,11 @@ def main():
     SCAN_RESULT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     
     print(f"\n{'='*60}")
-    print(f"✓ 扫描完成!")
+    print("✓ 扫描完成!")
     print(f"  总效果: {report['total_effects']}")
     print(f"  内置: {report['builtin_count']}")
     print(f"  第三方: {report['third_party_total']} (可用: {report['third_party_available']})")
-    print(f"\n  可用插件分类:")
+    print("\n  可用插件分类:")
     for cat, plugins in sorted(cat_details.items(), key=lambda x: -len(x[1])):
         print(f"    [{cat}] ({len(plugins)}个)")
         for p in plugins[:5]:
@@ -274,9 +278,12 @@ AE已安装插件全量扫描 + 能力清单生成
 
 用法: py -3.12 scripts/plugin_full_scan.py
 """
-import json, time, sys, os
-from pathlib import Path
+import json
+import os
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -505,7 +512,7 @@ def main():
     available, unavailable = scan_third_party_details(effects)
     
     # Step 3: 分类整理
-    print(f"\n[3/3] 分类整理...")
+    print("\n[3/3] 分类整理...")
     categories = categorize_plugins(effects, available)
     
     # 输出报告
@@ -532,7 +539,7 @@ def main():
     print(f"  总效果数: {report['total_effects']}")
     print(f"  内置(ADBE): {report['builtin_count']}")
     print(f"  第三方: {report['third_party_total']} (可用: {report['third_party_available']})")
-    print(f"\n  分类统计:")
+    print("\n  分类统计:")
     for cat, count in sorted(report['categories'].items(), key=lambda x: -x[1]):
         print(f"    {cat}: {count}个")
     print(f"{'='*60}")

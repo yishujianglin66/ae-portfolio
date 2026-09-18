@@ -141,7 +141,7 @@ def resolve_font_for_preset(preset_key: str, emotion: str = "") -> dict:
 #   apply_effects: 可选，返回 JSX 添加 AE 效果的代码
 # ============================================================================
 
-TEXT_ANIM_PRESETS: Dict[str, Dict[str, Any]] = {
+TEXT_ANIM_PRESETS: dict[str, dict[str, Any]] = {
     # ① 缩放弹跳（参考 douyin_bounce_title）
     "scale_bounce": {
         "pos": ("c.width/2", "c.height/2"),
@@ -847,7 +847,7 @@ SUBTITLE_TEXTS = [
 ]
 
 # 最近一次运行的统计信息（供反馈闭环消费）
-_LAST_RUN_STATS: Dict[str, Any] = {
+_LAST_RUN_STATS: dict[str, Any] = {
     "presets_used": [],
     "fonts_used": [],
     "preset_count": 0,
@@ -855,7 +855,7 @@ _LAST_RUN_STATS: Dict[str, Any] = {
 }
 
 
-def get_last_run_stats() -> Dict[str, Any]:
+def get_last_run_stats() -> dict[str, Any]:
     """获取最近一次 build_smart_text_jsx 运行的预设/字体使用统计。
 
     优先返回内存中的统计，若为空则尝试从磁盘文件加载
@@ -883,14 +883,14 @@ def get_last_run_stats() -> Dict[str, Any]:
 #   applicable_intensity: 适用的强度级别列表
 #   emotion_tags : 适合的情绪标签
 # ============================================================================
-ADVANCED_EDIT_TECHNIQUES: Dict[str, Dict[str, Any]] = {
+ADVANCED_EDIT_TECHNIQUES: dict[str, dict[str, Any]] = {
     "match_cut": {
         "description": "匹配剪辑 — 前后镜头视觉元素（形状/颜色/运动方向）对齐",
         "applicable_intensity": ["moderate", "intense"],
         "emotion_tags": ["triumph", "nostalgia"],
         "jsx_modifier": lambda si, t0, dur, label: (
             # 匹配剪辑：文字从上一镜头的结束位置继承，实现视觉连续
-            f"/* match_cut: 视觉连续 */"
+            "/* match_cut: 视觉连续 */"
         ),
         "preset_bias": ["scale_bounce", "rotate_3d", "flip_card"],
     },
@@ -900,7 +900,7 @@ ADVANCED_EDIT_TECHNIQUES: Dict[str, Dict[str, Any]] = {
         "emotion_tags": ["tension", "melancholy"],
         "jsx_modifier": lambda si, t0, dur, label: (
             # J-Cut：文字提前 0.3s 出现
-            f"/* j_cut: 声音先行，文字提前 0.3s */"
+            "/* j_cut: 声音先行，文字提前 0.3s */"
         ),
         "preset_bias": ["fade_scale", "slide_left", "slide_right"],
         "timing_offset": -0.3,  # 文字提前出现
@@ -910,7 +910,7 @@ ADVANCED_EDIT_TECHNIQUES: Dict[str, Dict[str, Any]] = {
         "applicable_intensity": ["moderate", "gentle"],
         "emotion_tags": ["nostalgia", "serenity"],
         "jsx_modifier": lambda si, t0, dur, label: (
-            f"/* l_cut: 画面先行，文字延连 0.3s */"
+            "/* l_cut: 画面先行，文字延连 0.3s */"
         ),
         "preset_bias": ["fade_scale", "drop_top"],
         "timing_extend": 0.3,  # 文字延后消失
@@ -920,7 +920,7 @@ ADVANCED_EDIT_TECHNIQUES: Dict[str, Dict[str, Any]] = {
         "applicable_intensity": ["intense"],
         "emotion_tags": ["rage", "tension", "horror"],
         "jsx_modifier": lambda si, t0, dur, label: (
-            f"/* jump_cut: 突兀跳切 */"
+            "/* jump_cut: 突兀跳切 */"
         ),
         "preset_bias": ["glitch_shake", "shockwave", "speed_impact"],
     },
@@ -929,7 +929,7 @@ ADVANCED_EDIT_TECHNIQUES: Dict[str, Dict[str, Any]] = {
         "applicable_intensity": ["intense"],
         "emotion_tags": ["triumph", "rage"],
         "jsx_modifier": lambda si, t0, dur, label: (
-            f"/* montage: 快速蒙太奇 */"
+            "/* montage: 快速蒙太奇 */"
         ),
         "preset_bias": ["glow_pulse", "elastic_overshoot", "rgb_split", "neon_stroke"],
         "speed_multiplier": 1.5,  # 动画速度加快
@@ -950,7 +950,7 @@ EMOTION_ARC_PHASES = [
 ]
 
 
-def get_arc_phase(normalized_time: float) -> Dict[str, Any]:
+def get_arc_phase(normalized_time: float) -> dict[str, Any]:
     """根据归一化时间 (0~1) 返回当前情绪弧线阶段。"""
     for phase in EMOTION_ARC_PHASES:
         if phase["range"][0] <= normalized_time < phase["range"][1]:
@@ -959,13 +959,13 @@ def get_arc_phase(normalized_time: float) -> Dict[str, Any]:
 
 
 def select_preset_with_arc(
-    preset_pool: List[str],
+    preset_pool: list[str],
     shot_index: int,
     total_shots: int,
     normalized_time: float,
-    technique: Optional[str] = None,
-    feedback_weights: Optional[Dict[str, float]] = None,
-    preset_usage_counts: Optional[Dict[str, int]] = None,
+    technique: str | None = None,
+    feedback_weights: dict[str, float] | None = None,
+    preset_usage_counts: dict[str, int] | None = None,
 ) -> str:
     """情绪弧线 + 反馈闭环 + 覆盖率保证联合驱动的预设选择。
 
@@ -1158,15 +1158,14 @@ _DIRECTOR_INTENSITY_MAP = {
 
 def select_text_combo_for_shot(intensity: str = "moderate",
                                scene_tag: str = "",
-                               emotion: str = "") -> Optional[Dict[str, Any]]:
+                               emotion: str = "") -> dict[str, Any] | None:
     """镜头节奏 → 三维文字组合 (字体×特效×动画×强度)。
 
     优先级: scene_tag 精确命中 → 情绪标签 → 强度降级表。
     SmartMatcher 不可用时返回 None，降级为旧预设逻辑。
     """
     try:
-        from core.jsx_keyframe_animator import (
-            get_smart_matcher, AnimationIntensity)
+        from core.jsx_keyframe_animator import AnimationIntensity, get_smart_matcher
         matcher = get_smart_matcher()
         tag = scene_tag or emotion or _DIRECTOR_SCENE_FALLBACK.get(
             intensity, "cinematic")
@@ -1190,7 +1189,7 @@ def select_text_combo_for_shot(intensity: str = "moderate",
 #  知识库消费（感知→分析→决策链路中引入外部知识）
 # ============================================================================
 
-def _load_knowledge_bases() -> Dict[str, Any]:
+def _load_knowledge_bases() -> dict[str, Any]:
     """尝试加载知识库资源，返回可用知识摘要。
 
     消费：
@@ -1198,7 +1197,7 @@ def _load_knowledge_bases() -> Dict[str, Any]:
     - ae/presets/3d_effect.json      → 3D 效果参考
     - 10-风格化剪辑知识库            → 风格标签
     """
-    kb: Dict[str, Any] = {"loaded": False}
+    kb: dict[str, Any] = {"loaded": False}
     presets_dir = os.path.join(_PROJECT_ROOT, "ae", "presets")
     # 加载文字动画预设清单（仅名称和标签，不加载完整 script_template）
     ta_path = os.path.join(presets_dir, "text_animation.json")
@@ -1235,9 +1234,9 @@ def _load_knowledge_bases() -> Dict[str, Any]:
 # ============================================================================
 
 def build_smart_text_jsx(
-    cut_times: List[float],
+    cut_times: list[float],
     duration: float,
-    shot_analysis: Optional[List[Dict[str, Any]]] = None,
+    shot_analysis: list[dict[str, Any]] | None = None,
 ) -> str:
     """根据镜头分析结果，生成多样化的文字动画 JSX 代码。
 
@@ -1265,14 +1264,14 @@ def build_smart_text_jsx(
             f"3d_effects={len(kb.get('effect_3d_names', []))}, "
             f"style_kb={kb.get('style_kb_count', 0)} files")
 
-    parts: List[str] = []
+    parts: list[str] = []
     n = len(cut_times)
-    _actual_selections: List[Dict[str, str]] = []  # 记录实际选择的预设和字体
-    _combo_usages: List[str] = []  # 【P2-1】记录三维特效组合使用
+    _actual_selections: list[dict[str, str]] = []  # 记录实际选择的预设和字体
+    _combo_usages: list[str] = []  # 【P2-1】记录三维特效组合使用
 
     # 【P3】加载反馈权重 + 使用计数（覆盖率保证）
-    feedback_weights: Optional[Dict[str, float]] = None
-    preset_usage_counts: Dict[str, int] = {}
+    feedback_weights: dict[str, float] | None = None
+    preset_usage_counts: dict[str, int] = {}
     try:
         from core.evolution.capability_feedback import CapabilityFeedbackLoop
         fb = CapabilityFeedbackLoop()
@@ -1392,9 +1391,7 @@ def build_smart_text_jsx(
             intensity, scene_tag=sa_entry.get("scene_tag", ""))
         if combo is not None:
             try:
-                from core.jsx_keyframe_animator import (
-                    get_effect_builder, get_preset_tracker,
-                    AnimationIntensity)
+                from core.jsx_keyframe_animator import AnimationIntensity, get_effect_builder, get_preset_tracker
                 eb = get_effect_builder()
                 cfg = eb.build_effect_config(
                     combo["effect_combo_id"], font=combo["font"],

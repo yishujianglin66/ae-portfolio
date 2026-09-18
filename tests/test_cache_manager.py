@@ -8,13 +8,13 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from performance.cache_manager import (
-    MemoryCache,
     DiskCache,
-    file_fingerprint,
-    cached,
-    get_config_cached,
-    clear_all_caches,
+    MemoryCache,
     cache_stats,
+    cached,
+    clear_all_caches,
+    file_fingerprint,
+    get_config_cached,
 )
 
 

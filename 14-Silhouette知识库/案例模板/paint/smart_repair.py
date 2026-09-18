@@ -1,8 +1,9 @@
 # Smart Repair Template
 # 智能修复模板 - 自动检测并修复画面瑕疵
 
-from fx import *
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=24.0):

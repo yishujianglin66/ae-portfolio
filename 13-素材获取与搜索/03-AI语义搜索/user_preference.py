@@ -11,12 +11,12 @@
 from __future__ import annotations
 
 import json
-import sys
 import os
-from pathlib import Path
-from typing import List, Dict, Any, Optional
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -26,7 +26,7 @@ class UserAction:
     action_type: str = ""   # search, click, download, like, skip
     query: str = ""         # 搜索查询
     item_id: str = ""       # 素材ID/URL
-    item_metadata: Dict[str, Any] = field(default_factory=dict)
+    item_metadata: dict[str, Any] = field(default_factory=dict)
     timestamp: str = ""     # ISO时间戳
     duration: float = 0.0   # 停留时长（秒）
     position: int = 0       # 结果位置
@@ -36,13 +36,13 @@ class UserAction:
 class UserProfile:
     """用户画像"""
     user_id: str = ""
-    preferences: Dict[str, float] = field(default_factory=dict)
-    mood_history: Dict[str, int] = field(default_factory=dict)
-    genre_history: Dict[str, int] = field(default_factory=dict)
-    platform_history: Dict[str, int] = field(default_factory=dict)
-    quality_history: Dict[str, int] = field(default_factory=dict)
-    bpm_history: Dict[str, int] = field(default_factory=dict)
-    recent_actions: List[Dict[str, Any]] = field(default_factory=list)
+    preferences: dict[str, float] = field(default_factory=dict)
+    mood_history: dict[str, int] = field(default_factory=dict)
+    genre_history: dict[str, int] = field(default_factory=dict)
+    platform_history: dict[str, int] = field(default_factory=dict)
+    quality_history: dict[str, int] = field(default_factory=dict)
+    bpm_history: dict[str, int] = field(default_factory=dict)
+    recent_actions: list[dict[str, Any]] = field(default_factory=list)
     created_at: str = ""
     updated_at: str = ""
 
@@ -72,11 +72,11 @@ class UserPreferenceLearner:
     # 时间衰减因子（每天衰减10%）
     TIME_DECAY = 0.9
     
-    def __init__(self, data_dir: Optional[str] = None):
+    def __init__(self, data_dir: str | None = None):
         self.data_dir = data_dir or _default_data_dir()
         os.makedirs(self.data_dir, exist_ok=True)
         
-        self.user_profiles: Dict[str, UserProfile] = {}
+        self.user_profiles: dict[str, UserProfile] = {}
     
     def _load_profile(self, user_id: str) -> UserProfile:
         """加载用户画像"""
@@ -110,7 +110,7 @@ class UserPreferenceLearner:
         action_type: str,
         item_id: str = "",
         query: str = "",
-        item_metadata: Optional[Dict[str, Any]] = None,
+        item_metadata: dict[str, Any] | None = None,
         duration: float = 0.0,
         position: int = 0
     ) -> None:
@@ -224,7 +224,7 @@ class UserPreferenceLearner:
         
         profile.preferences = preferences
     
-    def get_preferences(self, user_id: str) -> Dict[str, Any]:
+    def get_preferences(self, user_id: str) -> dict[str, Any]:
         """
         获取用户偏好
         
@@ -258,9 +258,9 @@ class UserPreferenceLearner:
     def personalize_results(
         self,
         user_id: str,
-        results: List[Dict[str, Any]],
+        results: list[dict[str, Any]],
         top_k: int = 10
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         个性化推荐
         
@@ -336,7 +336,7 @@ class UserPreferenceLearner:
         
         return scored_results[:top_k]
     
-    def get_suggested_queries(self, user_id: str, count: int = 5) -> List[str]:
+    def get_suggested_queries(self, user_id: str, count: int = 5) -> list[str]:
         """
         获取建议搜索词
         
@@ -394,7 +394,7 @@ def main() -> None:
         action = input_json.get("action", "")
         
         learner = UserPreferenceLearner()
-        result: Dict[str, Any] = {"success": False}
+        result: dict[str, Any] = {"success": False}
         
         if action == "record_action":
             user_action = UserAction(

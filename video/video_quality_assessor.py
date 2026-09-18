@@ -27,8 +27,7 @@ import subprocess
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
-
+from typing import Any, Dict, List, Optional, Tuple
 
 # ============================================================================
 # 数据类
@@ -37,14 +36,14 @@ from typing import Dict, List, Optional, Any, Tuple
 @dataclass
 class QualityMetrics:
     """质量评估指标结果"""
-    psnr: Optional[float] = None  # dB，越高越好
-    ssim: Optional[float] = None  # 0-1，越高越好
-    vmaf: Optional[float] = None  # 0-100，越高越好
-    brisque: Optional[float] = None  # 0-100，越低越好（无参考）
+    psnr: float | None = None  # dB，越高越好
+    ssim: float | None = None  # 0-1，越高越好
+    vmaf: float | None = None  # 0-100，越高越好
+    brisque: float | None = None  # 0-100，越低越好（无参考）
     overall_score: float = 0.0  # 综合评分 0-100
     grade: str = "unknown"  # 质量等级 excellent/good/fair/poor/bad
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "psnr": self.psnr,
             "ssim": self.ssim,
@@ -77,9 +76,9 @@ class QualityAssessmentResult:
     mode: str = "simulate"
     duration: float = 0.0
     error_message: str = ""
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "reference_video": self.reference_video,
@@ -170,9 +169,9 @@ class VideoQualityAssessor:
     def __init__(
         self,
         mode: str = "auto",
-        ffmpeg_path: Optional[str] = None,
-        thresholds: Optional[QualityThreshold] = None,
-        model_path: Optional[str] = None,
+        ffmpeg_path: str | None = None,
+        thresholds: QualityThreshold | None = None,
+        model_path: str | None = None,
     ):
         """
         Args:
@@ -212,7 +211,7 @@ class VideoQualityAssessor:
             self._ffmpeg_available = False
         return self._ffmpeg_available
 
-    def _resolve_mode(self, requested_mode: Optional[str] = None) -> str:
+    def _resolve_mode(self, requested_mode: str | None = None) -> str:
         """解析实际运行模式（auto 降级）"""
         mode = requested_mode or self.mode
         if mode == "auto":
@@ -227,8 +226,8 @@ class VideoQualityAssessor:
         self,
         reference_video: str,
         test_video: str,
-        mode: Optional[str] = None,
-        thresholds: Optional[QualityThreshold] = None,
+        mode: str | None = None,
+        thresholds: QualityThreshold | None = None,
     ) -> QualityAssessmentResult:
         """评估视频质量（对比参考视频）
 
@@ -257,8 +256,8 @@ class VideoQualityAssessor:
     def assess_no_reference(
         self,
         video_path: str,
-        mode: Optional[str] = None,
-        thresholds: Optional[QualityThreshold] = None,
+        mode: str | None = None,
+        thresholds: QualityThreshold | None = None,
     ) -> QualityAssessmentResult:
         """无参考视频质量评估（仅 BRISQUE）
 
@@ -286,10 +285,10 @@ class VideoQualityAssessor:
     def batch_assess(
         self,
         reference_video: str,
-        test_videos: List[str],
-        mode: Optional[str] = None,
-        thresholds: Optional[QualityThreshold] = None,
-    ) -> List[QualityAssessmentResult]:
+        test_videos: list[str],
+        mode: str | None = None,
+        thresholds: QualityThreshold | None = None,
+    ) -> list[QualityAssessmentResult]:
         """批量评估多个视频
 
         Args:
@@ -423,7 +422,7 @@ class VideoQualityAssessor:
             mode="real",
         )
 
-    def _calc_psnr(self, ref: str, test: str) -> Optional[float]:
+    def _calc_psnr(self, ref: str, test: str) -> float | None:
         """使用 ffmpeg 计算 PSNR"""
         try:
             cmd = [
@@ -442,7 +441,7 @@ class VideoQualityAssessor:
             pass
         return None
 
-    def _calc_ssim(self, ref: str, test: str) -> Optional[float]:
+    def _calc_ssim(self, ref: str, test: str) -> float | None:
         """使用 ffmpeg 计算 SSIM"""
         try:
             cmd = [
@@ -461,7 +460,7 @@ class VideoQualityAssessor:
             pass
         return None
 
-    def _calc_vmaf(self, ref: str, test: str) -> Optional[float]:
+    def _calc_vmaf(self, ref: str, test: str) -> float | None:
         """使用 ffmpeg 计算 VMAF"""
         try:
             filter_str = "libvmaf"
@@ -484,7 +483,7 @@ class VideoQualityAssessor:
             pass
         return None
 
-    def _calc_brisque(self, video_path: str) -> Optional[float]:
+    def _calc_brisque(self, video_path: str) -> float | None:
         """使用 ffmpeg 计算 BRISQUE（取第一帧）"""
         try:
             tmp_img = tempfile.mktemp(suffix=".png")
@@ -606,9 +605,9 @@ class VideoQualityAssessor:
 # ============================================================================
 
 def generate_quality_report(
-    results: List[QualityAssessmentResult],
-    output_path: Optional[str] = None,
-) -> Dict[str, Any]:
+    results: list[QualityAssessmentResult],
+    output_path: str | None = None,
+) -> dict[str, Any]:
     """生成质量评估汇总报告
 
     Args:
@@ -623,7 +622,7 @@ def generate_quality_report(
     failed = total - passed
 
     # 统计各等级数量
-    grade_counts: Dict[str, int] = {}
+    grade_counts: dict[str, int] = {}
     for r in results:
         g = r.metrics.grade
         grade_counts[g] = grade_counts.get(g, 0) + 1

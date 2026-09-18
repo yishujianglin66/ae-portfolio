@@ -22,7 +22,8 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 sys.path.insert(0, PROJECT_ROOT)
 
 from core.fx.particle_presets import ParticleFXClient, _send_raw  # noqa: E402
-from core.fx.text_impact import TextImpactClient, _build_jsx as _build_impact_jsx  # noqa: E402
+from core.fx.text_impact import TextImpactClient  # noqa: E402
+from core.fx.text_impact import _build_jsx as _build_impact_jsx
 
 TEMPLATES_PATH = os.path.join(PROJECT_ROOT, "data", "style_templates", "templates.json")
 EXECUTION_LOG_PATH = os.path.join(PROJECT_ROOT, "data", "fx", "style_preset_engine", "executions.jsonl")
@@ -41,14 +42,14 @@ class StylePresetEngine:
                  execution_log_path: str = EXECUTION_LOG_PATH):
         with open(templates_path, "r", encoding="utf-8") as f:
             raw = json.load(f)
-        self.templates: Dict[str, Dict[str, Any]] = raw.get("templates", {})
+        self.templates: dict[str, dict[str, Any]] = raw.get("templates", {})
         self.meta = raw.get("_meta", {})
         self._execution_log_path = Path(execution_log_path)
         self._execution_log_path.parent.mkdir(parents=True, exist_ok=True)
 
     # ---------- 执行记录持久化 ----------
     def record_execution(self, style_id: str, comp_name: str,
-                         result: Dict[str, Any]) -> None:
+                         result: dict[str, Any]) -> None:
         """把一次 execute() 结果追加写盘（JSON Lines）。"""
         entry = {
             "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -62,11 +63,11 @@ class StylePresetEngine:
         except OSError:
             pass
 
-    def get_executions(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_executions(self, limit: int = 100) -> list[dict[str, Any]]:
         path = self._execution_log_path
         if not path.is_file():
             return []
-        lines: List[Dict[str, Any]] = []
+        lines: list[dict[str, Any]] = []
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -84,22 +85,22 @@ class StylePresetEngine:
             path.unlink()
 
     # ---------- 查询 ----------
-    def list_styles(self) -> List[Dict[str, Any]]:
+    def list_styles(self) -> list[dict[str, Any]]:
         return [
             {"id": sid, "name": t.get("name"), "desc": t.get("desc"),
              "mood": t.get("mood", [])}
             for sid, t in self.templates.items()
         ]
 
-    def get(self, style_id: str) -> Dict[str, Any]:
+    def get(self, style_id: str) -> dict[str, Any]:
         if style_id not in self.templates:
             raise KeyError(f"未知风格模板: {style_id}，可选: {list(self.templates)}")
         return self.templates[style_id]
 
     # ---------- 校验 ----------
-    def validate(self, style_id: str) -> List[str]:
+    def validate(self, style_id: str) -> list[str]:
         """返回问题列表，空列表 = 模板合法。"""
-        problems: List[str] = []
+        problems: list[str] = []
         try:
             t = self.get(style_id)
         except KeyError as e:
@@ -121,10 +122,10 @@ class StylePresetEngine:
 
     # ---------- 执行计划 ----------
     def build_plan(self, style_id: str, comp_name: str,
-                   beats: Optional[List[float]] = None) -> List[Dict[str, Any]]:
+                   beats: list[float] | None = None) -> list[dict[str, Any]]:
         """把模板展开成有序步骤列表（不执行，供审查/测试）。"""
         t = self.get(style_id)
-        plan: List[Dict[str, Any]] = []
+        plan: list[dict[str, Any]] = []
         for g in t.get("color_grade", []):
             plan.append({"step": "color_grade", "effect": g["effect"],
                          "params": g.get("params", {}), "comp": comp_name})
@@ -141,7 +142,7 @@ class StylePresetEngine:
 
     # ---------- 真机执行 ----------
     @staticmethod
-    def warmup_effects(timeout: float = 400.0) -> Dict[str, Any]:
+    def warmup_effects(timeout: float = 400.0) -> dict[str, Any]:
         """预热重效果引擎：AE 首次 addProperty Lumetri/Glo2 会同步初始化效果引擎，
         实测可达 120s+，会打穿任何客户端超时。必须在正式作业前预热一次。
         """
@@ -172,7 +173,7 @@ class StylePresetEngine:
         r = _send_raw(jsx, timeout=30)
         return int(r.get("index", 1)) if isinstance(r, dict) else 1
 
-    def apply_color_grade(self, comp_name: str, grade: Dict[str, Any]) -> Dict[str, Any]:
+    def apply_color_grade(self, comp_name: str, grade: dict[str, Any]) -> dict[str, Any]:
         """新建调整图层并按 matchName 直写效果参数。"""
         params_js = "".join(
             f"try{{ef.property('{k}').setValue({json.dumps(v)});}}catch(ep){{bad.push('{k}:'+ep.toString());}}"
@@ -199,13 +200,13 @@ class StylePresetEngine:
         return _send_raw(jsx, timeout=150)
 
     def execute(self, style_id: str, comp_name: str,
-                text_layer: Optional[str] = None, particle_layer: Optional[str] = None,
-                beats: Optional[List[float]] = None,
-                skip: Optional[List[str]] = None) -> Dict[str, Any]:
+                text_layer: str | None = None, particle_layer: str | None = None,
+                beats: list[float] | None = None,
+                skip: list[str] | None = None) -> dict[str, Any]:
         """按模板顺序真机执行。skip 可跳过 ['color_grade'|'particles'|'text_fx']。"""
         skip = set(skip or [])
         t = self.get(style_id)
-        results: Dict[str, Any] = {"style": style_id, "comp": comp_name, "steps": []}
+        results: dict[str, Any] = {"style": style_id, "comp": comp_name, "steps": []}
         pfx = ParticleFXClient()
         tfx = TextImpactClient()
 
@@ -280,7 +281,7 @@ class StylePresetEngine:
 # 全局单例
 # ============================================================
 
-_style_preset_engine: Optional[StylePresetEngine] = None
+_style_preset_engine: StylePresetEngine | None = None
 
 
 def get_style_preset_engine() -> StylePresetEngine:

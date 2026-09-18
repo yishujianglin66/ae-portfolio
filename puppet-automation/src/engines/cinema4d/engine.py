@@ -429,7 +429,7 @@ if __name__ == "__main__":
     # ===================================================================
     # 构造与初始化
     # ===================================================================
-    def __init__(self, executable_path: Optional[Path | str] = None):
+    def __init__(self, executable_path: Path | str | None = None):
         """初始化 Cinema4D 引擎。
 
         Args:
@@ -694,7 +694,7 @@ if __name__ == "__main__":
     async def run_python_script(
         self,
         script_content: str,
-        c4d_file: Optional[Path | str] = None,
+        c4d_file: Path | str | None = None,
     ) -> EngineResult:
         """运行自定义 Python 脚本（通用接口）。
 

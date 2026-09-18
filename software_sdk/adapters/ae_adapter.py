@@ -6,8 +6,8 @@ software_sdk/adapters/ae_adapter.py - After Effects 适配器
 """
 from __future__ import annotations
 
-import os
 import logging
+import os
 from typing import Any, Optional
 
 from software_sdk.base import BaseSoftwareAdapter
@@ -34,8 +34,8 @@ class AfterEffectsAdapter(BaseSoftwareAdapter):
 
     def __init__(
         self,
-        config: Optional[SoftwareConfig] = None,
-        logger: Optional[logging.Logger] = None,
+        config: SoftwareConfig | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         if config is None:
             config = SoftwareConfig(software=SoftwareType.AFTER_EFFECTS)

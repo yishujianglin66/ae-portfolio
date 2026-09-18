@@ -3,9 +3,9 @@
 提供入场/出场/循环/强调等动画模板，并支持节拍-关键帧精密映射
 """
 
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple
 import math
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass
@@ -15,8 +15,8 @@ class KeyframePoint:
     value: Any   # 值（可以是数字、数组）
     ease_in: str = "linear"   # 入缓动: linear, ease_in, ease_out, ease_in_out, bezier
     ease_out: str = "linear"  # 出缓动
-    bezier_in: Tuple[float, float, float, float] = None  # 贝塞尔控制点 (x1,y1,x2,y2)
-    bezier_out: Tuple[float, float, float, float] = None
+    bezier_in: tuple[float, float, float, float] = None  # 贝塞尔控制点 (x1,y1,x2,y2)
+    bezier_out: tuple[float, float, float, float] = None
 
 
 @dataclass
@@ -25,7 +25,7 @@ class AnimationTemplate:
     name: str
     category: str  # entrance, exit, loop, emphasis, camera
     description: str
-    keyframes: List[KeyframePoint]
+    keyframes: list[KeyframePoint]
     property_name: str  # Position, Scale, Rotation, Opacity, etc.
     duration: float  # 默认持续时间（秒）
 
@@ -60,9 +60,9 @@ class KeyframeAnimationGenerator:
     def __init__(self):
         self.templates = self._init_templates()
 
-    def _init_templates(self) -> Dict[str, List[AnimationTemplate]]:
+    def _init_templates(self) -> dict[str, list[AnimationTemplate]]:
         """初始化动画模板库"""
-        templates: Dict[str, List[AnimationTemplate]] = {
+        templates: dict[str, list[AnimationTemplate]] = {
             "entrance": [],
             "exit": [],
             "loop": [],
@@ -585,9 +585,9 @@ class KeyframeAnimationGenerator:
 
         return templates
 
-    def _rescale_keyframes(self, template_kfs: List[KeyframePoint],
+    def _rescale_keyframes(self, template_kfs: list[KeyframePoint],
                            target_duration: float,
-                           template_duration: float) -> List[KeyframePoint]:
+                           template_duration: float) -> list[KeyframePoint]:
         """将模板关键帧按时间比例缩放到目标时长"""
         if template_duration <= 0:
             return template_kfs
@@ -605,7 +605,7 @@ class KeyframeAnimationGenerator:
             result.append(new_kf)
         return result
 
-    def generate_entrance_animation(self, anim_type: str, duration: float, **kwargs) -> List[KeyframePoint]:
+    def generate_entrance_animation(self, anim_type: str, duration: float, **kwargs) -> list[KeyframePoint]:
         """生成入场动画关键帧
         anim_type: fade_in, slide_left, slide_right, slide_up, slide_down,
                    scale_up, scale_down, rotate_in, zoom_in, blur_in
@@ -622,7 +622,7 @@ class KeyframeAnimationGenerator:
                 return kfs
         raise ValueError(f"未知的入场动画类型: {anim_type}")
 
-    def generate_exit_animation(self, anim_type: str, duration: float, **kwargs) -> List[KeyframePoint]:
+    def generate_exit_animation(self, anim_type: str, duration: float, **kwargs) -> list[KeyframePoint]:
         """生成出场动画关键帧
         anim_type: fade_out, slide_left_out, slide_right_out, slide_up_out,
                    slide_down_out, scale_up_out, scale_down_out, rotate_out, zoom_out
@@ -638,7 +638,7 @@ class KeyframeAnimationGenerator:
                 return kfs
         raise ValueError(f"未知的出场动画类型: {anim_type}")
 
-    def generate_loop_animation(self, anim_type: str, duration: float, **kwargs) -> List[KeyframePoint]:
+    def generate_loop_animation(self, anim_type: str, duration: float, **kwargs) -> list[KeyframePoint]:
         """生成循环动画关键帧
         anim_type: pulse, breathe, swing, rotate_loop, float, bounce
         """
@@ -648,7 +648,7 @@ class KeyframeAnimationGenerator:
                 return kfs
         raise ValueError(f"未知的循环动画类型: {anim_type}")
 
-    def generate_emphasis_animation(self, anim_type: str, duration: float, **kwargs) -> List[KeyframePoint]:
+    def generate_emphasis_animation(self, anim_type: str, duration: float, **kwargs) -> list[KeyframePoint]:
         """生成强调动画关键帧
         anim_type: shake, flash, pop, wiggle, rubber_band, jello
         """
@@ -665,13 +665,13 @@ class KeyframeAnimationGenerator:
                 return kfs
         raise ValueError(f"未知的强调动画类型: {anim_type}")
 
-    def generate_beat_synced_keyframes(self, beat_times: List[float],
+    def generate_beat_synced_keyframes(self, beat_times: list[float],
                                         property_name: str,
                                         base_value: Any,
                                         beat_value: Any,
                                         attack_ms: float = 30,
                                         decay_ms: float = 200,
-                                        ease_type: str = "ease_out") -> List[KeyframePoint]:
+                                        ease_type: str = "ease_out") -> list[KeyframePoint]:
         """节拍同步关键帧生成
         beat_times: 节拍时间点列表（秒）
         property_name: 属性名
@@ -681,7 +681,7 @@ class KeyframeAnimationGenerator:
         decay_ms: 衰减时间（毫秒）
         """
         bezier = EASE_PRESETS.get(ease_type)
-        keyframes: List[KeyframePoint] = []
+        keyframes: list[KeyframePoint] = []
 
         attack_s = attack_ms / 1000.0
         decay_s = decay_ms / 1000.0
@@ -708,11 +708,11 @@ class KeyframeAnimationGenerator:
         keyframes.sort(key=lambda kf: kf.time)
         return keyframes
 
-    def generate_beat_scale_animation(self, beat_times: List[float],
+    def generate_beat_scale_animation(self, beat_times: list[float],
                                        base_scale: float = 100,
                                        beat_scale: float = 110,
                                        attack_ms: float = 30,
-                                       decay_ms: float = 200) -> List[Dict]:
+                                       decay_ms: float = 200) -> list[dict]:
         """节拍缩放动画 - 卡点放大效果"""
         kfs = self.generate_beat_synced_keyframes(
             beat_times=beat_times,
@@ -725,11 +725,11 @@ class KeyframeAnimationGenerator:
         )
         return self.to_ae_keyframe_commands(kfs, layer_name="", property_name="Scale")
 
-    def generate_beat_opacity_animation(self, beat_times: List[float],
+    def generate_beat_opacity_animation(self, beat_times: list[float],
                                          base_opacity: float = 100,
                                          beat_opacity: float = 70,
                                          attack_ms: float = 20,
-                                         decay_ms: float = 150) -> List[Dict]:
+                                         decay_ms: float = 150) -> list[dict]:
         """节拍透明度动画 - 闪烁效果"""
         kfs = self.generate_beat_synced_keyframes(
             beat_times=beat_times,
@@ -742,11 +742,11 @@ class KeyframeAnimationGenerator:
         )
         return self.to_ae_keyframe_commands(kfs, layer_name="", property_name="Opacity")
 
-    def generate_beat_position_animation(self, beat_times: List[float],
+    def generate_beat_position_animation(self, beat_times: list[float],
                                           direction: str = "up",
                                           distance: float = 20,
                                           attack_ms: float = 30,
-                                          decay_ms: float = 200) -> List[Dict]:
+                                          decay_ms: float = 200) -> list[dict]:
         """节拍位移动画 - 弹跳效果"""
         # 根据方向确定偏移
         direction_map = {
@@ -757,7 +757,7 @@ class KeyframeAnimationGenerator:
         }
         offset = direction_map.get(direction, [0, -distance])
 
-        kfs: List[KeyframePoint] = []
+        kfs: list[KeyframePoint] = []
         attack_s = attack_ms / 1000.0
         decay_s = decay_ms / 1000.0
         bezier = EASE_PRESETS["ease_out"]
@@ -783,14 +783,14 @@ class KeyframeAnimationGenerator:
         kfs.sort(key=lambda kf: kf.time)
         return self.to_ae_keyframe_commands(kfs, layer_name="", property_name="Position")
 
-    def to_ae_keyframe_commands(self, keyframes: List[KeyframePoint],
+    def to_ae_keyframe_commands(self, keyframes: list[KeyframePoint],
                                  layer_name: str,
                                  property_name: str,
-                                 comp_name: str = None) -> List[Dict]:
+                                 comp_name: str = None) -> list[dict]:
         """将关键帧转换为AE命令格式"""
         commands = []
         for kf in keyframes:
-            cmd: Dict[str, Any] = {
+            cmd: dict[str, Any] = {
                 "command": "setKeyframe",
                 "layer": layer_name,
                 "property": property_name,
@@ -801,7 +801,7 @@ class KeyframeAnimationGenerator:
                 cmd["comp"] = comp_name
 
             # 缓动信息
-            easing: Dict[str, Any] = {}
+            easing: dict[str, Any] = {}
             if kf.ease_out != "linear" and kf.bezier_out is not None:
                 easing["out"] = {
                     "type": kf.ease_out,

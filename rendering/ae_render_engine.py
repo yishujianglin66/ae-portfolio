@@ -38,25 +38,24 @@ aerender 渲染失败根因分类与修复
 
 from __future__ import annotations
 
-import os
-import re
-import sys
-import json
-import time
-import shutil
-import signal
 import ctypes
+import json
 import locale
 import logging
+import os
 import platform
+import re
+import shutil
+import signal
 import subprocess
-import threading
+import sys
 import tempfile
-from pathlib import Path
+import threading
+import time
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Callable, Tuple, Any
 from enum import Enum, IntEnum
-
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +82,7 @@ class AerenderExitCode(IntEnum):
 
 
 # 错误码 → 中文描述 + 是否可重试
-ERROR_CODE_INFO: Dict[int, Dict[str, Any]] = {
+ERROR_CODE_INFO: dict[int, dict[str, Any]] = {
     AerenderExitCode.SUCCESS: {
         "desc": "渲染成功", "retryable": False, "category": "success",
     },
@@ -187,14 +186,14 @@ class RenderJob:
     start_frame: int = 0
     end_frame: int = -1  # -1 = 全部
     output_format: str = "h264"  # h264, mov, prores, png_seq, tiff_seq, exr_seq
-    reuse_ae: Optional[bool] = None  # None = 自动检测
+    reuse_ae: bool | None = None  # None = 自动检测
     multi_process: bool = True
     memory_percent: int = 0  # 0 = 自动计算
     continue_on_missing_footage: bool = True
     close_project: str = "DO_NOT_SAVE_CHANGES"
     verbose_level: str = "ERRORS_AND_PROGRESS"
-    om_template: Optional[str] = None  # None = 根据 output_format 从候选表选
-    rs_template: Optional[str] = None
+    om_template: str | None = None  # None = 根据 output_format 从候选表选
+    rs_template: str | None = None
     max_retries: int = 2
     timeout: int = 0  # 0 = 根据帧数自动估算
     status: RenderStatus = RenderStatus.PENDING
@@ -206,10 +205,10 @@ class RenderJob:
     start_time: float = 0.0
     end_time: float = 0.0
     attempts: int = 0
-    diagnostics: Optional[RenderDiagnostics] = None
+    diagnostics: RenderDiagnostics | None = None
     log_path: str = ""
-    process: Optional[subprocess.Popen] = None
-    _cancel_event: Optional[threading.Event] = field(default=None, repr=False)
+    process: subprocess.Popen | None = None
+    _cancel_event: threading.Event | None = field(default=None, repr=False)
 
     def __post_init__(self):
         if self._cancel_event is None:
@@ -226,7 +225,7 @@ class RenderJob:
 
 # 输出模块模板候选（按优先级排序，第一个可用的获胜）
 # 注意：最后必须包含 None（不指定模板），让 aerender 使用项目渲染队列设置
-OM_TEMPLATES: Dict[str, List[Optional[str]]] = {
+OM_TEMPLATES: dict[str, list[str | None]] = {
     "h264": [
         "H.264 - Match Source - High bitrate",
         "Match Source - H.264 high bitrate",
@@ -306,7 +305,7 @@ OM_TEMPLATES: Dict[str, List[Optional[str]]] = {
 
 # 渲染设置模板候选（按优先级排序）
 # 注意：最后必须包含 None（不指定模板）作为兜底
-RS_TEMPLATES: Dict[str, List[Optional[str]]] = {
+RS_TEMPLATES: dict[str, list[str | None]] = {
     "best": [
         "Best Settings",
         "Best",
@@ -343,7 +342,7 @@ RS_TEMPLATES: Dict[str, List[Optional[str]]] = {
 #  aerender 路径自动探测
 # ============================================================================
 
-def detect_aerender() -> Optional[Path]:
+def detect_aerender() -> Path | None:
     r"""全策略自动探测 aerender.exe 路径
 
     探测顺序（优先级从高到低）：
@@ -440,7 +439,7 @@ def detect_aerender() -> Optional[Path]:
     return None
 
 
-def _detect_aerender_from_registry() -> Optional[Path]:
+def _detect_aerender_from_registry() -> Path | None:
     """从 Windows 注册表探测 AE 安装路径"""
     if platform.system() != "Windows":
         return None
@@ -554,7 +553,7 @@ def is_afterfx_running() -> bool:
 # ============================================================================
 
 # 多语言进度正则（覆盖英文/中文/日文 AE 版本）
-PROGRESS_PATTERNS: List[re.Pattern] = [
+PROGRESS_PATTERNS: list[re.Pattern] = [
     # 英文时间码: "Rendering: 01:00:00:00 / 00:00:03:00 (1/72)"
     re.compile(r"\((\d+)\s*/\s*(\d+)\)", re.I),
     # 英文: "Rendering frame 123 of 456" / "Frame 123 (456)"
@@ -574,7 +573,7 @@ PROGRESS_PATTERNS: List[re.Pattern] = [
 ]
 
 
-def parse_progress_from_log(log_text: str) -> Tuple[float, int, int]:
+def parse_progress_from_log(log_text: str) -> tuple[float, int, int]:
     """从日志文本解析渲染进度
 
     Returns:
@@ -607,7 +606,7 @@ def parse_progress_from_log(log_text: str) -> Tuple[float, int, int]:
     return 0.0, 0, 0
 
 
-def parse_aerender_error(stdout: str, stderr: str, exit_code: int) -> Tuple[str, int, str]:
+def parse_aerender_error(stdout: str, stderr: str, exit_code: int) -> tuple[str, int, str]:
     """从 aerender 输出解析具体错误原因
 
     Returns:
@@ -706,8 +705,8 @@ class AERenderEngine:
 
     def __init__(
         self,
-        aerender_path: Optional[str] = None,
-        log_dir: Optional[str] = None,
+        aerender_path: str | None = None,
+        log_dir: str | None = None,
         default_timeout: int = 3600,
         default_max_retries: int = 2,
         auto_detect: bool = True,
@@ -751,8 +750,8 @@ class AERenderEngine:
             self.log_dir = Path(__file__).parent / ".ae-mcp-bridge" / "renders"
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
-        self._jobs: Dict[str, RenderJob] = {}
-        self._callbacks: Dict[str, Callable] = {}
+        self._jobs: dict[str, RenderJob] = {}
+        self._callbacks: dict[str, Callable] = {}
         self._lock = threading.Lock()
 
         logger.info(f"AERenderEngine 初始化: aerender={self.aerender_path}")
@@ -794,18 +793,18 @@ class AERenderEngine:
         start_frame: int = 0,
         end_frame: int = -1,
         output_format: str = "h264",
-        reuse_ae: Optional[bool] = None,
+        reuse_ae: bool | None = None,
         multi_process: bool = True,
         memory_percent: int = 0,
-        om_template: Optional[str] = None,
-        rs_template: Optional[str] = None,
+        om_template: str | None = None,
+        rs_template: str | None = None,
         continue_on_missing_footage: bool = True,
         timeout: int = 0,
         max_retries: int = -1,
-        on_progress: Optional[Callable[[float, RenderJob], None]] = None,
-        on_complete: Optional[Callable[[RenderJob], None]] = None,
-        on_error: Optional[Callable[[RenderJob], None]] = None,
-        job_id: Optional[str] = None,
+        on_progress: Callable[[float, RenderJob], None] | None = None,
+        on_complete: Callable[[RenderJob], None] | None = None,
+        on_error: Callable[[RenderJob], None] | None = None,
+        job_id: str | None = None,
     ) -> RenderJob:
         """
         渲染单个合成（异步，立即返回 RenderJob）
@@ -903,17 +902,17 @@ class AERenderEngine:
     # ---------------------------------------------------------------- batch
     def render_batch(
         self,
-        jobs: List[Dict],
+        jobs: list[dict],
         max_concurrent: int = 1,
-        on_complete: Optional[Callable[[RenderJob], None]] = None,
-    ) -> List[RenderJob]:
+        on_complete: Callable[[RenderJob], None] | None = None,
+    ) -> list[RenderJob]:
         """批量渲染（带并发控制）"""
-        results: List[RenderJob] = []
+        results: list[RenderJob] = []
         semaphore = threading.Semaphore(max_concurrent)
-        threads: List[threading.Thread] = []
+        threads: list[threading.Thread] = []
         results_lock = threading.Lock()
 
-        def _run_one(job_cfg: Dict):
+        def _run_one(job_cfg: dict):
             semaphore.acquire()
             try:
                 job = self.render(**job_cfg)
@@ -941,10 +940,10 @@ class AERenderEngine:
         return results
 
     # ---------------------------------------------------------------- job management
-    def get_job(self, job_id: str) -> Optional[RenderJob]:
+    def get_job(self, job_id: str) -> RenderJob | None:
         return self._jobs.get(job_id)
 
-    def get_all_jobs(self) -> Dict[str, RenderJob]:
+    def get_all_jobs(self) -> dict[str, RenderJob]:
         with self._lock:
             return dict(self._jobs)
 
@@ -963,9 +962,9 @@ class AERenderEngine:
     def _build_command(
         self,
         job: RenderJob,
-        om_template_override: Optional[str] = "__NOT_SET__",
-        rs_template_override: Optional[str] = "__NOT_SET__",
-    ) -> List[str]:
+        om_template_override: str | None = "__NOT_SET__",
+        rs_template_override: str | None = "__NOT_SET__",
+    ) -> list[str]:
         """构建 aerender 命令行参数
         
         om_template_override / rs_template_override:
@@ -1068,7 +1067,7 @@ class AERenderEngine:
         return cmd
 
     # ---------------------------------------------------------------- preflight checks
-    def _run_preflight(self, job: RenderJob) -> Optional[str]:
+    def _run_preflight(self, job: RenderJob) -> str | None:
         """环境预检，返回错误信息（None=通过）"""
         job.status = RenderStatus.PREFLIGHT
         diag = job.diagnostics
@@ -1188,7 +1187,7 @@ class AERenderEngine:
             # 第 0 位：(None, None) 不传任何模板（默认设置，100% 成功，最快路径）
             # 第一阶段：固定第一个命名 OM，尝试所有命名 RS
             # 第二阶段：固定最后一个 RS，尝试剩余命名 OM
-            attempts_list: List[Tuple[Optional[str], Optional[str]]] = [(None, None)]
+            attempts_list: list[tuple[str | None, str | None]] = [(None, None)]
 
             # 第一阶段：固定第一个命名 OM（非 None），尝试所有命名 RS（非 None）
             named_oms = [o for o in om_candidates if o is not None]
@@ -1266,11 +1265,11 @@ class AERenderEngine:
                 # 模板错误：自动切换到下一个模板组合
                 if err_code == AerenderExitCode.RS_TEMPLATE_NOT_FOUND:
                     if attempt_idx < max_template_attempts - 1:
-                        logger.info(f"[AE] RS 模板不匹配，尝试下一组")
+                        logger.info("[AE] RS 模板不匹配，尝试下一组")
                         continue
                 elif err_code == AerenderExitCode.OM_TEMPLATE_NOT_FOUND:
                     if attempt_idx < max_template_attempts - 1:
-                        logger.info(f"[AE] OM 模板不匹配，尝试下一组")
+                        logger.info("[AE] OM 模板不匹配，尝试下一组")
                         continue
                 elif not retryable:
                     # 不可重试错误（项目不存在/合成不存在/许可错误等）
@@ -1298,15 +1297,15 @@ class AERenderEngine:
             self._finalize_job(job, success=False)
 
     def _execute_single_render(
-        self, job: RenderJob, cmd: List[str]
-    ) -> Tuple[bool, str, int]:
+        self, job: RenderJob, cmd: list[str]
+    ) -> tuple[bool, str, int]:
         """执行单次 aerender 进程
 
         Returns:
             (success, error_message, error_code)
         """
-        stdout_chunks: List[str] = []
-        stderr_chunks: List[str] = []
+        stdout_chunks: list[str] = []
+        stderr_chunks: list[str] = []
 
         try:
             job.status = RenderStatus.RUNNING
@@ -1513,7 +1512,7 @@ class AERenderEngine:
             if job.process:
                 self._terminate_process_tree(job.process)
                 job.process = None
-            return False, f"渲染超时", AerenderExitCode.TIMEOUT
+            return False, "渲染超时", AerenderExitCode.TIMEOUT
         except PermissionError as e:
             return False, f"权限错误: {e}", AerenderExitCode.CANNOT_WRITE_OUTPUT
         except FileNotFoundError as e:

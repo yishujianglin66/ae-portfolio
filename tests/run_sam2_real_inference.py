@@ -9,8 +9,8 @@
 """
 from __future__ import annotations
 
-import sys
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -18,8 +18,9 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "puppet-automation"))
 
-import torch
 import cv2
+import torch
+
 
 def main():
     print("=" * 60)
@@ -64,7 +65,7 @@ def main():
     print(f"    抽取完成: {extracted} 帧")
     
     # 3. 初始化 SAM2
-    print(f"\n[3] 初始化 SAM2 video predictor")
+    print("\n[3] 初始化 SAM2 video predictor")
     checkpoint = Path(r"D:\AE-Work\models\sam2\sam2.1_hiera_base_plus.pt")
     model_cfg = "configs/sam2.1/sam2.1_hiera_b+.yaml"
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -83,10 +84,10 @@ def main():
     print(f"    模型加载耗时: {t1-t0:.1f}s")
     
     # 4. 初始化视频状态
-    print(f"\n[4] 初始化视频状态")
+    print("\n[4] 初始化视频状态")
     with torch.inference_mode():
         inference_state = predictor.init_state(video_path=str(frames_dir))
-        print(f"    状态初始化完成")
+        print("    状态初始化完成")
         
         # 5. 添加点提示（画面中心，假设主体在中心区域）
         center_x, center_y = width // 2, height // 2
@@ -100,7 +101,7 @@ def main():
         )
         
         # 6. 逐帧传播
-        print(f"\n[6] 逐帧传播生成遮罩")
+        print("\n[6] 逐帧传播生成遮罩")
         output_dir = Path(r"D:\AE-Work\output\sam2_test\masks")
         output_dir.mkdir(parents=True, exist_ok=True)
         
@@ -126,7 +127,7 @@ def main():
         print(f"\n    遮罩生成完成: {mask_count} 帧 | 耗时: {t3-t2:.1f}s | 平均: {(t3-t2)/max(mask_count,1):.2f}s/帧")
     
     # 7. 验证遮罩文件
-    print(f"\n[7] 验证遮罩文件")
+    print("\n[7] 验证遮罩文件")
     masks = sorted(output_dir.glob("*.png"))
     print(f"    文件数: {len(masks)}")
     
@@ -155,7 +156,7 @@ def main():
     
     if valid_masks == len(masks) and valid_masks > 0:
         print(f"\n{'=' * 60}")
-        print(f"  ✅ SAM2 真实推理验证通过！")
+        print("  ✅ SAM2 真实推理验证通过！")
         print(f"  生成了 {valid_masks} 帧真实遮罩，平均覆盖率 {avg_coverage:.1f}%")
         print(f"  遮罩目录: {output_dir}")
         print(f"{'=' * 60}")
@@ -166,7 +167,7 @@ def main():
         return 0
     else:
         print(f"\n{'=' * 60}")
-        print(f"  ❌ SAM2 推理验证失败：部分遮罩无效")
+        print("  ❌ SAM2 推理验证失败：部分遮罩无效")
         print(f"{'=' * 60}")
         del predictor
         torch.cuda.empty_cache()

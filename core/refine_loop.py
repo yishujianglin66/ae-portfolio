@@ -43,7 +43,7 @@ class DirectorRefineLoop:
     def __init__(
         self,
         generator: Any = None,
-        scorer: Optional[DirectorQualityScorer] = None,
+        scorer: DirectorQualityScorer | None = None,
         target_score: float = 85.0,
         max_iterations: int = 3,
     ):
@@ -58,9 +58,9 @@ class DirectorRefineLoop:
 
     def refine_script(
         self,
-        script: Dict[str, Any],
-        combo_stats: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        script: dict[str, Any],
+        combo_stats: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """轨迹驱动的迭代修补
 
         Returns:
@@ -68,8 +68,8 @@ class DirectorRefineLoop:
              "iterations": int, "trajectory": [{step, score, weakest, actions}],
              "improved": bool, "heartbeats": [float]}
         """
-        trajectory: List[Dict[str, Any]] = []
-        heartbeats: List[float] = []
+        trajectory: list[dict[str, Any]] = []
+        heartbeats: list[float] = []
 
         card = self._scorer.score_card(
             script, combo_stats=combo_stats,
@@ -119,10 +119,10 @@ class DirectorRefineLoop:
     def refine(
         self,
         user_prompt: str,
-        material_analyses: List[Dict],
+        material_analyses: list[dict],
         style: str = "cinematic",
         generator: Any = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成剧本并自改进 (generator未注入时用规则fallback)"""
         gen = generator or self._generator
         if gen is not None:
@@ -139,7 +139,7 @@ class DirectorRefineLoop:
     #  评分与维度分析
     # ────────────────────────────────────────────────────────────
 
-    def _build_evidence(self, script: Dict[str, Any]) -> Dict[str, Any]:
+    def _build_evidence(self, script: dict[str, Any]) -> dict[str, Any]:
         """从剧本提取反模式证据 (与 scorer.score_anti_patterns 契约一致)"""
         segs = script.get("segments", [])
         movements = [
@@ -149,7 +149,7 @@ class DirectorRefineLoop:
         ]
         movements = [m for m in movements if m]
         durs = [round(s.get("duration", 0), 2) for s in segs if s.get("duration")]
-        cuts: List[float] = []
+        cuts: list[float] = []
         for s in segs:
             cuts.extend(s.get("cut_times", []))
         beat_card = self._scorer.score_beat_alignment(
@@ -162,7 +162,7 @@ class DirectorRefineLoop:
             "camera_unique": len(set(movements)),
         }
 
-    def _weakest_dimension(self, card: Dict[str, Any]) -> str:
+    def _weakest_dimension(self, card: dict[str, Any]) -> str:
         metrics = card.get("metrics", {})
         dims = {
             "beat_alignment": metrics.get("beat_alignment", {}).get("score", 100),
@@ -178,17 +178,17 @@ class DirectorRefineLoop:
     # ────────────────────────────────────────────────────────────
 
     def _apply_refinements(
-        self, script: Dict[str, Any], weakest: str, card: Dict[str, Any]
-    ) -> List[str]:
+        self, script: dict[str, Any], weakest: str, card: dict[str, Any]
+    ) -> list[str]:
         """按最弱维度顺序执行修补; 每轮全维度扫一遍保证收敛"""
-        actions: List[str] = []
+        actions: list[str] = []
         actions += self._refine_beat(script, card)
         actions += self._refine_camera(script, card)
         actions += self._refine_arc(script, card)
         actions += self._refine_anti(script, card)
         return actions
 
-    def _refine_beat(self, script: Dict[str, Any], card: Dict) -> List[str]:
+    def _refine_beat(self, script: dict[str, Any], card: dict) -> list[str]:
         """切点吸附BPM半拍网格 (防累积漂移: 逐点独立吸附)"""
         metrics = card.get("metrics", {})
         if metrics.get("beat_alignment", {}).get("score", 100) >= 99.0:
@@ -209,7 +209,7 @@ class DirectorRefineLoop:
             seg["cut_times"] = new_cuts
         return [f"beat_snap:{snapped}个切点吸附BPM网格"] if snapped else []
 
-    def _refine_camera(self, script: Dict[str, Any], card) -> List[str]:
+    def _refine_camera(self, script: dict[str, Any], card) -> list[str]:
         """运镜去重+多样化注入 (CAMERA_IDS_ALL 12运镜池)"""
         segs = script.get("segments", [])
         movements = [
@@ -253,7 +253,7 @@ class DirectorRefineLoop:
                     actions.append(f"camera_inject:注入{repl}提升多样性")
         return actions
 
-    def _refine_arc(self, script: Dict[str, Any], card) -> List[str]:
+    def _refine_arc(self, script: dict[str, Any], card) -> list[str]:
         """弧线补全: energy_target / breath_break / 非均分时长"""
         actions = []
         segs = script.get("segments", [])
@@ -291,7 +291,7 @@ class DirectorRefineLoop:
             actions.append("arc_envelope:时长改为12/24/34/12/18能量包络")
         return actions
 
-    def _refine_anti(self, script: Dict[str, Any], card) -> List[str]:
+    def _refine_anti(self, script: dict[str, Any], card) -> list[str]:
         """反模式修补: 缓动缺失 / 过大缩放"""
         actions = []
         segs = script.get("segments", [])

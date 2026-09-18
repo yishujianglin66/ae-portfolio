@@ -25,20 +25,19 @@
 - [[🎬-风格化剪辑知识库-MOC]]
 """
 
-import os
-import sys
-import json
-import time
 import copy
+import json
+import os
 import shutil
-import traceback
-from dataclasses import dataclass, field, asdict
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple, Callable, Union
-from enum import Enum
-
 import subprocess
+import sys
+import time
+import traceback
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 
 def _env_path(env_var: str, *candidates: str) -> str:
@@ -52,7 +51,7 @@ def _env_path(env_var: str, *candidates: str) -> str:
     return v or (candidates[0] if candidates else "")
 
 
-def _run(cmd: List[str], log: List[str], timeout: int = 600) -> None:
+def _run(cmd: list[str], log: list[str], timeout: int = 600) -> None:
     """执行子进程，失败抛异常（由调用方决定降级）。"""
     log.append("CMD: " + " ".join(str(c) for c in cmd))
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
@@ -95,11 +94,11 @@ class ToolInfo:
     description: str
     status: str = ToolStatus.UNAVAILABLE.value
     executable_path: str = ""
-    adapter_class: Optional[Callable] = None
-    capabilities: List[str] = field(default_factory=list)
-    input_schema: Dict[str, Any] = field(default_factory=dict)
-    output_schema: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    adapter_class: Callable | None = None
+    capabilities: list[str] = field(default_factory=list)
+    input_schema: dict[str, Any] = field(default_factory=dict)
+    output_schema: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -108,12 +107,12 @@ class ToolResult:
     success: bool
     tool_name: str
     operation: str
-    output_path: Optional[str] = None
-    output_data: Dict[str, Any] = field(default_factory=dict)
+    output_path: str | None = None
+    output_data: dict[str, Any] = field(default_factory=dict)
     error: str = ""
     duration_ms: float = 0
     mode_used: str = "simulate"
-    log: List[str] = field(default_factory=list)
+    log: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -124,8 +123,8 @@ class WorkflowStep:
     tool_name: str
     operation: str
     description: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
-    depends_on: List[str] = field(default_factory=list)
+    params: dict[str, Any] = field(default_factory=dict)
+    depends_on: list[str] = field(default_factory=list)
     enabled: bool = True
     retry_count: int = 0
 
@@ -135,9 +134,9 @@ class WorkflowResult:
     """工作流执行结果"""
     workflow_name: str
     status: str
-    steps: List[ToolResult] = field(default_factory=list)
+    steps: list[ToolResult] = field(default_factory=list)
     total_duration_ms: float = 0
-    output_files: List[str] = field(default_factory=list)
+    output_files: list[str] = field(default_factory=list)
     error: str = ""
     summary: str = ""
 
@@ -146,9 +145,9 @@ class ToolRegistry:
     """工具注册中心"""
 
     def __init__(self):
-        self._tools: Dict[str, ToolInfo] = {}
-        self._categories: Dict[str, List[str]] = {cat.value: [] for cat in ToolCategory}
-        self._status_cache: Dict[str, str] = {}
+        self._tools: dict[str, ToolInfo] = {}
+        self._categories: dict[str, list[str]] = {cat.value: [] for cat in ToolCategory}
+        self._status_cache: dict[str, str] = {}
 
     def register_tool(self, tool_info: ToolInfo) -> None:
         """注册工具"""
@@ -156,17 +155,17 @@ class ToolRegistry:
         self._categories[tool_info.category].append(tool_info.name)
         self._status_cache[tool_info.name] = tool_info.status
 
-    def get_tool(self, name: str) -> Optional[ToolInfo]:
+    def get_tool(self, name: str) -> ToolInfo | None:
         """获取工具信息"""
         return self._tools.get(name)
 
-    def list_tools(self, category: Optional[str] = None) -> List[ToolInfo]:
+    def list_tools(self, category: str | None = None) -> list[ToolInfo]:
         """列出工具"""
         if category:
             return [self._tools[name] for name in self._categories.get(category, [])]
         return list(self._tools.values())
 
-    def list_tool_names(self, category: Optional[str] = None) -> List[str]:
+    def list_tool_names(self, category: str | None = None) -> list[str]:
         """列出工具名称"""
         if category:
             return self._categories.get(category, [])
@@ -201,7 +200,7 @@ class ToolchainManager:
 
     def __init__(self):
         self.registry = ToolRegistry()
-        self._engine_adapters: Dict[str, Any] = {}
+        self._engine_adapters: dict[str, Any] = {}
         self._init_default_tools()
 
     def _init_default_tools(self) -> None:
@@ -404,7 +403,7 @@ class ToolchainManager:
         for tool in python_tools:
             self.registry.register_tool(tool)
 
-    def get_tool_status(self, tool_name: str) -> Dict[str, Any]:
+    def get_tool_status(self, tool_name: str) -> dict[str, Any]:
         """获取工具状态"""
         tool = self.registry.get_tool(tool_name)
         if not tool:
@@ -421,7 +420,7 @@ class ToolchainManager:
             "metadata": tool.metadata
         }
 
-    def get_all_tool_status(self) -> Dict[str, Any]:
+    def get_all_tool_status(self) -> dict[str, Any]:
         """获取所有工具状态"""
         result = {
             "total_tools": len(self.registry.list_tools()),
@@ -445,7 +444,7 @@ class ToolchainManager:
 
         return result
 
-    def execute_tool(self, tool_name: str, operation: str, params: Dict[str, Any],
+    def execute_tool(self, tool_name: str, operation: str, params: dict[str, Any],
                      mode: str = "auto") -> ToolResult:
         """执行工具操作"""
         start_time = time.time()
@@ -509,8 +508,8 @@ class ToolchainManager:
         t = self.registry.get_tool(name)
         return t.executable_path if (t and t.executable_path) else ""
 
-    def _execute_real(self, tool_name: str, operation: str, params: Dict[str, Any],
-                      log: List[str], start_time: float) -> ToolResult:
+    def _execute_real(self, tool_name: str, operation: str, params: dict[str, Any],
+                      log: list[str], start_time: float) -> ToolResult:
         """执行真实工具（真正调用二进制；失败抛异常由 auto 降级 simulate）"""
         log.append(f"执行真实工具: {tool_name}.{operation}")
         if tool_name == "ffmpeg":
@@ -523,7 +522,7 @@ class ToolchainManager:
             return self._execute_blender(operation, params, log)
         raise NotImplementedError(f"工具 {tool_name} 暂无真实执行适配器")
 
-    def _execute_ffmpeg(self, operation: str, params: Dict[str, Any], log: List[str]) -> ToolResult:
+    def _execute_ffmpeg(self, operation: str, params: dict[str, Any], log: list[str]) -> ToolResult:
         """真实调用 FFmpeg（本机唯一保证可用的真实引擎）"""
         exe = self._tool_exe("ffmpeg")
         if not exe:
@@ -558,7 +557,7 @@ class ToolchainManager:
                               output_path=out, output_data={"filters": filters}, mode_used="real", log=log)
         raise NotImplementedError(f"ffmpeg 操作 {operation} 需提供 input_path/output_path")
 
-    def _execute_ae(self, operation: str, params: Dict[str, Any], log: List[str]) -> ToolResult:
+    def _execute_ae(self, operation: str, params: dict[str, Any], log: list[str]) -> ToolResult:
         """真实调用 aerender（需 project/comp/output）"""
         exe = self._tool_exe("after_effects")
         if not exe:
@@ -576,11 +575,11 @@ class ToolchainManager:
                               output_path=out, output_data={"comp": comp}, mode_used="real", log=log)
         raise NotImplementedError(f"AE 操作 {operation} 暂无真实适配器")
 
-    def _execute_topaz(self, operation: str, params: Dict[str, Any], log: List[str]) -> ToolResult:
+    def _execute_topaz(self, operation: str, params: dict[str, Any], log: list[str]) -> ToolResult:
         """Topaz 为 GUI BETA，无标准 CLI 适配器 → 诚实失败由 auto 降级 simulate"""
         raise NotImplementedError("Topaz Video AI 暂无真实 CLI 适配器")
 
-    def _execute_blender(self, operation: str, params: Dict[str, Any], log: List[str]) -> ToolResult:
+    def _execute_blender(self, operation: str, params: dict[str, Any], log: list[str]) -> ToolResult:
         """真实调用 Blender（需 project/脚本）"""
         exe = self._tool_exe("blender")
         if not exe:
@@ -597,8 +596,8 @@ class ToolchainManager:
                               output_data={"project": proj}, mode_used="real", log=log)
         raise NotImplementedError(f"Blender 操作 {operation} 需提供 project_path")
 
-    def _simulate_execution(self, tool_name: str, operation: str, params: Dict[str, Any],
-                            log: List[str], start_time: float) -> ToolResult:
+    def _simulate_execution(self, tool_name: str, operation: str, params: dict[str, Any],
+                            log: list[str], start_time: float) -> ToolResult:
         """模拟执行"""
         duration = (time.time() - start_time) * 1000
         log.append(f"模拟执行: {tool_name}.{operation}")
@@ -689,7 +688,7 @@ class ToolchainManager:
             except Exception:
                 pass
 
-    def _get_workflow_steps(self, workflow_name: str, input_path: str, output_path: str) -> List[WorkflowStep]:
+    def _get_workflow_steps(self, workflow_name: str, input_path: str, output_path: str) -> list[WorkflowStep]:
         """获取工作流步骤"""
         workflows = {
             "enhance_quality": [
@@ -763,11 +762,11 @@ class ToolchainManager:
 
         return workflows.get(workflow_name, [])
 
-    def list_workflows(self) -> List[str]:
+    def list_workflows(self) -> list[str]:
         """列出所有工作流"""
         return ["enhance_quality", "delivery_pipeline", "full_production"]
 
-    def get_workflow_details(self, workflow_name: str) -> Dict[str, Any]:
+    def get_workflow_details(self, workflow_name: str) -> dict[str, Any]:
         """获取工作流详情"""
         steps = self._get_workflow_steps(workflow_name, "input.mp4", "output.mp4")
         return {

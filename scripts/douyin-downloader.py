@@ -1,11 +1,11 @@
-import subprocess
 import json
 import os
 import re
+import subprocess
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
-from datetime import datetime
 
 CONFIG_PATH = Path(__file__).parent / "config" / "media-config.json"
 
@@ -21,8 +21,8 @@ class DouyinDownloader:
         os.makedirs(self.config["directories"]["bgm_library"], exist_ok=True)
         os.makedirs(os.path.dirname(self.config["platforms"]["douyin"]["cookie_path"]), exist_ok=True)
 
-    def download_video(self, url: str, output_dir: Optional[str] = None,
-                      audio_only: bool = False, watermark_free: bool = True) -> Dict:
+    def download_video(self, url: str, output_dir: str | None = None,
+                      audio_only: bool = False, watermark_free: bool = True) -> dict:
         if output_dir is None:
             output_dir = self.config["directories"]["video_library"]
             if audio_only:
@@ -92,11 +92,11 @@ class DouyinDownloader:
 
         return result
 
-    def download_bgm(self, url: str) -> Dict:
+    def download_bgm(self, url: str) -> dict:
         return self.download_video(url, audio_only=True)
 
     def search_and_download(self, keyword: str, max_results: int = 5,
-                           audio_only: bool = False) -> List[Dict]:
+                           audio_only: bool = False) -> list[dict]:
         results = []
 
         cmd = [
@@ -152,7 +152,7 @@ class DouyinDownloader:
         return results
 
     def download_user_videos(self, user_url: str, limit: int = 10,
-                             audio_only: bool = False) -> List[Dict]:
+                             audio_only: bool = False) -> list[dict]:
         results = []
 
         cmd = [
@@ -199,7 +199,7 @@ class DouyinDownloader:
 
         return results
 
-    def batch_extract_audio(self, video_directory: str = None) -> List[Dict]:
+    def batch_extract_audio(self, video_directory: str = None) -> list[dict]:
         if video_directory is None:
             video_directory = self.config["directories"]["video_library"]
 
@@ -225,7 +225,7 @@ class DouyinDownloader:
 
         return results
 
-    def extract_audio_from_douyin_video(self, video_path: str, output_dir: Optional[str] = None) -> Dict:
+    def extract_audio_from_douyin_video(self, video_path: str, output_dir: str | None = None) -> dict:
         from ffmpeg_toolkit import FFmpegToolkit
 
         if output_dir is None:
@@ -251,7 +251,7 @@ class DouyinDownloader:
 
         return {"success": True, "cookie_path": cookie_path}
 
-    def validate_cookie(self) -> Dict:
+    def validate_cookie(self) -> dict:
         cookie_path = self.config["platforms"]["douyin"]["cookie_path"]
 
         if not os.path.exists(cookie_path):
@@ -288,7 +288,7 @@ class DouyinDownloader:
             "cookie_path": self.config["platforms"]["douyin"]["cookie_path"]
         }
 
-    def download_trending_videos(self, count: int = 5, audio_only: bool = False) -> List[Dict]:
+    def download_trending_videos(self, count: int = 5, audio_only: bool = False) -> list[dict]:
         trending_url = "https://www.douyin.com"
 
         cmd = [
@@ -342,7 +342,7 @@ class DouyinDownloader:
         except Exception as e:
             return [{"success": False, "error": str(e)}]
     
-    def search_videos(self, keyword: str, count: int = 5) -> Dict:
+    def search_videos(self, keyword: str, count: int = 5) -> dict:
         """搜索抖音视频（不下载）"""
         search_url = f"https://www.douyin.com/search/{keyword}"
         

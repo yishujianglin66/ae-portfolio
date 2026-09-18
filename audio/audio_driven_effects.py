@@ -3,9 +3,10 @@
 音频驱动效果参数变化 - 验证流程
 模拟BPM=128的音乐，生成节拍同步关键帧
 """
-from ae_mcp_client import AECommandClient
 import json
 import math
+
+from ae_mcp_client import AECommandClient
 
 # 模拟音频分析结果
 BPM = 128
@@ -165,7 +166,7 @@ print(json.dumps(r2, indent=2, ensure_ascii=False))
 
 print("\n=== Audio-driven effects setup complete ===")
 print(f"- {len(beat_times)} beats mapped to keyframes")
-print(f"- Scale: beat-synced pulses (100-115)")
-print(f"- Rotation: continuous + beat wobble (0-30)")
-print(f"- Opacity: energy-responsive (70-100)")
-print(f"- Expressions: Opacity sine-wave, Rotation wobble")
+print("- Scale: beat-synced pulses (100-115)")
+print("- Rotation: continuous + beat wobble (0-30)")
+print("- Opacity: energy-responsive (70-100)")
+print("- Expressions: Opacity sine-wave, Rotation wobble")

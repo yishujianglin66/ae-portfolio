@@ -15,8 +15,8 @@ import torch
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "external", "matanyone2"))
 
 from matanyone2.inference.inference_core import InferenceCore
-from matanyone2.utils.get_default_model import get_matanyone2_model
 from matanyone2.utils.device import get_default_device
+from matanyone2.utils.get_default_model import get_matanyone2_model
 
 CKPT = "pretrained_models/matanyone2.pth"
 VIDEO = "inputs/video/test-sample1"

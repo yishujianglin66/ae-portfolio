@@ -15,13 +15,13 @@
     每个测试用例输出 PASS/FAIL，最终汇总报告
 """
 
-import os
-import sys
-import time
 import json
+import os
 import signal
-import traceback
+import sys
 import threading
+import time
+import traceback
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 os.environ["PATH"] += os.pathsep + r"D:\app\FormatFactory"
@@ -164,9 +164,7 @@ def test_workflow_presets():
 
     try:
         def _run():
-            from unified_tool_integrator import (
-                ToolType, WorkflowPreset, WORKFLOW_PRESETS
-            )
+            from unified_tool_integrator import WORKFLOW_PRESETS, ToolType, WorkflowPreset
 
             # 验证新 ToolType
             new_tools = {
@@ -368,7 +366,7 @@ def print_summary():
     print(f"  通过率: {passed/total*100:.1f}%" if total > 0 else "  通过率: N/A")
 
     if failed > 0:
-        print(f"\n  失败项目:")
+        print("\n  失败项目:")
         for r in results:
             if not r["passed"]:
                 print(f"    [FAIL] {r['name']}: {r['detail']}")

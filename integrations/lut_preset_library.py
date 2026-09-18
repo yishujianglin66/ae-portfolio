@@ -10,13 +10,12 @@ DaVinci Resolve LUT 预设库 v1.0
 - Fusion 调色脚本生成
 - 多 LUT 链式应用
 """
-import os
 import json
+import os
 import time
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
-
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # ============================================================================
 # LUT 库根目录
@@ -38,20 +37,20 @@ class LUTPreset:
     category: str                # 主分类
     subcategory: str = ""        # 子分类
     description: str = ""        # 描述
-    tags: List[str] = field(default_factory=list)  # 标签
-    intensity_range: Tuple[float, float] = (0.3, 1.0)  # 推荐强度范围
-    best_for: List[str] = field(default_factory=list)    # 最佳适用场景
+    tags: list[str] = field(default_factory=list)  # 标签
+    intensity_range: tuple[float, float] = (0.3, 1.0)  # 推荐强度范围
+    best_for: list[str] = field(default_factory=list)    # 最佳适用场景
     mood: str = ""               # 情绪/氛围
     lut_dir_pattern: str = ""    # LUT 目录匹配模式
     lut_file_pattern: str = ""   # LUT 文件名匹配模式
-    preferred_files: List[str] = field(default_factory=list)  # 精选文件编号
+    preferred_files: list[str] = field(default_factory=list)  # 精选文件编号
 
 
 # ============================================================================
 # 完整预设库 (40+ 预设)
 # ============================================================================
 
-LUT_PRESETS: Dict[str, LUTPreset] = {
+LUT_PRESETS: dict[str, LUTPreset] = {
     # ---- 电影感系列 ----
     "cinematic": LUTPreset(
         name="cinematic",
@@ -586,7 +585,7 @@ LUT_PRESETS: Dict[str, LUTPreset] = {
 # 场景 → 预设推荐映射
 # ============================================================================
 
-SCENE_PRESET_MAP: Dict[str, List[str]] = {
+SCENE_PRESET_MAP: dict[str, list[str]] = {
     "高燃混剪": ["dramatic", "hollywood", "rogue", "cinematic"],
     "战斗场景": ["dramatic", "rogue", "silence", "noir"],
     "情感叙事": ["cinematic_02", "memories", "movie", "japan"],
@@ -617,12 +616,12 @@ SCENE_PRESET_MAP: Dict[str, List[str]] = {
 class LUTLibrary:
     """LUT 库管理器"""
     
-    def __init__(self, base_dir: Optional[Path] = None):
+    def __init__(self, base_dir: Path | None = None):
         self.base_dir = base_dir or LUT_BASE_DIR
-        self._index: Optional[Dict[str, Any]] = None
-        self._file_cache: Dict[str, str] = {}  # preset_name -> lut_path
+        self._index: dict[str, Any] | None = None
+        self._file_cache: dict[str, str] = {}  # preset_name -> lut_path
     
-    def _load_index(self) -> Dict[str, Any]:
+    def _load_index(self) -> dict[str, Any]:
         """加载或构建 LUT 索引"""
         if self._index:
             return self._index
@@ -650,7 +649,7 @@ class LUTLibrary:
         
         return self._index
     
-    def get_preset_lut(self, preset_name: str, variant: int = 1) -> Optional[str]:
+    def get_preset_lut(self, preset_name: str, variant: int = 1) -> str | None:
         """获取预设对应的 LUT 文件路径
         
         Args:
@@ -697,7 +696,7 @@ class LUTLibrary:
         
         return None
     
-    def get_all_luts_for_preset(self, preset_name: str) -> List[str]:
+    def get_all_luts_for_preset(self, preset_name: str) -> list[str]:
         """获取预设对应的所有 LUT 文件"""
         preset = LUT_PRESETS.get(preset_name)
         if not preset:
@@ -709,22 +708,22 @@ class LUTLibrary:
                 return dir_info["files"]
         return []
     
-    def get_presets_by_category(self, category: str) -> List[LUTPreset]:
+    def get_presets_by_category(self, category: str) -> list[LUTPreset]:
         """按分类获取预设列表"""
         return [p for p in LUT_PRESETS.values() if p.category == category]
     
-    def get_presets_by_tag(self, tag: str) -> List[LUTPreset]:
+    def get_presets_by_tag(self, tag: str) -> list[LUTPreset]:
         """按标签搜索预设"""
         tag_lower = tag.lower()
         return [p for p in LUT_PRESETS.values() 
                 if tag_lower in [t.lower() for t in p.tags]]
     
-    def get_presets_for_scene(self, scene_type: str) -> List[LUTPreset]:
+    def get_presets_for_scene(self, scene_type: str) -> list[LUTPreset]:
         """获取场景推荐的预设列表"""
         preset_names = SCENE_PRESET_MAP.get(scene_type, [])
         return [LUT_PRESETS[n] for n in preset_names if n in LUT_PRESETS]
     
-    def search_presets(self, query: str) -> List[LUTPreset]:
+    def search_presets(self, query: str) -> list[LUTPreset]:
         """搜索预设（名称/描述/标签）"""
         query_lower = query.lower()
         results = []
@@ -737,11 +736,11 @@ class LUTLibrary:
                 results.append(p)
         return results
     
-    def get_all_categories(self) -> List[str]:
+    def get_all_categories(self) -> list[str]:
         """获取所有分类"""
         return list(set(p.category for p in LUT_PRESETS.values()))
     
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取库统计信息"""
         index = self._load_index()
         total_files = sum(info["count"] for info in index.values())
@@ -785,7 +784,7 @@ class FusionColorEngine:
         saturation: float = 1.0,
     ) -> str:
         """生成亮度/对比度/饱和度 Fusion 合成 Lua"""
-        return f'''
+        return '''
 -- Fusion Color Adjustment
 local comp = item:AddFusionComp("ColorAdjust")
 if comp then
@@ -796,8 +795,8 @@ end
     
     @staticmethod
     def generate_multi_lut_chain_lua(
-        lut_paths: List[str],
-        intensities: Optional[List[float]] = None,
+        lut_paths: list[str],
+        intensities: list[float] | None = None,
     ) -> str:
         """生成多 LUT 链式应用 Lua
         
@@ -838,7 +837,7 @@ end
 # ============================================================================
 
 # 全局 LUT 库实例
-_lut_library: Optional[LUTLibrary] = None
+_lut_library: LUTLibrary | None = None
 
 def get_lut_library() -> LUTLibrary:
     """获取全局 LUT 库实例"""
@@ -848,18 +847,18 @@ def get_lut_library() -> LUTLibrary:
     return _lut_library
 
 
-def find_lut_for_preset(preset_name: str, variant: int = 1) -> Optional[str]:
+def find_lut_for_preset(preset_name: str, variant: int = 1) -> str | None:
     """查找预设对应的 LUT 文件（增强版）"""
     lib = get_lut_library()
     return lib.get_preset_lut(preset_name, variant)
 
 
-def get_scene_presets(scene_type: str) -> List[str]:
+def get_scene_presets(scene_type: str) -> list[str]:
     """获取场景类型推荐的预设名列表"""
     return SCENE_PRESET_MAP.get(scene_type, [])
 
 
-def get_preset_info(preset_name: str) -> Optional[Dict[str, Any]]:
+def get_preset_info(preset_name: str) -> dict[str, Any] | None:
     """获取预设详细信息"""
     preset = LUT_PRESETS.get(preset_name)
     if not preset:
@@ -877,7 +876,7 @@ def get_preset_info(preset_name: str) -> Optional[Dict[str, Any]]:
     }
 
 
-def list_all_presets() -> List[Dict[str, str]]:
+def list_all_presets() -> list[dict[str, str]]:
     """列出所有预设概要"""
     return [
         {

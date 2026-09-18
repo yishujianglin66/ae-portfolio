@@ -2,8 +2,8 @@
 """P2 贝叶斯优化器闭环验证
 验证 BayesianParameterOptimizer 的 observe() 和 recommend() 闭环。
 """
-import sys
 import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -18,7 +18,7 @@ def main():
     # 1. 加载优化器
     print("\n[1] Loading BayesianParameterOptimizer...")
     try:
-        from core.bayesian_optimizer import get_optimizer, PARAMETER_SPACES
+        from core.bayesian_optimizer import PARAMETER_SPACES, get_optimizer
         optimizer = get_optimizer()
         print("    Optimizer loaded OK")
         print(f"    Parameter spaces: {len(PARAMETER_SPACES)} effects")

@@ -49,7 +49,7 @@ class TestAUProcessManager:
 
     def test_au_metrics(self):
         """测试获取 AU 进程指标。"""
-        from ae.au_process_manager import AUProcessManager, AUMetrics
+        from ae.au_process_manager import AUMetrics, AUProcessManager
 
         manager = AUProcessManager()
         metrics = manager.get_au_metrics()
@@ -149,11 +149,11 @@ class TestAUMcpClient:
     def test_au_client_exceptions(self):
         """测试异常类导入。"""
         from ae.au_mcp_client import (
-            AUMCPError,
-            AUConnectionError,
             AUCommandError,
-            AUTimeoutError,
+            AUConnectionError,
+            AUMCPError,
             AUNotFoundError,
+            AUTimeoutError,
         )
 
         assert AUMCPError is not None
@@ -164,7 +164,7 @@ class TestAUMcpClient:
 
     def test_au_data_classes(self):
         """测试数据类。"""
-        from ae.au_mcp_client import SessionInfo, TrackInfo, ClipInfo
+        from ae.au_mcp_client import ClipInfo, SessionInfo, TrackInfo
 
         session = SessionInfo(
             name="TestSession",
@@ -204,10 +204,10 @@ class TestAUAdapter:
     def test_au_adapter_imports(self):
         """测试适配器导入。"""
         from ae.adapters.au_adapter import (
+            AUAdapterFactory,
             BaseAUAdapter,
             MCPClientAUAdapter,
             PuppetEngineAUAdapter,
-            AUAdapterFactory,
         )
 
         assert BaseAUAdapter is not None
@@ -262,10 +262,10 @@ class TestAUIntegration:
     def test_au_adapter_exported_in_init(self):
         """测试适配器在 __init__.py 中导出。"""
         from ae.adapters import (
+            AUAdapterFactory,
             BaseAUAdapter,
             MCPClientAUAdapter,
             PuppetEngineAUAdapter,
-            AUAdapterFactory,
         )
 
         assert BaseAUAdapter is not None

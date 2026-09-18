@@ -3,8 +3,8 @@
 支持多种数据集类型，提供便捷的数据准备流程
 参考 Antares 哲学：数据质量是小模型成功的关键
 """
-import os
 import logging
+import os
 from typing import Any, Dict, Optional, Tuple, Type
 
 from .dataset_base import BaseDataset, DatasetConfig, DatasetStats
@@ -32,14 +32,14 @@ class DataPreparator:
         dataset_type: str,
         data_path: str,
         dataset_name: str = "",
-        max_samples: Optional[int] = None,
+        max_samples: int | None = None,
         data_augmentation: bool = True,
         filter_invalid: bool = True,
         test_split_ratio: float = 0.1,
         val_split_ratio: float = 0.1,
         seed: int = 42,
         **kwargs
-    ) -> Tuple[BaseDataset, DatasetStats]:
+    ) -> tuple[BaseDataset, DatasetStats]:
         """创建并准备数据集
         
         Args:
@@ -94,7 +94,7 @@ class DataPreparator:
         data_path: str,
         dataset_name: str = "jsx_code",
         **kwargs
-    ) -> Tuple[JSXCodeDataset, DatasetStats]:
+    ) -> tuple[JSXCodeDataset, DatasetStats]:
         """准备 JSX 代码数据集
         
         Args:
@@ -113,7 +113,7 @@ class DataPreparator:
         data_path: str,
         dataset_name: str = "style_classify",
         **kwargs
-    ) -> Tuple[StyleClassifyDataset, DatasetStats]:
+    ) -> tuple[StyleClassifyDataset, DatasetStats]:
         """准备风格分类数据集
         
         Args:
@@ -127,7 +127,7 @@ class DataPreparator:
         return cls.create_dataset('style_classify', data_path, dataset_name, **kwargs)
 
     @classmethod
-    def list_supported_datasets(cls) -> Dict[str, str]:
+    def list_supported_datasets(cls) -> dict[str, str]:
         """列出支持的数据集类型
         
         Returns:

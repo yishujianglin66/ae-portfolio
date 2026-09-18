@@ -1,5 +1,7 @@
 """检测哪些测试文件在导入时挂起或报错"""
-import subprocess, sys, os
+import os
+import subprocess
+import sys
 
 os.chdir(os.path.join(os.path.dirname(__file__), '..', 'tests'))
 files = sorted(f for f in os.listdir('.') if f.startswith('test_') and f.endswith('.py'))
@@ -41,18 +43,18 @@ for f in files:
     except subprocess.TimeoutExpired:
         hang.append(f)
 
-print(f"\n=== 检测结果 ===")
+print("\n=== 检测结果 ===")
 print(f"总计: {len(files)-len(ignored)} 文件 (排除 {len(ignored)} 个已知)")
 print(f"正常: {len(ok)}")
 print(f"导入错误: {len(error)}")
 print(f"导入挂起(>8s): {len(hang)}")
 
 if hang:
-    print(f"\n--- 挂起文件 ---")
+    print("\n--- 挂起文件 ---")
     for f in hang:
         print(f"  HANG: {f}")
 
 if error:
-    print(f"\n--- 导入错误文件 (前20) ---")
+    print("\n--- 导入错误文件 (前20) ---")
     for f, e in error[:20]:
         print(f"  ERR: {f} → {e[:120]}")

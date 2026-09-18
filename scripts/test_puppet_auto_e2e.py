@@ -16,12 +16,12 @@
 - full: 完整端到端测试（包含所有步骤）
 """
 
+import json
 import os
 import sys
-import json
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -34,7 +34,7 @@ def step_log(step_num: int, total: int, title: str, emoji: str = "📌"):
     print(f"{'='*60}")
 
 
-def generate_test_report(report_data: Dict, output_path: str):
+def generate_test_report(report_data: dict, output_path: str):
     """生成测试报告"""
     report = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -60,7 +60,7 @@ def generate_test_report(report_data: Dict, output_path: str):
     return report
 
 
-def test_step1_generate_video(output_dir: str) -> Dict:
+def test_step1_generate_video(output_dir: str) -> dict:
     """步骤1: 生成测试视频"""
     start_time = time.time()
     
@@ -101,7 +101,7 @@ def test_step1_generate_video(output_dir: str) -> Dict:
     return result
 
 
-def test_step2_mediapipe_detection(video_path: str, mode: str = "simulate") -> Dict:
+def test_step2_mediapipe_detection(video_path: str, mode: str = "simulate") -> dict:
     """步骤2: MediaPipe 人物检测"""
     start_time = time.time()
     
@@ -115,7 +115,7 @@ def test_step2_mediapipe_detection(video_path: str, mode: str = "simulate") -> D
     }
     
     try:
-        from mediapipe_integration import MediaPipeIntegrator, MediaPipeConfig
+        from mediapipe_integration import MediaPipeConfig, MediaPipeIntegrator
         
         config = MediaPipeConfig(
             mode=mode,
@@ -131,7 +131,7 @@ def test_step2_mediapipe_detection(video_path: str, mode: str = "simulate") -> D
         
         if not integrator.is_available():
             result["mode"] = "simulate"
-            print(f"  ⚠️ MediaPipe 不可用，使用模拟模式")
+            print("  ⚠️ MediaPipe 不可用，使用模拟模式")
         
         mp_result = integrator.process_video(video_path)
         
@@ -161,7 +161,7 @@ def test_step2_mediapipe_detection(video_path: str, mode: str = "simulate") -> D
     return result
 
 
-def test_step3_style_generation(detection_data: Dict, style_type: str = "wooden_puppet") -> Dict:
+def test_step3_style_generation(detection_data: dict, style_type: str = "wooden_puppet") -> dict:
     """步骤3: 木偶风格化效果生成"""
     start_time = time.time()
     
@@ -175,7 +175,7 @@ def test_step3_style_generation(detection_data: Dict, style_type: str = "wooden_
     }
     
     try:
-        from puppet_style_engine import PuppetStyleEngine, PuppetStyleConfig
+        from puppet_style_engine import PuppetStyleConfig, PuppetStyleEngine
         
         engine = PuppetStyleEngine()
         
@@ -225,7 +225,7 @@ def test_step3_style_generation(detection_data: Dict, style_type: str = "wooden_
 
 
 def test_step4_jsx_generation(style_result: Any, video_path: str,
-                               output_dir: str, style_type: str) -> Dict:
+                               output_dir: str, style_type: str) -> dict:
     """步骤4: 生成 AE JSX 脚本"""
     start_time = time.time()
     
@@ -268,7 +268,7 @@ def test_step4_jsx_generation(style_result: Any, video_path: str,
     return result
 
 
-def test_demo_mode(output_dir: str) -> Dict:
+def test_demo_mode(output_dir: str) -> dict:
     """演示模式 - 使用模拟数据跑全流程"""
     report_data = {
         "total_steps": 4,
@@ -380,7 +380,7 @@ def test_demo_mode(output_dir: str) -> Dict:
     return report_data
 
 
-def test_full_mode(output_dir: str) -> Dict:
+def test_full_mode(output_dir: str) -> dict:
     """完整模式 - 使用真实测试视频"""
     report_data = {
         "total_steps": 5,
@@ -413,7 +413,7 @@ def test_full_mode(output_dir: str) -> Dict:
             for vid in step1_result["videos"]:
                 print(f"  - {vid['style']}: {os.path.basename(vid['path'])} ({vid['size']} bytes)")
         else:
-            print(f"  ⚠️ ffmpeg 不可用，使用模拟数据")
+            print("  ⚠️ ffmpeg 不可用，使用模拟数据")
     else:
         print(f"  ❌ 失败: {step1_result['error']}")
         report_data["errors"].append(step1_result["error"])
@@ -507,9 +507,9 @@ def test_full_mode(output_dir: str) -> Dict:
                 "type": "detection_result",
                 "path": det_path,
             })
-            print(f"  ✅ 检测结果已保存")
+            print("  ✅ 检测结果已保存")
         else:
-            print(f"  ⚠️ 无检测结果可保存")
+            print("  ⚠️ 无检测结果可保存")
         
         report_data["steps"].append({
             "step": "保存检测结果",
@@ -578,12 +578,12 @@ def main():
     print(f"  总耗时: {report['summary']['total_duration']}秒")
     
     if report["errors"]:
-        print(f"\n  ❌ 错误列表:")
+        print("\n  ❌ 错误列表:")
         for err in report["errors"]:
             print(f"    - {err}")
     
     if report["artifacts"]:
-        print(f"\n  📦 生成的文件:")
+        print("\n  📦 生成的文件:")
         for art in report["artifacts"]:
             size_info = f" ({art.get('size', 0)} bytes)" if "size" in art else ""
             print(f"    - {art['type']}: {os.path.basename(art['path'])}{size_info}")

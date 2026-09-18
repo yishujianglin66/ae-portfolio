@@ -52,7 +52,7 @@ _IGNORE_PACKAGES = {
 }
 
 
-def _run_npm_search(keyword: str, limit: int = 30) -> List[Dict[str, Any]]:
+def _run_npm_search(keyword: str, limit: int = 30) -> list[dict[str, Any]]:
     """执行 npm search 并返回解析结果。"""
     try:
         result = subprocess.run(
@@ -76,7 +76,7 @@ def _run_npm_search(keyword: str, limit: int = 30) -> List[Dict[str, Any]]:
     return []
 
 
-def _get_installed_packages() -> Set[str]:
+def _get_installed_packages() -> set[str]:
     """读取已安装的 DSH 插件列表。"""
     pkg_json = _DSH_PROFILE / "package.json"
     if not pkg_json.exists():
@@ -90,7 +90,7 @@ def _get_installed_packages() -> Set[str]:
         return set()
 
 
-def _score_relevance(package: Dict[str, Any]) -> Tuple[float, List[str]]:
+def _score_relevance(package: dict[str, Any]) -> tuple[float, list[str]]:
     """计算包与项目的相关性分数。"""
     name = (package.get("name") or "").lower()
     desc = (package.get("description") or "").lower()
@@ -132,9 +132,9 @@ def _score_relevance(package: Dict[str, Any]) -> Tuple[float, List[str]]:
 
 
 def _format_report(
-    new_packages: List[Tuple[Dict[str, Any], float, List[str]]],
-    updated_packages: List[Tuple[Dict[str, Any], float, List[str]]],
-    installed: Set[str],
+    new_packages: list[tuple[dict[str, Any], float, list[str]]],
+    updated_packages: list[tuple[dict[str, Any], float, list[str]]],
+    installed: set[str],
     total_searched: int,
 ) -> str:
     """生成 markdown 报告。"""
@@ -200,7 +200,7 @@ def main() -> None:
         "dsh-plugin", "dsh-", "deepseek-harness",
         "dsh-tool", "dsh-mcp", "cordis-plugin",
     ]
-    all_packages: Dict[str, Dict[str, Any]] = {}
+    all_packages: dict[str, dict[str, Any]] = {}
     for kw in search_keywords:
         print(f"\n搜索: {kw} ...")
         results = _run_npm_search(kw)
@@ -250,7 +250,7 @@ def main() -> None:
     print(f"  新插件: {len(new_packages)} 个")
     print(f"  已安装更新: {len(updated_packages)} 个")
     if new_packages:
-        print(f"\n  TOP 3 新插件:")
+        print("\n  TOP 3 新插件:")
         for pkg, score, matched in new_packages[:3]:
             print(f"    {pkg['name']} v{pkg.get('version','')} "
                   f"(score={score:.0f}, keys={matched[:3]})")

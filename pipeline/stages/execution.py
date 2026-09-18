@@ -15,10 +15,10 @@ v2.0 变更：
 from __future__ import annotations
 
 import json
-import os
-import time
-import threading
 import logging
+import os
+import threading
+import time
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ class ExecutionStage:
                     self._client = None
         return self._client
 
-    def _send(self, op: str, params: Dict) -> Dict:
+    def _send(self, op: str, params: dict) -> dict:
         """发送命令到 AE（直接 Bridge 文件协议）
 
         v2.1: 直接写入 ~/Documents/ae-mcp-bridge/ae_command.json
@@ -130,7 +130,7 @@ class ExecutionStage:
         bridge_cmd = cmd_map.get(op, op)
         return self._send_bridge_command(bridge_cmd, params)
 
-    def _send_bridge_command(self, command: str, args: Dict, timeout: float = 15.0) -> Dict:
+    def _send_bridge_command(self, command: str, args: dict, timeout: float = 15.0) -> dict:
         """通过 AE Bridge 文件轮询协议执行命令。
 
         listener (ae_mcp_auto_listener.jsx) 原生支持 ping / getProjectInfo /
@@ -149,7 +149,7 @@ class ExecutionStage:
         finally:
             self._bridge_lock.release()
 
-    def _send_bridge_command_impl(self, command: str, args: Dict, timeout: float = 15.0) -> Dict:
+    def _send_bridge_command_impl(self, command: str, args: dict, timeout: float = 15.0) -> dict:
         """Bridge 命令实际执行（已由 _send_bridge_command 串行化保护）"""
         import time as _time
 
@@ -258,7 +258,7 @@ class ExecutionStage:
         return {"status": "error", "message": f"Bridge timeout ({timeout}s) for: {command}", "success": False}
 
     @staticmethod
-    def _build_jsx_for_command(command: str, args: Dict) -> str:
+    def _build_jsx_for_command(command: str, args: dict) -> str:
         """为非原生命令生成 JSX 脚本（通过 runScript 执行）。
 
         支持的命令: createComposition / importFootage / createTextLayer /
@@ -293,25 +293,25 @@ class ExecutionStage:
             text = args.get("text", "")
             name = args.get("name", text)
             pre = _comp_prefix(args)
-            return f'(function(){{try{{' + pre + f'if(!c||!(c instanceof CompItem))return JSON.stringify({{success:false,error:{{message:"no target comp"}}}});var l=c.layers.addText({_s(text)});l.name={_s(name)};return JSON.stringify({{success:true,data:{{layerIndex:l.index}}}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
+            return '(function(){try{' + pre + f'if(!c||!(c instanceof CompItem))return JSON.stringify({{success:false,error:{{message:"no target comp"}}}});var l=c.layers.addText({_s(text)});l.name={_s(name)};return JSON.stringify({{success:true,data:{{layerIndex:l.index}}}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
         if command == "createShapeLayer":
             name = args.get("name", "Shape")
             pre = _comp_prefix(args)
-            return f'(function(){{try{{' + pre + f'if(!c||!(c instanceof CompItem))return JSON.stringify({{success:false,error:{{message:"no target comp"}}}});var l=c.layers.addShape();l.name={_s(name)};return JSON.stringify({{success:true,data:{{layerIndex:l.index}}}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
+            return '(function(){try{' + pre + f'if(!c||!(c instanceof CompItem))return JSON.stringify({{success:false,error:{{message:"no target comp"}}}});var l=c.layers.addShape();l.name={_s(name)};return JSON.stringify({{success:true,data:{{layerIndex:l.index}}}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
         if command == "addAdjustmentLayer":
             name = args.get("name", "Adjustment")
             pre = _comp_prefix(args)
-            return f'(function(){{try{{' + pre + f'if(!c||!(c instanceof CompItem))return JSON.stringify({{success:false,error:{{message:"no target comp"}}}});var l=c.layers.addSolid([0,0,0],{_s(name)},c.width,c.height,1,c.duration);l.adjustmentLayer=true;return JSON.stringify({{success:true,data:{{layerIndex:l.index}}}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
+            return '(function(){try{' + pre + f'if(!c||!(c instanceof CompItem))return JSON.stringify({{success:false,error:{{message:"no target comp"}}}});var l=c.layers.addSolid([0,0,0],{_s(name)},c.width,c.height,1,c.duration);l.adjustmentLayer=true;return JSON.stringify({{success:true,data:{{layerIndex:l.index}}}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
         if command == "setBlendMode":
             layer_idx = args.get("layerIndex", args.get("layer", 1))
             mode = args.get("mode", args.get("blendMode", "SCREEN")).upper()
             pre = _comp_prefix(args)
-            return f'(function(){{try{{' + pre + f'if(!c)return JSON.stringify({{success:false,error:{{message:"no comp"}}}});var m={{"NONE":BlendingMode.NONE,"SCREEN":BlendingMode.SCREEN,"MULTIPLY":BlendingMode.MULTIPLY,"ADD":BlendingMode.ADD,"OVERLAY":BlendingMode.OVERLAY}};c.layer({layer_idx}).blendingMode=m[{_s(mode)}]||BlendingMode.SCREEN;return JSON.stringify({{success:true}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
+            return '(function(){try{' + pre + f'if(!c)return JSON.stringify({{success:false,error:{{message:"no comp"}}}});var m={{"NONE":BlendingMode.NONE,"SCREEN":BlendingMode.SCREEN,"MULTIPLY":BlendingMode.MULTIPLY,"ADD":BlendingMode.ADD,"OVERLAY":BlendingMode.OVERLAY}};c.layer({layer_idx}).blendingMode=m[{_s(mode)}]||BlendingMode.SCREEN;return JSON.stringify({{success:true}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
         if command == "setTrackMatte":
             layer_idx = args.get("layerIndex", 1)
             matte = args.get("matteType", "ALPHA_TRACK_MATTE").upper()
             pre = _comp_prefix(args)
-            return f'(function(){{try{{' + pre + f'if(!c)return JSON.stringify({{success:false,error:{{message:"no comp"}}}});var m={{"NO_TRACK_MATTE":TrackMatteType.NO_TRACK_MATTE,"ALPHA_TRACK_MATTE":TrackMatteType.ALPHA_TRACK_MATTE,"LUMA_TRACK_MATTE":TrackMatteType.LUMA_TRACK_MATTE}};c.layer({layer_idx}).trackMatteType=m[{_s(matte)}]||TrackMatteType.ALPHA_TRACK_MATTE;return JSON.stringify({{success:true}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
+            return '(function(){try{' + pre + f'if(!c)return JSON.stringify({{success:false,error:{{message:"no comp"}}}});var m={{"NO_TRACK_MATTE":TrackMatteType.NO_TRACK_MATTE,"ALPHA_TRACK_MATTE":TrackMatteType.ALPHA_TRACK_MATTE,"LUMA_TRACK_MATTE":TrackMatteType.LUMA_TRACK_MATTE}};c.layer({layer_idx}).trackMatteType=m[{_s(matte)}]||TrackMatteType.ALPHA_TRACK_MATTE;return JSON.stringify({{success:true}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
         if command == "listCompositions":
             return '(function(){try{var comps=[];for(var i=1;i<=app.project.numItems;i++){var it=app.project.item(i);if(it instanceof CompItem)comps.push({name:it.name,duration:it.duration,width:it.width,height:it.height});}return JSON.stringify({success:true,data:{compositions:comps}});}catch(e){return JSON.stringify({success:false,error:{message:e.toString()}});}})();'
         if command == "analyzeProject":
@@ -323,12 +323,12 @@ class ExecutionStage:
             keyframes = args.get("keyframes", [])
             kf_json = _json.dumps(keyframes)
             pre = _comp_prefix(args)
-            return f'(function(){{try{{' + pre + f'if(!c)return JSON.stringify({{success:false,error:{{message:"no comp"}}}});var l=c.layer({layer_idx});var eff=l.Effects.addProperty({_s(effect_name)});var kf={kf_json};var pn={_s(prop_name)};if(pn&&kf.length>0){{var p=eff.property(pn);for(var i=0;i<kf.length;i++){{p.setValueAtTime(kf[i].time,kf[i].value);}}}}return JSON.stringify({{success:true,data:{{effectIndex:eff.propertyIndex}}}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
+            return '(function(){try{' + pre + f'if(!c)return JSON.stringify({{success:false,error:{{message:"no comp"}}}});var l=c.layer({layer_idx});var eff=l.Effects.addProperty({_s(effect_name)});var kf={kf_json};var pn={_s(prop_name)};if(pn&&kf.length>0){{var p=eff.property(pn);for(var i=0;i<kf.length;i++){{p.setValueAtTime(kf[i].time,kf[i].value);}}}}return JSON.stringify({{success:true,data:{{effectIndex:eff.propertyIndex}}}});}}catch(e){{return JSON.stringify({{success:false,error:{{message:e.toString()}}}});}}}})();'
         if command == "executeAtomScript":
             return args.get("scriptContent", args.get("script", ""))
         return ""
 
-    def _send_atom_script(self, op: str, params: Dict) -> Dict:
+    def _send_atom_script(self, op: str, params: dict) -> dict:
         """通过 executeAtomScript 执行未映射的命令"""
         jsx_body = self._build_jsx_for_op(op, params)
         if not jsx_body:
@@ -341,7 +341,7 @@ class ExecutionStage:
         )
 
     @staticmethod
-    def _build_jsx_for_op(op: str, params: Dict) -> str:
+    def _build_jsx_for_op(op: str, params: dict) -> str:
         """为未映射的命令生成 JSX 脚本"""
         import json as _json
 
@@ -371,7 +371,7 @@ class ExecutionStage:
             )
         return ""
 
-    def run(self, previous_data: Dict) -> Dict:
+    def run(self, previous_data: dict) -> dict:
         """执行阶段：将剧本转化为 AE 项目操作 (或 Resolve/FFmpeg 降级)"""
         plan = previous_data.get("plan", {})
         script = plan.get("script")
@@ -412,7 +412,7 @@ class ExecutionStage:
         result["execution_mode"] = "ffmpeg_fallback"
         return self._execute_ffmpeg(script, plan, previous_data, result)
 
-    def _execute_ae(self, script: Dict, plan: Dict, previous_data: Dict, result: Dict) -> Dict:
+    def _execute_ae(self, script: dict, plan: dict, previous_data: dict, result: dict) -> dict:
         """AE Bridge 执行路径 — 建工程 + 加效果 + 真实渲染输出"""
         project_path = self._create_project(script)
         result["project_path"] = project_path
@@ -494,7 +494,7 @@ class ExecutionStage:
         result["execution_mode"] = "ffmpeg_fallback"
         return self._execute_ffmpeg(script, plan, previous_data, result)
 
-    def _execute_ffmpeg(self, script: Dict, plan: Dict, previous_data: Dict, result: Dict) -> Dict:
+    def _execute_ffmpeg(self, script: dict, plan: dict, previous_data: dict, result: dict) -> dict:
         """FFmpeg 降级执行路径 — 使用 FFmpeg 编辑引擎实现真实视频处理"""
         import subprocess
         perceive = previous_data.get("perceive", {})
@@ -511,8 +511,8 @@ class ExecutionStage:
             file_paths = [v.get("path", "") for v in videos if os.path.isfile(v.get("path", ""))]
             if file_paths:
                 try:
-                    from pipeline.stages import resolve_ffmpeg
                     from pipeline.ffmpeg_edit_engine import FFmpegEditEngine, TransitionEngine
+                    from pipeline.stages import resolve_ffmpeg
                     ffmpeg = resolve_ffmpeg(self.config)
                     engine = FFmpegEditEngine(ffmpeg)
 
@@ -575,7 +575,7 @@ class ExecutionStage:
             logger.debug(f"Script save failed: {e}")
         return result
 
-    def _do_concat(self, file_paths: List[str], output: str, ffmpeg: str, output_dir: str) -> bool:
+    def _do_concat(self, file_paths: list[str], output: str, ffmpeg: str, output_dir: str) -> bool:
         """基础concat拼接"""
         import subprocess
         list_path = os.path.join(output_dir, "_concat_list.txt")
@@ -588,11 +588,9 @@ class ExecutionStage:
         return r.returncode == 0 and os.path.isfile(output)
 
     def _apply_ffmpeg_filters(self, engine, input_path: str, output_path: str,
-                               plan: Dict, script: Dict) -> bool:
+                               plan: dict, script: dict) -> bool:
         """从plan中提取滤镜参数并应用"""
-        from pipeline.ffmpeg_edit_engine import (
-            FFmpegFilterBuilder, ColorGradeParams, SharpenParams, VignetteParams
-        )
+        from pipeline.ffmpeg_edit_engine import ColorGradeParams, FFmpegFilterBuilder, SharpenParams, VignetteParams
         fb = FFmpegFilterBuilder()
         has_filter = False
 
@@ -659,10 +657,10 @@ class ExecutionStage:
             logger.debug(f"Resolve check failed: {e}")
             return False
 
-    def _execute_resolve(self, script: Dict, plan: Dict, previous_data: Dict, result: Dict) -> Dict:
+    def _execute_resolve(self, script: dict, plan: dict, previous_data: dict, result: dict) -> dict:
         """Resolve Bridge 执行路径 — 调色/渲染"""
         try:
-            from integrations.davinci_fuscript import ResolveColorEngine, ColorGradeConfig
+            from integrations.davinci_fuscript import ColorGradeConfig, ResolveColorEngine
 
             perceive = previous_data.get("perceive", {})
             media_files = perceive.get("videos", [])
@@ -717,7 +715,7 @@ class ExecutionStage:
             result["execution_mode"] = "ffmpeg_fallback"
             return self._execute_ffmpeg(script, plan, previous_data, result)
 
-    def _create_project(self, script: Dict) -> str:
+    def _create_project(self, script: dict) -> str:
         """创建AE项目路径"""
         output_dir = self.config.output_dir or "output"
         os.makedirs(output_dir, exist_ok=True)
@@ -727,7 +725,7 @@ class ExecutionStage:
         # 这里记录项目路径供后续使用
         return project_path
 
-    def _create_composition(self, name: str, duration: float, script: Dict) -> str:
+    def _create_composition(self, name: str, duration: float, script: dict) -> str:
         """通过 Bridge 创建合成"""
         result = self._send("create_comp", {
             "name": name,
@@ -744,7 +742,7 @@ class ExecutionStage:
             logger.debug(f"合成创建降级: {result.get('message', 'unknown')}")
             return name
 
-    def _import_footage(self, files: List[Dict]) -> List[Dict]:
+    def _import_footage(self, files: list[dict]) -> list[dict]:
         """通过 Bridge 导入素材，返回 [{"path": ..., "name": AE内项目名}]"""
         imported = []
         for f in files:
@@ -766,7 +764,7 @@ class ExecutionStage:
                 logger.debug(f"素材导入失败: {path} - {result.get('message', '')}")
         return imported
 
-    def _arrange_shots(self, shots: List[Dict], comp_name: str = "") -> int:
+    def _arrange_shots(self, shots: list[dict], comp_name: str = "") -> int:
         """按剧本排列镜头到时间线（创建对应图层）"""
         arranged = 0
         for shot in shots:
@@ -798,7 +796,7 @@ class ExecutionStage:
                 arranged += 1
         return arranged
 
-    def _apply_transitions(self, transitions: List[Dict], comp_name: str = "",
+    def _apply_transitions(self, transitions: list[dict], comp_name: str = "",
                            comp_duration: float = 30.0) -> int:
         """应用转场效果：闪白/硬切类用闪白固态图层，其余用转场效果关键帧"""
         applied = 0
@@ -838,7 +836,7 @@ class ExecutionStage:
                 applied += 1
         return applied
 
-    def _apply_effects(self, effects: List[Dict], comp_name: str = "") -> int:
+    def _apply_effects(self, effects: list[dict], comp_name: str = "") -> int:
         """应用效果"""
         applied = 0
         for eff in effects:
@@ -852,7 +850,7 @@ class ExecutionStage:
                 applied += 1
         return applied
 
-    def _set_keyframes(self, style_params: Dict, comp_name: str = "") -> int:
+    def _set_keyframes(self, style_params: dict, comp_name: str = "") -> int:
         """设置关键帧"""
         if not style_params:
             return 0
@@ -869,7 +867,7 @@ class ExecutionStage:
                     set_count += len(val["keyframes"])
         return set_count
 
-    def _add_footage_to_comp(self, imported_files: List[Dict], comp_name: str) -> int:
+    def _add_footage_to_comp(self, imported_files: list[dict], comp_name: str) -> int:
         """将已导入的素材按顺序叠加到指定合成（P3-A: 按名定位，不再依赖 activeItem）
 
         叠加规则：每个素材的 startTime = 现有图层的最大 outPoint；
@@ -914,12 +912,12 @@ class ExecutionStage:
         "noise": "ADBE Noise",
     }
 
-    def _build_style_ops(self, plan: Dict) -> List[Dict]:
+    def _build_style_ops(self, plan: dict) -> list[dict]:
         """从 plan 的 style_params/effect_stack 构建可见效果操作列表（P3-B）
 
         每个 op: {"effect": matchName, "prop": 属性名, "value": 数值, "label": 语义标签}
         """
-        ops: List[Dict] = []
+        ops: list[dict] = []
         style_params = plan.get("style_params", {}) or {}
         style_text = json.dumps(plan, ensure_ascii=False).lower()
 
@@ -972,7 +970,7 @@ class ExecutionStage:
                             "value": 8, "label": f"grain:{name}"})
         return ops
 
-    def _apply_visible_style(self, comp_name: str, ops: List[Dict]) -> int:
+    def _apply_visible_style(self, comp_name: str, ops: list[dict]) -> int:
         """在合成顶部建调整图层并逐个应用可见效果（P3-B）"""
         if not ops:
             return 0

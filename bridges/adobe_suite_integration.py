@@ -27,17 +27,17 @@
 
 from __future__ import annotations
 
-import os
-import sys
-import time
 import json
-import warnings
-import tempfile
-import subprocess
+import os
 import platform
+import subprocess
+import sys
+import tempfile
+import time
+import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 # ============================================================================
 # 数据类定义
@@ -55,7 +55,7 @@ class PhotoshopConfig:
     # 纹理尺寸
     texture_size: tuple = (2048, 2048)
     # 帧处理范围（frame_process 模式）
-    frame_range: Optional[tuple] = None
+    frame_range: tuple | None = None
     # 输出格式
     output_format: str = "png"
     # 输出路径
@@ -75,7 +75,7 @@ class PhotoshopResult:
     success: bool = False
     operation: str = ""
     material_type: str = ""
-    output_files: List[str] = field(default_factory=list)
+    output_files: list[str] = field(default_factory=list)
     frames_processed: int = 0
     duration: float = 0.0
     mode: str = "simulate"
@@ -95,7 +95,7 @@ class PremiereConfig:
     # 转场持续时间（秒）
     transition_duration: float = 0.5
     # 输入片段列表
-    input_clips: List[str] = field(default_factory=list)
+    input_clips: list[str] = field(default_factory=list)
     # 输出路径（PR 项目文件）
     output_project: str = ""
     # 导出路径（导出视频）
@@ -131,7 +131,7 @@ class MediaEncoderConfig:
     # 操作类型: batch_render / format_convert / watch_folder
     operation: str = "batch_render"
     # 输入文件列表
-    input_files: List[str] = field(default_factory=list)
+    input_files: list[str] = field(default_factory=list)
     # 输出目录
     output_dir: str = ""
     # 输出格式: mp4 / mov / prores / h265
@@ -139,7 +139,7 @@ class MediaEncoderConfig:
     # 编码器: H264 / ProRes422HQ / H265
     codec: str = "H264"
     # 分辨率（空表示保持原分辨率）
-    resolution: Optional[tuple] = None
+    resolution: tuple | None = None
     # 比特率
     bitrate: str = "10M"
     # 预设名称
@@ -157,7 +157,7 @@ class MediaEncoderResult:
     success: bool = False
     operation: str = ""
     files_processed: int = 0
-    output_files: List[str] = field(default_factory=list)
+    output_files: list[str] = field(default_factory=list)
     total_duration: float = 0.0
     mode: str = "simulate"
     error: str = ""
@@ -168,7 +168,7 @@ class MediaEncoderResult:
 # ============================================================================
 
 # PS 材质纹理预设
-MATERIAL_PRESETS: Dict[str, Dict[str, Any]] = {
+MATERIAL_PRESETS: dict[str, dict[str, Any]] = {
     "wood": {
         "name": "木质纹理",
         "base_color": (139, 90, 43),
@@ -220,7 +220,7 @@ MATERIAL_PRESETS: Dict[str, Dict[str, Any]] = {
 }
 
 # PR 转场预设
-TRANSITION_PRESETS: Dict[str, Dict[str, Any]] = {
+TRANSITION_PRESETS: dict[str, dict[str, Any]] = {
     "cross_dissolve": {
         "name": "交叉溶解",
         "duration": 0.5,
@@ -254,7 +254,7 @@ TRANSITION_PRESETS: Dict[str, Dict[str, Any]] = {
 }
 
 # ME 输出格式预设
-OUTPUT_FORMAT_PRESETS: Dict[str, Dict[str, Any]] = {
+OUTPUT_FORMAT_PRESETS: dict[str, dict[str, Any]] = {
     "mp4_h264": {
         "name": "MP4 H.264",
         "format": "mp4",
@@ -306,11 +306,11 @@ class PhotoshopIntegrator:
     支持 real/simulate/auto 三种模式。
     """
 
-    def __init__(self, config: Optional[PhotoshopConfig] = None):
+    def __init__(self, config: PhotoshopConfig | None = None):
         self.config = config or PhotoshopConfig()
-        self._exe_path: Optional[Path] = self._find_photoshop()
+        self._exe_path: Path | None = self._find_photoshop()
 
-    def _find_photoshop(self) -> Optional[Path]:
+    def _find_photoshop(self) -> Path | None:
         """查找 Photoshop 安装路径"""
         possible_paths = [
             r"D:\ps\Adobe Photoshop 2025\Photoshop.exe",
@@ -337,7 +337,7 @@ class PhotoshopIntegrator:
         material_type: str = "wood",
         size: tuple = (2048, 2048),
         output_path: str = "",
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> PhotoshopResult:
         """生成材质纹理
 
@@ -650,7 +650,7 @@ main();
         input_dir: str,
         output_dir: str,
         operation: str = "stylize",
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> PhotoshopResult:
         """批量处理视频帧
 
@@ -722,11 +722,11 @@ class PremiereIntegrator:
     提供时间线组装、转场添加、音频同步等能力。
     """
 
-    def __init__(self, config: Optional[PremiereConfig] = None):
+    def __init__(self, config: PremiereConfig | None = None):
         self.config = config or PremiereConfig()
-        self._exe_path: Optional[Path] = self._find_premiere()
+        self._exe_path: Path | None = self._find_premiere()
 
-    def _find_premiere(self) -> Optional[Path]:
+    def _find_premiere(self) -> Path | None:
         """查找 Premiere Pro 安装路径"""
         possible_paths = [
             r"D:\pr\Adobe Premiere Pro 2025\Adobe Premiere Pro.exe",
@@ -750,12 +750,12 @@ class PremiereIntegrator:
 
     def assemble_timeline(
         self,
-        clips: List[str],
+        clips: list[str],
         timeline_name: str = "AE_Puppet_Timeline",
         transitions: bool = True,
         transition_type: str = "cross_dissolve",
         output_project: str = "",
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> PremiereResult:
         """组装时间线
 
@@ -1073,7 +1073,7 @@ main();
 """
         return script
 
-    def get_available_transitions(self) -> List[str]:
+    def get_available_transitions(self) -> list[str]:
         """获取可用转场列表"""
         return list(TRANSITION_PRESETS.keys())
 
@@ -1089,11 +1089,11 @@ class MediaEncoderIntegrator:
     提供批量渲染、格式转换、监视文件夹等能力。
     """
 
-    def __init__(self, config: Optional[MediaEncoderConfig] = None):
+    def __init__(self, config: MediaEncoderConfig | None = None):
         self.config = config or MediaEncoderConfig()
-        self._exe_path: Optional[Path] = self._find_media_encoder()
+        self._exe_path: Path | None = self._find_media_encoder()
 
-    def _find_media_encoder(self) -> Optional[Path]:
+    def _find_media_encoder(self) -> Path | None:
         """查找 Media Encoder 安装路径"""
         possible_paths = [
             r"D:\Me\Adobe Media Encoder 2025\Adobe Media Encoder.exe",
@@ -1117,10 +1117,10 @@ class MediaEncoderIntegrator:
 
     def batch_render(
         self,
-        input_files: List[str],
+        input_files: list[str],
         output_dir: str,
         format_preset: str = "mp4_h264",
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> MediaEncoderResult:
         """批量渲染
 
@@ -1295,13 +1295,13 @@ class MediaEncoderIntegrator:
 
         return result
 
-    def _render_with_me(self, input_path: Path, output_file: Path, preset: Dict) -> bool:
+    def _render_with_me(self, input_path: Path, output_file: Path, preset: dict) -> bool:
         """尝试使用 Media Encoder 渲染"""
         # Media Encoder 命令行支持有限，这里尝试使用监视文件夹方式
         # 简化处理：先检查是否有 ffmpeg 可用，优先用 ffmpeg
         return False
 
-    def _render_with_ffmpeg(self, input_path: Path, output_file: Path, preset: Dict) -> bool:
+    def _render_with_ffmpeg(self, input_path: Path, output_file: Path, preset: dict) -> bool:
         """使用 ffmpeg 进行转码（后备方案）"""
         try:
             # 查找 ffmpeg（优先权威安装路径 C:/ffmpeg/bin/，与 puppet settings.py 一致）
@@ -1359,7 +1359,7 @@ class MediaEncoderIntegrator:
             print(f"[MediaEncoderIntegrator] ffmpeg 转码失败: {e}")
             return False
 
-    def get_available_presets(self) -> List[str]:
+    def get_available_presets(self) -> list[str]:
         """获取可用输出预设"""
         return list(OUTPUT_FORMAT_PRESETS.keys())
 
@@ -1381,7 +1381,7 @@ class AdobeSuiteIntegrator:
         self.premiere = PremiereIntegrator(PremiereConfig(mode=mode))
         self.media_encoder = MediaEncoderIntegrator(MediaEncoderConfig(mode=mode))
 
-    def is_available(self) -> Dict[str, bool]:
+    def is_available(self) -> dict[str, bool]:
         """检查各软件可用性"""
         return {
             "photoshop": self.photoshop.is_available(),
@@ -1391,10 +1391,10 @@ class AdobeSuiteIntegrator:
 
     def generate_puppet_textures(
         self,
-        materials: List[str] = None,
+        materials: list[str] = None,
         output_dir: str = "",
-        callback: Optional[Callable[[float, str], None]] = None,
-    ) -> Dict[str, PhotoshopResult]:
+        callback: Callable[[float, str], None] | None = None,
+    ) -> dict[str, PhotoshopResult]:
         """生成木偶风格材质纹理包
 
         Args:
@@ -1437,10 +1437,10 @@ class AdobeSuiteIntegrator:
 
     def assemble_puppet_video(
         self,
-        clips: List[str],
+        clips: list[str],
         output_project: str = "",
         transition_type: str = "puppet_transition",
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> PremiereResult:
         """组装木偶风格视频时间线
 
@@ -1464,10 +1464,10 @@ class AdobeSuiteIntegrator:
 
     def batch_export(
         self,
-        input_files: List[str],
+        input_files: list[str],
         output_dir: str,
         format_preset: str = "mp4_puppet",
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> MediaEncoderResult:
         """批量导出视频
 
@@ -1508,17 +1508,17 @@ def create_media_encoder_config(operation: str = "batch_render", **kwargs) -> Me
     return MediaEncoderConfig(operation=operation, **kwargs)
 
 
-def get_available_materials() -> List[str]:
+def get_available_materials() -> list[str]:
     """获取可用材质列表"""
     return list(MATERIAL_PRESETS.keys())
 
 
-def get_available_transitions() -> List[str]:
+def get_available_transitions() -> list[str]:
     """获取可用转场列表"""
     return list(TRANSITION_PRESETS.keys())
 
 
-def get_available_output_formats() -> List[str]:
+def get_available_output_formats() -> list[str]:
     """获取可用输出格式列表"""
     return list(OUTPUT_FORMAT_PRESETS.keys())
 

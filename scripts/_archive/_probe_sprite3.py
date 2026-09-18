@@ -1,6 +1,11 @@
 """完整精灵链验证: 设粒子类型→选图层→渲染一帧看粒子是否变贴图"""
-import json, time, uuid, os, shutil
+import json
+import os
+import shutil
+import time
+import uuid
 from pathlib import Path
+
 ROOT = Path(__file__).resolve().parent.parent
 bd = ROOT / ".ae-mcp-bridge"
 tmp_png = ROOT / "tmp" / "sprite_glow.png"

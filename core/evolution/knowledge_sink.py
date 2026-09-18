@@ -60,10 +60,10 @@ class KnowledgeSink:
         scope: str,
         decision: str,
         score: float,
-        adjustments: Optional[Dict[str, Any]] = None,
-        notes: Optional[List[str]] = None,
+        adjustments: dict[str, Any] | None = None,
+        notes: list[str] | None = None,
         run_id: str = "",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """将一次进化决策提炼为经验条目
 
         经验格式（供 Optimizer/管线消费）:
@@ -98,7 +98,7 @@ class KnowledgeSink:
         scope: str,
         decision: str,
         score: float,
-        adjustments: Optional[Dict[str, Any]],
+        adjustments: dict[str, Any] | None,
     ) -> str:
         adj_desc = ", ".join(f"{k}={v}" for k, v in (adjustments or {}).items()) or "无配置调整"
         if decision == "accept":
@@ -106,14 +106,14 @@ class KnowledgeSink:
         return f"[{scope}] 无效尝试: {adj_desc} → 得分 {score:.1f}（被回退，避免重复）"
 
     @staticmethod
-    def _lesson_value(decision: str, adjustments: Optional[Dict[str, Any]]) -> int:
+    def _lesson_value(decision: str, adjustments: dict[str, Any] | None) -> int:
         """经验价值分（裁剪时保留高价值条目）"""
         value = 3 if decision == "rollback" else 2   # 失败教训更有价值
         if adjustments:
             value += 1
         return value
 
-    def _is_duplicate(self, entry: Dict[str, Any]) -> bool:
+    def _is_duplicate(self, entry: dict[str, Any]) -> bool:
         """同 scope + 同 adjustments 视为重复"""
         for existing in self._read_lessons()[-20:]:
             if (
@@ -132,7 +132,7 @@ class KnowledgeSink:
         self,
         scope: str = "",
         limit: int = 10,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """加载相关经验（scope 精确匹配优先，其次全局高价值条目）"""
         lessons = self._read_lessons()
         if not lessons:
@@ -151,10 +151,10 @@ class KnowledgeSink:
             lines.append(f"- {l.get('lesson', '')}")
         return "\n".join(lines)
 
-    def _read_lessons(self) -> List[Dict[str, Any]]:
+    def _read_lessons(self) -> list[dict[str, Any]]:
         if not self._lessons_path.exists():
             return []
-        lessons: List[Dict[str, Any]] = []
+        lessons: list[dict[str, Any]] = []
         try:
             with open(self._lessons_path, "r", encoding="utf-8") as f:
                 for line in f:
@@ -189,7 +189,7 @@ class KnowledgeSink:
         except Exception as e:
             logger.warning("[KnowledgeSink] trim failed: %s", e)
 
-    def _update_stats(self, entry: Dict[str, Any]) -> None:
+    def _update_stats(self, entry: dict[str, Any]) -> None:
         stats = read_json(self._stats_path, {}) or {}
         stats["total_lessons"] = len(self._read_lessons())
         stats["last_updated"] = time.time()
@@ -198,7 +198,7 @@ class KnowledgeSink:
         stats["by_scope"] = by_scope
         write_json(self._stats_path, stats)
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         """知识沉淀统计（供 Dashboard / 验收标准检查）"""
         lessons = self._read_lessons()
         return {
@@ -209,8 +209,8 @@ class KnowledgeSink:
         }
 
     @staticmethod
-    def _count_by(lessons: List[Dict[str, Any]], key: str) -> Dict[str, int]:
-        counts: Dict[str, int] = {}
+    def _count_by(lessons: list[dict[str, Any]], key: str) -> dict[str, int]:
+        counts: dict[str, int] = {}
         for l in lessons:
             k = str(l.get(key, "unknown"))
             counts[k] = counts.get(k, 0) + 1
@@ -221,7 +221,7 @@ class KnowledgeSink:
 #  全局单例
 # ============================================================================
 
-_global_sink: Optional[KnowledgeSink] = None
+_global_sink: KnowledgeSink | None = None
 
 
 def get_knowledge_sink(data_dir: str = KnowledgeSink.DEFAULT_DIR) -> KnowledgeSink:

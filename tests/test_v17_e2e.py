@@ -10,11 +10,11 @@ V17 冰海战记实战测试 - 功能可行性与深度分析
 6. 项目可行性评估报告
 """
 
+import json
 import os
+import subprocess
 import sys
 import time
-import json
-import subprocess
 import traceback
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
@@ -359,7 +359,7 @@ def test_opensource_e2e_v17():
 
     # 测试 OpenSourceHub 对 V17 视频的操作
     try:
-        from opensource_integrations import OpenSourceHub, MoviePyAdapter
+        from opensource_integrations import MoviePyAdapter, OpenSourceHub
 
         hub = OpenSourceHub()
         status = hub.auto_detect()
@@ -392,7 +392,7 @@ def test_opensource_e2e_v17():
 
     # 测试 UnifiedToolIntegrator 桥接层
     try:
-        from unified_tool_integrator import UnifiedToolIntegrator, WORKFLOW_PRESETS
+        from unified_tool_integrator import WORKFLOW_PRESETS, UnifiedToolIntegrator
 
         integrator = UnifiedToolIntegrator(
             default_mode="simulate",
@@ -518,7 +518,7 @@ def print_summary():
             categories["开源工具链"] += 1 if r["passed"] else 0
 
     if failed > 0:
-        print(f"\n  失败项目:")
+        print("\n  失败项目:")
         for r in results:
             if not r["passed"]:
                 print(f"    [FAIL] {r['name']}: {r['detail']}")

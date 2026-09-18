@@ -23,13 +23,12 @@ from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
+    Query,
     WebSocket,
     WebSocketDisconnect,
-    Query,
     status,
 )
 from loguru import logger
-
 
 # ============================================================
 # 任务队列
@@ -49,17 +48,17 @@ class BatchTask:
     """批量任务。"""
     task_id: str
     task_type: str
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     status: TaskStatus = TaskStatus.PENDING
     priority: int = 5  # 1-10, 10 最高
     progress: float = 0.0
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
+    result: dict[str, Any] | None = None
+    error: str | None = None
     created_at: float = field(default_factory=time.time)
-    started_at: Optional[float] = None
-    finished_at: Optional[float] = None
+    started_at: float | None = None
+    finished_at: float | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "task_id": self.task_id,
             "task_type": self.task_type,
@@ -85,14 +84,14 @@ class TaskQueue:
 
     def __init__(self, max_concurrent: int = 3):
         self.max_concurrent = max_concurrent
-        self._tasks: Dict[str, BatchTask] = {}
+        self._tasks: dict[str, BatchTask] = {}
         self._running = False
-        self._ws_clients: List[WebSocket] = []
+        self._ws_clients: list[WebSocket] = []
 
     def submit(
         self,
         task_type: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         priority: int = 5,
     ) -> BatchTask:
         """提交任务。"""
@@ -107,15 +106,15 @@ class TaskQueue:
         self._broadcast_task_update(task)
         return task
 
-    def get_task(self, task_id: str) -> Optional[BatchTask]:
+    def get_task(self, task_id: str) -> BatchTask | None:
         return self._tasks.get(task_id)
 
     def list_tasks(
         self,
-        status: Optional[TaskStatus] = None,
-        task_type: Optional[str] = None,
+        status: TaskStatus | None = None,
+        task_type: str | None = None,
         limit: int = 50,
-    ) -> List[BatchTask]:
+    ) -> list[BatchTask]:
         tasks = list(self._tasks.values())
         if status:
             tasks = [t for t in tasks if t.status == status]
@@ -147,9 +146,9 @@ class TaskQueue:
             except Exception:
                 pass
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         total = len(self._tasks)
-        by_status: Dict[str, int] = {}
+        by_status: dict[str, int] = {}
         for t in self._tasks.values():
             by_status[t.status.value] = by_status.get(t.status.value, 0) + 1
         return {
@@ -168,8 +167,8 @@ class WebSocketManager:
     """WebSocket 连接管理器。"""
 
     def __init__(self):
-        self._active_connections: Dict[str, WebSocket] = {}
-        self._subscriptions: Dict[str, List[str]] = {}  # topic -> [client_ids]
+        self._active_connections: dict[str, WebSocket] = {}
+        self._subscriptions: dict[str, list[str]] = {}  # topic -> [client_ids]
 
     async def connect(self, websocket: WebSocket, client_id: str) -> str:
         await websocket.accept()
@@ -185,7 +184,7 @@ class WebSocketManager:
         }
         logger.info(f"WebSocket 断开: {client_id}, 总数: {len(self._active_connections)}")
 
-    async def broadcast(self, message: Dict[str, Any]):
+    async def broadcast(self, message: dict[str, Any]):
         """广播消息给所有连接。"""
         for ws in list(self._active_connections.values()):
             try:
@@ -193,7 +192,7 @@ class WebSocketManager:
             except Exception:
                 pass
 
-    async def send_to(self, client_id: str, message: Dict[str, Any]) -> bool:
+    async def send_to(self, client_id: str, message: dict[str, Any]) -> bool:
         ws = self._active_connections.get(client_id)
         if not ws:
             return False
@@ -215,8 +214,8 @@ class WebSocketManager:
 router = APIRouter(prefix="/api/v1", tags=["advanced"])
 
 # 单例
-_task_queue: Optional[TaskQueue] = None
-_ws_manager: Optional[WebSocketManager] = None
+_task_queue: TaskQueue | None = None
+_ws_manager: WebSocketManager | None = None
 
 
 def get_task_queue() -> TaskQueue:
@@ -240,8 +239,8 @@ def get_ws_manager() -> WebSocketManager:
 @router.get("/effects/search")
 async def search_effects(
     q: str = Query(..., description="搜索关键词"),
-    category: Optional[str] = Query(None, description="效果分类"),
-    plugin: Optional[str] = Query(None, description="插件包名"),
+    category: str | None = Query(None, description="效果分类"),
+    plugin: str | None = Query(None, description="插件包名"),
     limit: int = Query(20, ge=1, le=100),
 ):
     """搜索 AE 效果（基于知识库效果目录）。"""
@@ -370,7 +369,7 @@ async def get_effect_detail(match_name: str):
 
 @router.post("/layer-pipeline/render")
 async def render_layer_pipeline(
-    request: Dict[str, Any],
+    request: dict[str, Any],
 ):
     """执行 6 层结构渲染管线。
 
@@ -381,8 +380,8 @@ async def render_layer_pipeline(
         - layers: 自定义层配置（可选，覆盖预设）
     """
     try:
+        from ..models.layer_pipeline import LayerType, RenderPipeline
         from ..services.layer_render_service import LayerRenderService
-        from ..models.layer_pipeline import RenderPipeline, LayerType
 
         service = LayerRenderService()
 
@@ -471,7 +470,7 @@ async def list_layer_types():
 
 @router.post("/roto/auto")
 async def auto_roto(
-    request: Dict[str, Any],
+    request: dict[str, Any],
 ):
     """一键自动抠像（SAM2 粗分 + Silhouette 精修 + 质量评估）。
 
@@ -521,7 +520,7 @@ async def auto_roto(
 
 @router.post("/roto/sam2-segment")
 async def sam2_segment(
-    request: Dict[str, Any],
+    request: dict[str, Any],
 ):
     """SAM2 自动分割。"""
     try:
@@ -553,7 +552,7 @@ async def sam2_segment(
 
 @router.post("/roto/silhouette-refine")
 async def silhouette_refine(
-    request: Dict[str, Any],
+    request: dict[str, Any],
 ):
     """Silhouette 精修。"""
     try:
@@ -628,7 +627,7 @@ async def get_om_pipeline(name: str):
 async def run_om_pipeline_stage(
     name: str,
     stage: str,
-    request: Dict[str, Any],
+    request: dict[str, Any],
 ):
     """执行流水线的单个阶段。"""
     try:
@@ -656,8 +655,8 @@ async def run_om_pipeline_stage(
 
 @router.get("/openmontage/skills")
 async def list_om_skills(
-    layer: Optional[str] = None,
-    q: Optional[str] = None,
+    layer: str | None = None,
+    q: str | None = None,
 ):
     """列出 OpenMontage 技能。"""
     try:
@@ -706,7 +705,7 @@ async def list_om_styles():
 @router.post("/openmontage/styles/{name}/apply")
 async def apply_om_style(
     name: str,
-    request: Dict[str, Any],
+    request: dict[str, Any],
 ):
     """应用风格手册到 AE 合成。"""
     try:
@@ -733,7 +732,7 @@ async def apply_om_style(
 
 @router.post("/tasks/submit")
 async def submit_task(
-    request: Dict[str, Any],
+    request: dict[str, Any],
     queue: TaskQueue = Depends(get_task_queue),
 ):
     """提交批量任务。
@@ -760,8 +759,8 @@ async def submit_task(
 
 @router.get("/tasks")
 async def list_tasks(
-    status: Optional[str] = None,
-    task_type: Optional[str] = None,
+    status: str | None = None,
+    task_type: str | None = None,
     limit: int = Query(50, ge=1, le=500),
     queue: TaskQueue = Depends(get_task_queue),
 ):
@@ -894,13 +893,14 @@ async def websocket_endpoint(websocket: WebSocket):
 async def dashboard_overview():
     """控制台总览数据（首页卡片）。"""
     try:
+        from fastapi import Request
+
         from ..integrations.openmontage import (
+            OpenMontagePipelineRuntime,
             SkillLoader,
             StylePlaybookLoader,
-            OpenMontagePipelineRuntime,
         )
         from ..services.effect_registry_service import get_effect_registry
-        from fastapi import Request
 
         effect_registry = get_effect_registry()
         skill_loader = SkillLoader()

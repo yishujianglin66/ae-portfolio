@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """部署 create-e2e-music-video MCP工具到 after-effects-mcp-main"""
-import shutil
 import os
+import shutil
 
 MCP_DIR = r"c:\Users\Administrator\Desktop\after-effects-mcp-main"
 SRC_FILE = os.path.join(MCP_DIR, "src", "index.ts")
@@ -89,6 +89,7 @@ with open(SRC_FILE, "w", encoding="utf-8") as f:
 # Step 4: Build
 print("[4/4] Building...")
 import subprocess
+
 result = subprocess.run(
     ["npm", "run", "build"],
     cwd=MCP_DIR,

@@ -1,7 +1,8 @@
-import requests
-import re
 import json
 import os
+import re
+
+import requests
 
 video_id = "7651343231908753649"
 
@@ -41,7 +42,7 @@ for api_url in apis:
         if resp.status_code == 200 and resp.text:
             try:
                 data = resp.json()
-                print(f"  JSON解析成功")
+                print("  JSON解析成功")
                 
                 # 查找视频地址
                 def find_video_url(obj, depth=0):
@@ -69,7 +70,7 @@ for api_url in apis:
                 
                 video_url = find_video_url(data)
                 if video_url:
-                    print(f"\n  ✓ 找到视频地址:")
+                    print("\n  ✓ 找到视频地址:")
                     print(f"    {video_url}")
                     
                     # 下载
@@ -77,7 +78,7 @@ for api_url in apis:
                     os.makedirs(output_dir, exist_ok=True)
                     output_path = os.path.join(output_dir, f"douyin_{video_id}.mp4")
                     
-                    print(f"\n  开始下载...")
+                    print("\n  开始下载...")
                     video_resp = requests.get(video_url, headers=headers, stream=True, timeout=120)
                     if video_resp.status_code == 200:
                         with open(output_path, "wb") as f:
@@ -90,7 +91,7 @@ for api_url in apis:
                         print(f"  ✗ 下载失败: {video_resp.status_code}")
                     break
                 else:
-                    print(f"  未找到视频地址")
+                    print("  未找到视频地址")
                     print(f"  响应keys: {list(data.keys())[:10]}")
             except:
                 print(f"  JSON解析失败: {resp.text[:100]}")

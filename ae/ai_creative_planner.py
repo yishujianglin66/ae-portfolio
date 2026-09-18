@@ -9,8 +9,8 @@ import json
 import os
 import sys
 import time
-from typing import Dict, List, Any, Optional
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 try:
     import requests
@@ -20,17 +20,17 @@ except ImportError:
 from .creative_patterns import (
     CREATIVE_PATTERNS,
     find_patterns_by_keyword,
-    get_pattern_by_name,
     generate_task_graph,
+    get_pattern_by_name,
 )
+from .preset_executor import PresetExecutor, PresetLibrary, initialize_default_combinations
+from .preset_system import PresetSystem
 from .prompt_templates import (
     build_creative_analysis_prompt,
     build_parameter_optimization_prompt,
     build_style_transfer_prompt,
     build_subtitle_optimization_prompt,
 )
-from .preset_system import PresetSystem
-from .preset_executor import PresetExecutor, PresetLibrary, initialize_default_combinations
 from .subtitle_system import SubtitleSystem
 
 
@@ -39,13 +39,14 @@ def _gateway_chat(
     user_prompt: str,
     temperature: float,
     max_tokens: int,
-) -> Optional[str]:
+) -> str | None:
     """同步桥接 core.llm_gateway.chat()（异步统一网关）。
 
     网关不可用 / 已有运行中的事件循环时返回 None，由调用方降级直连。
     """
     try:
         import asyncio
+
         from core.llm_gateway import llm_gateway
     except Exception:
         return None
@@ -106,7 +107,7 @@ class AICreativePlanner:
         user_prompt: str,
         temperature: float = 0.7,
         max_tokens: int = 2000,
-    ) -> Optional[str]:
+    ) -> str | None:
         """经统一网关调用 LLM，网关不可用时降级直连 LLM API。
 
         Returns:
@@ -146,7 +147,7 @@ class AICreativePlanner:
             return result["content"]
         return None
 
-    def parse_creative_description(self, description: str) -> Dict[str, Any]:
+    def parse_creative_description(self, description: str) -> dict[str, Any]:
         """
         解析创意描述，生成任务图
 
@@ -207,7 +208,7 @@ class AICreativePlanner:
 
         return self._llm_analysis(description)
 
-    def _heuristic_analysis(self, description: str) -> Dict[str, Any]:
+    def _heuristic_analysis(self, description: str) -> dict[str, Any]:
         """
         启发式分析创意描述（无 LLM 时的备选方案）
 
@@ -333,7 +334,7 @@ class AICreativePlanner:
             "task_graph": task_graph,
         }
 
-    def _generate_subtitle_task_graph(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_subtitle_task_graph(self, params: dict[str, Any]) -> dict[str, Any]:
         """生成字幕任务图"""
         return {
             "version": "1.0",
@@ -361,7 +362,7 @@ class AICreativePlanner:
             ],
         }
 
-    def _llm_analysis(self, description: str) -> Dict[str, Any]:
+    def _llm_analysis(self, description: str) -> dict[str, Any]:
         """
         使用 LLM 分析创意描述
 
@@ -389,7 +390,7 @@ class AICreativePlanner:
             # 如果不是纯 JSON，尝试提取其中的 JSON
             return self._extract_json_from_text(content)
 
-    def _extract_json_from_text(self, text: str) -> Dict[str, Any]:
+    def _extract_json_from_text(self, text: str) -> dict[str, Any]:
         """从文本中提取 JSON"""
         import re
 
@@ -403,7 +404,7 @@ class AICreativePlanner:
 
         return self._heuristic_analysis(text)
 
-    def _extract_text_from_description(self, description: str) -> Optional[str]:
+    def _extract_text_from_description(self, description: str) -> str | None:
         """从描述中提取文字内容"""
         import re
 
@@ -442,7 +443,7 @@ class AICreativePlanner:
 
         return 5.0
 
-    def _extract_keywords(self, description: str) -> List[str]:
+    def _extract_keywords(self, description: str) -> list[str]:
         """从描述中提取关键词"""
         keywords = []
         keyword_list = [
@@ -480,7 +481,7 @@ class AICreativePlanner:
         audio_path: Path | str,
         language: str = "zh",
         optimize_with_llm: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         从音频生成字幕（集成字幕系统）
 
@@ -533,10 +534,10 @@ class AICreativePlanner:
 
     async def optimize_subtitles(
         self,
-        subtitles: List[Dict[str, Any]],
+        subtitles: list[dict[str, Any]],
         language: str = "zh",
         style: str = "default",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         使用 LLM 优化字幕
 
@@ -560,8 +561,8 @@ class AICreativePlanner:
         return [s.to_dict() for s in optimized]
 
     def optimize_parameters(
-        self, description: str, current_params: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, description: str, current_params: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         优化参数
 
@@ -587,7 +588,7 @@ class AICreativePlanner:
         except json.JSONDecodeError:
             return current_params
 
-    def analyze_style(self, reference_description: str) -> Dict[str, Any]:
+    def analyze_style(self, reference_description: str) -> dict[str, Any]:
         """
         分析参考风格
 
@@ -626,7 +627,7 @@ class AICreativePlanner:
                 "apply_params": {},
             }
 
-    def execute_task_graph(self, task_graph: Dict[str, Any], ae_client=None) -> Dict[str, Any]:
+    def execute_task_graph(self, task_graph: dict[str, Any], ae_client=None) -> dict[str, Any]:
         """
         执行任务图
 
@@ -685,7 +686,7 @@ class AICreativePlanner:
         description: str,
         ae_client=None,
         optimize: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         生成任务图并执行
 
@@ -724,30 +725,30 @@ class AICreativePlanner:
             "total_time": round(total_time, 2),
         }
 
-    def list_available_patterns(self) -> List[Dict[str, Any]]:
+    def list_available_patterns(self) -> list[dict[str, Any]]:
         """列出所有可用的创意模式"""
         return [pattern.to_dict() for pattern in CREATIVE_PATTERNS]
 
-    def list_presets(self, category: str = None) -> List[str]:
+    def list_presets(self, category: str = None) -> list[str]:
         """列出所有可用的预设"""
         if hasattr(self, 'preset_system'):
             return self.preset_system.list_presets(category)
         return []
 
-    def search_presets(self, keyword: str) -> List[Dict[str, Any]]:
+    def search_presets(self, keyword: str) -> list[dict[str, Any]]:
         """搜索预设"""
         if hasattr(self, 'preset_system'):
             presets = self.preset_system.search_presets(keyword)
             return [preset.to_dict() for preset in presets]
         return []
 
-    def execute_preset(self, preset_name: str, ae_client=None, **kwargs) -> Dict[str, Any]:
+    def execute_preset(self, preset_name: str, ae_client=None, **kwargs) -> dict[str, Any]:
         """执行预设"""
         if hasattr(self, 'preset_executor'):
             return self.preset_executor.execute_preset(preset_name, ae_client, **kwargs)
         return {"success": False, "error": "预设系统未启用"}
 
-    def execute_preset_combination(self, combination_name: str, ae_client=None, **kwargs) -> Dict[str, Any]:
+    def execute_preset_combination(self, combination_name: str, ae_client=None, **kwargs) -> dict[str, Any]:
         """执行预设组合"""
         if hasattr(self, 'preset_library') and hasattr(self, 'preset_executor'):
             combo = self.preset_library.get_combination(combination_name)
@@ -761,7 +762,7 @@ class AICreativePlanner:
             return {"success": False, "error": f"组合不存在: {combination_name}"}
         return {"success": False, "error": "预设系统未启用"}
 
-    def generate_preset_task_graph(self, preset_name: str, **kwargs) -> Dict[str, Any]:
+    def generate_preset_task_graph(self, preset_name: str, **kwargs) -> dict[str, Any]:
         """从预设生成任务图"""
         if hasattr(self, 'preset_system'):
             preset = self.preset_system.get_preset(preset_name)
@@ -790,7 +791,7 @@ class AICreativePlanner:
             return {"error": f"预设不存在: {preset_name}"}
         return {"error": "预设系统未启用"}
 
-    def list_preset_combinations(self) -> List[str]:
+    def list_preset_combinations(self) -> list[str]:
         """列出所有预设组合"""
         if hasattr(self, 'preset_library'):
             return self.preset_library.list_combinations()

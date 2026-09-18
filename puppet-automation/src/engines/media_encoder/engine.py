@@ -26,7 +26,6 @@ from loguru import logger
 from ...config import settings
 from ..base import BaseEngine, EngineResult
 
-
 # 平台预设映射
 PLATFORM_PRESETS = {
     "douyin": {
@@ -96,7 +95,7 @@ class MediaEncoderEngine(BaseEngine):
 
     name = "media_encoder"
 
-    def __init__(self, executable_path: Optional[Path | str] = None):
+    def __init__(self, executable_path: Path | str | None = None):
         path = Path(executable_path) if executable_path else settings.media_encoder_path
         super().__init__(path)
         # 注意：不设 cli_path 字段——AME 无 AMETemplateFile.dll CLI，
@@ -126,7 +125,7 @@ class MediaEncoderEngine(BaseEngine):
         input_path: Path | str,
         output_path: Path | str,
         platform: str = "douyin",
-        preset_file: Optional[Path | str] = None,
+        preset_file: Path | str | None = None,
         overwrite: bool = True,
     ) -> EngineResult:
         """使用 Media Encoder 编码视频。
@@ -193,8 +192,8 @@ class MediaEncoderEngine(BaseEngine):
         self,
         input_path: Path,
         output_path: Path,
-        preset: Optional[dict] = None,
-        preset_file: Optional[Path] = None,
+        preset: dict | None = None,
+        preset_file: Path | None = None,
     ) -> EngineResult:
         """通过 Watch Folder 模式编码。
 
@@ -281,7 +280,7 @@ class MediaEncoderEngine(BaseEngine):
         except Exception as e:
             logger.warning(f"Failed to check/start ME: {e}. Manual launch may be required.")
 
-    async def _generate_epr_preset(self, platform: str, preset: dict) -> Optional[Path]:
+    async def _generate_epr_preset(self, platform: str, preset: dict) -> Path | None:
         """生成 .epr 预设文件（简化版）。
 
         实际的 .epr 文件是复杂的 XML 格式，这里生成基础版本。
@@ -574,10 +573,10 @@ class MediaEncoderEngine(BaseEngine):
             duration_seconds=elapsed,
         )
 
-    async def _run_ffprobe(self, video_path: Path) -> Optional[dict]:
+    async def _run_ffprobe(self, video_path: Path) -> dict | None:
         """运行 ffprobe 获取视频元数据。"""
-        import subprocess
         import json as _json
+        import subprocess
 
         try:
             cmd = [

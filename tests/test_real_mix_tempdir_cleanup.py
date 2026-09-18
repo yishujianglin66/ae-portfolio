@@ -19,13 +19,14 @@ P1 关键缺陷回归测试: _run_execute_real_mix 成功路径临时目录清�
 from __future__ import annotations
 
 import os
+import shutil
 import sys
 import tempfile
-import shutil
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
+
 pytestmark = pytest.mark.real_e2e
 
 
@@ -40,7 +41,7 @@ class TestRealMixTempdirCleanup:
     @pytest.fixture
     def setup_pipeline(self, tmp_path):
         """构造最小化 UnifiedPipeline 实例 (不调用外部依赖)。"""
-        from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig
+        from pipeline.unified_pipeline import PipelineConfig, UnifiedPipeline
 
         output_dir = tmp_path / "output"
         materials_dir = tmp_path / "materials"

@@ -33,7 +33,7 @@ import logging
 import os
 import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -68,12 +68,12 @@ class Artifact:
     checksum: str = ""
     size: int = 0
     created_at: float = 0.0
-    parent_ids: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    parent_ids: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     run_id: str = ""
     expires_at: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -109,7 +109,7 @@ class ArtifactManager:
         except Exception:
             pass
         # id -> Artifact
-        self._artifacts: Dict[str, Artifact] = {}
+        self._artifacts: dict[str, Artifact] = {}
         # _logger 必须先于 _load_registry 初始化，否则加载失败时
         # _load_registry 内部的 logger.warning 会触发 AttributeError
         self._logger = logging.getLogger(__name__ + ".ArtifactManager")
@@ -208,7 +208,7 @@ class ArtifactManager:
         )
         return artifact.id
 
-    def get(self, artifact_id: str) -> Optional[Artifact]:
+    def get(self, artifact_id: str) -> Artifact | None:
         """获取产物
 
         Args:
@@ -219,7 +219,7 @@ class ArtifactManager:
         """
         return self._artifacts.get(artifact_id)
 
-    def list_by_stage(self, stage: str) -> List[Artifact]:
+    def list_by_stage(self, stage: str) -> list[Artifact]:
         """按阶段列出产物
 
         Args:
@@ -232,7 +232,7 @@ class ArtifactManager:
         items.sort(key=lambda x: x.created_at)
         return items
 
-    def list_by_type(self, artifact_type: str) -> List[Artifact]:
+    def list_by_type(self, artifact_type: str) -> list[Artifact]:
         """按类型列出产物
 
         Args:
@@ -245,7 +245,7 @@ class ArtifactManager:
         items.sort(key=lambda x: x.created_at)
         return items
 
-    def list_by_run(self, run_id: str) -> List[Artifact]:
+    def list_by_run(self, run_id: str) -> list[Artifact]:
         """按 run_id 列出产物
 
         Args:
@@ -327,7 +327,7 @@ class ArtifactManager:
             )
         return len(expired_ids)
 
-    def get_lineage(self, artifact_id: str, max_depth: int = 10) -> List[str]:
+    def get_lineage(self, artifact_id: str, max_depth: int = 10) -> list[str]:
         """获取产物血缘（上游所有祖先）
 
         使用 BFS 向上遍历 parent_ids，返回所有上游产物 ID。
@@ -341,8 +341,8 @@ class ArtifactManager:
             上游产物 ID 列表（不含起始产物自身）
         """
         visited: set = set()
-        result: List[str] = []
-        queue: List[tuple] = [(artifact_id, 0)]
+        result: list[str] = []
+        queue: list[tuple] = [(artifact_id, 0)]
         while queue:
             current_id, depth = queue.pop(0)
             if depth >= max_depth:
@@ -359,7 +359,7 @@ class ArtifactManager:
                     queue.append((pid, depth + 1))
         return result
 
-    def export_manifest(self, run_id: str) -> Dict[str, Any]:
+    def export_manifest(self, run_id: str) -> dict[str, Any]:
         """导出某次 run 的产物清单
 
         Args:
@@ -374,7 +374,7 @@ class ArtifactManager:
             - exported_at
         """
         items = self.list_by_run(run_id)
-        by_stage: Dict[str, List[Dict[str, Any]]] = {}
+        by_stage: dict[str, list[dict[str, Any]]] = {}
         total_size = 0
         for a in items:
             by_stage.setdefault(a.stage, []).append(a.to_dict())
@@ -396,7 +396,7 @@ class ArtifactManager:
 #  全局单例
 # ============================================================================
 
-_global_artifact_manager: Optional[ArtifactManager] = None
+_global_artifact_manager: ArtifactManager | None = None
 
 
 def get_artifact_manager() -> ArtifactManager:

@@ -17,7 +17,6 @@ from core.style_transfer_agents import (
     SubTaskPlan,
 )
 
-
 GOOD_PLAN_JSON = json.dumps([
     {
         'task_id': 'style-1',

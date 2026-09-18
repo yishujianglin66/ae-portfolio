@@ -36,9 +36,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from core.torch_runtime import infer_ctx
-
 import requests
+
+from core.torch_runtime import infer_ctx
 
 warnings.filterwarnings("ignore", message=".*torch.classes.*")
 warnings.filterwarnings("ignore", message=".*CUDA.*")
@@ -73,7 +73,7 @@ class LocalModelConfig:
 
 
 # 8GB VRAM 友好的模型推荐
-RECOMMENDED_MODELS: Dict[str, LocalModelConfig] = {
+RECOMMENDED_MODELS: dict[str, LocalModelConfig] = {
     "phi3-mini": LocalModelConfig(
         model_id="microsoft/Phi-3-mini-4k-instruct",
         name="Phi-3 Mini",
@@ -120,7 +120,7 @@ class LLMResponse:
     success: bool = False
     error: str = ""
     device: str = "cpu"  # cpu / cuda
-    raw: Dict[str, Any] = field(default_factory=dict)
+    raw: dict[str, Any] = field(default_factory=dict)
 
 
 class LocalLLMAdapter:
@@ -132,20 +132,20 @@ class LocalLLMAdapter:
 
     def __init__(
         self,
-        model_name: Optional[str] = None,
-        model_dir: Optional[Path] = None,
-        device: Optional[str] = None,
+        model_name: str | None = None,
+        model_dir: Path | None = None,
+        device: str | None = None,
     ):
         self._logger = logging.getLogger(f"{__name__}.LocalLLMAdapter")
         self.model_dir = model_dir or _DEFAULT_MODEL_DIR
         self.model_dir.mkdir(parents=True, exist_ok=True)
 
-        self._model_config: Optional[LocalModelConfig] = None
+        self._model_config: LocalModelConfig | None = None
         self._model = None
         self._tokenizer = None
         self._device = device
         self._is_initialized = False
-        self._gpu_info: Dict[str, Any] = {}
+        self._gpu_info: dict[str, Any] = {}
         # 防止并发 chat() 调用重复触发模型加载导致显存翻倍 OOM
         self._init_lock = asyncio.Lock()
 
@@ -184,7 +184,7 @@ class LocalLLMAdapter:
     def _check_bitsandbytes(self) -> bool:
         try:
             import bitsandbytes
-            self._logger.info(f"bitsandbytes 已安装")
+            self._logger.info("bitsandbytes 已安装")
             return True
         except ImportError:
             self._logger.warning(
@@ -193,7 +193,7 @@ class LocalLLMAdapter:
             )
             return False
 
-    def _detect_gpu(self) -> Dict[str, Any]:
+    def _detect_gpu(self) -> dict[str, Any]:
         """检测 GPU 能力。"""
         if not self._torch_available:
             return {"available": False, "vram_gb": 0}
@@ -234,7 +234,7 @@ class LocalLLMAdapter:
             # < 4GB VRAM，使用最小模型
             return RECOMMENDED_MODELS["gemma2-2b"]
 
-    async def initialize(self, model_name: Optional[str] = None) -> bool:
+    async def initialize(self, model_name: str | None = None) -> bool:
         """初始化本地 LLM 推理引擎。
 
         Args:
@@ -471,11 +471,11 @@ class LocalLLMAdapter:
 
     async def batch_chat(
         self,
-        prompts: List[str],
+        prompts: list[str],
         system_prompt: str = "",
         temperature: float = 0.7,
         max_tokens: int = 1024,
-    ) -> List[LLMResponse]:
+    ) -> list[LLMResponse]:
         """批量推理。
 
         Args:
@@ -498,7 +498,7 @@ class LocalLLMAdapter:
             results.append(result)
         return results
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         """获取适配器信息。"""
         return {
             "initialized": self._is_initialized,
@@ -537,7 +537,7 @@ class LocalLLMAdapter:
 
 async def quick_chat(
     prompt: str,
-    model_name: Optional[str] = None,
+    model_name: str | None = None,
     system_prompt: str = "",
     **kwargs,
 ) -> str:
@@ -559,7 +559,7 @@ async def quick_chat(
 
 
 # 全局单例（线程安全）
-_local_llm_adapter: Optional[LocalLLMAdapter] = None
+_local_llm_adapter: LocalLLMAdapter | None = None
 _adapter_lock = threading.Lock()
 
 

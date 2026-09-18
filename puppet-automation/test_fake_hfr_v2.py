@@ -35,10 +35,10 @@ async def main():
     # 先用第一个视频测试 60fps
     test_video = video_files[0]
     print(f"\n测试视频: {test_video.name}")
-    print(f"目标: 4K + 60fps真实补帧 + smart模式增强")
+    print("目标: 4K + 60fps真实补帧 + smart模式增强")
 
     output_60 = output_dir / f"{test_video.stem}_4K_60fps_smart.mp4"
-    print(f"\n[1] 60fps 真实补帧 + smart增强...")
+    print("\n[1] 60fps 真实补帧 + smart增强...")
     result = await service.apply_fake_hfr(
         test_video,
         output_60,
@@ -59,7 +59,7 @@ async def main():
 
     # 测试 120fps
     output_120 = output_dir / f"{test_video.stem}_4K_120fps_smart.mp4"
-    print(f"\n[2] 120fps 真实补帧 + smart增强...")
+    print("\n[2] 120fps 真实补帧 + smart增强...")
     result = await service.apply_fake_hfr(
         test_video,
         output_120,
@@ -80,7 +80,7 @@ async def main():
 
     # 测试 full 模式 (60fps)
     output_full = output_dir / f"{test_video.stem}_4K_60fps_full.mp4"
-    print(f"\n[3] 60fps 真实补帧 + full模式 (含调色)...")
+    print("\n[3] 60fps 真实补帧 + full模式 (含调色)...")
     result = await service.apply_fake_hfr(
         test_video,
         output_full,

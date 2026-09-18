@@ -2,7 +2,10 @@
 """P0 完整七阶段 E2E: perceive(Stock)→analyze→plan→execute→render→verify→learn
 验证从素材获取到成片输出的完整生产能力。
 """
-import sys, os, time, json
+import json
+import os
+import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -14,7 +17,7 @@ def main():
     print("P0 FULL 7-STAGE E2E (with Stock Footage)")
     print("=" * 60)
     
-    from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig
+    from pipeline.unified_pipeline import PipelineConfig, UnifiedPipeline
     
     # 不指定 materials_dir，让 perceive 阶段自动从 Pexels 获取
     config = PipelineConfig(
@@ -88,7 +91,7 @@ def main():
             fps = vs.get('r_frame_rate', '')
             bitrate = int(fmt.get('bit_rate', 0))
             
-            print(f"\n  [ffprobe]")
+            print("\n  [ffprobe]")
             print(f"    Codec: {codec}")
             print(f"    Resolution: {width}x{height}")
             print(f"    Duration: {duration:.1f}s")
@@ -107,7 +110,7 @@ def main():
             checks.append(("Quality > 60", quality > 60))
             checks.append(("Status success", str(status) in ("success", "done")))
             
-            print(f"\n  [Acceptance]")
+            print("\n  [Acceptance]")
             all_pass = True
             for name, passed in checks:
                 mark = "PASS" if passed else "FAIL"
@@ -116,16 +119,16 @@ def main():
                     all_pass = False
             
             if all_pass:
-                print(f"\n  RESULT: PASS - Production-ready output!")
+                print("\n  RESULT: PASS - Production-ready output!")
                 return 0
             else:
-                print(f"\n  RESULT: PARTIAL - Some checks failed")
+                print("\n  RESULT: PARTIAL - Some checks failed")
                 return 1
                 
         except Exception as e:
             print(f"    ffprobe error: {e}")
     else:
-        print(f"  ERROR: No output file found")
+        print("  ERROR: No output file found")
     
     return 1
 

@@ -6,8 +6,9 @@
 输出纯 JSON 便于后续解析
 """
 from __future__ import annotations
-import json
+
 import importlib
+import json
 import sys
 import time
 from pathlib import Path
@@ -153,8 +154,10 @@ except Exception as e:
 
 # artifact_manager 基本流程：注册/查询/校验？
 try:
-    import tempfile, hashlib
-    from core.artifact_manager import ArtifactManager, Artifact
+    import hashlib
+    import tempfile
+
+    from core.artifact_manager import Artifact, ArtifactManager
 
     with tempfile.TemporaryDirectory() as td:
         tdp = Path(td)
@@ -171,8 +174,10 @@ except Exception as e:
 
 # engine_registry: 注册 + select_best？
 try:
-    import tempfile, threading
-    from core.engine_registry import EngineRegistry, EngineMetadata
+    import tempfile
+    import threading
+
+    from core.engine_registry import EngineMetadata, EngineRegistry
 
     with tempfile.TemporaryDirectory() as td:
         state = str(Path(td) / "s.json")

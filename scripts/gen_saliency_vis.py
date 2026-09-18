@@ -46,7 +46,7 @@ def main():
             for j, p in enumerate(prompts):
                 print(f"    [{j+1}] x={p['x']}, y={p['y']}, score={p['score']}")
         else:
-            print(f"    未找到候选点")
+            print("    未找到候选点")
 
         results.append({"stem": stem, "prompts": prompts, "vis_png": str(vis_png)})
 

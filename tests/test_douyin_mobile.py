@@ -1,10 +1,12 @@
 import asyncio
+import json
 import os
 import re
-import json
 from pathlib import Path
-from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
+
 import requests
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
+from playwright.async_api import async_playwright
 
 OUTPUT_DIR = Path("D:/AE-Work/test_douyin")
 
@@ -148,7 +150,7 @@ async def main():
 
         if video_download_url:
             print()
-            print(f"  ✓ 找到视频下载地址:")
+            print("  ✓ 找到视频下载地址:")
             print(f"    {video_download_url[:120]}...")
             print()
 

@@ -10,12 +10,12 @@ Plugin discovery supports both entry-point based and directory scanning.
 
 from src.plugins.base import (
     BasePlugin,
+    FilterPlugin,
     HookPlugin,
     PhasePlugin,
-    FilterPlugin,
     PluginContext,
-    PluginState,
     PluginPriority,
+    PluginState,
 )
 from src.plugins.manager import PluginManager, plugin_manager
 

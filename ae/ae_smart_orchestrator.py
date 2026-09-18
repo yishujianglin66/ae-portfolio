@@ -49,8 +49,8 @@ class AESmartOrchestrator:
         self.v4_agent = V4Agent() if _V4_AVAILABLE and V4Agent else None
         self.ae_client = AECommandClient() if _AE_CLIENT_AVAILABLE and AECommandClient else None
         self.presets = ae_composition_presets if _PRESETS_AVAILABLE else None
-        self.task_history: List[Dict[str, Any]] = []
-        self.execution_log: List[Dict[str, Any]] = []
+        self.task_history: list[dict[str, Any]] = []
+        self.execution_log: list[dict[str, Any]] = []
 
     # ------------------------------------------------------------------
     # 主入口

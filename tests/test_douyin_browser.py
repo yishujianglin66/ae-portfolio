@@ -1,5 +1,5 @@
-import sys
 import importlib
+import sys
 
 mf = importlib.import_module("media-fetcher")
 MediaFetcher = mf.MediaFetcher
@@ -14,7 +14,7 @@ result = fetcher.download_video(
     output_dir="D:/AE-Work/test_douyin",
 )
 
-print(f"\n下载结果:")
+print("\n下载结果:")
 print(f"  成功: {result['success']}")
 print(f"  平台: {result['platform']}")
 print(f"  错误: {result.get('error', '')[:500]}")

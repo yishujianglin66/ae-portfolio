@@ -21,17 +21,16 @@ Phase 3 AE实机验证脚本 - 编排层与反馈闭环
     python tests/test_phase3_real_ae.py --full
 """
 
+import argparse
+import json
 import os
 import sys
-import json
 import time
-import argparse
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ae_agent_pipeline import AEAgentPipeline, PlanningResult
-
 
 # ==================== 配置 ====================
 
@@ -102,7 +101,7 @@ def step1_style_effects_verification():
             print(f"          设置: {json.dumps(effect['settings'], ensure_ascii=False)}")
         return True
     else:
-        print(f"  [FAIL] 风格效果生成失败")
+        print("  [FAIL] 风格效果生成失败")
         return False
 
 
@@ -154,7 +153,7 @@ def step2_scene_transition_verification():
 
         return True
     else:
-        print(f"  [FAIL] 场景编排失败")
+        print("  [FAIL] 场景编排失败")
         return False
 
 
@@ -200,7 +199,7 @@ def step3_beat_sync_verification():
 
         return True
     else:
-        print(f"  [FAIL] 节拍同步动画生成失败")
+        print("  [FAIL] 节拍同步动画生成失败")
         return False
 
 
@@ -259,7 +258,7 @@ def step4_full_orchestration_compilation():
 
     if compile_result.get("success"):
         jsx_code = compile_result["jsx_code"]
-        print(f"  [OK] JSX编译成功")
+        print("  [OK] JSX编译成功")
         print(f"  [OK] JSX长度: {len(jsx_code)} 字符")
         print(f"  [OK] 编译方法: {compile_result.get('method')}")
         print(f"  [OK] 命令数量: {compile_result.get('command_count')}")
@@ -326,7 +325,7 @@ def step5_feedback_loop_simulation():
     )
 
     if result2 and not result2["success"]:
-        print(f"  [OK] 失败执行 - 已捕获错误")
+        print("  [OK] 失败执行 - 已捕获错误")
         print(f"  [OK] 错误码: {result2['record'].error_code}")
         if result2["suggestion"]:
             print(f"  [OK] 恢复建议: {result2['suggestion']['default']}")

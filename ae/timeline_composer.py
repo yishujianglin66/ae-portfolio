@@ -32,11 +32,11 @@ import json
 import math
 import os
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union, Callable
+from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
-from copy import deepcopy
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -67,11 +67,11 @@ class ClipItem:
     id: str                          # 唯一标识
     source_path: str                 # 源文件路径
     source_start: float = 0.0        # 源素材入点（秒）
-    source_end: Optional[float] = None  # 源素材出点（秒），None 表示到结尾
+    source_end: float | None = None  # 源素材出点（秒），None 表示到结尾
 
     # 时间线位置
     timeline_in: float = 0.0        # 时间线上的入点
-    timeline_out: Optional[float] = None  # 时间线上的出点
+    timeline_out: float | None = None  # 时间线上的出点
     duration: float = 0.0           # 时长
 
     # 变换属性
@@ -82,17 +82,17 @@ class ClipItem:
     opacity: float = 1.0
 
     # 转场
-    transition_in: Optional[Dict] = None   # {type, duration}
-    transition_out: Optional[Dict] = None  # {type, duration}
+    transition_in: dict | None = None   # {type, duration}
+    transition_out: dict | None = None  # {type, duration}
 
     # 特效
-    effects: List[Dict] = field(default_factory=list)
+    effects: list[dict] = field(default_factory=list)
     speed: float = 1.0              # 变速
     is_reversed: bool = False
-    freeze_frame_at: Optional[float] = None
+    freeze_frame_at: float | None = None
 
     # 元数据
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     track_index: int = 0
     track_type: TrackType = TrackType.VIDEO
 
@@ -106,7 +106,7 @@ class Track:
     """时间线轨道"""
     index: int
     track_type: TrackType
-    clips: List[ClipItem] = field(default_factory=list)
+    clips: list[ClipItem] = field(default_factory=list)
     muted: bool = False
     locked: bool = False
     label: str = ""
@@ -117,18 +117,18 @@ class Timeline:
     """完整时间线"""
     name: str
     fps: float = 30.0
-    resolution: Tuple[int, int] = (1920, 1080)
+    resolution: tuple[int, int] = (1920, 1080)
     sample_rate: int = 48000
     total_duration: float = 0.0
 
-    tracks: List[Track] = field(default_factory=list)
-    markers: List[Dict] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tracks: list[Track] = field(default_factory=list)
+    markers: list[dict] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    audio_source: Optional[str] = None
+    audio_source: str | None = None
     style: TimelineStyle = TimelineStyle.DYNAMIC_CUT
 
-    def to_pr_json(self) -> Dict[str, Any]:
+    def to_pr_json(self) -> dict[str, Any]:
         """导出为 PremiereProMCP 兼容的时间线 JSON"""
         video_tracks = []
         audio_tracks = []
@@ -183,7 +183,7 @@ class Timeline:
             "metadata": self.metadata,
         }
 
-    def to_ae_json(self) -> Dict[str, Any]:
+    def to_ae_json(self) -> dict[str, Any]:
         """导出为 AE MCP 兼容的合成描述"""
         pr_json = self.to_pr_json()
         comp = {
@@ -240,7 +240,7 @@ class TimelineComposer:
     def __init__(
         self,
         fps: float = 30.0,
-        resolution: Tuple[int, int] = (1920, 1080),
+        resolution: tuple[int, int] = (1920, 1080),
         default_transition_duration: float = 0.3,
     ):
         self.fps = fps
@@ -270,11 +270,11 @@ class TimelineComposer:
     # ================================================================
     def build_timeline(
         self,
-        clips: List[str],
+        clips: list[str],
         audio: str = None,
         style: TimelineStyle = TimelineStyle.DYNAMIC_CUT,
-        target_duration: Optional[float] = None,
-        clip_duration_range: Tuple[float, float] = (0.5, 4.0),
+        target_duration: float | None = None,
+        clip_duration_range: tuple[float, float] = (0.5, 4.0),
         with_transitions: bool = True,
         transition_type: str = "crossfade",
     ) -> Timeline:
@@ -462,13 +462,13 @@ class TimelineComposer:
     # ================================================================
     def _style_dynamic_cut(
         self,
-        clips: List[str],
+        clips: list[str],
         suggestions: list,
-        clip_durations: Dict[str, float],
-        dur_range: Tuple[float, float],
+        clip_durations: dict[str, float],
+        dur_range: tuple[float, float],
         transition: str,
         with_transitions: bool,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """节奏卡点风格：按节拍建议分配素材"""
         arrangement = []
         min_dur, max_dur = dur_range
@@ -507,13 +507,13 @@ class TimelineComposer:
 
     def _style_fast_beat(
         self,
-        clips: List[str],
+        clips: list[str],
         beats: list,
-        clip_durations: Dict[str, float],
-        dur_range: Tuple[float, float],
+        clip_durations: dict[str, float],
+        dur_range: tuple[float, float],
         transition: str,
         with_transitions: bool,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """快节奏风格：每2-4个节拍切一次"""
         arrangement = []
         min_dur, max_dur = dur_range
@@ -547,13 +547,13 @@ class TimelineComposer:
 
     def _style_smooth_flow(
         self,
-        clips: List[str],
-        clip_durations: Dict[str, float],
-        dur_range: Tuple[float, float],
-        target_duration: Optional[float],
+        clips: list[str],
+        clip_durations: dict[str, float],
+        dur_range: tuple[float, float],
+        target_duration: float | None,
         transition: str,
         with_transitions: bool,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """平滑风格：均衡分配时长，使用长渐隐转场"""
         min_dur, max_dur = dur_range
         avg_dur = (min_dur + max_dur) / 2
@@ -581,12 +581,12 @@ class TimelineComposer:
 
     def _style_slow_cinematic(
         self,
-        clips: List[str],
-        clip_durations: Dict[str, float],
-        target_duration: Optional[float],
+        clips: list[str],
+        clip_durations: dict[str, float],
+        target_duration: float | None,
         transition: str,
         with_transitions: bool,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """电影感慢节奏：长片段 + 慢速 + 黑边"""
         arrangement = []
         dur_each = 5.0 if not target_duration else target_duration / max(len(clips), 1)
@@ -611,13 +611,13 @@ class TimelineComposer:
 
     def _style_glitch(
         self,
-        clips: List[str],
+        clips: list[str],
         beats: list,
-        clip_durations: Dict[str, float],
-        dur_range: Tuple[float, float],
+        clip_durations: dict[str, float],
+        dur_range: tuple[float, float],
         transition: str,
         with_transitions: bool,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """故障风格：短片段 + 故障转场 + RGB分离"""
         min_dur, _ = dur_range
         arrangement = []
@@ -641,13 +641,13 @@ class TimelineComposer:
 
     def _style_vlog(
         self,
-        clips: List[str],
-        clip_durations: Dict[str, float],
-        dur_range: Tuple[float, float],
-        target_duration: Optional[float],
+        clips: list[str],
+        clip_durations: dict[str, float],
+        dur_range: tuple[float, float],
+        target_duration: float | None,
         transition: str,
         with_transitions: bool,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Vlog风格：自由节奏 + 缩放转场 + 文字覆盖"""
         min_dur, max_dur = dur_range
         arrangement = []
@@ -723,7 +723,7 @@ class TimelineComposer:
     def fill_gaps(
         self,
         timeline: Timeline,
-        fill_clips: List[str],
+        fill_clips: list[str],
         track_index: int = 0,
     ) -> Timeline:
         """自动填充时间线间隙"""

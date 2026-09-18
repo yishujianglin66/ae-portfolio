@@ -51,7 +51,7 @@ async def test_cep_safe():
         if data.get('seqCount', 0) > 0:
             print(f"  → 已有序列: {data['seqNames']}")
         else:
-            print(f"  → 项目无序列，需要创建")
+            print("  → 项目无序列，需要创建")
             print(f"  → createNewSequence 方法: {data.get('hasCreateNewSeq', 'undefined')}")
     except PRBridgeError as e:
         print(f"  ❌ 失败: {e}")

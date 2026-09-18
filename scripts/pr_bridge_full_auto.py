@@ -5,10 +5,10 @@ AE Knowledge Vault - Premiere Pro 全自动剪辑控制器
 from __future__ import annotations
 
 import json
+import tempfile
 import time
 import uuid
 from pathlib import Path
-import tempfile
 
 
 class PRBridgeController:

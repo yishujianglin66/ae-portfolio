@@ -18,13 +18,12 @@ import re
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
-
 # ---------------------------------------------------------------------------
 # 混合任务拆分关键词
 # ---------------------------------------------------------------------------
 
 # 连接词，表示"先做A再做B"
-HYBRID_CONNECTORS: List[re.Pattern] = [
+HYBRID_CONNECTORS: list[re.Pattern] = [
     re.compile(r"然后", re.IGNORECASE),
     re.compile(r"之后再?", re.IGNORECASE),
     re.compile(r"接着", re.IGNORECASE),
@@ -40,7 +39,7 @@ HYBRID_CONNECTORS: List[re.Pattern] = [
 ]
 
 # Silhouette 相关关键词
-SILHOUETTE_KEYWORDS: List[re.Pattern] = [
+SILHOUETTE_KEYWORDS: list[re.Pattern] = [
     re.compile(r"(?:扣|抠|遮罩|蒙版|mask|roto)", re.IGNORECASE),
     re.compile(r"(?:跟踪|追踪|track)", re.IGNORECASE),
     re.compile(r"(?:修|擦|paint|修复|去除|擦除)", re.IGNORECASE),
@@ -48,7 +47,7 @@ SILHOUETTE_KEYWORDS: List[re.Pattern] = [
 ]
 
 # AE 效果关键词
-AE_EFFECT_KEYWORDS: List[re.Pattern] = [
+AE_EFFECT_KEYWORDS: list[re.Pattern] = [
     re.compile(r"(?:发光|辉光|glow|霓虹)", re.IGNORECASE),
     re.compile(r"(?:模糊|blur|高斯)", re.IGNORECASE),
     re.compile(r"(?:粒子|particle)", re.IGNORECASE),
@@ -72,10 +71,10 @@ AE_EFFECT_KEYWORDS: List[re.Pattern] = [
 class TaskRoute:
     """路由结果"""
     type: str  # ae_only | silhouette_only | hybrid | unknown
-    ae_operations: List[Dict] = field(default_factory=list)
-    silhouette_operations: List[Dict] = field(default_factory=list)
-    execution_order: List[str] = field(default_factory=list)
-    fallback: Optional[Dict] = None
+    ae_operations: list[dict] = field(default_factory=list)
+    silhouette_operations: list[dict] = field(default_factory=list)
+    execution_order: list[str] = field(default_factory=list)
+    fallback: dict | None = None
     reason: str = ""
     confidence: float = 0.0
 
@@ -85,7 +84,7 @@ class TaskRoute:
 # ---------------------------------------------------------------------------
 
 # Silhouette 任务类型 → 降级到 AE 原生操作的映射
-FALLBACK_MAP: Dict[str, Dict] = {
+FALLBACK_MAP: dict[str, dict] = {
     "roto": {
         "condition": "Silhouette 不可用或执行失败",
         "ae_fallback_ops": [
@@ -139,10 +138,10 @@ class _MemoryStore:
     """
 
     def __init__(self) -> None:
-        self._entries: List[Dict] = []
+        self._entries: list[dict] = []
 
-    def remember(self, category: str, key: str, content: Dict,
-                 tags: List[str], confidence: float) -> None:
+    def remember(self, category: str, key: str, content: dict,
+                 tags: list[str], confidence: float) -> None:
         """记录一条经验"""
         self._entries.append({
             "category": category,
@@ -153,7 +152,7 @@ class _MemoryStore:
         })
 
     def get_experience(self, category: str, task_keyword: str,
-                       limit: int = 3, min_confidence: float = 0.6) -> List[Dict]:
+                       limit: int = 3, min_confidence: float = 0.6) -> list[dict]:
         """检索相似任务的历史经验"""
         results = [
             e for e in self._entries
@@ -177,14 +176,14 @@ _memory_store = _MemoryStore()
 class IntentRouter:
     """意图路由决策器 — 根据用户输入判断任务流向"""
 
-    def __init__(self, memory_store: Optional[_MemoryStore] = None) -> None:
+    def __init__(self, memory_store: _MemoryStore | None = None) -> None:
         self._memory = memory_store or _memory_store
 
     # ------------------------------------------------------------------
     # 主路由方法
     # ------------------------------------------------------------------
 
-    def route(self, user_input: str, context: Optional[Dict] = None) -> TaskRoute:
+    def route(self, user_input: str, context: dict | None = None) -> TaskRoute:
         """
         根据用户输入路由任务。
 
@@ -223,7 +222,7 @@ class IntentRouter:
     # 带记忆系统增强的路由
     # ------------------------------------------------------------------
 
-    def route_enhanced(self, user_input: str, context: Optional[Dict] = None) -> TaskRoute:
+    def route_enhanced(self, user_input: str, context: dict | None = None) -> TaskRoute:
         """
         带记忆系统增强的路由方法。
         先查记忆系统相似任务历史，高置信度直接复用缓存路由，
@@ -310,7 +309,7 @@ class IntentRouter:
     # 拆分混合输入
     # ------------------------------------------------------------------
 
-    def split_hybrid_input(self, user_input: str) -> Dict:
+    def split_hybrid_input(self, user_input: str) -> dict:
         """
         拆分混合输入为 Silhouette 部分和 AE 部分。
 
@@ -389,9 +388,9 @@ class IntentRouter:
     # 操作生成
     # ==================================================================
 
-    def _generate_ae_ops(self, user_input: str) -> List[Dict]:
+    def _generate_ae_ops(self, user_input: str) -> list[dict]:
         """从用户输入中提取 AE 操作列表"""
-        ops: List[Dict] = []
+        ops: list[dict] = []
 
         # 尝试从拆分后的 AE 部分提取，或从整体输入提取
         split = self.split_hybrid_input(user_input)
@@ -409,7 +408,7 @@ class IntentRouter:
 
         return ops
 
-    def _generate_silhouette_ops(self, user_input: str) -> List[Dict]:
+    def _generate_silhouette_ops(self, user_input: str) -> list[dict]:
         """从用户输入中生成 Silhouette 操作列表"""
         task_type = self._detect_silhouette_task_type(user_input)
         if not task_type:
@@ -452,7 +451,7 @@ class IntentRouter:
     # 工具方法
     # ==================================================================
 
-    def _detect_silhouette_task_type(self, user_input: str) -> Optional[str]:
+    def _detect_silhouette_task_type(self, user_input: str) -> str | None:
         """
         从用户输入中检测 Silhouette 任务类型。
 

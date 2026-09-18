@@ -355,7 +355,7 @@ async def test_photoshop() -> dict:
 # Main
 # ──────────────────────────────────────────────────────────────────
 async def main():
-    print(f"P1 引擎实测开始")
+    print("P1 引擎实测开始")
     print(f"测试视频: {TEST_VIDEO}")
     print(f"输出目录: {OUTPUT_DIR}")
     print(f"时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")

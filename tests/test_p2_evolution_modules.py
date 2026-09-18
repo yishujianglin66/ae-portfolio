@@ -159,9 +159,13 @@ def test_agent_execution_paths():
     print("\n--- Test 4: Agent 真实执行路径开关 ---")
     import asyncio
     import os
+
     from core.style_transfer_agents import (
-        QualityReviewAgent, StyleAnalysisAgent, TaskDefinition,
-        _task_llm_enabled, _load_agent_prompt,
+        QualityReviewAgent,
+        StyleAnalysisAgent,
+        TaskDefinition,
+        _load_agent_prompt,
+        _task_llm_enabled,
     )
 
     # 默认关闭

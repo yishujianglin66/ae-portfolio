@@ -9,9 +9,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import torch
-from core.torch_runtime import get_device
 import whisper
 from loguru import logger
+
+from core.torch_runtime import get_device
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class AudioAnalysisService:
 
     def __init__(self, model_name: str = "base"):
         self.model_name = model_name
-        self._model: Optional[whisper.Whisper] = None
+        self._model: whisper.Whisper | None = None
         self._device = get_device()
 
     def _load_model(self):
@@ -30,7 +31,7 @@ class AudioAnalysisService:
             logger.info(f"Loading Whisper model '{self.model_name}' on {self._device}")
             self._model = whisper.load_model(self.model_name, device=self._device)
 
-    async def transcribe(self, audio_path: str | Path) -> Dict[str, Any]:
+    async def transcribe(self, audio_path: str | Path) -> dict[str, Any]:
         """Transcribe audio file using Whisper."""
         audio_path = Path(audio_path)
         if not audio_path.exists():
@@ -63,7 +64,7 @@ class AudioAnalysisService:
             "word_count": len(result.get("text", "").split()),
         }
 
-    async def detect_speakers(self, audio_path: str | Path) -> Dict[str, Any]:
+    async def detect_speakers(self, audio_path: str | Path) -> dict[str, Any]:
         """Detect speakers in audio file using PyAnnote."""
         audio_path = Path(audio_path)
         if not audio_path.exists():
@@ -110,7 +111,7 @@ class AudioAnalysisService:
 
         return base_transcription
 
-    async def analyze_audio(self, audio_path: str | Path, detect_speakers: bool = True) -> Dict[str, Any]:
+    async def analyze_audio(self, audio_path: str | Path, detect_speakers: bool = True) -> dict[str, Any]:
         """Perform comprehensive audio analysis."""
         if detect_speakers:
             return await self.detect_speakers(audio_path)

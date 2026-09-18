@@ -58,7 +58,7 @@ _CACHE_READ_LIMIT = 3 * 1024 * 1024  # 缓存文件 >3MB 直接跳过（防写�
 
 # ── 链定义 ────────────────────────────────────────────────────────
 # base_url: OpenAI 兼容 /chat/completions；key_env: 依次尝试的环境变量名列表
-_CHAIN: List[Dict[str, Any]] = [
+_CHAIN: list[dict[str, Any]] = [
     {
         "name": "dashscope-qwen-vl-max",
         "provider": "dashscope",
@@ -102,13 +102,13 @@ def _load_env() -> None:
         pass
 
 
-def _model_name(node: Dict[str, Any]) -> str:
+def _model_name(node: dict[str, Any]) -> str:
     """模型名支持 env 覆盖（LLM_CHAIN_SF_VL_32B / LLM_CHAIN_SF_VL_8B）。"""
     override = os.environ.get(f"LLM_CHAIN_{node['provider'].upper()}_VL_{'32B' if '32b' in node['model'].lower() else '8B'}")
     return override or node["model"]
 
 
-def _node_key(node: Dict[str, Any]) -> Optional[str]:
+def _node_key(node: dict[str, Any]) -> str | None:
     for env_name in node["key_env"]:
         v = os.environ.get(env_name, "").strip()
         if v:
@@ -118,7 +118,7 @@ def _node_key(node: Dict[str, Any]) -> Optional[str]:
 
 # ── 状态持久化 ────────────────────────────────────────────────────
 
-def _load_state() -> Dict[str, Any]:
+def _load_state() -> dict[str, Any]:
     try:
         if _STATE_FILE.exists():
             d = json.loads(_STATE_FILE.read_text(encoding="utf-8"))
@@ -129,7 +129,7 @@ def _load_state() -> Dict[str, Any]:
     return {"version": 1, "blacklist": {}, "history": []}
 
 
-def _save_state(state: Dict[str, Any]) -> None:
+def _save_state(state: dict[str, Any]) -> None:
     try:
         _STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
         _STATE_FILE.write_text(
@@ -138,7 +138,7 @@ def _save_state(state: Dict[str, Any]) -> None:
         logger.warning("llm_chain 状态写入失败: %s", e)
 
 
-def _is_blacklisted(name: str, state: Dict[str, Any]) -> bool:
+def _is_blacklisted(name: str, state: dict[str, Any]) -> bool:
     bl = state.get("blacklist", {}).get(name)
     if not bl:
         return False
@@ -173,7 +173,7 @@ def reset_blacklist() -> None:
     _save_state(state)
 
 
-def chain_status() -> Dict[str, Any]:
+def chain_status() -> dict[str, Any]:
     """各节点可用性 + 黑名单状态（验证命令 / 交接文档调用）。"""
     _load_env()
     state = _load_state()
@@ -199,12 +199,12 @@ def chain_status() -> Dict[str, Any]:
 
 # ── 缓存（相同帧+prompt 命中直接返回，省 API 计费） ──────────────
 
-def _cache_path(prompt: str, frames_b64: List[str]) -> Path:
+def _cache_path(prompt: str, frames_b64: list[str]) -> Path:
     h = hashlib.md5((prompt + "|" + "|".join(frames_b64)).encode()).hexdigest()[:16]
     return _CACHE_DIR / f"{h}.json"
 
 
-def _cache_read(p: Path) -> Optional[Dict[str, Any]]:
+def _cache_read(p: Path) -> dict[str, Any] | None:
     try:
         if not p.exists() or p.stat().st_size > _CACHE_READ_LIMIT:
             return None
@@ -213,7 +213,7 @@ def _cache_read(p: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
-def _cache_write(p: Path, result: Dict[str, Any]) -> None:
+def _cache_write(p: Path, result: dict[str, Any]) -> None:
     try:
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(json.dumps(result, ensure_ascii=False), encoding="utf-8")
@@ -223,8 +223,8 @@ def _cache_write(p: Path, result: Dict[str, Any]) -> None:
 
 # ── HTTP 调用 ─────────────────────────────────────────────────────
 
-def _post_json(url: str, key: str, payload: Dict[str, Any], timeout: int = 120
-               ) -> Tuple[int, Dict[str, Any]]:
+def _post_json(url: str, key: str, payload: dict[str, Any], timeout: int = 120
+               ) -> tuple[int, dict[str, Any]]:
     """POST OpenAI 兼容接口，返回 (status_code, body_dict)。
 
     死代理直连（继承 visual_scorer 教训）：Windows 注册表残留 Clash 代理配置时
@@ -250,7 +250,7 @@ def _post_json(url: str, key: str, payload: Dict[str, Any], timeout: int = 120
         return 0, {"error": str(e)}
 
 
-def _extract_json(text: str) -> Dict[str, Any]:
+def _extract_json(text: str) -> dict[str, Any]:
     m = re.search(r"\{.*\}", text, re.S)
     if not m:
         return {"scores": {}, "issues": [], "advice": "", "overall": 0}
@@ -263,7 +263,7 @@ def _extract_json(text: str) -> Dict[str, Any]:
 # ── 错误分级 ──────────────────────────────────────────────────────
 # 返回 "blacklist"（拉黑 30min）/ "skip"（本次跳过，不拉黑）
 
-def _classify(status: int, node: Dict[str, Any]) -> str:
+def _classify(status: int, node: dict[str, Any]) -> str:
     if status in (401, 403, 429):
         return "blacklist"          # 额度耗尽 / key 无效 / 限流
     if status == 404:
@@ -275,7 +275,7 @@ def _classify(status: int, node: Dict[str, Any]) -> str:
     return "skip"
 
 
-def _extract_message(body: Dict[str, Any]) -> str:
+def _extract_message(body: dict[str, Any]) -> str:
     try:
         return body["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError):
@@ -283,7 +283,7 @@ def _extract_message(body: Dict[str, Any]) -> str:
                                           if body else "空响应")
 
 
-def _reset_on_success(state: Dict[str, Any], name: str) -> None:
+def _reset_on_success(state: dict[str, Any], name: str) -> None:
     """节点成功后摘除其黑名单（避免 404 改配置后仍需等拉黑到期）。"""
     if name in state.get("blacklist", {}):
         state["blacklist"].pop(name, None)
@@ -292,8 +292,8 @@ def _reset_on_success(state: Dict[str, Any], name: str) -> None:
 
 # ── 主入口：vision_call / chat_call ───────────────────────────────
 
-def _run_chain(prompt: str, frames_b64: Optional[List[str]],
-               timeout: int = 120) -> Dict[str, Any]:
+def _run_chain(prompt: str, frames_b64: list[str] | None,
+               timeout: int = 120) -> dict[str, Any]:
     """按链序尝试各节点。返回最终结果或错误摘要。"""
     _load_env()
     cache_key = None
@@ -303,7 +303,7 @@ def _run_chain(prompt: str, frames_b64: Optional[List[str]],
         if hit is not None:
             return hit
 
-    errors: List[str] = []
+    errors: list[str] = []
     state = _load_state()
     for node in _CHAIN:
         name = node["name"]
@@ -355,7 +355,7 @@ def _run_chain(prompt: str, frames_b64: Optional[List[str]],
     return {"error": "所有节点均不可用 | " + "；".join(errors)}
 
 
-def vision_call(frames_b64: List[str], prompt: str, timeout: int = 120) -> Dict[str, Any]:
+def vision_call(frames_b64: list[str], prompt: str, timeout: int = 120) -> dict[str, Any]:
     """多模态视觉评分。frames_b64 为 jpeg base64 列表，返回结构化 JSON 结果。
 
     供 visual_scorer._call_qwen_vl 的 403/429 分支接入。

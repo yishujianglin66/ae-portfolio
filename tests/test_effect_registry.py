@@ -2,16 +2,16 @@
 test_effect_registry.py - 效果注册表单元测试
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from effect_registry import (
-    KEYWORD_TO_EFFECT_MAP,
     EFFECT_DISPLAY_NAMES,
-    get_effect_matchname,
+    KEYWORD_TO_EFFECT_MAP,
     get_all_effect_keywords,
+    get_effect_matchname,
 )
 
 
@@ -103,7 +103,7 @@ class TestBackwardCompatibility:
 
     def test_parameter_optimizer_resolve_works(self):
         """ParameterOptimizer 的 _resolve_effect_name 应正常工作。"""
-        from parameter_optimizer import ParameterOptimizer, ParameterContext
+        from parameter_optimizer import ParameterContext, ParameterOptimizer
         optimizer = ParameterOptimizer()
         ctx = ParameterContext(effect_name="发光", intensity=0.5)
         result = optimizer.optimize(ctx)

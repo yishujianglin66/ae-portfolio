@@ -85,13 +85,13 @@ class StageTask:
             return task.run_fn(context)
     """
     name: str                           # 任务名 (perceive/analyze/plan/...)
-    run_fn: Optional[Callable] = None   # 实际执行函数
-    dependencies: List[str] = field(default_factory=list)  # 依赖的前置任务名
+    run_fn: Callable | None = None   # 实际执行函数
+    dependencies: list[str] = field(default_factory=list)  # 依赖的前置任务名
     max_retries: int = 1                # 最大重试次数
     retry_delay_sec: float = 2.0        # 重试间隔
     timeout_sec: float = 300.0          # 超时时间
     cache_key: str = ""                 # 缓存键(用于跳过已完成任务)
-    tags: List[str] = field(default_factory=list)  # 标签(用于分组/过滤)
+    tags: list[str] = field(default_factory=list)  # 标签(用于分组/过滤)
 
 
 @dataclass
@@ -104,11 +104,11 @@ class FlowDefinition:
             # 按 DAG 顺序执行 tasks
     """
     name: str = "video_pipeline"
-    tasks: List[StageTask] = field(default_factory=list)
+    tasks: list[StageTask] = field(default_factory=list)
     max_retries: int = 0
     description: str = "AE-Knowledge-Vault 视频创作管线"
     
-    def get_execution_order(self) -> List[List[str]]:
+    def get_execution_order(self) -> list[list[str]]:
         """拓扑排序: 返回分层执行顺序(同层可并行)"""
         resolved = set()
         layers = []
@@ -136,7 +136,7 @@ class TaskResult:
     """任务执行结果 (对齐 Prefect State + 业务数据)"""
     task_name: str = ""
     state: TaskState = TaskState.PENDING
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     error: str = ""
     start_time: float = 0.0
     end_time: float = 0.0
@@ -160,7 +160,7 @@ class OrchestrationBackend(ABC):
     """
 
     @abstractmethod
-    def execute_flow(self, flow: FlowDefinition, context: Dict[str, Any]) -> Dict[str, TaskResult]:
+    def execute_flow(self, flow: FlowDefinition, context: dict[str, Any]) -> dict[str, TaskResult]:
         """执行整个工作流"""
         ...
 
@@ -179,17 +179,17 @@ class SimpleOrchestrator(OrchestrationBackend):
     - 关键阶段失败则中断
     """
 
-    def __init__(self, critical_stages: List[str] = None):
+    def __init__(self, critical_stages: list[str] = None):
         self._critical = set(critical_stages or ["execute", "render"])
 
     def get_backend_name(self) -> str:
         return "simple_sequential"
 
     def execute_flow(
-        self, flow: FlowDefinition, context: Dict[str, Any]
-    ) -> Dict[str, TaskResult]:
+        self, flow: FlowDefinition, context: dict[str, Any]
+    ) -> dict[str, TaskResult]:
         """按拓扑顺序执行所有任务"""
-        results: Dict[str, TaskResult] = {}
+        results: dict[str, TaskResult] = {}
         layers = flow.get_execution_order()
 
         for layer in layers:
@@ -213,8 +213,8 @@ class SimpleOrchestrator(OrchestrationBackend):
         return results
 
     def _execute_task(
-        self, task: StageTask, context: Dict[str, Any],
-        prev_results: Dict[str, TaskResult]
+        self, task: StageTask, context: dict[str, Any],
+        prev_results: dict[str, TaskResult]
     ) -> TaskResult:
         """执行单个任务(带重试)"""
         result = TaskResult(task_name=task.name)
@@ -269,8 +269,8 @@ def get_orchestrator(backend: str = "auto") -> OrchestrationBackend:
 # ============================================================================
 
 def pipeline_stages_to_flow(
-    stage_fns: Dict[str, Callable],
-    skip_stages: List[str] = None,
+    stage_fns: dict[str, Callable],
+    skip_stages: list[str] = None,
 ) -> FlowDefinition:
     """将现有管线的阶段函数转换为 FlowDefinition
     
@@ -360,7 +360,7 @@ class PipelineCoordinator:
     def __init__(self):
         self._logger = logging.getLogger(f"{__name__}.PipelineCoordinator")
     
-    def select_pipeline(self, task_spec: Dict[str, Any]) -> str:
+    def select_pipeline(self, task_spec: dict[str, Any]) -> str:
         """基于任务类型选择管线
         
         决策逻辑:
@@ -400,8 +400,8 @@ class PipelineCoordinator:
         self,
         unified_pipeline: Any,
         orchestrator: Any,
-        task_spec: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        task_spec: dict[str, Any],
+    ) -> dict[str, Any]:
         """协调两条管线执行任务 (hybrid 模式)
         
         流程:
@@ -426,8 +426,8 @@ class PipelineCoordinator:
             task_spec.get("task_type", "unknown"),
         )
         
-        unified_result: Dict[str, Any] = {}
-        orchestrator_result: Dict[str, Any] = {}
+        unified_result: dict[str, Any] = {}
+        orchestrator_result: dict[str, Any] = {}
         
         # 1. 执行 unified (端到端创作)
         if unified_pipeline is not None:
@@ -476,9 +476,9 @@ class PipelineCoordinator:
     
     def merge_results(
         self,
-        unified_result: Dict[str, Any],
-        orchestrator_result: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        unified_result: dict[str, Any],
+        orchestrator_result: dict[str, Any],
+    ) -> dict[str, Any]:
         """合并两条管线的结果
         
         策略:
@@ -494,7 +494,7 @@ class PipelineCoordinator:
         Returns:
             合并后的结果字典
         """
-        merged: Dict[str, Any] = {}
+        merged: dict[str, Any] = {}
         
         # 1. 先放 unified 的核心输出字段
         if isinstance(unified_result, dict):
@@ -535,7 +535,7 @@ class PipelineCoordinator:
         merged["orchestrator_result"] = orchestrator_result if isinstance(orchestrator_result, dict) else {}
         return merged
     
-    def _context_to_dict(self, ctx: Any) -> Dict[str, Any]:
+    def _context_to_dict(self, ctx: Any) -> dict[str, Any]:
         """将 WorkflowContext 转为 dict (容错)"""
         if ctx is None:
             return {}
@@ -556,7 +556,7 @@ class PipelineCoordinator:
 #  全局 PipelineCoordinator 单例
 # ============================================================================
 
-_global_coordinator: Optional[PipelineCoordinator] = None
+_global_coordinator: PipelineCoordinator | None = None
 
 
 def get_pipeline_coordinator() -> PipelineCoordinator:

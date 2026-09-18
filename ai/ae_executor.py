@@ -25,7 +25,6 @@ sys.path.insert(0, str(_PROJECT_ROOT))
 
 from ai.shot_script import ShotScript, ShotUnit, TextOverlay
 
-
 # textFXMaster支持的动画类型映射
 ANIMATION_MAP = {
     "typewriter": "typewriter",
@@ -195,7 +194,7 @@ class AEExecutor:
         return jsx_code
 
     def execute_text_overlay(self, shot: ShotUnit, overlay: TextOverlay, 
-                            dry_run: bool = False) -> Dict:
+                            dry_run: bool = False) -> dict:
         """执行单个文字叠加"""
         result = {
             "shot_id": shot.shot_id,
@@ -223,7 +222,7 @@ class AEExecutor:
         result["success"] = True
         return result
 
-    def execute(self, script: ShotScript, dry_run: bool = False) -> Dict:
+    def execute(self, script: ShotScript, dry_run: bool = False) -> dict:
         """执行ShotScript的所有文字叠加"""
         report = {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -268,7 +267,7 @@ class AEExecutor:
         return report
 
 
-def execute_shot_script_text(script_path: Path, dry_run: bool = False) -> Dict:
+def execute_shot_script_text(script_path: Path, dry_run: bool = False) -> dict:
     """便捷函数: 加载ShotScript并执行文字叠加"""
     script = ShotScript.load(script_path)
     executor = AEExecutor()
@@ -299,16 +298,16 @@ if __name__ == "__main__":
 
     # dry_run执行
     executor = AEExecutor()
-    print(f"\n[dry_run模式]")
+    print("\n[dry_run模式]")
     report = executor.execute(script, dry_run=True)
 
-    print(f"\n执行报告:")
+    print("\n执行报告:")
     print(f"  成功: {report['success']}")
     print(f"  总叠加数: {report.get('total_overlays', 0)}")
     print(f"  成功数: {report.get('success_count', 0)}")
     
     if report.get("text_overlays"):
-        print(f"\n  文字叠加详情:")
+        print("\n  文字叠加详情:")
         for ov in report["text_overlays"]:
             status = "✅" if ov.get("success") else "❌"
             print(f"    {status} Shot[{ov['shot_id']}]: '{ov['text']}' ({ov['animation']})")

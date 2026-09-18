@@ -8,8 +8,9 @@
 #   - 支持布尔运算组合形状
 #   - 适用场景: 复杂人物、机械结构、多部件物体
 
-from fx import *
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=30.0,
@@ -114,7 +115,7 @@ def create_pipeline(source_path, output_path, frame_rate=30.0,
     src.outputs[0].connect(roto_main.inputs[1])
     roto_main.outputs[0].connect(out_node.inputs[0])
 
-    print(f"[SILHOUETTE] 多形状抠像流程已创建")
+    print("[SILHOUETTE] 多形状抠像流程已创建")
     print(f"[SILHOUETTE] 源素材: {source_path}")
     print(f"[SILHOUETTE] 输出路径: {output_path}")
     print(f"[SILHOUETTE] 形状数量: {len(shapes_config)}")
@@ -206,7 +207,7 @@ def create_character_breakdown(roto_node):
         if parent_name and parent_name in shapes:
             info["shape"].parent = shapes[parent_name]["shape"]
 
-    print(f"[SILHOUETTE] 人物分解结构已创建")
+    print("[SILHOUETTE] 人物分解结构已创建")
     print(f"  部位数量: {len(character_parts)}")
     for part in character_parts:
         parent_info = f" (父级: {part['parent']})" if part["parent"] else ""
@@ -290,7 +291,7 @@ def create_mechanical_breakdown(roto_node):
         if parent_name and parent_name in shapes:
             info["shape"].parent = shapes[parent_name]["shape"]
 
-    print(f"[SILHOUETTE] 机械结构分解已创建")
+    print("[SILHOUETTE] 机械结构分解已创建")
     print(f"  部件数量: {len(mechanical_parts)}")
 
     return shapes

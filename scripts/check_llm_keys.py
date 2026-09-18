@@ -35,7 +35,7 @@ ENV_FILES = [ROOT / ".env", ROOT / ".env.doubao"]
 STATUS_FILE = ROOT / "data" / "llm_key_status.json"
 
 # env key → 探测配置（base_url/model 优先取配置文件中已有的值）
-KEY_PROBES: Dict[str, Dict[str, str]] = {
+KEY_PROBES: dict[str, dict[str, str]] = {
     "DEEPSEEK_API_KEY": {
         "provider": "deepseek",
         "base_url_env": "DEEPSEEK_BASE_URL", "base_url": "https://api.deepseek.com/v1",
@@ -79,9 +79,9 @@ KEY_PROBES: Dict[str, Dict[str, str]] = {
 }
 
 
-def load_env_values(path: Path) -> Dict[str, str]:
+def load_env_values(path: Path) -> dict[str, str]:
     """读取 .env 风格文件的 key=value（跳过注释行）"""
-    values: Dict[str, str] = {}
+    values: dict[str, str] = {}
     if not path.exists():
         return values
     with open(path, "r", encoding="utf-8") as f:
@@ -94,7 +94,7 @@ def load_env_values(path: Path) -> Dict[str, str]:
     return values
 
 
-def probe_key(base_url: str, api_key: str, model: str, timeout: int) -> Tuple[str, str, float]:
+def probe_key(base_url: str, api_key: str, model: str, timeout: int) -> tuple[str, str, float]:
     """最小请求验证 key，返回 (status, reason, latency_ms)"""
     url = f"{base_url.rstrip('/')}/chat/completions"
     req = urllib.request.Request(
@@ -129,7 +129,7 @@ def probe_key(base_url: str, api_key: str, model: str, timeout: int) -> Tuple[st
         return "unknown", f"{type(e).__name__}: {str(e)[:120]}", latency
 
 
-def comment_out_invalid(env_file: Path, invalid_reasons: Dict[str, str]) -> int:
+def comment_out_invalid(env_file: Path, invalid_reasons: dict[str, str]) -> int:
     """把配置文件中失效的 key 行注释掉并加 [INVALID] 标记（幂等）。返回改动行数。"""
     if not env_file.exists() or not invalid_reasons:
         return 0
@@ -167,13 +167,13 @@ def main() -> int:
     parser.add_argument("--no-comment", action="store_true", help="不在配置文件中注释失效行")
     args = parser.parse_args()
 
-    envs: Dict[str, str] = {}
+    envs: dict[str, str] = {}
     for f in ENV_FILES:
         envs.update(load_env_values(f))
 
-    results: Dict[str, Dict[str, str]] = {}
+    results: dict[str, dict[str, str]] = {}
     order = ["invalid", "unknown", "valid", "missing"]
-    buckets: Dict[str, list] = {k: [] for k in order}
+    buckets: dict[str, list] = {k: [] for k in order}
 
     for env_key, cfg in KEY_PROBES.items():
         api_key = envs.get(env_key, "")

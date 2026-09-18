@@ -17,7 +17,6 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-
 # 确保 core 模块可导入（puppet-automation/tests/conftest.py 已加 src 到 sys.path）
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -102,6 +101,7 @@ class TestAIPlannerServiceSuccess:
     async def test_plan_calls_gateway_with_intent_classification(self):
         """应使用 TaskType.INTENT_CLASSIFICATION 调用网关。"""
         from src.services.ai_planner import AIPlannerService
+
         from core.llm_gateway import TaskType
 
         gateway = _make_gateway_mock(content='{"intent":"other","params":{}}')
@@ -328,12 +328,11 @@ class TestAIPlannerServiceJsonExtraction:
 class TestAIPlannerServiceUnavailable:
     @pytest.mark.asyncio
     async def test_raises_when_gateway_not_configured(self):
-        from core.llm_gateway import LLMUnavailableError
         from src.services.ai_planner import AIPlannerService
 
         # 使用真实全局网关（默认未配置），不注入 mock
         # 先确保全局网关处于未配置状态
-        from core.llm_gateway import LLMConfig, llm_gateway
+        from core.llm_gateway import LLMConfig, LLMUnavailableError, llm_gateway
         llm_gateway.configure(LLMConfig(base_url="", api_key=""))
 
         service = AIPlannerService()  # 不注入 gateway，使用全局实例
@@ -346,8 +345,9 @@ class TestAIPlannerServiceUnavailable:
 
     @pytest.mark.asyncio
     async def test_raises_when_gateway_call_fails(self):
-        from core.llm_gateway import LLMUnavailableError
         from src.services.ai_planner import AIPlannerService
+
+        from core.llm_gateway import LLMUnavailableError
 
         gateway = _make_gateway_mock(
             content="",
@@ -362,8 +362,9 @@ class TestAIPlannerServiceUnavailable:
     @pytest.mark.asyncio
     async def test_error_message_does_not_leak_api_key(self, caplog):
         """日志中不得出现完整 API Key（脱敏验证）。"""
-        from core.llm_gateway import LLMUnavailableError
         from src.services.ai_planner import AIPlannerService
+
+        from core.llm_gateway import LLMUnavailableError
 
         secret_key = "sk-supersecretkey1234567890abcdefghij"
         gateway = _make_gateway_mock(
@@ -393,11 +394,11 @@ class TestAPIEndpoint503:
     @pytest.mark.asyncio
     async def test_parse_intent_returns_503_when_llm_unavailable(self):
         from fastapi import FastAPI
-        from httpx import AsyncClient, ASGITransport
+        from httpx import ASGITransport, AsyncClient
+        from src.services.ai_planner import AIPlannerService
 
         # 构造一个最小 app，仅挂载 parse-intent 端点
         from core.llm_gateway import LLMUnavailableError
-        from src.services.ai_planner import AIPlannerService
 
         app = FastAPI()
 
@@ -429,8 +430,7 @@ class TestAPIEndpoint503:
     @pytest.mark.asyncio
     async def test_parse_intent_returns_200_when_llm_succeeds(self):
         from fastapi import FastAPI, HTTPException, status
-        from httpx import AsyncClient, ASGITransport
-
+        from httpx import ASGITransport, AsyncClient
         from src.services.ai_planner import AIPlannerService
 
         app = FastAPI()

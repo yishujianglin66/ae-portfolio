@@ -41,7 +41,6 @@ from .prompts import (
     build_style_recommendation_prompt_with_resources,
 )
 
-
 # ============================================================
 # Data Models
 # ============================================================
@@ -74,8 +73,8 @@ class OptimizedParams:
 class PlanningResult:
     """AI规划结果。"""
     job: PipelineJob
-    style_recommendation: Optional[StyleRecommendation] = None
-    optimized_params: Optional[OptimizedParams] = None
+    style_recommendation: StyleRecommendation | None = None
+    optimized_params: OptimizedParams | None = None
     explanation: str = ""
     reasoning: str = ""
 
@@ -320,7 +319,7 @@ class StyleRecommender:
 
     async def recommend(
         self,
-        video_metadata: Optional[VideoMetadata] = None,
+        video_metadata: VideoMetadata | None = None,
         scene_count: int = 0,
         face_count: int = 0,
         content_type: str = "general",
@@ -353,7 +352,7 @@ class StyleRecommender:
 
     async def _recommend_with_llm(
         self,
-        video_metadata: Optional[VideoMetadata],
+        video_metadata: VideoMetadata | None,
         scene_count: int,
         face_count: int,
         content_type: str,
@@ -427,7 +426,7 @@ class StyleRecommender:
 
     def _recommend_rule_based(
         self,
-        video_metadata: Optional[VideoMetadata],
+        video_metadata: VideoMetadata | None,
         scene_count: int,
         face_count: int,
         content_type: str,
@@ -490,7 +489,7 @@ class ParamOptimizer:
 
     async def optimize(
         self,
-        video_metadata: Optional[VideoMetadata],
+        video_metadata: VideoMetadata | None,
         style: PuppetStyle,
         quality_preset: str = "medium",
         scene_count: int = 0,
@@ -525,7 +524,7 @@ class ParamOptimizer:
 
     async def _optimize_with_llm(
         self,
-        video_metadata: Optional[VideoMetadata],
+        video_metadata: VideoMetadata | None,
         style: PuppetStyle,
         quality_preset: str,
         scene_count: int,
@@ -609,7 +608,7 @@ class ParamOptimizer:
 
     def _optimize_rule_based(
         self,
-        video_metadata: Optional[VideoMetadata],
+        video_metadata: VideoMetadata | None,
         style: PuppetStyle,
         quality_preset: str,
         scene_count: int,
@@ -680,7 +679,7 @@ class AIPlanner:
         self,
         user_query: str,
         video_path: str,
-        video_metadata: Optional[VideoMetadata] = None,
+        video_metadata: VideoMetadata | None = None,
     ) -> PlanningResult:
         """从自然语言需求生成流水线规划。
 
@@ -763,7 +762,7 @@ class AIPlanner:
     async def recommend_style(
         self,
         video_path: str,
-        video_metadata: Optional[VideoMetadata] = None,
+        video_metadata: VideoMetadata | None = None,
         user_preferences: str = "",
     ) -> StyleRecommendation:
         """仅做风格推荐。"""
@@ -775,8 +774,8 @@ class AIPlanner:
     async def _generate_explanation(
         self,
         job: PipelineJob,
-        style_rec: Optional[StyleRecommendation],
-        opt_params: Optional[OptimizedParams],
+        style_rec: StyleRecommendation | None,
+        opt_params: OptimizedParams | None,
     ) -> str:
         """生成流水线解释。"""
         if self.intent_parser.llm:

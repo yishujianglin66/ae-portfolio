@@ -26,10 +26,10 @@ import json
 import math
 import os
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -55,7 +55,7 @@ class AudioTrackConfig:
     volume_db: float = 0.0
     pan: float = 0.0          # -1.0 (左) ~ 1.0 (右)
     muted: bool = False
-    effects: List[Dict] = field(default_factory=list)
+    effects: list[dict] = field(default_factory=list)
     start_offset: float = 0.0  # 起始偏移（秒）
 
 
@@ -67,8 +67,8 @@ class AudioMixResult:
     peak_db: float
     rms_db: float
     loudness_lufs: float
-    fades: List[AudioFade]
-    tracks: List[AudioTrackConfig]
+    fades: list[AudioFade]
+    tracks: list[AudioTrackConfig]
 
 
 # ================================================================
@@ -95,9 +95,9 @@ class AudioProcessor:
     def match_fade_to_transition(
         self,
         audio_path: str,
-        transitions: List[Dict[str, Any]],
+        transitions: list[dict[str, Any]],
         video_fps: float = 30.0,
-    ) -> List[AudioFade]:
+    ) -> list[AudioFade]:
         """
         根据视频转场自动匹配音频淡入淡出。
 
@@ -224,9 +224,9 @@ class AudioProcessor:
 
     def generate_fade_envelope(
         self,
-        fades: List[AudioFade],
+        fades: list[AudioFade],
         total_duration: float,
-    ) -> List[Dict[str, float]]:
+    ) -> list[dict[str, float]]:
         """
         生成完整的音量包络（用于 AE/PR 关键帧）。
 
@@ -279,7 +279,7 @@ class AudioProcessor:
         direction: str,
         curve_type: str,
         resolution: int = 20,
-    ) -> List[float]:
+    ) -> list[float]:
         """生成淡入淡出曲线采样点"""
         import numpy as np
 
@@ -428,7 +428,7 @@ class AudioProcessor:
 
     def mix_tracks(
         self,
-        tracks: List[AudioTrackConfig],
+        tracks: list[AudioTrackConfig],
         output_path: str,
     ) -> AudioMixResult:
         """
@@ -518,10 +518,10 @@ class AudioProcessor:
 
     def export_fade_keyframes_json(
         self,
-        fades: List[AudioFade],
+        fades: list[AudioFade],
         total_duration: float,
         output_path: str = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出淡入淡出关键帧为 AE/PR 兼容 JSON"""
         envelope = self.generate_fade_envelope(fades, total_duration)
 

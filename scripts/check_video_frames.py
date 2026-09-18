@@ -1,5 +1,6 @@
 """检查有显著性候选点视频的帧数。"""
-import json, subprocess
+import json
+import subprocess
 from pathlib import Path
 
 prompts = json.loads(Path(r'D:\AE-Work\saliency_vis\saliency_prompts.json').read_text(encoding='utf-8'))

@@ -22,7 +22,7 @@ def _store_path() -> Path:
     return Path(__file__).resolve().parent.parent / "learning" / ".cache" / "param_feedback.json"
 
 
-def record_director_feedback(run_info: Dict[str, Any]) -> int:
+def record_director_feedback(run_info: dict[str, Any]) -> int:
     """将一次导演运行的真实参数写入反馈库。返回写入条数。
 
     run_info 应包含:

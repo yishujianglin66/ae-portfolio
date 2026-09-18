@@ -71,8 +71,8 @@ class MusicDynamicsAnalyzer:
     # ------------------------------------------------------------------
     def analyze(self, rms: np.ndarray, times: np.ndarray,
                 total_duration: float,
-                beats_sec: Optional[np.ndarray] = None,
-                onsets_sec: Optional[np.ndarray] = None) -> List[DynamicSection]:
+                beats_sec: np.ndarray | None = None,
+                onsets_sec: np.ndarray | None = None) -> list[DynamicSection]:
         """将音乐分段为 high/mid/low 动态段
 
         双因子节奏强度曲线 (对短BGM鲁棒):
@@ -153,7 +153,7 @@ class MusicDynamicsAnalyzer:
                           np.where(intensity <= i_lo, "low", "mid"))
 
         # 游程编码 → 段
-        raw_sections: List[Tuple[float, float, str]] = []
+        raw_sections: list[tuple[float, float, str]] = []
         seg_start_idx = 0
         for i in range(1, n_bins):
             if labels[i] != labels[seg_start_idx]:
@@ -164,7 +164,7 @@ class MusicDynamicsAnalyzer:
                              str(labels[-1])))
 
         # 过短段并入邻段 (同级别直接合并; 短段并入更长邻居)
-        merged: List[List] = []
+        merged: list[list] = []
         for start, end, level in raw_sections:
             if end - start < 1e-3:
                 continue
@@ -177,7 +177,7 @@ class MusicDynamicsAnalyzer:
             merged.append([start, end, level])
 
         # 计算段内平均能量 → DynamicSection
-        sections: List[DynamicSection] = []
+        sections: list[DynamicSection] = []
         for start, end, level in merged:
             b0 = int(start / bin_t)
             b1 = min(n_bins, max(b0 + 1, int(end / bin_t)))
@@ -193,14 +193,14 @@ class MusicDynamicsAnalyzer:
                     f"{[f'{s.level}:{s.duration:.1f}s' for s in sections]}")
         return sections
 
-    def level_at(self, sections: List[DynamicSection], t: float) -> str:
+    def level_at(self, sections: list[DynamicSection], t: float) -> str:
         """查询时间点的动态级别"""
         for s in sections:
             if s.contains(t):
                 return s.level
         return "mid"
 
-    def section_at(self, sections: List[DynamicSection], t: float) -> Optional[DynamicSection]:
+    def section_at(self, sections: list[DynamicSection], t: float) -> DynamicSection | None:
         for s in sections:
             if s.contains(t):
                 return s
@@ -209,11 +209,11 @@ class MusicDynamicsAnalyzer:
     # ------------------------------------------------------------------
     # 2. 切点密度规划 (快段密切 / 慢段少切)
     # ------------------------------------------------------------------
-    def plan_cuts(self, sections: List[DynamicSection],
+    def plan_cuts(self, sections: list[DynamicSection],
                   beats_sec: np.ndarray,
                   downbeats_sec: np.ndarray,
                   onsets_sec: np.ndarray,
-                  min_shot_dur: float = 0.18) -> List[float]:
+                  min_shot_dur: float = 0.18) -> list[float]:
         """按动态级别规划切点网格
 
         策略 (借鉴 ai-montage-agent: 高潮0.3s密切 / 平静2s长镜头):
@@ -270,7 +270,7 @@ class MusicDynamicsAnalyzer:
     # 3. 变速映射 (随BGM卡点变速 — 用户核心诉求)
     # ------------------------------------------------------------------
     def speed_for_shot(self, level: str, beat_strength: str,
-                       energy_norm: float, is_downbeat: bool) -> Tuple[float, str]:
+                       energy_norm: float, is_downbeat: bool) -> tuple[float, str]:
         """镜头级变速决策 — 变速跟随音乐动态
 
         铁律 (漫剪卡点铁律 §2, v22 已验证):
@@ -302,9 +302,9 @@ class MusicDynamicsAnalyzer:
     # 4. 统计输出
     # ------------------------------------------------------------------
     @staticmethod
-    def summarize(sections: List[DynamicSection]) -> Dict[str, float]:
+    def summarize(sections: list[DynamicSection]) -> dict[str, float]:
         """分段统计"""
-        out: Dict[str, float] = {"total_sections": len(sections)}
+        out: dict[str, float] = {"total_sections": len(sections)}
         for lvl in ("high", "mid", "low"):
             ss = [s for s in sections if s.level == lvl]
             out[f"{lvl}_count"] = len(ss)

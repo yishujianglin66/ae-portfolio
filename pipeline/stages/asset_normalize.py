@@ -50,12 +50,12 @@ TARGET_CHANNELS = 2
 class NormalizeResult:
     """规范化结果"""
     success: bool
-    output_videos: List[str] = field(default_factory=list)
-    output_audio: Optional[str] = None
-    md5sums_path: Optional[str] = None
-    errors: List[str] = field(default_factory=list)
+    output_videos: list[str] = field(default_factory=list)
+    output_audio: str | None = None
+    md5sums_path: str | None = None
+    errors: list[str] = field(default_factory=list)
     elapsed_s: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class AssetNormalizeStage:
@@ -84,7 +84,7 @@ class AssetNormalizeStage:
 
     def run(
         self,
-        source_videos: List[str | Path],
+        source_videos: list[str | Path],
         source_audio: str | Path,
         output_dir: str | Path,
     ) -> NormalizeResult:
@@ -102,9 +102,9 @@ class AssetNormalizeStage:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        errors: List[str] = []
-        output_videos: List[str] = []
-        output_audio: Optional[str] = None
+        errors: list[str] = []
+        output_videos: list[str] = []
+        output_audio: str | None = None
 
         # 验证输入数量
         if len(source_videos) != 3:
@@ -173,7 +173,7 @@ class AssetNormalizeStage:
     # 内部方法
     # ------------------------------------------------------------------
 
-    def _probe_video(self, path: Path) -> Dict[str, Any]:
+    def _probe_video(self, path: Path) -> dict[str, Any]:
         """用 ffprobe 获取视频信息"""
         cmd = [
             str(self.ffprobe_path),

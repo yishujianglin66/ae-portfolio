@@ -46,8 +46,8 @@ class ThinkingUpgradePolicy:
 
     def __init__(
         self,
-        llm_gateway: Optional["LLMGateway"] = None,
-        thinking_config: Optional[Dict[str, Any]] = None,
+        llm_gateway: "LLMGateway" | None = None,
+        thinking_config: dict[str, Any] | None = None,
     ):
         """初始化策略。
 
@@ -59,7 +59,7 @@ class ThinkingUpgradePolicy:
         """
         self._gw = llm_gateway
         self._logger = logging.getLogger(f"{__name__}.ThinkingUpgradePolicy")
-        self._config: Dict[str, Any] = (
+        self._config: dict[str, Any] = (
             thinking_config if thinking_config is not None else self._load_default_config()
         )
 
@@ -68,7 +68,7 @@ class ThinkingUpgradePolicy:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _load_default_config() -> Dict[str, Any]:
+    def _load_default_config() -> dict[str, Any]:
         """读取 core.config 中 model.thinking_upgrade 默认配置。
 
         函数内 import core.config 以避免循环依赖；配置缺失/异常时回退空配置。
@@ -118,7 +118,7 @@ class ThinkingUpgradePolicy:
         self,
         task_type: TaskType,
         prompt: str,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> ThinkingUpgradeDecision:
         """判断是否值得升级到 TIER_3 多轮深度推理（H1：预算来自配置）。"""
         current_tier = TASK_TIER_MAP.get(task_type, ModelTier.TIER_2_MIDTIER_GENERAL)
@@ -252,8 +252,8 @@ class ThinkingUpgradePolicy:
         self,
         prompt: str,
         original_task_type: TaskType,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[str, ThinkingTrace]:
+        context: dict[str, Any] | None = None,
+    ) -> tuple[str, ThinkingTrace]:
         """执行深度推理升级（H1/H2/H4/M1-M10 修复）。
 
         决策应升级时执行多轮 TIER_3 推理 + self-check；异常/超时/超预算时
@@ -261,7 +261,7 @@ class ThinkingUpgradePolicy:
         """
         decision = self.should_upgrade(original_task_type, prompt, context)
         gateway = self._gateway_or_create()
-        context_keys: List[str] = list(context.keys()) if context else []
+        context_keys: list[str] = list(context.keys()) if context else []
 
         if not decision.should_upgrade:
             # 非升级路径（M5：检查 success）
@@ -300,10 +300,10 @@ class ThinkingUpgradePolicy:
                 context_text = str(context)
             current_prompt = f"[上下文]\n{context_text}\n[任务]\n{prompt}"
 
-        rounds: List[ThinkingRound] = []
+        rounds: list[ThinkingRound] = []
         total_cost = 0.0
         total_latency = 0.0
-        stop_reason: Optional[str] = None
+        stop_reason: str | None = None
         start_time = time.time()
         timeout_seconds = float(decision.budget.timeout_seconds)
 
@@ -422,10 +422,10 @@ class ThinkingUpgradePolicy:
         prompt: str,
         original_task_type: TaskType,
         decision: ThinkingUpgradeDecision,
-        rounds: List[ThinkingRound],
-        context_keys: List[str],
+        rounds: list[ThinkingRound],
+        context_keys: list[str],
         exc: Exception,
-    ) -> Tuple[str, ThinkingTrace]:
+    ) -> tuple[str, ThinkingTrace]:
         """处理升级循环异常（M4：不裸抛，降级或返回部分轨迹）。
 
         - downgrade_on_failure=True 且 rounds 为空 → 降级到普通 chat_with_routing；
@@ -479,9 +479,9 @@ class ThinkingUpgradePolicy:
 async def chat_with_thinking_upgrade(
     prompt: str,
     task_type: TaskType,
-    context: Optional[Dict[str, Any]] = None,
-    config: Optional[Dict[str, Any]] = None,
-) -> Tuple[str, ThinkingTrace]:
+    context: dict[str, Any] | None = None,
+    config: dict[str, Any] | None = None,
+) -> tuple[str, ThinkingTrace]:
     """深度推理升级生产入口（M8：集成生产路径）。
 
     Args:
@@ -493,7 +493,7 @@ async def chat_with_thinking_upgrade(
     Returns:
         Tuple[str, ThinkingTrace]: (最终答案, 深度推理轨迹)
     """
-    cfg: Dict[str, Any] = config if config is not None else {}
+    cfg: dict[str, Any] = config if config is not None else {}
     if not cfg.get("enabled", False):
         # 未启用 → 直接走普通 chat_with_routing，返回最小轨迹
         from core.llm_gateway import chat_with_routing  # 惰性导入 (拆分后宿主函数)
@@ -517,7 +517,7 @@ if __name__ == "__main__":
     import base64
     import io
 
-    def _make_test_jpeg_b64() -> Optional[str]:
+    def _make_test_jpeg_b64() -> str | None:
         """生成 8x8 白色 JPEG 的 base64，用于 VISION 自测。
 
         依赖 Pillow；缺失时返回 None，VISION 测试将被跳过。
@@ -618,17 +618,17 @@ if __name__ == "__main__":
 try:
     from core import llm_gateway  # noqa: E402  # 模块级单例 (宿主符号接入)
     from core.llm_gateway import (  # noqa: E402
+        TASK_TIER_MAP,
         LLMUnavailableError,
         ModelTier,
-        TASK_TIER_MAP,
         ThinkingBudget,
         ThinkingRound,
         ThinkingTrace,
         ThinkingUpgradeDecision,
+        _load_dotenv_manual,
+        _sanitize_log_text,
         chat_thinking,
         chat_vision,
-        _sanitize_log_text,
-        _load_dotenv_manual,
     )
 except ImportError:  # 极端情况: 兜底空值
     llm_gateway = None  # type: ignore

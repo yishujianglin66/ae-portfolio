@@ -1,8 +1,9 @@
 """Debug: 打印 auto_grade 生成的 Lua 脚本"""
 import sys
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.davinci_fuscript import ResolveColorEngine, ColorGradeConfig, find_lut_for_preset
+from integrations.davinci_fuscript import ColorGradeConfig, ResolveColorEngine, find_lut_for_preset
 
 engine = ResolveColorEngine()
 

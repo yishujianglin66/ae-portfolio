@@ -84,7 +84,7 @@ class TestClientInstantiation:
         """空 beats 在不触发 Bridge 的情况下直接返回错误并记录。"""
         with tempfile.TemporaryDirectory() as tmp:
             client = TextImpactClient(history_dir=str(Path(tmp) / "hist"))
-            result: Dict[str, Any] = client.beat_sync("Comp 1", "Title", [])
+            result: dict[str, Any] = client.beat_sync("Comp 1", "Title", [])
             assert result["status"] == "error"
             assert "不能为空" in result["message"]
             assert len(client.get_history()) == 1

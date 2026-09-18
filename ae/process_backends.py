@@ -58,7 +58,7 @@ class ProcessMetrics:
     num_handles: int = 0
     create_time: float = 0.0
     status: str = "unknown"
-    extra: Dict[str, Any] = field(default_factory=dict)
+    extra: dict[str, Any] = field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -95,7 +95,7 @@ class ProcessBackend(ABC):
         ...
 
     @abstractmethod
-    def find_process(self, process_name: str) -> Optional[ProcessInfo]:
+    def find_process(self, process_name: str) -> ProcessInfo | None:
         """查找指定名称的进程。
 
         Args:
@@ -107,7 +107,7 @@ class ProcessBackend(ABC):
         ...
 
     @abstractmethod
-    def get_metrics(self, pid: int) -> Optional[ProcessMetrics]:
+    def get_metrics(self, pid: int) -> ProcessMetrics | None:
         """获取进程性能指标。
 
         Args:
@@ -131,7 +131,7 @@ class ProcessBackend(ABC):
         """
         ...
 
-    def launch(self, exe_path: str, args: Optional[List[str]] = None) -> subprocess.Popen:
+    def launch(self, exe_path: str, args: list[str] | None = None) -> subprocess.Popen:
         """启动进程。
 
         Args:
@@ -184,7 +184,7 @@ class PsutilBackend(ProcessBackend):
         except ImportError:
             raise RuntimeError("psutil not installed")
         # PID 缓存（优化进程查找）
-        self._pid_cache: Dict[str, tuple[int, float]] = {}  # name -> (pid, timestamp)
+        self._pid_cache: dict[str, tuple[int, float]] = {}  # name -> (pid, timestamp)
         self._pid_cache_ttl = 5.0  # 5秒 TTL
 
     @property
@@ -215,7 +215,7 @@ class PsutilBackend(ProcessBackend):
                 continue
         return False
 
-    def find_process(self, process_name: str) -> Optional[ProcessInfo]:
+    def find_process(self, process_name: str) -> ProcessInfo | None:
         name_lower = process_name.lower()
         for proc in self._psutil.process_iter(["name", "pid"]):
             try:
@@ -239,7 +239,7 @@ class PsutilBackend(ProcessBackend):
                 continue
         return None
 
-    def get_metrics(self, pid: int) -> Optional[ProcessMetrics]:
+    def get_metrics(self, pid: int) -> ProcessMetrics | None:
         try:
             proc = self._psutil.Process(pid)
             with proc.oneshot():
@@ -310,7 +310,7 @@ class Win32APIBackend(ProcessBackend):
     def is_running(self, process_name: str) -> bool:
         return self.find_process(process_name) is not None
 
-    def find_process(self, process_name: str) -> Optional[ProcessInfo]:
+    def find_process(self, process_name: str) -> ProcessInfo | None:
         # 使用 tasklist 作为 Win32 后端的进程查找方式
         try:
             result = subprocess.run(
@@ -331,7 +331,7 @@ class Win32APIBackend(ProcessBackend):
             pass
         return None
 
-    def get_metrics(self, pid: int) -> Optional[ProcessMetrics]:
+    def get_metrics(self, pid: int) -> ProcessMetrics | None:
         # Win32 API 获取指标较复杂，使用简化版本
         if not self.pid_exists(pid):
             return None
@@ -385,7 +385,7 @@ class TasklistBackend(ProcessBackend):
         except Exception:
             return False
 
-    def find_process(self, process_name: str) -> Optional[ProcessInfo]:
+    def find_process(self, process_name: str) -> ProcessInfo | None:
         try:
             result = subprocess.run(
                 ["tasklist", "/FO", "CSV", "/NH"],
@@ -405,7 +405,7 @@ class TasklistBackend(ProcessBackend):
             pass
         return None
 
-    def get_metrics(self, pid: int) -> Optional[ProcessMetrics]:
+    def get_metrics(self, pid: int) -> ProcessMetrics | None:
         if not self.is_running(f"PID:{pid}"):
             return None
         return ProcessMetrics(pid=pid, status="running")

@@ -41,11 +41,11 @@ def _log(msg: str):
     print(msg, flush=True)
 
 
-def load_labels() -> List[Dict]:
+def load_labels() -> list[dict]:
     return json.loads(LABELS.read_text(encoding="utf-8"))
 
 
-def build_class_map(labels: List[Dict]) -> Tuple[Dict[str, int], Dict[int, str]]:
+def build_class_map(labels: list[dict]) -> tuple[dict[str, int], dict[int, str]]:
     cnt = Counter(l["ip"] for l in labels)
     kept = sorted([ip for ip, c in cnt.items() if c >= MIN_CLASS_FRAMES])
     classes = kept + ["other"]
@@ -54,7 +54,7 @@ def build_class_map(labels: List[Dict]) -> Tuple[Dict[str, int], Dict[int, str]]
     return c2i, i2c
 
 
-def split_videos(labels: List[Dict], golden_videos: set) -> Tuple[List[str], List[str], List[str]]:
+def split_videos(labels: list[dict], golden_videos: set) -> tuple[list[str], list[str], list[str]]:
     """视频级三分: train / val / accept(黄金集)"""
     videos = sorted({l["video"] for l in labels})
     train_pool = [v for v in videos if v not in golden_videos]
@@ -63,10 +63,10 @@ def split_videos(labels: List[Dict], golden_videos: set) -> Tuple[List[str], Lis
     for v in train_pool:
         ips = Counter(l["ip"] for l in labels if l["video"] == v)
         vid_main_ip[v] = ips.most_common(1)[0][0]
-    by_ip: Dict[str, List[str]] = defaultdict(list)
+    by_ip: dict[str, list[str]] = defaultdict(list)
     for v, ip in vid_main_ip.items():
         by_ip[ip].append(v)
-    val_videos: List[str] = []
+    val_videos: list[str] = []
     import random
     random.seed(42)
     for ip, vs in by_ip.items():
@@ -79,7 +79,7 @@ def split_videos(labels: List[Dict], golden_videos: set) -> Tuple[List[str], Lis
 
 
 class FrameDataset:
-    def __init__(self, items: List[Dict], c2i: Dict[str, int], train: bool):
+    def __init__(self, items: list[dict], c2i: dict[str, int], train: bool):
         import torch
         from torchvision import transforms
         self.items = items
@@ -115,8 +115,8 @@ class FrameDataset:
 
 
 def make_model(num_classes: int):
-    from torchvision import models
     import torch.nn as nn
+    from torchvision import models
     m = models.resnet18(weights="IMAGENET1K_V1")
     # v2防过拟合: 冻结前半backbone(conv1/bn1/layer1/layer2)
     for p in list(m.conv1.parameters()) + list(m.bn1.parameters()) + \
@@ -205,11 +205,11 @@ def train():
     return best_acc
 
 
-def predict_video(video_path: str, sample_frames: int = 16) -> Dict:
+def predict_video(video_path: str, sample_frames: int = 16) -> dict:
     """对单视频抽帧推理 → 多数投票IP判定"""
+    import cv2
     import torch
     from torchvision import transforms
-    import cv2
     meta = json.loads(META.read_text(encoding="utf-8"))
     c2i = meta["classes"]
     i2c = {v: k for k, v in c2i.items()}
@@ -228,7 +228,7 @@ def predict_video(video_path: str, sample_frames: int = 16) -> Dict:
     import numpy as np
     picks = np.linspace(0, max(n - 1, 0), sample_frames).astype(int)
     votes: Counter = Counter()
-    confs: List[float] = []
+    confs: list[float] = []
     import torch as T
     with T.no_grad():
         for fi in picks:

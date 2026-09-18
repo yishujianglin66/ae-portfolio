@@ -19,20 +19,19 @@ aerender 渲染引擎 v2.0 全面验证测试
 """
 from __future__ import annotations
 
-import os
-import sys
-import re
 import json
-import time
-import tempfile
+import os
 import platform
+import re
 import subprocess
+import sys
+import tempfile
+import time
 from pathlib import Path
 from typing import List, Tuple
 from unittest import mock
 
 import pytest
-
 
 # 添加 rendering 目录到路径
 RENDERING_DIR = Path(__file__).parent.parent / "rendering"
@@ -45,21 +44,20 @@ if str(RENDERING_DIR) not in sys.path:
 # ============================================================================
 
 from ae_render_engine import (
-    AERenderEngine,
-    RenderJob,
-    RenderStatus,
-    RenderDiagnostics,
-    AerenderExitCode,
     ERROR_CODE_INFO,
     OM_TEMPLATES,
+    PROGRESS_PATTERNS,
     RS_TEMPLATES,
+    AERenderEngine,
+    AerenderExitCode,
+    RenderDiagnostics,
+    RenderJob,
+    RenderStatus,
     detect_aerender,
     is_afterfx_running,
-    parse_progress_from_log,
     parse_aerender_error,
-    PROGRESS_PATTERNS,
+    parse_progress_from_log,
 )
-
 
 # ============================================================================
 #  基础常量测试

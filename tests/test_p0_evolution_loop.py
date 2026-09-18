@@ -53,8 +53,8 @@ def make_pipeline_result(run_id: str, status: str, quality_score: float,
 def build_runner(tmp_dir: Path, enable_rubrics: bool = False):
     """构建使用临时目录的 EvolutionRunner（隔离测试，不污染真实数据）"""
     from core.evolution.evaluator import EvolutionEvaluator
-    from core.evolution.version_manager import VersionManager
     from core.evolution.runner import EvolutionRunner
+    from core.evolution.version_manager import VersionManager
 
     evaluator = EvolutionEvaluator(
         benchmark_dir=str(PROJECT_ROOT / "data" / "benchmark"),

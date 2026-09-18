@@ -31,29 +31,35 @@ DaVinci Resolve 自动化引擎 v5.0
 - ffmpeg_grade()           → FFmpeg 降级调色
 - build_artifact()         → 生成 ColorGradeArtifact
 """
+import hashlib
+import json
 import os
+import shutil
+import signal
 import subprocess
 import tempfile
 import time
-import json
-import hashlib
-import signal
-import shutil
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple, Callable
-from dataclasses import dataclass, field
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
+from integrations.resolve_engine import (
+    CDLConfig as _CDLConfig,
+)
 
 # 导入新引擎
 from integrations.resolve_engine import (
     ResolveAutomationEngine,
-    CDLConfig as _CDLConfig,
-    TransformConfig as _TransformConfig,
-    SpeedConfig as _SpeedConfig,
     ResolveError,
 )
-
+from integrations.resolve_engine import (
+    SpeedConfig as _SpeedConfig,
+)
+from integrations.resolve_engine import (
+    TransformConfig as _TransformConfig,
+)
 
 # ============================================================================
 # Data Models
@@ -73,8 +79,8 @@ class FuscriptResult:
     clips_imported: int = 0
     render_complete: bool = False
     output_path: str = ""
-    errors: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -109,13 +115,13 @@ class QualifierParams:
 class ColorGradeConfig:
     """调色配置"""
     preset: str = "cinematic"
-    lut_path: Optional[str] = None
+    lut_path: str | None = None
     lut_intensity: float = 1.0
     brightness: float = 1.0
     contrast: float = 1.0
     saturation: float = 1.0
-    scene_type: Optional[str] = None
-    segment_presets: Optional[Dict[str, str]] = None
+    scene_type: str | None = None
+    segment_presets: dict[str, str] | None = None
     lift: ColorWheelParams = field(default_factory=ColorWheelParams)
     gamma: ColorWheelParams = field(
         default_factory=lambda: ColorWheelParams(red=1.0, green=1.0, blue=1.0, master=1.0)
@@ -126,14 +132,14 @@ class ColorGradeConfig:
     offset: ColorWheelParams = field(default_factory=ColorWheelParams)
     pivot: float = 0.435
     blend_opacity: float = 1.0
-    custom_curve: List[float] = field(default_factory=list)
-    hue_vs_hue: List[float] = field(default_factory=list)
-    hue_vs_sat: List[float] = field(default_factory=list)
-    hue_vs_lum: List[float] = field(default_factory=list)
-    lum_vs_sat: List[float] = field(default_factory=list)
-    sat_vs_sat: List[float] = field(default_factory=list)
-    lum_vs_lum: List[float] = field(default_factory=list)
-    qualifier: Optional[QualifierParams] = None
+    custom_curve: list[float] = field(default_factory=list)
+    hue_vs_hue: list[float] = field(default_factory=list)
+    hue_vs_sat: list[float] = field(default_factory=list)
+    hue_vs_lum: list[float] = field(default_factory=list)
+    lum_vs_sat: list[float] = field(default_factory=list)
+    sat_vs_sat: list[float] = field(default_factory=list)
+    lum_vs_lum: list[float] = field(default_factory=list)
+    qualifier: QualifierParams | None = None
 
 
 @dataclass
@@ -157,11 +163,11 @@ class ColorGradeArtifact:
     preset_name: str = ""
     source: str = "auto"
     created_at: str = ""
-    nodes: List[Dict[str, Any]] = field(default_factory=list)
+    nodes: list[dict[str, Any]] = field(default_factory=list)
     ffmpeg_filter: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "version": self.version,
             "preset_name": self.preset_name,
@@ -176,7 +182,7 @@ class ColorGradeArtifact:
         return json.dumps(self.to_dict(), indent=indent, ensure_ascii=False)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ColorGradeArtifact":
+    def from_dict(cls, data: dict[str, Any]) -> "ColorGradeArtifact":
         return cls(
             version=data.get("version", "1.0"),
             preset_name=data.get("preset_name", ""),
@@ -234,7 +240,7 @@ DCTL_PRESET_MAP = {
 # Resolve 调色预设 (CDL 架构)
 # ============================================================================
 
-RESOLVE_PRESETS: Dict[str, Dict[str, Any]] = {
+RESOLVE_PRESETS: dict[str, dict[str, Any]] = {
     "default": {
         "description": "默认轻微调色，自然色彩增强",
         "cdl": {"slope": (1.03, 1.03, 1.03), "offset": (0.0, 0.0, 0.0),
@@ -302,7 +308,7 @@ RESOLVE_PRESETS: Dict[str, Dict[str, Any]] = {
 # FFmpeg Filter 调色预设
 # ============================================================================
 
-FFMPEG_COLOR_PRESETS: Dict[str, Dict[str, Any]] = {
+FFMPEG_COLOR_PRESETS: dict[str, dict[str, Any]] = {
     "natural": {
         "description": "自然色彩增强",
         "ffmpeg_filter": (
@@ -396,7 +402,7 @@ def preset_to_color_grade_config(preset_name: str) -> ColorGradeConfig:
     )
 
 
-def find_dctl_for_preset(preset_name: str) -> Optional[str]:
+def find_dctl_for_preset(preset_name: str) -> str | None:
     """查找预设对应的 DCTL 文件路径"""
     resolve_lut = Path(r"C:\ProgramData\Blackmagic Design\DaVinci Resolve\Support\LUT")
     if preset_name in DCTL_PRESET_MAP:
@@ -414,7 +420,7 @@ def find_dctl_for_preset(preset_name: str) -> Optional[str]:
     return None
 
 
-def find_lut_for_preset(preset_name: str, variant: int = 1) -> Optional[str]:
+def find_lut_for_preset(preset_name: str, variant: int = 1) -> str | None:
     """查找预设对应的 LUT/DCTL 文件"""
     try:
         from integrations.lut_preset_library import get_lut_library
@@ -483,9 +489,9 @@ class ResolveColorEngine:
 
     def __init__(
         self,
-        resolve_home: Optional[str] = None,
-        lut_dirs: Optional[List[str]] = None,
-        custom_lut_dir: Optional[str] = None,
+        resolve_home: str | None = None,
+        lut_dirs: list[str] | None = None,
+        custom_lut_dir: str | None = None,
     ):
         # fuscript.exe 路径
         self.fuscript_path = Path(resolve_home or os.environ.get(
@@ -505,7 +511,7 @@ class ResolveColorEngine:
                 lut_dirs = [d.strip() for d in env_lut_dirs.split(";") if d.strip()]
             else:
                 lut_dirs = RESOLVE_LUT_DIRS.copy()
-        self.lut_dirs: List[Path] = [Path(os.path.expandvars(d)) for d in lut_dirs]
+        self.lut_dirs: list[Path] = [Path(os.path.expandvars(d)) for d in lut_dirs]
 
         if custom_lut_dir is None:
             custom_lut_dir = os.environ.get(
@@ -528,7 +534,7 @@ class ResolveColorEngine:
         except Exception:
             return False
     
-    def launch_resolve(self, wait_timeout: int = 60, callback: Optional[Callable] = None) -> bool:
+    def launch_resolve(self, wait_timeout: int = 60, callback: Callable | None = None) -> bool:
         """确保 Resolve 正在运行（如果已运行则直接返回 True）"""
         if self.check_resolve_running():
             return True
@@ -542,7 +548,7 @@ class ResolveColorEngine:
                 return True
         return False
     
-    def close_resolve(self, wait_timeout: int = 30, callback: Optional[Callable] = None) -> bool:
+    def close_resolve(self, wait_timeout: int = 30, callback: Callable | None = None) -> bool:
         """不关闭 Resolve（Studio 版保持运行）"""
         return True
     
@@ -563,11 +569,11 @@ class ResolveColorEngine:
     def create_project(
         self,
         project_name: str,
-        media_files: List[str],
+        media_files: list[str],
         timeline_name: str = "MainTimeline",
-        color_config: Optional[ColorGradeConfig] = None,
+        color_config: ColorGradeConfig | None = None,
         render: bool = False,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
     ) -> FuscriptResult:
         """创建项目、导入素材、建时间线、逐片段调色（可选渲染）"""
         t0 = time.time()
@@ -635,7 +641,7 @@ class ResolveColorEngine:
     def grade_project(
         self,
         project_name: str,
-        color_config: Optional[ColorGradeConfig] = None,
+        color_config: ColorGradeConfig | None = None,
     ) -> FuscriptResult:
         """对已有项目调色"""
         t0 = time.time()
@@ -691,12 +697,12 @@ class ResolveColorEngine:
     def auto_grade(
         self,
         project_name: str,
-        media_files: List[str],
-        color_config: Optional[ColorGradeConfig] = None,
+        media_files: list[str],
+        color_config: ColorGradeConfig | None = None,
         render: bool = False,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         close_after: bool = True,
-        callback: Optional[Callable] = None,
+        callback: Callable | None = None,
     ) -> FuscriptResult:
         """全自动调色"""
         def _cb(progress: float, msg: str):
@@ -726,7 +732,7 @@ class ResolveColorEngine:
         self,
         project_name: str,
         output_path: str,
-        render_config: Optional[RenderConfig] = None,
+        render_config: RenderConfig | None = None,
     ) -> FuscriptResult:
         """渲染项目"""
         t0 = time.time()
@@ -748,7 +754,7 @@ class ResolveColorEngine:
         self,
         project_name: str,
         lut_path: str,
-        timeline_name: Optional[str] = None,
+        timeline_name: str | None = None,
     ) -> FuscriptResult:
         """对项目的当前时间线应用 LUT"""
         t0 = time.time()
@@ -787,8 +793,8 @@ class ResolveColorEngine:
     
     def batch_grade(
         self,
-        projects: List[Dict[str, Any]],
-    ) -> List[FuscriptResult]:
+        projects: list[dict[str, Any]],
+    ) -> list[FuscriptResult]:
         """批量调色多个项目"""
         results = []
         for proj_info in projects:
@@ -813,7 +819,7 @@ class ResolveColorEngine:
         except Exception:
             return False
     
-    def get_recommendation(self, scene_type: str) -> Dict[str, Any]:
+    def get_recommendation(self, scene_type: str) -> dict[str, Any]:
         """获取场景调色推荐"""
         try:
             from integrations.lut_preset_library import get_scene_presets
@@ -882,7 +888,7 @@ class ResolveColorEngine:
     # 内部辅助方法
     # ================================================================
     
-    def _safe_lut_path(self, lut_path: Optional[str]) -> Optional[str]:
+    def _safe_lut_path(self, lut_path: str | None) -> str | None:
         """将含非 ASCII 字符的 LUT 路径复制到纯英文临时目录"""
         if not lut_path:
             return lut_path
@@ -920,7 +926,7 @@ class ResolveColorEngine:
         self,
         input_path: str,
         preset: str = "natural",
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> FuscriptResult:
         """FFmpeg 降级调色"""
         preset_data = FFMPEG_COLOR_PRESETS.get(preset)
@@ -961,9 +967,9 @@ class ResolveColorEngine:
         self,
         video_path: str,
         preset: str = "cinematic",
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         close_after: bool = True,
-        callback: Optional[Callable] = None,
+        callback: Callable | None = None,
     ) -> FuscriptResult:
         """一键调色"""
         def _cb(progress: float, msg: str):
@@ -1087,7 +1093,7 @@ class ResolveColorEngine:
         if artifact.ffmpeg_filter:
             return artifact.ffmpeg_filter
         
-        settings: Dict[str, Any] = {}
+        settings: dict[str, Any] = {}
         for node in artifact.nodes or []:
             node_settings = self._node_settings(node)
             settings.update(node_settings)
@@ -1101,7 +1107,7 @@ class ResolveColorEngine:
             # 全部禁用 → natural 回退
             return FFMPEG_COLOR_PRESETS["natural"]["ffmpeg_filter"]
         
-        eq_parts: List[str] = []
+        eq_parts: list[str] = []
         if "saturation" in settings and settings["saturation"] is not None:
             eq_parts.append(f"saturation={float(settings['saturation']):.3f}")
         if "contrast" in settings and settings["contrast"] is not None:
@@ -1123,7 +1129,7 @@ class ResolveColorEngine:
             return colorbalance
         return "eq=" + ":".join(eq_parts) if eq_parts else FFMPEG_COLOR_PRESETS["natural"]["ffmpeg_filter"]
     
-    def _settings_to_colorbalance(self, settings: Dict[str, Any]) -> str:
+    def _settings_to_colorbalance(self, settings: dict[str, Any]) -> str:
         """将 lift/gamma/gain 色轮转成 FFmpeg colorbalance 滤镜。"""
         lift = settings.get("lift")
         gamma = settings.get("gamma")
@@ -1134,7 +1140,7 @@ class ResolveColorEngine:
                 return None
             return [float(vals[i]) - base for i in range(3)]
         
-        parts: List[str] = []
+        parts: list[str] = []
         l_d = _delta(lift)
         g_d = _delta(gamma)
         gn_d = _delta(gain)
@@ -1150,7 +1156,7 @@ class ResolveColorEngine:
         self,
         input_path: str,
         artifact: ColorGradeArtifact,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> FuscriptResult:
         """使用 FFmpeg 应用 Artifact 调色"""
         ffmpeg_filter = artifact.ffmpeg_filter
@@ -1229,12 +1235,12 @@ class ResolveColorEngine:
     # ================================================================
 
     @staticmethod
-    def _node_settings(node: Dict[str, Any]) -> Dict[str, Any]:
+    def _node_settings(node: dict[str, Any]) -> dict[str, Any]:
         """提取节点设置：兼容 node_type(primary)+settings 与 type(cdl) 两种格式。"""
         if "settings" in node and isinstance(node["settings"], dict):
             return node["settings"]
         # cdl 格式：slope/offset/power/saturation 平铺在节点上
-        settings: Dict[str, Any] = {}
+        settings: dict[str, Any] = {}
         if "slope" in node:
             settings["gain"] = list(node["slope"])
         if "offset" in node:
@@ -1253,8 +1259,8 @@ class ResolveColorEngine:
     def artifact_to_ae_jsx(
         self,
         artifact: ColorGradeArtifact,
-        layer_name: Optional[str] = None,
-        output_path: Optional[str] = None,
+        layer_name: str | None = None,
+        output_path: str | None = None,
     ) -> str:
         """将 Artifact 调色描述转为 AE ExtendScript (JSX)。
 
@@ -1270,9 +1276,9 @@ class ResolveColorEngine:
         brightness = 0.0
         contrast = 0.0
         saturation = 0.0
-        lift: Optional[List[float]] = None
-        gamma: Optional[List[float]] = None
-        gain: Optional[List[float]] = None
+        lift: list[float] | None = None
+        gamma: list[float] | None = None
+        gain: list[float] | None = None
         node_name = "Primary"
 
         for node in nodes:
@@ -1293,7 +1299,7 @@ class ResolveColorEngine:
             if "gain" in settings:
                 gain = [float(x) for x in settings["gain"]]
 
-        lines: List[str] = []
+        lines: list[str] = []
         lines.append("var comp = app.project.activeItem;")
         lines.append("var adjLayer = comp.layers.addSolid([0, 0, 0], 'Temp', comp.width, comp.height, comp.pixelAspect, comp.duration);")
         lines.append("adjLayer.adjustmentLayer = true;")
@@ -1312,7 +1318,7 @@ class ResolveColorEngine:
 
         # Brightness & Contrast
         if brightness != 0.0 or contrast != 0.0:
-            bc = f"adjLayer.property('ADBE Effect Parade').addProperty('ADBE Brightness & Contrast');"
+            bc = "adjLayer.property('ADBE Effect Parade').addProperty('ADBE Brightness & Contrast');"
             lines.append(bc)
             lines.append(f"bc.name = '{safe_node} - BC';")
             lines.append(f"bc.property('ADBE Brightness-Contrast-1').setValue({self._fmt_color(brightness)});")
@@ -1320,14 +1326,14 @@ class ResolveColorEngine:
 
         # Hue Saturation
         if saturation != 0.0:
-            hs = f"adjLayer.property('ADBE Effect Parade').addProperty('ADBE Hue Saturation');"
+            hs = "adjLayer.property('ADBE Effect Parade').addProperty('ADBE Hue Saturation');"
             lines.append(hs)
             lines.append(f"hs.name = '{safe_node} - HS';")
             lines.append(f"hs.property('ADBE HSL-2').setValue({self._fmt_color(saturation)});")
 
         # Color Balance（色轮：lift/gamma/gain → 阴影/中间调/高光）
         if has_color:
-            cb = f"adjLayer.property('ADBE Effect Parade').addProperty('ADBE Color Balance');"
+            cb = "adjLayer.property('ADBE Effect Parade').addProperty('ADBE Color Balance');"
             lines.append(cb)
             lines.append(f"cb.name = '{safe_node} - CB';")
             for idx, (name, wheel) in enumerate(
@@ -1359,7 +1365,7 @@ class ResolveColorEngine:
 
     def build_artifact_from_ae(
         self,
-        ae_effects: List[Dict[str, Any]],
+        ae_effects: list[dict[str, Any]],
         preset_name: str = "from_ae",
     ) -> ColorGradeArtifact:
         """从 AE 效果列表构建 ColorGradeArtifact。
@@ -1367,16 +1373,16 @@ class ResolveColorEngine:
         支持 ADBE Brightness & Contrast / ADBE Hue Saturation / ADBE Color Balance。
         未知效果被忽略，亮度/对比度/饱和度采用累加式映射。
         """
-        settings: Dict[str, Any] = {}
+        settings: dict[str, Any] = {}
         brightness = 0.0
         contrast = 0.0
         saturation = 0.0
-        lift: List[float] = [1.0, 1.0, 1.0, 0.0]
-        gamma: List[float] = [1.0, 1.0, 1.0, 0.0]
-        gain: List[float] = [1.0, 1.0, 1.0, 0.0]
+        lift: list[float] = [1.0, 1.0, 1.0, 0.0]
+        gamma: list[float] = [1.0, 1.0, 1.0, 0.0]
+        gain: list[float] = [1.0, 1.0, 1.0, 0.0]
         effect_count = 0
         # 原始 AE 参数（往返无损保留，供 JSX 重建）
-        ae_raw: Dict[str, Any] = {
+        ae_raw: dict[str, Any] = {
             "brightness": 0.0, "contrast": 0.0, "saturation": 0.0,
             "shadow": [0.0, 0.0, 0.0], "midtone": [0.0, 0.0, 0.0],
             "highlight": [0.0, 0.0, 0.0],
@@ -1442,7 +1448,7 @@ class ResolveColorEngine:
         self, artifact: ColorGradeArtifact
     ) -> ColorGradeConfig:
         """将 Artifact 转为 Resolve 调色配置 ColorGradeConfig。"""
-        settings: Dict[str, Any] = {}
+        settings: dict[str, Any] = {}
         for node in artifact.nodes or []:
             node_settings = self._node_settings(node)
             settings.update(node_settings)
@@ -1479,12 +1485,12 @@ class ResolveColorEngine:
 def grade_project(
     project_name: str,
     preset: str = "cinematic",
-    lut_path: Optional[str] = None,
+    lut_path: str | None = None,
     brightness: float = 1.0,
     contrast: float = 1.0,
     saturation: float = 1.0,
     lut_intensity: float = 1.0,
-    resolve_home: Optional[str] = None,
+    resolve_home: str | None = None,
 ) -> FuscriptResult:
     """便捷函数：对已有项目调色"""
     engine = ResolveColorEngine(resolve_home=resolve_home)
@@ -1496,7 +1502,7 @@ def grade_project(
     return engine.grade_project(project_name, config)
 
 
-def get_color_recommendation(scene_type: str) -> Dict[str, Any]:
+def get_color_recommendation(scene_type: str) -> dict[str, Any]:
     """便捷函数：获取场景调色推荐"""
     engine = ResolveColorEngine()
     return engine.get_recommendation(scene_type)
@@ -1505,8 +1511,8 @@ def get_color_recommendation(scene_type: str) -> Dict[str, Any]:
 def quick_grade(
     video_path: str,
     preset: str = "cinematic",
-    output_dir: Optional[str] = None,
-    resolve_home: Optional[str] = None,
+    output_dir: str | None = None,
+    resolve_home: str | None = None,
 ) -> FuscriptResult:
     """便捷函数：一键调色"""
     engine = ResolveColorEngine(resolve_home=resolve_home)
@@ -1516,7 +1522,7 @@ def quick_grade(
 def ffmpeg_grade(
     input_path: str,
     preset: str = "natural",
-    output_path: Optional[str] = None,
+    output_path: str | None = None,
 ) -> FuscriptResult:
     """便捷函数：FFmpeg 降级调色"""
     engine = ResolveColorEngine()

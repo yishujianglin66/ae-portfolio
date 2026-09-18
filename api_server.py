@@ -25,10 +25,21 @@ from collections import defaultdict
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, WebSocket, WebSocketDisconnect, Depends, Request, status, Body
+from fastapi import (
+    BackgroundTasks,
+    Body,
+    Depends,
+    FastAPI,
+    HTTPException,
+    Query,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+    status,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 try:
@@ -40,7 +51,7 @@ except ImportError:
     _logger = logging.getLogger("api-server")
 
 try:
-    from batch_queue import BatchQueue, TaskStatus, Task, get_default_queue
+    from batch_queue import BatchQueue, Task, TaskStatus, get_default_queue
     _BATCH_QUEUE_AVAILABLE = True
 except ImportError:
     _BATCH_QUEUE_AVAILABLE = False
@@ -56,26 +67,26 @@ class HealthResponse(BaseModel):
     version: str = "1.0.0"
     timestamp: float = Field(default_factory=time.time)
     uptime: float = 0.0
-    services: Dict[str, str] = Field(default_factory=dict)
+    services: dict[str, str] = Field(default_factory=dict)
 
 
 class SystemStatsResponse(BaseModel):
     """系统统计响应"""
-    tasks: Dict[str, int] = Field(default_factory=dict)
+    tasks: dict[str, int] = Field(default_factory=dict)
     workers: int = 0
     uptime: float = 0.0
-    memory_usage: Optional[float] = None
-    cpu_usage: Optional[float] = None
+    memory_usage: float | None = None
+    cpu_usage: float | None = None
 
 
 class TaskSubmitRequest(BaseModel):
     """任务提交请求"""
     task_type: str = Field(..., description="任务类型: puppet_style, quality_assess, parameter_optimize")
-    input_path: Optional[str] = Field(None, description="输入文件路径")
-    output_path: Optional[str] = Field(None, description="输出文件路径")
-    config: Dict[str, Any] = Field(default_factory=dict, description="任务配置")
+    input_path: str | None = Field(None, description="输入文件路径")
+    output_path: str | None = Field(None, description="输出文件路径")
+    config: dict[str, Any] = Field(default_factory=dict, description="任务配置")
     priority: int = Field(5, ge=1, le=10, description="优先级 1-10")
-    callback_url: Optional[str] = Field(None, description="完成回调 URL")
+    callback_url: str | None = Field(None, description="完成回调 URL")
 
 
 class TaskResponse(BaseModel):
@@ -87,11 +98,11 @@ class TaskResponse(BaseModel):
     progress_message: str = ""
     priority: int
     created_at: float
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    started_at: float | None = None
+    completed_at: float | None = None
     duration: float = 0.0
-    result: Optional[Any] = None
-    error: Optional[str] = None
+    result: Any | None = None
+    error: str | None = None
     retries: int = 0
     max_retries: int = 0
 
@@ -99,7 +110,7 @@ class TaskResponse(BaseModel):
 class TaskListResponse(BaseModel):
     """任务列表响应"""
     total: int
-    tasks: List[TaskResponse]
+    tasks: list[TaskResponse]
     page: int
     page_size: int
 
@@ -118,13 +129,13 @@ class QualityAssessRequest(BaseModel):
     """质量评估请求"""
     reference_video: str = Field(..., description="参考视频路径")
     test_video: str = Field(..., description="待评估视频路径")
-    metrics: List[str] = Field(default_factory=lambda: ["psnr", "ssim", "vmaf"])
+    metrics: list[str] = Field(default_factory=lambda: ["psnr", "ssim", "vmaf"])
     mode: str = Field("auto", description="执行模式")
 
 
 class BatchSubmitRequest(BaseModel):
     """批量任务提交请求"""
-    tasks: List[Dict[str, Any]] = Field(..., description="任务列表")
+    tasks: list[dict[str, Any]] = Field(..., description="任务列表")
     batch_name: str = Field("batch", description="批次名称")
     priority: int = Field(5, ge=1, le=10, description="优先级")
 
@@ -135,11 +146,15 @@ class BatchSubmitRequest(BaseModel):
 
 try:
     from auth_system import (
-        AuthManager, Role, Permission,
+        AuthManager,
+        Permission,
+        Role,
+    )
+    from auth_system import (
         get_auth_manager as _get_auth_manager,
     )
     _AUTH_AVAILABLE = True
-    _auth: Optional[AuthManager] = _get_auth_manager()
+    _auth: AuthManager | None = _get_auth_manager()
 except ImportError:
     _AUTH_AVAILABLE = False
     _auth = None
@@ -147,7 +162,7 @@ except ImportError:
 _security = HTTPBearer(auto_error=False)
 
 
-def require_auth(credentials: Optional[HTTPAuthorizationCredentials] = Depends(_security)):
+def require_auth(credentials: HTTPAuthorizationCredentials | None = Depends(_security)):
     """认证依赖 - 要求已登录
 
     安全要求：fail-closed。
@@ -199,16 +214,25 @@ def require_permission(permission: Permission):
 
 try:
     from monitoring import (
-        MetricsRegistry, AlertManager, AlertRule, AlertSeverity,
+        AlertManager,
+        AlertRule,
+        AlertSeverity,
+        MetricsRegistry,
         SystemCollector,
-        get_metrics_registry as _get_metrics_registry,
+    )
+    from monitoring import (
         get_alert_manager as _get_alert_manager,
+    )
+    from monitoring import (
+        get_metrics_registry as _get_metrics_registry,
+    )
+    from monitoring import (
         get_system_collector as _get_system_collector,
     )
     _MONITORING_AVAILABLE = True
-    _metrics: Optional[MetricsRegistry] = _get_metrics_registry()
-    _alerts: Optional[AlertManager] = _get_alert_manager()
-    _system_collector: Optional[SystemCollector] = _get_system_collector(interval=15.0)
+    _metrics: MetricsRegistry | None = _get_metrics_registry()
+    _alerts: AlertManager | None = _get_alert_manager()
+    _system_collector: SystemCollector | None = _get_system_collector(interval=15.0)
 except ImportError:
     _MONITORING_AVAILABLE = False
     _metrics = None
@@ -221,7 +245,7 @@ except ImportError:
 # ============================================================================
 
 _start_time = time.time()
-_queue: Optional[BatchQueue] = None
+_queue: BatchQueue | None = None
 
 
 def get_queue() -> BatchQueue:
@@ -236,7 +260,7 @@ def get_queue() -> BatchQueue:
 # 任务执行函数
 # ============================================================================
 
-def _execute_puppet_style_task(config: Dict[str, Any]) -> Dict[str, Any]:
+def _execute_puppet_style_task(config: dict[str, Any]) -> dict[str, Any]:
     """执行木偶风格化任务"""
     from pathlib import Path
 
@@ -291,7 +315,7 @@ def _execute_puppet_style_task(config: Dict[str, Any]) -> Dict[str, Any]:
         raise
 
 
-def _execute_quality_assessment(config: Dict[str, Any]) -> Dict[str, Any]:
+def _execute_quality_assessment(config: dict[str, Any]) -> dict[str, Any]:
     """执行视频质量评估任务"""
     reference = config.get("reference_video", "")
     test = config.get("test_video", "")
@@ -330,7 +354,7 @@ def _execute_quality_assessment(config: Dict[str, Any]) -> Dict[str, Any]:
         raise
 
 
-def _execute_parameter_optimize(config: Dict[str, Any]) -> Dict[str, Any]:
+def _execute_parameter_optimize(config: dict[str, Any]) -> dict[str, Any]:
     """执行参数优化任务"""
     context = config.get("context", {})
     use_feedback = config.get("use_feedback", True)
@@ -438,7 +462,7 @@ app.add_middleware(
 
 _RATE_LIMIT_ENABLED = os.environ.get("AE_VAULT_RATE_LIMIT_ENABLED", "true").lower() == "true"
 _RATE_LIMIT_PER_MINUTE = int(os.environ.get("AE_VAULT_RATE_LIMIT_PER_MINUTE", "60"))
-_rate_limit_buckets: Dict[str, Dict[str, float]] = defaultdict(
+_rate_limit_buckets: dict[str, dict[str, float]] = defaultdict(
     lambda: {"tokens": float(_RATE_LIMIT_PER_MINUTE), "last_time": time.time()}
 )
 _rate_limit_lock = asyncio.Lock()
@@ -644,7 +668,7 @@ async def metrics_summary(user: Any = Depends(require_auth)):
         return {"error": "monitoring not available", "metrics": {}}
     data = _metrics.export_dict()
 
-    system_metrics: Dict[str, float] = {}
+    system_metrics: dict[str, float] = {}
     cpu_metric = data.get("system_cpu_percent")
     if cpu_metric and cpu_metric["samples"]:
         system_metrics["cpu_percent"] = cpu_metric["samples"][0]["value"]
@@ -760,7 +784,7 @@ async def refresh_tokens(request: RefreshRequest):
 
 
 @app.post("/api/v1/auth/logout", tags=["认证"])
-async def logout(user: Any = Depends(require_auth), credentials: Optional[HTTPAuthorizationCredentials] = Depends(_security)):
+async def logout(user: Any = Depends(require_auth), credentials: HTTPAuthorizationCredentials | None = Depends(_security)):
     """用户登出 (撤销当前令牌)"""
     if not _AUTH_AVAILABLE or _auth is None:
         return {"logged_out": True}
@@ -860,7 +884,7 @@ async def get_user_detail(user_id: str, user: Any = Depends(require_auth)):
 
 
 @app.put("/api/v1/users/{user_id}", tags=["用户管理"])
-async def update_user_api(user_id: str, updates: Dict[str, Any], user: Any = Depends(require_auth)):
+async def update_user_api(user_id: str, updates: dict[str, Any], user: Any = Depends(require_auth)):
     """更新用户信息 (需 admin 权限)"""
     if not _AUTH_AVAILABLE or _auth is None:
         raise HTTPException(status_code=503, detail="认证系统不可用")
@@ -895,7 +919,7 @@ async def delete_user_api(user_id: str, user: Any = Depends(require_auth)):
 
 @app.get("/api/v1/auth/audit-log", tags=["认证"])
 async def get_audit_log(
-    action: Optional[str] = Query(None, description="按操作过滤"),
+    action: str | None = Query(None, description="按操作过滤"),
     limit: int = Query(50, ge=1, le=500),
     user: Any = Depends(require_auth),
 ):
@@ -1023,7 +1047,7 @@ async def submit_task(
 
 @app.get("/api/v1/tasks", response_model=TaskListResponse, tags=["任务"])
 async def list_tasks(
-    status: Optional[str] = Query(None, description="按状态过滤"),
+    status: str | None = Query(None, description="按状态过滤"),
     page: int = Query(1, ge=1, description="页码"),
     page_size: int = Query(20, ge=1, le=100, description="每页数量"),
     user: Any = Depends(require_auth),
@@ -1205,7 +1229,7 @@ async def list_quality_metrics():
 
 @app.post("/api/v1/optimize/parameters", response_model=TaskResponse, tags=["参数优化"])
 async def optimize_parameters(
-    context: Dict[str, Any],
+    context: dict[str, Any],
     use_feedback: bool = Query(True, description="是否使用历史反馈"),
     mode: str = Query("auto", description="执行模式"),
     user: Any = Depends(require_auth),
@@ -1293,7 +1317,7 @@ class ConnectionManager:
     """WebSocket 连接管理器"""
 
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: list[WebSocket] = []
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -1302,7 +1326,7 @@ class ConnectionManager:
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
 
-    async def broadcast(self, message: Dict[str, Any]):
+    async def broadcast(self, message: dict[str, Any]):
         for connection in self.active_connections:
             try:
                 await connection.send_json(message)
@@ -1314,7 +1338,7 @@ manager = ConnectionManager()
 
 
 @app.websocket("/ws/progress")
-async def websocket_progress(websocket: WebSocket, token: Optional[str] = Query(None)):
+async def websocket_progress(websocket: WebSocket, token: str | None = Query(None)):
     """WebSocket 实时进度推送
 
     认证方式：通过 query 参数 token 传递 Bearer Token。
@@ -1355,7 +1379,7 @@ async def websocket_progress(websocket: WebSocket, token: Optional[str] = Query(
 # ============================================================================
 
 @app.get("/api/v1/effects", tags=["效果库"])
-async def list_effects(category: Optional[str] = Query(None, description="按分类过滤")):
+async def list_effects(category: str | None = Query(None, description="按分类过滤")):
     """获取效果列表"""
     effects = [
         {
@@ -1567,12 +1591,12 @@ async def get_style(style_id: str):
 # ============================================================================
 
 # 内存存储（后续可替换为数据库）
-_projects_store: Dict[str, Dict[str, Any]] = {}
+_projects_store: dict[str, dict[str, Any]] = {}
 
 
 @app.get("/api/v1/projects", tags=["项目管理"])
 async def list_projects(
-    status: Optional[str] = Query(None, description="按状态过滤"),
+    status: str | None = Query(None, description="按状态过滤"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 ):
@@ -1599,7 +1623,7 @@ async def list_projects(
 
 @app.post("/api/v1/projects", tags=["项目管理"])
 async def create_project(
-    project_data: Dict[str, Any],
+    project_data: dict[str, Any],
     user: Any = Depends(require_auth),
 ):
     """创建项目"""
@@ -1639,7 +1663,7 @@ async def get_project_detail(project_id: str):
 @app.put("/api/v1/projects/{project_id}", tags=["项目管理"])
 async def update_project(
     project_id: str,
-    updates: Dict[str, Any],
+    updates: dict[str, Any],
     user: Any = Depends(require_auth),
 ):
     """更新项目"""
@@ -1673,14 +1697,14 @@ async def delete_project(
 # 历史记录 API
 # ============================================================================
 
-_history_store: List[Dict[str, Any]] = []
+_history_store: list[dict[str, Any]] = []
 
 
 @app.get("/api/v1/history", tags=["历史记录"])
 async def list_history(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    result: Optional[str] = Query(None, description="按结果过滤"),
+    result: str | None = Query(None, description="按结果过滤"),
 ):
     """获取历史记录"""
     history = list(reversed(_history_store))
@@ -1701,7 +1725,7 @@ async def list_history(
 
 @app.post("/api/v1/history", tags=["历史记录"])
 async def add_history(
-    item: Dict[str, Any],
+    item: dict[str, Any],
     user: Any = Depends(require_auth),
 ):
     """添加历史记录"""
@@ -1728,7 +1752,7 @@ async def add_history(
 # ============================================================================
 
 try:
-    from toolchain_api import register_toolchain_routes, get_toolchain_manager
+    from toolchain_api import get_toolchain_manager, register_toolchain_routes
     _TOOLCHAIN_AVAILABLE = True
     register_toolchain_routes(app)
     _logger.info("工具链 API 路由已注册")
@@ -1989,7 +2013,7 @@ except ImportError as e:
 class ToolExecuteRequest(BaseModel):
     """工具执行请求"""
     tool_name: str = Field(..., description="工具名称")
-    arguments: Dict[str, Any] = Field(default_factory=dict, description="工具参数")
+    arguments: dict[str, Any] = Field(default_factory=dict, description="工具参数")
 
 
 class ToolOrchestrateRequest(BaseModel):
@@ -2000,7 +2024,7 @@ class ToolOrchestrateRequest(BaseModel):
 
 class ToolListResponse(BaseModel):
     """工具列表响应"""
-    tools: List[Dict[str, Any]]
+    tools: list[dict[str, Any]]
     total: int
 
 
@@ -2046,7 +2070,7 @@ async def get_tool_detail(tool_name: str):
 @app.post("/api/v1/tools/{tool_name}/execute", tags=["工具执行引擎"])
 async def execute_tool_api(
     tool_name: str,
-    arguments: Dict[str, Any] = {},
+    arguments: dict[str, Any] = {},
     user: Any = Depends(require_auth),
 ):
     """执行指定工具"""
@@ -2138,8 +2162,8 @@ class CompositionTaskRequest(BaseModel):
     """合成任务请求"""
     task_description: str = Field(..., description="自然语言描述合成任务")
     mode: str = Field("auto", description="执行模式: auto/preset/script")
-    preset_name: Optional[str] = Field(None, description="预设名称")
-    overrides: Dict[str, Any] = Field(default_factory=dict, description="预设覆盖参数")
+    preset_name: str | None = Field(None, description="预设名称")
+    overrides: dict[str, Any] = Field(default_factory=dict, description="预设覆盖参数")
 
 
 class CompositionTaskResponse(BaseModel):
@@ -2147,7 +2171,7 @@ class CompositionTaskResponse(BaseModel):
     success: bool
     task_type: str = ""
     steps_count: int = 0
-    results: List[Dict[str, Any]] = Field(default_factory=list)
+    results: list[dict[str, Any]] = Field(default_factory=list)
     ae_script: str = ""
     error: str = ""
 
@@ -2191,7 +2215,7 @@ async def compose_task(request: CompositionTaskRequest):
 @app.post("/api/v1/compose/quick/{preset}", tags=["V4远程编排"])
 async def quick_compose(
     preset: str,
-    params: Dict[str, Any] = Body(default={}),
+    params: dict[str, Any] = Body(default={}),
 ):
     """快速合成预设 - 一键创建
 

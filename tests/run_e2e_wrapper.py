@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Wrapper to run E2E test with proper encoding handling"""
-import sys
-import os
 import io
+import os
+import sys
 
 # Force UTF-8 output
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')

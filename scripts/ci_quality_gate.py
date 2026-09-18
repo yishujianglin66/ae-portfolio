@@ -38,7 +38,7 @@ from core.quality_gate import (  # noqa: E402
 )
 
 
-def load_json(path: Path) -> Optional[Dict[str, Any]]:
+def load_json(path: Path) -> dict[str, Any] | None:
     try:
         return json.loads(path.read_text(encoding="utf-8-sig"))
     except Exception as e:
@@ -46,7 +46,7 @@ def load_json(path: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
-def probe_media(video: Path) -> Dict[str, Any]:
+def probe_media(video: Path) -> dict[str, Any]:
     """用 ffprobe 探测产物：时长 / 分辨率 / 文件大小 / 音轨。找不到 ffprobe 则跳过。"""
     empty = {"available": False, "duration_sec": 0.0, "resolution": None,
              "size_mb": 0.0, "has_audio": False}
@@ -77,8 +77,8 @@ def probe_media(video: Path) -> Dict[str, Any]:
     }
 
 
-def build_context(result: Dict[str, Any], probe: Dict[str, Any],
-                  thresholds: Dict[str, Any]) -> QualityContext:
+def build_context(result: dict[str, Any], probe: dict[str, Any],
+                  thresholds: dict[str, Any]) -> QualityContext:
     """组装 QualityContext（阈值可从 --thresholds 覆盖，缺失用规则默认值）"""
     overall = result.get("quality_score", 0.0)
     try:
@@ -112,7 +112,7 @@ def build_context(result: Dict[str, Any], probe: Dict[str, Any],
     )
 
 
-def apply_vmaf_threshold(gate, vmaf_min: Optional[float]):
+def apply_vmaf_threshold(gate, vmaf_min: float | None):
     """--vmaf-min 与规则默认不同时，重建 VmafThresholdRule。"""
     if vmaf_min is None:
         return
@@ -136,7 +136,7 @@ def main() -> int:
         print("[QGATE-CI] FAIL: 无法读取 pipeline_result.json", file=sys.stderr)
         return 2
 
-    thresholds: Dict[str, Any] = {}
+    thresholds: dict[str, Any] = {}
     if args.thresholds:
         thresholds = load_json(Path(args.thresholds)) or {}
 

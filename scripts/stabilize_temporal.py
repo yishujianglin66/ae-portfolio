@@ -29,7 +29,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
-from core.torch_runtime import infer_ctx, get_device
+
+from core.torch_runtime import get_device, infer_ctx
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "external" / "rife" / "model"))
 from warplayer import warp  # noqa: E402

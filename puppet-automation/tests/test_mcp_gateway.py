@@ -4,7 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from src.engines.base import BaseEngine, EngineResult
 from src.mcp_gateway import MCPRegistry, MCPTool, initialize_gateway
 

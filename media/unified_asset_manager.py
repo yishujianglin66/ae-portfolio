@@ -11,25 +11,23 @@ License: MIT
 
 from __future__ import annotations
 
-import os
-import sys
-import json
-import sqlite3
 import hashlib
-import shutil
+import json
 import logging
+import os
+import shutil
+import sqlite3
 import subprocess
+import sys
 import threading
 import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum, IntEnum
 from pathlib import Path
-from typing import (
-    Any, Callable, Dict, List, Optional, Set, Tuple, Union, Generator
-)
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Union
 
 logging.basicConfig(
     level=logging.INFO,
@@ -84,7 +82,7 @@ PARTICLE_EXTENSIONS = {".pex", ".pfs", ".prtl", ".aep"}
 TEXTURE_EXTENSIONS = {".jpg", ".png", ".tiff", ".tga", ".exr", ".hdr"}
 HDRI_EXTENSIONS = {".hdr", ".exr", ".hdri"}
 
-CATEGORY_EXTENSIONS: Dict[AssetCategory, Set[str]] = {
+CATEGORY_EXTENSIONS: dict[AssetCategory, set[str]] = {
     AssetCategory.VIDEO: VIDEO_EXTENSIONS,
     AssetCategory.AUDIO: AUDIO_EXTENSIONS,
     AssetCategory.IMAGE: IMAGE_EXTENSIONS,
@@ -98,7 +96,7 @@ CATEGORY_EXTENSIONS: Dict[AssetCategory, Set[str]] = {
 }
 
 
-def detect_category(file_path: str) -> Optional[AssetCategory]:
+def detect_category(file_path: str) -> AssetCategory | None:
     ext = Path(file_path).suffix.lower()
     for category, extensions in CATEGORY_EXTENSIONS.items():
         if ext in extensions:
@@ -111,11 +109,11 @@ class AssetMetadata:
     id: str
     name: str
     category: AssetCategory
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     file_path: str = ""
     file_size: int = 0
     duration: float = 0.0
-    resolution: Tuple[int, int] = (0, 0)
+    resolution: tuple[int, int] = (0, 0)
     fps: float = 0.0
     format: str = ""
     license: LicenseType = LicenseType.UNKNOWN
@@ -131,9 +129,9 @@ class AssetMetadata:
     color_space: str = ""
     author: str = ""
     description: str = ""
-    custom_fields: Dict[str, Any] = field(default_factory=dict)
+    custom_fields: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data["category"] = self.category.value
         data["license"] = self.license.value
@@ -141,7 +139,7 @@ class AssetMetadata:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "AssetMetadata":
+    def from_dict(cls, data: dict[str, Any]) -> "AssetMetadata":
         data = data.copy()
         if isinstance(data.get("category"), str):
             data["category"] = AssetCategory(data["category"])
@@ -164,10 +162,10 @@ class DAMConfig:
     thumbnail_directory: str = "D:\\AE-Work\\thumbnails"
     proxy_directory: str = "D:\\AE-Work\\proxies"
     archive_directory: str = "D:\\AE-Work\\archive"
-    watch_folders: List[str] = field(default_factory=list)
+    watch_folders: list[str] = field(default_factory=list)
     default_license: LicenseType = LicenseType.UNKNOWN
-    thumbnail_size: Tuple[int, int] = (320, 180)
-    proxy_resolution: Tuple[int, int] = (960, 540)
+    thumbnail_size: tuple[int, int] = (320, 180)
+    proxy_resolution: tuple[int, int] = (960, 540)
     max_concurrent_downloads: int = 3
     max_concurrent_processes: int = 2
     deduplication_enabled: bool = True
@@ -313,7 +311,7 @@ class AssetLibrary:
             self.conn.executescript(SQLITE_SCHEMA)
             self.conn.commit()
 
-    def _locked_execute(self, sql: str, params: Optional[Tuple] = None, commit: bool = False):
+    def _locked_execute(self, sql: str, params: tuple | None = None, commit: bool = False):
         with self._db_lock:
             cursor = self.conn.cursor()
             if params:
@@ -435,7 +433,7 @@ class AssetLibrary:
                 logger.info(f"Asset removed: {asset_id}")
             return deleted
 
-    def update_asset(self, asset_id: str, updates: Dict[str, Any]) -> bool:
+    def update_asset(self, asset_id: str, updates: dict[str, Any]) -> bool:
         if not updates:
             return False
         with self._db_lock:
@@ -484,13 +482,13 @@ class AssetLibrary:
 
             return cursor.rowcount > 0
 
-    def get_asset(self, asset_id: str) -> Optional[AssetMetadata]:
+    def get_asset(self, asset_id: str) -> AssetMetadata | None:
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM assets WHERE id = ?", (asset_id,))
         row = cursor.fetchone()
         return self._row_to_asset(row) if row else None
 
-    def get_asset_by_path(self, file_path: str) -> Optional[AssetMetadata]:
+    def get_asset_by_path(self, file_path: str) -> AssetMetadata | None:
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM assets WHERE file_path = ?", (file_path,))
         row = cursor.fetchone()
@@ -498,14 +496,14 @@ class AssetLibrary:
 
     def list_assets(
         self,
-        category: Optional[AssetCategory] = None,
+        category: AssetCategory | None = None,
         limit: int = 100,
         offset: int = 0,
         sort_by: str = "created_at",
         sort_order: str = "DESC",
-    ) -> List[AssetMetadata]:
+    ) -> list[AssetMetadata]:
         query = "SELECT * FROM assets"
-        params: List[Any] = []
+        params: list[Any] = []
         if category:
             query += " WHERE category = ?"
             params.append(category.value)
@@ -520,9 +518,9 @@ class AssetLibrary:
         cursor.execute(query, params)
         return [self._row_to_asset(row) for row in cursor.fetchall()]
 
-    def count_assets(self, category: Optional[AssetCategory] = None) -> int:
+    def count_assets(self, category: AssetCategory | None = None) -> int:
         query = "SELECT COUNT(*) FROM assets"
-        params: List[Any] = []
+        params: list[Any] = []
         if category:
             query += " WHERE category = ?"
             params.append(category.value)
@@ -535,8 +533,8 @@ class AssetLibrary:
         directory: str,
         recursive: bool = True,
         auto_detect: bool = True,
-        default_tags: Optional[List[str]] = None,
-    ) -> Tuple[int, int]:
+        default_tags: list[str] | None = None,
+    ) -> tuple[int, int]:
         added = 0
         skipped = 0
         default_tags = default_tags or []
@@ -567,7 +565,7 @@ class AssetLibrary:
         return added, skipped
 
     def _create_asset_from_file(
-        self, file_path: str, category: AssetCategory, tags: Optional[List[str]] = None
+        self, file_path: str, category: AssetCategory, tags: list[str] | None = None
     ) -> AssetMetadata:
         path = Path(file_path)
         stat = path.stat()
@@ -605,7 +603,7 @@ class AssetLibrary:
         elif asset.category == AssetCategory.FONT:
             self._extract_font_metadata(asset)
 
-    def _run_ffprobe(self, file_path: str) -> Optional[Dict[str, Any]]:
+    def _run_ffprobe(self, file_path: str) -> dict[str, Any] | None:
         try:
             result = subprocess.run(
                 ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", "-show_streams", file_path],
@@ -775,7 +773,7 @@ class AssetLibrary:
     def _video_phash(self, video_path: str) -> str:
         return hashlib.md5((video_path + str(os.path.getsize(video_path))).encode()).hexdigest()
 
-    def find_duplicates(self, threshold: int = 5) -> List[List[AssetMetadata]]:
+    def find_duplicates(self, threshold: int = 5) -> list[list[AssetMetadata]]:
         cursor = self.conn.cursor()
         cursor.execute("SELECT id, perceptual_hash FROM assets WHERE perceptual_hash != ''")
         assets = cursor.fetchall()
@@ -821,7 +819,7 @@ class AssetLibrary:
 
         return duplicates
 
-    def backup_database(self, backup_path: Optional[str] = None) -> str:
+    def backup_database(self, backup_path: str | None = None) -> str:
         backup_path = backup_path or os.path.join(
             self.config.backup_directory,
             f"asset_library_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
@@ -855,7 +853,7 @@ class SearchEngine:
     def __init__(self, library: AssetLibrary):
         self.library = library
 
-    def keyword_search(self, query: str, limit: int = 50) -> List[AssetMetadata]:
+    def keyword_search(self, query: str, limit: int = 50) -> list[AssetMetadata]:
         cursor = self.library.conn.cursor()
         try:
             cursor.execute(
@@ -875,7 +873,7 @@ class SearchEngine:
             )
         return [self.library._row_to_asset(row) for row in cursor.fetchall()]
 
-    def fuzzy_search(self, query: str, max_distance: int = 2, limit: int = 50) -> List[AssetMetadata]:
+    def fuzzy_search(self, query: str, max_distance: int = 2, limit: int = 50) -> list[AssetMetadata]:
         all_assets = self.library.list_assets(limit=1000)
         scored = []
         query_lower = query.lower()
@@ -905,10 +903,10 @@ class SearchEngine:
 
     def tag_search(
         self,
-        tags: List[str],
+        tags: list[str],
         operator: str = "AND",
         limit: int = 50,
-    ) -> List[AssetMetadata]:
+    ) -> list[AssetMetadata]:
         if not tags:
             return []
         cursor = self.library.conn.cursor()
@@ -939,16 +937,16 @@ class SearchEngine:
     def category_search(
         self,
         category: AssetCategory,
-        subcategory: Optional[str] = None,
+        subcategory: str | None = None,
         limit: int = 100,
-    ) -> List[AssetMetadata]:
+    ) -> list[AssetMetadata]:
         return self.library.list_assets(category=category, limit=limit)
 
-    def semantic_search(self, text_query: str, limit: int = 20) -> List[AssetMetadata]:
+    def semantic_search(self, text_query: str, limit: int = 20) -> list[AssetMetadata]:
         logger.info("Semantic search placeholder - requires CLIP model integration")
         return self.keyword_search(text_query, limit)
 
-    def similarity_search(self, asset_id: str, limit: int = 10) -> List[AssetMetadata]:
+    def similarity_search(self, asset_id: str, limit: int = 10) -> list[AssetMetadata]:
         source = self.library.get_asset(asset_id)
         if not source:
             return []
@@ -971,19 +969,19 @@ class SearchEngine:
 
     def advanced_filter(
         self,
-        category: Optional[AssetCategory] = None,
-        min_resolution: Optional[Tuple[int, int]] = None,
-        max_resolution: Optional[Tuple[int, int]] = None,
-        min_duration: Optional[float] = None,
-        max_duration: Optional[float] = None,
-        formats: Optional[List[str]] = None,
-        licenses: Optional[List[LicenseType]] = None,
-        min_quality: Optional[float] = None,
-        tags: Optional[List[str]] = None,
+        category: AssetCategory | None = None,
+        min_resolution: tuple[int, int] | None = None,
+        max_resolution: tuple[int, int] | None = None,
+        min_duration: float | None = None,
+        max_duration: float | None = None,
+        formats: list[str] | None = None,
+        licenses: list[LicenseType] | None = None,
+        min_quality: float | None = None,
+        tags: list[str] | None = None,
         limit: int = 100,
-    ) -> List[AssetMetadata]:
+    ) -> list[AssetMetadata]:
         query = "SELECT * FROM assets WHERE 1=1"
-        params: List[Any] = []
+        params: list[Any] = []
 
         if category:
             query += " AND category = ?"
@@ -1024,7 +1022,7 @@ class SearchEngine:
 
         return results
 
-    def get_all_tags(self) -> List[Tuple[str, int]]:
+    def get_all_tags(self) -> list[tuple[str, int]]:
         cursor = self.library.conn.cursor()
         cursor.execute(
             """SELECT t.name, COUNT(at.asset_id) as count
@@ -1056,8 +1054,8 @@ class MediaDownloader:
     def __init__(self, library: AssetLibrary, config: DAMConfig):
         self.library = library
         self.config = config
-        self._download_threads: Dict[int, threading.Thread] = {}
-        self._stop_events: Dict[int, threading.Event] = {}
+        self._download_threads: dict[int, threading.Thread] = {}
+        self._stop_events: dict[int, threading.Event] = {}
 
     def add_to_queue(
         self,
@@ -1077,10 +1075,10 @@ class MediaDownloader:
         self.library.conn.commit()
         return cursor.lastrowid
 
-    def get_queue(self, status: Optional[DownloadStatus] = None) -> List[Dict[str, Any]]:
+    def get_queue(self, status: DownloadStatus | None = None) -> list[dict[str, Any]]:
         cursor = self.library.conn.cursor()
         query = "SELECT * FROM download_queue"
-        params: List[Any] = []
+        params: list[Any] = []
         if status:
             query += " WHERE status = ?"
             params.append(status.value)
@@ -1096,7 +1094,7 @@ class MediaDownloader:
         )
         self.library.conn.commit()
 
-    def batch_download(self, urls: List[str], output_dir: str) -> List[int]:
+    def batch_download(self, urls: list[str], output_dir: str) -> list[int]:
         download_ids = []
         for url in urls:
             did = self.add_to_queue(url, output_dir)
@@ -1120,7 +1118,7 @@ class MediaDownloader:
                 except Exception as e:
                     self._on_download_failed(download_id, str(e))
 
-    def _download_asset(self, download_id: int, url: str, target_path: str) -> Optional[str]:
+    def _download_asset(self, download_id: int, url: str, target_path: str) -> str | None:
         self.update_progress(download_id, 0, DownloadStatus.DOWNLOADING)
         os.makedirs(target_path or self.config.root_directory, exist_ok=True)
         output_dir = target_path or os.path.join(self.config.root_directory, "downloads")
@@ -1168,24 +1166,24 @@ class MediaDownloader:
 class StockAPIClient:
     def __init__(self, config: DAMConfig):
         self.config = config
-        self._api_keys: Dict[str, str] = {}
+        self._api_keys: dict[str, str] = {}
 
     def set_api_key(self, provider: str, key: str) -> None:
         self._api_keys[provider] = key
 
-    def search_pexels(self, query: str, per_page: int = 15, media_type: str = "photos") -> List[Dict[str, Any]]:
+    def search_pexels(self, query: str, per_page: int = 15, media_type: str = "photos") -> list[dict[str, Any]]:
         logger.info(f"Pexels search placeholder: {query} ({media_type})")
         return self._mock_search_results(query, per_page, "pexels")
 
-    def search_pixabay(self, query: str, per_page: int = 15, media_type: str = "photo") -> List[Dict[str, Any]]:
+    def search_pixabay(self, query: str, per_page: int = 15, media_type: str = "photo") -> list[dict[str, Any]]:
         logger.info(f"Pixabay search placeholder: {query} ({media_type})")
         return self._mock_search_results(query, per_page, "pixabay")
 
-    def search_unsplash(self, query: str, per_page: int = 15) -> List[Dict[str, Any]]:
+    def search_unsplash(self, query: str, per_page: int = 15) -> list[dict[str, Any]]:
         logger.info(f"Unsplash search placeholder: {query}")
         return self._mock_search_results(query, per_page, "unsplash")
 
-    def _mock_search_results(self, query: str, count: int, source: str) -> List[Dict[str, Any]]:
+    def _mock_search_results(self, query: str, count: int, source: str) -> list[dict[str, Any]]:
         results = []
         for i in range(count):
             results.append({
@@ -1205,9 +1203,9 @@ class StockAPIClient:
 class AIGenerator:
     def __init__(self, config: DAMConfig):
         self.config = config
-        self._api_keys: Dict[str, str] = {}
+        self._api_keys: dict[str, str] = {}
 
-    def generate_image(self, prompt: str, provider: str = "midjourney", **kwargs) -> Dict[str, Any]:
+    def generate_image(self, prompt: str, provider: str = "midjourney", **kwargs) -> dict[str, Any]:
         logger.info(f"AI Image Generation placeholder: {prompt} via {provider}")
         return {
             "status": "queued",
@@ -1217,7 +1215,7 @@ class AIGenerator:
             "job_id": str(uuid.uuid4()),
         }
 
-    def generate_video(self, prompt: str, provider: str = "runway", **kwargs) -> Dict[str, Any]:
+    def generate_video(self, prompt: str, provider: str = "runway", **kwargs) -> dict[str, Any]:
         logger.info(f"AI Video Generation placeholder: {prompt} via {provider}")
         return {
             "status": "queued",
@@ -1227,7 +1225,7 @@ class AIGenerator:
             "job_id": str(uuid.uuid4()),
         }
 
-    def check_generation_status(self, job_id: str) -> Dict[str, Any]:
+    def check_generation_status(self, job_id: str) -> dict[str, Any]:
         return {"job_id": job_id, "status": "processing", "progress": 50}
 
 
@@ -1244,9 +1242,9 @@ class ProcessingPipeline:
         self,
         asset_id: str,
         output_format: str,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
         **kwargs,
-    ) -> Optional[str]:
+    ) -> str | None:
         asset = self.library.get_asset(asset_id)
         if not asset:
             return None
@@ -1291,7 +1289,7 @@ class ProcessingPipeline:
         except ImportError:
             pass
 
-    def quality_enhancement(self, asset_id: str, method: str = "topaz") -> Optional[str]:
+    def quality_enhancement(self, asset_id: str, method: str = "topaz") -> str | None:
         asset = self.library.get_asset(asset_id)
         if not asset:
             return None
@@ -1299,7 +1297,7 @@ class ProcessingPipeline:
         output_path = os.path.splitext(asset.file_path)[0] + f"_enhanced.{asset.format}"
         return output_path
 
-    def proxy_generation(self, asset_id: str) -> Optional[str]:
+    def proxy_generation(self, asset_id: str) -> str | None:
         asset = self.library.get_asset(asset_id)
         if not asset or asset.category != AssetCategory.VIDEO:
             return None
@@ -1324,7 +1322,7 @@ class ProcessingPipeline:
         except (FileNotFoundError, subprocess.TimeoutExpired):
             return None
 
-    def watermark_removal(self, asset_id: str) -> Optional[str]:
+    def watermark_removal(self, asset_id: str) -> str | None:
         asset = self.library.get_asset(asset_id)
         if not asset:
             return None
@@ -1334,10 +1332,10 @@ class ProcessingPipeline:
 
     def batch_process(
         self,
-        asset_ids: List[str],
-        operations: List[Dict[str, Any]],
-        progress_callback: Optional[Callable[[int, int], None]] = None,
-    ) -> Dict[str, str]:
+        asset_ids: list[str],
+        operations: list[dict[str, Any]],
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> dict[str, str]:
         results = {}
         total = len(asset_ids)
         for i, asset_id in enumerate(asset_ids):
@@ -1506,7 +1504,7 @@ class QualityAssessment:
         self.library.update_asset(asset_id, {"quality_score": score})
         return score
 
-    def batch_assess(self, asset_ids: Optional[List[str]] = None) -> Dict[str, float]:
+    def batch_assess(self, asset_ids: list[str] | None = None) -> dict[str, float]:
         if not asset_ids:
             all_assets = self.library.list_assets(limit=10000)
             asset_ids = [a.id for a in all_assets]
@@ -1529,10 +1527,10 @@ class EnterpriseWorkflow:
     def ingest_workflow(
         self,
         file_path: str,
-        category: Optional[AssetCategory] = None,
-        tags: Optional[List[str]] = None,
+        category: AssetCategory | None = None,
+        tags: list[str] | None = None,
         auto_approve: bool = False,
-    ) -> Optional[str]:
+    ) -> str | None:
         if not os.path.exists(file_path):
             logger.error(f"File not found: {file_path}")
             return None
@@ -1589,7 +1587,7 @@ class EnterpriseWorkflow:
         self.library.conn.commit()
         return cursor.rowcount > 0
 
-    def get_approval_queue(self, status: str = "pending") -> List[Dict[str, Any]]:
+    def get_approval_queue(self, status: str = "pending") -> list[dict[str, Any]]:
         cursor = self.library.conn.cursor()
         cursor.execute(
             """SELECT aq.*, a.name, a.category, a.thumbnail_path
@@ -1601,7 +1599,7 @@ class EnterpriseWorkflow:
         )
         return [dict(row) for row in cursor.fetchall()]
 
-    def archive_workflow(self, asset_id: str, delete_original: bool = False) -> Optional[str]:
+    def archive_workflow(self, asset_id: str, delete_original: bool = False) -> str | None:
         asset = self.library.get_asset(asset_id)
         if not asset:
             return None
@@ -1639,7 +1637,7 @@ class EnterpriseWorkflow:
         )
         self.library.conn.commit()
 
-    def get_usage_stats(self, asset_id: str) -> Dict[str, Any]:
+    def get_usage_stats(self, asset_id: str) -> dict[str, Any]:
         cursor = self.library.conn.cursor()
         cursor.execute(
             "SELECT COUNT(*) as total, usage_type, COUNT(DISTINCT project_name) as projects FROM usage_tracking WHERE asset_id = ? GROUP BY usage_type",
@@ -1653,7 +1651,7 @@ class EnterpriseWorkflow:
             "by_type": by_type,
         }
 
-    def license_compliance_check(self, asset_id: str) -> Dict[str, Any]:
+    def license_compliance_check(self, asset_id: str) -> dict[str, Any]:
         asset = self.library.get_asset(asset_id)
         if not asset:
             return {"compliant": False, "issues": ["Asset not found"]}
@@ -1677,7 +1675,7 @@ class EnterpriseWorkflow:
             "license": asset.license.value,
         }
 
-    def batch_license_check(self, asset_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    def batch_license_check(self, asset_ids: list[str] | None = None) -> dict[str, Any]:
         if not asset_ids:
             all_assets = self.library.list_assets(limit=10000)
             asset_ids = [a.id for a in all_assets]
@@ -1712,13 +1710,13 @@ class FontManager:
     def __init__(self, library: AssetLibrary):
         self.library = library
 
-    def discover_fonts(self, directory: str) -> List[str]:
+    def discover_fonts(self, directory: str) -> list[str]:
         fonts = []
         for ext in FONT_EXTENSIONS:
             fonts.extend(str(p) for p in Path(directory).rglob(f"*{ext}"))
         return fonts
 
-    def get_font_info(self, font_path: str) -> Dict[str, Any]:
+    def get_font_info(self, font_path: str) -> dict[str, Any]:
         info = {
             "path": font_path,
             "family": "",
@@ -1770,7 +1768,7 @@ class FontManager:
 
         return info
 
-    def font_pairing_recommendation(self, font_family: str, limit: int = 5) -> List[Dict[str, Any]]:
+    def font_pairing_recommendation(self, font_family: str, limit: int = 5) -> list[dict[str, Any]]:
         logger.info(f"Font pairing recommendation for: {font_family}")
         pairings = [
             {"font": "Inter", "reason": "Modern sans-serif pairing", "use_case": "Body text"},
@@ -1781,7 +1779,7 @@ class FontManager:
         ]
         return pairings[:limit]
 
-    def font_license_check(self, font_path: str) -> Dict[str, Any]:
+    def font_license_check(self, font_path: str) -> dict[str, Any]:
         info = self.get_font_info(font_path)
         license_text = info.get("license", "").lower() + info.get("copyright", "").lower()
 
@@ -1807,7 +1805,7 @@ class FontManager:
         base_size: int = 16,
         ratio: str = "golden",
         steps: int = 6,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         ratios = {
             "golden": 1.618,
             "minor_second": 1.067,
@@ -1851,7 +1849,7 @@ class FontManager:
             "wcag_standards": wcag_contrasts,
         }
 
-    def check_contrast_ratio(self, foreground: str, background: str) -> Dict[str, Any]:
+    def check_contrast_ratio(self, foreground: str, background: str) -> dict[str, Any]:
         def hex_to_rgb(h):
             h = h.lstrip("#")
             return tuple(int(h[i:i+2], 16) / 255.0 for i in (0, 2, 4))
@@ -1889,10 +1887,10 @@ class IntegrationInterfaces:
     def __init__(self, library: AssetLibrary, config: DAMConfig):
         self.library = library
         self.config = config
-        self._watch_threads: Dict[str, threading.Thread] = {}
-        self._stop_events: Dict[str, threading.Event] = {}
+        self._watch_threads: dict[str, threading.Thread] = {}
+        self._stop_events: dict[str, threading.Event] = {}
 
-    def export_to_ae(self, asset_ids: List[str], project_path: str) -> bool:
+    def export_to_ae(self, asset_ids: list[str], project_path: str) -> bool:
         logger.info(f"Exporting {len(asset_ids)} assets to After Effects: {project_path}")
         jsx_script = f'''
 var assetList = {json.dumps([self.library.get_asset(aid).file_path if self.library.get_asset(aid) else "" for aid in asset_ids])};
@@ -1902,24 +1900,24 @@ app.project.importFile();
         logger.debug(f"AE JSX script generated for {len(asset_ids)} assets")
         return True
 
-    def export_to_pr(self, asset_ids: List[str], project_path: str) -> bool:
+    def export_to_pr(self, asset_ids: list[str], project_path: str) -> bool:
         logger.info(f"Exporting {len(asset_ids)} assets to Premiere Pro: {project_path}")
         return True
 
-    def export_to_resolve(self, asset_ids: List[str], project_name: str) -> bool:
+    def export_to_resolve(self, asset_ids: list[str], project_name: str) -> bool:
         logger.info(f"Exporting {len(asset_ids)} assets to DaVinci Resolve: {project_name}")
         return True
 
-    def export_to_blender(self, asset_ids: List[str], scene_path: str) -> bool:
+    def export_to_blender(self, asset_ids: list[str], scene_path: str) -> bool:
         logger.info(f"Exporting {len(asset_ids)} assets to Blender: {scene_path}")
         return True
 
     def watch_folder(
         self,
         folder_path: str,
-        category: Optional[AssetCategory] = None,
+        category: AssetCategory | None = None,
         auto_import: bool = True,
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
     ) -> bool:
         if not os.path.exists(folder_path):
             logger.error(f"Watch folder does not exist: {folder_path}")
@@ -1940,12 +1938,12 @@ app.project.importFile();
     def _watch_loop(
         self,
         folder_path: str,
-        category: Optional[AssetCategory],
+        category: AssetCategory | None,
         auto_import: bool,
-        tags: List[str],
+        tags: list[str],
         stop_event: threading.Event,
     ) -> None:
-        known_files: Set[str] = set()
+        known_files: set[str] = set()
         while not stop_event.is_set():
             try:
                 current_files = set()
@@ -1979,7 +1977,7 @@ app.project.importFile();
             return True
         return False
 
-    def generate_ae_import_script(self, asset_ids: List[str], output_path: str) -> str:
+    def generate_ae_import_script(self, asset_ids: list[str], output_path: str) -> str:
         assets_data = []
         for aid in asset_ids:
             asset = self.library.get_asset(aid)
@@ -2024,7 +2022,7 @@ importAssets();
 # ============================================================================
 
 class UnifiedAssetManager:
-    def __init__(self, config: Optional[DAMConfig] = None):
+    def __init__(self, config: DAMConfig | None = None):
         self.config = config or DAMConfig()
         self.config.ensure_directories()
         self.library = AssetLibrary(self.config)
@@ -2039,7 +2037,7 @@ class UnifiedAssetManager:
         self.integration = IntegrationInterfaces(self.library, self.config)
         logger.info("Unified Asset Manager initialized")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         stats = {
             "total_assets": self.library.count_assets(),
             "by_category": {},
@@ -2057,15 +2055,15 @@ class UnifiedAssetManager:
         stats["total_file_size"] = row["total"] or 0
         return stats
 
-    def quick_search(self, query: str, limit: int = 50) -> List[AssetMetadata]:
+    def quick_search(self, query: str, limit: int = 50) -> list[AssetMetadata]:
         return self.search.keyword_search(query, limit)
 
     def import_folder(
         self,
         folder_path: str,
         recursive: bool = True,
-        tags: Optional[List[str]] = None,
-    ) -> Tuple[int, int]:
+        tags: list[str] | None = None,
+    ) -> tuple[int, int]:
         return self.library.batch_import_from_directory(folder_path, recursive, True, tags)
 
     def close(self) -> None:
@@ -2098,13 +2096,13 @@ def main():
         backup_directory="D:\\AE-Work-Demo\\backup",
     )
 
-    print(f"[1] 初始化 Unified Asset Manager")
+    print("[1] 初始化 Unified Asset Manager")
     print(f"    根目录: {config.root_directory}")
     print(f"    数据库: {config.database_path}")
     print()
 
     with UnifiedAssetManager(config) as dam:
-        print(f"[2] 资产分类系统")
+        print("[2] 资产分类系统")
         print(f"    支持的资产类别: {', '.join(c.value for c in AssetCategory)}")
         print(f"    许可证类型: {', '.join(l.value for l in LicenseType)}")
         print(f"    质量等级: {', '.join(q.name for q in AssetQuality)}")
@@ -2113,7 +2111,7 @@ def main():
         test_dir = "D:\\AE-Work-Demo\\test_assets"
         os.makedirs(test_dir, exist_ok=True)
 
-        print(f"[3] 资产库管理")
+        print("[3] 资产库管理")
         print(f"    批量导入测试目录: {test_dir}")
         added, skipped = dam.import_folder(test_dir, recursive=True, tags=["demo", "test"])
         print(f"    导入结果: {added} 个新增, {skipped} 个跳过")
@@ -2145,7 +2143,7 @@ def main():
         print(f"    资产ID: {asset_id}")
         print()
 
-        print(f"[4] 智能搜索")
+        print("[4] 智能搜索")
         results = dam.quick_search("视频", limit=10)
         print(f"    关键字搜索 '视频': 找到 {len(results)} 个结果")
         for r in results[:3]:
@@ -2155,7 +2153,7 @@ def main():
         print(f"    标签搜索 (演示 AND 测试): 找到 {len(tag_results)} 个结果")
         print()
 
-        print(f"[5] 质量评估")
+        print("[5] 质量评估")
         quality_score = dam.quality.overall_quality_rating(sample_asset)
         print(f"    技术质量分: {dam.quality.technical_quality_score(sample_asset):.1f}/100")
         print(f"    内容质量分: {dam.quality.content_quality_score(sample_asset):.1f}/100")
@@ -2163,9 +2161,9 @@ def main():
         print(f"    综合质量评级: {quality_score:.1f}/100")
         print()
 
-        print(f"[6] 字体管理")
+        print("[6] 字体管理")
         font_info = dam.fonts.typography_calculator(base_size=16, ratio="golden", steps=3)
-        print(f"    排版计算器 (黄金比例, 基准16px):")
+        print("    排版计算器 (黄金比例, 基准16px):")
         print(f"      比例值: {font_info['ratio_value']:.3f}")
         print(f"      字号范围: {font_info['scale'].get('step_neg_3')}px - {font_info['scale'].get('step_3')}px")
         print(f"      行高: {font_info['line_height']}px")
@@ -2176,7 +2174,7 @@ def main():
         print(f"      AAA 正常: {'通过' if contrast['aaa_normal'] else '未通过'}")
         print()
 
-        print(f"[7] 企业工作流")
+        print("[7] 企业工作流")
         compliance = dam.workflow.license_compliance_check(asset_id)
         print(f"    许可证合规检查: {'合规' if compliance['compliant'] else '待完善'}")
         if compliance["warnings"]:
@@ -2191,10 +2189,10 @@ def main():
         print(f"    使用统计: 共 {usage_stats['total_usage']} 次使用")
         print()
 
-        print(f"[8] 统计概览")
+        print("[8] 统计概览")
         stats = dam.get_stats()
         print(f"    总资产数: {stats['total_assets']}")
-        print(f"    分类统计:")
+        print("    分类统计:")
         for cat, count in stats["by_category"].items():
             print(f"      {cat}: {count}")
         size_mb = stats["total_file_size"] / (1024 * 1024)
@@ -2203,7 +2201,7 @@ def main():
         print()
 
         backup_path = dam.library.backup_database()
-        print(f"[9] 数据库备份")
+        print("[9] 数据库备份")
         print(f"    备份文件: {backup_path}")
         print()
 

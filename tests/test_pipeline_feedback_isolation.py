@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from config.settings import settings as root_settings
 import pipeline.feedback_loop as feedback_loop_module
+from config.settings import settings as root_settings
 from pipeline.feedback_loop import ErrorPatternMemory, FeedbackLoop
 
 

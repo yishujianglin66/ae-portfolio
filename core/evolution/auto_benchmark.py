@@ -43,7 +43,7 @@ class AutoBenchmark:
         "text_topic": "effect_apply",
     }
 
-    def __init__(self, builder: Optional[BenchmarkBuilder] = None):
+    def __init__(self, builder: BenchmarkBuilder | None = None):
         self._builder = builder or get_benchmark_builder()
         self._benchmark_dir = self._builder._benchmark_dir
         self._retired_dir = self._benchmark_dir / "retired"
@@ -54,9 +54,9 @@ class AutoBenchmark:
 
     def harvest_from_pipeline_run(
         self,
-        pipeline_result: Dict[str, Any],
+        pipeline_result: dict[str, Any],
         split: str = "train",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """从一次管线运行提炼新题目（P2 知识反哺评测集）
 
         仅当运行含有效输入主题时提炼；去重由 BenchmarkBuilder 隔离校验保证。
@@ -84,9 +84,9 @@ class AutoBenchmark:
 
     def harvest_from_trajectory(
         self,
-        trajectory: Dict[str, Any],
+        trajectory: dict[str, Any],
         split: str = "train",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """从执行轨迹提炼题目（透传到 BenchmarkBuilder）"""
         return self._builder.generate_from_trajectory(trajectory, split=split)
 
@@ -99,7 +99,7 @@ class AutoBenchmark:
         task_type: str,
         split: str = "train",
         new_count: int = 2,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """轮换评测题目: 生成新题 + 退役最旧的生成题
 
         Returns:
@@ -128,15 +128,15 @@ class AutoBenchmark:
         )
         return summary
 
-    def _retire_overflow(self, task_type: str, split: str) -> List[Dict[str, Any]]:
+    def _retire_overflow(self, task_type: str, split: str) -> list[dict[str, Any]]:
         """将超出上限的最旧「生成题目」移入 retired/（手动题目永不移除）"""
         split_dir = self._benchmark_dir / split
         generated_files = sorted(split_dir.glob("generated_*.json"))
-        retired: List[Dict[str, Any]] = []
+        retired: list[dict[str, Any]] = []
 
         # 统计当前生成题总数
         total_generated = 0
-        file_tasks: List[tuple] = []   # (path, tasks)
+        file_tasks: list[tuple] = []   # (path, tasks)
         for path in generated_files:
             tasks = read_json(path, [])
             if isinstance(tasks, list) and tasks:
@@ -172,9 +172,9 @@ class AutoBenchmark:
     #  统计
     # ----------------------------------------------------------------
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         """评测基准库统计（供 Dashboard 展示）"""
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         for split in BenchmarkBuilder.VALID_SPLITS:
             tasks = self._builder.list_tasks(split)
             result[split] = {
@@ -192,7 +192,7 @@ class AutoBenchmark:
 #  全局单例
 # ============================================================================
 
-_global_auto: Optional[AutoBenchmark] = None
+_global_auto: AutoBenchmark | None = None
 
 
 def get_auto_benchmark() -> AutoBenchmark:

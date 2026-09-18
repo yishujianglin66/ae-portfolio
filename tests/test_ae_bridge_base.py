@@ -2,9 +2,9 @@
 test_ae_bridge_base.py - AE 桥接客户端基类单元测试
 """
 
-import sys
-import os
 import json
+import os
+import sys
 import tempfile
 import threading
 import time
@@ -283,14 +283,14 @@ class TestBackwardCompatibility:
     """向后兼容测试：两个具体客户端应正常工作。"""
 
     def test_ae_command_client_inherits_base(self):
-        from ae_mcp_client import AECommandClient
         from ae_bridge_base import AEBridgeClient
+        from ae_mcp_client import AECommandClient
         client = AECommandClient(signature_enabled=False)
         assert isinstance(client, AEBridgeClient)
 
     def test_mcp_bridge_client_inherits_base(self):
-        from mcp_bridge_client import MCPBridgeClient
         from ae_bridge_base import AEBridgeClient
+        from mcp_bridge_client import MCPBridgeClient
         client = MCPBridgeClient()
         assert isinstance(client, AEBridgeClient)
 

@@ -19,15 +19,14 @@ API 文档：https://pixabay.com/api/docs/
     2. JSON 输入模式：python pixabay_client.py --json-input '{"func":"search_videos","params":{...}}'
 """
 
+import json
 import os
 import sys
-import json
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 import requests
-
 
 # =============================================================================
 # 常量定义
@@ -92,7 +91,7 @@ class PixabayClient:
     封装视频/图片搜索与下载能力，提供完善的错误处理与参数校验。
     """
 
-    def __init__(self, api_key: str, output_dir: Optional[str] = None):
+    def __init__(self, api_key: str, output_dir: str | None = None):
         """
         初始化客户端
 
@@ -105,13 +104,13 @@ class PixabayClient:
         self.output_dir = output_dir or os.getcwd()
         self.session = requests.Session()
         # 记录最近请求时间，便于客户端侧节流
-        self._request_timestamps: List[float] = []
+        self._request_timestamps: list[float] = []
 
     # -------------------------------------------------------------------------
     # 内部工具方法
     # -------------------------------------------------------------------------
 
-    def _build_params(self, **kwargs) -> Dict[str, str]:
+    def _build_params(self, **kwargs) -> dict[str, str]:
         """构造请求参数，自动附加 API Key"""
         params = {"key": self.api_key}
         for k, v in kwargs.items():
@@ -137,7 +136,7 @@ class PixabayClient:
                 )
         self._request_timestamps.append(now)
 
-    def _request(self, url: str, params: Dict[str, str]) -> Dict:
+    def _request(self, url: str, params: dict[str, str]) -> dict:
         """
         发起 GET 请求并返回 JSON
 
@@ -197,7 +196,7 @@ class PixabayClient:
         orientation: str = "all",
         category: str = "",
         order: str = "popular",
-    ) -> Dict:
+    ) -> dict:
         """
         搜索视频素材
 
@@ -246,7 +245,7 @@ class PixabayClient:
         orientation: str = "all",
         category: str = "",
         order: str = "popular",
-    ) -> Dict:
+    ) -> dict:
         """
         搜索图片素材
 
@@ -291,7 +290,7 @@ class PixabayClient:
         query: str,
         per_page: int = 20,
         page: int = 1,
-    ) -> Dict:
+    ) -> dict:
         """
         搜索音乐素材
 
@@ -335,7 +334,7 @@ class PixabayClient:
     # 详情查询
     # -------------------------------------------------------------------------
 
-    def get_video(self, video_id: str) -> Dict:
+    def get_video(self, video_id: str) -> dict:
         """
         获取单个视频信息（通过搜索 id 实现，Pixabay 无独立详情端点）
 
@@ -351,7 +350,7 @@ class PixabayClient:
                 return hit
         return {}
 
-    def get_image(self, image_id: str) -> Dict:
+    def get_image(self, image_id: str) -> dict:
         """
         获取单个图片信息（通过搜索 id 实现）
 
@@ -375,7 +374,7 @@ class PixabayClient:
         url: str,
         output_path: str,
         expected_min_size: int = 0,
-    ) -> Dict:
+    ) -> dict:
         """
         下载文件到本地
 
@@ -421,9 +420,9 @@ class PixabayClient:
     def download_video(
         self,
         video_id: str,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         quality: str = "large",
-    ) -> Dict:
+    ) -> dict:
         """
         下载指定视频
 
@@ -484,9 +483,9 @@ class PixabayClient:
     def download_image(
         self,
         image_id: str,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         quality: str = "largeImageURL",
-    ) -> Dict:
+    ) -> dict:
         """
         下载指定图片
 
@@ -543,7 +542,7 @@ class PixabayClient:
 # 统一结果格式化（供 unified_search 使用）
 # =============================================================================
 
-def normalize_video_result(raw: Dict) -> Dict:
+def normalize_video_result(raw: dict) -> dict:
     """
     将 Pixabay 视频结果归一化为统一格式
 
@@ -572,7 +571,7 @@ def normalize_video_result(raw: Dict) -> Dict:
     }
 
 
-def normalize_image_result(raw: Dict) -> Dict:
+def normalize_image_result(raw: dict) -> dict:
     """
     将 Pixabay 图片结果归一化为统一格式
     """

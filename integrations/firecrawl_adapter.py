@@ -73,9 +73,9 @@ class ScrapeResult:
     markdown: str = ""
     html: str = ""
     screenshot: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     duration_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -83,10 +83,10 @@ class SearchResult:
     """搜索结果"""
     query: str = ""
     status: str = "pending"
-    items: List[Dict[str, Any]] = field(default_factory=list)
+    items: list[dict[str, Any]] = field(default_factory=list)
     total_count: int = 0
     duration_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -94,10 +94,10 @@ class CrawlResult:
     """爬取结果"""
     base_url: str = ""
     status: str = "pending"
-    pages: List[ScrapeResult] = field(default_factory=list)
+    pages: list[ScrapeResult] = field(default_factory=list)
     total_pages: int = 0
     duration_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 # ── 适配器 ───────────────────────────────────────────────────────────────
@@ -120,7 +120,7 @@ class FirecrawlAdapter:
 
     TOOL_NAME = "firecrawl"
 
-    SUPPORTED_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    SUPPORTED_OPERATIONS: dict[str, dict[str, Any]] = {
         "scrape": {"desc": "抓取单个网页 → Markdown"},
         "crawl": {"desc": "爬取整站 → 多页 Markdown"},
         "search": {"desc": "联网搜索 → 相关内容"},
@@ -130,11 +130,11 @@ class FirecrawlAdapter:
         "kb_build": {"desc": "知识库构建: 爬取教程站点"},
     }
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._api_key = self.config.get("api_key") or os.environ.get("FIRECRAWL_API_KEY", "")
         self._api_url = self.config.get("api_url") or os.environ.get("FIRECRAWL_API_URL", "")
-        self._app: Optional[Any] = None
+        self._app: Any | None = None
         self._cache_dir = Path(self.config.get(
             "cache_dir", str(PROJECT_ROOT / "cache" / "firecrawl"),
         ))
@@ -162,12 +162,12 @@ class FirecrawlAdapter:
         """检查 Firecrawl 是否可用"""
         return self._app is not None
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return list(self.SUPPORTED_OPERATIONS.keys())
 
     # ── 核心 API ──────────────────────────────────────────────────────
 
-    def scrape(self, url: str, formats: Optional[List[str]] = None,
+    def scrape(self, url: str, formats: list[str] | None = None,
                timeout: int = 30) -> ScrapeResult:
         """抓取单个网页
 
@@ -262,8 +262,8 @@ class FirecrawlAdapter:
         return result
 
     def crawl(self, url: str, max_pages: int = 10,
-              include_paths: Optional[List[str]] = None,
-              exclude_paths: Optional[List[str]] = None) -> CrawlResult:
+              include_paths: list[str] | None = None,
+              exclude_paths: list[str] | None = None) -> CrawlResult:
         """爬取整站
 
         Args:
@@ -315,7 +315,7 @@ class FirecrawlAdapter:
 
         return result
 
-    def map_site(self, url: str) -> List[str]:
+    def map_site(self, url: str) -> list[str]:
         """发现站点所有 URL"""
         try:
             if not self._app:
@@ -330,7 +330,7 @@ class FirecrawlAdapter:
 
     # ── 领域特化 API ──────────────────────────────────────────────────
 
-    def research_style(self, style_keyword: str, max_sources: int = 5) -> List[Dict]:
+    def research_style(self, style_keyword: str, max_sources: int = 5) -> list[dict]:
         """风格研究: 搜索并抓取教程内容
 
         用于风格复刻管线，搜索相关教程并提取内容供 Agent 分析。
@@ -361,8 +361,8 @@ class FirecrawlAdapter:
 
         return research_data
 
-    def build_knowledge_base(self, base_urls: List[str],
-                             max_pages_per_site: int = 20) -> List[Dict]:
+    def build_knowledge_base(self, base_urls: list[str],
+                             max_pages_per_site: int = 20) -> list[dict]:
         """知识库构建: 爬取多个教程站点
 
         用于构建 10-风格化剪辑知识库 和 11-大师知识库。
@@ -383,7 +383,7 @@ class FirecrawlAdapter:
 
         return kb_entries
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Any:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> Any:
         """统一执行接口"""
         params = params or {}
         if operation == "scrape":
@@ -403,7 +403,7 @@ class FirecrawlAdapter:
 
     # ── 缓存 ──────────────────────────────────────────────────────────
 
-    def _cache_result(self, key: str, data: Dict):
+    def _cache_result(self, key: str, data: dict):
         """缓存结果到本地"""
         try:
             safe_key = key.replace("/", "_").replace(":", "_")[:100]
@@ -413,7 +413,7 @@ class FirecrawlAdapter:
         except Exception as e:
             logger.debug("[Firecrawl] Cache write failed: %s", e)
 
-    def _get_cached(self, key: str) -> Optional[Dict]:
+    def _get_cached(self, key: str) -> dict | None:
         """从缓存读取"""
         try:
             safe_key = key.replace("/", "_").replace(":", "_")[:100]
@@ -428,11 +428,11 @@ class FirecrawlAdapter:
 
 # ── 便捷函数 ─────────────────────────────────────────────────────────────
 
-def get_adapter(config: Optional[Dict[str, Any]] = None) -> FirecrawlAdapter:
+def get_adapter(config: dict[str, Any] | None = None) -> FirecrawlAdapter:
     return FirecrawlAdapter(config)
 
 
-def quick_test() -> Dict[str, Any]:
+def quick_test() -> dict[str, Any]:
     adapter = get_adapter()
     return {
         "available": adapter.check_available(),

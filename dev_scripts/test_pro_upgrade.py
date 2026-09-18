@@ -16,14 +16,11 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from core.camera_language import (CameraLanguageLibrary, CAMERA_IDS,  # noqa: E402
-                                  CAMERA_IDS_3D, CAMERA_IDS_ALL)
-from core.text_3d import (Text3DRenderer, MATERIAL_PRESETS,  # noqa: E402
-                          MIN_STACK_LAYERS, dof_params_from_energy)
-from core.font_scanner import (SystemFontScanner,  # noqa: E402
-                               SCENE_FONT_RULES)
-from core.effect_depth import EffectDepthLibrary, INTENSITY_TIERS  # noqa: E402
+from core.camera_language import CAMERA_IDS, CAMERA_IDS_3D, CAMERA_IDS_ALL, CameraLanguageLibrary  # noqa: E402
 from core.director_scorer import DirectorQualityScorer  # noqa: E402
+from core.effect_depth import INTENSITY_TIERS, EffectDepthLibrary  # noqa: E402
+from core.font_scanner import SCENE_FONT_RULES, SystemFontScanner  # noqa: E402
+from core.text_3d import MATERIAL_PRESETS, MIN_STACK_LAYERS, Text3DRenderer, dof_params_from_energy  # noqa: E402
 
 PASS = 0
 FAIL = 0
@@ -191,6 +188,7 @@ check("link_jsx组合输出", "ADBE Shift Channels" in link_block)
 
 print("\n=== 8. ai_director端到端: 新管线score_card≥85 ===")
 from ai.ai_director import ScriptGenerator, ScriptToJSXTranslator  # noqa: E402
+
 gen = ScriptGenerator()
 analyses = [{"width": 1920, "height": 1080, "duration": 10.0}] * 6
 script = gen._fallback_script("3D升级验收", analyses, "热血战斗")

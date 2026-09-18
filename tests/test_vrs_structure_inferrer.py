@@ -16,12 +16,13 @@ test_vrs_structure_inferrer.py — VRS 合成结构推断器回归测试
   结构蓝图解析失败，进而整个流程降级为简化结构，丢失多图层信息。
 - 该解析路径是 VRS 流水线的关键节点，无测试覆盖即等于"裸奔"。
 """
+import json
 import os
 import sys
-import json
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -30,10 +31,10 @@ sys.path.insert(0, str(PROJECT_ROOT / "vrs"))
 # 检查被测模块是否可用
 try:
     from vrs.vrs_structure_inferrer import (
-        CompositionStructureInferrer,
         DEFAULT_COMP,
-        SUPPORTED_LAYER_TYPES,
         SUPPORTED_BLEND_MODES,
+        SUPPORTED_LAYER_TYPES,
+        CompositionStructureInferrer,
     )
     HAS_INFERRER = True
 except ImportError:

@@ -33,7 +33,7 @@ class Invariant(ABC):
     """形式化不变量基类。"""
 
     @abstractmethod
-    def check(self, context: Dict[str, Any]) -> Tuple[bool, str]:
+    def check(self, context: dict[str, Any]) -> tuple[bool, str]:
         """校验管线上下文并返回通过状态和错误信息。"""
 
     @property
@@ -42,7 +42,7 @@ class Invariant(ABC):
         """不变量名称。"""
 
 
-def _to_number(value: Any, default: Optional[float] = None) -> Optional[float]:
+def _to_number(value: Any, default: float | None = None) -> float | None:
     """将任意输入安全归一化为 float（H1）。
 
     支持 int / float / 数字字符串（"90"→90.0）。无法解析时返回 default，
@@ -56,7 +56,7 @@ def _to_number(value: Any, default: Optional[float] = None) -> Optional[float]:
         return default
 
 
-def _parse_bitrate(value: Any) -> Optional[float]:
+def _parse_bitrate(value: Any) -> float | None:
     """将 FFmpeg 码率参数归一化为 bps（H2）。
 
     三种形态：
@@ -89,7 +89,7 @@ def _parse_bitrate(value: Any) -> Optional[float]:
     return None
 
 
-def _parse_position(value: Any) -> Optional[Tuple[float, float]]:
+def _parse_position(value: Any) -> tuple[float, float] | None:
     """将图层位置归一化为 (x, y)（H1）。
 
     - None → (0, 0)（缺省位置语义）；
@@ -133,7 +133,7 @@ class FanPositionConstraint(Invariant):
     def name(self) -> str:
         return "FanPositionConstraint"
 
-    def check(self, context: Dict[str, Any]) -> Tuple[bool, str]:
+    def check(self, context: dict[str, Any]) -> tuple[bool, str]:
         layers = context.get("ae_layers")
         if not layers:
             # C1/M1: ae_layers 未提供或为空 → 视为"未测量"，告警并跳过
@@ -174,7 +174,7 @@ class FFmpegParamBoundary(Invariant):
     def name(self) -> str:
         return "FFmpegParamBoundary"
 
-    def check(self, context: Dict[str, Any]) -> Tuple[bool, str]:
+    def check(self, context: dict[str, Any]) -> tuple[bool, str]:
         params = context.get("ffmpeg_params")
         if not params:
             # C1/M1: ffmpeg_params 未提供或为空 → 视为"未测量"，告警并跳过
@@ -209,7 +209,7 @@ class AERenderTimeout(Invariant):
     def name(self) -> str:
         return "AERenderTimeout"
 
-    def check(self, context: Dict[str, Any]) -> Tuple[bool, str]:
+    def check(self, context: dict[str, Any]) -> tuple[bool, str]:
         render_time = context.get("ae_render_time_ms")
         if render_time is None:
             # M1: 未测量 → 告警并跳过超时校验（不再默认 0 恒通过）
@@ -243,7 +243,7 @@ class H3VideoSpec(Invariant):
     def name(self) -> str:
         return "H3VideoSpec"
 
-    def check(self, context: Dict[str, Any]) -> Tuple[bool, str]:
+    def check(self, context: dict[str, Any]) -> tuple[bool, str]:
         # C1 修复精神：H3 专属字段缺时视为"未测量"，告警不视为违规
         h3 = context.get("h3_output")
         if not h3 or not isinstance(h3, dict):
@@ -269,7 +269,7 @@ class H3VideoSpec(Invariant):
         return True, ""
 
 
-FORMAL_INVARIANTS: List[Invariant] = [
+FORMAL_INVARIANTS: list[Invariant] = [
     FanPositionConstraint(),
     FFmpegParamBoundary(),
     AERenderTimeout(),
@@ -277,7 +277,7 @@ FORMAL_INVARIANTS: List[Invariant] = [
 ]
 
 
-def check_invariants(context: Dict[str, Any], skip: bool = False) -> None:
+def check_invariants(context: dict[str, Any], skip: bool = False) -> None:
     """校验全部注册不变量，违规时抛出 `InvariantViolation`。
 
     M2: 遍历全部不变量并聚合所有违规，全部检查完若存在违规则一次性抛出
@@ -287,7 +287,7 @@ def check_invariants(context: Dict[str, Any], skip: bool = False) -> None:
     if skip:
         logger.debug("跳过不变量校验（调试模式）")
         return
-    errors: List[str] = []
+    errors: list[str] = []
     for invariant in FORMAL_INVARIANTS:
         passed, error = invariant.check(context)
         if not passed:

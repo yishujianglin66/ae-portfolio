@@ -21,8 +21,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from ae.preset_system import PresetSystem, PRESET_CATEGORIES
 from ae.preset_executor import PresetExecutor, PresetLibrary, initialize_default_combinations
+from ae.preset_system import PRESET_CATEGORIES, PresetSystem
 
 
 def print_banner():
@@ -103,17 +103,17 @@ def execute_preset(executor: PresetExecutor, preset_name: str, params: dict = No
     result = executor.execute_preset(preset_name, ae_client=None, **params)
 
     if result.get("success"):
-        print(f"\n✅ 成功")
+        print("\n✅ 成功")
         print(f"   预设: {result.get('preset')}")
         print(f"   分类: {result.get('category')}")
         print(f"   状态: {result.get('status', 'executed')}")
 
         if result.get("jsx"):
             jsx_preview = result["jsx"][:200] + "..." if len(result["jsx"]) > 200 else result["jsx"]
-            print(f"\n   JSX预览:")
+            print("\n   JSX预览:")
             print(f"   {jsx_preview}")
     else:
-        print(f"\n❌ 失败")
+        print("\n❌ 失败")
         print(f"   错误: {result.get('error')}")
 
 
@@ -125,7 +125,7 @@ def execute_preset_chain(executor: PresetExecutor, preset_names: list, params: d
 
     result = executor.execute_preset_chain(preset_names, ae_client=None, shared_params=params)
 
-    print(f"\n📊 执行结果:")
+    print("\n📊 执行结果:")
     print(f"   总预设: {result.get('total_presets')}")
     print(f"   成功: {result.get('success_count')}")
     print(f"   失败: {result.get('failed_count')}")
@@ -158,7 +158,7 @@ def execute_combination(executor: PresetExecutor, library: PresetLibrary, combo_
 
     result = executor.execute_preset_chain(combo.presets, ae_client=None, shared_params=params)
 
-    print(f"\n📊 执行结果:")
+    print("\n📊 执行结果:")
     print(f"   总预设: {result.get('total_presets')}")
     print(f"   成功: {result.get('success_count')}")
     print(f"   失败: {result.get('failed_count')}")
@@ -181,14 +181,14 @@ def show_preset_info(preset_system: PresetSystem, preset_name: str):
     print(f"\n📋 预设详情: {preset.name}")
     print("-" * 60)
 
-    print(f"\n基本信息:")
+    print("\n基本信息:")
     print(f"  • 名称: {preset.name}")
     print(f"  • 分类: {PRESET_CATEGORIES.get(preset.category, {}).get('name', preset.category)}")
     print(f"  • 子分类: {preset.subcategory}")
     print(f"  • 描述: {preset.description}")
     print(f"  • 标签: {', '.join(preset.tags)}")
 
-    print(f"\n参数:")
+    print("\n参数:")
     for param_name, param_info in preset.parameters.items():
         default = preset.default_values.get(param_name, "无默认值")
         print(f"  • {param_name}:")
@@ -202,7 +202,7 @@ def show_preset_info(preset_system: PresetSystem, preset_name: str):
         if "options" in param_info:
             print(f"     选项: {', '.join(param_info['options'])}")
 
-    print(f"\n兼容性:")
+    print("\n兼容性:")
     ae_versions = preset.compatibility.get("ae", [])
     print(f"  • AE版本: {', '.join(ae_versions)}")
 
@@ -218,7 +218,7 @@ def generate_script(preset_system: PresetSystem, preset_name: str, output_path: 
             output_file.write_text(jsx_code, encoding="utf-8")
             print(f"\n✅ JSX脚本已生成: {output_file}")
         else:
-            print(f"\n📝 生成的JSX脚本:")
+            print("\n📝 生成的JSX脚本:")
             print("-" * 60)
             print(jsx_code)
             print("-" * 60)
@@ -268,7 +268,7 @@ def batch_generate(preset_system: PresetSystem, category: str, output_dir: str):
             print(f"   ❌ {preset_name} - {e}")
             failed_count += 1
 
-    print(f"\n📊 批量生成结果:")
+    print("\n📊 批量生成结果:")
     print(f"   成功: {generated_count}")
     print(f"   失败: {failed_count}")
 

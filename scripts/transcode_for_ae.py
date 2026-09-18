@@ -1,4 +1,9 @@
-import subprocess, sys, os, json, time
+import json
+import os
+import subprocess
+import sys
+import time
+
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 ffmpeg = r"C:\ffmpeg\bin\ffmpeg.exe"
@@ -71,7 +76,7 @@ audio_out = os.path.join(out_dir, "ae实战音乐.mp3")
 if not os.path.exists(audio_out) and os.path.exists(audio_src):
     import shutil
     shutil.copy2(audio_src, audio_out)
-    print(f"\nAudio copied: ae实战音乐.mp3")
+    print("\nAudio copied: ae实战音乐.mp3")
 
 print(f"\nDone! Output dir: {out_dir}")
 print("Files in output:")

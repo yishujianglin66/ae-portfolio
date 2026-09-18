@@ -29,7 +29,7 @@ class PRPresetConverter:
     """AE 预设到 PR 预设的转化器。"""
 
     # AE 效果名 → PR 效果名映射表
-    AE_TO_PR_EFFECT_MAP: Dict[str, str] = {
+    AE_TO_PR_EFFECT_MAP: dict[str, str] = {
         # 调色类
         "ADBE Curves": "Lumetri Color",
         "ADBE Hue Saturation": "Lumetri Color",
@@ -75,7 +75,7 @@ class PRPresetConverter:
     }
 
     # AE 转场类型 → PR 转场类型映射
-    AE_TO_PR_TRANSITION_MAP: Dict[str, str] = {
+    AE_TO_PR_TRANSITION_MAP: dict[str, str] = {
         "cross_dissolve": "Cross Dissolve",
         "dip_to_black": "Dip to Black",
         "dip_to_white": "Dip to White",
@@ -99,7 +99,7 @@ class PRPresetConverter:
     }
 
     # AE 参数名 → PR 参数名映射
-    AE_TO_PR_PARAM_MAP: Dict[str, str] = {
+    AE_TO_PR_PARAM_MAP: dict[str, str] = {
         # 通用变换
         "position": "Position",
         "scale": "Scale",
@@ -136,11 +136,11 @@ class PRPresetConverter:
         "blendWithOriginal": "Blend With Original",
     }
 
-    def __init__(self, presets_dir: Optional[Path] = None):
+    def __init__(self, presets_dir: Path | None = None):
         self.presets_dir = presets_dir or Path(__file__).parent / "presets"
-        self._converted_cache: Dict[str, Dict[str, Any]] = {}
+        self._converted_cache: dict[str, dict[str, Any]] = {}
 
-    def convert_effect_preset(self, ae_preset: Dict[str, Any]) -> Dict[str, Any]:
+    def convert_effect_preset(self, ae_preset: dict[str, Any]) -> dict[str, Any]:
         """将 AE 效果预设转化为 PR 效果预设。
 
         Args:
@@ -189,7 +189,7 @@ class PRPresetConverter:
 
         return pr_preset
 
-    def convert_transition_preset(self, ae_preset: Dict[str, Any]) -> Dict[str, Any]:
+    def convert_transition_preset(self, ae_preset: dict[str, Any]) -> dict[str, Any]:
         """将 AE 转场预设转化为 PR 转场预设。
 
         Args:
@@ -242,7 +242,7 @@ class PRPresetConverter:
 
         return pr_preset
 
-    def convert_color_grading_preset(self, ae_preset: Dict[str, Any]) -> Dict[str, Any]:
+    def convert_color_grading_preset(self, ae_preset: dict[str, Any]) -> dict[str, Any]:
         """将 AE 调色预设转化为 PR Lumetri Color 预设。
 
         Args:
@@ -295,7 +295,7 @@ class PRPresetConverter:
 
         return pr_preset
 
-    def _infer_pr_effect_name(self, param_name: str, param_meta: Dict[str, Any]) -> str:
+    def _infer_pr_effect_name(self, param_name: str, param_meta: dict[str, Any]) -> str:
         """根据参数名推断 PR 效果名称。"""
         param_lower = param_name.lower()
 
@@ -321,8 +321,8 @@ class PRPresetConverter:
     def convert_preset_file(
         self,
         input_path: Path,
-        output_path: Optional[Path] = None,
-    ) -> List[Dict[str, Any]]:
+        output_path: Path | None = None,
+    ) -> list[dict[str, Any]]:
         """批量转化预设文件。
 
         Args:
@@ -364,7 +364,7 @@ class PRPresetConverter:
         self,
         input_dir: Path,
         output_dir: Path,
-    ) -> Dict[str, List[Dict[str, Any]]]:
+    ) -> dict[str, list[dict[str, Any]]]:
         """批量转化目录中的所有预设文件。
 
         Args:
@@ -384,7 +384,7 @@ class PRPresetConverter:
 
         return results
 
-    def get_conversion_report(self) -> Dict[str, Any]:
+    def get_conversion_report(self) -> dict[str, Any]:
         """获取转化报告。"""
         return {
             "total_converted": len(self._converted_cache),

@@ -6,9 +6,14 @@
   --create-only : 只创建合成不渲染
   --render-only : 只渲染已创建的合成
 """
-import json, time, sys, os, subprocess, argparse
-from pathlib import Path
+import argparse
+import json
+import os
+import subprocess
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -227,10 +232,10 @@ def main():
 
     # === Phase 2: 渲染 ===
     if not args.create_only:
-        print(f"\n[Phase 2] Rendering to video")
+        print("\n[Phase 2] Rendering to video")
         if not AERENDER.exists():
             print(f"  [ERROR] aerender not found: {AERENDER}")
-            print(f"  Please install AE or update AERENDER path")
+            print("  Please install AE or update AERENDER path")
             return
         
         rendered = 0
@@ -252,7 +257,7 @@ def main():
 
     # === Summary ===
     print(f"\n{'='*60}")
-    print(f"  DONE")
+    print("  DONE")
     print(f"  Total presets: {total}")
     print(f"  Duration each: {DURATION}s")
     print(f"  Total video time: {total * DURATION / 60:.1f} min")

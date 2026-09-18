@@ -1,9 +1,12 @@
 """测试完整桥接通信 (ping + get_info)"""
-import asyncio, sys
+import asyncio
+import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve() / "puppet-automation"))
 from src.engines.premiere.pr_bridge_client import PRBridgeClient, PRBridgeError
+
 
 async def test():
     c = PRBridgeClient()
@@ -19,7 +22,7 @@ async def test():
     try:
         r = await c.ping()
         d = r.get("data", {})
-        print(f"   ✅ ping 成功!")
+        print("   ✅ ping 成功!")
         print(f"   PR 版本: {d.get('appVersion', '?')}")
         print(f"   项目: {d.get('project', '无')}")
         print(f"   序列: {d.get('sequence', '无')}")
@@ -33,7 +36,7 @@ async def test():
     try:
         r = await c.get_info()
         d = r.get("data", {})
-        print(f"   ✅ get_info 成功!")
+        print("   ✅ get_info 成功!")
         print(f"   应用: {d.get('appName', '?')} v{d.get('appVersion', '?')}")
         print(f"   项目: {d.get('project', '无')}")
         bins = d.get("binCount", 0)

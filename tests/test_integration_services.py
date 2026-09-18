@@ -31,7 +31,6 @@ sys.path.insert(0, os.path.join(PROJECT_ROOT, "puppet-automation"))
 from src.services.audio_analysis import AudioAnalysisService
 from src.services.scene_detection import SceneDetectionService
 
-
 # ============================================================
 # AudioAnalysisService 集成测试
 # ============================================================

@@ -1,6 +1,7 @@
 # 创建测试素材图片
-from PIL import Image, ImageDraw, ImageFont
 import os
+
+from PIL import Image, ImageDraw, ImageFont
 
 # 创建测试图片目录
 test_dir = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\05-测试套件\test_resources"
@@ -32,6 +33,7 @@ print(f"测试图片已创建: {test_image_path}")
 
 # 也创建一个简单的 SVG 作为备选
 import xml.etree.ElementTree as ET
+
 svg = ET.Element('svg', width='512', height='512', xmlns='http://www.w3.org/2000/svg')
 rect = ET.SubElement(svg, 'rect', width='512', height='512', fill='green')
 circle = ET.SubElement(svg, 'circle', cx='256', cy='256', r='100', fill='orange')

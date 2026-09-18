@@ -138,13 +138,13 @@ async def main() -> int:
 
     total = len(videos)
     print("=" * 70)
-    print(f"批量 auto_frame 分割")
+    print("批量 auto_frame 分割")
     print(f"  输入: {INPUT_DIR}")
     print(f"  输出: {OUTPUT_BASE}")
     print(f"  视频数: {total}")
     print(f"  模型: {args.model_size} | detect_conf={args.detect_conf}")
-    print(f"  模式: auto_frame (YOLO person + SAM2 单帧分割)")
-    print(f"  输出: 遮罩PNG序列 + qtrle透明视频MOV")
+    print("  模式: auto_frame (YOLO person + SAM2 单帧分割)")
+    print("  输出: 遮罩PNG序列 + qtrle透明视频MOV")
     print("=" * 70)
 
     # 实例化引擎（只一次）
@@ -214,7 +214,7 @@ async def main() -> int:
     print(f"  总耗时: {batch_duration}s ({round(batch_duration/60, 1)}min)")
     print(f"  汇总报告: {summary_file}")
     if failed:
-        print(f"\n失败列表:")
+        print("\n失败列表:")
         for r in failed:
             print(f"  - {r['video']}: {r.get('error', 'unknown')[:100]}")
     print("=" * 70)

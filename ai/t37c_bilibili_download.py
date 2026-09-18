@@ -2,7 +2,14 @@
 t37c_bilibili_download.py - B站API搜索 + yt-dlp下载 + 帧提取
 ==============================================================
 """
-import os, sys, json, time, subprocess, shutil, urllib.request, urllib.parse
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 PROJECT_ROOT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
@@ -123,7 +130,7 @@ def extract_frames(video_path, output_dir, fps=1, max_frames=300):
         "-q:v", "2",
         "-frames:v", str(max_frames),
         "-y",
-        str(output_dir / f"dl_%06d.jpg")
+        str(output_dir / "dl_%06d.jpg")
     ]
     try:
         r = subprocess.run(cmd, capture_output=True, timeout=600,
@@ -197,7 +204,7 @@ def main():
     for ip, info in results.items():
         print(f"  {ip}: +{info['new_frames']} 帧 ({info['videos']} 视频)")
     
-    print(f"\n[更新后各IP总帧数]")
+    print("\n[更新后各IP总帧数]")
     for d in sorted(CORPUS_DIR.iterdir()):
         if d.is_dir():
             frames = list(d.rglob("*.jpg")) + list(d.rglob("*.png"))

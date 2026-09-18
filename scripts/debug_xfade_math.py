@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from ai.production_director import ProductionDirector, DirectorSegment
+from ai.production_director import DirectorSegment, ProductionDirector
 from core.paths import ffmpeg_bin, ffprobe_bin
 
 

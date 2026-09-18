@@ -65,7 +65,7 @@ def _delete_state(job_id: str) -> None:
     _celery_app_module.delete_state_from_redis(job_id)
 
 
-def submit_job(job: PipelineJob) -> Optional[str]:
+def submit_job(job: PipelineJob) -> str | None:
     """Submit a job to Celery.  Returns the Celery task id, or None if disabled.
 
     Initial PipelineState is created lazily by the orchestrator so we do not
@@ -77,7 +77,7 @@ def submit_job(job: PipelineJob) -> Optional[str]:
     return _celery_app_module.submit_pipeline_job(job_dict)
 
 
-def cancel_task(task_id: Optional[str]) -> bool:
+def cancel_task(task_id: str | None) -> bool:
     """Cancel a Celery task.  Returns True on success or no-op."""
     if not is_enabled() or not task_id:
         return False
@@ -91,7 +91,7 @@ def persist_state(state: PipelineState) -> None:
     _save_state(state.model_dump(mode="json"))
 
 
-def hydrate_state(job_id: str) -> Optional[PipelineState]:
+def hydrate_state(job_id: str) -> PipelineState | None:
     """Load a PipelineState from Redis (or None if absent / disabled)."""
     if not is_enabled():
         return None

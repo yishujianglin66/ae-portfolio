@@ -22,7 +22,6 @@ from src.models.pipeline import (
     TaskStatus,
 )
 
-
 # ============================================================
 # Plugin state and priority
 # ============================================================
@@ -60,8 +59,8 @@ class PluginContext:
     state: PipelineState
     engines: dict[str, Any]
     work_dir: Path
-    phase: Optional[PipelinePhase] = None
-    phase_result: Optional[PhaseResult] = None
+    phase: PipelinePhase | None = None
+    phase_result: PhaseResult | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -142,7 +141,7 @@ class HookPlugin(BasePlugin):
     async def before_phase(self, ctx: PluginContext) -> None:
         """Called before each phase executes."""
 
-    async def after_phase(self, ctx: PluginContext) -> Optional[PhaseResult]:
+    async def after_phase(self, ctx: PluginContext) -> PhaseResult | None:
         """Called after each phase completes.
 
         Can return a modified PhaseResult to override the original.

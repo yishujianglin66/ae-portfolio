@@ -1,16 +1,17 @@
 """Bridge Middleware 单元测试。"""
 from __future__ import annotations
 
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from ae.bridge_middleware import (
-    MiddlewarePipeline,
     LoggingMiddleware,
-    ValidationMiddleware,
-    RateLimitMiddleware,
     MetricsMiddleware,
+    MiddlewarePipeline,
+    RateLimitMiddleware,
     RetryMiddleware,
+    ValidationMiddleware,
 )
 from ae.bridge_protocol import BridgeCommand, BridgeResponse
 

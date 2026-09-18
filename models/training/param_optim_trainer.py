@@ -6,22 +6,24 @@
 输入：风格标签 + 基础参数
 输出：优化后的效果参数
 """
-import os
-import time
 import json
 import logging
+import os
+import time
 from typing import Any, Dict, List, Optional
+
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from core.torch_runtime import infer_ctx
-from torch.utils.data import Dataset, DataLoader, TensorDataset
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from torch.optim.lr_scheduler import CosineAnnealingLR, CosineAnnealingWarmRestarts
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from torch.utils.data import DataLoader, Dataset, TensorDataset
+
+from core.torch_runtime import infer_ctx
+from models.utils.metrics import cost_effectiveness_ratio, count_parameters
 
 from .trainer_base import BaseTrainer, TrainingConfig, TrainingResult
-from models.utils.metrics import count_parameters, cost_effectiveness_ratio
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +71,7 @@ class ParamOptimModel(nn.Module):
 class ParamOptimDatasetTorch(Dataset):
     """PyTorch数据集包装器"""
 
-    def __init__(self, data: List[Dict]):
+    def __init__(self, data: list[dict]):
         self.data = data
         self.inputs = torch.stack([torch.from_numpy(s['input_vector']) for s in data])
         self.targets = torch.stack([torch.from_numpy(s['output_vector']) for s in data])
@@ -86,15 +88,15 @@ class ParamOptimTrainer(BaseTrainer):
 
     def __init__(self, config: TrainingConfig):
         super().__init__(config)
-        self._model: Optional[ParamOptimModel] = None
-        self._criterion: Optional[nn.Module] = None
-        self._optimizer: Optional[optim.Optimizer] = None
-        self._scheduler: Optional[Any] = None
+        self._model: ParamOptimModel | None = None
+        self._criterion: nn.Module | None = None
+        self._optimizer: optim.Optimizer | None = None
+        self._scheduler: Any | None = None
         self._input_dim: int = 0
         self._output_dim: int = 0
         self._device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    def load_dataset(self, train_data: List[Dict], eval_data: List[Dict] = None) -> None:
+    def load_dataset(self, train_data: list[dict], eval_data: list[dict] = None) -> None:
         if train_data:
             self._input_dim = train_data[0]['input_vector'].shape[0]
             self._output_dim = train_data[0]['output_vector'].shape[0]
@@ -231,7 +233,7 @@ class ParamOptimTrainer(BaseTrainer):
             cost_estimate_usd=self._estimate_cost(params_million, training_time),
         )
 
-    def evaluate(self) -> Dict[str, float]:
+    def evaluate(self) -> dict[str, float]:
         if self._model is None or self._eval_dataset is None:
             return {}
 

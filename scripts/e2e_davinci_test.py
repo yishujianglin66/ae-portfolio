@@ -96,7 +96,7 @@ class TestRunner:
 # 环境检测
 # ---------------------------------------------------------------------------
 
-def find_davinci_resolve() -> Optional[Path]:
+def find_davinci_resolve() -> Path | None:
     """检测 DaVinci Resolve 可执行路径."""
     candidates = [
         Path(r"C:\Program Files\Blackmagic Design\DaVinci Resolve\Resolve.exe"),
@@ -109,7 +109,7 @@ def find_davinci_resolve() -> Optional[Path]:
     return None
 
 
-def find_ffmpeg() -> Optional[Path]:
+def find_ffmpeg() -> Path | None:
     """检测 FFmpeg 可执行路径."""
     try:
         result = subprocess.run(["where", "ffmpeg"], capture_output=True, text=True)
@@ -182,7 +182,7 @@ async def test_pyscenedetect(runner: TestRunner):
     def _check():
         try:
             import scenedetect
-            from scenedetect import VideoManager, SceneManager
+            from scenedetect import SceneManager, VideoManager
             from scenedetect.detectors import ContentDetector
 
             # 验证核心类可用

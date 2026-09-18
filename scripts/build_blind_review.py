@@ -53,7 +53,7 @@ def main() -> int:
         print("先完成 v3 标签合并")
         return 1
     rows = [json.loads(l) for l in LABELS.read_text(encoding="utf-8").splitlines() if l.strip()]
-    by_dir: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    by_dir: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for r in rows:
         if float(r.get("confidence", 0)) >= 0.7 and r.get("movement_label") != "complex":
             by_dir[r["movement_label"]].append(r)
@@ -62,7 +62,7 @@ def main() -> int:
     n_classes = len(by_dir)
     per = max(3, N_TOTAL // n_classes)
     random.seed(20260815)
-    picked: List[Dict[str, Any]] = []
+    picked: list[dict[str, Any]] = []
     for d, items in by_dir.items():
         k = min(per, len(items))
         picked.extend(random.sample(items, k))

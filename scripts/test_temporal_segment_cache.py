@@ -7,8 +7,8 @@
 import os
 import shutil
 import sys
-import time
 import tempfile
+import time
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -50,8 +50,9 @@ def _analyze_full(analyzer, video):
 
 
 def main():
-    from core.temporal_analyzer import TemporalAnalyzer
     from core.temporal_segment_cache import analyze_cached
+
+    from core.temporal_analyzer import TemporalAnalyzer
 
     d = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(tempfile.mkdtemp(prefix="aekv_segtest_"))
     full, trimmed_head, trimmed_mid = _make_videos(d)

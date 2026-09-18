@@ -47,9 +47,9 @@ class KBDocument:
     content: str
     source_path: str
     category: str = ""
-    tags: List[str] = field(default_factory=list)
-    embedding: Optional[np.ndarray] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    embedding: np.ndarray | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def content_hash(self) -> str:
@@ -63,7 +63,7 @@ class SearchResult:
     score: float
     highlight: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "doc_id": self.doc.doc_id,
             "title": self.doc.title,
@@ -81,7 +81,7 @@ class SearchResult:
 class EmbeddingBackend:
     """向量化后端基类"""
 
-    def embed(self, texts: List[str]) -> np.ndarray:
+    def embed(self, texts: list[str]) -> np.ndarray:
         raise NotImplementedError
 
     @property
@@ -102,14 +102,14 @@ class TFIDFBackend(EmbeddingBackend):
         self._fitted = False
         self._dim = max_features
 
-    def fit(self, corpus: List[str]):
+    def fit(self, corpus: list[str]):
         """拟合语料库"""
         self.vectorizer.fit(corpus)
         self._fitted = True
         self._dim = len(self.vectorizer.vocabulary_)
         logger.info(f"TF-IDF fitted: {self._dim} features")
 
-    def embed(self, texts: List[str]) -> np.ndarray:
+    def embed(self, texts: list[str]) -> np.ndarray:
         if not self._fitted:
             self.fit(texts)
         return self.vectorizer.transform(texts).toarray().astype(np.float32)
@@ -129,7 +129,7 @@ class SentenceTransformerBackend(EmbeddingBackend):
         "sentence-transformers/all-MiniLM-L6-v2",  # 英文，384维
     ]
 
-    def __init__(self, model_name: Optional[str] = None, device: str = "cpu"):
+    def __init__(self, model_name: str | None = None, device: str = "cpu"):
         try:
             from sentence_transformers import SentenceTransformer
         except ImportError:
@@ -163,7 +163,7 @@ class SentenceTransformerBackend(EmbeddingBackend):
 
         raise RuntimeError("No embedding model could be loaded")
 
-    def embed(self, texts: List[str]) -> np.ndarray:
+    def embed(self, texts: list[str]) -> np.ndarray:
         self._load_model()
         embeddings = self._model.encode(
             texts,
@@ -188,17 +188,17 @@ class KnowledgeBaseSearcher:
 
     def __init__(
         self,
-        kb_dir: Optional[Path] = None,
-        backend: Optional[str] = "auto",
-        cache_dir: Optional[Path] = None,
+        kb_dir: Path | None = None,
+        backend: str | None = "auto",
+        cache_dir: Path | None = None,
     ):
         self.kb_dir = kb_dir or KB_DIR
         self.cache_dir = cache_dir or CACHE_DIR
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        self.documents: List[KBDocument] = []
-        self._index: Optional[np.ndarray] = None
-        self._backend: Optional[EmbeddingBackend] = None
+        self.documents: list[KBDocument] = []
+        self._index: np.ndarray | None = None
+        self._backend: EmbeddingBackend | None = None
         self._backend_type = backend
 
         # 统计
@@ -397,9 +397,9 @@ class KnowledgeBaseSearcher:
         self,
         query: str,
         top_k: int = 5,
-        category_filter: Optional[str] = None,
+        category_filter: str | None = None,
         min_score: float = 0.0,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """语义搜索"""
         start_time = time.time()
 
@@ -481,15 +481,15 @@ class KnowledgeBaseSearcher:
     # 便捷方法
     # ------------------------------------------------------------------
 
-    def search_style(self, style_name: str, top_k: int = 5) -> List[SearchResult]:
+    def search_style(self, style_name: str, top_k: int = 5) -> list[SearchResult]:
         """搜索特定风格的知识"""
         return self.search(f"{style_name} 风格 特效 制作", top_k=top_k)
 
-    def search_technique(self, technique: str, top_k: int = 5) -> List[SearchResult]:
+    def search_technique(self, technique: str, top_k: int = 5) -> list[SearchResult]:
         """搜索特定技术"""
         return self.search(f"{technique} 教程 方法 步骤", top_k=top_k)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计信息"""
         return {
             **self.stats,
@@ -503,7 +503,7 @@ class KnowledgeBaseSearcher:
 # 全局单例
 # ---------------------------------------------------------------------------
 
-_global_searcher: Optional[KnowledgeBaseSearcher] = None
+_global_searcher: KnowledgeBaseSearcher | None = None
 
 
 def get_searcher() -> KnowledgeBaseSearcher:

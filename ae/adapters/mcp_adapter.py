@@ -60,7 +60,7 @@ class MCPClientAdapter(BaseAEAdapter):
         self._client = AEMCPClient()
         return self._client
 
-    def _wrap(self, payload: Any) -> Dict[str, Any]:
+    def _wrap(self, payload: Any) -> dict[str, Any]:
         """标注通道字段。"""
         if isinstance(payload, dict):
             d = dict(payload)
@@ -69,7 +69,7 @@ class MCPClientAdapter(BaseAEAdapter):
             return d
         return {"success": True, "data": payload, "channel": self.name}
 
-    def _wrap_list(self, payload: Any) -> List[Dict[str, Any]]:
+    def _wrap_list(self, payload: Any) -> list[dict[str, Any]]:
         if isinstance(payload, list):
             return [
                 {**item, "channel": self.name} if isinstance(item, dict) else {"data": item, "channel": self.name}
@@ -101,7 +101,7 @@ class MCPClientAdapter(BaseAEAdapter):
         fps: float = 30.0,
         duration: float = 10.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(
             client.create_composition(
@@ -114,7 +114,7 @@ class MCPClientAdapter(BaseAEAdapter):
             )
         )
 
-    def list_compositions(self) -> List[Dict[str, Any]]:
+    def list_compositions(self) -> list[dict[str, Any]]:
         try:
             client = self._ensure_client()
         except Exception:
@@ -142,13 +142,13 @@ class MCPClientAdapter(BaseAEAdapter):
         self,
         comp_name: str,
         text: str,
-        layer_name: Optional[str] = None,
-        font_family: Optional[str] = None,
-        font_size: Optional[float] = None,
-        fill_color: Optional[List[float]] = None,
-        position: Optional[List[float]] = None,
+        layer_name: str | None = None,
+        font_family: str | None = None,
+        font_size: float | None = None,
+        fill_color: list[float] | None = None,
+        position: list[float] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(
             client.create_text_layer(
@@ -165,12 +165,12 @@ class MCPClientAdapter(BaseAEAdapter):
     def create_solid_layer(
         self,
         comp_name: str,
-        color: List[float],
-        layer_name: Optional[str] = None,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
+        color: list[float],
+        layer_name: str | None = None,
+        width: int | None = None,
+        height: int | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(
             client.create_solid_layer(
@@ -186,12 +186,12 @@ class MCPClientAdapter(BaseAEAdapter):
         self,
         comp_name: str,
         shape_type: str,
-        layer_name: Optional[str] = None,
-        fill_color: Optional[List[float]] = None,
-        size: Optional[List[float]] = None,
-        position: Optional[List[float]] = None,
+        layer_name: str | None = None,
+        fill_color: list[float] | None = None,
+        size: list[float] | None = None,
+        position: list[float] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(
             client.create_shape_layer(
@@ -207,9 +207,9 @@ class MCPClientAdapter(BaseAEAdapter):
     def add_adjustment_layer(
         self,
         comp_name: str,
-        layer_name: Optional[str] = None,
+        layer_name: str | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(
             client.add_adjustment_layer(comp_name=comp_name, layer_name=layer_name)
@@ -224,7 +224,7 @@ class MCPClientAdapter(BaseAEAdapter):
         comp_name: str,
         layer_index: int,
         **properties: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """MCP 实现：按 layerIndex 找图层后批量设属性。"""
         client = self._ensure_client()
         # MCP 通常按 layer_name 操作；这里使用 layer_index 实际取值
@@ -241,7 +241,7 @@ class MCPClientAdapter(BaseAEAdapter):
         layer_index: int,
         blend_mode: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         layer_name = kwargs.get("layer_name") or str(layer_index)
         return self._wrap(
@@ -256,7 +256,7 @@ class MCPClientAdapter(BaseAEAdapter):
         layer_index: int,
         matte_type: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         layer_name = kwargs.get("layer_name") or str(layer_index)
         return self._wrap(
@@ -271,7 +271,7 @@ class MCPClientAdapter(BaseAEAdapter):
         layer_index: int,
         parent_index: int,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         layer_name = kwargs.get("layer_name") or str(layer_index)
         return self._wrap(
@@ -290,7 +290,7 @@ class MCPClientAdapter(BaseAEAdapter):
         time: float,
         value: Any,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         layer_name = kwargs.get("layer_name") or str(layer_index)
         return self._wrap(
@@ -311,7 +311,7 @@ class MCPClientAdapter(BaseAEAdapter):
         key_index: int,
         easing_type: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         layer_name = kwargs.get("layer_name") or str(layer_index)
         return self._wrap(
@@ -331,7 +331,7 @@ class MCPClientAdapter(BaseAEAdapter):
         property_name: str,
         expression: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         layer_name = kwargs.get("layer_name") or str(layer_index)
         return self._wrap(
@@ -352,9 +352,9 @@ class MCPClientAdapter(BaseAEAdapter):
         comp_name: str,
         layer_index: int,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         layer_name = kwargs.get("layer_name") or str(layer_index)
         return self._wrap(
@@ -372,7 +372,7 @@ class MCPClientAdapter(BaseAEAdapter):
         layer_index: int,
         template_name: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         layer_name = kwargs.get("layer_name") or str(layer_index)
         return self._wrap(
@@ -387,9 +387,9 @@ class MCPClientAdapter(BaseAEAdapter):
         self,
         comp_name: str,
         layer_index: int,
-        effects: List[Dict[str, Any]],
+        effects: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         layer_name = kwargs.get("layer_name") or str(layer_index)
         return self._wrap(
@@ -408,7 +408,7 @@ class MCPClientAdapter(BaseAEAdapter):
         layer_index: int,
         shape: str = "rect",
         **mask_params: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         layer_name = mask_params.pop("layer_name", None) or str(layer_index)
         # 兼容调用方传入的 mask 参数，映射到 create_mask 的命名参数
@@ -432,7 +432,7 @@ class MCPClientAdapter(BaseAEAdapter):
         output_path: str,
         format: str = "h264",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         # AEMCPClient 无 render 方法：通过"加入渲染队列 + 开始渲染"组合实现
         queued = client.add_to_render_queue(
@@ -452,7 +452,7 @@ class MCPClientAdapter(BaseAEAdapter):
         script: str,
         dry_run: bool = False,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         if dry_run:
             return {

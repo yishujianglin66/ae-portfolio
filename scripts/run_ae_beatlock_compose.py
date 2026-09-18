@@ -11,8 +11,8 @@ import sys
 import time
 
 sys.path.insert(0, ".")
-from core.composition_tree import build_fate_composite_template
 from core.beatlock import BeatGrid, compose
+from core.composition_tree import build_fate_composite_template
 
 BRIDGE = ".ae-mcp-bridge"
 CMD = f"{BRIDGE}/ae_command.json"

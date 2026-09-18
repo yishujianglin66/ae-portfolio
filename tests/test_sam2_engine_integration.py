@@ -16,7 +16,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -34,6 +34,7 @@ class TestSAM2EngineModuleDetection(unittest.TestCase):
         with patch.dict('sys.modules', {'sam2': mock_sam2}):
             # 重新导入引擎以触发检测
             import importlib
+
             from engines.sam2.engine import SAM2Engine
             importlib.reload(sys.modules['engines.sam2.engine'])
             
@@ -238,7 +239,7 @@ class TestSAM2EngineModelDirManagement(unittest.TestCase):
 
     def test_default_model_dir(self):
         """默认模型目录为 D:\\AE-Work\\models\\sam2"""
-        from engines.sam2.engine import SAM2Engine, _DEFAULT_MODEL_DIR
+        from engines.sam2.engine import _DEFAULT_MODEL_DIR, SAM2Engine
         
         self.assertEqual(_DEFAULT_MODEL_DIR, Path(r"D:\AE-Work\models\sam2"))
 

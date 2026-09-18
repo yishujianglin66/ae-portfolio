@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """创建总合成 + AE内部渲染单个完整视频"""
-import sys, json, time
+import json
+import sys
+import time
+
 sys.stdout.reconfigure(encoding='utf-8')
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BRIDGE_CMD = ROOT / ".ae-mcp-bridge" / "ae_command.json"

@@ -4,19 +4,19 @@
 使用 C:\\VinlandClips 真实动漫素材 + data\\real_amv_test 真实AMV音频，
 逐项渲染验证并输出可播放 MP4 到 output\\phase3_showcase\\
 """
-import sys
-import os
-import time
 import json
+import os
 import subprocess
+import sys
+import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
 from integrations.resolve_engine import (
-    ResolveAutomationEngine,
-    TransitionConfig,
     ColorWheelConfig,
     Keyframe,
+    ResolveAutomationEngine,
+    TransitionConfig,
 )
 
 WORKSPACE = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault"

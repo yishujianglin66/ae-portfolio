@@ -24,20 +24,20 @@ from __future__ import annotations
 
 import json
 import math
-import os
-import sys
-import time
-import subprocess
-import uuid
-import threading
-import queue
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union, Callable
-from dataclasses import dataclass, field
-from enum import Enum
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
-from datetime import datetime
 import multiprocessing
+import os
+import queue
+import subprocess
+import sys
+import threading
+import time
+import uuid
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -81,12 +81,12 @@ class RenderTask:
     progress: float = 0.0            # 0.0 ~ 1.0
     error_message: str = ""
     created_at: str = ""
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
-    worker_id: Optional[str] = None
+    started_at: str | None = None
+    completed_at: str | None = None
+    worker_id: str | None = None
     retry_count: int = 0
     max_retries: int = 3
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.created_at:
@@ -101,7 +101,7 @@ class RenderWorker:
     status: str = "idle"        # idle, busy, offline
     gpu_available: bool = False
     cpu_cores: int = 4
-    current_task: Optional[str] = None
+    current_task: str | None = None
     tasks_completed: int = 0
     total_render_time: float = 0.0
     last_heartbeat: str = ""
@@ -111,7 +111,7 @@ class RenderWorker:
 class RenderBatch:
     """渲染批次"""
     batch_id: str
-    tasks: List[RenderTask]
+    tasks: list[RenderTask]
     total_progress: float = 0.0
     completed_tasks: int = 0
     failed_tasks: int = 0
@@ -139,22 +139,22 @@ class DistributedRenderer:
 
         # 任务队列
         self._task_queue: queue.PriorityQueue = queue.PriorityQueue()
-        self._active_tasks: Dict[str, RenderTask] = {}
-        self._completed_tasks: Dict[str, RenderTask] = {}
-        self._workers: Dict[str, RenderWorker] = {}
+        self._active_tasks: dict[str, RenderTask] = {}
+        self._completed_tasks: dict[str, RenderTask] = {}
+        self._workers: dict[str, RenderWorker] = {}
 
         # 回调
-        self._on_task_complete: Optional[Callable] = None
-        self._on_task_error: Optional[Callable] = None
-        self._on_task_progress: Optional[Callable[[str, float], None]] = None
+        self._on_task_complete: Callable | None = None
+        self._on_task_error: Callable | None = None
+        self._on_task_progress: Callable[[str, float], None] | None = None
 
         # 执行器
-        self._executor: Optional[ThreadPoolExecutor] = None
+        self._executor: ThreadPoolExecutor | None = None
         self._running = False
         self._lock = threading.Lock()
 
     @staticmethod
-    def _find_aerender() -> Optional[str]:
+    def _find_aerender() -> str | None:
         """查找 aerender 可执行文件"""
         candidates = [
             r"C:\Program Files\Adobe\Adobe After Effects 2024\Support Files\aerender.exe",
@@ -176,7 +176,7 @@ class DistributedRenderer:
         start_frame: int = 0,
         end_frame: int = 0,
         priority: TaskPriority = TaskPriority.NORMAL,
-        metadata: Dict = None,
+        metadata: dict = None,
     ) -> str:
         """提交渲染任务"""
         task_id = str(uuid.uuid4())[:8]
@@ -209,7 +209,7 @@ class DistributedRenderer:
 
     def submit_batch(
         self,
-        tasks: List[Dict[str, Any]],
+        tasks: list[dict[str, Any]],
         priority: TaskPriority = TaskPriority.NORMAL,
     ) -> RenderBatch:
         """批量提交任务"""
@@ -238,7 +238,7 @@ class DistributedRenderer:
         total_frames: int,
         segments: int = None,
         priority: TaskPriority = TaskPriority.NORMAL,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         视频分段渲染 — 将长视频拆分为多段并行渲染。
 
@@ -428,7 +428,7 @@ class DistributedRenderer:
     # ================================================================
     #  状态查询
     # ================================================================
-    def get_task_status(self, task_id: str) -> Optional[Dict]:
+    def get_task_status(self, task_id: str) -> dict | None:
         """获取任务状态"""
         task = self._active_tasks.get(task_id) or self._completed_tasks.get(task_id)
         if not task:
@@ -447,7 +447,7 @@ class DistributedRenderer:
             "retries": task.retry_count,
         }
 
-    def get_queue_status(self) -> Dict[str, Any]:
+    def get_queue_status(self) -> dict[str, Any]:
         """获取队列状态"""
         return {
             "mode": self.mode.value,
@@ -466,7 +466,7 @@ class DistributedRenderer:
             return True
         return False
 
-    def get_batch_progress(self, batch_id: str) -> Dict[str, Any]:
+    def get_batch_progress(self, batch_id: str) -> dict[str, Any]:
         """获取批次进度"""
         batch_tasks = [
             t for t in list(self._active_tasks.values()) + list(self._completed_tasks.values())
@@ -533,7 +533,7 @@ class RenderFarmAdapter:
     外部农场集成属 Phase 1+ 工作，不在 P0 可运行性治理范围内脚手架实现。
     """
 
-    def __init__(self, farm_type: str = "opencue", endpoint: Optional[str] = None):
+    def __init__(self, farm_type: str = "opencue", endpoint: str | None = None):
         self.farm_type = farm_type
         self.endpoint = endpoint
 
@@ -542,7 +542,7 @@ class RenderFarmAdapter:
         project_path: str,
         output_path: str,
         frames: str = "",
-    ) -> Dict:
+    ) -> dict:
         return {
             "farm": self.farm_type,
             "status": "unsupported",
@@ -562,7 +562,7 @@ class RenderFarmAdapter:
         project_path: str,
         output_path: str,
         frames: str = "1-300",
-    ) -> Dict:
+    ) -> dict:
         """提交到 OpenCue 渲染农场。
 
         未配置真实 OpenCue 端点时返回 unsupported + success=False；
@@ -579,7 +579,7 @@ class RenderFarmAdapter:
         project_path: str,
         output_path: str,
         frames: str = "1-300",
-    ) -> Dict:
+    ) -> dict:
         """提交到 Afanasy 渲染管理器。
 
         未配置真实 Afanasy 端点时返回 unsupported + success=False；

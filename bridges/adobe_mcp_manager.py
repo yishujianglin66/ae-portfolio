@@ -23,20 +23,20 @@ adobe_mcp_manager.py — Adobe MCP 统一管理器
 
 from __future__ import annotations
 
-import os
 import json
-import time
+import os
 import subprocess
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from adobe_universal_bridge import (
+    ADOBE_APPS,
     AdobeUniversalBridge,
+    AfterEffectsBridge,
+    MediaEncoderBridge,
     PhotoshopBridge,
     PremiereBridge,
-    MediaEncoderBridge,
-    AfterEffectsBridge,
-    ADOBE_APPS,
     create_bridge,
     detect_installed_adobe_apps,
     log,
@@ -46,11 +46,11 @@ from adobe_universal_bridge import (
 class AdobeMCPManager:
     """Adobe MCP 统一管理器"""
     
-    def __init__(self, project_root: Optional[str] = None):
+    def __init__(self, project_root: str | None = None):
         self.project_root = Path(project_root) if project_root else Path(__file__).parent
-        self.bridges: Dict[str, AdobeUniversalBridge] = {}
-        self.installed_apps: Dict[str, Dict] = {}
-        self.jsx_files: Dict[str, str] = {
+        self.bridges: dict[str, AdobeUniversalBridge] = {}
+        self.installed_apps: dict[str, dict] = {}
+        self.jsx_files: dict[str, str] = {
             "photoshop": str(self.project_root / "photoshop_mcp_listener.jsx"),
             "premiere": str(self.project_root / "premiere_mcp_listener.jsx"),
             "media_encoder": str(self.project_root / "media_encoder_mcp_listener.jsx"),
@@ -60,7 +60,7 @@ class AdobeMCPManager:
     # ------------------------------------------------------------------
     # 检测
     # ------------------------------------------------------------------
-    def detect_all(self) -> Dict[str, Dict]:
+    def detect_all(self) -> dict[str, dict]:
         """检测系统上所有已安装的 Adobe 软件"""
         self.installed_apps = detect_installed_adobe_apps()
         log(f"检测到 {len(self.installed_apps)} 个 Adobe 软件")
@@ -69,7 +69,7 @@ class AdobeMCPManager:
             log(f"  [{info['short']}] {info['name']} - {status}")
         return self.installed_apps
     
-    def get_installed_apps(self) -> List[str]:
+    def get_installed_apps(self) -> list[str]:
         """获取已安装的 Adobe 软件列表"""
         if not self.installed_apps:
             self.detect_all()
@@ -110,7 +110,7 @@ class AdobeMCPManager:
         bridge = self.get_bridge(app_key)
         return bridge.install_startup_jsx(jsx_path)
     
-    def install_all(self) -> Dict[str, bool]:
+    def install_all(self) -> dict[str, bool]:
         """安装所有已安装软件的 Bridge"""
         results = {}
         for app_key in self.installed_apps:
@@ -139,8 +139,8 @@ class AdobeMCPManager:
     # ------------------------------------------------------------------
     # 命令执行
     # ------------------------------------------------------------------
-    def send_command(self, app_key: str, command: str, args: Optional[Dict] = None, 
-                     timeout: Optional[int] = None) -> Dict:
+    def send_command(self, app_key: str, command: str, args: dict | None = None, 
+                     timeout: int | None = None) -> dict:
         """向指定软件发送命令
         
         Args:
@@ -155,12 +155,12 @@ class AdobeMCPManager:
         bridge = self.get_bridge(app_key)
         return bridge.execute(command, args, timeout=timeout)
     
-    def execute_script(self, app_key: str, script: str, timeout: Optional[int] = None) -> Dict:
+    def execute_script(self, app_key: str, script: str, timeout: int | None = None) -> dict:
         """在指定软件中执行 ExtendScript"""
         bridge = self.get_bridge(app_key)
         return bridge.execute_script(script, timeout=timeout)
     
-    def ping_all(self) -> Dict[str, bool]:
+    def ping_all(self) -> dict[str, bool]:
         """测试所有 Bridge 连接"""
         results = {}
         for app_key in self.installed_apps:
@@ -174,7 +174,7 @@ class AdobeMCPManager:
     # ------------------------------------------------------------------
     # 高级功能
     # ------------------------------------------------------------------
-    def get_all_app_info(self) -> Dict[str, Dict]:
+    def get_all_app_info(self) -> dict[str, dict]:
         """获取所有运行中软件的详细信息"""
         info = {}
         for app_key in self.installed_apps:
@@ -187,8 +187,8 @@ class AdobeMCPManager:
                     info[app_key] = {"error": str(e)}
         return info
     
-    def batch_execute(self, command: str, args: Optional[Dict] = None, 
-                      target_apps: Optional[List[str]] = None) -> Dict[str, Dict]:
+    def batch_execute(self, command: str, args: dict | None = None, 
+                      target_apps: list[str] | None = None) -> dict[str, dict]:
         """在多个软件中批量执行同一命令
         
         Args:
@@ -211,7 +211,7 @@ class AdobeMCPManager:
     # ------------------------------------------------------------------
     # MCP 配置生成
     # ------------------------------------------------------------------
-    def generate_mcp_config(self, output_path: Optional[str] = None) -> str:
+    def generate_mcp_config(self, output_path: str | None = None) -> str:
         """生成 MCP Server 配置 (用于 Qoder/其他 MCP 客户端)
         
         Returns:
@@ -275,18 +275,18 @@ class AdobeMCPManager:
                 # 检查 listener log
                 log_file = bridge_dir / f"{app_key}_bridge.log"
                 if log_file.exists():
-                    lines.append(f"       日志: 有")
+                    lines.append("       日志: 有")
             else:
-                lines.append(f"       Bridge: 未初始化")
+                lines.append("       Bridge: 未初始化")
             
             # Startup 检查
             startup = info.get("startup_dir", "")
             if startup and Path(startup).exists():
                 loader = Path(startup) / f"mcp_{app_key}_listener.jsx"
                 if loader.exists():
-                    lines.append(f"       Startup: 已安装")
+                    lines.append("       Startup: 已安装")
                 else:
-                    lines.append(f"       Startup: 未安装")
+                    lines.append("       Startup: 未安装")
             
             lines.append("")
         
@@ -309,7 +309,7 @@ class AdobeMCPServer:
         self.manager = AdobeMCPManager()
         self.bridge = self.manager.get_bridge(app_key)
     
-    def handle_request(self, method: str, params: Dict) -> Dict:
+    def handle_request(self, method: str, params: dict) -> dict:
         """处理 MCP 请求"""
         if method == "tools/list":
             return self._list_tools()
@@ -322,7 +322,7 @@ class AdobeMCPServer:
         else:
             return {"error": f"Unknown method: {method}"}
     
-    def _list_tools(self) -> Dict:
+    def _list_tools(self) -> dict:
         """列出可用工具"""
         app_info = self.manager.installed_apps.get(self.app_key, {})
         short = app_info.get("short", self.app_key.upper())
@@ -396,7 +396,7 @@ class AdobeMCPServer:
         
         return {"tools": tools}
     
-    def _call_tool(self, tool_name: str, arguments: Dict) -> Dict:
+    def _call_tool(self, tool_name: str, arguments: dict) -> dict:
         """调用工具"""
         if tool_name == "execute_script":
             result = self.bridge.execute_script(

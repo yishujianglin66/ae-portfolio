@@ -4,9 +4,9 @@
 基于BPM的音乐节拍编排与关键帧生成系统
 """
 
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
 import math
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -102,7 +102,7 @@ class BeatOrchestrator:
         self.beat_interval = 60.0 / bpm
         self.measure_interval = self.beat_interval * beats_per_measure
 
-    def generate_beat_timeline(self, duration: float, offset: float = 0.0) -> List[float]:
+    def generate_beat_timeline(self, duration: float, offset: float = 0.0) -> list[float]:
         """生成所有节拍时间点"""
         beats = []
         t = offset
@@ -111,7 +111,7 @@ class BeatOrchestrator:
             t += self.beat_interval
         return beats
 
-    def generate_downbeats(self, duration: float, offset: float = 0.0) -> List[float]:
+    def generate_downbeats(self, duration: float, offset: float = 0.0) -> list[float]:
         """生成重拍时间点（每小节第一拍）"""
         downbeats = []
         t = offset
@@ -123,7 +123,7 @@ class BeatOrchestrator:
             beat_index += 1
         return downbeats
 
-    def generate_offbeats(self, duration: float, offset: float = 0.0) -> List[float]:
+    def generate_offbeats(self, duration: float, offset: float = 0.0) -> list[float]:
         """生成弱拍（偶数拍）"""
         offbeats = []
         t = offset
@@ -138,9 +138,9 @@ class BeatOrchestrator:
     def generate_beat_synced_keyframes(
         self,
         layer_name: str,
-        beat_times: List[float],
+        beat_times: list[float],
         config: BeatSyncConfig,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成节拍同步关键帧"""
         keyframes = []
         prop_map = {
@@ -184,10 +184,10 @@ class BeatOrchestrator:
     def generate_beat_effect_triggers(
         self,
         layer_name: str,
-        beat_times: List[float],
+        beat_times: list[float],
         effect_type: str,
         intensity: float = 1.0,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成节拍触发效果"""
         triggers = []
 
@@ -246,7 +246,7 @@ class BeatOrchestrator:
         self,
         duration: float,
         template: str = "pop_song",
-    ) -> List[MusicalSection]:
+    ) -> list[MusicalSection]:
         """生成音乐结构段落"""
         template_data = MUSICAL_STRUCTURE_TEMPLATES.get(template)
         if template_data is None:
@@ -286,7 +286,7 @@ class BeatOrchestrator:
         duration: float,
         style: str = "energetic",
         structure_template: str = "pop_song",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成完整节拍秀（含效果和关键帧）"""
         style_config = BEAT_EFFECT_STYLES.get(style)
         if style_config is None:

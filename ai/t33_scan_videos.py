@@ -1,7 +1,10 @@
 """Scan video resources on D drive to identify anime content for multi-IP corpus."""
-import os, sys, json, subprocess
-from pathlib import Path
+import json
+import os
+import subprocess
+import sys
 from collections import defaultdict
+from pathlib import Path
 
 video_dir = Path(r"D:\AE-Work\resources\video")
 results = []

@@ -42,7 +42,7 @@ class RifeEngine(BaseEngine):
     def __init__(
         self,
         executable_path: Path | str = sys.executable,
-        rife_root: Optional[Path] = None,
+        rife_root: Path | None = None,
     ):
         self.rife_root = rife_root or _RIFE_ROOT
         self.inference_script = self.rife_root / "inference_video.py"
@@ -76,7 +76,7 @@ class RifeEngine(BaseEngine):
         input_path: Path | str,
         output_path: Path | str,
         multiplier: int = 2,
-        fps: Optional[int] = None,
+        fps: int | None = None,
         fp16: bool = False,
         scale: float = 1.0,
         UHD: bool = False,
@@ -213,7 +213,7 @@ class RifeEngine(BaseEngine):
             return 0.0
 
     @staticmethod
-    def _get_video_fps(video_path: Path) -> Optional[float]:
+    def _get_video_fps(video_path: Path) -> float | None:
         """获取视频帧率。"""
         try:
             import cv2

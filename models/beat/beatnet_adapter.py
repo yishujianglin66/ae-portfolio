@@ -40,21 +40,21 @@ _MODEL_CHOICES = {
 @dataclass
 class BeatGridResult:
     """节拍网格结果。"""
-    beats: List[float] = field(default_factory=list)       # 每拍时间 (s)
-    downbeats: List[float] = field(default_factory=list)   # 小节第一拍 (s)
-    beat_numbers: List[int] = field(default_factory=list)  # 每拍在小节内编号 (1=下拍)
+    beats: list[float] = field(default_factory=list)       # 每拍时间 (s)
+    downbeats: list[float] = field(default_factory=list)   # 小节第一拍 (s)
+    beat_numbers: list[int] = field(default_factory=list)  # 每拍在小节内编号 (1=下拍)
     tempo: float = 0.0                                     # BPM 估计
     meter: int = 4                                         # 拍号分子 (4/4 → 4)
     latency_sec: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "tempo": self.tempo, "meter": self.meter,
             "n_beats": len(self.beats), "n_downbeats": len(self.downbeats),
             "latency_sec": self.latency_sec,
         }
 
-    def to_beatgrid(self) -> List[Dict[str, Any]]:
+    def to_beatgrid(self) -> list[dict[str, Any]]:
         """转换为项目节奏管线的 beatgrid 消费格式。
 
         每拍一条: {time, beat_number, is_downbeat}
@@ -74,11 +74,11 @@ class BeatNetAdapter:
     """BeatNetLite 适配器 (懒加载, 优雅降级)。"""
 
     def __init__(self, model: str = "generic",
-                 beatnet_dir: Optional[str] = None) -> None:
+                 beatnet_dir: str | None = None) -> None:
         self.model = model
         self.beatnet_dir = Path(beatnet_dir) if beatnet_dir else _BEATNET_DIR
         self._bn = None
-        self._load_error: Optional[str] = None
+        self._load_error: str | None = None
 
     def available(self) -> bool:
         """模型权重与依赖齐备即视为可用。"""
@@ -105,7 +105,7 @@ class BeatNetAdapter:
             logger.warning("[BeatNet] load failed: %s", exc)
             return False
 
-    def analyze(self, audio_path: str) -> Optional[BeatGridResult]:
+    def analyze(self, audio_path: str) -> BeatGridResult | None:
         """对音频做节拍网格分析。
 
         Returns:
@@ -159,7 +159,7 @@ class BeatNetAdapter:
             return None
 
 
-_SINGLETON: Optional[BeatNetAdapter] = None
+_SINGLETON: BeatNetAdapter | None = None
 
 
 def get_beatnet(**kwargs) -> BeatNetAdapter:

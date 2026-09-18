@@ -15,7 +15,6 @@ Phase 3 - 3D 场景与摄像机系统编排器
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-
 __all__ = [
     "CameraMove",
     "LightConfig",
@@ -32,10 +31,10 @@ class CameraMove:
     """摄像机运动"""
     type: str = "push"  # push / pull / pan_left / pan_right / tilt_up / tilt_down / orbit / handheld
     duration: float = 2.0
-    start_position: List[float] = field(default_factory=lambda: [960, 540, -1000])
-    end_position: List[float] = field(default_factory=lambda: [960, 540, -500])
-    start_point_of_interest: Optional[List[float]] = None
-    end_point_of_interest: Optional[List[float]] = None
+    start_position: list[float] = field(default_factory=lambda: [960, 540, -1000])
+    end_position: list[float] = field(default_factory=lambda: [960, 540, -500])
+    start_point_of_interest: list[float] | None = None
+    end_point_of_interest: list[float] | None = None
 
 
 @dataclass
@@ -43,9 +42,9 @@ class LightConfig:
     """灯光配置"""
     name: str
     light_type: str = "point"  # point / parallel / ambient / spot
-    position: List[float] = field(default_factory=lambda: [960, 540, -500])
+    position: list[float] = field(default_factory=lambda: [960, 540, -500])
     intensity: float = 100.0
-    color: List[int] = field(default_factory=lambda: [255, 255, 255])
+    color: list[int] = field(default_factory=lambda: [255, 255, 255])
     casts_shadows: bool = False
 
 
@@ -55,7 +54,7 @@ class Layer3DConfig:
     layer_name: str
     three_d_enabled: bool = False
     z_position: float = 0.0
-    orientation: List[float] = field(default_factory=lambda: [0, 0, 0])
+    orientation: list[float] = field(default_factory=lambda: [0, 0, 0])
     accepts_shadows: bool = False
     casts_shadows: bool = False
 
@@ -67,7 +66,7 @@ class Layer3DConfig:
 class Scene3DOrchestrator:
     """3D 场景编排器"""
 
-    STYLE_3D_MAP: Dict[str, Dict[str, Any]] = {
+    STYLE_3D_MAP: dict[str, dict[str, Any]] = {
         "cinematic": {
             "enable_3d": True,
             "camera_type": "cinematic",
@@ -127,15 +126,15 @@ class Scene3DOrchestrator:
         self.enable_3d = config.get("enable_3d", False)
         self.depth = config.get("depth", 300.0)
         self._camera_config = config
-        self.cameras: List[Dict[str, Any]] = []
-        self.lights: List[LightConfig] = []
-        self.layers_3d: List[Layer3DConfig] = []
+        self.cameras: list[dict[str, Any]] = []
+        self.lights: list[LightConfig] = []
+        self.layers_3d: list[Layer3DConfig] = []
 
     # ------------------------------------------------------------------
     # 公共 API
     # ------------------------------------------------------------------
 
-    def generate_scene(self, layers: List[Dict], duration: float) -> Dict[str, Any]:
+    def generate_scene(self, layers: list[dict], duration: float) -> dict[str, Any]:
         """生成完整 3D 场景配置
 
         Args:
@@ -209,7 +208,7 @@ class Scene3DOrchestrator:
     # 内部方法
     # ------------------------------------------------------------------
 
-    def _setup_layers_3d(self, layers: List[Dict]) -> None:
+    def _setup_layers_3d(self, layers: list[dict]) -> None:
         """为 footage 图层开启 3D，按顺序分配 Z 轴深度"""
         footage_layers = [l for l in layers if l["type"] == "footage"]
         count = max(len(footage_layers), 1)
@@ -312,7 +311,7 @@ class Scene3DOrchestrator:
             if name in light_templates:
                 self.lights.append(light_templates[name])
 
-    def _generate_keyframe_ops(self, duration: float) -> List[Dict]:
+    def _generate_keyframe_ops(self, duration: float) -> list[dict]:
         """生成 3D 关键帧操作列表"""
         ops = []
 
@@ -341,11 +340,11 @@ class Scene3DOrchestrator:
 
 def generate_3d_scene(
     style: str,
-    layers: List[Dict],
+    layers: list[dict],
     duration: float,
     comp_width: int = 1920,
     comp_height: int = 1080,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """快捷函数：生成 3D 场景"""
     orch = Scene3DOrchestrator(style, comp_width, comp_height)
     return orch.generate_scene(layers, duration)

@@ -65,7 +65,7 @@ if all_new_files:
         fpath = f"ae/adapters/{f}"
         missing_paths_1.append(fpath)
         print(f"   - {fpath}")
-    print(f"\n同步命令:")
+    print("\n同步命令:")
     for p in missing_paths_1:
         print(f"  git checkout {BRANCH_B} -- {p}")
 else:
@@ -100,14 +100,14 @@ if missing_puppet:
     print(f"\n⚠️  {len(missing_puppet)} 个 puppet 相关文件缺失于 master:")
     for p in missing_puppet:
         print(f"   - {p}")
-    print(f"\n同步命令:")
+    print("\n同步命令:")
     for p in missing_puppet:
         print(f"  git checkout {BRANCH_B} -- {p}")
 else:
     print("\n✅  feat 分支中没有新的 puppet 相关文件缺失于 master")
 
 if existing_puppet:
-    print(f"\n两分支共有的 puppet 文件内容对比:")
+    print("\n两分支共有的 puppet 文件内容对比:")
     for p in existing_puppet:
         status = compare_file(BRANCH_A, BRANCH_B, p)
         if status == "same":
@@ -142,14 +142,14 @@ if extra_emotion:
     print(f"\n⚠️  {len(extra_emotion)} 个 emotion_curve* 补充模块缺失于 master (排除 emotion_curve_generator.py):")
     for p in extra_emotion:
         print(f"   - {p}")
-    print(f"\n同步命令:")
+    print("\n同步命令:")
     for p in extra_emotion:
         print(f"  git checkout {BRANCH_B} -- {p}")
 else:
     print("\n✅  feat 分支中没有发现 emotion_curve_generator.py 之外的补充模块缺失于 master")
 
 if existing_emotion:
-    print(f"\n两分支共有的 emotion_curve 文件内容对比:")
+    print("\n两分支共有的 emotion_curve 文件内容对比:")
     for p in existing_emotion:
         status = compare_file(BRANCH_A, BRANCH_B, p)
         if status == "same":
@@ -176,14 +176,14 @@ if missing_combos:
     print(f"\n⚠️  {len(missing_combos)} 个预设组合配置文件缺失于 master:")
     for p in missing_combos:
         print(f"   - {p}")
-    print(f"\n同步命令:")
+    print("\n同步命令:")
     for p in missing_combos:
         print(f"  git checkout {BRANCH_B} -- {p}")
 else:
     print("\n✅  feat 分支中没有新的 combinations* 预设文件缺失于 master")
 
 if existing_combos:
-    print(f"\n两分支共有的 combinations 文件内容对比:")
+    print("\n两分支共有的 combinations 文件内容对比:")
     for p in existing_combos:
         status = compare_file(BRANCH_A, BRANCH_B, p)
         if status == "same":
@@ -204,7 +204,7 @@ if all_missing:
     print(f"\n共 {len(all_missing)} 个文件需要从 {BRANCH_B} 同步到 {BRANCH_A}:")
     for p in all_missing:
         print(f"  - {p}")
-    print(f"\n批量同步命令:")
+    print("\n批量同步命令:")
     print(f"  git checkout {BRANCH_B} -- " + " ".join(all_missing))
 else:
     print("\n✅  4类模块在 master 和 feat 分支中均已同步，无缺失文件")

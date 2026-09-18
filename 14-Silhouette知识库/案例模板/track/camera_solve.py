@@ -1,9 +1,10 @@
 # Camera Solve Template
 # 摄像机解算模板 - 适用于3D摄像机解算、3D跟踪
 
-from fx import *
 import json
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=24.0):

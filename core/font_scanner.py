@@ -44,7 +44,7 @@ _STYLE_KEYWORDS = {
 
 # 20种场景标签 → 匹配偏好 (weight_min + 风格标签优先级 + 名称关键词)
 # 标签集与 SmartMatcher 20合法场景标签一致
-SCENE_FONT_RULES: Dict[str, Dict[str, Any]] = {
+SCENE_FONT_RULES: dict[str, dict[str, Any]] = {
     "battle":     {"weight_min": 700, "prefer": ["display", "gothic"],
                    "names": ["impact", "simhei", "yahei", "hupo"]},
     "cyberpunk":  {"weight_min": 400, "prefer": ["monospace", "display"],
@@ -88,7 +88,7 @@ SCENE_FONT_RULES: Dict[str, Dict[str, Any]] = {
 }
 
 
-def _parse_font_file(fname: str) -> Optional[Dict[str, Any]]:
+def _parse_font_file(fname: str) -> dict[str, Any] | None:
     """文件名启发式解析: 字体名/粗度/风格标签"""
     stem = os.path.splitext(fname)[0]
     low = stem.lower().replace(" ", "")
@@ -99,7 +99,7 @@ def _parse_font_file(fname: str) -> Optional[Dict[str, Any]]:
         if kw in low:
             weight = w
             break
-    styles: List[str] = []
+    styles: list[str] = []
     for kw, tag in _STYLE_KEYWORDS.items():
         k = kw[0] if isinstance(kw, tuple) else kw
         if k in low and tag not in styles:
@@ -114,16 +114,16 @@ def _parse_font_file(fname: str) -> Optional[Dict[str, Any]]:
 class SystemFontScanner:
     """系统字体扫描 + 场景智能搭配 + 三级层次分配"""
 
-    def __init__(self, font_dirs: Optional[List[str]] = None):
+    def __init__(self, font_dirs: list[str] | None = None):
         self.font_dirs = font_dirs or FONT_DIRS
-        self._cache: List[Dict[str, Any]] = []
+        self._cache: list[dict[str, Any]] = []
 
     # ── 扫描 ──────────────────────────────────────────────
-    def scan(self) -> List[Dict[str, Any]]:
+    def scan(self) -> list[dict[str, Any]]:
         """扫描字体目录, 返回 [{name, file, weight, styles, cjk}]"""
         if self._cache:
             return self._cache
-        found: Dict[str, Dict[str, Any]] = {}
+        found: dict[str, dict[str, Any]] = {}
         for d in self.font_dirs:
             if not os.path.isdir(d):
                 continue
@@ -137,7 +137,7 @@ class SystemFontScanner:
                              key=lambda x: (x["name"].lower()))
         return self._cache
 
-    def stats(self) -> Dict[str, int]:
+    def stats(self) -> dict[str, int]:
         fonts = self.scan()
         return {
             "total": len(fonts),
@@ -148,8 +148,8 @@ class SystemFontScanner:
         }
 
     # ── 场景匹配 ─────────────────────────────────────────
-    def _score(self, font: Dict[str, Any],
-               rule: Dict[str, Any]) -> float:
+    def _score(self, font: dict[str, Any],
+               rule: dict[str, Any]) -> float:
         s = 0.0
         low = font["name"].lower()
         for kw in rule.get("names", []):
@@ -164,7 +164,7 @@ class SystemFontScanner:
             s -= 4.0
         return s
 
-    def match_scene(self, scene_tag: str, top_k: int = 5) -> List[str]:
+    def match_scene(self, scene_tag: str, top_k: int = 5) -> list[str]:
         """按场景标签返回最优字体名列表(得分降序)"""
         rule = SCENE_FONT_RULES.get(scene_tag)
         if rule is None:
@@ -175,7 +175,7 @@ class SystemFontScanner:
         return [name for _, name in scored[:top_k]]
 
     # ── 三级层次分配 ────────────────────────────────────
-    def hierarchy(self, scene_tag: str) -> Dict[str, str]:
+    def hierarchy(self, scene_tag: str) -> dict[str, str]:
         """主标题+副标题+正文三级字体层次
 
         主标题: 场景最优(最重/最个性) / 副标题: 次优 / 正文: 高可读(CJK优先)
@@ -196,6 +196,6 @@ class SystemFontScanner:
             body = pool[-1]
         return {"title": title, "subtitle": subtitle, "body": body}
 
-    def all_scene_matches(self) -> Dict[str, List[str]]:
+    def all_scene_matches(self) -> dict[str, list[str]]:
         """20场景全覆盖匹配报告"""
         return {tag: self.match_scene(tag) for tag in SCENE_FONT_RULES}

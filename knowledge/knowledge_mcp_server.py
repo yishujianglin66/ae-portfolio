@@ -32,7 +32,7 @@ _AE_BRIDGE_DIR = str(_PROJECT_ROOT / ".ae-mcp-bridge")
 _PR_BRIDGE_DIR = str(_PROJECT_ROOT / ".premiere-mcp-bridge")
 
 # 大师知识库缓存 (启动时加载一次)
-_master_kb_index: Optional[List[Dict[str, Any]]] = None
+_master_kb_index: list[dict[str, Any]] | None = None
 
 
 def _get_kb_loader():
@@ -41,7 +41,7 @@ def _get_kb_loader():
     return KnowledgeBaseLoader.get_instance()
 
 
-def _ensure_master_index() -> List[Dict[str, Any]]:
+def _ensure_master_index() -> list[dict[str, Any]]:
     """构建大师知识库索引 (标题 + 标签 + 内容摘要)。"""
     global _master_kb_index
     if _master_kb_index is not None:
@@ -272,14 +272,14 @@ def get_bridge_status() -> str:
                 t_data = json.loads(trigger.read_text(encoding="utf-8"))
                 lines.append(f"- 最新触发: {json.dumps(t_data, ensure_ascii=False)[:200]}")
             except Exception:
-                lines.append(f"- trigger 文件存在但解析失败")
+                lines.append("- trigger 文件存在但解析失败")
 
         if command.exists():
             try:
                 c_data = json.loads(command.read_text(encoding="utf-8"))
                 lines.append(f"- 最新命令: {json.dumps(c_data, ensure_ascii=False)[:200]}")
             except Exception:
-                lines.append(f"- command 文件存在但解析失败")
+                lines.append("- command 文件存在但解析失败")
 
         if result.exists():
             try:
@@ -287,14 +287,14 @@ def get_bridge_status() -> str:
                 r_str = json.dumps(r_data, ensure_ascii=False)[:200]
                 lines.append(f"- 最新结果: {r_str}")
             except Exception:
-                lines.append(f"- result 文件存在但解析失败")
+                lines.append("- result 文件存在但解析失败")
 
         if log.exists():
             try:
                 log_text = log.read_text(encoding="utf-8", errors="replace")
                 log_lines = log_text.strip().splitlines()
                 if log_lines:
-                    lines.append(f"- 监听日志最后 3 行:")
+                    lines.append("- 监听日志最后 3 行:")
                     for ll in log_lines[-3:]:
                         lines.append(f"  `{ll[:120]}`")
             except Exception:
@@ -333,7 +333,7 @@ def get_bridge_status() -> str:
                 log_text = startup_log.read_text(encoding="utf-8", errors="replace")
                 log_lines = log_text.strip().splitlines()
                 if log_lines:
-                    lines.append(f"- 启动日志最后 3 行:")
+                    lines.append("- 启动日志最后 3 行:")
                     for ll in log_lines[-3:]:
                         lines.append(f"  `{ll[:120]}`")
             except Exception:

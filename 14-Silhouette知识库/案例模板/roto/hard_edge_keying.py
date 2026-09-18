@@ -8,8 +8,9 @@
 #   - 不启用运动模糊（静态或匀速运动）
 #   - 适用场景: 产品广告、建筑可视化、机械零件
 
-from fx import *
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=30.0,

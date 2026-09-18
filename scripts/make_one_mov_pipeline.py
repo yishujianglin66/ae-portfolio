@@ -631,7 +631,7 @@ def step3_build_mov(
         "-c:v", "qtrle", "-pix_fmt", "yuva444p10le",
         str(mov_path),
     ]
-    print(f"  FFmpeg 合成: qtrle + yuva444p10le ...")
+    print("  FFmpeg 合成: qtrle + yuva444p10le ...")
     t_f = time.time()
     p = subprocess.run(cmd, capture_output=False, timeout=4 * 3600)
     ffmpeg_dt = time.time() - t_f
@@ -802,7 +802,7 @@ def main() -> int:
     input_mp4 = Path(args.input)
     if not input_mp4.exists():
         print(f"[FATAL] 输入文件不存在: {input_mp4}")
-        print(f"  建议：检查 --input 路径拼写，确保 MP4 文件存在。")
+        print("  建议：检查 --input 路径拼写，确保 MP4 文件存在。")
         return 2
 
     slug = f"DL_{input_mp4.stem}"
@@ -917,7 +917,7 @@ def main() -> int:
     if step3.get("status") not in ("ok", "skip") or not mov_path.exists() or mov_path.stat().st_size < 1024:
         print(f"\n[FATAL] STEP 3 MOV 合成失败: {json.dumps(step3, ensure_ascii=False)[:300]}")
         print(f"  建议排查：1) FFMPEG={FFMPEG} 是否存在且为完整版；2) mask_dir={mask_dir} 下 mask_*.png 是否命名为 mask_00000 起；")
-        print(f"          3) 磁盘空间是否充足；4) 手动运行 FFmpeg 命令看错误信息。")
+        print("          3) 磁盘空间是否充足；4) 手动运行 FFmpeg 命令看错误信息。")
         save_pipeline_report(report_path, {"steps": pipeline_steps,
                                            "total_status": "fail_step3",
                                            "total_elapsed_s": round(time.time() - t_start, 1)})

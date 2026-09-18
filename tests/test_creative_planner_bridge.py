@@ -21,9 +21,10 @@
 from __future__ import annotations
 
 import json
-import pytest
 from typing import Any, Dict
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 # ============================================================
@@ -89,8 +90,8 @@ def bridge():
 class TestFactory:
     def test_create_returns_bridge(self):
         from ae.creative_planner_bridge import (
-            create_creative_planner_bridge,
             CreativePlannerBridge,
+            create_creative_planner_bridge,
         )
         # 通过 mock AICreativePlanner 验证工厂包装
         with patch("ae.creative_planner_bridge.AICreativePlanner") as MockPlanner:

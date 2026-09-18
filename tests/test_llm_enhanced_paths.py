@@ -11,13 +11,13 @@ P3-10: LLM 增强路径真实调用链路测试（mock LLM 返回）
 
 运行: py -3.12 -m pytest tests/test_llm_enhanced_paths.py -v
 """
-import sys
-import os
-import json
 import asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
+import json
+import os
+import sys
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -43,7 +43,7 @@ class MockLLMResponse:
     latency_ms: float = 200.0
     success: bool = True
     error: str = ""
-    raw: Dict[str, Any] = field(default_factory=dict)
+    raw: dict[str, Any] = field(default_factory=dict)
     tier: str = ""
     cost_usd: float = 0.0
     tier_upgraded: bool = False
@@ -60,7 +60,7 @@ class TestOptimizeEnhanced:
 
     def test_llm_enhanced_path_taken(self):
         """LLM 可用时，optimize_enhanced 应调用 LLM 并合并建议"""
-        from parameter_optimizer import ParameterOptimizer, ParameterContext
+        from parameter_optimizer import ParameterContext, ParameterOptimizer
 
         optimizer = ParameterOptimizer()
         ctx = ParameterContext(
@@ -90,6 +90,7 @@ class TestOptimizeEnhanced:
         }):
             # 需要重新导入以使用 mock
             import importlib
+
             import parameter_optimizer as po_mod
             # 直接 monkey-patch 模块级引用
             original_optimize_enhanced = optimizer.optimize_enhanced
@@ -115,7 +116,7 @@ class TestOptimizeEnhanced:
 
     def test_llm_unavailable_fallback(self):
         """LLM 不可用时，optimize_enhanced 应降级为本地规则"""
-        from parameter_optimizer import ParameterOptimizer, ParameterContext
+        from parameter_optimizer import ParameterContext, ParameterOptimizer
 
         optimizer = ParameterOptimizer()
         ctx = ParameterContext(effect_name="Glow", intensity=0.5)
@@ -128,7 +129,7 @@ class TestOptimizeEnhanced:
 
     def test_memory_cache_hit(self):
         """记忆系统命中高置信度经验时应直接返回缓存"""
-        from parameter_optimizer import ParameterOptimizer, ParameterContext, OptimizedParameters
+        from parameter_optimizer import OptimizedParameters, ParameterContext, ParameterOptimizer
 
         optimizer = ParameterOptimizer()
         ctx = ParameterContext(effect_name="Blur", intensity=0.8, style_name="anime")
@@ -174,7 +175,7 @@ class TestChatWithRoutingFallback:
 
     def test_fallback_chain_primary_fails(self):
         """主 Provider 失败时应遍历备选 Provider"""
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
 
         config = LLMConfig(
             base_url="http://localhost:9999/v1",
@@ -217,7 +218,7 @@ class TestChatWithRoutingFallback:
 
     def test_all_providers_fail(self):
         """所有 Provider 失败时应返回失败响应"""
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
 
         config = LLMConfig(
             base_url="http://localhost:9999/v1",
@@ -252,7 +253,7 @@ class TestModelScopeConfig:
 
     def test_modelscope_registered_from_env(self):
         """环境变量配置时 ModelScope 应被注册为 Provider"""
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
 
         config = LLMConfig(
             base_url="http://localhost:5273/v1",
@@ -276,7 +277,7 @@ class TestModelScopeConfig:
 
     def test_modelscope_not_registered_without_key(self):
         """无 API Key 时不应注册 ModelScope"""
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
 
         config = LLMConfig(base_url="http://localhost:5273/v1", api_key="k")
 

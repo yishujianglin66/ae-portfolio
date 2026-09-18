@@ -6,18 +6,29 @@ AE Render v2.0 直接验证 - 不依赖 Bridge
 3. 验证错误码和模板 fallback
 """
 from __future__ import annotations
-import sys, os, time, subprocess, shutil
-from pathlib import Path
+
+import os
+import shutil
+import subprocess
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "rendering"))
 
 from ae_render_engine import (
-    AERenderEngine, RenderStatus, detect_aerender, is_afterfx_running,
-    AerenderExitCode, ERROR_CODE_INFO, parse_progress_from_log,
-    OM_TEMPLATES, RS_TEMPLATES,
+    ERROR_CODE_INFO,
+    OM_TEMPLATES,
+    RS_TEMPLATES,
+    AERenderEngine,
+    AerenderExitCode,
+    RenderStatus,
+    detect_aerender,
+    is_afterfx_running,
+    parse_progress_from_log,
 )
 
 print("=" * 70)
@@ -99,6 +110,7 @@ print(f"  目标 AEP: {aep_path.name}")
 print("  调用 AfterFX 创建项目...")
 # 先关闭可能打开的对话框
 import ctypes
+
 try:
     ctypes.windll.user32.keybd_event(0x0D, 0, 0, 0)  # Enter
     ctypes.windll.user32.keybd_event(0x0D, 0, 2, 0)
@@ -221,7 +233,7 @@ if job.error_code >= 0:
 # 诊断
 if job.diagnostics:
     d = job.diagnostics
-    print(f"\n  诊断信息:")
+    print("\n  诊断信息:")
     print(f"    项目大小: {d.project_size_mb:.1f} MB")
     print(f"    输出磁盘剩余: {d.output_disk_free_gb:.1f} GB")
     print(f"    可用内存: {d.available_memory_gb:.1f}/{d.system_memory_gb:.1f} GB")
@@ -232,7 +244,7 @@ if job.diagnostics:
         try:
             txt = lp.read_text(encoding='utf-8', errors='replace')
             nonempty = [l for l in txt.split('\n') if l.strip()]
-            print(f"    日志末尾 6 行:")
+            print("    日志末尾 6 行:")
             for l in nonempty[-6:]:
                 print(f"      | {l.rstrip()[:140]}")
         except Exception as e:
@@ -297,14 +309,14 @@ if j2.error:
 print("\n" + "=" * 70)
 print("验证总结")
 print("=" * 70)
-print(f"  aerender 路径检测:      [PASS]")
-print(f"  多语言进度解析:         [PASS]")
-print(f"  错误码映射 (11 类):     [PASS]")
-print(f"  OM/RS 模板 fallback:    [PASS]")
-print(f"  AEP 创建/获取:          [PASS]" if aep_found else "  AEP 创建/获取:          [FAIL]")
-print(f"  实际渲染产出:           [PASS]" if render_ok else "  实际渲染产出:           [FAIL]")
-print(f"  错误处理 (不存在文件):  [PASS]" if t5a else "  错误处理 (不存在文件):  [INFO]")
-print(f"  错误处理 (不存在合成):  [PASS]" if t5b else "  错误处理 (不存在合成):  [INFO]")
+print("  aerender 路径检测:      [PASS]")
+print("  多语言进度解析:         [PASS]")
+print("  错误码映射 (11 类):     [PASS]")
+print("  OM/RS 模板 fallback:    [PASS]")
+print("  AEP 创建/获取:          [PASS]" if aep_found else "  AEP 创建/获取:          [FAIL]")
+print("  实际渲染产出:           [PASS]" if render_ok else "  实际渲染产出:           [FAIL]")
+print("  错误处理 (不存在文件):  [PASS]" if t5a else "  错误处理 (不存在文件):  [INFO]")
+print("  错误处理 (不存在合成):  [PASS]" if t5b else "  错误处理 (不存在合成):  [INFO]")
 
 print(f"\n  输出目录: {RENDER_DIR}")
 for f in sorted(RENDER_DIR.glob("*")):

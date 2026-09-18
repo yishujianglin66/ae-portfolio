@@ -2,9 +2,9 @@
 Import重定向兼容层
 确保旧代码中的 import xxx 仍然能正常工作，即使文件已迁移到子目录
 """
-import sys
 import importlib.util
 import os
+import sys
 
 # 递归保护：记录正在加载中的模块，防止循环重定向导致无限递归
 _LOADING = set()

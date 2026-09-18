@@ -105,7 +105,7 @@ else:
     sys.exit(1)
 '''
 
-    def __init__(self, executable_path: Optional[Path | str] = None):
+    def __init__(self, executable_path: Path | str | None = None):
         path = Path(executable_path) if executable_path else settings.davinci_path
         exe = path / "Resolve.exe"
         super().__init__(exe)
@@ -114,7 +114,7 @@ else:
         self,
         input_path: Path | str,
         output_dir: Path | str,
-        grade_preset: Optional[dict[str, Any]] = None,
+        grade_preset: dict[str, Any] | None = None,
         style: str = "cinematic",
         resolution: tuple[int, int] = (1920, 1080),
     ) -> EngineResult:
@@ -244,8 +244,8 @@ else:
         lines = [
             "TITLE \"AutoGrade LUT\"",
             f"LUT_3D_SIZE {lut_size}",
-            f"DOMAIN_MIN 0.0 0.0 0.0",
-            f"DOMAIN_MAX 1.0 1.0 1.0",
+            "DOMAIN_MIN 0.0 0.0 0.0",
+            "DOMAIN_MAX 1.0 1.0 1.0",
             "",
         ]
 
@@ -270,7 +270,7 @@ else:
     async def import_media_and_create_timeline(
         self,
         media_paths: list[Path | str],
-        project_path: Optional[Path | str] = None,
+        project_path: Path | str | None = None,
         timeline_name: str = "Timeline 1",
         fps: float = 30.0,
         width: int = 1920,

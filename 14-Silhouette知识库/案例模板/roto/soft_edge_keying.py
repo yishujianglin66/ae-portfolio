@@ -8,8 +8,9 @@
 #   - 可选启用运动模糊
 #   - 适用场景: 人物轮廓、动物、自然物体、布料
 
-from fx import *
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=30.0,

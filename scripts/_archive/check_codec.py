@@ -1,4 +1,7 @@
-import subprocess, sys, os
+import os
+import subprocess
+import sys
+
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 ffmpeg = r"C:\ffmpeg\bin\ffmpeg.exe"

@@ -22,43 +22,42 @@ Premiere Pro MCP 客户端封装
 """
 from __future__ import annotations
 
-import time
 import logging
 import threading
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ae.pr_transition_system import (
-    TransitionType,
-    TransitionDirection,
-    TransitionParam,
-    PremiereTransitionSystem,
-)
-from ae.pr_advanced_editing import (
-    EditMode,
-    MotionDirection,
-    WhipPanParam,
-    DynamicZoomParam,
-    SpeedRampParam,
-    KeyframePoint,
-    KeyframeAnimationParam,
-    AdvancedEditParam,
-    PremiereAdvancedEditing,
-)
-
 from ae.archive.bridge_protocol import (
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_POLL_INTERVAL,
+    DEFAULT_TTL_MS,
     BridgeClient,
     BridgeCommand,
-    BridgeResponse,
-    BridgeProgress,
     BridgeMetadata,
+    BridgeProgress,
+    BridgeResponse,
     CommandStatus,
     ErrorCode,
     Priority,
-    DEFAULT_TTL_MS,
-    DEFAULT_POLL_INTERVAL,
-    DEFAULT_MAX_RETRIES,
+)
+from ae.pr_advanced_editing import (
+    AdvancedEditParam,
+    DynamicZoomParam,
+    EditMode,
+    KeyframeAnimationParam,
+    KeyframePoint,
+    MotionDirection,
+    PremiereAdvancedEditing,
+    SpeedRampParam,
+    WhipPanParam,
+)
+from ae.pr_transition_system import (
+    PremiereTransitionSystem,
+    TransitionDirection,
+    TransitionParam,
+    TransitionType,
 )
 
 # Bridge 默认目录收口到 core/paths.py（AEK_PR_BRIDGE_DIR 可覆盖）
@@ -84,8 +83,8 @@ class PRMCPError(PRError):
     def __init__(
         self,
         message: str = "PR MCP 操作失败",
-        error_code: Optional[ErrorCode] = None,
-        details: Optional[Dict[str, Any]] = None,
+        error_code: ErrorCode | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         self.message = message
         self.error_code = error_code
@@ -149,7 +148,7 @@ class PRUnknownError(PRMCPError):
     pass
 
 
-_ERROR_CODE_TO_EXCEPTION: Dict[ErrorCode, type[PRMCPError]] = {
+_ERROR_CODE_TO_EXCEPTION: dict[ErrorCode, type[PRMCPError]] = {
     ErrorCode.AE_NOT_RUNNING: PRConnectionError,
     ErrorCode.AE_NOT_RESPONDING: PRConnectionError,
     ErrorCode.IO_ERROR: PRConnectionError,
@@ -220,7 +219,7 @@ class ClientStats:
     avg_latency_ms: float = 0.0
     min_latency_ms: float = 0.0
     max_latency_ms: float = 0.0
-    last_call_time: Optional[float] = None
+    last_call_time: float | None = None
 
 
 class PRMCP:
@@ -240,8 +239,8 @@ class PRMCP:
         self,
         bridge_dir: str = _DEFAULT_BRIDGE_DIR,
         signature_enabled: bool = True,
-        secret: Optional[str] = None,
-        secret_file: Optional[str] = None,
+        secret: str | None = None,
+        secret_file: str | None = None,
         poll_interval: float = DEFAULT_POLL_INTERVAL,
         max_retries: int = DEFAULT_MAX_RETRIES,
         base_delay_ms: float = 100,
@@ -267,11 +266,11 @@ class PRMCP:
         self._default_ttl_ms = default_ttl_ms
         self._stats = ClientStats()
         self._stats_lock = threading.Lock()
-        self._last_heartbeat_time: Optional[float] = None
+        self._last_heartbeat_time: float | None = None
 
     def _build_command(
-        self, command: str, params: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        self, command: str, params: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         return {
             "command": command,
             "params": params or {},
@@ -279,7 +278,7 @@ class PRMCP:
             "timestamp": time.time(),
         }
 
-    def _extract_protocol_version(self, response: Dict[str, Any]) -> str:
+    def _extract_protocol_version(self, response: dict[str, Any]) -> str:
         return response.get("protocol_version", self.DEFAULT_PROTOCOL_VERSION)
 
     def _sanitize_log_text(self, text: str) -> str:
@@ -289,7 +288,7 @@ class PRMCP:
         text = re.sub(r"api_key\s*=\s*\"?\S+\"?", 'api_key="[REDACTED]"', text)
         return text
 
-    def _map_error(self, response: Dict[str, Any]) -> PRMCPError:
+    def _map_error(self, response: dict[str, Any]) -> PRMCPError:
         error_info = response.get("error", {})
         code = error_info.get("code", "UNKNOWN")
         message = error_info.get("message", "未知错误")
@@ -308,14 +307,14 @@ class PRMCP:
     def _execute(
         self,
         command: str,
-        params: Optional[Dict[str, Any]] = None,
-        ttl: Optional[int] = None,
-        priority: Optional[Priority] = None,
-        idempotency_key: Optional[str] = None,
-        metadata: Optional[BridgeMetadata] = None,
-        progress_callback: Optional[Any] = None,
+        params: dict[str, Any] | None = None,
+        ttl: int | None = None,
+        priority: Priority | None = None,
+        idempotency_key: str | None = None,
+        metadata: BridgeMetadata | None = None,
+        progress_callback: Any | None = None,
         raise_on_error: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         start_time = time.time()
 
         cmd_data = {
@@ -326,7 +325,7 @@ class PRMCP:
             "idempotency_key": idempotency_key,
         }
 
-        def _bridge_handler(cmd: Dict[str, Any]) -> BridgeResponse:
+        def _bridge_handler(cmd: dict[str, Any]) -> BridgeResponse:
             return self._bridge.send_command(
                 command=cmd["command"],
                 params=cmd["params"],
@@ -378,7 +377,7 @@ class PRMCP:
 
             self._stats.last_call_time = time.time()
 
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         """检测 Premiere Pro 是否存活。"""
         try:
             result = self._execute("ping", {})
@@ -424,7 +423,7 @@ class PRMCP:
             sequence_count=info.get("sequenceCount", 0),
         )
 
-    def list_sequences(self) -> List[SequenceInfo]:
+    def list_sequences(self) -> list[SequenceInfo]:
         """列出项目中的所有序列。"""
         result = self._execute("listSequences")
         seqs = result.get("sequences", [])
@@ -446,7 +445,7 @@ class PRMCP:
         height: int = 1080,
         fps: float = 25.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建新序列。
 
         Args:
@@ -467,19 +466,19 @@ class PRMCP:
         params.update(kwargs)
         return self._execute("createSequence", params)
 
-    def delete_sequence(self, sequence_name: str) -> Dict[str, Any]:
+    def delete_sequence(self, sequence_name: str) -> dict[str, Any]:
         """删除序列。"""
         return self._execute("deleteSequence", {"name": sequence_name})
 
-    def get_sequence_info(self, sequence_name: str) -> Dict[str, Any]:
+    def get_sequence_info(self, sequence_name: str) -> dict[str, Any]:
         """获取序列详细信息。"""
         return self._execute("getSequenceInfo", {"name": sequence_name})
 
     def import_media(
         self,
-        files: List[str],
+        files: list[str],
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导入素材到项目。
 
         Args:
@@ -490,7 +489,7 @@ class PRMCP:
         """
         return self._execute("importMedia", {"files": files, **kwargs})
 
-    def get_timeline_info(self) -> Dict[str, Any]:
+    def get_timeline_info(self) -> dict[str, Any]:
         """获取当前时间线信息。"""
         return self._execute("getTimelineInfo")
 
@@ -500,7 +499,7 @@ class PRMCP:
         track_index: int = 0,
         position: float = 0.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """将素材添加到序列。
 
         Args:
@@ -525,7 +524,7 @@ class PRMCP:
         track_index: int = 0,
         position: float = 0.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """将素材添加到序列（别名）。"""
         return self.add_to_sequence(clip_name, track_index, position, **kwargs)
 
@@ -535,7 +534,7 @@ class PRMCP:
         clip_index: int,
         cut_time: float,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """剪切剪辑。"""
         params = {
             "track": track_index,
@@ -550,7 +549,7 @@ class PRMCP:
         track_index: int,
         clip_index: int,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """删除剪辑。"""
         params = {
             "track": track_index,
@@ -565,7 +564,7 @@ class PRMCP:
         clip_index: int,
         new_position: float,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """移动剪辑。"""
         params = {
             "track": track_index,
@@ -581,7 +580,7 @@ class PRMCP:
         clip_index: int,
         split_time: float,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """分割剪辑。
 
         Args:
@@ -607,7 +606,7 @@ class PRMCP:
         new_start: float,
         new_end: float,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """修剪剪辑。
 
         Args:
@@ -632,9 +631,9 @@ class PRMCP:
         self,
         clip_name: str,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用效果到剪辑。
 
         Args:
@@ -658,7 +657,7 @@ class PRMCP:
         clip_name: str,
         effect_name: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """移除剪辑上的效果。"""
         params = {
             "clip": clip_name,
@@ -674,7 +673,7 @@ class PRMCP:
         param_name: str,
         value: Any,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """设置效果参数。"""
         params = {
             "clip": clip_name,
@@ -690,7 +689,7 @@ class PRMCP:
         clip_name: str,
         effect_name: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """获取效果参数。"""
         params = {
             "clip": clip_name,
@@ -699,7 +698,7 @@ class PRMCP:
         params.update(kwargs)
         return self._execute("getEffectParams", params)
 
-    def list_available_effects(self) -> Dict[str, Any]:
+    def list_available_effects(self) -> dict[str, Any]:
         """列出可用效果。"""
         return self._execute("listAvailableEffects")
 
@@ -710,7 +709,7 @@ class PRMCP:
         transition_name: str = "Cross Dissolve",
         duration: float = 1.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用转场效果。
 
         Args:
@@ -738,7 +737,7 @@ class PRMCP:
         property_name: str,
         value: Any,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """设置剪辑属性。"""
         params = {
             "track": track_index,
@@ -754,7 +753,7 @@ class PRMCP:
         output_path: str,
         preset: str = "H.264",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出序列。
 
         Args:
@@ -776,51 +775,51 @@ class PRMCP:
         output_path: str,
         preset: str = "H.264",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """渲染序列（别名）。"""
         return self.export_sequence(output_path, preset, **kwargs)
 
-    def get_render_status(self, render_id: str) -> Dict[str, Any]:
+    def get_render_status(self, render_id: str) -> dict[str, Any]:
         """获取渲染状态。"""
         return self._execute("getRenderStatus", {"renderId": render_id})
 
-    def cancel_render(self, render_id: str) -> Dict[str, Any]:
+    def cancel_render(self, render_id: str) -> dict[str, Any]:
         """取消渲染。"""
         return self._execute("cancelRender", {"renderId": render_id})
 
-    def save_project(self, path: Optional[str] = None) -> Dict[str, Any]:
+    def save_project(self, path: str | None = None) -> dict[str, Any]:
         """保存项目。"""
         params = {"path": path} if path else {}
         return self._execute("saveProject", params)
 
-    def open_project(self, path: str) -> Dict[str, Any]:
+    def open_project(self, path: str) -> dict[str, Any]:
         """打开项目。"""
         return self._execute("openProject", {"path": path})
 
-    def create_project(self, name: str, path: Optional[str] = None) -> Dict[str, Any]:
+    def create_project(self, name: str, path: str | None = None) -> dict[str, Any]:
         """创建新项目。"""
         params = {"name": name}
         if path:
             params["path"] = path
         return self._execute("createProject", params)
 
-    def new_project(self, name: str, path: Optional[str] = None) -> Dict[str, Any]:
+    def new_project(self, name: str, path: str | None = None) -> dict[str, Any]:
         """创建新项目（别名）。"""
         return self.create_project(name, path)
 
-    def close_project(self) -> Dict[str, Any]:
+    def close_project(self) -> dict[str, Any]:
         """关闭项目。"""
         return self._execute("closeProject")
 
-    def get_effects(self) -> Dict[str, Any]:
+    def get_effects(self) -> dict[str, Any]:
         """获取可用效果列表。"""
         return self._execute("getEffects")
 
-    def set_playback_position(self, position: float) -> Dict[str, Any]:
+    def set_playback_position(self, position: float) -> dict[str, Any]:
         """设置播放位置。"""
         return self._execute("setPlaybackPosition", {"position": position})
 
-    def execute_script(self, script: str) -> Dict[str, Any]:
+    def execute_script(self, script: str) -> dict[str, Any]:
         """执行 ExtendScript 代码。"""
         return self._execute("executeScript", {"script": script})
 
@@ -832,22 +831,22 @@ class PRMCP:
 
     # ==================== 转场效果 API ====================
 
-    def list_transitions(self) -> List[Dict[str, Any]]:
+    def list_transitions(self) -> list[dict[str, Any]]:
         """列出所有可用转场效果。"""
         transition_system = PremiereTransitionSystem(self)
         return transition_system.list_transitions()
 
-    def list_transition_categories(self) -> List[str]:
+    def list_transition_categories(self) -> list[str]:
         """列出转场分类。"""
         transition_system = PremiereTransitionSystem(self)
         return transition_system.list_categories()
 
-    def get_transitions_by_category(self, category: str) -> List[Dict[str, Any]]:
+    def get_transitions_by_category(self, category: str) -> list[dict[str, Any]]:
         """按分类获取转场效果。"""
         transition_system = PremiereTransitionSystem(self)
         return transition_system.get_transitions_by_category(category)
 
-    def get_transition_info(self, transition_type: Union[str, TransitionType]) -> Dict[str, Any]:
+    def get_transition_info(self, transition_type: Union[str, TransitionType]) -> dict[str, Any]:
         """获取转场效果信息。"""
         transition_system = PremiereTransitionSystem(self)
         if isinstance(transition_type, str):
@@ -860,9 +859,9 @@ class PRMCP:
         clip_index: int,
         transition_type: Union[str, TransitionType],
         duration: float = 1.0,
-        direction: Optional[Union[str, TransitionDirection]] = None,
+        direction: Union[str, TransitionDirection] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用转场效果。
 
         Args:
@@ -899,7 +898,7 @@ class PRMCP:
         speed: float = 2.0,
         blur_amount: float = 25.0,
         duration: float = 0.5,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用拉镜转场效果。
 
         Args:
@@ -929,7 +928,7 @@ class PRMCP:
         zoom_amount: float = 1.5,
         blur_amount: float = 20.0,
         duration: float = 1.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用缩放转场效果。
 
         Args:
@@ -957,7 +956,7 @@ class PRMCP:
         clip_index: int,
         glitch_amount: float = 5.0,
         duration: float = 0.5,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用故障转场效果。
 
         Args:
@@ -979,12 +978,12 @@ class PRMCP:
 
     # ==================== 高级剪辑 API ====================
 
-    def list_edit_modes(self) -> List[Dict[str, Any]]:
+    def list_edit_modes(self) -> list[dict[str, Any]]:
         """列出所有可用编辑模式。"""
         editing_system = PremiereAdvancedEditing(self)
         return editing_system.list_edit_modes()
 
-    def get_edit_mode_info(self, edit_mode: Union[str, EditMode]) -> Dict[str, Any]:
+    def get_edit_mode_info(self, edit_mode: Union[str, EditMode]) -> dict[str, Any]:
         """获取编辑模式信息。"""
         editing_system = PremiereAdvancedEditing(self)
         if isinstance(edit_mode, str):
@@ -1000,7 +999,7 @@ class PRMCP:
         blur_amount: float = 25.0,
         duration: float = 0.5,
         overlap: float = 0.3,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用拉镜效果。
 
         Args:
@@ -1034,9 +1033,9 @@ class PRMCP:
         end_scale: float = 150.0,
         duration: float = 2.0,
         ease_type: str = "ease_in_out",
-        focus_point: Optional[List[float]] = None,
+        focus_point: list[float] | None = None,
         blur_amount: float = 0.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用动态缩放效果。
 
         Args:
@@ -1074,7 +1073,7 @@ class PRMCP:
         ease_type: str = "ease_in_out",
         frame_blending: bool = True,
         preserve_audio: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用速度调整效果。
 
         Args:
@@ -1107,9 +1106,9 @@ class PRMCP:
         track_index: int,
         clip_index: int,
         property_name: str,
-        keyframes: List[Dict[str, Any]],
+        keyframes: list[dict[str, Any]],
         easing: str = "ease_in_out",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用关键帧动画。
 
         Args:
@@ -1139,7 +1138,7 @@ class PRMCP:
         editing_system = PremiereAdvancedEditing(self)
         return editing_system.apply_editing(track_index, clip_index, params)
 
-    def apply_batch_editing(self, edits: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def apply_batch_editing(self, edits: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """批量应用高级编辑效果。
 
         Args:

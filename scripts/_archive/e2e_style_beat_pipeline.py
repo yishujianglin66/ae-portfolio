@@ -175,7 +175,7 @@ def stage3_edit_plan(beats: dict, materials: list, segments: int,
 def _build_segment_filter(seg: dict, grade: dict, graded: bool = True) -> str:
     d = seg["duration"]
     speed = seg["speed"]
-    filters = [f"setpts=PTS-STARTPTS", f"setpts=PTS/{speed}"]
+    filters = ["setpts=PTS-STARTPTS", f"setpts=PTS/{speed}"]
     # 镜头推拉：crop 动画 + 还原缩放
     amt = 0.12
     if seg["camera"] == "push_in":
@@ -322,8 +322,8 @@ def verify_cut_alignment(final: Path, plan: dict) -> dict:
 
 def verify_style_applied(nograde: Path, final: Path, out_dir: Path) -> dict:
     """调色前后像素级对比（取各 1s 处帧）"""
-    from PIL import Image
     import numpy as np
+    from PIL import Image
     evidence = out_dir / "evidence"
     evidence.mkdir(exist_ok=True)
     shots = {}

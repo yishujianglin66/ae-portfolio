@@ -3,7 +3,7 @@
 参考 Antares "精悍够用" 哲学：用最小参数量实现精准的视频风格分类
 """
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import Dict, List
 
 
 @dataclass
@@ -20,7 +20,7 @@ class StyleClassifyConfig:
     base_model: str = "google/vit-base-patch16-224"
     """推荐基座模型（ViT-Base，视觉Transformer基础版）"""
     
-    alternative_base_models: List[str] = field(default_factory=lambda: [
+    alternative_base_models: list[str] = field(default_factory=lambda: [
         "google/vit-small-patch16-224",
         "microsoft/resnet-50",
         "facebook/convnext-tiny-224",
@@ -43,7 +43,7 @@ class StyleClassifyConfig:
     num_classes: int = 21
     """风格类别数量（13通用+8漫剪）"""
     
-    style_labels: List[str] = field(default_factory=lambda: [
+    style_labels: list[str] = field(default_factory=lambda: [
         "cinematic",
         "anime_puppet",
         "fast_cut",
@@ -82,7 +82,7 @@ class StyleClassifyConfig:
     lora_dropout: float = 0.1
     """LoRA dropout"""
     
-    lora_target_modules: List[str] = field(default_factory=lambda: [
+    lora_target_modules: list[str] = field(default_factory=lambda: [
         "query", "value",
     ])
     """LoRA 目标模块 — 分类任务只需要微调注意力层"""
@@ -132,7 +132,7 @@ class StyleClassifyConfig:
     data_augmentation: bool = True
     """是否启用数据增强"""
     
-    augmentation_types: List[str] = field(default_factory=lambda: [
+    augmentation_types: list[str] = field(default_factory=lambda: [
         "feature_noise",
         "brightness_jitter",
         "contrast_jitter",
@@ -147,7 +147,7 @@ class StyleClassifyConfig:
     augmentation_dropout_prob: float = 0.1
     """特征 dropout 概率"""
     
-    evaluation_metrics: List[str] = field(default_factory=lambda: [
+    evaluation_metrics: list[str] = field(default_factory=lambda: [
         "accuracy",
         "precision",
         "recall",
@@ -157,10 +157,10 @@ class StyleClassifyConfig:
     ])
     """评估指标列表"""
     
-    top_k_values: List[int] = field(default_factory=lambda: [1, 3, 5])
+    top_k_values: list[int] = field(default_factory=lambda: [1, 3, 5])
     """Top-K 准确率的 K 值"""
     
-    class_weights: Dict[str, float] = field(default_factory=dict)
+    class_weights: dict[str, float] = field(default_factory=dict)
     """类别权重，用于处理类别不平衡"""
     
     estimated_training_cost_usd: float = 2.0

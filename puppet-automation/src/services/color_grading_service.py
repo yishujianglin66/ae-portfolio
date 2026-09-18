@@ -10,8 +10,8 @@ from typing import Any, Dict, List, Literal, Optional
 from loguru import logger
 
 from ..config import settings
-from ..engines.base import EngineResult
 from ..engines.ae.engine import AEEngine
+from ..engines.base import EngineResult
 
 
 class ColorGradingService:
@@ -50,7 +50,7 @@ class ColorGradingService:
         "ADBE Lumetri": "Lumetri Color",
     }
 
-    def __init__(self, ae_engine: Optional[AEEngine] = None):
+    def __init__(self, ae_engine: AEEngine | None = None):
         """初始化调色服务。
 
         Args:
@@ -331,7 +331,7 @@ class ColorGradingService:
         except json.JSONDecodeError:
             return EngineResult(
                 success=False,
-                error=f"JSON解析失败",
+                error="JSON解析失败",
             )
 
     async def apply_lut(
@@ -469,7 +469,7 @@ class ColorGradingService:
         except json.JSONDecodeError:
             return EngineResult(
                 success=False,
-                error=f"JSON解析失败",
+                error="JSON解析失败",
             )
 
     async def apply_lut_by_name(
@@ -503,7 +503,7 @@ class ColorGradingService:
     async def create_full_grading_pipeline(
         self,
         comp_name: str,
-        segments: List[Dict[str, Any]],
+        segments: list[dict[str, Any]],
     ) -> EngineResult:
         """一键创建多段调色管线。
 
@@ -669,10 +669,10 @@ class ColorGradingService:
         except json.JSONDecodeError:
             return EngineResult(
                 success=False,
-                error=f"JSON解析失败",
+                error="JSON解析失败",
             )
 
-    def get_filter_combinations(self) -> Dict[str, List[str]]:
+    def get_filter_combinations(self) -> dict[str, list[str]]:
         """获取所有滤镜组合方案。
 
         Returns:

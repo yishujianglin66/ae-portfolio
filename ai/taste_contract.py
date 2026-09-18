@@ -19,18 +19,17 @@ from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence
 
-
 # ============================================================
 # 运镜池
 # ============================================================
 
-LOW_MOTION_POOL: List[str] = [
+LOW_MOTION_POOL: list[str] = [
     "static",        # 固定镜头
     "zoom_out",      # 缓拉
     "zoom_in",       # 缓推
 ]
 
-MID_MOTION_POOL: List[str] = [
+MID_MOTION_POOL: list[str] = [
     "pan_left",      # 横摇
     "pan_right",     # 反横摇
     "zoom_in",       # 推近
@@ -38,7 +37,7 @@ MID_MOTION_POOL: List[str] = [
     "diag_pan",      # 对角摇
 ]
 
-HIGH_MOTION_POOL: List[str] = [
+HIGH_MOTION_POOL: list[str] = [
     "pan_left",
     "pan_right",
     "zoom_in",
@@ -50,7 +49,7 @@ HIGH_MOTION_POOL: List[str] = [
 ]
 
 
-def camera_pool_for_intensity(motion_intensity: int) -> List[str]:
+def camera_pool_for_intensity(motion_intensity: int) -> list[str]:
     """根据 motion_intensity 返回候选运镜池。
 
     Args:
@@ -79,8 +78,8 @@ class TasteProfile:
     motion_intensity: int = 5
     information_density: int = 5
     design_read: str = ""
-    anti_patterns: List[str] = field(default_factory=list)
-    quality_gates: List[str] = field(default_factory=list)
+    anti_patterns: list[str] = field(default_factory=list)
+    quality_gates: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         self.visual_variance = max(1, min(10, int(self.visual_variance)))
@@ -88,7 +87,7 @@ class TasteProfile:
         self.information_density = max(1, min(10, int(self.information_density)))
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> TasteProfile:
+    def from_dict(cls, d: dict[str, Any]) -> TasteProfile:
         return cls(
             visual_variance=d.get("visual_variance", 5),
             motion_intensity=d.get("motion_intensity", 5),
@@ -98,7 +97,7 @@ class TasteProfile:
             quality_gates=d.get("quality_gates", []),
         )
 
-    def camera_pool(self) -> List[str]:
+    def camera_pool(self) -> list[str]:
         """快捷: 返回当前 motion_intensity 对应的运镜池。"""
         return camera_pool_for_intensity(self.motion_intensity)
 
@@ -112,9 +111,9 @@ DEFAULT_TASTE = TasteProfile()
 # ============================================================
 
 def check_anti_defaults(
-    segments: Sequence[Dict[str, Any]],
+    segments: Sequence[dict[str, Any]],
     taste: TasteProfile,
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
     """机检 Anti-Default Checklist 前 3 条。
 
     Args:
@@ -127,7 +126,7 @@ def check_anti_defaults(
     if not segments:
         return []
 
-    violations: List[Dict[str, str]] = []
+    violations: list[dict[str, str]] = []
 
     # --- Rule #2: visual_variance >= 4 时不允许"可变化转场"的切点全部同质 ---
     # 统计范围限定为"转场可变化的镜头":

@@ -16,11 +16,11 @@ knowledge_base/kb_loader.py - 知识库门面 API (Layer 5)
 """
 from __future__ import annotations
 
-import os
 import json
+import os
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass, field
 
 try:
     from loguru import logger
@@ -28,21 +28,20 @@ except ImportError:
     import logging
     logger = logging.getLogger(__name__)
 
-from knowledge_base.types import (
-    BlockType,
-    MdBlock,
-    EffectMapping,
-    TransitionRecipe,
-    ColorPreset,
-    StyleRecipe,
-)
-from knowledge_base.md_parser import MdParser
-from knowledge_base.table_extractor import TableExtractor
-from knowledge_base.section_parser import SectionParser
-from knowledge_base.kb_cache import KbCache
 from knowledge_base.adapters.effect_adapter import EffectAdapter
 from knowledge_base.adapters.transition_adapter import TransitionAdapter
-
+from knowledge_base.kb_cache import KbCache
+from knowledge_base.md_parser import MdParser
+from knowledge_base.section_parser import SectionParser
+from knowledge_base.table_extractor import TableExtractor
+from knowledge_base.types import (
+    BlockType,
+    ColorPreset,
+    EffectMapping,
+    MdBlock,
+    StyleRecipe,
+    TransitionRecipe,
+)
 
 # 默认知识库路径 —— 支持多目录聚合（10/11/12/14/15/13 六大知识库）
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -58,7 +57,7 @@ _DEFAULT_CACHE_DIR = str(_PROJECT_ROOT / "data" / "kb_cache")
 _DEFAULT_EFFECT_CATALOG = str(_PROJECT_ROOT / "knowledge_base" / "effect_catalog.json")
 
 
-def _iter_kb_dirs(kb_dirs: Optional[List[str]] = None) -> List[str]:
+def _iter_kb_dirs(kb_dirs: list[str] | None = None) -> list[str]:
     """过滤实际存在的知识库目录列表。"""
     dirs = kb_dirs if kb_dirs is not None else _DEFAULT_KB_DIRS
     return [d for d in dirs if os.path.isdir(d)]
@@ -72,15 +71,15 @@ class EffectFullInfo:
     category: str = "other"
     plugin_package: str = ""
     description: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
-    usage_scenarios: List[str] = field(default_factory=list)
-    default_presets: List[Dict[str, Any]] = field(default_factory=list)
+    params: dict[str, Any] = field(default_factory=dict)
+    usage_scenarios: list[str] = field(default_factory=list)
+    default_presets: list[dict[str, Any]] = field(default_factory=list)
     source: str = ""
     confidence: float = 0.8
 
 
 # 效果参数模板生成规则
-_PARAM_TEMPLATES: Dict[str, Dict[str, Any]] = {
+_PARAM_TEMPLATES: dict[str, dict[str, Any]] = {
     "blur": {
         "Blurriness": {"type": "number", "min": 0, "max": 1000, "default": 10, "description": "模糊强度"},
         "Blur Dimensions": {"type": "enum", "values": ["Horizontal & Vertical", "Horizontal Only", "Vertical Only"], "default": "Horizontal & Vertical", "description": "模糊维度"},
@@ -180,7 +179,7 @@ _PARAM_TEMPLATES: Dict[str, Dict[str, Any]] = {
 }
 
 # 使用场景推荐
-_USAGE_SCENARIOS: Dict[str, List[str]] = {
+_USAGE_SCENARIOS: dict[str, list[str]] = {
     "blur": ["背景虚化", "景深效果", "运动模糊", "柔化画面", "过渡转场"],
     "color": ["调色", "色彩校正", "风格化调色", "肤色美化", "胶片模拟"],
     "distort": ["变形效果", "波浪扭曲", "鱼眼效果", "透视校正", "故障效果"],
@@ -207,12 +206,12 @@ class KnowledgeBaseLoader:
     单例模式，确保全库只解析一次。
     """
 
-    _instance: Optional["KnowledgeBaseLoader"] = None
+    _instance: "KnowledgeBaseLoader" | None = None
 
     def __init__(
         self,
         kb_dir: str = "",
-        kb_dirs: Optional[List[str]] = None,
+        kb_dirs: list[str] | None = None,
         cache_dir: str = "",
     ) -> None:
         """初始化加载器（支持多目录聚合）。
@@ -224,7 +223,7 @@ class KnowledgeBaseLoader:
         """
         # 多目录：向后兼容 + 默认全量聚合
         if kb_dirs:
-            self._kb_dirs: List[str] = list(kb_dirs)
+            self._kb_dirs: list[str] = list(kb_dirs)
         elif kb_dir:
             self._kb_dirs = [kb_dir]
         else:
@@ -242,18 +241,18 @@ class KnowledgeBaseLoader:
 
         # 缓存解析结果
         # key = "<目录名>/<文件名>"，避免跨目录同名文件互相覆盖
-        self._file_blocks: Dict[str, List[MdBlock]] = {}
-        self._effect_map: Optional[Dict[str, str]] = None
-        self._transition_map: Optional[Dict[str, Dict[str, Any]]] = None
-        self._color_presets: Optional[List[ColorPreset]] = None
-        self._style_recipes: Optional[List[StyleRecipe]] = None
+        self._file_blocks: dict[str, list[MdBlock]] = {}
+        self._effect_map: dict[str, str] | None = None
+        self._transition_map: dict[str, dict[str, Any]] | None = None
+        self._color_presets: list[ColorPreset] | None = None
+        self._style_recipes: list[StyleRecipe] | None = None
 
 
     @classmethod
     def get_instance(
         cls,
         kb_dir: str = "",
-        kb_dirs: Optional[List[str]] = None,
+        kb_dirs: list[str] | None = None,
         cache_dir: str = "",
     ) -> "KnowledgeBaseLoader":
         """获取单例实例。"""
@@ -261,9 +260,9 @@ class KnowledgeBaseLoader:
             cls._instance = cls(kb_dir=kb_dir, kb_dirs=kb_dirs, cache_dir=cache_dir)
         return cls._instance
 
-    def list_files(self) -> List[str]:
+    def list_files(self) -> list[str]:
         """列出所有知识库目录中的 md 文件（返回 "<目录名>/<文件名>" 复合键）。"""
-        files: List[str] = []
+        files: list[str] = []
         for kb_dir in self._kb_dirs:
             if not os.path.isdir(kb_dir):
                 continue
@@ -296,7 +295,7 @@ class KnowledgeBaseLoader:
                 return candidate
         return ""
 
-    def parse_file(self, filename: str) -> List[MdBlock]:
+    def parse_file(self, filename: str) -> list[MdBlock]:
         """解析单个知识库文件（filename 可为复合键 dir/file.md 或纯文件名）。"""
         if filename in self._file_blocks:
             return self._file_blocks[filename]
@@ -334,8 +333,8 @@ class KnowledgeBaseLoader:
 
     def get_effect_map(
         self,
-        fallback: Optional[Dict[str, str]] = None,
-    ) -> Dict[str, str]:
+        fallback: dict[str, str] | None = None,
+    ) -> dict[str, str]:
         """获取效果映射字典。
 
         输出格式与 effect_registry.KEYWORD_TO_EFFECT_MAP 兼容。
@@ -351,7 +350,7 @@ class KnowledgeBaseLoader:
 
         self._parse_all_files()
 
-        all_mappings: List[EffectMapping] = []
+        all_mappings: list[EffectMapping] = []
         for filename, blocks in self._file_blocks.items():
             mappings = self._effect_adapter.extract_from_blocks(
                 blocks, source_file=filename
@@ -375,8 +374,8 @@ class KnowledgeBaseLoader:
 
     def get_transition_map(
         self,
-        fallback: Optional[Dict[str, Dict[str, Any]]] = None,
-    ) -> Dict[str, Dict[str, Any]]:
+        fallback: dict[str, dict[str, Any]] | None = None,
+    ) -> dict[str, dict[str, Any]]:
         """获取转场配方字典。
 
         输出格式与 transition_rebuilder.TRANSITION_IMPL_MAP 兼容。
@@ -392,7 +391,7 @@ class KnowledgeBaseLoader:
 
         self._parse_all_files()
 
-        all_recipes: List[TransitionRecipe] = []
+        all_recipes: list[TransitionRecipe] = []
         for filename, blocks in self._file_blocks.items():
             recipes = self._transition_adapter.extract_from_blocks(
                 blocks, source_file=filename
@@ -410,7 +409,7 @@ class KnowledgeBaseLoader:
         self._cache.save()
         return dict(self._transition_map)
 
-    def get_color_presets(self) -> List[ColorPreset]:
+    def get_color_presets(self) -> list[ColorPreset]:
         """获取调色预设列表。
 
         Returns:
@@ -425,7 +424,7 @@ class KnowledgeBaseLoader:
         # 暂不实现详细提取，返回空列表
         return list(self._color_presets)
 
-    def get_style_recipes(self) -> List[StyleRecipe]:
+    def get_style_recipes(self) -> list[StyleRecipe]:
         """获取风格配方列表。
 
         Returns:
@@ -443,7 +442,7 @@ class KnowledgeBaseLoader:
     # =========================================================================
 
     @staticmethod
-    def _blocks_to_cache(blocks: List[MdBlock]) -> Dict[str, Any]:
+    def _blocks_to_cache(blocks: list[MdBlock]) -> dict[str, Any]:
         """将 MdBlock 列表转为可 JSON 序列化的格式。"""
         return {
             "blocks": [
@@ -458,9 +457,9 @@ class KnowledgeBaseLoader:
         }
 
     @staticmethod
-    def _blocks_from_cache(data: Dict[str, Any]) -> List[MdBlock]:
+    def _blocks_from_cache(data: dict[str, Any]) -> list[MdBlock]:
         """从缓存数据恢复 MdBlock 列表。"""
-        blocks: List[MdBlock] = []
+        blocks: list[MdBlock] = []
         for item in data.get("blocks", []):
             try:
                 bt = BlockType(item["block_type"])
@@ -482,7 +481,7 @@ class KnowledgeBaseLoader:
         self,
         generate_missing: bool = True,
         use_catalog: bool = True,
-    ) -> Dict[str, EffectFullInfo]:
+    ) -> dict[str, EffectFullInfo]:
         """加载插件效果。
 
         优先从预生成的 effect_catalog.json 加载，若不存在则通过
@@ -511,7 +510,7 @@ class KnowledgeBaseLoader:
         scanner.scan_plugins(generate_missing=generate_missing)
         scanner.scan_knowledge_base()
 
-        effects: Dict[str, EffectFullInfo] = {}
+        effects: dict[str, EffectFullInfo] = {}
 
         for key, effect_info in scanner._effects.items():
             full_info = self._convert_to_full_info(effect_info)
@@ -521,7 +520,7 @@ class KnowledgeBaseLoader:
         logger.info(f"插件效果加载完成，共 {len(effects)} 个效果")
         return effects
 
-    def _load_from_catalog(self, catalog_path: Path) -> Dict[str, EffectFullInfo]:
+    def _load_from_catalog(self, catalog_path: Path) -> dict[str, EffectFullInfo]:
         """从预生成的 effect_catalog.json 加载效果。
 
         Args:
@@ -537,7 +536,7 @@ class KnowledgeBaseLoader:
         with open(catalog_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        effects: Dict[str, EffectFullInfo] = {}
+        effects: dict[str, EffectFullInfo] = {}
         effects_data = data.get("effects", data)
 
         if isinstance(effects_data, dict):
@@ -591,7 +590,7 @@ class KnowledgeBaseLoader:
         self,
         effect_name: str,
         category: str = "",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """为效果生成默认参数模板。
 
         根据效果分类生成默认参数模板。如果指定了分类则直接使用，
@@ -666,7 +665,7 @@ class KnowledgeBaseLoader:
         self,
         effect_name: str,
         category: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成默认预设。"""
         presets = []
 

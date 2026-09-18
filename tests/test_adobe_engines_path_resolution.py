@@ -18,7 +18,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 _PA_ROOT = str(PROJECT_ROOT / "puppet-automation")
@@ -234,8 +234,8 @@ class TestAdobeEnginesInitialization(_EngineModuleIsolationMixin, unittest.TestC
 
     def test_base_engine_inheritance(self):
         """验证继承 BaseEngine"""
-        from src.engines.base import BaseEngine
         from src.engines.audition.engine import AuditionEngine
+        from src.engines.base import BaseEngine
         from src.engines.photoshop.engine import PhotoshopEngine
         from src.engines.premiere.engine import PremiereEngine
         

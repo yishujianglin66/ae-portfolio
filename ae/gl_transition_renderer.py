@@ -22,14 +22,14 @@ GL-Transition Renderer — GPU加速转场渲染引擎
 from __future__ import annotations
 
 import json
+import math
 import os
 import sys
 import time
-import math
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Callable
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -37,7 +37,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # ================================================================
 #  GL 转场类型 → gl-transitions 名称映射
 # ================================================================
-GL_TRANSITION_TABLE: Dict[str, Dict[str, Any]] = {
+GL_TRANSITION_TABLE: dict[str, dict[str, Any]] = {
     # ================================================================
     #  125 GLSL shader 完整映射表 (v2 — 基于 gl-transitions 仓库)
     #  70 个 shader 包含参数化的 uniform 默认值
@@ -246,8 +246,8 @@ class GLTransitionRenderer:
 
         self._ctx = None
         self._gpu_available = False
-        self._shader_cache: Dict[str, str] = {}
-        self._program_cache: Dict[str, Any] = {}
+        self._shader_cache: dict[str, str] = {}
+        self._program_cache: dict[str, Any] = {}
         self._init_gpu()
 
     def _init_gpu(self):
@@ -260,26 +260,26 @@ class GLTransitionRenderer:
             self._gpu_available = False
 
     @property
-    def available_transitions(self) -> List[str]:
+    def available_transitions(self) -> list[str]:
         """列出所有可用转场效果"""
         return sorted(GL_TRANSITION_TABLE.keys())
 
-    def list_by_category(self, category: str) -> List[str]:
+    def list_by_category(self, category: str) -> list[str]:
         """按分类列出转场"""
         return sorted([
             name for name, info in GL_TRANSITION_TABLE.items()
             if info["category"] == category
         ])
 
-    def list_categories(self) -> List[str]:
+    def list_categories(self) -> list[str]:
         """列出所有分类"""
         return sorted(set(info["category"] for info in GL_TRANSITION_TABLE.values()))
 
-    def get_transition_info(self, name: str) -> Optional[Dict[str, Any]]:
+    def get_transition_info(self, name: str) -> dict[str, Any] | None:
         """获取转场信息"""
         return GL_TRANSITION_TABLE.get(name)
 
-    def load_gl_transition_shader(self, gl_name: str) -> Optional[str]:
+    def load_gl_transition_shader(self, gl_name: str) -> str | None:
         """从 gl-transitions 仓库加载 GLSL Shader 源码"""
         if gl_name in self._shader_cache:
             return self._shader_cache[gl_name]
@@ -614,7 +614,7 @@ void main() {{
         output_path: str,
         duration: float = 1.0,
         fps: int = 30,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         渲染两段视频之间的转场效果。
 
@@ -678,7 +678,7 @@ void main() {{
             "output": output_path,
         }
 
-    def get_mapping_to_pr_transition(self, gl_transition: str) -> Optional[str]:
+    def get_mapping_to_pr_transition(self, gl_transition: str) -> str | None:
         """将 GL 转场映射回 PR TransitionSystem 类型"""
         for pr_name, info in GL_TRANSITION_TABLE.items():
             if info["gl_name"] == gl_transition:
@@ -690,12 +690,14 @@ void main() {{
     # ================================================================
 
     @staticmethod
-    def auto_discover_shaders(shader_dir: str = None) -> Dict[str, Dict[str, Any]]:
+    def auto_discover_shaders(shader_dir: str = None) -> dict[str, dict[str, Any]]:
         """
         自动扫描 gl-transitions/transitions/ 目录，发现所有未映射的 .glsl shader。
         返回 {key: {...}} 字典，可与 GL_TRANSITION_TABLE 合并。
         """
-        import glob, re, os
+        import glob
+        import os
+        import re
 
         if shader_dir is None:
             shader_dir = str(Path(__file__).parent.parent / "ae" / "gl-transitions")
@@ -740,7 +742,7 @@ void main() {{
         return discovered
 
     @staticmethod
-    def extract_uniform_params(gl_name: str, shader_dir: str = None) -> List[List[str]]:
+    def extract_uniform_params(gl_name: str, shader_dir: str = None) -> list[list[str]]:
         """
         提取指定 shader 的 uniform 参数默认值。
 
@@ -750,7 +752,8 @@ void main() {{
         Returns:
             [[type, name, default_value], ...]
         """
-        import re, os
+        import os
+        import re
 
         if shader_dir is None:
             shader_dir = str(Path(__file__).parent.parent / "ae" / "gl-transitions")
@@ -767,7 +770,7 @@ void main() {{
         return [[t, n, v] for t, n, v in uniforms]
 
     @staticmethod
-    def validate_all_shaders(shader_dir: str = None) -> Dict[str, Any]:
+    def validate_all_shaders(shader_dir: str = None) -> dict[str, Any]:
         """
         验证所有 shader 文件是否可正确加载和构建。
 
@@ -780,7 +783,8 @@ void main() {{
                 "params_count": {str: int, ...}
             }
         """
-        import os, glob
+        import glob
+        import os
 
         if shader_dir is None:
             shader_dir = str(Path(__file__).parent.parent / "ae" / "gl-transitions")
@@ -816,7 +820,7 @@ void main() {{
 
         return result
 
-    def get_all_transitions(self, include_auto_discovered: bool = False) -> Dict[str, Dict[str, Any]]:
+    def get_all_transitions(self, include_auto_discovered: bool = False) -> dict[str, dict[str, Any]]:
         """获取所有转场（可选合并自动发现的 shader）"""
         all_trans = dict(GL_TRANSITION_TABLE)
         if include_auto_discovered:
@@ -837,7 +841,7 @@ class GLTransitionAdapter:
     def __init__(self, shader_dir: str = None):
         self.renderer = GLTransitionRenderer(shader_dir=shader_dir)
 
-    def get_gpu_transitions(self) -> Dict[str, Dict[str, Any]]:
+    def get_gpu_transitions(self) -> dict[str, dict[str, Any]]:
         """获取所有支持 GPU 渲染的转场及其分类"""
         categories = {}
         for name, info in GL_TRANSITION_TABLE.items():

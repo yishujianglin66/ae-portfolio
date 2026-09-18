@@ -69,7 +69,7 @@ def main():
     agent = MasterCutAgent()
 
     # 调用render_cut
-    print(f"\n[MasterCut Agent] Starting render with premium effects..."
+    print("\n[MasterCut Agent] Starting render with premium effects..."
           + ("  [DRY-RUN — 不碰 AE]" if dry_run else ""))
     print(f"  Sources: {len(sources)} files")
     print(f"  Effects: {len(effects)} configs")

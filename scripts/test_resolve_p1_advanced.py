@@ -3,17 +3,23 @@ P1 高级功能 E2E 测试
 =====================
 变速曲线 + Ken Burns 拉镜 + Zoom 转场 + 多素材拼接渲染
 """
-import sys
 import os
+import sys
 import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
 from integrations.resolve_engine import (
-    ResolveAutomationEngine, CDLConfig, TransformConfig,
-    SpeedCurve, KenBurnsConfig, ZoomTransition, ItemEffect,
-    ResolveError
+    CDLConfig,
+    ItemEffect,
+    KenBurnsConfig,
+    ResolveAutomationEngine,
+    ResolveError,
+    SpeedCurve,
+    TransformConfig,
+    ZoomTransition,
 )
+
 
 def test_section(name):
     print(f"\n{'='*60}")
@@ -66,7 +72,7 @@ def main():
                         power=(1.0, 1.05, 0.95), saturation=1.15)
         engine.apply_cdl(project_name, "AdvTL", 1, cdl)
         engine.apply_preset_grade(project_name, 2, "teal_orange")
-        print(f"  [PASS] CDL + preset applied")
+        print("  [PASS] CDL + preset applied")
         results["passed"] += 1
         results["tests"].append(("CDL调色", "PASS"))
     except Exception as e:
@@ -81,7 +87,7 @@ def main():
     try:
         curve = SpeedCurve(curve_type="ease_in", start_speed=0.5, end_speed=2.0)
         engine.apply_speed_curve(project_name, 1, curve)
-        print(f"  [PASS] Speed curve applied (0.5x -> 2.0x)")
+        print("  [PASS] Speed curve applied (0.5x -> 2.0x)")
         results["passed"] += 1
         results["tests"].append(("变速曲线", "PASS"))
     except Exception as e:
@@ -95,7 +101,7 @@ def main():
     test_section("Test 4: 基础变速 (2x)")
     try:
         engine.set_speed(project_name, 2, 2.0)
-        print(f"  [PASS] Speed 2x applied to item 2")
+        print("  [PASS] Speed 2x applied to item 2")
         results["passed"] += 1
         results["tests"].append(("基础变速", "PASS"))
     except Exception as e:
@@ -110,7 +116,7 @@ def main():
     try:
         tf = TransformConfig(zoom_x=1.3, zoom_y=1.3, position_x=50, position_y=-30, rotation=3.0)
         engine.set_transform(project_name, 3, tf)
-        print(f"  [PASS] Transform applied to item 3")
+        print("  [PASS] Transform applied to item 3")
         results["passed"] += 1
         results["tests"].append(("变换", "PASS"))
     except Exception as e:
@@ -150,7 +156,7 @@ def main():
             end_x=0.7, end_y=0.5,
         )
         engine.apply_ken_burns(project_name, 1, kb)
-        print(f"  [PASS] Ken Burns configured (1.0x -> 1.5x zoom)")
+        print("  [PASS] Ken Burns configured (1.0x -> 1.5x zoom)")
         results["passed"] += 1
         results["tests"].append(("Ken Burns", "PASS"))
     except Exception as e:
@@ -185,7 +191,7 @@ def main():
     try:
         for page in ["edit", "color", "deliver", "edit"]:
             engine.switch_page(page)
-        print(f"  [PASS] All pages switched")
+        print("  [PASS] All pages switched")
         results["passed"] += 1
         results["tests"].append(("页面切换", "PASS"))
     except Exception as e:
@@ -207,7 +213,7 @@ def main():
     # Summary
     # ============================================================
     print(f"\n{'='*60}")
-    print(f"  P1 Advanced E2E Test Summary")
+    print("  P1 Advanced E2E Test Summary")
     print(f"{'='*60}")
     for name, status in results["tests"]:
         icon = "[OK]" if "PASS" in status else "[FAIL]"

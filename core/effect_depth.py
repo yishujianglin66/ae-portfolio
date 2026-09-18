@@ -16,7 +16,7 @@
 from typing import Any, Dict, List
 
 # 三档强度参数: 振幅/频率/透明度联动
-INTENSITY_TIERS: Dict[str, Dict[str, float]] = {
+INTENSITY_TIERS: dict[str, dict[str, float]] = {
     "subtle":   {"amp": 0.35, "freq": 0.6, "opacity": 60,
                  "glow_radius": 8, "blur_len": 6, "rgb_offset": 2},
     "moderate": {"amp": 0.7, "freq": 1.0, "opacity": 80,
@@ -27,7 +27,7 @@ INTENSITY_TIERS: Dict[str, Dict[str, float]] = {
 
 
 def _ease_lines(var: str, n_keys: int, speed: float = 1.0,
-                infl: float = 75.0) -> List[str]:
+                infl: float = 75.0) -> list[str]:
     out = []
     for k in range(1, n_keys + 1):
         out.append(f'var __fe{k} = new KeyframeEase({speed}, {infl});'
@@ -50,7 +50,7 @@ def _validated_jsx(jsx: str) -> str:
 class EffectDepthLibrary:
     """效果深化JSX生成器 — intensity三档联动 + 运镜联动"""
 
-    def tier(self, intensity: str) -> Dict[str, float]:
+    def tier(self, intensity: str) -> dict[str, float]:
         return INTENSITY_TIERS.get(intensity, INTENSITY_TIERS["moderate"])
 
     # ── 1. Glow 深化: 双层辉光 + 色相偏移 ────────────────
@@ -206,13 +206,13 @@ class EffectDepthLibrary:
 
     # ── 6. 效果×运镜联动 ─────────────────────────────────
     def camera_effect_link(self, camera_id: str,
-                           seg_type: str) -> List[Dict[str, Any]]:
+                           seg_type: str) -> list[dict[str, Any]]:
         """运镜→效果联动规则:
         - drop段 whip甩镜 → RGB分离(色差抖动) + 运动模糊(速度线)
         - break段任意运镜 → 柔光 + 降饱和
         - drop段 push → 双层Glow脉冲
         """
-        links: List[Dict[str, Any]] = []
+        links: list[dict[str, Any]] = []
         if seg_type == "drop" and camera_id == "whip":
             links.append({"effect": "rgb_split", "intensity": "intense"})
             links.append({"effect": "speed_lines", "intensity": "intense"})
@@ -244,6 +244,6 @@ class EffectDepthLibrary:
                                                  seg_start, seg_end, uid))
         return _validated_jsx("\n".join(out))
 
-    def list_effects(self) -> List[str]:
+    def list_effects(self) -> list[str]:
         return ["glow_double", "speed_lines", "rgb_split",
                 "particle_world", "saber", "form_grid", "soft_breathe"]

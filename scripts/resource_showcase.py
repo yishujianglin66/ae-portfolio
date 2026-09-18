@@ -21,9 +21,9 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from scripts.m2_auto_iterate import render_tree  # noqa: E402
-from core.sfx_layer import plan_sfx, mix_sfx  # noqa: E402
 from core.lut_pipeline import load_sampling, transcode_with_lut  # noqa: E402
+from core.sfx_layer import mix_sfx, plan_sfx  # noqa: E402
+from scripts.m2_auto_iterate import render_tree  # noqa: E402
 
 OUT_DIR = PROJECT / "output" / "resource_showcase"
 DUR = 8.0
@@ -33,8 +33,9 @@ SEQ_DIR = PROJECT / "resources" / "effects" / "序列帧贴图"
 
 def big_fx_layer(category: str, t_hit: float, dur: float, z: int, seed_tweak=0):
     """全屏化贴图层: cover 全屏 + 长持续 + 强 punch (与 image_fx 的保守版对比)。"""
-    from core.composition_tree import LayerSpec
     import random
+
+    from core.composition_tree import LayerSpec
     pool = FX_IDX.get(category, [])
     if not pool:
         return None
@@ -68,7 +69,7 @@ def seq_layers(t0: float, n: int = 8, per: float = 0.1, z: int = 8):
 
 
 def build_tree():
-    from core.composition_tree import LayerSpec, CompositionTree, EffectRef
+    from core.composition_tree import CompositionTree, EffectRef, LayerSpec
     FOOTAGE = "data/real_amv_test/DL_FATE_r978_BV1qb411C79B_p1.mp4"
     beats = [
         {"time": 0.8, "beat_type": "kick"},

@@ -47,7 +47,7 @@ class OpenMontageEngine(BaseEngine):
     def __init__(
         self,
         executable_path: Path | str = sys.executable,
-        om_root: Optional[Path] = None,
+        om_root: Path | None = None,
     ):
         self.om_root = om_root or _OM_ROOT
         super().__init__(executable_path)
@@ -88,9 +88,9 @@ class OpenMontageEngine(BaseEngine):
         query: str,
         kind: str = "video",  # video | image | any
         max_results: int = 10,
-        sources: Optional[List[str]] = None,
+        sources: list[str] | None = None,
         download: bool = False,
-        download_dir: Optional[Path] = None,
+        download_dir: Path | None = None,
     ) -> EngineResult:
         """多平台素材搜索。
 
@@ -188,7 +188,7 @@ class OpenMontageEngine(BaseEngine):
 
     def _search_single_source(
         self, source_name: str, query: str, kind: str, limit: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """搜索单个素材源。"""
         try:
             # 动态导入源模块
@@ -221,7 +221,7 @@ class OpenMontageEngine(BaseEngine):
             return []
 
     @staticmethod
-    def _download_media(url: str, download_dir: Path) -> Optional[Path]:
+    def _download_media(url: str, download_dir: Path) -> Path | None:
         """下载单个媒体文件。"""
         import urllib.request
 
@@ -332,7 +332,7 @@ class OpenMontageEngine(BaseEngine):
                 success=False, error=f"Reframe error: {str(e)[:500]}",
             )
 
-    def _calculate_face_crop(self, video_path: Path, target_aspect: float) -> Dict[str, int]:
+    def _calculate_face_crop(self, video_path: Path, target_aspect: float) -> dict[str, int]:
         """使用MediaPipe计算人脸追踪裁剪参数。"""
         import cv2
         import mediapipe as mp
@@ -384,7 +384,7 @@ class OpenMontageEngine(BaseEngine):
 
         return {"width": new_width, "height": new_height, "x": x, "y": y}
 
-    def _calculate_center_crop(self, video_path: Path, target_aspect: float) -> Dict[str, int]:
+    def _calculate_center_crop(self, video_path: Path, target_aspect: float) -> dict[str, int]:
         """计算居中裁剪参数。"""
         import cv2
 
@@ -412,10 +412,10 @@ class OpenMontageEngine(BaseEngine):
 
     async def compose_video(
         self,
-        clips: List[Dict[str, Any]],
+        clips: list[dict[str, Any]],
         output_path: Path | str,
         transitions: str = "fade",  # fade/none/slide
-        audio_path: Optional[Path] = None,
+        audio_path: Path | None = None,
         resolution: str = "1080x1920",
         fps: int = 30,
     ) -> EngineResult:
@@ -488,7 +488,7 @@ class OpenMontageEngine(BaseEngine):
             duration_seconds=duration,
         )
 
-    def _build_filter_complex(self, clips: List[Dict], transitions: str) -> str:
+    def _build_filter_complex(self, clips: list[dict], transitions: str) -> str:
         """构建FFmpeg滤镜图。"""
         parts = []
         current_offset = 0.0

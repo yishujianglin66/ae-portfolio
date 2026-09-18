@@ -32,9 +32,9 @@ from __future__ import annotations
 
 import json
 import logging
-import time
-import threading
 import subprocess
+import threading
+import time
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
@@ -77,7 +77,7 @@ class ValidationResult:
         category: TestCategory,
         status: ValidationStatus,
         message: str = "",
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
         duration: float = 0.0,
         recommendation: str = "",
     ):
@@ -89,7 +89,7 @@ class ValidationResult:
         self.duration = duration
         self.recommendation = recommendation
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "test_name": self.test_name,
             "category": self.category.value,
@@ -105,16 +105,16 @@ class ValidationReport:
     """完整的验证报告。"""
 
     def __init__(self):
-        self.results: List[ValidationResult] = []
+        self.results: list[ValidationResult] = []
         self.start_time: float = 0.0
         self.end_time: float = 0.0
-        self.summary: Dict[str, Any] = {}
+        self.summary: dict[str, Any] = {}
 
     def add_result(self, result: ValidationResult) -> None:
         """添加验证结果。"""
         self.results.append(result)
 
-    def generate_summary(self) -> Dict[str, Any]:
+    def generate_summary(self) -> dict[str, Any]:
         """生成验证总结。"""
         passed = sum(1 for r in self.results if r.status == ValidationStatus.PASSED)
         failed = sum(1 for r in self.results if r.status == ValidationStatus.FAILED)
@@ -137,7 +137,7 @@ class ValidationReport:
         }
         return self.summary
 
-    def _get_category_summary(self) -> Dict[str, Any]:
+    def _get_category_summary(self) -> dict[str, Any]:
         """按类别生成总结。"""
         categories = {}
         for cat in TestCategory:
@@ -152,14 +152,14 @@ class ValidationReport:
                 }
         return categories
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式。"""
         return {
             "summary": self.summary,
             "results": [r.to_dict() for r in self.results],
         }
 
-    def to_json(self, output_path: Optional[str] = None, indent: int = 2) -> str:
+    def to_json(self, output_path: str | None = None, indent: int = 2) -> str:
         """转换为 JSON 字符串。"""
         data = self.to_dict()
         json_str = json.dumps(data, ensure_ascii=False, indent=indent)
@@ -209,8 +209,8 @@ class AEEnvironmentValidator:
 
     def __init__(
         self,
-        ae_executable: Optional[str] = None,
-        bridge_dir: Optional[str] = None,
+        ae_executable: str | None = None,
+        bridge_dir: str | None = None,
         timeout: int = 60,
         skip_e2e: bool = False,
         skip_performance: bool = False,
@@ -894,7 +894,7 @@ class AEEnvironmentValidator:
                 "performance_ping_latency",
                 TestCategory.PERFORMANCE,
                 ValidationStatus.PASSED,
-                f"Ping 延迟基准测试完成",
+                "Ping 延迟基准测试完成",
                 {
                     "avg_latency_ms": round(avg_latency, 2),
                     "min_latency_ms": round(min_latency, 2),

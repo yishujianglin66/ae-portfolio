@@ -46,7 +46,7 @@ from typing import Optional
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-def _env(name: str) -> Optional[str]:
+def _env(name: str) -> str | None:
     """读取环境变量，空串视为未设置。"""
     v = os.environ.get(name)
     return v.strip() if isinstance(v, str) and v.strip() else None
@@ -177,8 +177,8 @@ def env_or_default(
     env_key: str,
     default: str,
     *,
-    env_file: Optional[str] = None,
-    skip_keys: Optional[set] = None,
+    env_file: str | None = None,
+    skip_keys: set | None = None,
 ) -> str:
     """从环境变量取配置，未设置时回退默认值（含 AE_WORK_DIR 前缀替换）。
 
@@ -259,8 +259,8 @@ def pr_bridge_dir() -> str:
 # FFmpeg / ffprobe 版本检测（惰性缓存，供 FFmpeg 8.0 兼容性判断）
 # ---------------------------------------------------------------------------
 
-_FFMPEG_VERSION_CACHE: Optional[tuple] = None
-_FFPROBE_VERSION_CACHE: Optional[tuple] = None
+_FFMPEG_VERSION_CACHE: tuple | None = None
+_FFPROBE_VERSION_CACHE: tuple | None = None
 
 
 def _parse_ffmpeg_version(output: str) -> tuple:

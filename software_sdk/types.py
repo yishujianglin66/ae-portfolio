@@ -12,7 +12,6 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
-
 # ============================================================================
 # 枚举类型
 # ============================================================================
@@ -108,16 +107,16 @@ class SoftwareStatus:
     """软件状态信息"""
     software: SoftwareType
     status: ConnectionStatus
-    version: Optional[str] = None
-    last_heartbeat: Optional[datetime] = None
-    error_message: Optional[str] = None
+    version: str | None = None
+    last_heartbeat: datetime | None = None
+    error_message: str | None = None
     cpu_usage: float = 0.0
     gpu_usage: float = 0.0
     memory_usage: float = 0.0
     active_tasks: int = 0
     max_tasks: int = 1
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "software": self.software.value,
             "status": self.status.value,
@@ -136,10 +135,10 @@ class SoftwareStatus:
 class SoftwareCapabilities:
     """软件能力描述"""
     software: SoftwareType
-    capabilities: Set[SoftwareCapability] = field(default_factory=set)
-    supported_formats_input: Set[str] = field(default_factory=set)
-    supported_formats_output: Set[str] = field(default_factory=set)
-    max_resolution: Tuple[int, int] = (3840, 2160)
+    capabilities: set[SoftwareCapability] = field(default_factory=set)
+    supported_formats_input: set[str] = field(default_factory=set)
+    supported_formats_output: set[str] = field(default_factory=set)
+    max_resolution: tuple[int, int] = (3840, 2160)
     max_framerate: float = 60.0
     gpu_accelerated: bool = False
     scriptable: bool = False
@@ -147,7 +146,7 @@ class SoftwareCapabilities:
     def has_capability(self, capability: SoftwareCapability) -> bool:
         return capability in self.capabilities
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "software": self.software.value,
             "capabilities": [c.value for c in self.capabilities],
@@ -165,30 +164,30 @@ class Task:
     """任务数据类"""
     task_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     task_type: str = "generic"
-    target_software: Optional[SoftwareType] = None
-    params: Dict[str, Any] = field(default_factory=dict)
+    target_software: SoftwareType | None = None
+    params: dict[str, Any] = field(default_factory=dict)
     priority: TaskPriority = TaskPriority.NORMAL
     status: TaskStatus = TaskStatus.PENDING
-    result: Optional[Any] = None
-    error: Optional[str] = None
-    callback: Optional[Callable[["Task"], None]] = None
+    result: Any | None = None
+    error: str | None = None
+    callback: Callable[["Task"], None] | None = None
     created_at: datetime = field(default_factory=datetime.now)
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    dependencies: List[str] = field(default_factory=list)
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    dependencies: list[str] = field(default_factory=list)
     retry_count: int = 0
     max_retries: int = 3
     timeout_seconds: int = 3600
     progress: float = 0.0
-    software_used: Optional[SoftwareType] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    software_used: SoftwareType | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __lt__(self, other: "Task") -> bool:
         if not isinstance(other, Task):
             return NotImplemented
         return self.priority.value > other.priority.value
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "task_id": self.task_id,
             "task_type": self.task_type,
@@ -214,17 +213,17 @@ class SoftwareConfig:
     """软件配置"""
     software: SoftwareType
     enabled: bool = True
-    executable_path: Optional[str] = None
-    install_dir: Optional[str] = None
-    version: Optional[str] = None
-    api_endpoint: Optional[str] = None
-    api_key: Optional[str] = None
+    executable_path: str | None = None
+    install_dir: str | None = None
+    version: str | None = None
+    api_endpoint: str | None = None
+    api_key: str | None = None
     max_concurrent_tasks: int = 1
     priority_weight: float = 1.0
-    license_key: Optional[str] = None
-    additional_settings: Dict[str, Any] = field(default_factory=dict)
+    license_key: str | None = None
+    additional_settings: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "software": self.software.value,
             "enabled": self.enabled,

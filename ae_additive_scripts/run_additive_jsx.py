@@ -22,11 +22,11 @@
 
 输出：可直接作为 execute-atom-script 的 scriptContent。
 """
+import argparse
+import json
 import os
 import re
 import sys
-import json
-import argparse
 
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.join(SCRIPTS_DIR, "_lib")

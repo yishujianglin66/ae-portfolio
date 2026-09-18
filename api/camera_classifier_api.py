@@ -4,24 +4,26 @@
 提供REST API接口用于视频运镜分类
 """
 
+import json
+import logging
 import os
 import sys
-from pathlib import Path
 import tempfile
-import json
-from typing import Dict, Tuple, Optional
-import logging
+from pathlib import Path
+from typing import Dict, Optional, Tuple
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent))
 
+import asyncio
+
+import uvicorn
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
 from models.camera_classifier.camera_classifier_2class import CameraClassifier2Class
 from models.camera_classifier.camera_classifier_hierarchical import HierarchicalCameraClassifier
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
-from fastapi.responses import JSONResponse
-import uvicorn
-import asyncio
-from pydantic import BaseModel
 
 # 设置日志
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +39,7 @@ class ClassificationResult(BaseModel):
     prediction: str
     confidence: float
     method: str
-    description: Optional[str] = None
+    description: str | None = None
     processing_time: float
 
 class ClassificationRequest(BaseModel):

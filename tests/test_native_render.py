@@ -3,15 +3,16 @@ Resolve 原生渲染测试（使用 SetRenderSettings API）
 ==================================================
 验证修复后的渲染逻辑能否正确设置输出路径并完成渲染
 """
-import sys
 import os
+import sys
 import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.resolve_engine import ResolveAutomationEngine, CDLConfig
-
 import pytest
+
+from integrations.resolve_engine import CDLConfig, ResolveAutomationEngine
+
 pytestmark = pytest.mark.real_davinci  # 需真实 DaVinci Resolve 环境
 
 def test_native_render():
@@ -68,16 +69,16 @@ def test_native_render():
         size = os.path.getsize(output_path) if exists else 0
         
         if exists and size > 100000:  # >100KB
-            print(f"[OK] Native render SUCCESSFUL!")
+            print("[OK] Native render SUCCESSFUL!")
             print(f"   Output: {output_path}")
             print(f"   Size: {size/1024/1024:.1f} MB")
-            print(f"\nPlease play this video to verify:")
-            print(f"   - CDL color grading is preserved (100% accurate)")
-            print(f"   - All effects are intact")
-            print(f"   - No quality loss from FFmpeg conversion")
+            print("\nPlease play this video to verify:")
+            print("   - CDL color grading is preserved (100% accurate)")
+            print("   - All effects are intact")
+            print("   - No quality loss from FFmpeg conversion")
         else:
             print(f"[FAIL] Native render FAILED or output too small: {size} bytes")
-            print(f"   Check Resolve UI for error messages")
+            print("   Check Resolve UI for error messages")
             
     except Exception as e:
         print(f"[ERROR] Render exception: {e}")

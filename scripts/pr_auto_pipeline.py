@@ -61,7 +61,7 @@ class PRAutoPipeline:
         self.pr_project_dir = self.output_dir / "pr_project"
         self.pr_project_dir.mkdir(exist_ok=True)
 
-        self.manifest: Dict = {
+        self.manifest: dict = {
             "created_at": datetime.now().isoformat(),
             "clips": [],
             "transitions": [],
@@ -73,7 +73,7 @@ class PRAutoPipeline:
     # 阶段 1: 生成测试素材
     # ============================================================
 
-    def generate_test_clips(self, count: int = 5, duration: float = 3.0) -> List[Path]:
+    def generate_test_clips(self, count: int = 5, duration: float = 3.0) -> list[Path]:
         """生成风格化测试视频片段。"""
         print("=" * 60)
         print("【阶段 1/6】生成测试素材")
@@ -110,7 +110,7 @@ class PRAutoPipeline:
         print()
         return clip_paths
 
-    def _generate_style_clip(self, output_path: Path, style: Dict, duration: float):
+    def _generate_style_clip(self, output_path: Path, style: dict, duration: float):
         """生成单个风格化视频片段。"""
         bg = style["bg_color"]
         accent = style["accent"]
@@ -196,7 +196,7 @@ class PRAutoPipeline:
     # 阶段 2: FFmpeg 离线剪辑（主轨，保证有输出）
     # ============================================================
 
-    def ffmpeg_edit_pipeline(self, clip_paths: List[Path]) -> Path:
+    def ffmpeg_edit_pipeline(self, clip_paths: list[Path]) -> Path:
         """FFmpeg 全流程离线剪辑。"""
         print("=" * 60)
         print("【阶段 2/6】FFmpeg 离线剪辑（主轨）")
@@ -235,7 +235,7 @@ class PRAutoPipeline:
         print()
         return final_output
 
-    def _apply_transitions_concat(self, clips: List[Path]) -> Path:
+    def _apply_transitions_concat(self, clips: list[Path]) -> Path:
         """使用 xfade 滤镜做转场拼接。"""
         n = len(clips)
         transition_duration = 0.5
@@ -456,7 +456,7 @@ class PRAutoPipeline:
     # 阶段 3: 生成 Premiere Pro 工程脚本
     # ============================================================
 
-    def generate_pr_project_script(self, clip_paths: List[Path]) -> Path:
+    def generate_pr_project_script(self, clip_paths: list[Path]) -> Path:
         """生成 Premiere Pro 全自动工程脚本。"""
         print("=" * 60)
         print("【阶段 3/6】生成 Premiere Pro 工程脚本")
@@ -501,7 +501,7 @@ class PRAutoPipeline:
         print()
         return script_path
 
-    def _build_pr_auto_script(self, clips: List[Path], manifest_path: Path) -> str:
+    def _build_pr_auto_script(self, clips: list[Path], manifest_path: Path) -> str:
         """构建 PR 全自动脚本。"""
         imports_code = ""
         for i, clip in enumerate(clips):
@@ -633,7 +633,7 @@ class PRAutoPipeline:
 }})();
 '''
 
-    def _build_pr_batch_script(self, clips: List[Path]) -> str:
+    def _build_pr_batch_script(self, clips: list[Path]) -> str:
         """构建 PR 批量执行 Python 脚本。"""
         clips_list = ",\n    ".join(f'Path(r"{p.as_posix()}")' for p in clips)
         return f'''#!/usr/bin/env python3
@@ -691,7 +691,7 @@ if __name__ == "__main__":
     # 阶段 4: 生成预览缩略图和信息
     # ============================================================
 
-    def generate_preview(self, video_path: Path) -> Dict:
+    def generate_preview(self, video_path: Path) -> dict:
         """生成视频预览和信息。"""
         print("=" * 60)
         print("【阶段 4/6】生成预览和信息")
@@ -755,7 +755,7 @@ if __name__ == "__main__":
     # 阶段 5: 输出清单和报告
     # ============================================================
 
-    def generate_report(self, video_info: Dict):
+    def generate_report(self, video_info: dict):
         """生成执行报告。"""
         print("=" * 60)
         print("【阶段 5/6】生成执行报告")
@@ -883,7 +883,7 @@ python pr_project/batch_execute.py
     # 阶段 6: 尝试启动 PR 执行（可选）
     # ============================================================
 
-    def try_pr_execution(self) -> Dict:
+    def try_pr_execution(self) -> dict:
         """尝试通过 PREngine 执行 PR 自动化（如果 PR 运行中）。"""
         print("=" * 60)
         print("【阶段 6/6】检查 Premiere Pro 状态")
@@ -927,7 +927,7 @@ python pr_project/batch_execute.py
     # 主入口
     # ============================================================
 
-    def run_full_pipeline(self) -> Dict:
+    def run_full_pipeline(self) -> dict:
         """运行完整流水线。"""
         start_time = datetime.now()
 

@@ -15,9 +15,9 @@ SadTalker Runner - 兼容性补丁 + 推理入口
 """
 from __future__ import annotations
 
+import importlib
 import sys
 import types
-import importlib
 
 
 def _patch_torchvision_functional_tensor() -> None:

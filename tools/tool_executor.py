@@ -15,15 +15,15 @@
 - 状态追踪：记录每次工具调用的结果
 """
 
-import os
-import sys
 import json
-import time
+import os
 import subprocess
-from dataclasses import dataclass, field, asdict
+import sys
+import time
+from dataclasses import asdict, dataclass, field
 from enum import Enum
-from typing import Dict, Any, List, Optional, Callable, Union
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -34,7 +34,7 @@ except ImportError:
     V4_AVAILABLE = False
 
 try:
-    from model_router import select_model, TaskCategory
+    from model_router import TaskCategory, select_model
     ROUTER_AVAILABLE = True
 except ImportError:
     ROUTER_AVAILABLE = False
@@ -63,15 +63,15 @@ class ToolDefinition:
     name: str
     description: str
     type: ToolType
-    input_schema: Dict[str, Any] = field(default_factory=dict)
-    output_schema: Dict[str, Any] = field(default_factory=dict)
-    handler: Optional[Callable] = None
+    input_schema: dict[str, Any] = field(default_factory=dict)
+    output_schema: dict[str, Any] = field(default_factory=dict)
+    handler: Callable | None = None
     engine_name: str = ""
     action: str = ""
     executable: str = ""
-    arguments: List[str] = field(default_factory=list)
+    arguments: list[str] = field(default_factory=list)
     
-    def to_v4_tool(self) -> Dict[str, Any]:
+    def to_v4_tool(self) -> dict[str, Any]:
         """转换为 V4 Function Calling 工具格式"""
         return {
             "type": "function",
@@ -88,12 +88,12 @@ class ToolCallResult:
     """工具调用结果"""
     tool_name: str
     status: ExecutionStatus
-    output: Optional[str] = None
+    output: str | None = None
     error: str = ""
     duration: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "tool_name": self.tool_name,
             "status": self.status.value,
@@ -108,17 +108,17 @@ class ToolExecutor:
     """工具执行引擎"""
     
     def __init__(self):
-        self._tools: Dict[str, ToolDefinition] = {}
-        self._v4_agent: Optional[V4Agent] = None
-        self._call_history: List[ToolCallResult] = []
+        self._tools: dict[str, ToolDefinition] = {}
+        self._v4_agent: V4Agent | None = None
+        self._call_history: list[ToolCallResult] = []
         self._load_builtin_tools()
     
     @property
-    def tools(self) -> Dict[str, ToolDefinition]:
+    def tools(self) -> dict[str, ToolDefinition]:
         return self._tools
     
     @property
-    def call_history(self) -> List[ToolCallResult]:
+    def call_history(self) -> list[ToolCallResult]:
         return self._call_history
     
     def _load_builtin_tools(self):
@@ -300,15 +300,15 @@ class ToolExecutor:
         """注册工具"""
         self._tools[tool.name] = tool
     
-    def get_tool(self, name: str) -> Optional[ToolDefinition]:
+    def get_tool(self, name: str) -> ToolDefinition | None:
         """获取工具定义"""
         return self._tools.get(name)
     
-    def list_v4_tools(self) -> List[Dict[str, Any]]:
+    def list_v4_tools(self) -> list[dict[str, Any]]:
         """获取所有工具的V4 Function Calling格式列表"""
         return [tool.to_v4_tool() for tool in self._tools.values()]
     
-    def execute_command(self, executable: str, arguments: List[str], 
+    def execute_command(self, executable: str, arguments: list[str], 
                        timeout: int = 120) -> ToolCallResult:
         """执行命令行工具"""
         start_time = time.time()
@@ -361,7 +361,7 @@ class ToolExecutor:
             )
     
     def execute_mcp_tool(self, engine_name: str, action: str, 
-                         arguments: Dict[str, Any]) -> ToolCallResult:
+                         arguments: dict[str, Any]) -> ToolCallResult:
         """执行MCP工具"""
         try:
             from mcp_bridge_client import MCPBridgeClient
@@ -400,7 +400,7 @@ class ToolExecutor:
             )
     
     def _generate_jsx_script(self, engine_name: str, action: str, 
-                            arguments: Dict[str, Any]) -> str:
+                            arguments: dict[str, Any]) -> str:
         """生成JSX脚本"""
         if engine_name == "after_effects":
             if action == "create_composition":
@@ -436,7 +436,7 @@ if (comp && comp instanceof CompItem) {{
         
         return f"{{ status: 'error', message: 'Unsupported action {action}' }}"
     
-    def execute(self, tool_name: str, arguments: Dict[str, Any]) -> ToolCallResult:
+    def execute(self, tool_name: str, arguments: dict[str, Any]) -> ToolCallResult:
         """执行工具（统一入口）"""
         tool = self._tools.get(tool_name)
         if not tool:
@@ -470,7 +470,7 @@ if (comp && comp instanceof CompItem) {{
         
         return result
     
-    def _build_command_args(self, tool: ToolDefinition, arguments: Dict[str, Any]) -> List[str]:
+    def _build_command_args(self, tool: ToolDefinition, arguments: dict[str, Any]) -> list[str]:
         """构建命令行参数"""
         args = []
         
@@ -508,7 +508,7 @@ if (comp && comp instanceof CompItem) {{
         
         return args
     
-    def _execute_engine_tool(self, tool: ToolDefinition, arguments: Dict[str, Any]) -> ToolCallResult:
+    def _execute_engine_tool(self, tool: ToolDefinition, arguments: dict[str, Any]) -> ToolCallResult:
         """执行引擎工具"""
         try:
             from toolchain_manager import ToolchainManager
@@ -548,7 +548,7 @@ if (comp && comp instanceof CompItem) {{
             )
     
     def model_driven_execution(self, user_request: str, 
-                               max_tool_calls: int = 5) -> Dict[str, Any]:
+                               max_tool_calls: int = 5) -> dict[str, Any]:
         """模型驱动的工具执行
         
         流程：V4分析 → 选择工具 → 执行 → 反馈 → 继续/结束
@@ -645,7 +645,7 @@ if (comp && comp instanceof CompItem) {{
                 "steps": [],
             }
     
-    def _parse_tool_calls(self, result: str) -> List[Dict[str, Any]]:
+    def _parse_tool_calls(self, result: str) -> list[dict[str, Any]]:
         """解析V4返回的工具调用"""
         try:
             json_start = result.find("[")
@@ -672,7 +672,7 @@ if (comp && comp instanceof CompItem) {{
         
         return []
     
-    def execute_plan(self, plan: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def execute_plan(self, plan: list[dict[str, Any]]) -> dict[str, Any]:
         """执行预定义计划"""
         executed_steps = []
         
@@ -718,7 +718,7 @@ def execute_tool(tool_name: str, **kwargs) -> ToolCallResult:
     return get_executor().execute(tool_name, kwargs)
 
 
-def model_execute(user_request: str) -> Dict[str, Any]:
+def model_execute(user_request: str) -> dict[str, Any]:
     """快捷函数：模型驱动执行"""
     return get_executor().model_driven_execution(user_request)
 

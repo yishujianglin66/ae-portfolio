@@ -94,6 +94,7 @@ check("材质渐变shade范围0.18→0.90",
 
 # 渲染冒烟: extrude特效实际产出带深度偏移的像素
 from PIL import Image, ImageDraw  # noqa: E402
+
 probe = Image.new('RGBA', (160, 90), (0, 0, 0, 0))
 ImageDraw.Draw(probe).text((40, 25), "Z", font=gta.load_font("SimHei", 40),
                            fill=(255, 255, 255, 255))
@@ -105,6 +106,7 @@ check("挤出深度方向存在实体像素(>80个)", depth_px > 80, str(depth_p
 
 print("\n=== 4. 继承链: 预览字体池 ⊆ font_scanner 实扫 ===")
 from core.font_scanner import SystemFontScanner  # noqa: E402
+
 fs = SystemFontScanner()
 scanned = fs.scan()
 scanned_names = {f["name"].lower() for f in scanned}

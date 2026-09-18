@@ -26,12 +26,12 @@
 """
 from __future__ import annotations
 
+import json
+import logging
+import math
 import os
 import re
-import json
-import math
 import subprocess
-import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -39,7 +39,8 @@ logger = logging.getLogger(__name__)
 
 # ffmpeg/ffprobe 默认路径收口到 core/paths.py（AEK_FFMPEG / AEK_FFPROBE 可覆盖）
 try:
-    from core.paths import ffmpeg_bin as _paths_ffmpeg, ffprobe_bin as _paths_ffprobe
+    from core.paths import ffmpeg_bin as _paths_ffmpeg
+    from core.paths import ffprobe_bin as _paths_ffprobe
 except ImportError:
     _paths_ffmpeg = lambda: r"C:\ffmpeg\bin\ffmpeg.exe"
     _paths_ffprobe = lambda: r"C:\ffmpeg\bin\ffprobe.exe"
@@ -65,7 +66,7 @@ class VideoQualityAssessor:
     #  主入口
     # ------------------------------------------------------------------
     def assess(self, video_path: str, reference_path: str = "",
-               min_score: float = 60.0) -> Dict[str, Any]:
+               min_score: float = 60.0) -> dict[str, Any]:
         """评估视频质量，返回结构化报告。
 
         Args:
@@ -128,8 +129,8 @@ class VideoQualityAssessor:
         )
 
         # 3. 各维度评分
-        checks: Dict[str, Any] = {}
-        suggestions: List[str] = []
+        checks: dict[str, Any] = {}
+        suggestions: list[str] = []
 
         # --- 编码健康度 ---
         enc = self._score_encoding(probe)
@@ -185,7 +186,7 @@ class VideoQualityAssessor:
             suggestions.append("视频几乎全为静帧，判定为静态内容")
 
         # 5. 参考视频对比 (可选, 不影响主分数)
-        ref_info: Dict[str, Any] = {}
+        ref_info: dict[str, Any] = {}
         if reference_path and Path(reference_path).exists():
             ref_probe = self._ffprobe(reference_path)
             if ref_probe:
@@ -216,7 +217,7 @@ class VideoQualityAssessor:
     # ------------------------------------------------------------------
     #  内部工具方法
     # ------------------------------------------------------------------
-    def _error_result(self, msg: str) -> Dict[str, Any]:
+    def _error_result(self, msg: str) -> dict[str, Any]:
         """构造错误返回"""
         return {
             "passed": False,
@@ -229,7 +230,7 @@ class VideoQualityAssessor:
         }
 
     def _signalstats_analyze(self, video_path: str, duration_limit: float = 10.0,
-                             video_duration: float = 0.0) -> Dict[str, float]:
+                             video_duration: float = 0.0) -> dict[str, float]:
         """OpenCV 不可用时的兜底实测: ffmpeg signalstats(亮度/饱和度) + freezedetect(静帧)
 
         与 core/evolution/evaluator._measure_video_stats 同源方法。
@@ -255,7 +256,7 @@ class VideoQualityAssessor:
         if not out:
             return {"valid": False}
 
-        vals: Dict[str, float] = {}
+        vals: dict[str, float] = {}
         cnt = 0
         for key in ("YAVG", "YLOW", "YHIGH", "SATAVG"):
             ms = re.findall(r"lavfi\.signalstats\." + key + r"=(\d+(?:\.\d+)?)", out)
@@ -285,7 +286,7 @@ class VideoQualityAssessor:
             "valid": cnt > 0,
         }
 
-    def _ffprobe(self, video_path: str) -> Dict[str, Any]:
+    def _ffprobe(self, video_path: str) -> dict[str, Any]:
         """调用 ffprobe 获取视频元数据 (JSON)"""
         if not self.ffprobe_bin or not Path(self.ffprobe_bin).exists():
             return {}
@@ -304,9 +305,9 @@ class VideoQualityAssessor:
             logger.debug(f"_ffprobe 失败 {video_path}: {e}")
             return {}
 
-    def _opencv_analyze(self, video_path: str, max_frames: int = 12) -> Dict[str, Any]:
+    def _opencv_analyze(self, video_path: str, max_frames: int = 12) -> dict[str, Any]:
         """用 OpenCV 抽帧分析: 锐度(Laplacian方差), 亮度, 对比度, 饱和度, 黑场"""
-        metrics: Dict[str, Any] = {
+        metrics: dict[str, Any] = {
             "frames": 0, "sharpness_list": [], "brightness_list": [],
             "contrast_list": [], "saturation_list": [], "black_frames": 0,
             # openable: None=OpenCV不可用未尝试, True=打开成功, False=视频打不开(损坏)
@@ -361,7 +362,7 @@ class VideoQualityAssessor:
         return metrics
 
     # -------- 评分维度 --------
-    def _score_encoding(self, probe: Dict[str, Any]) -> Dict[str, Any]:
+    def _score_encoding(self, probe: dict[str, Any]) -> dict[str, Any]:
         """编码健康度评分"""
         streams = probe.get("streams", []) or []
         vstreams = [s for s in streams if s.get("codec_type") == "video"]
@@ -373,7 +374,7 @@ class VideoQualityAssessor:
         codec = vs.get("codec_name", "unknown")
         width = int(vs.get("width", 0) or 0)
         height = int(vs.get("height", 0) or 0)
-        issues: List[str] = []
+        issues: list[str] = []
 
         # codec 评分
         codec_score = 100 if codec in ("h264", "hevc", "vp9", "av1") else 60
@@ -431,7 +432,7 @@ class VideoQualityAssessor:
             "fps": fps, "bit_rate": fmt.get("bit_rate"), "issues": issues,
         }
 
-    def _score_visual_quality(self, fm: Dict[str, Any]) -> Dict[str, Any]:
+    def _score_visual_quality(self, fm: dict[str, Any]) -> dict[str, Any]:
         """视觉质量: 锐度 + 对比度"""
         # OpenCV 不可用 (openable is None): 优先用 signalstats 兜底实测
         if fm.get("openable") is None:
@@ -502,7 +503,7 @@ class VideoQualityAssessor:
             "sharpness_score": sharp_score, "contrast_score": contrast_score,
         }
 
-    def _score_color_consistency(self, fm: Dict[str, Any]) -> Dict[str, Any]:
+    def _score_color_consistency(self, fm: dict[str, Any]) -> dict[str, Any]:
         """色彩一致性: 亮度稳定性 + 饱和度合理性"""
         # OpenCV 不可用 (openable is None): 优先用 signalstats 兜底实测
         if fm.get("openable") is None:
@@ -584,7 +585,7 @@ class VideoQualityAssessor:
             "avg_saturation": round(avg_s, 3), "brightness_variance": round(b_var, 4),
         }
 
-    def _score_temporal_stability(self, probe: Dict[str, Any], fm: Dict[str, Any]) -> Dict[str, Any]:
+    def _score_temporal_stability(self, probe: dict[str, Any], fm: dict[str, Any]) -> dict[str, Any]:
         """时间稳定性: 黑场 + PTS 连续性"""
         black = fm.get("black_frames", 0)
         # 黑场评分 (signalstats 兜底路径: 全黑视频直接 0 分)
@@ -621,7 +622,7 @@ class VideoQualityAssessor:
 
         pts_score = 95 if pts_gaps == 0 else 65
         score = round(0.6 * bf_score + 0.4 * pts_score, 1)
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "score": score, "black_frames": black, "pts_gaps": pts_gaps,
         }
         if fm.get("all_black"):

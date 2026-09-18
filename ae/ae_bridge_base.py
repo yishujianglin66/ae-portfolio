@@ -20,12 +20,12 @@ v2.0 新增:
 子类可重写：
 - _canonical_json(data)  : 自定义规范 JSON 序列化方式
 """
-import os
-import json
-import time
-import hmac
 import hashlib
+import hmac
+import json
 import logging
+import os
+import time
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
@@ -66,7 +66,7 @@ class AEBridgeClient(ABC):
         timeout: int = 10,
         poll_interval: float = 0.5,
         signature_enabled: bool = True,
-        secret: Optional[str] = None,
+        secret: str | None = None,
         # v2.0 新增参数
         middleware_pipeline: Any = None,
         idempotency_enabled: bool = False,
@@ -93,7 +93,7 @@ class AEBridgeClient(ABC):
         """加载签名密钥，返回字符串（无密钥返回空串）。"""
         ...
 
-    def _is_result_ready(self, result: Dict[str, Any]) -> bool:
+    def _is_result_ready(self, result: dict[str, Any]) -> bool:
         """判断结果是否就绪。默认只要读到非空即就绪，子类可重写。
 
         例如 MCPBridgeClient 要求 status in ['success','error','timeout']。
@@ -103,7 +103,7 @@ class AEBridgeClient(ABC):
     # ------------------------------------------------------------------
     # 通用方法
     # ------------------------------------------------------------------
-    def _verify_response_signature(self, result: Dict[str, Any]) -> bool:
+    def _verify_response_signature(self, result: dict[str, Any]) -> bool:
         """验证响应签名（如果存在）。
 
         Returns:
@@ -122,14 +122,14 @@ class AEBridgeClient(ABC):
             logger.warning(f"Response signature verification failed: {e}")
             return False
 
-    def _canonical_json(self, data: Dict[str, Any]) -> str:
+    def _canonical_json(self, data: dict[str, Any]) -> str:
         """生成规范 JSON 字符串（用于签名）。
 
         默认与 mcp_bridge_client._canonicalize 一致：sort_keys + 紧凑分隔符。
         """
         return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
-    def _generate_signature(self, data: Dict[str, Any]) -> str:
+    def _generate_signature(self, data: dict[str, Any]) -> str:
         """HMAC-SHA256 签名。无密钥或签名关闭时返回空串。"""
         if not self.signature_enabled or not self.secret:
             return ""
@@ -140,7 +140,7 @@ class AEBridgeClient(ABC):
             hashlib.sha256,
         ).hexdigest()
 
-    def _write_command_file(self, command: Dict[str, Any]) -> None:
+    def _write_command_file(self, command: dict[str, Any]) -> None:
         """写入命令文件（自动创建父目录）。"""
         parent = os.path.dirname(self.command_file)
         if parent:
@@ -148,7 +148,7 @@ class AEBridgeClient(ABC):
         with open(self.command_file, "w", encoding="utf-8") as f:
             json.dump(command, f, ensure_ascii=False, indent=2)
 
-    def _read_result(self) -> Optional[Dict[str, Any]]:
+    def _read_result(self) -> dict[str, Any] | None:
         """读取结果文件，文件不存在或解析失败返回 None。"""
         if not os.path.exists(self.result_file):
             return None
@@ -158,7 +158,7 @@ class AEBridgeClient(ABC):
         except (json.JSONDecodeError, OSError):
             return None
 
-    def _wait_for_result(self) -> Dict[str, Any]:
+    def _wait_for_result(self) -> dict[str, Any]:
         """轮询等待结果，超时返回错误 dict。
 
         v2.0: 读取结果后自动验证签名。

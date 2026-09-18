@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 """批量分析设备图片并生成学习笔记"""
 
-import os
 import base64
+import os
 import time
+from pathlib import Path
+
 import requests
 from dotenv import load_dotenv
-from pathlib import Path
 
 load_dotenv('.env.doubao')
 
@@ -101,7 +102,7 @@ output_md.mkdir(parents=True, exist_ok=True)
 md_path = output_md / '设备学习笔记-20260717.md'
 with open(md_path, 'w', encoding='utf-8') as f:
     f.write('# 设备学习与普工工作笔记\n\n')
-    f.write(f'> 日期: 2026-07-17\n')
+    f.write('> 日期: 2026-07-17\n')
     f.write(f'> 图片数量: {len(results)} 张\n\n')
     f.write('---\n\n')
     

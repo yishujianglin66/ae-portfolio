@@ -21,18 +21,18 @@ Phase 2 AE实机验证脚本 - AI调度引擎效果扩展
     python tests/test_phase2_real_ae.py --full
 """
 
+import argparse
+import json
 import os
 import sys
-import json
 import time
-import argparse
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ae_ts_compiler_client import AETSCompilerClient
-from ae_agent_pipeline import AEAgentPipeline, PlanningResult
 
+from ae_agent_pipeline import AEAgentPipeline, PlanningResult
 
 # ==================== 配置 ====================
 
@@ -145,7 +145,7 @@ def step1_verify_ts_compiler():
         print(f"  [OK] JSX已保存: {jsx_path}")
         return True
     else:
-        print(f"  [FAIL] JSX生成失败")
+        print("  [FAIL] JSX生成失败")
         return False
 
 
@@ -288,7 +288,7 @@ def step5_verify_pipeline_jsx_compilation():
 
     if result["success"]:
         jsx = result["jsx_code"]
-        print(f"  [OK] 端到端JSX编译成功")
+        print("  [OK] 端到端JSX编译成功")
         print(f"  [OK] JSX长度: {len(jsx)} 字符")
         print(f"  [OK] 方法: {result['method']}")
         print(f"  [OK] 包含ADBE Gaussian Blur 2: {'ADBE Gaussian Blur 2' in jsx}")

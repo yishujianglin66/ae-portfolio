@@ -3,9 +3,9 @@
 Silhouette 集成测试 v2.0
 基于真实 Silhouette 2026 fx API 验证。
 """
-import sys
-import os
 import json
+import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -221,9 +221,9 @@ def test_roto_pipeline_emulation():
         # 8. 管线结构
         print("\n  Pipeline Structure:")
         print(f"    Source ({src.label})")
-        print(f"      output → Roto.foreground")
+        print("      output → Roto.foreground")
         print(f"    Roto ({roto.label})")
-        print(f"      output → Output.input")
+        print("      output → Output.input")
         print(f"    Output ({out_node.label})")
         
         print("\n  Result: 8/8 passed")

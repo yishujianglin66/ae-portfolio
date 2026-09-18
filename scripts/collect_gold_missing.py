@@ -16,11 +16,10 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from scripts.collect_tuning_data import (  # noqa: E402
-    build_tree_with_params, render_tree, SAMPLES, FRAME_ROOT)
 from core.visual_scorer import score_video  # noqa: E402
-from scripts.m2_auto_iterate import _param_snapshot  # noqa: E402
 from scripts.calibrate_gold_set import GOLD, PK  # noqa: E402
+from scripts.collect_tuning_data import FRAME_ROOT, SAMPLES, build_tree_with_params, render_tree  # noqa: E402
+from scripts.m2_auto_iterate import _param_snapshot  # noqa: E402
 
 
 def main() -> int:

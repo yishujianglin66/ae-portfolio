@@ -25,7 +25,7 @@ import json
 import logging
 import re
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -46,9 +46,9 @@ class OptimizationProposal:
     """一次优化提案"""
     proposal_id: str
     scope: str
-    adjustments: Dict[str, Any] = field(default_factory=dict)   # 配置调整键值对
+    adjustments: dict[str, Any] = field(default_factory=dict)   # 配置调整键值对
     rationale: str = ""                                          # 失分原因分析
-    actions: List[str] = field(default_factory=list)             # 建议动作清单
+    actions: list[str] = field(default_factory=list)             # 建议动作清单
     auto_approved: bool = False                                  # 是否在安全边界内
     needs_human_review: bool = False                             # 需人工确认
     source: str = "heuristic"                                    # llm / heuristic
@@ -56,12 +56,12 @@ class OptimizationProposal:
     cost_usd: float = 0.0
     timestamp: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
 # 允许 Optimizer 自动调整的安全参数（键 → (最小值, 最大值)）
-SAFE_ADJUSTABLE_PARAMS: Dict[str, tuple] = {
+SAFE_ADJUSTABLE_PARAMS: dict[str, tuple] = {
     "min_quality_score": (40.0, 90.0),
     "max_quality_iterations": (1, 5),
     "style_match": (None, None),        # bool 开关
@@ -100,8 +100,8 @@ class OptimizerAgent:
 
     def propose_improvements(
         self,
-        eval_records: List[Dict[str, Any]],
-        current_config: Optional[Dict[str, Any]] = None,
+        eval_records: list[dict[str, Any]],
+        current_config: dict[str, Any] | None = None,
         scope: str = "",
         experience_context: str = "",
     ) -> OptimizationProposal:
@@ -117,7 +117,7 @@ class OptimizerAgent:
             OptimizationProposal（永不抛异常，失败时返回空提案）
         """
         current_config = current_config or {}
-        proposal: Optional[OptimizationProposal] = None
+        proposal: OptimizationProposal | None = None
 
         # 优先 LLM 分析，失败降级启发式
         try:
@@ -150,13 +150,14 @@ class OptimizerAgent:
 
     def _propose_with_llm(
         self,
-        eval_records: List[Dict[str, Any]],
-        current_config: Dict[str, Any],
+        eval_records: list[dict[str, Any]],
+        current_config: dict[str, Any],
         scope: str,
         experience_context: str = "",
-    ) -> Optional[OptimizationProposal]:
+    ) -> OptimizationProposal | None:
         """用 LLM 分析失分原因并生成配置调整"""
         import asyncio
+
         from core.llm_gateway import LLMGateway, TaskType
 
         summary = self._build_analysis_summary(eval_records)
@@ -217,7 +218,7 @@ class OptimizerAgent:
             cost_usd=round(getattr(resp, "cost_usd", 0.0) or 0.0, 6),
         )
 
-    def _build_analysis_summary(self, eval_records: List[Dict[str, Any]]) -> str:
+    def _build_analysis_summary(self, eval_records: list[dict[str, Any]]) -> str:
         """构建失分分析摘要（只含训练集可见信息，P3-D: 含 style_match 失分归因）"""
         if not eval_records:
             return "（无评测记录）"
@@ -234,7 +235,7 @@ class OptimizerAgent:
             )
         return "\n".join(lines)
 
-    def _parse_proposal(self, content: str) -> Optional[Dict[str, Any]]:
+    def _parse_proposal(self, content: str) -> dict[str, Any] | None:
         """解析 LLM 提案输出"""
         if not content:
             return None
@@ -263,8 +264,8 @@ class OptimizerAgent:
 
     def _propose_heuristic(
         self,
-        eval_records: List[Dict[str, Any]],
-        current_config: Dict[str, Any],
+        eval_records: list[dict[str, Any]],
+        current_config: dict[str, Any],
         scope: str,
     ) -> OptimizationProposal:
         """基于规则的保守改进（LLM 不可用时的兜底）
@@ -273,9 +274,9 @@ class OptimizerAgent:
         - 均分 < 70: 逐步开启 反馈闭环 → 增加迭代 → compiler
         - 均分 < 60: 一次性开启全部可用改进
         """
-        adjustments: Dict[str, Any] = {}
-        actions: List[str] = []
-        rationale_parts: List[str] = []
+        adjustments: dict[str, Any] = {}
+        actions: list[str] = []
+        rationale_parts: list[str] = []
 
         if eval_records:
             avg_score = sum(float(r.get("score", 0) or 0) for r in eval_records) / len(eval_records)
@@ -323,7 +324,7 @@ class OptimizerAgent:
 
             # 【P3-D】消费 style_match 失分归因 → 针对性提案
             # 归因来自评测器 checks.style_match_detail.failures（黑屏/断言未达标）
-            failure_counts: Dict[str, int] = {}
+            failure_counts: dict[str, int] = {}
             for rec in eval_records:
                 smd = (rec.get("checks", {}) or {}).get("style_match_detail", {}) or {}
                 for f in smd.get("failures", []) or []:
@@ -371,9 +372,9 @@ class OptimizerAgent:
     #  安全边界
     # ----------------------------------------------------------------
 
-    def _clip_to_safe_bounds(self, adjustments: Dict[str, Any]) -> Dict[str, Any]:
+    def _clip_to_safe_bounds(self, adjustments: dict[str, Any]) -> dict[str, Any]:
         """裁剪到安全范围；未知键移除（防止 Optimizer 越权）"""
-        clipped: Dict[str, Any] = {}
+        clipped: dict[str, Any] = {}
         for key, value in adjustments.items():
             if key not in SAFE_ADJUSTABLE_PARAMS:
                 logger.warning("[Optimizer] reject unknown adjustment key: %s", key)
@@ -390,7 +391,7 @@ class OptimizerAgent:
             clipped[key] = max(lo, min(hi, int(num) if isinstance(value, int) else num))
         return clipped
 
-    def _is_within_safe_bounds(self, adjustments: Dict[str, Any]) -> bool:
+    def _is_within_safe_bounds(self, adjustments: dict[str, Any]) -> bool:
         """判断提案是否在自动执行的安全边界内
 
         规则: 全部键在 SAFE_ADJUSTABLE_PARAMS 白名单内 → 自动批准
@@ -418,7 +419,7 @@ class OptimizerAgent:
             logger.warning("[Optimizer] persist failed: %s", e)
         append_jsonl(self._proposals_dir.parent / "optimization_log.jsonl", proposal.to_dict())
 
-    def load_proposal(self, proposal_id: str) -> Optional[Dict[str, Any]]:
+    def load_proposal(self, proposal_id: str) -> dict[str, Any] | None:
         """读取历史提案"""
         path = self._proposals_dir / f"proposal_{proposal_id}.json"
         if not path.exists():
@@ -434,7 +435,7 @@ class OptimizerAgent:
 #  全局单例
 # ============================================================================
 
-_global_optimizer: Optional[OptimizerAgent] = None
+_global_optimizer: OptimizerAgent | None = None
 
 
 def get_optimizer_agent(

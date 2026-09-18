@@ -58,14 +58,14 @@ class OpenCutClip:
     transition_in: str = ""
     transition_out: str = ""
     transition_duration: float = 0.5
-    effects: List[Dict[str, Any]] = field(default_factory=list)
-    filters: List[Dict[str, Any]] = field(default_factory=list)
-    text_overlays: List[Dict[str, Any]] = field(default_factory=list)
+    effects: list[dict[str, Any]] = field(default_factory=list)
+    filters: list[dict[str, Any]] = field(default_factory=list)
+    text_overlays: list[dict[str, Any]] = field(default_factory=list)
     speed: float = 1.0
     opacity: float = 1.0
     volume: float = 1.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "source": self.source_path,
@@ -90,12 +90,12 @@ class OpenCutTrack:
     id: str = ""
     name: str = ""
     track_type: str = "video"  # video / audio / text
-    clips: List[OpenCutClip] = field(default_factory=list)
+    clips: list[OpenCutClip] = field(default_factory=list)
     muted: bool = False
     locked: bool = False
     visible: bool = True
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "name": self.name,
@@ -116,10 +116,10 @@ class OpenCutProject:
     canvas_height: int = 1080
     fps: int = 30
     duration: float = 0.0
-    tracks: List[OpenCutTrack] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tracks: list[OpenCutTrack] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "version": self.version,
@@ -253,7 +253,7 @@ class OpenCutBridge:
 
     # ---- EditScript → OpenCut ----
 
-    def export_to_opencut(self, edit_script: Dict[str, Any], output_path: str) -> Dict[str, Any]:
+    def export_to_opencut(self, edit_script: dict[str, Any], output_path: str) -> dict[str, Any]:
         """将 EditScript 导出为 OpenCut 工程文件。
 
         Args:
@@ -263,7 +263,7 @@ class OpenCutBridge:
         Returns:
             导出结果
         """
-        log(f"--- EditScript → OpenCut 导出 ---")
+        log("--- EditScript → OpenCut 导出 ---")
 
         project = OpenCutProject(
             name=edit_script.get("title", "AE-Vault Export"),
@@ -378,7 +378,7 @@ class OpenCutBridge:
 
     # ---- OpenCut → EditScript ----
 
-    def import_from_opencut(self, project_path: str) -> Dict[str, Any]:
+    def import_from_opencut(self, project_path: str) -> dict[str, Any]:
         """从 OpenCut 工程文件导入为 EditScript。
 
         Args:
@@ -387,7 +387,7 @@ class OpenCutBridge:
         Returns:
             EditScript dict
         """
-        log(f"--- OpenCut → EditScript 导入 ---")
+        log("--- OpenCut → EditScript 导入 ---")
 
         project = OpenCutProject.load(project_path)
 
@@ -438,7 +438,7 @@ class OpenCutBridge:
 
     # ---- VRS → OpenCut ----
 
-    def vrs_to_timeline(self, vrs_result: Dict[str, Any], output_path: str) -> Dict[str, Any]:
+    def vrs_to_timeline(self, vrs_result: dict[str, Any], output_path: str) -> dict[str, Any]:
         """将 VRS 分析结果转换为 OpenCut 时间轴。
 
         Args:
@@ -448,7 +448,7 @@ class OpenCutBridge:
         Returns:
             导出结果
         """
-        log(f"--- VRS → OpenCut 时间轴 ---")
+        log("--- VRS → OpenCut 时间轴 ---")
 
         edit_script = {
             "title": vrs_result.get("title", "VRS Analysis Export"),
@@ -494,15 +494,15 @@ class OpenCutBridge:
         reverse_map = {v: k for k, v in self._transition_map.items()}
         return reverse_map.get(opencut_transition, opencut_transition)
 
-    def get_supported_transitions(self) -> List[str]:
+    def get_supported_transitions(self) -> list[str]:
         """获取所有支持的转场类型。"""
         return list(TRANSITION_MAP.keys())
 
-    def get_supported_effects(self) -> List[str]:
+    def get_supported_effects(self) -> list[str]:
         """获取所有支持的特效。"""
         return list(EFFECT_MAP.keys())
 
-    def get_supported_filters(self) -> List[str]:
+    def get_supported_filters(self) -> list[str]:
         """获取所有支持的滤镜。"""
         return list(FILTER_MAP.keys())
 
@@ -511,13 +511,13 @@ class OpenCutBridge:
 #  快捷函数
 # ================================================================
 
-def export_to_opencut(edit_script: Dict, output_path: str) -> Dict:
+def export_to_opencut(edit_script: dict, output_path: str) -> dict:
     """快捷导出到 OpenCut。"""
     bridge = OpenCutBridge()
     return bridge.export_to_opencut(edit_script, output_path)
 
 
-def import_from_opencut(project_path: str) -> Dict:
+def import_from_opencut(project_path: str) -> dict:
     """快捷从 OpenCut 导入。"""
     bridge = OpenCutBridge()
     return bridge.import_from_opencut(project_path)

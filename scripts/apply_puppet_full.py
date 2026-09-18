@@ -1,6 +1,6 @@
-import subprocess
-import os
 import json
+import os
+import subprocess
 
 config = json.load(open("c:/Users/Administrator/Desktop/AE-Knowledge-Vault/config/media-config.json", encoding="utf-8"))
 FFMPEG = config["tools"]["ffmpeg"]
@@ -71,6 +71,7 @@ else:
 final_prod = "D:/AE-Work/成品库/木偶风格_圣斗士.mp4"
 os.makedirs(os.path.dirname(final_prod), exist_ok=True)
 import shutil
+
 shutil.copy2(final, final_prod)
 
 print()

@@ -2,7 +2,10 @@
 """方向2: 字体×效果组合设计 + 更新预设配置
 基于外网MAD/AMV/漫剪调研 + 本机38个AE可用字体
 """
-import json, sys, re
+import json
+import re
+import sys
+
 sys.stdout.reconfigure(encoding='utf-8')
 from pathlib import Path
 
@@ -217,15 +220,15 @@ def update_presets():
     CONFIG.write_text(json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8")
     
     print(f"\n{'='*60}")
-    print(f"  FONT DESIGN SYSTEM APPLIED")
+    print("  FONT DESIGN SYSTEM APPLIED")
     print(f"{'='*60}")
     print(f"  Presets updated: {updated}/109")
-    print(f"  Version: 5.0-font-design")
-    print(f"\n  Font usage distribution:")
+    print("  Version: 5.0-font-design")
+    print("\n  Font usage distribution:")
     for font, count in sorted(font_usage.items(), key=lambda x: -x[1]):
         print(f"    {font:<30} {count} presets")
     
-    print(f"\n  Category → Primary font:")
+    print("\n  Category → Primary font:")
     for cat, strategy in FONT_STRATEGY.items():
         print(f"    {cat:<25} → {strategy['primary']} ({strategy['style']})")
 

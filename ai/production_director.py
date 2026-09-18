@@ -48,18 +48,24 @@ _TAIL_MARGIN = 1.5
 
 # 导入核心模块
 from ae.beat_detector import BeatDetector, BeatInfo
-from ae.emotion_curve_generator import EmotionCurveGenerator, EmotionCurve
-from ae.visual_content_analyzer import VisualContentAnalyzer, MaterialTag
-from core.temporal_analyzer import TemporalAnalyzer, MotionProfile, ShotStructure
-from core.audiovisual_correlator import AudioVisualCorrelator
+from ae.emotion_curve_generator import EmotionCurve, EmotionCurveGenerator
 from ae.text_animation_engine import (
-    TextAnimationEngine, TextAnimation, TextStyle, AnimationConfig,
-    AnimationPreset, MOOD_COLORS, POSITION_MAP,
+    MOOD_COLORS,
+    POSITION_MAP,
+    AnimationConfig,
+    AnimationPreset,
+    TextAnimation,
+    TextAnimationEngine,
+    TextStyle,
 )
+from ae.visual_content_analyzer import MaterialTag, VisualContentAnalyzer
 from ai.material_intelligence import (
-    MaterialIntelligenceEngine, MaterialIntelTag, MaterialIndex,
+    MaterialIndex,
+    MaterialIntelligenceEngine,
+    MaterialIntelTag,
 )
-
+from core.audiovisual_correlator import AudioVisualCorrelator
+from core.temporal_analyzer import MotionProfile, ShotStructure, TemporalAnalyzer
 
 # ================================================================
 #  数据结构
@@ -76,14 +82,14 @@ class DirectorSegment:
     energy: float           # 0.0 ~ 1.0
     source_file: str        # 使用的素材文件路径
     source_start: float     # 素材内的起始时间
-    text_overlay: Optional[Dict]  # {lyric, start, end, color, mood}
+    text_overlay: dict | None  # {lyric, start, end, color, mood}
     color_grade: str
     transition: str
     # ---- 方向B扩展（2026-08-10）----
     speed: float = 1.0                       # 段落播放速度（0.25~4.0，<1慢放 >1加速）
-    transition_params: Optional[Dict] = None  # {type, duration} 显式转场参数，优先于 transition 标签
-    zoompan_effect: Optional[str] = None       # 运镜效果: zoom_in/zoom_out/pan_left/diag_pan
-    onset_times: Optional[List[float]] = None  # 镜头内 onset 时间点列表（输出视频相对时间）
+    transition_params: dict | None = None  # {type, duration} 显式转场参数，优先于 transition 标签
+    zoompan_effect: str | None = None       # 运镜效果: zoom_in/zoom_out/pan_left/diag_pan
+    onset_times: list[float] | None = None  # 镜头内 onset 时间点列表（输出视频相对时间）
 
 
 @dataclass
@@ -93,10 +99,10 @@ class DirectorScript:
     total_duration: float
     bgm_path: str
     bgm_start_sec: float
-    segments: List[DirectorSegment] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    segments: list[DirectorSegment] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "title": self.title,
             "total_duration": self.total_duration,
@@ -158,7 +164,7 @@ class DirectorScript:
 
 
 def export_decision_log(script: DirectorScript, path,
-                        rationale: Optional[Dict[int, Dict]] = None) -> Path:
+                        rationale: dict[int, dict] | None = None) -> Path:
     """P2: 导出镜头决策日志 (每镜: 为何选该技巧/素材/速度/转场)
 
     Args:
@@ -221,13 +227,13 @@ class RenderResult:
     success: bool
     duration: float = 0.0
     file_size_mb: float = 0.0
-    resolution: Tuple[int, int] = (0, 0)
+    resolution: tuple[int, int] = (0, 0)
     fps: int = 0
     has_audio: bool = False
     elapsed_time: float = 0.0
     error_message: str = ""
     # 生产级内容复核
-    content_verified: Optional[bool] = None   # None=未复核, True/False=复核结果
+    content_verified: bool | None = None   # None=未复核, True/False=复核结果
     verification_reason: str = ""
 
 
@@ -297,8 +303,8 @@ class ProductionDirector:
         self,
         ffmpeg_path: str = None,
         ffprobe_path: str = None,
-        work_dir: Optional[str] = None,
-        taste_profile: Optional[dict] = None,
+        work_dir: str | None = None,
+        taste_profile: dict | None = None,
     ):
         # ffmpeg/ffprobe 默认路径收口到 core/paths.py（AEK_FFMPEG / AEK_FFPROBE 可覆盖）
         try:
@@ -311,12 +317,12 @@ class ProductionDirector:
         self.work_dir = Path(work_dir or str(_PROJECT_ROOT / "tmp" / "director_work"))
 
         # T4: 品味契约接入
-        from ai.taste_contract import TasteProfile, DEFAULT_TASTE
+        from ai.taste_contract import DEFAULT_TASTE, TasteProfile
         self.taste: TasteProfile = (
             TasteProfile.from_dict(taste_profile) if taste_profile else DEFAULT_TASTE
         )
         # 风格标识（用于规则适用域裁决；taste_profile 里带 style_id 时记录）
-        self._style_id: Optional[str] = (
+        self._style_id: str | None = (
             (taste_profile or {}).get("style_id") if taste_profile else None
         )
 
@@ -330,25 +336,25 @@ class ProductionDirector:
         self.av_correlator = AudioVisualCorrelator(tolerance_ms=100)
 
         # 分析缓存
-        self._beats: List[BeatInfo] = []
-        self._emotion_curve: Optional[EmotionCurve] = None
-        self._material_tags: Dict[str, MaterialTag] = {}
-        self._intel_tags: Dict[str, MaterialIntelTag] = {}
-        self._material_index: Optional[MaterialIndex] = None
-        self._source_durations: Dict[str, float] = {}
+        self._beats: list[BeatInfo] = []
+        self._emotion_curve: EmotionCurve | None = None
+        self._material_tags: dict[str, MaterialTag] = {}
+        self._intel_tags: dict[str, MaterialIntelTag] = {}
+        self._material_index: MaterialIndex | None = None
+        self._source_durations: dict[str, float] = {}
         # 生产级素材选择结果
-        self._selection: Dict[str, List[str]] = {}
-        self._selected_sources: List[str] = []
+        self._selection: dict[str, list[str]] = {}
+        self._selected_sources: list[str] = []
 
         # 本地训练模型中枢（懒加载，权重缺失/推理失败自动降级，不中断渲染）
         from ai.local_model_hub import get_hub
         self.model_hub = get_hub()
-        self._scene_model_tags: Dict[str, Dict] = {}   # 素材场景模型预测证据
-        self._rhythm_selection: Dict[str, Any] = {}    # 节奏奖励择优证据
-        self._used_windows: Dict[str, List[float]] = {}  # 素材已用窗口记录(防重复)
-        self._highlight_pool: Optional[Dict[str, List[Tuple[float, float]]]] = None  # 高光段池懒加载
+        self._scene_model_tags: dict[str, dict] = {}   # 素材场景模型预测证据
+        self._rhythm_selection: dict[str, Any] = {}    # 节奏奖励择优证据
+        self._used_windows: dict[str, list[float]] = {}  # 素材已用窗口记录(防重复)
+        self._highlight_pool: dict[str, list[tuple[float, float]]] | None = None  # 高光段池懒加载
         self._highlight_pool_warned: bool = False  # 高光池失效只报一次(每选段都会调,防刷屏)
-        self._semantic_windows: Optional[Dict[str, List[Tuple[float, str]]]] = None  # 语义窗口池懒加载(Stage2)
+        self._semantic_windows: dict[str, list[tuple[float, str]]] | None = None  # 语义窗口池懒加载(Stage2)
         self._beat_class = None       # v22 节拍强弱分级结果 (懒加载)
         self._dyn = None              # v22 音乐动态分析器 (懒加载)
         self._preset_sys = None       # v22 风格预设 (choose_camera 运镜池)
@@ -359,12 +365,12 @@ class ProductionDirector:
         self._last_punch_sec = -999.0  # 拉进-闪回撞击间距门控 (2026-08-15: 全片≤6次, 间隔≥20s)
         self._punch_budget = 6          # 撞击运镜总预算 (v22 全片 pulse 仅 2 次 → 稀缺强调)
         self._shot_plan = None          # LLM 镜头设计计划 (ai/shot_design_llm.py, 2026-08-15)
-        self._arc_shot_plan: Dict[float, dict] = {}  # 弧段start(round3) → 计划弧段
-        self._punch_points: List[float] = []         # LLM 指定撞击点 (绝对秒)
-        self._source_use_count: Dict[str, int] = {}  # 素材使用计数 (2026-08-15 防重复:
+        self._arc_shot_plan: dict[float, dict] = {}  # 弧段start(round3) → 计划弧段
+        self._punch_points: list[float] = []         # LLM 指定撞击点 (绝对秒)
+        self._source_use_count: dict[str, int] = {}  # 素材使用计数 (2026-08-15 防重复:
         #                                              v6 独自升级5 独占101镜 → 均衡轮转)
-        self._motion_profiles: Dict[str, MotionProfile] = {}   # 素材运动画像
-        self._shot_structures: Dict[str, ShotStructure] = {}   # 素材镜头结构
+        self._motion_profiles: dict[str, MotionProfile] = {}   # 素材运动画像
+        self._shot_structures: dict[str, ShotStructure] = {}   # 素材镜头结构
 
         # P0: SSIM自适应抽帧器懒加载 (素材预处理标准接口)
         self._frame_extractor = None
@@ -388,29 +394,29 @@ class ProductionDirector:
 
     def render(
         self,
-        video_sources: List[str],
+        video_sources: list[str],
         bgm_path: str,
         output_dir: str,
         output_name: str = "director_output.mp4",
-        lyrics: Optional[List[Tuple]] = None,
+        lyrics: list[tuple] | None = None,
         bgm_start_sec: float = 0.0,
-        target_duration: Optional[float] = None,
-        resolution: Tuple[int, int] = (1920, 1080),
+        target_duration: float | None = None,
+        resolution: tuple[int, int] = (1920, 1080),
         fps: int = 24,
         target_ip: str = "",
         strict: bool = True,
         allow_mixed: bool = False,
         verify_content: bool = True,
         use_speed_ramp: bool = False,
-        style_spec: Optional[dict] = None,
-        style_id: Optional[str] = None,
+        style_spec: dict | None = None,
+        style_id: str | None = None,
         use_beatnet: bool = False,
-        bpm_override: Optional[float] = None,
-        theme: Optional[str] = None,
+        bpm_override: float | None = None,
+        theme: str | None = None,
         enable_ae_channel: bool = False,
         clean_bgm_sfx: bool = False,
         beat_lock_hard_cuts: bool = False,
-        cut_times_override: Optional[List[float]] = None,
+        cut_times_override: list[float] | None = None,
     ) -> str:
         """端到端渲染。
 
@@ -463,7 +469,7 @@ class ProductionDirector:
                 print(f"  [style] 风格卡加载失败({_e}), 继续使用显式参数")
 
         # 风格卡/规格书中的运镜禁忌 → T4 池过滤
-        self._forbidden_cameras: List[str] = []
+        self._forbidden_cameras: list[str] = []
         if style_spec and style_spec.get("camera_preferences"):
             _forbid = style_spec["camera_preferences"].get("forbidden") or []
             self._forbidden_cameras = [str(c) for c in _forbid]
@@ -672,7 +678,7 @@ class ProductionDirector:
             elapsed = time.time() - t0
             print(f"\n{'=' * 60}")
             if result.success:
-                print(f"渲染成功!")
+                print("渲染成功!")
                 print(f"输出: {output_path}")
                 print(f"大小: {result.file_size_mb:.2f} MB")
                 print(f"时长: {result.duration:.2f}s")
@@ -913,11 +919,13 @@ class ProductionDirector:
 
         def _submit():
             try:
-                from datetime import datetime
-                from core.self_evolution_engine import (
-                    get_evolution_engine, ExecutionRecord,
-                )
                 import asyncio
+                from datetime import datetime
+
+                from core.self_evolution_engine import (
+                    ExecutionRecord,
+                    get_evolution_engine,
+                )
 
                 engine = get_evolution_engine()
                 # 从 RenderResult 已知信息推导初始质量基线，避免永远 0.0
@@ -1003,8 +1011,9 @@ class ProductionDirector:
                     )
                     # D2 修复: 导演真实参数反馈写入
                     try:
-                        from ai.director_feedback_hook import record_director_feedback
                         from datetime import datetime as _dt
+
+                        from ai.director_feedback_hook import record_director_feedback
                         record_director_feedback({
                             "run_id": f"director_{_dt.now().strftime('%Y%m%d_%H%M%S')}",
                             "quality": review.quality.overall_score,
@@ -1029,7 +1038,7 @@ class ProductionDirector:
 
     def _analyze(self, bgm_path, video_sources, bgm_start_sec, target_duration,
                  target_ip="", strict=True, allow_mixed=False, bpm_override=None,
-                 use_beatnet: bool = False, theme: Optional[str] = None):
+                 use_beatnet: bool = False, theme: str | None = None):
         """执行感知分析 — 包含素材IP智能识别与严格素材选择"""
 
         # 1.1 节拍检测
@@ -1063,7 +1072,8 @@ class ProductionDirector:
         # BPM 覆盖：使用 StyleSpec 的 BPM 生成合成节拍网格
         if bpm_override and abs(bpm_override - bpm) > 1.0:
             # 获取 BGM 时长
-            import subprocess, json as _json
+            import json as _json
+            import subprocess
             probe = subprocess.run(
                 ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", bgm_path],
                 capture_output=True, text=True, encoding="utf-8", errors="replace"
@@ -1435,7 +1445,7 @@ class ProductionDirector:
                         + "。拒绝降级到无关素材，请提供《"
                         + target_ip + "》的真实素材后重试。")
                 else:
-                    print(f"      [WARN] 非严格模式: 无匹配素材，将使用全部素材")
+                    print("      [WARN] 非严格模式: 无匹配素材，将使用全部素材")
             else:
                 self._selected_sources = matched
             # 覆盖度检查
@@ -1485,8 +1495,8 @@ class ProductionDirector:
     # ================================================================
 
     def _plan(self, video_sources, bgm_path, bgm_start_sec, duration, lyrics, target_ip="",
-              style_spec=None, use_speed_ramp: bool = False, theme: Optional[str] = None,
-              cut_times_override: Optional[List[float]] = None):
+              style_spec=None, use_speed_ramp: bool = False, theme: str | None = None,
+              cut_times_override: list[float] | None = None):
         """编排导演剧本 — 基于情绪曲线划分段落，踩拍切点，智能素材匹配
 
         2026-08-13 Stage1: theme 传入时用 direct_from_text 生成分镜,
@@ -1575,6 +1585,7 @@ class ProductionDirector:
         # 结构兼容的 arc_segments (type→mood 映射见下, cut_times 由能量驱动)。
         import librosa as _librosa
         import numpy as _np
+
         from core.music_dynamics import MusicDynamicsAnalyzer
         _dyn = MusicDynamicsAnalyzer(min_section_dur=1.2, smooth_frames=15)
         _y, _sr = _librosa.load(bgm_path, sr=22050, mono=True)
@@ -1627,8 +1638,8 @@ class ProductionDirector:
         # 给每段标注"叙事角色"(铺垫/蓄力/爆发/收尾)。素材匹配时优先按角色语义,
         # 而非纯高光/时间分散 → 解决"镜头杂乱无章"(此前每段只贴节拍无叙事意图)。
         # 失败/无 theme 时保持纯节拍驱动(行为不变)。
-        self._narrative_roles: Dict[float, str] = {}  # 弧段start → 叙事角色
-        self._narrative_sections: List[Dict] = []     # LLM 分镜 structure
+        self._narrative_roles: dict[float, str] = {}  # 弧段start → 叙事角色
+        self._narrative_sections: list[dict] = []     # LLM 分镜 structure
         _theme_role = None
         if theme:
             try:
@@ -2037,7 +2048,7 @@ class ProductionDirector:
                 # 输出视频时间 → BGM绝对时间（与 beats_abs 同坐标系）
                 return [c + bgm_start_sec for c in cuts_rel]
 
-            plans: Dict[str, List[float]] = {"arc_plan": list(global_cuts)}
+            plans: dict[str, list[float]] = {"arc_plan": list(global_cuts)}
             # 2026-09-02 移除 half_shift 候选: 它把全部切点整体偏移半拍
             # (切在弱拍/鼓点之间), run2 实测被采纳后切点-鼓点对齐率仅 34%,
             # 用户听感"完全没卡上鼓点"。0.01 级分差属噪声, 却能整体毁掉
@@ -2133,7 +2144,8 @@ class ProductionDirector:
         _MAX_RECENT = 2
         try:
             from ai.camera_decision import (
-                SourceCameraInventory, suggest_camera_for_shot,
+                SourceCameraInventory,
+                suggest_camera_for_shot,
             )
             _cam_inv = SourceCameraInventory()
             _cam_inv.batch_analyze(available_sources)
@@ -2838,7 +2850,7 @@ class ProductionDirector:
                               "drum": _drum, "t": round(_roll_start, 3)})
         return rolls
 
-    def _inject_stem_anchors(self, grid: Dict[str, Any], bgm_path: str) -> Dict[str, Any]:
+    def _inject_stem_anchors(self, grid: dict[str, Any], bgm_path: str) -> dict[str, Any]:
         """E0-1 鼓点 stem 锚定: anchors.json 真值覆盖 beatgrid 的 kick/strong/weak/rolls。
 
         频段 FFT 分离的 kick/snare 是启发式（150Hz/5kHz 割裂 + librosa onset）；
@@ -2870,7 +2882,7 @@ class ProductionDirector:
             print(f"      [beatgrid] stem 锚定注入失败, 保留频段版: {_ij_e}")
         return grid
 
-    def _load_beatgrid(self, bgm_path: str) -> Optional[Dict[str, Any]]:
+    def _load_beatgrid(self, bgm_path: str) -> dict[str, Any] | None:
         """自包含 beatgrid 分析：librosa 频段分离 → 鼓点分类 → 节拍网格。
 
         替代已失效的 OpenMontage analyze-beatgrid.py 外部脚本。
@@ -3211,6 +3223,7 @@ class ProductionDirector:
         """
         try:
             import subprocess as _s
+
             import numpy as _np
             # 源 fps 探测 (run53 教训: 60fps 素材按 24 映射, 时间标签错 2.5 倍)
             _pr = _s.run(["ffprobe", "-v", "error", "-show_entries", "stream=r_frame_rate",
@@ -3439,7 +3452,7 @@ class ProductionDirector:
         return segments
 
     def _calc_source_start(self, seg_idx, src_dur, seg_dur, mood, source_key="",
-                           role: Optional[str] = None):
+                           role: str | None = None):
         """计算素材内起始时间 — 内容感知高光优先 + 叙事角色语义匹配 + 贪心去重
 
         2026-08-13 Stage2: 叙事角色(铺垫/蓄力/爆发/收尾) → 匹配素材中
@@ -3530,8 +3543,8 @@ class ProductionDirector:
     #  高光段池 (v22 内容感知选材)
     # ================================================================
 
-    def _pick_by_narrative_role(self, role: str, available_sources: List[str],
-                                seg_idx: int) -> Optional[str]:
+    def _pick_by_narrative_role(self, role: str, available_sources: list[str],
+                                seg_idx: int) -> str | None:
         """按叙事角色选素材 — 用语义窗口缓存匹配 (Stage2 核心)。
 
         叙事角色 → 偏好情绪: 铺垫=calm/dark/quiet, 蓄力=intense/bright/epic,
@@ -3615,8 +3628,8 @@ class ProductionDirector:
         _caps = {s: self._source_durations.get(s, 60.0) for s in _matched}
         return self._balanced_pick(_matched, seg_idx, capacities=_caps)
 
-    def _balanced_pick(self, pool: List[str], seg_idx: int,
-                       capacities: Optional[Dict[str, float]] = None) -> str:
+    def _balanced_pick(self, pool: list[str], seg_idx: int,
+                       capacities: dict[str, float] | None = None) -> str:
         """素材均衡选择: 按"使用占比/容量"最低优先 (确定性)。
 
         2026-08-15: 纯计数均衡让 53s 短素材与 232s 长素材同频使用,
@@ -3658,7 +3671,7 @@ class ProductionDirector:
               + ("；该缓存已固化上游失败, 建议删除后重跑"
                  if cached and _tag == "neutral" else ""))
 
-    def _get_semantic_windows(self, source_key: str) -> Optional[List[Tuple[float, str]]]:
+    def _get_semantic_windows(self, source_key: str) -> list[tuple[float, str]] | None:
         """懒加载素材的语义窗口池 [(start_sec, scene_tag), ...] — Qwen3-VL 分析。
 
         2026-08-13 Stage2: 叙事角色匹配素材语义。把素材按时间窗口抽帧,
@@ -3673,7 +3686,8 @@ class ProductionDirector:
         v4 只抽中帧 → 标签=该帧内容, 取点 +1.5s 恰好命中被判定帧。
         """
         try:
-            import hashlib, json as _json
+            import hashlib
+            import json as _json
             if not source_key or not os.path.exists(source_key):
                 return None
             if self._semantic_windows is None:
@@ -3756,7 +3770,7 @@ class ProductionDirector:
         self._highlight_pool_warned = True
         print(f"  [highlight-pool] {msg}")
 
-    def _get_highlight_pool(self, source_key: str) -> Optional[List[Tuple[float, float]]]:
+    def _get_highlight_pool(self, source_key: str) -> list[tuple[float, float]] | None:
         """懒加载某素材的高光段池 [(start_sec, total_score), ...] 按total降序。
 
         只读 HighlightScorer 磁盘缓存 (cache/highlight_scores/), 该缓存由
@@ -3873,7 +3887,7 @@ class ProductionDirector:
                 segs[i].transition_params = params
 
         # 链内最后一个 clip 的一次性补偿时长: Σt (本链全部转场)
-        chain_last_extra: Dict[int, float] = {}
+        chain_last_extra: dict[int, float] = {}
         _heads_sorted = sorted(group_heads)
         for _hi, _head in enumerate(_heads_sorted):
             _end = _heads_sorted[_hi + 1] if _hi + 1 < len(_heads_sorted) else len(segs)
@@ -3894,11 +3908,11 @@ class ProductionDirector:
 
         # 1. 裁剪（含预补偿：渲染时长 = 段落时长 + 进入下一段的转场时长）
         #    预补偿基于安全化后的最终分组: 仅当 i+1 与 i 同链时才加长
-        clips: List[Tuple[str, DirectorSegment]] = []
+        clips: list[tuple[str, DirectorSegment]] = []
 
         # 1.5 AE高级运镜通道: 识别 zoom_back/pulse 镜头, 批量 AE 预渲染
         # (v22 双通道架构: AE 贝塞尔缓动+运动模糊 替代 FFmpeg 匀速 zoompan)
-        ae_clips_map: Dict[int, str] = {}
+        ae_clips_map: dict[int, str] = {}
         # ══ 重复乐句克隆 (2026-09-03 用户定稿语法) ═══════════════════════
         # 用户澄清: 不是全片段泛化, 而是"25s 后有几秒音乐与 23-25s 是同一段
         # (重复乐句)"→只把这些重复段用标杆段同款编导克隆。专业漫剪惯例:
@@ -4065,7 +4079,7 @@ class ProductionDirector:
             _gp = _bg
 
         if enable_ae_channel:
-            from ai.ae_render_channel import AERenderChannel, AE_TECHS
+            from ai.ae_render_channel import AE_TECHS, AERenderChannel
             _ae_plan = {}
             for _i, _seg in enumerate(segs):
                 if len(_ae_plan) >= 12:
@@ -4331,7 +4345,7 @@ class ProductionDirector:
 
         # 2. 按转场边界分组：cut 转场处分链，非cut链内 xfade，链超上限再强切
         groups = self._group_for_transitions(clips)
-        group_outputs: List[str] = []
+        group_outputs: list[str] = []
         for gi, group in enumerate(groups):
             g_out = run_dir / f"group_{gi:02d}.mp4"
             if len(group) == 1:
@@ -4352,7 +4366,7 @@ class ProductionDirector:
         if len(group_outputs) == 1:
             shutil.copy(group_outputs[0], str(concat_output))
         elif not self._concat_hard(group_outputs, str(concat_output)):
-            print(f"    [WARN] 组间拼接失败，使用首片段")
+            print("    [WARN] 组间拼接失败，使用首片段")
             shutil.copy(group_outputs[0], str(concat_output))
 
         n_xfade = sum(1 for _, seg in clips[1:] if self._xfade_for(seg)[1] > 0)
@@ -4380,7 +4394,7 @@ class ProductionDirector:
 
         return str(concat_output)
 
-    def _xfade_for(self, seg) -> Tuple[str, float]:
+    def _xfade_for(self, seg) -> tuple[str, float]:
         """进入该段落的转场 → (xfade滤镜名, 时长秒)；cut 返回 ('', 0)"""
         params = seg.transition_params if isinstance(seg.transition_params, dict) else {}
         tag = str(params.get("type") or getattr(seg, "transition", "cut") or "cut")
@@ -4465,7 +4479,7 @@ class ProductionDirector:
                 return False
             return Path(output).exists() and Path(output).stat().st_size > 0
         except subprocess.TimeoutExpired:
-            print(f"    [WARN] xfade链合成超时")
+            print("    [WARN] xfade链合成超时")
             return False
 
     def _concat_hard(self, clip_paths, output) -> bool:
@@ -4838,7 +4852,7 @@ class ProductionDirector:
             if Path(text_output).exists() and Path(text_output).stat().st_size > 0:
                 return text_output
         except subprocess.TimeoutExpired:
-            print(f"    [WARN] 文字叠加超时")
+            print("    [WARN] 文字叠加超时")
 
         return input_video
 
@@ -4958,7 +4972,7 @@ class ProductionDirector:
             print(f"    [SFX清理] librosa 未安装({e}), 退回原始 BGM")
             return bgm_path
 
-        print(f"    [SFX清理] HPSS 音源分离中 (激进模式)...")
+        print("    [SFX清理] HPSS 音源分离中 (激进模式)...")
 
         try:
             y, sr = librosa.load(bgm_path, sr=44100, mono=False)
@@ -5084,7 +5098,7 @@ class ProductionDirector:
                 # 降级：直接复制视频
                 shutil.copy(video_path, output_path)
         except subprocess.TimeoutExpired:
-            print(f"    [WARN] 混音超时")
+            print("    [WARN] 混音超时")
             shutil.copy(video_path, output_path)
 
     # ================================================================
@@ -5132,7 +5146,7 @@ class ProductionDirector:
     #  生产审计报告
     # ================================================================
 
-    def _load_atmosphere_annotations(self) -> Dict[str, Dict]:
+    def _load_atmosphere_annotations(self) -> dict[str, dict]:
         """加载 W6 氛围标注缓存 (ToriiGate 批量产物) → {文件名: 标注 dict}。
 
         优先数据源: data/material_tags/unified_tags.json (三源融合画像,
@@ -5146,7 +5160,7 @@ class ProductionDirector:
             if _unified.exists():
                 data = _json.loads(_unified.read_text(encoding="utf-8"))
                 tags = data.get("tags") or {}
-                merged: Dict[str, Dict] = {}
+                merged: dict[str, dict] = {}
                 for name, val in tags.items():
                     if isinstance(val, dict):
                         merged[name] = {
@@ -5182,6 +5196,7 @@ class ProductionDirector:
         """
         try:
             import asyncio
+
             from ai.stage_critic import StageCritic
             note = asyncio.run(StageCritic().critique(
                 stage=stage, stage_summary=stage_summary,
@@ -5252,6 +5267,7 @@ class ProductionDirector:
             try:
                 from core.atomic_checks import run_atomic_checks
                 from core.render_rubric import compute_rubric
+
                 from ai.stage_critic import StageCritic
                 _ac = run_atomic_checks(
                     result.output_path,

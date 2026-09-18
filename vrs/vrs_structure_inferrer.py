@@ -37,7 +37,7 @@ from loguru import logger
 
 # 项目内导入（带降级）
 try:
-    from core.llm_gateway import chat_with_routing, TaskType, LLMResponse
+    from core.llm_gateway import LLMResponse, TaskType, chat_with_routing
     _LLM_AVAILABLE = True
 except ImportError:
     logger.warning("core.llm_gateway 不可用，结构推断将降级为规则模式")
@@ -299,7 +299,7 @@ class CompositionStructureInferrer:
             except Exception:
                 filename = "未知"
 
-        sections: List[str] = []
+        sections: list[str] = []
 
         # 1. 视频基本信息
         sections.append("【视频基本信息】")
@@ -439,7 +439,7 @@ class CompositionStructureInferrer:
             return self._build_fallback_blueprint({})
 
         # 尝试直接解析
-        blueprint: Optional[dict] = None
+        blueprint: dict | None = None
         try:
             blueprint = json.loads(llm_response)
         except json.JSONDecodeError:
@@ -496,7 +496,7 @@ class CompositionStructureInferrer:
         if not blueprint or "layers" not in blueprint:
             return blueprint
 
-        layers: List[dict] = blueprint.get("layers", [])
+        layers: list[dict] = blueprint.get("layers", [])
         if not layers:
             return blueprint
 
@@ -524,7 +524,7 @@ class CompositionStructureInferrer:
     # 5. 生成原子操作序列
     # ------------------------------------------------------------------
 
-    def generate_layer_operations(self, blueprint: dict) -> List[dict]:
+    def generate_layer_operations(self, blueprint: dict) -> list[dict]:
         """将结构蓝图转换为原子操作序列
 
         操作类型：
@@ -550,7 +550,7 @@ class CompositionStructureInferrer:
         Returns:
             操作序列列表，按 AE 执行顺序排序
         """
-        operations: List[dict] = []
+        operations: list[dict] = []
         comp = blueprint.get("composition", {})
         comp_name = comp.get("name", DEFAULT_COMP["name"])
 
@@ -702,7 +702,7 @@ class CompositionStructureInferrer:
 
         return merged
 
-    def _extract_json_block(self, text: str) -> Optional[str]:
+    def _extract_json_block(self, text: str) -> str | None:
         """从文本中提取 JSON 片段
 
         依次尝试：
@@ -760,7 +760,7 @@ class CompositionStructureInferrer:
         layers = blueprint.get("layers", [])
         if not isinstance(layers, list):
             layers = []
-        normalized_layers: List[dict] = []
+        normalized_layers: list[dict] = []
         for i, layer in enumerate(layers, start=1):
             if not isinstance(layer, dict):
                 continue
@@ -808,7 +808,7 @@ class CompositionStructureInferrer:
         effects = layer.get("effects", [])
         if not isinstance(effects, list):
             effects = []
-        norm_effects: List[dict] = []
+        norm_effects: list[dict] = []
         for eff in effects:
             if isinstance(eff, dict) and eff.get("matchName"):
                 params = eff.get("params", {})
@@ -909,8 +909,8 @@ class CompositionStructureInferrer:
         return layer
 
     def _merge_similar_adjustment_layers(
-        self, layers: List[dict]
-    ) -> List[dict]:
+        self, layers: list[dict]
+    ) -> list[dict]:
         """合并相似的相邻调整层
 
         合并条件：
@@ -929,7 +929,7 @@ class CompositionStructureInferrer:
         if len(layers) <= 1:
             return layers
 
-        merged: List[dict] = []
+        merged: list[dict] = []
         for layer in layers:
             if not merged:
                 merged.append(layer)
@@ -964,9 +964,9 @@ class CompositionStructureInferrer:
 
     def _enforce_precomp_for_particles(
         self,
-        layers: List[dict],
-        existing_precomps: List[dict],
-    ) -> Tuple[List[dict], List[dict]]:
+        layers: list[dict],
+        existing_precomps: list[dict],
+    ) -> tuple[list[dict], list[dict]]:
         """对粒子层强制使用预合成
 
         检测粒子系统（Trapcode Particular 或名称包含"粒子/particular"），
@@ -979,8 +979,8 @@ class CompositionStructureInferrer:
         Returns:
             (更新后的 layers, 更新后的 precomps)
         """
-        new_precomps: List[dict] = list(existing_precomps)
-        new_layers: List[dict] = []
+        new_precomps: list[dict] = list(existing_precomps)
+        new_layers: list[dict] = []
 
         for layer in layers:
             effects = layer.get("effects", [])
@@ -1134,7 +1134,7 @@ class CompositionStructureInferrer:
             "duration": basic.get("duration", DEFAULT_COMP["duration"]),
         }
 
-        layers: List[dict] = [
+        layers: list[dict] = [
             {
                 "index": 1,
                 "name": "调色调整层",
@@ -1174,7 +1174,7 @@ class CompositionStructureInferrer:
             "fallback": True,
         }
 
-    def _build_color_effects(self, color: dict) -> List[dict]:
+    def _build_color_effects(self, color: dict) -> list[dict]:
         """根据调色分析构建 Lumetri 效果列表
 
         Args:

@@ -1,6 +1,9 @@
 """M4 收尾蒸馏: 4层链路全链路验收经验（6空帧bug修复 + fast断链 + AE验证规程）写入自进化知识库。"""
 from __future__ import annotations
-import sys, time, json
+
+import json
+import sys
+import time
 from pathlib import Path
 
 ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")

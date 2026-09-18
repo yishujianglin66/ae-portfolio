@@ -3,14 +3,15 @@
 TDD: 这些测试先于实现编写, 验证四个纯函数的边界行为。
 """
 import math
+
 import pytest
+
 from core.content_metrics import (
     beat_alignment_score,
     camera_diversity_score,
     material_reuse_penalty,
     temporal_energy_variance,
 )
-
 
 # ── beat_alignment_score ─────────────────────────────────────────────
 

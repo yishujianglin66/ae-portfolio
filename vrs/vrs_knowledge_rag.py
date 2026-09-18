@@ -51,10 +51,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from loguru import logger
-
 # numpy 是核心依赖（pyproject.toml 已声明 numpy>=1.24,<2.0）
 import numpy as np
+from loguru import logger
 
 # ---------------------------------------------------------------------------
 # 默认配置
@@ -72,7 +71,7 @@ _CHUNK_MAX_CHARS: int = 3000  # 单 chunk 最大字符数（embedding 输入有�
 _CHUNK_MIN_CHARS: int = 50  # 单 chunk 最小字符数（过短的 chunk 跳过）
 
 # 优先索引的高价值文档（按文件名匹配）
-PRIORITY_DOCS: List[str] = [
+PRIORITY_DOCS: list[str] = [
     "参数-效果原子级映射库.md",
     "AE效果视觉特征库.md",
     "AE第三方插件与脚本知识库.md",
@@ -83,7 +82,7 @@ PRIORITY_DOCS: List[str] = [
 ]
 
 # 视觉特征检索的优先文档
-_VISUAL_FEATURE_DOCS: List[str] = [
+_VISUAL_FEATURE_DOCS: list[str] = [
     "参数-效果原子级映射库.md",
     "AE效果视觉特征库.md",
 ]
@@ -97,10 +96,10 @@ class ChunkRecord:
     """知识库 chunk 记录 - 一个 ## 章节作为一个 chunk"""
     id: str
     content: str
-    vector: List[float] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    vector: list[float] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转为可序列化的 dict"""
         return {
             "id": self.id,
@@ -128,8 +127,8 @@ class KnowledgeRAG:
 
     def __init__(
         self,
-        kb_dir: Optional[Path] = None,
-        index_path: Optional[Path] = None,
+        kb_dir: Path | None = None,
+        index_path: Path | None = None,
         embedding_model: str = _DEFAULT_EMBEDDING_MODEL,
     ) -> None:
         """初始化 RAG 系统
@@ -144,9 +143,9 @@ class KnowledgeRAG:
         self.embedding_model: str = embedding_model
 
         # 索引数据
-        self._chunks: List[Dict[str, Any]] = []
-        self._vectors: Optional[np.ndarray] = None  # shape: (N, D)
-        self._index_meta: Dict[str, Any] = {
+        self._chunks: list[dict[str, Any]] = []
+        self._vectors: np.ndarray | None = None  # shape: (N, D)
+        self._index_meta: dict[str, Any] = {
             "version": self.VERSION,
             "model": embedding_model,
             "dimension": 0,
@@ -188,14 +187,14 @@ class KnowledgeRAG:
             }
 
         # 收集所有 .md 文件，按优先级排序
-        md_files: List[Path] = sorted(
+        md_files: list[Path] = sorted(
             self.kb_dir.rglob("*.md"),
             key=self._priority_sort_key,
         )
         logger.info(f"发现 {len(md_files)} 个 Markdown 文件（优先文档已前置）")
 
         # 切分 chunk
-        all_chunks: List[Dict[str, Any]] = []
+        all_chunks: list[dict[str, Any]] = []
         doc_categories: set = set()
         chunk_seq: int = 0
 
@@ -229,7 +228,7 @@ class KnowledgeRAG:
             }
 
         # 向量化
-        texts: List[str] = [c["content"] for c in all_chunks]
+        texts: list[str] = [c["content"] for c in all_chunks]
         try:
             vectors = self._embed_sync(texts)
             self._tfidf_fallback = False
@@ -263,7 +262,7 @@ class KnowledgeRAG:
         self._save_index()
 
         elapsed: float = time.time() - start_time
-        stats: Dict[str, Any] = {
+        stats: dict[str, Any] = {
             "total_docs": len(md_files),
             "total_chunks": len(all_chunks),
             "indexed_categories": sorted(doc_categories),
@@ -274,7 +273,7 @@ class KnowledgeRAG:
         logger.info(f"索引构建完成: {stats}")
         return stats
 
-    def _priority_sort_key(self, path: Path) -> Tuple[int, int, str]:
+    def _priority_sort_key(self, path: Path) -> tuple[int, int, str]:
         """优先索引高价值文档的排序键
 
         Returns:
@@ -285,7 +284,7 @@ class KnowledgeRAG:
             return (0, PRIORITY_DOCS.index(name), name)
         return (1, 0, name)
 
-    def _parse_md_file(self, md_path: Path) -> List[Dict[str, Any]]:
+    def _parse_md_file(self, md_path: Path) -> list[dict[str, Any]]:
         """解析 Markdown 文件，按 ## 标题切分 chunk
 
         Args:
@@ -297,13 +296,13 @@ class KnowledgeRAG:
         """
         content: str = md_path.read_text(encoding="utf-8", errors="ignore")
         source_file: str = md_path.name
-        tags: List[str] = self._extract_tags(content)
+        tags: list[str] = self._extract_tags(content)
         doc_type: str = self._classify_doc_type(source_file, content)
 
         # 去除 YAML frontmatter（--- ... ---）
         content = re.sub(r"\A---\n.*?\n---\n", "", content, count=1, flags=re.DOTALL)
 
-        chunks: List[Dict[str, Any]] = []
+        chunks: list[dict[str, Any]] = []
         # 按 ## 标题切分（## 是二级标题，### 是三级标题不切分）
         pattern = re.compile(r"^##\s+(.+)$", re.MULTILINE)
         matches = list(pattern.finditer(content))
@@ -380,7 +379,7 @@ class KnowledgeRAG:
 
         return "methodology"
 
-    def _extract_tags(self, content: str) -> List[str]:
+    def _extract_tags(self, content: str) -> list[str]:
         """从 YAML frontmatter 提取 tags
 
         支持格式：
@@ -392,14 +391,14 @@ class KnowledgeRAG:
         if not match:
             return []
         tags_block: str = match.group(1)
-        tags: List[str] = re.findall(r"-\s*(.+?)\s*$", tags_block, re.MULTILINE)
+        tags: list[str] = re.findall(r"-\s*(.+?)\s*$", tags_block, re.MULTILINE)
         return [t.strip() for t in tags if t.strip()]
 
     # =========================================================================
     # 2. Embedding 调用
     # =========================================================================
 
-    def _embed_sync(self, texts: List[str]) -> np.ndarray:
+    def _embed_sync(self, texts: list[str]) -> np.ndarray:
         """同步调用 embedding（内部封装 asyncio）
 
         优先级：
@@ -426,7 +425,7 @@ class KnowledgeRAG:
             # 没有运行中的事件循环
             return asyncio.run(self._embed_async(texts))
 
-    async def _embed_async(self, texts: List[str]) -> np.ndarray:
+    async def _embed_async(self, texts: list[str]) -> np.ndarray:
         """异步批量调用 embedding API（OpenAI 兼容协议）
 
         通过 httpx 直接调用 /embeddings 端点。
@@ -456,18 +455,18 @@ class KnowledgeRAG:
             )
 
         url: str = f"{base_url.rstrip('/')}/embeddings"
-        headers: Dict[str, str] = {
+        headers: dict[str, str] = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}",
         }
 
-        all_vectors: List[List[float]] = []
+        all_vectors: list[list[float]] = []
         total: int = len(texts)
 
         async with httpx.AsyncClient(timeout=_EMBEDDING_TIMEOUT) as client:
             for i in range(0, total, _EMBEDDING_BATCH_SIZE):
-                batch: List[str] = texts[i:i + _EMBEDDING_BATCH_SIZE]
-                payload: Dict[str, Any] = {
+                batch: list[str] = texts[i:i + _EMBEDDING_BATCH_SIZE]
+                payload: dict[str, Any] = {
                     "model": self.embedding_model,
                     "input": batch,
                 }
@@ -504,7 +503,7 @@ class KnowledgeRAG:
 
         return np.array(all_vectors, dtype=np.float32)
 
-    def _embed_tfidf(self, texts: List[str], fit: bool = False) -> np.ndarray:
+    def _embed_tfidf(self, texts: list[str], fit: bool = False) -> np.ndarray:
         """TF-IDF fallback 向量化（sklearn）
 
         当 LLM embedding 不可用时作为简单替代。
@@ -572,7 +571,7 @@ class KnowledgeRAG:
         # Top-K（降序）
         top_indices = np.argsort(similarities)[::-1][:top_k]
 
-        results: List[Dict[str, Any]] = []
+        results: list[dict[str, Any]] = []
         for idx in top_indices:
             idx_int: int = int(idx)
             sim: float = float(similarities[idx_int])
@@ -629,11 +628,11 @@ class KnowledgeRAG:
             [{effect_name, matchName, params_range, source, similarity, content_excerpt}]
         """
         # 先用通用 search 检索（多召回一些以便筛选）
-        raw_results: List[Dict[str, Any]] = self.search(feature_desc, top_k=10)
+        raw_results: list[dict[str, Any]] = self.search(feature_desc, top_k=10)
 
         # 优先保留来自视觉特征库和参数映射库的 chunk
-        prioritized: List[Dict[str, Any]] = []
-        others: List[Dict[str, Any]] = []
+        prioritized: list[dict[str, Any]] = []
+        others: list[dict[str, Any]] = []
         for r in raw_results:
             src: str = r.get("source_file", "")
             if src in _VISUAL_FEATURE_DOCS:
@@ -641,10 +640,10 @@ class KnowledgeRAG:
             else:
                 others.append(r)
 
-        ordered: List[Dict[str, Any]] = prioritized + others
+        ordered: list[dict[str, Any]] = prioritized + others
 
         # 解析出效果名、matchName、参数范围
-        parsed: List[Dict[str, Any]] = []
+        parsed: list[dict[str, Any]] = []
         for r in ordered:
             parsed.append(self._parse_effect_from_chunk(r))
 
@@ -652,8 +651,8 @@ class KnowledgeRAG:
 
     def _parse_effect_from_chunk(
         self,
-        chunk_result: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        chunk_result: dict[str, Any],
+    ) -> dict[str, Any]:
         """从 chunk 内容解析出效果信息
 
         Args:
@@ -675,7 +674,7 @@ class KnowledgeRAG:
             matchName = m.group(1).strip()
 
         # 从内容中提取参数范围表
-        params_range: Dict[str, Dict[str, Any]] = self._extract_params_range(content)
+        params_range: dict[str, dict[str, Any]] = self._extract_params_range(content)
 
         return {
             "effect_name": effect_name,
@@ -689,7 +688,7 @@ class KnowledgeRAG:
     def _extract_params_range(
         self,
         content: str,
-    ) -> Dict[str, Dict[str, Any]]:
+    ) -> dict[str, dict[str, Any]]:
         """从内容中提取参数范围表
 
         识别 Markdown 表格中的 | 参数名 | 范围 | 效果 | ... 格式，
@@ -701,14 +700,14 @@ class KnowledgeRAG:
         Returns:
             {param_name: {min, max, typical, visual_signature}}
         """
-        params: Dict[str, Dict[str, Any]] = {}
+        params: dict[str, dict[str, Any]] = {}
 
-        lines: List[str] = content.split("\n")
+        lines: list[str] = content.split("\n")
         for line in lines:
             if "|" not in line:
                 continue
 
-            cells: List[str] = [c.strip() for c in line.split("|")]
+            cells: list[str] = [c.strip() for c in line.split("|")]
             cells = [c for c in cells if c]
             if len(cells) < 2:
                 continue
@@ -769,16 +768,16 @@ class KnowledgeRAG:
         Returns:
             增强后的结果（原结果 + 每个效果补充 params_range + recommended_matchName）
         """
-        enhanced: Dict[str, Any] = dict(vision_result)
-        effects: List[Dict[str, Any]] = (
+        enhanced: dict[str, Any] = dict(vision_result)
+        effects: list[dict[str, Any]] = (
             vision_result.get("effects")
             or vision_result.get("effect_list")
             or []
         )
 
-        enhanced_effects: List[Dict[str, Any]] = []
+        enhanced_effects: list[dict[str, Any]] = []
         for eff in effects:
-            eff_enhanced: Dict[str, Any] = dict(eff)
+            eff_enhanced: dict[str, Any] = dict(eff)
             effect_name: str = eff.get("effect_name", "") or eff.get("name", "")
 
             if not effect_name:
@@ -786,11 +785,11 @@ class KnowledgeRAG:
                 continue
 
             # 用效果名检索知识库
-            results: List[Dict[str, Any]] = self.search(effect_name, top_k=3)
+            results: list[dict[str, Any]] = self.search(effect_name, top_k=3)
 
             if results:
-                top: Dict[str, Any] = results[0]
-                parsed: Dict[str, Any] = self._parse_effect_from_chunk(top)
+                top: dict[str, Any] = results[0]
+                parsed: dict[str, Any] = self._parse_effect_from_chunk(top)
                 eff_enhanced["params_range"] = parsed["params_range"]
                 eff_enhanced["recommended_matchName"] = parsed["matchName"]
                 eff_enhanced["knowledge_source"] = parsed["source"]
@@ -821,11 +820,11 @@ class KnowledgeRAG:
         Returns:
             {param_name: {min, max, typical, visual_signature}}
         """
-        results: List[Dict[str, Any]] = self.search(effect_name, top_k=3)
+        results: list[dict[str, Any]] = self.search(effect_name, top_k=3)
 
-        all_params: Dict[str, Dict[str, Any]] = {}
+        all_params: dict[str, dict[str, Any]] = {}
         for r in results:
-            parsed: Dict[str, Any] = self._parse_effect_from_chunk(r)
+            parsed: dict[str, Any] = self._parse_effect_from_chunk(r)
             for pname, pinfo in parsed["params_range"].items():
                 if pname not in all_params:
                     all_params[pname] = pinfo
@@ -841,7 +840,7 @@ class KnowledgeRAG:
         self.index_path.mkdir(parents=True, exist_ok=True)
         index_file: Path = self.index_path / "kb_index.json"
 
-        serializable: Dict[str, Any] = {
+        serializable: dict[str, Any] = {
             "version": self._index_meta["version"],
             "model": self._index_meta["model"],
             "dimension": self._index_meta["dimension"],
@@ -890,7 +889,7 @@ class KnowledgeRAG:
 
                 # 如果是 TF-IDF 模式，重新 fit vectorizer（用于 query 向量化）
                 if self._tfidf_fallback:
-                    texts: List[str] = [c["content"] for c in self._chunks]
+                    texts: list[str] = [c["content"] for c in self._chunks]
                     try:
                         self._embed_tfidf(texts, fit=True)
                     except Exception as e:
@@ -906,7 +905,7 @@ class KnowledgeRAG:
     # 辅助方法
     # =========================================================================
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取当前索引统计信息"""
         return {
             "total_chunks": len(self._chunks),
@@ -937,8 +936,8 @@ def _run_cli() -> None:
 
     args = parser.parse_args()
 
-    kb_dir: Optional[Path] = Path(args.kb_dir) if args.kb_dir else None
-    index_path: Optional[Path] = Path(args.index_path) if args.index_path else None
+    kb_dir: Path | None = Path(args.kb_dir) if args.kb_dir else None
+    index_path: Path | None = Path(args.index_path) if args.index_path else None
 
     rag = KnowledgeRAG(kb_dir=kb_dir, index_path=index_path)
 
@@ -980,7 +979,7 @@ def _run_builtin_test(rag: KnowledgeRAG) -> None:
         rag.build_index()
 
     stats = rag.get_stats()
-    print(f"\n[1] 索引状态")
+    print("\n[1] 索引状态")
     print(f"    chunks: {stats['total_chunks']}")
     print(f"    model:  {stats['model']}")
     print(f"    dim:    {stats['dimension']}")

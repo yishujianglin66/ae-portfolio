@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """复现：手工渲染 seg 4 + seg 5 然后 concat_hard，看边界帧是否真切了。"""
-import json, sys, subprocess, shutil, hashlib
+import hashlib
+import json
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 PROJ = Path(__file__).resolve().parent.parent

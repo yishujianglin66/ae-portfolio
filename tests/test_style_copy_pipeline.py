@@ -16,17 +16,17 @@ import pytest
 
 # tests/conftest.py 已把项目根注入 sys.path，可顶层包方式导入
 import bootstrap  # noqa: E402  (统一路径引导)
-from style_copy.style_analyzer import (  # noqa: E402
-    get_analyzer,
-    LocalStyleAnalyzer,
-    V4_AVAILABLE,
-)
-from style_copy.tool_orchestrator import ToolOrchestrator  # noqa: E402
 from style_copy.ffmpeg_generator import (  # noqa: E402
-    FFmpegCommandGenerator,
     STYLE_TO_FILTER_MAP,
+    FFmpegCommandGenerator,
+)
+from style_copy.style_analyzer import (  # noqa: E402
+    V4_AVAILABLE,
+    LocalStyleAnalyzer,
+    get_analyzer,
 )
 from style_copy.style_copy_mvp import supported_ff_filters  # noqa: E402
+from style_copy.tool_orchestrator import ToolOrchestrator  # noqa: E402
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

@@ -41,12 +41,12 @@ class ToolResult:
     """Structured result from a tool execution."""
     tool_name: str
     success: bool
-    output: Dict[str, Any] = field(default_factory=dict)
-    error: Optional[str] = None
+    output: dict[str, Any] = field(default_factory=dict)
+    error: str | None = None
     reasoning_log: str = ""
     elapsed_ms: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "tool": self.tool_name,
             "success": self.success,
@@ -61,14 +61,14 @@ class ToolRegistry:
     """Registry mapping tool names to callable functions with metadata."""
 
     def __init__(self):
-        self._tools: Dict[str, Dict[str, Any]] = {}
+        self._tools: dict[str, dict[str, Any]] = {}
 
     def register(
         self,
         name: str,
         func: Callable,
         description: str,
-        input_schema: Optional[Dict[str, Any]] = None,
+        input_schema: dict[str, Any] | None = None,
     ):
         """Register a tool with its metadata."""
         self._tools[name] = {
@@ -77,11 +77,11 @@ class ToolRegistry:
             "input_schema": input_schema or {},
         }
 
-    def get(self, name: str) -> Optional[Dict[str, Any]]:
+    def get(self, name: str) -> dict[str, Any] | None:
         """Retrieve tool metadata by name."""
         return self._tools.get(name)
 
-    def list_tools(self) -> List[Dict[str, str]]:
+    def list_tools(self) -> list[dict[str, str]]:
         """List all registered tools with descriptions."""
         return [
             {"name": name, "description": meta["description"]}
@@ -121,7 +121,7 @@ class ToolRegistry:
             )
 
 
-def _stage_analyze_beat(bgm_path: str, **kwargs) -> Dict[str, Any]:
+def _stage_analyze_beat(bgm_path: str, **kwargs) -> dict[str, Any]:
     """① BGM beat/dynamics analysis.
 
     数据流（2026-09-14 修复：旧 `BeatStrengthEngine.detect(path)` / `analyze(path)`
@@ -152,7 +152,7 @@ def _stage_analyze_beat(bgm_path: str, **kwargs) -> Dict[str, Any]:
     beats_sec = np.asarray([b.time for b in beat_infos], dtype=float)
     downbeats_sec = np.asarray([b.time for b in beat_infos if b.is_downbeat], dtype=float)
 
-    strength_stats: Dict[str, Any] = {}
+    strength_stats: dict[str, Any] = {}
     if beats_sec.size:
         strength_stats = BeatStrengthEngine().classify_beats(
             beats_sec, downbeats_sec,
@@ -174,7 +174,7 @@ def _stage_analyze_beat(bgm_path: str, **kwargs) -> Dict[str, Any]:
     }
 
 
-def _stage_analyze_motion(sources: List[str], cache_dir: Optional[str] = None, **kwargs) -> Dict[str, Any]:
+def _stage_analyze_motion(sources: list[str], cache_dir: str | None = None, **kwargs) -> dict[str, Any]:
     """② Source footage motion labeling (CNN+VLM layered classifier)."""
     from ai.camera_decision import SourceCameraInventory
 
@@ -195,7 +195,7 @@ def _stage_analyze_motion(sources: List[str], cache_dir: Optional[str] = None, *
     return {"sources": results}
 
 
-def _validate_effect_configs(effects: List[Dict[str, Any]]) -> Dict[str, Any]:
+def _validate_effect_configs(effects: list[dict[str, Any]]) -> dict[str, Any]:
     """Validate effect configurations against visual_effect_schema.json."""
     import jsonschema
     
@@ -224,12 +224,12 @@ MIN_RENDER_BYTES = 100 * 1024
 
 
 def _apply_effects_to_video(
-    effects: List[Dict[str, Any]],
+    effects: list[dict[str, Any]],
     output_dir: str,
-    run_dir_name: Optional[str] = None,
-    tag: Optional[str] = None,
+    run_dir_name: str | None = None,
+    tag: str | None = None,
     dry_run: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """经 build_master_polish.py + render_master.py 应用已校验的特效配置。
 
     2026-09-07 修复三个致命缺陷:
@@ -256,7 +256,7 @@ def _apply_effects_to_video(
     # run_dir / tag 推导 — 先过白名单, 否则子进程只会回一句含糊的 ERR
     if run_dir_name is None:
         run_dir_name = out_dir.name
-    from scripts.build_master_polish import RUN_DIR_PATTERN   # 单一真源(Step1.5), 避免三处白名单漂移
+    from scripts.build_master_polish import RUN_DIR_PATTERN  # 单一真源(Step1.5), 避免三处白名单漂移
     if not _re.fullmatch(RUN_DIR_PATTERN, str(run_dir_name)):
         return {
             "success": False,
@@ -307,7 +307,7 @@ def _apply_effects_to_video(
 
     # 注入记账 — 由 build_master_polish.py 落盘, 是"实际上了多少"的唯一可信来源
     report_p = PROJECT / "tmp" / "effects_injection_report.json"
-    inj: Dict[str, Any] = {}
+    inj: dict[str, Any] = {}
     if report_p.exists():
         try:
             inj = json.loads(report_p.read_text(encoding="utf-8"))
@@ -318,7 +318,7 @@ def _apply_effects_to_video(
     unmapped = int(inj.get("unmapped_count", 0))
     skipped = int(inj.get("skipped_count", 0))
 
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "stage": "build",
         "returncode": build.returncode,
@@ -396,7 +396,7 @@ def _apply_effects_to_video(
 
 
 def _stage_render_cut(
-    sources: List[str],
+    sources: list[str],
     bgm_path: str,
     output_dir: str,
     output_name: str = "cut.mp4",
@@ -404,11 +404,11 @@ def _stage_render_cut(
     theme: str = "燃向混剪: 铺垫→蓄力→爆发→收尾",
     style: str = "amv_highenergy",
     enable_ae: bool = False,
-    skill_id: Optional[str] = None,
-    effects: Optional[List[Dict[str, Any]]] = None,
+    skill_id: str | None = None,
+    effects: list[dict[str, Any]] | None = None,
     effects_dry_run: bool = False,
     **kwargs,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """③ Orchestration rendering (ProductionDirector V23 engine).
 
     Supports optional effect configurations via visual_effect_schema.json.
@@ -463,7 +463,7 @@ def _stage_render_cut(
 
     # Apply effects if provided and AE channel enabled
     final_video = str(base_video)
-    effect_result: Optional[Dict[str, Any]] = None
+    effect_result: dict[str, Any] | None = None
     if effects and enable_ae:
         logger.info(f"Applying {len(effects)} effects...")
         # 不传 tag: 旧实现传 f"{stem}_fx" 违反 build_master_polish.py 的 run\\d+
@@ -516,7 +516,7 @@ def _stage_apply_lut(
     style: str = "amv_highenergy",
     tag: str = "lut",
     **kwargs,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """④-a LUT color grading (style-themed Hollywood/Vintage Film)."""
     import subprocess as sp
 
@@ -568,15 +568,16 @@ def _stage_apply_sfx(
     input_video: str,
     bgm_path: str,
     output_dir: str,
-    production_report_path: Optional[str] = None,
+    production_report_path: str | None = None,
     tag: str = "sfx",
     **kwargs,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """④-b SFX v2.1 musical enhancement (impact/whoosh/glitch layers)."""
     import random
     import subprocess as sp
 
-    from core.sfx_layer import _load_index as sfx_index, shorten_sfx, SFX_TAIL_S
+    from core.sfx_layer import SFX_TAIL_S, shorten_sfx
+    from core.sfx_layer import _load_index as sfx_index
 
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -653,7 +654,7 @@ def _stage_apply_sfx(
     }
 
 
-def _stage_score_video(video_path: str, mode: str = "local", **kwargs) -> Dict[str, Any]:
+def _stage_score_video(video_path: str, mode: str = "local", **kwargs) -> dict[str, Any]:
     """⑤ Final video scoring (CNN + SiliconFlow hybrid chain)."""
     from core.cnn_scorer import score_video_mode
 
@@ -664,7 +665,7 @@ def _stage_score_video(video_path: str, mode: str = "local", **kwargs) -> Dict[s
     }
 
 
-def _stage_run_gate(output_dir: str, tag: str, bgm_path: str, **kwargs) -> Dict[str, Any]:
+def _stage_run_gate(output_dir: str, tag: str, bgm_path: str, **kwargs) -> dict[str, Any]:
     """⑥ Quality gate validation (7-metric acceptance criteria)."""
     import subprocess as sp
 
@@ -682,7 +683,7 @@ def _stage_run_gate(output_dir: str, tag: str, bgm_path: str, **kwargs) -> Dict[
     }
 
 
-def _stage_harvest_experience(output_dir: str, tag: str, bgm_path: str, **kwargs) -> Dict[str, Any]:
+def _stage_harvest_experience(output_dir: str, tag: str, bgm_path: str, **kwargs) -> dict[str, Any]:
     """⑦ Experience harvesting (auto-save to render_history.jsonl)."""
     import subprocess as sp
 
@@ -800,13 +801,13 @@ class MasterCutAgent:
         """Execute a registered tool by name."""
         return self.registry.execute(tool_name, **kwargs)
 
-    def list_tools(self) -> List[Dict[str, str]]:
+    def list_tools(self) -> list[dict[str, str]]:
         """List all available tools."""
         return self.registry.list_tools()
 
     def run_full_pipeline(
         self,
-        sources: List[str],
+        sources: list[str],
         bgm_path: str,
         output_dir: str,
         tag: str = "run",
@@ -814,7 +815,7 @@ class MasterCutAgent:
         theme: str = "燃向混剪: 铺垫→蓄力→爆发→收尾",
         style: str = "amv_highenergy",
         enable_ae: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Execute the full MasterCut pipeline end-to-end.
 
         This is a convenience method that chains all stages in sequence.
@@ -823,7 +824,7 @@ class MasterCutAgent:
         out_dir = Path(output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        report: Dict[str, Any] = {
+        report: dict[str, Any] = {
             "sources": sources,
             "bgm": bgm_path,
             "theme": theme,

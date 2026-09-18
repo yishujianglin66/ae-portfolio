@@ -17,6 +17,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "ae_additive_scripts"))
 
 import run_additive_jsx  # noqa: E402
+
 from core.fx.particle_presets import _send_raw  # noqa: E402
 
 # 调用历史持久化目录（仅供记录/审计，不参与 AE 执行）
@@ -51,8 +52,8 @@ class TextImpactClient:
         self._history_dir.mkdir(parents=True, exist_ok=True)
 
     # ---------- 调用历史持久化 ----------
-    def record_call(self, action: str, params: Dict[str, Any],
-                    result: Dict[str, Any]) -> None:
+    def record_call(self, action: str, params: dict[str, Any],
+                    result: dict[str, Any]) -> None:
         entry = {
             "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "action": action,
@@ -65,11 +66,11 @@ class TextImpactClient:
         except OSError:
             pass
 
-    def get_history(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_history(self, limit: int = 100) -> list[dict[str, Any]]:
         path = self._history_dir / "history.jsonl"
         if not path.is_file():
             return []
-        lines: List[Dict[str, Any]] = []
+        lines: list[dict[str, Any]] = []
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -89,7 +90,7 @@ class TextImpactClient:
     # ---------- 真机执行 ----------
     def impact(self, comp_name: str, layer_name: str, time: float = 0.0,
                start_scale: float = 160.0, flash: bool = True,
-               timeout: float = 40.0) -> Dict[str, Any]:
+               timeout: float = 40.0) -> dict[str, Any]:
         result = _send_raw(_build_jsx(
             "impact", compName=comp_name, layerName=layer_name,
             time=time, startScale=start_scale, flash=flash), timeout)
@@ -98,9 +99,9 @@ class TextImpactClient:
                                     "flash": flash}, result)
         return result
 
-    def beat_sync(self, comp_name: str, layer_name: str, beats: List[float],
+    def beat_sync(self, comp_name: str, layer_name: str, beats: list[float],
                   peak_scale: float = 118.0, decay: float = 0.15,
-                  timeout: float = 40.0) -> Dict[str, Any]:
+                  timeout: float = 40.0) -> dict[str, Any]:
         if not beats:
             result = {"status": "error", "message": "beats 不能为空"}
         else:
@@ -113,9 +114,9 @@ class TextImpactClient:
         return result
 
     def rgb_glitch(self, comp_name: str, layer_name: str,
-                   start_time: Optional[float] = None, end_time: Optional[float] = None,
+                   start_time: float | None = None, end_time: float | None = None,
                    glitch_keys: int = 10, offset_max: float = 12.0,
-                   timeout: float = 40.0) -> Dict[str, Any]:
+                   timeout: float = 40.0) -> dict[str, Any]:
         params = {"compName": comp_name, "layerName": layer_name,
                   "glitchKeys": glitch_keys, "offsetMax": offset_max}
         if start_time is not None:
@@ -131,7 +132,7 @@ class TextImpactClient:
 # 全局单例
 # ============================================================
 
-_text_impact_client: Optional[TextImpactClient] = None
+_text_impact_client: TextImpactClient | None = None
 
 
 def get_text_impact_client() -> TextImpactClient:

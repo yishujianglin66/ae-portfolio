@@ -6,11 +6,12 @@
 from __future__ import annotations
 
 import json
-import sys
 import os
-from pathlib import Path
-from typing import List, Dict, Any, Optional
+import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 from PIL import Image
 
@@ -32,7 +33,7 @@ BATCH_SIZE = 50
 IMAGE_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.bmp', '.webp'}
 
 
-def get_model() -> Optional[Any]:
+def get_model() -> Any | None:
     """
     加载CLIP模型
 
@@ -51,7 +52,7 @@ def get_model() -> Optional[Any]:
         return None
 
 
-def get_image_metadata(image_path: str) -> Dict[str, Any]:
+def get_image_metadata(image_path: str) -> dict[str, Any]:
     """
     获取图片元数据
 
@@ -79,7 +80,7 @@ def get_image_metadata(image_path: str) -> Dict[str, Any]:
     return metadata
 
 
-def get_vector(model: Any, image_path: str) -> Optional[List[float]]:
+def get_vector(model: Any, image_path: str) -> list[float] | None:
     """
     计算单张图片的CLIP向量
 
@@ -111,7 +112,7 @@ def build_index(
     media_directory: str,
     output_path: str,
     batch_size: int = BATCH_SIZE
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     为素材库所有图片/视频帧建立CLIP向量索引
 
@@ -129,7 +130,7 @@ def build_index(
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "index_path": output_path,
         "total_items": 0,
@@ -162,7 +163,7 @@ def build_index(
             return result
 
         # 构建索引
-        index_data: Dict[str, Any] = {
+        index_data: dict[str, Any] = {
             "index_version": "1.0",
             "model": MODEL_NAME,
             "build_time": datetime.now().isoformat(),
@@ -210,8 +211,8 @@ def build_index(
 
 def update_index(
     index_path: str,
-    new_files: List[str]
-) -> Dict[str, Any]:
+    new_files: list[str]
+) -> dict[str, Any]:
     """
     增量更新索引（只计算新文件）
 
@@ -227,7 +228,7 @@ def update_index(
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "added_items": 0,
         "failed_items": []
@@ -319,7 +320,7 @@ def main() -> None:
         input_json = json.loads(sys.argv[2])
         action = input_json.get("action", "")
 
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
 
         if action == "build_index":
             media_directory = input_json.get("media_directory", "")

@@ -13,14 +13,14 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from pipeline.adaptive_fallback import get_fallback_selector
+
 # 拆分时遗漏的模块级依赖 (本文件仅在 unified_pipeline 方法内延迟导入,
 # 反向引入不会形成循环): 缺它们时 run_learn/run_stage 会在运行期 NameError
 from pipeline.unified_pipeline import StageResult, StageStatus
-from pipeline.adaptive_fallback import get_fallback_selector
 
 
-
-def run_learn(self) -> Dict:
+def run_learn(self) -> dict:
     """学习阶段 (v2 新增)：将反馈写入 KB + 生成迭代建议
 
     S4闭环: 消费VMAF worst_segment信号，生成精准时间点修复建议
@@ -63,15 +63,19 @@ def run_learn(self) -> Dict:
     # 修复历史缺陷：原 _run_learn 只调 FeedbackLoop（写质检报告），从不调
     # learning.PersistentLearningLoop（真正学习）。此处补齐接线，让 170+ 次
     # 渲染的经验能自动沉淀为参数模板 + 置信度调整 + 执行记录。
-    learning_stats: Optional[Dict] = None
+    learning_stats: dict | None = None
     try:
-        from learning.persistent_learning_loop import PersistentLearningLoop
+        from learning.learning_loop import (
+            ExecutionResult as LLExecutionResult,
+        )
         from learning.learning_loop import (
             ExpectedParameters,
             ExpectedProperty,
-            ExecutionResult as LLExecutionResult,
+        )
+        from learning.learning_loop import (
             VerificationResult as LLVerificationResult,
         )
+        from learning.persistent_learning_loop import PersistentLearningLoop
 
         # 构建 ExpectedParameters（从 plan 阶段提取效果栈）
         plan_data_for_learn = self._results.get(
@@ -159,9 +163,9 @@ def run_learn(self) -> Dict:
     # S7: BayesianParameterOptimizer 观测写入
     # 闭合贝叶斯优化器写侧断点：让 verify 阶段的质量分数、渲染时间、文件大小
     # 真正被 observe() 消化，下次 recommend() 才能基于真实数据拟合 GP 模型。
-    bayesian_observed: Optional[Dict[str, Any]] = None
+    bayesian_observed: dict[str, Any] | None = None
     try:
-        from core.bayesian_optimizer import get_optimizer, PARAMETER_SPACES
+        from core.bayesian_optimizer import PARAMETER_SPACES, get_optimizer
         from learning.learning_bridge import LearningBridge
 
         optimizer = get_optimizer()
@@ -202,7 +206,7 @@ def run_learn(self) -> Dict:
         ).data or {}
         effect_stack_bo = plan_data_for_bo.get("effect_stack", [])
 
-        observed_effects: List[str] = []
+        observed_effects: list[str] = []
         for effect in effect_stack_bo:
             effect_name = effect.get("name", "") or effect.get("effectName", "")
             match_name = effect.get("matchName", "") or effect.get("id", "")
@@ -229,7 +233,7 @@ def run_learn(self) -> Dict:
             # - enum字符串不转（如 "From Behind"）→ 单个skip；其余合格参数照常
             # - 数字字符串 → float
             # - None → skip；int→float；其他类型兜底0.0
-            valid_params: Dict[str, float] = {}
+            valid_params: dict[str, float] = {}
             for _k, _v in raw_valid.items():
                 if _v is None:
                     continue
@@ -283,7 +287,7 @@ def run_learn(self) -> Dict:
     # S8: MemoryStore 经验写入
     # 闭合记忆库写侧断点：将本次渲染经验以 effect_params 类别写入 MemoryStore，
     # 供下次 plan 阶段通过 LearningBridge._apply_memory_experience() 查询复用。
-    memory_written: Optional[Dict[str, Any]] = None
+    memory_written: dict[str, Any] | None = None
     try:
         from core.memory_store import MemoryStore
 
@@ -294,7 +298,7 @@ def run_learn(self) -> Dict:
         effect_stack_mem = plan_data_for_mem.get("effect_stack", [])
         score_mem = verify.data.get("score", 0)
 
-        written_keys: List[str] = []
+        written_keys: list[str] = []
         for effect in effect_stack_mem:
             effect_name = effect.get("name", "") or effect.get("effectName", "")
             match_name = effect.get("matchName", "") or effect.get("id", "")
@@ -391,7 +395,7 @@ def run_learn(self) -> Dict:
 
 
 def build_effect_stack_from_vrs(
-    self, vrs: Dict[str, Any]
+    self, vrs: dict[str, Any]
 ) -> tuple:
     """把 VRS 真分析字段直接转换为 effect_stack 条目。
 
@@ -419,8 +423,8 @@ def build_effect_stack_from_vrs(
            "param_path":"params.temperature=cool, params.blue_boost=0.15",
            "reason":"VRS 检测冷色调，注入冷色分级"}
     """
-    mapping: List[Dict[str, Any]] = []
-    stack: List[Dict[str, Any]] = []
+    mapping: list[dict[str, Any]] = []
+    stack: list[dict[str, Any]] = []
 
     color_palette = vrs.get("color_palette", {}) or {}
     rhythm = vrs.get("rhythm", {}) or {}
@@ -439,7 +443,7 @@ def build_effect_stack_from_vrs(
         confidence = float(eff.get("confidence", 0.5) or 0.5)
         eff_lower = eff_name.lower()
 
-        entry: Optional[Dict[str, Any]] = None
+        entry: dict[str, Any] | None = None
         reason = ""
 
         if eff_lower.startswith("color_grade_"):
@@ -483,7 +487,7 @@ def build_effect_stack_from_vrs(
             else:
                 entry = {
                     "name": "color_grade",
-                    "description": f"VRS 检测中性色调",
+                    "description": "VRS 检测中性色调",
                     "params": {
                         "temperature": "neutral",
                         "saturation": 1.10,
@@ -586,7 +590,7 @@ def build_effect_stack_from_vrs(
         sat = float(color_palette.get("saturation", 0.4))
         contrast = float(color_palette.get("contrast", 0.2))
         brightness = float(color_palette.get("avg_brightness", 0.5))
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "saturation": round(1.0 + sat * 0.5, 3),
             "contrast": round(1.0 + contrast * 1.0, 3),
             "brightness": round((0.5 - brightness) * 0.1, 3),
@@ -684,7 +688,7 @@ def build_effect_stack_from_vrs(
 
     # ---- 5. 由 style_tags 整体微调效果强度 ----
     if style_tags:
-        style_adjustments: Dict[str, Any] = {}
+        style_adjustments: dict[str, Any] = {}
         if "vibrant" in style_tags:
             style_adjustments["saturation_boost_pct"] = 10
         if "dark" in style_tags:

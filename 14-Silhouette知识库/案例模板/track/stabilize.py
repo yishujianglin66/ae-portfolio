@@ -1,9 +1,10 @@
 # Stabilize Template
 # 稳定化模板 - 适用于画面稳定、抖动去除、反向跟踪
 
-from fx import *
 import json
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=24.0):

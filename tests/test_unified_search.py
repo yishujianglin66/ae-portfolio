@@ -8,14 +8,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "13-素材获取与搜索" / "02-免费素材API"))
 
 from unified_search import (
-    UnifiedSearch,
-    _load_api_keys,
-    _normalize_title_similarity,
-    _dedup_results,
-    _safe_call,
     SUPPORTED_MEDIA_TYPES,
     SUPPORTED_PLATFORMS,
     InvalidPlatformError,
+    UnifiedSearch,
+    _dedup_results,
+    _load_api_keys,
+    _normalize_title_similarity,
+    _safe_call,
 )
 
 

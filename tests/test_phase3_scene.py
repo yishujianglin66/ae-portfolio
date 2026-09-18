@@ -1,15 +1,17 @@
 import os
 import sys
+
 import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scene_orchestrator import (
-    SceneOrchestrator,
-    Scene,
-    CameraMove,
-    Transition,
-    TRANSITION_TYPES,
     CAMERA_MOVE_TYPES,
+    TRANSITION_TYPES,
+    CameraMove,
+    Scene,
+    SceneOrchestrator,
+    Transition,
 )
 
 

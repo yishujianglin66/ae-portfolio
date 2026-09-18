@@ -35,8 +35,7 @@ def check(name, ok, detail=""):
 print("=" * 70)
 print("1. P2-1 — select_text_combo_for_shot 三档强度分配")
 print("=" * 70)
-from integrations.smart_director import (
-    select_text_combo_for_shot, build_smart_text_jsx)
+from integrations.smart_director import build_smart_text_jsx, select_text_combo_for_shot
 
 combos = {k: select_text_combo_for_shot(k) for k in ("intense", "moderate", "gentle")}
 check("三档强度均返回组合", all(v is not None for v in combos.values()),
@@ -102,6 +101,7 @@ check(f"所有关键帧时间落在[0,{duration + 1}]s", not out_of_range,
       f"越界:{out_of_range[:5]}")
 
 from integrations.resolve_ae_resolve_pipeline import _infer_scene_tag
+
 grid = [("intense", "rich"), ("intense", "medium"), ("intense", "poor"),
         ("moderate", "rich"), ("moderate", "medium"), ("moderate", "poor"),
         ("gentle", "rich"), ("gentle", "medium"), ("gentle", "poor")]
@@ -116,9 +116,7 @@ print()
 print("=" * 70)
 print("4. P2-3 — PresetTracker 三维覆盖率追踪")
 print("=" * 70)
-from core.jsx_keyframe_animator import (
-    PresetTracker, TextAnimationStyle, AnimationOrchestrator,
-    get_preset_tracker)
+from core.jsx_keyframe_animator import AnimationOrchestrator, PresetTracker, TextAnimationStyle, get_preset_tracker
 
 tk = PresetTracker()
 tk.record_combo("effect_cyber_glitch", TextAnimationStyle.IMPACT_SHAKE, "Impact")
@@ -156,6 +154,7 @@ print("=" * 70)
 print("5. P2-1/P2-2 — 导演统计回传 (get_last_run_stats)")
 print("=" * 70)
 from integrations.smart_director import get_last_run_stats
+
 sd_stats = get_last_run_stats()
 check("统计含text_combos_used", "text_combos_used" in sd_stats, str(sd_stats.keys()))
 check("至少1个三维组合被使用", len(sd_stats.get("text_combos_used", [])) >= 1, "")

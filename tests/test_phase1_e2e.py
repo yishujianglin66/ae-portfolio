@@ -1,17 +1,12 @@
 import os
 import sys
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ae_agent_pipeline import (
-    AEAgentPipeline,
-    PerceptionResult,
-    UnderstandingResult,
-    PlanningResult,
-    ExecutionResult
-)
+from ae_agent_pipeline import AEAgentPipeline, ExecutionResult, PerceptionResult, PlanningResult, UnderstandingResult
 
 
 class TestPhase1EndToEnd:

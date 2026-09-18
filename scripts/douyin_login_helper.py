@@ -2,7 +2,9 @@ import asyncio
 import os
 import sys
 from pathlib import Path
-from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
+
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
+from playwright.async_api import async_playwright
 
 COOKIE_FILE = Path("D:/AE-Work/cookies/douyin_cookies.txt")
 LOGIN_KEY_COOKIES = ["sessionid", "sid_guard"]

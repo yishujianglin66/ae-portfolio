@@ -168,7 +168,7 @@ class ColorWheelValues:
     blue: float = 0.0
     master: float = 0.0
 
-    def to_dict(self, balance_type: ColorBalanceType = ColorBalanceType.RGB) -> Dict[str, float]:
+    def to_dict(self, balance_type: ColorBalanceType = ColorBalanceType.RGB) -> dict[str, float]:
         """转换为 Resolve API 所需的字典。"""
         if balance_type == ColorBalanceType.HSL:
             return {
@@ -187,7 +187,7 @@ class ColorWheelValues:
 
     @classmethod
     def from_dict(
-        cls, data: Dict[str, float], balance_type: ColorBalanceType = ColorBalanceType.RGB
+        cls, data: dict[str, float], balance_type: ColorBalanceType = ColorBalanceType.RGB
     ) -> "ColorWheelValues":
         """从 Resolve API 字典反序列化。"""
         if not data:
@@ -227,9 +227,9 @@ class ColorGradingPreset:
     highlight_saturation: float = 1.0
     shadow_saturation: float = 1.0
     blend_opacity: float = 1.0
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转为可 JSON 序列化的字典。"""
         data = asdict(self)
         # asdict 会把 dataclass 嵌套转为 dict；这里我们希望嵌套结构更友好：
@@ -240,9 +240,9 @@ class ColorGradingPreset:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ColorGradingPreset":
+    def from_dict(cls, data: dict[str, Any]) -> "ColorGradingPreset":
         """从字典反序列化（支持 JSON 加载）。"""
-        kwargs: Dict[str, Any] = {}
+        kwargs: dict[str, Any] = {}
         for key in (
             "name",
             "description",
@@ -379,7 +379,7 @@ class ColorGrader:
             )
         return items[clip_index]
 
-    def _safe_lut_path(self, lut_path: Optional[str]) -> Optional[str]:
+    def _safe_lut_path(self, lut_path: str | None) -> str | None:
         """复制非 ASCII 路径到纯英文临时目录（与 davinci_fuscript 保持一致）。"""
         if not lut_path:
             return lut_path
@@ -614,7 +614,7 @@ class ColorGrader:
         clip_index: int,
         node_index: int,
         curve_type: CurveType | str,
-        points: List[float],
+        points: list[float],
     ) -> bool:
         """设置曲线（points 为控制点数值的扁平列表）。"""
         ct = curve_type.value if isinstance(curve_type, CurveType) else str(curve_type)
@@ -640,7 +640,7 @@ class ColorGrader:
         ct = curve_type.value if isinstance(curve_type, CurveType) else str(curve_type)
         current = self.get_custom_curve(clip_index, node_index, ct)
         # 约定：每两个值为 (x, y) 对
-        merged: List[float] = list(current) + [float(x), float(y)]
+        merged: list[float] = list(current) + [float(x), float(y)]
         return self.set_custom_curve(clip_index, node_index, ct, merged)
 
     def reset_curve(
@@ -661,7 +661,7 @@ class ColorGrader:
         clip_index: int,
         node_index: int,
         curve_type: CurveType | str,
-    ) -> List[float]:
+    ) -> list[float]:
         """读取当前曲线控制点列表。"""
         ct = curve_type.value if isinstance(curve_type, CurveType) else str(curve_type)
         item = self._get_timeline_item(clip_index)
@@ -682,9 +682,9 @@ class ColorGrader:
         self,
         clip_index: int,
         node_index: int,
-        hue_range: Tuple[float, float],
-        sat_range: Tuple[float, float] = (0.0, 1.0),
-        lum_range: Tuple[float, float] = (0.0, 1.0),
+        hue_range: tuple[float, float],
+        sat_range: tuple[float, float] = (0.0, 1.0),
+        lum_range: tuple[float, float] = (0.0, 1.0),
     ) -> bool:
         """使用限定器按 HSL 范围选择区域。
 
@@ -792,13 +792,13 @@ class ColorGrader:
 
     def grade_clip_range(
         self,
-        clip_indices: List[int],
+        clip_indices: list[int],
         node_index: int,
         preset: ColorGradingPreset,
         balance_type: ColorBalanceType = ColorBalanceType.RGB,
-    ) -> Dict[int, bool]:
+    ) -> dict[int, bool]:
         """将预设应用到多个片段（返回每个片段的成功标志）。"""
-        results: Dict[int, bool] = {}
+        results: dict[int, bool] = {}
         for idx in clip_indices:
             try:
                 results[idx] = self.apply_preset(idx, node_index, preset, balance_type)
@@ -810,10 +810,10 @@ class ColorGrader:
     def copy_grading(
         self,
         source_clip_index: int,
-        target_clip_indices: List[int],
+        target_clip_indices: list[int],
         node_index: int = 0,
         balance_type: ColorBalanceType = ColorBalanceType.RGB,
-    ) -> Dict[int, bool]:
+    ) -> dict[int, bool]:
         """从源片段复制调色到多个目标片段。"""
         preset = self.save_preset_from_node(
             source_clip_index, node_index,

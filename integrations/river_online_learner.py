@@ -79,12 +79,12 @@ class RiverOnlineLearner:
     def __init__(self, data_dir: str = "data/online_learner"):
         self._data_dir = Path(data_dir)
         self._data_dir.mkdir(parents=True, exist_ok=True)
-        self._river_available: Optional[bool] = None
+        self._river_available: bool | None = None
         
         # 每个阶段的模型/统计
-        self._stage_models: Dict[str, Any] = {}
-        self._stage_stats: Dict[str, Dict[str, OnlineStats]] = {}
-        self._drift_counters: Dict[str, int] = {}
+        self._stage_models: dict[str, Any] = {}
+        self._stage_stats: dict[str, dict[str, OnlineStats]] = {}
+        self._drift_counters: dict[str, int] = {}
         self._total_observations: int = 0
         
         # 加载已有状态
@@ -106,7 +106,7 @@ class RiverOnlineLearner:
         duration: float = 0.0,
         success: bool = True,
         quality: float = 0.0,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> None:
         """记录一次执行观测并更新模型
         
@@ -183,11 +183,11 @@ class RiverOnlineLearner:
             drift_detected=drift,
         )
 
-    def predict_all(self) -> Dict[str, StagePrediction]:
+    def predict_all(self) -> dict[str, StagePrediction]:
         """预测所有已知阶段"""
         return {name: self.predict(name) for name in self._stage_stats}
 
-    def get_stage_stats(self, stage_name: str) -> Dict[str, Any]:
+    def get_stage_stats(self, stage_name: str) -> dict[str, Any]:
         """获取阶段的在线统计量"""
         stats = self._stage_stats.get(stage_name)
         if not stats:
@@ -250,11 +250,11 @@ class RiverOnlineLearner:
 
     def _update_river_model(
         self, stage_name: str, duration: float,
-        success: bool, quality: float, params: Optional[Dict]
+        success: bool, quality: float, params: dict | None
     ) -> None:
         """使用 River 更新在线回归模型"""
         try:
-            from river import linear_model, preprocessing, optim
+            from river import linear_model, optim, preprocessing
 
             if stage_name not in self._stage_models:
                 self._stage_models[stage_name] = (
@@ -280,7 +280,7 @@ class RiverOnlineLearner:
         except Exception as e:
             logger.debug(f"[RiverLearner] River update failed: {e}")
 
-    def _predict_river(self, stage_name: str) -> Optional[Dict[str, float]]:
+    def _predict_river(self, stage_name: str) -> dict[str, float] | None:
         """使用 River 模型预测"""
         try:
             model = self._stage_models.get(stage_name)
@@ -337,7 +337,7 @@ class RiverOnlineLearner:
             logger.debug(f"[RiverLearner] Load failed: {e}")
 
     @staticmethod
-    def _stats_to_dict(stats: OnlineStats) -> Dict[str, float]:
+    def _stats_to_dict(stats: OnlineStats) -> dict[str, float]:
         return {
             "mean": stats.mean,
             "variance": stats.variance,
@@ -349,7 +349,7 @@ class RiverOnlineLearner:
         }
 
     @staticmethod
-    def _dict_to_stats(d: Dict) -> OnlineStats:
+    def _dict_to_stats(d: dict) -> OnlineStats:
         return OnlineStats(
             mean=d.get("mean", 0),
             variance=d.get("variance", 0),

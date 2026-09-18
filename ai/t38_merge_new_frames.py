@@ -3,9 +3,12 @@ t38_merge_new_frames.py - 将新提取的帧合并到训练数据
 ========================================================
 新帧已经按IP分好目录，直接用IP名作为标签追加到 merged_vlm.jsonl。
 """
-import json, os, sys, time
-from pathlib import Path
+import json
+import os
+import sys
+import time
 from collections import Counter
+from pathlib import Path
 
 CORPUS_DIR = Path(r"D:\multi_ip_corpus")
 MERGED_VLM = Path(r"D:\multi_ip_corpus\merged_vlm.jsonl")
@@ -52,7 +55,7 @@ def main():
         print(f"    {ip}: {cnt} ({cnt/existing_count*100:.1f}%)")
     
     # 2. 扫描新帧
-    print(f"\n[扫描新帧]")
+    print("\n[扫描新帧]")
     new_records = []
     new_by_ip = Counter()
     
@@ -104,7 +107,7 @@ def main():
     print(f"  追加完成: {existing_count} → {total_after} 条")
     
     # 4. 更新后统计
-    print(f"\n[更新后IP分布]")
+    print("\n[更新后IP分布]")
     ip_counter_after = Counter()
     ip_counter_after.update(ip_counter)
     ip_counter_after.update(new_by_ip)

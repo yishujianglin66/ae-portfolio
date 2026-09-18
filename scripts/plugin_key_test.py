@@ -9,9 +9,12 @@
 - BCC (粒子/灯光)
 - Red Giant (Stylize/Transitions)
 """
-import json, time, sys, uuid
-from pathlib import Path
+import json
+import sys
+import time
+import uuid
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -242,9 +245,9 @@ def main():
     OUTPUT.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     
     print(f"\n{'='*60}")
-    print(f"✓ 测试完成!")
+    print("✓ 测试完成!")
     print(f"  测试: {len(results)}, 可用: {len(available)}, 不可用: {len(unavailable)}")
-    print(f"\n  可用插件按类别:")
+    print("\n  可用插件按类别:")
     for cat, items in sorted(by_category.items()):
         print(f"    [{cat}] ({len(items)}个)")
         for item in items[:3]:
@@ -254,7 +257,7 @@ def main():
             print(f"      ... +{len(items)-3}个")
     
     if unavailable:
-        print(f"\n  不可用插件:")
+        print("\n  不可用插件:")
         for r in unavailable[:10]:
             print(f"    ✗ {r['matchName']}")
     

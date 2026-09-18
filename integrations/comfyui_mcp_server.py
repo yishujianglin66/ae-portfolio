@@ -61,17 +61,17 @@ class ComfyUIClient:
         except Exception:
             return False
 
-    def get_system_stats(self) -> Dict:
+    def get_system_stats(self) -> dict:
         req = urllib.request.Request(f"{self.base_url}/system_stats")
         with urllib.request.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
-    def get_object_info(self, class_name: str) -> Dict:
+    def get_object_info(self, class_name: str) -> dict:
         req = urllib.request.Request(f"{self.base_url}/object_info/{class_name}")
         with urllib.request.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
-    def queue_prompt(self, workflow: Dict) -> str:
+    def queue_prompt(self, workflow: dict) -> str:
         data = json.dumps(workflow).encode("utf-8")
         req = urllib.request.Request(
             f"{self.base_url}/prompt", data=data,
@@ -81,12 +81,12 @@ class ComfyUIClient:
             result = json.loads(resp.read().decode("utf-8"))
             return result.get("prompt_id", "")
 
-    def get_history(self, prompt_id: str) -> Dict:
+    def get_history(self, prompt_id: str) -> dict:
         req = urllib.request.Request(f"{self.base_url}/history/{prompt_id}")
         with urllib.request.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
-    def wait_for_completion(self, prompt_id: str, max_wait: int = 300) -> Optional[Dict]:
+    def wait_for_completion(self, prompt_id: str, max_wait: int = 300) -> dict | None:
         start = time.time()
         while time.time() - start < max_wait:
             try:
@@ -100,7 +100,7 @@ class ComfyUIClient:
             time.sleep(5)
         return None
 
-    def get_gpu_info(self) -> Dict:
+    def get_gpu_info(self) -> dict:
         stats = self.get_system_stats()
         devices = stats.get("devices", [])
         return {
@@ -114,7 +114,7 @@ class ComfyUIClient:
             ]
         }
 
-    def list_models(self) -> List[str]:
+    def list_models(self) -> list[str]:
         try:
             info = self.get_object_info("CheckpointLoaderSimple")
             return info.get("CheckpointLoaderSimple", {}).get(
@@ -164,7 +164,7 @@ if MCP_AVAILABLE:
 
     @app.tool(name="comfyui_run_workflow",
               description="运行自定义 ComfyUI 工作流 JSON")
-    def tool_run_workflow(workflow: Dict, output_path: str = "output.png",
+    def tool_run_workflow(workflow: dict, output_path: str = "output.png",
                           timeout: int = 300) -> str:
         result = _run_workflow(locals())
         return json.dumps(result, ensure_ascii=False, indent=2)
@@ -176,7 +176,7 @@ if MCP_AVAILABLE:
                           ensure_ascii=False, indent=2)
 
 
-def _generate_image(args: Dict) -> Dict:
+def _generate_image(args: dict) -> dict:
     """图像生成。"""
     prompt = args.get("prompt", "")
     negative = args.get("negative_prompt", "blurry, low quality")
@@ -212,7 +212,7 @@ def _generate_image(args: Dict) -> Dict:
     return {"success": False, "error": "Timeout", "prompt_id": prompt_id}
 
 
-def _generate_video(args: Dict) -> Dict:
+def _generate_video(args: dict) -> dict:
     """视频生成。"""
     prompt = args.get("prompt", "")
     w = args.get("width", 720)
@@ -246,7 +246,7 @@ def _generate_video(args: Dict) -> Dict:
     return {"success": False, "error": "Timeout", "prompt_id": prompt_id}
 
 
-def _run_workflow(args: Dict) -> Dict:
+def _run_workflow(args: dict) -> dict:
     """运行自定义工作流。"""
     workflow = args.get("workflow", {})
     timeout = args.get("timeout", 300)

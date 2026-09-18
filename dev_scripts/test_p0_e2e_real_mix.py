@@ -14,13 +14,13 @@ P0 端到端验证: 真实素材 → 真实混剪 → 真实 MP4 输出
   - ffprobe 可解析 (时长>3s, 1920x1080, h264)
   - 管线日志无 CRITICAL 错误
 """
-import sys
-import os
 import json
-import time
+import os
 import subprocess
-from pathlib import Path
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 # 项目根目录
 ROOT = Path(__file__).parent.parent
@@ -102,7 +102,7 @@ def main():
     log("")
     log(">>> 初始化 UnifiedPipeline...")
     
-    from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig
+    from pipeline.unified_pipeline import PipelineConfig, UnifiedPipeline
     
     config = PipelineConfig(
         input_topic="赛博朋克高燃踩点混剪 霓虹色彩 故障艺术",

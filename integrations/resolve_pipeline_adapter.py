@@ -13,22 +13,22 @@ Usage:
 """
 import os
 import sys
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 
 @dataclass
 class ResolveStageConfig:
     """Resolve 调色阶段配置"""
     preset: str = "cinematic"
-    lut_path: Optional[str] = None
+    lut_path: str | None = None
     brightness: float = 1.0
     contrast: float = 1.0
     saturation: float = 1.0
     lut_intensity: float = 1.0
     render: bool = False
-    output_dir: Optional[str] = None
+    output_dir: str | None = None
     close_after: bool = True
     # 智能调色
     auto_detect_scene: bool = False
@@ -41,7 +41,7 @@ class ResolvePipelineStage:
     集成到 UnifiedPipeline 中作为调色阶段。
     """
     
-    def __init__(self, config: Optional[ResolveStageConfig] = None, **kwargs):
+    def __init__(self, config: ResolveStageConfig | None = None, **kwargs):
         if config is None:
             config = ResolveStageConfig(**kwargs)
         self.config = config
@@ -54,7 +54,7 @@ class ResolvePipelineStage:
             self._engine = ResolveColorEngine()
         return self._engine
     
-    def execute(self, context: Dict[str, Any], callback: Optional[Callable] = None) -> Dict[str, Any]:
+    def execute(self, context: dict[str, Any], callback: Callable | None = None) -> dict[str, Any]:
         """执行调色阶段
         
         Args:
@@ -109,14 +109,16 @@ class ResolvePipelineStage:
     
     def _build_color_config(
         self,
-        media_files: List[str],
-        context: Dict[str, Any],
-        callback: Optional[Callable] = None,
+        media_files: list[str],
+        context: dict[str, Any],
+        callback: Callable | None = None,
     ):
         """构建调色配置（支持智能调色 + v4.0 预设系统）"""
         from integrations.davinci_fuscript import (
-            ColorGradeConfig, find_lut_for_preset,
-            RESOLVE_PRESETS, preset_to_color_grade_config,
+            RESOLVE_PRESETS,
+            ColorGradeConfig,
+            find_lut_for_preset,
+            preset_to_color_grade_config,
         )
         
         preset = self.config.preset
@@ -155,9 +157,9 @@ class ResolvePipelineStage:
     
     def _detect_scenes(
         self,
-        media_files: List[str],
-        callback: Optional[Callable] = None,
-    ) -> Optional[Dict[str, str]]:
+        media_files: list[str],
+        callback: Callable | None = None,
+    ) -> dict[str, str] | None:
         """检测场景类型并返回分段预设"""
         try:
             from integrations.scene_detector import SceneDetector
@@ -187,8 +189,8 @@ class ResolvePipelineStage:
     def _match_audio_mood(
         self,
         media_file: str,
-        callback: Optional[Callable] = None,
-    ) -> Optional[str]:
+        callback: Callable | None = None,
+    ) -> str | None:
         """根据音频情绪匹配预设"""
         try:
             from integrations.audio_analyzer import AudioAnalyzer

@@ -47,9 +47,9 @@ def load_ground_truth() -> dict:
 
 async def run_pipeline(video_path: Path) -> dict:
     """对单个视频运行完整管线"""
+    from core.jsx_generator import style_result_to_jsx
     from core.style_pipeline import analyze_video_style
     from core.style_preset_adapter import style_to_atomic_params
-    from core.jsx_generator import style_result_to_jsx
 
     start = time.time()
 
@@ -161,7 +161,7 @@ async def main():
     print(f"  平均延迟: {avg_time:.1f}s (阈值: <15s)")
 
     # 验收判定
-    print(f"\n验收标准:")
+    print("\n验收标准:")
     print(f"  [{'PASS' if accuracy >= 0.7 else 'FAIL'}] 准确率 >= 70%: {accuracy:.1%}")
     print(f"  [{'PASS' if max_pred_ratio <= 0.4 else 'FAIL'}] 无单类 > 40%: {max_pred_ratio:.1%}")
     print(f"  [{'PASS' if bad_jsx == 0 else 'FAIL'}] 无错误matchName: {bad_jsx} 个")

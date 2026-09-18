@@ -11,21 +11,21 @@
 
 from __future__ import annotations
 
-import json
-import sys
-import os
 import hashlib
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
+import json
+import os
+import sys
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "01-下载器"))
 
 try:
-    from douyin_downloader_pro import DouyinDownloaderPro
     from bilibili_downloader import BilibiliDownloader
+    from douyin_downloader_pro import DouyinDownloaderPro
+    from unified_downloader import PLATFORM_RULES, detect_platform
     from youtube_downloader import YouTubeDownloader
-    from unified_downloader import detect_platform, PLATFORM_RULES
     DOWNLOADERS_AVAILABLE = True
 except ImportError:
     DOWNLOADERS_AVAILABLE = False
@@ -45,10 +45,10 @@ class SearchResult:
     quality: str = "medium"
     watermark: bool = True
     similarity: float = 0.0
-    audio_features: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    audio_features: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "url": self.url,
             "title": self.title,
@@ -70,7 +70,7 @@ class CrossPlatformSearcher:
     """跨平台搜索器"""
     
     def __init__(self):
-        self.downloaders: Dict[str, Any] = {}
+        self.downloaders: dict[str, Any] = {}
         if DOWNLOADERS_AVAILABLE:
             self._init_downloaders()
     
@@ -94,10 +94,10 @@ class CrossPlatformSearcher:
     def search(
         self,
         query: str,
-        platforms: Optional[List[str]] = None,
+        platforms: list[str] | None = None,
         max_results_per_platform: int = 10,
         media_type: str = "video"
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         跨平台搜索
         
@@ -140,7 +140,7 @@ class CrossPlatformSearcher:
         query: str,
         max_results: int,
         media_type: str
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """搜索单个平台"""
         results = []
         
@@ -177,7 +177,7 @@ class CrossPlatformSearcher:
         
         return results[:max_results]
     
-    def deduplicate(self, results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def deduplicate(self, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         跨平台去重
         
@@ -236,7 +236,7 @@ class CrossPlatformSearcher:
         
         return len(intersection) / len(union)
     
-    def assess_quality(self, result: Dict[str, Any]) -> float:
+    def assess_quality(self, result: dict[str, Any]) -> float:
         """
         评估单个结果的质量（便捷方法）
         
@@ -251,7 +251,7 @@ class CrossPlatformSearcher:
             return evaluated[0].get("quality_score", 0.5)
         return 0.5
     
-    def evaluate_quality(self, results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def evaluate_quality(self, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         质量评估
         
@@ -333,11 +333,11 @@ class CrossPlatformSearcher:
     
     def merge_results(
         self,
-        local_results: List[Dict[str, Any]],
-        remote_results: List[Dict[str, Any]],
+        local_results: list[dict[str, Any]],
+        remote_results: list[dict[str, Any]],
         local_weight: float = 0.6,
         remote_weight: float = 0.4
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         合并本地和远程搜索结果
         
@@ -391,7 +391,7 @@ def main() -> None:
         action = input_json.get("action", "")
         
         searcher = CrossPlatformSearcher()
-        result: Dict[str, Any] = {"success": False, "results": []}
+        result: dict[str, Any] = {"success": False, "results": []}
         
         if action == "search":
             query = input_json.get("query", "")

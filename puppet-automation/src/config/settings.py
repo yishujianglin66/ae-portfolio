@@ -273,6 +273,7 @@ class Settings(BaseSettings):
             core.llm_gateway.LLMConfig — 已合并 settings 与环境变量的配置
         """
         import json as _json
+
         from core.llm_gateway import LLMConfig, TaskType
 
         fallbacks = []

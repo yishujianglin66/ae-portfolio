@@ -14,11 +14,12 @@
 from __future__ import annotations
 
 import json
-import sys
 import os
-import pytest
+import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # 确保项目根目录在 sys.path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,14 +27,13 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from ae.preset_executor import (
-    resolve_style_id,
-    adjust_parameter_by_intensity,
-    mix_parameters,
-    StyleCompositionEngine,
-    compose_style,
     STYLE_ALIASES,
+    StyleCompositionEngine,
+    adjust_parameter_by_intensity,
+    compose_style,
+    mix_parameters,
+    resolve_style_id,
 )
-
 
 # ============================================================
 # Fixture

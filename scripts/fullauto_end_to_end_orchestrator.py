@@ -36,16 +36,16 @@ from __future__ import annotations
 
 import ctypes
 import ctypes.wintypes as wintypes
+import io
 import json
 import os
 import shutil
 import subprocess
 import sys
 import time
-import io
-from pathlib import Path
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
 
 # ── 编码强制 UTF-8 ─────────────────────────────────────────
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
@@ -599,7 +599,7 @@ def main() -> int:
     logger.log("  遵循 第十二章 7 条经验 & 第七章 编码器持久化最佳实践")
     logger.log(f"  PR 模式:      { '跳过' if args.skip_pr else 'Startup 脚本 (经验 #4)' }")
     logger.log(f"  Resolve 模式: { '跳过' if args.skip_render else 'fuscript -lua (经验 #5)' }")
-    logger.log(f"  编码器验证:   FourCC=apch 二进制级检查 (经验 #1 #7)")
+    logger.log("  编码器验证:   FourCC=apch 二进制级检查 (经验 #1 #7)")
 
     pr_result = None
     render_result = None

@@ -14,20 +14,20 @@ from __future__ import annotations
 import json
 import os
 import sys
-import threading
 import tempfile
-import pytest
+import threading
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.engine_registry import (
-    EngineMetadata,
     EngineExecutionRecord,
+    EngineMetadata,
     EngineRegistry,
     get_engine_registry,
 )
-
 
 # ============================================================
 # EngineMetadata 数据类

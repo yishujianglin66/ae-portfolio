@@ -5,13 +5,13 @@
 集成 Whisper 语音识别生成字幕，并通过 LLM 网关进行智能优化
 """
 
-import json
-import re
 import asyncio
+import json
 import logging
+import re
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +30,11 @@ class SubtitleStyle:
     """字幕样式"""
     font_family: str = "Arial"
     font_size: int = 48
-    font_color: List[float] = None
-    stroke_color: List[float] = None
+    font_color: list[float] = None
+    stroke_color: list[float] = None
     stroke_width: float = 2.0
     glow_enabled: bool = True
-    glow_color: List[float] = None
+    glow_color: list[float] = None
     glow_radius: float = 15.0
     position_y: float = 0.85
     alignment: str = "center"
@@ -53,7 +53,7 @@ class SubtitleParser:
     """字幕解析器 - 支持 SRT/VTT/ASS 格式"""
 
     @staticmethod
-    def parse_srt(content: str) -> List[SubtitleItem]:
+    def parse_srt(content: str) -> list[SubtitleItem]:
         """解析 SRT 字幕格式"""
         items = []
         blocks = content.strip().split('\n\n')
@@ -78,7 +78,7 @@ class SubtitleParser:
         return items
 
     @staticmethod
-    def parse_vtt(content: str) -> List[SubtitleItem]:
+    def parse_vtt(content: str) -> list[SubtitleItem]:
         """解析 WebVTT 字幕格式"""
         items = []
         lines = content.split('\n')
@@ -105,7 +105,7 @@ class SubtitleParser:
         return items
 
     @staticmethod
-    def parse_ass(content: str) -> List[SubtitleItem]:
+    def parse_ass(content: str) -> list[SubtitleItem]:
         """解析 ASS 字幕格式（简化版）"""
         items = []
         events_start = False
@@ -170,7 +170,7 @@ class SubtitleParser:
         return 'srt'
 
     @staticmethod
-    def parse(content: str, format_type: str = None) -> List[SubtitleItem]:
+    def parse(content: str, format_type: str = None) -> list[SubtitleItem]:
         """解析字幕内容"""
         if format_type is None:
             format_type = SubtitleParser.detect_format(content)
@@ -186,7 +186,7 @@ class SubtitleGenerator:
     """字幕生成器 - 导出字幕为 SRT/VTT/ASS 格式"""
 
     @staticmethod
-    def to_srt(items: List[SubtitleItem]) -> str:
+    def to_srt(items: list[SubtitleItem]) -> str:
         """导出为 SRT 格式"""
         lines = []
         for item in items:
@@ -199,7 +199,7 @@ class SubtitleGenerator:
         return '\n'.join(lines)
 
     @staticmethod
-    def to_vtt(items: List[SubtitleItem]) -> str:
+    def to_vtt(items: list[SubtitleItem]) -> str:
         """导出为 WebVTT 格式"""
         lines = ["WEBVTT", ""]
         for item in items:
@@ -211,7 +211,7 @@ class SubtitleGenerator:
         return '\n'.join(lines)
 
     @staticmethod
-    def to_ass(items: List[SubtitleItem]) -> str:
+    def to_ass(items: list[SubtitleItem]) -> str:
         """导出为 ASS 格式"""
         lines = [
             "[Script Info]",
@@ -258,7 +258,7 @@ class SubtitleSystem:
         self.llm_api_key = llm_api_key
         self.model = model
 
-    async def parse_file(self, file_path: Path | str) -> List[SubtitleItem]:
+    async def parse_file(self, file_path: Path | str) -> list[SubtitleItem]:
         """解析字幕文件"""
         file_path = Path(file_path)
         if not file_path.exists():
@@ -272,10 +272,10 @@ class SubtitleSystem:
     async def import_subtitle_to_ae(
         self,
         comp_name: str,
-        subtitle_items: List[SubtitleItem],
-        style: Optional[SubtitleStyle] = None,
-        project_path: Optional[Path | str] = None,
-    ) -> Dict[str, Any]:
+        subtitle_items: list[SubtitleItem],
+        style: SubtitleStyle | None = None,
+        project_path: Path | str | None = None,
+    ) -> dict[str, Any]:
         """将字幕导入 AE 合成"""
         if style is None:
             style = SubtitleStyle()
@@ -381,9 +381,9 @@ class SubtitleSystem:
         self,
         comp_name: str,
         srt_path: Path | str,
-        style: Optional[SubtitleStyle] = None,
-        project_path: Optional[Path | str] = None,
-    ) -> Dict[str, Any]:
+        style: SubtitleStyle | None = None,
+        project_path: Path | str | None = None,
+    ) -> dict[str, Any]:
         """导入 SRT 文件到 AE"""
         items = await self.parse_file(srt_path)
         return await self.import_subtitle_to_ae(comp_name, items, style, project_path)
@@ -393,8 +393,8 @@ class SubtitleSystem:
         comp_name: str,
         output_path: Path | str,
         format_type: str = "srt",
-        project_path: Optional[Path | str] = None,
-    ) -> Dict[str, Any]:
+        project_path: Path | str | None = None,
+    ) -> dict[str, Any]:
         """从 AE 导出字幕"""
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -474,7 +474,7 @@ class SubtitleSystem:
         audio_path: Path | str,
         language: str = "zh",
         use_llm: bool = True,
-    ) -> List[SubtitleItem]:
+    ) -> list[SubtitleItem]:
         """从音频生成字幕（使用 Whisper + LLM 优化）"""
         audio_path = Path(audio_path)
         if not audio_path.exists():
@@ -506,10 +506,10 @@ class SubtitleSystem:
 
     async def _optimize_subtitles_with_llm(
         self,
-        subtitles: List[SubtitleItem],
+        subtitles: list[SubtitleItem],
         language: str = "zh",
-        style: Optional[SubtitleStyle] = None,
-    ) -> List[SubtitleItem]:
+        style: SubtitleStyle | None = None,
+    ) -> list[SubtitleItem]:
         """使用 LLM 优化字幕质量"""
         try:
             from core.llm_gateway import LLMGateway
@@ -558,9 +558,9 @@ class SubtitleSystem:
     def batch_import_subtitles(
         self,
         comp_name: str,
-        subtitle_files: List[Path | str],
-        style: Optional[SubtitleStyle] = None,
-        project_path: Optional[Path | str] = None,
+        subtitle_files: list[Path | str],
+        style: SubtitleStyle | None = None,
+        project_path: Path | str | None = None,
     ):
         """批量导入字幕文件"""
         async def import_one(file_path):

@@ -31,7 +31,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from fastmcp import FastMCP, Context
+from fastmcp import Context, FastMCP
 
 # =====================================================================
 # 主服务器 — 统一入口
@@ -99,7 +99,7 @@ def kb_style_article(filename: str) -> str:
 @mcp.resource("bridge://ae/status")
 def bridge_ae_status() -> dict:
     """AE Bridge 实时状态 — 读取 trigger/command/result 文件。"""
-    result: Dict[str, Any] = {"available": False}
+    result: dict[str, Any] = {"available": False}
     if not _AE_BRIDGE_DIR.is_dir():
         return result
 
@@ -272,10 +272,10 @@ async def get_bridge_status(ctx: Context = None) -> dict:
     if ctx:
         await ctx.info("正在检查 AE/PR Bridge 状态")
 
-    status: Dict[str, Any] = {}
+    status: dict[str, Any] = {}
 
     # --- AE Bridge ---
-    ae_status: Dict[str, Any] = {"exists": _AE_BRIDGE_DIR.is_dir()}
+    ae_status: dict[str, Any] = {"exists": _AE_BRIDGE_DIR.is_dir()}
     if _AE_BRIDGE_DIR.is_dir():
         for key, fname in [
             ("trigger", "ae_trigger.json"),
@@ -301,7 +301,7 @@ async def get_bridge_status(ctx: Context = None) -> dict:
     status["ae_bridge"] = ae_status
 
     # --- PR Bridge ---
-    pr_status: Dict[str, Any] = {"exists": _PR_BRIDGE_DIR.is_dir()}
+    pr_status: dict[str, Any] = {"exists": _PR_BRIDGE_DIR.is_dir()}
     if _PR_BRIDGE_DIR.is_dir():
         status_files = {
             "bridge_ready": "bridge_ready.txt",
@@ -327,10 +327,10 @@ async def get_bridge_status(ctx: Context = None) -> dict:
 # 内部辅助
 # =====================================================================
 
-_master_kb_index: Optional[List[Dict[str, Any]]] = None
+_master_kb_index: list[dict[str, Any]] | None = None
 
 
-def _build_master_index() -> List[Dict[str, Any]]:
+def _build_master_index() -> list[dict[str, Any]]:
     """构建大师知识库索引 (标题 + 标签 + 内容摘要)。"""
     global _master_kb_index
     if _master_kb_index is not None:

@@ -21,7 +21,7 @@ from __future__ import annotations
 import difflib
 import logging
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -37,7 +37,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 HUMAN_REVIEW_DIFF_THRESHOLD = 0.30
 
 # 各 Agent 角色的内置默认 Prompt（文件不存在时的兜底）
-BUILTIN_PROMPTS: Dict[str, str] = {
+BUILTIN_PROMPTS: dict[str, str] = {
     "style_analysis": (
         "你是视频风格分析专家。请从输入信息中提取可量化的风格参数：\n"
         "1. style_tags: 风格标签数组\n"
@@ -79,7 +79,7 @@ class PromptUpdateResult:
     reason: str = ""
     timestamp: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -120,7 +120,7 @@ class AgentAssetManager:
         """返回 prompt 来源: file / builtin"""
         return "file" if self.prompt_path(role).exists() else "builtin"
 
-    def list_roles(self) -> List[str]:
+    def list_roles(self) -> list[str]:
         """已注册的角色（内置默认 ∪ 已存在文件）"""
         roles = set(BUILTIN_PROMPTS.keys())
         if self._prompts_dir.exists():
@@ -201,12 +201,12 @@ class AgentAssetManager:
                 pass
         return result
 
-    def list_pending(self) -> List[Dict[str, Any]]:
+    def list_pending(self) -> list[dict[str, Any]]:
         """列出全部待人工确认的 Prompt 修改"""
         if not self._pending_dir.exists():
             return []
         import json
-        items: List[Dict[str, Any]] = []
+        items: list[dict[str, Any]] = []
         for p in sorted(self._pending_dir.glob("*.json")):
             try:
                 with open(p, "r", encoding="utf-8") as f:
@@ -229,11 +229,11 @@ class AgentAssetManager:
         ratio = difflib.SequenceMatcher(None, old_text, new_text).ratio()
         return 1.0 - ratio
 
-    def snapshot_assets(self) -> Dict[str, str]:
+    def snapshot_assets(self) -> dict[str, str]:
         """打包全部 Prompt 快照（供 VersionManager 存档）"""
         return {role: self.load_prompt(role) for role in self.list_roles()}
 
-    def restore_assets(self, snapshot: Dict[str, str]) -> int:
+    def restore_assets(self, snapshot: dict[str, str]) -> int:
         """从快照恢复 Prompt（版本回退用），返回恢复数量"""
         count = 0
         for role, text in snapshot.items():
@@ -258,7 +258,7 @@ class AgentAssetManager:
 #  全局单例
 # ============================================================================
 
-_global_assets: Optional[AgentAssetManager] = None
+_global_assets: AgentAssetManager | None = None
 
 
 def get_agent_asset_manager(

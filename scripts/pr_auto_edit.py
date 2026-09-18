@@ -216,14 +216,17 @@ async def run_auto_edit_workflow() -> None:
     project_path = str(PROJECT_FILE)
 
     from src.engines.premiere.pr_bridge_client import (
-        PRBridgeClient, PRBridgeError, SequenceCreationError, auto_edit_workflow,
+        PRBridgeClient,
+        PRBridgeError,
+        SequenceCreationError,
+        auto_edit_workflow,
     )
 
     logger.info("开始执行自动剪辑工作流...")
     print()
     logger.info(f"  素材: {len(media_files)} 个文件")
-    logger.info(f"  序列: AutoEdit")
-    logger.info(f"  转场: Cross Dissolve (0.5s)")
+    logger.info("  序列: AutoEdit")
+    logger.info("  转场: Cross Dissolve (0.5s)")
     logger.info(f"  输出: {output_path}")
     print()
 

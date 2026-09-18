@@ -71,8 +71,8 @@ class EngineStatus:
     name: str
     executable_path: str
     exists: bool
-    bridge_available: Optional[bool] = None  # None=无Bridge, True/False=有Bridge的连通性
-    version: Optional[str] = None
+    bridge_available: bool | None = None  # None=无Bridge, True/False=有Bridge的连通性
+    version: str | None = None
 
 
 @dataclass
@@ -81,10 +81,10 @@ class HealthReport:
     passed: bool
     timestamp: float = field(default_factory=time.time)
     run_id: str = ""
-    checks: List[CheckItem] = field(default_factory=list)
-    engines: List[EngineStatus] = field(default_factory=list)
+    checks: list[CheckItem] = field(default_factory=list)
+    engines: list[EngineStatus] = field(default_factory=list)
     disk_free_gb: float = 0.0
-    failures: List[CheckItem] = field(default_factory=list)
+    failures: list[CheckItem] = field(default_factory=list)
     summary: str = ""
 
     def to_json(self) -> str:
@@ -108,19 +108,19 @@ class HealthCheckConfig:
     check_bridge: bool = True
     check_disk: bool = True
     check_ascii_path: bool = True
-    run_dir: Optional[Path] = None
+    run_dir: Path | None = None
 
 
 # ============================================================================
 #  引擎路径注册表（默认值，可被 config 覆盖）
 # ============================================================================
 
-def _get_default_engine_paths() -> Dict[str, Dict[str, Any]]:
+def _get_default_engine_paths() -> dict[str, dict[str, Any]]:
     """获取默认引擎路径配置。
 
     优先从 puppet-automation settings 读取，失败时使用硬编码默认值。
     """
-    defaults: Dict[str, Dict[str, Any]] = {
+    defaults: dict[str, dict[str, Any]] = {
         "after_effects": {
             "executable": "C:/Program Files/Adobe/Adobe After Effects 2025/Support Files/aerender.exe",
             "bridge_dir": None,  # 需要项目根目录
@@ -211,8 +211,8 @@ class HealthChecker:
 
     def __init__(
         self,
-        config: Optional[HealthCheckConfig] = None,
-        engine_paths: Optional[Dict[str, Dict[str, Any]]] = None,
+        config: HealthCheckConfig | None = None,
+        engine_paths: dict[str, dict[str, Any]] | None = None,
     ):
         self.config = config or HealthCheckConfig()
         self._engine_paths = engine_paths or _get_default_engine_paths()
@@ -223,8 +223,8 @@ class HealthChecker:
 
     def check_pipeline_requirements(
         self,
-        engine_names: List[str],
-        run_id: Optional[str] = None,
+        engine_names: list[str],
+        run_id: str | None = None,
     ) -> HealthReport:
         """执行全部健康检查，返回结构化报告。
 
@@ -236,8 +236,8 @@ class HealthChecker:
             HealthReport（passed=True 表示全部通过）
         """
         run_id = run_id or f"health_{uuid.uuid4().hex[:8]}"
-        checks: List[CheckItem] = []
-        engines: List[EngineStatus] = []
+        checks: list[CheckItem] = []
+        engines: list[EngineStatus] = []
 
         # 1. 引擎可执行文件检查
         for name in engine_names:
@@ -339,7 +339,7 @@ class HealthChecker:
         )
         return item, status
 
-    def _check_bridge(self, name: str) -> Optional[CheckItem]:
+    def _check_bridge(self, name: str) -> CheckItem | None:
         """检查引擎 Bridge 连通性（仅对有 Bridge 的引擎）"""
         engine_cfg = self._engine_paths.get(name)
         if not engine_cfg or not engine_cfg.get("has_bridge"):
@@ -512,9 +512,9 @@ class HealthChecker:
 # ============================================================================
 
 def run_health_check(
-    engine_names: Optional[List[str]] = None,
-    run_dir: Optional[Path | str] = None,
-    save_path: Optional[Path | str] = None,
+    engine_names: list[str] | None = None,
+    run_dir: Path | str | None = None,
+    save_path: Path | str | None = None,
 ) -> HealthReport:
     """一键执行健康检查。
 

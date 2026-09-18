@@ -1,19 +1,20 @@
 """core.workflow_orchestrator 单元测试 - 工作流编排引擎核心逻辑"""
+import asyncio
 import os
 import sys
-import asyncio
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.workflow_orchestrator import (
-    TaskStatus,
-    TaskType,
-    WorkflowStatus,
     TaskDefinition,
     TaskInstance,
+    TaskStatus,
+    TaskType,
     WorkflowContext,
     WorkflowOrchestrator,
+    WorkflowStatus,
     create_orchestrator,
 )
 

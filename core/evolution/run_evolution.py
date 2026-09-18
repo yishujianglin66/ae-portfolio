@@ -77,13 +77,13 @@ class EvolutionLoop:
         self._cycle_tokens = 0
         self._cycle_cost = 0.0
         # P2: 渲染引擎使用分布追踪（ae_render/aerender/real_mix/ffmpeg...）
-        self._engine_usage: Dict[str, int] = {}
+        self._engine_usage: dict[str, int] = {}
 
     # ----------------------------------------------------------------
     #  主入口
     # ----------------------------------------------------------------
 
-    def run(self, iterations: int = 3, blind_test: bool = True) -> Dict[str, Any]:
+    def run(self, iterations: int = 3, blind_test: bool = True) -> dict[str, Any]:
         """运行进化循环
 
         Args:
@@ -99,8 +99,8 @@ class EvolutionLoop:
             logger.error("[EvolutionLoop] no train tasks for task_type=%s", self._task_type)
             return {"status": "no_tasks", "task_type": self._task_type}
 
-        working_config: Dict[str, Any] = {}
-        history: List[Dict[str, Any]] = []
+        working_config: dict[str, Any] = {}
+        history: list[dict[str, Any]] = []
         start = time.time()
 
         for it in range(iterations):
@@ -142,7 +142,7 @@ class EvolutionLoop:
                 print(f"    [!] proposal needs human review: {proposal.adjustments}")
 
             # 3. 应用自动批准的调整（人工确认项跳过）
-            applied_adj: Dict[str, Any] = {}
+            applied_adj: dict[str, Any] = {}
             if proposal.auto_approved and proposal.adjustments:
                 working_config.update(proposal.adjustments)
                 applied_adj = dict(proposal.adjustments)
@@ -174,7 +174,7 @@ class EvolutionLoop:
             ))
 
         # 4. 验证集盲测（防过拟合）
-        val_summary: Dict[str, Any] = {}
+        val_summary: dict[str, Any] = {}
         if blind_test:
             val_summary = self._blind_test(scope, working_config)
 
@@ -201,17 +201,17 @@ class EvolutionLoop:
 
     def _run_iteration(
         self,
-        tasks: List[Dict[str, Any]],
+        tasks: list[dict[str, Any]],
         scope: str,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         iteration: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """单轮迭代: 全部任务执行+评测 → 按轮均分做一次版本决策
 
         设计: 版本对比以「轮」为单位（均分），避免单题波动触发误回退。
         """
-        records: List[Dict[str, Any]] = []
-        eval_details: List[Any] = []
+        records: list[dict[str, Any]] = []
+        eval_details: list[Any] = []
 
         for task in tasks:
             task_id = str(task.get("id", "unknown"))
@@ -288,8 +288,8 @@ class EvolutionLoop:
     # ----------------------------------------------------------------
 
     def _simulate_pipeline_run(
-        self, task: Dict[str, Any], config: Dict[str, Any], run_id: str
-    ) -> Dict[str, Any]:
+        self, task: dict[str, Any], config: dict[str, Any], run_id: str
+    ) -> dict[str, Any]:
         """dry-run 模拟执行 — 确定性伪结果，用于验证闭环机制
 
         模拟规则（对 Optimizer 可改进的敏感项）:
@@ -332,8 +332,8 @@ class EvolutionLoop:
         }
 
     def _execute_real_pipeline(
-        self, task: Dict[str, Any], config: Dict[str, Any], run_id: str
-    ) -> Optional[Dict[str, Any]]:
+        self, task: dict[str, Any], config: dict[str, Any], run_id: str
+    ) -> dict[str, Any] | None:
         """真实运行 UnifiedPipeline（--execute 模式）"""
         try:
             from pipeline.unified_pipeline import PipelineConfig, UnifiedPipeline
@@ -361,13 +361,13 @@ class EvolutionLoop:
     #  验证集盲测（防过拟合）
     # ----------------------------------------------------------------
 
-    def _blind_test(self, scope: str, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _blind_test(self, scope: str, config: dict[str, Any]) -> dict[str, Any]:
         """在验证集上盲测 — Optimizer 不可见，用于确认改进是否真实"""
         val_tasks = self._evaluator.load_benchmark_tasks("val", self._task_type)
         if not val_tasks:
             return {"status": "no_val_tasks"}
         print(f"\n--- Blind test on validation set ({len(val_tasks)} tasks) ---")
-        scores: List[float] = []
+        scores: list[float] = []
         for task in val_tasks:
             task_id = str(task.get("id", "unknown"))
             run_id = f"evo_blind_{scope}_{task_id}"
@@ -409,7 +409,7 @@ class EvolutionLoop:
     #  持久化与日志
     # ----------------------------------------------------------------
 
-    def _save_report(self, report: Dict[str, Any]) -> None:
+    def _save_report(self, report: dict[str, Any]) -> None:
         ts = time.strftime("%Y%m%d_%H%M%S")
         results_dir = PROJECT_ROOT / "data" / "benchmark" / "results"
         write_json(results_dir / f"evolution_run_{ts}.json", report)
@@ -427,7 +427,7 @@ class EvolutionLoop:
         except Exception as e:
             logger.debug("[EvolutionLoop] message log failed: %s", e)
 
-    def _print_summary(self, report: Dict[str, Any]) -> None:
+    def _print_summary(self, report: dict[str, Any]) -> None:
         print("\n" + "=" * 60)
         print(f"Evolution summary: task_type={report['task_type']}")
         history = report.get("train_history", [])
@@ -457,7 +457,7 @@ class EvolutionLoop:
 #  CLI 入口
 # ============================================================================
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="core.evolution.run_evolution",
         description="评测驱动的自进化循环 (P1)",

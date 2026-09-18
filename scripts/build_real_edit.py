@@ -4,11 +4,15 @@
      + 真色差 + Anton巨字扫动 + S_Shake窗口 + gen_fx光尘 + grain
 输出: Edit_RealFootage 合成 → aerender 渲染
 """
-import sys, json, time, uuid, os
+import json
+import os
+import sys
+import time
+import uuid
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from core.composition_tree import (CompositionTree, LayerSpec, EffectRef, AnimationSpec)
+from core.composition_tree import AnimationSpec, CompositionTree, EffectRef, LayerSpec
 from core.synthesis_orchestrator import SynthesisOrchestrator
 
 DUR = 5.0

@@ -12,8 +12,8 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Any
+from dataclasses import asdict, dataclass
+from typing import Any, Dict, List
 
 CATEGORIES = (
     "BRIDGE_DOWN",
@@ -62,7 +62,7 @@ class BridgeFailure:
     recoverable: bool
     ts: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -78,11 +78,11 @@ def from_reason(reason: str, stage: str) -> BridgeFailure:
     )
 
 
-def failures_summary(failures: List[BridgeFailure]) -> Dict[str, Any]:
+def failures_summary(failures: list[BridgeFailure]) -> dict[str, Any]:
     """聚合失败列表：总数 + 按类别分组 + 是否有可恢复项。"""
     if not failures:
         return {"count": 0, "by_category": {}, "recoverable": False}
-    by_cat: Dict[str, int] = {}
+    by_cat: dict[str, int] = {}
     for f in failures:
         by_cat[f.category] = by_cat.get(f.category, 0) + 1
     return {

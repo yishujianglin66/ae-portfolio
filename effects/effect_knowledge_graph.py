@@ -5,18 +5,18 @@ effect_knowledge_graph.py - Python版效果知识图谱
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
 class EffectParameter:
     name: str
     param_type: str  # number, color, enum, boolean, point
-    min_val: Optional[float] = None
-    max_val: Optional[float] = None
+    min_val: float | None = None
+    max_val: float | None = None
     default: Any = None
     intensity_scale: float = 0.0
-    enum_values: Optional[List[str]] = None
+    enum_values: list[str] | None = None
 
 
 @dataclass
@@ -24,9 +24,9 @@ class EffectNode:
     match_name: str
     display_name: str
     category: str
-    sub_category: Optional[str] = None
-    tags: List[str] = field(default_factory=list)
-    parameters: List[EffectParameter] = field(default_factory=list)
+    sub_category: str | None = None
+    tags: list[str] = field(default_factory=list)
+    parameters: list[EffectParameter] = field(default_factory=list)
     confidence: float = 0.8
     description: str = ""
 
@@ -43,8 +43,8 @@ class EffectRelation:
 @dataclass
 class StyleRecipeEffect:
     match_name: str
-    settings: Dict[str, Any] = field(default_factory=dict)
-    intensity_param: Optional[str] = None
+    settings: dict[str, Any] = field(default_factory=dict)
+    intensity_param: str | None = None
     intensity_factor: float = 0.0
 
 
@@ -54,12 +54,12 @@ class StyleRecipe:
     display_name: str
     category: str
     description: str
-    keywords: List[str] = field(default_factory=list)
-    intensity_range: List[float] = field(default_factory=lambda: [0.2, 1.5])
-    effects: List[StyleRecipeEffect] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
+    intensity_range: list[float] = field(default_factory=lambda: [0.2, 1.5])
+    effects: list[StyleRecipeEffect] = field(default_factory=list)
 
 
-def _build_effect_knowledge_graph() -> Dict[str, EffectNode]:
+def _build_effect_knowledge_graph() -> dict[str, EffectNode]:
     """构建效果知识图谱"""
     graph = {}
 
@@ -945,7 +945,7 @@ def _build_effect_knowledge_graph() -> Dict[str, EffectNode]:
     return graph
 
 
-def _build_effect_relations() -> List[EffectRelation]:
+def _build_effect_relations() -> list[EffectRelation]:
     """构建效果关系图谱"""
     relations = []
 
@@ -1017,8 +1017,8 @@ def _build_effect_relations() -> List[EffectRelation]:
     return relations
 
 
-EFFECT_KNOWLEDGE_GRAPH: Dict[str, EffectNode] = _build_effect_knowledge_graph()
-EFFECT_RELATIONS: List[EffectRelation] = _build_effect_relations()
+EFFECT_KNOWLEDGE_GRAPH: dict[str, EffectNode] = _build_effect_knowledge_graph()
+EFFECT_RELATIONS: list[EffectRelation] = _build_effect_relations()
 
 CATEGORIES = {
     "blur_sharpen": "模糊与锐化",
@@ -1033,15 +1033,15 @@ CATEGORIES = {
 }
 
 
-def get_effect_by_match_name(match_name: str) -> Optional[EffectNode]:
+def get_effect_by_match_name(match_name: str) -> EffectNode | None:
     return EFFECT_KNOWLEDGE_GRAPH.get(match_name)
 
 
-def get_effects_by_category(category: str) -> List[EffectNode]:
+def get_effects_by_category(category: str) -> list[EffectNode]:
     return [e for e in EFFECT_KNOWLEDGE_GRAPH.values() if e.category == category]
 
 
-def search_effects(keyword: str) -> List[EffectNode]:
+def search_effects(keyword: str) -> list[EffectNode]:
     keyword_lower = keyword.lower()
     results = []
     for effect in EFFECT_KNOWLEDGE_GRAPH.values():
@@ -1053,12 +1053,12 @@ def search_effects(keyword: str) -> List[EffectNode]:
     return results
 
 
-def get_relations_for_effect(match_name: str) -> List[EffectRelation]:
+def get_relations_for_effect(match_name: str) -> list[EffectRelation]:
     return [r for r in EFFECT_RELATIONS
             if r.effect_a == match_name or r.effect_b == match_name]
 
 
-def get_synergy_effects(match_name: str) -> List[Dict[str, Any]]:
+def get_synergy_effects(match_name: str) -> list[dict[str, Any]]:
     synergies = []
     for r in EFFECT_RELATIONS:
         if r.relation_type != "synergy":
@@ -1089,7 +1089,7 @@ def get_effect_count() -> int:
 # 失败时自动降级为纯本地搜索
 # ============================================================================
 
-def search_effects_enhanced(description: str) -> List[EffectNode]:
+def search_effects_enhanced(description: str) -> list[EffectNode]:
     """
     LLM 增强版效果搜索 — 从关键词搜索升级为自然语言搜索
     失败时自动降级为纯本地搜索
@@ -1110,7 +1110,7 @@ def search_effects_enhanced(description: str) -> List[EffectNode]:
 
     # 2. 尝试导入 LLM 网关和记忆系统
     try:
-        from core.llm_gateway import llm_gateway, TaskType
+        from core.llm_gateway import TaskType, llm_gateway
         from core.memory_store import memory_store
     except ImportError:
         return local_results
@@ -1196,7 +1196,7 @@ def search_effects_enhanced(description: str) -> List[EffectNode]:
     return local_results
 
 
-def recommend_style_enhanced(description: str) -> Optional[StyleRecipe]:
+def recommend_style_enhanced(description: str) -> StyleRecipe | None:
     """
     LLM 增强版风格配方推荐
     Python 端无内置风格配方数据，完全依赖 LLM 推荐
@@ -1213,7 +1213,7 @@ def recommend_style_enhanced(description: str) -> Optional[StyleRecipe]:
     import re as _re
 
     try:
-        from core.llm_gateway import llm_gateway, TaskType
+        from core.llm_gateway import TaskType, llm_gateway
         from core.memory_store import memory_store
     except ImportError:
         return None
@@ -1306,7 +1306,7 @@ def recommend_style_enhanced(description: str) -> Optional[StyleRecipe]:
     return None
 
 
-def find_conflicts(effect_name: str, settings: Dict[str, Any]) -> List[Dict[str, Any]]:
+def find_conflicts(effect_name: str, settings: dict[str, Any]) -> list[dict[str, Any]]:
     """检测效果参数间的冲突关系"""
     conflicts = []
     effect = get_effect_by_match_name(effect_name)
@@ -1345,7 +1345,7 @@ def find_conflicts(effect_name: str, settings: Dict[str, Any]) -> List[Dict[str,
     return conflicts
 
 
-def check_boundaries(effect_name: str, settings: Dict[str, Any]) -> List[Dict[str, Any]]:
+def check_boundaries(effect_name: str, settings: dict[str, Any]) -> list[dict[str, Any]]:
     """检测参数值是否接近边界"""
     issues = []
     effect = get_effect_by_match_name(effect_name)

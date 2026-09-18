@@ -3,20 +3,20 @@ from __future__ import annotations
 
 import os
 import sys
-import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
 from typing import Any, Dict, List
+from unittest.mock import MagicMock, PropertyMock, patch
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+from ae.adapters.mcp_adapter import MCPClientAdapter
 from ae.adapters.puppet_adapter import (
     BaseAEAdapter,
     PuppetEngineAdapter,
-    json_repr,
     _resolve_output_module,
+    json_repr,
 )
-from ae.adapters.mcp_adapter import MCPClientAdapter
-
 
 # ---------------------------------------------------------------------------
 # BaseAEAdapter 测试

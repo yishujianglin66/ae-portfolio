@@ -23,7 +23,6 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-
 # 项目根目录（config/ 的父目录）
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 _DEFAULT_CONFIG_PATH = _PROJECT_ROOT / "config" / "media-config.json"
@@ -32,9 +31,9 @@ _DEFAULT_CONFIG_PATH = _PROJECT_ROOT / "config" / "media-config.json"
 class ConfigManager:
     """统一配置管理器，所有模块共享单一配置源。"""
 
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Path | None = None):
         self._config_path = config_path or _DEFAULT_CONFIG_PATH
-        self._config: Dict[str, Any] = {}
+        self._config: dict[str, Any] = {}
         self._load()
 
     def _load(self):
@@ -122,13 +121,13 @@ class ConfigManager:
         tools = self._config.get("tools", {})
         return tools.get(name, name)
 
-    def get_platform_cookie_path(self, platform: str) -> Optional[str]:
+    def get_platform_cookie_path(self, platform: str) -> str | None:
         """获取指定平台的 Cookie 文件路径。"""
         platforms = self._config.get("platforms", {})
         platform_cfg = platforms.get(platform, {})
         return platform_cfg.get("cookie_path")
 
-    def get_platform_config(self, platform: str) -> Dict[str, Any]:
+    def get_platform_config(self, platform: str) -> dict[str, Any]:
         """获取指定平台的完整配置。"""
         return self._config.get("platforms", {}).get(platform, {})
 
@@ -138,7 +137,7 @@ class ConfigManager:
             if isinstance(dir_path, str) and dir_path:
                 os.makedirs(dir_path, exist_ok=True)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """返回完整配置字典的副本。"""
         return json.loads(json.dumps(self._config))
 
@@ -147,7 +146,7 @@ class ConfigManager:
     # ------------------------------------------------------------------
 
     # 常见软件安装路径（自动检测用）
-    _SOFTWARE_PATHS: Dict[str, list] = {
+    _SOFTWARE_PATHS: dict[str, list] = {
         "blender": [
             r"D:\Blender\Blender 5.1.0\blender.exe",
             r"C:\Program Files\Blender Foundation\Blender 4.0\blender.exe",
@@ -179,7 +178,7 @@ class ConfigManager:
         ],
     }
 
-    def get_software_path(self, software: str) -> Optional[str]:
+    def get_software_path(self, software: str) -> str | None:
         """获取软件可执行文件路径。
 
         优先级：配置文件 > 环境变量 > 自动检测
@@ -209,13 +208,13 @@ class ConfigManager:
 
         return None
 
-    def detect_installed_software(self) -> Dict[str, str]:
+    def detect_installed_software(self) -> dict[str, str]:
         """自动检测已安装的软件。
 
         Returns:
             软件名称 -> 路径 字典
         """
-        found: Dict[str, str] = {}
+        found: dict[str, str] = {}
         for software in self._SOFTWARE_PATHS:
             path = self.get_software_path(software)
             if path:
@@ -377,17 +376,17 @@ _DEFAULT_CONFIG = {
     },
 }
 
-_cached_config: Optional[Dict[str, Any]] = None
-_cached_env: Optional[Dict[str, str]] = None
+_cached_config: dict[str, Any] | None = None
+_cached_env: dict[str, str] | None = None
 
 
-def _load_dotenv() -> Dict[str, str]:
+def _load_dotenv() -> dict[str, str]:
     """加载 .env 文件中的环境变量。"""
     global _cached_env
     if _cached_env is not None:
         return _cached_env
 
-    env_vars: Dict[str, str] = {}
+    env_vars: dict[str, str] = {}
 
     if _ENV_FILE.exists():
         with open(_ENV_FILE, "r", encoding="utf-8") as f:
@@ -407,7 +406,7 @@ def _load_dotenv() -> Dict[str, str]:
     return env_vars
 
 
-def _deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     """深度合并两个字典，override 覆盖 base。"""
     result = dict(base)
     for key, value in override.items():
@@ -422,7 +421,7 @@ def _deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any
     return result
 
 
-def _find_config_path(config: Dict[str, Any], target_key: str) -> Optional[list]:
+def _find_config_path(config: dict[str, Any], target_key: str) -> list | None:
     """在配置字典中递归查找目标键的路径。
 
     Args:
@@ -442,7 +441,7 @@ def _find_config_path(config: Dict[str, Any], target_key: str) -> Optional[list]
     return None
 
 
-def _apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
+def _apply_env_overrides(config: dict[str, Any]) -> dict[str, Any]:
     """使用环境变量覆盖配置值。
 
     支持的环境变量格式：
@@ -491,7 +490,7 @@ def _apply_env_overrides(config: Dict[str, Any]) -> Dict[str, Any]:
     return config
 
 
-def _set_nested_value(d: Dict[str, Any], keys: list, value: str) -> None:
+def _set_nested_value(d: dict[str, Any], keys: list, value: str) -> None:
     """递归设置嵌套字典值。"""
     current = d
     for i, key in enumerate(keys[:-1]):
@@ -518,7 +517,7 @@ def _set_nested_value(d: Dict[str, Any], keys: list, value: str) -> None:
         current[last_key] = value
 
 
-def _load_config_file(env: str) -> Dict[str, Any]:
+def _load_config_file(env: str) -> dict[str, Any]:
     """加载指定环境的配置文件。"""
     config_path = _CONFIG_DIR / f"config.{env}.json"
     if config_path.exists():
@@ -527,7 +526,7 @@ def _load_config_file(env: str) -> Dict[str, Any]:
     return {}
 
 
-def get_config(environment: Optional[str] = None) -> Dict[str, Any]:
+def get_config(environment: str | None = None) -> dict[str, Any]:
     """获取配置。
 
     优先级（从高到低）：
@@ -566,7 +565,7 @@ def get_config(environment: Optional[str] = None) -> Dict[str, Any]:
     return config
 
 
-def get_secret(key: str, default: Optional[str] = None) -> Optional[str]:
+def get_secret(key: str, default: str | None = None) -> str | None:
     """从环境变量获取敏感凭证。
 
     Args:

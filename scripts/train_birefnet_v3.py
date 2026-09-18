@@ -53,7 +53,6 @@ sys.path.insert(0, str(PROJECT))
 
 from core.torch_runtime import infer_ctx  # noqa: E402
 
-
 # ============================== 损失函数 ==============================
 
 def _ssim_loss(pred_sig: torch.Tensor, target: torch.Tensor, window_size: int = 11) -> torch.Tensor:

@@ -30,15 +30,15 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from core.local_model_adapter import (
+    DEFAULT_MODELS,
     LocalModelAdapter,
     LocalModelConfig,
-    LocalModelType,
     LocalModelRegistry,
-    DEFAULT_MODELS,
+    LocalModelType,
 )
 
 
-def test_model_load(model_name: str) -> Dict[str, Any]:
+def test_model_load(model_name: str) -> dict[str, Any]:
     """测试模型加载"""
     print(f"\n[测试] 模型加载: {model_name}")
     
@@ -64,7 +64,7 @@ def test_model_load(model_name: str) -> Dict[str, Any]:
         return {"success": False, "error": error}
 
 
-def test_embedding(model_name: str = "bge-small-zh") -> Dict[str, Any]:
+def test_embedding(model_name: str = "bge-small-zh") -> dict[str, Any]:
     """测试嵌入功能"""
     print(f"\n[测试] 嵌入功能: {model_name}")
     
@@ -96,7 +96,7 @@ def test_embedding(model_name: str = "bge-small-zh") -> Dict[str, Any]:
     
     if response.success:
         embedding_dim = len(response.embeddings[0]) if response.embeddings else 0
-        print(f"  [成功] 嵌入完成")
+        print("  [成功] 嵌入完成")
         print(f"  [信息] 嵌入维度: {embedding_dim}")
         print(f"  [信息] 延迟: {response.latency_ms:.0f}ms")
         print(f"  [信息] 吞吐量: {len(test_texts) / embed_time:.1f} texts/s")
@@ -111,7 +111,7 @@ def test_embedding(model_name: str = "bge-small-zh") -> Dict[str, Any]:
         return {"success": False, "error": response.error}
 
 
-def test_generation(model_name: str = "qwen2-0.5b") -> Dict[str, Any]:
+def test_generation(model_name: str = "qwen2-0.5b") -> dict[str, Any]:
     """测试生成功能"""
     print(f"\n[测试] 生成功能: {model_name}")
     
@@ -165,7 +165,7 @@ def test_generation(model_name: str = "qwen2-0.5b") -> Dict[str, Any]:
     }
 
 
-def test_performance_benchmark() -> Dict[str, Any]:
+def test_performance_benchmark() -> dict[str, Any]:
     """性能基准测试"""
     print("\n[测试] 性能基准")
     
@@ -184,12 +184,12 @@ def test_performance_benchmark() -> Dict[str, Any]:
     return results
 
 
-def test_gateway_integration() -> Dict[str, Any]:
+def test_gateway_integration() -> dict[str, Any]:
     """测试与LLM Gateway集成"""
     print("\n[测试] Gateway集成")
     
     try:
-        from core.llm_gateway import LLMGateway, LLMConfig, ModelTier
+        from core.llm_gateway import LLMConfig, LLMGateway, ModelTier
         
         config = LLMConfig()
         gateway = LLMGateway(config)
@@ -199,7 +199,7 @@ def test_gateway_integration() -> Dict[str, Any]:
             print(f"  [信息] 已注册本地适配器: {list(gateway._local_adapters.keys())}")
             return {"success": True, "adapters": list(gateway._local_adapters.keys())}
         else:
-            print(f"  [信息] Gateway暂未集成本地适配器")
+            print("  [信息] Gateway暂未集成本地适配器")
             return {"success": False, "error": "Gateway未集成本地适配器"}
             
     except ImportError as e:

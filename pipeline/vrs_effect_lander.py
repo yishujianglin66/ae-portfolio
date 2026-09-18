@@ -15,14 +15,18 @@ VRS 效果落地器 — 将 VRS 分析结果通过 FFmpeg 滤镜实际渲染
 Author: AE-Knowledge-Vault Team
 """
 
-import os
 import logging
-from typing import Dict, List, Optional, Any
+import os
+from typing import Any, Dict, List, Optional
 
 from pipeline.ffmpeg_edit_engine import (
-    FFmpegEditEngine, FFmpegFilterBuilder,
-    ColorGradeParams, SharpenParams, BlurParams, VignetteParams,
-    TransitionEngine
+    BlurParams,
+    ColorGradeParams,
+    FFmpegEditEngine,
+    FFmpegFilterBuilder,
+    SharpenParams,
+    TransitionEngine,
+    VignetteParams,
 )
 
 logger = logging.getLogger(__name__)
@@ -162,8 +166,8 @@ class VRSEffectLander:
     def __init__(self, ffmpeg_bin: str = ""):
         self.engine = FFmpegEditEngine(ffmpeg_bin)
 
-    def apply(self, input_video: str, vrs_analysis: Dict,
-              output: str = "") -> Dict:
+    def apply(self, input_video: str, vrs_analysis: dict,
+              output: str = "") -> dict:
         """
         将 VRS 分析结果应用到视频
         
@@ -282,8 +286,8 @@ class VRSEffectLander:
             "reasoning": f"应用{len(applied)}个效果: {', '.join(applied)}"
         }
 
-    def apply_transitions(self, clips: List[str], output: str,
-                          vrs_transitions: List[Dict]) -> bool:
+    def apply_transitions(self, clips: list[str], output: str,
+                          vrs_transitions: list[dict]) -> bool:
         """
         将 VRS 转场信息应用到多片段拼接
         
@@ -321,10 +325,10 @@ class VRSEffectLander:
             clips, output, mapped_types[:n], mapped_durations[:n]
         )
 
-    def get_style_preset(self, style_tag: str) -> Optional[Dict]:
+    def get_style_preset(self, style_tag: str) -> dict | None:
         """获取风格预设信息"""
         return STYLE_PRESETS.get(style_tag)
 
-    def list_available_styles(self) -> List[str]:
+    def list_available_styles(self) -> list[str]:
         """列出所有可用风格"""
         return list(STYLE_PRESETS.keys())

@@ -9,12 +9,13 @@
 
 from __future__ import annotations
 
-import json
-import sys
-import os
 import hashlib
+import json
+import os
+import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 from PIL import Image
 
@@ -68,7 +69,7 @@ def _image_to_simulated_vector(image) -> np.ndarray:
         return np.random.randn(512).astype(np.float32)
 
 
-def get_model() -> Optional[Any]:
+def get_model() -> Any | None:
     """
     加载CLIP模型
 
@@ -97,7 +98,7 @@ def get_model() -> Optional[Any]:
         return MockModel()
 
 
-def encode_text(model: Any, text: str) -> Optional[np.ndarray]:
+def encode_text(model: Any, text: str) -> np.ndarray | None:
     """
     将文本编码为CLIP向量
 
@@ -117,7 +118,7 @@ def encode_text(model: Any, text: str) -> Optional[np.ndarray]:
         return None
 
 
-def encode_image(model: Any, image_path: str) -> Optional[np.ndarray]:
+def encode_image(model: Any, image_path: str) -> np.ndarray | None:
     """
     将图片编码为CLIP向量
 
@@ -164,7 +165,7 @@ def cosine_similarity(v1: np.ndarray, v2: np.ndarray) -> float:
     return float(similarity)
 
 
-def load_index(index_path: str) -> Optional[Dict[str, Any]]:
+def load_index(index_path: str) -> dict[str, Any] | None:
     """
     加载索引文件
 
@@ -186,7 +187,7 @@ def search(
     query: str,
     index_path: str,
     top_k: int = 10
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     根据自然语言查询搜索素材
 
@@ -203,7 +204,7 @@ def search(
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "query": query,
         "results": []
@@ -272,7 +273,7 @@ def search_by_image(
     image_path: str,
     index_path: str,
     top_k: int = 10
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     图片搜索（以图搜图）
 
@@ -289,7 +290,7 @@ def search_by_image(
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "query_image": image_path,
         "results": []
@@ -364,10 +365,10 @@ def search_by_image(
 
 
 def search_by_tags(
-    tags: List[str],
+    tags: list[str],
     index_path: str,
     top_k: int = 10
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     标签搜索（组合多个关键词）
 
@@ -384,7 +385,7 @@ def search_by_tags(
             "error": str (仅在失败时)
         }
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "tags": tags,
         "results": []
@@ -482,7 +483,7 @@ def main() -> None:
         input_json = json.loads(sys.argv[2])
         action = input_json.get("action", "")
 
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
 
         if action == "search":
             query = input_json.get("query", "")

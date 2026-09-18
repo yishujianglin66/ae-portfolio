@@ -3,7 +3,10 @@ t39_run_real_pipeline.py - 用真实素材跑一次完整导演管线
 =========================================================
 ProductionDirector: 感知 → 编排 → 执行 → 验证
 """
-import os, sys, time, json
+import json
+import os
+import sys
+import time
 from pathlib import Path
 
 PROJECT_ROOT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
@@ -152,7 +155,7 @@ def main():
             verify_content=False,  # 混合IP不验证
         )
         
-        print(f"\n[4/5] 渲染结果:")
+        print("\n[4/5] 渲染结果:")
         if isinstance(result, str):
             if os.path.exists(result):
                 sz = os.path.getsize(result) / 1024 / 1024
@@ -187,7 +190,7 @@ def main():
                 output_dir=str(OUTPUT_DIR),
             )
             
-            print(f"\n  E2E Pipeline 结果:")
+            print("\n  E2E Pipeline 结果:")
             print(f"  成功: {result.success if hasattr(result, 'success') else 'N/A'}")
             if hasattr(result, 'output_dir'):
                 print(f"  输出目录: {result.output_dir}")
@@ -202,7 +205,7 @@ def main():
             traceback.print_exc()
     
     # 5. 检查输出
-    print(f"\n[5/5] 检查输出目录:")
+    print("\n[5/5] 检查输出目录:")
     if OUTPUT_DIR.exists():
         for f in sorted(OUTPUT_DIR.iterdir()):
             if f.is_file():

@@ -184,7 +184,7 @@ class Keyframe:
 class AnimationTrack:
     """单属性动画轨道"""
     property_path: str           # AE属性路径，如 "ADBE Transform Group/ADBE Position"
-    keyframes: List[Keyframe] = field(default_factory=list)
+    keyframes: list[Keyframe] = field(default_factory=list)
     property_type: str = "float" # float, position, scale, 3d, color
 
 
@@ -193,7 +193,7 @@ class LayerAnimation:
     """单层完整动画"""
     layer_index: int
     layer_type: str  # "footage", "text", "solid", "adjustment"
-    animation_tracks: List[AnimationTrack] = field(default_factory=list)
+    animation_tracks: list[AnimationTrack] = field(default_factory=list)
     entrance_style: EntranceStyle = EntranceStyle.NONE
     entrance_duration: float = 0.5
     entrance_offset: float = 0.0
@@ -255,7 +255,7 @@ def ease_in_out_quad(t: float) -> float:
     return 2 * t * t if t < 0.5 else 1 - (-2 * t + 2) ** 2 / 2
 
 
-def sample_beat_strength(time: float, beats: List[BeatTiming], 
+def sample_beat_strength(time: float, beats: list[BeatTiming], 
                          lookahead: float = 0.05) -> float:
     """采样给定时间点的节拍强度"""
     strength = 0.0
@@ -313,7 +313,7 @@ class EntranceAnimator:
         EntranceStyle.THREE_D_FLIP: EaseType.EASE_OUT_ELASTIC,
     }
     
-    def __init__(self, seed: Optional[int] = 42):
+    def __init__(self, seed: int | None = 42):
         """seed=None 保留随机抖动(创作自由度); 默认固定 42 保证同树可复现
         (2026-08-16 决策: 入场动画此前用全局 random 无种子, 同树 JSX
         跨进程不可复现 — 见 docs/process/2026-08-16-phase2-architecture-consolidation-log.md)。
@@ -325,9 +325,9 @@ class EntranceAnimator:
         self, 
         style: EntranceStyle, 
         layer_start: float = 0.0,
-        duration: Optional[float] = None,
+        duration: float | None = None,
         direction: AnimationDirection = AnimationDirection.FROM_CENTER,
-    ) -> List[AnimationTrack]:
+    ) -> list[AnimationTrack]:
         """生成入场动画轨道列表
         
         Args:
@@ -369,7 +369,7 @@ class EntranceAnimator:
         logger.warning(f"未知入场风格 {style}，回退到fadeIn")
         return self._build_fade_in(layer_start, duration)
     
-    def _build_fade_in(self, start: float, duration: float) -> List[AnimationTrack]:
+    def _build_fade_in(self, start: float, duration: float) -> list[AnimationTrack]:
         """纯淡入"""
         opacity_track = AnimationTrack(
             property_path="Transform/Opacity",
@@ -381,7 +381,7 @@ class EntranceAnimator:
         )
         return [opacity_track]
     
-    def _build_fade_in_zoom(self, start: float, duration: float) -> List[AnimationTrack]:
+    def _build_fade_in_zoom(self, start: float, duration: float) -> list[AnimationTrack]:
         """淡入+缩放（漫剪最常用风格）"""
         # 缩放从1.3→1.0，实现"镜头推进"感
         tracks = []
@@ -407,7 +407,7 @@ class EntranceAnimator:
         
         return tracks
     
-    def _build_blur_in(self, start: float, duration: float) -> List[AnimationTrack]:
+    def _build_blur_in(self, start: float, duration: float) -> list[AnimationTrack]:
         """模糊入场 — opacity + gaussian blur"""
         tracks = []
         
@@ -433,7 +433,7 @@ class EntranceAnimator:
         return tracks
     
     def _build_slide(self, start: float, duration: float, 
-                     direction: AnimationDirection) -> List[AnimationTrack]:
+                     direction: AnimationDirection) -> list[AnimationTrack]:
         """方向滑入"""
         direction = direction if direction != AnimationDirection.RANDOM else \
             self._rng.choice([AnimationDirection.FROM_LEFT, AnimationDirection.FROM_RIGHT])
@@ -462,7 +462,7 @@ class EntranceAnimator:
         )]
         return tracks
     
-    def _build_scale_up(self, start: float, duration: float) -> List[AnimationTrack]:
+    def _build_scale_up(self, start: float, duration: float) -> list[AnimationTrack]:
         """弹性放大入场"""
         return [AnimationTrack(
             property_path="Transform/Scale",
@@ -473,7 +473,7 @@ class EntranceAnimator:
             ],
         )]
     
-    def _build_scale_down(self, start: float, duration: float) -> List[AnimationTrack]:
+    def _build_scale_down(self, start: float, duration: float) -> list[AnimationTrack]:
         """缩小入场（从大→正常，用于强调）"""
         tracks = [AnimationTrack(
             property_path="Transform/Scale",
@@ -485,7 +485,7 @@ class EntranceAnimator:
         )]
         return tracks
     
-    def _build_3d_flip(self, start: float, duration: float) -> List[AnimationTrack]:
+    def _build_3d_flip(self, start: float, duration: float) -> list[AnimationTrack]:
         """3D Y轴翻转入场"""
         tracks = [AnimationTrack(
             property_path="Transform/Y Rotation",
@@ -497,7 +497,7 @@ class EntranceAnimator:
         )]
         return tracks
     
-    def _build_3d_rotate(self, start: float, duration: float) -> List[AnimationTrack]:
+    def _build_3d_rotate(self, start: float, duration: float) -> list[AnimationTrack]:
         """3D Z轴旋转入场"""
         tracks = [AnimationTrack(
             property_path="Transform/Rotation",
@@ -509,7 +509,7 @@ class EntranceAnimator:
         )]
         return tracks
     
-    def _build_glitch_in(self, start: float, duration: float) -> List[AnimationTrack]:
+    def _build_glitch_in(self, start: float, duration: float) -> list[AnimationTrack]:
         """故障风格入场（快速闪烁+位移抖动）"""
         tracks = []
         # Opacity 快速闪烁
@@ -542,7 +542,7 @@ class EntranceAnimator:
         
         return tracks
     
-    def _build_whip_in(self, start: float, duration: float) -> List[AnimationTrack]:
+    def _build_whip_in(self, start: float, duration: float) -> list[AnimationTrack]:
         """甩入（快速滑动+轻微旋转）"""
         tracks = []
         
@@ -593,7 +593,7 @@ class TextAnimator:
     基于AE Text Animator系统，支持逐字级动画。
     """
     
-    def __init__(self, seed: Optional[int] = 42):
+    def __init__(self, seed: int | None = 42):
         """seed=None 保留随机(创作自由度); 默认固定 42 与 EntranceAnimator 同口径。"""
         self._rng = random.Random(seed)
     
@@ -605,7 +605,7 @@ class TextAnimator:
         char_count: int = 10,
         stagger: float = 0.05,   # 逐字延迟
         magnitude: float = 50,   # 动画幅度
-    ) -> List[AnimationTrack]:
+    ) -> list[AnimationTrack]:
         """生成文字动画轨道 — 20种预设全覆盖
         
         Returns:
@@ -1352,11 +1352,11 @@ class BeatSyncAnimator:
     
     def build_beat_pulses(
         self,
-        beats: List[BeatTiming],
+        beats: list[BeatTiming],
         layer_start: float = 0.0,
         amplitude: float = 1.0,
-        properties: Optional[List[str]] = None,
-    ) -> List[AnimationTrack]:
+        properties: list[str] | None = None,
+    ) -> list[AnimationTrack]:
         """根据节拍列表生成脉冲动画轨道
         
         Args:
@@ -1382,7 +1382,7 @@ class BeatSyncAnimator:
         
         return tracks
     
-    def _build_opacity_pulses(self, beats: List[BeatTiming], 
+    def _build_opacity_pulses(self, beats: list[BeatTiming], 
                               layer_start: float, amplitude: float) -> AnimationTrack:
         """build opacity pulses for each beat"""
         kfs = [Keyframe(layer_start, 100)]  # 起始帧
@@ -1412,7 +1412,7 @@ class BeatSyncAnimator:
             keyframes=kfs,
         )
     
-    def _build_scale_pulses(self, beats: List[BeatTiming],
+    def _build_scale_pulses(self, beats: list[BeatTiming],
                             layer_start: float, amplitude: float) -> AnimationTrack:
         """build scale pulses for each beat"""
         kfs = [Keyframe(layer_start, [100, 100, 100])]
@@ -1513,7 +1513,7 @@ class CameraAnimator:
         layer_duration: float,
         layer_start: float = 0.0,
         intensity: float = 1.0,
-    ) -> List[AnimationTrack]:
+    ) -> list[AnimationTrack]:
         """生成运镜关键帧轨道"""
         if style == CameraStyle.KEN_BURNS:
             return self._build_ken_burns(layer_start, layer_duration, intensity)
@@ -1531,7 +1531,7 @@ class CameraAnimator:
         return []
     
     def _build_ken_burns(self, start: float, duration: float, 
-                         intensity: float) -> List[AnimationTrack]:
+                         intensity: float) -> list[AnimationTrack]:
         """Ken Burns效果 — 缓慢缩放 + 随机平移"""
         tracks = []
         
@@ -1570,7 +1570,7 @@ class CameraAnimator:
         
         return tracks
     
-    def _build_whip_pan(self, start: float, duration: float) -> List[AnimationTrack]:
+    def _build_whip_pan(self, start: float, duration: float) -> list[AnimationTrack]:
         """快速甩镜 — 极快滑动+运动模糊"""
         direction = self._rng.choice([[-400, 0, 0], [400, 0, 0], [0, -300, 0], [0, 300, 0]])
         
@@ -1588,7 +1588,7 @@ class CameraAnimator:
         return tracks
     
     def _build_dolly_zoom(self, start: float, duration: float,
-                          intensity: float) -> List[AnimationTrack]:
+                          intensity: float) -> list[AnimationTrack]:
         """Dolly Zoom — 反向缩放（缩放+反方向位置补偿）"""
         tracks = []
         
@@ -1616,7 +1616,7 @@ class CameraAnimator:
         return tracks
     
     def _build_handheld_shake(self, start: float, duration: float,
-                              intensity: float) -> List[AnimationTrack]:
+                              intensity: float) -> list[AnimationTrack]:
         """手持晃动 — 高频小幅度随机位置晃动"""
         kfs = []
         sample_rate = 0.05  # 20Hz抖动采样
@@ -1641,7 +1641,7 @@ class CameraAnimator:
         )]
     
     def _build_push_in(self, start: float, duration: float,
-                       intensity: float) -> List[AnimationTrack]:
+                       intensity: float) -> list[AnimationTrack]:
         """推进 — 从正常推近到特写"""
         return [AnimationTrack(
             property_path="Transform/Scale",
@@ -1654,7 +1654,7 @@ class CameraAnimator:
         )]
     
     def _build_pull_out(self, start: float, duration: float,
-                        intensity: float) -> List[AnimationTrack]:
+                        intensity: float) -> list[AnimationTrack]:
         """拉远 — 从特写拉远到广角"""
         return [AnimationTrack(
             property_path="Transform/Scale",
@@ -1761,7 +1761,7 @@ class EffectPulseAnimator:
         effect_path: str,
         duration: float,
         start: float = 0.0,
-        colors: Optional[List[List[float]]] = None,
+        colors: list[list[float]] | None = None,
     ) -> AnimationTrack:
         """颜色冲刷 — Hue周期性变化"""
         if colors is None:
@@ -1782,10 +1782,10 @@ class EffectPulseAnimator:
     def build_effect_beat_pulse(
         self,
         effect_path: str,
-        beats: List[BeatTiming],
+        beats: list[BeatTiming],
         start: float = 0.0,
         pulse_magnitude: float = 0.3,
-    ) -> Optional[AnimationTrack]:
+    ) -> AnimationTrack | None:
         """效果参数随节拍脉冲"""
         if not beats:
             return None
@@ -1863,7 +1863,7 @@ def ae_safe_font_name(display_name: str) -> str:
 # 6-B. 文字动画预设注册表（20种）+ 覆盖率追踪
 # ============================================================
 
-ALL_TEXT_STYLES: List[TextAnimationStyle] = list(TextAnimationStyle)
+ALL_TEXT_STYLES: list[TextAnimationStyle] = list(TextAnimationStyle)
 
 # 风格分组（用于智能选择）
 _STYLE_GROUPS = {
@@ -1898,10 +1898,10 @@ class PresetTracker:
     """文字动画预设覆盖率追踪器"""
 
     def __init__(self):
-        self._usage: Dict[str, int] = {s.value: 0 for s in TextAnimationStyle}
-        self._history: List[str] = []
+        self._usage: dict[str, int] = {s.value: 0 for s in TextAnimationStyle}
+        self._history: list[str] = []
         # 【P2-3】三维组合覆盖追踪: 特效×动画×字体
-        self._combos: Dict[str, int] = {}
+        self._combos: dict[str, int] = {}
 
     def record(self, style: TextAnimationStyle):
         self._usage[style.value] = self._usage.get(style.value, 0) + 1
@@ -1925,7 +1925,7 @@ class PresetTracker:
             return 0.0
         return self.combo_count / denom
 
-    def get_combo_stats(self) -> Dict[str, Any]:
+    def get_combo_stats(self) -> dict[str, Any]:
         total_uses = sum(self._combos.values())
         top = sorted(self._combos.items(), key=lambda kv: -kv[1])[:10]
         return {
@@ -1951,10 +1951,10 @@ class PresetTracker:
         return self.used_count / total if total else 0.0
 
     @property
-    def unused(self) -> List[str]:
+    def unused(self) -> list[str]:
         return [k for k, v in self._usage.items() if v == 0]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "total_presets": len(self._usage),
             "used": self.used_count,
@@ -1993,17 +1993,17 @@ class TextHierarchyConfig:
     title_font: str = "Arial"
     subtitle_font: str = "Arial"
     # 位置多样性（AE comp坐标 1920x1080）
-    title_positions: List[Tuple[float, float]] = field(
+    title_positions: list[tuple[float, float]] = field(
         default_factory=lambda: [
             (960, 440), (960, 380), (960, 540), (480, 440), (1440, 440),
         ])
-    subtitle_positions: List[Tuple[float, float]] = field(
+    subtitle_positions: list[tuple[float, float]] = field(
         default_factory=lambda: [
             (960, 560), (960, 620), (960, 300), (480, 560), (1440, 560),
         ])
     # 动画风格偏好（主标题用入场类，副标题用连续类）
-    title_style_pool: Optional[List[TextAnimationStyle]] = None
-    subtitle_style_pool: Optional[List[TextAnimationStyle]] = None
+    title_style_pool: list[TextAnimationStyle] | None = None
+    subtitle_style_pool: list[TextAnimationStyle] | None = None
 
     def __post_init__(self):
         if self.title_style_pool is None:
@@ -2022,12 +2022,12 @@ class EffectConfig:
     """空间层效果配置 — EFFECT_COMBOS 的运行时实例"""
     combo_id: str
     combo_name: str
-    effects: List[Dict[str, Any]] = field(default_factory=list)
+    effects: list[dict[str, Any]] = field(default_factory=list)
     font: str = "Arial"
     font_size: float = 96.0
     intensity: AnimationIntensity = AnimationIntensity.MODERATE
     visual_style: str = ""
-    best_for: List[str] = field(default_factory=list)
+    best_for: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -2056,7 +2056,7 @@ class EffectLayerBuilder:
     """
 
     # 已实测验证的 matchName → (显示名, 参数键 → 属性索引) 映射
-    VERIFIED_EFFECT_MAP: Dict[str, Dict[str, Any]] = {
+    VERIFIED_EFFECT_MAP: dict[str, dict[str, Any]] = {
         "ADBE Glo2": {
             "display": "Glow",
             "params": {"threshold": 2, "radius": 3, "intensity": 4,
@@ -2089,7 +2089,7 @@ class EffectLayerBuilder:
     }
 
     # 未验证索引的效果器 → 显示名 + (参数键 → 显示名) 回退查找
-    UNVERIFIED_EFFECT_MAP: Dict[str, Dict[str, Any]] = {
+    UNVERIFIED_EFFECT_MAP: dict[str, dict[str, Any]] = {
         "ADBE Turbulent Displace": {
             "display": "Turbulent Displace",
             "params": {"amount": "Amount", "size": "Size"},
@@ -2129,13 +2129,13 @@ class EffectLayerBuilder:
         "if (p) { try { p.setValue(val); } catch (e3) {} } }\n"
     )
 
-    def __init__(self, effect_combos: Optional[List[Dict[str, Any]]] = None):
+    def __init__(self, effect_combos: list[dict[str, Any]] | None = None):
         if effect_combos is None:
             effect_combos = _load_preset_matrix_data()["effect_combos"]
         self._combos = {c["id"]: c for c in effect_combos}
 
     @property
-    def combo_ids(self) -> List[str]:
+    def combo_ids(self) -> list[str]:
         return list(self._combos.keys())
 
     def build_effect_config(
@@ -2144,7 +2144,7 @@ class EffectLayerBuilder:
         font: str = "Arial",
         font_size: float = 96.0,
         intensity: AnimationIntensity = AnimationIntensity.MODERATE,
-    ) -> Optional[EffectConfig]:
+    ) -> EffectConfig | None:
         """从 EFFECT_COMBOS 数据库构建运行时效果配置"""
         combo = self._combos.get(combo_id)
         if not combo:
@@ -2202,7 +2202,7 @@ class EffectLayerBuilder:
                 )
                 # 同一显示名的多键合并(如 Bevel Emboss 双色控件:
                 # highlightColor+shadowColor → [hl, sh] 单次赋值，避免覆盖)
-                disp_groups: Dict[str, List[Any]] = {}
+                disp_groups: dict[str, list[Any]] = {}
                 for key, val in fx["params"].items():
                     disp = info.get("params", {}).get(key)
                     if disp is None:
@@ -2253,10 +2253,10 @@ class EffectLayerBuilder:
 
 
 # ── 预设矩阵数据库加载(带缓存) ──────────────────────────────
-_preset_matrix_cache: Optional[Dict[str, Any]] = None
+_preset_matrix_cache: dict[str, Any] | None = None
 
 
-def _load_preset_matrix_data() -> Dict[str, Any]:
+def _load_preset_matrix_data() -> dict[str, Any]:
     """加载 scripts/build_text_preset_matrix.py 的三维数据库
 
     使用 importlib 按路径加载，避免对 scripts 包的硬依赖。
@@ -2264,7 +2264,9 @@ def _load_preset_matrix_data() -> Dict[str, Any]:
     global _preset_matrix_cache
     if _preset_matrix_cache is not None:
         return _preset_matrix_cache
-    import importlib.util, contextlib, io as _io
+    import contextlib
+    import importlib.util
+    import io as _io
     path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                         "scripts", "build_text_preset_matrix.py")
     spec = importlib.util.spec_from_file_location("build_text_preset_matrix", path)
@@ -2281,7 +2283,7 @@ def _load_preset_matrix_data() -> Dict[str, Any]:
 
 
 # ── 矩阵动画ID → TextAnimationStyle 枚举映射 ─────────────────
-ANIM_ID_TO_STYLE: Dict[str, TextAnimationStyle] = {
+ANIM_ID_TO_STYLE: dict[str, TextAnimationStyle] = {
     "anim_bounce_in": TextAnimationStyle.DROP_BOUNCE,
     "anim_glitch_pop": TextAnimationStyle.GLITCH_TEXT,
     "anim_kinetic_smash": TextAnimationStyle.IMPACT_SHAKE,
@@ -2322,7 +2324,7 @@ class SmartMatcher:
     """
 
     # 20组 Ground Truth 场景表 (来源: 整合方案 §2.2, verified=True 基准推导)
-    SCENE_TABLE: Dict[str, Dict[str, str]] = {
+    SCENE_TABLE: dict[str, dict[str, str]] = {
         "battle":      {"font_id": "font_impact",    "effect": "effect_cyber_glitch",  "anim": "anim_kinetic_smash",   "intensity": "intense"},
         "cyberpunk":   {"font_id": "font_consolas",  "effect": "effect_rgb_split",     "anim": "anim_glitch_pop",      "intensity": "intense"},
         "cinematic":   {"font_id": "font_arial_bold","effect": "effect_golden_logo",   "anim": "anim_elastic_overshoot","intensity": "moderate"},
@@ -2354,8 +2356,8 @@ class SmartMatcher:
 
     def _build_scene_index(self):
         """建立 场景关键词 → 候选ID 倒排索引"""
-        self._fx_index: Dict[str, List[str]] = {}
-        self._anim_index: Dict[str, List[str]] = {}
+        self._fx_index: dict[str, list[str]] = {}
+        self._anim_index: dict[str, list[str]] = {}
         for cid, c in self.effects.items():
             for tag in c.get("best_for", []):
                 self._fx_index.setdefault(tag, []).append(cid)
@@ -2367,7 +2369,7 @@ class SmartMatcher:
         self,
         scene_tag: str,
         role: str = "title",
-        intensity: Optional[AnimationIntensity] = None,
+        intensity: AnimationIntensity | None = None,
     ) -> MatchResult:
         """根据场景标签返回最佳三维组合"""
         tag = (scene_tag or "").strip().lower()
@@ -2421,7 +2423,7 @@ class SmartMatcher:
         """中文字符重叠数(去重)"""
         return sum(1 for ch in set(query) if ch in tag)
 
-    def _fuzzy_best(self, entries: Dict[str, Dict], query: str) -> Tuple[Optional[str], int]:
+    def _fuzzy_best(self, entries: dict[str, dict], query: str) -> tuple[str | None, int]:
         """字符重叠打分选最优候选: 子串包含加2分"""
         best_id, best_score = None, 0
         for eid, e in entries.items():
@@ -2433,7 +2435,7 @@ class SmartMatcher:
                     best_id, best_score = eid, s
         return best_id, best_score
 
-    def _score_best_effect(self, candidates: List[str]) -> str:
+    def _score_best_effect(self, candidates: list[str]) -> str:
         """verified + rating 打分选最优特效"""
         def score(cid):
             c = self.effects[cid]
@@ -2480,8 +2482,8 @@ class SmartMatcher:
 
 
 # 全局单例
-_smart_matcher: Optional[SmartMatcher] = None
-_effect_builder: Optional[EffectLayerBuilder] = None
+_smart_matcher: SmartMatcher | None = None
+_effect_builder: EffectLayerBuilder | None = None
 
 
 def get_smart_matcher() -> SmartMatcher:
@@ -2513,8 +2515,8 @@ class AnimationOrchestrator:
     - 参数随机化（stagger/magnitude 不再硬编码）
     """
 
-    def __init__(self, hierarchy: Optional[TextHierarchyConfig] = None,
-                 seed: Optional[int] = 42):
+    def __init__(self, hierarchy: TextHierarchyConfig | None = None,
+                 seed: int | None = 42):
         self.entrance = EntranceAnimator()
         self.text = TextAnimator()
         self.beat_sync = BeatSyncAnimator()
@@ -2527,8 +2529,8 @@ class AnimationOrchestrator:
         # 轮转索引：确保每种风格被均匀使用
         self._style_rotation_idx = 0
         # 三维匹配引擎(懒加载，避免导入时加载数据库)
-        self._matcher: Optional[SmartMatcher] = None
-        self._effect_builder: Optional[EffectLayerBuilder] = None
+        self._matcher: SmartMatcher | None = None
+        self._effect_builder: EffectLayerBuilder | None = None
     
     def _pick_text_style(self, role: str = "title") -> TextAnimationStyle:
         """智能选择文字动画风格 — 轮转确保覆盖率(调用方负责 record)"""
@@ -2539,13 +2541,13 @@ class AnimationOrchestrator:
         self._style_rotation_idx += 1
         return style
 
-    def _pick_position(self, role: str = "title") -> Tuple[float, float]:
+    def _pick_position(self, role: str = "title") -> tuple[float, float]:
         """从位置池中随机选择，确保多样性"""
         positions = (self.hierarchy.title_positions if role == "title"
                      else self.hierarchy.subtitle_positions)
         return self._rng.choice(positions)
 
-    def _random_params(self, role: str = "title") -> Tuple[float, float]:
+    def _random_params(self, role: str = "title") -> tuple[float, float]:
         """随机化 stagger 和 magnitude，避免硬编码"""
         if role == "title":
             stagger = self._rng.uniform(0.03, 0.08)
@@ -2557,9 +2559,9 @@ class AnimationOrchestrator:
     
     def orchestrate_layer(
         self,
-        layer_config: Dict[str, Any],
+        layer_config: dict[str, Any],
         style_category: str = "amv_pull_zoom",
-        beats: Optional[List[BeatTiming]] = None,
+        beats: list[BeatTiming] | None = None,
         duration: float = 2.0,
         start_time: float = 0.0,
     ) -> LayerAnimation:
@@ -2590,7 +2592,7 @@ class AnimationOrchestrator:
         # === 2. 文字动画（仅文字层）— V2全覆盖 + V3三维匹配 ===
         if layer_type == "text":
             scene_tag = layer_config.get("scene_tag")
-            match_result: Optional[MatchResult] = None
+            match_result: MatchResult | None = None
             if scene_tag:
                 # 三维智能匹配: 场景标签 → 字体×特效×动画×强度
                 if self._matcher is None:
@@ -2706,10 +2708,10 @@ class AnimationOrchestrator:
     
     def orchestrate_sequence(
         self,
-        layers: List[Dict[str, Any]],
+        layers: list[dict[str, Any]],
         style_category: str = "amv_pull_zoom",
-        beats: Optional[List[BeatTiming]] = None,
-    ) -> List[LayerAnimation]:
+        beats: list[BeatTiming] | None = None,
+    ) -> list[LayerAnimation]:
         """为整个序列编排动画
         
         Args:
@@ -2795,9 +2797,9 @@ class AnimationOrchestrator:
 # ============================================================
 
 def animate_layer(
-    layer_config: Dict[str, Any],
+    layer_config: dict[str, Any],
     style_category: str = "amv_pull_zoom",
-    beats: Optional[List[BeatTiming]] = None,
+    beats: list[BeatTiming] | None = None,
     duration: float = 2.0,
     start_time: float = 0.0,
 ) -> LayerAnimation:
@@ -2817,10 +2819,10 @@ def animate_layer(
 
 
 def animate_sequence(
-    layers: List[Dict[str, Any]],
+    layers: list[dict[str, Any]],
     style_category: str = "amv_pull_zoom",
-    beats: Optional[List[BeatTiming]] = None,
-) -> List[LayerAnimation]:
+    beats: list[BeatTiming] | None = None,
+) -> list[LayerAnimation]:
     """便捷函数：为序列生成动画
     
     Returns:
@@ -2834,9 +2836,9 @@ def animate_sequence(
     )
 
 
-def beats_from_times(beat_times: List[float], 
-                     strengths: Optional[List[float]] = None,
-                     downbeat_indices: Optional[List[int]] = None) -> List[BeatTiming]:
+def beats_from_times(beat_times: list[float], 
+                     strengths: list[float] | None = None,
+                     downbeat_indices: list[int] | None = None) -> list[BeatTiming]:
     """从节拍时间列表构建BeatTiming列表
     
     Args:

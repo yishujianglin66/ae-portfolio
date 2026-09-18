@@ -33,13 +33,14 @@ import json
 import logging
 import os
 import sys
-from core.torch_runtime import get_device, infer_ctx
 import time
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
+
+from core.torch_runtime import get_device, infer_ctx
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -62,7 +63,7 @@ FEATURE_KEYS = [
 
 # ── 特征提取 ─────────────────────────────────────────────────────────────
 
-def extract_shot_features(video_path: str) -> Optional[Dict[str, float]]:
+def extract_shot_features(video_path: str) -> dict[str, float] | None:
     """对视频提取光流统计特征 (复用光流规则分类器的特征工程)。
 
     注意: MovieShots 镜头边界在 shot_detection 标注里, 这里先用整段视频
@@ -70,7 +71,7 @@ def extract_shot_features(video_path: str) -> Optional[Dict[str, float]]:
     """
     try:
         sys.path.insert(0, str(PROJECT_ROOT))
-        from core.camera_movement_classifier import _track_and_analyze, _read_frames
+        from core.camera_movement_classifier import _read_frames, _track_and_analyze
         frames = _read_frames(video_path)
         if len(frames) < 3:
             return None
@@ -84,7 +85,7 @@ def extract_shot_features(video_path: str) -> Optional[Dict[str, float]]:
 def cmd_extract(args: argparse.Namespace) -> int:
     """Step A: 对视频提取特征, 与标注按 (movie_id, shot_idx) 匹配。"""
     # 加载标注 (统一 JSONL)
-    annot: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    annot: dict[tuple[str, str], dict[str, Any]] = {}
     with open(args.annot, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -99,7 +100,7 @@ def cmd_extract(args: argparse.Namespace) -> int:
         logger.error("video dir not found: %s", video_dir)
         return 1
 
-    out_rows: List[Dict[str, Any]] = []
+    out_rows: list[dict[str, Any]] = []
     n_total = 0
     n_hit = 0
     for video_file in sorted(video_dir.rglob("*")):
@@ -153,9 +154,9 @@ def cmd_extract(args: argparse.Namespace) -> int:
 
 # ── 训练 ─────────────────────────────────────────────────────────────────
 
-def _load_features(path: str) -> Tuple[np.ndarray, np.ndarray, List[str]]:
+def _load_features(path: str) -> tuple[np.ndarray, np.ndarray, list[str]]:
     """加载特征数据集 -> (X, y_idx, samples)。"""
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -320,8 +321,8 @@ def cmd_verify(args: argparse.Namespace) -> int:
     import torch
 
     ckpt = torch.load(args.model, map_location="cpu")
-    labels: List[str] = ckpt["labels"]
-    feature_keys: List[str] = ckpt["feature_keys"]
+    labels: list[str] = ckpt["labels"]
+    feature_keys: list[str] = ckpt["feature_keys"]
 
     model = _build_mlp(ckpt["feature_dim"], hidden=ckpt.get("hidden", 64),
                        n_classes=len(labels))
@@ -329,7 +330,7 @@ def cmd_verify(args: argparse.Namespace) -> int:
     model.eval()
 
     # 素材库目录: 逐视频提取特征 -> 分类
-    from core.camera_movement_classifier import _track_and_analyze, _read_frames
+    from core.camera_movement_classifier import _read_frames, _track_and_analyze
 
     video_dir = Path(args.video_dir)
     results = []

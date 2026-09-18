@@ -14,8 +14,7 @@ import tempfile
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from config.output_registry import (  # noqa: E402
-    OutputRegistry, DELIVERY_ROOT, get_registry)
+from config.output_registry import DELIVERY_ROOT, OutputRegistry, get_registry  # noqa: E402
 
 PASS = 0
 FAIL = 0

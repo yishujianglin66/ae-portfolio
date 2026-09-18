@@ -76,7 +76,7 @@ def generate_expression(kind: str, **opts: Any) -> str:
 # 二、JSX 组装（预检 / 正式写入共用定位逻辑）
 # ============================================================
 
-def _normalize_path(property_path: Union[str, List[str]]) -> List[str]:
+def _normalize_path(property_path: Union[str, list[str]]) -> list[str]:
     if isinstance(property_path, str):
         segs = [s for s in property_path.replace("\\", "/").split("/") if s]
     else:
@@ -102,7 +102,7 @@ if(!nx){return JSON.stringify({ok:false,error_type:"property_not_found",comp:com
 p=nx;trail=trail+"/"+s;}"""
 
 
-def _locate_js(comp_name: str, layer: Union[str, int], property_path: Union[str, List[str]]) -> str:
+def _locate_js(comp_name: str, layer: Union[str, int], property_path: Union[str, list[str]]) -> str:
     js = _LOCATE_JS
     js = js.replace("%COMP%", json.dumps(comp_name))
     js = js.replace("%LAYER%", json.dumps(layer))
@@ -111,7 +111,7 @@ def _locate_js(comp_name: str, layer: Union[str, int], property_path: Union[str,
 
 
 def _build_preflight_jsx(comp_name: str, layer: Union[str, int],
-                         property_path: Union[str, List[str]], expression: str) -> str:
+                         property_path: Union[str, list[str]], expression: str) -> str:
     return (
         "(function(){try{"
         + _locate_js(comp_name, layer, property_path)
@@ -133,7 +133,7 @@ return JSON.stringify({ok:true,comp:compName,layer:l.name,property:trail,message
 
 
 def _build_write_jsx(comp_name: str, layer: Union[str, int],
-                     property_path: Union[str, List[str]], expression: str) -> str:
+                     property_path: Union[str, list[str]], expression: str) -> str:
     return (
         "(function(){try{"
         + _locate_js(comp_name, layer, property_path)
@@ -150,8 +150,8 @@ return JSON.stringify({ok:true,comp:compName,layer:l.name,property:trail,message
 # 三、对外 API
 # ============================================================
 
-def _interpret(res: Dict[str, Any], comp_name: str, layer: Union[str, int],
-               property_path: Union[str, List[str]]) -> Dict[str, Any]:
+def _interpret(res: dict[str, Any], comp_name: str, layer: Union[str, int],
+               property_path: Union[str, list[str]]) -> dict[str, Any]:
     """_send_raw 直接返回解包后的 dict：含 error_type 即预检结果；status=error 即传输失败。"""
     if isinstance(res, dict) and "error_type" in res:
         return res
@@ -163,8 +163,8 @@ def _interpret(res: Dict[str, Any], comp_name: str, layer: Union[str, int],
 
 
 def preflight_expression(comp_name: str, layer: Union[str, int],
-                         property_path: Union[str, List[str]], expression: str,
-                         timeout: float = 60.0) -> Dict[str, Any]:
+                         property_path: Union[str, list[str]], expression: str,
+                         timeout: float = 60.0) -> dict[str, Any]:
     """预检：试设表达式并立即恢复原值。
 
     返回 dict：
@@ -183,8 +183,8 @@ def preflight_expression(comp_name: str, layer: Union[str, int],
 
 
 def apply_expression(comp_name: str, layer: Union[str, int],
-                     property_path: Union[str, List[str]], expression: str,
-                     timeout: float = 60.0) -> Dict[str, Any]:
+                     property_path: Union[str, list[str]], expression: str,
+                     timeout: float = 60.0) -> dict[str, Any]:
     """预检 → 通过后正式写入 → 读回核验。预检失败直接阻断（blocked=True）。"""
     pf = preflight_expression(comp_name, layer, property_path, expression, timeout)
     if not pf.get("ok"):
@@ -219,8 +219,8 @@ class ExpressionGate:
 
     # ---------- 日志持久化 ----------
     def record(self, kind: str, comp_name: str, layer: Union[str, int],
-               property_path: Union[str, List[str]], result: Dict[str, Any],
-               expression: Optional[str] = None) -> None:
+               property_path: Union[str, list[str]], result: dict[str, Any],
+               expression: str | None = None) -> None:
         entry = {
             "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "kind": kind,
@@ -237,11 +237,11 @@ class ExpressionGate:
         except OSError:
             pass
 
-    def get_log(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_log(self, limit: int = 100) -> list[dict[str, Any]]:
         path = self._log_dir / "gate_log.jsonl"
         if not path.is_file():
             return []
-        lines: List[Dict[str, Any]] = []
+        lines: list[dict[str, Any]] = []
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -263,17 +263,17 @@ class ExpressionGate:
         return generate_expression(kind, **opts)
 
     def preflight(self, comp_name: str, layer: Union[str, int],
-                  property_path: Union[str, List[str]], expression: str,
-                  timeout: float = 60.0) -> Dict[str, Any]:
+                  property_path: Union[str, list[str]], expression: str,
+                  timeout: float = 60.0) -> dict[str, Any]:
         result = preflight_expression(comp_name, layer, property_path, expression, timeout)
         self.record("preflight", comp_name, layer, property_path, result, expression)
         return result
 
     def apply(self, comp_name: str, layer: Union[str, int],
-              property_path: Union[str, List[str]],
-              expression: Optional[str] = None, kind: Optional[str] = None,
-              opts: Optional[Dict[str, Any]] = None,
-              timeout: float = 60.0) -> Dict[str, Any]:
+              property_path: Union[str, list[str]],
+              expression: str | None = None, kind: str | None = None,
+              opts: dict[str, Any] | None = None,
+              timeout: float = 60.0) -> dict[str, Any]:
         """expression 与 kind 二选一；kind 时自动生成。"""
         expr = expression if expression is not None else generate_expression(kind, **(opts or {}))
         result = apply_expression(comp_name, layer, property_path, expr, timeout)
@@ -285,7 +285,7 @@ class ExpressionGate:
 # 全局单例
 # ============================================================
 
-_expression_gate: Optional[ExpressionGate] = None
+_expression_gate: ExpressionGate | None = None
 
 
 def get_expression_gate() -> ExpressionGate:

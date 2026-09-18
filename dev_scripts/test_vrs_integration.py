@@ -63,7 +63,7 @@ def main():
 
     # ---------- T1 加载 ----------
     try:
-        from vrs_resolve_bridge import VrsResolveBridge, Keyframe, TransitionConfig
+        from vrs_resolve_bridge import Keyframe, TransitionConfig, VrsResolveBridge
         bridge = VrsResolveBridge()
         check("T1 桥接模块加载", True, f"use_vrs={bridge.use_vrs}")
     except Exception as e:

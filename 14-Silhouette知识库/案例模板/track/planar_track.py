@@ -1,9 +1,11 @@
 # Planar Tracking Template
 # 平面跟踪模板
 
-from fx import *
 import json
 import os
+
+from fx import *
+
 
 def create_pipeline(source_path, output_path, frame_rate=30.0):
     proj = activeProject() or Project()

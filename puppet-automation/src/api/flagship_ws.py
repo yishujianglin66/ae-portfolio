@@ -23,9 +23,9 @@ class FlagshipWSManager:
 
     def __init__(self):
         # run_id -> set of active websocket connections
-        self._connections: Dict[str, Set[WebSocket]] = {}
+        self._connections: dict[str, set[WebSocket]] = {}
         # run_id -> latest status payload
-        self._status_cache: Dict[str, Dict[str, Any]] = {}
+        self._status_cache: dict[str, dict[str, Any]] = {}
 
     async def connect(self, run_id: str, websocket: WebSocket) -> None:
         """接受 WebSocket 连接。"""
@@ -47,11 +47,11 @@ class FlagshipWSManager:
                 del self._connections[run_id]
         logger.info(f"[FlagshipWS] Client disconnected from run={run_id}")
 
-    async def broadcast(self, run_id: str, status: Dict[str, Any]) -> None:
+    async def broadcast(self, run_id: str, status: dict[str, Any]) -> None:
         """向指定 run 的所有客户端广播状态。"""
         self._status_cache[run_id] = status
         connections = self._connections.get(run_id, set()).copy()
-        dead: List[WebSocket] = []
+        dead: list[WebSocket] = []
 
         for ws in connections:
             try:
@@ -62,11 +62,11 @@ class FlagshipWSManager:
         for ws in dead:
             self.disconnect(run_id, ws)
 
-    def update_status(self, run_id: str, status: Dict[str, Any]) -> None:
+    def update_status(self, run_id: str, status: dict[str, Any]) -> None:
         """更新缓存状态（不推送，等待下次广播周期）。"""
         self._status_cache[run_id] = status
 
-    def get_status(self, run_id: str) -> Optional[Dict[str, Any]]:
+    def get_status(self, run_id: str) -> dict[str, Any] | None:
         """获取缓存的最新状态。"""
         return self._status_cache.get(run_id)
 

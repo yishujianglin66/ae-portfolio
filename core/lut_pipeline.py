@@ -90,7 +90,7 @@ def load_sampling() -> dict:
     return d if isinstance(d, dict) else {}
 
 
-def lut_md5(cube_path: str) -> Optional[str]:
+def lut_md5(cube_path: str) -> str | None:
     """从索引查 cube 的内容 md5 (数据卫生: 样本行记录哈希防路径移动错位)。"""
     try:
         idx = json.loads(LUT_INDEX.read_text(encoding="utf-8"))

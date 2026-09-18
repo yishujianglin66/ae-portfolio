@@ -31,6 +31,7 @@ Usage:
 from __future__ import annotations
 
 import warnings as _warnings
+
 _warnings.warn(
     "bridges.unified_bridge_base 已弃用：自研 .ae-mcp-bridge 协议已弃用，"
     "AE MCP 已转向开源 after-effects-mcp 基线。",
@@ -40,12 +41,12 @@ _warnings.warn(
 
 import logging
 import os
-import time
-from pathlib import Path
-from typing import Any, Dict, Optional
 
 # 延迟导入 ae 核心模块
 import sys
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 # P1 修复：ae_bridge_base.py 位于本 bridges/ 包内，必须将此目录加入 sys.path，
 # 而非父目录下的 ae/（原逻辑导致 ModuleNotFoundError）。
@@ -89,11 +90,11 @@ class UnifiedBridgeBase(_base_mod.AEBridgeClient):
 
     def __init__(
         self,
-        bridge_dir: Optional[str | Path] = None,
+        bridge_dir: str | Path | None = None,
         timeout: int = 15,
         poll_interval: float = 0.3,
         signature_enabled: bool = False,
-        secret: Optional[str] = None,
+        secret: str | None = None,
         middleware_pipeline: Any = None,
         idempotency_enabled: bool = False,
         auto_setup_middleware: bool = True,
@@ -152,7 +153,7 @@ class UnifiedBridgeBase(_base_mod.AEBridgeClient):
         except OSError:
             return ""
 
-    def _is_result_ready(self, result: Dict[str, Any]) -> bool:
+    def _is_result_ready(self, result: dict[str, Any]) -> bool:
         """判断结果是否就绪：status 字段为 success/error 即就绪。"""
         return result.get("status") in ("success", "error")
 
@@ -163,10 +164,10 @@ class UnifiedBridgeBase(_base_mod.AEBridgeClient):
     def send_command(
         self,
         command: str,
-        script: Optional[str] = None,
-        timeout: Optional[int] = None,
+        script: str | None = None,
+        timeout: int | None = None,
         **extra_params: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """发送命令到目标 Adobe 应用并等待结果。
 
         Args:
@@ -185,7 +186,7 @@ class UnifiedBridgeBase(_base_mod.AEBridgeClient):
         self.clear_result()
 
         # 构建命令
-        cmd_data: Dict[str, Any] = {
+        cmd_data: dict[str, Any] = {
             "command": command,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "processed": False,
@@ -210,9 +211,9 @@ class UnifiedBridgeBase(_base_mod.AEBridgeClient):
             self.clear_result()
             return result
 
-    def _send_via_pipeline(self, cmd_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _send_via_pipeline(self, cmd_data: dict[str, Any]) -> dict[str, Any]:
         """通过中间件管道发送命令。"""
-        def _execute(cmd: Dict[str, Any]) -> Dict[str, Any]:
+        def _execute(cmd: dict[str, Any]) -> dict[str, Any]:
             self._write_command_file(cmd)
             result = self._wait_for_result()
             self.clear_result()
@@ -233,7 +234,7 @@ class UnifiedBridgeBase(_base_mod.AEBridgeClient):
             self.clear_result()
             return result
 
-    def ping(self, timeout: int = 5) -> Dict[str, Any]:
+    def ping(self, timeout: int = 5) -> dict[str, Any]:
         """发送 Ping 命令，检测 Bridge 是否在线。"""
         return self.send_command("ping", timeout=timeout)
 
@@ -245,7 +246,7 @@ class UnifiedBridgeBase(_base_mod.AEBridgeClient):
         except Exception:
             return False
 
-    def get_metrics(self) -> Optional[Dict[str, Any]]:
+    def get_metrics(self) -> dict[str, Any] | None:
         """获取中间件收集的指标数据。"""
         if self._metrics_middleware is not None:
             return self._metrics_middleware.metrics.to_dict()

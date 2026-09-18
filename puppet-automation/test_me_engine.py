@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.engines.media_encoder import MediaEncoderEngine, PLATFORM_PRESETS
+from src.engines.media_encoder import PLATFORM_PRESETS, MediaEncoderEngine
 
 
 def test_init():

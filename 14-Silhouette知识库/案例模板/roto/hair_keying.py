@@ -1,8 +1,10 @@
 # Hair Keying Template
 # 毛发抠像模板 - 适用于毛发、半透明物体
 
-from fx import *
 import os
+
+from fx import *
+
 
 def create_pipeline(source_path, output_path, frame_rate=30.0):
     proj = activeProject() or Project()

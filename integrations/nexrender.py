@@ -12,12 +12,13 @@ nexrender 是一个数据驱动的 AE 渲染自动化工具，支持：
 参考: https://github.com/inlife/nexrender
 """
 
+import asyncio
 import json
 import os
 import subprocess
-import asyncio
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
+
 from loguru import logger
 
 
@@ -26,9 +27,9 @@ class NexrenderIntegration:
 
     def __init__(
         self,
-        node_path: Optional[str] = None,
-        nexrender_path: Optional[str] = None,
-        ae_path: Optional[str] = None,
+        node_path: str | None = None,
+        nexrender_path: str | None = None,
+        ae_path: str | None = None,
     ):
         self.node_path = node_path or self._find_node()
         self.nexrender_path = nexrender_path or self._find_nexrender()
@@ -111,9 +112,9 @@ class NexrenderIntegration:
         self,
         template_path: str,
         output_path: str,
-        data: Dict[str, Any],
-        render_settings: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        data: dict[str, Any],
+        render_settings: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """创建 nexrender 模板配置
 
         Args:
@@ -173,17 +174,17 @@ class NexrenderIntegration:
 
         return config
 
-    def save_config(self, config: Dict[str, Any], config_path: str):
+    def save_config(self, config: dict[str, Any], config_path: str):
         """保存配置到文件"""
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(config, f, ensure_ascii=False, indent=2)
 
     async def render(
         self,
-        config: Dict[str, Any],
-        config_path: Optional[str] = None,
+        config: dict[str, Any],
+        config_path: str | None = None,
         progress_callback=None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """执行 nexrender 渲染
 
         Args:
@@ -238,9 +239,9 @@ class NexrenderIntegration:
         self,
         template_path: str,
         output_dir: str,
-        data_list: List[Dict[str, Any]],
-        render_settings: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict[str, Any]]:
+        data_list: list[dict[str, Any]],
+        render_settings: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
         """批量渲染模板
 
         Args:
@@ -276,13 +277,13 @@ class NexrenderIntegration:
         self,
         template_path: str,
         output_path: str,
-        subtitles: List[Dict[str, Any]],
+        subtitles: list[dict[str, Any]],
         font_family: str = "Arial",
         font_size: int = 48,
-        font_color: List[float] = None,
+        font_color: list[float] = None,
         glow_enabled: bool = True,
-        glow_color: List[float] = None,
-    ) -> Dict[str, Any]:
+        glow_color: list[float] = None,
+    ) -> dict[str, Any]:
         """创建字幕模板渲染配置
 
         Args:
@@ -334,7 +335,7 @@ class NexrenderIntegration:
             logger.error(f"Install nexrender error: {e}")
             return False
 
-    def get_template_variables(self, aep_path: str) -> List[str]:
+    def get_template_variables(self, aep_path: str) -> list[str]:
         """从 AE 项目中提取可用的模板变量（图层名称）
 
         Args:
@@ -345,9 +346,9 @@ class NexrenderIntegration:
         """
         variables = []
         try:
-            import sys
             import importlib.machinery
             import importlib.util
+            import sys
             from pathlib import Path as _NxPath
             _project_root = _NxPath(__file__).resolve().parent.parent
             _pa_dir = _project_root / "puppet-automation"

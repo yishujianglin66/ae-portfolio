@@ -35,6 +35,7 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
+
 from core.torch_runtime import get_device, infer_ctx
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -133,7 +134,7 @@ def _load_model():
 
 
 # ---------------------------------------------------------------- T3 嵌入磁盘缓存
-def _emb_cache_key(paths: List[Path]) -> str:
+def _emb_cache_key(paths: list[Path]) -> str:
     h = hashlib.md5()
     for p in paths:
         try:
@@ -144,7 +145,7 @@ def _emb_cache_key(paths: List[Path]) -> str:
     return h.hexdigest()[:16]
 
 
-def encode_paths(paths: List[Path]) -> np.ndarray:
+def encode_paths(paths: list[Path]) -> np.ndarray:
     from PIL import Image
     EMB_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     key = f"{_emb_cache_key(paths)}_{BACKEND_TAG}.npz"
@@ -178,9 +179,10 @@ def encode_paths(paths: List[Path]) -> np.ndarray:
     return embs
 
 
-def encode_bytes_list(jpegs: List[bytes]) -> np.ndarray:
-    from PIL import Image
+def encode_bytes_list(jpegs: list[bytes]) -> np.ndarray:
     import io
+
+    from PIL import Image
     model, pre, _ = _load_model()
     outs = []
     for i in range(0, len(jpegs), 32):
@@ -218,9 +220,9 @@ class ProtoKB:
     """全量教师帧图像支持库 + 全类文本原型"""
 
     def __init__(self):
-        self.classes: List[str] = []
-        self.img_embs: Dict[str, np.ndarray] = {}
-        self.txt_proto: Dict[str, np.ndarray] = {}
+        self.classes: list[str] = []
+        self.img_embs: dict[str, np.ndarray] = {}
+        self.txt_proto: dict[str, np.ndarray] = {}
 
     @classmethod
     def build(cls, golden_videos: set) -> "ProtoKB":
@@ -271,7 +273,7 @@ class ProtoKB:
              f"| 文本原型={len(kb.txt_proto)} | {time.time()-t0:.1f}s")
         return kb
 
-    def frame_scores(self, v: np.ndarray) -> List[Tuple[str, float]]:
+    def frame_scores(self, v: np.ndarray) -> list[tuple[str, float]]:
         """帧向量 → [(ip, score)] 降序"""
         v = l2_norm(v)
         rows = []
@@ -288,10 +290,10 @@ class ProtoKB:
 
 
 # ---------------------------------------------------------------- 视频推理
-def extract_frames_bytes(video_path: str, count: int) -> List[bytes]:
+def extract_frames_bytes(video_path: str, count: int) -> list[bytes]:
+    import re
     import subprocess
     import tempfile
-    import re
     FFMPEG = r"C:\ffmpeg\bin\ffmpeg.exe"
     with tempfile.TemporaryDirectory() as td:
         probe = subprocess.run([FFMPEG, "-i", video_path], capture_output=True,
@@ -311,10 +313,10 @@ def extract_frames_bytes(video_path: str, count: int) -> List[bytes]:
         return [p.read_bytes() for p in sorted(Path(td).glob("f_*.jpg"))[:count]]
 
 
-def scene_adaptive_timestamps(video_path: str, count: int, thr: float = 0.3) -> List[float]:
+def scene_adaptive_timestamps(video_path: str, count: int, thr: float = 0.3) -> list[float]:
     """T4: ffmpeg scene检测切镜头 → 按镜头时长比例分配抽帧点(多IP混剪不再被均匀抽帧偏置)。"""
-    import subprocess
     import re
+    import subprocess
     FFMPEG = r"C:\ffmpeg\bin\ffmpeg.exe"
     probe = subprocess.run([FFMPEG, "-i", video_path], capture_output=True,
                            text=True, encoding="utf-8", errors="replace")
@@ -355,7 +357,7 @@ def scene_adaptive_timestamps(video_path: str, count: int, thr: float = 0.3) -> 
     return ts[:count]
 
 
-def extract_frames_scene_aware(video_path: str, count: int) -> List[bytes]:
+def extract_frames_scene_aware(video_path: str, count: int) -> list[bytes]:
     """T4: 场景自适应抽帧(替代均匀抽帧的升级路径, 均匀版保留作回归基线)。"""
     import subprocess
     import tempfile
@@ -377,7 +379,7 @@ def extract_frames_scene_aware(video_path: str, count: int) -> List[bytes]:
 
 def predict_video(video_path: str, kb: ProtoKB,
                   n_frames: int = GOLDEN_TEST_FRAMES,
-                  scene_aware: bool = False) -> Dict:
+                  scene_aware: bool = False) -> dict:
     raw = (extract_frames_scene_aware(video_path, n_frames) if scene_aware
            else extract_frames_bytes(video_path, n_frames))
     if not raw:

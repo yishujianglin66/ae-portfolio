@@ -17,7 +17,6 @@ from loguru import logger
 
 from src.config import settings
 
-
 # ============================================================
 # Schema version and DDL
 # ============================================================
@@ -156,12 +155,12 @@ class Database:
         await db.close()
     """
 
-    def __init__(self, db_path: Optional[str] = None) -> None:
+    def __init__(self, db_path: str | None = None) -> None:
         self.db_path = Path(db_path or getattr(settings, "database_url", "data/puppet.db"))
         self._conn: Any = None
-        self._jobs: Optional[JobRepository] = None
-        self._phases: Optional[PhaseRepository] = None
-        self._perception: Optional[PerceptionRepository] = None
+        self._jobs: JobRepository | None = None
+        self._phases: PhaseRepository | None = None
+        self._perception: PerceptionRepository | None = None
 
     async def connect(self) -> None:
         """Open the database connection and run migrations."""
@@ -269,7 +268,7 @@ class JobRepository:
         await self._conn.execute(sql, values)
         await self._conn.commit()
 
-    async def get(self, job_id: str) -> Optional[dict[str, Any]]:
+    async def get(self, job_id: str) -> dict[str, Any] | None:
         """Return job row as dict, or None."""
         cursor = await self._conn.execute(
             "SELECT * FROM jobs WHERE job_id = ?", (job_id,)
@@ -279,7 +278,7 @@ class JobRepository:
 
     async def list(
         self,
-        status: Optional[str] = None,
+        status: str | None = None,
         limit: int = 100,
         offset: int = 0,
     ) -> list[dict[str, Any]]:
@@ -362,7 +361,7 @@ class PhaseRepository:
         await self._conn.execute(sql, values)
         await self._conn.commit()
 
-    async def get(self, job_id: str, phase: str) -> Optional[dict[str, Any]]:
+    async def get(self, job_id: str, phase: str) -> dict[str, Any] | None:
         cursor = await self._conn.execute(
             "SELECT * FROM phases WHERE job_id = ? AND phase = ?",
             (job_id, phase),
@@ -409,7 +408,7 @@ class PerceptionRepository:
         ))
         await self._conn.commit()
 
-    async def get_video_metadata(self, job_id: str) -> Optional[dict[str, Any]]:
+    async def get_video_metadata(self, job_id: str) -> dict[str, Any] | None:
         cursor = await self._conn.execute(
             "SELECT * FROM video_metadata WHERE job_id = ?", (job_id,)
         )
@@ -492,7 +491,7 @@ class PerceptionRepository:
         )
         await self._conn.commit()
 
-    async def get_audio_analysis(self, job_id: str) -> Optional[dict[str, Any]]:
+    async def get_audio_analysis(self, job_id: str) -> dict[str, Any] | None:
         cursor = await self._conn.execute(
             "SELECT * FROM audio_analysis WHERE job_id = ?", (job_id,)
         )

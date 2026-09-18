@@ -28,16 +28,16 @@ from unittest.mock import patch
 import pytest
 
 from core.layer_builders import (
-    js_str,
-    _hex_to_rgb,
-    LayerBuildContext,
-    build_layer,
     LAYER_BUILDERS,
-    build_solid_layer,
+    LayerBuildContext,
+    _hex_to_rgb,
     build_adjustment_layer,
     build_footage_layer,
-    build_text_layer,
+    build_layer,
     build_particle_layer,
+    build_solid_layer,
+    build_text_layer,
+    js_str,
 )
 
 

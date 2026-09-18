@@ -31,7 +31,7 @@ from ai.shot_script import ShotScript, ShotUnit
 class ResolveExecutor:
     """ShotScript→Resolve执行器"""
 
-    def __init__(self, fuscript_path: Optional[str] = None):
+    def __init__(self, fuscript_path: str | None = None):
         self.fuscript_path = fuscript_path or self._find_fuscript()
         self.engine = None
         self._log("ResolveExecutor初始化")
@@ -79,7 +79,7 @@ class ResolveExecutor:
         self._log("❌ 未找到Resolve安装")
         return False
 
-    def execute(self, script: ShotScript, dry_run: bool = False) -> Dict:
+    def execute(self, script: ShotScript, dry_run: bool = False) -> dict:
         """执行ShotScript→Resolve时间线
 
         Args:
@@ -248,7 +248,7 @@ class ResolveExecutor:
         return report
 
 
-def execute_shot_script(script_path: Path, dry_run: bool = False) -> Dict:
+def execute_shot_script(script_path: Path, dry_run: bool = False) -> dict:
     """便捷函数: 加载ShotScript并执行"""
     script = ShotScript.load(script_path)
     executor = ResolveExecutor()
@@ -276,13 +276,13 @@ if __name__ == "__main__":
 
     # dry_run执行
     executor = ResolveExecutor()
-    print(f"\n[dry_run模式]")
+    print("\n[dry_run模式]")
     report = executor.execute(script, dry_run=True)
 
-    print(f"\n执行报告:")
+    print("\n执行报告:")
     print(f"  成功: {report['success']}")
     print(f"  素材数: {report.get('media_count', 0)}")
-    print(f"  步骤:")
+    print("  步骤:")
     for step in report["steps"]:
         status = "✅" if step.get("ok") else "❌"
         print(f"    {status} {step['step']}")

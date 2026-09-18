@@ -18,13 +18,12 @@ from __future__ import annotations
 
 import json
 import os
-import sys
-import time
-import tempfile
 import shutil
+import sys
+import tempfile
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
 
 # ============================================================================
 # 测试辅助工具
@@ -35,11 +34,11 @@ class TestResult:
     def __init__(self, name: str):
         self.name = name
         self.passed = False
-        self.error: Optional[str] = None
+        self.error: str | None = None
         self.duration = 0.0
-        self.details: Dict[str, Any] = {}
+        self.details: dict[str, Any] = {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "passed": self.passed,
@@ -53,8 +52,8 @@ class IntegrationTestSuite:
     """集成测试套件"""
 
     def __init__(self):
-        self.results: List[TestResult] = []
-        self.tmp_dir: Optional[str] = None
+        self.results: list[TestResult] = []
+        self.tmp_dir: str | None = None
 
     def run_test(self, name: str, test_func) -> TestResult:
         """运行单个测试"""
@@ -83,9 +82,9 @@ class IntegrationTestSuite:
     # 测试用例
     # --------------------------------------------------------------------
 
-    def test_batch_queue(self) -> Dict[str, Any]:
+    def test_batch_queue(self) -> dict[str, Any]:
         """测试1: 批处理队列系统"""
-        from batch_queue import BatchQueue, TaskStatus, ProgressContext
+        from batch_queue import BatchQueue, ProgressContext, TaskStatus
 
         queue = BatchQueue(max_workers=2, max_retries=1)
         queue.start()
@@ -125,9 +124,9 @@ class IntegrationTestSuite:
             "stats": stats,
         }
 
-    def test_task_persistence(self) -> Dict[str, Any]:
+    def test_task_persistence(self) -> dict[str, Any]:
         """测试2: 任务持久化"""
-        from task_persistence import TaskPersistence, PersistenceConfig
+        from task_persistence import PersistenceConfig, TaskPersistence
 
         persist_dir = os.path.join(self.tmp_dir, "persistence")
         config = PersistenceConfig(
@@ -187,7 +186,7 @@ class IntegrationTestSuite:
             "history_count": len(history),
         }
 
-    def test_resource_manager(self) -> Dict[str, Any]:
+    def test_resource_manager(self) -> dict[str, Any]:
         """测试3: 资源管理器"""
         from resource_manager import ResourceManager
 
@@ -238,7 +237,7 @@ class IntegrationTestSuite:
             "estimated_memory_gb": estimated.memory_gb,
         }
 
-    def test_workflow_batch_integration(self) -> Dict[str, Any]:
+    def test_workflow_batch_integration(self) -> dict[str, Any]:
         """测试4: 工作流编排器 - 批处理集成"""
         from workflow_batch_integration import WorkflowBatchIntegration
 
@@ -319,7 +318,7 @@ class IntegrationTestSuite:
             "status_counts": stats["status_counts"],
         }
 
-    def test_api_server_import(self) -> Dict[str, Any]:
+    def test_api_server_import(self) -> dict[str, Any]:
         """测试5: FastAPI 服务层导入与基本结构"""
         import importlib
 
@@ -362,9 +361,9 @@ class IntegrationTestSuite:
             "expected_routes": len(expected_routes),
         }
 
-    def test_failure_recovery(self) -> Dict[str, Any]:
+    def test_failure_recovery(self) -> dict[str, Any]:
         """测试6: 失败恢复机制"""
-        from failure_recovery import FailureRecovery, FailureRecoveryOptions, ErrorCode
+        from failure_recovery import ErrorCode, FailureRecovery, FailureRecoveryOptions
 
         options = FailureRecoveryOptions(
             max_retries=3,
@@ -407,10 +406,10 @@ class IntegrationTestSuite:
             "sample_actions": actions[:2],
         }
 
-    def test_config_schema(self) -> Dict[str, Any]:
+    def test_config_schema(self) -> dict[str, Any]:
         """测试7: 配置 Schema 验证"""
         try:
-            from config_schema import ConfigSchemaValidator, ConfigSchemaNode, ValidationResult
+            from config_schema import ConfigSchemaNode, ConfigSchemaValidator, ValidationResult
         except ImportError as e:
             return {
                 "imported": False,
@@ -525,7 +524,7 @@ class IntegrationTestSuite:
 
         if self.tmp_dir:
             shutil.rmtree(self.tmp_dir, ignore_errors=True)
-            print(f"\n测试目录已清理")
+            print("\n测试目录已清理")
 
         print("\n" + "=" * 70)
 

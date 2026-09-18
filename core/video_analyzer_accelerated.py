@@ -47,14 +47,14 @@ except ImportError:
 # 环境与能力探测
 # --------------------------------------------------------------------------- #
 
-def _probe_cuda() -> Dict[str, Any]:
+def _probe_cuda() -> dict[str, Any]:
     """探测 OpenCV CUDA 模块的可用性与设备能力。
 
     经验（Experience 393483）：
       - 未先做能力探测就直接上 GPU 并行，会反复改写、加速失效，甚至输出不一致。
       - 因此这里必须先给出"CPU 预处理 / H2D 传输 / GPU 算子"的能力基线，再决定是否加速。
     """
-    info: Dict[str, Any] = {
+    info: dict[str, Any] = {
         "available": False,
         "device_count": 0,
         "device_name": "",
@@ -99,7 +99,7 @@ class PixelAccelerator:
 
     def __init__(self, prefer_gpu: bool = True):
         self.use_gpu = prefer_gpu and CUDA_INFO["available"]
-        self._gpu_stream: Optional["cv2.cuda.Stream"] = None
+        self._gpu_stream: "cv2.cuda.Stream" | None = None
         self._canny_detector = None
 
     # ------------ GPU 资源 ------------ #
@@ -214,7 +214,7 @@ def _detect_zoom(flow: np.ndarray) -> str:
     return "static"
 
 
-def _composition(frame: np.ndarray, width: int, height: int) -> Dict[str, Any]:
+def _composition(frame: np.ndarray, width: int, height: int) -> dict[str, Any]:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150)
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -263,7 +263,7 @@ class SegmentTask:
     use_gpu: bool
 
 
-def _run_segment(task: SegmentTask) -> Dict[str, Any]:
+def _run_segment(task: SegmentTask) -> dict[str, Any]:
     """子进程主函数：读取指定片段并返回采样帧数据 + 该片段耗时统计。
 
     经验（Experience 974902）：
@@ -278,8 +278,8 @@ def _run_segment(task: SegmentTask) -> Dict[str, Any]:
     # 关键：直接跳到片段起点，避免读前面的帧
     cap.set(cv2.CAP_PROP_POS_FRAMES, task.start_frame)
 
-    frames: List[Dict[str, Any]] = []
-    prev_gray: Optional[np.ndarray] = None
+    frames: list[dict[str, Any]] = []
+    prev_gray: np.ndarray | None = None
     frame_idx = task.start_frame
     sample_base = task.start_frame if (task.start_frame % task.sample_interval == 0) else \
         task.start_frame + (task.sample_interval - (task.start_frame % task.sample_interval))
@@ -314,7 +314,7 @@ def _run_segment(task: SegmentTask) -> Dict[str, Any]:
                 gray = accelerator.cvt_bgr2gray(frame)
                 hsv = accelerator.cvt_bgr2hsv(frame)
                 lab = accelerator.cvt_bgr2lab(frame)
-                info: Dict[str, Any] = {
+                info: dict[str, Any] = {
                     "frame_idx": frame_idx,
                     "time_sec": round(frame_idx / task.fps, 3),
                     "hsv": {
@@ -411,8 +411,8 @@ class AcceleratedVideoAnalyzer:
     def __init__(
         self,
         enable_cache: bool = True,
-        cache_dir: Optional[str] = None,
-        num_workers: Optional[int] = None,
+        cache_dir: str | None = None,
+        num_workers: int | None = None,
         use_gpu: bool = True,
     ):
         self._enable_cache = enable_cache
@@ -444,9 +444,9 @@ class AcceleratedVideoAnalyzer:
         video_path: str,
         sample_interval: int = 5,
         detail_level: str = "standard",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         perf_start = time.perf_counter()
-        perf: Dict[str, Any] = {
+        perf: dict[str, Any] = {
             "accelerator": "gpu_multiprocess" if self._use_gpu else "multiprocess_cpu",
             "cuda_available": CUDA_INFO["available"],
             "cuda_reason": CUDA_INFO["reason"],
@@ -468,7 +468,7 @@ class AcceleratedVideoAnalyzer:
                 cached["_from_cache"] = True
                 return cached
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "video_path": video_path,
             "filename": os.path.basename(video_path),
@@ -543,7 +543,7 @@ class AcceleratedVideoAnalyzer:
     # ------------------------------------------------------------------ #
     # 多进程采样：按帧区间切分片段
     # ------------------------------------------------------------------ #
-    def _basic_info(self, video_path: str) -> Dict[str, Any]:
+    def _basic_info(self, video_path: str) -> dict[str, Any]:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             return {"error": "无法打开视频"}
@@ -607,12 +607,12 @@ class AcceleratedVideoAnalyzer:
 
         return '__main__' in source and '__name__' in source
 
-    def _split_segments(self, frame_count: int) -> List[Tuple[int, int]]:
+    def _split_segments(self, frame_count: int) -> list[tuple[int, int]]:
         """按帧数均匀切分为 num_workers 段，段与段保留 1 帧重叠以确保首帧也能算光流。"""
         n = max(1, min(self._num_workers, frame_count))
         base = frame_count // n
         remainder = frame_count % n
-        segs: List[Tuple[int, int]] = []
+        segs: list[tuple[int, int]] = []
         cursor = 0
         for i in range(n):
             size = base + (1 if i < remainder else 0)
@@ -633,7 +633,7 @@ class AcceleratedVideoAnalyzer:
         height: int,
         frame_count: int,
         sample_interval: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         if frame_count <= 0:
             return []
         segments = self._split_segments(frame_count)
@@ -653,8 +653,8 @@ class AcceleratedVideoAnalyzer:
             for i, (s, e) in enumerate(segments)
         ]
 
-        per_segment: List[Dict[str, Any]] = [{}] * len(tasks)
-        segment_times: List[float] = []
+        per_segment: list[dict[str, Any]] = [{}] * len(tasks)
+        segment_times: list[float] = []
 
         # spawn 模式下子进程会重新导入调用方的 __main__ 模块。
         # 若调用方没有 `if __name__ == "__main__":` 保护，就会递归启动，
@@ -682,7 +682,7 @@ class AcceleratedVideoAnalyzer:
 
         # 合并：按 segment_index 顺序拼接，并过滤掉重叠区重复的 frame_idx
         seen: set = set()
-        merged: List[Dict[str, Any]] = []
+        merged: list[dict[str, Any]] = []
         for seg in per_segment:
             if not seg:
                 continue
@@ -698,7 +698,7 @@ class AcceleratedVideoAnalyzer:
     # ------------------------------------------------------------------ #
     # 其余分析阶段保持与 v2.0 等价（这些都是小开销阶段）
     # ------------------------------------------------------------------ #
-    def _scenes(self, video_path: str) -> List[Dict[str, Any]]:
+    def _scenes(self, video_path: str) -> list[dict[str, Any]]:
         if SCENEDETECT_AVAILABLE:
             try:
                 scenes = detect(video_path, ContentDetector(threshold=27.0))
@@ -721,7 +721,7 @@ class AcceleratedVideoAnalyzer:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             return []
-        scenes: List[Dict[str, Any]] = []
+        scenes: list[dict[str, Any]] = []
         try:
             fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
             prev_gray = None
@@ -763,8 +763,8 @@ class AcceleratedVideoAnalyzer:
             cap.release()
         return scenes
 
-    def _transitions(self, frames: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        out: List[Dict[str, Any]] = []
+    def _transitions(self, frames: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        out: list[dict[str, Any]] = []
         for i in range(1, len(frames)):
             p, c = frames[i - 1], frames[i]
             gap = c["time_sec"] - p["time_sec"]
@@ -778,7 +778,7 @@ class AcceleratedVideoAnalyzer:
             ld = abs(lc["L"] - lp["L"])
             ad = abs(lc["A"] - lp["A"])
             bbd = abs(lc["B"] - lp["B"])
-            tr: Dict[str, Any] = {"time_sec": c["time_sec"], "frame_idx": c["frame_idx"]}
+            tr: dict[str, Any] = {"time_sec": c["time_sec"], "frame_idx": c["frame_idx"]}
             fd = c.get("frame_diff", {}).get("mean_diff", 0)
             if fd > 30 or bd > 50:
                 tr.update(type="hard_cut", confidence=min(fd / 60, 1.0), ae_effect="无转场效果，直接切换")
@@ -801,7 +801,7 @@ class AcceleratedVideoAnalyzer:
             out.append(tr)
         return out
 
-    def _color_features(self, frames: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _color_features(self, frames: list[dict[str, Any]]) -> dict[str, Any]:
         if not frames:
             return {}
         hues = [f["hsv"]["hue"] for f in frames]
@@ -871,7 +871,7 @@ class AcceleratedVideoAnalyzer:
         if b < 110 and 180 < hue < 260: return "蓝色冷调风格"
         return "标准/自然风格"
 
-    def _motion_features(self, frames: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _motion_features(self, frames: list[dict[str, Any]]) -> dict[str, Any]:
         if len(frames) < 2:
             return {"avg_motion": 0, "motion_style": "static"}
         ms = [f["motion"]["avg_magnitude"] for f in frames]
@@ -879,7 +879,7 @@ class AcceleratedVideoAnalyzer:
         zooms = [f["motion"]["zoom"] for f in frames]
         avg_m = float(np.mean(ms))
         max_m = float(np.max(ms))
-        changes: List[Dict[str, Any]] = []
+        changes: list[dict[str, Any]] = []
         for i in range(1, len(ms)):
             if ms[i] > 0 and ms[i - 1] > 0:
                 r = ms[i] / max(ms[i - 1], 0.1)
@@ -896,7 +896,7 @@ class AcceleratedVideoAnalyzer:
                         "ae_params": {"property": "timeRemap", "speed": round(r, 1)},
                     })
         mstyle = "高动态/快节奏" if avg_m > 10 else "中等动态" if avg_m > 4 else "低动态/平稳" if avg_m > 1.5 else "静态/固定镜头"
-        dc: Dict[str, int] = {}
+        dc: dict[str, int] = {}
         for d in dirs:
             dc[d] = dc.get(d, 0) + 1
         primary = max(dc, key=dc.get, default="none")
@@ -917,7 +917,7 @@ class AcceleratedVideoAnalyzer:
             "motion_variance": round(float(np.std(ms)), 2),
         }
 
-    def _composition(self, frames: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _composition(self, frames: list[dict[str, Any]]) -> dict[str, Any]:
         if not frames:
             return {}
         xs = [f["composition"]["subject_center_x"] for f in frames]
@@ -926,7 +926,7 @@ class AcceleratedVideoAnalyzer:
         rot = [f["composition"]["rule_of_thirds_score"] for f in frames]
         bal = [f["composition"]["balance_score"] for f in frames]
         ct = [f["composition"]["composition_type"] for f in frames]
-        counts: Dict[str, int] = {}
+        counts: dict[str, int] = {}
         for t in ct:
             counts[t] = counts.get(t, 0) + 1
         dom = max(counts, key=counts.get, default="unknown")
@@ -940,11 +940,11 @@ class AcceleratedVideoAnalyzer:
             "composition_type_distribution": counts,
         }
 
-    def _shot_types(self, video_path: str) -> List[Dict[str, Any]]:
+    def _shot_types(self, video_path: str) -> list[dict[str, Any]]:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             return []
-        shots: List[Dict[str, Any]] = []
+        shots: list[dict[str, Any]] = []
         try:
             fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
             frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -985,7 +985,7 @@ class AcceleratedVideoAnalyzer:
             cap.release()
         return shots
 
-    def _visual_effects(self, frames: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _visual_effects(self, frames: list[dict[str, Any]]) -> dict[str, Any]:
         if not frames:
             return {}
         blurs = [f["blur_score"] for f in frames]
@@ -993,7 +993,7 @@ class AcceleratedVideoAnalyzer:
         motions = [f["motion"]["avg_magnitude"] for f in frames]
         vals = [f["hsv"]["value"] for f in frames]
         sats = [f["hsv"]["saturation"] for f in frames]
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
         avg_blur = float(np.mean(blurs))
         low_blur = sum(1 for b in blurs if b < 50)
         if low_blur > len(blurs) * 0.25:
@@ -1046,7 +1046,7 @@ class AcceleratedVideoAnalyzer:
             "flash_count": flashes,
         }
 
-    def _rhythm(self, scenes: List[Dict[str, Any]], mf: Dict[str, Any]) -> Dict[str, Any]:
+    def _rhythm(self, scenes: list[dict[str, Any]], mf: dict[str, Any]) -> dict[str, Any]:
         if not scenes:
             return {"rhythm": "unknown"}
         durs = [s.get("duration", 0) for s in scenes if s.get("duration", 0) > 0]
@@ -1082,8 +1082,8 @@ class AcceleratedVideoAnalyzer:
             "rhythm_motion_coordination": coord_map.get((rhythm, level), 0.5),
         }
 
-    def _ae_params(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
-        out: Dict[str, Any] = {
+    def _ae_params(self, analysis: dict[str, Any]) -> dict[str, Any]:
+        out: dict[str, Any] = {
             "composition": {
                 "width": analysis.get("basic_info", {}).get("width", 1920),
                 "height": analysis.get("basic_info", {}).get("height", 1080),

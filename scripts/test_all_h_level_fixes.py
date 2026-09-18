@@ -5,13 +5,13 @@ ExitCode=0 表示所有断言通过
 """
 from __future__ import annotations
 
+import json
 import os
 import sys
-import json
 import tempfile
 import uuid
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -39,7 +39,7 @@ def check(name: str, cond: bool, detail: str = ""):
 # =====================================================================
 print("\n=== [Batch1] Core Pipeline 修复验证 ===")
 
-from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig
+from pipeline.unified_pipeline import PipelineConfig, UnifiedPipeline
 
 # 1-1: _cfg() 覆盖机制 - 局部覆盖不污染全局config
 cfg = PipelineConfig(use_davinci_render=True)
@@ -152,9 +152,10 @@ check(
 # =====================================================================
 print("\n=== [Batch2] Engine Layer 修复验证 ===")
 
-from engines.base import EngineResult, BaseEngine
 import abc
 import asyncio
+
+from engines.base import BaseEngine, EngineResult
 
 # 2-1: EngineResult 新增 6 字段
 check(
@@ -276,6 +277,7 @@ check("B3-1g: 短串(≤4字符) 全***",
 
 # 3-2: 路径白名单
 from config.settings import Settings
+
 _settings = Settings()
 ALLOWED_ROOTS = [
     Path(_settings.output_dir).resolve(),
@@ -336,6 +338,7 @@ check("B4-1e: webhook ghp_ → 掩码",
 
 # 4-2: settings SecretStr
 from pydantic import SecretStr
+
 check("B4-2a: mcp_auth_token 是 SecretStr 类型",
       isinstance(_settings.mcp_auth_token, SecretStr),
       f"实际type={type(_settings.mcp_auth_token).__name__}")

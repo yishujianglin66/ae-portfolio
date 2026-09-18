@@ -46,7 +46,7 @@ def output_dir(run_id: str) -> Path:
 
 
 @pytest.fixture(scope="module")
-def engine_paths() -> Dict[str, Any]:
+def engine_paths() -> dict[str, Any]:
     """收集所有引擎路径（用于 S0 健康检查）。"""
     import sys
     pa_src = PROJECT_ROOT / "puppet-automation" / "src"
@@ -69,7 +69,7 @@ class TestS0Health:
 
     def test_health_check_runs(self, output_dir):
         """执行健康检查（不要求全部通过，但必须能运行）"""
-        from core.health_checker import HealthChecker, HealthCheckConfig
+        from core.health_checker import HealthCheckConfig, HealthChecker
 
         config = HealthCheckConfig(
             min_disk_free_gb=10.0,  # E2E 测试降低磁盘要求
@@ -130,7 +130,7 @@ class TestS3AE:
 
     def test_ae_composite_import(self):
         """S3 模块可导入"""
-        from pipeline.stages.ae_composite import AECompositeStage, COMP_DEFINITIONS
+        from pipeline.stages.ae_composite import COMP_DEFINITIONS, AECompositeStage
         assert len(COMP_DEFINITIONS) == 3
 
 
@@ -143,7 +143,7 @@ class TestS4Premiere:
 
     def test_pr_edit_import(self):
         """S4 模块可导入"""
-        from pipeline.stages.pr_edit import PREditStage, S4_TOTAL_TIMEOUT
+        from pipeline.stages.pr_edit import S4_TOTAL_TIMEOUT, PREditStage
         assert S4_TOTAL_TIMEOUT == 600.0
 
 
@@ -187,18 +187,14 @@ class TestS7QualityGate:
 
     def test_quality_gate_flagship_rules(self):
         """质量门包含旗舰规则"""
-        from core.quality_gate import (
-            FrameLuminanceRule, BeatAlignmentRule, GradeNodeRule
-        )
+        from core.quality_gate import BeatAlignmentRule, FrameLuminanceRule, GradeNodeRule
         assert FrameLuminanceRule().rule_id == "frame_luminance"
         assert BeatAlignmentRule().rule_id == "beat_alignment"
         assert GradeNodeRule().rule_id == "grade_nodes"
 
     def test_error_classification(self):
         """八类错误分类可用"""
-        from core.failure_postmortem import (
-            FlagshipErrorCode, classify_error, get_fix_recommendation
-        )
+        from core.failure_postmortem import FlagshipErrorCode, classify_error, get_fix_recommendation
         assert len(FlagshipErrorCode) == 8
         code = classify_error("BRIDGE_DOWN")
         assert code == FlagshipErrorCode.BRIDGE_DOWN
@@ -219,7 +215,7 @@ class TestFullChainReal:
         from core.workflow_orchestrator import DAGOrchestrator, RunManifest
 
         orch = DAGOrchestrator(run_dir=output_dir, run_id=run_id)
-        executed_stages: List[str] = []
+        executed_stages: list[str] = []
 
         # 定义 8 阶段 DAG（线性依赖）
         def make_stage(stage_id: str):

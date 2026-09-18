@@ -36,8 +36,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from integrations.unified_video_pipeline import (  # noqa: E402
-    UnifiedVideoPipeline,
     OPENMONTAGE_STYLE_MAP,
+    UnifiedVideoPipeline,
 )
 
 # 候选素材目录，按优先级排列

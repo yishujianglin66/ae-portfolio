@@ -1,5 +1,6 @@
+import collections
+import json
 from pathlib import Path
-import collections, json
 
 files = [
     r'C:\Users\Administrator\Desktop\AE-Knowledge-Vault\tmp\cloud_labels\vlm_labels_v2new.jsonl',

@@ -34,7 +34,9 @@ from typing import Any, Dict, List, Optional, Union
 # 注意: media_library 各目录(如 D:/AE-Work/resources/video)与 core.paths.video_library()
 #       (D:/AE-Work/视频素材库) 是历史上并存的两套目录约定, 值不同, 不做合并。
 try:
-    from core.paths import ae_exe as _paths_ae_exe, ffmpeg_bin as _paths_ffmpeg, resources_root as _paths_resources_root
+    from core.paths import ae_exe as _paths_ae_exe
+    from core.paths import ffmpeg_bin as _paths_ffmpeg
+    from core.paths import resources_root as _paths_resources_root
     _DEFAULT_AE_INSTALL = _paths_ae_exe()
     _DEFAULT_FFMPEG_BIN = _paths_ffmpeg()
     _DEFAULT_RESOURCES_ROOT = _paths_resources_root()
@@ -49,7 +51,7 @@ class ConfigSource:
     """配置来源"""
     name: str
     priority: int
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
 
 
 class ConfigValidator:
@@ -70,14 +72,14 @@ class ConfigValidator:
     def __init__(self, strict: bool = True):
         self.strict = strict
 
-    def validate(self, config: Dict[str, Any]):
+    def validate(self, config: dict[str, Any]):
         """验证配置并返回 (errors, warnings)"""
-        errors: List[str] = []
-        warnings: List[str] = []
+        errors: list[str] = []
+        warnings: list[str] = []
         env = os.environ.get("AEK_ENVIRONMENT", "development").lower()
         is_production = env == "production" or self.strict
 
-        def err_or_warn(msg: str, key: Optional[str] = None):
+        def err_or_warn(msg: str, key: str | None = None):
             """非致命项（key 在 _NON_FATAL_KEYS 中）在非生产环境降级为 warning。"""
             non_fatal = key in self._NON_FATAL_KEYS if key else False
             if is_production or not non_fatal:
@@ -167,13 +169,13 @@ class ConfigValidator:
 class ConfigManager:
     """配置管理器 - 支持分层覆盖和类型安全"""
 
-    def __init__(self, config_files: List[str] = None, auto_load: bool = True):
+    def __init__(self, config_files: list[str] = None, auto_load: bool = True):
         self._logger = logging.getLogger(f"{__name__}.ConfigManager")
-        self._sources: List[ConfigSource] = []
-        self._config: Dict[str, Any] = {}
+        self._sources: list[ConfigSource] = []
+        self._config: dict[str, Any] = {}
         self._validator = ConfigValidator()
         self._last_reload_time = 0.0
-        self._config_files: List[str] = []
+        self._config_files: list[str] = []
 
         # 默认配置
         self._register_default_config()
@@ -718,7 +720,7 @@ class ConfigManager:
     # 加载配置
     # -------------------------------------------------------------------------
 
-    def load_config(self, config_files: List[str] = None) -> None:
+    def load_config(self, config_files: list[str] = None) -> None:
         """加载配置（文件 + 环境变量）"""
         self._config_files = config_files or []
 
@@ -789,7 +791,7 @@ class ConfigManager:
         3. 通用回退：按第一个下划线切分 section/key，避免把所有下划线转成点号。
         """
         # 显式映射: env var (AEKV_ 之后的部分, 大写) → 配置点路径
-        EXPLICIT_MAP: Dict[str, str] = {
+        EXPLICIT_MAP: dict[str, str] = {
             # LLM / Model
             "LLM_API_KEY": "model.api_key",
             "LLM_BASE_URL": "model.base_url",
@@ -840,12 +842,12 @@ class ConfigManager:
         }
 
         # Section 别名（保留供未来扩展；当前通用回退直接按点路径写入）
-        SECTION_ALIASES: Dict[str, str] = {
+        SECTION_ALIASES: dict[str, str] = {
             "LLM": "model",
         }
         _ = SECTION_ALIASES  # 目前通用回退不使用别名，保留显式映射表即可
 
-        env_config: Dict[str, Any] = {}
+        env_config: dict[str, Any] = {}
         loaded = 0
 
         for key, value in os.environ.items():
@@ -853,7 +855,7 @@ class ConfigManager:
                 continue
 
             suffix = key[5:]  # 去掉 AEKV_ 前缀
-            target_path: Optional[str] = EXPLICIT_MAP.get(suffix)
+            target_path: str | None = EXPLICIT_MAP.get(suffix)
 
             if target_path is None:
                 # 通用回退（已知复合键已由 EXPLICIT_MAP 覆盖）：
@@ -861,7 +863,7 @@ class ConfigManager:
                 # 无法再下钻时把剩余段整体作为叶子 key（保留 snake_case 下划线）。
                 # 若第一个段就不是已知 section，全下划线转点号（兼容任意深度自定义）。
                 parts_lower = suffix.lower().split("_")
-                matched_parts: List[str] = []
+                matched_parts: list[str] = []
                 current_node: Any = self._config
                 pos = 0
                 n = len(parts_lower)
@@ -950,7 +952,7 @@ class ConfigManager:
         """合并配置来源到主配置"""
         self._config = self._deep_merge(self._config, source.data)
 
-    def _deep_merge(self, base: Dict[str, Any], overlay: Dict[str, Any]) -> Dict[str, Any]:
+    def _deep_merge(self, base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]:
         """深度合并两个字典"""
         result = base.copy()
         for key, value in overlay.items():
@@ -1007,14 +1009,14 @@ class ConfigManager:
             return value.lower() == "true"
         return bool(value)
 
-    def get_list(self, path: str, default: List[Any] = None) -> List[Any]:
+    def get_list(self, path: str, default: list[Any] = None) -> list[Any]:
         """获取列表配置"""
         value = self.get(path, default or [])
         if isinstance(value, list):
             return value
         return default or []
 
-    def get_dict(self, path: str, default: Dict[str, Any] = None) -> Dict[str, Any]:
+    def get_dict(self, path: str, default: dict[str, Any] = None) -> dict[str, Any]:
         """获取字典配置"""
         value = self.get(path, default or {})
         if isinstance(value, dict):
@@ -1051,7 +1053,7 @@ class ConfigManager:
                 display_value = "***"
         self._logger.debug(f"配置更新: {path} = {display_value}")
 
-    def update(self, data: Dict[str, Any]) -> None:
+    def update(self, data: dict[str, Any]) -> None:
         """批量更新配置"""
         self._config = self._deep_merge(self._config, data)
         self._logger.debug(f"配置批量更新: {len(data)} 项")
@@ -1061,7 +1063,7 @@ class ConfigManager:
     # -------------------------------------------------------------------------
 
     @staticmethod
-    def _mask_sensitive_config(config_dict: Dict[str, Any]) -> Dict[str, Any]:
+    def _mask_sensitive_config(config_dict: dict[str, Any]) -> dict[str, Any]:
         """递归掩码配置中的敏感字段，用于保存/导出时不泄漏 API Key。"""
         import copy
         SENSITIVE_KEYWORDS = [
@@ -1125,7 +1127,7 @@ class ConfigManager:
     # 配置检查
     # -------------------------------------------------------------------------
 
-    def check_dependencies(self) -> Dict[str, bool]:
+    def check_dependencies(self) -> dict[str, bool]:
         """检查依赖项是否可用"""
         dependencies = {
             "ae_installed": os.path.exists(self.get_str("ae.install_path")),
@@ -1157,12 +1159,12 @@ class ConfigManager:
     # 配置信息
     # -------------------------------------------------------------------------
 
-    def get_config(self) -> Dict[str, Any]:
+    def get_config(self) -> dict[str, Any]:
         """获取完整配置字典的只读副本"""
         import copy
         return copy.deepcopy(self._config)
 
-    def get_config_summary(self) -> Dict[str, Any]:
+    def get_config_summary(self) -> dict[str, Any]:
         """获取配置摘要（不含敏感信息）"""
         summary = {
             "sources": [s.name for s in self._sources],
@@ -1204,7 +1206,7 @@ class ConfigManager:
         }
         return summary
 
-    def get_full_config(self) -> Dict[str, Any]:
+    def get_full_config(self) -> dict[str, Any]:
         """获取完整配置的深拷贝（不掩码；对外展示请用 get_config_summary）"""
         import copy
         return copy.deepcopy(self._config)
@@ -1221,7 +1223,7 @@ config_manager = ConfigManager()
 # 便捷函数
 # -----------------------------------------------------------------------------
 
-def load_config(config_files: List[str] = None) -> None:
+def load_config(config_files: list[str] = None) -> None:
     config_manager.load_config(config_files)
 
 
@@ -1245,11 +1247,11 @@ def get_bool(path: str, default: bool = False) -> bool:
     return config_manager.get_bool(path, default)
 
 
-def get_list(path: str, default: List[Any] = None) -> List[Any]:
+def get_list(path: str, default: list[Any] = None) -> list[Any]:
     return config_manager.get_list(path, default)
 
 
-def get_dict(path: str, default: Dict[str, Any] = None) -> Dict[str, Any]:
+def get_dict(path: str, default: dict[str, Any] = None) -> dict[str, Any]:
     return config_manager.get_dict(path, default)
 
 
@@ -1257,5 +1259,5 @@ def set_config(path: str, value: Any) -> None:
     config_manager.set(path, value)
 
 
-def check_dependencies() -> Dict[str, bool]:
+def check_dependencies() -> dict[str, bool]:
     return config_manager.check_dependencies()

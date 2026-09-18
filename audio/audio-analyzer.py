@@ -1,13 +1,14 @@
-import os
 import json
-import math
 import logging
+import math
+import os
 import subprocess
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from dataclasses import dataclass
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +31,8 @@ class AudioFeatures:
     spectral_bandwidth: float = 0.0
     spectral_rolloff: float = 0.0
     zero_crossing_rate: float = 0.0
-    mfccs: List[float] = None
-    chroma: List[float] = None
+    mfccs: list[float] = None
+    chroma: list[float] = None
     energy: float = 0.0
     mood: str = ""
     mood_score: float = 0.0
@@ -82,7 +83,7 @@ class AudioAnalyzer:
                 raise ImportError("scipy 未安装，请执行: pip install scipy")
         return self._scipy
 
-    def analyze_audio(self, audio_path: str) -> Dict:
+    def analyze_audio(self, audio_path: str) -> dict:
         if not os.path.exists(audio_path):
             return {"success": False, "error": "音频文件不存在"}
 
@@ -98,7 +99,7 @@ class AudioAnalyzer:
             logger.error(f"librosa 分析异常，降级到 FFprobe: {e}")
             return self._fallback_analyze(audio_path)
 
-    def _analyze_audio_impl(self, audio_path: str) -> Dict:
+    def _analyze_audio_impl(self, audio_path: str) -> dict:
         """librosa 完整分析实现（内部方法，受超时保护）。"""
         try:
             librosa = self._ensure_librosa()
@@ -159,7 +160,7 @@ class AudioAnalyzer:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _fallback_analyze(self, audio_path: str) -> Dict:
+    def _fallback_analyze(self, audio_path: str) -> dict:
         """降级方案：使用 FFprobe 获取基础音频信息（无需 librosa）。"""
         try:
             ffprobe_cmd = self.config.get("tools", {}).get("ffprobe", "ffprobe")
@@ -217,7 +218,7 @@ class AudioAnalyzer:
         except Exception as e:
             return {"success": False, "error": f"降级分析失败: {e}"}
 
-    def _detect_key(self, chroma: List[float]) -> Tuple[str, str]:
+    def _detect_key(self, chroma: list[float]) -> tuple[str, str]:
         key_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
         mode_names = ['major', 'minor']
 
@@ -235,7 +236,7 @@ class AudioAnalyzer:
 
         return key, mode
 
-    def _calculate_mode_score(self, chroma: List[float]) -> float:
+    def _calculate_mode_score(self, chroma: list[float]) -> float:
         major_pattern = [1, 0.6, 0.8, 0.6, 1, 0.8, 0.6, 1, 0.8, 0.6, 0.8, 0.6]
         minor_pattern = [1, 0.8, 0.6, 0.8, 0.6, 1, 0.6, 1, 0.8, 0.6, 0.8, 0.6]
 
@@ -244,7 +245,7 @@ class AudioAnalyzer:
 
         return major_score - minor_score
 
-    def _infer_mood(self, tempo: float, energy: float, spectral_centroid: float) -> Tuple[str, float]:
+    def _infer_mood(self, tempo: float, energy: float, spectral_centroid: float) -> tuple[str, float]:
         mood_scores = {}
 
         mood_scores["excited"] = min(tempo / 150, 1.0) * 0.5 + min(energy / 0.3, 1.0) * 0.3 + min(spectral_centroid / 2000, 1.0) * 0.2
@@ -275,8 +276,8 @@ class AudioAnalyzer:
         else:
             return "other"
 
-    def find_best_bgm_match(self, target_features: Dict, bgm_directory: str, 
-                            max_results: int = 5) -> List[Dict]:
+    def find_best_bgm_match(self, target_features: dict, bgm_directory: str, 
+                            max_results: int = 5) -> list[dict]:
         if not os.path.exists(bgm_directory):
             return []
 
@@ -304,7 +305,7 @@ class AudioAnalyzer:
 
         return sorted(matches, key=lambda x: x["similarity"], reverse=True)[:max_results]
 
-    def _calculate_similarity(self, target: Dict, candidate: Dict) -> float:
+    def _calculate_similarity(self, target: dict, candidate: dict) -> float:
         score = 0.0
 
         if "tempo" in target and "tempo" in candidate:
@@ -330,7 +331,7 @@ class AudioAnalyzer:
 
         return round(score, 3)
 
-    def generate_beat_map(self, audio_path: str) -> Dict:
+    def generate_beat_map(self, audio_path: str) -> dict:
         analysis = self.analyze_audio(audio_path)
         if not analysis["success"]:
             return analysis
@@ -350,7 +351,7 @@ class AudioAnalyzer:
             "features": analysis["features"]
         }
 
-    def _detect_sections(self, beat_times: List[float], duration: float) -> List[Dict]:
+    def _detect_sections(self, beat_times: list[float], duration: float) -> list[dict]:
         sections = []
         if len(beat_times) < 4:
             return []
@@ -385,7 +386,7 @@ class AudioAnalyzer:
         ]
         return actions[(section_number - 1) % len(actions)]
     
-    def test_librosa(self) -> Dict:
+    def test_librosa(self) -> dict:
         """测试librosa和scipy可用性"""
         librosa_available = False
         scipy_available = False

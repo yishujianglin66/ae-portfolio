@@ -1,7 +1,7 @@
 """测试 API 端点是否正常工作。"""
+import json
 import sys
 import urllib.request
-import json
 
 BASE_URL = "http://127.0.0.1:8765"
 

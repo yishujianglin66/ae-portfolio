@@ -1,8 +1,11 @@
 # Silhouette Roto 端到端测试 - 完整管线
 import pytest
+
 pytest.importorskip("fx")
-from fx import *
 import os
+
+from fx import *
+
 
 class TestRotoE2E(Action):
 	def __init__(self):
@@ -33,13 +36,13 @@ class TestRotoE2E(Action):
 			f.write("\n[2] Creating nodes:\n")
 			
 			src = Node("SourceNode")
-			f.write(f"  SourceNode: OK\n")
+			f.write("  SourceNode: OK\n")
 			
 			roto = Node("RotoNode")
-			f.write(f"  RotoNode: OK\n")
+			f.write("  RotoNode: OK\n")
 			
 			out_node = Node("OutputNode")
-			f.write(f"  OutputNode: OK\n")
+			f.write("  OutputNode: OK\n")
 			
 			# Step 3: 正确连接节点
 			f.write("\n[3] Connecting nodes:\n")
@@ -47,14 +50,14 @@ class TestRotoE2E(Action):
 			# Source → Roto (连接到 foreground 端口)
 			try:
 				src.outputs[0].connect(roto.inputs[1])  # inputs[1] = foreground
-				f.write(f"  Source.output → Roto.foreground: OK\n")
+				f.write("  Source.output → Roto.foreground: OK\n")
 			except Exception as e:
 				f.write(f"  Source→Roto FAIL: {e}\n")
 			
 			# Roto → Output
 			try:
 				roto.outputs[0].connect(out_node.inputs[0])  # outputs[0] = output
-				f.write(f"  Roto.output → Output.input: OK\n")
+				f.write("  Roto.output → Output.input: OK\n")
 			except Exception as e:
 				f.write(f"  Roto→Output FAIL: {e}\n")
 			
@@ -81,14 +84,14 @@ class TestRotoE2E(Action):
 						path_prop = src.property('path')
 						f.write(f"  path property: {path_prop}\n")
 						path_prop.setValue(test_image, 0)
-						f.write(f"  Path set via setValue: OK\n")
+						f.write("  Path set via setValue: OK\n")
 					except Exception as e:
 						f.write(f"  setValue FAIL: {e}\n")
 				
 				# 方法2: 直接设置属性
 				try:
 					src.path = test_image
-					f.write(f"  Path set via src.path: OK\n")
+					f.write("  Path set via src.path: OK\n")
 				except Exception as e:
 					f.write(f"  src.path FAIL: {e}\n")
 				

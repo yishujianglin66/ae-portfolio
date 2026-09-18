@@ -6,11 +6,12 @@
 输出：优化后的效果参数
 """
 import json
+import logging
 import os
 import random
 import re
-from typing import Any, Dict, List, Tuple, Optional
-import logging
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
 
 from .dataset_base import BaseDataset, DatasetConfig, DatasetStats
@@ -219,7 +220,7 @@ class ParamOptimDataset(BaseDataset):
         self._param_names = []
         self._effect_param_map = {}
 
-    def load_data(self, data_path: str) -> List[Dict]:
+    def load_data(self, data_path: str) -> list[dict]:
         all_data = []
 
         effect_presets_path = os.path.join(
@@ -299,7 +300,7 @@ class ParamOptimDataset(BaseDataset):
         logger.info(f"Total samples after augmentation: {len(all_data)}")
         return all_data
 
-    def _generate_style_based_samples(self, existing_data: List[Dict]) -> List[Dict]:
+    def _generate_style_based_samples(self, existing_data: list[dict]) -> list[dict]:
         new_samples = existing_data.copy()
 
         for style_label in STYLE_LABELS:
@@ -342,7 +343,7 @@ class ParamOptimDataset(BaseDataset):
         logger.info(f"Generated {len(new_samples) - len(existing_data)} style-based samples")
         return new_samples
 
-    def _generate_effect_variations(self, existing_data: List[Dict]) -> List[Dict]:
+    def _generate_effect_variations(self, existing_data: list[dict]) -> list[dict]:
         new_samples = existing_data.copy()
 
         for effect_name in EFFECT_PARAM_RANGES:
@@ -392,11 +393,11 @@ class ParamOptimDataset(BaseDataset):
     def _create_sample(
         self,
         effect_name: str,
-        params_info: Dict,
-        preset_params: Dict,
+        params_info: dict,
+        preset_params: dict,
         style_label: str,
         category: str,
-    ) -> Optional[Dict]:
+    ) -> dict | None:
         base_params = {}
         optimized_params = {}
 
@@ -456,7 +457,7 @@ class ParamOptimDataset(BaseDataset):
         default_factor = style_factors.get(style_label, {})
         return default_factor.get(param_name, default_factor.get('Intensity', 0.5))
 
-    def preprocess(self, data: List[Dict]) -> List[Dict]:
+    def preprocess(self, data: list[dict]) -> list[dict]:
         processed = []
 
         for sample in data:
@@ -495,7 +496,7 @@ class ParamOptimDataset(BaseDataset):
 
         return processed
 
-    def _encode_input(self, sample: Dict) -> np.ndarray:
+    def _encode_input(self, sample: dict) -> np.ndarray:
         style_idx = sample.get('style_idx', 0)
         effect_idx = sample.get('effect_idx', 0)
         normalized_base = sample.get('normalized_base', {})
@@ -522,7 +523,7 @@ class ParamOptimDataset(BaseDataset):
 
         return input_vector.astype(np.float32)
 
-    def _encode_output(self, sample: Dict) -> np.ndarray:
+    def _encode_output(self, sample: dict) -> np.ndarray:
         normalized_optimized = sample.get('normalized_optimized', {})
 
         output_values = []
@@ -535,7 +536,7 @@ class ParamOptimDataset(BaseDataset):
 
         return np.array(output_values, dtype=np.float32)
 
-    def validate_sample(self, sample: Dict) -> bool:
+    def validate_sample(self, sample: dict) -> bool:
         input_vector = sample.get('input_vector')
         output_vector = sample.get('output_vector')
 
@@ -556,7 +557,7 @@ class ParamOptimDataset(BaseDataset):
 
         return True
 
-    def augment_sample(self, sample: Dict) -> List[Dict]:
+    def augment_sample(self, sample: dict) -> list[dict]:
         augmented = []
 
         jitter_std = 0.05
@@ -583,7 +584,7 @@ class ParamOptimDataset(BaseDataset):
 
         return augmented
 
-    def _get_similar_styles(self, style_idx: int) -> List[int]:
+    def _get_similar_styles(self, style_idx: int) -> list[int]:
         style_clusters = [
             [0, 10, 14],
             [1, 10, 16],
@@ -620,10 +621,10 @@ class ParamOptimDataset(BaseDataset):
     def get_num_styles(self) -> int:
         return len(STYLE_LABELS)
 
-    def get_param_names(self) -> List[str]:
+    def get_param_names(self) -> list[str]:
         return self._param_names[:16]
 
-    def denormalize_params(self, normalized_params: Dict, params_info: Dict) -> Dict:
+    def denormalize_params(self, normalized_params: dict, params_info: dict) -> dict:
         denormalized = {}
         for param_name, normalized_value in normalized_params.items():
             if param_name not in params_info:

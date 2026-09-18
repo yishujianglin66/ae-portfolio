@@ -1,6 +1,8 @@
 # Silhouette Roto 管线测试 - 连接修复版
-from fx import *
 import os
+
+from fx import *
+
 
 class TestRotoPipeline(Action):
 	def __init__(self):
@@ -32,7 +34,7 @@ class TestRotoPipeline(Action):
 			
 			try:
 				src = Node("SourceNode")
-				f.write(f"  SourceNode: OK\n")
+				f.write("  SourceNode: OK\n")
 				f.write(f"    outputs: {[o.name for o in src.outputs]}\n")
 			except Exception as e:
 				f.write(f"  SourceNode FAIL: {e}\n")
@@ -40,7 +42,7 @@ class TestRotoPipeline(Action):
 			
 			try:
 				roto = Node("RotoNode")
-				f.write(f"  RotoNode: OK\n")
+				f.write("  RotoNode: OK\n")
 				f.write(f"    inputs: {[i.name for i in roto.inputs]}\n")
 				f.write(f"    outputs: {[o.name for o in roto.outputs]}\n")
 			except Exception as e:
@@ -49,7 +51,7 @@ class TestRotoPipeline(Action):
 			
 			try:
 				out_node = Node("OutputNode")
-				f.write(f"  OutputNode: OK\n")
+				f.write("  OutputNode: OK\n")
 				f.write(f"    inputs: {[i.name for i in out_node.inputs]}\n")
 			except Exception as e:
 				f.write(f"  OutputNode FAIL: {e}\n")
@@ -62,14 +64,14 @@ class TestRotoPipeline(Action):
 				# 方法1: 直接赋值
 				try:
 					roto.inputs[0].source = src.outputs[0]
-					f.write(f"  Method1: roto.inputs[0].source = src.outputs[0] : OK\n")
+					f.write("  Method1: roto.inputs[0].source = src.outputs[0] : OK\n")
 				except Exception as e:
 					f.write(f"  Method1 FAIL: {e}\n")
 				
 				# 方法2: connect 方法
 				try:
 					src.outputs[0].connect(roto.inputs[0])
-					f.write(f"  Method2: src.outputs[0].connect(roto.inputs[0]) : OK\n")
+					f.write("  Method2: src.outputs[0].connect(roto.inputs[0]) : OK\n")
 				except Exception as e:
 					f.write(f"  Method2 FAIL: {e}\n")
 				
@@ -83,7 +85,7 @@ class TestRotoPipeline(Action):
 			if roto and out_node:
 				try:
 					out_node.inputs[0].source = roto.outputs[0]
-					f.write(f"  Roto→Output: OK\n")
+					f.write("  Roto→Output: OK\n")
 				except Exception as e:
 					f.write(f"  Roto→Output FAIL: {e}\n")
 			

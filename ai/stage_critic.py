@@ -52,7 +52,7 @@ CRITIC_PROMPT = """你是视频渲染流水线的阶段评审员 (StageCritic)�
 class StageCritic:
     """渲染阶段自评器 — 调 LLM 估计阶段价值, 结果写 run_notes.jsonl。"""
 
-    def __init__(self, notes_file: Optional[Path] = None):
+    def __init__(self, notes_file: Path | None = None):
         self._notes_file = notes_file or NOTES_FILE
 
     async def critique(
@@ -63,7 +63,7 @@ class StageCritic:
         goal: str,
         provider: str = "doubao",
         model_type: str = "flash",
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """自评单个阶段。返回 {stage, value, rationale, risks, timestamp} 或 None。"""
         try:
             from core.llm_gateway import llm_gateway
@@ -114,7 +114,7 @@ class StageCritic:
                 pass
             return None
 
-    def _append_note(self, note: Dict[str, Any]) -> None:
+    def _append_note(self, note: dict[str, Any]) -> None:
         try:
             os.makedirs(self._notes_file.parent, exist_ok=True)
             with open(self._notes_file, "a", encoding="utf-8") as f:
@@ -123,7 +123,7 @@ class StageCritic:
             pass
 
     @staticmethod
-    def load_notes(notes_file: Optional[Path] = None,
+    def load_notes(notes_file: Path | None = None,
                    max_notes: int = 10) -> list:
         """读最近 N 条 notes (供下一阶段 prompt 注入)。"""
         f = notes_file or NOTES_FILE

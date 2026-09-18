@@ -3,7 +3,12 @@ t37b_direct_download_extract.py - 直接用yt-dlp下载B站视频并提取帧
 =====================================================================
 绕过MaterialSearcher，直接用yt-dlp下载B站动漫视频，然后提取帧扩充训练数据。
 """
-import os, sys, json, time, subprocess, shutil
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 PROJECT_ROOT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
@@ -103,7 +108,7 @@ def ytdlp_download(search_keyword, output_dir, max_videos=3):
                     err = r.stderr.decode('utf-8', errors='replace')[:200]
                     log(f"  失败: {err}", "ERROR")
             except subprocess.TimeoutExpired:
-                log(f"  超时", "WARN")
+                log("  超时", "WARN")
             except Exception as e:
                 log(f"  异常: {e}", "ERROR")
             
@@ -128,7 +133,7 @@ def extract_frames(video_path, output_dir, fps=1, max_frames=300):
         "-q:v", "2",
         "-frames:v", str(max_frames),
         "-y",
-        str(output_dir / f"dl_%06d.jpg")
+        str(output_dir / "dl_%06d.jpg")
     ]
     try:
         r = subprocess.run(cmd, capture_output=True, timeout=600,
@@ -191,7 +196,7 @@ def main():
     for ip, info in results.items():
         print(f"  {ip}: +{info['new_frames']} 帧 ({info['videos']} 视频)")
     
-    print(f"\n[更新后各IP总帧数]")
+    print("\n[更新后各IP总帧数]")
     for d in sorted(CORPUS_DIR.iterdir()):
         if d.is_dir():
             frames = list(d.rglob("*.jpg")) + list(d.rglob("*.png"))

@@ -1,8 +1,9 @@
 # Wire Removal Template
 # 威亚去除模板 - 适用于威亚擦除、线条状物体去除
 
-from fx import *
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=24.0):

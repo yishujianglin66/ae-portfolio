@@ -39,9 +39,9 @@ class AEPAnalyzer:
     ) -> None:
         self._bridge_dir = bridge_dir or _BRIDGE_DIR
         self._jsx_path = jsx_path or _DEEP_INSPECT_JSX
-        self._last_report: Optional[Dict[str, Any]] = None
+        self._last_report: dict[str, Any] | None = None
 
-    def analyze_from_json(self, json_path: str) -> Dict[str, Any]:
+    def analyze_from_json(self, json_path: str) -> dict[str, Any]:
         """从 JSON 文件加载分析结果（离线模式）。
 
         Args:
@@ -51,11 +51,11 @@ class AEPAnalyzer:
             分析报告字典
         """
         with open(json_path, "r", encoding="utf-8") as f:
-            data: Dict[str, Any] = json.load(f)
+            data: dict[str, Any] = json.load(f)
         self._last_report = data
         return data
 
-    def analyze_via_bridge(self, timeout: int = 30) -> Dict[str, Any]:
+    def analyze_via_bridge(self, timeout: int = 30) -> dict[str, Any]:
         """通过 MCP Bridge 分析当前 AE 中打开的项目（在线模式）。
 
         发送 deep_inspect.jsx 命令到 AE，等待结果。
@@ -85,7 +85,7 @@ class AEPAnalyzer:
         # 解析结果
         try:
             if isinstance(result, str):
-                data: Dict[str, Any] = json.loads(result)
+                data: dict[str, Any] = json.loads(result)
             else:
                 data = result
         except json.JSONDecodeError as e:
@@ -97,7 +97,7 @@ class AEPAnalyzer:
         self._last_report = data
         return dict(data)
 
-    def analyze_via_mcp(self) -> Dict[str, Any]:
+    def analyze_via_mcp(self) -> dict[str, Any]:
         """通过 MCP Server 的 run-jsx-script 工具分析项目。
 
         Returns:
@@ -110,11 +110,11 @@ class AEPAnalyzer:
             "instructions": "Execute via MCP run-jsx-script tool",
         }
 
-    def get_last_report(self) -> Optional[Dict[str, Any]]:
+    def get_last_report(self) -> dict[str, Any] | None:
         """获取上次分析报告。"""
         return self._last_report
 
-    def get_summary(self, report: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def get_summary(self, report: dict[str, Any] | None = None) -> dict[str, Any]:
         """获取分析报告摘要。
 
         Args:
@@ -144,8 +144,8 @@ class AEPAnalyzer:
         }
 
     def get_effect_chains(
-        self, report: Optional[Dict[str, Any]] = None
-    ) -> List[Dict[str, Any]]:
+        self, report: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """提取效果链（每个图层的效果组合）。
 
         Args:
@@ -159,7 +159,7 @@ class AEPAnalyzer:
         if report is None:
             return []
 
-        chains: List[Dict[str, Any]] = []
+        chains: list[dict[str, Any]] = []
         for comp in report.get("compositions", []):
             for layer in comp.get("layers", []):
                 effects = layer.get("effects", [])
@@ -192,13 +192,13 @@ class AEPAnalyzer:
         with open(self._jsx_path, "r", encoding="utf-8") as f:
             return f.read()
 
-    def _write_command(self, command: Dict[str, Any]) -> None:
+    def _write_command(self, command: dict[str, Any]) -> None:
         """写入命令文件。"""
         os.makedirs(self._bridge_dir, exist_ok=True)
         with open(_COMMAND_FILE, "w", encoding="utf-8") as f:
             json.dump(command, f, ensure_ascii=False)
 
-    def _wait_for_result(self, timeout: int) -> Optional[Any]:
+    def _wait_for_result(self, timeout: int) -> Any | None:
         """等待结果文件。"""
         import time
         start = time.time()

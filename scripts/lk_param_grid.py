@@ -35,8 +35,8 @@ COMBOS = [
 ]
 
 
-def sparse_step(g0: np.ndarray, g1: np.ndarray, win: Tuple[int, int], lv: int,
-                pts: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def sparse_step(g0: np.ndarray, g1: np.ndarray, win: tuple[int, int], lv: int,
+                pts: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     nxt, st, _ = cv2.calcOpticalFlowPyrLK(
         g0, g1, pts, None, winSize=win, maxLevel=lv,
         criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
@@ -48,14 +48,14 @@ def sparse_step(g0: np.ndarray, g1: np.ndarray, win: Tuple[int, int], lv: int,
     return p1 - p0, p0
 
 
-def analyze_clip(clip: str, win: Tuple[int, int], lv: int,
-                 stats: str) -> Tuple[float, float]:
+def analyze_clip(clip: str, win: tuple[int, int], lv: int,
+                 stats: str) -> tuple[float, float]:
     frames = _read_frames(clip, max_frames=50, target_fps=10)
     if len(frames) < 3:
         return 0.0, 0.0
     grays = [cv2.cvtColor(f, cv2.COLOR_BGR2GRAY) for f in frames]
-    dxs: List[float] = []
-    dys: List[float] = []
+    dxs: list[float] = []
+    dys: list[float] = []
     for i in range(1, len(grays)):
         pts = cv2.goodFeaturesToTrack(grays[i - 1], maxCorners=200, qualityLevel=0.01,
                                       minDistance=7, blockSize=7)
@@ -88,7 +88,7 @@ def main() -> int:
     print(f"抽样 {len(picks)} 片段")
 
     # 稠密基准
-    dense_ref: List[Tuple[float, float]] = []
+    dense_ref: list[tuple[float, float]] = []
     clips = []
     for r in picks:
         frames = _read_frames(r["clip_path"], max_frames=50, target_fps=10)

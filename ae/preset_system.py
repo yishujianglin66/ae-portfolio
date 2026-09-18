@@ -25,14 +25,14 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Dict, List, Any, Optional
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class Preset:
     """预设类"""
 
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, data: dict[str, Any]):
         self.name = data.get("name", "")
         self.category = data.get("category", "")
         self.subcategory = data.get("subcategory", "")
@@ -43,7 +43,7 @@ class Preset:
         self.default_values = data.get("default_values", {})
         self.compatibility = data.get("compatibility", {"ae": ["2024", "2025", "2026"]})
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "category": self.category,
@@ -79,7 +79,7 @@ class Preset:
                     script = script.replace(placeholder, str(value))
         return script
 
-    def validate_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_params(self, params: dict[str, Any]) -> dict[str, Any]:
         """验证参数"""
         validated = {}
         for param_name, param_info in self.parameters.items():
@@ -102,8 +102,8 @@ class PresetSystem:
 
     def __init__(self, presets_dir: str = None):
         self.presets_dir = Path(presets_dir or "ae/presets")
-        self.presets: Dict[str, Preset] = {}
-        self.categories: Dict[str, List[str]] = {}
+        self.presets: dict[str, Preset] = {}
+        self.categories: dict[str, list[str]] = {}
         self.load_all_presets()
 
     def load_all_presets(self):
@@ -140,17 +140,17 @@ class PresetSystem:
         if preset.name not in self.categories[preset.category]:
             self.categories[preset.category].append(preset.name)
 
-    def get_preset(self, name: str) -> Optional[Preset]:
+    def get_preset(self, name: str) -> Preset | None:
         """获取预设"""
         return self.presets.get(name)
 
-    def list_presets(self, category: str = None) -> List[str]:
+    def list_presets(self, category: str = None) -> list[str]:
         """列出预设"""
         if category:
             return self.categories.get(category, [])
         return list(self.presets.keys())
 
-    def search_presets(self, keyword: str) -> List[Preset]:
+    def search_presets(self, keyword: str) -> list[Preset]:
         """搜索预设（匹配名称、描述、标签、分类名）"""
         keyword_lower = keyword.lower()
         results = []
@@ -177,7 +177,7 @@ class PresetSystem:
         validated_params = preset.validate_params(kwargs)
         return preset.generate_jsx(**validated_params)
 
-    def create_preset(self, data: Dict[str, Any]) -> Preset:
+    def create_preset(self, data: dict[str, Any]) -> Preset:
         """创建预设"""
         preset = Preset(data)
         self._register_preset(preset)
@@ -193,7 +193,7 @@ class PresetSystem:
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(preset.to_dict(), f, ensure_ascii=False, indent=2)
 
-    def get_category_info(self) -> Dict[str, Dict[str, Any]]:
+    def get_category_info(self) -> dict[str, dict[str, Any]]:
         """获取分类信息"""
         info = {}
         for category, presets in self.categories.items():
@@ -227,6 +227,6 @@ def create_preset_system() -> PresetSystem:
     return PresetSystem()
 
 
-def get_preset_category_info() -> Dict[str, Dict[str, Any]]:
+def get_preset_category_info() -> dict[str, dict[str, Any]]:
     """获取预设分类信息"""
     return PRESET_CATEGORIES

@@ -8,7 +8,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from queue import Queue, Empty
+from queue import Empty, Queue
 
 SERVER_PATH = Path(__file__).resolve().parent.parent / "ae-mcp-server" / "dist" / "index.js"
 

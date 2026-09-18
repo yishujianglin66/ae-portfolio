@@ -20,7 +20,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from typing import Any, Dict
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -94,7 +94,7 @@ class TestErrorPaths:
             "format": {"duration": "5.0"},
         }
         # openable=False 表示 OpenCV 尝试打开但失败 → 文件损坏
-        opencv_metrics: Dict[str, Any] = {
+        opencv_metrics: dict[str, Any] = {
             "frames": 0, "openable": False,
             "sharpness_list": [], "brightness_list": [],
             "contrast_list": [], "saturation_list": [], "black_frames": 0,
@@ -128,7 +128,7 @@ class TestBlackScreenPenalty:
             "format": {"duration": "5.0", "bit_rate": "2000000"},
         }
         # OpenCV 不可用 (openable=None)，走 signalstats 兜底
-        opencv_metrics: Dict[str, Any] = {
+        opencv_metrics: dict[str, Any] = {
             "frames": 0, "openable": None,
             "sharpness_list": [], "brightness_list": [],
             "contrast_list": [], "saturation_list": [], "black_frames": 0,
@@ -161,7 +161,7 @@ class TestBlackScreenPenalty:
             "format": {"duration": "5.0", "bit_rate": "2000000"},
         }
         # OpenCV 可用，10 帧全黑
-        opencv_metrics: Dict[str, Any] = {
+        opencv_metrics: dict[str, Any] = {
             "frames": 10, "openable": True,
             "sharpness_list": [10.0] * 10,
             "brightness_list": [0.01] * 10,  # < 0.04 → black
@@ -197,7 +197,7 @@ class TestStaticVideoPenalty:
             "format": {"duration": "10.0", "bit_rate": "2000000"},
         }
         # OpenCV 不可用，走 signalstats 兜底
-        opencv_metrics: Dict[str, Any] = {
+        opencv_metrics: dict[str, Any] = {
             "frames": 0, "openable": None,
             "sharpness_list": [], "brightness_list": [],
             "contrast_list": [], "saturation_list": [], "black_frames": 0,
@@ -230,7 +230,7 @@ class TestStaticVideoPenalty:
             ],
             "format": {"duration": "1.0", "bit_rate": "2000000"},  # < 2.0
         }
-        opencv_metrics: Dict[str, Any] = {
+        opencv_metrics: dict[str, Any] = {
             "frames": 0, "openable": None,
             "sharpness_list": [], "brightness_list": [],
             "contrast_list": [], "saturation_list": [], "black_frames": 0,
@@ -261,7 +261,7 @@ class TestStaticVideoPenalty:
             ],
             "format": {"duration": "10.0", "bit_rate": "2000000"},
         }
-        opencv_metrics: Dict[str, Any] = {
+        opencv_metrics: dict[str, Any] = {
             "frames": 0, "openable": None,
             "sharpness_list": [], "brightness_list": [],
             "contrast_list": [], "saturation_list": [], "black_frames": 0,
@@ -309,7 +309,7 @@ class TestWeightedScoring:
             ],
             "format": {"duration": "10.0", "bit_rate": "5000000"},
         }
-        opencv_metrics: Dict[str, Any] = {
+        opencv_metrics: dict[str, Any] = {
             "frames": 10, "openable": True,
             "sharpness_list": [600.0] * 10,  # 清晰
             "brightness_list": [0.4] * 10,   # 正常亮度
@@ -346,7 +346,7 @@ class TestWeightedScoring:
             ],
             "format": {"duration": "10.0", "bit_rate": "5000000"},
         }
-        opencv_metrics: Dict[str, Any] = {
+        opencv_metrics: dict[str, Any] = {
             "frames": 10, "openable": True,
             "sharpness_list": [600.0] * 10,
             "brightness_list": [0.4] * 10,
@@ -532,7 +532,7 @@ class TestReturnFieldCompleteness:
             }],
             "format": {"duration": "10.0", "bit_rate": "5000000"},
         }
-        opencv_metrics: Dict[str, Any] = {
+        opencv_metrics: dict[str, Any] = {
             "frames": 10, "openable": True,
             "sharpness_list": [600.0] * 10,
             "brightness_list": [0.4] * 10,

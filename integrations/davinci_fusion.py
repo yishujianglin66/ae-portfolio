@@ -45,12 +45,12 @@ class FusionNode:
     node_id: str
     node_type: str
     name: str = ""
-    inputs: Dict[str, Any] = field(default_factory=dict)
-    position: Tuple[int, int] = (0, 0)
-    connected_to: List[str] = field(default_factory=list)  # downstream node IDs
-    connected_from: List[str] = field(default_factory=list)  # upstream node IDs
+    inputs: dict[str, Any] = field(default_factory=dict)
+    position: tuple[int, int] = (0, 0)
+    connected_to: list[str] = field(default_factory=list)  # downstream node IDs
+    connected_from: list[str] = field(default_factory=list)  # upstream node IDs
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "node_id": self.node_id,
             "type": self.node_type,
@@ -71,10 +71,10 @@ class FusionComp:
     height: int = 1080
     fps: float = 30.0
     duration_frames: int = 90
-    nodes: Dict[str, FusionNode] = field(default_factory=dict)
-    render_node: Optional[str] = None  # 最终输出节点 ID
+    nodes: dict[str, FusionNode] = field(default_factory=dict)
+    render_node: str | None = None  # 最终输出节点 ID
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "comp_id": self.comp_id,
             "name": self.name,
@@ -165,8 +165,8 @@ class FusionCompositor:
         self._comp = None
         self._available = False
         self._simulate_mode = False
-        self._comps: Dict[str, FusionComp] = {}
-        self._current_comp: Optional[FusionComp] = None
+        self._comps: dict[str, FusionComp] = {}
+        self._current_comp: FusionComp | None = None
         self._node_counter = 0
         self._init_connection()
 
@@ -219,11 +219,11 @@ class FusionCompositor:
         logger.info(f"[Fusion] Created comp: {name} ({width}x{height} @ {fps}fps)")
         return comp_id
 
-    def get_comp(self, comp_id: str) -> Optional[FusionComp]:
+    def get_comp(self, comp_id: str) -> FusionComp | None:
         """获取合成"""
         return self._comps.get(comp_id)
 
-    def list_comps(self) -> List[str]:
+    def list_comps(self) -> list[str]:
         """列出所有合成"""
         return list(self._comps.keys())
 
@@ -231,8 +231,8 @@ class FusionCompositor:
     #  节点操作
     # ----------------------------------------------------------------
 
-    def add_node(self, node_type: str, inputs: Optional[Dict] = None,
-                 name: str = "", position: Tuple[int, int] = None) -> str:
+    def add_node(self, node_type: str, inputs: dict | None = None,
+                 name: str = "", position: tuple[int, int] = None) -> str:
         """添加节点到当前合成。
 
         Args:
@@ -323,7 +323,7 @@ class FusionCompositor:
                 if node_id in other_node.connected_from:
                     other_node.connected_from.remove(node_id)
 
-    def get_node_graph(self) -> Dict:
+    def get_node_graph(self) -> dict:
         """获取当前合成的节点图"""
         if not self._current_comp:
             return {}
@@ -333,7 +333,7 @@ class FusionCompositor:
     #  预设合成模板
     # ----------------------------------------------------------------
 
-    def create_title_card(self, text: str, bg_color: Tuple[float, float, float] = (0, 0, 0),
+    def create_title_card(self, text: str, bg_color: tuple[float, float, float] = (0, 0, 0),
                           font_size: float = 0.05, duration_frames: int = 90) -> str:
         """创建标题卡合成"""
         comp_id = self.create_comp("TitleCard", duration_frames=duration_frames)
@@ -387,7 +387,7 @@ class FusionCompositor:
 
         return comp_id
 
-    def create_vrs_effect_chain(self, vrs_effects: List[Dict]) -> str:
+    def create_vrs_effect_chain(self, vrs_effects: list[dict]) -> str:
         """从 VRS 效果列表创建 Fusion 节点链"""
         comp_id = self.create_comp("VRS_Effects")
 
@@ -423,7 +423,7 @@ class FusionCompositor:
     #  渲染输出
     # ----------------------------------------------------------------
 
-    def render(self, output_path: str, comp_id: Optional[str] = None) -> bool:
+    def render(self, output_path: str, comp_id: str | None = None) -> bool:
         """渲染当前合成"""
         comp = self._comps.get(comp_id) if comp_id else self._current_comp
         if not comp:
@@ -467,7 +467,7 @@ class FusionCompositor:
         logger.info(f"[Fusion][SIM] Render simulated: {output_path}")
         return True
 
-    def _nodes_to_ffmpeg_filters(self, comp: FusionComp) -> List[str]:
+    def _nodes_to_ffmpeg_filters(self, comp: FusionComp) -> list[str]:
         """将 Fusion 节点图转换为 FFmpeg 滤镜链"""
         filters = []
         for node in comp.nodes.values():
@@ -476,7 +476,7 @@ class FusionCompositor:
                 filters.append(f"boxblur={sigma:.1f}:{sigma:.1f}")
             elif node.node_type == "Glow":
                 brightness = node.inputs.get("Brightness", 1.0)
-                filters.append(f"gblur=sigma=10")
+                filters.append("gblur=sigma=10")
             elif node.node_type == "BrightnessContrast":
                 b = node.inputs.get("Brightness", 0)
                 c = node.inputs.get("Contrast", 0)
@@ -505,7 +505,7 @@ class FusionCompositor:
             json.dump(comp.to_dict(), f, ensure_ascii=False, indent=2)
         return True
 
-    def import_comp(self, json_path: str) -> Optional[str]:
+    def import_comp(self, json_path: str) -> str | None:
         """从 JSON 导入合成配置"""
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)

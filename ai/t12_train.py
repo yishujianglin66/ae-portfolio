@@ -16,7 +16,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
@@ -365,7 +365,7 @@ def main():
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     _log(f"\n{'='*60}")
-    _log(f"✅ T12训练完成")
+    _log("✅ T12训练完成")
     _log(f"   最佳验证: mood+scene avg={result['best_val_avg']}")
     _log(f"   报告: {report_path}")
     _log(f"{'='*60}")

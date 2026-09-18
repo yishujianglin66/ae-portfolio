@@ -21,16 +21,16 @@ CLI 命令: blender --python script.py
 - simulate: 模拟执行，生成模拟结果（用于测试和流程验证）
 - auto    : 优先真实模式，失败自动降级到模拟模式
 """
-import os
-import sys
 import json
-import time
+import os
 import subprocess
+import sys
 import tempfile
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple, Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 DEFAULT_BLENDER_HOME = Path(r"C:\Program Files\Blender Foundation\Blender 4.2")
 BLENDER_HOME = Path(os.environ.get("BLENDER_HOME", str(DEFAULT_BLENDER_HOME)))
@@ -102,8 +102,8 @@ class BlenderSceneResult:
     object_count: int = 0
     light_count: int = 0
     camera_count: int = 0
-    frame_range: Tuple[int, int] = (1, 1)
-    error: Optional[str] = None
+    frame_range: tuple[int, int] = (1, 1)
+    error: str | None = None
     mode: str = "simulate"
 
 
@@ -120,14 +120,14 @@ class Scene3DConfig:
         animations: 动画列表（object_name/property/keyframes）
     """
     scene_type: str = "empty"
-    background_color: Tuple[float, float, float, float] = (0.1, 0.1, 0.1, 1.0)
-    objects: List[Dict[str, Any]] = field(default_factory=list)
-    lights: List[Dict[str, Any]] = field(default_factory=list)
-    cameras: List[Dict[str, Any]] = field(default_factory=list)
-    animations: List[Dict[str, Any]] = field(default_factory=list)
+    background_color: tuple[float, float, float, float] = (0.1, 0.1, 0.1, 1.0)
+    objects: list[dict[str, Any]] = field(default_factory=list)
+    lights: list[dict[str, Any]] = field(default_factory=list)
+    cameras: list[dict[str, Any]] = field(default_factory=list)
+    animations: list[dict[str, Any]] = field(default_factory=list)
 
 
-BLENDER_SCENE_PRESETS: Dict[str, Scene3DConfig] = {
+BLENDER_SCENE_PRESETS: dict[str, Scene3DConfig] = {
     "puppet_stage_wooden": Scene3DConfig(
         scene_type="puppet_stage",
         background_color=(0.05, 0.05, 0.08, 1.0),
@@ -856,7 +856,7 @@ class Blender3DIntegrator:
     动画、渲染等功能的统一接口。支持真实模式、模拟模式和自动降级模式。
     """
 
-    def __init__(self, config: Optional[BlenderConfig] = None):
+    def __init__(self, config: BlenderConfig | None = None):
         """初始化 Blender3DIntegrator。
 
         Args:
@@ -869,7 +869,7 @@ class Blender3DIntegrator:
         print(f"[Blender3DIntegrator] Blender available: {self._available}")
         print(f"[Blender3DIntegrator] Path: {self._blender_path}")
 
-    def _find_blender(self) -> Optional[Path]:
+    def _find_blender(self) -> Path | None:
         """查找 Blender 可执行文件。
 
         Returns:
@@ -947,7 +947,7 @@ class Blender3DIntegrator:
         """
         return self._available
 
-    def get_scene_presets(self) -> Dict[str, Scene3DConfig]:
+    def get_scene_presets(self) -> dict[str, Scene3DConfig]:
         """获取场景预设字典。
 
         Returns:
@@ -1053,7 +1053,7 @@ class Blender3DIntegrator:
                 script_lines.append("bpy.ops.mesh.primitive_cube_add(size=2)")
 
             script_lines.extend([
-                f"obj = bpy.context.active_object",
+                "obj = bpy.context.active_object",
                 f"obj.name = '{obj_name}'",
                 f"obj.location = ({location[0]}, {location[1]}, {location[2]})",
                 f"obj.rotation_euler = ({rotation[0]}, {rotation[1]}, {rotation[2]})",
@@ -1141,7 +1141,7 @@ class Blender3DIntegrator:
                     max_frame = max(max_frame, kf.get("frame", 1))
             script_lines.extend([
                 "",
-                f"scene.frame_start = 1",
+                "scene.frame_start = 1",
                 f"scene.frame_end = {max_frame}",
             ])
 
@@ -1374,7 +1374,7 @@ class Blender3DIntegrator:
         blend_file: str,
         start_frame: int = 1,
         end_frame: int = 100,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> BlenderSceneResult:
         """渲染动画。
 
@@ -1547,7 +1547,7 @@ class Blender3DIntegrator:
         self,
         blend_file: str,
         frame: int = 1,
-        output_path: Optional[str] = None,
+        output_path: str | None = None,
     ) -> BlenderSceneResult:
         """渲染静帧图像。
 
@@ -1762,7 +1762,7 @@ def _run_self_tests():
         if attrs_ok:
             print(f"  ✓ BlenderConfig 包含所有必需属性 ({len(required_attrs)} 个)")
         else:
-            print(f"  ✗ BlenderConfig 缺少必需属性")
+            print("  ✗ BlenderConfig 缺少必需属性")
         results.append(("config_dataclass", attrs_ok))
     except Exception as e:
         print(f"  ✗ BlenderConfig 错误: {e}")
@@ -1780,7 +1780,7 @@ def _run_self_tests():
         if attrs_ok:
             print(f"  ✓ BlenderSceneResult 包含所有必需属性 ({len(required_attrs)} 个)")
         else:
-            print(f"  ✗ BlenderSceneResult 缺少必需属性")
+            print("  ✗ BlenderSceneResult 缺少必需属性")
         results.append(("result_dataclass", attrs_ok))
     except Exception as e:
         print(f"  ✗ BlenderSceneResult 错误: {e}")
@@ -1797,7 +1797,7 @@ def _run_self_tests():
         if attrs_ok:
             print(f"  ✓ Scene3DConfig 包含所有必需属性 ({len(required_attrs)} 个)")
         else:
-            print(f"  ✗ Scene3DConfig 缺少必需属性")
+            print("  ✗ Scene3DConfig 缺少必需属性")
         results.append(("scene_config_dataclass", attrs_ok))
     except Exception as e:
         print(f"  ✗ Scene3DConfig 错误: {e}")
@@ -1806,7 +1806,7 @@ def _run_self_tests():
     print("\n[测试 5/10] 检查 Blender3DIntegrator 初始化...")
     try:
         integrator = Blender3DIntegrator(config=BlenderConfig(mode="simulate", output_dir=str(test_dir)))
-        print(f"  ✓ Blender3DIntegrator 初始化成功")
+        print("  ✓ Blender3DIntegrator 初始化成功")
         print(f"    - Mode: {integrator.config.mode}")
         print(f"    - Available: {integrator.is_available()}")
         results.append(("integrator_init", True))
@@ -1842,10 +1842,10 @@ def _run_self_tests():
                 print(f"  ✓ Blender 脚本生成成功 ({len(content)} 字符)")
                 results.append(("generate_script", True))
             else:
-                print(f"  ✗ 脚本内容不完整")
+                print("  ✗ 脚本内容不完整")
                 results.append(("generate_script", False))
         else:
-            print(f"  ✗ 脚本文件不存在或为空")
+            print("  ✗ 脚本文件不存在或为空")
             results.append(("generate_script", False))
     except Exception as e:
         print(f"  ✗ generate_blender_script 错误: {e}")
@@ -1861,7 +1861,7 @@ def _run_self_tests():
         result = integrator.generate_scene(scene_config, output_name="test_scene")
 
         if result.success and Path(result.blend_file).exists():
-            print(f"  ✓ 模拟模式场景生成成功")
+            print("  ✓ 模拟模式场景生成成功")
             print(f"    - 物体数: {result.object_count}")
             print(f"    - 灯光数: {result.light_count}")
             print(f"    - 摄像机数: {result.camera_count}")
@@ -1882,7 +1882,7 @@ def _run_self_tests():
         result = integrator.generate_puppet_stage(stage_type="wooden", style="classic")
 
         if result.success and result.object_count > 0:
-            print(f"  ✓ 木偶舞台生成成功")
+            print("  ✓ 木偶舞台生成成功")
             print(f"    - 物体数: {result.object_count}")
             print(f"    - 灯光数: {result.light_count}")
             results.append(("puppet_stage", True))
@@ -1906,7 +1906,7 @@ def _run_self_tests():
             print(f"    - 灯光数: {len(config.lights)}")
             results.append(("preset_create", True))
         else:
-            print(f"  ✗ 预设参数不匹配")
+            print("  ✗ 预设参数不匹配")
             results.append(("preset_create", False))
     except Exception as e:
         print(f"  ✗ create_scene_config_from_preset 错误: {e}")

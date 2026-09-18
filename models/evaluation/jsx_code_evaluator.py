@@ -7,8 +7,8 @@ JSX 代码评估器 - 评估 AE JSX 代码生成模型的质量
 - BLEU/CodeBLEU 分数
 参考 Antares 哲学：量化评估，精悍够用
 """
-import re
 import logging
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from .evaluator_base import BaseEvaluator, EvaluationConfig, EvaluationResult
@@ -40,7 +40,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         super().__init__(config)
         self._syntax_patterns = self._build_syntax_patterns()
 
-    def _build_syntax_patterns(self) -> Dict[str, re.Pattern]:
+    def _build_syntax_patterns(self) -> dict[str, re.Pattern]:
         """构建语法检查模式
         
         Returns:
@@ -142,7 +142,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         
         return self._end_evaluation(result)
 
-    def _get_test_data(self) -> List[Any]:
+    def _get_test_data(self) -> list[Any]:
         """获取测试数据
         
         Returns:
@@ -159,7 +159,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         
         return []
 
-    def _get_reference(self, sample: Any) -> Optional[str]:
+    def _get_reference(self, sample: Any) -> str | None:
         """获取参考输出
         
         Args:
@@ -188,7 +188,7 @@ class JSXCodeEvaluator(BaseEvaluator):
             return reference
         return ""
 
-    def calculate_metrics(self, predictions: List[str], references: List[str]) -> Dict[str, float]:
+    def calculate_metrics(self, predictions: list[str], references: list[str]) -> dict[str, float]:
         """计算评估指标
         
         Args:
@@ -207,7 +207,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         
         return metrics
 
-    def _calculate_bleu(self, predictions: List[str], references: List[str]) -> float:
+    def _calculate_bleu(self, predictions: list[str], references: list[str]) -> float:
         """计算 BLEU 分数（简化实现）
         
         Args:
@@ -285,7 +285,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         
         return brevity_penalty * geo_mean
 
-    def _get_ngrams(self, tokens: List[str], n: int) -> List[tuple]:
+    def _get_ngrams(self, tokens: list[str], n: int) -> list[tuple]:
         """获取 n-gram 列表
         
         Args:
@@ -300,7 +300,7 @@ class JSXCodeEvaluator(BaseEvaluator):
             ngrams.append(tuple(tokens[i:i + n]))
         return ngrams
 
-    def _calculate_code_bleu(self, predictions: List[str], references: List[str]) -> float:
+    def _calculate_code_bleu(self, predictions: list[str], references: list[str]) -> float:
         """计算 CodeBLEU 分数（简化实现）
         
         CodeBLEU 考虑：
@@ -322,7 +322,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         
         return code_bleu
 
-    def _calculate_keyword_match(self, predictions: List[str], references: List[str]) -> float:
+    def _calculate_keyword_match(self, predictions: list[str], references: list[str]) -> float:
         """计算关键词匹配度
         
         Args:
@@ -355,7 +355,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         
         return total_match / count if count > 0 else 0.0
 
-    def _calculate_structure_match(self, predictions: List[str], references: List[str]) -> float:
+    def _calculate_structure_match(self, predictions: list[str], references: list[str]) -> float:
         """计算结构匹配度
         
         Args:
@@ -421,7 +421,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         
         return max_depth
 
-    def _calculate_exact_match(self, predictions: List[str], references: List[str]) -> float:
+    def _calculate_exact_match(self, predictions: list[str], references: list[str]) -> float:
         """计算完全匹配率
         
         Args:
@@ -437,7 +437,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         matches = sum(1 for p, r in zip(predictions, references) if p.strip() == r.strip())
         return matches / len(predictions)
 
-    def _calculate_edit_similarity(self, predictions: List[str], references: List[str]) -> float:
+    def _calculate_edit_similarity(self, predictions: list[str], references: list[str]) -> float:
         """计算编辑相似度
         
         Args:
@@ -627,7 +627,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         
         return False
 
-    def _calculate_avg_lines(self, codes: List[str]) -> float:
+    def _calculate_avg_lines(self, codes: list[str]) -> float:
         """计算平均代码行数
         
         Args:
@@ -642,7 +642,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         total_lines = sum(len(code.split('\n')) for code in codes)
         return total_lines / len(codes)
 
-    def _calculate_code_quality(self, codes: List[str]) -> float:
+    def _calculate_code_quality(self, codes: list[str]) -> float:
         """计算代码质量分数
         
         基于：
@@ -693,7 +693,7 @@ class JSXCodeEvaluator(BaseEvaluator):
         
         return total_quality / count if count > 0 else 0.0
 
-    def _check_indent_consistency(self, lines: List[str]) -> float:
+    def _check_indent_consistency(self, lines: list[str]) -> float:
         """检查缩进一致性
         
         Args:

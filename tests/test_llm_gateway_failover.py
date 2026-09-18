@@ -5,20 +5,19 @@ import asyncio
 import json
 import logging
 import time
-
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+
 from core.llm_gateway import (
-    LLMGateway,
     LLMConfig,
+    LLMGateway,
     LLMResponse,
     ProviderHealth,
     ProviderStatus,
     TaskType,
     _sanitize_log_text,
 )
-
 
 # ============================================================================
 # Fixtures

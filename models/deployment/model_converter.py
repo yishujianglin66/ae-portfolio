@@ -2,10 +2,10 @@
 模型格式转换 - 支持多种模型格式间的转换
 参考 Antares 哲学：根据场景选择最优格式，精悍够用
 """
-import os
 import logging
-from typing import Optional, Dict, List, Any
+import os
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class ConversionConfig:
     """源格式：huggingface, pytorch, onnx, gguf, tflite"""
     target_format: str = "onnx"
     """目标格式"""
-    quantization: Optional[str] = None
+    quantization: str | None = None
     """量化方式：None, int8, fp16, int4"""
     optimize: bool = True
     """是否优化"""
@@ -47,7 +47,7 @@ class ModelConverter:
         """初始化模型转换器"""
         self._dependencies = self._check_dependencies()
 
-    def _check_dependencies(self) -> Dict[str, bool]:
+    def _check_dependencies(self) -> dict[str, bool]:
         """检查依赖库是否可用
         
         Returns:
@@ -344,7 +344,7 @@ class ModelConverter:
         self,
         original_size_mb: float,
         target_format: str,
-        quantization: Optional[str] = None,
+        quantization: str | None = None,
     ) -> float:
         """估算体积缩小比例
         

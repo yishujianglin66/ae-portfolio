@@ -43,11 +43,11 @@ class ExecutionRecord:
     run_id: str
     timestamp: float = 0.0
     # 各阶段结果
-    stages: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    stages: dict[str, dict[str, Any]] = field(default_factory=dict)
     # 输入规格
-    input_spec: Dict[str, Any] = field(default_factory=dict)
+    input_spec: dict[str, Any] = field(default_factory=dict)
     # 配置
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
     # 输出
     output_path: str = ""
     output_quality: float = 0.0
@@ -67,8 +67,8 @@ class QualityAssessment:
     audio_quality: float = 0.0        # 音频质量
     style_consistency: float = 0.0    # 风格一致性
     technical_quality: float = 0.0    # 技术质量（分辨率/帧率/编码）
-    issues: List[Dict[str, str]] = field(default_factory=list)
-    strengths: List[str] = field(default_factory=list)
+    issues: list[dict[str, str]] = field(default_factory=list)
+    strengths: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -77,26 +77,26 @@ class ReviewResult:
     run_id: str
     quality: QualityAssessment
     prediction_deviation: float = 0.0  # 预测偏差
-    experience_extracted: List[str] = field(default_factory=list)
-    knowledge_updates: List[Dict[str, str]] = field(default_factory=list)
-    strategy_feedback: Optional[Dict[str, Any]] = None
+    experience_extracted: list[str] = field(default_factory=list)
+    knowledge_updates: list[dict[str, str]] = field(default_factory=list)
+    strategy_feedback: dict[str, Any] | None = None
 
 
 @dataclass
 class DistilledKnowledge:
     """蒸馏出的知识"""
-    rules: List[Dict[str, Any]] = field(default_factory=list)
+    rules: list[dict[str, Any]] = field(default_factory=list)
     # 每条规则: {"condition": str, "action": str, "confidence": float, "evidence": int}
-    error_patterns: List[Dict[str, str]] = field(default_factory=list)
-    parameter_insights: List[Dict[str, float]] = field(default_factory=list)
-    strategy_improvements: List[Dict[str, Any]] = field(default_factory=list)
+    error_patterns: list[dict[str, str]] = field(default_factory=list)
+    parameter_insights: list[dict[str, float]] = field(default_factory=list)
+    strategy_improvements: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
 class PendingKnowledge:
     """待验证的知识"""
     knowledge_id: str
-    content: Dict[str, Any]
+    content: dict[str, Any]
     confirm_count: int = 0
     reject_count: int = 0
     created_at: float = 0.0
@@ -126,7 +126,7 @@ class ExecutionEpisode:
         engine_used: 使用的引擎名
     """
     episode_id: str = ""
-    context_features: Dict[str, Any] = field(default_factory=dict)
+    context_features: dict[str, Any] = field(default_factory=dict)
     action_taken: str = ""
     outcome_success: bool = False
     outcome_quality: float = 0.0
@@ -159,9 +159,9 @@ class DistilledRule:
     support: int = 0
     source: str = "distillation"
     created_at: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "rule_id": self.rule_id,
             "condition": self.condition,
@@ -237,8 +237,8 @@ class RuleDistiller:
     
     def distill_from_episodes(
         self,
-        episodes: List[ExecutionEpisode],
-    ) -> List[DistilledRule]:
+        episodes: list[ExecutionEpisode],
+    ) -> list[DistilledRule]:
         """从多次执行情节中蒸馏通用规则
         
         Args:
@@ -252,14 +252,14 @@ class RuleDistiller:
         
         # Step 1: 按 (condition_signature, action) 分组
         # condition_signature 是上下文特征的简化签名（离散化后的 key-value 对）
-        groups: Dict[Tuple[str, str], List[ExecutionEpisode]] = {}
+        groups: dict[tuple[str, str], list[ExecutionEpisode]] = {}
         for ep in episodes:
             cond_sig = self._signature(ep.context_features)
             key = (cond_sig, ep.action_taken)
             groups.setdefault(key, []).append(ep)
         
         # Step 2: 对每组生成规则
-        rules: List[DistilledRule] = []
+        rules: list[DistilledRule] = []
         for (cond_sig, action), group_eps in groups.items():
             support = len(group_eps)
             if support < self._min_support:
@@ -306,7 +306,7 @@ class RuleDistiller:
     def validate_rule(
         self,
         rule: DistilledRule,
-        test_episodes: List[ExecutionEpisode],
+        test_episodes: list[ExecutionEpisode],
     ) -> RuleValidation:
         """在历史 episodes 上验证规则有效性
         
@@ -382,8 +382,8 @@ class RuleDistiller:
     
     def rule_conflict_resolution(
         self,
-        rules: List[DistilledRule],
-    ) -> List[DistilledRule]:
+        rules: list[DistilledRule],
+    ) -> list[DistilledRule]:
         """检测并解决冲突规则
         
         冲突定义: 两条规则 condition 相似（签名相同）但 action 不同，
@@ -404,12 +404,12 @@ class RuleDistiller:
             return list(rules)
         
         # 按 condition_signature 分组
-        groups: Dict[str, List[DistilledRule]] = {}
+        groups: dict[str, list[DistilledRule]] = {}
         for rule in rules:
             sig = rule.metadata.get("condition_signature", rule.condition)
             groups.setdefault(sig, []).append(rule)
         
-        resolved: List[DistilledRule] = []
+        resolved: list[DistilledRule] = []
         for sig, group_rules in groups.items():
             if len(group_rules) == 1:
                 resolved.append(group_rules[0])
@@ -417,7 +417,7 @@ class RuleDistiller:
             
             # 检测冲突: action 不同 + confidence 接近
             # 先按 action 二次分组
-            by_action: Dict[str, List[DistilledRule]] = {}
+            by_action: dict[str, list[DistilledRule]] = {}
             for r in group_rules:
                 by_action.setdefault(r.action, []).append(r)
             
@@ -435,7 +435,7 @@ class RuleDistiller:
                 reverse=True,
             )
             
-            kept: List[DistilledRule] = []
+            kept: list[DistilledRule] = []
             for r in sorted_rules:
                 conflict = False
                 for k in kept:
@@ -459,7 +459,7 @@ class RuleDistiller:
     #  内部工具方法
     # ------------------------------------------------------------------
     
-    def _signature(self, context_features: Dict[str, Any]) -> str:
+    def _signature(self, context_features: dict[str, Any]) -> str:
         """生成上下文特征的签名（用于分组）
         
         将连续特征离散化，便于规则匹配。
@@ -496,7 +496,7 @@ class RuleDistiller:
     
     def _condition_to_str(
         self,
-        context_features: Dict[str, Any],
+        context_features: dict[str, Any],
         signature: str,
     ) -> str:
         """将条件签名转换为人类可读的条件表达式"""
@@ -559,7 +559,7 @@ class AutoQualityEvaluator:
     """
     
     # 各平台的技术标准
-    PLATFORM_STANDARDS: Dict[str, Dict[str, Any]] = {
+    PLATFORM_STANDARDS: dict[str, dict[str, Any]] = {
         "bilibili": {"min_resolution": (1280, 720), "min_fps": 24, "target_bitrate_mbps": 6},
         "douyin": {"min_resolution": (1080, 1920), "min_fps": 30, "target_bitrate_mbps": 8},
         "youtube": {"min_resolution": (1920, 1080), "min_fps": 30, "target_bitrate_mbps": 10},
@@ -569,9 +569,9 @@ class AutoQualityEvaluator:
     async def evaluate(
         self,
         output_path: str,
-        input_spec: Dict[str, Any],
-        config: Dict[str, Any],
-        stages_result: Dict[str, Dict]
+        input_spec: dict[str, Any],
+        config: dict[str, Any],
+        stages_result: dict[str, dict]
     ) -> QualityAssessment:
         """自动评估输出质量"""
         assessment = QualityAssessment()
@@ -608,7 +608,7 @@ class AutoQualityEvaluator:
         return assessment
     
     def _evaluate_technical(
-        self, output_path: str, input_spec: Dict, config: Dict
+        self, output_path: str, input_spec: dict, config: dict
     ) -> float:
         """技术质量评估 — 使用 ffprobe 真实数据"""
         # 检查输出文件
@@ -674,7 +674,7 @@ class AutoQualityEvaluator:
         
         return float(np.clip(score, 0, 100))
     
-    def _evaluate_visual(self, output_path: str, stages_result: Dict) -> float:
+    def _evaluate_visual(self, output_path: str, stages_result: dict) -> float:
         """视觉质量评估 — 使用真实帧采样解码像素
         
         修复 D1 根因: 旧实现仅数阶段成功数(恒返 60.0), 从未解码像素。
@@ -760,7 +760,7 @@ class AutoQualityEvaluator:
             return 40.0
     
     def _evaluate_style_consistency(
-        self, stages_result: Dict, config: Dict
+        self, stages_result: dict, config: dict
     ) -> float:
         """风格一致性评估 — 内容级指标优先, 阶段计数兜底
         
@@ -800,7 +800,7 @@ class AutoQualityEvaluator:
             score += 5
         return float(np.clip(score, 0, 100))
     
-    def _identify_issues(self, assessment: QualityAssessment) -> List[Dict[str, str]]:
+    def _identify_issues(self, assessment: QualityAssessment) -> list[dict[str, str]]:
         """识别质量问题"""
         issues = []
         
@@ -819,7 +819,7 @@ class AutoQualityEvaluator:
         
         return issues
     
-    def _identify_strengths(self, assessment: QualityAssessment) -> List[str]:
+    def _identify_strengths(self, assessment: QualityAssessment) -> list[str]:
         """识别优势"""
         strengths = []
         if assessment.technical_quality > 80:
@@ -843,7 +843,7 @@ class PredictionDeviationAnalyzer:
     
     async def analyze(
         self,
-        prediction: Dict[str, Any],
+        prediction: dict[str, Any],
         actual: ExecutionRecord
     ) -> float:
         """分析预测偏差
@@ -885,8 +885,8 @@ class ExperienceDistiller:
     
     async def distill(
         self,
-        successful_runs: List[ExecutionRecord],
-        failed_runs: List[ExecutionRecord]
+        successful_runs: list[ExecutionRecord],
+        failed_runs: list[ExecutionRecord]
     ) -> DistilledKnowledge:
         """蒸馏经验"""
         knowledge = DistilledKnowledge()
@@ -909,11 +909,11 @@ class ExperienceDistiller:
         return knowledge
     
     def _extract_error_patterns(
-        self, failed_runs: List[ExecutionRecord]
-    ) -> List[Dict[str, str]]:
+        self, failed_runs: list[ExecutionRecord]
+    ) -> list[dict[str, str]]:
         """从失败案例提取错误模式"""
         patterns = []
-        error_counts: Dict[str, int] = {}
+        error_counts: dict[str, int] = {}
         
         for run in failed_runs:
             for stage_name, stage_data in run.stages.items():
@@ -935,10 +935,10 @@ class ExperienceDistiller:
         return patterns
     
     def _extract_success_factors(
-        self, successful_runs: List[ExecutionRecord]
-    ) -> Dict[str, Any]:
+        self, successful_runs: list[ExecutionRecord]
+    ) -> dict[str, Any]:
         """提取成功因素"""
-        factors: Dict[str, Any] = {
+        factors: dict[str, Any] = {
             "common_stages": {},
             "avg_effects_count": 0,
             "common_engines": [],
@@ -970,9 +970,9 @@ class ExperienceDistiller:
     
     def _generate_rules(
         self,
-        success_factors: Dict,
-        error_patterns: List[Dict]
-    ) -> List[Dict[str, Any]]:
+        success_factors: dict,
+        error_patterns: list[dict]
+    ) -> list[dict[str, Any]]:
         """生成 if-then 规则"""
         rules = []
         
@@ -1012,13 +1012,13 @@ class ExperienceDistiller:
         return rules
     
     def _extract_parameter_insights(
-        self, successful_runs: List[ExecutionRecord]
-    ) -> List[Dict[str, float]]:
+        self, successful_runs: list[ExecutionRecord]
+    ) -> list[dict[str, float]]:
         """提取参数洞察"""
         insights = []
         
         # 收集成功运行中的参数
-        all_params: Dict[str, List[float]] = {}
+        all_params: dict[str, list[float]] = {}
         for run in successful_runs:
             execute_data = run.stages.get("execute", {})
             params = execute_data.get("params", {})
@@ -1056,12 +1056,12 @@ class KnowledgeBaseUpdater:
     """
     
     def __init__(self):
-        self._pending: Dict[str, PendingKnowledge] = {}
+        self._pending: dict[str, PendingKnowledge] = {}
         self._confirmed_threshold = 3  # 确认3次后升级
     
     def submit_knowledge(
         self,
-        content: Dict[str, Any],
+        content: dict[str, Any],
         target_subsystem: str,
         knowledge_id: str = ""
     ) -> str:
@@ -1118,7 +1118,7 @@ class KnowledgeBaseUpdater:
         except Exception as e:
             logger.warning(f"[KBUpdater] 应用知识失败: {e}")
     
-    def _apply_to_error_memory(self, content: Dict) -> None:
+    def _apply_to_error_memory(self, content: dict) -> None:
         """写入错误模式记忆"""
         try:
             from pipeline.feedback_loop import ErrorPatternMemory
@@ -1133,7 +1133,7 @@ class KnowledgeBaseUpdater:
         except ImportError:
             pass
     
-    def _apply_to_causal_engine(self, content: Dict) -> None:
+    def _apply_to_causal_engine(self, content: dict) -> None:
         """写入因果引擎"""
         try:
             from core.causal_engine import get_causal_engine
@@ -1150,7 +1150,7 @@ class KnowledgeBaseUpdater:
         except Exception as e:
             logger.warning(f"[KBUpdater] 因果引擎写入异常: {e}")
     
-    def _apply_to_strategy(self, content: Dict) -> None:
+    def _apply_to_strategy(self, content: dict) -> None:
         """写入策略引擎"""
         try:
             from core.meta_strategy_engine import get_strategy_engine
@@ -1169,7 +1169,7 @@ class KnowledgeBaseUpdater:
         except Exception as e:
             logger.warning(f"[KBUpdater] 策略引擎写入异常: {e}")
     
-    def _apply_to_digital_twin(self, content: Dict) -> None:
+    def _apply_to_digital_twin(self, content: dict) -> None:
         """P1-1 修复: 将参数洞察转化为数字孪生预测校正
 
         实现逻辑:
@@ -1179,7 +1179,7 @@ class KnowledgeBaseUpdater:
         - 高稳定性洞察 → execute/render 阶段成功率提升
         """
         try:
-            from core.pipeline_digital_twin import get_digital_twin, ExecutionObservation
+            from core.pipeline_digital_twin import ExecutionObservation, get_digital_twin
             twin = get_digital_twin()
             insights = content.get("parameter_insights", [])
             if not insights:
@@ -1231,7 +1231,7 @@ class KnowledgeBaseUpdater:
     def get_pending_count(self) -> int:
         return len(self._pending)
     
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         return {
             "pending_knowledge": len(self._pending),
             "pending_details": {
@@ -1273,8 +1273,8 @@ class SelfEvolutionEngine:
         self._kb_updater = KnowledgeBaseUpdater()
         
         # 执行历史
-        self._execution_history: List[ExecutionRecord] = []
-        self._review_history: List[Dict] = []
+        self._execution_history: list[ExecutionRecord] = []
+        self._review_history: list[dict] = []
         self._last_evolution_run: int = 0
         
         # 加载持久化
@@ -1377,8 +1377,8 @@ class SelfEvolutionEngine:
     
     async def distill_experience(
         self,
-        successful_runs: Optional[List[ExecutionRecord]] = None,
-        failed_runs: Optional[List[ExecutionRecord]] = None
+        successful_runs: list[ExecutionRecord] | None = None,
+        failed_runs: list[ExecutionRecord] | None = None
     ) -> DistilledKnowledge:
         """经验蒸馏"""
         if successful_runs is None:
@@ -1417,7 +1417,7 @@ class SelfEvolutionEngine:
     #  L3.5: 周期性策略进化
     # ----------------------------------------------------------------
     
-    async def trigger_evolution_cycle(self) -> List[Dict]:
+    async def trigger_evolution_cycle(self) -> list[dict]:
         """触发策略进化周期"""
         self._last_evolution_run = len(self._execution_history)
         
@@ -1452,7 +1452,8 @@ class SelfEvolutionEngine:
         
         # 3. 因果图增量更新
         try:
-            from core.causal_engine import get_causal_engine, ExecutionRecord as CER
+            from core.causal_engine import ExecutionRecord as CER
+            from core.causal_engine import get_causal_engine
             causal = get_causal_engine()
             # 将执行记录转换为因果引擎格式
             causal_records = []
@@ -1472,7 +1473,7 @@ class SelfEvolutionEngine:
         
         # 4. 数字孪生校正
         try:
-            from core.pipeline_digital_twin import get_digital_twin, ExecutionObservation
+            from core.pipeline_digital_twin import ExecutionObservation, get_digital_twin
             twin = get_digital_twin()
             for record in self._execution_history[-10:]:
                 for stage_name, stage_data in record.stages.items():
@@ -1537,7 +1538,7 @@ class SelfEvolutionEngine:
     #  统计
     # ----------------------------------------------------------------
     
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取统计信息"""
         total = len(self._execution_history)
         success = sum(1 for r in self._execution_history if r.success)
@@ -1563,7 +1564,7 @@ class SelfEvolutionEngine:
         self,
         min_support: int = 3,
         min_confidence: float = 0.6,
-    ) -> List["DistilledRule"]:
+    ) -> list["DistilledRule"]:
         """从执行历史中蒸馏规则
         
         将 self._execution_history 中的 ExecutionRecord 转换为 ExecutionEpisode，
@@ -1586,8 +1587,8 @@ class SelfEvolutionEngine:
     
     def _records_to_episodes(
         self,
-        records: List["ExecutionRecord"],
-    ) -> List["ExecutionEpisode"]:
+        records: list["ExecutionRecord"],
+    ) -> list["ExecutionEpisode"]:
         """将 ExecutionRecord 列表转换为 ExecutionEpisode 列表
         
         转换规则:
@@ -1595,9 +1596,9 @@ class SelfEvolutionEngine:
         - action_taken: 用 strategy_id 或 engine 名作为 action 标识
         - outcome_success / quality / duration: 直接映射
         """
-        episodes: List[ExecutionEpisode] = []
+        episodes: list[ExecutionEpisode] = []
         for r in records:
-            ctx: Dict[str, Any] = {}
+            ctx: dict[str, Any] = {}
             # 从 input_spec 提取
             for k in ("material_count", "video_count", "image_count",
                       "audio_count", "total_duration_sec"):
@@ -1646,7 +1647,7 @@ class SelfEvolutionEngine:
 #  全局单例
 # ============================================================================
 
-_global_engine: Optional[SelfEvolutionEngine] = None
+_global_engine: SelfEvolutionEngine | None = None
 
 
 def get_evolution_engine(data_dir: str = SelfEvolutionEngine.DEFAULT_DATA_DIR

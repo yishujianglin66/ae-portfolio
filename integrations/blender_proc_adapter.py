@@ -74,14 +74,14 @@ class SceneGenResult:
     """场景生成结果"""
     scene_type: str = ""
     status: str = "pending"
-    output_files: List[str] = field(default_factory=list)
+    output_files: list[str] = field(default_factory=list)
     render_path: str = ""
     depth_map: str = ""
     segmentation_map: str = ""
     normal_map: str = ""
-    scene_config: Dict[str, Any] = field(default_factory=dict)
+    scene_config: dict[str, Any] = field(default_factory=dict)
     duration_ms: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
     used_fallback: bool = False
 
 
@@ -105,7 +105,7 @@ class BlenderProcAdapter:
 
     TOOL_NAME = "blender_proc"
 
-    SUPPORTED_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    SUPPORTED_OPERATIONS: dict[str, dict[str, Any]] = {
         "generate_indoor": {"type": "indoor", "desc": "生成程序化室内场景"},
         "generate_outdoor": {"type": "outdoor", "desc": "生成程序化室外场景"},
         "generate_object": {"type": "object", "desc": "生成单个 3D 物体渲染"},
@@ -116,7 +116,7 @@ class BlenderProcAdapter:
         "render_normal": {"type": "normal", "desc": "渲染法线图"},
     }
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._proc_dir = Path(self.config.get("proc_dir", str(BLENDER_PROC_DIR)))
         self._blender_path = self.config.get("blender_path",
@@ -176,14 +176,14 @@ class BlenderProcAdapter:
         except Exception:
             return False
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return list(self.SUPPORTED_OPERATIONS.keys())
 
     # ── 高级 API ──────────────────────────────────────────────────────
 
     def generate_scene(self, scene_type: str = "indoor",
                        style: str = "",
-                       resolution: Tuple[int, int] = (1920, 1080),
+                       resolution: tuple[int, int] = (1920, 1080),
                        num_objects: int = 10,
                        enable_depth: bool = True,
                        enable_segmentation: bool = True,
@@ -251,7 +251,7 @@ class BlenderProcAdapter:
         """生成室外场景的便捷方法"""
         return self.generate_scene(scene_type="outdoor", **kwargs)
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> SceneGenResult:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> SceneGenResult:
         """统一执行接口"""
         params = params or {}
         op_info = self.SUPPORTED_OPERATIONS.get(operation)
@@ -267,9 +267,9 @@ class BlenderProcAdapter:
     # ── 内部方法 ──────────────────────────────────────────────────────
 
     def _build_config(self, scene_type: str, style: str,
-                      resolution: Tuple[int, int], num_objects: int,
+                      resolution: tuple[int, int], num_objects: int,
                       enable_depth: bool, enable_segmentation: bool,
-                      enable_normal: bool) -> Dict[str, Any]:
+                      enable_normal: bool) -> dict[str, Any]:
         """构建 BlenderProc 配置
 
         BlenderProc 2.8 使用 Python 脚本（bproc API）而非 JSON pipeline。
@@ -317,7 +317,7 @@ class BlenderProcAdapter:
             },
         }
 
-    def _run_blenderproc(self, config_path: str) -> Optional[Dict[str, Any]]:
+    def _run_blenderproc(self, config_path: str) -> dict[str, Any] | None:
         """执行 BlenderProc
 
         2026-08-15 修复: BlenderProc 2.8 CLI 用 --custom-blender-path 指定
@@ -369,11 +369,11 @@ class BlenderProcAdapter:
 
 # ── 便捷函数 ─────────────────────────────────────────────────────────────
 
-def get_adapter(config: Optional[Dict[str, Any]] = None) -> BlenderProcAdapter:
+def get_adapter(config: dict[str, Any] | None = None) -> BlenderProcAdapter:
     return BlenderProcAdapter(config)
 
 
-def quick_test() -> Dict[str, Any]:
+def quick_test() -> dict[str, Any]:
     adapter = get_adapter()
     return {
         "available": adapter.check_available(),

@@ -51,8 +51,8 @@ def make_defect_script():
 
 
 print("=== 1. Prime Agent /refine: 节拍吸附 ===")
-from core.refine_loop import DirectorRefineLoop, get_refine_loop  # noqa: E402
 from core.director_scorer import DirectorQualityScorer  # noqa: E402
+from core.refine_loop import DirectorRefineLoop, get_refine_loop  # noqa: E402
 
 loop = DirectorRefineLoop(target_score=95, max_iterations=3)
 script = make_defect_script()
@@ -112,8 +112,12 @@ check("generator来源标记", r3["generator_used"] == "injected")
 
 print("\n=== 5. JoyAI: 因果流式调度(不等完整视频) ===")
 from core.streaming_pipeline import (  # noqa: E402
-    StreamSegment, StreamingCausalScheduler, HeartbeatMonitor,
-    ThroughputBenchmark, causal_benchmark)
+    HeartbeatMonitor,
+    StreamingCausalScheduler,
+    StreamSegment,
+    ThroughputBenchmark,
+    causal_benchmark,
+)
 
 sched = StreamingCausalScheduler()
 e1 = sched.feed(StreamSegment("s1", payload="intro", frames=30, deps=[]))

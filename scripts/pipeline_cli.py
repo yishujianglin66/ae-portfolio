@@ -159,7 +159,7 @@ async def run_pipeline(
     style: str,
     output: str,
     dry_run: bool = False,
-    stages_filter: Optional[list[str]] = None,
+    stages_filter: list[str] | None = None,
 ) -> dict[str, Any]:
     """运行完整流水线（依赖驱动 DAG）."""
     results: dict[str, StageResult] = {}

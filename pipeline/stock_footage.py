@@ -22,9 +22,9 @@ import json
 import logging
 import os
 import time
-import urllib.request
-import urllib.parse
 import urllib.error
+import urllib.parse
+import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -157,7 +157,7 @@ class StockFootageClient:
         min_width: int = 1280,
         min_height: int = 720,
         min_duration: float = 5.0,
-    ) -> List[str]:
+    ) -> list[str]:
         """搜索并下载无水印视频素材。
 
         Args:
@@ -179,7 +179,7 @@ class StockFootageClient:
         )
 
         # 双源搜索，优先 Pexels，补充 Pixabay
-        results: List[VideoResult] = []
+        results: list[VideoResult] = []
 
         if self._pexels_key:
             pexels_results = self._search_pexels(config)
@@ -214,7 +214,7 @@ class StockFootageClient:
         logger.info(f"[StockFootage] Downloaded {len(downloaded)}/{count} videos for '{query}'")
         return downloaded
 
-    def search_only(self, query: str, count: int = 10) -> List[VideoResult]:
+    def search_only(self, query: str, count: int = 10) -> list[VideoResult]:
         """仅搜索不下载，返回结果列表"""
         config = SearchConfig(query=query, count=count, per_page=count)
         results = []
@@ -224,7 +224,7 @@ class StockFootageClient:
             results.extend(self._search_pixabay(config))
         return results[:count]
 
-    def test_connectivity(self) -> Dict[str, Any]:
+    def test_connectivity(self) -> dict[str, Any]:
         """测试 API 连通性"""
         report = {"pexels": False, "pixabay": False, "errors": []}
 
@@ -248,7 +248,7 @@ class StockFootageClient:
     #  Pexels API
     # =========================================================================
 
-    def _search_pexels(self, config: SearchConfig) -> List[VideoResult]:
+    def _search_pexels(self, config: SearchConfig) -> list[VideoResult]:
         """Pexels Video Search API
         
         GET https://api.pexels.com/videos/search
@@ -312,8 +312,8 @@ class StockFootageClient:
         return results
 
     def _select_best_file_pexels(
-        self, video_files: List[Dict], min_w: int, min_h: int
-    ) -> Optional[Dict]:
+        self, video_files: list[dict], min_w: int, min_h: int
+    ) -> dict | None:
         """从 Pexels video_files 中选择最佳质量"""
         candidates = []
         for f in video_files:
@@ -339,7 +339,7 @@ class StockFootageClient:
     #  Pixabay API
     # =========================================================================
 
-    def _search_pixabay(self, config: SearchConfig) -> List[VideoResult]:
+    def _search_pixabay(self, config: SearchConfig) -> list[VideoResult]:
         """Pixabay Video Search API
         
         GET https://pixabay.com/api/videos/
@@ -398,8 +398,8 @@ class StockFootageClient:
         return results
 
     def _select_best_pixabay(
-        self, videos_dict: Dict, min_width: int
-    ) -> Optional[Dict]:
+        self, videos_dict: dict, min_width: int
+    ) -> dict | None:
         """从 Pixabay videos 对象中选择最佳质量
         
         Pixabay 格式: {"large": {...}, "medium": {...}, "small": {...}, "tiny": {...}}
@@ -417,7 +417,7 @@ class StockFootageClient:
     #  下载
     # =========================================================================
 
-    def _download_video(self, result: VideoResult) -> Optional[str]:
+    def _download_video(self, result: VideoResult) -> str | None:
         """下载单个视频到本地缓存"""
         if not result.download_url:
             return None
@@ -508,7 +508,7 @@ class StockFootageClient:
 
 
 # 全局单例
-_client: Optional[StockFootageClient] = None
+_client: StockFootageClient | None = None
 
 
 def get_stock_client() -> StockFootageClient:

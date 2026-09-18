@@ -10,20 +10,20 @@ software_sdk - 统一软件适配器 SDK
     registry.register(SoftwareType.AFTER_EFFECTS, ae_adapter)
     adapter = registry.get(SoftwareType.AFTER_EFFECTS)
 """
-from software_sdk.types import (
-    SoftwareType,
-    ConnectionStatus,
-    TaskStatus,
-    TaskPriority,
-    SoftwareCapability,
-    FallbackStrategyType,
-    SoftwareStatus,
-    SoftwareCapabilities,
-    Task,
-    SoftwareConfig,
-)
 from software_sdk.base import BaseSoftwareAdapter
 from software_sdk.registry import SoftwareRegistry
+from software_sdk.types import (
+    ConnectionStatus,
+    FallbackStrategyType,
+    SoftwareCapabilities,
+    SoftwareCapability,
+    SoftwareConfig,
+    SoftwareStatus,
+    SoftwareType,
+    Task,
+    TaskPriority,
+    TaskStatus,
+)
 
 __all__ = [
     "SoftwareType",

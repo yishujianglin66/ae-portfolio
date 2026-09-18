@@ -25,7 +25,7 @@ PROBLEM_TYPES = ["卡点", "切点", "变速", "调色", "效果", "叙事", "�
 VERDICTS = ["采纳", "需修改", "拒绝"]
 
 
-def discover_runs(output_root: str) -> List[str]:
+def discover_runs(output_root: str) -> list[str]:
     """枚举 output/ 下的 unified_run* 目录（按修改时间倒序）。"""
     root = Path(output_root)
     if not root.exists():
@@ -35,7 +35,7 @@ def discover_runs(output_root: str) -> List[str]:
     return [str(d) for d in runs]
 
 
-def discover_versions(run_dir: str) -> List[str]:
+def discover_versions(run_dir: str) -> list[str]:
     """枚举 run 目录顶层 mp4 成片（按修改时间倒序，最新版本在前）。"""
     if not run_dir:
         return []
@@ -45,7 +45,7 @@ def discover_versions(run_dir: str) -> List[str]:
 
 
 def submit_acceptance(run_tag: str, version_a: str, version_b: str,
-                      rating_a: int, rating_b: int, issues: List[List],
+                      rating_a: int, rating_b: int, issues: list[list],
                       verdict: str, notes: str, log_path: str) -> str:
     """写入一条结构化验收记录（蒸馏引擎的数据接口，字段稳定勿改）。"""
     record = {
@@ -76,7 +76,7 @@ def submit_acceptance(run_tag: str, version_a: str, version_b: str,
             f"记录键: {run_tag} + {record['versions']}")
 
 
-def load_history(log_path: str) -> List[List]:
+def load_history(log_path: str) -> list[list]:
     """读取验收历史（最近 50 条，倒序）供 Dataframe 展示。"""
     log = Path(log_path)
     if not log.exists():

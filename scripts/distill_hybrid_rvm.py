@@ -1,6 +1,9 @@
 """RVM-static 混合通道实证蒸馏（2026-08-14）——三方案 J500/质量对比结论写入知识库。"""
 from __future__ import annotations
-import sys, time, json
+
+import json
+import sys
+import time
 from pathlib import Path
 
 ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")

@@ -13,13 +13,13 @@ DeepSeek V4 正式版 API 测试脚本
 6. 响应时间基准
 """
 
+import hashlib
+import json
 import os
 import sys
-import json
 import time
-import hashlib
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # 尝试导入 requests
 try:
@@ -27,8 +27,8 @@ try:
     HAS_REQUESTS = True
 except ImportError:
     HAS_REQUESTS = False
-    import urllib.request
     import urllib.error
+    import urllib.request
 
 # DeepSeek V4 正式版 API 配置
 DEEPSEEK_API_BASE = "https://api.deepseek.com"
@@ -106,13 +106,13 @@ class DeepSeekV4APITester:
                 result["status"] = "success"
                 result["latency_ms"] = int((time.time() - start_time) * 1000)
                 result["model"] = response.get("model", "unknown")
-                print(f"✅ API 连接成功")
+                print("✅ API 连接成功")
                 print(f"   模型: {result['model']}")
                 print(f"   响应时间: {result['latency_ms']}ms")
             else:
                 result["status"] = "failed"
                 result["error"] = "Invalid response format"
-                print(f"❌ API 返回格式异常")
+                print("❌ API 返回格式异常")
 
         except Exception as e:
             result["status"] = "failed"
@@ -164,7 +164,7 @@ class DeepSeekV4APITester:
                 result["content"] = content
                 result["model"] = response.get("model", "unknown")
 
-                print(f"✅ V4-Flash 调用成功")
+                print("✅ V4-Flash 调用成功")
                 print(f"   模型: {result['model']}")
                 print(f"   响应时间: {latency}ms")
                 print(f"   Token: 输入={result['tokens_input']}, 输出={result['tokens_output']}")
@@ -172,7 +172,7 @@ class DeepSeekV4APITester:
             else:
                 result["status"] = "failed"
                 result["error"] = "Invalid response"
-                print(f"❌ V4-Flash 调用失败")
+                print("❌ V4-Flash 调用失败")
 
         except Exception as e:
             result["status"] = "failed"
@@ -224,7 +224,7 @@ class DeepSeekV4APITester:
                 result["content"] = content
                 result["model"] = response.get("model", "unknown")
 
-                print(f"✅ V4-Pro 调用成功")
+                print("✅ V4-Pro 调用成功")
                 print(f"   模型: {result['model']}")
                 print(f"   响应时间: {latency}ms")
                 print(f"   Token: 输入={result['tokens_input']}, 输出={result['tokens_output']}")
@@ -232,7 +232,7 @@ class DeepSeekV4APITester:
             else:
                 result["status"] = "failed"
                 result["error"] = "Invalid response"
-                print(f"❌ V4-Pro 调用失败")
+                print("❌ V4-Pro 调用失败")
 
         except Exception as e:
             result["status"] = "failed"
@@ -286,7 +286,7 @@ class DeepSeekV4APITester:
                 result["tokens_output"] = usage.get("completion_tokens", 0)
                 result["model"] = response.get("model", "unknown")
 
-                print(f"✅ 大上下文测试成功")
+                print("✅ 大上下文测试成功")
                 print(f"   模型: {result['model']}")
                 print(f"   响应时间: {latency}ms")
                 print(f"   Token: 输入={result['tokens_input']}, 输出={result['tokens_output']}")
@@ -297,7 +297,7 @@ class DeepSeekV4APITester:
             else:
                 result["status"] = "failed"
                 result["error"] = "Invalid response"
-                print(f"❌ 大上下文测试失败")
+                print("❌ 大上下文测试失败")
 
         except Exception as e:
             result["status"] = "failed"
@@ -398,7 +398,7 @@ class DeepSeekV4APITester:
             "details": results,
         }
 
-        print(f"✅ 意图识别测试完成")
+        print("✅ 意图识别测试完成")
         print(f"   准确率: {accuracy * 100:.1f}% ({correct_count}/{len(results)})")
         for r in results:
             status = "✓" if r.get("correct") else "✗"

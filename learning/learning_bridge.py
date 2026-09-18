@@ -45,11 +45,11 @@ class EffectEnhancement:
     effect_name: str
     match_name: str
     enhanced: bool = False
-    sources: List[str] = field(default_factory=list)  # ["template", "default_value", "bayesian", "memory"]
-    applied_params: Dict[str, Any] = field(default_factory=dict)
-    template_id: Optional[str] = None
-    bayesian_confidence: Optional[float] = None
-    memory_key: Optional[str] = None
+    sources: list[str] = field(default_factory=list)  # ["template", "default_value", "bayesian", "memory"]
+    applied_params: dict[str, Any] = field(default_factory=dict)
+    template_id: str | None = None
+    bayesian_confidence: float | None = None
+    memory_key: str | None = None
 
 
 @dataclass
@@ -58,11 +58,11 @@ class EnhancementReport:
 
     total_effects: int = 0
     enhanced_count: int = 0
-    per_effect: List[EffectEnhancement] = field(default_factory=list)
-    learning_stats: Dict[str, Any] = field(default_factory=dict)
-    errors: List[str] = field(default_factory=list)
+    per_effect: list[EffectEnhancement] = field(default_factory=list)
+    learning_stats: dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "total_effects": self.total_effects,
             "enhanced_count": self.enhanced_count,
@@ -107,9 +107,9 @@ class LearningBridge:
     SOURCE_PRIORITY = ["template", "default_value", "bayesian", "memory"]
 
     def __init__(self, lazy_load: bool = True):
-        self._learner: Optional[Any] = None
-        self._optimizer: Optional[Any] = None
-        self._memory_store: Optional[Any] = None
+        self._learner: Any | None = None
+        self._optimizer: Any | None = None
+        self._memory_store: Any | None = None
         self._loaded = False
         self._lazy_load = lazy_load
 
@@ -160,11 +160,11 @@ class LearningBridge:
 
     def enhance_effect_stack(
         self,
-        effect_stack: List[Dict[str, Any]],
-        style_context: Optional[Any] = None,
-        user_input: Optional[str] = None,
-        vrs_result: Optional[Dict[str, Any]] = None,
-        kb_style: Optional[Dict[str, Any]] = None,
+        effect_stack: list[dict[str, Any]],
+        style_context: Any | None = None,
+        user_input: str | None = None,
+        vrs_result: dict[str, Any] | None = None,
+        kb_style: dict[str, Any] | None = None,
     ) -> EnhancementReport:
         """增强 effect_stack 中的每个效果参数
 
@@ -223,9 +223,9 @@ class LearningBridge:
 
     def build_style_vector(
         self,
-        user_input: Optional[str] = None,
-        vrs_result: Optional[Dict[str, Any]] = None,
-        kb_style: Optional[Dict[str, Any]] = None,
+        user_input: str | None = None,
+        vrs_result: dict[str, Any] | None = None,
+        kb_style: dict[str, Any] | None = None,
     ) -> Any:
         """从 VRS/KB 分析结果构造 StyleVector
 
@@ -249,10 +249,10 @@ class LearningBridge:
         # 默认值
         style_name = ""
         mood = ""
-        color_palette: List[str] = []
+        color_palette: list[str] = []
         intensity = 0.5
         target_platform = ""
-        reference_params: Dict[str, float] = {}
+        reference_params: dict[str, float] = {}
 
         # 从 user_input 提取风格名
         if user_input:
@@ -334,9 +334,9 @@ class LearningBridge:
     def _enhance_single_effect(
         self,
         idx: int,
-        effect: Dict[str, Any],
-        style_context: Optional[Any],
-        user_input: Optional[str],
+        effect: dict[str, Any],
+        style_context: Any | None,
+        user_input: str | None,
     ) -> EffectEnhancement:
         """对单个效果应用四种学习来源的增强"""
         effect_name = effect.get("name", "") or effect.get("effectName", "")
@@ -355,7 +355,7 @@ class LearningBridge:
         # 确保 params 字段存在
         if "params" not in effect or effect["params"] is None:
             effect["params"] = {}
-        current_params: Dict[str, Any] = effect["params"]
+        current_params: dict[str, Any] = effect["params"]
 
         # 来源 1: PersistentLearningLoop 参数模板
         self._apply_template(key, current_params, enhancement)
@@ -389,7 +389,7 @@ class LearningBridge:
     def _apply_template(
         self,
         key: str,
-        current_params: Dict[str, Any],
+        current_params: dict[str, Any],
         enhancement: EffectEnhancement,
     ) -> None:
         if not self._learner:
@@ -430,7 +430,7 @@ class LearningBridge:
     def _apply_default_values(
         self,
         key: str,
-        current_params: Dict[str, Any],
+        current_params: dict[str, Any],
         enhancement: EffectEnhancement,
     ) -> None:
         if not self._learner:
@@ -461,8 +461,8 @@ class LearningBridge:
         self,
         effect_name: str,
         match_name: str,
-        style_context: Optional[Any],
-        current_params: Dict[str, Any],
+        style_context: Any | None,
+        current_params: dict[str, Any],
         enhancement: EffectEnhancement,
     ) -> None:
         if not self._optimizer:
@@ -520,8 +520,8 @@ class LearningBridge:
         self,
         effect_name: str,
         match_name: str,
-        user_input: Optional[str],
-        current_params: Dict[str, Any],
+        user_input: str | None,
+        current_params: dict[str, Any],
         enhancement: EffectEnhancement,
     ) -> None:
         if not self._memory_store:
@@ -574,7 +574,7 @@ class LearningBridge:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _extract_short_effect_name(match_name: str, effect_name: str) -> Optional[str]:
+    def _extract_short_effect_name(match_name: str, effect_name: str) -> str | None:
         """从 matchName 提取贝叶斯优化器能识别的短名
 
         例如：
@@ -613,9 +613,9 @@ class LearningBridge:
             return "Sharpen"
         return None
 
-    def _collect_learning_stats(self) -> Dict[str, Any]:
+    def _collect_learning_stats(self) -> dict[str, Any]:
         """收集三个学习系统的统计快照"""
-        stats: Dict[str, Any] = {}
+        stats: dict[str, Any] = {}
 
         if self._learner:
             try:
@@ -652,7 +652,7 @@ class LearningBridge:
 # ============================================================================
 
 
-_global_bridge: Optional[LearningBridge] = None
+_global_bridge: LearningBridge | None = None
 
 
 def get_learning_bridge() -> LearningBridge:
@@ -668,7 +668,7 @@ def get_learning_bridge() -> LearningBridge:
 # ============================================================================
 
 
-def diagnose_learning_systems() -> Dict[str, Any]:
+def diagnose_learning_systems() -> dict[str, Any]:
     """学习系统健康度自检
 
     返回每个学习系统的真实状态：
@@ -677,14 +677,14 @@ def diagnose_learning_systems() -> Dict[str, Any]:
     - 是否有数据被消费
     - 推荐的修复动作
     """
-    diagnosis: Dict[str, Any] = {
+    diagnosis: dict[str, Any] = {
         "overall_health": "unknown",
         "systems": {},
         "recommendations": [],
     }
 
     # 1. PersistentLearningLoop
-    pll_status: Dict[str, Any] = {"loaded": False}
+    pll_status: dict[str, Any] = {"loaded": False}
     try:
         from learning.persistent_learning_loop import PersistentLearningLoop
 
@@ -720,7 +720,7 @@ def diagnose_learning_systems() -> Dict[str, Any]:
     diagnosis["systems"]["persistent_learning_loop"] = pll_status
 
     # 2. BayesianParameterOptimizer
-    bo_status: Dict[str, Any] = {"loaded": False}
+    bo_status: dict[str, Any] = {"loaded": False}
     try:
         from core.bayesian_optimizer import get_optimizer
 
@@ -753,7 +753,7 @@ def diagnose_learning_systems() -> Dict[str, Any]:
     diagnosis["systems"]["bayesian_optimizer"] = bo_status
 
     # 3. MemoryStore
-    ms_status: Dict[str, Any] = {"loaded": False}
+    ms_status: dict[str, Any] = {"loaded": False}
     try:
         from core.memory_store import MemoryStore
 

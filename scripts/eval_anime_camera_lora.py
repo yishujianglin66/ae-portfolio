@@ -24,8 +24,8 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from core.torch_runtime import infer_ctx, get_device  # noqa: E402
-from scripts.train_anime_camera_lora import COARSE_LABELS, COARSE_MAP, NUM_FRAMES, IMG_SIZE  # noqa: E402
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
+from scripts.train_anime_camera_lora import COARSE_LABELS, COARSE_MAP, IMG_SIZE, NUM_FRAMES  # noqa: E402
 
 MODEL_DIR = r"D:\AE-Data\Models\VideoMAE-MovieShots\movement"
 LORA_DIR = str(PROJECT_ROOT / "models" / "output" / "anime_camera_lora")
@@ -75,8 +75,8 @@ def rule_predict(clip: str) -> int:
     return COARSE_LABELS.index(coarse)
 
 
-def eval_set(samples: List[Dict[str, Any]], model, processor, device,
-             use_rule: bool = False) -> Dict[str, Any]:
+def eval_set(samples: list[dict[str, Any]], model, processor, device,
+             use_rule: bool = False) -> dict[str, Any]:
     correct = 0
     n = 0
     cm = np.zeros((len(COARSE_LABELS), len(COARSE_LABELS)), dtype=int)
@@ -138,7 +138,7 @@ def main() -> int:
 
     # 模型: 必须分开加载! PeftModel.from_pretrained(base,...) 会原地给 base 注入
     # 适配器, 导致 base 也变成 LoRA 模型 (上次评估 base==lora 的假对比就是这原因)
-    from transformers import VideoMAEImageProcessor, VideoMAEForVideoClassification
+    from transformers import VideoMAEForVideoClassification, VideoMAEImageProcessor
     processor = VideoMAEImageProcessor.from_pretrained(MODEL_DIR, local_files_only=True)
     base = VideoMAEForVideoClassification.from_pretrained(MODEL_DIR, local_files_only=True)
     base.to(device)

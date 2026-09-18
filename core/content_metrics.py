@@ -61,7 +61,7 @@ def camera_diversity_score(moves: Sequence[str]) -> float:
     return min(entropy / max_entropy, 1.0)
 
 
-def material_reuse_penalty(windows: Sequence[Tuple[str, float, float]]) -> float:
+def material_reuse_penalty(windows: Sequence[tuple[str, float, float]]) -> float:
     """素材窗口重叠率。windows=(source, start, end)。0=无复用, 1=完全复用。
 
     按素材源分组, 合并重叠区间后计算 overlap/union(Jaccard 式)。
@@ -75,7 +75,7 @@ def material_reuse_penalty(windows: Sequence[Tuple[str, float, float]]) -> float
     """
     if len(windows) < 2:
         return 0.0
-    by_src: Dict[str, List[Tuple[float, float]]] = {}
+    by_src: dict[str, list[tuple[float, float]]] = {}
     for src, s, e in windows:
         by_src.setdefault(src, []).append((s, e))
     total_overlap = 0.0
@@ -83,7 +83,7 @@ def material_reuse_penalty(windows: Sequence[Tuple[str, float, float]]) -> float
     for spans in by_src.values():
         spans.sort()
         # 合并重叠区间, 同时累计重叠量
-        merged: List[Tuple[float, float]] = []
+        merged: list[tuple[float, float]] = []
         for s, e in spans:
             if not merged or s >= merged[-1][1]:
                 # 无重叠, 新增区间

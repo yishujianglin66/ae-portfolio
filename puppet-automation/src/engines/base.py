@@ -61,15 +61,15 @@ def validate_path_safety(path: Path | str, must_exist: bool = True) -> Path:
 class EngineResult:
     """Standard engine execution result."""
     success: bool
-    output_path: Optional[Path] = None
+    output_path: Path | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
-    error: Optional[str] = None
+    error: str | None = None
     duration_seconds: float = 0.0
     # ====== 新增：可追溯性/类型稳定性 ======
-    run_id: Optional[str] = None        # 关联 pipeline.run_id
-    trace_id: Optional[str] = None      # 关联追踪ID
-    sample_id: Optional[str] = None     # 关联素材/样本ID
-    error_code: Optional[str] = None    # 错误码枚举: ENGINE_NOT_AVAILABLE / PARAM_MISSING / TIMEOUT / JSON_PARSE_ERROR 等
+    run_id: str | None = None        # 关联 pipeline.run_id
+    trace_id: str | None = None      # 关联追踪ID
+    sample_id: str | None = None     # 关联素材/样本ID
+    error_code: str | None = None    # 错误码枚举: ENGINE_NOT_AVAILABLE / PARAM_MISSING / TIMEOUT / JSON_PARSE_ERROR 等
     is_error_sample: bool = False       # 异常样本标记（避免污染学习数据）
     available: bool = True              # 引擎是否可用（软件是否安装）
 
@@ -180,8 +180,8 @@ class BaseEngine(abc.ABC):
         self,
         cmd: list[str],
         timeout: int = 3600,
-        cwd: Optional[Path] = None,
-    ) -> tuple[int, str, str, Optional[str]]:
+        cwd: Path | None = None,
+    ) -> tuple[int, str, str, str | None]:
         """Run subprocess with fine-grained error classification.
 
         Returns: (returncode, stdout, stderr, error_code)

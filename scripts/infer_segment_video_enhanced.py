@@ -39,15 +39,16 @@ from __future__ import annotations
 import json
 import os
 import sys
-import time
 import tempfile
+import time
 import traceback
 from pathlib import Path
 
 import cv2
 import numpy as np
 import torch
-from core.torch_runtime import infer_ctx, get_device
+
+from core.torch_runtime import get_device, infer_ctx
 
 # Layer 2A: RIFE warplayer（CUDA 双线性 warp），失败则禁用稳定（向后兼容）
 try:
@@ -528,7 +529,7 @@ def run(params: dict) -> dict:
         return _img_predictor_holder["p"]
 
     video_predictor = build_video_predictor(params)
-    print(f"[SAM2] loaded ONLY video predictor (image predictor will lazy build if fallback needed)", file=sys.stderr)
+    print("[SAM2] loaded ONLY video predictor (image predictor will lazy build if fallback needed)", file=sys.stderr)
 
     # FP16 autocast
     use_fp16 = True
@@ -1248,7 +1249,7 @@ def run(params: dict) -> dict:
               file=sys.stderr)
 
     # ===== 保存 =====
-    print(f"\n=== Saving masks ===", file=sys.stderr)
+    print("\n=== Saving masks ===", file=sys.stderr)
     nonempty = 0
     for idx in range(N):
         global_idx = start_frame + idx

@@ -69,7 +69,7 @@ class MotionCanvasAdapter:
         "typescript": "^5.5.0",
     }
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.project_dir = Path(self.config.get("project_dir", _MC_PROJECT_DIR))
         self._node_ok = shutil.which("node") is not None
@@ -85,7 +85,7 @@ class MotionCanvasAdapter:
     # ------------------------------------------------------------------
     #  操作: init_project
     # ------------------------------------------------------------------
-    def _init_project(self) -> Dict[str, Any]:
+    def _init_project(self) -> dict[str, Any]:
         d = self.project_dir
         d.mkdir(parents=True, exist_ok=True)
         (d / "src").mkdir(exist_ok=True)
@@ -179,7 +179,7 @@ class MotionCanvasAdapter:
     # ------------------------------------------------------------------
     #  操作: generate_scene
     # ------------------------------------------------------------------
-    def _scene_typography(self, spec: Dict[str, Any]) -> str:
+    def _scene_typography(self, spec: dict[str, Any]) -> str:
         title = spec.get("title", "Motion Canvas")
         duration = spec.get("duration", 2.0)
         accent = spec.get("style", {}).get("accent", "#4fc3f7")
@@ -207,7 +207,7 @@ export default makeScene2D(function* (view) {{
 }});
 '''
 
-    def _scene_data_chart(self, spec: Dict[str, Any]) -> str:
+    def _scene_data_chart(self, spec: dict[str, Any]) -> str:
         data = spec.get("data", [{"label": "A", "value": 50}])
         accent = spec.get("style", {}).get("accent", "#4fc3f7")
         duration = spec.get("duration", 3.0)
@@ -250,7 +250,7 @@ export default makeScene2D(function* (view) {{
             "});\n"
         )
 
-    def _scene_shape(self, spec: Dict[str, Any]) -> str:
+    def _scene_shape(self, spec: dict[str, Any]) -> str:
         accent = spec.get("style", {}).get("accent", "#4fc3f7")
         secondary = spec.get("style", {}).get("secondary", "#e040fb")
         duration = spec.get("duration", 2.0)
@@ -277,7 +277,7 @@ export default makeScene2D(function* (view) {{
 }});
 '''
 
-    def _generate_scene(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_scene(self, params: dict[str, Any]) -> dict[str, Any]:
         spec = params.get("spec", {})
         scene_name = params.get("scene_name", "generated_scene")
         stype = spec.get("type", "typography")
@@ -307,7 +307,7 @@ export default makeScene2D(function* (view) {{
     # ------------------------------------------------------------------
     #  操作: render
     # ------------------------------------------------------------------
-    def _render(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _render(self, params: dict[str, Any]) -> dict[str, Any]:
         if not self._node_ok or not self._npm_ok:
             return {
                 "status": "error",
@@ -342,7 +342,7 @@ export default makeScene2D(function* (view) {{
     # ------------------------------------------------------------------
     #  执行入口
     # ------------------------------------------------------------------
-    def execute(self, operation: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any]) -> dict[str, Any]:
         if operation not in self.SUPPORTED_OPERATIONS:
             return {"status": "error", "error": f"不支持的操作: {operation}"}
         if operation == "init_project":

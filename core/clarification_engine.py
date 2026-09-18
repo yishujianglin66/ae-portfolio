@@ -1,22 +1,23 @@
-from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
 import re
-from nlu_parser import Intent, IntentType, IntentSlots, ConfidenceThresholds
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+
+from nlu_parser import ConfidenceThresholds, Intent, IntentSlots, IntentType
 
 
 @dataclass
 class ClarificationQuestion:
     question: str
     slot: str
-    options: List[str] = field(default_factory=list)
+    options: list[str] = field(default_factory=list)
     required: bool = True
 
 
 @dataclass
 class ClarificationState:
     intent: Intent
-    questions: List[ClarificationQuestion]
-    answered_slots: Dict[str, Any] = field(default_factory=dict)
+    questions: list[ClarificationQuestion]
+    answered_slots: dict[str, Any] = field(default_factory=dict)
     current_question_index: int = 0
 
 
@@ -120,7 +121,7 @@ class ClarificationEngine:
             ],
         }
 
-    def generate_questions(self, intent: Intent) -> List[ClarificationQuestion]:
+    def generate_questions(self, intent: Intent) -> list[ClarificationQuestion]:
         questions = []
         templates = self.question_templates.get(intent.type, [])
 
@@ -147,7 +148,7 @@ class ClarificationEngine:
     def has_more_questions(self, state: ClarificationState) -> bool:
         return state.current_question_index < len(state.questions)
 
-    def get_next_question(self, state: ClarificationState) -> Optional[ClarificationQuestion]:
+    def get_next_question(self, state: ClarificationState) -> ClarificationQuestion | None:
         if self.has_more_questions(state):
             return state.questions[state.current_question_index]
         return None
@@ -188,7 +189,7 @@ class ClarificationEngine:
     def should_auto_execute(self, intent: Intent) -> bool:
         return intent.confidence >= ConfidenceThresholds.AUTO_EXECUTE
 
-    def analyze_confidence_gap(self, intent: Intent) -> Dict[str, float]:
+    def analyze_confidence_gap(self, intent: Intent) -> dict[str, float]:
         gaps = {}
         if not intent.slots.effectName:
             gaps["effectName"] = 0.3

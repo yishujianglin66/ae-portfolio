@@ -11,9 +11,13 @@ Architecture per comp:
   9. Narrative rhythm: birth rate envelope (surge -> steady -> decay)
 Verified APIs: CC PW flat indices, BlendingMode.ADD, ADBE Glo2, Camera Options DoF, ADBE Ramp
 """
-import json, time, sys, os, glob
-from pathlib import Path
+import glob
+import json
+import os
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_DIR = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge")
 CMD_FILE = BRIDGE_DIR / "ae_command.json"
@@ -618,7 +622,7 @@ if __name__ == "__main__":
             rendered.append((name, out))
         else:
             # Timeout: ping to confirm AE is idle before continuing
-            print(f"  [WARN] Render timeout - pinging AE before next command...")
+            print("  [WARN] Render timeout - pinging AE before next command...")
             ping_ok = False
             for attempt in range(60):
                 time.sleep(5)

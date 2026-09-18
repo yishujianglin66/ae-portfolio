@@ -63,8 +63,8 @@ def _log(msg: str):
 
 def build_character_prototypes():
     """构建角色原型向量"""
-    import torch
     import open_clip
+    import torch
 
     _log("加载CLIP模型...")
     ckpt_path = str(
@@ -168,7 +168,7 @@ def build_character_prototypes():
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     _log(f"\n{'='*60}")
-    _log(f"✅ T22角色原型库完成")
+    _log("✅ T22角色原型库完成")
     _log(f"   角色: {len(all_characters)}个")
     _log(f"   原型维度: {text_embeddings.shape}")
     _log(f"   报告: {report_path}")

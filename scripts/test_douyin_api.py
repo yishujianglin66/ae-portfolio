@@ -1,6 +1,8 @@
-import requests
 import json
 import os
+
+import requests
+
 
 def get_session_cookies():
     cookie_file = "D:/AE-Work/cookies/douyin_cookies.txt"
@@ -56,7 +58,7 @@ def download_douyin_video(video_url, output_dir="D:/AE-Work/test_douyin"):
                 os.makedirs(output_dir, exist_ok=True)
                 output_path = os.path.join(output_dir, f"{video_id}.mp4")
                 
-                print(f"\n开始下载...")
+                print("\n开始下载...")
                 video_resp = requests.get(
                     video_download_url,
                     headers=headers,

@@ -34,11 +34,11 @@ class TemplateLearner:
 
     def __init__(self, kb_dir: str = "") -> None:
         self._kb_dir = kb_dir or _DEFAULT_KB_DIR
-        self._reports: List[Dict[str, Any]] = []
-        self._knowledge_list: List[Dict[str, Any]] = []
+        self._reports: list[dict[str, Any]] = []
+        self._knowledge_list: list[dict[str, Any]] = []
         self._extractor = KnowledgeExtractor()
 
-    def add_report(self, report: Dict[str, Any]) -> None:
+    def add_report(self, report: dict[str, Any]) -> None:
         """添加一份分析报告。
 
         Args:
@@ -58,7 +58,7 @@ class TemplateLearner:
         report = analyzer.analyze_from_json(json_path)
         self.add_report(report)
 
-    def synthesize(self) -> Dict[str, Any]:
+    def synthesize(self) -> dict[str, Any]:
         """综合所有报告提取通用模式。
 
         Returns:
@@ -90,7 +90,7 @@ class TemplateLearner:
         if "error" in knowledge:
             return ""
 
-        md_lines: List[str] = []
+        md_lines: list[str] = []
         md_lines.append("# AEP 模板学习到的通用模式")
         md_lines.append("")
         md_lines.append(f"基于 {knowledge['template_count']} 个模板文件分析。")
@@ -146,10 +146,10 @@ class TemplateLearner:
     # Merge Methods
     # =========================================================================
 
-    def _merge_effect_chains(self) -> List[Dict[str, Any]]:
+    def _merge_effect_chains(self) -> list[dict[str, Any]]:
         """合并所有报告的效果链。"""
         chain_freq: Counter = Counter()
-        chain_info: Dict[str, Dict[str, Any]] = {}
+        chain_info: dict[str, dict[str, Any]] = {}
 
         for knowledge in self._knowledge_list:
             for chain in knowledge.get("effect_chains", []):
@@ -163,14 +163,14 @@ class TemplateLearner:
                     }
                 chain_info[key]["total_frequency"] += chain.get("frequency", 1)
 
-        result: List[Dict[str, Any]] = []
+        result: list[dict[str, Any]] = []
         for key, freq in chain_freq.most_common(30):
             info = chain_info[key]
             info["total_frequency"] = freq
             result.append(info)
         return result
 
-    def _merge_color_patterns(self) -> Dict[str, int]:
+    def _merge_color_patterns(self) -> dict[str, int]:
         """合并调色模式。"""
         merged: Counter = Counter()
         for knowledge in self._knowledge_list:
@@ -179,7 +179,7 @@ class TemplateLearner:
                 merged[name] += count
         return dict(merged)
 
-    def _merge_naming_patterns(self) -> List[tuple]:
+    def _merge_naming_patterns(self) -> list[tuple]:
         """合并命名模式。"""
         merged: Counter = Counter()
         for knowledge in self._knowledge_list:
@@ -188,7 +188,7 @@ class TemplateLearner:
                 merged[pattern] += count
         return merged.most_common(20)
 
-    def _merge_plugin_usage(self) -> Dict[str, int]:
+    def _merge_plugin_usage(self) -> dict[str, int]:
         """合并插件使用频率。"""
         merged: Counter = Counter()
         for knowledge in self._knowledge_list:
@@ -197,7 +197,7 @@ class TemplateLearner:
                 merged[name] += count
         return dict(merged)
 
-    def _merge_techniques(self) -> List[tuple]:
+    def _merge_techniques(self) -> list[tuple]:
         """合并技法标签。"""
         merged: Counter = Counter()
         for knowledge in self._knowledge_list:
@@ -205,7 +205,7 @@ class TemplateLearner:
                 merged[tech] += 1
         return merged.most_common()
 
-    def _generate_summary(self) -> Dict[str, Any]:
+    def _generate_summary(self) -> dict[str, Any]:
         """生成综合摘要。"""
         total_layers = 0
         total_effects = 0

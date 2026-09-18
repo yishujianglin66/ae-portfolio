@@ -1,10 +1,12 @@
 """搜索项目需要的素材片段"""
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from material_searcher import BilibiliAdapter, MikananiAdapter
 from pathlib import Path
+
+from material_searcher import BilibiliAdapter, MikananiAdapter
 
 OUTPUT_DIR = Path("output_director/materials")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

@@ -16,17 +16,15 @@
 - v2.2 新增：多线程 DAG 并行执行（perceive ‖ analyze → plan → execute → render → verify）
 """
 import os
-import sys
-import subprocess
 import shutil
+import subprocess
+import sys
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from integrations.davinci_fuscript import (
-    ResolveColorEngine, ColorGradeConfig, DCTL_PRESET_MAP
-)
+from integrations.davinci_fuscript import DCTL_PRESET_MAP, ColorGradeConfig, ResolveColorEngine
 
 # video-use helpers 路径
 VIDEO_USE_DIR = Path(__file__).resolve().parent.parent / "external" / "video-use"
@@ -96,7 +94,7 @@ class UnifiedVideoPipeline:
         video_path: str,
         threshold: float = 27.0,
         max_scenes: int = 20,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """PySceneDetect 自动场景检测"""
         print(f"\n[SceneDetect] Analyzing: {os.path.basename(video_path)}")
         scenes = self.engine.detect_scenes(
@@ -144,7 +142,7 @@ class UnifiedVideoPipeline:
             print(f"  ERROR: {e}")
         return ""
 
-    def auto_analyze(self, video_path: str) -> Dict[str, Any]:
+    def auto_analyze(self, video_path: str) -> dict[str, Any]:
         """自动分析视频：先尝试 FFmpeg signalstats，失败则回退到 OpenCV
 
         FFmpeg 8.x 的 signalstats 滤镜可能因兼容性问题报错（exit code -22），
@@ -178,7 +176,7 @@ class UnifiedVideoPipeline:
                 print(f"    Resolution: {cv2_result['resolution']}")
         return {**cv2_result, "method": "opencv"}
 
-    def _cv2_analyze(self, video_path: str) -> Dict[str, Any]:
+    def _cv2_analyze(self, video_path: str) -> dict[str, Any]:
         """使用 OpenCV 进行视频分析（FFmpeg signalstats 不可用时的回退方案）
 
         通过采样帧并转换为 HLS 色彩空间计算：
@@ -246,7 +244,7 @@ class UnifiedVideoPipeline:
     # 智能调色推荐（基于视频分析自动计算参数）
     # ----------------------------------------------------------------
 
-    def smart_grade_params(self, video_path: str) -> Dict[str, Any]:
+    def smart_grade_params(self, video_path: str) -> dict[str, Any]:
         """基于视频内容分析，自动推荐最佳调色参数
 
         分析视频亮度/对比度/饱和度，智能映射到 Resolve 调色参数：
@@ -259,7 +257,7 @@ class UnifiedVideoPipeline:
             {"brightness": float, "contrast": float, "saturation": float,
              "preset": str, "analysis": dict, "reasoning": str}
         """
-        print(f"\n[SmartGrade] Analyzing video for auto-grading...")
+        print("\n[SmartGrade] Analyzing video for auto-grading...")
         analysis = self._cv2_analyze(video_path)
         if "error" in analysis:
             print(f"  ERROR: {analysis['error']}, using defaults")
@@ -390,7 +388,7 @@ class UnifiedVideoPipeline:
         """
         ffmpeg = shutil.which("ffmpeg") or r"C:\ffmpeg\bin\ffmpeg.exe"
         if not os.path.isfile(ffmpeg):
-            print(f"  ERROR: ffmpeg not found")
+            print("  ERROR: ffmpeg not found")
             return ""
 
         # 构建 minterpolate 滤镜
@@ -419,7 +417,7 @@ class UnifiedVideoPipeline:
             else:
                 print(f"  FAILED: {result.stderr[-300:] if result.stderr else 'unknown'}")
         except subprocess.TimeoutExpired:
-            print(f"  TIMEOUT: 600s exceeded")
+            print("  TIMEOUT: 600s exceeded")
         except Exception as e:
             print(f"  ERROR: {e}")
         return ""
@@ -433,12 +431,12 @@ class UnifiedVideoPipeline:
         video_path: str,
         output_dir: str,
         preset: str = "cinematic",
-        segment_presets: Optional[Dict[str, str]] = None,
+        segment_presets: dict[str, str] | None = None,
         brightness: float = 1.05,
         contrast: float = 1.1,
         saturation: float = 1.05,
         close_after: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """使用 Resolve 引擎进行专业 DCTL/LUT + Fusion 调色
 
         通过 engine.auto_grade() 获得完整生命周期管理：
@@ -495,10 +493,10 @@ class UnifiedVideoPipeline:
         do_quick_grade: bool = True,
         do_resolve_grade: bool = True,
         smart_mode: bool = False,
-        style: Optional[str] = None,
+        style: str | None = None,
         interpolate_fps: float = 0,
         interpolate_method: str = "mvscale",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """一键全流程：场景检测 → 智能分析 → FFmpeg 预览 → Resolve 调色 → 补帧 → 渲染
 
         新增 v2.1 参数:
@@ -589,7 +587,7 @@ class UnifiedVideoPipeline:
         output_dir: str,
         max_workers: int = 4,
         progress_callback=None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """多线程全阶段执行（DAG 并行调度）
 
         DAG 依赖图:
@@ -632,10 +630,10 @@ class UnifiedVideoPipeline:
         video_path: str,
         output_dir: str,
         max_workers: int = 4,
-        style: Optional[str] = None,
+        style: str | None = None,
         smart_mode: bool = True,
         progress_callback=None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """多线程全流程（v2.2 入口）
 
         与 full_pipeline 功能等价，但使用多线程 DAG 调度器

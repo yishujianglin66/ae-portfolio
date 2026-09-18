@@ -30,6 +30,14 @@ def _safe_upload_name(filename: str) -> str:
     name = re.sub(r"[^A-Za-z0-9._\-\u4e00-\u9fff]", "_", name)
     return name or "upload.bin"
 
+# ----------------------------------------------------------------------
+# core.llm_gateway 的标准 logging → loguru 拦截：
+# LLM 网关内部用标准 logging（INFO 级别默认无 handler 不输出），
+# 这里将其接入 loguru 统一控制台，确保「密钥刷新完成」等关键日志可见。
+# 仅拦截 core.llm_gateway 一个 logger，不影响 uvicorn 自身的日志配置。
+# ----------------------------------------------------------------------
+import logging as _logging
+
 from fastapi import (
     Depends,
     FastAPI,
@@ -51,14 +59,6 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-# ----------------------------------------------------------------------
-# core.llm_gateway 的标准 logging → loguru 拦截：
-# LLM 网关内部用标准 logging（INFO 级别默认无 handler 不输出），
-# 这里将其接入 loguru 统一控制台，确保「密钥刷新完成」等关键日志可见。
-# 仅拦截 core.llm_gateway 一个 logger，不影响 uvicorn 自身的日志配置。
-# ----------------------------------------------------------------------
-import logging as _logging
-
 
 class _InterceptHandler(_logging.Handler):
     def emit(self, record: _logging.LogRecord) -> None:
@@ -74,11 +74,11 @@ _llm_gw_logger.handlers = [_InterceptHandler()]
 _llm_gw_logger.setLevel(_logging.INFO)
 _llm_gw_logger.propagate = False
 
-from ..config import settings
-from .. import auth as shared_auth
-
 # 弱 Token 集合：从 core.security 统一导入（单一定义源，禁止本地重复定义）
 from core.security import WEAK_TOKENS
+
+from .. import auth as shared_auth
+from ..config import settings
 
 _security = HTTPBearer(auto_error=False)
 
@@ -237,9 +237,9 @@ from ..engines.blender import BlenderEngine
 from ..engines.cinema4d import Cinema4DEngine
 from ..engines.davinci import DavinciEngine
 from ..engines.ffmpeg import FFmpegEngine
+from ..engines.matting import MattingEngine
 from ..engines.media_encoder import MediaEncoderEngine
 from ..engines.moviepy import MoviePyEngine
-from ..engines.matting import MattingEngine
 from ..engines.openmontage import OpenMontageEngine
 from ..engines.photoshop import PhotoshopEngine
 from ..engines.premiere import PremiereEngine

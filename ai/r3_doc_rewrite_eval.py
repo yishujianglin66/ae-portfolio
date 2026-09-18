@@ -48,7 +48,9 @@ def build_entries_variant(doc_format: str):
     import numpy as np
 
     from ai.t11_hybrid_search import (
-        CHAR_TO_IP, IP_VISUAL_KW, load_intel_cache,
+        CHAR_TO_IP,
+        IP_VISUAL_KW,
+        load_intel_cache,
     )
 
     entries = load_intel_cache()

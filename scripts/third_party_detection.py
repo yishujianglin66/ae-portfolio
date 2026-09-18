@@ -5,10 +5,11 @@
 检测所有第三方集成软件的安装状态，验证自动降级机制。
 """
 
-import os
 import json
+import os
 import subprocess
 from datetime import datetime
+
 
 def find_executable(name, paths):
     """在指定路径中查找可执行文件"""

@@ -29,7 +29,11 @@ sys.path.insert(0, str(PROJ))
 sys.path.insert(0, str(PROJ / "scripts"))
 
 from score_reference_gap import (  # noqa: E402
-    SIGNAL_DIR, SEMANTIC_DIMS, _scene_cuts, _signal, _semantic,
+    SEMANTIC_DIMS,
+    SIGNAL_DIR,
+    _scene_cuts,
+    _semantic,
+    _signal,
 )
 
 CACHE = PROJ / "reports" / "ref_metrics_cache.json"

@@ -58,12 +58,12 @@ DSL格式示例:
     result = dsl.execute(workflow)
 """
 
-import os
-import sys
 import json
+import os
 import re
-from typing import Dict, List, Any, Optional, Union
+import sys
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 # 确保可以导入项目模块
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -115,10 +115,10 @@ class WorkflowDSL:
             )
 
         # 解析上下文
-        self._variables: Dict[str, Any] = {}
-        self._step_results: Dict[str, Dict] = {}
+        self._variables: dict[str, Any] = {}
+        self._step_results: dict[str, dict] = {}
 
-    def parse(self, dsl_path: str) -> Dict[str, Any]:
+    def parse(self, dsl_path: str) -> dict[str, Any]:
         """
         解析DSL文件
 
@@ -133,7 +133,7 @@ class WorkflowDSL:
 
         return self.parse_string(content)
 
-    def parse_string(self, content: str) -> Dict[str, Any]:
+    def parse_string(self, content: str) -> dict[str, Any]:
         """
         解析DSL字符串
 
@@ -170,7 +170,7 @@ class WorkflowDSL:
             "steps": parsed_steps,
         }
 
-    def _validate_dsl(self, dsl: Dict) -> None:
+    def _validate_dsl(self, dsl: dict) -> None:
         """验证DSL结构"""
         if "steps" not in dsl:
             raise DSLValidationError("DSL必须包含steps字段")
@@ -181,7 +181,7 @@ class WorkflowDSL:
         for i, step in enumerate(dsl["steps"]):
             self._validate_step(step, i)
 
-    def _validate_step(self, step: Dict, index: int) -> None:
+    def _validate_step(self, step: dict, index: int) -> None:
         """验证步骤定义"""
         required = ["tool", "operation"]
         for field in required:
@@ -196,7 +196,7 @@ class WorkflowDSL:
                 f"可用工具: {', '.join(self.SUPPORTED_TOOLS)}"
             )
 
-    def _parse_step(self, step: Dict, index: int) -> Dict:
+    def _parse_step(self, step: dict, index: int) -> dict:
         """解析单个步骤"""
         step_id = step.get("id", f"step_{index + 1}")
 
@@ -218,7 +218,7 @@ class WorkflowDSL:
 
         return parsed
 
-    def _interpolate_params(self, params: Dict) -> Dict:
+    def _interpolate_params(self, params: dict) -> dict:
         """参数变量插值"""
         result = {}
 
@@ -270,7 +270,7 @@ class WorkflowDSL:
 
         return re.sub(pattern, replacer, s)
 
-    def execute(self, workflow: Dict, dry_run: bool = False) -> Dict:
+    def execute(self, workflow: dict, dry_run: bool = False) -> dict:
         """
         执行工作流
 
@@ -312,7 +312,7 @@ class WorkflowDSL:
 
         return result.to_dict()
 
-    def load_template(self, template_name: str) -> Dict:
+    def load_template(self, template_name: str) -> dict:
         """加载预设模板"""
         templates = {
             "video_enhance": {
@@ -396,11 +396,11 @@ class WorkflowDSL:
 
         return templates.get(template_name, {})
 
-    def list_templates(self) -> List[str]:
+    def list_templates(self) -> list[str]:
         """列出可用模板"""
         return ["video_enhance", "batch_transcode", "ae_render"]
 
-    def validate_workflow(self, workflow: Dict) -> Dict[str, List[str]]:
+    def validate_workflow(self, workflow: dict) -> dict[str, list[str]]:
         """验证工作流定义"""
         errors = []
         warnings = []
@@ -426,7 +426,7 @@ class WorkflowDSL:
 
         return {"errors": errors, "warnings": warnings}
 
-    def _has_circular_dependency(self, steps: List[Dict]) -> bool:
+    def _has_circular_dependency(self, steps: list[dict]) -> bool:
         """检查循环依赖"""
         step_ids = [s["step_id"] for s in steps]
         dep_graph = {s["step_id"]: s.get("depends_on", []) for s in steps}

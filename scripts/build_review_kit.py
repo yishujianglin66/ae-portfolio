@@ -44,7 +44,7 @@ def make_gif(clip_path: str, out_path: Path, width: int = 320, fps: int = 5) -> 
     return r.returncode == 0 and out_path.exists()
 
 
-def build_html(items: List[Dict[str, Any]]) -> str:
+def build_html(items: list[dict[str, Any]]) -> str:
     """生成自包含 HTML 图库 (GIF 网格 + 标签)。"""
     cells = []
     for it in items:
@@ -85,7 +85,7 @@ def main() -> int:
         return 1
     rows = [json.loads(l) for l in QUEUE.read_text(encoding="utf-8").splitlines() if l.strip()]
 
-    items: List[Dict[str, Any]] = []
+    items: list[dict[str, Any]] = []
     for i, r in enumerate(rows, 1):
         shot_id = r["shot_id"]
         gif = f"{i:03d}_{shot_id}.gif"

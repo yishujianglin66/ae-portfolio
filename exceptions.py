@@ -52,9 +52,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Type
 from enum import Enum
-
+from typing import Any, Dict, Optional, Type
 
 # ============================================================================
 # 错误码枚举
@@ -141,7 +140,7 @@ class ErrorCode(str, Enum):
 # 错误码描述映射
 # ============================================================================
 
-ERROR_MESSAGES: Dict[ErrorCode, str] = {
+ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.UNKNOWN: "未知错误",
     ErrorCode.INTERNAL_ERROR: "内部系统错误",
     ErrorCode.ASSERTION_FAILED: "断言失败",
@@ -224,10 +223,10 @@ class AEKnowledgeVaultError(Exception):
 
     def __init__(
         self,
-        message: Optional[str] = None,
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.UNKNOWN,
-        details: Optional[Dict[str, Any]] = None,
-        cause: Optional[BaseException] = None,
+        details: dict[str, Any] | None = None,
+        cause: BaseException | None = None,
     ):
         if message is None:
             message = ERROR_MESSAGES.get(error_code, "未知错误")
@@ -254,7 +253,7 @@ class AEKnowledgeVaultError(Exception):
             f"details={self.details!r})"
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典（用于序列化）"""
         return {
             "error_type": type(self).__name__,
@@ -274,10 +273,10 @@ class ConfigurationError(AEKnowledgeVaultError):
 
     def __init__(
         self,
-        message: Optional[str] = None,
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.CONFIG_INVALID,
-        config_key: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        config_key: str | None = None,
+        details: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -307,10 +306,10 @@ class ValidationError(AEKnowledgeVaultError):
 
     def __init__(
         self,
-        message: Optional[str] = None,
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.VALIDATION_FAILED,
-        field: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        field: str | None = None,
+        details: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -347,8 +346,8 @@ class ParameterOutOfRangeError(ValidationError):
         self,
         param_name: str,
         value: float,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
+        min_value: float | None = None,
+        max_value: float | None = None,
         **kwargs,
     ):
         parts = [f"参数 {param_name} = {value} 超出范围"]
@@ -380,10 +379,10 @@ class BridgeError(AEKnowledgeVaultError):
 
     def __init__(
         self,
-        message: Optional[str] = None,
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.BRIDGE_OFFLINE,
         bridge_type: str = "ae-mcp",
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -409,7 +408,7 @@ class BridgeOfflineError(BridgeError):
 class BridgeTimeoutError(BridgeError):
     """桥接超时"""
 
-    def __init__(self, timeout_ms: Optional[int] = None, **kwargs):
+    def __init__(self, timeout_ms: int | None = None, **kwargs):
         msg = "桥接请求超时"
         if timeout_ms:
             msg += f" (超时: {timeout_ms}ms)"
@@ -428,7 +427,7 @@ class BridgeCommandError(BridgeError):
     def __init__(
         self,
         command: str,
-        ae_error: Optional[str] = None,
+        ae_error: str | None = None,
         **kwargs,
     ):
         msg = f"命令执行失败: {command}"
@@ -453,11 +452,11 @@ class ExecutionError(AEKnowledgeVaultError):
 
     def __init__(
         self,
-        message: Optional[str] = None,
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.INTERNAL_ERROR,
-        comp_name: Optional[str] = None,
-        layer_index: Optional[int] = None,
-        details: Optional[Dict[str, Any]] = None,
+        comp_name: str | None = None,
+        layer_index: int | None = None,
+        details: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -511,7 +510,7 @@ class CompNotFoundError(ExecutionError):
 class PropertyNotFoundError(ExecutionError):
     """属性未找到"""
 
-    def __init__(self, property_name: str, effect_name: Optional[str] = None, **kwargs):
+    def __init__(self, property_name: str, effect_name: str | None = None, **kwargs):
         msg = f"属性未找到: {property_name}"
         if effect_name:
             msg += f" (效果: {effect_name})"
@@ -530,9 +529,9 @@ class KeyframeError(ExecutionError):
 
     def __init__(
         self,
-        property_name: Optional[str] = None,
-        frame: Optional[int] = None,
-        ae_error: Optional[str] = None,
+        property_name: str | None = None,
+        frame: int | None = None,
+        ae_error: str | None = None,
         **kwargs,
     ):
         parts = ["关键帧操作失败"]
@@ -558,7 +557,7 @@ class KeyframeError(ExecutionError):
 class ExpressionError(ExecutionError):
     """表达式错误"""
 
-    def __init__(self, expression: Optional[str] = None, ae_error: Optional[str] = None, **kwargs):
+    def __init__(self, expression: str | None = None, ae_error: str | None = None, **kwargs):
         msg = "表达式执行错误"
         if ae_error:
             msg += f": {ae_error}"
@@ -582,10 +581,10 @@ class MediaError(AEKnowledgeVaultError):
 
     def __init__(
         self,
-        message: Optional[str] = None,
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.MEDIA_DECODE_ERROR,
-        file_path: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        file_path: str | None = None,
+        details: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -613,7 +612,7 @@ class MediaNotFoundError(MediaError):
 class MediaDecodeError(MediaError):
     """媒体解码失败"""
 
-    def __init__(self, file_path: str, reason: Optional[str] = None, **kwargs):
+    def __init__(self, file_path: str, reason: str | None = None, **kwargs):
         msg = f"媒体解码失败: {file_path}"
         if reason:
             msg += f" ({reason})"
@@ -633,8 +632,8 @@ class QualityCheckFailedError(MediaError):
     def __init__(
         self,
         file_path: str,
-        metrics: Optional[Dict[str, Any]] = None,
-        thresholds: Optional[Dict[str, Any]] = None,
+        metrics: dict[str, Any] | None = None,
+        thresholds: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -658,11 +657,11 @@ class WorkflowError(AEKnowledgeVaultError):
 
     def __init__(
         self,
-        message: Optional[str] = None,
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.WORKFLOW_FAILED,
-        workflow_name: Optional[str] = None,
-        stage: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        workflow_name: str | None = None,
+        stage: str | None = None,
+        details: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -683,7 +682,7 @@ class StageFailedError(WorkflowError):
     def __init__(
         self,
         stage_name: str,
-        stage_error: Optional[str] = None,
+        stage_error: str | None = None,
         **kwargs,
     ):
         msg = f"阶段执行失败: {stage_name}"
@@ -705,7 +704,7 @@ class PipelineBrokenError(WorkflowError):
     def __init__(
         self,
         broken_at: str,
-        reason: Optional[str] = None,
+        reason: str | None = None,
         **kwargs,
     ):
         msg = f"流水线在 {broken_at} 处中断"
@@ -730,9 +729,9 @@ class ResourceError(AEKnowledgeVaultError):
 
     def __init__(
         self,
-        message: Optional[str] = None,
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.OUT_OF_MEMORY,
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -746,7 +745,7 @@ class ResourceError(AEKnowledgeVaultError):
 class OutOfMemoryError(ResourceError):
     """内存不足"""
 
-    def __init__(self, context: Optional[str] = None, **kwargs):
+    def __init__(self, context: str | None = None, **kwargs):
         msg = "内存不足，请关闭其他程序后重试"
         if context:
             msg += f" (上下文: {context})"
@@ -765,7 +764,7 @@ class TimeoutError_(ResourceError):
     def __init__(
         self,
         operation: str,
-        timeout_seconds: Optional[float] = None,
+        timeout_seconds: float | None = None,
         **kwargs,
     ):
         msg = f"操作超时: {operation}"
@@ -790,10 +789,10 @@ class NetworkError(AEKnowledgeVaultError):
 
     def __init__(
         self,
-        message: Optional[str] = None,
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.NETWORK_ERROR,
-        url: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        url: str | None = None,
+        details: dict[str, Any] | None = None,
         **kwargs,
     ):
         super().__init__(
@@ -816,11 +815,11 @@ class ExternalToolError(AEKnowledgeVaultError):
     def __init__(
         self,
         tool_name: str,
-        message: Optional[str] = None,
+        message: str | None = None,
         error_code: ErrorCode = ErrorCode.EXTERNAL_TOOL_ERROR,
-        exit_code: Optional[int] = None,
-        stderr: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        exit_code: int | None = None,
+        stderr: str | None = None,
+        details: dict[str, Any] | None = None,
         **kwargs,
     ):
         msg = f"{tool_name} 执行错误"
@@ -913,7 +912,7 @@ class PremiereError(ExternalToolError):
 
 def wrap_exception(
     exc: BaseException,
-    target_type: Type[AEKnowledgeVaultError],
+    target_type: type[AEKnowledgeVaultError],
     **extra_details,
 ) -> AEKnowledgeVaultError:
     """将任意异常包装为项目自定义异常

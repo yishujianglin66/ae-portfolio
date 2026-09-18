@@ -7,22 +7,17 @@
 3. 分段并行渲染（多线程 + FFmpeg concat）
 4. 渲染缓存机制（参数 hash 复用）
 """
-import sys
 import os
-import time
 import subprocess
+import sys
+import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.resolve_engine import (
-    ResolveAutomationEngine,
-    CDLConfig,
-    SpeedCurve,
-    KenBurnsConfig,
-    ItemEffect
-)
-
 import pytest
+
+from integrations.resolve_engine import CDLConfig, ItemEffect, KenBurnsConfig, ResolveAutomationEngine, SpeedCurve
+
 pytestmark = pytest.mark.real_davinci  # 需真实 DaVinci Resolve + 真实素材环境
 
 OUTPUT_DIR = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\output_production"

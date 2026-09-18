@@ -25,19 +25,19 @@
 - 与 unified_tool_integrator.py 的工作流预设无缝对接
 """
 
-import os
-import sys
 import json
-import time
+import logging
+import os
 import shutil
 import subprocess
+import sys
+import time
 import warnings
-import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple, Union
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 logger = logging.getLogger(__name__)
 
@@ -61,10 +61,10 @@ class ToolResult:
     operation: str
     status: str = "pending"
     mode_used: str = "simulate"
-    output_files: List[str] = field(default_factory=list)
-    output_data: Dict[str, Any] = field(default_factory=dict)
-    log: List[str] = field(default_factory=list)
-    error: Optional[str] = None
+    output_files: list[str] = field(default_factory=list)
+    output_data: dict[str, Any] = field(default_factory=dict)
+    log: list[str] = field(default_factory=list)
+    error: str | None = None
     duration_ms: float = 0.0
     used_fallback: bool = False
 
@@ -73,20 +73,20 @@ class BaseOpenSourceAdapter:
     """开源工具适配器基类"""
 
     TOOL_NAME: str = "base"
-    SUPPORTED_OPERATIONS: List[str] = []
+    SUPPORTED_OPERATIONS: list[str] = []
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
-        self._bin_path: Optional[str] = None
+        self._bin_path: str | None = None
 
     def check_available(self) -> bool:
         """检查工具是否可用"""
         raise NotImplementedError
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> ToolResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> ToolResult:
         raise NotImplementedError
 
     def _make_result(self, operation: str, **kwargs) -> ToolResult:
@@ -96,7 +96,7 @@ class BaseOpenSourceAdapter:
             **kwargs,
         )
 
-    def _run_cmd(self, cmd: List[str], timeout: int = 600, cwd: str = None) -> Tuple[int, str, str]:
+    def _run_cmd(self, cmd: list[str], timeout: int = 600, cwd: str = None) -> tuple[int, str, str]:
         """Execute external command, return (returncode, stdout, stderr)
 
         Security note: shell=False is used on ALL platforms (default, not explicitly passed).
@@ -176,7 +176,7 @@ class RIFEAdapter(BaseOpenSourceAdapter):
             return True
         return False
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> ToolResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> ToolResult:
         result = self._make_result(operation)
         start = time.time()
 
@@ -213,7 +213,7 @@ class RIFEAdapter(BaseOpenSourceAdapter):
         result.duration_ms = (time.time() - start) * 1000
         return result
 
-    def _interpolate(self, params: Dict, exp: int = 1) -> Dict:
+    def _interpolate(self, params: dict, exp: int = 1) -> dict:
         input_video = params.get("input_video", "")
         output_dir = params.get("output_dir", "")
         scale = params.get("scale", 1.0)
@@ -248,12 +248,12 @@ class RIFEAdapter(BaseOpenSourceAdapter):
             except ImportError:
                 return {"files": [], "data": {"simulated": True, "exp": exp}}
 
-    def _slow_motion(self, params: Dict) -> Dict:
+    def _slow_motion(self, params: dict) -> dict:
         factor = params.get("factor", 4)
         exp = {2: 1, 4: 2, 8: 3}.get(factor, 2)
         return self._interpolate(params, exp=exp)
 
-    def _batch_interpolate(self, params: Dict) -> Dict:
+    def _batch_interpolate(self, params: dict) -> dict:
         input_files = params.get("input_files", [])
         results = []
         for f in input_files:
@@ -309,7 +309,7 @@ class SAM2Adapter(BaseOpenSourceAdapter):
             return True
         return False
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> ToolResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> ToolResult:
         result = self._make_result(operation)
         start = time.time()
 
@@ -348,7 +348,7 @@ class SAM2Adapter(BaseOpenSourceAdapter):
         result.duration_ms = (time.time() - start) * 1000
         return result
 
-    def _segment_image(self, params: Dict) -> Dict:
+    def _segment_image(self, params: dict) -> dict:
         import numpy as np
         img_path = params.get("input_image", "")
         points = params.get("points", [])
@@ -386,7 +386,7 @@ class SAM2Adapter(BaseOpenSourceAdapter):
         cv2.imwrite(mask_file, (masks[0] * 255).astype(np.uint8))
         return {"files": [mask_file], "data": {"scores": scores.tolist(), "mask_shape": masks[0].shape}}
 
-    def _segment_video(self, params: Dict) -> Dict:
+    def _segment_video(self, params: dict) -> dict:
         video_path = params.get("input_video", "")
         points = params.get("points", [])
         output_dir = params.get("output_dir", "")
@@ -424,7 +424,7 @@ class SAM2Adapter(BaseOpenSourceAdapter):
 
         return {"files": mask_files, "data": {"frame_count": len(mask_files)}}
 
-    def _auto_mask(self, params: Dict) -> Dict:
+    def _auto_mask(self, params: dict) -> dict:
         img_path = params.get("input_image", "")
         output_dir = params.get("output_dir", "")
 
@@ -432,8 +432,8 @@ class SAM2Adapter(BaseOpenSourceAdapter):
             output_dir = os.path.join(os.path.dirname(img_path), "sam2_auto_output")
         os.makedirs(output_dir, exist_ok=True)
 
-        from sam2.build_sam import build_sam2
         from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
+        from sam2.build_sam import build_sam2
 
         model_cfg = self.config.get("model_cfg", "sam2_hiera_l.yaml")
         checkpoint = self.config.get("checkpoint", "sam2_hiera_large.pt")
@@ -452,10 +452,10 @@ class SAM2Adapter(BaseOpenSourceAdapter):
 
         return {"files": mask_files, "data": {"mask_count": len(masks)}}
 
-    def _track_object(self, params: Dict) -> Dict:
+    def _track_object(self, params: dict) -> dict:
         return self._segment_video(params)
 
-    def _generate_matte(self, params: Dict) -> Dict:
+    def _generate_matte(self, params: dict) -> dict:
         """生成 AE 可用的蒙版序列（PNG序列或EXR）"""
         result = self._segment_video(params)
         output_dir = params.get("output_dir", "")
@@ -475,7 +475,7 @@ class SAM2Adapter(BaseOpenSourceAdapter):
         result["output_data"]["matte_dir"] = matte_dir
         return result
 
-    def _batch_segment(self, params: Dict) -> Dict:
+    def _batch_segment(self, params: dict) -> dict:
         input_files = params.get("input_files", [])
         results = []
         for f in input_files:
@@ -534,7 +534,7 @@ class Video2XAdapter(BaseOpenSourceAdapter):
             pass
         return False
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> ToolResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> ToolResult:
         result = self._make_result(operation)
         start = time.time()
 
@@ -569,7 +569,7 @@ class Video2XAdapter(BaseOpenSourceAdapter):
         result.duration_ms = (time.time() - start) * 1000
         return result
 
-    def _upscale(self, operation: str, params: Dict) -> Dict:
+    def _upscale(self, operation: str, params: dict) -> dict:
         input_video = params.get("input_video", "")
         output_dir = params.get("output_dir", "")
 
@@ -603,15 +603,15 @@ class Video2XAdapter(BaseOpenSourceAdapter):
                 raise RuntimeError(f"Video2X failed: {stderr}")
         return {"files": [], "data": {"simulated": True}}
 
-    def _enhance(self, operation: str, params: Dict) -> Dict:
+    def _enhance(self, operation: str, params: dict) -> dict:
         algorithm = "realcugan" if "anime" in operation else "realesrgan"
         params_copy = {**params}
-        return self._upscale(f"upscale_2x", {**params_copy, "_algorithm": algorithm})
+        return self._upscale("upscale_2x", {**params_copy, "_algorithm": algorithm})
 
-    def _denoise(self, params: Dict) -> Dict:
+    def _denoise(self, params: dict) -> dict:
         return self._upscale("upscale_2x", params)
 
-    def _batch_upscale(self, params: Dict) -> Dict:
+    def _batch_upscale(self, params: dict) -> dict:
         input_files = params.get("input_files", [])
         results = []
         for f in input_files:
@@ -669,7 +669,7 @@ class WhisperAdapter(BaseOpenSourceAdapter):
         except ImportError:
             return False
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> ToolResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> ToolResult:
         result = self._make_result(operation)
         start = time.time()
 
@@ -750,7 +750,7 @@ class WhisperAdapter(BaseOpenSourceAdapter):
                     "请先在有网络时运行: python -c \"import whisper; whisper.load_model('tiny')\""
                 )
 
-    def _transcribe(self, params: Dict) -> Dict:
+    def _transcribe(self, params: dict) -> dict:
         input_file = params.get("input_audio", params.get("input_video", ""))
         model = self._get_model(params.get("model"))
         language = params.get("language")
@@ -782,7 +782,7 @@ class WhisperAdapter(BaseOpenSourceAdapter):
             }
         }
 
-    def _generate_subtitles(self, params: Dict) -> Dict:
+    def _generate_subtitles(self, params: dict) -> dict:
         input_file = params.get("input_audio", params.get("input_video", ""))
         output_dir = params.get("output_dir", "")
         fmt = params.get("format", "srt")  # srt / vtt / json
@@ -807,7 +807,7 @@ class WhisperAdapter(BaseOpenSourceAdapter):
 
         return {"files": [output_file], "data": {"format": fmt, "segment_count": len(segments)}}
 
-    def _write_srt(self, segments: List[Dict], output_file: str):
+    def _write_srt(self, segments: list[dict], output_file: str):
         def fmt_time(seconds: float) -> str:
             h = int(seconds // 3600)
             m = int((seconds % 3600) // 60)
@@ -821,7 +821,7 @@ class WhisperAdapter(BaseOpenSourceAdapter):
                 f.write(f"{fmt_time(seg['start'])} --> {fmt_time(seg['end'])}\n")
                 f.write(f"{seg['text'].strip()}\n\n")
 
-    def _write_vtt(self, segments: List[Dict], output_file: str):
+    def _write_vtt(self, segments: list[dict], output_file: str):
         def fmt_time(seconds: float) -> str:
             h = int(seconds // 3600)
             m = int((seconds % 3600) // 60)
@@ -836,7 +836,7 @@ class WhisperAdapter(BaseOpenSourceAdapter):
                 f.write(f"{fmt_time(seg['start'])} --> {fmt_time(seg['end'])}\n")
                 f.write(f"{seg['text'].strip()}\n\n")
 
-    def _detect_language(self, params: Dict) -> Dict:
+    def _detect_language(self, params: dict) -> dict:
         input_file = params.get("input_audio", params.get("input_video", ""))
         model = self._get_model(params.get("model"))
 
@@ -852,17 +852,17 @@ class WhisperAdapter(BaseOpenSourceAdapter):
             detected = max(probs, key=probs.get)
             return {"files": [], "data": {"language": detected, "probability": probs[detected]}}
 
-    def _timestamp_align(self, params: Dict) -> Dict:
+    def _timestamp_align(self, params: dict) -> dict:
         return self._transcribe(params)
 
-    def _extract_segments(self, params: Dict) -> Dict:
+    def _extract_segments(self, params: dict) -> dict:
         result = self._transcribe(params)
         segments = result["data"]["segments"]
         min_duration = params.get("min_duration", 5.0)
         filtered = [s for s in segments if (s["end"] - s["start"]) >= min_duration]
         return {"files": [], "data": {"segments": filtered, "count": len(filtered)}}
 
-    def _batch_transcribe(self, params: Dict) -> Dict:
+    def _batch_transcribe(self, params: dict) -> dict:
         input_files = params.get("input_files", [])
         all_results = []
         for f in input_files:
@@ -925,7 +925,7 @@ class RemotionAdapter(BaseOpenSourceAdapter):
             return True
         return False
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> ToolResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> ToolResult:
         result = self._make_result(operation)
         start = time.time()
 
@@ -962,7 +962,7 @@ class RemotionAdapter(BaseOpenSourceAdapter):
         result.duration_ms = (time.time() - start) * 1000
         return result
 
-    def _render_video(self, params: Dict) -> Dict:
+    def _render_video(self, params: dict) -> dict:
         composition = params.get("composition", "Main")
         output_dir = params.get("output_dir", "output")
         props = params.get("props", {})
@@ -979,7 +979,7 @@ class RemotionAdapter(BaseOpenSourceAdapter):
             return {"files": [output_file], "data": {"composition": composition}}
         raise RuntimeError(f"Remotion render failed: {stderr}")
 
-    def _render_sequence(self, params: Dict) -> Dict:
+    def _render_sequence(self, params: dict) -> dict:
         composition = params.get("composition", "Main")
         output_dir = params.get("output_dir", "output/sequence")
         os.makedirs(output_dir, exist_ok=True)
@@ -992,11 +992,11 @@ class RemotionAdapter(BaseOpenSourceAdapter):
             return {"files": frames, "data": {"frame_count": len(frames)}}
         raise RuntimeError(f"Remotion sequence failed: {stderr}")
 
-    def _create_from_template(self, params: Dict) -> Dict:
+    def _create_from_template(self, params: dict) -> dict:
         template = params.get("template", "default")
         return self._render_video(params)
 
-    def _batch_render(self, params: Dict) -> Dict:
+    def _batch_render(self, params: dict) -> dict:
         compositions = params.get("compositions", [])
         results = []
         for comp in compositions:
@@ -1006,7 +1006,7 @@ class RemotionAdapter(BaseOpenSourceAdapter):
         all_files = [f for r in results for f in r.get("files", [])]
         return {"files": all_files, "data": {"batch_count": len(results)}}
 
-    def _still_image(self, params: Dict) -> Dict:
+    def _still_image(self, params: dict) -> dict:
         composition = params.get("composition", "Main")
         output_dir = params.get("output_dir", "output")
         os.makedirs(output_dir, exist_ok=True)
@@ -1067,7 +1067,7 @@ class OpenMontageAdapter(BaseOpenSourceAdapter):
             return True
         return False
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> ToolResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> ToolResult:
         result = self._make_result(operation)
         start = time.time()
 
@@ -1152,7 +1152,7 @@ class MoviePyAdapter(BaseOpenSourceAdapter):
         except ImportError:
             return False
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> ToolResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> ToolResult:
         result = self._make_result(operation)
         start = time.time()
 
@@ -1165,14 +1165,14 @@ class MoviePyAdapter(BaseOpenSourceAdapter):
 
         try:
             try:
-                from moviepy import (
-                    VideoFileClip, concatenate_videoclips,
-                    CompositeVideoClip, TextClip, AudioFileClip
-                )
+                from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip, concatenate_videoclips
             except ImportError:
                 from moviepy.editor import (
-                    VideoFileClip, concatenate_videoclips,
-                    CompositeVideoClip, TextClip, AudioFileClip
+                    AudioFileClip,
+                    CompositeVideoClip,
+                    TextClip,
+                    VideoFileClip,
+                    concatenate_videoclips,
                 )
 
             output_dir = params.get("output_dir", "output")
@@ -1261,10 +1261,10 @@ class OpenSourceHub:
         "moviepy": MoviePyAdapter,
     }
 
-    def __init__(self, configs: Optional[Dict[str, Dict]] = None):
+    def __init__(self, configs: dict[str, dict] | None = None):
         self.configs = configs or {}
-        self._adapters: Dict[str, BaseOpenSourceAdapter] = {}
-        self._available: Dict[str, bool] = {}
+        self._adapters: dict[str, BaseOpenSourceAdapter] = {}
+        self._available: dict[str, bool] = {}
         self._init_adapters()
 
     def _init_adapters(self):
@@ -1272,13 +1272,13 @@ class OpenSourceHub:
             config = self.configs.get(name, {})
             self._adapters[name] = cls(config)
 
-    def auto_detect(self) -> Dict[str, bool]:
+    def auto_detect(self) -> dict[str, bool]:
         """自动检测所有工具的可用状态"""
         for name, adapter in self._adapters.items():
             self._available[name] = adapter.check_available()
         return self._available
 
-    def execute(self, tool_name: str, operation: str, params: Dict[str, Any]) -> ToolResult:
+    def execute(self, tool_name: str, operation: str, params: dict[str, Any]) -> ToolResult:
         """统一执行入口"""
         if tool_name not in self._adapters:
             result = ToolResult(tool_name=tool_name, operation=operation, status="error")
@@ -1302,13 +1302,13 @@ class OpenSourceHub:
         lines.append(f"总计: {available_count}/{len(self._available)} 工具可用")
         return "\n".join(lines)
 
-    def get_adapter(self, tool_name: str) -> Optional[BaseOpenSourceAdapter]:
+    def get_adapter(self, tool_name: str) -> BaseOpenSourceAdapter | None:
         return self._adapters.get(tool_name)
 
-    def list_tools(self) -> List[str]:
+    def list_tools(self) -> list[str]:
         return list(self.ADAPTERS.keys())
 
-    def list_operations(self, tool_name: str) -> List[str]:
+    def list_operations(self, tool_name: str) -> list[str]:
         adapter = self._adapters.get(tool_name)
         return adapter.list_operations() if adapter else []
 
@@ -1317,7 +1317,7 @@ class OpenSourceHub:
 # -- 便捷工厂函数
 # -------------------------------------------------------------
 
-def create_hub(configs: Optional[Dict[str, Dict]] = None) -> OpenSourceHub:
+def create_hub(configs: dict[str, dict] | None = None) -> OpenSourceHub:
     """创建开源项目调度中心"""
     return OpenSourceHub(configs)
 

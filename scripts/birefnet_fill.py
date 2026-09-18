@@ -8,10 +8,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
-from core.torch_runtime import infer_ctx, get_device
 from torchvision import transforms
-
 from transformers import AutoModelForImageSegmentation
+
+from core.torch_runtime import get_device, infer_ctx
 
 CUR = Path("output/step2_locator/matanyone_seg_final")   # v12 最终输出
 VIDEO = "data/real_amv_test/DL_FATE_r978_BV1qb411C79B_p1.mp4"

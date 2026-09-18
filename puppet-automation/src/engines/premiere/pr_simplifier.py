@@ -35,7 +35,6 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
-
 # ======================================================================
 # 数据模型
 # ======================================================================
@@ -58,8 +57,8 @@ class SimplifyReport:
 
     project_name: str = ""
     timestamp: float = field(default_factory=time.time)
-    issues: List[SimplifyIssue] = field(default_factory=list)
-    stats: Dict[str, Any] = field(default_factory=dict)
+    issues: list[SimplifyIssue] = field(default_factory=list)
+    stats: dict[str, Any] = field(default_factory=dict)
     elapsed_s: float = 0.0
 
     @property
@@ -70,9 +69,9 @@ class SimplifyReport:
     def fixable_count(self) -> int:
         return sum(1 for i in self.issues if i.auto_fixable)
 
-    def summary(self) -> Dict[str, int]:
+    def summary(self) -> dict[str, int]:
         """按类别统计。"""
-        counts: Dict[str, int] = {}
+        counts: dict[str, int] = {}
         for issue in self.issues:
             counts[issue.category] = counts.get(issue.category, 0) + 1
         return counts
@@ -84,10 +83,10 @@ class SimplifyResult:
 
     success: bool = True
     dry_run: bool = False
-    actions_taken: List[Dict[str, Any]] = field(default_factory=list)
-    actions_skipped: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    report: Optional[SimplifyReport] = None
+    actions_taken: list[dict[str, Any]] = field(default_factory=list)
+    actions_skipped: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    report: SimplifyReport | None = None
     elapsed_s: float = 0.0
 
     @property
@@ -118,7 +117,7 @@ class PRSimplifier:
     # 1. 项目分析
     # ------------------------------------------------------------------
 
-    async def analyze(self, sequence_name: Optional[str] = None) -> SimplifyReport:
+    async def analyze(self, sequence_name: str | None = None) -> SimplifyReport:
         """全面分析当前 PR 项目，生成简洁化报告。
 
         检测项目：
@@ -209,7 +208,7 @@ class PRSimplifier:
         remove_empty_tracks: bool = True,
         close_gaps: bool = True,
         consolidate_duplicates: bool = True,
-        sequence_name: Optional[str] = None,
+        sequence_name: str | None = None,
         auto_save: bool = True,
     ) -> SimplifyResult:
         """一键执行全部简洁化操作。
@@ -279,7 +278,7 @@ class PRSimplifier:
     # 3. 单项操作 API
     # ------------------------------------------------------------------
 
-    async def remove_unused_media(self) -> Dict[str, Any]:
+    async def remove_unused_media(self) -> dict[str, Any]:
         """移除项目中未被任何序列引用的素材。"""
         jsx = """
         (function() {
@@ -345,7 +344,7 @@ class PRSimplifier:
         engine_result = await self._engine._execute_jsx_safe(jsx, "simplify_remove_unused")
         return self._parse_action_result(engine_result, "remove_unused_media")
 
-    async def remove_empty_tracks(self, sequence_name: Optional[str] = None) -> Dict[str, Any]:
+    async def remove_empty_tracks(self, sequence_name: str | None = None) -> dict[str, Any]:
         """删除没有任何剪辑的轨道。"""
         seq_block = self._build_seq_selector(sequence_name)
         jsx = f"""
@@ -392,7 +391,7 @@ class PRSimplifier:
         engine_result = await self._engine._execute_jsx_safe(jsx, "simplify_remove_empty_tracks")
         return self._parse_action_result(engine_result, "remove_empty_tracks")
 
-    async def close_gaps(self, sequence_name: Optional[str] = None) -> Dict[str, Any]:
+    async def close_gaps(self, sequence_name: str | None = None) -> dict[str, Any]:
         """关闭时间线上的间隙（Ripple Delete 空白段）。"""
         seq_block = self._build_seq_selector(sequence_name)
         jsx = f"""
@@ -441,7 +440,7 @@ class PRSimplifier:
         engine_result = await self._engine._execute_jsx_safe(jsx, "simplify_close_gaps")
         return self._parse_action_result(engine_result, "close_gaps")
 
-    async def consolidate_duplicates(self) -> Dict[str, Any]:
+    async def consolidate_duplicates(self) -> dict[str, Any]:
         """合并项目中的重复素材（同名同路径）。"""
         jsx = """
         (function() {
@@ -492,8 +491,8 @@ class PRSimplifier:
     async def organize_bins(
         self,
         strategy: str = "by_type",
-        sequence_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        sequence_name: str | None = None,
+    ) -> dict[str, Any]:
         """自动整理素材箱。
 
         Args:
@@ -560,7 +559,7 @@ class PRSimplifier:
     # 内部检测方法
     # ------------------------------------------------------------------
 
-    async def _detect_unused_media(self) -> List[str]:
+    async def _detect_unused_media(self) -> list[str]:
         """检测未使用素材，返回名称列表。"""
         jsx = """
         (function() {
@@ -609,7 +608,7 @@ class PRSimplifier:
         data = self._extract_data(engine_result)
         return data if isinstance(data, list) else []
 
-    async def _detect_empty_tracks(self, sequence_name: Optional[str] = None) -> List[Dict]:
+    async def _detect_empty_tracks(self, sequence_name: str | None = None) -> list[dict]:
         """检测空轨道。"""
         seq_block = self._build_seq_selector(sequence_name)
         jsx = f"""
@@ -638,7 +637,7 @@ class PRSimplifier:
         data = self._extract_data(engine_result)
         return data if isinstance(data, list) else []
 
-    async def _detect_gaps(self, sequence_name: Optional[str] = None) -> List[Dict]:
+    async def _detect_gaps(self, sequence_name: str | None = None) -> list[dict]:
         """检测时间线间隙。"""
         seq_block = self._build_seq_selector(sequence_name)
         ticks = self._engine.TICKS_PER_SECOND
@@ -677,7 +676,7 @@ class PRSimplifier:
         data = self._extract_data(engine_result)
         return data if isinstance(data, list) else []
 
-    async def _detect_duplicates(self) -> List[Dict]:
+    async def _detect_duplicates(self) -> list[dict]:
         """检测重复素材。"""
         jsx = """
         (function() {
@@ -722,7 +721,7 @@ class PRSimplifier:
     # 工具方法
     # ------------------------------------------------------------------
 
-    def _build_seq_selector(self, sequence_name: Optional[str]) -> str:
+    def _build_seq_selector(self, sequence_name: str | None) -> str:
         """构建序列选择 JSX 代码块。"""
         if sequence_name:
             sn_js = self._engine._jsx_escape(sequence_name)
@@ -752,7 +751,7 @@ class PRSimplifier:
         """
         await self._engine._execute_jsx_safe(jsx, "simplify_save")
 
-    def _parse_action_result(self, engine_result: Any, action_name: str) -> Dict[str, Any]:
+    def _parse_action_result(self, engine_result: Any, action_name: str) -> dict[str, Any]:
         """解析引擎执行结果为标准字典。"""
         if not engine_result.success:
             return {"status": "error", "error": engine_result.error, "action": action_name}

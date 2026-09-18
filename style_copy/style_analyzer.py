@@ -14,9 +14,9 @@ style_copy/style_analyzer.py
   - ai_agent.py 的 V4 API 客户端
 """
 
-import os
-import json
 import base64
+import json
+import os
 from typing import Dict, List, Optional
 
 try:
@@ -57,12 +57,12 @@ STYLE_JSON_SCHEMA = {
 class StyleAnalyzer:
     """视频风格分析器"""
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         if not V4_AVAILABLE:
             raise ImportError("ai_agent模块不可用")
         self.agent = V4Agent(api_key=api_key)
     
-    def analyze_from_video(self, video_path: str, keyframe_paths: List[str]) -> Dict:
+    def analyze_from_video(self, video_path: str, keyframe_paths: list[str]) -> dict:
         """从视频分析风格"""
         if not keyframe_paths:
             return self._analyze_without_frames(video_path)
@@ -79,7 +79,7 @@ class StyleAnalyzer:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    def analyze_from_prompt(self, prompt: str) -> Dict:
+    def analyze_from_prompt(self, prompt: str) -> dict:
         """从提示词生成风格描述"""
         system_prompt = f"""你是视频风格专家。请根据以下描述生成结构化风格JSON。
 
@@ -101,7 +101,7 @@ class StyleAnalyzer:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    def _analyze_without_frames(self, video_path: str) -> Dict:
+    def _analyze_without_frames(self, video_path: str) -> dict:
         """没有关键帧时的简化分析"""
         prompt = f"""请分析视频风格，输出结构化JSON。
 
@@ -119,7 +119,7 @@ class StyleAnalyzer:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    def _build_video_analysis_prompt(self, frame_paths: List[str]) -> str:
+    def _build_video_analysis_prompt(self, frame_paths: list[str]) -> str:
         """构建视频分析提示词"""
         prompt = """你是专业视频风格分析师。请分析以下视频帧，提取视觉风格特征。
 
@@ -139,7 +139,7 @@ class StyleAnalyzer:
         
         return prompt
     
-    def _parse_result(self, result: str) -> Dict:
+    def _parse_result(self, result: str) -> dict:
         """解析V4返回结果"""
         try:
             json_start = result.find("{")
@@ -193,7 +193,7 @@ class LocalStyleAnalyzer:
         "slide": ["滑动", "slide"],
     }
 
-    def analyze_from_prompt(self, prompt: str) -> Dict:
+    def analyze_from_prompt(self, prompt: str) -> dict:
         """从提示词生成风格描述（离线）"""
         text = (prompt or "").lower()
 
@@ -242,7 +242,7 @@ class LocalStyleAnalyzer:
         }
         return {"success": True, "style": style, "source": "local_heuristic"}
 
-    def analyze_from_video(self, video_path: str, keyframe_paths: List[str] = None) -> Dict:
+    def analyze_from_video(self, video_path: str, keyframe_paths: list[str] = None) -> dict:
         """从本地视频生成风格描述（离线，基于 ffprobe 特征启发式）"""
         features = self._probe_video(video_path)
         fps = features.get("fps", 0)
@@ -266,10 +266,12 @@ class LocalStyleAnalyzer:
         return {"success": True, "style": style, "source": "local_probe"}
 
     @staticmethod
-    def _probe_video(path: str) -> Dict:
+    def _probe_video(path: str) -> dict:
         """用 ffprobe 探测视频基础特征（失败则返回空）"""
         try:
-            import shutil, subprocess, json as _json
+            import json as _json
+            import shutil
+            import subprocess
             ffprobe = shutil.which("ffprobe") or shutil.which("ffprobe.exe")
             if not ffprobe or not path:
                 return {}
@@ -289,18 +291,18 @@ class LocalStyleAnalyzer:
             return {}
 
     @staticmethod
-    def _match_first(text: str, mapping: Dict[str, List[str]], default: str) -> str:
+    def _match_first(text: str, mapping: dict[str, list[str]], default: str) -> str:
         for key, kws in mapping.items():
             if any(kw in text for kw in kws):
                 return key
         return default
 
     @staticmethod
-    def _match_all(text: str, mapping: Dict[str, List[str]]) -> List[str]:
+    def _match_all(text: str, mapping: dict[str, list[str]]) -> list[str]:
         return [key for key, kws in mapping.items() if any(kw in text for kw in kws)]
 
 
-def get_analyzer(api_key: Optional[str] = None):
+def get_analyzer(api_key: str | None = None):
     """分析器工厂：优先 V4，不可用则降级到本地离线分析器"""
     if V4_AVAILABLE:
         try:

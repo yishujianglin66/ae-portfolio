@@ -10,8 +10,8 @@
 """
 from __future__ import annotations
 
-import sys
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Any, Dict
@@ -36,7 +36,7 @@ def scan_all_effects(
     output_path: str = "",
     export_format: str = "json",
     stats_only: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """一键扫描所有效果。
 
     Args:
@@ -53,8 +53,8 @@ def scan_all_effects(
     logger.info("AE 效果全量扫描 - 开始")
     logger.info("=" * 60)
 
-    from knowledge_base.kb_scanner import KBScanner
     from knowledge_base.kb_loader import KnowledgeBaseLoader
+    from knowledge_base.kb_scanner import KBScanner
 
     scanner = KBScanner()
 
@@ -79,9 +79,9 @@ def scan_all_effects(
     logger.info("")
     logger.info("[4/4] 生成效果分类统计...")
 
-    category_stats: Dict[str, int] = {}
-    plugin_stats: Dict[str, int] = {}
-    source_stats: Dict[str, int] = {}
+    category_stats: dict[str, int] = {}
+    plugin_stats: dict[str, int] = {}
+    source_stats: dict[str, int] = {}
 
     for key, effect in full_effects.items():
         cat = effect.category or "other"
@@ -163,7 +163,7 @@ def scan_all_effects(
     return stats
 
 
-def _export_json(effects: Dict[str, Any], output_path: str) -> None:
+def _export_json(effects: dict[str, Any], output_path: str) -> None:
     """导出 JSON 格式。"""
     data = []
     for key, effect in effects.items():
@@ -188,7 +188,7 @@ def _export_json(effects: Dict[str, Any], output_path: str) -> None:
     )
 
 
-def _export_csv(effects: Dict[str, Any], output_path: str) -> None:
+def _export_csv(effects: dict[str, Any], output_path: str) -> None:
     """导出 CSV 格式。"""
     import csv
 

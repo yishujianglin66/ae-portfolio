@@ -4,9 +4,9 @@
 绕过完整 director 初始化，直接拿方法对比相邻段的渲染产物。
 """
 import json
-import sys
-import subprocess
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 PROJ = Path(__file__).resolve().parent.parent
@@ -79,6 +79,7 @@ for i in [4, 5]:
     subprocess.run(cmd, capture_output=True)
 
 import hashlib
+
 for i in [4, 5]:
     p = PROJ / f"tmp/r1_probe/ext/prod_seg{i}_m.png"
     h = hashlib.md5(p.read_bytes()).hexdigest()[:10]

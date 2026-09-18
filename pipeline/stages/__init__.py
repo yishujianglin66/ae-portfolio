@@ -24,7 +24,8 @@ _FFMPEG_CACHE: dict = {}
 
 # env 覆盖路径（AEK_FFMPEG / AEK_FFPROBE，经 core/paths.py 统一收口）作为最高优先级候选
 try:
-    from core.paths import ffmpeg_bin as _env_ffmpeg, ffprobe_bin as _env_ffprobe
+    from core.paths import ffmpeg_bin as _env_ffmpeg
+    from core.paths import ffprobe_bin as _env_ffprobe
 except ImportError:
     _env_ffmpeg = lambda: ""
     _env_ffprobe = lambda: ""
@@ -129,13 +130,13 @@ class StageContext:
     """
     stage_name: str = ""
     config: Any = None
-    previous_data: Dict[str, Any] = field(default_factory=dict)
+    previous_data: dict[str, Any] = field(default_factory=dict)
     run_id: str = ""
     iteration: int = 0
     mode: str = "auto"
-    global_context: Dict[str, Any] = field(default_factory=dict)
+    global_context: dict[str, Any] = field(default_factory=dict)
 
-    def get_previous(self, stage_name: str) -> Dict[str, Any]:
+    def get_previous(self, stage_name: str) -> dict[str, Any]:
         """获取指定前序阶段的输出数据
         
         Args:
@@ -164,7 +165,7 @@ class StageResult:
     """
     stage: str
     status: StageStatus = StageStatus.PENDING
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     error: str = ""
     duration_sec: float = 0.0
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -173,7 +174,7 @@ class StageResult:
         """是否成功"""
         return self.status == StageStatus.DONE
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转 dict (供序列化)"""
         return {
             "stage": self.stage,
@@ -201,9 +202,9 @@ class StageMetadata:
     name: str
     version: str = "1.0"
     description: str = ""
-    inputs: List[str] = field(default_factory=list)
-    outputs: List[str] = field(default_factory=list)
-    tags: List[str] = field(default_factory=list)
+    inputs: list[str] = field(default_factory=list)
+    outputs: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     critical: bool = False
 
 

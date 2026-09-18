@@ -28,9 +28,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, Type
 from pathlib import Path
-
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 # ============================================================================
 # 验证结果
@@ -40,8 +39,8 @@ from pathlib import Path
 class ValidationResult:
     """配置验证结果"""
     valid: bool
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     fixed_value: Any = None  # 自动修复后的值
 
     def __bool__(self) -> bool:
@@ -63,21 +62,21 @@ class ConfigSchemaNode:
     default: Any = None
     description: str = ""
     # 类型特定约束
-    min_value: Optional[Union[int, float]] = None
-    max_value: Optional[Union[int, float]] = None
-    min_length: Optional[int] = None
-    max_length: Optional[int] = None
-    pattern: Optional[str] = None
-    enum: Optional[List[Any]] = None
-    item_schema: Optional["ConfigSchemaNode"] = None  # list 元素 schema
-    properties: Optional[Dict[str, "ConfigSchemaNode"]] = None  # dict 属性 schema
+    min_value: Union[int, float] | None = None
+    max_value: Union[int, float] | None = None
+    min_length: int | None = None
+    max_length: int | None = None
+    pattern: str | None = None
+    enum: list[Any] | None = None
+    item_schema: "ConfigSchemaNode" | None = None  # list 元素 schema
+    properties: dict[str, "ConfigSchemaNode"] | None = None  # dict 属性 schema
     # 自定义验证器
-    validator: Optional[Callable[[Any], Tuple[bool, Optional[str]]]] = None
+    validator: Callable[[Any], tuple[bool, str | None]] | None = None
     # 转换器
-    converter: Optional[Callable[[Any], Any]] = None
+    converter: Callable[[Any], Any] | None = None
     # 元数据
     category: str = "general"
-    examples: List[Any] = field(default_factory=list)
+    examples: list[Any] = field(default_factory=list)
 
 
 # ============================================================================
@@ -90,7 +89,7 @@ class ConfigSchemaValidator:
     支持验证嵌套配置结构，类型检查，范围验证等。
     """
 
-    def __init__(self, schema: Dict[str, ConfigSchemaNode]):
+    def __init__(self, schema: dict[str, ConfigSchemaNode]):
         """
         Args:
             schema: 顶层配置Schema字典 {config_key: ConfigSchemaNode}
@@ -108,7 +107,7 @@ class ConfigSchemaValidator:
             "any": lambda v, n: ValidationResult(valid=True),
         }
 
-    def validate(self, config: Dict[str, Any]) -> ValidationResult:
+    def validate(self, config: dict[str, Any]) -> ValidationResult:
         """验证完整配置
 
         Args:
@@ -117,9 +116,9 @@ class ConfigSchemaValidator:
         Returns:
             ValidationResult 验证结果
         """
-        all_errors: List[str] = []
-        all_warnings: List[str] = []
-        cleaned_config: Dict[str, Any] = {}
+        all_errors: list[str] = []
+        all_warnings: list[str] = []
+        cleaned_config: dict[str, Any] = {}
 
         for key, node in self._schema.items():
             value = config.get(key)
@@ -179,8 +178,8 @@ class ConfigSchemaValidator:
         path: str,
     ) -> ValidationResult:
         """内部验证方法"""
-        errors: List[str] = []
-        warnings: List[str] = []
+        errors: list[str] = []
+        warnings: list[str] = []
         current_value = value
 
         # 类型验证
@@ -352,8 +351,8 @@ class ConfigSchemaValidator:
         if isinstance(value, list):
             # 如果有元素schema，逐个验证
             if node.item_schema:
-                all_errors: List[str] = []
-                fixed_items: List[Any] = []
+                all_errors: list[str] = []
+                fixed_items: list[Any] = []
                 for i, item in enumerate(value):
                     result = self._validate_value(item, node.item_schema, f"[{i}]")
                     if not result.valid:
@@ -394,9 +393,9 @@ class ConfigSchemaValidator:
         if isinstance(value, dict):
             # 如果有属性schema，逐个验证
             if node.properties:
-                all_errors: List[str] = []
-                all_warnings: List[str] = []
-                fixed_dict: Dict[str, Any] = {}
+                all_errors: list[str] = []
+                all_warnings: list[str] = []
+                fixed_dict: dict[str, Any] = {}
                 for prop_key, prop_schema in node.properties.items():
                     prop_value = value.get(prop_key)
                     if prop_value is None and prop_schema.default is not None:
@@ -475,7 +474,7 @@ class ConfigSchemaValidator:
         lines = ["# 配置项文档\n"]
 
         # 按分类组织
-        categories: Dict[str, List[Tuple[str, ConfigSchemaNode]]] = {}
+        categories: dict[str, list[tuple[str, ConfigSchemaNode]]] = {}
         for key, node in self._schema.items():
             cat = node.category or "general"
             if cat not in categories:
@@ -494,7 +493,7 @@ class ConfigSchemaValidator:
 
         return "\n".join(lines)
 
-    def get_defaults(self) -> Dict[str, Any]:
+    def get_defaults(self) -> dict[str, Any]:
         """获取所有默认值"""
         defaults = {}
         for key, node in self._schema.items():
@@ -507,7 +506,7 @@ class ConfigSchemaValidator:
 # 项目默认配置Schema
 # ============================================================================
 
-def build_default_schema() -> Dict[str, ConfigSchemaNode]:
+def build_default_schema() -> dict[str, ConfigSchemaNode]:
     """构建项目默认配置Schema"""
     return {
         "environment": ConfigSchemaNode(
@@ -657,8 +656,8 @@ def build_default_schema() -> Dict[str, ConfigSchemaNode]:
 # ============================================================================
 
 def validate_config(
-    config: Dict[str, Any],
-    schema: Optional[Dict[str, ConfigSchemaNode]] = None,
+    config: dict[str, Any],
+    schema: dict[str, ConfigSchemaNode] | None = None,
 ) -> ValidationResult:
     """便捷函数：验证配置
 

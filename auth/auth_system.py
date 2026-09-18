@@ -26,10 +26,10 @@ import os
 import secrets
 import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
-from datetime import datetime, timezone
 
 try:
     from logger import get_logger
@@ -72,7 +72,7 @@ class Permission(str, Enum):
 
 
 # 角色 -> 默认权限映射
-ROLE_PERMISSIONS: Dict[Role, Set[Permission]] = {
+ROLE_PERMISSIONS: dict[Role, set[Permission]] = {
     Role.ADMIN: set(Permission),  # 所有权限
     Role.OPERATOR: {
         Permission.TASK_SUBMIT, Permission.TASK_CANCEL, Permission.TASK_VIEW,
@@ -96,7 +96,7 @@ _WEAK_SECRET_KEY = "ae-knowledge-vault-secret-key-please-change-in-production"
 
 MIN_SECRET_KEY_LENGTH = 32
 
-def _resolve_secret_key(explicit: Optional[str] = None) -> str:
+def _resolve_secret_key(explicit: str | None = None) -> str:
     key = explicit or os.environ.get("AE_VAULT_SECRET_KEY", "")
     if not key:
         key = _WEAK_SECRET_KEY
@@ -119,7 +119,7 @@ def _resolve_secret_key(explicit: Optional[str] = None) -> str:
 # 工具函数: 密码哈希
 # ============================================================================
 
-def hash_password(password: str, salt: Optional[str] = None) -> str:
+def hash_password(password: str, salt: str | None = None) -> str:
     """哈希密码 (PBKDF2-HMAC-SHA256)
 
     Args:
@@ -183,7 +183,7 @@ def _hmac_sha256(message: bytes, secret: bytes) -> bytes:
     return hmac.new(secret, message, hashlib.sha256).digest()
 
 
-def jwt_encode(payload: Dict[str, Any], secret: str = _WEAK_SECRET_KEY,
+def jwt_encode(payload: dict[str, Any], secret: str = _WEAK_SECRET_KEY,
                algorithm: str = JWT_ALG) -> str:
     """编码 JWT
 
@@ -212,7 +212,7 @@ def jwt_encode(payload: Dict[str, Any], secret: str = _WEAK_SECRET_KEY,
 
 
 def jwt_decode(token: str, secret: str = _WEAK_SECRET_KEY,
-               verify_exp: bool = True) -> Dict[str, Any]:
+               verify_exp: bool = True) -> dict[str, Any]:
     """解码并验证 JWT
 
     Args:
@@ -273,14 +273,14 @@ class User:
     email: str
     password_hash: str
     role: Role = Role.VIEWER
-    permissions: Set[Permission] = field(default_factory=set)
+    permissions: set[Permission] = field(default_factory=set)
     is_active: bool = True
     created_at: float = field(default_factory=time.time)
-    last_login: Optional[float] = None
-    last_login_ip: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    last_login: float | None = None
+    last_login_ip: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为字典 (不含密码)"""
         d = asdict(self)
         d["role"] = self.role.value
@@ -309,7 +309,7 @@ class TokenPair:
     user_id: str = ""
     username: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "access_token": self.access_token,
             "refresh_token": self.refresh_token,
@@ -329,10 +329,10 @@ class AuditLogEntry:
     action: str
     resource: str
     timestamp: float
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    ip_address: str | None = None
+    user_agent: str | None = None
     success: bool = True
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 # ============================================================================
@@ -343,9 +343,9 @@ class UserStore:
     """用户存储"""
 
     def __init__(self):
-        self._users: Dict[str, User] = {}  # user_id -> User
-        self._username_index: Dict[str, str] = {}  # username (lower) -> user_id
-        self._email_index: Dict[str, str] = {}  # email (lower) -> user_id
+        self._users: dict[str, User] = {}  # user_id -> User
+        self._username_index: dict[str, str] = {}  # username (lower) -> user_id
+        self._email_index: dict[str, str] = {}  # email (lower) -> user_id
         self._lock = __import__("threading").RLock()
 
     def add(self, user: User) -> None:
@@ -358,21 +358,21 @@ class UserStore:
             self._username_index[user.username.lower()] = user.user_id
             self._email_index[user.email.lower()] = user.user_id
 
-    def get(self, user_id: str) -> Optional[User]:
+    def get(self, user_id: str) -> User | None:
         with self._lock:
             return self._users.get(user_id)
 
-    def get_by_username(self, username: str) -> Optional[User]:
+    def get_by_username(self, username: str) -> User | None:
         with self._lock:
             uid = self._username_index.get(username.lower())
             return self._users.get(uid) if uid else None
 
-    def get_by_email(self, email: str) -> Optional[User]:
+    def get_by_email(self, email: str) -> User | None:
         with self._lock:
             uid = self._email_index.get(email.lower())
             return self._users.get(uid) if uid else None
 
-    def update(self, user_id: str, updates: Dict[str, Any]) -> User:
+    def update(self, user_id: str, updates: dict[str, Any]) -> User:
         with self._lock:
             user = self._users.get(user_id)
             if not user:
@@ -424,7 +424,7 @@ class UserStore:
             self._email_index.pop(user.email.lower(), None)
             return True
 
-    def list_users(self) -> List[User]:
+    def list_users(self) -> list[User]:
         with self._lock:
             return list(self._users.values())
 
@@ -441,7 +441,7 @@ class TokenBlacklist:
     """令牌黑名单 (撤销已签发但未过期的令牌)"""
 
     def __init__(self, cleanup_interval: float = 300.0):
-        self._blacklist: Dict[str, float] = {}  # token_id -> exp
+        self._blacklist: dict[str, float] = {}  # token_id -> exp
         self._lock = __import__("threading").RLock()
         self._cleanup_interval = cleanup_interval
         self._last_cleanup = time.time()
@@ -480,13 +480,13 @@ class AuditLogger:
     """审计日志记录器"""
 
     def __init__(self, max_entries: int = 10000):
-        self._entries: List[AuditLogEntry] = []
+        self._entries: list[AuditLogEntry] = []
         self._max_entries = max_entries
         self._lock = __import__("threading").RLock()
 
     def log(self, user_id: str, username: str, action: str, resource: str,
-            success: bool = True, ip_address: Optional[str] = None,
-            user_agent: Optional[str] = None, **details) -> str:
+            success: bool = True, ip_address: str | None = None,
+            user_agent: str | None = None, **details) -> str:
         """记录审计日志"""
         log_id = uuid.uuid4().hex[:12]
         entry = AuditLogEntry(
@@ -507,8 +507,8 @@ class AuditLogger:
                 self._entries = self._entries[-self._max_entries:]
         return log_id
 
-    def list_entries(self, user_id: Optional[str] = None, action: Optional[str] = None,
-                    limit: int = 100) -> List[AuditLogEntry]:
+    def list_entries(self, user_id: str | None = None, action: str | None = None,
+                    limit: int = 100) -> list[AuditLogEntry]:
         with self._lock:
             entries = list(self._entries)
         if user_id:
@@ -572,7 +572,7 @@ class AuthManager:
             if generated:
                 print("=" * 60)
                 print("  首次启动：自动生成的管理员密码")
-                print(f"  用户名: admin")
+                print("  用户名: admin")
                 print(f"  密码  : {bootstrap_pwd}")
                 print("  请立即登录并修改密码！")
                 print("  或设置 AEK_BOOTSTRAP_ADMIN_PASSWORD 环境变量。")
@@ -582,7 +582,7 @@ class AuthManager:
 
     def register_user(self, username: str, email: str, password: str,
                       role: Role = Role.VIEWER,
-                      permissions: Optional[Set[Permission]] = None) -> User:
+                      permissions: set[Permission] | None = None) -> User:
         """注册新用户
 
         Raises:
@@ -607,7 +607,7 @@ class AuthManager:
         _logger.info(f"新用户注册: {username} (角色: {role.value})")
         return user
 
-    def delete_user(self, user_id: str, operator: Optional[User] = None) -> bool:
+    def delete_user(self, user_id: str, operator: User | None = None) -> bool:
         """删除用户"""
         user = self.users.get(user_id)
         if not user:
@@ -625,8 +625,8 @@ class AuthManager:
             _logger.info(f"用户已删除: {user.username}")
         return ok
 
-    def update_user(self, user_id: str, updates: Dict[str, Any],
-                    operator: Optional[User] = None) -> User:
+    def update_user(self, user_id: str, updates: dict[str, Any],
+                    operator: User | None = None) -> User:
         """更新用户信息"""
         user = self.users.update(user_id, updates)
         self.audit.log(
@@ -655,7 +655,7 @@ class AuthManager:
     # ==================== 认证 ====================
 
     def authenticate(self, username: str, password: str,
-                     ip_address: Optional[str] = None) -> Tuple[User, TokenPair]:
+                     ip_address: str | None = None) -> tuple[User, TokenPair]:
         """用户认证 (登录)
 
         Returns:
@@ -760,7 +760,7 @@ class AuthManager:
 
     # ==================== 令牌验证 ====================
 
-    def verify_token(self, token: str) -> Dict[str, Any]:
+    def verify_token(self, token: str) -> dict[str, Any]:
         """验证 access_token
 
         Returns:
@@ -784,7 +784,7 @@ class AuthManager:
 
         return payload
 
-    def get_user_from_token(self, token: str) -> Optional[User]:
+    def get_user_from_token(self, token: str) -> User | None:
         """从令牌中获取用户"""
         try:
             payload = self.verify_token(token)
@@ -801,7 +801,7 @@ class AuthManager:
             return False
         return user.has_permission(permission)
 
-    def require_permission(self, token: str, permission: Permission) -> Dict[str, Any]:
+    def require_permission(self, token: str, permission: Permission) -> dict[str, Any]:
         """要求令牌必须有指定权限, 否则抛出异常
 
         Returns:
@@ -828,10 +828,10 @@ class AuthManager:
 # 单例
 # ============================================================================
 
-_auth_manager: Optional[AuthManager] = None
+_auth_manager: AuthManager | None = None
 
 
-def get_auth_manager(secret_key: Optional[str] = None) -> AuthManager:
+def get_auth_manager(secret_key: str | None = None) -> AuthManager:
     """获取认证管理器单例"""
     global _auth_manager
     if _auth_manager is None:
@@ -855,8 +855,8 @@ def create_fastapi_dependencies():
             ...
     """
     try:
-        from fastapi import Depends, HTTPException, Header, status
-        from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+        from fastapi import Depends, Header, HTTPException, status
+        from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
     except ImportError:
         _logger.warning("FastAPI 未安装, 跳过依赖注入创建")
         return None
@@ -865,7 +865,7 @@ def create_fastapi_dependencies():
     auth = get_auth_manager()
 
     def get_current_user(
-        credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+        credentials: HTTPAuthorizationCredentials | None = Depends(security),
     ) -> User:
         """获取当前用户 (必须已认证)"""
         if not credentials:
@@ -910,8 +910,8 @@ def create_fastapi_dependencies():
         return user
 
     def optional_user(
-        credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
-    ) -> Optional[User]:
+        credentials: HTTPAuthorizationCredentials | None = Depends(security),
+    ) -> User | None:
         """可选的用户 (未认证返回 None)"""
         if not credentials:
             return None
@@ -948,8 +948,8 @@ def _run_tests():
     assert verify_password("mypassword", hashed), "密码验证失败"
     assert not verify_password("wrongpassword", hashed), "错误密码不应通过"
     print(f"  哈希格式: {hashed[:30]}...")
-    print(f"  验证正确密码: OK")
-    print(f"  拒绝错误密码: OK")
+    print("  验证正确密码: OK")
+    print("  拒绝错误密码: OK")
 
     # ---------- 2. JWT 编解码 ----------
     print("\n2. JWT 编解码...")
@@ -967,7 +967,7 @@ def _run_tests():
         assert False, "错误密钥应失败"
     except ValueError as e:
         assert "签名" in str(e)
-        print(f"  错误密钥拒绝: OK")
+        print("  错误密钥拒绝: OK")
 
     # 过期令牌应失败
     expired_payload = {"sub": "x", "exp": int(time.time()) - 100}
@@ -977,7 +977,7 @@ def _run_tests():
         assert False, "过期令牌应失败"
     except ValueError as e:
         assert "过期" in str(e)
-        print(f"  过期令牌拒绝: OK")
+        print("  过期令牌拒绝: OK")
 
     # ---------- 3. 默认用户 ----------
     print("\n3. 默认用户...")
@@ -1004,14 +1004,14 @@ def _run_tests():
         auth.register_user("newuser", "other@ae-vault.local", "pass123")
         assert False
     except ValueError:
-        print(f"  重复用户名拒绝: OK")
+        print("  重复用户名拒绝: OK")
 
     # 密码过短应失败
     try:
         auth.register_user("short", "short@ae-vault.local", "123")
         assert False
     except ValueError:
-        print(f"  短密码拒绝: OK")
+        print("  短密码拒绝: OK")
 
     # ---------- 5. 登录认证 ----------
     print("\n5. 登录认证...")
@@ -1030,14 +1030,14 @@ def _run_tests():
         auth.authenticate("admin", "wrongpassword")
         assert False
     except ValueError:
-        print(f"  错误密码拒绝: OK")
+        print("  错误密码拒绝: OK")
 
     # 不存在的用户应失败
     try:
         auth.authenticate("nonexistent", "pass")
         assert False
     except ValueError:
-        print(f"  不存在用户拒绝: OK")
+        print("  不存在用户拒绝: OK")
 
     # ---------- 6. 令牌验证 ----------
     print("\n6. 令牌验证...")
@@ -1050,7 +1050,7 @@ def _run_tests():
     user_from_token = auth.get_user_from_token(tokens.access_token)
     assert user_from_token is not None
     assert user_from_token.username == "admin"
-    print(f"  从令牌获取用户: OK")
+    print("  从令牌获取用户: OK")
 
     # ---------- 7. 刷新令牌 ----------
     print("\n7. 刷新令牌...")
@@ -1064,39 +1064,39 @@ def _run_tests():
     print("\n8. 权限检查...")
     assert admin.has_permission(Permission.USER_MANAGE), "admin 应有 USER_MANAGE"
     assert admin.has_permission(Permission.TASK_SUBMIT), "admin 应有 TASK_SUBMIT"
-    print(f"  admin 有 USER_MANAGE: OK")
-    print(f"  admin 有 TASK_SUBMIT: OK")
+    print("  admin 有 USER_MANAGE: OK")
+    print("  admin 有 TASK_SUBMIT: OK")
 
     viewer = auth.users.get_by_username("viewer")
     assert not viewer.has_permission(Permission.USER_MANAGE), "viewer 不应有 USER_MANAGE"
     assert viewer.has_permission(Permission.TASK_VIEW), "viewer 应有 TASK_VIEW"
-    print(f"  viewer 无 USER_MANAGE: OK")
-    print(f"  viewer 有 TASK_VIEW: OK")
+    print("  viewer 无 USER_MANAGE: OK")
+    print("  viewer 有 TASK_VIEW: OK")
 
     # require_permission
     payload = auth.require_permission(tokens.access_token, Permission.USER_MANAGE)
     assert payload["username"] == "admin"
-    print(f"  require_permission (admin, USER_MANAGE): OK")
+    print("  require_permission (admin, USER_MANAGE): OK")
 
     viewer_tokens = auth.authenticate("viewer", "viewer123")[1]
     try:
         auth.require_permission(viewer_tokens.access_token, Permission.USER_MANAGE)
         assert False
     except PermissionError:
-        print(f"  require_permission (viewer, USER_MANAGE) 拒绝: OK")
+        print("  require_permission (viewer, USER_MANAGE) 拒绝: OK")
 
     # ---------- 9. 令牌黑名单 / 登出 ----------
     print("\n9. 令牌黑名单 / 登出...")
     payload = auth.verify_token(tokens.access_token)
     auth.logout(payload["jti"], payload["exp"], payload["sub"], payload["username"])
-    print(f"  登出 (撤销令牌): OK")
+    print("  登出 (撤销令牌): OK")
 
     try:
         auth.verify_token(tokens.access_token)
         assert False, "已撤销令牌应失败"
     except ValueError as e:
         assert "撤销" in str(e)
-        print(f"  已撤销令牌拒绝: OK")
+        print("  已撤销令牌拒绝: OK")
 
     # ---------- 10. 修改密码 ----------
     print("\n10. 修改密码...")
@@ -1106,11 +1106,11 @@ def _run_tests():
         auth.authenticate("newuser", "newpass123")
         assert False
     except ValueError:
-        print(f"  旧密码登录拒绝: OK")
+        print("  旧密码登录拒绝: OK")
     # 新密码应成功
     user, _ = auth.authenticate("newuser", "newpass456")
     assert user.username == "newuser"
-    print(f"  新密码登录: OK")
+    print("  新密码登录: OK")
 
     # ---------- 11. 用户管理 ----------
     print("\n11. 用户管理...")
@@ -1121,26 +1121,26 @@ def _run_tests():
         assert False, "禁用用户不应能登录"
     except ValueError as e:
         assert "禁用" in str(e)
-        print(f"  禁用用户登录拒绝: OK")
+        print("  禁用用户登录拒绝: OK")
 
     # 重新启用
     auth.update_user(new_user.user_id, {"is_active": True})
     user, _ = auth.authenticate("newuser", "newpass456")
     assert user.is_active
-    print(f"  重新启用用户: OK")
+    print("  重新启用用户: OK")
 
     # 删除用户
     ok = auth.delete_user(new_user.user_id)
     assert ok
     assert auth.users.get(new_user.user_id) is None
-    print(f"  删除用户: OK")
+    print("  删除用户: OK")
 
     # 不能删除 admin
     try:
         auth.delete_user(admin.user_id)
         assert False
     except ValueError:
-        print(f"  删除 admin 拒绝: OK")
+        print("  删除 admin 拒绝: OK")
 
     # ---------- 12. 审计日志 ----------
     print("\n12. 审计日志...")
@@ -1157,11 +1157,11 @@ def _run_tests():
     try:
         deps = create_fastapi_dependencies()
         if deps:
-            print(f"  依赖注入创建: OK")
+            print("  依赖注入创建: OK")
             print(f"  get_current_user: {deps.get_current_user}")
             print(f"  require_admin: {deps.require_admin}")
         else:
-            print(f"  FastAPI 未安装, 跳过")
+            print("  FastAPI 未安装, 跳过")
     except Exception as e:
         print(f"  依赖注入创建失败: {e}")
 

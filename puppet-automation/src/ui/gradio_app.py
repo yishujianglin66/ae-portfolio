@@ -14,12 +14,12 @@ Features:
 from __future__ import annotations
 
 import asyncio
-import httpx
 import json
 import time
 from pathlib import Path
 
 import gradio as gr
+import httpx
 
 # API Configuration
 API_BASE_URL = "http://127.0.0.1:8000"

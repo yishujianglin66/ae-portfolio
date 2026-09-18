@@ -12,10 +12,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from ai.t11_hybrid_search import (  # noqa: E402
-    RERANK_ENV, decide_route, query_has_alias_hit,
-)
 from ai.query_normalizer import NORM_API_ENV  # noqa: E402
+from ai.t11_hybrid_search import (  # noqa: E402
+    RERANK_ENV,
+    decide_route,
+    query_has_alias_hit,
+)
 
 
 class TestQueryHasAliasHit(unittest.TestCase):

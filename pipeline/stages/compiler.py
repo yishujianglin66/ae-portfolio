@@ -38,15 +38,15 @@ class CompilerStage:
 
         try:
             try:
-                from compiler.vocabulary_map import VocabularyMap
                 from compiler.intent_router import IntentRouter
                 from compiler.parameter_mapper import ParameterMapper
                 from compiler.report_to_ops import ReportToOps
+                from compiler.vocabulary_map import VocabularyMap
             except ImportError:
-                from vocabulary_map import VocabularyMap
                 from intent_router import IntentRouter
                 from parameter_mapper import ParameterMapper
                 from report_to_ops import ReportToOps
+                from vocabulary_map import VocabularyMap
 
             self._vocab_map = VocabularyMap()
             self._intent_router = IntentRouter()
@@ -57,7 +57,7 @@ class CompilerStage:
             logger.warning(f"Compiler modules not available: {e}")
             return False
 
-    def run(self, previous_data: Dict) -> Dict:
+    def run(self, previous_data: dict) -> dict:
         """执行编译管线"""
         # 获取用户输入
         user_input = ""
@@ -128,7 +128,7 @@ class CompilerStage:
 
         return result
 
-    def _ops_to_script(self, compiler_result: Dict) -> Dict:
+    def _ops_to_script(self, compiler_result: dict) -> dict:
         """将编译结果转换为管线剧本格式"""
         return {
             "title": compiler_result.get("input", "Compiled Output"),
@@ -139,7 +139,7 @@ class CompilerStage:
             "source": "compiler",
         }
 
-    def _ops_to_effects(self, ops: List) -> List[Dict]:
+    def _ops_to_effects(self, ops: list) -> list[dict]:
         """将操作列表转换为效果栈"""
         effects = []
         for op in ops:
@@ -152,7 +152,7 @@ class CompilerStage:
                 })
         return effects
 
-    def _ops_to_transitions(self, ops: List) -> List[Dict]:
+    def _ops_to_transitions(self, ops: list) -> list[dict]:
         """将操作列表转换为转场计划"""
         transitions = []
         for op in ops:

@@ -99,7 +99,7 @@ class BlenderAEBridge:
         frame_count: int = 60,
         render_engine: str = "BLENDER_EEVEE",
         import_to_ae: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """全链路：Blender 生成舞台 → 导出 AE 资产 → AE 合成。
 
         Args:
@@ -118,7 +118,7 @@ class BlenderAEBridge:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "stage_created": False,
             "fbx_exported": False,
             "frames_exported": False,
@@ -164,7 +164,7 @@ class BlenderAEBridge:
             return result
 
         # Step 2a: 创建 AE 工程和合成
-        logger.info(f"[BlenderAEBridge] Step 2a: Creating AE project + comp")
+        logger.info("[BlenderAEBridge] Step 2a: Creating AE project + comp")
         ae_result = await self.ae_engine.create_project(
             project_path=ae_project_path,
             comp_name=comp_name,
@@ -229,12 +229,12 @@ class BlenderAEBridge:
         style: str = "anime",
         resolution: tuple[int, int] = (1920, 1080),
         frame_count: int = 60,
-        model_path: Optional[Path | str] = None,
+        model_path: Path | str | None = None,
         outline_mode: str = "lineart",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Cel-shading 3渲2 → AE 合成链路。"""
         output_dir = Path(output_dir)
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "cel_rendered": False,
             "fbx_exported": False,
             "ae_project_created": False,
@@ -300,15 +300,15 @@ class BlenderAEBridge:
         self,
         output_dir: Path | str,
         element_type: str = "logo",
-        element_params: Optional[Dict[str, Any]] = None,
+        element_params: dict[str, Any] | None = None,
         resolution: tuple[int, int] = (1920, 1080),
         frame_count: int = 60,
-        ae_project_path: Optional[Path | str] = None,
+        ae_project_path: Path | str | None = None,
         comp_name: str = "Foreground Comp",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """3D 前景元素 → AE 叠加合成。"""
         output_dir = Path(output_dir)
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "element_rendered": False,
             "ae_project_created": False,
             "asset_imported_to_ae": False,

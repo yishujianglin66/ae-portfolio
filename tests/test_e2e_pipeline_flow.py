@@ -9,10 +9,10 @@ test_e2e_pipeline_flow.py
   4. 参数优化器优化效果参数
   5. 混合路由（Silhouette + AE）场景
 """
-import sys
-import os
-import tempfile
 import logging
+import os
+import sys
+import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -67,10 +67,12 @@ def test_full_pipeline_flow():
 def test_nlu_intent_feedback():
     """测试 NLU 精细意图反哺粗粒度 intent"""
     print("\n[Test] NLU 精细意图反哺粗粒度 intent")
-    from ae_agent_pipeline import AEAgentPipeline, PerceptionResult
-    from nlu_parser import IntentType
-    from core.memory_store import MemoryStore
     import tempfile
+
+    from nlu_parser import IntentType
+
+    from ae_agent_pipeline import AEAgentPipeline, PerceptionResult
+    from core.memory_store import MemoryStore
 
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         db_path = f.name
@@ -99,9 +101,10 @@ def test_nlu_intent_feedback():
 def test_knowledge_graph_enhancement():
     """测试效果知识图谱增强效果列表"""
     print("\n[Test] 效果知识图谱增强效果列表")
+    import tempfile
+
     from ae_agent_pipeline import AEAgentPipeline, PerceptionResult
     from core.memory_store import MemoryStore
-    import tempfile
 
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         db_path = f.name
@@ -128,9 +131,10 @@ def test_knowledge_graph_enhancement():
 def test_parameter_optimization():
     """测试参数优化器优化效果参数"""
     print("\n[Test] 参数优化器优化效果参数")
+    import tempfile
+
     from ae_agent_pipeline import AEAgentPipeline, PerceptionResult
     from core.memory_store import MemoryStore
-    import tempfile
 
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         db_path = f.name
@@ -170,9 +174,10 @@ def test_parameter_optimization():
 def test_hybrid_routing():
     """测试混合路由（Silhouette + AE）场景"""
     print("\n[Test] 混合路由（Silhouette + AE）场景")
+    import tempfile
+
     from ae_agent_pipeline import AEAgentPipeline, PerceptionResult
     from core.memory_store import MemoryStore
-    import tempfile
 
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         db_path = f.name
@@ -207,9 +212,10 @@ def test_hybrid_routing():
 def test_empty_input_handling():
     """测试空输入处理"""
     print("\n[Test] 空输入处理")
+    import tempfile
+
     from ae_agent_pipeline import AEAgentPipeline, PerceptionResult
     from core.memory_store import MemoryStore
-    import tempfile
 
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         db_path = f.name
@@ -242,9 +248,10 @@ def test_empty_input_handling():
 def test_ae_only_routing():
     """测试纯 AE 路由场景"""
     print("\n[Test] 纯 AE 路由场景")
+    import tempfile
+
     from ae_agent_pipeline import AEAgentPipeline, PerceptionResult
     from core.memory_store import MemoryStore
-    import tempfile
 
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         db_path = f.name
@@ -270,9 +277,10 @@ def test_ae_only_routing():
 def test_feedback_mechanism():
     """测试 feedback() 反馈层机制"""
     print("\n[Test] feedback() 反馈层机制")
-    from ae_agent_pipeline import AEAgentPipeline, PerceptionResult, ExecutionResult
-    from core.memory_store import MemoryStore
     import tempfile
+
+    from ae_agent_pipeline import AEAgentPipeline, ExecutionResult, PerceptionResult
+    from core.memory_store import MemoryStore
 
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
         db_path = f.name

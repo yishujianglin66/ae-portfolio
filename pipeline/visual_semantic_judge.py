@@ -52,14 +52,14 @@ class JudgeReport:
     """语义评判结果"""
     score: float = 100.0                       # 0-100, 100 为最好
     passed: bool = True
-    issues: List[str] = field(default_factory=list)
-    recommendations: List[str] = field(default_factory=list)
+    issues: list[str] = field(default_factory=list)
+    recommendations: list[str] = field(default_factory=list)
     backend: str = "rule"                      # rule / vlm
     hard_veto: bool = False                    # 灾难性问题, 无论信号分多高都应否决
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    metrics: dict[str, Any] = field(default_factory=dict)
     error: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "score": self.score,
             "passed": self.passed,
@@ -83,7 +83,7 @@ class RuleJudge:
         self.ffmpeg_bin = ffmpeg_bin or "ffmpeg"
         self.ffprobe_bin = ffprobe_bin or "ffprobe"
 
-    def judge(self, video_path: str, context: Optional[Dict] = None) -> JudgeReport:
+    def judge(self, video_path: str, context: dict | None = None) -> JudgeReport:
         path = Path(video_path)
         if not path.exists():
             return JudgeReport(
@@ -92,10 +92,10 @@ class RuleJudge:
                 recommendations=["检查 render 阶段输出路径"],
             )
 
-        issues: List[str] = []
-        recommendations: List[str] = []
+        issues: list[str] = []
+        recommendations: list[str] = []
         hard_veto = False
-        metrics: Dict[str, Any] = {}
+        metrics: dict[str, Any] = {}
 
         # 检查0: 文件大小 (沿用既有渲染验证标准 >100KB)
         size = path.stat().st_size
@@ -261,7 +261,7 @@ class RuleJudge:
             metrics=metrics,
         )
 
-    def _probe_audio_energy(self, video_path: str) -> Optional[float]:
+    def _probe_audio_energy(self, video_path: str) -> float | None:
         """ffprobe 采样音频均方能量; 无音频流/工具缺失返回 None"""
         cmd = [
             self.ffprobe_bin, "-v", "error",
@@ -305,7 +305,7 @@ class RuleJudge:
 # 【提速】模块级模型缓存: 同 (权重路径, 量化策略, 设备) 的已加载模型/processor 常驻,
 # 质量迭代多轮 verify 不再重复加载 8B 权重 (首次 ~60-90s → 后续复用近 0)。
 # 显存仅 8GB, 只保留 1 个模型; 换路径/量化策略时自动替换旧的。
-_VLM_CACHE: Dict[str, Any] = {}
+_VLM_CACHE: dict[str, Any] = {}
 
 _VLM_PROMPT_TEMPLATE = """你是专业视频后期质检员。请观看这段自动生成的混剪视频片段，从以下5个维度打分，每项0-10分（10分为最好）：
 1. black_frame 黑帧/空画面情况（10=完全没有黑帧，画面始终有内容）
@@ -440,7 +440,7 @@ class VLMJudge:
             return False
 
     @staticmethod
-    def extract_frames(video_path: str, n_frames: int = 8) -> List[Any]:
+    def extract_frames(video_path: str, n_frames: int = 8) -> list[Any]:
         """均匀抽帧 (RGB), 写法与 models/camera_classifier/vlm_expert_3class.py 一致"""
         import cv2
         import numpy as np
@@ -477,7 +477,7 @@ class VLMJudge:
         return frames
 
     @staticmethod
-    def build_prompt(context: Optional[Dict] = None) -> str:
+    def build_prompt(context: dict | None = None) -> str:
         """根据 plan 上下文构造打分 prompt (供测试与推理共用)"""
         context_line = ""
         if context:
@@ -495,7 +495,7 @@ class VLMJudge:
                 context_line = "创作意图信息(用于判断特效是否生效、风格是否契合): " + "; ".join(parts)
         return _VLM_PROMPT_TEMPLATE.format(context_line=context_line or "（无附加创作意图信息）")
 
-    def judge(self, video_path: str, context: Optional[Dict] = None) -> JudgeReport:
+    def judge(self, video_path: str, context: dict | None = None) -> JudgeReport:
         if not self.load():
             raise RuntimeError(f"VLM unavailable: {self._load_error}")
 
@@ -545,7 +545,7 @@ class VLMJudge:
         score = max(0.0, min(100.0, score))
 
         issues = list(vlm_issues)
-        recommendations: List[str] = []
+        recommendations: list[str] = []
         if dims.get("black_frame", 10) <= 3:
             issues.append("VLM检出黑帧/空画面")
             recommendations.append("重新渲染: VLM检出黑帧，检查图层可见性与渲染范围")
@@ -569,7 +569,7 @@ class VLMJudge:
     @staticmethod
     def _parse_output(text: str):
         """解析 VLM 输出: 先 JSON, 失败降级为逐项正则; 再失败返回 (None, [])"""
-        issues: List[str] = []
+        issues: list[str] = []
         m = re.search(r"\{.*\}", text, re.S)
         if m:
             try:
@@ -624,7 +624,7 @@ class VisualSemanticJudge:
         self.rule = RuleJudge(ffmpeg_bin=ffmpeg_bin, ffprobe_bin=ffprobe_bin)
         self.vlm = VLMJudge(model_path=model_path, device=device, quantize=quantize)
 
-    def judge(self, video_path: str, context: Optional[Dict] = None) -> JudgeReport:
+    def judge(self, video_path: str, context: dict | None = None) -> JudgeReport:
         # 规则检测永远执行: 硬性否决不依赖 VLM
         rule_report = self.rule.judge(video_path, context)
 

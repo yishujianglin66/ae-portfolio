@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import List
 
 ae_root = Path("C:/Program Files/Adobe/Adobe After Effects 2025")
-output_lines: List[str] = []
+output_lines: list[str] = []
 
 
 def log(line: str = "") -> None:

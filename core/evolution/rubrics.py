@@ -22,7 +22,7 @@ import json
 import logging
 import re
 import statistics
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -40,13 +40,13 @@ class RubricScoreResult:
     """一次 Rubrics 评分的完整结果"""
     score: float                                # 中位数得分 0-100
     runs_ok: int = 0                            # 成功采样次数
-    samples: List[float] = field(default_factory=list)  # 各次采样分数
+    samples: list[float] = field(default_factory=list)  # 各次采样分数
     tokens_used: int = 0
     cost_usd: float = 0.0
     reason: str = ""                            # 中位数那次采样的理由
-    notes: List[str] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -133,7 +133,7 @@ class RubricsScorer:
         Raises:
             RuntimeError: 全部采样失败
         """
-        from core.llm_gateway import llm_gateway, TaskType
+        from core.llm_gateway import TaskType, llm_gateway
 
         rubrics = rubrics_text.strip() if rubrics_text else self.load_rubrics(scope)
 
@@ -154,11 +154,11 @@ class RubricsScorer:
         # ensure_configured() 幂等加载 .env/.env.doubao 并装配多 Provider。
         gateway = llm_gateway
         gateway.ensure_configured()
-        samples: List[float] = []
-        reasons: List[str] = []
+        samples: list[float] = []
+        reasons: list[str] = []
         total_tokens = 0
         total_cost = 0.0
-        notes: List[str] = []
+        notes: list[str] = []
 
         for _ in range(self._runs):
             # 成本熔断
@@ -230,7 +230,7 @@ class RubricsScorer:
     #  解析
     # ----------------------------------------------------------------
 
-    def _parse_response(self, content: str) -> Optional[tuple]:
+    def _parse_response(self, content: str) -> tuple | None:
         """从 LLM 输出解析 (score, reason)"""
         if not content:
             return None
@@ -263,7 +263,7 @@ class RubricsScorer:
 #  全局单例
 # ============================================================================
 
-_global_scorer: Optional[RubricsScorer] = None
+_global_scorer: RubricsScorer | None = None
 
 
 def get_rubrics_scorer(

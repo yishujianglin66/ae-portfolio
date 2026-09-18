@@ -1,5 +1,6 @@
 """Quick check of data structures."""
-import os, json
+import json
+import os
 from pathlib import Path
 
 # Check mao_mao issue

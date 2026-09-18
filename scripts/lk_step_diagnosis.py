@@ -17,7 +17,7 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from core.camera_movement_classifier import _read_frames, _RESIZE_W, _RESIZE_H  # noqa: E402
+from core.camera_movement_classifier import _RESIZE_H, _RESIZE_W, _read_frames  # noqa: E402
 
 DETAIL = PROJECT_ROOT / "models" / "output" / "flow_vlm_eval.jsonl"
 CLIPS = ["BV1GC4y1U79F_108", "BV14t411t7KQ_073", "BV1aD4y1j7E7_076"]

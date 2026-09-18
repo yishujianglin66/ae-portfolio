@@ -26,7 +26,7 @@ STAT_KEYS = ["mean_dx", "mean_dy", "mean_radial", "h_consistency",
              "direction_entropy"]
 
 
-def load(path: Path) -> List[Dict[str, Any]]:
+def load(path: Path) -> list[dict[str, Any]]:
     rows = []
     for line in path.read_text(encoding="utf-8").splitlines():
         if line.strip():
@@ -49,7 +49,7 @@ def main() -> int:
 
     rows = load(REVIEWED)
     n = len(rows)
-    report: Dict[str, Any] = {"n": n}
+    report: dict[str, Any] = {"n": n}
 
     # ── 1. 标签分布 ──────────────────────────────────────────────
     vlm_dist = Counter(r["original_label"] for r in rows)
@@ -62,7 +62,7 @@ def main() -> int:
         print(f"{lab:<12} {vlm_dist.get(lab, 0):>8} {flow_dist.get(lab, 0):>8}")
 
     # ── 2. 混淆矩阵 ──────────────────────────────────────────────
-    cm: Dict[str, Counter] = defaultdict(Counter)
+    cm: dict[str, Counter] = defaultdict(Counter)
     for r in rows:
         cm[r["original_label"]][r["reviewed_label"]] += 1
     print("\n=== 2. 混淆矩阵 (行=VLM, 列=LK) ===")
@@ -121,7 +121,7 @@ def main() -> int:
 
     # ── 5. 按 LK 标签看 flow_stats ───────────────────────────────
     print("\n=== 5. 各 LK 标签的全局 flow_stats 均值 (片段级) ===")
-    per_label_stats: Dict[str, List[Dict[str, float]]] = defaultdict(list)
+    per_label_stats: dict[str, list[dict[str, float]]] = defaultdict(list)
     for r in rows:
         for s in r.get("reviewed_per_segment", []):
             per_label_stats[s["label"]].append(s["flow_stats"])

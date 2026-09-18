@@ -84,7 +84,7 @@ class SilhouetteAEBridge:
         roto_mode: str = "foreground",
         frame_count: int = 100,
         frame_rate: float = 25.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Silhouette Roto 抠像 → AE Mask 链路。
 
         Args:
@@ -101,7 +101,7 @@ class SilhouetteAEBridge:
         output_dir.mkdir(parents=True, exist_ok=True)
         ae_project_path = Path(ae_project_path)
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "roto_completed": False,
             "mask_data_exported": False,
             "ae_project_created": False,
@@ -173,14 +173,14 @@ class SilhouetteAEBridge:
         ae_project_path: Path | str,
         comp_name: str = "Tracker Comp",
         tracker_type: str = "planar",
-        track_points: Optional[List[Dict[str, Any]]] = None,
-    ) -> Dict[str, Any]:
+        track_points: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
         """Silhouette Tracker → AE 追踪链路。"""
         video_path = Path(video_path)
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "tracking_completed": False,
             "track_data_exported": False,
             "ae_project_created": False,

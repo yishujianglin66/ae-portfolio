@@ -1,5 +1,6 @@
 import json
 import os
+
 import numpy as np
 
 data_path = os.path.join('models', 'output', 'param-optimizer', 'data', 'train_data.npy')

@@ -23,10 +23,10 @@ Premiere Pro 高级剪辑系统
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, asdict, field
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 
 class EditMode(str, Enum):
@@ -72,7 +72,7 @@ class DynamicZoomParam:
     end_scale: float = 150.0
     duration: float = 2.0
     ease_type: str = "ease_in_out"
-    focus_point: Optional[List[float]] = None
+    focus_point: list[float] | None = None
     blur_amount: float = 0.0
 
 
@@ -91,15 +91,15 @@ class SpeedRampParam:
 class KeyframePoint:
     """关键帧点。"""
     time: float
-    value: Union[float, List[float]]
+    value: Union[float, list[float]]
     interpolation: str = "linear"
 
 
 @dataclass
 class KeyframeAnimationParam:
     """关键帧动画参数。"""
-    property_name: Optional[str] = None
-    keyframes: Optional[List[KeyframePoint]] = None
+    property_name: str | None = None
+    keyframes: list[KeyframePoint] | None = None
     easing: str = "ease_in_out"
 
 
@@ -116,12 +116,12 @@ class AdvancedEditParam:
     
     track_index: int = 0
     clip_index: int = 0
-    start_time: Optional[float] = None
-    end_time: Optional[float] = None
+    start_time: float | None = None
+    end_time: float | None = None
     
-    custom_settings: Optional[Dict[str, Any]] = None
+    custom_settings: dict[str, Any] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         result = {
             "edit_mode": self.edit_mode.value,
             "track_index": self.track_index,
@@ -159,7 +159,7 @@ class PremiereAdvancedEditing:
     def __init__(self, pr_client=None):
         self.pr_client = pr_client
 
-    def get_edit_mode_info(self, edit_mode: EditMode) -> Dict[str, Any]:
+    def get_edit_mode_info(self, edit_mode: EditMode) -> dict[str, Any]:
         """获取编辑模式信息。"""
         info = {
             EditMode.WHIP_PAN: {
@@ -224,7 +224,7 @@ class PremiereAdvancedEditing:
             "icon": "❓",
         })
 
-    def list_edit_modes(self) -> List[Dict[str, Any]]:
+    def list_edit_modes(self) -> list[dict[str, Any]]:
         """列出所有可用编辑模式。"""
         modes = []
         for mode in EditMode:
@@ -667,7 +667,7 @@ class PremiereAdvancedEditing:
         track_index: int,
         clip_index: int,
         params: AdvancedEditParam,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用高级编辑效果。"""
         script = self.generate_editing_script(track_index, clip_index, params)
         
@@ -685,8 +685,8 @@ class PremiereAdvancedEditing:
 
     def apply_batch_editing(
         self,
-        edits: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        edits: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """批量应用高级编辑效果。"""
         results = []
         for edit in edits:

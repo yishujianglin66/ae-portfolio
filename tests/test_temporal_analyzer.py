@@ -13,8 +13,16 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.temporal_analyzer import (
-    TemporalAnalyzer, CameraMotion, TransitionType, ArcSegmentType,
-    MotionProfile, MotionVector, ShotInfo, ShotStructure, NarrativeArc, ArcSegment,
+    ArcSegment,
+    ArcSegmentType,
+    CameraMotion,
+    MotionProfile,
+    MotionVector,
+    NarrativeArc,
+    ShotInfo,
+    ShotStructure,
+    TemporalAnalyzer,
+    TransitionType,
 )
 
 

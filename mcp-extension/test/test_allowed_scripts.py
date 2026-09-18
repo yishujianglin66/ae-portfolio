@@ -189,4 +189,4 @@ async def test_async_whitelist_no_duplicates():
     """测试10（异步）：异步读取并验证白名单无重复"""
     content = await _read_file_async(INDEX_ADDITIONS_FILE)
     names = _extract_new_allowed_scripts(content)
-    assert len(names) == len(set(names)), f"异步验证: 白名单存在重复项"
+    assert len(names) == len(set(names)), "异步验证: 白名单存在重复项"

@@ -3,14 +3,14 @@ kb_scanner.py - 知识库多线程扫描器
 =====================================
 并行分析207个知识库文件，提取效果参数映射、转场配方、调色预设等结构化数据
 """
+import glob
+import json
 import os
 import re
-import json
-import time
-import glob
 import threading
+import time
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 KB_ROOT = r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\10-风格化剪辑知识库"
 OUTPUT_DIR = r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\output_kb_scan"
@@ -20,8 +20,8 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 class KBScanner:
     def __init__(self):
-        self._files: List[str] = []
-        self._results: Dict[str, Any] = {}
+        self._files: list[str] = []
+        self._results: dict[str, Any] = {}
         self._lock = threading.Lock()
         self._total_files = 0
         self._processed = 0
@@ -91,7 +91,7 @@ class KBScanner:
             if self._processed % 20 == 0:
                 print(f"  进度: {self._processed}/{self._total_files}")
 
-    def _extract_tables(self, content: str) -> List[Dict]:
+    def _extract_tables(self, content: str) -> list[dict]:
         """提取Markdown表格"""
         tables = []
         table_pattern = re.compile(
@@ -108,7 +108,7 @@ class KBScanner:
             tables.append({"header": header, "rows": rows})
         return tables
 
-    def _extract_code_blocks(self, content: str) -> List[Dict]:
+    def _extract_code_blocks(self, content: str) -> list[dict]:
         """提取代码块"""
         blocks = []
         code_pattern = re.compile(
@@ -121,7 +121,7 @@ class KBScanner:
             blocks.append({"lang": lang, "lines": code.count("\n") + 1})
         return blocks
 
-    def _extract_effects(self, content: str) -> List[str]:
+    def _extract_effects(self, content: str) -> list[str]:
         """提取效果关键词"""
         effect_patterns = [
             r"ADBE [A-Za-z ]+",
@@ -137,7 +137,7 @@ class KBScanner:
                 effects.add(match.group().strip())
         return list(effects)[:30]
 
-    def _extract_transitions(self, content: str) -> List[str]:
+    def _extract_transitions(self, content: str) -> list[str]:
         """提取转场类型"""
         transition_keywords = [
             "wipe", "dissolve", "fade", "glitch", "zoom",
@@ -151,7 +151,7 @@ class KBScanner:
                 transitions.add(kw)
         return list(transitions)
 
-    def _extract_color_presets(self, content: str) -> List[str]:
+    def _extract_color_presets(self, content: str) -> list[str]:
         """提取调色预设名称"""
         presets = []
         preset_pattern = re.compile(r"([\u4e00-\u9fa5a-zA-Z]+[调色预设|预设|风格])")
@@ -159,7 +159,7 @@ class KBScanner:
             presets.append(match.group(1))
         return list(set(presets))[:20]
 
-    def _extract_tags(self, content: str) -> List[str]:
+    def _extract_tags(self, content: str) -> list[str]:
         """提取YAML frontmatter中的tags"""
         tag_pattern = re.compile(r"tags:\s*(\[.*?\])", re.DOTALL)
         match = tag_pattern.search(content)
@@ -170,7 +170,7 @@ class KBScanner:
                 pass
         return []
 
-    def scan_parallel(self, threads: int = 8) -> Dict[str, Any]:
+    def scan_parallel(self, threads: int = 8) -> dict[str, Any]:
         """多线程扫描"""
         print(f"开始多线程扫描 (threads={threads})...")
         start = time.time()

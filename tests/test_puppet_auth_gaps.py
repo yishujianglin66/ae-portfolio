@@ -5,10 +5,10 @@ puppet-automation/src/auth.py 模块高风险缺口测试
 """
 from __future__ import annotations
 
-import sys
 import copy
 import hashlib
 import importlib.util
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 

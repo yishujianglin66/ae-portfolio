@@ -26,10 +26,10 @@ import json
 import math
 import os
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union, TYPE_CHECKING
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -60,7 +60,7 @@ class SceneCut:
     end_frame: int                 # 结束帧
     frame_count: int               # 帧数
     thumbnail_frame: int = 0       # 缩略图帧号
-    metadata: Dict[str, Any] = field(default_factory=dict)  # 场景元数据
+    metadata: dict[str, Any] = field(default_factory=dict)  # 场景元数据
 
     @property
     def start_tc(self) -> str:
@@ -80,7 +80,7 @@ class SceneCut:
         f = int((total_seconds - int(total_seconds)) * fps)
         return f"{h:02d}:{m:02d}:{s:02d}:{f:02d}"
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "index": self.index,
             "start_time": self.start_time,
@@ -100,11 +100,11 @@ class SceneMetadata:
     """场景元数据"""
     avg_brightness: float = 0.0
     avg_saturation: float = 0.0
-    color_histogram: Optional[List[float]] = None
+    color_histogram: list[float] | None = None
     motion_level: float = 0.0
     edge_density: float = 0.0
     blur_score: float = 0.0
-    dominant_colors: Optional[List[Tuple[int, int, int]]] = None
+    dominant_colors: list[tuple[int, int, int]] | None = None
     is_dark_scene: bool = False
     is_fast_motion: bool = False
     sentiment_hint: str = "neutral"
@@ -130,7 +130,7 @@ class SceneDetector:
         self.fps = fps
         self.extract_metadata = extract_metadata
 
-    def detect(self, video_path: str) -> List[SceneCut]:
+    def detect(self, video_path: str) -> list[SceneCut]:
         """
         检测视频中的所有场景切割点。
 
@@ -141,8 +141,7 @@ class SceneDetector:
             场景切割点列表
         """
         try:
-            from scenedetect import detect, ContentDetector, AdaptiveDetector
-            from scenedetect import split_video_ffmpeg
+            from scenedetect import AdaptiveDetector, ContentDetector, detect, split_video_ffmpeg
 
             # 根据方法选择检测器
             if self.method == DetectionMethod.CONTENT:
@@ -188,7 +187,7 @@ class SceneDetector:
             print(f"[SceneDetector] PySceneDetect error: {e}, falling back to OpenCV")
             return self._fallback_detect(video_path)
 
-    def _fallback_detect(self, video_path: str) -> List[SceneCut]:
+    def _fallback_detect(self, video_path: str) -> list[SceneCut]:
         """OpenCV 回退方案：基于直方图差异的简单场景检测"""
         import cv2
         import numpy as np
@@ -358,7 +357,7 @@ class SceneDetector:
             is_fast_motion=False,
         )
 
-    def detect_with_timestamps(self, video_path: str) -> List[Dict[str, Any]]:
+    def detect_with_timestamps(self, video_path: str) -> list[dict[str, Any]]:
         """检测并返回时间码格式结果（直接对接 PR 时间线）"""
         cuts = self.detect(video_path)
         return [
@@ -382,7 +381,7 @@ class SceneDetector:
         cuts = self.detect(video_path)
         edl_lines = [
             f'TITLE: Scene Detection EDL - {Path(video_path).name}',
-            f'FCM: NON-DROP FRAME',
+            'FCM: NON-DROP FRAME',
             ''
         ]
 
@@ -413,7 +412,7 @@ class SceneDetector:
         video_path: str,
         top_k: int = 5,
         criteria: str = "motion",
-    ) -> List[SceneCut]:
+    ) -> list[SceneCut]:
         """
         自动识别高光场景。
 

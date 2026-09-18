@@ -924,6 +924,7 @@ def main():
         # 原理: 冻结瞬间显示的源时刻 = sin + freeze_offset (cut=0 / mid=(锚-t0)*spd / end=dur*spd),
         # 平移 sin 让"顶点帧"落到冻结点; 叠化底片重定时镜头 (20.25) 除外 — 转场内容固定。
         import subprocess as _sp3
+
         import numpy as np
 
         def _src_meta(p):
@@ -1057,6 +1058,7 @@ def main():
     # 最长 500ms — 用户反馈 22/25/27s "没有缓慢运动, 突兀") → S 层加慢推镜:
     # Scale 100→106% 线性, 节拍切点起止, 给静止画面节拍内的缓慢运镜
     import subprocess as _sp2
+
     import numpy as _np
     _r = _sp2.run(["ffmpeg", "-v", "error", "-i", str(run_dir / f"{tag}_lut.mp4"),
                    "-vf", "scale=160:90", "-f", "rawvideo", "-pix_fmt", "gray", "-"],

@@ -1,12 +1,13 @@
 """BiRefNet 集成冒烟：单帧推理验证"""
 import sys
+
 import cv2
 import numpy as np
 import torch
-from core.torch_runtime import infer_ctx
 from torchvision import transforms
-
 from transformers import AutoModelForImageSegmentation
+
+from core.torch_runtime import infer_ctx
 
 print("loading BiRefNet...", file=sys.stderr)
 model = AutoModelForImageSegmentation.from_pretrained(
@@ -32,6 +33,7 @@ rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 pil = tf(rgb).unsqueeze(0).half().to(device)
 
 import time
+
 t0 = time.time()
 with infer_ctx(device):
     preds = model(pil)[-1].sigmoid().cpu()

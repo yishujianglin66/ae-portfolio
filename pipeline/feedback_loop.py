@@ -69,11 +69,11 @@ class FeedbackResult:
     run_id: str
     passed: bool
     overall_score: float
-    issues: List[QualityIssue] = field(default_factory=list)
-    adjustments: List[AdjustmentAdvice] = field(default_factory=list)
-    kb_entry: Dict[str, Any] = field(default_factory=dict)
+    issues: list[QualityIssue] = field(default_factory=list)
+    adjustments: list[AdjustmentAdvice] = field(default_factory=list)
+    kb_entry: dict[str, Any] = field(default_factory=dict)
     should_retry: bool = False
-    retry_stages: List[str] = field(default_factory=list)
+    retry_stages: list[str] = field(default_factory=list)
 
 
 # ============================================================================
@@ -106,7 +106,7 @@ class FeedbackLoop:
     """管线反馈闭环引擎"""
 
     def __init__(
-        self, feedback_dir: Optional[str | Path] = None
+        self, feedback_dir: str | Path | None = None
     ):
         # 默认写入二线实战反馈隔离目录 settings.feedback_dir，
         # 显式传入时尊重调用方指定路径
@@ -116,8 +116,8 @@ class FeedbackLoop:
     def process(
         self,
         run_id: str,
-        quality_result: Dict[str, Any],
-        pipeline_context: Optional[Dict[str, Any]] = None,
+        quality_result: dict[str, Any],
+        pipeline_context: dict[str, Any] | None = None,
     ) -> FeedbackResult:
         """处理质检结果，生成反馈和调整建议。
 
@@ -162,7 +162,7 @@ class FeedbackLoop:
             retry_stages=retry_stages,
         )
 
-    def get_historical_feedback(self, style: str = "", limit: int = 5) -> List[Dict]:
+    def get_historical_feedback(self, style: str = "", limit: int = 5) -> list[dict]:
         """获取历史反馈记录。
 
         Args:
@@ -186,12 +186,12 @@ class FeedbackLoop:
         results.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
         return results[:limit]
 
-    def get_success_patterns(self, style: str = "") -> List[Dict]:
+    def get_success_patterns(self, style: str = "") -> list[dict]:
         """获取成功模式 (score >= 80 的项目)。"""
         all_feedback = self.get_historical_feedback(style, limit=50)
         return [f for f in all_feedback if f.get("score", 0) >= 80]
 
-    def get_failure_patterns(self, style: str = "") -> List[Dict]:
+    def get_failure_patterns(self, style: str = "") -> list[dict]:
         """获取失败模式 (score < 60 的项目)。"""
         all_feedback = self.get_historical_feedback(style, limit=50)
         return [f for f in all_feedback if f.get("score", 0) < 60]
@@ -200,7 +200,7 @@ class FeedbackLoop:
     #  内部方法
     # ----------------------------------------------------------------
 
-    def _analyze_issues(self, checks: Dict, score: float) -> List[QualityIssue]:
+    def _analyze_issues(self, checks: dict, score: float) -> list[QualityIssue]:
         """从质检结果中分析问题"""
         issues = []
 
@@ -277,8 +277,8 @@ class FeedbackLoop:
         return issues
 
     def _generate_adjustments(
-        self, issues: List[QualityIssue], context: Dict
-    ) -> List[AdjustmentAdvice]:
+        self, issues: list[QualityIssue], context: dict
+    ) -> list[AdjustmentAdvice]:
         """根据问题生成调整建议"""
         context = context or {}
         adjustments = []
@@ -328,10 +328,10 @@ class FeedbackLoop:
         run_id: str,
         score: float,
         passed: bool,
-        issues: List[QualityIssue],
-        adjustments: List[AdjustmentAdvice],
-        context: Dict,
-    ) -> Dict[str, Any]:
+        issues: list[QualityIssue],
+        adjustments: list[AdjustmentAdvice],
+        context: dict,
+    ) -> dict[str, Any]:
         """构建知识库条目"""
         context = context or {}
         return {
@@ -357,7 +357,7 @@ class FeedbackLoop:
             "critical_issues": sum(1 for i in issues if i.severity == "critical"),
         }
 
-    def _write_feedback(self, run_id: str, entry: Dict):
+    def _write_feedback(self, run_id: str, entry: dict):
         """写入反馈文件"""
         filepath = self.feedback_dir / f"feedback_{run_id}.json"
 
@@ -388,21 +388,21 @@ class FeedbackLoop:
 
 def process_quality_feedback(
     run_id: str,
-    quality_result: Dict,
-    context: Optional[Dict] = None,
+    quality_result: dict,
+    context: dict | None = None,
 ) -> FeedbackResult:
     """快捷函数: 处理质检反馈"""
     loop = FeedbackLoop()
     return loop.process(run_id, quality_result, context)
 
 
-def get_past_feedback(style: str = "", limit: int = 5) -> List[Dict]:
+def get_past_feedback(style: str = "", limit: int = 5) -> list[dict]:
     """快捷函数: 获取历史反馈"""
     loop = FeedbackLoop()
     return loop.get_historical_feedback(style, limit)
 
 
-def get_success_patterns(style: str = "") -> List[Dict]:
+def get_success_patterns(style: str = "") -> list[dict]:
     """快捷函数: 获取成功模式"""
     loop = FeedbackLoop()
     return loop.get_success_patterns(style)
@@ -417,8 +417,8 @@ class ErrorPattern:
     """错误模式记录"""
     error_type: str
     error_msg: str
-    error_keywords: List[str]
-    context_keys: List[str]
+    error_keywords: list[str]
+    context_keys: list[str]
     fix_applied: str
     fix_code: str = ""
     success: bool = False
@@ -672,12 +672,12 @@ class ErrorPatternMemory:
         },
     }
     
-    def __init__(self, memory_dir: Optional[str | Path] = None):
+    def __init__(self, memory_dir: str | Path | None = None):
         # 默认写入二线实战反馈隔离目录 settings.feedback_dir 下的 error_patterns，
         # 显式传入时尊重调用方指定路径
         self.memory_dir = Path(memory_dir) if memory_dir is not None else Path(settings.feedback_dir) / "error_patterns"
         self.memory_dir.mkdir(parents=True, exist_ok=True)
-        self._patterns: List[Dict] = []
+        self._patterns: list[dict] = []
         self._load_patterns()
     
     def _load_patterns(self):
@@ -701,7 +701,7 @@ class ErrorPatternMemory:
         except Exception as e:
             logger.warning(f"[ErrorMemory] Save failed: {e}")
     
-    def _extract_keywords(self, error_msg: str) -> List[str]:
+    def _extract_keywords(self, error_msg: str) -> list[str]:
         """从错误消息中提取关键词"""
         # 移除常见无意义词
         stopwords = {"the", "a", "an", "is", "are", "was", "were", "in", "on", "at", "to", "for", "of", "with", "by"}
@@ -712,7 +712,7 @@ class ErrorPatternMemory:
     def record_error(
         self,
         error: Exception,
-        context: Dict,
+        context: dict,
         fix_applied: str,
         fix_code: str = "",
         success: bool = False,
@@ -761,7 +761,7 @@ class ErrorPatternMemory:
         self._save_patterns()
         logger.info(f"[ErrorMemory] Recorded: {error_type} -> {fix_applied} (success={success})")
     
-    def _find_exact_match(self, error_type: str, keywords: List[str]) -> Optional[Dict]:
+    def _find_exact_match(self, error_type: str, keywords: list[str]) -> dict | None:
         """查找精确匹配的错误模式"""
         for pattern in self._patterns:
             if pattern.get("error_type") == error_type:
@@ -773,9 +773,9 @@ class ErrorPatternMemory:
     def find_similar_error(
         self,
         error: Exception,
-        context: Dict,
+        context: dict,
         min_confidence: float = 0.5,
-    ) -> Optional[Dict]:
+    ) -> dict | None:
         """
         查找相似错误的历史修复方案
         
@@ -827,7 +827,7 @@ class ErrorPatternMemory:
         
         return None
     
-    def _check_known_pitfalls(self, error_msg: str) -> Optional[Dict]:
+    def _check_known_pitfalls(self, error_msg: str) -> dict | None:
         """检查已知引擎陷阱知识库（大小写不敏感匹配）"""
         error_msg_lower = error_msg.lower()
         for pitfall_name, pitfall in self.KNOWN_ENGINE_PITFALLS.items():
@@ -849,9 +849,9 @@ class ErrorPatternMemory:
     def _calculate_similarity(
         self,
         error_type: str,
-        keywords: List[str],
-        context: Dict,
-        pattern: Dict,
+        keywords: list[str],
+        context: dict,
+        pattern: dict,
     ) -> float:
         """计算当前错误与历史模式的相似度"""
         score = 0.0
@@ -881,7 +881,7 @@ class ErrorPatternMemory:
         
         return min(score, 1.0)
     
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """获取错误模式统计信息"""
         total = len(self._patterns)
         total_occurrences = sum(p.get("occurrence_count", 1) for p in self._patterns)
@@ -914,7 +914,7 @@ class ErrorPatternMemory:
 
 
 # 全局错误记忆实例
-_error_memory: Optional[ErrorPatternMemory] = None
+_error_memory: ErrorPatternMemory | None = None
 
 
 def get_error_memory() -> ErrorPatternMemory:
@@ -927,7 +927,7 @@ def get_error_memory() -> ErrorPatternMemory:
 
 def record_error_pattern(
     error: Exception,
-    context: Dict,
+    context: dict,
     fix_applied: str,
     fix_code: str = "",
     success: bool = False,
@@ -936,6 +936,6 @@ def record_error_pattern(
     get_error_memory().record_error(error, context, fix_applied, fix_code, success)
 
 
-def find_error_fix(error: Exception, context: Dict) -> Optional[Dict]:
+def find_error_fix(error: Exception, context: dict) -> dict | None:
     """快捷函数: 查找错误修复方案"""
     return get_error_memory().find_similar_error(error, context)

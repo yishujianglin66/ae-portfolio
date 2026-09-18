@@ -20,9 +20,10 @@
 """
 from __future__ import annotations
 
-import pytest
 from typing import Any, Dict
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 # ============================================================
@@ -54,9 +55,9 @@ class TestAdvancedEditParam:
     def _make_param(self, **kwargs):
         from ae.pr_advanced_editing import (
             AdvancedEditParam,
+            DynamicZoomParam,
             EditMode,
             WhipPanParam,
-            DynamicZoomParam,
         )
 
         defaults = dict(
@@ -89,8 +90,8 @@ class TestAdvancedEditParam:
         from ae.pr_advanced_editing import (
             AdvancedEditParam,
             EditMode,
-            WhipPanParam,
             MotionDirection,
+            WhipPanParam,
         )
 
         param = AdvancedEditParam(
@@ -111,7 +112,7 @@ class TestAdvancedEditParam:
         assert d["whip_pan"]["blur_amount"] == 15.0
 
     def test_to_dict_dynamic_zoom_serialized(self):
-        from ae.pr_advanced_editing import AdvancedEditParam, EditMode, DynamicZoomParam
+        from ae.pr_advanced_editing import AdvancedEditParam, DynamicZoomParam, EditMode
 
         param = AdvancedEditParam(
             edit_mode=EditMode.DYNAMIC_ZOOM,
@@ -187,9 +188,9 @@ class TestAdvancedEditParam:
 class TestGenerateEditingScript:
     def test_unknown_mode_falls_back_to_whip_pan(self):
         from ae.pr_advanced_editing import (
-            PremiereAdvancedEditing,
             AdvancedEditParam,
             EditMode,
+            PremiereAdvancedEditing,
         )
 
         # 模拟一个"未知"的 mode：构造一个 enum 之外的 param
@@ -209,11 +210,11 @@ class TestGenerateEditingScript:
 
     def test_known_modes_generate_nonempty(self):
         from ae.pr_advanced_editing import (
-            PremiereAdvancedEditing,
             AdvancedEditParam,
             EditMode,
-            KeyframePoint,
             KeyframeAnimationParam,
+            KeyframePoint,
+            PremiereAdvancedEditing,
         )
 
         sys_obj = PremiereAdvancedEditing(pr_client=None)
@@ -244,9 +245,9 @@ class TestGenerateEditingScript:
 class TestApplyEditingDryRun:
     def test_dry_run_returns_status(self):
         from ae.pr_advanced_editing import (
-            PremiereAdvancedEditing,
             AdvancedEditParam,
             EditMode,
+            PremiereAdvancedEditing,
         )
 
         # pr_client=None → dry_run
@@ -261,9 +262,9 @@ class TestApplyEditingDryRun:
 
     def test_with_pr_client_calls_execute_script(self):
         from ae.pr_advanced_editing import (
-            PremiereAdvancedEditing,
             AdvancedEditParam,
             EditMode,
+            PremiereAdvancedEditing,
         )
 
         # 模拟 pr_client

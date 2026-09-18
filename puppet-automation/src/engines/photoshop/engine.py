@@ -31,8 +31,8 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
-from ..base import BaseEngine, EngineResult  # noqa: E402
 from ...config.settings import get_settings
+from ..base import BaseEngine, EngineResult  # noqa: E402
 
 # Bridge Client 在项目根目录，延迟导入
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
@@ -47,7 +47,7 @@ class PhotoshopEngine(BaseEngine):
 
     def __init__(
         self,
-        executable_path: Optional[Path | str] = None,
+        executable_path: Path | str | None = None,
     ):
         self._settings = get_settings()
         self.ps_path = self._resolve_executable(executable_path)
@@ -57,9 +57,9 @@ class PhotoshopEngine(BaseEngine):
 
         # 初始化 MCP Bridge Client（延迟导入，避免循环依赖）
         self._bridge_client = None
-        self._bridge_available: Optional[bool] = None  # None=未检测, True=在线, False=离线
+        self._bridge_available: bool | None = None  # None=未检测, True=在线, False=离线
 
-    def _resolve_executable(self, explicit: Optional[Path | str]) -> Optional[Path]:
+    def _resolve_executable(self, explicit: Path | str | None) -> Path | None:
         """解析可执行文件路径：显式参数 > settings配置 > 自动发现。"""
         if explicit:
             p = Path(explicit)
@@ -75,7 +75,7 @@ class PhotoshopEngine(BaseEngine):
         return self._find_photoshop()
 
     @staticmethod
-    def _find_photoshop() -> Optional[Path]:
+    def _find_photoshop() -> Path | None:
         """自动发现 Photoshop 安装路径。"""
         possible_paths = [
             r"C:\Program Files\Adobe\Adobe Photoshop 2025\Photoshop.exe",
@@ -326,7 +326,7 @@ class PhotoshopEngine(BaseEngine):
         jsx_file.write_text(jsx_code, encoding="utf-8")
 
         logger.info(f"[Photoshop] JSX prepared (fallback): {jsx_file}")
-        logger.info(f"[Photoshop] Run manually: File > Scripts > Browse...")
+        logger.info("[Photoshop] Run manually: File > Scripts > Browse...")
 
         return EngineResult(
             success=True,

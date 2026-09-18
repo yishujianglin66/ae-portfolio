@@ -1,10 +1,10 @@
 """SynthesisOrchestrator 单元测试（M1b 验收：dry_run 模式不碰真机）"""
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.composition_tree import build_template, STYLE_CARDS
+from core.composition_tree import STYLE_CARDS, build_template
 from core.synthesis_orchestrator import JsxProjectBuilder, SynthesisOrchestrator
 
 passed = failed = 0
@@ -68,6 +68,7 @@ print("=" * 60)
 print("3.5 footage 抠像素材层（M1 收尾）")
 print("=" * 60)
 from core.composition_tree import build_fate_composite_template
+
 fate = build_fate_composite_template("D:/AE-Work/x_transparent.mov", duration=5.0)
 jsx3 = JsxProjectBuilder().build(fate)
 check("fate 模板 JSX 生成", len(jsx3) > 800, f"len={len(jsx3)}")
@@ -78,7 +79,8 @@ check("outPoint 钳制素材时长", "Math.min(" in jsx3 and "layer1_ftg.duratio
 check("无 track_matte 后处理", "moveAfter" not in jsx3 and "TrackMatteType" not in jsx3)
 
 # track_matte 模式：彩色视频 + 遮罩序列
-from core.composition_tree import LayerSpec, CompositionTree
+from core.composition_tree import CompositionTree, LayerSpec
+
 tm_tree = CompositionTree(
     comp_name="tm_test", style_card="amv", duration=4.0,
     layers=[
@@ -131,6 +133,7 @@ check("execute 发送 script 字段", "script" in fake.last_params and "scriptCo
 
 # 非法树被拦
 from core.composition_tree import CompositionTree
+
 bad = CompositionTree(comp_name="bad", style_card="not_a_style")
 r2 = orch.execute(bad, dry_run=True)
 check("非法风格卡被拦", r2["status"] == "invalid")

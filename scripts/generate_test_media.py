@@ -80,7 +80,7 @@ try:
     print(f"  ✓ 多目标测试图片: {img3_path}")
 
     print(f"\n  所有测试素材已生成到: {OUTPUT_DIR}")
-    print(f"  文件列表:")
+    print("  文件列表:")
     for f in os.listdir(OUTPUT_DIR):
         fpath = os.path.join(OUTPUT_DIR, f)
         size = os.path.getsize(fpath)

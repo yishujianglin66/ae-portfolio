@@ -20,17 +20,17 @@
 from __future__ import annotations
 
 import json
-import sys
 import os
+import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from semantic_parser import SemanticParser, ParsedQuery
-from multimodal_retriever import MultimodalRetriever, CLAPEncoder, RRFFusion
 from audio_feature_extractor import AudioFeatureExtractor
 from cross_platform_searcher import CrossPlatformSearcher
+from multimodal_retriever import CLAPEncoder, MultimodalRetriever, RRFFusion
+from semantic_parser import ParsedQuery, SemanticParser
 from smart_ranker import SmartRanker
 from user_preference import UserPreferenceLearner
 
@@ -56,9 +56,9 @@ class SmartMatcher:
     
     def __init__(
         self,
-        index_path: Optional[str] = None,
-        offline_mode: Optional[bool] = None,
-        preference_data_dir: Optional[str] = None,
+        index_path: str | None = None,
+        offline_mode: bool | None = None,
+        preference_data_dir: str | None = None,
     ):
         self.index_path = index_path or str(Path(__file__).resolve().parent / "index.json")
         self.offline_mode = offline_mode
@@ -92,7 +92,7 @@ class SmartMatcher:
         clap_weight: float = 0.8,
         local_weight: float = 0.6,
         remote_weight: float = 0.4
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         端到端智能匹配
         
@@ -107,7 +107,7 @@ class SmartMatcher:
             local_weight: 本地结果权重
             remote_weight: 远程结果权重
         """
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "query": query,
             "user_id": user_id,
@@ -209,7 +209,7 @@ class SmartMatcher:
         action_type: str,
         query: str,
         item_id: str,
-        item_metadata: Optional[Dict[str, Any]] = None,
+        item_metadata: dict[str, Any] | None = None,
         duration: float = 0.0,
         position: int = 0
     ) -> None:
@@ -236,7 +236,7 @@ class SmartMatcher:
             position=position
         ))
     
-    def extract_audio_features(self, audio_path: str) -> Dict[str, Any]:
+    def extract_audio_features(self, audio_path: str) -> dict[str, Any]:
         """
         提取音频特征（集成 Essentia/librosa 双引擎）
         
@@ -249,7 +249,7 @@ class SmartMatcher:
         features = self.audio_extractor.extract(audio_path)
         return features.to_dict()
     
-    def batch_extract_audio_features(self, audio_paths: List[str]) -> List[Dict[str, Any]]:
+    def batch_extract_audio_features(self, audio_paths: list[str]) -> list[dict[str, Any]]:
         """
         批量提取音频特征
         
@@ -261,14 +261,14 @@ class SmartMatcher:
         """
         return self.audio_extractor.extract_batch(audio_paths)
     
-    def get_engine_info(self) -> Dict[str, Any]:
+    def get_engine_info(self) -> dict[str, Any]:
         """获取当前可用的引擎信息"""
         return {
             "audio": self.audio_extractor.get_engine_info(),
             "clap": self.retriever.clap_encoder.is_available(),
         }
     
-    def get_user_preferences(self, user_id: str) -> Dict[str, Any]:
+    def get_user_preferences(self, user_id: str) -> dict[str, Any]:
         """
         获取用户偏好
         
@@ -280,7 +280,7 @@ class SmartMatcher:
         """
         return self.preference_learner.get_preferences(user_id)
     
-    def get_suggested_queries(self, user_id: str, count: int = 5) -> List[str]:
+    def get_suggested_queries(self, user_id: str, count: int = 5) -> list[str]:
         """
         获取建议搜索词
         
@@ -312,7 +312,7 @@ def main() -> None:
         index_path = input_json.get("index_path")
         matcher = SmartMatcher(index_path=index_path)
         
-        result: Dict[str, Any] = {"success": False}
+        result: dict[str, Any] = {"success": False}
         
         if action == "match":
             query = input_json.get("query", "")

@@ -32,7 +32,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-
 # ============================================================================
 # 任务状态枚举
 # ============================================================================
@@ -56,26 +55,26 @@ class Task:
     task_id: str
     name: str
     func: Callable[..., Any]
-    args: Tuple[Any, ...] = ()
-    kwargs: Dict[str, Any] = field(default_factory=dict)
+    args: tuple[Any, ...] = ()
+    kwargs: dict[str, Any] = field(default_factory=dict)
     priority: int = 5  # 1-10，越高优先级越高
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     retries: int = 0
     max_retries: int = 0
     progress: float = 0.0  # 0.0 - 1.0
     progress_message: str = ""
     created_at: float = field(default_factory=time.time)
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    started_at: float | None = None
+    completed_at: float | None = None
     duration: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    on_complete: Optional[Callable[["Task"], None]] = None
-    on_failure: Optional[Callable[["Task"], None]] = None
-    on_progress: Optional[Callable[["Task", float, str], None]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    on_complete: Callable[["Task"], None] | None = None
+    on_failure: Callable[["Task"], None] | None = None
+    on_progress: Callable[["Task", float, str], None] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "task_id": self.task_id,
             "name": self.name,
@@ -162,13 +161,13 @@ class BatchQueue:
         self._max_retries = max_retries
         self._retry_delay = retry_delay
 
-        self._tasks: Dict[str, Task] = {}
-        self._pending: List[Task] = []
-        self._running: List[Task] = []
+        self._tasks: dict[str, Task] = {}
+        self._pending: list[Task] = []
+        self._running: list[Task] = []
         self._lock = threading.RLock()
 
         self._stop_event = threading.Event()
-        self._workers: List[threading.Thread] = []
+        self._workers: list[threading.Thread] = []
         self._started = False
 
         # 统计
@@ -225,13 +224,13 @@ class BatchQueue:
         self,
         func: Callable[..., Any],
         *args,
-        name: Optional[str] = None,
+        name: str | None = None,
         priority: int = 5,
-        max_retries: Optional[int] = None,
-        on_complete: Optional[Callable[[Task], None]] = None,
-        on_failure: Optional[Callable[[Task], None]] = None,
-        on_progress: Optional[Callable[[Task, float, str], None]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        max_retries: int | None = None,
+        on_complete: Callable[[Task], None] | None = None,
+        on_failure: Callable[[Task], None] | None = None,
+        on_progress: Callable[[Task, float, str], None] | None = None,
+        metadata: dict[str, Any] | None = None,
         **kwargs,
     ) -> Task:
         """提交单个任务
@@ -280,11 +279,11 @@ class BatchQueue:
 
     def submit_batch(
         self,
-        tasks: List[Tuple[Callable, Tuple, Dict]],
+        tasks: list[tuple[Callable, tuple, dict]],
         batch_name: str = "batch",
         priority: int = 5,
-        on_batch_complete: Optional[Callable[[List[Task]], None]] = None,
-    ) -> List[Task]:
+        on_batch_complete: Callable[[list[Task]], None] | None = None,
+    ) -> list[Task]:
         """批量提交任务
 
         Args:
@@ -309,7 +308,7 @@ class BatchQueue:
             ]
 
         total = len(tasks)
-        results: List[Task] = []
+        results: list[Task] = []
         state_lock = threading.Lock()
         done_count = [0]
         all_submitted = [False]
@@ -325,7 +324,7 @@ class BatchQueue:
             except Exception:
                 pass
 
-        def make_callback(user_callback: Optional[Callable[[Task], None]]):
+        def make_callback(user_callback: Callable[[Task], None] | None):
             def callback(task: Task):
                 if user_callback:
                     try:
@@ -358,17 +357,17 @@ class BatchQueue:
     # 任务查询
     # --------------------------------------------------------------------
 
-    def get_task(self, task_id: str) -> Optional[Task]:
+    def get_task(self, task_id: str) -> Task | None:
         """根据ID获取任务"""
         with self._lock:
             return self._tasks.get(task_id)
 
-    def get_all_tasks(self) -> List[Task]:
+    def get_all_tasks(self) -> list[Task]:
         """获取所有任务"""
         with self._lock:
             return list(self._tasks.values())
 
-    def get_tasks_by_status(self, status: TaskStatus) -> List[Task]:
+    def get_tasks_by_status(self, status: TaskStatus) -> list[Task]:
         """根据状态获取任务列表"""
         with self._lock:
             return [t for t in self._tasks.values() if t.status == status]
@@ -391,7 +390,7 @@ class BatchQueue:
     def failed_count(self) -> int:
         return self._total_failed
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取队列统计信息"""
         with self._lock:
             return {
@@ -428,7 +427,7 @@ class BatchQueue:
             task.status = TaskStatus.CANCELLED
             return True
 
-    def wait_for_task(self, task_id: str, timeout: Optional[float] = None) -> Task:
+    def wait_for_task(self, task_id: str, timeout: float | None = None) -> Task:
         """等待任务完成
 
         Args:
@@ -454,7 +453,7 @@ class BatchQueue:
                 return task
             time.sleep(0.1)
 
-    def wait_all(self, timeout: Optional[float] = None) -> bool:
+    def wait_all(self, timeout: float | None = None) -> bool:
         """等待所有任务完成
 
         Returns:
@@ -484,7 +483,7 @@ class BatchQueue:
 
             self._execute_task(task)
 
-    def _pick_next_task(self) -> Optional[Task]:
+    def _pick_next_task(self) -> Task | None:
         """取下一个待执行任务"""
         with self._lock:
             if not self._pending:
@@ -505,7 +504,7 @@ class BatchQueue:
         终态与回调在同一临界区内发布：等待方（wait_for_task / wait_all）
         读到 COMPLETED 或 FAILED 时，对应的 on_complete / on_failure 必然已执行完。
         """
-        terminal: Optional[TaskStatus] = None
+        terminal: TaskStatus | None = None
         try:
             # 创建进度上下文
             ctx = ProgressContext(task)
@@ -579,7 +578,7 @@ class BatchQueue:
 @dataclass
 class BatchResult:
     """批量处理结果"""
-    tasks: List[Task] = field(default_factory=list)
+    tasks: list[Task] = field(default_factory=list)
 
     @property
     def total(self) -> int:
@@ -604,14 +603,14 @@ class BatchResult:
         return self.completed / self.total
 
     @property
-    def results(self) -> List[Any]:
+    def results(self) -> list[Any]:
         return [t.result for t in self.tasks if t.status == TaskStatus.COMPLETED]
 
     @property
-    def errors(self) -> List[Tuple[str, str]]:
+    def errors(self) -> list[tuple[str, str]]:
         return [(t.name, t.error or "") for t in self.tasks if t.status == TaskStatus.FAILED]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "total": self.total,
             "completed": self.completed,
@@ -627,7 +626,7 @@ class BatchResult:
 # 模块单例
 # ============================================================================
 
-_default_queue: Optional[BatchQueue] = None
+_default_queue: BatchQueue | None = None
 
 
 def get_default_queue(max_workers: int = 3) -> BatchQueue:

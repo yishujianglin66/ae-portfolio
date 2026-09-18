@@ -16,13 +16,13 @@ Subtitle Burner - 字幕烧录引擎
     # 手动字幕
     jsx = burner.from_text([{"start": 0, "end": 3, "text": "Hello"}])
 """
-import os
-import sys
 import json
-import time
+import os
 import re
+import sys
+import time
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
@@ -38,7 +38,7 @@ def log(msg: str, level: str = "INFO"):
 class SubtitleParser:
     """解析 SRT/ASS 字幕文件"""
 
-    def parse_srt(self, srt_path: str) -> List[Dict[str, Any]]:
+    def parse_srt(self, srt_path: str) -> list[dict[str, Any]]:
         """解析 SRT 文件"""
         with open(srt_path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -80,7 +80,7 @@ class SubtitleParser:
         log(f"  SRT 解析: {len(entries)} 条字幕")
         return entries
 
-    def parse_ass(self, ass_path: str) -> List[Dict[str, Any]]:
+    def parse_ass(self, ass_path: str) -> list[dict[str, Any]]:
         """解析 ASS 文件"""
         with open(ass_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -122,7 +122,7 @@ class SubtitleParser:
 class WhisperTranscriber:
     """Whisper 自动语音转录"""
 
-    def transcribe(self, audio_or_video_path: str) -> List[Dict[str, Any]]:
+    def transcribe(self, audio_or_video_path: str) -> list[dict[str, Any]]:
         """使用 Whisper 转录音频/视频"""
         # 尝试导入 whisper
         try:
@@ -152,7 +152,7 @@ class WhisperTranscriber:
         log(f"  Whisper 转录: {len(entries)} 段")
         return entries
 
-    def _transcribe_faster(self, path: str) -> List[Dict[str, Any]]:
+    def _transcribe_faster(self, path: str) -> list[dict[str, Any]]:
         """使用 faster-whisper"""
         from faster_whisper import WhisperModel
         model = WhisperModel("base", compute_type="int8")
@@ -232,7 +232,7 @@ class SubtitleJSXGenerator:
         },
     }
 
-    def generate(self, subtitles: List[Dict], style: str = "standard",
+    def generate(self, subtitles: list[dict], style: str = "standard",
                  comp_width: int = 1920, comp_height: int = 1080) -> str:
         """生成字幕 JSX"""
         preset = self.STYLE_PRESETS.get(style, self.STYLE_PRESETS["standard"])
@@ -271,9 +271,9 @@ class SubtitleJSXGenerator:
             # 描边 (通过 Layer Style)
             if preset["stroke_width"] > 0:
                 sc = preset["stroke_color"]
-                lines.append(f"try {{")
+                lines.append("try {")
                 lines.append(f"  sub_{i}.property('ADBE Text Properties').property('ADBE Text Document').setValue(td_{i});")
-                lines.append(f"}} catch(e) {{}}")
+                lines.append("} catch(e) {}")
 
             # 动画
             animation = preset.get("animation", "fade_in")
@@ -283,7 +283,7 @@ class SubtitleJSXGenerator:
 
         return "\n".join(lines)
 
-    def _calc_position(self, position: str, w: int, h: int, idx: int) -> Tuple[int, int]:
+    def _calc_position(self, position: str, w: int, h: int, idx: int) -> tuple[int, int]:
         """计算字幕位置"""
         if position == "bottom":
             return (w // 2, h - 80)
@@ -293,7 +293,7 @@ class SubtitleJSXGenerator:
             return (w // 2, 80)
         return (w // 2, h - 80)
 
-    def _add_animation(self, lines: List[str], idx: int,
+    def _add_animation(self, lines: list[str], idx: int,
                        start: float, end: float, dur: float,
                        animation: str):
         """添加字幕动画"""
@@ -370,14 +370,14 @@ class SubtitleBurner:
             return "// No subtitles transcribed"
         return self.jsx_gen.generate(subtitles, style, comp_width, comp_height)
 
-    def from_text(self, entries: List[Dict], style: str = "standard",
+    def from_text(self, entries: list[dict], style: str = "standard",
                   comp_width: int = 1920, comp_height: int = 1080) -> str:
         """从手动字幕列表生成 JSX"""
         return self.jsx_gen.generate(entries, style, comp_width, comp_height)
 
     def burn(self, source: str, source_type: str = "auto",
              style: str = "standard",
-             comp_width: int = 1920, comp_height: int = 1080) -> Dict[str, Any]:
+             comp_width: int = 1920, comp_height: int = 1080) -> dict[str, Any]:
         """
         完整字幕烧录流程。
 

@@ -19,7 +19,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
-from ae.ps_mcp_client import PSMDPClient, DocumentInfo, LayerInfo, BlendMode, PSConnectionError
+from ae.ps_mcp_client import BlendMode, DocumentInfo, LayerInfo, PSConnectionError, PSMDPClient
 
 logger = logging.getLogger(__name__)
 
@@ -42,23 +42,23 @@ class BasePSAdapter(ABC):
         height: int = 1080,
         resolution: float = 72.0,
         color_mode: str = "RGB",
-        background_color: Optional[List[float]] = None,
-    ) -> Dict[str, Any]:
+        background_color: list[float] | None = None,
+    ) -> dict[str, Any]:
         """创建新文档。"""
         pass
 
     @abstractmethod
-    def open_document(self, file_path: str) -> Dict[str, Any]:
+    def open_document(self, file_path: str) -> dict[str, Any]:
         """打开文档。"""
         pass
 
     @abstractmethod
-    def close_document(self, document_name: str, save_changes: bool = False) -> Dict[str, Any]:
+    def close_document(self, document_name: str, save_changes: bool = False) -> dict[str, Any]:
         """关闭文档。"""
         pass
 
     @abstractmethod
-    def save_document(self, document_name: str, file_path: Optional[str] = None) -> Dict[str, Any]:
+    def save_document(self, document_name: str, file_path: str | None = None) -> dict[str, Any]:
         """保存文档。"""
         pass
 
@@ -69,7 +69,7 @@ class BasePSAdapter(ABC):
         file_path: str,
         format: str = "PNG",
         quality: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导出文档。"""
         pass
 
@@ -77,14 +77,14 @@ class BasePSAdapter(ABC):
     def create_layer(
         self,
         document_name: str,
-        layer_name: Optional[str] = None,
+        layer_name: str | None = None,
         layer_type: str = "pixel",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建图层。"""
         pass
 
     @abstractmethod
-    def delete_layer(self, document_name: str, layer_name: str) -> Dict[str, Any]:
+    def delete_layer(self, document_name: str, layer_name: str) -> dict[str, Any]:
         """删除图层。"""
         pass
 
@@ -93,8 +93,8 @@ class BasePSAdapter(ABC):
         self,
         document_name: str,
         layer_name: str,
-        new_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        new_name: str | None = None,
+    ) -> dict[str, Any]:
         """复制图层。"""
         pass
 
@@ -103,8 +103,8 @@ class BasePSAdapter(ABC):
         self,
         document_name: str,
         layer_name: str,
-        properties: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any],
+    ) -> dict[str, Any]:
         """设置图层属性。"""
         pass
 
@@ -114,7 +114,7 @@ class BasePSAdapter(ABC):
         document_name: str,
         layer_name: str,
         blend_mode: Union[BlendMode, str],
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """设置图层混合模式。"""
         pass
 
@@ -124,13 +124,13 @@ class BasePSAdapter(ABC):
         document_name: str,
         layer_name: str,
         filter_name: str,
-        properties: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """应用滤镜。"""
         pass
 
     @abstractmethod
-    def remove_filter(self, document_name: str, layer_name: str, filter_name: str) -> Dict[str, Any]:
+    def remove_filter(self, document_name: str, layer_name: str, filter_name: str) -> dict[str, Any]:
         """移除滤镜。"""
         pass
 
@@ -142,7 +142,7 @@ class BasePSAdapter(ABC):
         left: int = 0,
         width: int = 100,
         height: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建选区。"""
         pass
 
@@ -150,20 +150,20 @@ class BasePSAdapter(ABC):
     def fill_selection(
         self,
         document_name: str,
-        color: List[float],
+        color: list[float],
         blend_mode: str = "NORMAL",
         opacity: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """填充选区。"""
         pass
 
     @abstractmethod
-    def get_document_info(self) -> Dict[str, Any]:
+    def get_document_info(self) -> dict[str, Any]:
         """获取当前文档信息。"""
         pass
 
     @abstractmethod
-    def list_documents(self) -> List[DocumentInfo]:
+    def list_documents(self) -> list[DocumentInfo]:
         """列出所有打开的文档。"""
         pass
 
@@ -171,13 +171,13 @@ class BasePSAdapter(ABC):
     def get_layer_info(
         self,
         document_name: str,
-        layer_name: Optional[str] = None,
-    ) -> Union[LayerInfo, List[LayerInfo]]:
+        layer_name: str | None = None,
+    ) -> Union[LayerInfo, list[LayerInfo]]:
         """获取图层信息。"""
         pass
 
     @abstractmethod
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         """检测 Photoshop 是否存活。"""
         pass
 
@@ -187,17 +187,17 @@ class BasePSAdapter(ABC):
         pass
 
     @abstractmethod
-    def execute_script(self, script_content: str) -> Dict[str, Any]:
+    def execute_script(self, script_content: str) -> dict[str, Any]:
         """执行 ExtendScript 脚本。"""
         pass
 
     @abstractmethod
-    def undo(self) -> Dict[str, Any]:
+    def undo(self) -> dict[str, Any]:
         """撤销上一步操作。"""
         pass
 
     @abstractmethod
-    def redo(self) -> Dict[str, Any]:
+    def redo(self) -> dict[str, Any]:
         """重做上一步操作。"""
         pass
 
@@ -210,14 +210,14 @@ class MCPClientPSAdapter(BasePSAdapter):
 
     name = "ps_mcp"
 
-    def __init__(self, client: Optional[PSMDPClient] = None, **client_kwargs) -> None:
+    def __init__(self, client: PSMDPClient | None = None, **client_kwargs) -> None:
         """初始化 MCP 客户端适配器。
 
         Args:
             client: 已初始化的 PSMDPClient 实例
             client_kwargs: 创建 PSMDPClient 时的参数
         """
-        self._client: Optional[PSMDPClient] = client
+        self._client: PSMDPClient | None = client
         self._client_kwargs = client_kwargs
         self._client_lock = None
 
@@ -234,8 +234,8 @@ class MCPClientPSAdapter(BasePSAdapter):
         height: int = 1080,
         resolution: float = 72.0,
         color_mode: str = "RGB",
-        background_color: Optional[List[float]] = None,
-    ) -> Dict[str, Any]:
+        background_color: list[float] | None = None,
+    ) -> dict[str, Any]:
         return self._ensure_client().create_document(
             name=name,
             width=width,
@@ -245,13 +245,13 @@ class MCPClientPSAdapter(BasePSAdapter):
             background_color=background_color,
         )
 
-    def open_document(self, file_path: str) -> Dict[str, Any]:
+    def open_document(self, file_path: str) -> dict[str, Any]:
         return self._ensure_client().open_document(file_path)
 
-    def close_document(self, document_name: str, save_changes: bool = False) -> Dict[str, Any]:
+    def close_document(self, document_name: str, save_changes: bool = False) -> dict[str, Any]:
         return self._ensure_client().close_document(document_name, save_changes)
 
-    def save_document(self, document_name: str, file_path: Optional[str] = None) -> Dict[str, Any]:
+    def save_document(self, document_name: str, file_path: str | None = None) -> dict[str, Any]:
         return self._ensure_client().save_document(document_name, file_path)
 
     def export_document(
@@ -260,7 +260,7 @@ class MCPClientPSAdapter(BasePSAdapter):
         file_path: str,
         format: str = "PNG",
         quality: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_client().export_document(
             document_name=document_name,
             file_path=file_path,
@@ -271,32 +271,32 @@ class MCPClientPSAdapter(BasePSAdapter):
     def create_layer(
         self,
         document_name: str,
-        layer_name: Optional[str] = None,
+        layer_name: str | None = None,
         layer_type: str = "pixel",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_client().create_layer(
             document_name=document_name,
             layer_name=layer_name,
             layer_type=layer_type,
         )
 
-    def delete_layer(self, document_name: str, layer_name: str) -> Dict[str, Any]:
+    def delete_layer(self, document_name: str, layer_name: str) -> dict[str, Any]:
         return self._ensure_client().delete_layer(document_name, layer_name)
 
     def duplicate_layer(
         self,
         document_name: str,
         layer_name: str,
-        new_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        new_name: str | None = None,
+    ) -> dict[str, Any]:
         return self._ensure_client().duplicate_layer(document_name, layer_name, new_name)
 
     def set_layer_properties(
         self,
         document_name: str,
         layer_name: str,
-        properties: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any],
+    ) -> dict[str, Any]:
         return self._ensure_client().set_layer_properties(document_name, layer_name, properties)
 
     def set_blend_mode(
@@ -304,7 +304,7 @@ class MCPClientPSAdapter(BasePSAdapter):
         document_name: str,
         layer_name: str,
         blend_mode: Union[BlendMode, str],
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_client().set_blend_mode(document_name, layer_name, blend_mode)
 
     def apply_filter(
@@ -312,8 +312,8 @@ class MCPClientPSAdapter(BasePSAdapter):
         document_name: str,
         layer_name: str,
         filter_name: str,
-        properties: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         return self._ensure_client().apply_filter(
             document_name=document_name,
             layer_name=layer_name,
@@ -321,7 +321,7 @@ class MCPClientPSAdapter(BasePSAdapter):
             properties=properties,
         )
 
-    def remove_filter(self, document_name: str, layer_name: str, filter_name: str) -> Dict[str, Any]:
+    def remove_filter(self, document_name: str, layer_name: str, filter_name: str) -> dict[str, Any]:
         return self._ensure_client().remove_filter(document_name, layer_name, filter_name)
 
     def create_selection(
@@ -331,7 +331,7 @@ class MCPClientPSAdapter(BasePSAdapter):
         left: int = 0,
         width: int = 100,
         height: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_client().create_selection(
             document_name=document_name,
             top=top,
@@ -343,38 +343,38 @@ class MCPClientPSAdapter(BasePSAdapter):
     def fill_selection(
         self,
         document_name: str,
-        color: List[float],
+        color: list[float],
         blend_mode: str = "NORMAL",
         opacity: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_client().fill_selection(document_name, color, blend_mode, opacity)
 
-    def get_document_info(self) -> Dict[str, Any]:
+    def get_document_info(self) -> dict[str, Any]:
         return self._ensure_client().get_document_info()
 
-    def list_documents(self) -> List[DocumentInfo]:
+    def list_documents(self) -> list[DocumentInfo]:
         return self._ensure_client().list_documents()
 
     def get_layer_info(
         self,
         document_name: str,
-        layer_name: Optional[str] = None,
-    ) -> Union[LayerInfo, List[LayerInfo]]:
+        layer_name: str | None = None,
+    ) -> Union[LayerInfo, list[LayerInfo]]:
         return self._ensure_client().get_layer_info(document_name, layer_name)
 
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         return self._ensure_client().ping()
 
     def is_alive(self) -> bool:
         return self._ensure_client().is_alive()
 
-    def execute_script(self, script_content: str) -> Dict[str, Any]:
+    def execute_script(self, script_content: str) -> dict[str, Any]:
         return self._ensure_client().execute_script(script_content)
 
-    def undo(self) -> Dict[str, Any]:
+    def undo(self) -> dict[str, Any]:
         return self._ensure_client().undo()
 
-    def redo(self) -> Dict[str, Any]:
+    def redo(self) -> dict[str, Any]:
         return self._ensure_client().redo()
 
     @property
@@ -397,9 +397,9 @@ class PuppetEnginePSAdapter(BasePSAdapter):
     def _ensure_engine(self):
         if self._engine is None:
             try:
-                import sys
                 import importlib.machinery
                 import importlib.util
+                import sys
                 from pathlib import Path
                 _project_root = Path(__file__).resolve().parent.parent.parent
                 _pa_dir = _project_root / "puppet-automation"
@@ -444,8 +444,8 @@ class PuppetEnginePSAdapter(BasePSAdapter):
         height: int = 1080,
         resolution: float = 72.0,
         color_mode: str = "RGB",
-        background_color: Optional[List[float]] = None,
-    ) -> Dict[str, Any]:
+        background_color: list[float] | None = None,
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="create_document",
             name=name,
@@ -456,17 +456,17 @@ class PuppetEnginePSAdapter(BasePSAdapter):
             background_color=background_color,
         )
 
-    def open_document(self, file_path: str) -> Dict[str, Any]:
+    def open_document(self, file_path: str) -> dict[str, Any]:
         return self._ensure_engine().execute(action="open_document", file_path=file_path)
 
-    def close_document(self, document_name: str, save_changes: bool = False) -> Dict[str, Any]:
+    def close_document(self, document_name: str, save_changes: bool = False) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="close_document",
             document_name=document_name,
             save_changes=save_changes,
         )
 
-    def save_document(self, document_name: str, file_path: Optional[str] = None) -> Dict[str, Any]:
+    def save_document(self, document_name: str, file_path: str | None = None) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="save_document",
             document_name=document_name,
@@ -479,7 +479,7 @@ class PuppetEnginePSAdapter(BasePSAdapter):
         file_path: str,
         format: str = "PNG",
         quality: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="export_document",
             document_name=document_name,
@@ -491,9 +491,9 @@ class PuppetEnginePSAdapter(BasePSAdapter):
     def create_layer(
         self,
         document_name: str,
-        layer_name: Optional[str] = None,
+        layer_name: str | None = None,
         layer_type: str = "pixel",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="create_layer",
             document_name=document_name,
@@ -501,7 +501,7 @@ class PuppetEnginePSAdapter(BasePSAdapter):
             layer_type=layer_type,
         )
 
-    def delete_layer(self, document_name: str, layer_name: str) -> Dict[str, Any]:
+    def delete_layer(self, document_name: str, layer_name: str) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="delete_layer",
             document_name=document_name,
@@ -512,8 +512,8 @@ class PuppetEnginePSAdapter(BasePSAdapter):
         self,
         document_name: str,
         layer_name: str,
-        new_name: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        new_name: str | None = None,
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="duplicate_layer",
             document_name=document_name,
@@ -525,8 +525,8 @@ class PuppetEnginePSAdapter(BasePSAdapter):
         self,
         document_name: str,
         layer_name: str,
-        properties: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any],
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="set_layer_properties",
             document_name=document_name,
@@ -539,7 +539,7 @@ class PuppetEnginePSAdapter(BasePSAdapter):
         document_name: str,
         layer_name: str,
         blend_mode: Union[BlendMode, str],
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="set_blend_mode",
             document_name=document_name,
@@ -552,8 +552,8 @@ class PuppetEnginePSAdapter(BasePSAdapter):
         document_name: str,
         layer_name: str,
         filter_name: str,
-        properties: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="apply_filter",
             document_name=document_name,
@@ -562,7 +562,7 @@ class PuppetEnginePSAdapter(BasePSAdapter):
             properties=properties,
         )
 
-    def remove_filter(self, document_name: str, layer_name: str, filter_name: str) -> Dict[str, Any]:
+    def remove_filter(self, document_name: str, layer_name: str, filter_name: str) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="remove_filter",
             document_name=document_name,
@@ -577,7 +577,7 @@ class PuppetEnginePSAdapter(BasePSAdapter):
         left: int = 0,
         width: int = 100,
         height: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="create_selection",
             document_name=document_name,
@@ -590,10 +590,10 @@ class PuppetEnginePSAdapter(BasePSAdapter):
     def fill_selection(
         self,
         document_name: str,
-        color: List[float],
+        color: list[float],
         blend_mode: str = "NORMAL",
         opacity: int = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._ensure_engine().execute(
             action="fill_selection",
             document_name=document_name,
@@ -602,10 +602,10 @@ class PuppetEnginePSAdapter(BasePSAdapter):
             opacity=opacity,
         )
 
-    def get_document_info(self) -> Dict[str, Any]:
+    def get_document_info(self) -> dict[str, Any]:
         return self._ensure_engine().execute(action="get_document_info")
 
-    def list_documents(self) -> List[DocumentInfo]:
+    def list_documents(self) -> list[DocumentInfo]:
         result = self._ensure_engine().execute(action="list_documents")
         docs = result.get("documents", [])
         return [
@@ -624,8 +624,8 @@ class PuppetEnginePSAdapter(BasePSAdapter):
     def get_layer_info(
         self,
         document_name: str,
-        layer_name: Optional[str] = None,
-    ) -> Union[LayerInfo, List[LayerInfo]]:
+        layer_name: str | None = None,
+    ) -> Union[LayerInfo, list[LayerInfo]]:
         result = self._ensure_engine().execute(
             action="get_layer_info",
             document_name=document_name,
@@ -656,7 +656,7 @@ class PuppetEnginePSAdapter(BasePSAdapter):
                 for l in layers
             ]
 
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         return self._ensure_engine().execute(action="ping")
 
     def is_alive(self) -> bool:
@@ -666,13 +666,13 @@ class PuppetEnginePSAdapter(BasePSAdapter):
         except Exception:
             return False
 
-    def execute_script(self, script_content: str) -> Dict[str, Any]:
+    def execute_script(self, script_content: str) -> dict[str, Any]:
         return self._ensure_engine().execute(action="execute_script", script_content=script_content)
 
-    def undo(self) -> Dict[str, Any]:
+    def undo(self) -> dict[str, Any]:
         return self._ensure_engine().execute(action="undo")
 
-    def redo(self) -> Dict[str, Any]:
+    def redo(self) -> dict[str, Any]:
         return self._ensure_engine().execute(action="redo")
 
     @property

@@ -3,8 +3,8 @@ LoRA 微调训练器 - 低秩适应（Low-Rank Adaptation）
 最常用的小样本微调方式，适合垂直领域小模型
 参考 Antares 哲学：用最小的可训练参数量达到最好的效果
 """
-import os
 import logging
+import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -29,7 +29,7 @@ class LoRAConfig:
     dropout: float = 0.05
     """LoRA dropout 概率"""
     
-    target_modules: List[str] = field(default_factory=lambda: ["q_proj", "v_proj"])
+    target_modules: list[str] = field(default_factory=lambda: ["q_proj", "v_proj"])
     """目标模块，指定哪些层应用 LoRA"""
     
     bias: str = "none"
@@ -62,7 +62,7 @@ class LoRATrainer(BaseTrainer):
     若依赖缺失，会优雅降级并给出框架说明。
     """
 
-    def __init__(self, config: TrainingConfig, lora_config: Optional[LoRAConfig] = None):
+    def __init__(self, config: TrainingConfig, lora_config: LoRAConfig | None = None):
         """初始化 LoRA 训练器
         
         Args:
@@ -83,9 +83,9 @@ class LoRATrainer(BaseTrainer):
             bool: 所有必需依赖是否可用
         """
         try:
+            import peft
             import torch
             import transformers
-            import peft
             logger.info(f"Dependencies available: torch={torch.__version__}, "
                        f"transformers={transformers.__version__}, peft={peft.__version__}")
             return True
@@ -102,7 +102,7 @@ class LoRATrainer(BaseTrainer):
             train_data: 训练数据，可以是 Dataset 对象或文件路径
             eval_data: 评估数据，可选
         """
-        logger.info(f"Loading dataset for LoRA training")
+        logger.info("Loading dataset for LoRA training")
         self._train_dataset = train_data
         self._eval_dataset = eval_data
         self._fire_callback("on_dataset_loaded", 
@@ -126,8 +126,9 @@ class LoRATrainer(BaseTrainer):
 
         try:
             import torch
+            from peft import LoraConfig as PeftLoraConfig
+            from peft import get_peft_model
             from transformers import AutoModelForCausalLM, AutoTokenizer
-            from peft import LoraConfig as PeftLoraConfig, get_peft_model
 
             self._tokenizer = AutoTokenizer.from_pretrained(self.config.base_model_path)
             
@@ -192,9 +193,10 @@ class LoRATrainer(BaseTrainer):
             TrainingResult: 训练结果
         """
         import time
+
         import torch
-        from transformers import TrainingArguments, Trainer
         from peft import get_peft_model_state_dict
+        from transformers import Trainer, TrainingArguments
 
         output_dir = os.path.join(self.config.output_dir, self.config.model_name)
         os.makedirs(output_dir, exist_ok=True)
@@ -315,7 +317,7 @@ class LoRATrainer(BaseTrainer):
         
         return base_params_million
 
-    def evaluate(self) -> Dict[str, float]:
+    def evaluate(self) -> dict[str, float]:
         """评估模型
         
         Returns:

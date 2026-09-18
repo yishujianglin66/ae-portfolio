@@ -31,14 +31,14 @@ def js_str(s: str) -> str:
 class LayerBuildContext:
     """单次 build 内各图层构建器共享的状态。"""
 
-    def __init__(self, tree: "CompositionTree", warnings: List[str],
-                 post_lines: List[str]):
+    def __init__(self, tree: "CompositionTree", warnings: list[str],
+                 post_lines: list[str]):
         self.tree = tree
         self.warnings = warnings
         self.post_lines = post_lines  # 跨图层后处理(track matte 紧邻调整等)
 
 
-def _hex_to_rgb(hex_color: str) -> List[float]:
+def _hex_to_rgb(hex_color: str) -> list[float]:
     h = hex_color.lstrip("#")
     return [int(h[0:2], 16) / 255.0, int(h[2:4], 16) / 255.0, int(h[4:6], 16) / 255.0]
 
@@ -46,7 +46,7 @@ def _hex_to_rgb(hex_color: str) -> List[float]:
 # ── solid ─────────────────────────────────────────────────────────────
 
 
-def build_solid_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str]:
+def build_solid_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> list[str]:
     tree = ctx.tree
     var = f"layer{layer.z_index}"
     color = layer.content.get("color", [0, 0, 0])
@@ -62,7 +62,7 @@ def build_solid_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str]:
 # ── adjustment ────────────────────────────────────────────────────────
 
 
-def build_adjustment_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str]:
+def build_adjustment_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> list[str]:
     tree = ctx.tree
     idx = layer.z_index
     var = f"layer{idx}"
@@ -75,7 +75,7 @@ def build_adjustment_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[s
     ]
     # M7: grain 后处理层（edit_fx_layer="grain"）
     if layer.content.get("edit_fx_layer") == "grain":
-        lines.append(f"    // ── grain 后处理 ──")
+        lines.append("    // ── grain 后处理 ──")
         lines.append(
             f"    var _gn{idx} = {var}.property('ADBE Effect Parade')"
             f".addProperty('ADBE Noise');")
@@ -89,7 +89,7 @@ def build_adjustment_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[s
 # ── text ──────────────────────────────────────────────────────────────
 
 
-def build_text_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str]:
+def build_text_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> list[str]:
     tree = ctx.tree
     var = f"layer{layer.z_index}"
     text = js_str(layer.content.get("text", ""))
@@ -99,7 +99,7 @@ def build_text_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str]:
     # 字体回退链：AE 只认 PS 名。font="auto" 时按风格卡经字体风格映射解析
     # （2026-08-16: 系统 2375 字体资产经真机验证 12/12, 见 core/font_style_map.py）
     requested = str(layer.content.get("font", "auto"))
-    chain: List[str] = []
+    chain: list[str] = []
     if requested == "auto":
         try:
             from core.font_style_map import resolve_font
@@ -117,14 +117,14 @@ def build_text_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str]:
         f"    var {var} = comp.layers.addText(\"{text}\");",
         f"    var {var}_td = {var}.property(\"ADBE Text Properties\").property(\"ADBE Text Document\");",
         f"    var _fonts = {fonts_js};",
-        f"    var _fontOk = false;",
-        f"    for (var _fi = 0; _fi < _fonts.length; _fi++) {{",
+        "    var _fontOk = false;",
+        "    for (var _fi = 0; _fi < _fonts.length; _fi++) {",
         f"        var {var}_doc = {var}_td.value;",
         f"        {var}_doc.resetCharStyle();",
         f"        {var}_doc.fontSize = {size};",
         f"        {var}_doc.fillColor = [{main[0]:.4f}, {main[1]:.4f}, {main[2]:.4f}];",
         f"        try {{ {var}_doc.font = _fonts[_fi]; {var}_td.setValue({var}_doc); _fontOk = true; break; }} catch(e) {{ _fontOk = false; }}",
-        f"    }}",
+        "    }",
         f"    {var}.startTime = {layer.time_range[0]};",
         f"    {var}.outPoint = {layer.time_range[1]};",
     ]
@@ -141,7 +141,7 @@ _DEFAULT_SPRITES = {
 }
 
 
-def build_particle_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str]:
+def build_particle_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> list[str]:
     tree = ctx.tree
     var = f"layer{layer.z_index}"
     lines = [
@@ -182,7 +182,7 @@ def build_particle_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str
 # ── footage（gen_fx 素材预备后复用同一路径）────────────────────────────
 
 
-def build_footage_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str]:
+def build_footage_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> list[str]:
     """素材图层：RGBA 透明 MOV/PNG 序列直投，或 彩色视频+遮罩序列 track matte"""
     tree = ctx.tree
     idx = layer.z_index
@@ -259,7 +259,7 @@ def build_footage_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str]
 
 # ── 分派注册表 ────────────────────────────────────────────────────────
 
-LAYER_BUILDERS: Dict[str, Callable[[LayerBuildContext, "LayerSpec"], List[str]]] = {
+LAYER_BUILDERS: dict[str, Callable[[LayerBuildContext, "LayerSpec"], list[str]]] = {
     "solid": build_solid_layer,
     "adjustment": build_adjustment_layer,
     "text": build_text_layer,
@@ -268,7 +268,7 @@ LAYER_BUILDERS: Dict[str, Callable[[LayerBuildContext, "LayerSpec"], List[str]]]
 }
 
 
-def build_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> List[str]:
+def build_layer(ctx: LayerBuildContext, layer: "LayerSpec") -> list[str]:
     """按 layer.type 分派到对应构建器; 未知类型抛 ValueError。"""
     builder = LAYER_BUILDERS.get(layer.type)
     if builder is None:

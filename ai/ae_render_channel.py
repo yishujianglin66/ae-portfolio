@@ -19,17 +19,18 @@ v22 成片即此通道渲染(用户认可"细节质感")。核心价值:
 """
 from __future__ import annotations
 
+import concurrent.futures
+import hashlib
+import hmac
 import json
 import subprocess
 import time
-import hmac
-import hashlib
-import concurrent.futures
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from core.bridge_failure import BridgeFailure
+from core.bridge_failure import from_reason as _bf_from_reason
 from core.paths import ae_exe, aerender_exe, ffmpeg_bin, ffprobe_bin
-from core.bridge_failure import from_reason as _bf_from_reason, BridgeFailure
 
 # AE 2025 完整版 (AE 2026 目录是空壳, 只有1个脚本面板)
 # 路径统一收口到 core/paths.py（AEK_AE_EXE / AEK_AERENDER / AEK_FFMPEG / AEK_FFPROBE 可覆盖）
@@ -62,7 +63,7 @@ class AERenderChannel:
         self.ae_dir.mkdir(parents=True, exist_ok=True)
         self.aep_path = self.out_dir / "ae_shots.aep"
         self.jsx_path = self.out_dir / "build_comps.jsx"
-        self.failures: List[BridgeFailure] = []
+        self.failures: list[BridgeFailure] = []
 
     def _fail(self, reason: str, stage: str, on_fail_reason=None) -> None:
         """记录结构化失败 + 回调旧接口（向后兼容）。"""
@@ -70,7 +71,7 @@ class AERenderChannel:
         if on_fail_reason:
             on_fail_reason(reason)
 
-    def get_failures(self) -> List[Dict]:
+    def get_failures(self) -> list[dict]:
         return [f.to_dict() for f in self.failures]
 
     # ────────────────────────────────────────────────────────────
@@ -90,7 +91,7 @@ class AERenderChannel:
                 continue
         return ""
 
-    def _generate_signature(self, data: Dict, secret: str) -> str:
+    def _generate_signature(self, data: dict, secret: str) -> str:
         """HMAC-SHA256 hex。canonical = json.dumps(sort_keys, 紧凑分隔符)。"""
         canonical = json.dumps(data, sort_keys=True, separators=(",", ":"),
                                ensure_ascii=False)
@@ -101,7 +102,7 @@ class AERenderChannel:
     # AE 整片精修 Pass (2026-09-04): 单次 aerender 给全片所有镜头上
     # Glow 微光 + 胶片颗粒 — 比逐镜 AE 快 10-20 倍, 每镜都有插件级质感
     # ────────────────────────────────────────────────────────────
-    def polish_pass(self, video_in: str, out_dir: str = "") -> Optional[str]:
+    def polish_pass(self, video_in: str, out_dir: str = "") -> str | None:
         import os
         od = Path(out_dir) if out_dir else self.out_dir
         od = od.resolve()  # aerender 把相对路径解析到自己安装目录 (2026-09-04 实测)
@@ -150,7 +151,7 @@ class AERenderChannel:
                            capture_output=True, timeout=1800,
                            encoding="utf-8", errors="replace")  # aerender 中文输出 GBK, text=True 默认 utf-8 会崩 reader 线程
         if not out_mp4.exists() or out_mp4.stat().st_size < 10000:
-            print(f"    [AE精修] aerender 失败, 回退原片")
+            print("    [AE精修] aerender 失败, 回退原片")
             return None
         ok = True
         print(f"    [AE精修] OK: {out_mp4}")
@@ -159,8 +160,8 @@ class AERenderChannel:
     # ────────────────────────────────────────────────────────────
     # 主入口: 完整渲染 AE 高级运镜镜头, 返回 {idx: mp4_path}
     # ────────────────────────────────────────────────────────────
-    def build_and_render(self, ae_plan: Dict[int, Dict], fps: int,
-                         on_fail_reason=None) -> Dict[int, str]:
+    def build_and_render(self, ae_plan: dict[int, dict], fps: int,
+                         on_fail_reason=None) -> dict[int, str]:
         """ae_plan: {idx: {source, source_start, render_dur, speed, tech,
                            onsets, fps, resolution, color}}"""
         if not ae_plan or not Path(AERENDER).exists():
@@ -229,7 +230,7 @@ class AERenderChannel:
 
         # 规范化 (并行4线程: 精确帧数 + 调色)
         print("[AE通道] 规范化AE片段 (并行4线程)...")
-        ae_clips: Dict[int, str] = {}
+        ae_clips: dict[int, str] = {}
 
         def _norm_one(idx, p):
             comp_name = f"shot_{idx:03d}"

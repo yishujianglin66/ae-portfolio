@@ -75,10 +75,12 @@ def load_done() -> set:
 
 def run_caption():
     import torch
-    from transformers import (
-        AutoModelForImageTextToText, AutoProcessor, BitsAndBytesConfig,
-    )
     from qwen_vl_utils import process_vision_info
+    from transformers import (
+        AutoModelForImageTextToText,
+        AutoProcessor,
+        BitsAndBytesConfig,
+    )
 
     _log("=" * 60)
     _log("R3 VLM 帧级 caption（qwen2.5-vl-7b-cam-motion, 4bit nf4）")

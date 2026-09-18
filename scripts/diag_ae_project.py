@@ -1,4 +1,8 @@
-import json, os, sys, time
+import json
+import os
+import sys
+import time
+
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 cmd_path = 'C:/Users/Administrator/Desktop/AE-Knowledge-Vault/.ae-mcp-bridge/ae_command.json'
@@ -77,7 +81,7 @@ if os.path.exists(res_path):
         for rq in inner.get('renderQueue', []):
             print(f"  Comp: {rq['compName']}, Status: {rq['status']}, Elapsed: {rq['elapsed']}s")
         
-        print(f"\n=== V15 Comp ===")
+        print("\n=== V15 Comp ===")
         print(f"  Name: {inner.get('v15Comp', 'NOT FOUND')}")
         print(f"  Layers: {inner.get('v15NumLayers', 0)}")
         for layer in inner.get('v15Layers', []):

@@ -9,13 +9,14 @@
 5. 音频指纹 - chroma特征、MFCC、频谱特征
 6. 和弦检测 - 基于chroma的和弦识别
 """
-import os
 import json
 import math
-import numpy as np
-from typing import Dict, List, Optional, Tuple
-from datetime import datetime
+import os
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config", "media-config.json")
 
@@ -43,17 +44,17 @@ class AudioFeaturesEnhanced:
     spectral_bandwidth: float = 0.0
     spectral_rolloff: float = 0.0
     zero_crossing_rate: float = 0.0
-    mfccs: List[float] = None
-    chroma: List[float] = None
+    mfccs: list[float] = None
+    chroma: list[float] = None
     energy: float = 0.0
-    energy_curve: Dict = None
+    energy_curve: dict = None
     mood: str = ""
     mood_score: float = 0.0
     genre: str = ""
-    beats: List[float] = None
-    downbeats: List[float] = None
-    segments: List[AudioSegment] = None
-    chords: List[Dict] = None
+    beats: list[float] = None
+    downbeats: list[float] = None
+    segments: list[AudioSegment] = None
+    chords: list[dict] = None
     danceability: float = 0.0
     valence: float = 0.0
     arousal: float = 0.0
@@ -134,7 +135,7 @@ class EnhancedAudioAnalyzer:
                 self._get_config_cached = None
         self.config = self._load_config(config_path)
 
-    def _load_config(self, path: str) -> Dict:
+    def _load_config(self, path: str) -> dict:
         # 优先用缓存读取，多模块共享同一配置文件时只读一次磁盘
         if self._get_config_cached is not None:
             data = self._get_config_cached(path)
@@ -166,7 +167,7 @@ class EnhancedAudioAnalyzer:
                 raise ImportError("scipy 未安装，请执行: pip install scipy")
         return self._scipy
 
-    def analyze_audio(self, audio_path: str) -> Dict:
+    def analyze_audio(self, audio_path: str) -> dict:
         if not os.path.exists(audio_path):
             return {"success": False, "error": "音频文件不存在"}
 
@@ -281,7 +282,7 @@ class EnhancedAudioAnalyzer:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _detect_key(self, chroma: List[float]) -> Tuple[str, str]:
+    def _detect_key(self, chroma: list[float]) -> tuple[str, str]:
         key_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
         mode_names = ['major', 'minor']
 
@@ -299,7 +300,7 @@ class EnhancedAudioAnalyzer:
 
         return key, mode
 
-    def _calculate_mode_score(self, chroma: List[float]) -> float:
+    def _calculate_mode_score(self, chroma: list[float]) -> float:
         major_pattern = [1, 0.6, 0.8, 0.6, 1, 0.8, 0.6, 1, 0.8, 0.6, 0.8, 0.6]
         minor_pattern = [1, 0.8, 0.6, 0.8, 0.6, 1, 0.6, 1, 0.8, 0.6, 0.8, 0.6]
 
@@ -308,7 +309,7 @@ class EnhancedAudioAnalyzer:
 
         return major_score - minor_score
 
-    def _infer_mood_enhanced(self, tempo: float, energy: float, spectral_centroid: float, zcr: float, mfccs: List[float]) -> Tuple[str, float]:
+    def _infer_mood_enhanced(self, tempo: float, energy: float, spectral_centroid: float, zcr: float, mfccs: list[float]) -> tuple[str, float]:
         mood_scores = {}
 
         mfcc_mean = np.mean(mfccs) if mfccs else 0
@@ -393,7 +394,7 @@ class EnhancedAudioAnalyzer:
         else:
             return "other"
 
-    def _detect_downbeats(self, beat_times: List[float], tempo: float) -> List[float]:
+    def _detect_downbeats(self, beat_times: list[float], tempo: float) -> list[float]:
         if len(beat_times) < 4:
             return []
 
@@ -411,7 +412,7 @@ class EnhancedAudioAnalyzer:
 
         return downbeats
 
-    def _analyze_energy_curve(self, rms: np.ndarray, sr: int) -> Dict:
+    def _analyze_energy_curve(self, rms: np.ndarray, sr: int) -> dict:
         times = self._librosa.frames_to_time(range(len(rms[0])), sr=sr)
         values = [float(v) for v in rms[0]]
 
@@ -439,7 +440,7 @@ class EnhancedAudioAnalyzer:
             "energy_range": float(np.max(values) - np.min(values))
         }
 
-    def _detect_segments_enhanced(self, y: np.ndarray, sr: int, beat_times: List[float], energy_curve: Dict, chroma: np.ndarray = None) -> List[AudioSegment]:
+    def _detect_segments_enhanced(self, y: np.ndarray, sr: int, beat_times: list[float], energy_curve: dict, chroma: np.ndarray = None) -> list[AudioSegment]:
         librosa = self._ensure_librosa()
 
         # 复用上游已计算的 chroma，避免重复 STFT（CPU 密集型）
@@ -509,7 +510,7 @@ class EnhancedAudioAnalyzer:
         else:
             return "transition"
 
-    def _detect_chords(self, chroma: np.ndarray, sr: int) -> List[Dict]:
+    def _detect_chords(self, chroma: np.ndarray, sr: int) -> list[dict]:
         chord_names = [
             "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
             "Cm", "C#m", "Dm", "D#m", "Em", "Fm", "F#m", "Gm", "G#m", "Am", "A#m", "Bm"
@@ -582,7 +583,7 @@ class EnhancedAudioAnalyzer:
             max(0, 1 - abs(tempo - 100) / 60) * 0.2
         )
 
-    def _calculate_valence(self, chroma: List[float], tempo: float) -> float:
+    def _calculate_valence(self, chroma: list[float], tempo: float) -> float:
         bright_keys = [0, 4, 7, 9, 11]
         dark_keys = [2, 3, 5, 8, 10]
 
@@ -605,7 +606,7 @@ class EnhancedAudioAnalyzer:
             max(0, 1 - abs(tempo - 120) / 80) * 0.1
         )
 
-    def generate_beat_map(self, audio_path: str) -> Dict:
+    def generate_beat_map(self, audio_path: str) -> dict:
         analysis = self.analyze_audio(audio_path)
         if not analysis["success"]:
             return analysis
@@ -625,7 +626,7 @@ class EnhancedAudioAnalyzer:
             "features": features
         }
 
-    def find_best_bgm_match(self, target_features: Dict, bgm_directory: str, max_results: int = 5) -> List[Dict]:
+    def find_best_bgm_match(self, target_features: dict, bgm_directory: str, max_results: int = 5) -> list[dict]:
         if not os.path.exists(bgm_directory):
             return []
 
@@ -653,7 +654,7 @@ class EnhancedAudioAnalyzer:
 
         return sorted(matches, key=lambda x: x["similarity"], reverse=True)[:max_results]
 
-    def _calculate_similarity_enhanced(self, target: Dict, candidate: Dict) -> float:
+    def _calculate_similarity_enhanced(self, target: dict, candidate: dict) -> float:
         score = 0.0
 
         if "tempo" in target and "tempo" in candidate:
@@ -705,7 +706,7 @@ class EnhancedAudioAnalyzer:
 
         return 0.5
 
-    def test_librosa(self) -> Dict:
+    def test_librosa(self) -> dict:
         librosa_available = False
         scipy_available = False
         

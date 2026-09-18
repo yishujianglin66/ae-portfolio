@@ -49,7 +49,12 @@ PROJ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJ))
 
 from scripts.cut_visibility_v2 import (  # noqa: E402
-    ahash, frames_by_number, hamming, norm, probe_fps, safe_video,
+    ahash,
+    frames_by_number,
+    hamming,
+    norm,
+    probe_fps,
+    safe_video,
 )
 
 FREEZE_HAMMING = 10

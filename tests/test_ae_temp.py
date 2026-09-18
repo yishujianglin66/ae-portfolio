@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """临时测试：验证 AE 引擎实际脚本执行能力。"""
-import sys
 import asyncio
+import sys
 from pathlib import Path
 
 import pytest

@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
-import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -238,10 +238,11 @@ def main():
     count = integrate_presets()
     if count > 0:
         print("\n重新加载PresetSystem验证...")
-        from ae.preset_system import PresetSystem
         # 重新实例化以加载最新JSON
         import importlib
+
         import ae.preset_system as ps_mod
+        from ae.preset_system import PresetSystem
         importlib.reload(ps_mod)
         ps = ps_mod.PresetSystem()
         print(f"PresetSystem加载: {len(ps.list_presets())} 个预设")

@@ -67,9 +67,9 @@ class RubricDimension:
 class Rubric:
     """评分量表"""
     id: str
-    dimensions: List[RubricDimension] = field(default_factory=list)
+    dimensions: list[RubricDimension] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "dimensions": [
@@ -78,10 +78,10 @@ class Rubric:
             ],
         }
 
-    def dim_names(self) -> List[str]:
+    def dim_names(self) -> list[str]:
         return [d.name for d in self.dimensions]
 
-    def weights(self) -> Dict[str, float]:
+    def weights(self) -> dict[str, float]:
         return {d.name: d.weight for d in self.dimensions}
 
 
@@ -100,7 +100,7 @@ class ImageScore:
     image_ref: str                 # 路径或 "frame@3.2s"
     md5: str = ""
     total: float = 0.0             # 加权总分（0-100）
-    dimensions: List[DimensionScore] = field(default_factory=list)
+    dimensions: list[DimensionScore] = field(default_factory=list)
     model: str = ""                # 实际使用的模型名
     provider: str = ""             # 实际 Provider
     backend: str = "heuristic"     # "vlm" | "heuristic"
@@ -110,13 +110,13 @@ class ImageScore:
     latency_ms: float = 0.0
     raw: str = ""
 
-    def dim(self, name: str) -> Optional[DimensionScore]:
+    def dim(self, name: str) -> DimensionScore | None:
         for d in self.dimensions:
             if d.name == name:
                 return d
         return None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "image_ref": self.image_ref, "md5": self.md5, "total": self.total,
             "model": self.model, "provider": self.provider, "backend": self.backend,
@@ -135,23 +135,23 @@ class ImageScore:
 class VariantScore:
     """单参数变体的评分（多帧聚合）"""
     label: str
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     total: float = 0.0             # 帧均总分（0-100）
-    per_dim_avg: Dict[str, float] = field(default_factory=dict)
+    per_dim_avg: dict[str, float] = field(default_factory=dict)
     temporal_energy: float = 0.0   # 帧间差异代理（节奏感，启发式后端才有意义）
-    image_scores: List[ImageScore] = field(default_factory=list)
+    image_scores: list[ImageScore] = field(default_factory=list)
 
 
 @dataclass
 class VisualEvalReport:
     """变体优选报告"""
-    variants: List[VariantScore] = field(default_factory=list)
-    best: Optional[VariantScore] = None
-    ranking: List[Tuple[str, float]] = field(default_factory=list)  # (label, total) 降序
+    variants: list[VariantScore] = field(default_factory=list)
+    best: VariantScore | None = None
+    ranking: list[tuple[str, float]] = field(default_factory=list)  # (label, total) 降序
     backend: str = "heuristic"
     offline: bool = True
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "backend": self.backend, "offline": self.offline,
             "best": self.best.label if self.best else None,
@@ -225,7 +225,7 @@ def build_score_prompt(rubric: Rubric, context: str = "") -> str:
     )
 
 
-def parse_score_json(text: str, rubric: Rubric) -> List[DimensionScore]:
+def parse_score_json(text: str, rubric: Rubric) -> list[DimensionScore]:
     """从模型输出中稳健提取评分 JSON（容忍代码块/前后缀散文）。
 
     失败抛 ValueError，由调用方降级启发式。
@@ -246,7 +246,7 @@ def parse_score_json(text: str, rubric: Rubric) -> List[DimensionScore]:
     if not isinstance(dims_raw, dict):
         raise ValueError(f"dims 字段类型异常: {type(dims_raw)}")
     weights = rubric.weights()
-    scores: List[DimensionScore] = []
+    scores: list[DimensionScore] = []
     for d in rubric.dimensions:
         raw = dims_raw.get(d.name)
         val = None
@@ -281,7 +281,7 @@ def weighted_total(scores: Sequence[DimensionScore]) -> float:
 
 
 # ── 启发式离线指标（honest degradation 弱代理）───────────────────────
-def heuristic_dimension_scores(bgr) -> List[Tuple[str, float, str]]:
+def heuristic_dimension_scores(bgr) -> list[tuple[str, float, str]]:
     """从单帧图像算启发式指标，映射到 AE 默认量表的 (name, score1-5, comment)。
 
     明确声明：这是弱代理（弱于 VLM 人眼近似），仅用于离线兜底与单元测试。
@@ -361,9 +361,9 @@ class VisualEvalGateway:
         context:  打进 prompt 的渲染上下文（如 "AMV 高燃模板 glow_r30 变体"）
     """
 
-    def __init__(self, backend: str = "auto", model: Optional[str] = None,
+    def __init__(self, backend: str = "auto", model: str | None = None,
                  rubric: Any = RUBRIC_AE_DEFAULT,
-                 cache_dir: Optional[str] = None,
+                 cache_dir: str | None = None,
                  concurrency: int = 2, context: str = ""):
         if backend not in ("auto", "vlm", "heuristic"):
             raise ValueError(f"backend 非法: {backend}")
@@ -379,7 +379,7 @@ class VisualEvalGateway:
         self._vlm_broken_reason = ""
 
     # ── 帧采样 ───────────────────────────────────────────────────
-    def load_image_b64(self, image_path: str, quality: int = 85) -> Tuple[str, str]:
+    def load_image_b64(self, image_path: str, quality: int = 85) -> tuple[str, str]:
         """读图 → (base64_jpeg, md5)。md5 对编码后的 JPEG 计算。"""
         import cv2
         import numpy as np
@@ -392,7 +392,7 @@ class VisualEvalGateway:
         return self.encode_frame(img, quality)
 
     @staticmethod
-    def encode_frame(frame_bgr: Any, quality: int = 85) -> Tuple[str, str]:
+    def encode_frame(frame_bgr: Any, quality: int = 85) -> tuple[str, str]:
         """BGR ndarray → (base64_jpeg, md5)。md5 对编码后 JPEG 字节计算（内容寻址）。"""
         import cv2
         ok, buf = cv2.imencode(".jpg", frame_bgr,
@@ -402,8 +402,8 @@ class VisualEvalGateway:
         raw = buf.tobytes()
         return base64.b64encode(raw).decode("ascii"), hashlib.md5(raw).hexdigest()
 
-    def frames_from_video(self, video_path: str, times: Optional[Sequence[float]] = None,
-                          max_frames: int = 8, resize: Any = None) -> List[Tuple[float, Any]]:
+    def frames_from_video(self, video_path: str, times: Sequence[float] | None = None,
+                          max_frames: int = 8, resize: Any = None) -> list[tuple[float, Any]]:
         """视频 → [(t_sec, BGR帧)]。times 指定时间点；None 时均匀采样 max_frames 帧。"""
         import cv2
         cap = cv2.VideoCapture(str(video_path))
@@ -419,7 +419,7 @@ class VisualEvalGateway:
                     times = [0.0]
                 else:
                     times = [duration * (i + 0.5) / n for i in range(n)]
-            out: List[Tuple[float, Any]] = []
+            out: list[tuple[float, Any]] = []
             for t in times:
                 cap.set(cv2.CAP_PROP_POS_MSEC, float(t) * 1000.0)
                 ok, frame = cap.read()
@@ -433,12 +433,12 @@ class VisualEvalGateway:
             cap.release()
 
     # ── 缓存 ─────────────────────────────────────────────────────
-    def _cache_path(self, md5: str) -> Optional[Path]:
+    def _cache_path(self, md5: str) -> Path | None:
         if not self.cache_dir:
             return None
         return self.cache_dir / f"{md5[:24]}.json"
 
-    def _cache_load(self, md5: str) -> Optional[ImageScore]:
+    def _cache_load(self, md5: str) -> ImageScore | None:
         p = self._cache_path(md5)
         if not p or not p.exists():
             return None
@@ -484,7 +484,7 @@ class VisualEvalGateway:
             return cached
 
         t0 = time.perf_counter()
-        score: Optional[ImageScore] = None
+        score: ImageScore | None = None
         if self.backend in ("auto", "vlm") and not self._vlm_broken:
             try:
                 score = await self._score_vlm(b64, md5, image_ref)
@@ -503,7 +503,7 @@ class VisualEvalGateway:
 
     async def _score_vlm(self, b64: str, md5: str, image_ref: str) -> ImageScore:
         """走 llm_gateway vision 通道评分（Qwen3-VL-30B-A3B 或 VISION 档位 Provider）"""
-        from core.llm_gateway import llm_gateway, TaskType  # 惰性导入，离线环境不拖累
+        from core.llm_gateway import TaskType, llm_gateway  # 惰性导入，离线环境不拖累
 
         # 强制重装配 Provider：网关单例可能在本进程更早的导入期以空配置初始化
         # （真机实测：不 force 时 providers 为空 → "LLM 网关未配置" 降级启发式）
@@ -538,7 +538,7 @@ class VisualEvalGateway:
         if img is None:
             raise ValueError("启发式解码失败")
         weights = self.rubric.weights()
-        dims: List[DimensionScore] = []
+        dims: list[DimensionScore] = []
         known = {n: (s, c) for n, s, c in heuristic_dimension_scores(img)}
         for d in self.rubric.dimensions:
             s, comment = known.get(d.name, (3.0, "无代理指标，中性分"))
@@ -555,8 +555,8 @@ class VisualEvalGateway:
         b64, md5 = self.load_image_b64(image_path)
         return await self.score_b64(b64, md5, image_ref=str(image_path))
 
-    async def score_video(self, video_path: str, times: Optional[Sequence[float]] = None,
-                          max_frames: int = 8) -> List[ImageScore]:
+    async def score_video(self, video_path: str, times: Sequence[float] | None = None,
+                          max_frames: int = 8) -> list[ImageScore]:
         frames = self.frames_from_video(video_path, times, max_frames)
         sem = asyncio.Semaphore(self.concurrency)
 
@@ -567,7 +567,7 @@ class VisualEvalGateway:
 
         return await asyncio.gather(*[_one(t, f) for t, f in frames])
 
-    async def compare_variants(self, variants: List[Dict[str, Any]],
+    async def compare_variants(self, variants: list[dict[str, Any]],
                                rubric: Any = None) -> VisualEvalReport:
         """参数变体优选：评分 → 帧均聚合 → 排序。
 
@@ -583,10 +583,10 @@ class VisualEvalGateway:
                 self.rubric = saved
         return report
 
-    async def _compare_variants_inner(self, variants: List[Dict[str, Any]]) -> VisualEvalReport:
-        vs: List[VariantScore] = []
+    async def _compare_variants_inner(self, variants: list[dict[str, Any]]) -> VisualEvalReport:
+        vs: list[VariantScore] = []
         offline = True
-        backends: List[str] = []
+        backends: list[str] = []
         for v in variants:
             label = str(v.get("label", ""))
             paths = list(v.get("image_paths", []) or [])
@@ -602,7 +602,7 @@ class VisualEvalGateway:
 
             scores = await asyncio.gather(*[_one(p) for p in paths])
             total = sum(s.total for s in scores) / len(scores)
-            per_dim: Dict[str, List[float]] = {}
+            per_dim: dict[str, list[float]] = {}
             for s in scores:
                 for d in s.dimensions:
                     per_dim.setdefault(d.name, []).append(d.score)
@@ -652,11 +652,11 @@ class VisualEvalGateway:
         b64, md5 = self.encode_frame(frame_bgr)
         return self.score_b64_sync(b64, md5, image_ref=image_ref)
 
-    def score_video_sync(self, video_path: str, times: Optional[Sequence[float]] = None,
-                         max_frames: int = 8) -> List[ImageScore]:
+    def score_video_sync(self, video_path: str, times: Sequence[float] | None = None,
+                         max_frames: int = 8) -> list[ImageScore]:
         return self._run(self.score_video(video_path, times, max_frames))
 
-    def compare_variants_sync(self, variants: List[Dict[str, Any]],
+    def compare_variants_sync(self, variants: list[dict[str, Any]],
                               rubric: Any = None) -> VisualEvalReport:
         return self._run(self.compare_variants(variants, rubric))
 

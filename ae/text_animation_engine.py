@@ -22,10 +22,10 @@ from __future__ import annotations
 
 import os
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -136,7 +136,7 @@ class TextAnimation:
     end_time: float                     # 结束时间（秒）
     style: TextStyle
     animation: AnimationConfig
-    position: Tuple[int, int]           # (x, y)
+    position: tuple[int, int]           # (x, y)
     layer: int = 0                      # 图层
 
 
@@ -159,8 +159,8 @@ class TextAnimationEngine:
 
     def generate_ass(
         self,
-        animations: List[TextAnimation],
-        output_path: Optional[str] = None,
+        animations: list[TextAnimation],
+        output_path: str | None = None,
     ) -> str:
         """
         生成 ASS 字幕文件。
@@ -176,11 +176,11 @@ class TextAnimationEngine:
 
         # ASS 头部
         lines.append("[Script Info]")
-        lines.append(f"Title: Levi MAD Lyrics")
-        lines.append(f"ScriptType: v4.00+")
+        lines.append("Title: Levi MAD Lyrics")
+        lines.append("ScriptType: v4.00+")
         lines.append(f"PlayResX: {self.width}")
         lines.append(f"PlayResY: {self.height}")
-        lines.append(f"Timer: 100.0000")
+        lines.append("Timer: 100.0000")
         lines.append("")
 
         # 样式定义
@@ -306,7 +306,7 @@ class TextAnimationEngine:
         
         elif preset == AnimationPreset.GLITCH_SHAKE.value:
             # 故障抖动（简化版）
-            return f"{{\\fad(100,100)}}"
+            return "{\\fad(100,100)}"
         
         elif preset == AnimationPreset.PULSE.value:
             # 脉冲
@@ -420,7 +420,7 @@ class TextAnimationEngine:
 # ================================================================
 
 def generate_lyric_ass(
-    lyrics: List[Tuple[str, float, float, str, str]],
+    lyrics: list[tuple[str, float, float, str, str]],
     output_path: str,
     video_width: int = 1920,
     video_height: int = 1080,

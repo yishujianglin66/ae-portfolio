@@ -342,14 +342,14 @@ class TestLLMGatewayNewTaskTypes(unittest.TestCase):
             self.assertTrue(hasattr(TaskType, name), f"TaskType.{name} missing")
 
     def test_task_provider_map_has_new_types(self):
-        from core.llm_gateway import TaskType, TASK_PROVIDER_MAP
+        from core.llm_gateway import TASK_PROVIDER_MAP, TaskType
         for tt in [TaskType.SOCIAL_MEDIA_CRAWL, TaskType.WEB_CONTEXT_FETCH,
                     TaskType.SCENE_GENERATION_3D, TaskType.COMFYUI_WORKFLOW,
                     TaskType.ADOBE_AUTOMATION, TaskType.RENDER_AUTOMATION]:
             self.assertIn(tt, TASK_PROVIDER_MAP, f"{tt} not in TASK_PROVIDER_MAP")
 
     def test_task_tier_map_has_new_types(self):
-        from core.llm_gateway import TaskType, TASK_TIER_MAP
+        from core.llm_gateway import TASK_TIER_MAP, TaskType
         for tt in [TaskType.SOCIAL_MEDIA_CRAWL, TaskType.WEB_CONTEXT_FETCH,
                     TaskType.SCENE_GENERATION_3D, TaskType.COMFYUI_WORKFLOW,
                     TaskType.ADOBE_AUTOMATION, TaskType.RENDER_AUTOMATION]:

@@ -53,13 +53,13 @@ def run_stage1(bgm: Path, out_dir: Path, device_str: str) -> Path:
     assert MSST_DIR.exists(), f"MSST 代码缺失: {MSST_DIR}"
     assert CKPT.exists() and CFG.exists(), "melband ckpt/config 缺失（闸门1：存在性）"
     sys.path.insert(0, str(MSST_DIR))
+    import librosa
+    import numpy as np
+    import soundfile as sf
     import torch
     import yaml
-    import librosa
-    import soundfile as sf
-    import numpy as np
-    from utils.settings import get_model_from_config
     from utils.model_utils import demix
+    from utils.settings import get_model_from_config
 
     t0 = time.time()
     # config 含 !!python/tuple 标签，safe_load 不支持，MSST 官方同样用 full_load
@@ -94,12 +94,12 @@ def run_stage1(bgm: Path, out_dir: Path, device_str: str) -> Path:
 def run_stage2(drums_wav: Path, out_dir: Path, device_str: str) -> dict:
     th = DRUMSEP_REPO / "49469ca8.th"
     assert th.exists(), f"drumsep 权重缺失: {th}（闸门1：存在性）"
-    import torch
     import librosa
-    import soundfile as sf
     import numpy as np
-    from demucs.pretrained import get_model as demucs_get_model
+    import soundfile as sf
+    import torch
     from demucs.apply import apply_model
+    from demucs.pretrained import get_model as demucs_get_model
 
     out = {}
     if all((out_dir / f"{s}.wav").exists() for s in STEMS_DRUM):

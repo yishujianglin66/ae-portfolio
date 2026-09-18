@@ -26,12 +26,12 @@ adobe_universal_bridge.py — Adobe 通用 MCP Bridge 基类
 
 from __future__ import annotations
 
-import os
-import json
-import time
-import hmac
 import hashlib
+import hmac
+import json
+import os
 import subprocess
+import time
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -119,14 +119,14 @@ class AdobeUniversalBridge(ABC):
 
     # 子类必须设置
     APP_KEY: str = ""          # e.g. "photoshop"
-    APP_CONFIG: Dict = {}      # ADOBE_APPS 中的配置
+    APP_CONFIG: dict = {}      # ADOBE_APPS 中的配置
     
     def __init__(
         self,
-        bridge_dir: Optional[str] = None,
+        bridge_dir: str | None = None,
         timeout: int = 15,
         poll_interval: float = 0.5,
-        secret: Optional[str] = None,
+        secret: str | None = None,
     ):
         if not self.APP_KEY:
             raise ValueError("子类必须设置 APP_KEY")
@@ -190,7 +190,7 @@ class AdobeUniversalBridge(ABC):
             pass
         return False
     
-    def find_install_path(self) -> Optional[str]:
+    def find_install_path(self) -> str | None:
         """查找 Adobe 软件安装路径"""
         for path_template in self.app_config.get("install_paths", []):
             path = path_template.replace("{year}", str(time.localtime().tm_year))
@@ -198,7 +198,7 @@ class AdobeUniversalBridge(ABC):
                 return path
         return None
     
-    def get_startup_dir(self) -> Optional[str]:
+    def get_startup_dir(self) -> str | None:
         """获取 JSX Startup 脚本目录"""
         install_path = self.find_install_path()
         if not install_path:
@@ -209,7 +209,7 @@ class AdobeUniversalBridge(ABC):
     # ------------------------------------------------------------------
     # 文件通信
     # ------------------------------------------------------------------
-    def _generate_signature(self, data: Dict) -> str:
+    def _generate_signature(self, data: dict) -> str:
         """HMAC-SHA256 签名"""
         if not self.secret:
             return ""
@@ -220,13 +220,13 @@ class AdobeUniversalBridge(ABC):
             hashlib.sha256,
         ).hexdigest()
     
-    def _write_command(self, command: Dict) -> None:
+    def _write_command(self, command: dict) -> None:
         """写入命令文件"""
         self.command_file.parent.mkdir(parents=True, exist_ok=True)
         with open(self.command_file, "w", encoding="utf-8") as f:
             json.dump(command, f, ensure_ascii=False, indent=2)
     
-    def _read_result(self) -> Optional[Dict]:
+    def _read_result(self) -> dict | None:
         """读取结果文件"""
         if not self.result_file.exists():
             return None
@@ -236,7 +236,7 @@ class AdobeUniversalBridge(ABC):
         except (json.JSONDecodeError, OSError):
             return None
     
-    def _wait_result(self) -> Dict:
+    def _wait_result(self) -> dict:
         """轮询等待结果"""
         start = time.time()
         while time.time() - start < self.timeout:
@@ -257,7 +257,7 @@ class AdobeUniversalBridge(ABC):
     # ------------------------------------------------------------------
     # 核心命令执行
     # ------------------------------------------------------------------
-    def execute(self, command: str, args: Optional[Dict] = None, timeout: Optional[int] = None) -> Dict:
+    def execute(self, command: str, args: dict | None = None, timeout: int | None = None) -> dict:
         """执行命令
         
         Args:
@@ -289,7 +289,7 @@ class AdobeUniversalBridge(ABC):
         self._log(f"CMD {command} -> {result.get('status', 'unknown')}")
         return result
     
-    def execute_script(self, script: str, timeout: Optional[int] = None) -> Dict:
+    def execute_script(self, script: str, timeout: int | None = None) -> dict:
         """执行 ExtendScript 脚本
         
         Args:
@@ -306,7 +306,7 @@ class AdobeUniversalBridge(ABC):
         result = self.execute("ping", timeout=5)
         return result.get("status") == "success"
     
-    def get_app_info(self) -> Dict:
+    def get_app_info(self) -> dict:
         """获取 Adobe 软件信息"""
         result = self.execute("getAppInfo")
         return result.get("result", {}) if result.get("status") == "success" else {}
@@ -388,23 +388,23 @@ class PhotoshopBridge(AdobeUniversalBridge):
     """Photoshop MCP Bridge"""
     APP_KEY = "photoshop"
     
-    def execute_script(self, script: str, timeout: Optional[int] = None) -> Dict:
+    def execute_script(self, script: str, timeout: int | None = None) -> dict:
         """PS 脚本执行 (包装为 PS 兼容格式)"""
         return self.execute("executeScript", {"script": script}, timeout=timeout)
     
-    def get_document_info(self) -> Dict:
+    def get_document_info(self) -> dict:
         """获取当前文档信息"""
         return self.execute("getDocumentInfo")
     
-    def apply_filter(self, filter_name: str, params: Optional[Dict] = None) -> Dict:
+    def apply_filter(self, filter_name: str, params: dict | None = None) -> dict:
         """应用滤镜"""
         return self.execute("applyFilter", {"filter": filter_name, "params": params or {}})
     
-    def export_document(self, output_path: str, format: str = "png") -> Dict:
+    def export_document(self, output_path: str, format: str = "png") -> dict:
         """导出文档"""
         return self.execute("exportDocument", {"path": output_path, "format": format})
     
-    def create_document(self, width: int, height: int, name: str = "Untitled") -> Dict:
+    def create_document(self, width: int, height: int, name: str = "Untitled") -> dict:
         """创建新文档"""
         return self.execute("createDocument", {"width": width, "height": height, "name": name})
 
@@ -413,27 +413,27 @@ class PremiereBridge(AdobeUniversalBridge):
     """Premiere Pro MCP Bridge"""
     APP_KEY = "premiere"
     
-    def get_project_info(self) -> Dict:
+    def get_project_info(self) -> dict:
         """获取项目信息"""
         return self.execute("getProjectInfo")
     
-    def import_media(self, file_paths: List[str]) -> Dict:
+    def import_media(self, file_paths: list[str]) -> dict:
         """导入媒体文件"""
         return self.execute("importMedia", {"files": file_paths})
     
-    def add_to_sequence(self, clip_name: str, track: int = 1, position: float = 0) -> Dict:
+    def add_to_sequence(self, clip_name: str, track: int = 1, position: float = 0) -> dict:
         """添加片段到序列"""
         return self.execute("addToSequence", {"clip": clip_name, "track": track, "position": position})
     
-    def apply_transition(self, transition_name: str, duration: float = 1.0) -> Dict:
+    def apply_transition(self, transition_name: str, duration: float = 1.0) -> dict:
         """应用转场"""
         return self.execute("applyTransition", {"name": transition_name, "duration": duration})
     
-    def export_sequence(self, output_path: str, preset: str = "H.264") -> Dict:
+    def export_sequence(self, output_path: str, preset: str = "H.264") -> dict:
         """导出序列"""
         return self.execute("exportSequence", {"path": output_path, "preset": preset})
     
-    def get_timeline_info(self) -> Dict:
+    def get_timeline_info(self) -> dict:
         """获取时间线信息"""
         return self.execute("getTimelineInfo")
 
@@ -442,19 +442,19 @@ class MediaEncoderBridge(AdobeUniversalBridge):
     """Media Encoder MCP Bridge"""
     APP_KEY = "media_encoder"
     
-    def add_to_queue(self, source_path: str, preset: str = "H.264") -> Dict:
+    def add_to_queue(self, source_path: str, preset: str = "H.264") -> dict:
         """添加到编码队列"""
         return self.execute("addToQueue", {"source": source_path, "preset": preset})
     
-    def start_encoding(self) -> Dict:
+    def start_encoding(self) -> dict:
         """开始编码"""
         return self.execute("startEncoding")
     
-    def get_queue_status(self) -> Dict:
+    def get_queue_status(self) -> dict:
         """获取队列状态"""
         return self.execute("getQueueStatus")
     
-    def get_presets(self) -> Dict:
+    def get_presets(self) -> dict:
         """获取可用预设"""
         return self.execute("getPresets")
 
@@ -495,7 +495,7 @@ def create_bridge(app_key: str, **kwargs) -> AdobeUniversalBridge:
     return cls(**kwargs)
 
 
-def detect_installed_adobe_apps() -> Dict[str, Dict]:
+def detect_installed_adobe_apps() -> dict[str, dict]:
     """检测系统上已安装的 Adobe 软件
     
     Returns:

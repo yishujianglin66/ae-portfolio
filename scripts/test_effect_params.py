@@ -1,6 +1,6 @@
 """测试效果的参数名"""
-import sys
 import json
+import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")

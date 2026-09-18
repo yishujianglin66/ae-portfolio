@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """TextFX Showcase - Bridge文件协议执行JSX + aerender渲染"""
-import json, time, subprocess, sys
-from pathlib import Path
+import json
+import subprocess
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 JSX_PATH = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\temp\textfx_showcase_simple.jsx")
 BRIDGE_CMD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_command.json")

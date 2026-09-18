@@ -18,20 +18,24 @@
 - AWS Well-Architected Security Pillar
 """
 import os
-import sys
 import re
-import time
+import sys
 import threading
+import time
 import traceback
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Dict, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from core.security import (
-    SecurityManager, SecurityLevel, SecurityContext,
-    SecurityScanResult, PermissionType, AuditLogEntry
+    AuditLogEntry,
+    PermissionType,
+    SecurityContext,
+    SecurityLevel,
+    SecurityManager,
+    SecurityScanResult,
 )
 
 
@@ -55,19 +59,19 @@ class TestResult:
     is_blocked: bool
     expected_block: bool
     success: bool
-    scan_result: Optional[SecurityScanResult] = None
+    scan_result: SecurityScanResult | None = None
     response: str = ""
-    error: Optional[str] = None
+    error: str | None = None
     execution_time: float = 0.0
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class SecurityTestSuite:
     suite_name: str = "JSX Security Execution Layer Test Suite"
-    tests: List[TestResult] = field(default_factory=list)
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    tests: list[TestResult] = field(default_factory=list)
+    start_time: datetime | None = None
+    end_time: datetime | None = None
     total_tests: int = 0
     passed: int = 0
     failed: int = 0
@@ -78,8 +82,8 @@ class SecurityTestSuite:
 class SecurityTestFramework:
     def __init__(self):
         self.security_manager = SecurityManager()
-        self.test_cases: List[SecurityTestCase] = []
-        self.test_results: List[TestResult] = []
+        self.test_cases: list[SecurityTestCase] = []
+        self.test_results: list[TestResult] = []
         self._load_test_cases()
 
     def _load_test_cases(self):
@@ -454,7 +458,7 @@ class SecurityTestFramework:
                 details={'exception': traceback.format_exc()}
             )
 
-    def run_circuit_breaker_tests(self) -> List[TestResult]:
+    def run_circuit_breaker_tests(self) -> list[TestResult]:
         results = []
         self.security_manager.reset_circuit_breaker()
 
@@ -548,7 +552,7 @@ class SecurityTestFramework:
 
         return results
 
-    def run_path_scan_tests(self) -> List[TestResult]:
+    def run_path_scan_tests(self) -> list[TestResult]:
         results = []
         allowed_paths = ["./safe_dir", "./data"]
 
@@ -587,7 +591,7 @@ class SecurityTestFramework:
 
         return results
 
-    def run_audit_log_tests(self) -> List[TestResult]:
+    def run_audit_log_tests(self) -> list[TestResult]:
         results = []
         initial_count = len(self.security_manager._audit_logs)
 
@@ -633,7 +637,7 @@ class SecurityTestFramework:
         return results
 
 
-def generate_report(suite: SecurityTestSuite, additional_results: List[TestResult] = None) -> str:
+def generate_report(suite: SecurityTestSuite, additional_results: list[TestResult] = None) -> str:
     report = []
     report.append("# JSX 安全执行层测试报告")
     report.append("")

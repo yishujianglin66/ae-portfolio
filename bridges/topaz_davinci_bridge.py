@@ -82,9 +82,9 @@ class TopazDaVinciBridge:
         topaz_model: str = "proteus",
         scale: int = 2,
         use_video_ai: bool = True,
-        davinci_project_path: Optional[Path | str] = None,
+        davinci_project_path: Path | str | None = None,
         timeline_name: str = "Enhanced Timeline",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """AI 增强 → DaVinci 调色完整链路。
 
         Args:
@@ -100,7 +100,7 @@ class TopazDaVinciBridge:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "topaz_enhanced": False,
             "davinci_project_created": False,
             "timeline_created": False,
@@ -157,13 +157,13 @@ class TopazDaVinciBridge:
 
     async def batch_enhance_for_color_grading(
         self,
-        input_paths: List[Path | str],
+        input_paths: list[Path | str],
         output_dir: Path | str,
         topaz_model: str = "proteus",
         scale: int = 2,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """批量 AI 增强（不经过 DaVinci 编排，仅 Topaz 批处理）。"""
-        results: List[Dict[str, Any]] = []
+        results: list[dict[str, Any]] = []
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 

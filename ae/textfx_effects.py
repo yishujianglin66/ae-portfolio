@@ -23,7 +23,7 @@ TextFX 特效组合生成器
 
 from __future__ import annotations
 
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
 
 class TextFXEffects:
@@ -92,9 +92,9 @@ class TextFXEffects:
     def cyber_glow_jsx(
         self,
         layer_var: str = "layer",
-        glow_color: List[float] = None,
+        glow_color: list[float] = None,
         intensity: float = 2.0,
-        grid_color: List[float] = None,
+        grid_color: list[float] = None,
     ) -> str:
         """
         赛博朋克特效组合: Glow + Ramp + Grid
@@ -122,7 +122,7 @@ class TextFXEffects:
     def neon_effect_jsx(
         self,
         layer_var: str = "layer",
-        glow_color: List[float] = None,
+        glow_color: list[float] = None,
         flare_brightness: float = 80,
     ) -> str:
         """
@@ -150,7 +150,7 @@ class TextFXEffects:
     def hologram_effect_jsx(
         self,
         layer_var: str = "layer",
-        glow_color: List[float] = None,
+        glow_color: list[float] = None,
         hue_shift: float = 180,
     ) -> str:
         """
@@ -226,7 +226,7 @@ class TextFXEffects:
     #  基础效果 JSX 片段（内部）
     # ================================================================
 
-    def _add_glow_jsx(self, var: str, color: List[float], radius: float, intensity: float) -> str:
+    def _add_glow_jsx(self, var: str, color: list[float], radius: float, intensity: float) -> str:
         c = f"[{color[0]}, {color[1]}, {color[2]}]"
         r = max(1, min(100, radius))
         i = max(0, min(10, intensity))
@@ -241,7 +241,7 @@ class TextFXEffects:
         try {{ _glow.property("ADBE Glo2-0004").setValue({i}); }} catch(e) {{}}
     }}"""
 
-    def _add_ramp_jsx(self, var: str, start_color: List[float], end_color: List[float]) -> str:
+    def _add_ramp_jsx(self, var: str, start_color: list[float], end_color: list[float]) -> str:
         sc = f"[{start_color[0]}, {start_color[1]}, {start_color[2]}]"
         ec = f"[{end_color[0]}, {end_color[1]}, {end_color[2]}]"
         return f"""
@@ -305,7 +305,7 @@ class TextFXEffects:
         text: str,
         font: str,
         font_size: int,
-        color: List[float],
+        color: list[float],
         duration: float = 4.0,
         **kwargs,
     ) -> str:
@@ -367,7 +367,7 @@ class TextFXEffects:
     # ================================================================
 
     @staticmethod
-    def list_combos() -> List[Dict[str, str]]:
+    def list_combos() -> list[dict[str, str]]:
         """列出所有可用特效组合"""
         return [
             {"name": "cyberGlow", "desc": "赛博朋克: Glow + Ramp + Grid", "effects": ["Glow", "Ramp", "Grid"]},
@@ -378,7 +378,7 @@ class TextFXEffects:
         ]
 
     @staticmethod
-    def list_available_effects() -> List[Dict[str, str]]:
+    def list_available_effects() -> list[dict[str, str]]:
         """列出所有可用效果及其 matchName"""
         return [
             {"name": "Glow", "matchName": "ADBE Glo2", "status": "verified"},

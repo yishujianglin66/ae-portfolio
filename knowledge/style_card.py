@@ -44,23 +44,23 @@ class StyleCard:
     min_temporal_energy: float = 0.3
 
     # 运镜偏好
-    preferred_cameras: List[str] = field(default_factory=list)
-    forbidden_cameras: List[str] = field(default_factory=list)
+    preferred_cameras: list[str] = field(default_factory=list)
+    forbidden_cameras: list[str] = field(default_factory=list)
 
     # 风格反模式 (可机检)
-    anti_patterns: List[Dict[str, str]] = field(default_factory=list)
+    anti_patterns: list[dict[str, str]] = field(default_factory=list)
 
     # 关联的 AE 效果参数 (与 templates.json 对齐)
-    color_grade_params: List[Dict[str, Any]] = field(default_factory=list)
-    particle_presets: List[str] = field(default_factory=list)
-    lut: Dict[str, Any] = field(default_factory=dict)   # {'theme': LUT主题, 'strength': 0-1}
-    text_fx: List[Dict[str, Any]] = field(default_factory=list)
+    color_grade_params: list[dict[str, Any]] = field(default_factory=list)
+    particle_presets: list[str] = field(default_factory=list)
+    lut: dict[str, Any] = field(default_factory=dict)   # {'theme': LUT主题, 'strength': 0-1}
+    text_fx: list[dict[str, Any]] = field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> StyleCard:
+    def from_dict(cls, d: dict[str, Any]) -> StyleCard:
         return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "style_id": self.style_id,
             "name": self.name,
@@ -84,7 +84,7 @@ class StyleCard:
         }
 
 
-def load_card(style_id: str) -> Optional[StyleCard]:
+def load_card(style_id: str) -> StyleCard | None:
     """加载指定风格的知识卡。"""
     path = _CARD_DIR / f"{style_id}.json"
     if not path.exists():
@@ -97,7 +97,7 @@ def load_card(style_id: str) -> Optional[StyleCard]:
         return None
 
 
-def list_cards() -> List[str]:
+def list_cards() -> list[str]:
     """列出所有已注册的风格卡 ID。
 
     只返回符合 StyleCard 模式（含 style_id + name）的文件。
@@ -118,7 +118,7 @@ def list_cards() -> List[str]:
     return out
 
 
-def get_taste_profile(style_id: str) -> Dict[str, int]:
+def get_taste_profile(style_id: str) -> dict[str, int]:
     """快捷: 获取风格的品味三旋钮。"""
     card = load_card(style_id)
     if not card:
@@ -130,7 +130,7 @@ def get_taste_profile(style_id: str) -> Dict[str, int]:
     }
 
 
-def card_to_director_inputs(style_id: str) -> Dict[str, Any]:
+def card_to_director_inputs(style_id: str) -> dict[str, Any]:
     """把风格卡转换为导演输入 (taste_profile + style_spec)。
 
     这是风格卡 → 生产管线的消费桥 (2026-08-14 接线; 此前卡片仅被测试消费):
@@ -183,10 +183,10 @@ class StyleCardIntegration:
     def check_available(self) -> bool:
         return len(list_cards()) > 0
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return list(self.SUPPORTED_OPERATIONS.keys())
 
-    def execute(self, op: str, params: Optional[Dict[str, Any]] = None):
+    def execute(self, op: str, params: dict[str, Any] | None = None):
         params = params or {}
         if op == "list_cards":
             return list_cards()

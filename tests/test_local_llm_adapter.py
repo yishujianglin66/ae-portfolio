@@ -25,9 +25,10 @@ import asyncio
 import os
 import sys
 import threading
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 # ============================================================
@@ -272,7 +273,7 @@ class TestInitializeDowngrade:
     @pytest.mark.asyncio
     async def test_vram_downgrade_when_model_exceeds_available(self, tmp_path):
         """请求 7B 模型但只有 3GB VRAM → 降级到 Gemma 2 2B（TINY）。"""
-        from ai.local_llm_adapter import LocalLLMAdapter, ModelSize, RECOMMENDED_MODELS
+        from ai.local_llm_adapter import RECOMMENDED_MODELS, LocalLLMAdapter, ModelSize
 
         adapter = LocalLLMAdapter(model_name="qwen2-7b", model_dir=tmp_path)
         with patch.object(adapter, "_torch_available", True), \
@@ -377,7 +378,7 @@ class TestGetInfo:
             assert key in info["available_models"][0]
 
     def test_available_models_match_recommended(self, tmp_path):
-        from ai.local_llm_adapter import LocalLLMAdapter, RECOMMENDED_MODELS
+        from ai.local_llm_adapter import RECOMMENDED_MODELS, LocalLLMAdapter
 
         adapter = LocalLLMAdapter(model_dir=tmp_path)
         info = adapter.get_info()
@@ -509,8 +510,9 @@ class TestGetLocalLLMAdapter:
 
     def test_adapter_lock_exists(self, monkeypatch):
         """_adapter_lock 必须存在以序列化单例创建。"""
-        from ai import local_llm_adapter
         import tempfile
+
+        from ai import local_llm_adapter
 
         # 确保 _adapter_lock 在模块级别被初始化（修复后）
         # 需要先重置单例以触发模块级锁的初始化路径

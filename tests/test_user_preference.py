@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "13-素材获取与搜索" / "03-AI语义搜索"))
 
-from user_preference import UserPreferenceLearner, UserAction, _default_data_dir
+from user_preference import UserAction, UserPreferenceLearner, _default_data_dir
 
 
 class TestUserPreferenceBasic(unittest.TestCase):

@@ -3,15 +3,16 @@
 ====================================
 生成两个版本的输出文件用于肉眼对比
 """
-import sys
 import os
+import sys
 import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.resolve_engine import ResolveAutomationEngine, CDLConfig
-
 import pytest
+
+from integrations.resolve_engine import CDLConfig, ResolveAutomationEngine
+
 pytestmark = pytest.mark.real_davinci  # 需真实 DaVinci Resolve 环境
 
 def test_render_comparison():
@@ -124,7 +125,7 @@ def test_render_comparison():
         ffmpeg_size = os.path.getsize(ffmpeg_path)
         native_size = os.path.getsize(native_path)
         
-        print(f"\nFiles generated:")
+        print("\nFiles generated:")
         print(f"  FFmpeg:  {ffmpeg_path}")
         print(f"           Size: {ffmpeg_size/1024/1024:.1f} MB")
         print(f"  Native:  {native_path}")
@@ -133,29 +134,29 @@ def test_render_comparison():
         size_diff = abs(ffmpeg_size - native_size) / max(ffmpeg_size, native_size) * 100
         print(f"\nSize difference: {size_diff:.1f}%")
         
-        print(f"\nVisual comparison checklist:")
-        print(f"  [ ] Contrast (对比度) - Native should be stronger")
-        print(f"  [ ] Color temperature (色温) - Native warmer (orange/red)")
-        print(f"  [ ] Saturation (饱和度) - Native lower (0.6x)")
-        print(f"  [ ] Shadow detail (阴影细节) - Native lifted")
-        print(f"  [ ] Highlight roll-off (高光过渡) - Native smoother")
+        print("\nVisual comparison checklist:")
+        print("  [ ] Contrast (对比度) - Native should be stronger")
+        print("  [ ] Color temperature (色温) - Native warmer (orange/red)")
+        print("  [ ] Saturation (饱和度) - Native lower (0.6x)")
+        print("  [ ] Shadow detail (阴影细节) - Native lifted")
+        print("  [ ] Highlight roll-off (高光过渡) - Native smoother")
         
-        print(f"\nTo verify:")
-        print(f"  1. Open both files side-by-side in a video player")
-        print(f"  2. Look for the strong warm/orange tint in Native version")
-        print(f"  3. Check if FFmpeg version looks 'flatter' (less contrast)")
-        print(f"  4. If they look identical -> FFmpeg conversion is working well")
-        print(f"  5. If Native looks much more dramatic -> FFmpeg lost effects")
+        print("\nTo verify:")
+        print("  1. Open both files side-by-side in a video player")
+        print("  2. Look for the strong warm/orange tint in Native version")
+        print("  3. Check if FFmpeg version looks 'flatter' (less contrast)")
+        print("  4. If they look identical -> FFmpeg conversion is working well")
+        print("  5. If Native looks much more dramatic -> FFmpeg lost effects")
         
     elif ffmpeg_exists:
-        print(f"\nOnly FFmpeg render succeeded:")
+        print("\nOnly FFmpeg render succeeded:")
         print(f"  {ffmpeg_path}")
-        print(f"  Native render failed - check Resolve UI for errors")
+        print("  Native render failed - check Resolve UI for errors")
         
     elif native_exists:
-        print(f"\nOnly Native render succeeded:")
+        print("\nOnly Native render succeeded:")
         print(f"  {native_path}")
-        print(f"  FFmpeg render failed")
+        print("  FFmpeg render failed")
         
     else:
         print("\nBoth renders failed!")

@@ -29,10 +29,10 @@ import json
 import math
 import os
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 # 延迟导入的依赖（在实际使用时导入）
 # import numpy as np
@@ -58,13 +58,13 @@ class BeatInfo:
 @dataclass
 class MusicStructure:
     """音乐结构分析结果"""
-    sections: List[Dict[str, Any]] = field(default_factory=list)  # [{label, start, end, confidence}]
+    sections: list[dict[str, Any]] = field(default_factory=list)  # [{label, start, end, confidence}]
     key: str = "unknown"          # 调性
-    tempo: Optional[float] = None # BPM
+    tempo: float | None = None # BPM
     time_signature: str = "4/4"   # 拍号
-    energy_curve: List[float] = field(default_factory=list)  # 能量曲线
-    climax_regions: List[Dict] = field(default_factory=list) # 高潮段
-    quiet_regions: List[Dict] = field(default_factory=list)  # 安静段
+    energy_curve: list[float] = field(default_factory=list)  # 能量曲线
+    climax_regions: list[dict] = field(default_factory=list) # 高潮段
+    quiet_regions: list[dict] = field(default_factory=list)  # 安静段
 
 
 @dataclass
@@ -75,7 +75,7 @@ class ClipSuggestion:
     duration: float
     cut_type: str          # "on_beat" | "off_beat" | "fill"
     energy_level: float
-    suitable_effects: List[str] = field(default_factory=list)
+    suitable_effects: list[str] = field(default_factory=list)
 
 
 # ================================================================
@@ -88,7 +88,7 @@ class BeatDetector:
         self,
         sample_rate: int = 22050,
         hop_length: int = 512,
-        bpm_range: Tuple[float, float] = (60, 200),
+        bpm_range: tuple[float, float] = (60, 200),
         use_madmom: bool = True,
     ):
         self.sr = sample_rate
@@ -105,7 +105,7 @@ class BeatDetector:
         except ImportError:
             return False
 
-    def detect_bpm(self, audio_path: str) -> Tuple[float, float]:
+    def detect_bpm(self, audio_path: str) -> tuple[float, float]:
         """
         检测音频 BPM 和置信度。
 
@@ -140,7 +140,7 @@ class BeatDetector:
 
         return round(float(tempo_beats), 1), round(float(confidence), 3)
 
-    def detect_beats(self, audio_path: str) -> List[BeatInfo]:
+    def detect_beats(self, audio_path: str) -> list[BeatInfo]:
         """
         检测所有节拍位置。
 
@@ -188,7 +188,7 @@ class BeatDetector:
 
         return beats
 
-    def detect_beats_madmom(self, audio_path: str) -> List[BeatInfo]:
+    def detect_beats_madmom(self, audio_path: str) -> list[BeatInfo]:
         """
         使用 madmom RNN 进行高精度节拍追踪（需要 madmom 库）。
 
@@ -198,8 +198,8 @@ class BeatDetector:
             return self.detect_beats(audio_path)
 
         try:
-            from madmom.features.beats import RNNBeatProcessor, DBNBeatTrackingProcessor
             import numpy as np
+            from madmom.features.beats import DBNBeatTrackingProcessor, RNNBeatProcessor
 
             # RNN 节拍激活函数
             beat_processor = RNNBeatProcessor()(audio_path)
@@ -338,10 +338,10 @@ class BeatDetector:
     def generate_clip_suggestions(
         self,
         audio_path: str,
-        target_duration: Optional[float] = None,
+        target_duration: float | None = None,
         min_clip_duration: float = 0.5,
         max_clip_duration: float = 5.0,
-    ) -> List[ClipSuggestion]:
+    ) -> list[ClipSuggestion]:
         """
         根据节拍生成剪辑建议 — 每个剪辑点对齐到强拍。
 
@@ -429,7 +429,7 @@ class BeatDetector:
 
         return suggestions
 
-    def _merge_regions(self, times, mask, min_gap: int = 3) -> List[Tuple[float, float]]:
+    def _merge_regions(self, times, mask, min_gap: int = 3) -> list[tuple[float, float]]:
         """合并相邻区域"""
         regions = []
         start = None
@@ -444,7 +444,7 @@ class BeatDetector:
             regions.append((times[start], times[-1]))
         return regions
 
-    def detect_onsets(self, audio_path: str) -> List[float]:
+    def detect_onsets(self, audio_path: str) -> list[float]:
         """检测音符起始点（Onset Detection）"""
         import librosa
 

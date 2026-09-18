@@ -12,12 +12,12 @@ AE-Knowledge-Vault 本地测试套件
     py -3.12 scripts/local_test_suite.py --render
 """
 
+import argparse
 import json
 import os
 import subprocess
 import sys
 import time
-import argparse
 from pathlib import Path
 
 # 配置
@@ -129,11 +129,11 @@ def test_v2_project():
     result = send_bridge_command(script_path)
 
     if result.get("status") == "success":
-        print(f"✅ V2 工程创建成功")
+        print("✅ V2 工程创建成功")
         print(f"   合成名称: {result.get('compName')}")
         print(f"   图层数量: {result.get('layerCount')}")
         print(f"   场景数量: {result.get('scenes')}")
-        print(f"   增强功能:")
+        print("   增强功能:")
         for feat in result.get("enhancedFeatures", []):
             print(f"      - {feat}")
     else:
@@ -298,7 +298,7 @@ def render_v2():
         print(f"❌ 工程文件不存在: {aep_path}")
         return False
 
-    print(f"🎬 开始渲染...")
+    print("🎬 开始渲染...")
     print(f"   输入: {aep_path}")
     print(f"   输出: {output_path}")
 
@@ -315,10 +315,10 @@ def render_v2():
             print(f"✅ 渲染成功: {output_path} ({size_mb:.2f} MB)")
             return True
         else:
-            print(f"⚠️ 渲染命令成功但输出文件不存在")
+            print("⚠️ 渲染命令成功但输出文件不存在")
             return False
     else:
-        print(f"❌ 渲染失败:")
+        print("❌ 渲染失败:")
         print(result.stderr[-500:] if len(result.stderr) > 500 else result.stderr)
         return False
 

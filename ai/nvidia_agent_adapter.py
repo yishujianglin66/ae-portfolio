@@ -97,7 +97,7 @@ class NVIDIAConfig:
     fallback_to_local_llm: bool = True
     local_llm_model: str = "phi3-mini"  # phi3-mini / gemma2-2b / qwen2-7b
     
-    local_models: Dict[str, str] = field(default_factory=lambda: {
+    local_models: dict[str, str] = field(default_factory=lambda: {
         "text_pro": "nvidia-llama-3.3-70b",
         "text_flash": "nvidia-llama-3.3-8b",
         "vision": "nvidia-megatron-vision",
@@ -128,14 +128,14 @@ class InferenceResult:
     latency_ms: float = 0.0
     success: bool = False
     error: str = ""
-    raw: Dict[str, Any] = field(default_factory=dict)
+    raw: dict[str, Any] = field(default_factory=dict)
 
 
 class NVIDIAHealthChecker:
     def __init__(self, config: NVIDIAConfig):
         self._config = config
         self._logger = logging.getLogger(f"{__name__}.NVIDIAHealthChecker")
-        self._model_health: Dict[str, ModelHealth] = {}
+        self._model_health: dict[str, ModelHealth] = {}
         self._last_check_time = 0.0
         
     def _build_health_url(self) -> str:
@@ -170,7 +170,7 @@ class NVIDIAHealthChecker:
             self._logger.error(f"NVIDIA Agent Toolkit 健康检查异常: {e}")
             return False
     
-    def _update_model_health(self, health_data: Dict[str, Any]) -> None:
+    def _update_model_health(self, health_data: dict[str, Any]) -> None:
         models = health_data.get("models", {})
         for model_name, status in models.items():
             if model_name not in self._model_health:
@@ -194,7 +194,7 @@ class NVIDIAHealthChecker:
             return False
         return all(h.status == ProviderStatus.HEALTHY for h in self._model_health.values())
     
-    def get_model_health(self, model_name: str) -> Optional[ModelHealth]:
+    def get_model_health(self, model_name: str) -> ModelHealth | None:
         return self._model_health.get(model_name)
 
 
@@ -213,7 +213,7 @@ class NVIDIAInferenceClient:
         base = self._config.api_base.rstrip("/")
         return f"{base}/{endpoint}"
     
-    async def chat_completion(self, messages: List[Dict[str, str]], 
+    async def chat_completion(self, messages: list[dict[str, str]], 
                               model: str = None, **kwargs) -> InferenceResult:
         start_time = time.time()
         model = model or self._config.local_models.get("text_pro")
@@ -258,7 +258,7 @@ class NVIDIAInferenceClient:
             latency_ms=latency_ms,
         )
     
-    async def vision_completion(self, messages: List[Dict[str, Any]], 
+    async def vision_completion(self, messages: list[dict[str, Any]], 
                                 model: str = None, **kwargs) -> InferenceResult:
         model = model or self._config.local_models.get("vision")
         return await self.chat_completion(messages, model=model, **kwargs)
@@ -305,7 +305,7 @@ class NVIDIAInferenceClient:
             latency_ms=latency_ms,
         )
     
-    async def embedding(self, input_text: Union[str, List[str]], 
+    async def embedding(self, input_text: Union[str, list[str]], 
                         model: str = None, **kwargs) -> InferenceResult:
         start_time = time.time()
         model = model or self._config.local_models.get("embedding")
@@ -346,7 +346,7 @@ class NVIDIAInferenceClient:
             latency_ms=latency_ms,
         )
     
-    def _parse_response(self, data: Dict[str, Any], model: str, latency_ms: float) -> InferenceResult:
+    def _parse_response(self, data: dict[str, Any], model: str, latency_ms: float) -> InferenceResult:
         choices = data.get("choices", [])
         if not choices:
             return InferenceResult(
@@ -372,7 +372,7 @@ class NVIDIAInferenceClient:
 
 
 class NVIDIAAgentAdapter:
-    def __init__(self, config: Optional[NVIDIAConfig] = None):
+    def __init__(self, config: NVIDIAConfig | None = None):
         self._logger = logging.getLogger(f"{__name__}.NVIDIAAgentAdapter")
         self._config = config or self._load_config()
         self._health_checker = NVIDIAHealthChecker(self._config)
@@ -380,7 +380,7 @@ class NVIDIAAgentAdapter:
         self._initialized = False
         
         # 本地 LLM 回退适配器
-        self._local_llm: Optional[Any] = None
+        self._local_llm: Any | None = None
         if _LOCAL_LLM_AVAILABLE and self._config.fallback_to_local_llm:
             try:
                 self._local_llm = LocalLLMAdapter(
@@ -482,7 +482,7 @@ class NVIDIAAgentAdapter:
                   "请安装依赖: pip install torch transformers accelerate bitsandbytes",
         )
     
-    async def vision_chat(self, prompt: str, images: List[str], 
+    async def vision_chat(self, prompt: str, images: list[str], 
                           system_prompt: str = "", **kwargs) -> InferenceResult:
         if not self._config.enabled:
             return InferenceResult(
@@ -519,7 +519,7 @@ class NVIDIAAgentAdapter:
         
         return await self._client.image_generation(prompt, **kwargs)
     
-    async def generate_embedding(self, input_text: Union[str, List[str]], **kwargs) -> InferenceResult:
+    async def generate_embedding(self, input_text: Union[str, list[str]], **kwargs) -> InferenceResult:
         if not self._config.enabled:
             return InferenceResult(
                 success=False,
@@ -537,7 +537,7 @@ class NVIDIAAgentAdapter:
     def get_config(self) -> NVIDIAConfig:
         return self._config
     
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> dict[str, Any]:
         return {
             "enabled": self._config.enabled,
             "initialized": self._initialized,

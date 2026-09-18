@@ -10,8 +10,8 @@ import sys
 import time
 
 sys.path.insert(0, ".")
-from core.composition_tree import build_fate_composite_template
 from core.beatlock import BeatGrid, compose
+from core.composition_tree import build_fate_composite_template
 from core.visual_eval_gateway import VisualEvalGateway
 
 BRIDGE = ".ae-mcp-bridge"

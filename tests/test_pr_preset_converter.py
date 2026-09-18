@@ -7,9 +7,10 @@
 验证 AE 预设到 PR 预设的转化逻辑。
 """
 
-import pytest
 import json
 from pathlib import Path
+
+import pytest
 
 from ae.pr_preset_converter import PRPresetConverter
 

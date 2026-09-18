@@ -21,9 +21,9 @@
     handler.save_image(source_path, target_name, category='daily')
 """
 
+import glob
 import os
 import shutil
-import glob
 from datetime import datetime
 from pathlib import Path
 
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     
     # 测试保存
     if attachments:
-        print(f"\n测试保存第一张图片...")
+        print("\n测试保存第一张图片...")
         try:
             result = handler.save_image(
                 attachments[0], 

@@ -14,9 +14,10 @@ import cv2
 import numpy as np
 import torch
 import torch.nn.functional as F
-from core.torch_runtime import infer_ctx, get_device
 from torchvision import transforms
 from transformers import AutoModelForImageSegmentation
+
+from core.torch_runtime import get_device, infer_ctx
 
 PROJECT = Path(__file__).resolve().parents[1]
 DATA = PROJECT / "external" / "animeseg" / "dataset"

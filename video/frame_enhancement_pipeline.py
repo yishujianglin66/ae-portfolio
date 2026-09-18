@@ -14,14 +14,14 @@ V3 视频补帧超分全链路实战脚本（追求最高上限效果）
 """
 from __future__ import annotations
 
-import os
-import sys
-import time
 import json
+import os
 import shutil
 import subprocess
-from pathlib import Path
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 # === 路径配置 ===
 FFMPEG = r"C:\ffmpeg\bin\ffmpeg.exe"
@@ -393,7 +393,7 @@ def step3_ai_upscale(input_path: str, output_path: str, target_height: int = 108
         # 清理临时帧目录
         try:
             shutil.rmtree(frames_dir, ignore_errors=True)
-            log(f"[CLEAN] 已清理临时目录")
+            log("[CLEAN] 已清理临时目录")
         except Exception:
             pass
 
@@ -521,7 +521,7 @@ def main():
         if not exists and name in ("Topaz FFmpeg",):  # Topaz 和 Real-ESRGAN 可选（有回退）
             continue
         if not exists and name == "Real-ESRGAN":
-            log(f"[WARN] Real-ESRGAN 未找到，将使用 Topaz 或 lanczos 回退", "WARN")
+            log("[WARN] Real-ESRGAN 未找到，将使用 Topaz 或 lanczos 回退", "WARN")
             continue
         if not exists:
             log(f"[FATAL] {name} 不存在", "ERROR")
@@ -665,13 +665,13 @@ def main():
     
     if report["steps"].get("step5", {}).get("success"):
         final = report["steps"]["step5"]
-        log(f"\n[最终输出]")
+        log("\n[最终输出]")
         log(f"  路径: {final['output']}")
         log(f"  分辨率: {final.get('width','?')}x{final.get('height','?')}")
         log(f"  帧率: {final.get('fps','?')}")
         log(f"  时长: {final.get('duration','?')}s")
         log(f"  大小: {final.get('size_mb',0)}MB")
-        log(f"\n[原始]")
+        log("\n[原始]")
         log(f"  分辨率: {orig_info.get('width','?')}x{orig_info.get('height','?')}")
         log(f"  帧率: {orig_info.get('r_frame_rate','?')}")
         log(f"  大小: {get_file_size_mb(INPUT_VIDEO):.2f}MB")

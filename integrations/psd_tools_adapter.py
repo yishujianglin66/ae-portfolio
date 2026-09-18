@@ -36,7 +36,7 @@ class PsdToolsAdapter:
         "export_all_layers", "get_psd_metadata",
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._available = False
         self._init_check()
@@ -52,10 +52,10 @@ class PsdToolsAdapter:
     def check_available(self) -> bool:
         return self._available
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any]) -> dict[str, Any]:
         start = time.time()
         try:
             if operation == "parse_psd":
@@ -89,14 +89,14 @@ class PsdToolsAdapter:
                 "duration_ms": (time.time() - start) * 1000,
             }
 
-    def _load_psd(self, params: Dict):
+    def _load_psd(self, params: dict):
         from psd_tools import PSDImage
         path = params.get("psd_path") or params.get("file_path")
         if not path or not os.path.isfile(path):
             raise FileNotFoundError(f"PSD file not found: {path}")
         return PSDImage.open(path), path
 
-    def _parse_psd(self, params: Dict) -> Dict:
+    def _parse_psd(self, params: dict) -> dict:
         psd, path = self._load_psd(params)
         layers = []
         for layer in psd.descendants():
@@ -125,7 +125,7 @@ class PsdToolsAdapter:
             "layers": layers,
         }
 
-    def _extract_layers(self, params: Dict) -> Dict:
+    def _extract_layers(self, params: dict) -> dict:
         psd, path = self._load_psd(params)
         layer_names = []
         for layer in psd.descendants():
@@ -136,7 +136,7 @@ class PsdToolsAdapter:
             })
         return {"layers": layer_names, "count": len(layer_names)}
 
-    def _export_layer(self, params: Dict) -> Dict:
+    def _export_layer(self, params: dict) -> dict:
         psd, path = self._load_psd(params)
         layer_name = params.get("layer_name")
         layer_index = params.get("layer_index")
@@ -171,7 +171,7 @@ class PsdToolsAdapter:
         except Exception as e:
             return {"status": "error", "error": f"Export failed: {e}"}
 
-    def _get_layer_info(self, params: Dict) -> Dict:
+    def _get_layer_info(self, params: dict) -> dict:
         psd, path = self._load_psd(params)
         layer_name = params.get("layer_name")
         for layer in psd.descendants():
@@ -190,7 +190,7 @@ class PsdToolsAdapter:
                     return {"layer": info}
         return {"status": "error", "error": f"Layer not found: {layer_name}"}
 
-    def _composite(self, params: Dict) -> Dict:
+    def _composite(self, params: dict) -> dict:
         psd, path = self._load_psd(params)
         img = psd.composite()
         stem = Path(path).stem
@@ -204,7 +204,7 @@ class PsdToolsAdapter:
             "height": img.height,
         }
 
-    def _list_fonts(self, params: Dict) -> Dict:
+    def _list_fonts(self, params: dict) -> dict:
         psd, path = self._load_psd(params)
         fonts = set()
         for layer in psd.descendants():
@@ -218,7 +218,7 @@ class PsdToolsAdapter:
                     pass
         return {"fonts": list(fonts), "count": len(fonts)}
 
-    def _export_all_layers(self, params: Dict) -> Dict:
+    def _export_all_layers(self, params: dict) -> dict:
         psd, path = self._load_psd(params)
         stem = Path(path).stem
         out_dir = params.get("output_dir", str(OUTPUT_DIR / stem))
@@ -236,7 +236,7 @@ class PsdToolsAdapter:
                 pass
         return {"exported": len(exported), "output_dir": out_dir, "layers": exported}
 
-    def _get_metadata(self, params: Dict) -> Dict:
+    def _get_metadata(self, params: dict) -> dict:
         psd, path = self._load_psd(params)
         return {
             "file": os.path.basename(path),
@@ -248,7 +248,7 @@ class PsdToolsAdapter:
             "version": psd.version,
         }
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         return {
             "available": self._available,
             "operations": len(self.SUPPORTED_OPERATIONS),

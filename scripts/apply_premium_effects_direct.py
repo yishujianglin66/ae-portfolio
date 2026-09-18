@@ -192,7 +192,7 @@ def generate_effects_jsx(effects: list, video_path: str, aep_path: str) -> str:
             lines.append(f"  op_gen{i}.setValueAtTime({end_t}, {tail_op});")
 
     lines.append("")
-    lines.append(f"  // Save project")
+    lines.append("  // Save project")
     lines.append(f'  app.project.save(new File("{aeps}"));')
     lines.append(f'  $.writeln("Project saved: {aeps}");')
     lines.append("})();")
@@ -215,14 +215,14 @@ def main():
     print(f"Loaded {len(effects)} effect configurations")
 
     # Generate JSX script
-    print(f"\nGenerating JSX script...")
+    print("\nGenerating JSX script...")
     jsx_content = generate_effects_jsx(effects, VIDEO_IN, AEP_PATH)
     with open(JSX_PATH, 'w', encoding='utf-8-sig') as f:
         f.write(jsx_content)
     print(f"JSX script saved: {JSX_PATH}")
 
     # Execute JSX via AfterFX.exe -r
-    print(f"\nExecuting JSX via AfterFX.exe...")
+    print("\nExecuting JSX via AfterFX.exe...")
     print(f"  Command: {AFTER_FX_EXE} -r {JSX_PATH}")
     
     result = subprocess.run(
@@ -249,7 +249,7 @@ def main():
     print(f"  Size: {AEP_PATH.stat().st_size:,} bytes")
 
     # Render with aerender
-    print(f"\nRendering with aerender...")
+    print("\nRendering with aerender...")
     print(f"  Output: {MP4_OUT}")
     
     render_result = subprocess.run(
@@ -269,12 +269,12 @@ def main():
     # Verify output
     if MP4_OUT.exists():
         size_mb = MP4_OUT.stat().st_size / (1024 * 1024)
-        print(f"\n✓ OUTPUT SUCCESSFUL")
+        print("\n✓ OUTPUT SUCCESSFUL")
         print(f"  File: {MP4_OUT}")
         print(f"  Size: {size_mb:.2f} MB")
         return 0
     else:
-        print(f"\n✗ OUTPUT FAILED")
+        print("\n✗ OUTPUT FAILED")
         print(f"  Expected: {MP4_OUT}")
         return 1
 

@@ -4,7 +4,9 @@
 类别约定: gui_automation / video_processing / sampling_strategy / engine_performance
 可用 SearchMemory 按 title 检索 (nlu_parser 消费同一 store)
 """
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.memory_store import memory_store
 

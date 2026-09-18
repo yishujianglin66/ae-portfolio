@@ -107,7 +107,7 @@ class PRBridgeClient:
       - 需要在 PR 中手动运行一次 pr_mcp_bridge.jsx
     """
 
-    def __init__(self, bridge_dir: Optional[Path | str] = None):
+    def __init__(self, bridge_dir: Path | str | None = None):
         self._bridge_dir = Path(bridge_dir) if bridge_dir else BRIDGE_DIR
         self._bridge_dir.mkdir(parents=True, exist_ok=True)
         self._cmd_counter = 0
@@ -309,7 +309,7 @@ class PRBridgeClient:
     async def import_media(
         self,
         file_paths: list[str],
-        target_bin: Optional[str] = None,
+        target_bin: str | None = None,
         suppress_ui: bool = True,
     ) -> dict[str, Any]:
         """导入素材文件到项目。"""
@@ -348,15 +348,15 @@ class PRBridgeClient:
           4. 全失败则抛出 SequenceCreationError，引导用户手动创建
         """
         # 第一步：检查已有序列
-        probe = f"""
-        var info = {{}};
-        try {{ info.seqCount = app.project.sequences.numSequences; }} catch(e) {{ info.seqCount = -1; }}
-        if (info.seqCount > 0) {{
+        probe = """
+        var info = {};
+        try { info.seqCount = app.project.sequences.numSequences; } catch(e) { info.seqCount = -1; }
+        if (info.seqCount > 0) {
             info.existingNames = [];
-            for (var i = 0; i < app.project.sequences.numSequences; i++) {{
-                try {{ info.existingNames.push(app.project.sequences[i].name); }} catch(e) {{}}
-            }}
-        }}
+            for (var i = 0; i < app.project.sequences.numSequences; i++) {
+                try { info.existingNames.push(app.project.sequences[i].name); } catch(e) {}
+            }
+        }
         return __result(info);
         """
         probe_result = await self._send_script(probe, timeout=10.0)
@@ -438,15 +438,15 @@ class PRBridgeClient:
         start = time.monotonic()
         while time.monotonic() - start < timeout:
             try:
-                probe = f"""
-                var info = {{}};
-                try {{ info.seqCount = app.project.sequences.numSequences; }} catch(e) {{ info.seqCount = -1; }}
-                if (info.seqCount > 0) {{
+                probe = """
+                var info = {};
+                try { info.seqCount = app.project.sequences.numSequences; } catch(e) { info.seqCount = -1; }
+                if (info.seqCount > 0) {
                     info.existingNames = [];
-                    for (var i = 0; i < app.project.sequences.numSequences; i++) {{
-                        try {{ info.existingNames.push(app.project.sequences[i].name); }} catch(e) {{}}
-                    }}
-                }}
+                    for (var i = 0; i < app.project.sequences.numSequences; i++) {
+                        try { info.existingNames.push(app.project.sequences[i].name); } catch(e) {}
+                    }
+                }
                 return __result(info);
                 """
                 result = await self._send_script(probe, timeout=5.0)
@@ -577,7 +577,7 @@ class PRBridgeClient:
     # ------------------------------------------------------------------
 
     async def export_sequence(
-        self, output_path: str, preset_path: Optional[str] = None
+        self, output_path: str, preset_path: str | None = None
     ) -> dict[str, Any]:
         """导出序列为视频文件。"""
         if preset_path:
@@ -618,7 +618,7 @@ class PRBridgeClient:
         """
         return await self._send_script(script)
 
-    async def save_project(self, project_path: Optional[str] = None) -> dict[str, Any]:
+    async def save_project(self, project_path: str | None = None) -> dict[str, Any]:
         """保存项目。"""
         if project_path:
             script = f"""
@@ -644,7 +644,7 @@ async def auto_edit_workflow(
     sequence_name: str = "AutoEdit",
     transition_name: str = "Cross Dissolve",
     transition_duration: float = 0.5,
-    project_path: Optional[str] = None,
+    project_path: str | None = None,
 ) -> dict[str, Any]:
     """完整的 PR 自动化剪辑工作流。
 
@@ -702,12 +702,12 @@ async def auto_edit_workflow(
             print()
             print("  PR 2025 ExtendScript API 限制，无法自动创建序列。")
             print("  请在 Premiere Pro 中手动操作:")
-            print(f"    1. 点击: File > New > Sequence")
-            print(f"    2. 选择任意预设（如 DSLR 1080p29.97）")
+            print("    1. 点击: File > New > Sequence")
+            print("    2. 选择任意预设（如 DSLR 1080p29.97）")
             print(f"    3. 序列名称设为: {sequence_name}")
-            print(f"    4. 点击 OK")
+            print("    4. 点击 OK")
             print()
-            print(f"  脚本将在 5 秒后开始等待，最多等待 5 分钟...")
+            print("  脚本将在 5 秒后开始等待，最多等待 5 分钟...")
             print()
             await asyncio.sleep(5)
             seq_result = await client.wait_for_sequence(sequence_name, timeout=300.0)
@@ -785,7 +785,7 @@ if __name__ == "__main__":
         try:
             print("正在检测桥接连接...")
             info = await client.get_info()
-            print(f"✅ 桥接在线!")
+            print("✅ 桥接在线!")
             print(f"   PR 版本: {info.get('data', {}).get('appVersion', 'unknown')}")
             print(f"   项目: {info.get('data', {}).get('project', '无')}")
             seqs = info.get("data", {}).get("sequences", [])

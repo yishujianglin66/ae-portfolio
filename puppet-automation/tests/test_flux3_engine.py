@@ -6,13 +6,12 @@ so tests don't require a real API key or network access.
 
 from __future__ import annotations
 
-import httpx
-import pytest
 from pathlib import Path
 
-from src.engines.flux3 import Flux3Engine
+import httpx
+import pytest
 from src.engines.base import EngineResult
-
+from src.engines.flux3 import Flux3Engine
 
 # ============================================================
 # Fixtures

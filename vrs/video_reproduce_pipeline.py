@@ -49,9 +49,9 @@ from typing import Any, Dict, List, Optional
 _PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
+from color_grading_applier import ColorGradingApplier
 from effect_reproducer import EffectReproducer
 from transition_rebuilder import TransitionRebuilder
-from color_grading_applier import ColorGradingApplier
 
 
 class VideoReproducePipeline:
@@ -71,14 +71,14 @@ class VideoReproducePipeline:
 
     async def reproduce(
         self,
-        video_path: Optional[str] = None,
-        analysis_json: Optional[str] = None,
+        video_path: str | None = None,
+        analysis_json: str | None = None,
         output_mode: str = "jsx",
         detail_level: str = "full",
         auto_color_grade: bool = True,
         auto_transitions: bool = True,
         comp_name: str = "Reproduce_Comp",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """一键分析并复现。
 
         Args:
@@ -93,7 +93,7 @@ class VideoReproducePipeline:
         Returns:
             完整复现报告字典
         """
-        report: Dict[str, Any] = {
+        report: dict[str, Any] = {
             "pipeline_version": "1.0",
             "timestamp": datetime.now().isoformat(),
             "video_path": video_path,
@@ -118,7 +118,7 @@ class VideoReproducePipeline:
         }
 
         # ── 第 2 步：效果复现 ──────────────────────────────────
-        jsx_parts: List[str] = []
+        jsx_parts: list[str] = []
 
         # 文件头
         jsx_parts.append(self._generate_header(analysis, comp_name))
@@ -141,7 +141,7 @@ class VideoReproducePipeline:
                     comp_width=video_info.get("width", 1920),
                     comp_height=video_info.get("height", 1080),
                 )
-                jsx_parts.append(f"\n// ====== Color Grading ======")
+                jsx_parts.append("\n// ====== Color Grading ======")
                 jsx_parts.append(color_jsx)
                 report["color_grade_applied"] = True
             else:
@@ -163,7 +163,7 @@ class VideoReproducePipeline:
                     transition_jsx_parts.append(t_jsx)
 
                 if transition_jsx_parts:
-                    jsx_parts.append(f"\n// ====== Transitions ======")
+                    jsx_parts.append("\n// ====== Transitions ======")
                     jsx_parts.extend(transition_jsx_parts)
                     report["transitions_applied"] = len(transitions)
             else:
@@ -196,7 +196,7 @@ class VideoReproducePipeline:
     # 内部方法
     # =========================================================================
 
-    async def _run_analysis(self, video_path: str, detail_level: str) -> Dict[str, Any]:
+    async def _run_analysis(self, video_path: str, detail_level: str) -> dict[str, Any]:
         """运行 VRS v2 深度分析。"""
         try:
             from vrs.video_effect_analyzer_v2 import VideoEffectAnalyzerV2
@@ -208,7 +208,7 @@ class VideoReproducePipeline:
         except Exception as exc:
             return {"error": f"分析失败: {exc}", "video_path": video_path}
 
-    def _load_analysis(self, json_path: str) -> Dict[str, Any]:
+    def _load_analysis(self, json_path: str) -> dict[str, Any]:
         """从 JSON 文件加载预生成的分析结果。"""
         path = Path(json_path)
         if not path.exists():
@@ -216,7 +216,7 @@ class VideoReproducePipeline:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    def _generate_header(self, analysis: Dict[str, Any], comp_name: str) -> str:
+    def _generate_header(self, analysis: dict[str, Any], comp_name: str) -> str:
         """生成 JSX 文件头。"""
         style_tags = self._extract_style_tags(analysis)
         effects_count = len(self._extract_all_effects(analysis))
@@ -230,15 +230,15 @@ class VideoReproducePipeline:
 
 """
 
-    def _extract_all_effects(self, analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _extract_all_effects(self, analysis: dict[str, Any]) -> list[dict[str, Any]]:
         merged = analysis.get("merged", analysis.get("vision_result", analysis))
         return merged.get("effects", merged.get("aggregated_effects", []))
 
-    def _extract_style_tags(self, analysis: Dict[str, Any]) -> List[str]:
+    def _extract_style_tags(self, analysis: dict[str, Any]) -> list[str]:
         merged = analysis.get("merged", analysis.get("vision_result", analysis))
         return merged.get("style_tags", [])
 
-    def _extract_transitions(self, analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _extract_transitions(self, analysis: dict[str, Any]) -> list[dict[str, Any]]:
         """从分析结果中提取转场信息。"""
         cv_result = analysis.get("cv_result", {})
         transitions = cv_result.get("transitions", [])
@@ -282,7 +282,7 @@ class VideoReproducePipeline:
 
         return result
 
-    def _extract_video_info(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_video_info(self, analysis: dict[str, Any]) -> dict[str, Any]:
         cv = analysis.get("cv_result", {})
         basic = cv.get("basic_info", {})
         return {
@@ -293,7 +293,7 @@ class VideoReproducePipeline:
         }
 
     def _build_summary(
-        self, analysis: Dict[str, Any], confidence: Dict[str, Any]
+        self, analysis: dict[str, Any], confidence: dict[str, Any]
     ) -> str:
         """构建人类可读的分析摘要。"""
         effects = self._extract_all_effects(analysis)

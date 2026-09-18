@@ -26,8 +26,8 @@ LLM 网关层 - LLMGateway v1.0
     )
 """
 import asyncio
-import json
 import inspect
+import json
 import logging
 import os
 import random
@@ -225,7 +225,7 @@ class LLMConfig:
     prefer_small_model: bool = False
 
     # 各档位配置
-    tier_config: Dict[ModelTier, Dict[str, Any]] = field(default_factory=lambda: {
+    tier_config: dict[ModelTier, dict[str, Any]] = field(default_factory=lambda: {
         ModelTier.TIER_1_LOCAL_SPECIALIZED: {
             "enabled": True,
             "providers": ["nvidia-local"],
@@ -256,16 +256,16 @@ class LLMConfig:
     enable_cascade: bool = True
     cascade_confidence_threshold: float = 0.7
     cascade_max_upgrades: int = 2
-    cascade_enable_skip_tiers: List[str] = field(default_factory=list)
+    cascade_enable_skip_tiers: list[str] = field(default_factory=list)
     confidence_extraction_prompt: str = ""
-    auto_confidence_calibration: Dict[str, float] = field(default_factory=lambda: {
+    auto_confidence_calibration: dict[str, float] = field(default_factory=lambda: {
         ModelTier.TIER_1_LOCAL_SPECIALIZED.value: -0.1,
         ModelTier.TIER_2_MIDTIER_GENERAL.value: 0.0,
         ModelTier.TIER_3_FLAGSHIP_REASONING.value: 0.1,
     })
 
     # 任务→模型路由表
-    model_routing: Dict[TaskType, str] = field(default_factory=lambda: {
+    model_routing: dict[TaskType, str] = field(default_factory=lambda: {
         TaskType.INTENT_CLASSIFICATION: "auto",
         TaskType.SCENE_DESCRIPTION: "auto",
         TaskType.EFFECT_PLANNING: "auto",
@@ -297,12 +297,12 @@ class LLMConfig:
     })
 
     # 降级 Provider 列表
-    fallback_providers: List[Dict[str, str]] = field(default_factory=list)
+    fallback_providers: list[dict[str, str]] = field(default_factory=list)
 
     # 多Provider配置（VRS v2.0 任务级路由）
     # 格式: {"claude": {"base_url":"...", "api_key":"...",
     #          "models": {"vision":"...", "thinking":"...", "fast":"..."}}, ...}
-    providers: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    providers: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 @dataclass
@@ -317,14 +317,14 @@ class LLMResponse:
     latency_ms: float = 0.0
     success: bool = False
     error: str = ""
-    raw: Dict[str, Any] = field(default_factory=dict)
+    raw: dict[str, Any] = field(default_factory=dict)
     tier: str = ""
     cost_usd: float = 0.0
     tier_upgraded: bool = False
     confidence: float = 0.0
     confidence_level: str = ""
     confidence_reason: str = ""
-    cascade_path: List[str] = field(default_factory=list)
+    cascade_path: list[str] = field(default_factory=list)
     upgrade_count: int = 0
     saved_cost_usd: float = 0.0
     # ---- 多模态计费（per-second / per-image，非 token 口径）----
@@ -345,7 +345,7 @@ class ProviderHealth:
     last_error: str = ""
     total_requests: int = 0
     total_failures: int = 0
-    tier: Optional[ModelTier] = None
+    tier: ModelTier | None = None
     total_cost_usd: float = 0.0
     avg_latency_ms: float = 0.0
     total_video_seconds: float = 0.0     # 累计生成视频秒数
@@ -454,7 +454,7 @@ class TokenCompressor:
 #   - 深度推理(分镜/质量审查) → doubao thinking (deepseek-v4-pro)
 #   - 代码任务 → siliconflow code (Kimi-K2.7-Code 专用代码模型)
 #   - 高频快速任务 → doubao flash (deepseek-v4-flash-ga 最新 GA 版)
-TASK_PROVIDER_MAP: Dict[TaskType, Tuple[str, str]] = {
+TASK_PROVIDER_MAP: dict[TaskType, tuple[str, str]] = {
     TaskType.SCENE_DESCRIPTION: ("siliconflow", "vision"),  # 场景描述 → Qwen3-VL
     TaskType.EFFECT_PLANNING: ("doubao", "thinking"),       # 效果规划 → deepseek-v4-pro
     TaskType.INTENT_CLASSIFICATION: ("doubao", "flash"),    # 意图分类 → v4-flash-ga
@@ -485,7 +485,7 @@ TASK_PROVIDER_MAP: Dict[TaskType, Tuple[str, str]] = {
     TaskType.SUBTITLE_GENERATION: ("local", "whisper"),       # 字幕生成 → 本地 whisper
 }
 
-TASK_TIER_MAP: Dict[TaskType, ModelTier] = {
+TASK_TIER_MAP: dict[TaskType, ModelTier] = {
     TaskType.INTENT_CLASSIFICATION: ModelTier.TIER_1_LOCAL_SPECIALIZED,
     TaskType.EFFECT_SEARCH: ModelTier.TIER_1_LOCAL_SPECIALIZED,
     TaskType.FEEDBACK_ANALYSIS: ModelTier.TIER_1_LOCAL_SPECIALIZED,
@@ -527,7 +527,7 @@ TASK_TIER_MAP: Dict[TaskType, ModelTier] = {
 # 开启后将深度推理/视觉理解任务的主选 Provider 切换为 qwen（高性价比备选）。
 # 默认关闭；仅在 benchmark 验证质量达标后启用。qwen Provider 未注册时自动不生效。
 # -----------------------------------------------------------------------------
-QWEN_PRIORITY_TASKS: Dict[TaskType, Tuple[str, str]] = {
+QWEN_PRIORITY_TASKS: dict[TaskType, tuple[str, str]] = {
     TaskType.VISION_UNDERSTANDING: ("qwen", "vision"),    # 视觉理解档位
     TaskType.QUALITY_REVIEW: ("qwen", "thinking"),        # 深度推理档位
 }
@@ -551,11 +551,11 @@ class LLMGateway:
     7. 可观测：token 用量、延迟、成功率
     """
 
-    def __init__(self, config: Optional[LLMConfig] = None):
+    def __init__(self, config: LLMConfig | None = None):
         self._logger = logging.getLogger(f"{__name__}.LLMGateway")
         self._config = config or LLMConfig()
         self._compressor = TokenCompressor()
-        self._provider_health: Dict[str, ProviderHealth] = {}
+        self._provider_health: dict[str, ProviderHealth] = {}
         self._stats = {
             "total_requests": 0,
             "total_successes": 0,
@@ -568,7 +568,7 @@ class LLMGateway:
             "total_images_generated": 0,
             "total_modality_cost_usd": 0.0,
         }
-        self._tier_stats: Dict[ModelTier, Dict[str, Any]] = {
+        self._tier_stats: dict[ModelTier, dict[str, Any]] = {
             tier: {
                 "total_requests": 0,
                 "total_successes": 0,
@@ -583,7 +583,7 @@ class LLMGateway:
             }
             for tier in ModelTier
         }
-        self._cascade_stats: Dict[str, Any] = {
+        self._cascade_stats: dict[str, Any] = {
             "cascade_attempts": 0,
             "cascade_upgrades": 0,
             "cascade_savings_usd": 0.0,
@@ -594,7 +594,7 @@ class LLMGateway:
         # CRITICAL FIX(A7): asyncio.Lock 保护懒加载，防止并发首次调用创建多个 session；
         # 同时配合 _get_http_client 中的 loop 检测，避免跨事件循环复用旧 session
         self._http_client_lock = asyncio.Lock()
-        self._local_adapters: Dict[str, Any] = {}
+        self._local_adapters: dict[str, Any] = {}
         # key 状态后台刷新互斥标记（避免并发重复触发）
         self._key_refresh_running = False
 
@@ -721,7 +721,7 @@ class LLMGateway:
         if (not self._config.base_url or not self._config.api_key) and self._config.providers:
             # 回填优先级：用户可能想把哪个当主provider就先配哪个
             pref_order = ["modelscope", "kimi", "claude", "gpt", "deepseek", "doubao", "image_gen"]
-            chosen: Optional[Dict[str, Any]] = None
+            chosen: dict[str, Any] | None = None
             chosen_name = ""
             for name in pref_order:
                 if name in self._config.providers:
@@ -753,7 +753,7 @@ class LLMGateway:
         每个 Provider 包含 base_url、api_key 与多档位模型映射。
         缺失 API Key 的 Provider 自动跳过，不影响其他 Provider。
         """
-        providers: Dict[str, Dict[str, Any]] = {}
+        providers: dict[str, dict[str, Any]] = {}
 
         # Claude Provider（VISION/深度推理主力）— 兼容 DUCKMISS_/DUCK_MISS_ 两种前缀
         claude_key = (os.environ.get("DUCKMISS_API_KEY", "")
@@ -1316,7 +1316,7 @@ class LLMGateway:
         self,
         base_url: str,
         model: str,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         temperature: float = 0.7,
         max_tokens: int = 1024,
         provider_friendly_name: str = "",
@@ -1350,10 +1350,10 @@ class LLMGateway:
 
         try:
             from core.local_model_adapter import (
+                InferenceBackend,
                 LocalModelAdapter,
                 LocalModelConfig,
                 LocalModelType,
-                InferenceBackend,
             )
 
             model_name = model or ""
@@ -1454,8 +1454,8 @@ class LLMGateway:
         model: str = "",
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        use_compression: Optional[bool] = None,
-        images: Optional[List[str]] = None,
+        use_compression: bool | None = None,
+        images: list[str] | None = None,
     ) -> LLMResponse:
         """
         发送聊天请求
@@ -1493,7 +1493,7 @@ class LLMGateway:
 
         if has_images:
             # 构建 OpenAI 兼容的多模态消息体
-            content_parts: List[Dict[str, Any]] = [{"type": "text", "text": message}]
+            content_parts: list[dict[str, Any]] = [{"type": "text", "text": message}]
             for img_b64 in images:
                 content_parts.append({
                     "type": "image_url",
@@ -1556,10 +1556,10 @@ class LLMGateway:
         system_prompt: str = "",
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        images: Optional[List[str]] = None,
-        start_tier: Optional[ModelTier] = None,
-        min_confidence: Optional[float] = None,
-        max_upgrades: Optional[int] = None,
+        images: list[str] | None = None,
+        start_tier: ModelTier | None = None,
+        min_confidence: float | None = None,
+        max_upgrades: int | None = None,
     ) -> LLMResponse:
         """级联路由聊天 - 从低档位开始尝试，置信度不够自动升级
 
@@ -1639,10 +1639,10 @@ class LLMGateway:
         else:
             original_max_upgrades = None
 
-        cascade_path: List[str] = []
+        cascade_path: list[str] = []
         total_cost = 0.0
         upgrade_count = 0
-        final_response: Optional[LLMResponse] = None
+        final_response: LLMResponse | None = None
         total_latency = 0.0
 
         try:
@@ -1750,7 +1750,7 @@ class LLMGateway:
         system_prompt: str = "",
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        images: Optional[List[str]] = None,
+        images: list[str] | None = None,
     ) -> LLMResponse:
         """调用指定档位的模型
 
@@ -1863,8 +1863,8 @@ class LLMGateway:
         system_prompt: str = "",
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        images: Optional[List[str]] = None,
-        force_temperature: Optional[float] = None,
+        images: list[str] | None = None,
+        force_temperature: float | None = None,
         source_video: str = "",
     ) -> LLMResponse:
         """
@@ -1902,7 +1902,7 @@ class LLMGateway:
         # P0-4: 视频生成/编辑类任务不进入 chat token 路径，直接短路到 generate_video / edit_video
         try:
             if task_type == TaskType.VIDEO_GENERATION:
-                kwargs_extra: Dict[str, Any] = {}
+                kwargs_extra: dict[str, Any] = {}
                 if images is not None:
                     kwargs_extra["reference_images"] = images
                 result = await self.generate_video(
@@ -2020,7 +2020,7 @@ class LLMGateway:
             #   b) 否则含 "default" 档位的第一个；c) 否则字典第一个。
             # 只替换 provider，不替换 model_type（档位回退由下游 _tier_fallback_sequence 完成）
             if provider not in self._config.providers:
-                fallback_provider: Optional[str] = None
+                fallback_provider: str | None = None
                 for p_name, p_conf in self._config.providers.items():
                     if model_type in p_conf.get("models", {}):
                         fallback_provider = p_name
@@ -2186,7 +2186,7 @@ class LLMGateway:
         provider: str,
         model_type: str = "default",
         system_prompt: str = "",
-        images: Optional[List[str]] = None,
+        images: list[str] | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
     ) -> LLMResponse:
@@ -2233,7 +2233,7 @@ class LLMGateway:
         # 多密钥故障转移：依次尝试 api_keys 中的每个密钥
         api_keys = [k for k in (p.get("api_keys") or [p.get("api_key")]) if k]
 
-        last_response: Optional[LLMResponse] = None
+        last_response: LLMResponse | None = None
         for idx, key in enumerate(api_keys):
             response = await self._call_provider_internal(
                 prompt=prompt,
@@ -2267,7 +2267,7 @@ class LLMGateway:
         prompt: str,
         model: str,
         system_prompt: str,
-        images: Optional[List[str]],
+        images: list[str] | None,
         temperature: float,
         max_tokens: int,
         provider_name: str = "",
@@ -2293,12 +2293,12 @@ class LLMGateway:
                 user_prompt = self._compressor.compress_prompt(prompt)
                 user_prompt += self._compressor.get_compression_suffix()
 
-        messages: List[Dict[str, Any]] = []
+        messages: list[dict[str, Any]] = []
         if sys_prompt:
             messages.append({"role": "system", "content": sys_prompt})
 
         if has_images:
-            content_parts: List[Dict[str, Any]] = [
+            content_parts: list[dict[str, Any]] = [
                 {"type": "text", "text": user_prompt}
             ]
             for img_b64 in images:
@@ -2361,8 +2361,8 @@ class LLMGateway:
         return score
 
     def _order_fallback_candidates(
-        self, fallbacks: List[Dict[str, str]]
-    ) -> List[Dict[str, str]]:
+        self, fallbacks: list[dict[str, str]]
+    ) -> list[dict[str, str]]:
         """按健康分对降级候选排序（稳定排序：健康优先，熔断冷却中剔除）。
 
         静态配置顺序只在健康分相同时生效，避免已有部署的语义突变。
@@ -2414,7 +2414,7 @@ class LLMGateway:
         base_url: str,
         api_key: str,
         model: str,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         temperature: float,
         max_tokens: int,
         provider_friendly_name: str = "",
@@ -2714,7 +2714,7 @@ class LLMGateway:
     # MiniMax H3 异步 Provider 适配（文生视频 / 视频编辑）
     # -------------------------------------------------------------------------
 
-    def _get_h3_config(self) -> Dict[str, Any]:
+    def _get_h3_config(self) -> dict[str, Any]:
         """从 ConfigManager / LLMConfig.providers / 环境变量 读 MiniMax H3 配置。
 
         优先级（高→低）：环境变量 > 实例 LLMConfig.providers > 配置文件默认层。
@@ -2731,7 +2731,7 @@ class LLMGateway:
         prov = self._config.providers.get("minimax_h3", {})
         base_url = env_url or prov.get("base_url") or h3.get("base_url") or ""
         api_key = env_key or prov.get("api_key") or h3.get("api_key") or ""
-        merged: Dict[str, Any] = {
+        merged: dict[str, Any] = {
             "base_url": base_url,
             "api_key": api_key,
             "cost_per_sec_2k": float(prov.get("cost_per_sec_2k") or h3.get("cost_per_sec_2k") or 0.8),
@@ -2795,7 +2795,7 @@ class LLMGateway:
             except Exception:
                 return False
 
-    async def _h3_request(self, method: str, path: str, json_body: Optional[Dict[str, Any]] = None, timeout: Optional[float] = None) -> Dict[str, Any]:
+    async def _h3_request(self, method: str, path: str, json_body: dict[str, Any] | None = None, timeout: float | None = None) -> dict[str, Any]:
         """内部：发送 H3 HTTP 请求，统一异常捕获。
 
         Args:
@@ -2843,7 +2843,7 @@ class LLMGateway:
         except Exception as e:
             return {"error": f"H3 请求异常: {e}", "status_code": 0}
 
-    async def _h3_poll_until_done(self, task_id: str, h3_cfg: Dict[str, Any]) -> Dict[str, Any]:
+    async def _h3_poll_until_done(self, task_id: str, h3_cfg: dict[str, Any]) -> dict[str, Any]:
         """内部：轮询 H3 任务状态直到完成 / 失败 / 超时。
 
         Args:
@@ -2884,12 +2884,12 @@ class LLMGateway:
         duration_sec: int = 10,
         resolution: str = "768p",
         aspect_ratio: str = "16:9",
-        reference_images: Optional[List[str]] = None,
-        reference_videos: Optional[List[str]] = None,
-        reference_audios: Optional[List[str]] = None,
+        reference_images: list[str] | None = None,
+        reference_videos: list[str] | None = None,
+        reference_audios: list[str] | None = None,
         output_path: str = "",
         prompt_extra: str = "",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """顶层：MiniMax H3 文生视频 / 图生视频。
 
         Args:
@@ -2908,7 +2908,7 @@ class LLMGateway:
                    download_url, cost_usd, error}
         """
         h3_cfg = self._get_h3_config()
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "output_path": "",
             "task_id": "",
@@ -2925,7 +2925,7 @@ class LLMGateway:
 
             # 1. 组装请求体
             full_prompt = f"{prompt}\n{prompt_extra}" if prompt_extra else prompt
-            body: Dict[str, Any] = {
+            body: dict[str, Any] = {
                 "model": "minimax-h3",
                 "prompt": full_prompt,
                 "duration_sec": duration_sec,
@@ -3037,7 +3037,7 @@ class LLMGateway:
         reference_image: str = "",
         output_path: str = "",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """顶层：MiniMax H3 视频编辑（字幕修改 / 风格化 / 动作迁移 / 瑕疵修复 等）。
 
         Args:
@@ -3052,7 +3052,7 @@ class LLMGateway:
             dict: {success, output_path, task_id, download_url, cost_usd, error}
         """
         h3_cfg = self._get_h3_config()
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "output_path": "",
             "task_id": "",
@@ -3093,7 +3093,7 @@ class LLMGateway:
             endpoint = endpoint_map.get(op_lower, "/video-async/edits")
 
             # 1. 组装请求体
-            body: Dict[str, Any] = {
+            body: dict[str, Any] = {
                 "model": "minimax-h3",
                 "source_video": source_video,
             }
@@ -3206,7 +3206,7 @@ class LLMGateway:
     # P2：MiniMax H3 本地部署 + 手绘特效（代码预留骨架，权重开源后填充）
     # -------------------------------------------------------------------------
 
-    def check_local_h3_available(self) -> Dict[str, Any]:
+    def check_local_h3_available(self) -> dict[str, Any]:
         """P2 骨架：检测 MiniMax H3 本地部署是否可用。
         
         2026-08-03 权重刚开源，具体加载脚本/推理方式待社区确认；
@@ -3226,7 +3226,7 @@ class LLMGateway:
         import os as _os
         cfg = self._get_h3_config()
         local_cfg = cfg.get("local_deployment", {}) if isinstance(cfg, dict) else {}
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "available": False,
             "reason": "",
             "model_path": local_cfg.get("model_path", "") or _os.environ.get("AEKV_LLM_MINIMAX_H3_LOCAL_MODEL_PATH", ""),
@@ -3286,14 +3286,14 @@ class LLMGateway:
         prompt: str,
         output_path: str = "",
         duration_sec: int = 10,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """P2 骨架：MiniMax H3「手绘即特效」接口封装。
         
         H3 核心卖点之一：用户在画面上画涂鸦/遮罩，配合文字提示即生成对应特效。
         本骨架在调用前先校验本地/云端可用性，统一走 edit_video(inpainting+style_transfer 混合) 路径。
         """
         import os as _os
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "output_path": "",
             "mode": "",
@@ -3371,7 +3371,7 @@ class LLMGateway:
         else:
             tier_stat["total_failures"] += 1
 
-    def _get_tier_from_provider(self, provider_name: str) -> Optional[ModelTier]:
+    def _get_tier_from_provider(self, provider_name: str) -> ModelTier | None:
         """根据 Provider 名称推断所属档位
 
         Args:
@@ -3387,7 +3387,7 @@ class LLMGateway:
                     return tier
         return None
 
-    def get_tier_stats(self) -> Dict[str, Any]:
+    def get_tier_stats(self) -> dict[str, Any]:
         """获取各档位调用统计
 
         Returns:
@@ -3411,7 +3411,7 @@ class LLMGateway:
             }
         return result
 
-    def get_cascade_stats(self) -> Dict[str, Any]:
+    def get_cascade_stats(self) -> dict[str, Any]:
         """获取级联路由统计
 
         Returns:
@@ -3440,7 +3440,7 @@ class LLMGateway:
         response_content: str,
         tier: ModelTier,
         task_type: TaskType,
-    ) -> Tuple[float, str]:
+    ) -> tuple[float, str]:
         """从模型响应中提取置信度
 
         置信度来源优先级：
@@ -3609,7 +3609,7 @@ class LLMGateway:
         self,
         response: LLMResponse,
         task_type: TaskType,
-    ) -> Tuple[bool, float, str]:
+    ) -> tuple[bool, float, str]:
         """验证响应质量，返回 (是否通过, 置信度, 原因)
 
         质量检查项：
@@ -3730,7 +3730,7 @@ class LLMGateway:
         current_tier: ModelTier,
         task_type: TaskType,
         upgrade_count: int,
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """判断是否需要升级到更高档位
 
         判断条件：
@@ -3791,7 +3791,7 @@ class LLMGateway:
         system_prompt: str,
         temperature: float,
         max_tokens: int,
-        images: Optional[List[str]],
+        images: list[str] | None,
     ) -> LLMResponse:
         """尝试调用 NVIDIA Agent Toolkit 本地模型（GB300 Blackwell Ultra）
 
@@ -3810,7 +3810,7 @@ class LLMGateway:
             LLMResponse：成功时返回本地模型结果，失败时返回 success=False
         """
         try:
-            from ai.nvidia_agent_adapter import nvidia_adapter, ModelType
+            from ai.nvidia_agent_adapter import ModelType, nvidia_adapter
         except ImportError:
             return LLMResponse(success=False, error="NVIDIA Adapter 未安装")
 
@@ -3893,7 +3893,7 @@ class LLMGateway:
         self,
         content: str,
         review_prompt: str = "",
-    ) -> Tuple[LLMResponse, LLMResponse]:
+    ) -> tuple[LLMResponse, LLMResponse]:
         """
         双模型对抗审查 — 参考 cavekit 的双模型审查模式
 
@@ -3931,7 +3931,7 @@ class LLMGateway:
     # 统计与监控
     # -------------------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取网关统计"""
         total = self._stats["total_requests"]
         success_count = self._stats["total_successes"]
@@ -3961,7 +3961,7 @@ class LLMGateway:
             },
         }
 
-    def get_usage_stats(self) -> Dict[str, Any]:
+    def get_usage_stats(self) -> dict[str, Any]:
         """获取使用统计信息（含分层统计）
 
         Returns:
@@ -3969,7 +3969,7 @@ class LLMGateway:
         """
         return self.get_stats()
 
-    def get_health(self) -> Dict[str, Any]:
+    def get_health(self) -> dict[str, Any]:
         """获取 Provider 健康状态"""
         return {
             name: {
@@ -4027,7 +4027,7 @@ async def chat_with_cascade(
     return await llm_gateway.chat_with_cascade(message, task_type, system_prompt, **kwargs)
 
 
-def get_cascade_stats() -> Dict[str, Any]:
+def get_cascade_stats() -> dict[str, Any]:
     """获取级联路由统计"""
     return llm_gateway.get_cascade_stats()
 
@@ -4053,7 +4053,7 @@ def configure_providers_from_env() -> None:
 
 async def chat_vision(
     prompt: str,
-    images: List[str],
+    images: list[str],
     system_prompt: str = "",
     provider: str = "claude",
 ) -> LLMResponse:
@@ -4162,7 +4162,7 @@ class ThinkingBudget:
     max_cost_usd: float = 0.5
 
     @classmethod
-    def from_config(cls, cfg: Dict[str, Any]) -> "ThinkingBudget":
+    def from_config(cls, cfg: dict[str, Any]) -> "ThinkingBudget":
         """从配置字典构造预算（H1：消费 core.config 的 thinking_upgrade 配置）。
 
         Args:
@@ -4201,7 +4201,7 @@ class ThinkingRound:
 
     round_index: int
     prompt: str
-    response: Optional[str] = None  # L1: 失败路径归一化为 ""
+    response: str | None = None  # L1: 失败路径归一化为 ""
     self_check_result: str = ""
     passed: bool = False
     latency_ms: float = 0.0  # M10: 回答轮 + 审查轮耗时之和
@@ -4215,12 +4215,12 @@ class ThinkingTrace:
     original_prompt: str
     original_task_type: str
     decision: ThinkingUpgradeDecision
-    rounds: List[ThinkingRound]
-    final_answer: Optional[str] = None  # L1: 失败路径归一化为 ""
+    rounds: list[ThinkingRound]
+    final_answer: str | None = None  # L1: 失败路径归一化为 ""
     total_cost_usd: float = 0.0
     total_latency_ms: float = 0.0
-    error: Optional[str] = None  # M4: partial / timeout / cost_capped / llm_call_failed
-    context_keys: Optional[List[str]] = None  # M7: 记录上下文键
+    error: str | None = None  # M4: partial / timeout / cost_capped / llm_call_failed
+    context_keys: list[str] | None = None  # M7: 记录上下文键
 
 
 # ThinkingUpgradePolicy 已拆出 (2026-08-14), 此处 re-export 保持向后兼容:

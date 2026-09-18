@@ -5,16 +5,16 @@ T4: 品味契约接入导演 (零依赖, 直接提升 v23 编排)
 - Anti-Default Checklist 前 3 条机检化
 """
 import pytest
+
 from ai.taste_contract import (
-    TasteProfile,
     DEFAULT_TASTE,
     HIGH_MOTION_POOL,
     LOW_MOTION_POOL,
     MID_MOTION_POOL,
+    TasteProfile,
     camera_pool_for_intensity,
     check_anti_defaults,
 )
-
 
 # ---- TasteProfile 数据类 ----
 

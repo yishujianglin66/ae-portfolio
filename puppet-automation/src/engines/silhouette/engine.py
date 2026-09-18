@@ -237,7 +237,7 @@ def main():
 main()
 '''
 
-    def __init__(self, executable_path: Optional[Path | str] = None):
+    def __init__(self, executable_path: Path | str | None = None):
         path = Path(executable_path) if executable_path else settings.silhouette_path
         # Silhouette.exe is the main executable
         exe = path / "Silhouette.exe"
@@ -364,8 +364,8 @@ main()
     async def export_shapes(
         self,
         output_path: Path | str,
-        input_path: Optional[Path | str] = None,
-        session_path: Optional[Path | str] = None,
+        input_path: Path | str | None = None,
+        session_path: Path | str | None = None,
     ) -> EngineResult:
         """导出 Silhouette Roto 形状数据为 JSON。
 
@@ -658,7 +658,7 @@ main()
         self,
         mask_dir: Path | str,
         output_dir: Path | str,
-        video_path: Optional[Path | str] = None,
+        video_path: Path | str | None = None,
         feather: float = 2.0,
         motion_blur: float = 0.5,
         bezier_simplify: float = 1.0,

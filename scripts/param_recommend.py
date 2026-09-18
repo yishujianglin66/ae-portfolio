@@ -39,11 +39,14 @@ try:
 except ImportError:
     pass
 
-from scripts.train_param_tuner import (  # noqa: E402
-    FEATURES, TARGETS, extract_feature_value,
-    TINT_REVMAP, PARTICLE_REVMAP,
-)
 from core.visual_scorer import get_dim_priority  # noqa: E402
+from scripts.train_param_tuner import (  # noqa: E402
+    FEATURES,
+    PARTICLE_REVMAP,
+    TARGETS,
+    TINT_REVMAP,
+    extract_feature_value,
+)
 
 # 推荐网格（比采集 GRID 更细）
 # 2026-08-17 扩展: 新增 tint_color / particle_template / glow_radius
@@ -206,7 +209,7 @@ def run_single_stage(args, tuner, dim_weights) -> int:
 
 def run_two_stage(args, tuner, dim_weights) -> int:
     """GBDT 初筛 top-10 → CNN 精排 → final top-N。"""
-    from core.cnn_scorer import load_head, _pred_to_scores  # 复用生产头
+    from core.cnn_scorer import _pred_to_scores, load_head  # 复用生产头
 
     samples_path = PROJECT / "data" / "param_tuning" / "train_samples.jsonl"
     emb_path = PROJECT / "data" / "param_tuning" / "clip_vitl14_emb.npz"

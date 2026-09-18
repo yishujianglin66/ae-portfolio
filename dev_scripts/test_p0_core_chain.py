@@ -2,9 +2,9 @@
 """P0 核心链路简化测试: execute → render → verify
 跳过 perceive/analyze/plan 的耗时操作，直接测试核心执行链路。
 """
-import sys
-import os
 import json
+import os
+import sys
 import time
 from pathlib import Path
 
@@ -29,7 +29,7 @@ def main():
     
     # 2. 导入管线
     print("\n[2] Importing pipeline...")
-    from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig
+    from pipeline.unified_pipeline import PipelineConfig, UnifiedPipeline
     
     # 3. 配置 (跳过 perceive/analyze/plan)
     config = PipelineConfig(

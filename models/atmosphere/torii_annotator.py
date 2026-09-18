@@ -30,6 +30,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
 from core.torch_runtime import infer_ctx
 
 logger = logging.getLogger(__name__)
@@ -95,7 +96,7 @@ class AtmosphereResult:
     raw: str = ""                 # 模型原始输出 (追溯)
     latency_sec: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "atmosphere": self.atmosphere, "emotion": self.emotion,
             "energy": self.energy, "scene_type": self.scene_type,
@@ -105,7 +106,7 @@ class AtmosphereResult:
 
 
 def _sample_frames(video_path: str, n: int = MAX_FRAMES,
-                   size: int = FRAME_SIZE) -> Optional[List[Any]]:
+                   size: int = FRAME_SIZE) -> list[Any] | None:
     """cv2 均匀采样 n 帧 → PIL Image 列表 (RGB)。"""
     import cv2
     import numpy as np
@@ -182,7 +183,7 @@ def _normalize_atmosphere(raw: str) -> str:
     return raw[:12] if len(raw) <= 12 else raw[:12]
 
 
-def _parse_json_response(content: str) -> Optional[Dict[str, Any]]:
+def _parse_json_response(content: str) -> dict[str, Any] | None:
     """从 VLM 输出提取 JSON (容忍 markdown 包裹与前后杂文)。"""
     if not content:
         return None
@@ -205,7 +206,7 @@ class ToriiAtmosphereAnnotator:
 
     def __init__(self, model_dir: str = DEFAULT_MODEL_DIR,
                  max_frames: int = MAX_FRAMES,
-                 device: Optional[str] = None,
+                 device: str | None = None,
                  conf_threshold: float = 0.4) -> None:
         self.model_dir = model_dir
         self.max_frames = max_frames
@@ -213,7 +214,7 @@ class ToriiAtmosphereAnnotator:
         self.conf_threshold = conf_threshold
         self._processor = None
         self._model = None
-        self._load_error: Optional[str] = None
+        self._load_error: str | None = None
         self._n_infer = 0
         self._total_sec = 0.0
 
@@ -270,15 +271,15 @@ class ToriiAtmosphereAnnotator:
 
     # ── 推理 ──────────────────────────────────────────────
 
-    def _build_messages(self, frames) -> List[Dict[str, Any]]:
-        content: List[Dict[str, Any]] = [
+    def _build_messages(self, frames) -> list[dict[str, Any]]:
+        content: list[dict[str, Any]] = [
             {"type": "image", "image": img} for img in frames
         ]
         content.append({"type": "text",
                         "text": _PROMPT_TEMPLATE.format(n=len(frames))})
         return [{"role": "user", "content": content}]
 
-    def annotate(self, video_path: str) -> Optional[AtmosphereResult]:
+    def annotate(self, video_path: str) -> AtmosphereResult | None:
         """对单个视频做氛围标注。
 
         Returns:
@@ -348,7 +349,7 @@ class ToriiAtmosphereAnnotator:
                            Path(video_path).name, exc)
             return None
 
-    def _retry_generate(self, inputs, frames) -> Optional[str]:
+    def _retry_generate(self, inputs, frames) -> str | None:
         """解析失败后的纠错重试: 追问一次, 要求只输出合法 JSON。"""
         try:
             import torch
@@ -381,10 +382,10 @@ class ToriiAtmosphereAnnotator:
             logger.warning("[ToriiGate] retry failed: %s", exc)
             return None
 
-    def batch_annotate(self, video_paths) -> Dict[str, Optional[AtmosphereResult]]:
+    def batch_annotate(self, video_paths) -> dict[str, AtmosphereResult | None]:
         return {p: self.annotate(p) for p in video_paths}
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         return {
             "loaded": self._model is not None,
             "n_infer": self._n_infer,
@@ -396,7 +397,7 @@ class ToriiAtmosphereAnnotator:
         }
 
 
-_SINGLETON: Optional[ToriiAtmosphereAnnotator] = None
+_SINGLETON: ToriiAtmosphereAnnotator | None = None
 
 
 def get_torii_annotator(**kwargs) -> ToriiAtmosphereAnnotator:

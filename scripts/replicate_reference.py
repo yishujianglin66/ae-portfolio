@@ -22,10 +22,11 @@ PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
 from core.reference_analyzer import analyze_reference, profile_to_params  # noqa: E402
-from core.lut_pipeline import load_sampling, lut_md5  # noqa: E402
-from core.image_fx import pick_fx_layer  # noqa: E402
-from core.sfx_layer import plan_sfx, mix_sfx, _load_index  # noqa: E402
+
 from core.cnn_scorer import score_video_mode  # noqa: E402
+from core.image_fx import pick_fx_layer  # noqa: E402
+from core.lut_pipeline import load_sampling, lut_md5  # noqa: E402
+from core.sfx_layer import _load_index, mix_sfx, plan_sfx  # noqa: E402
 from scripts.m2_auto_iterate import render_tree  # noqa: E402
 
 DEFAULT_REF = Path(r"D:\AE-Work\resources\tutorials\AE教程10集\独自升级（一般）\成品.mp4")
@@ -36,8 +37,9 @@ DIMS = ["score_dynamism", "score_composition", "score_color_harmony",
 
 def build_replica_tree(pp: dict):
     """画像参数 + 资源库 → 合成树。"""
-    from core.composition_tree import LayerSpec, CompositionTree, EffectRef
     import random
+
+    from core.composition_tree import CompositionTree, EffectRef, LayerSpec
     rng = random.Random(2026)
     FOOTAGE = "data/real_amv_test/DL_FATE_r978_BV1qb411C79B_p1.mp4"
 

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """诊断2: 检查textLayerName参数默认值 + 模拟eval执行路径"""
-import json, sys, re
+import json
+import re
+import sys
+
 sys.stdout.reconfigure(encoding='utf-8')
 from pathlib import Path
 
@@ -42,14 +45,14 @@ for param in params:
 jsx = re.sub(r'\{\{(\w+)\}\}', '0', jsx)
 
 # 检查填充后的关键内容
-print(f"  After fill_template:")
+print("  After fill_template:")
 print(f"  Contains 'app.project.activeItem': {'app.project.activeItem' in jsx}")
 # 找textLayerName被替换成什么
 m = re.search(r"var n='([^']*)'", jsx)
 if m:
     print(f"  Layer name searched: '{m.group(1)}'")
 else:
-    print(f"  Could not find layer name pattern")
+    print("  Could not find layer name pattern")
 
 # 模拟wrapper中创建的图层名
 wrapper_layer_name = "\u6807\u9898\u6587\u5b57"  # 标题文字
@@ -77,12 +80,12 @@ print(f"  After escaping: {jsx_escaped.count(chr(92)+chr(39))} escaped quotes")
 
 # 最关键的问题: eval('...') 中如果内容太长或有特殊字符
 # AE的ExtendScript eval有长度限制吗?
-print(f"\n  CRITICAL ISSUE ANALYSIS:")
+print("\n  CRITICAL ISSUE ANALYSIS:")
 print(f"  1. Template uses app.project.activeItem: {'app.project.activeItem' in jsx}")
-print(f"     -> After addComp(), activeItem is NOT set to new comp!")
-print(f"     -> Template immediately returns 'No active comp' error!")
-print(f"  2. Wrapper catch(pe){{}} silently swallows this error")
-print(f"  3. Result: text layer created but NO animation applied")
+print("     -> After addComp(), activeItem is NOT set to new comp!")
+print("     -> Template immediately returns 'No active comp' error!")
+print("  2. Wrapper catch(pe){} silently swallows this error")
+print("  3. Result: text layer created but NO animation applied")
 
 # 验证: 3d_title preset使用不同模式
 print("\n" + "=" * 70)

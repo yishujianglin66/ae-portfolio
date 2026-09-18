@@ -1,11 +1,21 @@
 """E2E 验证：使用 DCTL 预设进行调色"""
-import sys, os, time, tempfile, shutil, subprocess, ctypes
+import ctypes
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
 from integrations.davinci_fuscript import (
-    ResolveColorEngine, ColorGradeConfig, 
-    find_lut_for_preset, find_dctl_for_preset
+    ColorGradeConfig,
+    ResolveColorEngine,
+    find_dctl_for_preset,
+    find_lut_for_preset,
 )
+
 
 def get_long_path(short_path):
     buf = ctypes.create_unicode_buffer(1024)
@@ -38,7 +48,7 @@ for preset in dctl_presets:
     print(f"  {preset}: {ext} -> {os.path.basename(lut_path) if lut_path else 'NOT FOUND'}")
 
 # 4. 使用 filmic DCTL 进行调色测试
-print(f"\n[4/5] Running E2E with 'filmic' DCTL preset...")
+print("\n[4/5] Running E2E with 'filmic' DCTL preset...")
 dctl_path = find_lut_for_preset("filmic")
 safe_dctl = engine._safe_lut_path(dctl_path)
 print(f"  DCTL: {dctl_path}")
@@ -83,7 +93,7 @@ if proc.stderr.strip():
 print(f"Return code: {proc.returncode}")
 
 # 5. 检查输出
-print(f"\n[5/5] Checking output...")
+print("\n[5/5] Checking output...")
 for f in os.listdir(output_dir):
     fp = os.path.join(output_dir, f)
     size = os.path.getsize(fp)

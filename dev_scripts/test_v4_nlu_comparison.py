@@ -7,11 +7,12 @@ DeepSeek V4 NLU 意图识别对比测试
 使用与 test_silhouette_nlu.ts 相同的 10 个测试用例。
 """
 
-import os
 import json
+import os
 import time
-import requests
 from datetime import datetime
+
+import requests
 
 # DeepSeek V4 API 配置
 API_BASE = "https://api.deepseek.com"
@@ -227,7 +228,7 @@ def run_comparison_test():
 
     print(f"✅ V4-Flash 单次费用约 ¥{flash_cost/len(results_flash):.6f}，成本极低")
     print(f"✅ 本地正则延迟约 {local_avg_latency}ms，适合高频简单意图")
-    print(f"✅ 推荐策略: 本地正则优先 → 低置信度时调用 V4-Flash → 复杂分析用 V4-Pro")
+    print("✅ 推荐策略: 本地正则优先 → 低置信度时调用 V4-Flash → 复杂分析用 V4-Pro")
 
     # 保存详细结果
     report = {

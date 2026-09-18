@@ -7,7 +7,6 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
-
 # ============================================================
 # Enums
 # ============================================================
@@ -67,7 +66,7 @@ class VideoMetadata(BaseModel):
     codec: str
     bitrate: int
     has_audio: bool
-    audio_codec: Optional[str] = None
+    audio_codec: str | None = None
     file_size: int
     path: str
 
@@ -81,7 +80,7 @@ class SceneSegment(BaseModel):
     end_time: float
     duration: float
     avg_motion: float = 0.0
-    keyframe_path: Optional[str] = None
+    keyframe_path: str | None = None
 
 
 class DetectionResult(BaseModel):
@@ -97,7 +96,7 @@ class PoseFrame(BaseModel):
     """Pose estimation frame data."""
     frame_idx: int
     landmarks_2d: list[list[float]] = Field(default_factory=list)
-    landmarks_3d: Optional[list[list[float]]] = None
+    landmarks_3d: list[list[float]] | None = None
     confidence: list[float] = Field(default_factory=list)
 
 
@@ -114,8 +113,8 @@ class FaceAnalysisResult(BaseModel):
 class MattingResult(BaseModel):
     """Matting/keying result."""
     method: str
-    alpha_path: Optional[str] = None
-    fg_path: Optional[str] = None
+    alpha_path: str | None = None
+    fg_path: str | None = None
     quality_score: float = 0.0
     processing_time: float = 0.0
 
@@ -156,10 +155,10 @@ class PhaseResult(BaseModel):
     """Result of a single pipeline phase."""
     phase: PipelinePhase
     status: TaskStatus = TaskStatus.PENDING
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    error: Optional[str] = None
-    output_path: Optional[str] = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    error: str | None = None
+    output_path: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     duration_seconds: float = 0.0
 
@@ -191,13 +190,13 @@ class PipelineJob(BaseModel):
 class PipelineState(BaseModel):
     """Current state of a pipeline job."""
     job_id: str
-    current_phase: Optional[PipelinePhase] = None
+    current_phase: PipelinePhase | None = None
     overall_status: TaskStatus = TaskStatus.PENDING
     phase_results: dict[PipelinePhase, PhaseResult] = Field(default_factory=dict)
     progress: float = 0.0
-    error: Optional[str] = None
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    error: str | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
 
 # ============================================================
@@ -215,7 +214,7 @@ class MCPEngineRequest(BaseModel):
 class MCPEngineResponse(BaseModel):
     """MCP engine action response."""
     success: bool
-    output_path: Optional[str] = None
+    output_path: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
-    error: Optional[str] = None
+    error: str | None = None
     duration_seconds: float = 0.0

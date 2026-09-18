@@ -39,7 +39,9 @@ from typing import Any, Dict, List, Optional, Sequence
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from core.composition_tree import (  # noqa: E402
-    CompositionTree, LayerSpec, validate_composition_tree,
+    CompositionTree,
+    LayerSpec,
+    validate_composition_tree,
 )
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -64,18 +66,18 @@ _MERGE_TOLERANCE = 0.05
 @dataclass
 class BeatGrid:
     """节拍网格（鼓类型/网格语义，与 production_director._load_beatgrid 对齐）"""
-    kick: List[float] = field(default_factory=list)      # 低频重音 <150Hz（撞拍核心）
-    strong: List[float] = field(default_factory=list)    # 强拍（正拍，排除 hihat）
-    weak: List[float] = field(default_factory=list)      # 弱拍（排除 hihat）
-    rolls: List[Dict[str, Any]] = field(default_factory=list)      # 连击段
-    moments: List[Dict[str, Any]] = field(default_factory=list)    # 关键时刻
-    hard_stops: List[float] = field(default_factory=list)          # 突然停止
-    bpm: Optional[float] = None
-    meta: Dict[str, Any] = field(default_factory=dict)
+    kick: list[float] = field(default_factory=list)      # 低频重音 <150Hz（撞拍核心）
+    strong: list[float] = field(default_factory=list)    # 强拍（正拍，排除 hihat）
+    weak: list[float] = field(default_factory=list)      # 弱拍（排除 hihat）
+    rolls: list[dict[str, Any]] = field(default_factory=list)      # 连击段
+    moments: list[dict[str, Any]] = field(default_factory=list)    # 关键时刻
+    hard_stops: list[float] = field(default_factory=list)          # 突然停止
+    bpm: float | None = None
+    meta: dict[str, Any] = field(default_factory=dict)
 
     # ── 构造器 ─────────────────────────────────────────────────
     @classmethod
-    def from_mapping(cls, d: Dict[str, Any]) -> "BeatGrid":
+    def from_mapping(cls, d: dict[str, Any]) -> "BeatGrid":
         """从 production_director._load_beatgrid 返回的 dict 构建"""
         return cls(
             kick=sorted(set(float(t) for t in d.get("kick", []))),
@@ -99,15 +101,15 @@ class BeatGrid:
                    bpm=float(getattr(result, "bpm", 0.0) or 0.0) or None)
 
     @classmethod
-    def load(cls, bgm_path: str, cache_dir: Optional[str] = None,
-             timeout: int = 180) -> Optional["BeatGrid"]:
+    def load(cls, bgm_path: str, cache_dir: str | None = None,
+             timeout: int = 180) -> "BeatGrid" | None:
         """加载 OpenMontage beatgrid（与主会话共用 audiomap 缓存键）。
 
         失败返回 None（调用方回退），不阻断渲染。
         """
         try:
-            import subprocess
             import os
+            import subprocess
             import sys as _sys
             if not _OM_BEATGRID_SCRIPT.exists():
                 return None
@@ -130,7 +132,7 @@ class BeatGrid:
             return None
 
     @classmethod
-    def from_audiomap(cls, raw: Dict[str, Any]) -> "BeatGrid":
+    def from_audiomap(cls, raw: dict[str, Any]) -> "BeatGrid":
         """解析 audiomap.json（纯函数，便于单测）"""
         events = raw.get("events", []) or []
         kicks = [float(e["t"]) for e in events if e.get("drum") == "kick"]
@@ -140,9 +142,9 @@ class BeatGrid:
         weaks = [float(e["t"]) for e in events
                  if e.get("grid") == "weak" and e.get("drum") != "hihat"]
 
-        def _times(xs: Any) -> List[float]:
+        def _times(xs: Any) -> list[float]:
             """v2 audiomap 事件可为 {t,kind,...} 字典，也可为裸秒数（[AE-sync] 主会话修复）"""
-            out: List[float] = []
+            out: list[float] = []
             for x in xs or []:
                 if isinstance(x, dict):
                     x = x.get("t")
@@ -175,7 +177,7 @@ class BeatGrid:
         )
 
     # ── 查询 ───────────────────────────────────────────────────
-    def events(self) -> List[tuple]:
+    def events(self) -> list[tuple]:
         """拍点统一序列 [(time, beat_type)]，按时间排序"""
         out = [(t, "kick") for t in self.kick] + \
               [(t, "strong") for t in self.strong] + \
@@ -196,22 +198,22 @@ class BeatAnchor:
     action: str                    # ACTION_TYPES
     layer_id: str = ""
     layer_index: int = 0           # AE 图层索引（1=顶层），emit_jsx 用 comp.layer(i)
-    params: Dict[str, Any] = field(default_factory=dict)  # amp/dur_ms 等
+    params: dict[str, Any] = field(default_factory=dict)  # amp/dur_ms 等
 
 
 @dataclass
 class BeatLockResult:
     """锚定结果：富化的合成树副本 + 锚点 + JSX 片段"""
-    tree: Optional[CompositionTree] = None
-    anchors: List[BeatAnchor] = field(default_factory=list)
+    tree: CompositionTree | None = None
+    anchors: list[BeatAnchor] = field(default_factory=list)
     jsx_fragment: str = ""
-    warnings: List[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     dropped: int = 0               # 越界/无目标被丢弃的拍点数
 
 
 # ── 风格自适应动作表 ─────────────────────────────────────────────────
 # beat_type → action（style_card 维度）
-_STYLE_ACTION_MAP: Dict[str, Dict[str, str]] = {
+_STYLE_ACTION_MAP: dict[str, dict[str, str]] = {
     "amv": {"kick": "punch", "strong": "flash", "weak": "pulse",
             "hard_stop": "flash", "roll": "shake"},
     "cyberpunk": {"kick": "punch", "strong": "flash", "weak": "pulse",
@@ -221,7 +223,7 @@ _STYLE_ACTION_MAP: Dict[str, Dict[str, str]] = {
 }
 
 # 动作默认参数
-_ACTION_DEFAULTS: Dict[str, Dict[str, Any]] = {
+_ACTION_DEFAULTS: dict[str, dict[str, Any]] = {
     "punch": {"amp": 1.12, "dur_ms": 160},
     "flash": {"opacity_low": 45, "dur_ms": 140},
     "pulse": {"amp": 1.05, "dur_ms": 120},
@@ -244,7 +246,7 @@ class BeatLock:
 
     # ── 图层工具 ───────────────────────────────────────────────
     @staticmethod
-    def _sorted_layers(tree: CompositionTree) -> List[LayerSpec]:
+    def _sorted_layers(tree: CompositionTree) -> list[LayerSpec]:
         """z_index 升序 = AE 从底到顶"""
         return sorted(tree.layers, key=lambda l: l.z_index)
 
@@ -256,7 +258,7 @@ class BeatLock:
         pos = ordered.index(layer) if layer in ordered else 0
         return len(ordered) - pos
 
-    def _default_target(self, tree: CompositionTree, beat_type: str) -> Optional[LayerSpec]:
+    def _default_target(self, tree: CompositionTree, beat_type: str) -> LayerSpec | None:
         """无模板提示时的默认锚定图层。
 
         kick/strong/hard_stop → 最顶层文字图层（主体），无文字则最顶层非背景；
@@ -278,7 +280,7 @@ class BeatLock:
         return ordered[-1] if ordered else None
 
     def _resolve_target(self, tree: CompositionTree, beat_type: str,
-                        t: float) -> Optional[LayerSpec]:
+                        t: float) -> LayerSpec | None:
         """模板 beat_events 提示优先（同类型+时间容差内），否则默认目标"""
         for ev in tree.beat_events:
             ev_bt = ev.get("beat_type")
@@ -293,14 +295,14 @@ class BeatLock:
         return self._default_target(tree, beat_type)
 
     # ── 锚点规划 ───────────────────────────────────────────────
-    def plan(self, tree: CompositionTree, grid: BeatGrid) -> List[BeatAnchor]:
+    def plan(self, tree: CompositionTree, grid: BeatGrid) -> list[BeatAnchor]:
         """网格拍点 → 锚点列表（不修改 tree）"""
         style = tree.style_card
         action_map = _STYLE_ACTION_MAP.get(style, _STYLE_ACTION_MAP["amv"])
-        anchors: List[BeatAnchor] = []
+        anchors: list[BeatAnchor] = []
         ordered = self._sorted_layers(tree)
 
-        def _add(t: float, beat_type: str, action: str) -> Optional[BeatAnchor]:
+        def _add(t: float, beat_type: str, action: str) -> BeatAnchor | None:
             if not action:
                 return None
             if not (0.0 <= t <= tree.duration + 1e-6):
@@ -355,7 +357,7 @@ class BeatLock:
     # ── 应用到合成树副本 ─────────────────────────────────────────
     def apply(self, tree: CompositionTree, grid: BeatGrid) -> BeatLockResult:
         """返回富化后的合成树副本 + 锚点（原 tree 不变）"""
-        warnings: List[str] = []
+        warnings: list[str] = []
         res = validate_composition_tree(tree)
         if not res["ok"]:
             raise ValueError(f"合成树校验失败: {res['errors']}")
@@ -365,7 +367,7 @@ class BeatLock:
         new_tree = copy.deepcopy(tree)
 
         # 合并 beat_events：模板事件 + 锚点事件（去重、时间钳制）
-        events: List[Dict[str, Any]] = list(new_tree.beat_events)
+        events: list[dict[str, Any]] = list(new_tree.beat_events)
         dropped = 0
         for a in anchors:
             if any(abs(float(e.get("time", -1)) - a.time) <= _MERGE_TOLERANCE
@@ -395,14 +397,14 @@ class BeatLock:
         """锚点 → JSX 关键帧片段（引用 comp.layer(i)，可在 JsxProjectBuilder
         生成的函数作用域内直接执行）"""
         tree = result.tree
-        lines: List[str] = ["    // ── BeatLock 节拍锚定关键帧（M3）──"]
+        lines: list[str] = ["    // ── BeatLock 节拍锚定关键帧（M3）──"]
         for a in result.anchors:
             lines.append(f"    // beat {a.beat_type}@{a.time:.3f}s "
                          f"→ {a.layer_id}(layer{a.layer_index}) {a.action}")
             lines.extend(self._anchor_jsx(a, tree))
         return "\n".join(lines)
 
-    def _anchor_jsx(self, a: BeatAnchor, tree: Optional[CompositionTree]) -> List[str]:
+    def _anchor_jsx(self, a: BeatAnchor, tree: CompositionTree | None) -> list[str]:
         li = a.layer_index
         scale_prop = (f'comp.layer({li}).property("ADBE Transform Group")'
                       f'.property("ADBE Scale")')
@@ -411,7 +413,7 @@ class BeatLock:
         pos_prop = (f'comp.layer({li}).property("ADBE Transform Group")'
                     f'.property("ADBE Position")')
         t = a.time
-        out: List[str] = []
+        out: list[str] = []
         if a.action == "punch":
             amp = float(a.params.get("amp", 1.12)) * 100.0
             dur = float(a.params.get("dur_ms", 160)) / 1000.0

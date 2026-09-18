@@ -89,15 +89,15 @@ class ToolValidationResult:
     category: str
     status: ValidationStatus
     latency_ms: float = 0.0
-    error_message: Optional[str] = None
-    error_code: Optional[int] = None
-    pre_conditions: List[str] = field(default_factory=list)
-    post_conditions: List[str] = field(default_factory=list)
+    error_message: str | None = None
+    error_code: int | None = None
+    pre_conditions: list[str] = field(default_factory=list)
+    post_conditions: list[str] = field(default_factory=list)
     notes: str = ""
     timestamp: datetime = field(default_factory=datetime.now)
     retry_count: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为可序列化的字典。"""
         d = asdict(self)
         d["timestamp"] = self.timestamp.isoformat(timespec="milliseconds")
@@ -134,7 +134,7 @@ class CategoryStats:
             return 0.0
         return (self.passed / self.total) * 100
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "category": self.category,
             "total": self.total,
@@ -178,15 +178,15 @@ class ValidationReport:
     pass_rate: float = 0.0
     avg_latency_ms: float = 0.0
     p95_latency_ms: float = 0.0
-    results: List[ToolValidationResult] = field(default_factory=list)
+    results: list[ToolValidationResult] = field(default_factory=list)
     start_time: datetime = field(default_factory=datetime.now)
     end_time: datetime = field(default_factory=datetime.now)
     ae_version: str = "unknown"
     mcp_server_version: str = "unknown"
     environment: str = "unknown"
-    category_stats: List[CategoryStats] = field(default_factory=list)
+    category_stats: list[CategoryStats] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "total_tools": self.total_tools,
             "passed": self.passed,
@@ -224,23 +224,23 @@ class _MockAEMCPClient:
     """
 
     def __init__(self, call_delay_ms: float = 5.0) -> None:
-        self.call_history: List[Tuple[str, Dict[str, Any], Dict[str, Any]]] = []
+        self.call_history: list[tuple[str, dict[str, Any], dict[str, Any]]] = []
         self.call_delay_ms = call_delay_ms
         self._comp_counter = 0
         self._layer_counter = 0
         self._keyframe_counter = 0
         self._effect_counter = 0
-        self._layer_index: Dict[str, int] = {}
-        self._comps: Dict[str, Dict[str, Any]] = {}
-        self._layers: Dict[Tuple[str, str], Dict[str, Any]] = {}
-        self._effects: Dict[Tuple[str, str], List[Dict[str, Any]]] = {}
-        self._properties: Dict[Tuple[str, str], Dict[str, Any]] = {}
+        self._layer_index: dict[str, int] = {}
+        self._comps: dict[str, dict[str, Any]] = {}
+        self._layers: dict[tuple[str, str], dict[str, Any]] = {}
+        self._effects: dict[tuple[str, str], list[dict[str, Any]]] = {}
+        self._properties: dict[tuple[str, str], dict[str, Any]] = {}
 
     # ---- 元信息 ----
-    def ping(self) -> Dict[str, Any]:
+    def ping(self) -> dict[str, Any]:
         return self._simulate("ping", {}, {"pong": True, "version": "mock-1.0.0"})
 
-    def get_project_info(self) -> Dict[str, Any]:
+    def get_project_info(self) -> dict[str, Any]:
         return self._simulate(
             "get_projectInfo",
             {},
@@ -252,7 +252,7 @@ class _MockAEMCPClient:
         )
 
     # ---- 合成 ----
-    def list_compositions(self) -> List[Dict[str, Any]]:
+    def list_compositions(self) -> list[dict[str, Any]]:
         comps = list(self._comps.values())
         return self._simulate("listCompositions", {}, {"compositions": comps})
 
@@ -263,8 +263,8 @@ class _MockAEMCPClient:
         height: int = 1080,
         duration: float = 10.0,
         frame_rate: float = 30.0,
-        bg_color: Optional[List[float]] = None,
-    ) -> Dict[str, Any]:
+        bg_color: list[float] | None = None,
+    ) -> dict[str, Any]:
         self._comp_counter += 1
         comp_id = f"comp_{self._comp_counter}"
         info = {
@@ -285,47 +285,47 @@ class _MockAEMCPClient:
         self,
         comp_name: str,
         text: str,
-        layer_name: Optional[str] = None,
+        layer_name: str | None = None,
         **_: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._create_layer(comp_name, layer_name or f"Text_{text[:10]}", "text", {"text": text})
 
     def create_solid_layer(
         self,
         comp_name: str,
-        layer_name: Optional[str] = None,
-        color: Optional[List[float]] = None,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        layer_name: str | None = None,
+        color: list[float] | None = None,
+        width: int | None = None,
+        height: int | None = None,
+    ) -> dict[str, Any]:
         return self._create_layer(
             comp_name, layer_name or "Solid", "solid",
             {"color": color, "width": width, "height": height},
         )
 
-    def create_shape_layer(self, comp_name: str, shape_type: str = "rect", layer_name: Optional[str] = None, **_: Any) -> Dict[str, Any]:
+    def create_shape_layer(self, comp_name: str, shape_type: str = "rect", layer_name: str | None = None, **_: Any) -> dict[str, Any]:
         return self._create_layer(comp_name, layer_name or f"Shape_{shape_type}", "shape", {"shapeType": shape_type})
 
-    def create_camera(self, comp_name: str, layer_name: Optional[str] = None, preset: Optional[str] = None) -> Dict[str, Any]:
+    def create_camera(self, comp_name: str, layer_name: str | None = None, preset: str | None = None) -> dict[str, Any]:
         return self._create_layer(comp_name, layer_name or "Camera", "camera", {"preset": preset})
 
-    def add_adjustment_layer(self, comp_name: str, layer_name: Optional[str] = None) -> Dict[str, Any]:
+    def add_adjustment_layer(self, comp_name: str, layer_name: str | None = None) -> dict[str, Any]:
         return self._create_layer(comp_name, layer_name or "Adjustment", "adjustment", {})
 
-    def delete_layer(self, comp_name: str, layer_name: str) -> Dict[str, Any]:
+    def delete_layer(self, comp_name: str, layer_name: str) -> dict[str, Any]:
         self._layers.pop((comp_name, layer_name), None)
         return self._simulate("deleteLayer", {"compName": comp_name, "layerName": layer_name}, {"deleted": True})
 
     def duplicate_layer(
-        self, comp_name: str, layer_name: str, new_name: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, comp_name: str, layer_name: str, new_name: str | None = None
+    ) -> dict[str, Any]:
         new_layer_name = new_name or f"{layer_name}_copy"
         return self._create_layer(comp_name, new_layer_name, "copy", {"sourceLayer": layer_name})
 
     # ---- 图层属性 ----
     def set_layer_properties(
-        self, comp_name: str, layer_name: str, properties: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, comp_name: str, layer_name: str, properties: dict[str, Any]
+    ) -> dict[str, Any]:
         self._properties.setdefault((comp_name, layer_name), {}).update(properties)
         return self._simulate(
             "setLayerProperties",
@@ -333,7 +333,7 @@ class _MockAEMCPClient:
             {"set": True, "properties": properties},
         )
 
-    def set_blend_mode(self, comp_name: str, layer_name: str, blend_mode: str) -> Dict[str, Any]:
+    def set_blend_mode(self, comp_name: str, layer_name: str, blend_mode: str) -> dict[str, Any]:
         return self._simulate(
             "setBlendingMode",
             {"compName": comp_name, "layerName": layer_name, "blendingMode": blend_mode},
@@ -342,7 +342,7 @@ class _MockAEMCPClient:
 
     def set_track_matte(
         self, comp_name: str, target_layer: str, matte_layer: str, matte_type: str = "ALPHA"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._simulate(
             "setTrackMatte",
             {"compName": comp_name, "targetLayer": target_layer, "matteLayer": matte_layer, "matteType": matte_type},
@@ -350,8 +350,8 @@ class _MockAEMCPClient:
         )
 
     def set_parent_layer(
-        self, comp_name: str, child_layer: str, parent_layer: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, comp_name: str, child_layer: str, parent_layer: str | None = None
+    ) -> dict[str, Any]:
         return self._simulate(
             "setParentLayer",
             {"compName": comp_name, "childLayer": child_layer, "parentLayer": parent_layer},
@@ -360,7 +360,7 @@ class _MockAEMCPClient:
 
     def set_motion_blur(
         self, comp_name: str, layer_name: str, enabled: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._simulate(
             "setMotionBlur",
             {"compName": comp_name, "layerName": layer_name, "enabled": enabled},
@@ -368,8 +368,8 @@ class _MockAEMCPClient:
         )
 
     def get_layer_info(
-        self, comp_name: str, layer_name: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, comp_name: str, layer_name: str | None = None
+    ) -> dict[str, Any]:
         if layer_name:
             layer = self._layers.get((comp_name, layer_name), {})
             return self._simulate(
@@ -390,8 +390,8 @@ class _MockAEMCPClient:
         property_name: str,
         time: float,
         value: Any,
-        easing: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        easing: str | None = None,
+    ) -> dict[str, Any]:
         self._keyframe_counter += 1
         kf_id = f"kf_{self._keyframe_counter}"
         return self._simulate(
@@ -406,9 +406,9 @@ class _MockAEMCPClient:
         layer_name: str,
         property_name: str,
         keyframe_index: int,
-        ease_in: Optional[List[float]] = None,
-        ease_out: Optional[List[float]] = None,
-    ) -> Dict[str, Any]:
+        ease_in: list[float] | None = None,
+        ease_out: list[float] | None = None,
+    ) -> dict[str, Any]:
         return self._simulate(
             "setKeyframeEasing",
             {
@@ -424,7 +424,7 @@ class _MockAEMCPClient:
 
     def set_layer_expression(
         self, comp_name: str, layer_name: str, property_name: str, expression: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._simulate(
             "setExpression",
             {"compName": comp_name, "layerName": layer_name, "propertyName": property_name, "expressionText": expression},
@@ -437,8 +437,8 @@ class _MockAEMCPClient:
         comp_name: str,
         layer_name: str,
         effect_name: str,
-        properties: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        properties: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         self._effect_counter += 1
         info = {
             "effectName": effect_name,
@@ -455,8 +455,8 @@ class _MockAEMCPClient:
         )
 
     def batch_add_effects(
-        self, comp_name: str, layer_name: str, effects: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        self, comp_name: str, layer_name: str, effects: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         applied = []
         for e in effects:
             r = self.apply_effect(comp_name, layer_name, e.get("name", ""), e.get("properties"))
@@ -469,14 +469,14 @@ class _MockAEMCPClient:
 
     def apply_effect_template(
         self, comp_name: str, layer_name: str, template_name: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._simulate(
             "applyEffectTemplate",
             {"compName": comp_name, "layerName": layer_name, "templateName": template_name},
             {"applied": True, "templateName": template_name},
         )
 
-    def list_effects(self, comp_name: str, layer_name: str) -> List[Dict[str, Any]]:
+    def list_effects(self, comp_name: str, layer_name: str) -> list[dict[str, Any]]:
         effects = self._effects.get((comp_name, layer_name), [])
         return self._simulate(
             "listEffects",
@@ -486,7 +486,7 @@ class _MockAEMCPClient:
 
     def get_effect_properties(
         self, comp_name: str, layer_name: str, effect_name: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._simulate(
             "getEffectProperties",
             {"compName": comp_name, "layerName": layer_name, "effectName": effect_name},
@@ -495,8 +495,8 @@ class _MockAEMCPClient:
 
     # ---- 素材 ----
     def import_footage(
-        self, file_path: str, name: Optional[str] = None, as_sequence: bool = False
-    ) -> Dict[str, Any]:
+        self, file_path: str, name: str | None = None, as_sequence: bool = False
+    ) -> dict[str, Any]:
         return self._simulate(
             "importFootage",
             {"filePath": file_path, "name": name, "importAsSequence": as_sequence},
@@ -505,8 +505,8 @@ class _MockAEMCPClient:
 
     # ---- 内部 ----
     def _create_layer(
-        self, comp_name: str, name: str, layer_type: str, extra: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, comp_name: str, name: str, layer_type: str, extra: dict[str, Any]
+    ) -> dict[str, Any]:
         self._layer_counter += 1
         self._layer_index[(comp_name, name)] = self._layer_counter
         info = {
@@ -529,8 +529,8 @@ class _MockAEMCPClient:
         )
 
     def _simulate(
-        self, command: str, params: Dict[str, Any], result: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, command: str, params: dict[str, Any], result: dict[str, Any]
+    ) -> dict[str, Any]:
         """模拟一次调用：记录历史 + 添加延迟。"""
         time.sleep(self.call_delay_ms / 1000.0)
         self.call_history.append((command, params, result))
@@ -565,10 +565,10 @@ class ToolValidator(ABC):
         self,
         status: ValidationStatus,
         latency_ms: float = 0.0,
-        error_message: Optional[str] = None,
-        error_code: Optional[int] = None,
-        pre_conditions: Optional[List[str]] = None,
-        post_conditions: Optional[List[str]] = None,
+        error_message: str | None = None,
+        error_code: int | None = None,
+        pre_conditions: list[str] | None = None,
+        post_conditions: list[str] | None = None,
         notes: str = "",
     ) -> ToolValidationResult:
         """构造验证结果。"""
@@ -586,7 +586,7 @@ class ToolValidator(ABC):
 
     async def _timed_call(
         self, func: Callable[..., Any], *args: Any, **kwargs: Any
-    ) -> Tuple[Optional[Dict[str, Any]], float, Optional[Exception]]:
+    ) -> tuple[dict[str, Any] | None, float, Exception | None]:
         """执行命令并测量延迟。
 
         Returns:
@@ -791,7 +791,7 @@ class SetLayerKeyframeValidator(ToolValidator):
             (2.0, [1920, 540]),
             (4.0, [0, 540]),
         ]
-        last_result: Optional[Dict[str, Any]] = None
+        last_result: dict[str, Any] | None = None
         total_latency = 0.0
         for t, v in keyframes:
             r, lat, err = await self._timed_call(
@@ -813,7 +813,7 @@ class SetLayerKeyframeValidator(ToolValidator):
             total_latency,
             pre_conditions=pre,
             post_conditions=[
-                f"keyframes=3",
+                "keyframes=3",
                 f"last_keyframeId={last_result.get('keyframeId', '?') if last_result else '?'}",
             ],
         )
@@ -1150,8 +1150,8 @@ class ImportFootageValidator(ToolValidator):
 
     async def run(self) -> ToolValidationResult:
         # 生成一个 1x1 透明 PNG 用于导入测试
-        import tempfile
         import base64
+        import tempfile
 
         png_b64 = (
             b"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk"
@@ -1209,7 +1209,7 @@ class CreateShapeLayerValidator(ToolValidator):
         if err is not None:
             return self._make_result("fail", latency, str(err), pre_conditions=pre)
         return self._make_result(
-            "pass", latency, pre_conditions=pre, post_conditions=[f"shapeType=ellipse"]
+            "pass", latency, pre_conditions=pre, post_conditions=["shapeType=ellipse"]
         )
 
 
@@ -1310,7 +1310,7 @@ class SetMotionBlurValidator(ToolValidator):
 
 
 # 默认分类映射表（可被外部覆盖）
-CATEGORY_DEFINITIONS: Dict[str, List[Type[ToolValidator]]] = {
+CATEGORY_DEFINITIONS: dict[str, list[type[ToolValidator]]] = {
     "core": [
         GetProjectInfoValidator,
         ListCompositionsValidator,
@@ -1345,7 +1345,7 @@ CATEGORY_DEFINITIONS: Dict[str, List[Type[ToolValidator]]] = {
 }
 
 
-CATEGORY_DISPLAY_NAMES: Dict[str, str] = {
+CATEGORY_DISPLAY_NAMES: dict[str, str] = {
     "core": "A 级（核心可用性）",
     "important": "B 级（重要能力）",
     "advanced": "C 级（高级能力）",
@@ -1371,11 +1371,11 @@ class MCPToolValidationSuite:
 
     def __init__(
         self,
-        client: Optional[Any] = None,
-        bridge_dir: Optional[str] = None,
+        client: Any | None = None,
+        bridge_dir: str | None = None,
         use_real_ae: bool = False,
-        categories: Optional[List[str]] = None,
-        logger: Optional[logging.Logger] = None,
+        categories: list[str] | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         """初始化验证套件。
 
@@ -1392,7 +1392,7 @@ class MCPToolValidationSuite:
         self._categories = categories or list(CATEGORY_DEFINITIONS.keys())
         self.logger = logger or logging.getLogger("ae.tests.mcp_tools_validation")
         self.report = ValidationReport()
-        self._client: Optional[Any] = None
+        self._client: Any | None = None
         self._environment = "unknown"
         self._ae_version = "unknown"
         self._mcp_server_version = "unknown"
@@ -1423,7 +1423,7 @@ class MCPToolValidationSuite:
         await self._detect_versions()
 
     async def run_all(
-        self, categories: Optional[List[str]] = None
+        self, categories: list[str] | None = None
     ) -> ValidationReport:
         """运行所有/指定分类的验证。
 
@@ -1447,7 +1447,7 @@ class MCPToolValidationSuite:
             mcp_server_version=self._mcp_server_version,
         )
 
-        all_results: List[ToolValidationResult] = []
+        all_results: list[ToolValidationResult] = []
         for cat in cats:
             self.logger.info("=" * 60)
             self.logger.info(f"运行分类: {CATEGORY_DISPLAY_NAMES.get(cat, cat)}")
@@ -1466,20 +1466,20 @@ class MCPToolValidationSuite:
         self._populate_report_stats()
         return self.report
 
-    async def run_category_a(self) -> List[ToolValidationResult]:
+    async def run_category_a(self) -> list[ToolValidationResult]:
         """运行 A 级（核心可用性）验证。"""
         return await self._run_category(self.CATEGORY_A_CORE)
 
-    async def run_category_b(self) -> List[ToolValidationResult]:
+    async def run_category_b(self) -> list[ToolValidationResult]:
         """运行 B 级（重要能力）验证。"""
         return await self._run_category(self.CATEGORY_B_IMPORTANT)
 
-    async def run_category_c(self) -> List[ToolValidationResult]:
+    async def run_category_c(self) -> list[ToolValidationResult]:
         """运行 C 级（高级能力）验证。"""
         return await self._run_category(self.CATEGORY_C_ADVANCED)
 
     async def validate_tool(
-        self, tool_name: str, category: Optional[str] = None
+        self, tool_name: str, category: str | None = None
     ) -> ToolValidationResult:
         """验证单个工具。
 
@@ -1495,8 +1495,8 @@ class MCPToolValidationSuite:
 
         # 查找验证器
         categories_to_search = [category] if category else list(CATEGORY_DEFINITIONS.keys())
-        validator_cls: Optional[Type[ToolValidator]] = None
-        found_cat: Optional[str] = None
+        validator_cls: type[ToolValidator] | None = None
+        found_cat: str | None = None
         for cat in categories_to_search:
             for cls in CATEGORY_DEFINITIONS.get(cat, []):
                 if cls.tool_name == tool_name:
@@ -1542,8 +1542,8 @@ class MCPToolValidationSuite:
     def save_report(
         self,
         output_dir: Union[str, Path],
-        formats: Optional[List[str]] = None,
-    ) -> List[Path]:
+        formats: list[str] | None = None,
+    ) -> list[Path]:
         """将报告保存到磁盘。
 
         Args:
@@ -1558,7 +1558,7 @@ class MCPToolValidationSuite:
         formats = formats or ["json", "markdown", "html"]
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         basename = f"mcp_validation_{timestamp}"
-        paths: List[Path] = []
+        paths: list[Path] = []
 
         if "json" in formats:
             p = output_dir / f"{basename}.json"
@@ -1637,11 +1637,11 @@ class MCPToolValidationSuite:
         except Exception:  # noqa: BLE001
             pass
 
-    async def _run_category(self, category: str) -> List[ToolValidationResult]:
+    async def _run_category(self, category: str) -> list[ToolValidationResult]:
         """运行指定分类的所有验证。"""
         assert self._client is not None
         validators = CATEGORY_DEFINITIONS.get(category, [])
-        results: List[ToolValidationResult] = []
+        results: list[ToolValidationResult] = []
         for cls in validators:
             try:
                 validator = cls(self._client)
@@ -1709,7 +1709,7 @@ class MCPToolValidationSuite:
         r.p95_latency_ms = _percentile(latencies, 95) if latencies else 0.0
 
         # 分类统计
-        cat_groups: Dict[str, List[ToolValidationResult]] = {}
+        cat_groups: dict[str, list[ToolValidationResult]] = {}
         for x in r.results:
             cat_groups.setdefault(x.category, []).append(x)
         r.category_stats = []
@@ -1730,7 +1730,7 @@ class MCPToolValidationSuite:
 # ============================================================================
 
 
-def _percentile(values: List[float], p: float) -> float:
+def _percentile(values: list[float], p: float) -> float:
     """计算列表的 p 分位数（线性插值）。"""
     if not values:
         return 0.0
@@ -1745,7 +1745,7 @@ def _percentile(values: List[float], p: float) -> float:
 
 def _render_markdown(report: ValidationReport) -> str:
     """渲染 Markdown 报告。"""
-    lines: List[str] = []
+    lines: list[str] = []
     lines.append("# AE MCP 工具真实环境验证报告")
     lines.append("")
     lines.append(f"> 生成时间: {report.end_time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -1949,9 +1949,9 @@ code {{ background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: .8
 
 
 async def run_validation(
-    categories: Optional[List[str]] = None,
+    categories: list[str] | None = None,
     use_real_ae: bool = False,
-    bridge_dir: Optional[str] = None,
+    bridge_dir: str | None = None,
 ) -> ValidationReport:
     """一键运行验证并返回报告（异步）。
 
@@ -1970,9 +1970,9 @@ async def run_validation(
 
 
 def run_validation_sync(
-    categories: Optional[List[str]] = None,
+    categories: list[str] | None = None,
     use_real_ae: bool = False,
-    bridge_dir: Optional[str] = None,
+    bridge_dir: str | None = None,
 ) -> ValidationReport:
     """一键运行验证（同步封装）。"""
     return asyncio.run(
@@ -1985,9 +1985,9 @@ def run_validation_sync(
 # ============================================================================
 
 
-def _build_pytest_parametrize_ids() -> List[Tuple[str, str, Type[ToolValidator]]]:
+def _build_pytest_parametrize_ids() -> list[tuple[str, str, type[ToolValidator]]]:
     """构造 pytest parametrize 的 (category, tool_name, validator_cls) 列表。"""
-    items: List[Tuple[str, str, Type[ToolValidator]]] = []
+    items: list[tuple[str, str, type[ToolValidator]]] = []
     for cat, validators in CATEGORY_DEFINITIONS.items():
         for cls in validators:
             items.append((cat, cls.tool_name, cls))
@@ -2027,7 +2027,7 @@ try:
     def test_mcp_tool_validation(
         category: str,
         tool_name: str,
-        validator_cls: Type[ToolValidator],
+        validator_cls: type[ToolValidator],
         shared_validation_suite: MCPToolValidationSuite,
     ) -> None:
         """pytest 入口：依次运行所有 MCP 工具验证。

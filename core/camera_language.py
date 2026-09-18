@@ -41,7 +41,7 @@ CAMERA_IDS_3D = ["dolly_zoom", "crane", "orbit_3d", "shake"]
 CAMERA_IDS_ALL = CAMERA_IDS + CAMERA_IDS_3D  # 全量12运镜
 
 
-def load_master_rules() -> Dict[str, Any]:
+def load_master_rules() -> dict[str, Any]:
     with open(MASTER_RULES_PATH, encoding="utf-8") as f:
         return json.load(f)
 
@@ -49,40 +49,40 @@ def load_master_rules() -> Dict[str, Any]:
 class CameraLanguageLibrary:
     """12运镜模板库: 8基础(2D变换) + 4真实3D摄像机(null控制器链)"""
 
-    def __init__(self, rules: Optional[Dict[str, Any]] = None):
+    def __init__(self, rules: dict[str, Any] | None = None):
         self.rules = rules or load_master_rules()
-        self.templates: Dict[str, Any] = {
+        self.templates: dict[str, Any] = {
             k: v for k, v in self.rules.get("camera_templates", {}).items()
             if not k.startswith("_")
         }
-        self.templates_3d: Dict[str, Any] = {
+        self.templates_3d: dict[str, Any] = {
             k: v for k, v in self.rules.get("camera3d_templates", {}).items()
             if not k.startswith("_")
         }
-        self.z_depth_profile: Dict[str, float] = {
+        self.z_depth_profile: dict[str, float] = {
             k: v for k, v in self.rules.get("z_depth_profile", {}).items()
             if not k.startswith("_")
         }
 
     # ── 查询 ────────────────────────────────────────────────
-    def list_cameras(self) -> List[str]:
+    def list_cameras(self) -> list[str]:
         return list(self.templates.keys())
 
-    def list_cameras_3d(self) -> List[str]:
+    def list_cameras_3d(self) -> list[str]:
         return list(self.templates_3d.keys())
 
-    def list_cameras_all(self) -> List[str]:
+    def list_cameras_all(self) -> list[str]:
         return self.list_cameras() + self.list_cameras_3d()
 
-    def get_template(self, cam_id: str) -> Optional[Dict[str, Any]]:
+    def get_template(self, cam_id: str) -> dict[str, Any] | None:
         return self.templates.get(cam_id) or self.templates_3d.get(cam_id)
 
-    def cameras_for_segment(self, seg_type: str) -> List[str]:
+    def cameras_for_segment(self, seg_type: str) -> list[str]:
         """返回适用该叙事段落的基础运镜列表(保持V1行为)"""
         return [cid for cid, t in self.templates.items()
                 if seg_type in t.get("segments", [])]
 
-    def cameras3d_for_segment(self, seg_type: str) -> List[str]:
+    def cameras3d_for_segment(self, seg_type: str) -> list[str]:
         """返回适用该叙事段落的3D摄像机运镜列表"""
         return [cid for cid, t in self.templates_3d.items()
                 if seg_type in t.get("segments", [])]
@@ -91,7 +91,7 @@ class CameraLanguageLibrary:
         """段落Z纵深: drop推进(+) / break回拉(-)"""
         return float(self.z_depth_profile.get(seg_type, 0.0))
 
-    def camera_by_cn(self, cn_name: str) -> Optional[str]:
+    def camera_by_cn(self, cn_name: str) -> str | None:
         """中文运镜名 → camera id (兼容旧剧本 movement 字段)"""
         mapping = {"推": "push", "拉": "pull", "摇": "pan", "移": "truck",
                    "跟": "follow", "环绕": "orbit", "甩镜": "whip", "甩": "whip",
@@ -102,7 +102,7 @@ class CameraLanguageLibrary:
         return mapping.get(cn_name)
 
     # ── JSX 生成 ────────────────────────────────────────────
-    def _ease_jsx(self, var: str, ease_name: str, n_keys: int) -> List[str]:
+    def _ease_jsx(self, var: str, ease_name: str, n_keys: int) -> list[str]:
         """生成 setTemporalEaseAtKey 语句 (in/out 同参数)"""
         speed, infl = EASE_PRESETS.get(ease_name, (1.0, 0.1))
         lines = []
@@ -247,7 +247,7 @@ class CameraLanguageLibrary:
 
     # ── 校验 ────────────────────────────────────────────────
     @staticmethod
-    def validate_jsx(jsx: str) -> Dict[str, Any]:
+    def validate_jsx(jsx: str) -> dict[str, Any]:
         """JSX安全与质量校验: 无alert/带Ease/scale≤150"""
         issues = []
         if "alert(" in jsx or "confirm(" in jsx:

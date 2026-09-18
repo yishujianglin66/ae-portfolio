@@ -65,7 +65,7 @@ class CausalNode:
     node_type: NodeType
     engine: EngineType
     name: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -87,8 +87,8 @@ class EngineFailure:
     stage: str
     error_msg: str
     error_type: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
-    upstream_outputs: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
+    upstream_outputs: dict[str, Any] = field(default_factory=dict)
     timestamp: float = 0.0
 
 
@@ -97,14 +97,14 @@ class Intervention:
     """干预动作"""
     target_node: str          # 干预目标节点
     action: str               # 干预类型: "fix_param" | "insert_transcode" | "skip_stage" | "retry"
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     description: str = ""
 
 
 @dataclass
 class InterventionPlan:
     """干预计划"""
-    interventions: List[Intervention]
+    interventions: list[Intervention]
     expected_success_rate: float = 0.0
     expected_quality_impact: float = 0.0
     estimated_cost: float = 0.0  # 额外耗时(秒)
@@ -119,7 +119,7 @@ class CounterfactualResult:
     causal_effect: float        # 因果效应量
     confidence: float           # 置信度
     explanation: str = ""
-    alternative_outcomes: List[Dict[str, Any]] = field(default_factory=list)
+    alternative_outcomes: list[dict[str, Any]] = field(default_factory=list)
     # P3.2 扩展字段（向后兼容：均有默认值）
     alternative_engine: str = ""                # 假设使用的替代引擎
     failure_id: str = ""                        # 关联的故障记录 ID
@@ -143,7 +143,7 @@ class CausalLink:
     confidence: float = 0.0
     explanation: str = ""
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "source": self.source,
             "target": self.target,
@@ -159,9 +159,9 @@ class ExecutionRecord:
     run_id: str
     timestamp: float = 0.0
     # 每个阶段的执行结果: stage_name -> {success, duration, error, engine, params}
-    stages: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    stages: dict[str, dict[str, Any]] = field(default_factory=dict)
     # 引擎状态快照: engine -> {memory, cpu, ...}
-    engine_states: Dict[str, Dict[str, float]] = field(default_factory=dict)
+    engine_states: dict[str, dict[str, float]] = field(default_factory=dict)
     # 最终输出质量
     output_quality: float = 0.0
     # 是否整体成功
@@ -173,7 +173,7 @@ class ExecutionRecord:
 # ============================================================================
 
 # 基于领域知识的先验因果关系
-EXPERT_PRIOR_EDGES: List[Dict[str, Any]] = [
+EXPERT_PRIOR_EDGES: list[dict[str, Any]] = [
     # AE 输出质量 → DaVinci 输入质量
     {"source": "ae_execute", "target": "davinci_color", "weight": 0.7, "confidence": 0.8},
     # AE 崩溃 → 下游 FFmpeg 无输入
@@ -213,17 +213,17 @@ class CausalGraph:
     """
     
     def __init__(self):
-        self._nodes: Dict[str, CausalNode] = {}
-        self._edges: Dict[str, Dict[str, CausalEdge]] = {}  # source -> target -> edge
-        self._adjacency: Dict[str, Set[str]] = defaultdict(set)  # 邻接表
-        self._reverse_adj: Dict[str, Set[str]] = defaultdict(set)  # 反向邻接
+        self._nodes: dict[str, CausalNode] = {}
+        self._edges: dict[str, dict[str, CausalEdge]] = {}  # source -> target -> edge
+        self._adjacency: dict[str, set[str]] = defaultdict(set)  # 邻接表
+        self._reverse_adj: dict[str, set[str]] = defaultdict(set)  # 反向邻接
     
     @property
-    def nodes(self) -> Dict[str, CausalNode]:
+    def nodes(self) -> dict[str, CausalNode]:
         return self._nodes
     
     @property
-    def edges(self) -> List[CausalEdge]:
+    def edges(self) -> list[CausalEdge]:
         return [e for targets in self._edges.values() for e in targets.values()]
     
     def add_node(self, node: CausalNode) -> None:
@@ -236,16 +236,16 @@ class CausalGraph:
         self._adjacency[edge.source].add(edge.target)
         self._reverse_adj[edge.target].add(edge.source)
     
-    def get_edge(self, source: str, target: str) -> Optional[CausalEdge]:
+    def get_edge(self, source: str, target: str) -> CausalEdge | None:
         return self._edges.get(source, {}).get(target)
     
-    def parents(self, node_id: str) -> Set[str]:
+    def parents(self, node_id: str) -> set[str]:
         return self._reverse_adj.get(node_id, set())
     
-    def children(self, node_id: str) -> Set[str]:
+    def children(self, node_id: str) -> set[str]:
         return self._adjacency.get(node_id, set())
     
-    def ancestors(self, node_id: str) -> Set[str]:
+    def ancestors(self, node_id: str) -> set[str]:
         """获取所有祖先节点"""
         visited = set()
         stack = list(self.parents(node_id))
@@ -257,7 +257,7 @@ class CausalGraph:
             stack.extend(self.parents(n))
         return visited
     
-    def descendants(self, node_id: str) -> Set[str]:
+    def descendants(self, node_id: str) -> set[str]:
         """获取所有后代节点"""
         visited = set()
         stack = list(self.children(node_id))
@@ -269,7 +269,7 @@ class CausalGraph:
             stack.extend(self.children(n))
         return visited
     
-    def topological_sort(self) -> List[str]:
+    def topological_sort(self) -> list[str]:
         """Kahn 算法拓扑排序"""
         in_degree = {n: len(self.parents(n)) for n in self._nodes}
         queue = [n for n, d in in_degree.items() if d == 0]
@@ -297,14 +297,14 @@ class CausalGraph:
             stack.extend(self.children(n))
         return False
     
-    def all_paths(self, source: str, target: str) -> List[List[str]]:
+    def all_paths(self, source: str, target: str) -> list[list[str]]:
         """枚举所有有向路径"""
         paths = []
         self._dfs_paths(source, target, [source], set(), paths)
         return paths
     
-    def _dfs_paths(self, current: str, target: str, path: List[str],
-                   visited: Set[str], paths: List[List[str]], max_depth: int = 10):
+    def _dfs_paths(self, current: str, target: str, path: list[str],
+                   visited: set[str], paths: list[list[str]], max_depth: int = 10):
         if current == target:
             paths.append(list(path))
             return
@@ -318,7 +318,7 @@ class CausalGraph:
                 path.pop()
         visited.discard(current)
     
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """序列化为字典"""
         return {
             "nodes": {
@@ -341,7 +341,7 @@ class CausalGraph:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict) -> "CausalGraph":
+    def from_dict(cls, data: dict) -> "CausalGraph":
         """从字典反序列化"""
         g = cls()
         for nid, ndata in data.get("nodes", {}).items():
@@ -379,11 +379,11 @@ class EngineStateObserver:
     """
     
     def __init__(self):
-        self._current_states: Dict[str, Dict[str, float]] = {}
-        self._state_history: List[Dict[str, Any]] = []
+        self._current_states: dict[str, dict[str, float]] = {}
+        self._state_history: list[dict[str, Any]] = []
         self._last_check: float = 0.0
     
-    def observe(self, engine: str, metrics: Dict[str, float]) -> None:
+    def observe(self, engine: str, metrics: dict[str, float]) -> None:
         """记录引擎状态观测"""
         ts = time.time()
         self._current_states[engine] = {**metrics, "_timestamp": ts}
@@ -392,7 +392,7 @@ class EngineStateObserver:
         })
         self._last_check = ts
     
-    def get_state(self, engine: str) -> Dict[str, float]:
+    def get_state(self, engine: str) -> dict[str, float]:
         """获取引擎最新状态"""
         return self._current_states.get(engine, {})
     
@@ -407,12 +407,12 @@ class EngineStateObserver:
             return False
         return True
     
-    def get_recent_states(self, engine: str, n: int = 10) -> List[Dict]:
+    def get_recent_states(self, engine: str, n: int = 10) -> list[dict]:
         """获取最近 N 次状态记录"""
         engine_records = [r for r in self._state_history if r["engine"] == engine]
         return engine_records[-n:]
     
-    def snapshot(self) -> Dict[str, Dict[str, float]]:
+    def snapshot(self) -> dict[str, dict[str, float]]:
         """获取所有引擎当前状态快照"""
         return dict(self._current_states)
 
@@ -440,7 +440,7 @@ class CausalDiscovery:
         self._alpha = alpha
     
     def _fisher_z_test(self, data: np.ndarray, x: int, y: int,
-                       conditioning: List[int]) -> float:
+                       conditioning: list[int]) -> float:
         """Fisher Z 条件独立性检验
         
         检验: X ⊥ Y | conditioning_set
@@ -500,8 +500,8 @@ class CausalDiscovery:
     def discover_skeleton(
         self,
         data: np.ndarray,
-        var_names: List[str]
-    ) -> Tuple[Set[Tuple[int, int]], Dict[Tuple[int, int], Set[int]]]:
+        var_names: list[str]
+    ) -> tuple[set[tuple[int, int]], dict[tuple[int, int], set[int]]]:
         """发现因果骨架（无向）
         
         PC 算法骨架发现阶段:
@@ -525,7 +525,7 @@ class CausalDiscovery:
             for j in range(i + 1, n_vars):
                 skeleton.add((i, j))
         
-        sep_sets: Dict[Tuple[int, int], Set[int]] = {}
+        sep_sets: dict[tuple[int, int], set[int]] = {}
         
         # 逐步增大条件集
         max_cond_size = n_vars - 2
@@ -563,11 +563,11 @@ class CausalDiscovery:
     
     def orient_edges(
         self,
-        skeleton: Set[Tuple[int, int]],
-        sep_sets: Dict[Tuple[int, int], Set[int]],
-        prior_edges: Optional[List[Tuple[int, int]]] = None,
-        temporal_order: Optional[List[str]] = None
-    ) -> List[Tuple[int, int]]:
+        skeleton: set[tuple[int, int]],
+        sep_sets: dict[tuple[int, int], set[int]],
+        prior_edges: list[tuple[int, int]] | None = None,
+        temporal_order: list[str] | None = None
+    ) -> list[tuple[int, int]]:
         """定向边（基于先验知识和时间顺序）
         
         规则:
@@ -576,7 +576,7 @@ class CausalDiscovery:
         3. v-结构: 如果 A - C - B 且 C 不在 sep_set(A,B)，则 A→C←B
         4. 其余按相关性方向
         """
-        directed: List[Tuple[int, int]] = []
+        directed: list[tuple[int, int]] = []
         undirected = set(skeleton)
         
         # 规则1: 先验边
@@ -604,7 +604,7 @@ class CausalDiscovery:
         
         # 规则3: v-结构定向
         # 构建邻接表
-        adj: Dict[int, Set[int]] = defaultdict(set)
+        adj: dict[int, set[int]] = defaultdict(set)
         for (i, j) in undirected:
             adj[i].add(j)
             adj[j].add(i)
@@ -656,15 +656,15 @@ class StructuralCausalModel:
         self._graph = graph
         # 每个节点的结构方程: node_id -> (weights, bias)
         # X_i = sum(weight_j * X_j for j in parents) + bias + noise
-        self._equations: Dict[str, Tuple[np.ndarray, float, float]] = {}
+        self._equations: dict[str, tuple[np.ndarray, float, float]] = {}
         # 噪声标准差
-        self._noise_std: Dict[str, float] = {}
+        self._noise_std: dict[str, float] = {}
     
     def fit_from_data(
         self,
         data: np.ndarray,
-        var_names: List[str],
-        parent_map: Dict[str, List[str]]
+        var_names: list[str],
+        parent_map: dict[str, list[str]]
     ) -> None:
         """从数据拟合结构方程
         
@@ -715,7 +715,7 @@ class StructuralCausalModel:
             self._equations[var_name] = (weights, bias, noise)
             self._noise_std[var_name] = max(noise, 1e-6)
     
-    def predict(self, observations: Dict[str, float]) -> Dict[str, float]:
+    def predict(self, observations: dict[str, float]) -> dict[str, float]:
         """基于观测预测所有节点值"""
         topo_order = self._topological_order()
         values = dict(observations)
@@ -739,9 +739,9 @@ class StructuralCausalModel:
     
     def do_intervention(
         self,
-        observations: Dict[str, float],
-        intervention: Dict[str, float]
-    ) -> Dict[str, float]:
+        observations: dict[str, float],
+        intervention: dict[str, float]
+    ) -> dict[str, float]:
         """do-算子: 干预某些节点为固定值，重新预测
         
         do(X=x) 等价于: 移除 X 的所有入边，设 X=x，然后前向传播
@@ -770,10 +770,10 @@ class StructuralCausalModel:
     
     def counterfactual(
         self,
-        observations: Dict[str, float],
-        intervention: Dict[str, float],
-        query_nodes: List[str]
-    ) -> Dict[str, float]:
+        observations: dict[str, float],
+        intervention: dict[str, float],
+        query_nodes: list[str]
+    ) -> dict[str, float]:
         """反事实查询: abduction → action → prediction
         
         1. Abduction: 从观测推断噪声项
@@ -827,10 +827,10 @@ class StructuralCausalModel:
         
         return {n: cf_values.get(n, 0.0) for n in query_nodes}
     
-    def _topological_order(self) -> List[str]:
+    def _topological_order(self) -> list[str]:
         """获取拓扑排序顺序"""
         in_degree = {}
-        children_map: Dict[str, List[str]] = defaultdict(list)
+        children_map: dict[str, list[str]] = defaultdict(list)
         
         for node_id in self._equations:
             in_degree.setdefault(node_id, 0)
@@ -851,7 +851,7 @@ class StructuralCausalModel:
                     queue.append(c)
         return result
     
-    def _get_parent_names(self, node_id: str) -> List[str]:
+    def _get_parent_names(self, node_id: str) -> list[str]:
         """获取节点的父节点名列表"""
         return sorted(self._graph.parents(node_id))
 
@@ -879,18 +879,18 @@ class CausalEngine:
         # 因果图
         self._graph = CausalGraph()
         # 结构因果模型
-        self._scm: Optional[StructuralCausalModel] = None
+        self._scm: StructuralCausalModel | None = None
         # 引擎状态感知
         self.observer = EngineStateObserver()
         # 因果发现算法
         self._discovery = CausalDiscovery()
         
         # 历史执行记录
-        self._execution_log: List[ExecutionRecord] = []
+        self._execution_log: list[ExecutionRecord] = []
         # 变量名映射
-        self._var_names: List[str] = []
+        self._var_names: list[str] = []
         # 数据矩阵
-        self._data_matrix: Optional[np.ndarray] = None
+        self._data_matrix: np.ndarray | None = None
         
         # 初始化先验因果图
         self._init_expert_prior()
@@ -957,7 +957,7 @@ class CausalEngine:
     
     async def discover_causal_structure(
         self,
-        execution_logs: List[ExecutionRecord]
+        execution_logs: list[ExecutionRecord]
     ) -> CausalGraph:
         """从历史执行记录中发现因果关系
         
@@ -1047,8 +1047,8 @@ class CausalEngine:
         return self._graph
     
     def _logs_to_matrix(
-        self, logs: List[ExecutionRecord]
-    ) -> Tuple[np.ndarray, List[str]]:
+        self, logs: list[ExecutionRecord]
+    ) -> tuple[np.ndarray, list[str]]:
         """将执行记录转换为数值矩阵
         
         特征提取:
@@ -1094,9 +1094,9 @@ class CausalEngine:
         
         return data, var_names
     
-    def _rebuild_scm(self, data: np.ndarray, var_names: List[str]) -> None:
+    def _rebuild_scm(self, data: np.ndarray, var_names: list[str]) -> None:
         """重建结构因果模型"""
-        parent_map: Dict[str, List[str]] = {v: [] for v in var_names}
+        parent_map: dict[str, list[str]] = {v: [] for v in var_names}
         
         for edge in self._graph.edges:
             if edge.source in parent_map and edge.target in var_names:
@@ -1113,7 +1113,7 @@ class CausalEngine:
         self,
         observed_failure: EngineFailure,
         intervention: Intervention,
-        context: Optional[Dict[str, Any]] = None
+        context: dict[str, Any] | None = None
     ) -> CounterfactualResult:
         """反事实查询: 如果当时做了X，结果会怎样？
         
@@ -1185,10 +1185,10 @@ class CausalEngine:
         )
     
     def _failure_to_observations(
-        self, failure: EngineFailure, context: Optional[Dict] = None
-    ) -> Dict[str, float]:
+        self, failure: EngineFailure, context: dict | None = None
+    ) -> dict[str, float]:
         """将故障记录转换为SCM观测向量"""
-        obs: Dict[str, float] = {}
+        obs: dict[str, float] = {}
         
         # 故障阶段
         stage_key = f"{failure.stage}_success"
@@ -1216,9 +1216,9 @@ class CausalEngine:
     
     def _intervention_to_values(
         self, intervention: Intervention
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """将干预动作转换为SCM干预值"""
-        values: Dict[str, float] = {}
+        values: dict[str, float] = {}
         
         if intervention.action == "fix_param":
             # 参数修复: 将参数节点设为修复后的值
@@ -1240,7 +1240,7 @@ class CausalEngine:
         self,
         failure: EngineFailure,
         intervention: Intervention,
-        cf_values: Dict[str, float],
+        cf_values: dict[str, float],
         effect: float
     ) -> str:
         """生成反事实解释"""
@@ -1258,8 +1258,8 @@ class CausalEngine:
     
     async def optimal_intervention(
         self,
-        current_state: Dict[str, Any],
-        target_outcome: Dict[str, float],
+        current_state: dict[str, Any],
+        target_outcome: dict[str, float],
         max_interventions: int = 5
     ) -> InterventionPlan:
         """给定当前状态和期望结果，计算最优干预策略
@@ -1289,7 +1289,7 @@ class CausalEngine:
             )
         
         # 枚举可能的干预
-        candidate_interventions: List[Tuple[Intervention, float]] = []
+        candidate_interventions: list[tuple[Intervention, float]] = []
         
         for fail_node in failure_nodes:
             # 干预策略1: 直接修复故障节点
@@ -1330,7 +1330,7 @@ class CausalEngine:
                 ))
         
         # 评估每个干预的期望效果
-        scored: List[Tuple[Intervention, float, float]] = []  # (intervention, score, cost)
+        scored: list[tuple[Intervention, float, float]] = []  # (intervention, score, cost)
         
         for intervention, cost in candidate_interventions[:max_interventions * 2]:
             obs = {k: float(v) for k, v in current_state.items()
@@ -1352,9 +1352,9 @@ class CausalEngine:
         scored.sort(key=lambda x: x[1], reverse=True)
         
         # 选择 top-K 不重叠的干预
-        selected: List[Intervention] = []
+        selected: list[Intervention] = []
         total_cost = 0.0
-        seen_targets: Set[str] = set()
+        seen_targets: set[str] = set()
         
         for intervention, score, cost in scored:
             if len(selected) >= max_interventions:
@@ -1470,7 +1470,7 @@ class CausalEngine:
     #  统计与诊断
     # ----------------------------------------------------------------
     
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取引擎统计信息"""
         edges = self._graph.edges
         expert_edges = [e for e in edges if e.is_expert]
@@ -1491,7 +1491,7 @@ class CausalEngine:
         """获取当前因果图"""
         return self._graph
     
-    def get_scm(self) -> Optional[StructuralCausalModel]:
+    def get_scm(self) -> StructuralCausalModel | None:
         """获取当前SCM"""
         return self._scm
 
@@ -1652,7 +1652,7 @@ class CausalEngine:
         self,
         failure_id: str,
         max_hops: int = 3,
-    ) -> List[CausalLink]:
+    ) -> list[CausalLink]:
         """多跳因果链推理: 找出故障的根因链
         
         从故障节点出发，沿着因果图的反向边（parents 方向）追溯，
@@ -1691,8 +1691,8 @@ class CausalEngine:
             else:
                 return []
         
-        chain: List[CausalLink] = []
-        visited: Set[str] = {start_node}
+        chain: list[CausalLink] = []
+        visited: set[str] = {start_node}
         current = start_node
         
         for hop in range(max_hops):
@@ -1740,7 +1740,7 @@ class CausalEngine:
         
         return chain
     
-    def _find_failure_record(self, failure_id: str) -> Optional[Dict[str, Any]]:
+    def _find_failure_record(self, failure_id: str) -> dict[str, Any] | None:
         """从执行日志中查找故障记录
         
         Args:
@@ -1776,7 +1776,7 @@ class CausalEngine:
         
         return None
     
-    def _record_to_failure_dict(self, rec: "ExecutionRecord") -> Dict[str, Any]:
+    def _record_to_failure_dict(self, rec: "ExecutionRecord") -> dict[str, Any]:
         """将 ExecutionRecord 转换为故障分析用的字典"""
         # 找到失败的阶段
         fail_stage = "execute"
@@ -1852,7 +1852,7 @@ class CausalEngine:
         """
         try:
             cf_path = self._data_dir / "counterfactuals.json"
-            existing: List[Dict[str, Any]] = []
+            existing: list[dict[str, Any]] = []
             if cf_path.exists():
                 try:
                     with open(cf_path, "r", encoding="utf-8") as f:
@@ -1891,7 +1891,7 @@ class CausalEngine:
 #  全局单例
 # ============================================================================
 
-_global_engine: Optional[CausalEngine] = None
+_global_engine: CausalEngine | None = None
 
 
 def get_causal_engine(data_dir: str = CausalEngine.DEFAULT_DATA_DIR) -> CausalEngine:
@@ -1911,7 +1911,7 @@ def _norm_cdf(x: float) -> float:
     return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
 
-def _combinations(items: List[int], k: int):
+def _combinations(items: list[int], k: int):
     """生成组合（不依赖 itertools 的简单实现）"""
     if k == 0:
         yield ()

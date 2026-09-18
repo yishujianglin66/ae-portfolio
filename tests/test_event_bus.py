@@ -1,28 +1,29 @@
 """core.event_bus 单元测试 - 事件总线核心逻辑"""
+import asyncio
 import os
 import sys
-import asyncio
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.event_bus import (
-    EventPriority,
-    EventCategory,
-    Event,
-    PipelineEvent,
-    SilhouetteEvent,
     AEEvent,
     ErrorEvent,
-    MetricEvent,
-    EventHandler,
+    Event,
     EventBus,
+    EventCategory,
+    EventHandler,
+    EventPriority,
+    MetricEvent,
+    PipelineEvent,
+    SilhouetteEvent,
     event_bus,
-    publish_pipeline_event,
-    publish_silhouette_event,
     publish_ae_event,
     publish_error,
     publish_metric,
+    publish_pipeline_event,
+    publish_silhouette_event,
 )
 
 

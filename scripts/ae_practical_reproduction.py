@@ -24,16 +24,16 @@
 ==================================================================
 """
 
+import argparse
 import json
 import os
 import sys
 import time
-import uuid
-import argparse
 import traceback
-from pathlib import Path
+import uuid
 from datetime import datetime
-from typing import Dict, Any, Optional, List, Tuple
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # ============================================================
 # 路径配置
@@ -61,15 +61,15 @@ class AEBridgeClient:
         self.timeout = timeout
         self.bridge_dir.mkdir(parents=True, exist_ok=True)
 
-    def ping(self) -> Tuple[bool, str]:
+    def ping(self) -> tuple[bool, str]:
         """检测 AE Bridge 是否在线"""
         try:
             return self.send_command("ping", {}, timeout=10)
         except Exception as e:
             return False, f"Ping failed: {e}"
 
-    def send_command(self, command: str, args: Dict = None,
-                     timeout: int = None) -> Tuple[bool, Any]:
+    def send_command(self, command: str, args: dict = None,
+                     timeout: int = None) -> tuple[bool, Any]:
         """发送命令到 AE Bridge 并等待结果"""
         if args is None:
             args = {}
@@ -128,7 +128,7 @@ class AEBridgeClient:
 
         return False, f"Timeout after {timeout}s (command: {command}, id: {cmd_id})"
 
-    def execute_atom_script(self, script_content: str, timeout: int = None) -> Tuple[bool, Any]:
+    def execute_atom_script(self, script_content: str, timeout: int = None) -> tuple[bool, Any]:
         """通过 executeAtomScript 命令在 AE 中执行 ExtendScript"""
         if timeout is None:
             timeout = self.timeout
@@ -149,7 +149,7 @@ class AEBridgeClient:
         except Exception:
             pass
 
-    def get_project_info(self) -> Tuple[bool, Any]:
+    def get_project_info(self) -> tuple[bool, Any]:
         """获取 AE 项目信息"""
         return self.send_command("getProjectInfo", {}, timeout=15)
 
@@ -253,7 +253,7 @@ class PluginDetector:
 
     def __init__(self, bridge: AEBridgeClient):
         self.bridge = bridge
-        self.results: Dict[str, Any] = {}
+        self.results: dict[str, Any] = {}
 
     def load_detection_script(self) -> str:
         """加载插件检测 JSX 脚本"""
@@ -262,7 +262,7 @@ class PluginDetector:
             raise FileNotFoundError(f"检测脚本不存在: {script_path}")
         return script_path.read_text(encoding="utf-8")
 
-    def run_detection(self) -> Dict[str, Any]:
+    def run_detection(self) -> dict[str, Any]:
         """执行完整的插件检测流程"""
         print("\n" + "=" * 60)
         print("  🔍 Phase 1: 插件/效果依赖检测")
@@ -295,7 +295,7 @@ class PluginDetector:
         self._print_summary()
         return self.results
 
-    def _parse_es_result(self, raw: str) -> Dict:
+    def _parse_es_result(self, raw: str) -> dict:
         """解析 ExtendScript 回传的 JSON 字符串"""
         # 尝试直接解析
         try:
@@ -339,7 +339,7 @@ class PluginDetector:
                 desc = info.get("desc", "")
                 print(f"     • {m} [{cat}] - {desc}")
 
-    def get_missing_with_hints(self) -> List[Dict]:
+    def get_missing_with_hints(self) -> list[dict]:
         """获取缺失插件列表（含安装提示）"""
         detected = self.results.get("detected", {})
         missing = []
@@ -378,7 +378,7 @@ class ProjectReplicator:
 
     def __init__(self, bridge: AEBridgeClient):
         self.bridge = bridge
-        self.results: Dict[str, Any] = {}
+        self.results: dict[str, Any] = {}
 
     def load_replication_script(self) -> str:
         """加载工程复刻 JSX 脚本"""
@@ -387,7 +387,7 @@ class ProjectReplicator:
             raise FileNotFoundError(f"复刻脚本不存在: {script_path}")
         return script_path.read_text(encoding="utf-8")
 
-    def run_replication(self) -> Dict[str, Any]:
+    def run_replication(self) -> dict[str, Any]:
         """执行完整工程复刻"""
         print("\n" + "=" * 60)
         print("  🏗️  Phase 2: AE 工程结构复刻")
@@ -418,7 +418,7 @@ class ProjectReplicator:
         self._print_summary()
         return self.results
 
-    def _parse_es_result(self, raw: str) -> Dict:
+    def _parse_es_result(self, raw: str) -> dict:
         try:
             return json.loads(raw)
         except (json.JSONDecodeError, TypeError):
@@ -447,7 +447,7 @@ class ProjectReplicator:
 
         # 逐模块打印
         modules = self.results.get("modules", {})
-        print(f"\n  📋 模块详情:")
+        print("\n  📋 模块详情:")
         for mod_key in sorted(modules.keys()):
             mod = modules[mod_key]
             mod_name = self.MODULE_NAMES.get(mod_key, mod_key)
@@ -474,7 +474,7 @@ class ReportGenerator:
 
     PLUGIN_HINTS = PluginDetector.PLUGIN_MANIFEST
 
-    def __init__(self, plugin_results: Dict, replication_results: Dict,
+    def __init__(self, plugin_results: dict, replication_results: dict,
                  output_dir: Path = None):
         self.plugin_results = plugin_results
         self.replication_results = replication_results
@@ -482,7 +482,7 @@ class ReportGenerator:
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.session_id = self.timestamp
 
-    def generate_all(self) -> Dict[str, Path]:
+    def generate_all(self) -> dict[str, Path]:
         """生成所有格式的报告"""
         reports = {}
 
@@ -507,7 +507,7 @@ class ReportGenerator:
 
         return reports
 
-    def _build_json_report(self) -> Dict:
+    def _build_json_report(self) -> dict:
         """构建结构化 JSON 报告"""
         now = datetime.now().isoformat()
 
@@ -600,7 +600,7 @@ class ReportGenerator:
             }
         }
 
-    def _collect_errors(self, modules: Dict) -> List[Dict]:
+    def _collect_errors(self, modules: dict) -> list[dict]:
         """收集所有失败和跳过的测试"""
         errors = []
         for mod_key, mod in modules.items():
@@ -615,7 +615,7 @@ class ReportGenerator:
                     })
         return errors
 
-    def _estimate_cost(self, missing: List[Dict]) -> str:
+    def _estimate_cost(self, missing: list[dict]) -> str:
         """估算缺失插件总费用"""
         total_free = 0
         total_paid = 0
@@ -627,7 +627,7 @@ class ReportGenerator:
                 total_paid += 1
         return f"{total_free} 免费插件 + {total_paid} 付费插件"
 
-    def _build_markdown_report(self, data: Dict) -> str:
+    def _build_markdown_report(self, data: dict) -> str:
         """生成 Markdown 格式报告"""
         meta = data["report_meta"]
         p1 = data["phase1_plugin_detection"]
@@ -635,111 +635,111 @@ class ReportGenerator:
         p3 = data["phase3_install_preview"]
 
         lines = []
-        lines.append(f"# AE 工程实战预测与重现 - 测试报告")
-        lines.append(f"")
+        lines.append("# AE 工程实战预测与重现 - 测试报告")
+        lines.append("")
         lines.append(f"**生成时间**: {meta['generated_at']}")
         lines.append(f"**会话 ID**: {meta['session_id']}")
         lines.append(f"**AE 版本**: {meta['ae_version']}")
         lines.append(f"**总耗时**: {meta['total_elapsed_ms']}ms")
-        lines.append(f"")
-        lines.append(f"---")
+        lines.append("")
+        lines.append("---")
 
         # 总览
-        lines.append(f"## 📊 执行总览")
-        lines.append(f"")
+        lines.append("## 📊 执行总览")
+        lines.append("")
         p2s = p2["summary"]
-        lines.append(f"| 指标 | 数值 |")
-        lines.append(f"|------|------|")
+        lines.append("| 指标 | 数值 |")
+        lines.append("|------|------|")
         lines.append(f"| 总测试数 | {p2s['total_tests']} |")
         lines.append(f"| 通过 | {p2s['passed']} |")
         lines.append(f"| 失败 | {p2s['failed']} |")
         lines.append(f"| 跳过 | {p2s['skipped']} |")
         lines.append(f"| 通过率 | **{p2s['pass_rate']}%** |")
         lines.append(f"| 插件可用 | {p1['summary'].get('available', 0)}/{p1['summary'].get('total', 0)} |")
-        lines.append(f"")
-        lines.append(f"---")
+        lines.append("")
+        lines.append("---")
 
         # 模块详情
-        lines.append(f"## 🧩 模块测试详情")
-        lines.append(f"")
+        lines.append("## 🧩 模块测试详情")
+        lines.append("")
         for mod_key, mod in data["phase2_project_replication"]["modules"].items():
             status = mod["status"]
             icon = "✅" if status == "PASS" else ("⚠️" if status == "PARTIAL" else "❌")
             lines.append(f"### {icon} {mod['name']} [{status}]")
-            lines.append(f"")
+            lines.append("")
             lines.append(f"通过: {mod['passed']} | 失败: {mod['failed']} | 跳过: {mod['skipped']}")
-            lines.append(f"")
+            lines.append("")
 
             # 测试详情表
             if mod["tests"]:
-                lines.append(f"| 测试项 | 状态 | 详情 |")
-                lines.append(f"|--------|------|------|")
+                lines.append("| 测试项 | 状态 | 详情 |")
+                lines.append("|--------|------|------|")
                 for t in mod["tests"]:
                     s_icon = "✅" if t["status"] == "PASS" else ("🔴" if t["status"] == "FAIL" else "⬜")
                     detail = t["detail"].replace("\n", " ")[:120]
                     lines.append(f"| {t['name']} | {s_icon} {t['status']} | {detail} |")
-                lines.append(f"")
+                lines.append("")
 
         # 插件检测
-        lines.append(f"---")
-        lines.append(f"## 🔌 插件检测结果")
-        lines.append(f"")
+        lines.append("---")
+        lines.append("## 🔌 插件检测结果")
+        lines.append("")
         p1s = p1["summary"]
         lines.append(f"- **AE 版本**: {p1['ae_environment'].get('version', '?')}")
         lines.append(f"- **安装路径**: `{p1['ae_environment'].get('install_path', '?')}`")
         lines.append(f"- **检测总计**: {p1s.get('total', 0)}")
         lines.append(f"- **可用**: {p1s.get('available', 0)}")
         lines.append(f"- **不可用**: {p1s.get('unavailable', 0)}")
-        lines.append(f"")
+        lines.append("")
 
         # 缺失插件
         if p3["missing_plugins"]:
             lines.append(f"### 🔴 缺失插件 ({p3['missing_count']} 个)")
-            lines.append(f"")
-            lines.append(f"| 插件 | 厂商 | 价格 | 获取链接 |")
-            lines.append(f"|------|------|------|----------|")
+            lines.append("")
+            lines.append("| 插件 | 厂商 | 价格 | 获取链接 |")
+            lines.append("|------|------|------|----------|")
             for mp in p3["missing_plugins"]:
                 lines.append(f"| {mp['name']} | {mp['vendor']} | {mp['price']} | [{mp['url']}]({mp['url']}) |")
-            lines.append(f"")
+            lines.append("")
             lines.append(f"**预估费用**: {p3['total_estimated_cost']}")
-            lines.append(f"")
+            lines.append("")
 
         # 错误日志
         errors = data["phase2_project_replication"].get("errors", [])
         if errors:
-            lines.append(f"---")
-            lines.append(f"## 🐛 错误日志")
-            lines.append(f"")
+            lines.append("---")
+            lines.append("## 🐛 错误日志")
+            lines.append("")
             for err in errors:
                 lines.append(f"- **[{err['module']}]** {err['test']} ({err['status']})")
-                lines.append(f"  ```")
+                lines.append("  ```")
                 lines.append(f"  {err['detail']}")
-                lines.append(f"  ```")
-                lines.append(f"")
+                lines.append("  ```")
+                lines.append("")
 
         # 复现步骤
-        lines.append(f"---")
-        lines.append(f"## 🔄 复现步骤")
-        lines.append(f"")
-        lines.append(f"### 前提条件")
+        lines.append("---")
+        lines.append("## 🔄 复现步骤")
+        lines.append("")
+        lines.append("### 前提条件")
         lines.append(f"1. 确保 Adobe After Effects **{meta['ae_version']}** 已安装并启动")
         lines.append(f"2. 确保 Bridge 面板已加载: `{p1['ae_environment'].get('scriptui_panels_path', '?')}`")
-        lines.append(f"3. 确保 `.ae-mcp-bridge/` 目录存在且 Bridge 正在轮询")
-        lines.append(f"")
-        lines.append(f"### 执行复现")
-        lines.append(f"```bash")
+        lines.append("3. 确保 `.ae-mcp-bridge/` 目录存在且 Bridge 正在轮询")
+        lines.append("")
+        lines.append("### 执行复现")
+        lines.append("```bash")
         lines.append(f"cd {PROJECT_ROOT}")
-        lines.append(f"python scripts/ae_practical_reproduction.py")
-        lines.append(f"```")
-        lines.append(f"")
-        lines.append(f"### 仅插件检测")
-        lines.append(f"```bash")
-        lines.append(f"python scripts/ae_practical_reproduction.py --plugins-only")
-        lines.append(f"```")
+        lines.append("python scripts/ae_practical_reproduction.py")
+        lines.append("```")
+        lines.append("")
+        lines.append("### 仅插件检测")
+        lines.append("```bash")
+        lines.append("python scripts/ae_practical_reproduction.py --plugins-only")
+        lines.append("```")
 
         return "\n".join(lines)
 
-    def _build_html_report(self, data: Dict) -> str:
+    def _build_html_report(self, data: dict) -> str:
         """生成 HTML 格式报告"""
         meta = data["report_meta"]
         p1 = data["phase1_plugin_detection"]
@@ -926,7 +926,7 @@ class ReportGenerator:
 </body>
 </html>"""
 
-    def _build_error_section_html(self, data: Dict) -> str:
+    def _build_error_section_html(self, data: dict) -> str:
         errors = data["phase2_project_replication"].get("errors", [])
         if not errors:
             return '<div class="success">✅ 无错误记录</div>'
@@ -966,7 +966,7 @@ class ReportGenerator:
             print()
 
         print(f"  预估总费用: {p3_data['total_estimated_cost']}")
-        print(f"\n  💡 提示: 可先安装免费插件（Saber 等），付费插件按需获取。")
+        print("\n  💡 提示: 可先安装免费插件（Saber 等），付费插件按需获取。")
 
 
 # ============================================================
@@ -1005,13 +1005,13 @@ def main():
     # 检查 Bridge 目录
     if not BRIDGE_DIR.exists():
         print(f"\n  ⚠️  Bridge 目录不存在: {BRIDGE_DIR}")
-        print(f"  💡 请先确保 AE 已启动且 Bridge 面板已加载")
-        print(f"  📖 运行 .ae-mcp-bridge/2_mcp_bridge_loader.jsx")
-        print(f"\n  🔧 切换到离线诊断模式...")
+        print("  💡 请先确保 AE 已启动且 Bridge 面板已加载")
+        print("  📖 运行 .ae-mcp-bridge/2_mcp_bridge_loader.jsx")
+        print("\n  🔧 切换到离线诊断模式...")
 
         # 离线模式：生成模板报告
         offline_report = generate_offline_report(output_dir)
-        print(f"\n  📄 离线报告已生成:")
+        print("\n  📄 离线报告已生成:")
         for fmt, path in offline_report.items():
             print(f"     {fmt}: {path}")
         return
@@ -1020,17 +1020,17 @@ def main():
     bridge = AEBridgeClient(bridge_dir=BRIDGE_DIR, timeout=timeout)
 
     # 连接测试
-    print(f"\n  📡 检测 AE Bridge 连接...")
+    print("\n  📡 检测 AE Bridge 连接...")
     online, ping_result = bridge.ping()
     if not online:
         print(f"  ⚠️  Bridge 未响应: {ping_result}")
-        print(f"  💡 请确认:")
-        print(f"     1. AE 已启动")
-        print(f"     2. Bridge 面板 (2_mcp_bridge_loader.jsx) 已加载")
+        print("  💡 请确认:")
+        print("     1. AE 已启动")
+        print("     2. Bridge 面板 (2_mcp_bridge_loader.jsx) 已加载")
         print(f"     3. Bridge 目录正确: {BRIDGE_DIR}")
-        print(f"\n  🔧 切换到离线诊断模式...")
+        print("\n  🔧 切换到离线诊断模式...")
         offline_report = generate_offline_report(output_dir)
-        print(f"\n  📄 离线报告已生成:")
+        print("\n  📄 离线报告已生成:")
         for fmt, path in offline_report.items():
             print(f"     {fmt}: {path}")
         return
@@ -1084,7 +1084,7 @@ def main():
     print("\n" + "=" * 60)
     print("  🎉 实战预测与重现完成!")
     print("=" * 60)
-    print(f"\n  📄 报告文件:")
+    print("\n  📄 报告文件:")
     for fmt, path in reports.items():
         print(f"     {fmt}: {path}")
 
@@ -1099,7 +1099,7 @@ def main():
             pass
 
 
-def generate_offline_report(output_dir: Path) -> Dict[str, Path]:
+def generate_offline_report(output_dir: Path) -> dict[str, Path]:
     """离线模式报告 - 当 AE Bridge 不可用时生成"""
     now = datetime.now()
     timestamp = now.strftime("%Y%m%d_%H%M%S")
@@ -1143,34 +1143,34 @@ def generate_offline_report(output_dir: Path) -> Dict[str, Path]:
 
     # Markdown 离线报告
     md_lines = [
-        f"# AE 工程实战预测与重现 - 离线诊断报告",
-        f"",
+        "# AE 工程实战预测与重现 - 离线诊断报告",
+        "",
         f"**生成时间**: {now.isoformat()}",
-        f"**模式**: ⚠️ 离线诊断 (AE Bridge 未连接)",
-        f"",
-        f"---",
-        f"",
-        f"## ❌ Bridge 连接失败",
-        f"",
+        "**模式**: ⚠️ 离线诊断 (AE Bridge 未连接)",
+        "",
+        "---",
+        "",
+        "## ❌ Bridge 连接失败",
+        "",
         f"无法连接到 AE MCP Bridge (`{BRIDGE_DIR}`)。",
-        f"",
-        f"### 排障步骤",
-        f"1. 确认 **Adobe After Effects** 已启动",
-        f"2. 在 AE 中手动加载 Bridge 面板:",
-        f"   - 文件 → 脚本 → 运行脚本文件",
+        "",
+        "### 排障步骤",
+        "1. 确认 **Adobe After Effects** 已启动",
+        "2. 在 AE 中手动加载 Bridge 面板:",
+        "   - 文件 → 脚本 → 运行脚本文件",
         f"   - 选择: `{SCRIPTS_DIR.parent / '.ae-mcp-bridge' / '2_mcp_bridge_loader.jsx'}`",
-        f"3. 查看 AE 的 ExtendScript 控制台是否有错误信息",
+        "3. 查看 AE 的 ExtendScript 控制台是否有错误信息",
         f"4. 确认 Bridge 目录存在: `{BRIDGE_DIR}`",
-        f"5. 确认 `ae_command.json` 文件有写入权限",
-        f"",
-        f"### 修复后重新运行",
-        f"```bash",
+        "5. 确认 `ae_command.json` 文件有写入权限",
+        "",
+        "### 修复后重新运行",
+        "```bash",
         f"cd {PROJECT_ROOT}",
-        f"python scripts/ae_practical_reproduction.py",
-        f"```",
-        f"",
-        f"---",
-        f"*由 AE-Knowledge-Vault 离线诊断系统生成*"
+        "python scripts/ae_practical_reproduction.py",
+        "```",
+        "",
+        "---",
+        "*由 AE-Knowledge-Vault 离线诊断系统生成*"
     ]
     md_path = output_dir / f"ae_reproduction_{timestamp}_offline.md"
     md_path.write_text("\n".join(md_lines), encoding="utf-8")

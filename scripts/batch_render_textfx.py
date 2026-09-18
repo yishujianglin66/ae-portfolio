@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """批量渲染文字特效预设组合 - 15个多样化搭配"""
-import json, time, subprocess, sys, os
-from pathlib import Path
+import json
+import os
+import subprocess
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 # === 路径配置 ===
 BRIDGE_CMD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_command.json")

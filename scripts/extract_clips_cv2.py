@@ -3,10 +3,11 @@
 使用OpenCV提取视频片段和关键帧
 """
 
-import os
-import cv2
-import json
 import glob
+import json
+import os
+
+import cv2
 import numpy as np
 
 SOURCE_DIR = r"D:\AE-Work\视频素材库\冰海战记新素材"
@@ -95,13 +96,13 @@ def main():
 
         info = get_video_info(video_path)
         if not info:
-            print(f"  无法打开视频，跳过")
+            print("  无法打开视频，跳过")
             continue
 
         print(f"  {info['width']}x{info['height']} | {info['fps']:.1f}fps | {info['duration']:.1f}s")
 
         if info["duration"] < 1:
-            print(f"  视频太短，跳过")
+            print("  视频太短，跳过")
             continue
 
         # 提取3-4个片段
@@ -146,7 +147,7 @@ def main():
                 })
 
     print(f"\n{'='*60}")
-    print(f"提取完成:")
+    print("提取完成:")
     print(f"  视频片段: {len(all_clips)} 个")
     print(f"  关键帧: {len(all_frames)} 张")
 
@@ -155,7 +156,7 @@ def main():
     landscape_clips = [c for c in all_clips if c["width"] >= c["height"]]
     print(f"  竖屏片段: {len(portrait_clips)} | 横屏片段: {len(landscape_clips)}")
 
-    print(f"\n片段列表:")
+    print("\n片段列表:")
     for c in all_clips:
         orient = "竖" if c["height"] > c["width"] else "横"
         print(f"  {os.path.basename(c['path'])}: {c['width']}x{c['height']} {orient} {c['duration']:.1f}s")

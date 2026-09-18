@@ -33,7 +33,7 @@ import hashlib
 import json
 import logging
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -60,7 +60,7 @@ class FailureSignature:
     signature: str = ""
     error_type: str = ""
     stage: str = ""
-    keywords: List[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
 
     @classmethod
     def from_record(
@@ -139,7 +139,7 @@ class FailureRecord:
     error_message: str = ""
     traceback_str: str = ""
     timestamp: float = 0.0
-    context: Dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
     trace_id: str = ""
 
 
@@ -164,15 +164,15 @@ class PostmortemReport:
     run_id: str = ""
     signature: FailureSignature = field(default_factory=FailureSignature)
     failure: FailureRecord = field(default_factory=FailureRecord)
-    root_causes: List[Dict[str, Any]] = field(default_factory=list)
-    recommendations: List[FixRecommendation] = field(default_factory=list)
-    distilled_rules: List[Dict[str, Any]] = field(default_factory=list)
-    similar_failures: List[str] = field(default_factory=list)
+    root_causes: list[dict[str, Any]] = field(default_factory=list)
+    recommendations: list[FixRecommendation] = field(default_factory=list)
+    distilled_rules: list[dict[str, Any]] = field(default_factory=list)
+    similar_failures: list[str] = field(default_factory=list)
     created_at: float = 0.0
-    trace_spans: List[Dict[str, Any]] = field(default_factory=list)
-    artifacts: List[Dict[str, Any]] = field(default_factory=list)
+    trace_spans: list[dict[str, Any]] = field(default_factory=list)
+    artifacts: list[dict[str, Any]] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "report_id": self.report_id,
             "run_id": self.run_id,
@@ -212,7 +212,7 @@ class FlagshipErrorCode(str, Enum):
 
 
 # 修复建议模板：错误码 → (title, description, action, confidence)
-FLAGSHIP_FIX_TEMPLATES: Dict[str, Dict[str, Any]] = {
+FLAGSHIP_FIX_TEMPLATES: dict[str, dict[str, Any]] = {
     FlagshipErrorCode.BRIDGE_DOWN: {
         "title": "Bridge 连接中断",
         "description": "MCP Bridge 文件轮询协议无法连通目标软件。可能是软件未启动、listener 未加载、或 Bridge 目录被删除。",
@@ -360,9 +360,9 @@ class FailurePostmortem:
         except Exception:
             pass
         # 内存索引: signature -> List[report_id]
-        self._signature_index: Dict[str, List[str]] = {}
+        self._signature_index: dict[str, list[str]] = {}
         # 内存缓存: report_id -> PostmortemReport
-        self._reports: Dict[str, PostmortemReport] = {}
+        self._reports: dict[str, PostmortemReport] = {}
         self._load_existing_reports()
         self._logger = logging.getLogger(__name__ + ".FailurePostmortem")
 
@@ -383,7 +383,7 @@ class FailurePostmortem:
         except Exception as e:
             self._logger.debug("[FailurePostmortem] load reports failed: %s", e)
 
-    def _dict_to_report(self, data: Dict[str, Any]) -> PostmortemReport:
+    def _dict_to_report(self, data: dict[str, Any]) -> PostmortemReport:
         """字典转 PostmortemReport"""
         sig_data = data.get("signature", {})
         fail_data = data.get("failure", {})
@@ -403,7 +403,7 @@ class FailurePostmortem:
         )
 
     # ---- 上下文收集 ----
-    def _collect_trace_spans(self, trace_id: str) -> List[Dict[str, Any]]:
+    def _collect_trace_spans(self, trace_id: str) -> list[dict[str, Any]]:
         """收集 trace 上下文（graceful degrade）"""
         if not trace_id:
             return []
@@ -416,7 +416,7 @@ class FailurePostmortem:
             self._logger.debug("[FailurePostmortem] trace collection failed: %s", e)
             return []
 
-    def _collect_artifacts(self, run_id: str) -> List[Dict[str, Any]]:
+    def _collect_artifacts(self, run_id: str) -> list[dict[str, Any]]:
         """收集产物上下文（graceful degrade）"""
         if not run_id:
             return []
@@ -428,7 +428,7 @@ class FailurePostmortem:
             self._logger.debug("[FailurePostmortem] artifact collection failed: %s", e)
             return []
 
-    def _query_root_causes(self, failure: FailureRecord) -> List[Dict[str, Any]]:
+    def _query_root_causes(self, failure: FailureRecord) -> list[dict[str, Any]]:
         """调用因果引擎获取根因链（graceful degrade）"""
         try:
             from core.causal_engine import get_causal_engine
@@ -456,11 +456,12 @@ class FailurePostmortem:
             self._logger.debug("[FailurePostmortem] causal engine query failed: %s", e)
             return []
 
-    def _distill_lessons(self, failure: FailureRecord) -> List[Dict[str, Any]]:
+    def _distill_lessons(self, failure: FailureRecord) -> list[dict[str, Any]]:
         """调用 RuleDistiller 蒸馏教训（graceful degrade）"""
         try:
             from core.self_evolution_engine import (
-                RuleDistiller, ExecutionEpisode,
+                ExecutionEpisode,
+                RuleDistiller,
             )
             distiller = RuleDistiller(min_support=1, min_confidence=0.5)
             # 构造单个 episode（蒸馏器要求 List，单个也行）
@@ -485,9 +486,9 @@ class FailurePostmortem:
     def _generate_recommendations(
         self,
         failure: FailureRecord,
-        root_causes: List[Dict[str, Any]],
-        distilled_rules: List[Dict[str, Any]],
-    ) -> List[FixRecommendation]:
+        root_causes: list[dict[str, Any]],
+        distilled_rules: list[dict[str, Any]],
+    ) -> list[FixRecommendation]:
         """根据根因和规则生成修复建议
 
         启发式策略:
@@ -495,7 +496,7 @@ class FailurePostmortem:
         - 若有 root_causes，根据 source/target 推荐干预
         - 兜底建议: 重试 + 检查日志
         """
-        recs: List[FixRecommendation] = []
+        recs: list[FixRecommendation] = []
 
         # 1. 从蒸馏规则生成建议
         for rule in distilled_rules:
@@ -647,7 +648,7 @@ class FailurePostmortem:
             return json.dumps(report.to_dict(), ensure_ascii=False, indent=2, default=str)
 
         # Markdown 格式
-        lines: List[str] = []
+        lines: list[str] = []
         lines.append(f"# 失败复盘报告: {report.report_id}")
         lines.append("")
         lines.append(f"- **Run ID**: {report.run_id}")
@@ -737,7 +738,7 @@ class FailurePostmortem:
             self._logger.warning("[FailurePostmortem] archive failed: %s", e)
             return ""
 
-    def get_sim_failures(self, failure_signature: str) -> List[PostmortemReport]:
+    def get_sim_failures(self, failure_signature: str) -> list[PostmortemReport]:
         """检索相似历史失败
 
         Args:
@@ -754,7 +755,7 @@ class FailurePostmortem:
 #  全局单例
 # ============================================================================
 
-_global_failure_postmortem: Optional[FailurePostmortem] = None
+_global_failure_postmortem: FailurePostmortem | None = None
 
 
 def get_failure_postmortem() -> FailurePostmortem:

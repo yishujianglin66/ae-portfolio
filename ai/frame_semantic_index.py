@@ -46,7 +46,7 @@ class ShotUnit:
     frame_path: str = ""                 # 代表帧路径
     description: str = ""                # VLM语义描述
     ip_name: str = ""                    # 该镜头归属IP(canonical)
-    characters: List[str] = field(default_factory=list)
+    characters: list[str] = field(default_factory=list)
     scene_type: str = "unknown"
     mood: str = "neutral"
     motion: float = 0.0                  # 镜头内平均运动强度
@@ -54,7 +54,7 @@ class ShotUnit:
     saturation: float = 0.0
     vector: np.ndarray = field(default_factory=lambda: np.zeros(0))  # 视觉向量
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "video_path": self.video_path, "filename": self.filename,
             "shot_id": self.shot_id, "start": round(self.start, 2),
@@ -68,7 +68,7 @@ class ShotUnit:
         }
 
     @staticmethod
-    def from_dict(d: Dict) -> "ShotUnit":
+    def from_dict(d: dict) -> "ShotUnit":
         s = ShotUnit(**{k: v for k, v in d.items() if k != "vector"})
         s.vector = np.asarray(d.get("vector", []), dtype=np.float32)
         return s
@@ -118,15 +118,15 @@ def _extract_visual_vector(frame_bgr: np.ndarray) -> np.ndarray:
 class FrameSemanticIndex:
     """帧级语义索引"""
 
-    def __init__(self, cache_dir: Optional[str] = None):
+    def __init__(self, cache_dir: str | None = None):
         self.cache_dir = Path(cache_dir) if cache_dir else _PROJECT_ROOT / "cache" / "frame_index"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.shots: List[ShotUnit] = []
+        self.shots: list[ShotUnit] = []
 
     # ---------------- 构建 ----------------
 
-    def build_from_library(self, video_paths: List[str],
-                           intel_cache_dir: Optional[str] = None,
+    def build_from_library(self, video_paths: list[str],
+                           intel_cache_dir: str | None = None,
                            shots_per_video: int = 8) -> int:
         """对素材库构建镜头索引。intel_cache_dir: material_intel缓存目录(提供语义描述)"""
         import cv2
@@ -145,9 +145,9 @@ class FrameSemanticIndex:
                 print(f"  [{i+1}/{len(video_paths)}] 失败 {Path(vp).name}: {e}")
         return total
 
-    def _load_intel_tags(self, intel_cache_dir: Optional[str]) -> Dict[str, Dict]:
+    def _load_intel_tags(self, intel_cache_dir: str | None) -> dict[str, dict]:
         """读取material_intel缓存 → {文件名: cache_dict}"""
-        out: Dict[str, Dict] = {}
+        out: dict[str, dict] = {}
         if not intel_cache_dir:
             return out
         cd = Path(intel_cache_dir)
@@ -162,7 +162,7 @@ class FrameSemanticIndex:
                 continue
         return out
 
-    def _index_one_video(self, video_path: str, intel: Dict,
+    def _index_one_video(self, video_path: str, intel: dict,
                          shots_per_video: int) -> int:
         import cv2
         cap = cv2.VideoCapture(video_path)
@@ -176,7 +176,7 @@ class FrameSemanticIndex:
         duration = total_frames / fps
 
         # 场景变化时间戳(来自intel缓存) 或 均匀切分
-        scene_changes: List[float] = list(intel.get("scene_changes", []) or [])
+        scene_changes: list[float] = list(intel.get("scene_changes", []) or [])
         if len(scene_changes) < shots_per_video - 1:
             scene_changes = list(np.linspace(0, duration, shots_per_video + 1)[1:-1])
         boundaries = sorted(set([0.0] + [t for t in scene_changes if 0 < t < duration] + [duration]))
@@ -242,7 +242,7 @@ class FrameSemanticIndex:
             prev = gray
         return float(np.mean(diffs)) if diffs else 0.0
 
-    def _match_timeline(self, timeline: List[Dict], t: float) -> Optional[Dict]:
+    def _match_timeline(self, timeline: list[dict], t: float) -> dict | None:
         for seg in timeline:
             try:
                 if float(seg.get("start", 0)) <= t <= float(seg.get("end", 1e9)):
@@ -254,7 +254,7 @@ class FrameSemanticIndex:
     # ---------------- 检索 ----------------
 
     def search_text(self, query: str, top_k: int = 10,
-                    ip_filter: str = "") -> List[Dict]:
+                    ip_filter: str = "") -> list[dict]:
         """语义关键词检索 — 对镜头描述/IP/角色/情绪做加权关键词匹配"""
         q_tokens = [t for t in re.split(r"[\s,，、;；]+", query.lower()) if t]
         scored = []
@@ -271,7 +271,7 @@ class FrameSemanticIndex:
         scored.sort(key=lambda x: -x[0])
         return [self._shot_result(s, score=sc) for sc, s in scored[:top_k]]
 
-    def search_by_frame(self, frame_bgr: np.ndarray, top_k: int = 10) -> List[Dict]:
+    def search_by_frame(self, frame_bgr: np.ndarray, top_k: int = 10) -> list[dict]:
         """以帧搜帧 — 余弦相似度"""
         qv = _extract_visual_vector(frame_bgr)
         scored = []
@@ -285,7 +285,7 @@ class FrameSemanticIndex:
 
     def filter(self, primary_ip: str = "", scene_type: str = "",
                mood: str = "", min_motion: float = 0.0,
-               max_motion: float = 1e9) -> List[Dict]:
+               max_motion: float = 1e9) -> list[dict]:
         """条件过滤"""
         out = []
         for shot in self.shots:
@@ -300,7 +300,7 @@ class FrameSemanticIndex:
             out.append(self._shot_result(shot))
         return out
 
-    def _shot_result(self, shot: ShotUnit, score: Optional[float] = None) -> Dict:
+    def _shot_result(self, shot: ShotUnit, score: float | None = None) -> dict:
         d = {
             "file": shot.filename, "shot_id": shot.shot_id,
             "start": shot.start, "end": shot.end,
@@ -328,8 +328,8 @@ class FrameSemanticIndex:
         self.shots = [ShotUnit.from_dict(d) for d in data.get("shots", [])]
         return True
 
-    def stats(self) -> Dict:
-        ips: Dict[str, int] = {}
+    def stats(self) -> dict:
+        ips: dict[str, int] = {}
         for s in self.shots:
             ips[s.ip_name or "(无)"] = ips.get(s.ip_name or "(无)", 0) + 1
         return {"total_shots": len(self.shots),

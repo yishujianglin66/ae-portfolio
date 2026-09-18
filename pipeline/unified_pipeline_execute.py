@@ -14,8 +14,7 @@ from typing import Any, Dict, List
 from pipeline.unified_pipeline import StageStatus, _paths_ffmpeg
 
 
-
-def run_execute_real_mix(self) -> Dict:
+def run_execute_real_mix(self) -> dict:
     """P1 真混剪: 用 FFmpegEditEngine 按 effect_stack 把素材分段应用滤镜并拼接成新视频。
 
     流程:
@@ -27,11 +26,16 @@ def run_execute_real_mix(self) -> Dict:
 
     失败时返回 error_code + error, 不再降级到参考视频截取。
     """
-    import subprocess
     import shutil
+    import subprocess
+
     from pipeline.ffmpeg_edit_engine import (
-        FFmpegEditEngine, FFmpegFilterBuilder,
-        ColorGradeParams, SharpenParams, VignetteParams, BlurParams,
+        BlurParams,
+        ColorGradeParams,
+        FFmpegEditEngine,
+        FFmpegFilterBuilder,
+        SharpenParams,
+        VignetteParams,
     )
 
     prev = self._get_previous_data()
@@ -39,7 +43,7 @@ def run_execute_real_mix(self) -> Dict:
     perceive = prev.get("perceive", {})
 
     # ---- 1. 收集素材源 ----
-    sources: List[str] = []
+    sources: list[str] = []
     # a. plan.shot_list 中带真实路径的 source
     for shot in plan.get("shot_list", []):
         src = shot.get("source", "") or ""
@@ -102,7 +106,7 @@ def run_execute_real_mix(self) -> Dict:
 
     # ---- 5. 多素材分段策略 (P2: 按 plan.shot_list 混剪, 不再用单素材分段) ----
     # 预计算每个 source 的时长
-    source_durations: Dict[str, float] = {}
+    source_durations: dict[str, float] = {}
     for _s in sources:
         try:
             source_durations[_s] = engine._get_duration(_s)
@@ -125,7 +129,7 @@ def run_execute_real_mix(self) -> Dict:
     # 解析 plan.shot_list (P2: 每个 shot 决定 source + start_time + end_time + effect)
     shot_list = plan.get("shot_list", []) or []
     # segment_plan: list of (source_path, seg_start, seg_dur, effect_dict)
-    segment_plan: List[tuple] = []
+    segment_plan: list[tuple] = []
     used_sources: set = set()
 
     def _match_shot_source(shot_src: str) -> str:
@@ -239,8 +243,8 @@ def run_execute_real_mix(self) -> Dict:
             "circlecrop": "circlecrop", "radial": "radial",
         }
         # 构建有效转场列表 (跳过 "cut" = 硬切无转场)
-        xfade_types: List[str] = []
-        xfade_durs: List[float] = []
+        xfade_types: list[str] = []
+        xfade_durs: list[float] = []
         for t in transition_plan:
             t_type = (t.get("type", "") or "").lower().strip()
             mapped = _XFADE_MAP.get(t_type, "")
@@ -260,8 +264,8 @@ def run_execute_real_mix(self) -> Dict:
                 f"types={xfade_types} durs={xfade_durs}"
             )
 
-        segment_files: List[str] = []
-        segment_durations: List[float] = []  # 记录每段真实时长 (xfade offset 计算用)
+        segment_files: list[str] = []
+        segment_durations: list[float] = []  # 记录每段真实时长 (xfade offset 计算用)
         effects_applied = 0
         for seg_idx, (src_path, seg_start, seg_dur, eff) in enumerate(segment_plan):
             fb = FFmpegFilterBuilder()
@@ -340,18 +344,18 @@ def run_execute_real_mix(self) -> Dict:
             # P1 转场库: 单次 filter_complex 多段 xfade (避免 chain_transitions 多次重编码)
             n_segs = len(segment_files)
             n_trans = min(len(xfade_types), n_segs - 1)
-            inputs: List[str] = []
+            inputs: list[str] = []
             for sf in segment_files:
                 inputs.extend(["-i", sf])
     
             # 探测每段真实时长 (xfade offset 计算必须精确)
-            actual_durs: List[float] = []
+            actual_durs: list[float] = []
             for sf in segment_files:
                 d = engine._get_duration(sf)
                 actual_durs.append(d if d > 0 else 3.0)
     
             # 构建视频 xfade 链 (单次 filter_complex, 标签顺序链接)
-            vf_parts: List[str] = []
+            vf_parts: list[str] = []
             offset = 0.0
             for i in range(n_trans):
                 if i == 0:
@@ -368,7 +372,7 @@ def run_execute_real_mix(self) -> Dict:
                 )
     
             # 构建音频 acrossfade 链 (同样顺序链接)
-            af_parts: List[str] = []
+            af_parts: list[str] = []
             for i in range(n_trans):
                 d = xfade_durs[i]
                 in_label = f"[{i}:a]" if i == 0 else f"[af{i}]"
@@ -483,7 +487,7 @@ def run_execute_real_mix(self) -> Dict:
                 filter_complex = (
                     "".join(filter_parts)
                     + f"concat=n={len(segment_files)}:v=1:a=1[v_pre][a];"
-                    + f"[v_pre]scale=1920:1080:flags=lanczos[v]"
+                    + "[v_pre]scale=1920:1080:flags=lanczos[v]"
                 )
                 cmd = [
                     ffmpeg_bin, "-y", "-hide_banner",

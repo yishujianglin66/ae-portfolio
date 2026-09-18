@@ -1,9 +1,9 @@
-import os
 import json
+import os
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
 from pathlib import Path
+from typing import Dict, List, Optional
 
 # D2 修复：使用 ConfigManager 替代硬编码路径
 _PROJECT_ROOT = Path(__file__).resolve().parent
@@ -20,6 +20,7 @@ except Exception:
 
 try:
     from training_state_manager import TrainingStateManager
+
     from system_memory import SystemMemory
     STATE_MANAGER_AVAILABLE = True
 except ImportError:
@@ -30,9 +31,9 @@ class TrainingLogger:
     def __init__(self, task_name: str, use_state_manager: bool = True):
         self.task_name = task_name
         self.start_time = datetime.now()
-        self.log_entries: List[Dict] = []
-        self.metrics: Dict = {}
-        self.artifacts: List[str] = []
+        self.log_entries: list[dict] = []
+        self.metrics: dict = {}
+        self.artifacts: list[str] = []
         
         self.state_manager = None
         self.system_memory = None
@@ -167,7 +168,7 @@ class TrainingLogger:
 
 
 class VideoGenerationLogger(TrainingLogger):
-    def __init__(self, music_path: str, clip_paths: List[str], output_path: str):
+    def __init__(self, music_path: str, clip_paths: list[str], output_path: str):
         super().__init__(task_name="video_generation")
         self.music_path = music_path
         self.clip_paths = clip_paths
@@ -181,7 +182,7 @@ class VideoGenerationLogger(TrainingLogger):
     def log_stage(self, stage: str, status: str, **kwargs):
         self.info(f"阶段 [{stage}] {status}", stage=stage, status=status, **kwargs)
 
-    def log_effect_apply(self, effect_name: str, layer_name: str, params: Dict):
+    def log_effect_apply(self, effect_name: str, layer_name: str, params: dict):
         self.info(f"应用效果: {effect_name} → {layer_name}", 
                   effect=effect_name, layer=layer_name, params=params)
 
@@ -244,10 +245,10 @@ class PipelineLogger(TrainingLogger):
         logger.save_pipeline_report()
     """
 
-    def __init__(self, task_name: str, pipeline_config: Optional[Dict] = None):
+    def __init__(self, task_name: str, pipeline_config: dict | None = None):
         super().__init__(task_name=task_name)
         self.pipeline_config = pipeline_config or {}
-        self.layer_results: Dict[str, Dict] = {}
+        self.layer_results: dict[str, dict] = {}
 
     def log_perception(self, **kwargs):
         self.layer_results["perception"] = kwargs
@@ -289,7 +290,7 @@ class PipelineLogger(TrainingLogger):
         return self.save_report(title)
 
 
-def get_latest_reports(count: int = 5) -> List[str]:
+def get_latest_reports(count: int = 5) -> list[str]:
     if not os.path.exists(LOG_DIR):
         return []
     reports = sorted(
@@ -299,7 +300,7 @@ def get_latest_reports(count: int = 5) -> List[str]:
     return reports
 
 
-def load_report(report_path: str) -> Dict:
+def load_report(report_path: str) -> dict:
     with open(report_path, "r", encoding="utf-8") as f:
         return json.load(f)
 

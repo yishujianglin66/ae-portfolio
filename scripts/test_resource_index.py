@@ -15,7 +15,7 @@ async def main():
     await resource_index_service.refresh_index()
 
     summary = resource_index_service.get_index_summary()
-    print(f"\nIndex Summary:")
+    print("\nIndex Summary:")
     total = 0
     for cat, count in sorted(summary.items()):
         print(f"  {cat:12s}: {count:6d}")

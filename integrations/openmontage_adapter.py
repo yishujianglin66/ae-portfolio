@@ -39,12 +39,12 @@ class OpenMontageAdapter:
         "get_architecture",
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._source_available = OM_DIR.is_dir()
         self._env_check = self._check_environment()
 
-    def _check_environment(self) -> Dict[str, Any]:
+    def _check_environment(self) -> dict[str, Any]:
         checks = {
             "source_cloned": self._source_available,
         }
@@ -74,10 +74,10 @@ class OpenMontageAdapter:
     def check_available(self) -> bool:
         return self._source_available
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
         start = time.time()
         try:
@@ -111,7 +111,7 @@ class OpenMontageAdapter:
             logger.error(f"[OpenMontage] {operation} failed: {e}")
             return {"status": "error", "operation": operation, "error": str(e), "duration_ms": (time.time() - start) * 1000}
 
-    def _list_pipelines(self) -> Dict:
+    def _list_pipelines(self) -> dict:
         pipeline_dir = OM_DIR / "pipeline_defs"
         pipelines = []
         if pipeline_dir.is_dir():
@@ -119,7 +119,7 @@ class OpenMontageAdapter:
                 pipelines.append({"name": f.stem, "file": f.name})
         return {"pipelines": pipelines, "count": len(pipelines)}
 
-    def _list_styles(self) -> Dict:
+    def _list_styles(self) -> dict:
         style_dir = OM_DIR / "styles"
         styles = []
         if style_dir.is_dir():
@@ -127,7 +127,7 @@ class OpenMontageAdapter:
                 styles.append({"name": f.stem, "file": f.name})
         return {"styles": styles, "count": len(styles)}
 
-    def _list_tools(self) -> Dict:
+    def _list_tools(self) -> dict:
         tools_dir = OM_DIR / "tools"
         categories = []
         if tools_dir.is_dir():
@@ -142,7 +142,7 @@ class OpenMontageAdapter:
         return {"categories": categories, "total_categories": len(categories),
                 "total_tools": sum(c["count"] for c in categories)}
 
-    def _get_pipeline_info(self, params: Dict) -> Dict:
+    def _get_pipeline_info(self, params: dict) -> dict:
         name = params.get("name", "")
         pipeline_file = OM_DIR / "pipeline_defs" / f"{name}.yaml"
         if not pipeline_file.is_file():
@@ -154,7 +154,7 @@ class OpenMontageAdapter:
         except Exception as e:
             return {"name": name, "raw_content": pipeline_file.read_text(encoding="utf-8")[:500]}
 
-    def _get_style_info(self, params: Dict) -> Dict:
+    def _get_style_info(self, params: dict) -> dict:
         name = params.get("name", "")
         style_file = OM_DIR / "styles" / f"{name}.yaml"
         if not style_file.is_file():
@@ -166,7 +166,7 @@ class OpenMontageAdapter:
         except Exception:
             return {"name": name, "raw_content": style_file.read_text(encoding="utf-8")[:500]}
 
-    def _get_tool_info(self, params: Dict) -> Dict:
+    def _get_tool_info(self, params: dict) -> dict:
         category = params.get("category", "")
         tool_name = params.get("tool", "")
         tool_file = OM_DIR / "tools" / category / f"{tool_name}.py"
@@ -187,7 +187,7 @@ class OpenMontageAdapter:
                 doc_lines.append(line.strip())
         return {"category": category, "tool": tool_name, "docstring": "\n".join(doc_lines), "size": len(content)}
 
-    def _list_demos(self) -> Dict:
+    def _list_demos(self) -> dict:
         props_dir = OM_DIR / "remotion-composer" / "public" / "demo-props"
         demos = []
         if props_dir.is_dir():
@@ -195,7 +195,7 @@ class OpenMontageAdapter:
                 demos.append({"name": f.stem, "file": f.name})
         return {"demos": demos, "count": len(demos)}
 
-    def _get_architecture(self) -> Dict:
+    def _get_architecture(self) -> dict:
         arch = {
             "project": "OpenMontage",
             "description": "AI-driven video production pipeline engine",
@@ -219,7 +219,7 @@ class OpenMontageAdapter:
                     arch["components"][comp] += f" ({py_count} py files)"
         return arch
 
-    def _render_demo(self, params: Dict) -> Dict:
+    def _render_demo(self, params: dict) -> dict:
         demo_name = params.get("name", "")
         if not self._env_check.get("node_ok"):
             return {"status": "blocked", "blocker": "Node.js not available"}
@@ -227,7 +227,7 @@ class OpenMontageAdapter:
             return {"status": "blocked", "blocker": "Remotion deps not installed (run npm install in remotion-composer/)"}
         return {"status": "info", "demo": demo_name, "note": "Use render_demo.py to render"}
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         return {
             "source_available": self._source_available,
             "pipelines": len(list((OM_DIR / "pipeline_defs").glob("*.yaml"))) if self._source_available else 0,

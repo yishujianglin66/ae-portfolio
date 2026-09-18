@@ -25,7 +25,7 @@ class TopazEngine(BaseEngine):
         "iris": "Iris",
     }
 
-    def __init__(self, executable_path: Optional[Path | str] = None):
+    def __init__(self, executable_path: Path | str | None = None):
         path = Path(executable_path) if executable_path else settings.topaz_path
         super().__init__(path)
 
@@ -35,10 +35,10 @@ class TopazEngine(BaseEngine):
         output_path: Path | str,
         model: str = "proteus",
         scale: float = 2.0,
-        fps: Optional[int] = None,
+        fps: int | None = None,
         denoise: int = 50,
         deblur: int = 30,
-        extra_args: Optional[list[str]] = None,
+        extra_args: list[str] | None = None,
     ) -> EngineResult:
         """Enhance video quality with Topaz AI."""
         input_path = Path(input_path)

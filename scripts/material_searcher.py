@@ -20,18 +20,18 @@ MaterialSearcher - 多平台素材搜索下载器
 - P4: AI生成补充 (当真实素材不足时)
 """
 
-import os
-import sys
 import json
-import time
+import os
 import shutil
 import subprocess
+import sys
 import tempfile
-import urllib.request
+import time
 import urllib.parse
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -67,7 +67,7 @@ def log(msg: str, level: str = "INFO"):
 class KeywordExtractor:
     """从用户描述中提取搜索关键词"""
 
-    def extract(self, user_prompt: str) -> List[str]:
+    def extract(self, user_prompt: str) -> list[str]:
         """
         提取搜索关键词列表。
         返回多个关键词用于不同平台搜索。
@@ -102,7 +102,7 @@ class KeywordExtractor:
 
         return unique[:5]  # 最多5个关键词
 
-    def _to_english_keywords(self, prompt: str) -> List[str]:
+    def _to_english_keywords(self, prompt: str) -> list[str]:
         """简单中文→英文关键词映射 (可扩展)"""
         mappings = {
             "利威尔": "Levi Ackerman attack on titan",
@@ -142,7 +142,7 @@ class BaseSourceAdapter:
         return True
 
     def search_and_download(self, query: str, output_dir: Path,
-                            max_results: int = 3) -> List[Dict]:
+                            max_results: int = 3) -> list[dict]:
         raise NotImplementedError
 
 
@@ -159,14 +159,14 @@ class PexelsAdapter(BaseSourceAdapter):
         return bool(os.environ.get("PEXELS_API_KEY"))
 
     def search_and_download(self, query: str, output_dir: Path,
-                            max_results: int = 3) -> List[Dict]:
+                            max_results: int = 3) -> list[dict]:
         api_key = os.environ.get("PEXELS_API_KEY")
         if not api_key:
             return []
 
         try:
-            import urllib.request
             import urllib.parse
+            import urllib.request
 
             encoded_query = urllib.parse.quote(query)
             url = f"https://api.pexels.com/videos/search?query={encoded_query}&per_page={max_results}&orientation=all"
@@ -262,7 +262,7 @@ class PixabayAdapter(BaseSourceAdapter):
         return bool(os.environ.get("PIXABAY_API_KEY"))
 
     def search_and_download(self, query: str, output_dir: Path,
-                            max_results: int = 3) -> List[Dict]:
+                            max_results: int = 3) -> list[dict]:
         api_key = os.environ.get("PIXABAY_API_KEY")
         if not api_key:
             return []
@@ -333,7 +333,7 @@ class PixabayImageAdapter(BaseSourceAdapter):
         return bool(os.environ.get("PIXABAY_API_KEY"))
 
     def search_and_download(self, query: str, output_dir: Path,
-                            max_results: int = 3) -> List[Dict]:
+                            max_results: int = 3) -> list[dict]:
         api_key = os.environ.get("PIXABAY_API_KEY")
         if not api_key:
             return []
@@ -403,12 +403,12 @@ class MikananiAdapter(BaseSourceAdapter):
         return True  # 国内直接可用
 
     def search_and_download(self, query: str, output_dir: Path,
-                            max_results: int = 3) -> List[Dict]:
+                            max_results: int = 3) -> list[dict]:
         """搜索动漫资源，下载 .torrent 文件 (HTTP直连可用)"""
         try:
-            import urllib.request
-            import urllib.parse
             import re
+            import urllib.parse
+            import urllib.request
 
             encoded_query = urllib.parse.quote(query)
             url = f"{self.BASE_URL}/Home/Search?searchstr={encoded_query}"
@@ -523,12 +523,12 @@ class RRDYnbAdapter(BaseSourceAdapter):
         return True  # 国内直接可用
 
     def search_and_download(self, query: str, output_dir: Path,
-                            max_results: int = 3) -> List[Dict]:
+                            max_results: int = 3) -> list[dict]:
         """搜索影视资源链接"""
         try:
-            import urllib.request
-            import urllib.parse
             import re
+            import urllib.parse
+            import urllib.request
 
             # 人人电影网搜索 (通过站内搜索)
             encoded_query = urllib.parse.quote(query)
@@ -601,7 +601,7 @@ class BilibiliAdapter(BaseSourceAdapter):
         except Exception:
             return False
 
-    def _search_bilibili(self, keyword: str, max_results: int = 5) -> List[Dict]:
+    def _search_bilibili(self, keyword: str, max_results: int = 5) -> list[dict]:
         """通过B站API搜索视频"""
         import re as _re
         api_url = f"{self.SEARCH_API}?keyword={urllib.parse.quote(keyword)}&page=1"
@@ -655,7 +655,7 @@ class BilibiliAdapter(BaseSourceAdapter):
         return False
 
     def search_and_download(self, query: str, output_dir: Path,
-                            max_results: int = 3) -> List[Dict]:
+                            max_results: int = 3) -> list[dict]:
         """搜索B站视频并下载"""
         try:
             # 1. 搜索
@@ -738,7 +738,7 @@ class URLDownloadAdapter(BaseSourceAdapter):
             return False
 
     def search_and_download(self, query: str, output_dir: Path,
-                            max_results: int = 3) -> List[Dict]:
+                            max_results: int = 3) -> list[dict]:
         """
         query 在这里应该是 URL，不是搜索词。
         如果不是URL，跳过。
@@ -788,14 +788,14 @@ class LocalLibraryAdapter(BaseSourceAdapter):
     name = "LocalLibrary"
     priority = 50
 
-    def __init__(self, library_dirs: Optional[List[str]] = None):
+    def __init__(self, library_dirs: list[str] | None = None):
         self.library_dirs = library_dirs or [
             r"D:\AE-Work\output",
             r"D:\AE-Work\素材库",
         ]
 
     def search_and_download(self, query: str, output_dir: Path,
-                            max_results: int = 3) -> List[Dict]:
+                            max_results: int = 3) -> list[dict]:
         """
         本地库不支持真正的搜索，只是返回最近的素材。
         如果需要语义搜索，需要额外的索引。
@@ -844,14 +844,14 @@ class MaterialFilter:
                  min_height: int = 720,
                  min_duration: float = 2.0,
                  max_duration: float = 60.0,
-                 target_duration: Optional[float] = None):
+                 target_duration: float | None = None):
         self.min_width = min_width
         self.min_height = min_height
         self.min_duration = min_duration
         self.max_duration = max_duration
         self.target_duration = target_duration
 
-    def filter(self, materials: List[Dict]) -> List[Dict]:
+    def filter(self, materials: list[dict]) -> list[dict]:
         """过滤不合格素材"""
         valid = []
         for m in materials:
@@ -895,7 +895,7 @@ class MaterialFilter:
         log(f"  质量筛选: {len(materials)} → {len(valid)} 个合格")
         return valid
 
-    def _probe_video(self, path: str) -> Optional[Dict]:
+    def _probe_video(self, path: str) -> dict | None:
         """使用 ffprobe 获取视频信息"""
         try:
             cmd = [
@@ -969,7 +969,7 @@ class MaterialSearcher:
     5. 返回合格素材列表
     """
 
-    def __init__(self, output_dir: Optional[Path] = None):
+    def __init__(self, output_dir: Path | None = None):
         self.output_dir = output_dir or OUTPUT_DIR
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -977,7 +977,7 @@ class MaterialSearcher:
         self.material_filter = MaterialFilter()
 
         # 注册适配器 (按优先级排序，全部国内直连无需代理)
-        self.adapters: List[BaseSourceAdapter] = [
+        self.adapters: list[BaseSourceAdapter] = [
             MikananiAdapter(),       # P1: 蜜柑计划动漫 (priority=95, 国内可用)
             BilibiliAdapter(),       # P1: B站视频搜索下载 (priority=92, 国内可用)
             RRDYnbAdapter(),         # P1: 人人电影网影视 (priority=88, 国内可用)
@@ -989,9 +989,9 @@ class MaterialSearcher:
         self._downloader = None
 
     def search(self, user_prompt: str,
-               material_urls: Optional[List[str]] = None,
+               material_urls: list[str] | None = None,
                min_results: int = 3,
-               max_per_source: int = 3) -> List[Dict]:
+               max_per_source: int = 3) -> list[dict]:
         """
         主搜索方法。
 
@@ -1004,10 +1004,10 @@ class MaterialSearcher:
         Returns:
             合格素材列表，每个素材包含 path, width, height, duration 等
         """
-        print(f"\n--- MaterialSearcher: 搜索素材 ---")
+        print("\n--- MaterialSearcher: 搜索素材 ---")
         log(f"需求: {user_prompt}")
 
-        all_materials: List[Dict] = []
+        all_materials: list[dict] = []
 
         # 1. 处理用户提供的URL
         if material_urls:
@@ -1064,7 +1064,7 @@ class MaterialSearcher:
 
         return valid_materials
 
-    def get_missing_count(self, materials: List[Dict], min_results: int = 3) -> int:
+    def get_missing_count(self, materials: list[dict], min_results: int = 3) -> int:
         """计算还需要多少个素材"""
         valid = [m for m in materials if m.get("success")]
         return max(0, min_results - len(valid))
@@ -1082,7 +1082,7 @@ class MaterialSearcher:
                 log(f"自动下载器加载失败: {e}", "WARN")
         return self._downloader
 
-    def _auto_download_magnets(self, materials: List[Dict]) -> List[Dict]:
+    def _auto_download_magnets(self, materials: list[dict]) -> list[dict]:
         """将搜索到的磁力链接通过 aria2 自动下载"""
         downloader = self._get_downloader()
         if not downloader:
@@ -1119,8 +1119,8 @@ class MaterialSearcher:
 #  快捷函数
 # ================================================================
 def search_materials(user_prompt: str,
-                     material_urls: Optional[List[str]] = None,
-                     min_results: int = 3) -> List[Dict]:
+                     material_urls: list[str] | None = None,
+                     min_results: int = 3) -> list[dict]:
     """快捷函数：搜索素材"""
     searcher = MaterialSearcher()
     return searcher.search(user_prompt, material_urls, min_results)

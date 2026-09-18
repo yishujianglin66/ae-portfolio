@@ -24,14 +24,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # repo root: _arch
 from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 try:
-    from scripts.train_anime_camera_lora import FINE_LABELS, NUM_FRAMES, IMG_SIZE  # noqa: E402
+    from scripts.train_anime_camera_lora import FINE_LABELS, IMG_SIZE, NUM_FRAMES  # noqa: E402
 except ImportError:
-    from train_anime_camera_lora import FINE_LABELS, NUM_FRAMES, IMG_SIZE  # noqa: E402
+    from train_anime_camera_lora import FINE_LABELS, IMG_SIZE, NUM_FRAMES  # noqa: E402
 
 MODEL_DIR = r"D:\AE-Data\Models\VideoMAE-MovieShots\movement"
 
 
-def load_frames(clip: str) -> Optional[np.ndarray]:
+def load_frames(clip: str) -> np.ndarray | None:
     from decord import VideoReader, cpu
     try:
         vr = VideoReader(clip, ctx=cpu(0))
@@ -55,7 +55,7 @@ def load_frames(clip: str) -> Optional[np.ndarray]:
     return frames
 
 
-def get_probs(model, clip: str, device) -> Optional[np.ndarray]:
+def get_probs(model, clip: str, device) -> np.ndarray | None:
     import torch
     frames = load_frames(clip)
     if frames is None:
@@ -83,8 +83,8 @@ def main() -> int:
 
     import torch
     device = get_device()
-    from transformers import VideoMAEForVideoClassification
     from peft import PeftModel
+    from transformers import VideoMAEForVideoClassification
     # v3 修复: 同 eval_fine_lora.py — base 需 num_labels=10 重建头
     base = VideoMAEForVideoClassification.from_pretrained(
         args.model_dir, local_files_only=True, num_labels=len(FINE_LABELS),
@@ -101,8 +101,8 @@ def main() -> int:
     samples = random.sample(labels, min(args.n_eval, len(labels)))
 
     label_to_idx = {l: i for i, l in enumerate(FINE_LABELS)}
-    probs_list: List[np.ndarray] = []
-    truths: List[int] = []
+    probs_list: list[np.ndarray] = []
+    truths: list[int] = []
     for s in samples:
         d = s.get("movement_label", "")
         if d not in label_to_idx:

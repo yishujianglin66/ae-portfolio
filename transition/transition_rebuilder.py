@@ -37,7 +37,7 @@ from typing import Any, Dict, List, Optional
 # ---------------------------------------------------------------------------
 # VRS 转场类型 → AE 实现映射
 # ---------------------------------------------------------------------------
-TRANSITION_IMPL_MAP: Dict[str, Dict[str, Any]] = {
+TRANSITION_IMPL_MAP: dict[str, dict[str, Any]] = {
     "linear_wipe": {
         "display_name": "线性擦除",
         "effect_match": "ADBE Linear Wipe",
@@ -164,7 +164,7 @@ TRANSITION_IMPL_MAP: Dict[str, Dict[str, Any]] = {
 }
 
 # 硬编码 fallback（知识库加载失败时使用）
-_HARDCODED_TRANSITION_MAP: Dict[str, Dict[str, Any]] = {
+_HARDCODED_TRANSITION_MAP: dict[str, dict[str, Any]] = {
     k: dict(v) for k, v in TRANSITION_IMPL_MAP.items()
 }
 
@@ -246,7 +246,7 @@ class TransitionRebuilder:
                 comp_width, comp_height,
             )
 
-    def list_supported_transitions(self) -> List[Dict[str, str]]:
+    def list_supported_transitions(self) -> list[dict[str, str]]:
         """返回所有支持的转场类型。"""
         result = []
         for key, val in TRANSITION_IMPL_MAP.items():
@@ -262,7 +262,7 @@ class TransitionRebuilder:
 
     def _generate_effect_transition_jsx(
         self,
-        impl: Dict[str, Any],
+        impl: dict[str, Any],
         transition_type: str,
         target_layer: str,
         start_time: float,
@@ -273,17 +273,17 @@ class TransitionRebuilder:
         """生成基于效果的转场 JSX。"""
         lines = [
             f"// Transition: {impl.get('display_name', transition_type)}",
-            f'var targetLayer = null;',
-            f'for (var i = 1; i <= thisComp.numLayers; i++) {{',
+            'var targetLayer = null;',
+            'for (var i = 1; i <= thisComp.numLayers; i++) {',
             f'  if (thisComp.layer(i).name === "{target_layer}") {{',
-            f'    targetLayer = thisComp.layer(i);',
-            f'    break;',
-            f'  }}',
-            f'}}',
+            '    targetLayer = thisComp.layer(i);',
+            '    break;',
+            '  }',
+            '}',
             f'if (!targetLayer) {{ alert("Layer not found: {target_layer}"); }}',
             f'var st = {start_time};',
             f'var dur = {duration};',
-            f'',
+            '',
         ]
 
         # 单效果转场

@@ -12,13 +12,13 @@
 - ae_resolve: 只测试 AE → Resolve 链路
 """
 
-import os
-import sys
 import json
-import time
+import os
 import subprocess
+import sys
+import time
 from pathlib import Path
-from typing import Dict, List, Optional, Callable
+from typing import Callable, Dict, List, Optional
 
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -54,9 +54,9 @@ def step_log(step_num: int, total: int, title: str):
     print(f"{'='*60}")
 
 
-def test_phase1_ps_materials(output_dir: Path, mode: str = "auto") -> Dict:
+def test_phase1_ps_materials(output_dir: Path, mode: str = "auto") -> dict:
     """Phase 1: PS 材质纹理生成"""
-    from adobe_suite_integration import PhotoshopIntegrator, PhotoshopConfig
+    from adobe_suite_integration import PhotoshopConfig, PhotoshopIntegrator
 
     result = {
         "phase": "PS材质生成",
@@ -111,7 +111,7 @@ def test_phase1_ps_materials(output_dir: Path, mode: str = "auto") -> Dict:
 
         # 智能降级：第一个材质如果降级到 simulate，后续全部用 simulate
         if i == 1 and mat_result.mode == "simulate" and current_mode != "simulate":
-            print(f"    💡 检测到 real 模式不可用，后续材质将使用 simulate 模式")
+            print("    💡 检测到 real 模式不可用，后续材质将使用 simulate 模式")
             current_mode = "simulate"
         elif i == 1 and mat_result.mode == "real":
             result["real_mode_working"] = True
@@ -120,12 +120,12 @@ def test_phase1_ps_materials(output_dir: Path, mode: str = "auto") -> Dict:
     return result
 
 
-def test_phase2_ae_style(input_video: str, output_dir: Path, style: str = "wooden_puppet") -> Dict:
+def test_phase2_ae_style(input_video: str, output_dir: Path, style: str = "wooden_puppet") -> dict:
     """Phase 2: AE 木偶风格化合成
 
     生成 AE JSX 脚本，模拟合成效果
     """
-    from puppet_style_engine import PuppetStyleEngine, PuppetStyleConfig
+    from puppet_style_engine import PuppetStyleConfig, PuppetStyleEngine
 
     engine = PuppetStyleEngine()
 
@@ -262,7 +262,7 @@ def generate_puppet_jsx(input_video: str, style: str, style_result, comp_width: 
     return jsx
 
 
-def test_phase3_resolve_grade(input_video: str, output_dir: Path, preset: str = "puppet_warm") -> Dict:
+def test_phase3_resolve_grade(input_video: str, output_dir: Path, preset: str = "puppet_warm") -> dict:
     """Phase 3: DaVinci Resolve 调色"""
     from davinci_resolve_integration import (
         DavinciColorist,
@@ -322,7 +322,7 @@ def test_phase3_resolve_grade(input_video: str, output_dir: Path, preset: str = 
     return result
 
 
-def test_full_workflow(workflow_type: str = "full") -> Dict:
+def test_full_workflow(workflow_type: str = "full") -> dict:
     """执行完整工作流测试"""
     print("=" * 60)
     print("  🎭 木偶视频化 - 端到端工作流集成测试")

@@ -9,8 +9,8 @@ Phase B3/B4 完整测试 — 转场规则引擎 + 字幕产品化
 - B4: 6 种字幕预设 + 样式推荐 + SRT 解析 + 优化 + IR 导出
 """
 
-import sys
 import os
+import sys
 import unittest
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,9 +25,7 @@ class TestTransitionSelector(unittest.TestCase):
     """B3 转场智能选择器测试"""
 
     def setUp(self):
-        from ae.transition_selector import (
-            TransitionSelector, StyleCategory, ContentRelation, TransitionRule
-        )
+        from ae.transition_selector import ContentRelation, StyleCategory, TransitionRule, TransitionSelector
         self.selector = TransitionSelector(seed=42)
         self.StyleCategory = StyleCategory
         self.ContentRelation = ContentRelation
@@ -174,7 +172,7 @@ class TestSubtitlePresets(unittest.TestCase):
     """B4 字幕预设完整性测试"""
 
     def setUp(self):
-        from ae.subtitle_product import SubtitleStyler, SubtitleStylePreset, _BUILTIN_PRESETS
+        from ae.subtitle_product import _BUILTIN_PRESETS, SubtitleStylePreset, SubtitleStyler
         self.styler = SubtitleStyler()
         self.presets = _BUILTIN_PRESETS
 
@@ -351,8 +349,8 @@ class TestB3B4Integration(unittest.TestCase):
 
     def test_transition_and_subtitle_coexist(self):
         """转场选择器和字幕管线可同时实例化"""
-        from ae.transition_selector import TransitionSelector
         from ae.subtitle_product import SubtitlePipeline
+        from ae.transition_selector import TransitionSelector
         selector = TransitionSelector()
         pipeline = SubtitlePipeline()
         self.assertIsNotNone(selector)

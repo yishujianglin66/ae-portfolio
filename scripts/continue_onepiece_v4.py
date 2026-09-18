@@ -5,6 +5,7 @@
 - START_FRAME = 4500（seg009），END=10126
 """
 from __future__ import annotations
+
 import json
 import os
 import shutil
@@ -167,8 +168,8 @@ def main():
                 break
             # QC fail: 升级重试
         if not success:
-            L(f"    [FATAL] 全部重试失败，跳到下一段")
-    L(f"\n" + "=" * 70)
+            L("    [FATAL] 全部重试失败，跳到下一段")
+    L("\n" + "=" * 70)
     L(f"结束：成功段 {all_ok}/{len(segs)}，累计 copy mask={total_copied}")
     L(f"最终成品 mask 数量：{count_existing_masks(MASK_DIR)} / {END_FRAME}")
     L(f"总耗时: {time.time()-t0:.0f}s")

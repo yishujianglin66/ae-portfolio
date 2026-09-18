@@ -26,7 +26,7 @@ from .flagship_ws import flagship_ws_manager
 router = APIRouter(prefix="/api/v1/flagship", tags=["flagship"])
 
 # 内存中的 run 状态存储（生产环境应持久化到 DB/文件）
-_runs: Dict[str, Dict[str, Any]] = {}
+_runs: dict[str, dict[str, Any]] = {}
 
 # 旗舰管线 8 阶段定义
 STAGE_IDS = [
@@ -46,7 +46,7 @@ STAGE_LABELS = {
 }
 
 
-def _create_run(run_id: str, input_video: Optional[str] = None) -> Dict[str, Any]:
+def _create_run(run_id: str, input_video: str | None = None) -> dict[str, Any]:
     """创建新的 run 状态。"""
     run = {
         "run_id": run_id,
@@ -68,7 +68,7 @@ def _create_run(run_id: str, input_video: Optional[str] = None) -> Dict[str, Any
     return run
 
 
-def _get_run(run_id: str) -> Dict[str, Any]:
+def _get_run(run_id: str) -> dict[str, Any]:
     """获取 run，不存在则 404。"""
     run = _runs.get(run_id)
     if run is None:
@@ -81,7 +81,7 @@ def _get_run(run_id: str) -> Dict[str, Any]:
 # ============================================================================
 
 @router.post("/execute")
-async def execute_flagship(payload: Optional[Dict[str, Any]] = None):
+async def execute_flagship(payload: dict[str, Any] | None = None):
     """触发旗舰管线执行。
 
     可选 body: {"input_video": "/path/to/video.mp4"} —— 提供输入素材后
@@ -244,7 +244,7 @@ async def flagship_ws(websocket: WebSocket, run_id: str):
 # ============================================================================
 
 # 旗舰阶段 → 引擎映射（诚实执行：引擎可用则真实调用，不可用则明确失败）
-_STAGE_ENGINE_MAP: Dict[str, str] = {
+_STAGE_ENGINE_MAP: dict[str, str] = {
     "S0_health": None,          # 健康检查：引擎注册表可用性
     "S1_assets": "ffmpeg",      # 素材规范化：ffprobe
     "S2_beat": "ffmpeg",        # 节拍分析：音频探测（真实分析需素材）
@@ -258,10 +258,10 @@ _STAGE_ENGINE_MAP: Dict[str, str] = {
 
 async def _execute_stage_honest(
     stage_id: str,
-    engines: Dict[str, Any],
-    input_video: Optional[str],
+    engines: dict[str, Any],
+    input_video: str | None,
     run_dir: Path,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """诚实执行单个旗舰阶段。
 
     规则：
@@ -293,7 +293,7 @@ async def _execute_stage_honest(
     # S7 质量门：真实 QualityGate 检查（无产物时明确失败）
     if stage_id == "S7_qg":
         try:
-            from core.quality_gate import QualityGate, QualityContext
+            from core.quality_gate import QualityContext, QualityGate
             final_mp4 = run_dir / "S6_export" / "final.mp4"
             if not final_mp4.exists():
                 return {

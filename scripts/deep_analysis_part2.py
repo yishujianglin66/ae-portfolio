@@ -90,6 +90,7 @@ if amt_lang.exists():
 
 # 检查用户 Prefs 中的语言设置
 import os
+
 appdata = Path(os.environ.get("APPDATA", ""))
 ae_prefs = appdata / "Adobe" / "After Effects" / "25.3" / "Prefs"
 if ae_prefs.exists():

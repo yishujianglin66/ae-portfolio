@@ -34,7 +34,7 @@ class TestLLMTaskTypeExpansion:
 
     def test_model_routing_dict_contains_h3_keys(self):
         """C1(b) LLMConfig.model_routing 含 11 个新成员默认 "auto"。"""
-        from core.llm_gateway import TaskType, LLMConfig
+        from core.llm_gateway import LLMConfig, TaskType
 
         cfg = LLMConfig()
         routing_keys = list(cfg.model_routing.keys())
@@ -46,7 +46,8 @@ class TestLLMTaskTypeExpansion:
     def test_task_provider_map_h3_minimax(self):
         """C1(c) TASK_PROVIDER_MAP 含 11 条 minimax_h3 路由。"""
         from core.llm_gateway import (
-            TaskType, TASK_PROVIDER_MAP,
+            TASK_PROVIDER_MAP,
+            TaskType,
         )
         paid = {
             TaskType.VIDEO_GENERATION, TaskType.VIDEO_EDITING, TaskType.IMAGE_GENERATION,
@@ -70,7 +71,9 @@ class TestLLMTaskTypeExpansion:
     def test_task_tier_map_h3_sane(self):
         """C1(d) TASK_TIER_MAP 含 11 条，档位符合预期。"""
         from core.llm_gateway import (
-            TaskType, TASK_TIER_MAP, ModelTier,
+            TASK_TIER_MAP,
+            ModelTier,
+            TaskType,
         )
         for name in self.H3_NAMES:
             tt = getattr(TaskType, name)
@@ -107,7 +110,7 @@ class TestPerSecondBillingFields:
 
     def test_stats_and_tier_stats_fields(self):
         """C1(e3)(e4) LLMGateway _stats / _tier_stats 有 3 个字段。"""
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
         g = LLMGateway(LLMConfig())
         for key in ("total_video_seconds", "total_images_generated", "total_modality_cost_usd"):
             assert key in g._stats, f"_stats 缺 {key}"
@@ -176,7 +179,7 @@ class TestH3Provider:
         """C2.1 _get_h3_config 读取 AEKV_LLM_MINIMAX_H3_* 环境变量。"""
         monkeypatch.setenv("AEKV_LLM_MINIMAX_H3_BASE_URL", "https://custom-h3.example/v1")
         monkeypatch.setenv("AEKV_LLM_MINIMAX_H3_API_KEY", "sk-test-12345")
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
         g = LLMGateway(LLMConfig())
         cfg = g._get_h3_config()
         assert cfg["base_url"] == "https://custom-h3.example/v1"
@@ -187,7 +190,7 @@ class TestH3Provider:
     @pytest.mark.asyncio
     async def test_generate_video_mock_success(self, tmp_path, monkeypatch):
         """C2.2/3/4 generate_video 成功流程：创建 -> poll → 下载 → 计费更新。"""
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
         session = FakeSession()
         g = LLMGateway(LLMConfig())
         g._http_client = session  # 直接注入 fake session
@@ -230,7 +233,7 @@ class TestH3Provider:
     @pytest.mark.asyncio
     async def test_edit_video_mock_all_ops(self, tmp_path, monkeypatch):
         """C2.5 edit_video 覆盖 operation 映射。"""
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
         session = FakeSession()
         g = LLMGateway(LLMConfig())
         g._http_client = session
@@ -275,7 +278,10 @@ class TestChatWithRoutingShortCircuit:
     @pytest.mark.asyncio
     async def test_video_generation_short_circuit(self, monkeypatch):
         from core.llm_gateway import (
-            LLMGateway, LLMConfig, TaskType, LLMResponse,
+            LLMConfig,
+            LLMGateway,
+            LLMResponse,
+            TaskType,
         )
         g = LLMGateway(LLMConfig())
         async def fake_gen(*a, **k):
@@ -290,7 +296,7 @@ class TestChatWithRoutingShortCircuit:
 
     @pytest.mark.asyncio
     async def test_video_editing_short_circuit(self, monkeypatch):
-        from core.llm_gateway import LLMGateway, LLMConfig, TaskType, LLMResponse
+        from core.llm_gateway import LLMConfig, LLMGateway, LLMResponse, TaskType
         g = LLMGateway(LLMConfig())
         async def fake_edit(*a, **k):
             return {"success": True, "output_path": "/tmp/y.mp4", "cost_usd": 2.4, "error": ""}
@@ -307,7 +313,7 @@ class TestChatWithRoutingShortCircuit:
     @pytest.mark.asyncio
     async def test_short_circuit_exception_fallback_no_escalate(self, monkeypatch):
         """短路时异常，不应抛到上层，应返回失败 LLMResponse.success=False。"""
-        from core.llm_gateway import LLMGateway, LLMConfig, TaskType, LLMResponse
+        from core.llm_gateway import LLMConfig, LLMGateway, LLMResponse, TaskType
         g = LLMGateway(LLMConfig())
         async def boom(*a, **k):
             raise RuntimeError("网络炸了")
@@ -326,7 +332,7 @@ class TestChatWithRoutingShortCircuit:
 class TestP2Skeletons:
     def test_check_local_h3_structured_result(self):
         """check_local_h3_available 返回结构化字段齐全且类型正确。"""
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
         g = LLMGateway(LLMConfig())
         r = g.check_local_h3_available()
         for k in ("available", "reason", "model_path", "device",
@@ -341,7 +347,7 @@ class TestP2Skeletons:
     @pytest.mark.asyncio
     async def test_sketch_to_effect_no_sketch_image_error(self):
         """sketch_to_effect 缺参考图时直接返回 error，不抛。"""
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
         g = LLMGateway(LLMConfig())
         r = await g.sketch_to_effect(
             sketch_image_path="/this_file_not_exists_xyz_12345.png",
@@ -353,7 +359,7 @@ class TestP2Skeletons:
     @pytest.mark.asyncio
     async def test_sketch_to_effect_no_api_and_no_local(self, tmp_path, monkeypatch):
         """无 API Key + 本地未启用 -> 返回 error，不抛。"""
-        from core.llm_gateway import LLMGateway, LLMConfig
+        from core.llm_gateway import LLMConfig, LLMGateway
         g = LLMGateway(LLMConfig())
         sk = tmp_path / "sketch.png"
         sk.write_bytes(b"\x89PNG fake")

@@ -30,7 +30,7 @@ class ColorGradingApplier:
 
     def generate_color_grade_jsx(
         self,
-        color_analysis: Dict[str, Any],
+        color_analysis: dict[str, Any],
         adjustment_layer_name: str = "Color_Grade_Adjust",
         comp_width: int = 1920,
         comp_height: int = 1080,
@@ -58,7 +58,7 @@ class ColorGradingApplier:
             "// Color Grading - Auto-generated",
             "// ============================================",
             "",
-            f'var comp = thisComp;',
+            'var comp = thisComp;',
             f'var adj = comp.layers.addSolid([0.5, 0.5, 0.5], "{adjustment_layer_name}", '
             f'{comp_width}, {comp_height}, 1, {duration});',
             'adj.adjustmentLayer = true;',
@@ -97,7 +97,7 @@ class ColorGradingApplier:
 
         return '\n'.join(lines)
 
-    def extract_color_params_from_vrs(self, vrs_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def extract_color_params_from_vrs(self, vrs_analysis: dict[str, Any]) -> dict[str, Any]:
         """从 VRS v2 完整分析结果中提取调色相关参数。
 
         将 VRS 的 effect 列表中 color 类型的效果参数提取出来，
@@ -109,7 +109,7 @@ class ColorGradingApplier:
         Returns:
             调色参数字典
         """
-        color_params: Dict[str, Any] = {}
+        color_params: dict[str, Any] = {}
 
         # 提取效果列表
         effects = self._extract_color_effects(vrs_analysis)
@@ -138,7 +138,7 @@ class ColorGradingApplier:
     # 内部 JSX 生成方法
     # =========================================================================
 
-    def _generate_lumetri_jsx(self, lumetri: Dict[str, Any]) -> List[str]:
+    def _generate_lumetri_jsx(self, lumetri: dict[str, Any]) -> list[str]:
         """生成 Lumetri Color 效果 JSX。"""
         lines = [
             '// --- Lumetri Color ---',
@@ -175,7 +175,7 @@ class ColorGradingApplier:
         lines.append('')
         return lines
 
-    def _generate_curves_jsx(self, curves: Dict[str, Any]) -> List[str]:
+    def _generate_curves_jsx(self, curves: dict[str, Any]) -> list[str]:
         """生成 Curves 效果 JSX。"""
         lines = [
             '// --- Curves ---',
@@ -196,12 +196,12 @@ class ColorGradingApplier:
                 if isinstance(points, list) and len(points) >= 2:
                     # AE Curves 需要设置控制点
                     lines.append(f'// {ae_name}: {json.dumps(points)}')
-                    lines.append(f'// (Curves control points require manual adjustment in AE UI)')
+                    lines.append('// (Curves control points require manual adjustment in AE UI)')
 
         lines.append('')
         return lines
 
-    def _generate_color_balance_jsx(self, cb: Dict[str, Any]) -> List[str]:
+    def _generate_color_balance_jsx(self, cb: dict[str, Any]) -> list[str]:
         """生成 Color Balance 效果 JSX。"""
         lines = [
             '// --- Color Balance ---',
@@ -226,7 +226,7 @@ class ColorGradingApplier:
         lines.append('')
         return lines
 
-    def _generate_tritone_jsx(self, tritone: Dict[str, Any]) -> List[str]:
+    def _generate_tritone_jsx(self, tritone: dict[str, Any]) -> list[str]:
         """生成 Tritone 效果 JSX。"""
         lines = [
             '// --- Tritone ---',
@@ -247,7 +247,7 @@ class ColorGradingApplier:
         lines.append('')
         return lines
 
-    def _generate_lut_jsx(self, lut_path: str) -> List[str]:
+    def _generate_lut_jsx(self, lut_path: str) -> list[str]:
         """生成 Import LUT 效果 JSX。"""
         escaped = lut_path.replace('\\', '\\\\').replace('"', '\\"')
         return [
@@ -259,7 +259,7 @@ class ColorGradingApplier:
             '',
         ]
 
-    def _generate_bc_jsx(self, bc: Dict[str, Any]) -> List[str]:
+    def _generate_bc_jsx(self, bc: dict[str, Any]) -> list[str]:
         """生成 Brightness & Contrast 效果 JSX。"""
         lines = [
             '// --- Brightness & Contrast ---',
@@ -279,7 +279,7 @@ class ColorGradingApplier:
     # 辅助方法
     # =========================================================================
 
-    def _extract_color_effects(self, analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _extract_color_effects(self, analysis: dict[str, Any]) -> list[dict[str, Any]]:
         """从 VRS 分析结果中提取 color 类型的效果。"""
         color_effects = []
 

@@ -1,6 +1,8 @@
 import asyncio
+
 from src.config.settings import settings
 from src.engines.ae.engine import AEEngine
+
 
 async def main():
     engine = AEEngine()

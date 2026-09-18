@@ -1,7 +1,8 @@
 """Quick render test - try different formats"""
-import json, time
-from pathlib import Path
+import json
+import time
 from datetime import datetime
+from pathlib import Path
 
 BD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge")
 CMD = BD / "ae_command.json"
@@ -71,6 +72,7 @@ else:
 
 # Step 3: Check output
 import os
+
 for f in os.listdir(OUT):
     fp = os.path.join(OUT, f)
     print(f"  FILE: {f} ({os.path.getsize(fp)} bytes)")

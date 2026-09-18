@@ -35,7 +35,7 @@ import torch.nn as nn
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -71,10 +71,10 @@ FEAT_DIM = 384
 
 def load_trainable(labels_path: str, min_conf: float = 0.7,
                    time_reverse: bool = True,
-                   data_root: str = "") -> List[Dict[str, Any]]:
+                   data_root: str = "") -> list[dict[str, Any]]:
     """加载 VLM 标注, 六类映射, 过滤 complex/低置信/缺失文件。"""
     label_files = [p.strip() for p in labels_path.split("|") if p.strip()]
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for lf in label_files:
         p = Path(lf)
         if not p.exists():
@@ -91,7 +91,7 @@ def load_trainable(labels_path: str, min_conf: float = 0.7,
     logger.info("标签文件加载: %d 行 (来自 %d 文件)", len(rows), len(label_files))
 
     # 去重
-    seen: Dict[str, Dict[str, Any]] = {}
+    seen: dict[str, dict[str, Any]] = {}
     for r in rows:
         sid = r.get("shot_id", "")
         if sid:
@@ -103,7 +103,7 @@ def load_trainable(labels_path: str, min_conf: float = 0.7,
         cp = cp.replace("\\", "/")
         return cp.rsplit("/", 1)[-1] if "/" in cp else cp
 
-    samples: List[Dict[str, Any]] = []
+    samples: list[dict[str, Any]] = []
     skipped = 0
     for r in rows:
         raw_label = r.get("movement_label", "").strip()
@@ -149,8 +149,8 @@ def load_trainable(labels_path: str, min_conf: float = 0.7,
 class ClipDataset(torch.utils.data.Dataset):
     """运镜分类数据集 — DINOv2 版 (禁止水平翻转, 支持 Repeated Augmentation)"""
 
-    def __init__(self, samples: List[Dict[str, Any]],
-                 label_to_idx: Dict[str, int],
+    def __init__(self, samples: list[dict[str, Any]],
+                 label_to_idx: dict[str, int],
                  num_sample: int = 2,
                  is_train: bool = True):
         self.samples = samples
@@ -161,7 +161,7 @@ class ClipDataset(torch.utils.data.Dataset):
     def __len__(self) -> int:
         return len(self.samples) * self.num_sample
 
-    def _load_frames(self, clip: str, copy_id: int = 0) -> Optional[np.ndarray]:
+    def _load_frames(self, clip: str, copy_id: int = 0) -> np.ndarray | None:
         from decord import VideoReader, cpu
         try:
             vr = VideoReader(clip, ctx=cpu(0), width=IMG_SIZE, height=IMG_SIZE)
@@ -182,7 +182,7 @@ class ClipDataset(torch.utils.data.Dataset):
         except Exception:
             return None
 
-    def __getitem__(self, idx: int) -> Dict[str, Any]:
+    def __getitem__(self, idx: int) -> dict[str, Any]:
         sample_idx = idx // self.num_sample
         copy_id = idx % self.num_sample
         s = self.samples[sample_idx]
@@ -214,7 +214,7 @@ class ClipDataset(torch.utils.data.Dataset):
         return {"pixel_values": frames_tensor, "labels": self.label_to_idx[s["label"]]}
 
 
-def _collate_batch(batch: List[Dict[str, Any]]) -> Dict[str, Any]:
+def _collate_batch(batch: list[dict[str, Any]]) -> dict[str, Any]:
     """collate: (B, T, C, H, W) uint8 → float + ImageNet 归一化"""
     videos = torch.stack([b["pixel_values"] for b in batch])
     videos = videos.float() / 255.0
@@ -282,7 +282,7 @@ class DINOv2TemporalClassifier(nn.Module):
         logger.info("DINOv2TemporalClassifier: 可训练 %d / %d (%.2f%%)",
                     n_train, n_total, 100 * n_train / max(1, n_total))
 
-    def forward(self, pixel_values: torch.Tensor, **kwargs) -> Dict[str, torch.Tensor]:
+    def forward(self, pixel_values: torch.Tensor, **kwargs) -> dict[str, torch.Tensor]:
         """
         Args:
             pixel_values: [B, T, C, H, W] normalized
@@ -484,7 +484,7 @@ def main():
     # 9. 训练循环
     best_acc = 0.0
     best_epoch = 0
-    history: List[Dict[str, Any]] = []
+    history: list[dict[str, Any]] = []
     t0 = time.time()
 
     for epoch in range(args.epochs):

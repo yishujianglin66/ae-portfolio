@@ -26,7 +26,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from core.evolution.protocol import append_jsonl, read_json, write_json, within_cost_limit
+from core.evolution.protocol import append_jsonl, read_json, within_cost_limit, write_json
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +64,8 @@ class BenchmarkBuilder:
         task_type: str,
         count: int = 3,
         split: str = "train",
-        seed_topics: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        seed_topics: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
         """用 LLM 自动生成评测题目
 
         Args:
@@ -84,7 +84,7 @@ class BenchmarkBuilder:
         existing_ids = self.all_task_ids()
         prompt = self._build_generation_prompt(task_type, count, seed_topics)
 
-        raw_tasks: List[Dict[str, Any]] = []
+        raw_tasks: list[dict[str, Any]] = []
         try:
             raw_tasks = self._call_llm(prompt)
         except Exception as e:
@@ -92,7 +92,7 @@ class BenchmarkBuilder:
             return []
 
         # 校验 + 去重 + 分配唯一 ID
-        accepted: List[Dict[str, Any]] = []
+        accepted: list[dict[str, Any]] = []
         for i, task in enumerate(raw_tasks):
             if not isinstance(task, dict):
                 continue
@@ -138,7 +138,7 @@ class BenchmarkBuilder:
     # ----------------------------------------------------------------
 
     def _build_generation_prompt(
-        self, task_type: str, count: int, seed_topics: Optional[List[str]]
+        self, task_type: str, count: int, seed_topics: list[str] | None
     ) -> str:
         seeds = f"\n可选主题参考: {', '.join(seed_topics)}" if seed_topics else ""
         return (
@@ -157,9 +157,10 @@ class BenchmarkBuilder:
             "不要输出 id 字段（系统自动分配），不要 markdown，不要任何额外文字。"
         )
 
-    def _call_llm(self, prompt: str) -> List[Dict[str, Any]]:
+    def _call_llm(self, prompt: str) -> list[dict[str, Any]]:
         """调用 LLM 生成题目（带成本熔断）"""
         import asyncio
+
         from core.llm_gateway import LLMGateway, TaskType
 
         gateway = LLMGateway()
@@ -194,7 +195,7 @@ class BenchmarkBuilder:
             logger.warning("[BenchmarkBuilder] generation tokens exceeded limit")
         return self._parse_tasks_json(getattr(resp, "content", "") or "")
 
-    def _parse_tasks_json(self, content: str) -> List[Dict[str, Any]]:
+    def _parse_tasks_json(self, content: str) -> list[dict[str, Any]]:
         """从 LLM 输出中解析 JSON 数组（容忍 markdown 包裹）"""
         if not content:
             return []
@@ -224,11 +225,11 @@ class BenchmarkBuilder:
 
     def _normalize_task(
         self,
-        task: Dict[str, Any],
+        task: dict[str, Any],
         task_type: str,
         existing_ids: set,
         index: int,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """规范化单个题目（补全字段）"""
         input_text = str(task.get("input", "")).strip()
         if not input_text:
@@ -251,7 +252,7 @@ class BenchmarkBuilder:
             "tags": [str(t) for t in tags],
         }
 
-    def validate_task(self, task: Dict[str, Any]) -> bool:
+    def validate_task(self, task: dict[str, Any]) -> bool:
         """结构校验：必填字段非空"""
         for field_name in self.REQUIRED_FIELDS:
             if not str(task.get(field_name, "")).strip():
@@ -286,7 +287,7 @@ class BenchmarkBuilder:
 
     def check_isolation(
         self,
-        new_tasks: List[Dict[str, Any]],
+        new_tasks: list[dict[str, Any]],
         exclude_split: str = "train",
     ) -> bool:
         """训练/验证/测试集隔离校验 — 新题目 ID 不得出现在其他 split
@@ -314,12 +315,12 @@ class BenchmarkBuilder:
     #  查询与落盘
     # ----------------------------------------------------------------
 
-    def list_tasks(self, split: str = "train", task_type: str = "") -> List[Dict[str, Any]]:
+    def list_tasks(self, split: str = "train", task_type: str = "") -> list[dict[str, Any]]:
         """列出某 split 的全部题目（含手动 + 生成）"""
         split_dir = self._benchmark_dir / split
         if not split_dir.exists():
             return []
-        tasks: List[Dict[str, Any]] = []
+        tasks: list[dict[str, Any]] = []
         for json_file in sorted(split_dir.glob("*.json")):
             data = read_json(json_file, [])
             if not isinstance(data, list):
@@ -332,7 +333,7 @@ class BenchmarkBuilder:
         return tasks
 
     def _save_tasks(
-        self, tasks: List[Dict[str, Any]], split: str, task_type: str
+        self, tasks: list[dict[str, Any]], split: str, task_type: str
     ) -> Path:
         ts = time.strftime("%Y%m%d_%H%M%S")
         safe_type = re.sub(r"[^\w-]", "_", task_type) or "tasks"
@@ -346,9 +347,9 @@ class BenchmarkBuilder:
 
     def generate_from_trajectory(
         self,
-        trajectory: Dict[str, Any],
+        trajectory: dict[str, Any],
         split: str = "train",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """从历史执行轨迹提炼新题目（P2 阶段实现完整逻辑）
 
         当前为最小实现：轨迹含 task_type + input 时直接转题目。
@@ -379,7 +380,7 @@ class BenchmarkBuilder:
 #  全局单例
 # ============================================================================
 
-_global_builder: Optional[BenchmarkBuilder] = None
+_global_builder: BenchmarkBuilder | None = None
 
 
 def get_benchmark_builder(

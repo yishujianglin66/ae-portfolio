@@ -26,13 +26,13 @@ class DaVinciGradeResult:
     """S5 阶段执行结果。"""
 
     success: bool
-    graded_mov: Optional[Path] = None
+    graded_mov: Path | None = None
     project_name: str = "FlagshipDR"
     nodes_applied: int = 0
     has_lut: bool = False
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     elapsed_s: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 # ASCII 文件名校验正则

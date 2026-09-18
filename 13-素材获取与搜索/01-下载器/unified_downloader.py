@@ -26,7 +26,7 @@ if _CURRENT_DIR not in sys.path:
 # ==================== 常量配置 ====================
 
 # 平台识别规则
-PLATFORM_RULES: Dict[str, list] = {
+PLATFORM_RULES: dict[str, list] = {
     "douyin": ["douyin.com", "iesdouyin.com", "v.douyin.com"],
     "bilibili": ["bilibili.com", "b23.tv", "acg.tv"],
     "youtube": ["youtube.com", "youtu.be"],
@@ -76,7 +76,7 @@ class UnknownPlatformError(UnifiedDownloaderError):
 # ==================== 平台识别 ====================
 
 
-def detect_platform(url: str) -> Optional[str]:
+def detect_platform(url: str) -> str | None:
     """自动识别 URL 对应的平台。
 
     识别规则：
@@ -112,16 +112,16 @@ def detect_platform(url: str) -> Optional[str]:
 class _ModuleLoader:
     """延迟加载下载器模块，避免单平台依赖缺失导致整体不可用。"""
 
-    _instances: Dict[str, Any] = {}
-    _errors: Dict[str, str] = {}
+    _instances: dict[str, Any] = {}
+    _errors: dict[str, str] = {}
 
     @classmethod
     def get_douyin_downloader(
         cls,
-        cookie: Optional[str] = None,
-        cookie_path: Optional[str] = None,
-        proxy: Optional[str] = None,
-    ) -> Tuple[Any, Optional[str]]:
+        cookie: str | None = None,
+        cookie_path: str | None = None,
+        proxy: str | None = None,
+    ) -> tuple[Any, str | None]:
         """加载抖音下载器。
 
         Returns:
@@ -148,9 +148,9 @@ class _ModuleLoader:
     @classmethod
     def get_bilibili_downloader(
         cls,
-        cookie_path: Optional[str] = None,
-        proxy: Optional[str] = None,
-    ) -> Tuple[Any, Optional[str]]:
+        cookie_path: str | None = None,
+        proxy: str | None = None,
+    ) -> tuple[Any, str | None]:
         """加载 B站下载器。
 
         Returns:
@@ -177,9 +177,9 @@ class _ModuleLoader:
     @classmethod
     def get_youtube_downloader(
         cls,
-        cookie_path: Optional[str] = None,
-        proxy: Optional[str] = None,
-    ) -> Tuple[Any, Optional[str]]:
+        cookie_path: str | None = None,
+        proxy: str | None = None,
+    ) -> tuple[Any, str | None]:
         """加载 YouTube 下载器。
 
         Returns:
@@ -244,9 +244,9 @@ class UnifiedDownloader:
 
     def __init__(
         self,
-        cookie: Optional[str] = None,
-        cookie_path: Optional[str] = None,
-        proxy: Optional[str] = None,
+        cookie: str | None = None,
+        cookie_path: str | None = None,
+        proxy: str | None = None,
     ) -> None:
         """初始化统一下载器。
 
@@ -261,7 +261,7 @@ class UnifiedDownloader:
 
     # ---------- 公共接口 ----------
 
-    def detect_platform(self, url: str) -> Dict[str, Any]:
+    def detect_platform(self, url: str) -> dict[str, Any]:
         """检测 URL 对应的平台。
 
         Args:
@@ -291,10 +291,10 @@ class UnifiedDownloader:
     def download(
         self,
         url: str,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         audio_only: bool = False,
         quality: str = "1080p",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """统一下载入口，自动路由到对应下载器。
 
         Args:
@@ -360,8 +360,8 @@ class UnifiedDownloader:
     def download_bgm(
         self,
         url: str,
-        output_dir: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        output_dir: str | None = None,
+    ) -> dict[str, Any]:
         """下载视频并提取音频为 MP3（自动识别平台）。
 
         Args:
@@ -375,7 +375,7 @@ class UnifiedDownloader:
             output_dir = DEFAULT_BGM_DIR
         return self.download(url, output_dir=output_dir, audio_only=True)
 
-    def get_video_info(self, url: str) -> Dict[str, Any]:
+    def get_video_info(self, url: str) -> dict[str, Any]:
         """获取视频元数据（自动识别平台）。
 
         Args:
@@ -418,7 +418,7 @@ class UnifiedDownloader:
         url: str,
         output_dir: str,
         audio_only: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """抖音下载路由。"""
         downloader, error = _ModuleLoader.get_douyin_downloader(
             cookie=self.cookie, cookie_path=self.cookie_path, proxy=self.proxy
@@ -460,7 +460,7 @@ class UnifiedDownloader:
         output_dir: str,
         audio_only: bool = False,
         quality: str = "1080p",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """B站下载路由。"""
         downloader, error = _ModuleLoader.get_bilibili_downloader(
             cookie_path=self.cookie_path, proxy=self.proxy
@@ -494,7 +494,7 @@ class UnifiedDownloader:
         output_dir: str,
         audio_only: bool = False,
         quality: str = "1080p",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """YouTube 下载路由。"""
         downloader, error = _ModuleLoader.get_youtube_downloader(
             cookie_path=self.cookie_path, proxy=self.proxy
@@ -522,7 +522,7 @@ class UnifiedDownloader:
                 "url": url,
             }
 
-    def _get_info_douyin(self, url: str) -> Dict[str, Any]:
+    def _get_info_douyin(self, url: str) -> dict[str, Any]:
         """抖音信息查询路由。"""
         downloader, error = _ModuleLoader.get_douyin_downloader(
             cookie=self.cookie, cookie_path=self.cookie_path, proxy=self.proxy
@@ -544,7 +544,7 @@ class UnifiedDownloader:
                 "platform": "douyin",
             }
 
-    def _get_info_bilibili(self, url: str) -> Dict[str, Any]:
+    def _get_info_bilibili(self, url: str) -> dict[str, Any]:
         """B站信息查询路由。"""
         downloader, error = _ModuleLoader.get_bilibili_downloader(
             cookie_path=self.cookie_path, proxy=self.proxy
@@ -565,7 +565,7 @@ class UnifiedDownloader:
                 "platform": "bilibili",
             }
 
-    def _get_info_youtube(self, url: str) -> Dict[str, Any]:
+    def _get_info_youtube(self, url: str) -> dict[str, Any]:
         """YouTube 信息查询路由。"""
         downloader, error = _ModuleLoader.get_youtube_downloader(
             cookie_path=self.cookie_path, proxy=self.proxy
@@ -590,7 +590,7 @@ class UnifiedDownloader:
 # ==================== 同步包装器（用于 --json-input 协议） ====================
 
 
-def _handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
+def _handle_request(request: dict[str, Any]) -> dict[str, Any]:
     """处理 --json-input 协议请求。"""
     func_name = request.get("func")
     params = request.get("params", {}) or {}
@@ -599,7 +599,7 @@ def _handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
         return {"success": False, "error": "缺少 func 字段"}
 
     # 初始化下载器
-    init_kwargs: Dict[str, Any] = {}
+    init_kwargs: dict[str, Any] = {}
     if "cookie" in params:
         init_kwargs["cookie"] = params.pop("cookie")
     if "cookie_path" in params:

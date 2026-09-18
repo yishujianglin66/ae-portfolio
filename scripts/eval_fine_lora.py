@@ -20,17 +20,17 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 try:
-    from scripts.train_anime_camera_lora import FINE_LABELS, NUM_FRAMES, IMG_SIZE  # noqa: E402
+    from scripts.train_anime_camera_lora import FINE_LABELS, IMG_SIZE, NUM_FRAMES  # noqa: E402
 except ImportError:
-    from train_anime_camera_lora import FINE_LABELS, NUM_FRAMES, IMG_SIZE  # noqa: E402
+    from train_anime_camera_lora import FINE_LABELS, IMG_SIZE, NUM_FRAMES  # noqa: E402
 
 MODEL_DIR = r"D:\AE-Data\Models\VideoMAE-MovieShots\movement"
 
 
-def load_frames(clip: str) -> Optional[np.ndarray]:
+def load_frames(clip: str) -> np.ndarray | None:
     from decord import VideoReader, cpu
     try:
         vr = VideoReader(clip, ctx=cpu(0))
@@ -82,8 +82,8 @@ def main() -> int:
 
     import torch
     device = get_device()
-    from transformers import VideoMAEForVideoClassification
     from peft import PeftModel
+    from transformers import VideoMAEForVideoClassification
     # v3 修复: fine schema 的 classifier 是 num_labels 重建的头 (不在基座 ckpt),
     # 训练脚本用 modules_to_save=["classifier"] 存进 adapter; 评估必须同样
     # 以 num_labels=10 重建 base, 否则 4 类头与 10 类 adapter 不匹配 (v3 首次评估坑)

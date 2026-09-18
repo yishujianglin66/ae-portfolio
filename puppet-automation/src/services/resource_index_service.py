@@ -35,9 +35,8 @@ from loguru import logger
 
 from ..config import settings
 
-
 # 资源类别 → (settings 字段名, 允许的扩展名列表)
-_RESOURCE_CATEGORIES: Dict[str, tuple] = {
+_RESOURCE_CATEGORIES: dict[str, tuple] = {
     "fonts": ("fonts_dir", (".ttf", ".otf", ".ttc")),
     "luts": ("luts_dir", (".cube", ".3dl", ".look", ".cms")),
     "effects": ("effects_dir", (".png", ".jpg", ".jpeg", ".webp", ".bmp", ".gif")),
@@ -67,7 +66,7 @@ class ResourceEntry:
     category: str       # 资源类别（fonts/luts/effects/...）
     relative_path: str  # 相对资源库根目录的路径
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转为字典（供 API 返回 / LLM 注入使用）。"""
         return asdict(self)
 
@@ -79,7 +78,7 @@ class ResourceIndexService:
     """
 
     def __init__(self) -> None:
-        self._index: Dict[str, List[ResourceEntry]] = {}
+        self._index: dict[str, list[ResourceEntry]] = {}
         self._initialized: bool = False
         self._lock = asyncio.Lock()
 
@@ -111,9 +110,9 @@ class ResourceIndexService:
         summary = {k: len(v) for k, v in self._index.items()}
         logger.info(f"资源索引构建完成: 共 {total} 个资源 | 分布: {summary}")
 
-    def _scan_all_categories(self) -> Dict[str, List[ResourceEntry]]:
+    def _scan_all_categories(self) -> dict[str, list[ResourceEntry]]:
         """扫描所有资源类别（同步，在 thread 中调用）。"""
-        index: Dict[str, List[ResourceEntry]] = {}
+        index: dict[str, list[ResourceEntry]] = {}
         for category, (settings_field, extensions) in _RESOURCE_CATEGORIES.items():
             index[category] = self._scan_category(category, settings_field, extensions)
         return index
@@ -123,7 +122,7 @@ class ResourceIndexService:
         category: str,
         settings_field: str,
         extensions: tuple,
-    ) -> List[ResourceEntry]:
+    ) -> list[ResourceEntry]:
         """扫描单个资源类别目录。"""
         root_dir: Path = getattr(settings, settings_field, None)
         if root_dir is None:
@@ -134,7 +133,7 @@ class ResourceIndexService:
             logger.warning(f"资源目录不存在: {root_dir} (category={category})")
             return []
 
-        entries: List[ResourceEntry] = []
+        entries: list[ResourceEntry] = []
         try:
             for file_path in root_dir.rglob("*"):
                 if not file_path.is_file():
@@ -174,7 +173,7 @@ class ResourceIndexService:
         category: str,
         name: str,
         exact: bool = False,
-    ) -> Optional[Path]:
+    ) -> Path | None:
         """查找资源（通用方法）。
 
         Args:
@@ -191,10 +190,10 @@ class ResourceIndexService:
 
     def _match_entry(
         self,
-        entries: List[ResourceEntry],
+        entries: list[ResourceEntry],
         name: str,
         exact: bool,
-    ) -> Optional[Path]:
+    ) -> Path | None:
         """在条目列表中匹配名称（同步）。"""
         if not entries:
             return None
@@ -228,63 +227,63 @@ class ResourceIndexService:
 
         return None
 
-    async def find_font(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_font(self, name: str, exact: bool = False) -> Path | None:
         """查找字体文件。"""
         return await self.find_resource("fonts", name, exact)
 
-    async def find_lut(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_lut(self, name: str, exact: bool = False) -> Path | None:
         """查找 LUT 文件。"""
         return await self.find_resource("luts", name, exact)
 
-    async def find_effect_image(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_effect_image(self, name: str, exact: bool = False) -> Path | None:
         """查找特效贴图。"""
         return await self.find_resource("effects", name, exact)
 
-    async def find_psd(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_psd(self, name: str, exact: bool = False) -> Path | None:
         """查找 PSD 文件。"""
         return await self.find_resource("psd", name, exact)
 
-    async def find_audio(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_audio(self, name: str, exact: bool = False) -> Path | None:
         """查找音频文件。"""
         return await self.find_resource("audio", name, exact)
 
-    async def find_video(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_video(self, name: str, exact: bool = False) -> Path | None:
         """查找视频文件。"""
         return await self.find_resource("video", name, exact)
 
-    async def find_model(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_model(self, name: str, exact: bool = False) -> Path | None:
         """查找 3D 模型文件。"""
         return await self.find_resource("models", name, exact)
 
-    async def find_davinci_preset(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_davinci_preset(self, name: str, exact: bool = False) -> Path | None:
         """查找达芬奇预设/插件文件。"""
         return await self.find_resource("davinci", name, exact)
 
-    async def find_premiere_preset(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_premiere_preset(self, name: str, exact: bool = False) -> Path | None:
         """查找 PR 预设文件。"""
         return await self.find_resource("premiere", name, exact)
 
-    async def find_project(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_project(self, name: str, exact: bool = False) -> Path | None:
         """查找 AE 工程文件。"""
         return await self.find_resource("projects", name, exact)
 
-    async def find_ae_preset(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_ae_preset(self, name: str, exact: bool = False) -> Path | None:
         """查找 AE 插件预设文件（.ffx / .aex / .anim）。"""
         return await self.find_resource("ae_presets", name, exact)
 
-    async def find_script(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_script(self, name: str, exact: bool = False) -> Path | None:
         """查找 AE 脚本文件（.jsx / .jsxbin / .js）。"""
         return await self.find_resource("scripts", name, exact)
 
-    async def find_plugin_package(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_plugin_package(self, name: str, exact: bool = False) -> Path | None:
         """查找 AE 插件安装包（.zxp / .aex / .exe / .msi）。"""
         return await self.find_resource("plugins", name, exact)
 
-    async def find_template(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_template(self, name: str, exact: bool = False) -> Path | None:
         """查找 AE 工程模板文件（.aep / .aet / .mogrt）。"""
         return await self.find_resource("templates", name, exact)
 
-    async def find_image(self, name: str, exact: bool = False) -> Optional[Path]:
+    async def find_image(self, name: str, exact: bool = False) -> Path | None:
         """查找图片素材文件。"""
         return await self.find_resource("images", name, exact)
 
@@ -297,7 +296,7 @@ class ResourceIndexService:
         category: str,
         limit: int = 100,
         offset: int = 0,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """列出指定类别的资源清单。
 
         Args:
@@ -313,39 +312,39 @@ class ResourceIndexService:
         sliced = entries[offset : offset + limit]
         return [e.to_dict() for e in sliced]
 
-    async def list_fonts(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_fonts(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """列出字体清单（供 LLM 推荐字体时使用）。"""
         return await self.list_resources_by_type("fonts", limit, offset)
 
-    async def list_luts(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_luts(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """列出 LUT 清单（供 LLM 推荐调色方案时使用）。"""
         return await self.list_resources_by_type("luts", limit, offset)
 
-    async def list_effects(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_effects(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """列出现效贴图清单。"""
         return await self.list_resources_by_type("effects", limit, offset)
 
-    async def list_audio(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_audio(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """列出音频清单。"""
         return await self.list_resources_by_type("audio", limit, offset)
 
-    async def list_video(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_video(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """列出视频素材清单。"""
         return await self.list_resources_by_type("video", limit, offset)
 
-    async def list_scripts(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_scripts(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """列出 AE 脚本清单。"""
         return await self.list_resources_by_type("scripts", limit, offset)
 
-    async def list_plugins(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_plugins(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """列出 AE 插件包清单。"""
         return await self.list_resources_by_type("plugins", limit, offset)
 
-    async def list_templates(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_templates(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """列出 AE 模板清单。"""
         return await self.list_resources_by_type("templates", limit, offset)
 
-    async def list_images(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_images(self, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
         """列出图片素材清单。"""
         return await self.list_resources_by_type("images", limit, offset)
 
@@ -353,7 +352,7 @@ class ResourceIndexService:
     # 摘要与统计
     # ------------------------------------------------------------------
 
-    def get_index_summary(self) -> Dict[str, int]:
+    def get_index_summary(self) -> dict[str, int]:
         """获取索引摘要（各类别资源数量）。
 
         Returns:

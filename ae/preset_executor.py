@@ -18,10 +18,10 @@ import json
 import math
 import os
 import re
-from typing import Dict, List, Any, Optional, Tuple
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
-from .preset_system import PresetSystem, Preset
+from .preset_system import Preset, PresetSystem
 
 
 class PresetExecutor:
@@ -35,7 +35,7 @@ class PresetExecutor:
         preset_name: str,
         ae_client=None,
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         执行单个预设
 
@@ -85,11 +85,11 @@ class PresetExecutor:
 
     def execute_preset_chain(
         self,
-        preset_names: List[str],
+        preset_names: list[str],
         ae_client=None,
-        shared_params: Dict[str, Any] = None,
-        per_preset_params: Dict[str, Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        shared_params: dict[str, Any] = None,
+        per_preset_params: dict[str, dict[str, Any]] = None,
+    ) -> dict[str, Any]:
         """
         执行预设链（按顺序执行多个预设）
 
@@ -122,7 +122,7 @@ class PresetExecutor:
 
     def generate_combined_script(
         self,
-        preset_names: List[str],
+        preset_names: list[str],
         **kwargs
     ) -> str:
         """
@@ -150,7 +150,7 @@ class PresetExecutor:
         keyword: str,
         ae_client=None,
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         搜索预设并执行
 
@@ -173,7 +173,7 @@ class PresetExecutor:
         preset = presets[0]
         return self.execute_preset(preset.name, ae_client, **kwargs)
 
-    def get_preset_info(self, preset_name: str) -> Optional[Dict[str, Any]]:
+    def get_preset_info(self, preset_name: str) -> dict[str, Any] | None:
         """
         获取预设详细信息
 
@@ -188,7 +188,7 @@ class PresetExecutor:
             return preset.to_dict()
         return None
 
-    def list_presets_by_category(self, category: str) -> List[Dict[str, Any]]:
+    def list_presets_by_category(self, category: str) -> list[dict[str, Any]]:
         """
         按分类列出预设
 
@@ -209,13 +209,13 @@ class PresetExecutor:
 class PresetCombination:
     """预设组合"""
 
-    def __init__(self, name: str, description: str, presets: List[str]):
+    def __init__(self, name: str, description: str, presets: list[str]):
         self.name = name
         self.description = description
         self.presets = presets
-        self.parameters: Dict[str, Any] = {}
+        self.parameters: dict[str, Any] = {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "description": self.description,
@@ -228,7 +228,7 @@ class PresetLibrary:
     """预设库"""
 
     def __init__(self):
-        self.combinations: Dict[str, PresetCombination] = {}
+        self.combinations: dict[str, PresetCombination] = {}
         self._load_combinations()
 
     def _load_combinations(self):
@@ -249,15 +249,15 @@ class PresetLibrary:
                 except Exception as e:
                     print(f"加载组合文件失败 {json_file}: {e}")
 
-    def get_combination(self, name: str) -> Optional[PresetCombination]:
+    def get_combination(self, name: str) -> PresetCombination | None:
         """获取预设组合"""
         return self.combinations.get(name)
 
-    def list_combinations(self) -> List[str]:
+    def list_combinations(self) -> list[str]:
         """列出所有组合"""
         return list(self.combinations.keys())
 
-    def create_combination(self, name: str, description: str, presets: List[str]) -> PresetCombination:
+    def create_combination(self, name: str, description: str, presets: list[str]) -> PresetCombination:
         """创建预设组合"""
         combo = PresetCombination(name, description, presets)
         self.combinations[name] = combo
@@ -287,7 +287,7 @@ def create_preset_library() -> PresetLibrary:
 # ============================================================
 
 # 风格名称映射（支持中英文、ID、别名）
-STYLE_ALIASES: Dict[str, List[str]] = {
+STYLE_ALIASES: dict[str, list[str]] = {
     "anime_puppet": ["动漫木偶风", "木偶风", "动漫风", "anime", "puppet"],
     "cinematic_color": ["电影感调色", "电影风", "电影调色", "cinematic", "color_grading"],
     "glitch_digital": ["故障数字风", "故障风", "数字风", "glitch", "digital"],
@@ -298,7 +298,7 @@ STYLE_ALIASES: Dict[str, List[str]] = {
 }
 
 # 反向索引：别名/中文名 -> 风格ID
-_ALIAS_TO_STYLE_ID: Dict[str, str] = {}
+_ALIAS_TO_STYLE_ID: dict[str, str] = {}
 for _style_id, _aliases in STYLE_ALIASES.items():
     _ALIAS_TO_STYLE_ID[_style_id] = _style_id  # ID 本身也可用于查找
     for _alias in _aliases:
@@ -321,7 +321,7 @@ _DEFAULT_COMP_SETTINGS = {
 }
 
 
-def resolve_style_id(style_name: str) -> Optional[str]:
+def resolve_style_id(style_name: str) -> str | None:
     """将风格名称（ID、中文名、别名）解析为标准风格ID。
 
     参数:
@@ -343,7 +343,7 @@ def resolve_style_id(style_name: str) -> Optional[str]:
 
 
 def adjust_parameter_by_intensity(
-    param_info: Dict[str, Any],
+    param_info: dict[str, Any],
     intensity: float,
 ) -> Any:
     """根据强度调整参数值。
@@ -392,11 +392,11 @@ def adjust_parameter_by_intensity(
 
 
 def mix_parameters(
-    params_a: Dict[str, Dict[str, Any]],
-    params_b: Dict[str, Dict[str, Any]],
+    params_a: dict[str, dict[str, Any]],
+    params_b: dict[str, dict[str, Any]],
     weight_a: float,
     weight_b: float,
-) -> Dict[str, Dict[str, Any]]:
+) -> dict[str, dict[str, Any]]:
     """混合两组效果参数。
 
     冲突参数（两个风格都有同一效果同一参数名）：取加权平均
@@ -417,7 +417,7 @@ def mix_parameters(
     norm_a = weight_a / total
     norm_b = weight_b / total
 
-    mixed: Dict[str, Dict[str, Any]] = {}
+    mixed: dict[str, dict[str, Any]] = {}
 
     # 先处理风格A的独有参数
     for name, info in params_a.items():
@@ -503,7 +503,7 @@ class StyleCompositionEngine:
 
         self.profiles_path = Path(profiles_path)
         self.presets_dir = Path(presets_dir)
-        self._profiles: Dict[str, Any] = {}
+        self._profiles: dict[str, Any] = {}
         self._load_profiles()
 
     def _load_profiles(self) -> None:
@@ -516,7 +516,7 @@ class StyleCompositionEngine:
             except Exception as e:
                 print(f"加载风格参数配置失败 {self.profiles_path}: {e}")
 
-    def get_style_profile(self, style_id: str) -> Optional[Dict[str, Any]]:
+    def get_style_profile(self, style_id: str) -> dict[str, Any] | None:
         """获取风格参数配置
 
         参数:
@@ -527,7 +527,7 @@ class StyleCompositionEngine:
         """
         return self._profiles.get(style_id)
 
-    def load_style_jsx(self, style_id: str) -> Optional[str]:
+    def load_style_jsx(self, style_id: str) -> str | None:
         """加载风格预设JSX文件内容
 
         参数:
@@ -547,9 +547,9 @@ class StyleCompositionEngine:
 
     def _apply_intensity_to_effects_chain(
         self,
-        effects_chain: List[Dict[str, Any]],
+        effects_chain: list[dict[str, Any]],
         intensity: float,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """对效果链中的参数应用强度调整
 
         参数:
@@ -574,11 +574,11 @@ class StyleCompositionEngine:
 
     def _mix_two_styles(
         self,
-        profile_a: Dict[str, Any],
-        profile_b: Dict[str, Any],
+        profile_a: dict[str, Any],
+        profile_b: dict[str, Any],
         weight_a: float,
         weight_b: float,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """混合两个风格配置
 
         参数:
@@ -681,7 +681,7 @@ class StyleCompositionEngine:
     def compose(
         self,
         style_name: str,
-        params: Dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
     ) -> str:
         """根据风格名称组合预设，生成JSX代码。
 
@@ -750,11 +750,11 @@ class StyleCompositionEngine:
         # 生成JSX
         return self._generate_jsx_from_profile(working_profile)
 
-    def _deep_copy_profile(self, profile: Dict[str, Any]) -> Dict[str, Any]:
+    def _deep_copy_profile(self, profile: dict[str, Any]) -> dict[str, Any]:
         """深拷贝风格配置（避免修改原始数据）"""
         return json.loads(json.dumps(profile))
 
-    def _generate_jsx_from_profile(self, profile: Dict[str, Any]) -> str:
+    def _generate_jsx_from_profile(self, profile: dict[str, Any]) -> str:
         """从风格配置生成完整JSX脚本
 
         参数:
@@ -776,11 +776,11 @@ class StyleCompositionEngine:
         framerate = comp.get("frame_rate", 30)
         bg_color = comp.get("bg_color", [0.05, 0.05, 0.08])
 
-        lines: List[str] = []
-        lines.append(f"// ============================================================================")
+        lines: list[str] = []
+        lines.append("// ============================================================================")
         lines.append(f"// 风格组合引擎生成: {style_name}")
         lines.append(f"// 风格ID: {style_id}")
-        lines.append(f"// ============================================================================")
+        lines.append("// ============================================================================")
 
         # 安全初始化
         lines.append("app.beginSuppressDialogs();")
@@ -805,7 +805,7 @@ class StyleCompositionEngine:
 
         # 创建图层
         lines.append("// ===== 创建图层 =====")
-        layer_var_map: Dict[str, str] = {}
+        layer_var_map: dict[str, str] = {}
         for i, layer_info in enumerate(layer_structure):
             layer_type = layer_info.get("type", "solid")
             layer_name = layer_info.get("name", f"Layer_{i}")
@@ -935,9 +935,9 @@ class StyleCompositionEngine:
     def _find_layer_var_for_effect(
         self,
         effect_matchname: str,
-        layer_structure: List[Dict[str, Any]],
-        layer_var_map: Dict[str, str],
-    ) -> Optional[str]:
+        layer_structure: list[dict[str, Any]],
+        layer_var_map: dict[str, str],
+    ) -> str | None:
         """根据效果matchname查找对应图层的变量名"""
         # 效果到图层类型的映射
         effect_layer_hints = {
@@ -969,7 +969,7 @@ class StyleCompositionEngine:
 
         return None
 
-    def _generate_utility_functions(self) -> List[str]:
+    def _generate_utility_functions(self) -> list[str]:
         """生成标准工具函数JSX代码"""
         return [
             "// ===== 工具函数 =====",

@@ -25,7 +25,9 @@ sys.path.insert(0, str(PROJECT / "external" / "matanyone" / "repo"))
 sys.path.insert(0, str(PROJECT / "scripts"))
 
 from infer_segment_video_enhanced import (  # noqa: E402
-    build_image_predictor, sam_single_frame_predict, YOLOFallbackDetector,
+    YOLOFallbackDetector,
+    build_image_predictor,
+    sam_single_frame_predict,
 )
 
 
@@ -91,8 +93,8 @@ def main() -> int:
                       "num_prototypes": 128, "max_num_tokens": 10000, "buffer_tokens": 2000},
     })
     cfg.model = model_cfg
-    from matanyone.model.matanyone import MatAnyone
     from matanyone.inference.inference_core import InferenceCore
+    from matanyone.model.matanyone import MatAnyone
     from matanyone.utils.inference_utils import read_frame_from_videos
     matanyone = MatAnyone(cfg, single_object=True).to(args.device).eval()
     mw = torch.load(args.ckpt, map_location="cpu")

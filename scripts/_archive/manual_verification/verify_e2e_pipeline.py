@@ -15,11 +15,11 @@ ae_agent_pipeline 端到端验证测试 (B3)
 说明：本文件是带命令行参数的人工验证脚本，不是 pytest 用例
 （其函数需要业务参数，没有对应 fixture），因此归档在此目录。
 """
+import argparse
+import json
 import os
 import sys
-import json
 import time
-import argparse
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]

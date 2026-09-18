@@ -27,7 +27,7 @@ import torch
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 SAMPLES = PROJECT / "data" / "param_tuning" / "train_samples.jsonl"
 OUT = PROJECT / "data" / "param_tuning" / "clip_vitl14_emb.npz"

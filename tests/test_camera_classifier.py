@@ -270,10 +270,12 @@ class TestCameraVocabulary:
             assert isinstance(label, str)
 
     def test_labels_overlap_taste_contract_pools(self):
-        from core.camera_movement_classifier import CAMERA_LABELS
         from ai.taste_contract import (
-            LOW_MOTION_POOL, MID_MOTION_POOL, HIGH_MOTION_POOL,
+            HIGH_MOTION_POOL,
+            LOW_MOTION_POOL,
+            MID_MOTION_POOL,
         )
+        from core.camera_movement_classifier import CAMERA_LABELS
         all_pool = set(LOW_MOTION_POOL) | set(MID_MOTION_POOL) | set(HIGH_MOTION_POOL)
         for name in all_pool:
             assert name in CAMERA_LABELS, (

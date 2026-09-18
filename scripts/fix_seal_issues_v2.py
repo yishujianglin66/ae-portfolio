@@ -1,7 +1,7 @@
-import os
 import json
+import os
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
 
 BASE_DIR = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault"
 EVIDENCE_DIR = os.path.join(BASE_DIR, "output", "evidence")
@@ -487,6 +487,6 @@ os.makedirs(os.path.dirname(wrapper_path), exist_ok=True)
 with open(wrapper_path, "w", encoding="utf-8") as f:
     f.write(bge_script_fixed)
 print(f"  已修复 wrapper: {wrapper_path}")
-print(f"  修复点: 移除 model.encode(max_length=...) 参数")
+print("  修复点: 移除 model.encode(max_length=...) 参数")
 print()
 print("全部修复完成！请重新运行 run_final_seal_verification_v2.py")

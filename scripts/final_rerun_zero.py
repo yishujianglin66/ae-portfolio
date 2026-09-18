@@ -27,8 +27,8 @@ PROJECT_ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 sys.path.insert(0, str(PROJECT_ROOT / "puppet-automation"))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-from src.engines.sam2.engine import SAM2Engine
 from saliency_prompt import find_prompts_with_visualization
+from src.engines.sam2.engine import SAM2Engine
 
 FFMPEG = r"C:\ffmpeg\bin\ffmpeg.exe"
 FFPROBE = r"C:\ffmpeg\bin\ffprobe.exe"
@@ -141,7 +141,7 @@ async def run_strategy_a(engine: SAM2Engine, stem: str) -> dict:
             if sub.is_dir():
                 shutil.rmtree(sub, ignore_errors=True)
 
-    print(f"  [策略A] auto_frame + yolov8x + conf=0.05 + detect_class=all")
+    print("  [策略A] auto_frame + yolov8x + conf=0.05 + detect_class=all")
     t0 = time.time()
     try:
         r = await engine.extract_foreground(
@@ -178,7 +178,7 @@ async def run_strategy_b(engine: SAM2Engine, stem: str) -> dict:
     # 获取显著性 prompt（先从缓存，再多帧分析）
     prompts = get_saliency_prompts(stem)
     if not prompts:
-        print(f"  多帧显著性分析...")
+        print("  多帧显著性分析...")
         prompts = find_prompts_multi_frame(src)
 
     if not prompts:
@@ -242,12 +242,12 @@ async def main():
             video_info.append((stem, frames))
     video_info.sort(key=lambda x: x[1])
 
-    print(f"\n视频按帧数排序:")
+    print("\n视频按帧数排序:")
     for stem, frames in video_info:
         print(f"  {stem[:50]:<50} {frames:>6} 帧")
 
     print(f"\n{'='*70}")
-    print(f"策略B：video + small + 显著性 prompt")
+    print("策略B：video + small + 显著性 prompt")
     print(f"{'='*70}")
 
     engine = SAM2Engine()

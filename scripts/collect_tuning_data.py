@@ -28,8 +28,8 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from scripts.m2_auto_iterate import render_tree, _param_snapshot  # noqa: E402
-from core.visual_scorer import score_video, _CACHE_DIR  # noqa: E402
+from core.visual_scorer import _CACHE_DIR, score_video  # noqa: E402
+from scripts.m2_auto_iterate import _param_snapshot, render_tree  # noqa: E402
 
 OUT_DIR = PROJECT / "output" / "m2_iteration"
 SAMPLES = PROJECT / "data" / "param_tuning" / "train_samples.jsonl"  # 2026-08-17 迁 data/: 计划清理只扫 output
@@ -67,7 +67,7 @@ def pick_lut(rng, theme: str = None) -> dict:
 
 def build_tree_with_params(combo: dict):
     """按参数组合构建合成树（短段 2s）。"""
-    from core.composition_tree import LayerSpec, CompositionTree, EffectRef
+    from core.composition_tree import CompositionTree, EffectRef, LayerSpec
     FOOTAGE = "data/real_amv_test/DL_FATE_r978_BV1qb411C79B_p1.mp4"
     tree = CompositionTree(
         comp_name="Edit_Tuning", style_card="edit", duration=DUR,

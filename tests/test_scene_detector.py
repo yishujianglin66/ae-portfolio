@@ -7,13 +7,14 @@ T5: PySceneDetect 接入素材预处理
 """
 import shutil
 import subprocess
-import pytest
 from pathlib import Path
+
+import pytest
 
 HAS_FFMPEG = shutil.which("ffmpeg") is not None
 
 try:
-    from scenedetect import detect, ContentDetector
+    from scenedetect import ContentDetector, detect
     HAS_SCENEDIRECT = True
 except ImportError:
     HAS_SCENEDIRECT = False

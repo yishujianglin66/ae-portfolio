@@ -46,7 +46,7 @@ class TextEffectService:
         "tracking": 80,
     }
 
-    def __init__(self, ae_engine: Optional[AEEngine] = None):
+    def __init__(self, ae_engine: AEEngine | None = None):
         """初始化文字效果服务.
 
         Args:
@@ -80,7 +80,7 @@ class TextEffectService:
 
         return False
 
-    def _hex_to_rgb(self, hex_color: str) -> Tuple[float, float, float]:
+    def _hex_to_rgb(self, hex_color: str) -> tuple[float, float, float]:
         """将 HEX 颜色转换为 RGB（0-1 范围）.
 
         Args:
@@ -95,7 +95,7 @@ class TextEffectService:
         b = int(hex_color[4:6], 16) / 255.0
         return (r, g, b)
 
-    def _rgb_to_jsx_array(self, rgb: Tuple[float, float, float]) -> str:
+    def _rgb_to_jsx_array(self, rgb: tuple[float, float, float]) -> str:
         """将 RGB 元组转换为 JSX 数组字符串.
 
         Args:
@@ -106,7 +106,7 @@ class TextEffectService:
         """
         return f"[{rgb[0]:.3f}, {rgb[1]:.3f}, {rgb[2]:.3f}]"
 
-    async def _resolve_font_path(self, font_name: str) -> Optional[Path]:
+    async def _resolve_font_path(self, font_name: str) -> Path | None:
         """通过 resource_index_service 解析字体名称到文件路径.
 
         优先从资源索引服务查找字体文件；若服务不可用或未找到，返回 None，
@@ -145,14 +145,14 @@ class TextEffectService:
         self,
         comp_name: str,
         text: str,
-        position: Tuple[int, int],
+        position: tuple[int, int],
         style: str = "epic3D",
         font: str = "Impact",
         font_size: int = 120,
         fill_color: str = "#FFFFFF",
         stroke_color: str = "#000000",
         stroke_width: int = 8,
-        font_path: Optional[Path] = None,
+        font_path: Path | None = None,
     ) -> EngineResult:
         """创建 3D 标题文字层.
 
@@ -419,7 +419,7 @@ class TextEffectService:
         self,
         comp_name: str,
         text_layer_index: int,
-        gradient_colors: List[str],
+        gradient_colors: list[str],
     ) -> EngineResult:
         """添加 GRAD_ 渐变层（Alpha Matte 蒙版）.
 
@@ -502,7 +502,7 @@ class TextEffectService:
         self,
         comp_name: str,
         text: str,
-        position: Tuple[int, int] = (960, 540),
+        position: tuple[int, int] = (960, 540),
         style: str = "epic3D",
         font: str = "Impact",
         font_size: int = 120,
@@ -511,8 +511,8 @@ class TextEffectService:
         glow_color: str = "#00FFFF",
         glow_intensity: float = 0.8,
         rgb_offset: int = 6,
-        gradient_colors: Optional[List[str]] = None,
-        font_path: Optional[Path] = None,
+        gradient_colors: list[str] | None = None,
+        font_path: Path | None = None,
     ) -> EngineResult:
         """一键创建完整文字系统：主文字层 + GLOW_ 辉光层 + RGB_R_/RGB_C_ 分离层 + GRAD_ 渐变层.
 
@@ -769,9 +769,9 @@ class TextEffectService:
     async def get_layer_info(
         self,
         comp_name: str,
-        layer_name: Optional[str] = None,
-        layer_index: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        layer_name: str | None = None,
+        layer_index: int | None = None,
+    ) -> dict[str, Any]:
         """获取图层信息（辅助方法）.
 
         Args:

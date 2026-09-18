@@ -22,9 +22,9 @@ class WordTimestamp:
     start: float  # 秒
     end: float  # 秒
     score: float = 1.0
-    speaker: Optional[str] = None
+    speaker: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "word": self.word,
             "start": self.start,
@@ -41,8 +41,8 @@ class SubtitleSegment:
     text: str
     start: float
     end: float
-    words: List[WordTimestamp] = field(default_factory=list)
-    speaker: Optional[str] = None
+    words: list[WordTimestamp] = field(default_factory=list)
+    speaker: str | None = None
 
     def to_srt(self, index: int) -> str:
         """生成 SRT 格式。"""
@@ -105,9 +105,9 @@ class WhisperXSubtitleGenerator:
     def transcribe(
         self,
         audio_path: Path | str,
-        language: Optional[str] = None,
+        language: str | None = None,
         word_timestamps: bool = True,
-    ) -> List[SubtitleSegment]:
+    ) -> list[SubtitleSegment]:
         """转录音频并生成词级字幕。
 
         Args:
@@ -137,7 +137,7 @@ class WhisperXSubtitleGenerator:
             logger.error(f"Whisper 转录失败: {e}")
             return self._fallback_transcribe(audio_path)
 
-    def _convert_to_segments(self, whisper_result: Dict[str, Any]) -> List[SubtitleSegment]:
+    def _convert_to_segments(self, whisper_result: dict[str, Any]) -> list[SubtitleSegment]:
         """将 Whisper 结果转换为 SubtitleSegment。"""
         segments = []
         for seg in whisper_result.get("segments", []):
@@ -157,14 +157,14 @@ class WhisperXSubtitleGenerator:
             ))
         return segments
 
-    def _fallback_transcribe(self, audio_path: Path) -> List[SubtitleSegment]:
+    def _fallback_transcribe(self, audio_path: Path) -> list[SubtitleSegment]:
         """降级：返回空列表（标记 stub）。"""
         logger.warning("Whisper 模型不可用，返回空字幕列表")
         return []
 
     def export_srt(
         self,
-        segments: List[SubtitleSegment],
+        segments: list[SubtitleSegment],
         output_path: Path | str,
     ) -> Path:
         """导出 SRT 字幕文件。"""
@@ -179,7 +179,7 @@ class WhisperXSubtitleGenerator:
 
     def export_ass(
         self,
-        segments: List[SubtitleSegment],
+        segments: list[SubtitleSegment],
         output_path: Path | str,
         style: str = "Default",
     ) -> Path:
@@ -211,7 +211,7 @@ class WhisperXSubtitleGenerator:
 
     def export_json(
         self,
-        segments: List[SubtitleSegment],
+        segments: list[SubtitleSegment],
         output_path: Path | str,
     ) -> Path:
         """导出 JSON 字幕（含词级时间戳，供 Remotion 使用）。"""

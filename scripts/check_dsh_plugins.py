@@ -45,7 +45,7 @@ for name in plugins:
             print(f"  DSH bundle: {dsh_info.get('bundle', False)}")
             print(f"  DSH client: {'yes' if dsh_info.get('client') else 'no'}")
         else:
-            print(f"  DSH type: unknown (no dsh field in package.json)")
+            print("  DSH type: unknown (no dsh field in package.json)")
             
         # Check dependencies
         deps = list(d.get('dependencies', {}).keys())

@@ -1,11 +1,11 @@
-import os
 import json
+import os
 import re
 import subprocess
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 CONFIG_PATH = Path(__file__).parent / "config" / "media-config.json"
 
@@ -18,11 +18,11 @@ class MediaItem:
     duration: float = 0.0
     width: int = 0
     height: int = 0
-    tags: List[str] = None
+    tags: list[str] = None
     created_at: datetime = None
     platform: str = ""
     url: str = ""
-    audio_features: Dict = None
+    audio_features: dict = None
     similarity_score: float = 0.0
 
     def to_dict(self):
@@ -50,7 +50,7 @@ class MediaSearchEngine:
         self.audio_extensions = self.config["download"]["audio_only_formats"]
         self._cache = {}
 
-    def scan_library(self, force_refresh: bool = False) -> List[MediaItem]:
+    def scan_library(self, force_refresh: bool = False) -> list[MediaItem]:
         cache_key = "library_scan"
         if not force_refresh and cache_key in self._cache:
             return self._cache[cache_key]
@@ -80,8 +80,8 @@ class MediaSearchEngine:
         self._cache[cache_key] = all_items
         return all_items
 
-    def search_by_keyword(self, keyword: str, media_type: Optional[str] = None, 
-                          max_results: int = 20) -> List[MediaItem]:
+    def search_by_keyword(self, keyword: str, media_type: str | None = None, 
+                          max_results: int = 20) -> list[MediaItem]:
         all_items = self.scan_library()
         keyword_lower = keyword.lower()
 
@@ -110,7 +110,7 @@ class MediaSearchEngine:
         return sorted(results, key=lambda x: x.similarity_score, reverse=True)[:max_results]
 
     def search_by_duration(self, min_duration: float = 0, max_duration: float = float('inf'),
-                          media_type: Optional[str] = None) -> List[MediaItem]:
+                          media_type: str | None = None) -> list[MediaItem]:
         all_items = self.scan_library()
 
         results = []
@@ -124,7 +124,7 @@ class MediaSearchEngine:
         return sorted(results, key=lambda x: x.duration)
 
     def search_by_mood(self, mood: str, media_type: str = "audio", 
-                       max_results: int = 10) -> List[MediaItem]:
+                       max_results: int = 10) -> list[MediaItem]:
         all_items = self.scan_library()
         mood_lower = mood.lower()
 
@@ -144,7 +144,7 @@ class MediaSearchEngine:
         return sorted(results, key=lambda x: x.similarity_score, reverse=True)[:max_results]
 
     def search_by_bpm(self, target_bpm: float, tolerance: float = 10, 
-                      media_type: str = "audio", max_results: int = 10) -> List[MediaItem]:
+                      media_type: str = "audio", max_results: int = 10) -> list[MediaItem]:
         all_items = self.scan_library()
 
         results = []
@@ -160,8 +160,8 @@ class MediaSearchEngine:
 
         return sorted(results, key=lambda x: x.similarity_score, reverse=True)[:max_results]
 
-    def find_bgm_for_video(self, video_duration: float, mood: Optional[str] = None,
-                           target_bpm: Optional[float] = None, max_results: int = 5) -> List[MediaItem]:
+    def find_bgm_for_video(self, video_duration: float, mood: str | None = None,
+                           target_bpm: float | None = None, max_results: int = 5) -> list[MediaItem]:
         bgm_dir = self.config["directories"]["bgm_library"]
 
         if not os.path.exists(bgm_dir):
@@ -202,8 +202,8 @@ class MediaSearchEngine:
 
         return sorted(results, key=lambda x: x.similarity_score, reverse=True)[:max_results]
 
-    def search_online(self, query: str, platform: Optional[str] = None, 
-                      max_results: int = 10) -> List[Dict]:
+    def search_online(self, query: str, platform: str | None = None, 
+                      max_results: int = 10) -> list[dict]:
         yt_dlp = self.config["tools"]["yt_dlp"]
         results = []
 
@@ -267,7 +267,7 @@ class MediaSearchEngine:
 
         return results[:max_results]
 
-    def get_library_stats(self) -> Dict:
+    def get_library_stats(self) -> dict:
         all_items = self.scan_library()
 
         stats = {
@@ -372,7 +372,7 @@ class MediaSearchEngine:
         else:
             return "local"
 
-    def _extract_tags_from_path(self, root: str, filename: str) -> List[str]:
+    def _extract_tags_from_path(self, root: str, filename: str) -> list[str]:
         tags = []
 
         parts = root.replace("\\", "/").split("/")

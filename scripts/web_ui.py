@@ -27,10 +27,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
-    from fastapi import FastAPI, File, UploadFile, HTTPException
-    from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
-    from fastapi.staticfiles import StaticFiles
     import uvicorn
+    from fastapi import FastAPI, File, HTTPException, UploadFile
+    from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+    from fastapi.staticfiles import StaticFiles
 except ImportError:
     print("需要安装: pip install fastapi uvicorn python-multipart")
     sys.exit(1)
@@ -180,9 +180,9 @@ async def analyze_video(file: UploadFile = File(..., max_length=512 * 1024 * 102
     save_path.write_bytes(content)
 
     # 运行管线
-    from core.style_pipeline import analyze_video_style
-    from core.style_preset_adapter import style_to_atomic_params, STYLE_PRESET_MAP
     from core.jsx_generator import generate_jsx_from_style
+    from core.style_pipeline import analyze_video_style
+    from core.style_preset_adapter import STYLE_PRESET_MAP, style_to_atomic_params
 
     result = await analyze_video_style(str(save_path), enable_vision=False)
 
@@ -219,7 +219,7 @@ async def analyze_video(file: UploadFile = File(..., max_length=512 * 1024 * 102
 
 
 @app.post("/api/feedback")
-async def submit_feedback(data: Dict):
+async def submit_feedback(data: dict):
     """提交用户反馈"""
     from core.feedback_loop import FeedbackLoop
 
@@ -248,7 +248,7 @@ async def download_file(path: str):
 @app.get("/api/status")
 async def system_status():
     """系统状态"""
-    from scripts.ae_automation import is_ae_running, health_check
+    from scripts.ae_automation import health_check, is_ae_running
 
     return {
         "ae_running": is_ae_running(),
@@ -266,7 +266,7 @@ def main():
     args = parser.parse_args()
 
     print(f"\n{'='*50}")
-    print(f"  漫剪风格管线 Web UI")
+    print("  漫剪风格管线 Web UI")
     print(f"  访问: http://localhost:{args.port}")
     print(f"{'='*50}\n")
 

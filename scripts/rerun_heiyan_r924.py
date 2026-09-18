@@ -42,7 +42,7 @@ async def rerun_one(stem: str, engine: SAM2Engine) -> dict:
             shutil.rmtree(sub, ignore_errors=True)
             print(f"  删除目录: {sub.name}")
 
-    print(f"  开始重跑: detect_conf=0.10 ...")
+    print("  开始重跑: detect_conf=0.10 ...")
     t0 = time.time()
     r = await engine.extract_foreground(
         video_path=src, output_path=out_mov,

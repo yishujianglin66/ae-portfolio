@@ -2,8 +2,8 @@
 
 覆盖: 方向映射表完整性 / 典型多标签 → 扁平标签 / 多维拆分。
 """
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

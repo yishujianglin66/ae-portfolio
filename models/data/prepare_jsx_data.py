@@ -2,12 +2,12 @@
 JSX 代码数据准备脚本 - 从项目中收集JSX代码并生成训练数据
 参考 Antares 哲学：高质量垂直领域代码数据是小模型成功的关键
 """
-import os
 import json
-import re
 import logging
-from typing import Dict, List, Tuple, Optional
+import os
+import re
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +46,10 @@ class JSXDataCollector:
     def __init__(self, output_dir: str = "./data/jsx"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.dataset: List[Dict[str, str]] = []
+        self.dataset: list[dict[str, str]] = []
         self.style_descriptions = self._load_style_descriptions()
 
-    def _load_style_descriptions(self) -> Dict[str, str]:
+    def _load_style_descriptions(self) -> dict[str, str]:
         """加载风格描述映射"""
         return {
             "applyExpression": "为图层属性添加表达式动画（wiggle、bounce、loop等效果）",
@@ -81,7 +81,7 @@ class JSXDataCollector:
             "textFXResourceIndex": "文字特效资源索引",
         }
 
-    def collect_jsx_files(self) -> List[Path]:
+    def collect_jsx_files(self) -> list[Path]:
         """收集项目中的所有JSX文件"""
         jsx_files = []
         
@@ -102,7 +102,7 @@ class JSXDataCollector:
         logger.info(f"Collected {len(jsx_files)} JSX files")
         return jsx_files
 
-    def extract_function_blocks(self, jsx_content: str, filename: str) -> List[Tuple[str, str]]:
+    def extract_function_blocks(self, jsx_content: str, filename: str) -> list[tuple[str, str]]:
         """从JSX文件中提取函数块"""
         function_pattern = re.compile(
             r'function\s+(\w+)\s*\([^)]*\)\s*\{([\s\S]*?)\}',
@@ -119,7 +119,7 @@ class JSXDataCollector:
         
         return results
 
-    def parse_jsx_file(self, filepath: Path) -> Optional[Dict[str, str]]:
+    def parse_jsx_file(self, filepath: Path) -> dict[str, str] | None:
         """解析单个JSX文件"""
         try:
             with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
@@ -163,7 +163,7 @@ class JSXDataCollector:
             logger.error(f"Failed to parse {filepath}: {e}")
             return None
 
-    def build_dataset(self) -> List[Dict[str, str]]:
+    def build_dataset(self) -> list[dict[str, str]]:
         """构建完整数据集"""
         jsx_files = self.collect_jsx_files()
         dataset = []
@@ -178,7 +178,7 @@ class JSXDataCollector:
         logger.info(f"Built dataset with {len(dataset)} samples")
         return dataset
 
-    def generate_synthetic_samples(self, num_samples: int = 50) -> List[Dict[str, str]]:
+    def generate_synthetic_samples(self, num_samples: int = 50) -> list[dict[str, str]]:
         """生成合成样本（基于模板扩展）"""
         templates = [
             {

@@ -23,9 +23,9 @@ from typing import Any, Dict, List, Optional
 from loguru import logger
 
 from .blender_ae_bridge import BlenderAEBridge
-from .topaz_davinci_bridge import TopazDaVinciBridge
-from .silhouette_ae_bridge import SilhouetteAEBridge
 from .c4d_ae_bridge import C4DAEBridge
+from .silhouette_ae_bridge import SilhouetteAEBridge
+from .topaz_davinci_bridge import TopazDaVinciBridge
 
 
 class PipelineOrchestrator:
@@ -47,8 +47,8 @@ class PipelineOrchestrator:
     async def run_pipeline(
         self,
         pipeline_type: str,
-        config: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        config: dict[str, Any],
+    ) -> dict[str, Any]:
         """运行指定类型的 Pipeline。
 
         Args:
@@ -75,7 +75,7 @@ class PipelineOrchestrator:
 
         return await handler(config)
 
-    async def _run_full_3d_pipeline(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    async def _run_full_3d_pipeline(self, config: dict[str, Any]) -> dict[str, Any]:
         """3D 全链路：Blender Stage → Topaz AI 增强 → AE 合成 → PR 剪辑。"""
         output_dir = config.get("output_dir", "D:/AE-Work/pipeline/output")
         ae_project_path = config.get("ae_project_path", str(Path(output_dir) / "final_project.aep"))
@@ -84,7 +84,7 @@ class PipelineOrchestrator:
         resolution = tuple(config.get("resolution", [1920, 1080]))
         frame_count = config.get("frame_count", 60)
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "pipeline_type": "full_3d_pipeline",
             "steps_completed": 0,
             "steps_total": 4,
@@ -141,7 +141,7 @@ class PipelineOrchestrator:
         )
         return result
 
-    async def _run_animation_pipeline(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    async def _run_animation_pipeline(self, config: dict[str, Any]) -> dict[str, Any]:
         """3D 动画链路：Blender Cel-shading → Silhouette Roto → AE 合成。"""
         output_dir = config.get("output_dir", "D:/AE-Work/pipeline/output")
         ae_project_path = config.get("ae_project_path", str(Path(output_dir) / "cel_project.aep"))
@@ -150,7 +150,7 @@ class PipelineOrchestrator:
         resolution = tuple(config.get("resolution", [1920, 1080]))
         frame_count = config.get("frame_count", 60)
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "pipeline_type": "animation_pipeline",
             "steps_completed": 0,
             "steps_total": 3,
@@ -192,7 +192,7 @@ class PipelineOrchestrator:
         result["success"] = len(result["errors"]) == 0
         return result
 
-    async def _run_mograph_pipeline(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    async def _run_mograph_pipeline(self, config: dict[str, Any]) -> dict[str, Any]:
         """MoGraph 链路：C4D → AE 合成 → 导出。"""
         output_dir = config.get("output_dir", "D:/AE-Work/pipeline/output")
         ae_project_path = config.get("ae_project_path", str(Path(output_dir) / "mograph_project.aep"))
@@ -200,7 +200,7 @@ class PipelineOrchestrator:
         frame_count = config.get("frame_count", 60)
         text = config.get("text", "MOTION")
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "pipeline_type": "mograph_pipeline",
             "steps_completed": 0,
             "steps_total": 2,
@@ -225,7 +225,7 @@ class PipelineOrchestrator:
         result["success"] = len(result["errors"]) == 0
         return result
 
-    async def _run_enhancement_pipeline(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    async def _run_enhancement_pipeline(self, config: dict[str, Any]) -> dict[str, Any]:
         """AI 增强链路：Topaz → DaVinci 调色。"""
         input_path = config.get("input_path")
         output_dir = config.get("output_dir", "D:/AE-Work/pipeline/output")

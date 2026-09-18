@@ -21,9 +21,8 @@ from __future__ import annotations
 
 from typing import Dict
 
-
 # 整数位置索引（property(N)）— 原 synthesis_orchestrator.MATCH_PARAM_MAP
-PARAM_POSITION_INDEX: Dict[str, Dict[str, int]] = {
+PARAM_POSITION_INDEX: dict[str, dict[str, int]] = {
     "ADBE Glo2": {"threshold": 1, "radius": 2, "intensity": 3},
     "ADBE Gaussian Blur 2": {"blurriness": 1},
     "ADBE Grid": {"opacity": 13},
@@ -33,7 +32,7 @@ PARAM_POSITION_INDEX: Dict[str, Dict[str, int]] = {
 }
 
 # AVID 字符串索引（property("ADBE xxx-000N")）— 原 jsx_generator._EFFECT_PARAM_INDEX
-PARAM_AVID_INDEX: Dict[str, Dict[str, str]] = {
+PARAM_AVID_INDEX: dict[str, dict[str, str]] = {
     "ADBE Glo2": {
         "Glow Threshold": "ADBE Glo2-0001",
         "Glow Radius": "ADBE Glo2-0002",
@@ -58,7 +57,7 @@ PARAM_AVID_INDEX: Dict[str, Dict[str, str]] = {
 }
 
 # AVID 兜底默认值 — 原 jsx_generator._EFFECT_DEFAULTS（无 config params 时使用）
-AVID_DEFAULTS: Dict[str, Dict[str, float]] = {
+AVID_DEFAULTS: dict[str, dict[str, float]] = {
     "ADBE Glo2": {"ADBE Glo2-0001": 50, "ADBE Glo2-0002": 15, "ADBE Glo2-0003": 1.0},
     "ADBE Gaussian Blur 2": {"ADBE Gaussian Blur 2-0001": 20, "ADBE Gaussian Blur 2-0002": 1},
     "ADBE Lens Flare": {"ADBE Lens Flare-0001": 50},

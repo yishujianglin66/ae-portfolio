@@ -8,15 +8,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "13-素材获取与搜索" / "01-下载器"))
 
 from douyin_downloader_pro import (
-    _safe_filename,
-    _parse_netscape_cookie,
-    _parse_cookie_string,
-    _cookies_to_header,
-    _resolve_cookie_source,
-    _validate_cookies_dict,
-    _get_env_or_default,
-    COOKIE_REQUIRED_FIELDS,
     COOKIE_OPTIONAL_FIELDS,
+    COOKIE_REQUIRED_FIELDS,
+    _cookies_to_header,
+    _get_env_or_default,
+    _parse_cookie_string,
+    _parse_netscape_cookie,
+    _resolve_cookie_source,
+    _safe_filename,
+    _validate_cookies_dict,
 )
 from unified_downloader import detect_platform
 
@@ -162,6 +162,7 @@ class TestCookieResolution(unittest.TestCase):
     def test_resolve_cookie_nonexistent_file(self):
         """不存在的cookie文件应回退到空结果（密闭隔离：环境变量/默认路径/项目内cookies回退全部失效）"""
         import unittest.mock as mock
+
         import douyin_downloader_pro as ddp
         with mock.patch.dict(os.environ, {"DOUYIN_COOKIE": "", "DOUYIN_COOKIE_PATH": ""}), \
              mock.patch.object(ddp, 'DEFAULT_COOKIE_PATH', '/nonexistent/default.txt'), \

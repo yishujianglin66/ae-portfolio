@@ -284,8 +284,9 @@ class YOLOFallbackDetector:
 def sam_predictor_factory(cfg: dict):
     """返回 SAM2 predictor 实例（单帧模式）。"""
     checkpoint = cfg["sam2_checkpoint"]
-    from sam2.build_sam import build_sam2
     import torch
+    from sam2.build_sam import build_sam2
+
     from core.torch_runtime import get_device
 
     variant = cfg.get("sam_variant", "large")

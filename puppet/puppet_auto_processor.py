@@ -16,20 +16,20 @@
 - 完整的错误处理和降级机制
 """
 
+import json
 import os
 import sys
-import json
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
+from typing import Any, Callable, Dict, List, Optional
 
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
     from mediapipe_integration import (
-        MediaPipeIntegrator,
         MediaPipeConfig,
+        MediaPipeIntegrator,
         MediaPipeResult,
     )
     _MEDIAPIPE_AVAILABLE = True
@@ -38,8 +38,8 @@ except ImportError:
 
 try:
     from puppet_style_engine import (
-        PuppetStyleEngine,
         PuppetStyleConfig,
+        PuppetStyleEngine,
         PuppetStyleResult,
     )
     _PUPPET_ENGINE_AVAILABLE = True
@@ -85,7 +85,7 @@ class PuppetAutoProcessor:
         """检查风格引擎是否可用"""
         return self._style_engine is not None
     
-    def get_available_styles(self) -> List[Dict[str, Any]]:
+    def get_available_styles(self) -> list[dict[str, Any]]:
         """获取可用风格列表"""
         if not self._style_engine:
             return []
@@ -93,7 +93,7 @@ class PuppetAutoProcessor:
     
     def process_video(self, video_path: str, style_type: str = "wooden_puppet",
                       intensity: float = 1.0, enable_face_puppet: bool = True,
-                      output_dir: Optional[str] = None) -> Dict[str, Any]:
+                      output_dir: str | None = None) -> dict[str, Any]:
         """处理视频，自动识别人物并生成木偶风格化效果
         
         Args:
@@ -138,7 +138,7 @@ class PuppetAutoProcessor:
         result["detection"] = detection_data
         
         if not detection_data.get("success"):
-            print(f"  ⚠️ 人物检测失败，使用默认参数")
+            print("  ⚠️ 人物检测失败，使用默认参数")
             bbox = None
             joint_data = []
             face_data = None
@@ -232,7 +232,7 @@ class PuppetAutoProcessor:
         
         return result
     
-    def _detect_person(self, video_path: str) -> Dict[str, Any]:
+    def _detect_person(self, video_path: str) -> dict[str, Any]:
         """使用 MediaPipe 检测人物
         
         Args:
@@ -273,7 +273,7 @@ class PuppetAutoProcessor:
         }
     
     def _generate_style(self, config: PuppetStyleConfig,
-                        duration: float = 5.0) -> Optional[PuppetStyleResult]:
+                        duration: float = 5.0) -> PuppetStyleResult | None:
         """生成风格化效果
         
         Args:
@@ -298,7 +298,7 @@ class PuppetAutoProcessor:
     
     def _generate_jsx(self, video_path: str, style_type: str,
                       style_result: PuppetStyleResult, width: int, height: int,
-                      duration: float, bbox: Optional[Dict[str, float]]) -> str:
+                      duration: float, bbox: dict[str, float] | None) -> str:
         """生成 AE JSX 脚本
         
         Args:
@@ -390,7 +390,7 @@ class PuppetAutoProcessor:
 """
         return jsx
     
-    def _generate_effects_js(self, effects: List[Dict[str, Any]],
+    def _generate_effects_js(self, effects: list[dict[str, Any]],
                              width: int, height: int) -> str:
         """生成效果应用 JSX 代码"""
         js_lines = []
@@ -453,7 +453,7 @@ class PuppetAutoProcessor:
         
         return "        adjLayer.property('Effects').addProperty('ADBE_CC Toner');\n        adjLayer.property('Effects').addProperty('ADBE_Lumetri_Color');\n"
     
-    def _generate_layers_js(self, layers: List[Dict[str, Any]],
+    def _generate_layers_js(self, layers: list[dict[str, Any]],
                             width: int, height: int, duration: float) -> str:
         """生成图层创建 JSX 代码"""
         js_lines = []
@@ -468,7 +468,7 @@ class PuppetAutoProcessor:
                 js_lines.append(f"            {json.dumps(color)},")
                 js_lines.append(f"            '{name}',")
                 js_lines.append(f"            {width}, {height}, 1.0, {duration}")
-                js_lines.append(f"        );")
+                js_lines.append("        );")
                 js_lines.append(f"        adj_{i}.adjustmentLayer = true;")
             elif ltype == "solid":
                 color = layer.get("color", [0.5, 0.5, 0.5])
@@ -476,14 +476,14 @@ class PuppetAutoProcessor:
                 js_lines.append(f"            {json.dumps(color)},")
                 js_lines.append(f"            '{name}',")
                 js_lines.append(f"            {width}, {height}, 1.0, {duration}")
-                js_lines.append(f"        );")
+                js_lines.append("        );")
         
         if js_lines:
             return "\n".join(js_lines) + "\n"
         
         return ""
     
-    def _generate_keyframes_js(self, keyframes: List[Dict[str, Any]]) -> str:
+    def _generate_keyframes_js(self, keyframes: list[dict[str, Any]]) -> str:
         """生成关键帧设置 JSX 代码"""
         js_lines = []
         
@@ -505,7 +505,7 @@ class PuppetAutoProcessor:
         
         return ""
     
-    def _generate_expressions_js(self, expressions: List[Dict[str, Any]]) -> str:
+    def _generate_expressions_js(self, expressions: list[dict[str, Any]]) -> str:
         """生成表达式设置 JSX 代码"""
         js_lines = []
         
@@ -523,7 +523,7 @@ class PuppetAutoProcessor:
         
         return ""
     
-    def _generate_bbox_js(self, bbox: Optional[Dict[str, float]],
+    def _generate_bbox_js(self, bbox: dict[str, float] | None,
                           width: int, height: int) -> str:
         """生成人物边界框相关 JSX 代码"""
         if not bbox:
@@ -620,18 +620,18 @@ def main():
     )
     
     if result["success"]:
-        print(f"\n✅ 处理完成!")
+        print("\n✅ 处理完成!")
         print(f"耗时: {result['duration']} 秒")
         print(f"MediaPipe 模式: {result['mediapipe_mode']}")
         
-        print(f"\n输出文件:")
+        print("\n输出文件:")
         for key, path in result["output_files"].items():
             size = os.path.getsize(path) if os.path.exists(path) else 0
             print(f"  - {key}: {os.path.basename(path)} ({size} bytes)")
         
         if result["style_result"]:
             sr = result["style_result"]
-            print(f"\n风格化统计:")
+            print("\n风格化统计:")
             print(f"  效果数: {len(sr.effects)}")
             print(f"  关键帧数: {len(sr.keyframes)}")
             print(f"  图层数: {len(sr.layers)}")
@@ -640,7 +640,7 @@ def main():
         
         if result["detection"]:
             det = result["detection"]
-            print(f"\n人物检测统计:")
+            print("\n人物检测统计:")
             print(f"  模式: {det.get('mode', 'N/A')}")
             print(f"  视频: {det.get('width', 0)}x{det.get('height', 0)}")
             print(f"  时长: {det.get('duration', 0):.2f}秒")
@@ -649,7 +649,7 @@ def main():
             print(f"  面部数据: {'有' if det.get('face_data') else '无'}")
             print(f"  边界框: {'有' if det.get('bbox') else '无'}")
     else:
-        print(f"\n❌ 处理失败")
+        print("\n❌ 处理失败")
         print(f"错误: {result.get('error', '未知错误')}")
         sys.exit(1)
 

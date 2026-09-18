@@ -66,7 +66,7 @@ def analyze_description(planner: AICreativePlanner, description: str):
     analysis = result.get("analysis", {})
     task_graph = result.get("task_graph", {})
 
-    print(f"\n📊 分析结果:")
+    print("\n📊 分析结果:")
     print(f"  • 置信度: {analysis.get('confidence', 0) * 100:.0f}%")
     print(f"  • 来源: {analysis.get('source', 'unknown')}")
     print(f"  • 匹配模式: {', '.join(analysis.get('patterns', []))}")
@@ -76,11 +76,11 @@ def analyze_description(planner: AICreativePlanner, description: str):
 
     params = analysis.get("parameters", {})
     if params:
-        print(f"\n⚙️ 提取参数:")
+        print("\n⚙️ 提取参数:")
         for key, value in params.items():
             print(f"  • {key}: {value}")
 
-    print(f"\n📋 任务图:")
+    print("\n📋 任务图:")
     print(f"  • 项目名称: {task_graph.get('project')}")
     print(f"  • 时长: {task_graph.get('duration')} 秒")
     print(f"  • 创意模式: {task_graph.get('pattern')}")
@@ -114,21 +114,21 @@ def execute_description(planner: AICreativePlanner, description: str, optimize: 
     task_graph = result.get("task_graph", {})
     execution = result.get("execution", {})
 
-    print(f"\n📊 分析结果:")
+    print("\n📊 分析结果:")
     print(f"  • 置信度: {analysis.get('confidence', 0) * 100:.0f}%")
     print(f"  • 匹配模式: {', '.join(analysis.get('patterns', []))}")
 
-    print(f"\n📋 任务图:")
+    print("\n📋 任务图:")
     print(f"  • 项目名称: {task_graph.get('project')}")
     print(f"  • 时长: {task_graph.get('duration')} 秒")
 
-    print(f"\n✅ 执行结果:")
+    print("\n✅ 执行结果:")
     print(f"  • 总任务: {execution.get('total_tasks')}")
     print(f"  • 成功: {execution.get('success_count')}")
     print(f"  • 总耗时: {result.get('total_time')} 秒")
 
     results = execution.get("results", [])
-    print(f"\n  📝 任务详情:")
+    print("\n  📝 任务详情:")
     for task_result in results:
         status = "✅" if task_result.get("success") else "❌"
         task_id = task_result.get("task_id")

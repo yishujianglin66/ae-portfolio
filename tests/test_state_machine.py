@@ -1,19 +1,20 @@
 """core.state_machine 单元测试 - 工作流状态机核心逻辑"""
 import os
 import sys
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.state_machine import (
-    PipelineStatus,
-    PipelinePhase,
-    SilhouetteStatus,
     AEStatus,
-    Transition,
+    PipelinePhase,
+    PipelineStateMachine,
+    PipelineStatus,
+    SilhouetteStatus,
     StateContext,
     StateListener,
-    PipelineStateMachine,
+    Transition,
 )
 
 

@@ -20,13 +20,15 @@ Note:
 """
 
 import argparse
+import sys
+import time
+from pathlib import Path
+
 import cv2
 import numpy as np
 import torch
 import torch.nn as nn
-from pathlib import Path
-import sys
-import time
+
 from core.torch_runtime import infer_ctx
 
 

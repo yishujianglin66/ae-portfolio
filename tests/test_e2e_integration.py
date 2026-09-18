@@ -4,16 +4,20 @@
 """
 import os
 import sys
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ae_agent_pipeline import (
-    AEAgentPipeline, PlanningResult, ExecutionResult,
-    PerceptionResult, UnderstandingResult, FeedbackResult,
+    AEAgentPipeline,
+    ExecutionResult,
+    FeedbackResult,
+    PerceptionResult,
+    PlanningResult,
+    UnderstandingResult,
 )
-
 
 # ============================================================================
 # 测试夹具
@@ -142,12 +146,13 @@ class TestAEPropertyQuery:
 
     def test_real_mcp_client_import(self):
         """测试 RealMcpClient 可导入"""
-        from result_verifier import RealMcpClient, McpClient
+        from result_verifier import McpClient, RealMcpClient
         assert issubclass(RealMcpClient, McpClient)
 
     def test_real_mcp_client_no_ae_client(self):
         """测试无 AE 客户端时返回 None"""
         import asyncio
+
         from result_verifier import RealMcpClient
 
         client = RealMcpClient(ae_client=None)
@@ -163,6 +168,7 @@ class TestAEPropertyQuery:
     def test_real_mcp_client_with_mock_ae(self):
         """测试有 mock AE 客户端时正常回读"""
         import asyncio
+
         from result_verifier import RealMcpClient
 
         mock_ae = Mock()
@@ -371,7 +377,7 @@ class TestHybridCoordinator:
 
     def test_hybrid_coordinator_calls_executor(self):
         """测试 HybridCoordinator 真正调用 SilhouetteExecutor"""
-        from hybrid_coordinator import HybridCoordinator, TaskRoute, ExecutionOptions
+        from hybrid_coordinator import ExecutionOptions, HybridCoordinator, TaskRoute
 
         route = TaskRoute(
             type="silhouette_only",
@@ -403,7 +409,7 @@ class TestHybridCoordinator:
 
     def test_hybrid_coordinator_fallback_on_import_error(self):
         """测试 SilhouetteExecutor 不可用时降级"""
-        from hybrid_coordinator import HybridCoordinator, TaskRoute, ExecutionOptions
+        from hybrid_coordinator import ExecutionOptions, HybridCoordinator, TaskRoute
 
         route = TaskRoute(
             type="silhouette_only",
@@ -436,7 +442,7 @@ class TestTransitionMap:
 
     def test_transition_map_import(self):
         """测试 transition_map 可导入"""
-        from transition_map import TRANSITION_MAP, transition_to_ae_ops, get_all_transition_types
+        from transition_map import TRANSITION_MAP, get_all_transition_types, transition_to_ae_ops
         assert len(TRANSITION_MAP) == 7
 
     def test_all_transition_types(self):

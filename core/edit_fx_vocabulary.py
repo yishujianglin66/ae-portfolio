@@ -39,7 +39,7 @@ def zoom_punch_jsx(var: str, times: Sequence[float], amount: float = 8.0,
                    settle_s: float = 0.28) -> str:
     """节拍推拉 punch。每个 t: 瞬间(100+amount)% → 衰减回 100%。正=推近。"""
     chain = _tg(var, "ADBE Transform Group/ADBE Scale")
-    lines: List[str] = []
+    lines: list[str] = []
     for t in times:
         a1 = amount * 0.3
         lines.append(
@@ -67,7 +67,7 @@ def shake_jsx(var: str, freq: float = 14.0, amp: float = 12.0,
     if start is not None and end is not None:
         win = (f' * linear(time, {start}, {start + 0.03}, 0, 1)'
                f' * linear(time, {end - 0.05}, {end}, 1, 0)')
-    lines: List[str] = []
+    lines: list[str] = []
     if axis in ("x", "both"):
         lines.append(
             f'    {pos}.expression = "seedRandom({seed}, true); '
@@ -109,7 +109,7 @@ def rgb_burst_jsx(var: str, times: Sequence[float], max_amount: float = 25.0,
             lines.append(f'        _amt{tag}.setValueAtTime({t + recover_s:.3f}, 0);')
         lines.append('    }')
         return "\n".join(lines)
-    lines: List[str] = [
+    lines: list[str] = [
         f'    var _tint{tag} = {fx}.addProperty("ADBE Tint");',
         f'    if (_tint{tag}) {{',
         f'        _tint{tag}.property(1).setValue([1, 0.1, 0.1, 1]);',

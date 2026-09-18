@@ -18,7 +18,7 @@ class FFmpegEngine(BaseEngine):
 
     name = "ffmpeg"
 
-    def __init__(self, executable_path: Optional[Path | str] = None):
+    def __init__(self, executable_path: Path | str | None = None):
         path = Path(executable_path) if executable_path else settings.ffmpeg_path
         super().__init__(path)
         self.ffprobe_path = path.parent / "ffprobe.exe" if path.name == "ffmpeg.exe" else path
@@ -90,10 +90,10 @@ class FFmpegEngine(BaseEngine):
         codec: str = "libx264",
         bitrate: str = "20M",
         preset: str = "medium",
-        crf: Optional[int] = None,
+        crf: int | None = None,
         audio_codec: str = "aac",
         audio_bitrate: str = "192k",
-        extra_args: Optional[list[str]] = None,
+        extra_args: list[str] | None = None,
     ) -> EngineResult:
         """Convert video format with specified encoding."""
         from ..base import validate_path_safety
@@ -209,7 +209,7 @@ class FFmpegEngine(BaseEngine):
         preset: str = "slow",
         frame_pattern: str = "frame_%06d.png",
         pixel_format: str = "yuv420p",
-        audio_path: Optional[Path | str] = None,
+        audio_path: Path | str | None = None,
     ) -> EngineResult:
         """将 PNG 帧序列合成为视频（替代 AME 的 PNG 序列编码）。
 

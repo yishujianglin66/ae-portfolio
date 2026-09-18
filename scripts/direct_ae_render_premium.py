@@ -260,7 +260,7 @@ def main():
     print(f"     Script size: {len(jsx_content)} bytes, {jsx_content.count(chr(10))} lines")
 
     # Step 1: Launch AfterFX with -r flag to execute JSX
-    print(f"\n[Step 1/3] Launching AfterFX to execute JSX...")
+    print("\n[Step 1/3] Launching AfterFX to execute JSX...")
     print(f"  AfterFX: {AFTERFX_EXE}")
     print(f"  JSX: {jsx_path}")
 
@@ -273,7 +273,7 @@ def main():
             creationflags=subprocess.CREATE_NEW_CONSOLE if sys.platform == "win32" else 0
         )
         print(f"  AfterFX launched (PID: {ae_proc.pid})")
-        print(f"  Waiting for AE to process JSX and save project...")
+        print("  Waiting for AE to process JSX and save project...")
 
         # Wait for AE to finish (it will exit after executing the script)
         # Give it up to 10 minutes
@@ -308,7 +308,7 @@ def main():
     print(f"  Size: {AEP_PATH.stat().st_size / (1024*1024):.1f} MB")
 
     # Step 2: Run aerender
-    print(f"\n[Step 2/3] Running aerender...")
+    print("\n[Step 2/3] Running aerender...")
     print(f"  aerender: {AERENDER_EXE}")
     print(f"  Project: {AEP_PATH}")
     print(f"  Output: {MP4_OUT}")
@@ -334,17 +334,17 @@ def main():
                 print(f"  stderr (last 500 chars): {r.stderr[-500:]}")
 
     except subprocess.TimeoutExpired:
-        print(f"[ERROR] aerender timed out after 3600s")
+        print("[ERROR] aerender timed out after 3600s")
         return 1
     except Exception as e:
         print(f"[ERROR] aerender failed: {e}")
         return 1
 
     # Step 3: Verify output
-    print(f"\n[Step 3/3] Verifying output...")
+    print("\n[Step 3/3] Verifying output...")
     if MP4_OUT.exists() and MP4_OUT.stat().st_size > 10000:
         size_mb = MP4_OUT.stat().st_size / (1024*1024)
-        print(f"[SUCCESS] Premium effects render completed!")
+        print("[SUCCESS] Premium effects render completed!")
         print(f"  Output: {MP4_OUT}")
         print(f"  Size: {size_mb:.1f} MB")
         print(f"  Duration: ~{len(effects)/4:.0f}s (estimated from effect count)")

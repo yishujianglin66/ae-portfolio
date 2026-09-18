@@ -34,9 +34,8 @@ import os
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Any, Optional, Set, Tuple
 from pathlib import Path
-
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 # ================================================================
 #  阶段枚举
@@ -51,7 +50,7 @@ class Phase(str, Enum):
     E = "E"  # 审核优化
 
 
-PHASE_NAMES: Dict[Phase, str] = {
+PHASE_NAMES: dict[Phase, str] = {
     Phase.A: "素材感知 (Perception)",
     Phase.B: "智能编排 (Orchestration)",
     Phase.C: "IR 标准化 (IR Standardization)",
@@ -88,13 +87,13 @@ class Capability:
     module: str                        # 模块路径 (如 "ae.scene_detector")
     phase: Phase                       # 所属阶段
     status: CapabilityStatus = CapabilityStatus.PLANNED
-    dependencies: List[str] = field(default_factory=list)
-    exports: List[str] = field(default_factory=list)  # 导出的主要类/函数
+    dependencies: list[str] = field(default_factory=list)
+    exports: list[str] = field(default_factory=list)  # 导出的主要类/函数
     description: str = ""
     test_coverage: float = 0.0         # 测试覆盖率 (0.0-1.0)
     notes: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "display_name": self.display_name,
@@ -121,8 +120,8 @@ class PhaseRegistry:
     """
 
     def __init__(self):
-        self._capabilities: Dict[str, Capability] = {}
-        self._phase_caps: Dict[Phase, List[str]] = {p: [] for p in Phase}
+        self._capabilities: dict[str, Capability] = {}
+        self._phase_caps: dict[Phase, list[str]] = {p: [] for p in Phase}
         self._register_builtins()
 
     # ----------------------------------------------------------
@@ -319,11 +318,11 @@ class PhaseRegistry:
     #  查询
     # ----------------------------------------------------------
 
-    def get(self, name: str) -> Optional[Capability]:
+    def get(self, name: str) -> Capability | None:
         """按名称获取能力"""
         return self._capabilities.get(name)
 
-    def list_by_phase(self, phase: Phase) -> List[Capability]:
+    def list_by_phase(self, phase: Phase) -> list[Capability]:
         """列出某阶段所有能力"""
         return [
             self._capabilities[name]
@@ -331,18 +330,18 @@ class PhaseRegistry:
             if name in self._capabilities
         ]
 
-    def list_by_status(self, status: CapabilityStatus) -> List[Capability]:
+    def list_by_status(self, status: CapabilityStatus) -> list[Capability]:
         """列出某状态所有能力"""
         return [c for c in self._capabilities.values() if c.status == status]
 
-    def get_dependency_graph(self) -> Dict[str, List[str]]:
+    def get_dependency_graph(self) -> dict[str, list[str]]:
         """获取依赖图 {cap_name: [dep_name, ...]}"""
         return {
             name: cap.dependencies
             for name, cap in self._capabilities.items()
         }
 
-    def get_phase_summary(self, phase: Phase) -> Dict[str, Any]:
+    def get_phase_summary(self, phase: Phase) -> dict[str, Any]:
         """获取阶段摘要"""
         caps = self.list_by_phase(phase)
         statuses = {}
@@ -358,11 +357,11 @@ class PhaseRegistry:
             "planned_count": sum(1 for c in caps if c.status == CapabilityStatus.PLANNED),
         }
 
-    def get_all_summaries(self) -> List[Dict[str, Any]]:
+    def get_all_summaries(self) -> list[dict[str, Any]]:
         """获取全阶段摘要"""
         return [self.get_phase_summary(p) for p in Phase]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """导出为字典"""
         return {
             "phases": {
@@ -395,14 +394,14 @@ class PhaseStateMachine:
     - 每个阶段可设置前置条件 (gate)，条件不满足时禁止推进
     """
 
-    _PHASE_ORDER: Tuple[Phase, ...] = (Phase.A, Phase.B, Phase.C, Phase.D, Phase.E)
-    _PHASE_INDEX: Dict[Phase, int] = {p: i for i, p in enumerate(_PHASE_ORDER)}
+    _PHASE_ORDER: tuple[Phase, ...] = (Phase.A, Phase.B, Phase.C, Phase.D, Phase.E)
+    _PHASE_INDEX: dict[Phase, int] = {p: i for i, p in enumerate(_PHASE_ORDER)}
 
-    def __init__(self, initial_phase: Phase = Phase.B, registry: Optional[PhaseRegistry] = None):
+    def __init__(self, initial_phase: Phase = Phase.B, registry: PhaseRegistry | None = None):
         self._current = initial_phase
         self._frozen = False
-        self._transition_history: List[Tuple[float, Phase, Phase, PhaseTransition]] = []
-        self._gates: Dict[Phase, List[str]] = {}  # phase -> 前置条件描述
+        self._transition_history: list[tuple[float, Phase, Phase, PhaseTransition]] = []
+        self._gates: dict[Phase, list[str]] = {}  # phase -> 前置条件描述
         self.registry = registry or PhaseRegistry()
 
     @property
@@ -422,11 +421,11 @@ class PhaseStateMachine:
     def phase_name(self) -> str:
         return PHASE_NAMES.get(self._current, "Unknown")
 
-    def set_gate(self, phase: Phase, conditions: List[str]) -> None:
+    def set_gate(self, phase: Phase, conditions: list[str]) -> None:
         """设置阶段门控条件"""
         self._gates[phase] = conditions
 
-    def check_gate(self, phase: Phase) -> Tuple[bool, List[str]]:
+    def check_gate(self, phase: Phase) -> tuple[bool, list[str]]:
         """检查是否能进入某阶段"""
         conditions = self._gates.get(phase, [])
         return len(conditions) == 0, conditions
@@ -474,7 +473,7 @@ class PhaseStateMachine:
         self._transition_history.append((time.time(), old, target, PhaseTransition.ADVANCE))
         return True
 
-    def advance_next(self) -> Optional[Phase]:
+    def advance_next(self) -> Phase | None:
         """推进到下一阶段"""
         current_idx = self._PHASE_INDEX[self._current]
         if current_idx >= len(self._PHASE_ORDER) - 1:
@@ -507,7 +506,7 @@ class PhaseStateMachine:
         """恢复阶段推进"""
         self._frozen = False
 
-    def report(self) -> Dict[str, Any]:
+    def report(self) -> dict[str, Any]:
         """阶段状态报告"""
         summary = self.registry.get_phase_summary(self._current) if self.registry else {}
         return {
@@ -559,7 +558,7 @@ class Roadmap:
     def advance_to(self, phase: Phase) -> bool:
         return self.state_machine.advance_to(phase)
 
-    def advance_next(self) -> Optional[Phase]:
+    def advance_next(self) -> Phase | None:
         return self.state_machine.advance_next()
 
     def rollback_to(self, phase: Phase) -> bool:
@@ -571,7 +570,7 @@ class Roadmap:
     def resume(self) -> None:
         self.state_machine.resume()
 
-    def report(self) -> Dict[str, Any]:
+    def report(self) -> dict[str, Any]:
         """完整路线图报告"""
         rpt = self.state_machine.report()
         rpt["all_phases"] = self.registry.get_all_summaries()
@@ -583,7 +582,7 @@ class Roadmap:
         rpt = self.report()
         lines = [
             "=" * 60,
-            f"  AE Knowledge Vault — 开发路线图",
+            "  AE Knowledge Vault — 开发路线图",
             "=" * 60,
             "",
             f"当前阶段: Phase {rpt['current_phase']} — {rpt['phase_name']}",
@@ -604,7 +603,7 @@ class Roadmap:
 
         return "\n".join(lines)
 
-    def export_json(self, path: Optional[str] = None) -> str:
+    def export_json(self, path: str | None = None) -> str:
         """导出路线图为 JSON"""
         data = self.report()
         if path:
@@ -612,7 +611,7 @@ class Roadmap:
                 json.dump(data, f, ensure_ascii=False, indent=2)
         return json.dumps(data, ensure_ascii=False, indent=2)
 
-    def get_capabilities(self, phase: Optional[Phase] = None) -> List[Capability]:
+    def get_capabilities(self, phase: Phase | None = None) -> list[Capability]:
         """获取能力列表"""
         if phase:
             return self.registry.list_by_phase(phase)

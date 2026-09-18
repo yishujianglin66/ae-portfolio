@@ -14,10 +14,10 @@ style_copy/tool_orchestrator.py
   - unified_tool_integrator.py 的工具执行
 """
 
+import json
 import os
 import sys
-import json
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 # 确保可以导入项目模块
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -29,7 +29,7 @@ except ImportError:
     V4_AVAILABLE = False
 
 try:
-    from unified_tool_integrator import UnifiedToolIntegrator, ToolConfig, ToolType
+    from unified_tool_integrator import ToolConfig, ToolType, UnifiedToolIntegrator
     INTEGRATOR_AVAILABLE = True
 except ImportError:
     INTEGRATOR_AVAILABLE = False
@@ -40,7 +40,7 @@ class ToolOrchestrator:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         mode: str = "real",
         output_dir: str = None,
     ):
@@ -75,14 +75,14 @@ class ToolOrchestrator:
                 config_file=config_path if os.path.exists(config_path) else None,
             )
 
-    def generate_tool_sequence(self, style: Dict, input_video: str) -> Dict:
+    def generate_tool_sequence(self, style: dict, input_video: str) -> dict:
         """根据风格生成工具调用序列"""
         if self.v4_orchestrator:
             return self._generate_with_v4(style, input_video)
         else:
             return self._generate_with_rules(style, input_video)
 
-    def _generate_with_v4(self, style: Dict, input_video: str) -> Dict:
+    def _generate_with_v4(self, style: dict, input_video: str) -> dict:
         """使用V4生成工具序列"""
         # 构建自然语言请求
         request = self._build_request_from_style(style, input_video)
@@ -105,7 +105,7 @@ class ToolOrchestrator:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _build_request_from_style(self, style: Dict, input_video: str) -> str:
+    def _build_request_from_style(self, style: dict, input_video: str) -> str:
         """从风格描述构建自然语言请求"""
         parts = [f"处理视频 {input_video}"]
 
@@ -153,7 +153,7 @@ class ToolOrchestrator:
             except ImportError:
                 return False
 
-    def execute_tool_sequence(self, steps: List[Dict], input_video: str = "") -> Dict:
+    def execute_tool_sequence(self, steps: list[dict], input_video: str = "") -> dict:
         """执行工具序列
 
         收口：优先走 Phase1 已验证的 ToolchainManager（ffmpeg 真实出片，
@@ -189,7 +189,7 @@ class ToolOrchestrator:
 
         return result.to_dict()
 
-    def run_style_copy(self, style: Dict, input_video: str, execute: bool = True) -> Dict:
+    def run_style_copy(self, style: dict, input_video: str, execute: bool = True) -> dict:
         """
         完整流程：风格分析 → 工具序列生成 → 执行
 
@@ -226,8 +226,8 @@ class ToolOrchestrator:
             "result": exec_result,
         }
 
-    def run_style_copy_via_toolchain(self, style: Dict, input_video: str = "",
-                                     mode: str = None) -> Dict:
+    def run_style_copy_via_toolchain(self, style: dict, input_video: str = "",
+                                     mode: str = None) -> dict:
         """统一入口：风格 → 规则编排 → Phase1 ToolchainManager 真实执行
 
         将 analyze + orchestrate + execute 三步收口为单一出口，避免分散调用
@@ -239,7 +239,7 @@ class ToolOrchestrator:
             return seq
         return self.execute_via_toolchain(seq["steps"], input_video, mode=mode)
 
-    def _generate_with_rules(self, style: Dict, input_video: str) -> Dict:
+    def _generate_with_rules(self, style: dict, input_video: str) -> dict:
         """使用规则生成工具序列"""
         steps = []
         base_name = os.path.splitext(input_video)[0]
@@ -307,7 +307,7 @@ class ToolOrchestrator:
 
         return {"success": True, "steps": steps}
 
-    def _get_ffmpeg_filters(self, style: Dict) -> List[str]:
+    def _get_ffmpeg_filters(self, style: dict) -> list[str]:
         """获取FFmpeg滤镜列表"""
         filters = []
 
@@ -334,8 +334,8 @@ class ToolOrchestrator:
 
         return filters
 
-    def execute_via_toolchain(self, steps: List[Dict], input_video: str = "",
-                              mode: str = "auto") -> Dict:
+    def execute_via_toolchain(self, steps: list[dict], input_video: str = "",
+                              mode: str = "auto") -> dict:
         """将规则编排步骤经 Phase1 已验证的 ToolchainManager 执行（ffmpeg 真实出片）
 
         步骤参数名映射: input_file->input_path, output_file->output_path。
@@ -391,8 +391,9 @@ class ToolOrchestrator:
 
         # 写运行清单（非致命）
         try:
+            import json as _j
+            import time as _t
             from pathlib import Path as _P
-            import time as _t, json as _j
             out_dir = _P("output/workflow_runs")
             out_dir.mkdir(parents=True, exist_ok=True)
             manifest = {
@@ -413,7 +414,7 @@ class ToolOrchestrator:
             "output_files": output_files,
         }
 
-    def list_available_tools(self) -> Dict[str, Any]:
+    def list_available_tools(self) -> dict[str, Any]:
         """列出可用工具"""
         if self.integrator:
             return self.integrator.get_all_tools_info()

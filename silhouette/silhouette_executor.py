@@ -28,14 +28,14 @@ API文档: resources\doc\scripting\reference\fx-module.html
 - 案例模板: 案例模板/roto/, 案例模板/track/, 案例模板/paint/
 - 参数文档: Silhouette fx API 参数详解手册.md
 """
-import os
-import sys
 import json
-import time
+import os
 import subprocess
+import sys
+import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from ae_bridge_base import AEBridgeClient
 
@@ -275,7 +275,7 @@ class SilhouetteExecutor(AEBridgeClient):
     def _load_secret(self) -> str:
         return os.environ.get("MCP_BRIDGE_SECRET", "")
 
-    def _is_result_ready(self, result: Dict[str, Any]) -> bool:
+    def _is_result_ready(self, result: dict[str, Any]) -> bool:
         return result.get('status') in ['success', 'error', 'timeout', 'pending_silhouette']
 
     def _load_knowledge_base(self):
@@ -289,10 +289,10 @@ class SilhouetteExecutor(AEBridgeClient):
                         self.templates[f"{category}/{template_name}"] = str(template_file)
         print(f"[SilhouetteExecutor] Loaded {len(self.templates)} templates from knowledge base")
 
-    def _get_preset(self, preset_name: str) -> Dict:
+    def _get_preset(self, preset_name: str) -> dict:
         return PRESET_CONFIGS.get(preset_name, {})
 
-    def execute(self, command_data: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, command_data: dict[str, Any]) -> dict[str, Any]:
         cmd_type = command_data.get("command", "")
         params = command_data.get("params", {})
 
@@ -322,7 +322,7 @@ class SilhouetteExecutor(AEBridgeClient):
                 "command": cmd_type,
             }
 
-    def _handle_roto(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_roto(self, params: dict[str, Any]) -> dict[str, Any]:
         source = Path(params["source_path"])
         if not source.exists():
             return {"status": "error", "error": f"Source not found: {source}"}
@@ -379,11 +379,11 @@ class SilhouetteExecutor(AEBridgeClient):
         source: str,
         output: str,
         shape_type: str = "x-spline",
-        tracking: Optional[str] = None,
+        tracking: str | None = None,
         tolerance: float = 1.0,
         keyframes: int = 5,
         fmt: str = "exr",
-        preset_config: Dict = None,
+        preset_config: dict = None,
     ) -> str:
         source_fwd = source.replace("\\", "/")
         output_fwd = output.replace("\\", "/")
@@ -572,7 +572,7 @@ print("[SILHOUETTE] Output: {output_fwd}")
 '''
         return script
 
-    def _handle_track(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_track(self, params: dict[str, Any]) -> dict[str, Any]:
         source = Path(params["source_path"])
         if not source.exists():
             return {"status": "error", "error": f"Source not found: {source}"}
@@ -797,7 +797,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
 '''
         return script
 
-    def _handle_paint(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_paint(self, params: dict[str, Any]) -> dict[str, Any]:
         source = Path(params["source_path"])
         if not source.exists():
             return {"status": "error", "error": f"Source not found: {source}"}
@@ -844,7 +844,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
         brush_hardness: float,
         brush_flow: float,
         mode: str,
-        sample_offset: List[float],
+        sample_offset: list[float],
     ) -> str:
         source_fwd = source.replace("\\", "/")
         output_fwd = output.replace("\\", "/")
@@ -981,7 +981,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
 '''
         return script
 
-    def _handle_export(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_export(self, params: dict[str, Any]) -> dict[str, Any]:
         export_type = params.get("export_type", "matte")
         output_dir = Path(params.get("output_dir", OUTPUT_BASE / "silhouette_output"))
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -1036,7 +1036,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
             "ae_integration_data": ae_data,
         }
 
-    def _handle_joint_track(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_joint_track(self, params: dict[str, Any]) -> dict[str, Any]:
         """关节点跟踪处理方法。
 
         使用多个 TrackerNode 对人体关节点进行逐帧跟踪，支持 point 或 planar 模式。
@@ -1096,13 +1096,13 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
         self,
         source: str,
         output: str,
-        joint_points: List[Dict[str, Any]],
+        joint_points: list[dict[str, Any]],
         track_mode: str,
         search_area: int,
         accuracy: str,
         pattern_size: int,
         keyframes: int,
-        joint_names: List[str],
+        joint_names: list[str],
     ) -> str:
         """生成关节跟踪 Silhouette 脚本。
 
@@ -1312,7 +1312,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
 '''
         return script
 
-    def _handle_face_track(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_face_track(self, params: dict[str, Any]) -> dict[str, Any]:
         """面部跟踪处理方法。
 
         使用多个 TrackerNode 对面部关键点进行逐帧跟踪，并推导表情参数。
@@ -1374,14 +1374,14 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
         self,
         source: str,
         output: str,
-        face_landmarks: List[Dict[str, Any]],
+        face_landmarks: list[dict[str, Any]],
         expression_mode: str,
         search_area: int,
         accuracy: str,
         pattern_size: int,
         keyframes: int,
-        landmark_groups: Dict[str, List[str]],
-        expression_params: List[str],
+        landmark_groups: dict[str, list[str]],
+        expression_params: list[str],
     ) -> str:
         """生成面部跟踪 Silhouette 脚本。
 
@@ -1657,7 +1657,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
 '''
         return script
 
-    def _run_silhouette_script(self, script_content: str, expected_output: Path) -> Dict[str, Any]:
+    def _run_silhouette_script(self, script_content: str, expected_output: Path) -> dict[str, Any]:
         script_file = self.bridge_dir / f"silhouette_script_{int(time.time())}.py"
 
         # ---- 安全检查：确保脚本路径在可信目录内 ----
@@ -1753,7 +1753,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
             print(f"[SilhouetteExecutor] Failed to launch Silhouette: {e}")
             return False
 
-    def _run_real_mode(self, script_file: Path, expected_output: Path) -> Dict[str, Any]:
+    def _run_real_mode(self, script_file: Path, expected_output: Path) -> dict[str, Any]:
         # 优先使用 Silhouette RPC（官方内置，无需额外启动）
         rpc_result = self._run_real_mode_via_rpc(script_file, expected_output)
         if rpc_result is not None:
@@ -1874,7 +1874,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
 
     def _run_real_mode_via_rpc(
         self, script_file: Path, expected_output: Path
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """通过 Silhouette 内置 RPC 服务器执行脚本（真实模式首选）。
 
         Silhouette 2026.0.2+ 自带 RPC 服务器（fxrpc.cpp），通过命名管道
@@ -1908,7 +1908,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
                 f"(pid={info.get('pid')}, v{info.get('version')})"
             )
 
-            async def _run() -> Dict[str, Any]:
+            async def _run() -> dict[str, Any]:
                 client = SilhouetteRpcClient(
                     read_timeout=float(self.timeout)
                 )
@@ -2001,7 +2001,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
 
     def _run_real_mode_via_render_tree(
         self, expected_output: Path
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """通过 Silhouette render_tree 命令行模式执行渲染。
 
         使用官方 tree DSL 构建节点图并渲染，无需手动处理 SourceNode 属性。
@@ -2045,7 +2045,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
 
             render_args = ["-range=1"]
 
-            async def _run() -> Dict[str, Any]:
+            async def _run() -> dict[str, Any]:
                 result = await render_tree(
                     tree_args=tree_args,
                     render_args=render_args,
@@ -2170,7 +2170,7 @@ print(f"[SILHOUETTE] Output: {output_fwd}")
                 expected_output.write_bytes(b"SIMULATED_OUTPUT")
             print(f"[SilhouetteExecutor] Created simulated output: {expected_output}")
 
-    def _run_simulate_mode(self, script_file: Path, expected_output: Path) -> Dict[str, Any]:
+    def _run_simulate_mode(self, script_file: Path, expected_output: Path) -> dict[str, Any]:
         python_exe = SILHOUETTE_PYTHON if SILHOUETTE_PYTHON.exists() else Path(sys.executable)
 
         env = os.environ.copy()
@@ -2371,12 +2371,12 @@ except Exception as e:
                 print(f"[SilhouetteExecutor] Error: {e}")
                 time.sleep(self.poll_interval)
 
-    def _write_result(self, result: Dict[str, Any]):
+    def _write_result(self, result: dict[str, Any]):
         with open(self.result_file, "w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, ensure_ascii=False)
 
 
-def execute_silhouette_command(command: str, mode="auto", **params) -> Dict[str, Any]:
+def execute_silhouette_command(command: str, mode="auto", **params) -> dict[str, Any]:
     executor = SilhouetteExecutor(mode=mode)
     return executor.execute({"command": command, "params": params})
 
@@ -2391,7 +2391,7 @@ def _run_self_tests():
     if not test_image.exists():
         test_image = Path(__file__).parent / "05-测试套件" / "test_resources" / "test_image.svg"
     if not test_image.exists():
-        print(f"[警告] 未找到测试图片，创建临时测试文件...")
+        print("[警告] 未找到测试图片，创建临时测试文件...")
         test_image = Path(__file__).parent / "test_temp.png"
         test_image.write_bytes(b"\x89PNG\r\n\x1a\n")
 

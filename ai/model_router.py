@@ -88,9 +88,9 @@
 └─────────────────────────────────────────────────────────────────────────┘
 """
 
-from enum import Enum
 import os
-from typing import Optional, Dict, List
+from enum import Enum
+from typing import Dict, List, Optional
 
 
 class TaskTier(Enum):
@@ -320,7 +320,7 @@ class ModelRouter:
         }
     
     def select_model(self, 
-                     category: Optional[TaskCategory] = None,
+                     category: TaskCategory | None = None,
                      force_pro: bool = False,
                      prefer_pro: bool = True) -> str:
         if force_pro:
@@ -333,7 +333,7 @@ class ModelRouter:
         self._call_stats[tier.value] += 1
         return tier.value
     
-    def select_for_prompt(self, prompt: str, keywords: Optional[Dict] = None) -> str:
+    def select_for_prompt(self, prompt: str, keywords: dict | None = None) -> str:
         flash_keywords = [
             "翻译", "translate", "转换", "格式", "总结", "摘要",
             "简单", "快速", "简短", "一句话", "简介",
@@ -419,7 +419,7 @@ class ModelRouter:
             return "pro"
     
     @property
-    def stats(self) -> Dict[str, int]:
+    def stats(self) -> dict[str, int]:
         return dict(self._call_stats)
     
     def reset_stats(self):
@@ -434,7 +434,7 @@ class ModelRouter:
 _default_router = ModelRouter(default_tier=TaskTier.PRO)
 
 
-def select_model(category: Optional[TaskCategory] = None, 
+def select_model(category: TaskCategory | None = None, 
                  force_pro: bool = False,
                  prefer_pro: bool = True) -> str:
     return _default_router.select_model(
@@ -448,7 +448,7 @@ def select_for_prompt(prompt: str) -> str:
     return _default_router.select_for_prompt(prompt)
 
 
-def get_router_stats() -> Dict[str, int]:
+def get_router_stats() -> dict[str, int]:
     return _default_router.stats
 
 
@@ -462,7 +462,7 @@ def get_model_provider(tier: str) -> str:
     return "deepseek"
 
 
-def get_all_available_models() -> Dict[str, List[str]]:
+def get_all_available_models() -> dict[str, list[str]]:
     return {
         "text_pro": [
             "deepseek-v4-pro-260425",

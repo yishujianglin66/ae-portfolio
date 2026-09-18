@@ -34,7 +34,7 @@ OUTPUT_DIR = "output/p2_9engine_dag"
 FFMPEG_BIN = r"C:\ffmpeg\bin\ffmpeg.exe"
 
 
-def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
+def _build_pipeline_funcs(input_video: str, output_dir: str) -> dict[str, Any]:
     """构造 19 节点 DAG 的 pipeline_funcs，每个函数实际调用对应引擎。"""
     # 注: puppet-automation/src 已在模块级 L30 sys.path.insert 注册, 因此直接 from engines.xxx 导入
     from engines.ae import AEEngine
@@ -43,8 +43,8 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
     from engines.davinci import DavinciEngine
     from engines.ffmpeg import FFmpegEngine
     from engines.media_encoder import MediaEncoderEngine
-    from engines.premiere import PremiereEngine
     from engines.photoshop import PhotoshopEngine
+    from engines.premiere import PremiereEngine
     from engines.silhouette import SilhouetteEngine
     from engines.topaz import TopazEngine
 
@@ -66,7 +66,7 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
     out_path.mkdir(parents=True, exist_ok=True)
 
     # 每个节点的实际执行函数
-    async def perceive(**kw) -> Dict:
+    async def perceive(**kw) -> dict:
         """感知层 - 使用 OpenCV 抽帧分析"""
         import cv2
         cap = cv2.VideoCapture(input_video)
@@ -82,11 +82,11 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
             "duration": duration,
         }
 
-    async def understand(**kw) -> Dict:
+    async def understand(**kw) -> dict:
         """理解层 - 简单风格分类"""
         return {"success": True, "style": "cyberpunk_glitch", "confidence": 0.85}
 
-    async def plan(**kw) -> Dict:
+    async def plan(**kw) -> dict:
         """规划层 - 生成执行计划"""
         return {
             "success": True,
@@ -94,7 +94,7 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
             "stages": ["ps_preprocess", "silhouette", "ae", "topaz", "davinci", "ffmpeg", "ame"],
         }
 
-    async def execute_ps_preprocess(**kw) -> Dict:
+    async def execute_ps_preprocess(**kw) -> dict:
         """PS 预处理 - 实际调用 PhotoshopEngine"""
         try:
             result = await engines["ps"].execute(action="export_layers")
@@ -102,7 +102,7 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "engine": "ps", "error": str(e)}
 
-    async def execute_silhouette(**kw) -> Dict:
+    async def execute_silhouette(**kw) -> dict:
         """Silhouette 抠像"""
         try:
             result = await engines["silhouette"].execute(action="roto")
@@ -110,16 +110,16 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "engine": "silhouette", "error": str(e)}
 
-    async def silhouette_fallback(**kw) -> Dict:
+    async def silhouette_fallback(**kw) -> dict:
         return {"success": True, "fallback": "silhouette_skipped"}
 
-    async def compile(**kw) -> Dict:
+    async def compile(**kw) -> dict:
         """AE 编译 - 生成 JSX 脚本占位"""
         jsx_path = out_path / "compiled.jsx"
         jsx_path.write_text("// AE JSX compiled\n", encoding="utf-8")
         return {"success": True, "jsx_path": str(jsx_path)}
 
-    async def execute_ae(**kw) -> Dict:
+    async def execute_ae(**kw) -> dict:
         """AE 执行 - 实际调用 AEEngine"""
         try:
             result = await engines["ae"].execute(action="render")
@@ -127,7 +127,7 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "engine": "ae", "error": str(e)}
 
-    async def execute_topaz(**kw) -> Dict:
+    async def execute_topaz(**kw) -> dict:
         """Topaz 增强"""
         try:
             result = await engines["topaz"].execute(action="enhance")
@@ -135,10 +135,10 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "engine": "topaz", "error": str(e)}
 
-    async def topaz_fallback(**kw) -> Dict:
+    async def topaz_fallback(**kw) -> dict:
         return {"success": True, "fallback": "topaz_skipped"}
 
-    async def execute_davinci_grade(**kw) -> Dict:
+    async def execute_davinci_grade(**kw) -> dict:
         """DaVinci 调色"""
         try:
             result = await engines["davinci"].execute(action="grade")
@@ -146,25 +146,25 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "engine": "davinci", "error": str(e)}
 
-    async def execute_runway(**kw) -> Dict:
+    async def execute_runway(**kw) -> dict:
         return {"success": True, "engine": "runway", "note": "skipped_no_api_key"}
 
-    async def runway_fallback(**kw) -> Dict:
+    async def runway_fallback(**kw) -> dict:
         return {"success": True, "fallback": "runway_skipped"}
 
-    async def execute_pika(**kw) -> Dict:
+    async def execute_pika(**kw) -> dict:
         return {"success": True, "engine": "pika", "note": "skipped_no_api_key"}
 
-    async def pika_fallback(**kw) -> Dict:
+    async def pika_fallback(**kw) -> dict:
         return {"success": True, "fallback": "pika_skipped"}
 
-    async def execute_flux3(**kw) -> Dict:
+    async def execute_flux3(**kw) -> dict:
         return {"success": True, "engine": "flux3", "note": "skipped_no_api_key"}
 
-    async def flux3_fallback(**kw) -> Dict:
+    async def flux3_fallback(**kw) -> dict:
         return {"success": True, "fallback": "flux3_skipped"}
 
-    async def execute_blender(**kw) -> Dict:
+    async def execute_blender(**kw) -> dict:
         """Blender 渲染"""
         try:
             result = await engines["blender"].execute(action="render")
@@ -172,10 +172,10 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "engine": "blender", "error": str(e)}
 
-    async def blender_fallback(**kw) -> Dict:
+    async def blender_fallback(**kw) -> dict:
         return {"success": True, "fallback": "blender_skipped"}
 
-    async def execute_c4d_mograph(**kw) -> Dict:
+    async def execute_c4d_mograph(**kw) -> dict:
         """C4D MoGraph"""
         try:
             result = await engines["c4d"].execute(action="render")
@@ -183,11 +183,11 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "engine": "c4d", "error": str(e)}
 
-    async def execute_whisper_subtitle(**kw) -> Dict:
+    async def execute_whisper_subtitle(**kw) -> dict:
         """Whisper 字幕（占位）"""
         return {"success": True, "engine": "whisper", "note": "subtitle_placeholder"}
 
-    async def execute_ffmpeg(**kw) -> Dict:
+    async def execute_ffmpeg(**kw) -> dict:
         """FFmpeg 转码 - 实际调用"""
         try:
             output_video = str(out_path / "dag_transcoded.mp4")
@@ -200,10 +200,10 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "engine": "ffmpeg", "error": str(e)}
 
-    async def ffmpeg_fallback(**kw) -> Dict:
+    async def ffmpeg_fallback(**kw) -> dict:
         return {"success": True, "fallback": "ffmpeg_skipped"}
 
-    async def execute_ffmpeg_export(**kw) -> Dict:
+    async def execute_ffmpeg_export(**kw) -> dict:
         """FFmpeg 最终导出 - 产出真实视频"""
         try:
             output_video = str(out_path / "dag_final_export.mp4")
@@ -216,7 +216,7 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "engine": "ffmpeg_export", "error": str(e)}
 
-    async def execute_ame_encode(**kw) -> Dict:
+    async def execute_ame_encode(**kw) -> dict:
         """AME 编码 - 实际调用 MediaEncoderEngine"""
         try:
             # 使用 Watch Folder 模式（不阻塞等待）
@@ -229,7 +229,7 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "engine": "ame", "error": str(e)}
 
-    async def feedback(**kw) -> Dict:
+    async def feedback(**kw) -> dict:
         """反馈层"""
         return {"success": True, "feedback": "dag_completed", "quality": 88.0}
 
@@ -263,7 +263,7 @@ def _build_pipeline_funcs(input_video: str, output_dir: str) -> Dict[str, Any]:
     }
 
 
-async def run_dag() -> Dict[str, Any]:
+async def run_dag() -> dict[str, Any]:
     """运行 9 引擎一体化 DAG"""
     from core.workflow_orchestrator import WorkflowOrchestrator
 
@@ -276,7 +276,7 @@ async def run_dag() -> Dict[str, Any]:
     print("=" * 70)
     print(f"  Input  : {REF_VIDEO}")
     print(f"  Output : {OUTPUT_DIR}")
-    print(f"  Nodes  : 19 (WorkflowOrchestrator DAG)")
+    print("  Nodes  : 19 (WorkflowOrchestrator DAG)")
     print("=" * 70)
 
     if not Path(input_video).exists():
@@ -290,12 +290,12 @@ async def run_dag() -> Dict[str, Any]:
     orchestrator.build_default_pipeline(pipeline_funcs)
 
     print(f"\n  [DAG] 注册节点数: {len(orchestrator._tasks_def)}")
-    print(f"  [DAG] 节点列表:")
+    print("  [DAG] 节点列表:")
     for i, task in enumerate(orchestrator._tasks_def, 1):
         deps = task.dependencies or ["(none)"]
         print(f"    {i:2d}. {task.task_id:20s} ({task.task_type.value:20s}) deps={deps}")
 
-    print(f"\n  [RUN] 启动工作流...")
+    print("\n  [RUN] 启动工作流...")
     context = await orchestrator.run(workflow_id="p2_9engine_dag")
 
     elapsed = time.time() - t0

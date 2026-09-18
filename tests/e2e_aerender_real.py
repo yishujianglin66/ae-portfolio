@@ -4,9 +4,13 @@ AE Render Engine v2.0 真实渲染验证
 通过 Bridge 创建合成 -> aerender 渲染 -> 验证输出
 """
 from __future__ import annotations
-import sys, os, time, json
-from pathlib import Path
+
+import json
+import os
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -14,9 +18,12 @@ sys.path.insert(0, str(PROJECT_ROOT / "rendering"))
 sys.path.insert(0, str(PROJECT_ROOT / "pipeline"))
 
 from ae_render_engine import (
-    AERenderEngine, RenderStatus,
-    detect_aerender, is_afterfx_running,
-    AerenderExitCode, ERROR_CODE_INFO,
+    ERROR_CODE_INFO,
+    AERenderEngine,
+    AerenderExitCode,
+    RenderStatus,
+    detect_aerender,
+    is_afterfx_running,
 )
 from engine_task_dispatcher import AETaskDispatcher
 
@@ -173,7 +180,7 @@ if job.error_code >= 0:
 # 诊断信息
 if job.diagnostics:
     d = job.diagnostics
-    print(f"\n  诊断:")
+    print("\n  诊断:")
     print(f"    项目大小: {d.project_size_mb:.1f} MB")
     print(f"    磁盘剩余: {d.output_disk_free_gb:.1f} GB")
     print(f"    内存: {d.available_memory_gb:.1f}/{d.system_memory_gb:.1f} GB")
@@ -185,7 +192,7 @@ if job.diagnostics:
             try:
                 logtxt = lp.read_text(encoding="utf-8", errors="replace")
                 lines = [l for l in logtxt.strip().split("\n") if l.strip()]
-                print(f"    日志最后 8 行:")
+                print("    日志最后 8 行:")
                 for l in lines[-8:]:
                     print(f"      | {l.rstrip()[:120]}")
             except Exception as e:
@@ -238,10 +245,10 @@ print(f"  {'[PASS]' if err_test_ok else '[INFO]'} 错误处理{'正常' if err_t
 print("\n" + "=" * 70)
 print("总结")
 print("=" * 70)
-print(f"  环境检测: [PASS]")
-print(f"  AEP 创建: [PASS]" if found_aep else "  AEP 创建: [FAIL]")
-print(f"  实际渲染: [PASS]" if render_ok else "  实际渲染: [FAIL]")
-print(f"  错误处理: [PASS]" if err_test_ok else f"  错误处理: [INFO]")
+print("  环境检测: [PASS]")
+print("  AEP 创建: [PASS]" if found_aep else "  AEP 创建: [FAIL]")
+print("  实际渲染: [PASS]" if render_ok else "  实际渲染: [FAIL]")
+print("  错误处理: [PASS]" if err_test_ok else "  错误处理: [INFO]")
 print(f"\n  输出目录: {RENDER_DIR}")
 for f in sorted(RENDER_DIR.glob("*")):
     print(f"    {f.name}: {f.stat().st_size/1024:.1f} KB")

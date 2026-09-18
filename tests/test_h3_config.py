@@ -56,8 +56,8 @@ class TestDefaultConfigContainsH3Block:
 class TestH3ConfigValidation:
     """ConfigValidator H3 校验规则。"""
 
-    def _validate(self, cfg_overrides: Dict[str, Any]):
-        from core.config import ConfigValidator, ConfigManager
+    def _validate(self, cfg_overrides: dict[str, Any]):
+        from core.config import ConfigManager, ConfigValidator
         # 拿默认配置 + 覆写
         mgr = ConfigManager(auto_load=False)
         default_cfg = mgr._sources[0].data if mgr._sources else {}
@@ -114,7 +114,7 @@ class TestH3ConfigValidation:
 
     def test_download_cache_dirs_normalized_to_abs(self):
         """download_dir、cache_dir 相对路径经校验后转绝对。"""
-        from core.config import ConfigValidator, ConfigManager
+        from core.config import ConfigManager, ConfigValidator
         mgr = ConfigManager(auto_load=False)
         default_cfg = mgr._sources[0].data if mgr._sources else {}
         cfg = {k: (dict(v) if isinstance(v, dict) else v) for k, v in default_cfg.items()}

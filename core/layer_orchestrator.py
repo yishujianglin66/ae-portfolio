@@ -13,7 +13,6 @@ Phase 3 - 多图层复杂编排智能
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
-
 __all__ = [
     "TrackMateConfig",
     "BlendModeRule",
@@ -49,7 +48,7 @@ class BlendModeRule:
 class AdjustmentLayerConfig:
     """调整图层配置"""
     name: str
-    effects: List[Dict[str, Any]] = field(default_factory=list)
+    effects: list[dict[str, Any]] = field(default_factory=list)
     startTime: float = 0.0
     duration: float = 0.0
 
@@ -62,7 +61,7 @@ class LayerOrchestrator:
     """多图层编排器"""
 
     # 效果 → 混合模式映射
-    EFFECT_BLEND_MODE_MAP: Dict[str, str] = {
+    EFFECT_BLEND_MODE_MAP: dict[str, str] = {
         "ADBE Glo2": "screen",
         "ADBE Glo": "screen",
         "ADBE Lens Flare": "screen",
@@ -80,7 +79,7 @@ class LayerOrchestrator:
     }
 
     # 风格 → 调整图层效果映射
-    STYLE_ADJUSTMENT_EFFECTS: Dict[str, List[str]] = {
+    STYLE_ADJUSTMENT_EFFECTS: dict[str, list[str]] = {
         "cinematic": ["ADBE Color Balance", "ADBE Photo Filter", "ADBE Sharpen"],
         "vibrant": ["ADBE Hue/Saturation", "ADBE Glo2", "ADBE Color Balance"],
         "dreamy": ["ADBE Gaussian Blur 2", "ADBE Glo2", "ADBE Photo Filter"],
@@ -92,10 +91,10 @@ class LayerOrchestrator:
     }
 
     def __init__(self):
-        self.track_mattes: List[TrackMateConfig] = []
-        self.parent_relationships: List[Tuple[str, str]] = []
-        self.adjustment_layers: List[AdjustmentLayerConfig] = []
-        self.blend_mode_assignments: Dict[str, str] = {}
+        self.track_mattes: list[TrackMateConfig] = []
+        self.parent_relationships: list[tuple[str, str]] = []
+        self.adjustment_layers: list[AdjustmentLayerConfig] = []
+        self.blend_mode_assignments: dict[str, str] = {}
 
     # ------------------------------------------------------------------
     # 公共 API
@@ -103,11 +102,11 @@ class LayerOrchestrator:
 
     def orchestrate(
         self,
-        layers: List[Dict],
-        effects: List[Dict],
+        layers: list[dict],
+        effects: list[dict],
         style: str = "cinematic",
-        silhouette_artifacts: Optional[List[Dict]] = None,
-    ) -> Dict[str, Any]:
+        silhouette_artifacts: list[dict] | None = None,
+    ) -> dict[str, Any]:
         """完整编排多图层关系
 
         Args:
@@ -168,7 +167,7 @@ class LayerOrchestrator:
     # ------------------------------------------------------------------
 
     def _create_track_mattes_from_silhouette(
-        self, artifacts: List[Dict], layers: List[Dict],
+        self, artifacts: list[dict], layers: list[dict],
     ) -> None:
         """从 Silhouette 产出创建轨道遮罩"""
         footage_layers = [l for l in layers if l["type"] == "footage"]
@@ -190,7 +189,7 @@ class LayerOrchestrator:
                     matte_type="alpha",
                 ))
 
-    def _assign_blend_modes(self, effects: List[Dict], style: str) -> None:
+    def _assign_blend_modes(self, effects: list[dict], style: str) -> None:
         """根据效果类型分配混合模式"""
         style_blend_overrides = {
             "vibrant": "overlay",
@@ -212,7 +211,7 @@ class LayerOrchestrator:
             elif style in style_blend_overrides and layer_name not in self.blend_mode_assignments:
                 self.blend_mode_assignments[layer_name] = default_blend
 
-    def _create_parent_relationships(self, layers: List[Dict]) -> None:
+    def _create_parent_relationships(self, layers: list[dict]) -> None:
         """创建父子关系：3D 摄像机作为 3D 图层的父级"""
         cameras = [l for l in layers if l.get("type") == "camera"]
         three_d_layers = [l for l in layers if l.get("threeD") and l.get("type") == "footage"]
@@ -223,7 +222,7 @@ class LayerOrchestrator:
                 self.parent_relationships.append((layer["name"], main_camera["name"]))
 
     def _create_adjustment_layers(
-        self, layers: List[Dict], effects: List[Dict], style: str,
+        self, layers: list[dict], effects: list[dict], style: str,
     ) -> None:
         """创建调整图层（全局效果）"""
         adj_effects = self.STYLE_ADJUSTMENT_EFFECTS.get(style, [])
@@ -245,7 +244,7 @@ class LayerOrchestrator:
             duration=max_duration,
         ))
 
-    def _generate_operations(self) -> List[Dict]:
+    def _generate_operations(self) -> list[dict]:
         """生成可注入 plan 的操作列表"""
         ops = []
 
@@ -300,7 +299,7 @@ def apply_track_matte(
     target_layer: str,
     matte_layer: str,
     matte_type: str = "alpha",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """快捷函数：创建轨道遮罩操作"""
     return {
         "op": "setTrackMatte",
@@ -325,9 +324,9 @@ def suggest_blend_mode(effect_match_name: str, style: str = "cinematic") -> str:
 
 def create_adjustment_layer(
     name: str,
-    effects: List[Dict],
+    effects: list[dict],
     duration: float = 5.0,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """快捷函数：创建调整图层"""
     return {
         "op": "addLayer",

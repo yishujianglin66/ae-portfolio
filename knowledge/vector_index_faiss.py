@@ -32,7 +32,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -50,13 +50,13 @@ except ImportError:
 class VectorIndex:
     """向量索引，支持 FAISS 加速和 numpy 降级"""
 
-    def __init__(self, dim: int = 512, index_path: Optional[str] = None):
+    def __init__(self, dim: int = 512, index_path: str | None = None):
         self.dim = dim
         self._index_path = index_path
-        self._file_paths: List[str] = []     # ID → file_path 映射
-        self._metadata: List[Dict] = []       # ID → metadata 映射
+        self._file_paths: list[str] = []     # ID → file_path 映射
+        self._metadata: list[dict] = []       # ID → metadata 映射
         self._faiss_index = None
-        self._numpy_vectors: Optional[np.ndarray] = None  # 降级用
+        self._numpy_vectors: np.ndarray | None = None  # 降级用
 
         if FAISS_AVAILABLE:
             # 使用内积索引（归一化向量等价于余弦相似度）
@@ -76,7 +76,7 @@ class VectorIndex:
     # 索引构建
     # ------------------------------------------------------------------
 
-    def add(self, file_paths: List[str], vectors: np.ndarray, metadata: Optional[List[Dict]] = None):
+    def add(self, file_paths: list[str], vectors: np.ndarray, metadata: list[dict] | None = None):
         """添加向量到索引
 
         Args:
@@ -112,7 +112,7 @@ class VectorIndex:
             else:
                 self._numpy_vectors = np.vstack([self._numpy_vectors, vectors])
 
-    def add_single(self, file_path: str, vector: np.ndarray, metadata: Optional[Dict] = None):
+    def add_single(self, file_path: str, vector: np.ndarray, metadata: dict | None = None):
         """添加单个向量"""
         self.add([file_path], vector.reshape(1, -1), [metadata] if metadata else None)
 
@@ -120,7 +120,7 @@ class VectorIndex:
     # 搜索
     # ------------------------------------------------------------------
 
-    def search(self, query_vector: np.ndarray, top_k: int = 20) -> List[Dict[str, Any]]:
+    def search(self, query_vector: np.ndarray, top_k: int = 20) -> list[dict[str, Any]]:
         """搜索最相似的向量
 
         Args:
@@ -170,7 +170,7 @@ class VectorIndex:
     # 持久化
     # ------------------------------------------------------------------
 
-    def save(self, path: Optional[str] = None):
+    def save(self, path: str | None = None):
         """保存索引到磁盘"""
         save_path = path or self._index_path
         if not save_path:
@@ -194,7 +194,7 @@ class VectorIndex:
         with open(meta_path, "w", encoding="utf-8") as f:
             json.dump(meta, f, ensure_ascii=False)
 
-    def load(self, path: Optional[str] = None) -> bool:
+    def load(self, path: str | None = None) -> bool:
         """从磁盘加载索引"""
         load_path = path or self._index_path
         if not load_path:
@@ -225,7 +225,7 @@ class VectorIndex:
     # JSON 迁移
     # ------------------------------------------------------------------
 
-    def migrate_from_json(self, json_path: str) -> Dict[str, Any]:
+    def migrate_from_json(self, json_path: str) -> dict[str, Any]:
         """从 CLIP index.json 迁移向量到 FAISS 索引
 
         Args:
@@ -272,7 +272,7 @@ class VectorIndex:
 
 def create_retriever_with_faiss(
     index_json_path: str,
-    faiss_index_path: Optional[str] = None,
+    faiss_index_path: str | None = None,
 ) -> VectorIndex:
     """从现有 JSON 索引创建 FAISS 加速的检索器
 
@@ -333,7 +333,7 @@ def _cli_main():
         query = vectors[0] if len(vectors) > 0 else np.random.randn(dim).astype(np.float32)
 
         # numpy 暴力搜索
-        print(f"\n=== 暴力搜索 (numpy) ===")
+        print("\n=== 暴力搜索 (numpy) ===")
         print(f"索引大小: {len(vectors)} 向量, 维度: {dim}")
         start = time.perf_counter()
         for _ in range(100):
@@ -344,7 +344,7 @@ def _cli_main():
 
         # FAISS
         if FAISS_AVAILABLE:
-            print(f"\n=== FAISS 搜索 ===")
+            print("\n=== FAISS 搜索 ===")
             idx = VectorIndex(dim=dim)
             paths = [item.get("file_path", "") for item in items if item.get("vector")]
             idx.add(paths, vectors)

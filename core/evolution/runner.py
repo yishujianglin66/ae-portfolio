@@ -37,8 +37,8 @@ class EvolutionRunner:
 
     def __init__(
         self,
-        evaluator: Optional[EvolutionEvaluator] = None,
-        version_manager: Optional[VersionManager] = None,
+        evaluator: EvolutionEvaluator | None = None,
+        version_manager: VersionManager | None = None,
         messages_log: str = DEFAULT_MESSAGES_LOG,
         enable_rubrics: bool = True,
     ):
@@ -54,10 +54,10 @@ class EvolutionRunner:
 
     def record_pipeline_run(
         self,
-        pipeline_result: Dict[str, Any],
+        pipeline_result: dict[str, Any],
         scope: str = "",
-        config_snapshot: Optional[Dict[str, Any]] = None,
-    ) -> Optional[VersionDecision]:
+        config_snapshot: dict[str, Any] | None = None,
+    ) -> VersionDecision | None:
         """记录一次管线运行并执行进化决策
 
         Args:
@@ -116,7 +116,7 @@ class EvolutionRunner:
     #  辅助
     # ----------------------------------------------------------------
 
-    def _infer_scope(self, pr: Dict[str, Any]) -> str:
+    def _infer_scope(self, pr: dict[str, Any]) -> str:
         """从管线结果推断评测作用域（同一任务类型才可比）"""
         mode = str(pr.get("mode", "")).lower()
         if "reference" in mode:
@@ -125,7 +125,7 @@ class EvolutionRunner:
             return "mixed"
         return "text_topic"
 
-    def _default_snapshot(self, pr: Dict[str, Any]) -> Dict[str, Any]:
+    def _default_snapshot(self, pr: dict[str, Any]) -> dict[str, Any]:
         """默认配置快照（P0 精简版，P1 由 Optimizer 消费）"""
         return {
             "mode": pr.get("mode", ""),
@@ -183,7 +183,7 @@ class EvolutionRunner:
 #  全局单例 + 便捷函数
 # ============================================================================
 
-_global_runner: Optional[EvolutionRunner] = None
+_global_runner: EvolutionRunner | None = None
 
 
 def get_evolution_runner(enable_rubrics: bool = True) -> EvolutionRunner:
@@ -195,10 +195,10 @@ def get_evolution_runner(enable_rubrics: bool = True) -> EvolutionRunner:
 
 
 def record_pipeline_run(
-    pipeline_result: Dict[str, Any],
+    pipeline_result: dict[str, Any],
     scope: str = "",
-    config_snapshot: Optional[Dict[str, Any]] = None,
-) -> Optional[VersionDecision]:
+    config_snapshot: dict[str, Any] | None = None,
+) -> VersionDecision | None:
     """便捷函数：记录管线运行并执行进化决策"""
     return get_evolution_runner().record_pipeline_run(
         pipeline_result, scope=scope, config_snapshot=config_snapshot

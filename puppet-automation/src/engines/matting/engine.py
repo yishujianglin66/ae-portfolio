@@ -44,7 +44,7 @@ class MattingEngine(BaseEngine):
     def __init__(
         self,
         executable_path: Path | str | None = None,
-        model_dir: Optional[Path] = None,
+        model_dir: Path | None = None,
     ):
         try:
             from ...config import settings as _settings
@@ -58,12 +58,12 @@ class MattingEngine(BaseEngine):
         venv_py = Path(os.environ.get("AEKV_MATTING_PYTHON", str(executable_path or sys.executable)))
         super().__init__(venv_py)
 
-        self._matting: Optional[bool] = None
+        self._matting: bool | None = None
         self._onnxruntime = None
         self._model_session = None
         self._check_available()
 
-        self._handlers: Dict[str, Callable[..., Any]] = {
+        self._handlers: dict[str, Callable[..., Any]] = {
             "human_matting": self.human_matting,
             "batch_frames": self.batch_frames,
         }
@@ -91,9 +91,9 @@ class MattingEngine(BaseEngine):
                 f"Expected PP-MattingV2 .onnx file."
             )
 
-    def _scan_model_dir(self) -> Dict[str, Any]:
+    def _scan_model_dir(self) -> dict[str, Any]:
         """扫描模型目录，返回检测报告。"""
-        report: Dict[str, Any] = {
+        report: dict[str, Any] = {
             "model_dir": str(self.model_dir),
             "model_dir_exists": self.model_dir.exists(),
             "onnx_files": [],
@@ -137,7 +137,7 @@ class MattingEngine(BaseEngine):
         self,
         input_path: Path | str,
         output_dir: Path | str,
-        model_name: Optional[str] = None,
+        model_name: str | None = None,
     ) -> EngineResult:
         """人像抠像（单图或目录批量）。
 
@@ -197,7 +197,7 @@ class MattingEngine(BaseEngine):
             alpha_dir.mkdir(parents=True, exist_ok=True)
             rgba_dir.mkdir(parents=True, exist_ok=True)
 
-            input_files: List[Path] = []
+            input_files: list[Path] = []
             if input_path.is_dir():
                 for ext in ("*.png", "*.jpg", "*.jpeg", "*.bmp", "*.webp"):
                     input_files.extend(sorted(input_path.glob(ext)))
@@ -251,7 +251,7 @@ class MattingEngine(BaseEngine):
         self,
         input_path: Path | str,
         output_dir: Path | str,
-        model_name: Optional[str] = None,
+        model_name: str | None = None,
     ) -> EngineResult:
         """帧序列批量抠像。
 
@@ -302,7 +302,7 @@ class MattingEngine(BaseEngine):
         try:
             output_dir.mkdir(parents=True, exist_ok=True)
 
-            frame_files: List[Path] = []
+            frame_files: list[Path] = []
             for ext in ("*.png", "*.jpg", "*.jpeg"):
                 frame_files.extend(sorted(input_path.glob(ext)))
 
@@ -346,7 +346,7 @@ class MattingEngine(BaseEngine):
                 is_error_sample=True,
             )
 
-    def _resolve_model(self, model_name: Optional[str] = None) -> Optional[Path]:
+    def _resolve_model(self, model_name: str | None = None) -> Path | None:
         """解析模型文件路径。
 
         优先级：
@@ -402,7 +402,7 @@ class MattingEngine(BaseEngine):
 
     def _run_matting_batch(
         self,
-        input_files: List[Path],
+        input_files: list[Path],
         alpha_dir: Path,
         rgba_dir: Path,
         model_path: Path,
@@ -412,7 +412,7 @@ class MattingEngine(BaseEngine):
 
     def _run_frames_batch(
         self,
-        frame_files: List[Path],
+        frame_files: list[Path],
         output_dir: Path,
         model_path: Path,
     ) -> int:
@@ -421,9 +421,9 @@ class MattingEngine(BaseEngine):
 
     def _run_onnx_matting_impl(
         self,
-        input_files: List[Path],
+        input_files: list[Path],
         alpha_output_dir: Path,
-        rgba_output_dir: Optional[Path],
+        rgba_output_dir: Path | None,
         model_path: Path,
     ) -> int:
         """实际 ONNX 推理实现（无 onnxruntime 时不执行到此处）。
@@ -649,8 +649,8 @@ class MattingEngine(BaseEngine):
     def _imread_unicode(path: Path) -> Any:
         """支持中文路径的图像读取。"""
         try:
-            import numpy as np
             import cv2
+            import numpy as np
             data = np.fromfile(str(path), dtype=np.uint8)
             return cv2.imdecode(data, cv2.IMREAD_COLOR)
         except Exception:
@@ -670,7 +670,7 @@ class MattingEngine(BaseEngine):
             pass
         return False
 
-    def get_info(self) -> Dict[str, Any]:
+    def get_info(self) -> dict[str, Any]:
         """返回引擎信息与模型检测报告。"""
         model_report = self._scan_model_dir()
         return {

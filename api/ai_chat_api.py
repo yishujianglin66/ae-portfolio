@@ -30,15 +30,15 @@ import os
 import time
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 # 尝试导入 V4 Agent
 try:
     from ai_agent import V4Agent, get_agent
     _AGENT_AVAILABLE = True
-    _agent: Optional[V4Agent] = None
+    _agent: V4Agent | None = None
 except ImportError:
     _AGENT_AVAILABLE = False
     _agent = None
@@ -47,7 +47,7 @@ except ImportError:
 try:
     from tool_executor import ToolExecutor, get_executor
     _EXECUTOR_AVAILABLE = True
-    _executor: Optional[ToolExecutor] = None
+    _executor: ToolExecutor | None = None
 except ImportError:
     _EXECUTOR_AVAILABLE = False
     _executor = None
@@ -129,8 +129,8 @@ class AIChatRequest(BaseModel):
     max_iterations: int = Field(5, ge=1, le=20, description="最大工具调用迭代次数")
     max_tokens: int = Field(4096, ge=256, le=32768, description="单次响应最大 token")
     temperature: float = Field(0.7, ge=0.0, le=2.0, description="采样温度")
-    system_prompt: Optional[str] = Field(None, description="自定义系统提示词")
-    tool_names: Optional[List[str]] = Field(
+    system_prompt: str | None = Field(None, description="自定义系统提示词")
+    tool_names: list[str] | None = Field(
         None, description="限定可用工具名列表（None=全部已注册工具）"
     )
 
@@ -138,8 +138,8 @@ class AIChatRequest(BaseModel):
 class ToolCallRecord(BaseModel):
     """单次工具调用记录"""
     name: str
-    arguments: Dict[str, Any]
-    result: Dict[str, Any]
+    arguments: dict[str, Any]
+    result: dict[str, Any]
     duration: float
     iteration: int
     tool_call_id: str = ""
@@ -148,9 +148,9 @@ class ToolCallRecord(BaseModel):
 class AIChatResponse(BaseModel):
     """AI 对话响应"""
     content: str = Field("", description="最终回答文本")
-    tool_calls: List[ToolCallRecord] = Field(default_factory=list, description="工具调用记录")
+    tool_calls: list[ToolCallRecord] = Field(default_factory=list, description="工具调用记录")
     iterations: int = Field(0, description="实际迭代次数")
-    usage: Dict[str, int] = Field(default_factory=dict, description="token 使用统计")
+    usage: dict[str, int] = Field(default_factory=dict, description="token 使用统计")
     model: str = Field("", description="实际使用的模型名")
     provider: str = Field("", description="API 提供商")
     error: str = Field("", description="错误信息（成功时为空）")
@@ -163,8 +163,8 @@ class AgentRunRequest(BaseModel):
     task: str = Field(..., min_length=1, max_length=8000, description="任务描述")
     model: str = Field("pro", description="模型选择")
     max_iterations: int = Field(10, ge=1, le=30, description="最大迭代次数")
-    system_prompt: Optional[str] = Field(None, description="自定义系统提示词")
-    tool_names: Optional[List[str]] = Field(None, description="限定工具列表")
+    system_prompt: str | None = Field(None, description="自定义系统提示词")
+    tool_names: list[str] | None = Field(None, description="限定工具列表")
 
 
 class ToolInfo(BaseModel):
@@ -179,7 +179,7 @@ class ToolInfo(BaseModel):
 class ToolListResponse(BaseModel):
     """工具列表响应"""
     total: int
-    tools: List[Dict[str, Any]] = Field(default_factory=list)
+    tools: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ============================================================================
@@ -190,7 +190,7 @@ def register_ai_chat_routes(app) -> None:
     """将 AI Chat API 路由注册到 FastAPI app"""
     router = APIRouter(prefix="/api/v1/ai", tags=["AI Agent"])
 
-    @router.get("/health", response_model=Dict[str, Any])
+    @router.get("/health", response_model=dict[str, Any])
     async def ai_health():
         """AI 服务健康检查"""
         return {
@@ -230,7 +230,7 @@ def register_ai_chat_routes(app) -> None:
         request_id = f"ai_{int(time.time() * 1000)}"
 
         # 构造工具定义列表
-        tools: Optional[List[Dict[str, Any]]] = None
+        tools: list[dict[str, Any]] | None = None
         if req.use_tools and _EXECUTOR_AVAILABLE:
             executor = _get_executor()
             all_tools = executor.list_v4_tools()
@@ -317,7 +317,7 @@ def register_ai_chat_routes(app) -> None:
             )
 
         # 工具定义
-        tools: Optional[List[Dict[str, Any]]] = None
+        tools: list[dict[str, Any]] | None = None
         if _EXECUTOR_AVAILABLE:
             executor = _get_executor()
             all_tools = executor.list_v4_tools()

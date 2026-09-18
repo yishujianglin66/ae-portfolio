@@ -57,7 +57,8 @@ logger = logging.getLogger(__name__)
 # ── 依赖检测 ─────────────────────────────────────────────────────────────
 
 try:
-    from adobe_mcp.server import mcp as _adobe_mcp_server, ADOBE_APPS
+    from adobe_mcp.server import ADOBE_APPS
+    from adobe_mcp.server import mcp as _adobe_mcp_server
     ADOBE_MCP_AVAILABLE = True
 except ImportError:
     ADOBE_MCP_AVAILABLE = False
@@ -95,10 +96,10 @@ class AdobeToolResult:
     operation: str = ""
     status: str = "pending"
     app: str = ""
-    output_files: List[str] = field(default_factory=list)
-    output_data: Dict[str, Any] = field(default_factory=dict)
-    log: List[str] = field(default_factory=list)
-    error: Optional[str] = None
+    output_files: list[str] = field(default_factory=list)
+    output_data: dict[str, Any] = field(default_factory=dict)
+    log: list[str] = field(default_factory=list)
+    error: str | None = None
     duration_ms: float = 0.0
     used_fallback: bool = False
     fallback_method: str = ""
@@ -125,7 +126,7 @@ class AdobeMCPAdapter:
     TOOL_NAME = "adobe_mcp"
 
     # 支持的操作映射: operation_name → (app, description)
-    SUPPORTED_OPERATIONS: Dict[str, Dict[str, Any]] = {
+    SUPPORTED_OPERATIONS: dict[str, dict[str, Any]] = {
         # Core / Cross-App (11)
         "list_apps": {"app": "core", "desc": "列出所有支持的 Adobe 应用及状态"},
         "app_status": {"app": "core", "desc": "检查指定应用是否运行中"},
@@ -192,14 +193,14 @@ class AdobeMCPAdapter:
         "ch_start_capture": {"app": "characteranimator", "desc": "开始捕获"},
     }
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._jsx_dir = Path(self.config.get("jsx_dir", "")) if self.config.get("jsx_dir") else None
         self._timeout = self.config.get("timeout", 120)
         self._use_com = self.config.get("use_com", True)
         self._use_jsx = self.config.get("use_jsx", True)
         self._available = False
-        self._available_apps: List[str] = []
+        self._available_apps: list[str] = []
         self._check_availability()
 
     def _check_availability(self) -> None:
@@ -226,7 +227,7 @@ class AdobeMCPAdapter:
         self._available_apps = list(ADOBE_APPS.keys())
         logger.info(f"[AdobeMCP] Available apps: {self._available_apps}")
 
-    def _discover_local_apps(self) -> Dict[str, Dict[str, Any]]:
+    def _discover_local_apps(self) -> dict[str, dict[str, Any]]:
         """发现本机已安装的 Adobe 应用（降级模式用的 ADOBE_APPS 元数据）"""
         candidates = [
             ("aftereffects", "after_effects", "AfterFX.exe",
@@ -240,7 +241,7 @@ class AdobeMCPAdapter:
             ("mediaencoder", "media_encoder", "Adobe Media Encoder.exe",
              r"C:\Program Files\Adobe\Adobe Media Encoder 2025"),
         ]
-        found: Dict[str, Dict[str, Any]] = {}
+        found: dict[str, dict[str, Any]] = {}
         for key, jsx_target, exe, install_dir in candidates:
             exe_path = Path(install_dir) / exe
             if exe_path.exists():
@@ -255,11 +256,11 @@ class AdobeMCPAdapter:
         """检查适配器是否可用"""
         return self._available
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         """列出所有支持的操作"""
         return list(self.SUPPORTED_OPERATIONS.keys())
 
-    def list_apps(self) -> Dict[str, Any]:
+    def list_apps(self) -> dict[str, Any]:
         """列出所有支持的 Adobe 应用及状态"""
         result = {}
         for app_name, app_info in ADOBE_APPS.items():
@@ -286,7 +287,7 @@ class AdobeMCPAdapter:
         except Exception:
             return False
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> AdobeToolResult:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> AdobeToolResult:
         """执行指定操作
 
         Args:
@@ -328,7 +329,7 @@ class AdobeMCPAdapter:
                 duration_ms=(time.perf_counter() - start_time) * 1000,
             )
 
-    def _execute_core(self, operation: str, params: Dict[str, Any]) -> AdobeToolResult:
+    def _execute_core(self, operation: str, params: dict[str, Any]) -> AdobeToolResult:
         """执行核心/跨应用操作"""
         if operation == "list_apps":
             apps = self.list_apps()
@@ -412,7 +413,7 @@ class AdobeMCPAdapter:
             error=f"Core operation not implemented: {operation}",
         )
 
-    def _execute_app_operation(self, operation: str, app: str, params: Dict[str, Any]) -> AdobeToolResult:
+    def _execute_app_operation(self, operation: str, app: str, params: dict[str, Any]) -> AdobeToolResult:
         """执行应用特定操作 — 通过 ExtendScript 实现"""
         jsx_code = self._build_jsx_for_operation(operation, app, params)
         if jsx_code is None:
@@ -422,7 +423,7 @@ class AdobeMCPAdapter:
             )
         return self._run_jsx(app, jsx_code)
 
-    def _build_jsx_for_operation(self, operation: str, app: str, params: Dict[str, Any]) -> Optional[str]:
+    def _build_jsx_for_operation(self, operation: str, app: str, params: dict[str, Any]) -> str | None:
         """根据操作名构建 ExtendScript 代码"""
 
         # ── After Effects ──
@@ -536,11 +537,11 @@ class AdobeMCPAdapter:
         if app == "premierepro":
             if operation == "pr_new_project":
                 name = params.get("name", "NewProject")
-                return f"""
-(function() {{
+                return """
+(function() {
     var project = app.project;
-    return {{status:"success", projectName: project.name, path: project.path}};
-}})();
+    return {status:"success", projectName: project.name, path: project.path};
+})();
 """
             if operation == "pr_import_media":
                 file_path = params.get("file_path", "")
@@ -713,7 +714,7 @@ class AdobeMCPAdapter:
         return AdobeToolResult(
             operation="run_jsx", status="failed", app=jsx_target,
             error=f"Bridge timeout after 30s (cmd_id={cmd_id})",
-            log=[f"JSX sent to Bridge but no response received"],
+            log=["JSX sent to Bridge but no response received"],
         )
 
     def _open_file_in_app(self, app: str, file_path: str) -> AdobeToolResult:
@@ -784,12 +785,12 @@ class AdobeMCPAdapter:
 
 # ── 便捷函数 ─────────────────────────────────────────────────────────────
 
-def get_adapter(config: Optional[Dict[str, Any]] = None) -> AdobeMCPAdapter:
+def get_adapter(config: dict[str, Any] | None = None) -> AdobeMCPAdapter:
     """获取 AdobeMCPAdapter 单例"""
     return AdobeMCPAdapter(config)
 
 
-def quick_test() -> Dict[str, Any]:
+def quick_test() -> dict[str, Any]:
     """快速验证测试 — 检测 adobe-mcp 可用性"""
     adapter = get_adapter()
     return {

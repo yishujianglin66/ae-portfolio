@@ -12,7 +12,9 @@
   python dev_scripts/download_weights_modelscope.py          # 下载 1+2
   python dev_scripts/download_weights_modelscope.py --big    # 追加下载 3
 """
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from modelscope.hub.snapshot_download import snapshot_download

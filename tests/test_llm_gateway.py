@@ -1,24 +1,25 @@
 """core.llm_gateway 单元测试 - LLM 网关核心逻辑"""
 import os
 import sys
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.llm_gateway import (
-    _sanitize_log_text,
-    TaskType,
-    ProviderStatus,
     LLMConfig,
+    LLMGateway,
     LLMResponse,
     ProviderHealth,
+    ProviderStatus,
+    TaskType,
     TokenCompressor,
-    LLMGateway,
-    llm_gateway,
+    _sanitize_log_text,
     chat,
     chat_with_routing,
-    configure_gateway,
     configure_from_env,
+    configure_gateway,
+    llm_gateway,
 )
 
 

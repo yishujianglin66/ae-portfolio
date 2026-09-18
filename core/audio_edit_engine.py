@@ -14,13 +14,13 @@ Audio Edit Engine - 音频驱动的自适应剪辑引擎
     engine = AudioEditEngine()
     result = engine.edit(audio_path="bgm.mp3", material_paths=["a.mp4", "b.mp4"])
 """
+import json
+import math
 import os
 import sys
-import json
 import time
-import math
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
@@ -36,7 +36,7 @@ def log(msg: str, level: str = "INFO"):
 class AudioAnalyzerAdapter:
     """适配已有 audio_analyzer_enhanced 或 librosa 回退"""
 
-    def analyze(self, audio_path: str) -> Dict[str, Any]:
+    def analyze(self, audio_path: str) -> dict[str, Any]:
         """分析音频，返回节拍/能量/段落信息"""
         # 尝试使用增强版分析器
         try:
@@ -52,7 +52,7 @@ class AudioAnalyzerAdapter:
         # 回退: 基于 ffmpeg + 简单能量检测
         return self._fallback_analyze(audio_path)
 
-    def _normalize(self, raw: Dict) -> Dict[str, Any]:
+    def _normalize(self, raw: dict) -> dict[str, Any]:
         """标准化分析结果"""
         # analyze_audio 返回 {success, features: {...}, beat_count, ...}
         features = raw.get("features", raw)
@@ -85,7 +85,7 @@ class AudioAnalyzerAdapter:
             "genre": features.get("genre", "unknown"),
         }
 
-    def _fallback_analyze(self, audio_path: str) -> Dict[str, Any]:
+    def _fallback_analyze(self, audio_path: str) -> dict[str, Any]:
         """无 librosa 时的回退分析 - 使用 ffmpeg 获取时长，模拟节拍"""
         duration = self._get_duration(audio_path)
         if duration <= 0:
@@ -150,9 +150,9 @@ class AudioAnalyzerAdapter:
 class EditDecisionGenerator:
     """根据音频分析生成剪辑决策表 (EDL)"""
 
-    def generate(self, audio_features: Dict[str, Any],
+    def generate(self, audio_features: dict[str, Any],
                  material_count: int = 3,
-                 material_durations: List[float] = None) -> List[Dict[str, Any]]:
+                 material_durations: list[float] = None) -> list[dict[str, Any]]:
         """
         生成 EDL。
 
@@ -197,11 +197,11 @@ class EditDecisionGenerator:
         log(f"  EDL 生成: {len(edl)} 段, BPM={bpm}")
         return edl
 
-    def _generate_single_material_edl(self, beats: List[float],
-                                       energy_vals: List[float],
+    def _generate_single_material_edl(self, beats: list[float],
+                                       energy_vals: list[float],
                                        duration: float,
-                                       sections: List[str],
-                                       bpm: float) -> List[Dict]:
+                                       sections: list[str],
+                                       bpm: float) -> list[dict]:
         """单素材智能分段: 按音频段落或能量变化切分"""
         edl = []
 
@@ -262,11 +262,11 @@ class EditDecisionGenerator:
 
         return edl
 
-    def _generate_multi_material_edl(self, beats: List[float],
-                                      energy_vals: List[float],
+    def _generate_multi_material_edl(self, beats: list[float],
+                                      energy_vals: list[float],
                                       duration: float,
                                       material_count: int,
-                                      bpm: float) -> List[Dict]:
+                                      bpm: float) -> list[dict]:
         """多素材: 每个素材覆盖一段音频"""
         beats_per_clip = max(4, len(beats) // material_count)
         edl = []
@@ -301,10 +301,10 @@ class EditDecisionGenerator:
 
         return edl
 
-    def _find_section_boundaries(self, beats: List[float],
-                                  energy_vals: List[float],
-                                  sections: List[str],
-                                  duration: float) -> List[Tuple[float, float]]:
+    def _find_section_boundaries(self, beats: list[float],
+                                  energy_vals: list[float],
+                                  sections: list[str],
+                                  duration: float) -> list[tuple[float, float]]:
         """根据段落类型找到切分点"""
         n_sections = len(sections)
         boundaries = []
@@ -318,7 +318,7 @@ class EditDecisionGenerator:
             boundaries.append((start, end))
         return boundaries
 
-    def _snap_to_beat(self, time: float, beats: List[float],
+    def _snap_to_beat(self, time: float, beats: list[float],
                       direction: str = "nearest") -> float:
         """将时间对齐到最近的节拍"""
         if not beats:
@@ -348,7 +348,7 @@ class EditDecisionGenerator:
             return 0.8
         return 0.6  # 低能量慢放
 
-    def _pick_transition(self, energy: float, idx: int) -> Dict[str, Any]:
+    def _pick_transition(self, energy: float, idx: int) -> dict[str, Any]:
         """根据能量选择转场 (映射到真实 AE 效果)"""
         # 高能量: 硬切/快速效果
         if energy > 0.85:
@@ -377,8 +377,8 @@ class EditDecisionGenerator:
 class SpeedRampGenerator:
     """基于能量曲线的速度渐变 (Time Remapping)"""
 
-    def generate_ramps(self, audio_features: Dict[str, Any],
-                       clip_start: float, clip_end: float) -> List[Dict]:
+    def generate_ramps(self, audio_features: dict[str, Any],
+                       clip_start: float, clip_end: float) -> list[dict]:
         """为单个片段生成速度渐变关键帧"""
         beats = audio_features.get("beats", [])
         energy_vals = audio_features.get("energy_values", [])
@@ -413,8 +413,8 @@ class SpeedRampGenerator:
 class AudioEditJSXGenerator:
     """将 EDL + 速度渐变转为 AE JSX"""
 
-    def generate(self, edl: List[Dict], audio_features: Dict[str, Any],
-                 material_paths: List[str],
+    def generate(self, edl: list[dict], audio_features: dict[str, Any],
+                 material_paths: list[str],
                  audio_path: str = None,
                  comp_name: str = "AudioEdit") -> str:
         """生成完整 JSX"""
@@ -435,9 +435,9 @@ class AudioEditJSXGenerator:
         # 2. 导入音频
         if audio_path and os.path.exists(audio_path):
             safe_audio = audio_path.replace("\\", "/")
-            lines.append(f"var audioFile = null;")
+            lines.append("var audioFile = null;")
             lines.append(f"try {{ var aio = new ImportOptions(File('{safe_audio}')); audioFile = app.project.importFile(aio); }} catch(e) {{}}")
-            lines.append(f"if (audioFile) {{ var aLy = comp.layers.add(audioFile); aLy.name = 'BGM'; }}")
+            lines.append("if (audioFile) { var aLy = comp.layers.add(audioFile); aLy.name = 'BGM'; }")
             lines.append("")
 
         # 3. 导入素材 + 按 EDL 排列
@@ -458,10 +458,10 @@ class AudioEditJSXGenerator:
                 if clip["speed"] != 1.0:
                     lines.append(f"  ly_{i}.timeRemapEnabled = true;")
                     tr_prop = f"ly_{i}.property('ADBE Effect Parade').property('ADBE Time Remapping')"
-                    lines.append(f"  try {{")
+                    lines.append("  try {")
                     lines.append(f"    {tr_prop}.setValueAtTime(0, {clip['start_time']});")
                     lines.append(f"    {tr_prop}.setValueAtTime({clip['duration']}, {clip['end_time'] * clip['speed']});")
-                    lines.append(f"  }} catch(e) {{}}")
+                    lines.append("  } catch(e) {}")
 
                 # 淡入淡出
                 op = f"ly_{i}.property('ADBE Transform Group').property('ADBE Opacity')"
@@ -482,13 +482,13 @@ class AudioEditJSXGenerator:
                         lines.append(f"  try {{ {scale_prop}.setValueAtTime({bt}, [{beat_scale:.1f}, {beat_scale:.1f}]); }} catch(e) {{}}")
                         lines.append(f"  try {{ {scale_prop}.setValueAtTime({bt + 0.15}, [100, 100]); }} catch(e) {{}}")
 
-                lines.append(f"}}")
+                lines.append("}")
                 lines.append("")
 
         # 4. 节拍标记层 (调试用)
         lines.append("// --- Beat Markers ---")
-        lines.append(f"var markerLayer = comp.layers.addSolid([1,0,0], 'BeatMarkers', 2, 2, 1, DUR);")
-        lines.append(f"markerLayer.opacity = 0;")
+        lines.append("var markerLayer = comp.layers.addSolid([1,0,0], 'BeatMarkers', 2, 2, 1, DUR);")
+        lines.append("markerLayer.opacity = 0;")
         beats = audio_features.get("beats", [])
         for bt in beats[:50]:  # 最多50个标记
             lines.append(f"markerLayer.property('ADBE Marker Group').addMarker({bt}, 'beat', 0.1);")
@@ -496,8 +496,8 @@ class AudioEditJSXGenerator:
 
         # 5. 调整图层 - 全局效果
         lines.append("// --- Adjustment Layer ---")
-        lines.append(f"var adj = comp.layers.addSolid([0.5,0.5,0.5], 'Adjust', W, H, 1, DUR);")
-        lines.append(f"adj.adjustmentLayer = true;")
+        lines.append("var adj = comp.layers.addSolid([0.5,0.5,0.5], 'Adjust', W, H, 1, DUR);")
+        lines.append("adj.adjustmentLayer = true;")
         # 根据整体能量添加效果
         avg_overall = sum(clip["avg_energy"] for clip in edl) / max(len(edl), 1)
         if avg_overall > 0.6:
@@ -526,8 +526,8 @@ class AudioEditEngine:
         self.jsx_gen = AudioEditJSXGenerator()
 
     def edit(self, audio_path: str,
-             material_paths: List[str],
-             comp_name: str = "AudioEdit") -> Dict[str, Any]:
+             material_paths: list[str],
+             comp_name: str = "AudioEdit") -> dict[str, Any]:
         """
         完整音频驱动剪辑流程。
 

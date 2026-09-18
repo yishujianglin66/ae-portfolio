@@ -47,7 +47,7 @@ class BeatVideoService:
         except ImportError:
             logger.warning("librosa not available, beat detection disabled")
 
-    async def detect_beats(self, audio_path: str | Path) -> Dict[str, Any]:
+    async def detect_beats(self, audio_path: str | Path) -> dict[str, Any]:
         """Detect beat positions in audio using librosa."""
         audio_path = Path(audio_path)
         if not audio_path.exists():
@@ -80,7 +80,7 @@ class BeatVideoService:
 
         return await loop.run_in_executor(None, _detect)
 
-    async def _get_video_info(self, video_path: Path) -> Dict[str, Any]:
+    async def _get_video_info(self, video_path: Path) -> dict[str, Any]:
         """Get video info using OpenCV (fallback for missing ffprobe)."""
         import cv2
         cap = cv2.VideoCapture(str(video_path))
@@ -117,7 +117,7 @@ class BeatVideoService:
         self,
         video_path: str | Path,
         mode: str = "combined",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generate beat/cut points for video editing.
 
         Args:
@@ -314,7 +314,7 @@ class BeatVideoService:
         enable_zoom: bool = True,
         zoom_speed: float = 1.15,
         upscale_4k: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generate a beat-synced highlight video.
 
         Args:

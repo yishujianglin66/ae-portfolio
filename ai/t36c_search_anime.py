@@ -1,5 +1,7 @@
 """Try to search and download anime via MaterialSearcher."""
-import sys, json, time
+import json
+import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\scripts")))

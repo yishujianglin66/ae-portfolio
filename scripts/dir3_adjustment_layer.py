@@ -1,9 +1,13 @@
 """Direction 3: Adjustment Layer - Global Color Grading & Stylized Filters
 Creates 5 compositions demonstrating adjustment layers with effects.
 """
-import json, time, sys, os, glob
-from pathlib import Path
+import glob
+import json
+import os
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_DIR = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge")
 CMD_FILE = BRIDGE_DIR / "ae_command.json"

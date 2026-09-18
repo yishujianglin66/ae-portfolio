@@ -28,7 +28,7 @@ class StreamSegment:
     seg_id: str
     payload: Any = None
     frames: int = 30              # 该段帧数 (吞吐基准用)
-    deps: List[str] = field(default_factory=list)  # 前驱依赖(因果约束)
+    deps: list[str] = field(default_factory=list)  # 前驱依赖(因果约束)
 
 
 class HeartbeatMonitor:
@@ -36,8 +36,8 @@ class HeartbeatMonitor:
 
     def __init__(self, timeout: float = 5.0):
         self._timeout = float(timeout)
-        self._last_beat: Optional[float] = None
-        self._beats: List[float] = []
+        self._last_beat: float | None = None
+        self._beats: list[float] = []
 
     def heartbeat(self) -> None:
         now = time.time()
@@ -55,7 +55,7 @@ class HeartbeatMonitor:
         return len(self._beats)
 
     @property
-    def last_beat(self) -> Optional[float]:
+    def last_beat(self) -> float | None:
         return self._last_beat
 
 
@@ -66,8 +66,8 @@ class ThroughputBenchmark:
         self._target_fps = float(target_fps)
         self._frames = 0
         self._segments = 0
-        self._t0: Optional[float] = None
-        self._t1: Optional[float] = None
+        self._t0: float | None = None
+        self._t1: float | None = None
 
     def start(self) -> None:
         self._t0 = time.perf_counter()
@@ -104,7 +104,7 @@ class ThroughputBenchmark:
     def is_realtime(self) -> bool:
         return self.realtime_ratio >= 1.0
 
-    def report(self) -> Dict[str, Any]:
+    def report(self) -> dict[str, Any]:
         return {
             "frames": self._frames,
             "segments": self._segments,
@@ -125,20 +125,20 @@ class StreamingCausalScheduler:
 
     def __init__(
         self,
-        handler: Optional[Callable[[StreamSegment], Any]] = None,
-        heartbeat: Optional[HeartbeatMonitor] = None,
-        benchmark: Optional[ThroughputBenchmark] = None,
+        handler: Callable[[StreamSegment], Any] | None = None,
+        heartbeat: HeartbeatMonitor | None = None,
+        benchmark: ThroughputBenchmark | None = None,
     ):
         self._handler = handler or (lambda seg: seg.payload)
         self._heartbeat = heartbeat or HeartbeatMonitor()
         self._benchmark = benchmark or ThroughputBenchmark()
-        self._pending: Dict[str, StreamSegment] = {}
-        self._done: Set[str] = set()
-        self._outputs: List[Dict[str, Any]] = []
+        self._pending: dict[str, StreamSegment] = {}
+        self._done: set[str] = set()
+        self._outputs: list[dict[str, Any]] = []
 
     # ── 流式喂入 ───────────────────────────────────────────────
 
-    def feed(self, segment: StreamSegment) -> List[str]:
+    def feed(self, segment: StreamSegment) -> list[str]:
         """喂入一个分段; 返回本次触发处理的seg_id列表
 
         因果保证: 依赖缺失/依赖未就绪 → 挂起等待; 依赖中引用未知seg →
@@ -149,15 +149,15 @@ class StreamingCausalScheduler:
         self._pending[segment.seg_id] = segment
         return self._try_emit()
 
-    def feed_batch(self, segments: List[StreamSegment]) -> List[str]:
-        emitted: List[str] = []
+    def feed_batch(self, segments: list[StreamSegment]) -> list[str]:
+        emitted: list[str] = []
         for seg in segments:
             emitted.extend(self.feed(seg))
         return emitted
 
-    def _try_emit(self) -> List[str]:
+    def _try_emit(self) -> list[str]:
         """波次触发: 就绪段处理后可能解锁后续段, 循环直到不动点"""
-        emitted: List[str] = []
+        emitted: list[str] = []
         progress = True
         while progress:
             progress = False
@@ -182,15 +182,15 @@ class StreamingCausalScheduler:
     # ── 状态查询 ───────────────────────────────────────────────
 
     @property
-    def pending_ids(self) -> List[str]:
+    def pending_ids(self) -> list[str]:
         return sorted(self._pending)
 
     @property
-    def done_ids(self) -> List[str]:
+    def done_ids(self) -> list[str]:
         return sorted(self._done)
 
     @property
-    def outputs(self) -> List[Dict[str, Any]]:
+    def outputs(self) -> list[dict[str, Any]]:
         return list(self._outputs)
 
     @property
@@ -203,7 +203,7 @@ class StreamingCausalScheduler:
 
     # ── 会话分离重连 (Prime Agent session detach/reconnect) ────
 
-    def checkpoint(self) -> Dict[str, Any]:
+    def checkpoint(self) -> dict[str, Any]:
         """状态快照: 支持长任务中断后重连续传"""
         return {
             "done": sorted(self._done),
@@ -215,7 +215,7 @@ class StreamingCausalScheduler:
             "frames_processed": self._benchmark._frames,
         }
 
-    def restore(self, ckpt: Dict[str, Any]) -> None:
+    def restore(self, ckpt: dict[str, Any]) -> None:
         """从快照恢复 (重连后续传, 已完成段不重放)"""
         self._done = set(ckpt.get("done", []))
         self._pending = {}
@@ -227,10 +227,10 @@ class StreamingCausalScheduler:
 
 
 def causal_benchmark(
-    segments: List[StreamSegment],
-    handler: Optional[Callable[[StreamSegment], Any]] = None,
+    segments: list[StreamSegment],
+    handler: Callable[[StreamSegment], Any] | None = None,
     target_fps: float = 30.0,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """一键吞吐基准测试: 乱序喂入全部分段并输出实时性报告"""
     sched = StreamingCausalScheduler(
         handler=handler, benchmark=ThroughputBenchmark(target_fps))
@@ -243,9 +243,9 @@ def causal_benchmark(
     return report
 
 
-def _verify_causal_order(outputs: List[Dict[str, Any]]) -> bool:
+def _verify_causal_order(outputs: list[dict[str, Any]]) -> bool:
     """验证输出顺序满足因果约束 (输出中deps已在前序完成)"""
-    seen: Set[str] = set()
+    seen: set[str] = set()
     for o in outputs:
         seen.add(o["seg_id"])
     # 输出本身由调度器保证因果, 这里做防御性校验: 段数一致即可

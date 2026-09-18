@@ -29,16 +29,16 @@ _SCENE_BY_SEG = {"intro": "cinematic", "build": "cinematic", "drop": "battle",
 class NarrativeArcPlanner:
     """五段式叙事弧线规划器 (能量包络 + BPM网格切点)"""
 
-    def __init__(self, rules: Optional[Dict[str, Any]] = None):
+    def __init__(self, rules: dict[str, Any] | None = None):
         if rules is None:
             with open(MASTER_RULES_PATH, encoding="utf-8") as f:
                 rules = json.load(f)
-        self.envelope: Dict[str, Any] = rules["energy_envelope"]["segments"]
-        self.bpm_table: Dict[str, Any] = rules["bpm_frame_table"]
+        self.envelope: dict[str, Any] = rules["energy_envelope"]["segments"]
+        self.bpm_table: dict[str, Any] = rules["bpm_frame_table"]
 
     # ── 段落规划 ────────────────────────────────────────────
     def plan_segments(self, total_dur: float, bpm: float = 128,
-                      style_profile: Optional[Dict] = None) -> List[Dict[str, Any]]:
+                      style_profile: dict | None = None) -> list[dict[str, Any]]:
         """按能量包络比例生成五段(+breath break)结构
 
         每个 segment 字段: type/name/start/end/duration/energy_target/
@@ -46,7 +46,7 @@ class NarrativeArcPlanner:
         """
         if total_dur <= 0:
             raise ValueError("total_dur must be positive")
-        segments: List[Dict[str, Any]] = []
+        segments: list[dict[str, Any]] = []
         cursor = 0.0
         for seg_type in ["intro", "build", "drop", "break", "outro"]:
             env = self.envelope[seg_type]
@@ -63,14 +63,14 @@ class NarrativeArcPlanner:
         return segments
 
     def _build_segment(self, seg_type: str, start: float, end: float,
-                       bpm: float, style_profile: Optional[Dict]) -> Dict[str, Any]:
+                       bpm: float, style_profile: dict | None) -> dict[str, Any]:
         env = self.envelope[seg_type]
         e0, e1 = env["energy"]
         sp = style_profile or {}
         # break段铁律: 急降留白, 无切点 (cut_beats仅记录节奏密度参考)
         cut_beats = env.get("cut_beats", 4)
         if seg_type == "break":
-            cut_times: List[float] = []
+            cut_times: list[float] = []
         else:
             cut_times = self.beat_grid_cuts(
                 start, end, bpm, cut_beats,
@@ -90,7 +90,7 @@ class NarrativeArcPlanner:
             "cut_times": cut_times,
         }
 
-    def _insert_breath_break(self, drop_seg: Dict, bpm: float) -> Optional[Dict]:
+    def _insert_breath_break(self, drop_seg: dict, bpm: float) -> dict | None:
         """drop 段 70% 处插入 2-4 拍 breath break 标记段"""
         beats = self.envelope["drop"].get("breath_break_beats", [2, 4])
         beat_dur = 60.0 / bpm if bpm > 0 else 0.5
@@ -116,7 +116,7 @@ class NarrativeArcPlanner:
     # ── BPM 网格切点 ────────────────────────────────────────
     def beat_grid_cuts(self, start: float, end: float, bpm: float,
                        beats_per_cut: int, half_beat: bool = False,
-                       fps: int = 30) -> List[float]:
+                       fps: int = 30) -> list[float]:
         """在 [start, end) 内按帧网格生成切点 (锚点 t=0, 帧级对齐)
 
         以 frames_per_beat(整数帧, 与 bpm_frame_table 对齐) 为骨架,
@@ -128,7 +128,7 @@ class NarrativeArcPlanner:
             return []
         beat_dur = 60.0 / bpm
         step_t = beat_dur * beats_per_cut
-        cuts: List[float] = []
+        cuts: list[float] = []
         k = max(1, math.ceil((start - 1e-6) / step_t))
         idx = 0
         seen = set()
@@ -158,7 +158,7 @@ class NarrativeArcPlanner:
         return int(round(fps * 60.0 / bpm))
 
     # ── 能量采样 ────────────────────────────────────────────
-    def energy_at(self, segments: List[Dict], t: float) -> float:
+    def energy_at(self, segments: list[dict], t: float) -> float:
         """线性插值能量包络: 返回时刻 t 的目标能量 [0,1]"""
         for seg in segments:
             if seg["start"] <= t <= seg["end"]:
@@ -175,12 +175,12 @@ class StyleProfile:
 
     def __init__(self, path: str = STYLE_PROFILES_PATH):
         with open(path, encoding="utf-8") as f:
-            self.profiles: Dict[str, Any] = json.load(f).get("profiles", {})
+            self.profiles: dict[str, Any] = json.load(f).get("profiles", {})
 
-    def list_styles(self) -> List[str]:
+    def list_styles(self) -> list[str]:
         return list(self.profiles.keys())
 
-    def resolve(self, style_name: str) -> Optional[Dict[str, Any]]:
+    def resolve(self, style_name: str) -> dict[str, Any] | None:
         """精确匹配风格; 失败时做中文别名宽松匹配"""
         if style_name in self.profiles:
             return self.profiles[style_name]
@@ -194,7 +194,7 @@ class StyleProfile:
                 return prof
         return None
 
-    def to_planner_profile(self, style_name: str) -> Dict[str, Any]:
+    def to_planner_profile(self, style_name: str) -> dict[str, Any]:
         """转换为 NarrativeArcPlanner.plan_segments 可消费的 profile dict"""
         prof = self.resolve(style_name)
         if prof is None:

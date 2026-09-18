@@ -1,22 +1,23 @@
 """core.ae_tracer 单元测试 - AE 专用追踪工具"""
+import asyncio
 import os
 import sys
+from unittest.mock import MagicMock, PropertyMock, patch
+
 import pytest
-import asyncio
-from unittest.mock import MagicMock, patch, PropertyMock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.ae_tracer import (
     AEOperationSpan,
-    AETracer,
     AETraceContext,
+    AETracer,
     ae_operation,
-    start_ae_operation,
-    end_ae_operation,
-    set_trace_id,
-    get_trace_id,
     ae_tracer,
+    end_ae_operation,
+    get_trace_id,
+    set_trace_id,
+    start_ae_operation,
 )
 
 

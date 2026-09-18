@@ -10,17 +10,20 @@
   5. Pipeline 全链路集成
 """
 
-import sys
 import os
+import sys
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from intent_router import IntentRouter, TaskRoute
 from hybrid_coordinator import (
-    HybridCoordinator, ExecutionOptions, PhaseResult, HybridExecutionResult,
+    ExecutionOptions,
+    HybridCoordinator,
+    HybridExecutionResult,
+    PhaseResult,
 )
-
+from intent_router import IntentRouter, TaskRoute
 
 # ===========================================================================
 # 1. IntentRouter 路由决策测试
@@ -366,7 +369,7 @@ class TestPipelineIntegration:
         sm.ae_rendered()
 
     def test_full_understand_plan_flow(self, pipeline):
-        from ae_agent_pipeline import UnderstandingResult, PerceptionResult
+        from ae_agent_pipeline import PerceptionResult, UnderstandingResult
         perception = PerceptionResult(
             music_features={
                 "bpm": 128, "fps": 30, "duration": 10,

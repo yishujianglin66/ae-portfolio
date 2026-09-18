@@ -1,5 +1,7 @@
 """查找 AE 和 DaVinci 安装路径"""
-import os, glob, subprocess
+import glob
+import os
+import subprocess
 
 # Find After Effects
 for p in glob.glob(r"C:\Program Files\Adobe\Adobe After Effects*\Support Files\AfterFX.exe"):

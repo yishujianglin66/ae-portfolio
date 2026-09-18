@@ -60,7 +60,7 @@ def main() -> int:
 
     # 分层抽样
     rng = random.Random(args.seed)
-    cells: Dict[tuple, List[Dict[str, Any]]] = defaultdict(list)
+    cells: dict[tuple, list[dict[str, Any]]] = defaultdict(list)
     for r in rows:
         lab = r.get("movement_label")
         if lab not in EVAL_LABELS:
@@ -69,7 +69,7 @@ def main() -> int:
         if tier is None:
             continue
         cells[(lab, tier)].append(r)
-    sample: List[Dict[str, Any]] = []
+    sample: list[dict[str, Any]] = []
     for (lab, tier), lst in sorted(cells.items()):
         pick = rng.sample(lst, min(args.per_cell, len(lst)))
         sample.extend(pick)
@@ -77,7 +77,7 @@ def main() -> int:
     print(f"抽样总计: {len(sample)}")
 
     # 跑光流分类器
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
     t0 = time.time()
     for i, s in enumerate(sample):
         clip = s["clip_path"]
@@ -114,7 +114,7 @@ def main() -> int:
     print(f"同族反向翻转: {flip}/{n} ({100.0 * flip / n:.1f}%)")
 
     # 每类 precision/recall (以 VLM 为参照)
-    cm: Dict[str, Counter] = defaultdict(Counter)
+    cm: dict[str, Counter] = defaultdict(Counter)
     for r in results:
         cm[r["vlm_label"]][r["flow_label"]] += 1
     print("\n混淆矩阵 (行=VLM, 列=光流):")
@@ -122,7 +122,7 @@ def main() -> int:
                    | set(r["flow_label"] for r in results))
     _col = "VLM\FLOW"
     print(f"{_col:<10} " + " ".join(f"{l:>10}" for l in order))
-    per_class: Dict[str, Any] = {}
+    per_class: dict[str, Any] = {}
     for a in order:
         row = cm[a]
         total = sum(row.values())

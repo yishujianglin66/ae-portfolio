@@ -46,6 +46,7 @@ Usage:
 from __future__ import annotations
 
 import warnings as _warnings
+
 _warnings.warn(
     "bridges.adobe_bridge_adapter 已弃用：自研 .ae-mcp-bridge 协议已弃用，"
     "AE MCP 已转向开源 after-effects-mcp 基线。",
@@ -54,8 +55,8 @@ _warnings.warn(
 )
 
 import logging
-import time
 import threading
+import time
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -90,7 +91,7 @@ class AppInfo:
         self.last_check = last_check
         self.error = error
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "app": self.app.value,
             "status": self.status.value,
@@ -104,12 +105,12 @@ class BatchResult:
     """批量操作结果。"""
 
     def __init__(self):
-        self.results: List[Dict[str, Any]] = []
+        self.results: list[dict[str, Any]] = []
         self.success_count = 0
         self.failure_count = 0
         self.total_time = 0.0
 
-    def add_result(self, app: AdobeApp, success: bool, result: Dict[str, Any],
+    def add_result(self, app: AdobeApp, success: bool, result: dict[str, Any],
                    duration: float) -> None:
         self.results.append({
             "app": app.value,
@@ -123,7 +124,7 @@ class BatchResult:
             self.failure_count += 1
         self.total_time += duration
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "results": self.results,
             "success_count": self.success_count,
@@ -150,10 +151,10 @@ class AdobeBridgeAdapter:
 
     def __init__(
         self,
-        ae_bridge_dir: Optional[str] = None,
-        pr_bridge_dir: Optional[str] = None,
-        ps_bridge_dir: Optional[str] = None,
-        au_bridge_dir: Optional[str] = None,
+        ae_bridge_dir: str | None = None,
+        pr_bridge_dir: str | None = None,
+        ps_bridge_dir: str | None = None,
+        au_bridge_dir: str | None = None,
         auto_detect: bool = True,
         health_check_interval: float = 30.0,
     ):
@@ -167,11 +168,11 @@ class AdobeBridgeAdapter:
             auto_detect: 是否自动检测应用
             health_check_interval: 健康检查间隔（秒）
         """
-        self._clients: Dict[AdobeApp, Any] = {}
-        self._app_info: Dict[AdobeApp, AppInfo] = {}
+        self._clients: dict[AdobeApp, Any] = {}
+        self._app_info: dict[AdobeApp, AppInfo] = {}
         self._health_check_interval = health_check_interval
         self._health_check_running = False
-        self._health_check_thread: Optional[threading.Thread] = None
+        self._health_check_thread: threading.Thread | None = None
         self._lock = threading.RLock()
 
         project_root = Path(__file__).resolve().parent.parent
@@ -250,7 +251,7 @@ class AdobeBridgeAdapter:
     # 应用检测
     # ------------------------------------------------------------------------
 
-    def detect_all_apps(self) -> Dict[AdobeApp, AppInfo]:
+    def detect_all_apps(self) -> dict[AdobeApp, AppInfo]:
         """检测所有 Adobe 应用的状态。
 
         Returns:
@@ -289,7 +290,7 @@ class AdobeBridgeAdapter:
                 error=str(e)
             )
 
-    def get_app_status(self, app: Optional[AdobeApp] = None) -> Union[AppInfo, Dict[AdobeApp, AppInfo]]:
+    def get_app_status(self, app: AdobeApp | None = None) -> Union[AppInfo, dict[AdobeApp, AppInfo]]:
         """获取应用状态。
 
         Args:
@@ -314,7 +315,7 @@ class AdobeBridgeAdapter:
         info = self.get_app_status(app)
         return info.status == AppStatus.ONLINE
 
-    def get_online_apps(self) -> List[AdobeApp]:
+    def get_online_apps(self) -> list[AdobeApp]:
         """获取所有在线的应用。
 
         Returns:
@@ -329,10 +330,10 @@ class AdobeBridgeAdapter:
     def send_to_ae(
         self,
         command: str,
-        params: Optional[Dict[str, Any]] = None,
-        timeout: Optional[int] = None,
+        params: dict[str, Any] | None = None,
+        timeout: int | None = None,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """向 AE 发送命令。
 
         Args:
@@ -348,10 +349,10 @@ class AdobeBridgeAdapter:
     def send_to_pr(
         self,
         command: str,
-        script: Optional[str] = None,
-        timeout: Optional[int] = None,
+        script: str | None = None,
+        timeout: int | None = None,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """向 PR 发送命令。
 
         Args:
@@ -367,10 +368,10 @@ class AdobeBridgeAdapter:
     def send_to_ps(
         self,
         command: str,
-        script: Optional[str] = None,
-        timeout: Optional[int] = None,
+        script: str | None = None,
+        timeout: int | None = None,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """向 PS 发送命令。
 
         Args:
@@ -386,10 +387,10 @@ class AdobeBridgeAdapter:
     def send_to_au(
         self,
         command: str,
-        script: Optional[str] = None,
-        timeout: Optional[int] = None,
+        script: str | None = None,
+        timeout: int | None = None,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """向 AU 发送命令。
 
         Args:
@@ -406,10 +407,10 @@ class AdobeBridgeAdapter:
         self,
         app: AdobeApp,
         command: str,
-        params: Optional[Dict[str, Any]] = None,
-        timeout: Optional[int] = None,
+        params: dict[str, Any] | None = None,
+        timeout: int | None = None,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """向指定应用发送命令。"""
         client = self._clients.get(app)
         if not client:
@@ -453,7 +454,7 @@ class AdobeBridgeAdapter:
         script: str,
         app: Union[str, AdobeApp] = AdobeApp.AE,
         timeout: int = 15,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """在指定应用中执行 ExtendScript 代码。
 
         Args:
@@ -477,9 +478,9 @@ class AdobeBridgeAdapter:
     def auto_route(
         self,
         task_type: str,
-        script: Optional[str] = None,
-        params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        script: str | None = None,
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """根据任务类型自动选择最佳应用执行。
 
         任务路由规则：
@@ -530,7 +531,7 @@ class AdobeBridgeAdapter:
 
     def batch_execute(
         self,
-        tasks: List[Dict[str, Any]],
+        tasks: list[dict[str, Any]],
         parallel: bool = True,
     ) -> BatchResult:
         """批量执行多个命令。
@@ -548,7 +549,7 @@ class AdobeBridgeAdapter:
             threads = []
             results = {}
 
-            def _execute_task(task: Dict[str, Any], idx: int):
+            def _execute_task(task: dict[str, Any], idx: int):
                 app_str = task.get("app", "ae")
                 try:
                     app = AdobeApp(app_str.lower())
@@ -650,7 +651,7 @@ class AdobeBridgeAdapter:
 
             time.sleep(self._health_check_interval)
 
-    def get_health_report(self) -> Dict[str, Any]:
+    def get_health_report(self) -> dict[str, Any]:
         """获取健康报告。
 
         Returns:
@@ -673,7 +674,7 @@ class AdobeBridgeAdapter:
     # 客户端访问
     # ------------------------------------------------------------------------
 
-    def get_client(self, app: AdobeApp) -> Optional[Any]:
+    def get_client(self, app: AdobeApp) -> Any | None:
         """获取指定应用的客户端实例。
 
         Args:

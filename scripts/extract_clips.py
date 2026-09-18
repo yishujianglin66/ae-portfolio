@@ -4,11 +4,11 @@
 + 分析素材信息
 """
 
-import os
-import sys
-import subprocess
-import json
 import glob
+import json
+import os
+import subprocess
+import sys
 
 SOURCE_DIR = r"D:\AE-Work\视频素材库\冰海战记新素材"
 CLIP_DIR = r"D:\AE-Work\视频素材库\冰海战记片段"
@@ -75,7 +75,7 @@ def main():
         # 获取视频信息
         info = get_video_info(video_path)
         if not info:
-            print(f"  无法获取信息，跳过")
+            print("  无法获取信息，跳过")
             continue
 
         duration = float(info.get("format", {}).get("duration", 0))
@@ -125,7 +125,7 @@ def main():
     print(f"输出目录: {CLIP_DIR}")
 
     # 列出所有素材
-    print(f"\n素材列表:")
+    print("\n素材列表:")
     for c in all_clips:
         print(f"  {os.path.basename(c['path'])}: {c['width']}x{c['height']}, {c['duration']:.1f}s")
 

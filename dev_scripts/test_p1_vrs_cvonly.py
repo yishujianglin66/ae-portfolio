@@ -22,7 +22,7 @@ def main():
     analyzer = VRSRealAnalyzer(num_frames=12)
     result = asyncio.run(analyzer.analyze(video))
 
-    print(f"\n[2] Results:")
+    print("\n[2] Results:")
     print(f"    success: {result.get('success')}")
     print(f"    source: {result.get('source')}")
     print(f"    confidence: {result.get('confidence')}")
@@ -63,7 +63,7 @@ def main():
     checks.append(("confidence > 0", (result.get("confidence") or 0) > 0))
     checks.append(("no critical errors", len(result.get("errors", [])) == 0))
 
-    print(f"\n[3] Verification:")
+    print("\n[3] Verification:")
     all_pass = True
     for desc, ok in checks:
         status = "PASS" if ok else "FAIL"

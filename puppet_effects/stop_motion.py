@@ -8,8 +8,7 @@ stop_motion.py
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any
-
+from typing import Any, Dict, List
 
 __all__ = [
     "StopMotionConfig",
@@ -44,7 +43,7 @@ class StopMotionEffect:
         pass
 
     @staticmethod
-    def get_presets() -> Dict[str, StopMotionConfig]:
+    def get_presets() -> dict[str, StopMotionConfig]:
         """获取定格动画预设配置
 
         Returns:
@@ -80,7 +79,7 @@ class StopMotionEffect:
     @staticmethod
     def generate_effects(config: StopMotionConfig,
                          layer_name: str = "layer_001",
-                         duration: float = 5.0) -> Dict[str, Any]:
+                         duration: float = 5.0) -> dict[str, Any]:
         """生成定格动画效果和关键帧
 
         包含：
@@ -118,7 +117,7 @@ class StopMotionEffect:
 
     @staticmethod
     def _build_effects(config: StopMotionConfig,
-                       layer_name: str) -> List[Dict[str, Any]]:
+                       layer_name: str) -> list[dict[str, Any]]:
         """构建定格动画相关的效果列表
 
         Args:
@@ -151,7 +150,7 @@ class StopMotionEffect:
     @staticmethod
     def _build_keyframes(config: StopMotionConfig,
                          layer_name: str,
-                         duration: float) -> List[Dict[str, Any]]:
+                         duration: float) -> list[dict[str, Any]]:
         """构建关键帧数据
 
         Args:
@@ -214,7 +213,7 @@ class StopMotionEffect:
 
     @staticmethod
     def _build_expressions(config: StopMotionConfig,
-                           layer_name: str) -> List[Dict[str, Any]]:
+                           layer_name: str) -> list[dict[str, Any]]:
         """构建表达式列表
 
         Args:
@@ -267,7 +266,7 @@ class StopMotionEffect:
 
     @staticmethod
     def _build_layer_structure(config: StopMotionConfig,
-                               layer_name: str) -> List[Dict[str, Any]]:
+                               layer_name: str) -> list[dict[str, Any]]:
         """构建推荐的图层结构
 
         Args:
@@ -390,7 +389,7 @@ if __name__ == "__main__":
         print(f"  图层数量: {len(result['layers'])}")
 
         if result["expressions"]:
-            print(f"\n  表达式示例:")
+            print("\n  表达式示例:")
             for expr in result["expressions"][:2]:
                 print(f"    [{expr['property']}]")
                 expr_lines = expr['expression'].strip().split('\n')

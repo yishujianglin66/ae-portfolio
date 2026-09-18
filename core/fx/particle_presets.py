@@ -129,7 +129,7 @@ def build_particle_jsx(action: str, **params) -> str:
     )
 
 
-def _send_raw(jsx_body: str, timeout: float = 60.0) -> Dict[str, Any]:
+def _send_raw(jsx_body: str, timeout: float = 60.0) -> dict[str, Any]:
     """走 .ae-mcp-bridge 文件轮询协议发送 executeAtomScript（对齐 execution.py 防竞态实现）。"""
     global _last_cmd_mtime
     # 竞态防护：结果文件基准 mtime 必须在写命令之前取，否则快速响应会被误判为旧结果
@@ -208,8 +208,8 @@ class ParticleFXClient:
         self._history_dir.mkdir(parents=True, exist_ok=True)
 
     # ---------- 调用历史持久化 ----------
-    def record_call(self, action: str, params: Dict[str, Any],
-                    result: Dict[str, Any]) -> None:
+    def record_call(self, action: str, params: dict[str, Any],
+                    result: dict[str, Any]) -> None:
         """把一次语义化调用追加写盘（JSON Lines）。"""
         entry = {
             "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -223,12 +223,12 @@ class ParticleFXClient:
         except OSError:
             pass
 
-    def get_history(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_history(self, limit: int = 100) -> list[dict[str, Any]]:
         """读取最近 limit 条调用历史（最新在后）。"""
         path = self._history_dir / "history.jsonl"
         if not path.is_file():
             return []
-        lines: List[Dict[str, Any]] = []
+        lines: list[dict[str, Any]] = []
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -248,7 +248,7 @@ class ParticleFXClient:
 
     # ---------- 真机执行 ----------
     def generate(self, comp_name: str, particle_type: str,
-                 options: Optional[Dict[str, Any]] = None, timeout: float = 60.0) -> Dict[str, Any]:
+                 options: dict[str, Any] | None = None, timeout: float = 60.0) -> dict[str, Any]:
         if particle_type not in PARTICLE_TYPES:
             result = {"status": "error", "message": f"unknown particle type: {particle_type}"}
         else:
@@ -259,15 +259,15 @@ class ParticleFXClient:
         return result
 
     def layered(self, comp_name: str, preset: str = "amv_highenergy",
-                timeout: float = 90.0) -> Dict[str, Any]:
+                timeout: float = 90.0) -> dict[str, Any]:
         result = _send_raw(build_particle_jsx(
             "layered", compName=comp_name, preset=preset), timeout)
         self.record_call("layered", {"compName": comp_name, "preset": preset}, result)
         return result
 
-    def beat_burst(self, comp_name: str, layer_name: str, beats: List[float],
+    def beat_burst(self, comp_name: str, layer_name: str, beats: list[float],
                    base_rate: float = 3.0, peak_rate: float = 20.0,
-                   decay: float = 0.12, timeout: float = 60.0) -> Dict[str, Any]:
+                   decay: float = 0.12, timeout: float = 60.0) -> dict[str, Any]:
         result = _send_raw(build_particle_jsx(
             "beat_burst", compName=comp_name, layerName=layer_name, beats=beats,
             baseRate=base_rate, peakRate=peak_rate, decay=decay), timeout)
@@ -277,7 +277,7 @@ class ParticleFXClient:
         return result
 
     def atmosphere(self, comp_name: str, mood: str = "smoke",
-                   timeout: float = 60.0) -> Dict[str, Any]:
+                   timeout: float = 60.0) -> dict[str, Any]:
         result = _send_raw(build_particle_jsx(
             "atmosphere", compName=comp_name, mood=mood), timeout)
         self.record_call("atmosphere", {"compName": comp_name, "mood": mood}, result)
@@ -288,7 +288,7 @@ class ParticleFXClient:
 # 全局单例
 # ============================================================
 
-_particle_fx_client: Optional[ParticleFXClient] = None
+_particle_fx_client: ParticleFXClient | None = None
 
 
 def get_particle_fx_client() -> ParticleFXClient:

@@ -36,13 +36,13 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from integrations.ae_to_davinci_pipeline import (  # noqa: E402
+    STYLE_PRESET_MAP,
     AEExportSpec,
     AEToDavinciPipeline,
     DavinciGradingSpec,
     DavinciRenderSpec,
     PipelineCheckpoint,
     PipelineResult,
-    STYLE_PRESET_MAP,
     quick_pipeline,
 )
 from integrations.davinci_color_grading import (  # noqa: E402
@@ -50,7 +50,6 @@ from integrations.davinci_color_grading import (  # noqa: E402
     ColorGradingPreset,
     ColorWheelValues,
 )
-
 
 # ============================================================================
 # Mock 工厂
@@ -68,7 +67,7 @@ class _MockFuscriptResult:
         clips_imported: int = 1,
         render_complete: bool = False,
         output_path: str = "",
-        errors: Optional[List[str]] = None,
+        errors: list[str] | None = None,
     ) -> None:
         self.success = success
         self.project_name = project_name
@@ -88,8 +87,8 @@ class _MockColorGrader:
             object(),
             object(),
         ]
-        self.grade_calls: List[Dict[str, Any]] = []
-        self.export_lut_calls: List[Dict[str, Any]] = []
+        self.grade_calls: list[dict[str, Any]] = []
+        self.export_lut_calls: list[dict[str, Any]] = []
         self.should_fail = False
 
     def switch_to_color_page(self) -> None:
@@ -130,11 +129,11 @@ class _MockResolveColorEngine:
 
     def __init__(self) -> None:
         self._grader = _MockColorGrader()
-        self.create_project_calls: List[Dict[str, Any]] = []
-        self.render_project_calls: List[Dict[str, Any]] = []
+        self.create_project_calls: list[dict[str, Any]] = []
+        self.render_project_calls: list[dict[str, Any]] = []
         self.should_fail_create = False
         self.should_fail_render = False
-        self.output_path_override: Optional[str] = None
+        self.output_path_override: str | None = None
 
     @property
     def color_grader(self) -> _MockColorGrader:
@@ -149,11 +148,11 @@ class _MockResolveColorEngine:
     def create_project(
         self,
         project_name: str,
-        media_files: List[str],
+        media_files: list[str],
         timeline_name: str = "MainTimeline",
         color_config: Any = None,
         render: bool = False,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
     ) -> _MockFuscriptResult:
         self.create_project_calls.append(
             {
@@ -182,7 +181,7 @@ class _MockResolveColorEngine:
         timeline_name: str,
         file_path: str,
         file_type: str = "XML",
-        color_config: Optional[Any] = None,
+        color_config: Any | None = None,
     ) -> _MockFuscriptResult:
         self.create_project_calls.append(
             {
@@ -250,18 +249,18 @@ class _MockUnifiedAEClient:
     """模拟 ``ae.unified_ae_client.UnifiedAEClient``。"""
 
     def __init__(self) -> None:
-        self.list_compositions_result: List[Dict[str, Any]] = [
+        self.list_compositions_result: list[dict[str, Any]] = [
             {"name": "MockComp1", "id": 1, "width": 1920, "height": 1080},
             {"name": "MockComp2", "id": 2, "width": 1280, "height": 720},
         ]
-        self.render_calls: List[Dict[str, Any]] = []
+        self.render_calls: list[dict[str, Any]] = []
         self.should_fail = False
-        self.missing_compositions: List[str] = []
+        self.missing_compositions: list[str] = []
 
-    def list_compositions(self) -> List[Dict[str, Any]]:
+    def list_compositions(self) -> list[dict[str, Any]]:
         return [c for c in self.list_compositions_result if c["name"] not in self.missing_compositions]
 
-    def render(self, comp_name: str, output_path: str, **kwargs: Any) -> Dict[str, Any]:
+    def render(self, comp_name: str, output_path: str, **kwargs: Any) -> dict[str, Any]:
         self.render_calls.append(
             {"comp_name": comp_name, "output_path": output_path, **kwargs}
         )
@@ -892,7 +891,7 @@ class TestRun:
         pipeline: AEToDavinciPipeline,
         temp_work_dir: Path,
     ) -> None:
-        events: List[tuple] = []
+        events: list[tuple] = []
 
         def cb(stage: str, pct: float) -> None:
             events.append((stage, pct))
@@ -1212,13 +1211,13 @@ class TestHelpers:
 
     def test_report_with_callback(self) -> None:
         pipeline = AEToDavinciPipeline()
-        events: List[tuple] = []
+        events: list[tuple] = []
         pipeline._report(lambda s, p: events.append((s, p)), "test", 0.5)
         assert events == [("test", 0.5)]
 
     def test_report_clamps_progress(self) -> None:
         pipeline = AEToDavinciPipeline()
-        events: List[tuple] = []
+        events: list[tuple] = []
         pipeline._report(lambda s, p: events.append((s, p)), "test", 1.5)
         assert events[0][1] == 1.0
         pipeline._report(lambda s, p: events.append((s, p)), "test", -0.5)

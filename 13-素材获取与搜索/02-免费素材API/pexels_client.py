@@ -19,15 +19,14 @@ API 文档：https://www.pexels.com/api/
     2. JSON 输入模式：python pexels_client.py --json-input '{"func":"search_videos","params":{...}}'
 """
 
+import json
 import os
 import sys
-import json
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 import requests
-
 
 # =============================================================================
 # 常量定义
@@ -82,7 +81,7 @@ class PexelsClient:
     通过 Authorization Header 鉴权，封装视频/图片搜索与下载能力。
     """
 
-    def __init__(self, api_key: str, output_dir: Optional[str] = None):
+    def __init__(self, api_key: str, output_dir: str | None = None):
         """
         初始化客户端
 
@@ -98,7 +97,7 @@ class PexelsClient:
             "Authorization": api_key,
             "User-Agent": "AE-Knowledge-Vault/1.0 (Pexels Client)",
         })
-        self._request_timestamps: List[float] = []
+        self._request_timestamps: list[float] = []
 
     # -------------------------------------------------------------------------
     # 内部工具方法
@@ -117,7 +116,7 @@ class PexelsClient:
                 )
         self._request_timestamps.append(now)
 
-    def _request(self, url: str, params: Optional[Dict] = None) -> Dict:
+    def _request(self, url: str, params: dict | None = None) -> dict:
         """
         发起 GET 请求并返回 JSON
 
@@ -154,7 +153,7 @@ class PexelsClient:
         except ValueError:
             raise PexelsError(f"响应解析失败（非 JSON）：{response.text[:200]}")
 
-    def _download_file(self, url: str, output_path: str) -> Dict:
+    def _download_file(self, url: str, output_path: str) -> dict:
         """
         下载文件到本地
 
@@ -198,7 +197,7 @@ class PexelsClient:
         per_page: int = 15,
         page: int = 1,
         orientation: str = "",
-    ) -> Dict:
+    ) -> dict:
         """
         搜索视频素材
 
@@ -229,7 +228,7 @@ class PexelsClient:
         self,
         per_page: int = 15,
         page: int = 1,
-    ) -> Dict:
+    ) -> dict:
         """
         获取热门视频
 
@@ -247,7 +246,7 @@ class PexelsClient:
         params = {"per_page": per_page, "page": page}
         return self._request(PEXELS_VIDEO_POPULAR_ENDPOINT, params)
 
-    def get_video(self, video_id: str) -> Dict:
+    def get_video(self, video_id: str) -> dict:
         """
         获取单个视频信息
 
@@ -271,7 +270,7 @@ class PexelsClient:
         per_page: int = 15,
         page: int = 1,
         orientation: str = "",
-    ) -> Dict:
+    ) -> dict:
         """
         搜索图片素材
 
@@ -302,7 +301,7 @@ class PexelsClient:
         self,
         per_page: int = 15,
         page: int = 1,
-    ) -> Dict:
+    ) -> dict:
         """
         获取编辑精选图片
 
@@ -326,9 +325,9 @@ class PexelsClient:
     def download_video(
         self,
         video_id: str,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         quality: str = "hd",
-    ) -> Dict:
+    ) -> dict:
         """
         下载视频文件
 
@@ -415,7 +414,7 @@ class PexelsClient:
 # 统一结果格式化（供 unified_search 使用）
 # =============================================================================
 
-def normalize_video_result(raw: Dict) -> Dict:
+def normalize_video_result(raw: dict) -> dict:
     """
     将 Pexels 视频结果归一化为统一格式
 
@@ -456,7 +455,7 @@ def normalize_video_result(raw: Dict) -> Dict:
     }
 
 
-def normalize_photo_result(raw: Dict) -> Dict:
+def normalize_photo_result(raw: dict) -> dict:
     """
     将 Pexels 图片结果归一化为统一格式
     """

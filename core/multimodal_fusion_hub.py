@@ -101,7 +101,7 @@ class AudioFeatures:
 class TextFeatures:
     """文本特征"""
     style_description: str = ""
-    keywords: List[str] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
     
     # 语义特征
     style_category: str = ""            # energetic / cinematic / minimal / vintage
@@ -122,7 +122,7 @@ class MultimodalEmbedding:
     
     # 融合后的嵌入
     fused_embedding: np.ndarray = field(default_factory=lambda: np.zeros(128))
-    modality_weights: Dict[str, float] = field(default_factory=dict)
+    modality_weights: dict[str, float] = field(default_factory=dict)
     alignment_quality: float = 0.0      # 跨模态对齐质量
 
 
@@ -132,9 +132,9 @@ class FusedDecision:
     decision_type: str                   # skip_stage / select_effect / tune_params / quality_threshold
     decision: Any = None                 # 具体决策值
     confidence: float = 0.0
-    modality_contributions: Dict[str, float] = field(default_factory=dict)
+    modality_contributions: dict[str, float] = field(default_factory=dict)
     reasoning: str = ""
-    alternatives: List[Tuple[Any, float]] = field(default_factory=list)
+    alternatives: list[tuple[Any, float]] = field(default_factory=list)
 
 
 # ============================================================================
@@ -158,9 +158,9 @@ class VisualFeatureExtractor:
         rng = np.random.RandomState(42)
         self._projection = rng.randn(256, self.EMBEDDING_DIM) / math.sqrt(256)
     
-    async def extract(self, video_path: Optional[str] = None,
-                      image_paths: Optional[List[str]] = None,
-                      frame_data: Optional[np.ndarray] = None
+    async def extract(self, video_path: str | None = None,
+                      image_paths: list[str] | None = None,
+                      frame_data: np.ndarray | None = None
                       ) -> VisualFeatures:
         """提取视觉特征"""
         features = VisualFeatures()
@@ -275,7 +275,7 @@ class VisualFeatureExtractor:
         features.available = True
         return features
     
-    async def _extract_from_images(self, image_paths: List[str]) -> VisualFeatures:
+    async def _extract_from_images(self, image_paths: list[str]) -> VisualFeatures:
         """从图片列表提取特征"""
         features = VisualFeatures()
         
@@ -316,8 +316,8 @@ class AudioFeatureExtractor:
         np.random.seed(43)
         self._projection = np.random.randn(256, self.EMBEDDING_DIM) / math.sqrt(256)
     
-    async def extract(self, audio_path: Optional[str] = None,
-                      audio_data: Optional[np.ndarray] = None,
+    async def extract(self, audio_path: str | None = None,
+                      audio_data: np.ndarray | None = None,
                       sample_rate: int = 44100) -> AudioFeatures:
         """提取音频特征"""
         features = AudioFeatures()
@@ -438,7 +438,7 @@ class TextFeatureExtractor:
     EMBEDDING_DIM = 64
     
     # 风格关键词映射
-    STYLE_KEYWORDS: Dict[str, List[str]] = {
+    STYLE_KEYWORDS: dict[str, list[str]] = {
         "energetic": ["燃", "热血", "高燃", "节奏", "快速", "energetic", "dynamic", "intense", "powerful"],
         "cinematic": ["电影", "cinematic", "cinema", "epic", "dramatic", "宏大", "叙事"],
         "minimal": ["简约", "minimal", "clean", "simple", "极简", "干净"],
@@ -447,7 +447,7 @@ class TextFeatureExtractor:
         "warm": ["温暖", "warm", "温馨", "治愈", "柔和", "soft"],
     }
     
-    PLATFORM_KEYWORDS: Dict[str, List[str]] = {
+    PLATFORM_KEYWORDS: dict[str, list[str]] = {
         "bilibili": ["b站", "bilibili", "二次元", "动漫"],
         "douyin": ["抖音", "douyin", "竖屏", "短视频"],
         "youtube": ["youtube", "油管", "横屏"],
@@ -457,7 +457,7 @@ class TextFeatureExtractor:
         np.random.seed(44)
         self._projection = np.random.randn(256, self.EMBEDDING_DIM) / math.sqrt(256)
     
-    async def extract(self, text: Optional[str] = None) -> TextFeatures:
+    async def extract(self, text: str | None = None) -> TextFeatures:
         """提取文本特征"""
         features = TextFeatures()
         
@@ -470,7 +470,7 @@ class TextFeatureExtractor:
         features.confidence = 0.8
         
         # 风格分类
-        style_scores: Dict[str, int] = {}
+        style_scores: dict[str, int] = {}
         for style, keywords in self.STYLE_KEYWORDS.items():
             score = sum(1 for kw in keywords if kw in text_lower)
             if score > 0:
@@ -535,10 +535,10 @@ class CrossModalAttention:
     def forward(
         self,
         query: np.ndarray,
-        keys: List[np.ndarray],
-        values: List[np.ndarray],
-        modality_mask: Optional[List[bool]] = None
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        keys: list[np.ndarray],
+        values: list[np.ndarray],
+        modality_mask: list[bool] | None = None
+    ) -> tuple[np.ndarray, np.ndarray]:
         """前向传播
         
         Args:
@@ -600,14 +600,14 @@ class DecisionHead:
         self._param_weights = np.random.randn(input_dim, 5) * scale   # 5个参数维度
         self._quality_weight = np.random.randn(input_dim) * scale
     
-    def predict_skip_stage(self, embedding: np.ndarray) -> Tuple[bool, float]:
+    def predict_skip_stage(self, embedding: np.ndarray) -> tuple[bool, float]:
         """预测是否应跳过某阶段"""
         score = float(np.dot(embedding, self._skip_weights))
         prob = 1.0 / (1.0 + math.exp(-score))  # sigmoid
         return prob > 0.6, prob
     
     def predict_effect_selection(self, embedding: np.ndarray
-                                  ) -> List[Tuple[str, float]]:
+                                  ) -> list[tuple[str, float]]:
         """预测效果选择"""
         scores = embedding @ self._effect_weights
         # softmax
@@ -619,7 +619,7 @@ class DecisionHead:
         return [(name, float(probs[i])) for i, name in enumerate(effect_names)]
     
     def predict_parameter_adjustment(self, embedding: np.ndarray
-                                      ) -> Dict[str, float]:
+                                      ) -> dict[str, float]:
         """预测参数调整"""
         adjustments = embedding @ self._param_weights
         param_names = ["intensity", "speed", "size", "threshold", "duration"]
@@ -657,7 +657,7 @@ class MultimodalFusionHub:
         self._decision_head = DecisionHead(input_dim=128)
         
         # 特征缓存
-        self._cache: Dict[str, Any] = {}
+        self._cache: dict[str, Any] = {}
     
     # ----------------------------------------------------------------
     #  多模态编码
@@ -665,12 +665,12 @@ class MultimodalFusionHub:
     
     async def encode_all(
         self,
-        video_path: Optional[str] = None,
-        audio_path: Optional[str] = None,
-        text_description: Optional[str] = None,
-        image_paths: Optional[List[str]] = None,
-        frame_data: Optional[np.ndarray] = None,
-        audio_data: Optional[np.ndarray] = None
+        video_path: str | None = None,
+        audio_path: str | None = None,
+        text_description: str | None = None,
+        image_paths: list[str] | None = None,
+        frame_data: np.ndarray | None = None,
+        audio_data: np.ndarray | None = None
     ) -> MultimodalEmbedding:
         """多模态编码（支持任意模态组合）"""
         embedding = MultimodalEmbedding()
@@ -762,7 +762,7 @@ class MultimodalFusionHub:
         return fused
     
     def _compute_modality_weights(self, embedding: MultimodalEmbedding
-                                   ) -> Dict[str, float]:
+                                   ) -> dict[str, float]:
         """计算模态权重"""
         weights = {}
         total = 0.0
@@ -820,7 +820,7 @@ class MultimodalFusionHub:
     
     def _adaptive_modality_weighting(
         self, embedding: MultimodalEmbedding
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """自适应模态加权（缺失模态鲁棒）"""
         weights = {}
         
@@ -856,7 +856,7 @@ class MultimodalFusionHub:
         self,
         embedding: MultimodalEmbedding,
         decision_type: str,
-        context: Optional[Dict[str, Any]] = None
+        context: dict[str, Any] | None = None
     ) -> FusedDecision:
         """跨模态融合决策"""
         fused = embedding.fused_embedding
@@ -917,7 +917,7 @@ class MultimodalFusionHub:
     #  缓存 / 决策持久化
     # ----------------------------------------------------------------
 
-    def save_cache(self, path: Optional[str] = None) -> str:
+    def save_cache(self, path: str | None = None) -> str:
         """把特征缓存写到 data_dir/cache.json，返回落盘路径。"""
         target = Path(path) if path else self._data_dir / "cache.json"
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -925,7 +925,7 @@ class MultimodalFusionHub:
             json.dump(self._cache, f, ensure_ascii=False, indent=2)
         return str(target)
 
-    def load_cache(self, path: Optional[str] = None) -> Dict[str, Any]:
+    def load_cache(self, path: str | None = None) -> dict[str, Any]:
         """从 data_dir/cache.json 读回特征缓存（文件不存在返回空 dict）。"""
         source = Path(path) if path else self._data_dir / "cache.json"
         if not source.is_file():
@@ -951,12 +951,12 @@ class MultimodalFusionHub:
         except OSError:
             pass
 
-    def get_decisions(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_decisions(self, limit: int = 100) -> list[dict[str, Any]]:
         """读取最近 limit 条融合决策。"""
         path = self._data_dir / "decisions.jsonl"
         if not path.is_file():
             return []
-        lines: List[Dict[str, Any]] = []
+        lines: list[dict[str, Any]] = []
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
@@ -978,7 +978,7 @@ class MultimodalFusionHub:
     #  统计
     # ----------------------------------------------------------------
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         return {
             "cache_size": len(self._cache),
             "attention_heads": self._attention._n_heads,
@@ -990,7 +990,7 @@ class MultimodalFusionHub:
 #  全局单例
 # ============================================================================
 
-_global_hub: Optional[MultimodalFusionHub] = None
+_global_hub: MultimodalFusionHub | None = None
 
 
 def get_fusion_hub(data_dir: str = MultimodalFusionHub.DEFAULT_DATA_DIR

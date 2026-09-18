@@ -18,11 +18,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "puppet-automation"))
 
+import pytest
 from src.config.settings import settings
 from src.engines.base import BaseEngine, EngineResult
 from src.engines.cinema4d.engine import Cinema4DEngine
 
-import pytest
 
 @pytest.fixture
 def engine():

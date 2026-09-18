@@ -1,12 +1,13 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from style_template_library import STYLE_TEMPLATES
 
 
 @dataclass
 class EffectSettings:
     effectName: str
-    settings: Dict[str, Any]
+    settings: dict[str, Any]
     intensity_param: str
     intensity_factor: float
 
@@ -17,14 +18,14 @@ class StyleTemplate:
     display_name: str
     category: str
     description: str
-    keywords: List[str]
-    intensity_range: List[float]
-    effects: List[EffectSettings]
+    keywords: list[str]
+    intensity_range: list[float]
+    effects: list[EffectSettings]
 
 
 class EffectComposer:
     def __init__(self):
-        self.templates: Dict[str, StyleTemplate] = {}
+        self.templates: dict[str, StyleTemplate] = {}
         self._load_templates()
 
     def _load_templates(self):
@@ -47,30 +48,30 @@ class EffectComposer:
                 effects=effects
             )
 
-    def list_templates(self) -> List[str]:
+    def list_templates(self) -> list[str]:
         return list(self.templates.keys())
 
-    def list_categories(self) -> List[str]:
+    def list_categories(self) -> list[str]:
         categories = set()
         for template in self.templates.values():
             categories.add(template.category)
         return sorted(list(categories))
 
-    def get_template(self, name: str) -> Optional[StyleTemplate]:
+    def get_template(self, name: str) -> StyleTemplate | None:
         return self.templates.get(name)
 
     def _clamp_intensity(self, template: StyleTemplate, intensity: float) -> float:
         min_int, max_int = template.intensity_range
         return max(min_int, min(max_int, intensity))
 
-    def _adjust_effect_intensity(self, effect: EffectSettings, intensity: float) -> Dict[str, Any]:
+    def _adjust_effect_intensity(self, effect: EffectSettings, intensity: float) -> dict[str, Any]:
         adjusted_settings = effect.settings.copy()
         base_value = adjusted_settings[effect.intensity_param]
         adjusted_value = base_value + (effect.intensity_factor - base_value) * (intensity - 0.5) * 2
         adjusted_settings[effect.intensity_param] = adjusted_value
         return adjusted_settings
 
-    def compose(self, style_name: str, intensity: float = 1.0, layer_name: str = "layer_001") -> Dict[str, Any]:
+    def compose(self, style_name: str, intensity: float = 1.0, layer_name: str = "layer_001") -> dict[str, Any]:
         template = self.get_template(style_name)
         if not template:
             raise ValueError(f"Style template '{style_name}' not found")
@@ -92,7 +93,7 @@ class EffectComposer:
             "effects": effects
         }
 
-    def recommend_by_keywords(self, keywords: List[str], limit: int = 5) -> List[Dict[str, Any]]:
+    def recommend_by_keywords(self, keywords: list[str], limit: int = 5) -> list[dict[str, Any]]:
         if not keywords:
             return []
 
@@ -120,7 +121,7 @@ class EffectComposer:
         scores.sort(key=lambda x: x["match_score"], reverse=True)
         return scores[:limit]
 
-    def mix_styles(self, style_names: List[str], ratios: Optional[List[float]] = None, layer_name: str = "layer_001") -> Dict[str, Any]:
+    def mix_styles(self, style_names: list[str], ratios: list[float] | None = None, layer_name: str = "layer_001") -> dict[str, Any]:
         if not style_names:
             raise ValueError("At least one style name is required")
 
@@ -135,8 +136,8 @@ class EffectComposer:
             raise ValueError("Sum of ratios cannot be zero")
         normalized_ratios = [r / total_ratio for r in ratios]
 
-        all_effects: Dict[str, Dict[str, Any]] = {}
-        intensity_param_map: Dict[str, str] = {}
+        all_effects: dict[str, dict[str, Any]] = {}
+        intensity_param_map: dict[str, str] = {}
 
         for style_name, ratio in zip(style_names, normalized_ratios):
             template = self.get_template(style_name)

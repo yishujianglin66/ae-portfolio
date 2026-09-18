@@ -14,9 +14,9 @@ adobe_mcp_server.py — Adobe MCP Stdio Server
     python adobe_mcp_server.py --app after_effects
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
 from pathlib import Path
 
 # 确保项目根目录在 path 中

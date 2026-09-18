@@ -31,9 +31,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 import sys
 import time
-import random
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -42,7 +42,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
+from torch.utils.data import DataLoader, Dataset, WeightedRandomSampler
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
@@ -80,7 +80,7 @@ def _log(msg: str):
 
 # ── 数据加载(多源合并) ────────────────────────────────────
 
-def load_merged_vlm(golden_videos: set) -> List[dict]:
+def load_merged_vlm(golden_videos: set) -> list[dict]:
     """从多IP合并VLM数据加载"""
     entries = []
     if not MERGED_VLM.exists():
@@ -112,7 +112,7 @@ def load_merged_vlm(golden_videos: set) -> List[dict]:
     return entries
 
 
-def load_vlm_full(golden_videos: set) -> List[dict]:
+def load_vlm_full(golden_videos: set) -> list[dict]:
     """从AoT VLM全量标注加载"""
     entries = []
     if not VLM_FULL.exists():
@@ -143,7 +143,7 @@ def load_vlm_full(golden_videos: set) -> List[dict]:
     return entries
 
 
-def load_pseudolabels(golden_videos: set) -> List[dict]:
+def load_pseudolabels(golden_videos: set) -> list[dict]:
     """从伪标签加载(兜底)"""
     entries = []
     if not PSEUDO_LABELS.exists():
@@ -166,7 +166,7 @@ def load_pseudolabels(golden_videos: set) -> List[dict]:
     return entries
 
 
-def load_teacher(golden_videos: set) -> List[dict]:
+def load_teacher(golden_videos: set) -> list[dict]:
     """加载教师标签数据"""
     entries = []
     if not TEACHER_LABELS.exists():
@@ -188,8 +188,8 @@ def load_teacher(golden_videos: set) -> List[dict]:
     return entries
 
 
-def balanced_sample(entries: List[dict], max_per_ip: int = MAX_PER_IP,
-                    min_per_ip: int = MIN_PER_IP) -> List[dict]:
+def balanced_sample(entries: list[dict], max_per_ip: int = MAX_PER_IP,
+                    min_per_ip: int = MIN_PER_IP) -> list[dict]:
     """均衡采样: 每个IP最多取max_per_ip帧, 低于min_per_ip的IP丢弃。
 
     采样策略: 如果某IP帧数 > max_per_ip, 随机下采样到max_per_ip。
@@ -229,7 +229,7 @@ def balanced_sample(entries: List[dict], max_per_ip: int = MAX_PER_IP,
 class BalancedContrastiveDataset(Dataset):
     """均衡对比学习数据集: 支持场景感知文本增强"""
 
-    def __init__(self, entries: List[dict], ip2idx: Dict[str, int],
+    def __init__(self, entries: list[dict], ip2idx: dict[str, int],
                  transform=None, scene_enhance: bool = True):
         self.entries = entries
         self.ip2idx = ip2idx
@@ -252,8 +252,8 @@ class BalancedContrastiveDataset(Dataset):
         return img, label
 
 
-def build_text_embeds_with_scene(class_names: List[str], entries: List[dict],
-                                 ip2idx: Dict[str, int],
+def build_text_embeds_with_scene(class_names: list[str], entries: list[dict],
+                                 ip2idx: dict[str, int],
                                  clip_model, tokenizer, device: str) -> np.ndarray:
     """构建文本嵌入: 用VLM场景/情绪信息增强IP描述。
 
@@ -370,7 +370,7 @@ def train_balanced_lora(clip_model, lora_model, train_loader,
 
         if avg_loss < best_loss:
             best_loss = avg_loss
-            _log(f"  ★ 新最佳loss, 保存中间权重")
+            _log("  ★ 新最佳loss, 保存中间权重")
             MODEL_DIR.mkdir(parents=True, exist_ok=True)
             torch.save({
                 "lora_state": lora_model.state_dict(),
@@ -416,7 +416,7 @@ def dry_run():
     # 场景分布
     scene_counts = Counter(e.get("scene_type", "") for e in sampled if e.get("scene_type"))
     if scene_counts:
-        _log(f"\n场景分布:")
+        _log("\n场景分布:")
         for scene, cnt in scene_counts.most_common():
             _log(f"  {scene}: {cnt} ({100*cnt/len(sampled):.1f}%)")
 

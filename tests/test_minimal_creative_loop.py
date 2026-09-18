@@ -29,7 +29,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-
 # 让测试可在无 conftest 注入 path 的情况下直接跑
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
@@ -53,7 +52,6 @@ from pipeline.prompts.creative_planning import (  # noqa: E402
     build_user_prompt,
 )
 
-
 # ============================================================================
 # Mock 客户端
 # ============================================================================
@@ -62,13 +60,13 @@ class MockUnifiedAEClient:
     """记录所有调用的 Mock AE 客户端。"""
 
     def __init__(self) -> None:
-        self.calls: List[Dict[str, Any]] = []
+        self.calls: list[dict[str, Any]] = []
         self._layer_counter = 0
-        self.fail_methods: List[str] = []
+        self.fail_methods: list[str] = []
         # 已创建的图层名集合（get_layer_info 用于判断图层是否存在）
         self.created_layers: set = set()
 
-    def _record(self, method: str, **kwargs: Any) -> Dict[str, Any]:
+    def _record(self, method: str, **kwargs: Any) -> dict[str, Any]:
         if method in self.fail_methods:
             return {"success": False, "error": f"mock failure on {method}"}
         self._layer_counter += 1
@@ -78,39 +76,39 @@ class MockUnifiedAEClient:
             "data": {"layer_index": self._layer_counter},
         }
 
-    def create_composition(self, **kw: Any) -> Dict[str, Any]:
+    def create_composition(self, **kw: Any) -> dict[str, Any]:
         return self._record("create_composition", **kw)
 
-    def create_text_layer(self, **kw: Any) -> Dict[str, Any]:
+    def create_text_layer(self, **kw: Any) -> dict[str, Any]:
         self.created_layers.add(kw.get("name", ""))
         return self._record("create_text_layer", **kw)
 
-    def create_solid_layer(self, **kw: Any) -> Dict[str, Any]:
+    def create_solid_layer(self, **kw: Any) -> dict[str, Any]:
         self.created_layers.add(kw.get("name", ""))
         return self._record("create_solid_layer", **kw)
 
-    def create_shape_layer(self, **kw: Any) -> Dict[str, Any]:
+    def create_shape_layer(self, **kw: Any) -> dict[str, Any]:
         self.created_layers.add(kw.get("name", ""))
         return self._record("create_shape_layer", **kw)
 
-    def add_adjustment_layer(self, **kw: Any) -> Dict[str, Any]:
+    def add_adjustment_layer(self, **kw: Any) -> dict[str, Any]:
         self.created_layers.add(kw.get("name", ""))
         return self._record("add_adjustment_layer", **kw)
 
-    def set_layer_keyframe(self, **kw: Any) -> Dict[str, Any]:
+    def set_layer_keyframe(self, **kw: Any) -> dict[str, Any]:
         return self._record("set_layer_keyframe", **kw)
 
-    def apply_effect(self, **kw: Any) -> Dict[str, Any]:
+    def apply_effect(self, **kw: Any) -> dict[str, Any]:
         return self._record("apply_effect", **kw)
 
-    def get_layer_info(self, **kw: Any) -> Dict[str, Any]:
+    def get_layer_info(self, **kw: Any) -> dict[str, Any]:
         # 只有已创建的图层才返回 layer_index
         layer_name = kw.get("layer_name", "")
         if layer_name in self.created_layers:
             return self._record("get_layer_info", **kw)
         return {"success": False, "error": f"layer not found: {layer_name}"}
 
-    def render(self, **kw: Any) -> Dict[str, Any]:
+    def render(self, **kw: Any) -> dict[str, Any]:
         out = Path(kw.get("output_path", "output/mock.mp4"))
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_bytes(b"MOCK")
@@ -121,7 +119,7 @@ class MockAEToDavinciPipeline:
     """Mock AE→DaVinci 链路。"""
 
     def __init__(self, success: bool = True) -> None:
-        self.calls: List[Dict[str, Any]] = []
+        self.calls: list[dict[str, Any]] = []
         self._success = success
 
     def run_with_preset(
@@ -153,10 +151,10 @@ class MockAEToDavinciPipeline:
 class MockLLMGateway:
     """Mock LLM 网关：返回指定 JSON。"""
 
-    def __init__(self, plan_json: Dict[str, Any] | None = None, raw: str | None = None) -> None:
+    def __init__(self, plan_json: dict[str, Any] | None = None, raw: str | None = None) -> None:
         self._plan_json = plan_json
         self._raw = raw
-        self.calls: List[Dict[str, Any]] = []
+        self.calls: list[dict[str, Any]] = []
 
     def _build_content(self) -> str:
         if self._raw is not None:
@@ -197,7 +195,7 @@ class FailingLLMGateway:
 
 
 def make_loop(
-    plan_json: Dict[str, Any] | None = None,
+    plan_json: dict[str, Any] | None = None,
     raw: str | None = None,
     pipeline_success: bool = True,
 ) -> MinimalCreativeLoop:
@@ -209,7 +207,7 @@ def make_loop(
     )
 
 
-def sample_plan(comp_name: str = "TestComp") -> Dict[str, Any]:
+def sample_plan(comp_name: str = "TestComp") -> dict[str, Any]:
     """构造一个标准的样例规划。"""
     return {
         "comp_name": comp_name,
@@ -583,7 +581,7 @@ class TestEndToEnd:
 
     def test_run_progress_callback_invoked(self, temp_output_dir: Path) -> None:
         loop = make_loop(plan_json=sample_plan("ProgressComp"))
-        progress_calls: List[tuple] = []
+        progress_calls: list[tuple] = []
 
         def cb(stage: str, percent: float) -> None:
             progress_calls.append((stage, percent))

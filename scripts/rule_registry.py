@@ -26,7 +26,7 @@ DEMOTE_THRESHOLD = 2
 RETIRE_THRESHOLD = 4
 
 # 首条规则：来自 2026-09-05 E0-1 二轮 A/B（闸门 2 合规）
-SEED_RULE: Dict[str, Any] = {
+SEED_RULE: dict[str, Any] = {
     "rule_id": "R-2026-0001",
     "statement": "切点必须锚定 stem 真实鼓点：kick/snare（strength≥0.5 为强锚），"
                  "笼统 onset（含 hihat/人声瞬态）退出切点候选池",
@@ -60,7 +60,7 @@ def _today() -> str:
     return time.strftime("%Y-%m-%d")
 
 
-def load_ruleset() -> List[Dict[str, Any]]:
+def load_ruleset() -> list[dict[str, Any]]:
     if not RULESET.exists():
         return []
     rules = []
@@ -75,14 +75,14 @@ def load_ruleset() -> List[Dict[str, Any]]:
     return rules
 
 
-def save_ruleset(rules: List[Dict[str, Any]]) -> None:
+def save_ruleset(rules: list[dict[str, Any]]) -> None:
     RULESET.parent.mkdir(parents=True, exist_ok=True)
     RULESET.write_text(
         "\n".join(json.dumps(r, ensure_ascii=False) for r in rules) + "\n",
         encoding="utf-8")
 
 
-def validate_schema(rule: Dict[str, Any]) -> List[str]:
+def validate_schema(rule: dict[str, Any]) -> list[str]:
     """闸门 3 风格的三对齐：rule_id 白名单 + 枚举字段 + 必填证据。"""
     errs = []
     rid = str(rule.get("rule_id", ""))
@@ -102,7 +102,7 @@ def validate_schema(rule: Dict[str, Any]) -> List[str]:
     return errs
 
 
-def evaluate_status(rule: Dict[str, Any]) -> Tuple[str, Optional[str]]:
+def evaluate_status(rule: dict[str, Any]) -> tuple[str, str | None]:
     """确定性状态机：按投票差 + 证据完整性判定目标状态（§7.3 治理机制）。
 
     纯函数，不落盘，由 cmd_vote 调用并把结果写回。语义：
@@ -157,7 +157,7 @@ def cmd_list() -> int:
     return 0
 
 
-def cut_anchor_allowed(context: Optional[Dict[str, Any]] = None) -> Optional[bool]:
+def cut_anchor_allowed(context: dict[str, Any] | None = None) -> bool | None:
     """锚点模式裁决：规则库未建立 → None（管线自便）；已建立 → 查 active 规则。
 
     退役/翻负的规则使本函数返回 False，production_director 自动回退启发式——
@@ -172,7 +172,7 @@ def cut_anchor_allowed(context: Optional[Dict[str, Any]] = None) -> Optional[boo
     return bool(active_rules("cut_anchor", context=context))
 
 
-def rule_applies(rule: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> bool:
+def rule_applies(rule: dict[str, Any], context: dict[str, Any] | None = None) -> bool:
     """判断规则是否适用于当前运行上下文（applicability 校验）。
 
     修复（2026-09-09, R4 诊断发现）：此前 active_rules 只按 inject_point 过滤，
@@ -227,8 +227,8 @@ def rule_applies(rule: Dict[str, Any], context: Optional[Dict[str, Any]] = None)
     return True
 
 
-def active_rules(inject_point: Optional[str] = None,
-                 context: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+def active_rules(inject_point: str | None = None,
+                 context: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     """管线消费 API：返回可注入的 active 规则（schema 全过才放行，闸门 5）。
 
     消费方示例（production_director 锚点块）:

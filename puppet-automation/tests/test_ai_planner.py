@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-
 from src.ai_planner import (
     AIPlanner,
     IntentParser,
@@ -11,9 +10,8 @@ from src.ai_planner import (
     StyleRecommendation,
     StyleRecommender,
 )
-from src.ai_planner.planner import _extract_json, OptimizedParams
+from src.ai_planner.planner import OptimizedParams, _extract_json
 from src.models.pipeline import PipelinePhase, PuppetStyle, VideoMetadata
-
 
 # ============================================================
 # Helper: JSON extraction

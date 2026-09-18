@@ -6,8 +6,8 @@ software_sdk/adapters/topaz_adapter.py - Topaz Video AI 适配器
 """
 from __future__ import annotations
 
-import os
 import logging
+import os
 import subprocess
 from typing import Any, Dict, List, Optional
 
@@ -46,8 +46,8 @@ class TopazAdapter(BaseSoftwareAdapter):
 
     def __init__(
         self,
-        config: Optional[SoftwareConfig] = None,
-        logger: Optional[logging.Logger] = None,
+        config: SoftwareConfig | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         if config is None:
             config = SoftwareConfig(software=SoftwareType.TOPAZ_VIDEO_AI)
@@ -122,7 +122,7 @@ class TopazAdapter(BaseSoftwareAdapter):
         finally:
             self._mark_task_end()
 
-    def _upscale(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _upscale(self, params: dict[str, Any]) -> dict[str, Any]:
         """视频超分辨率。"""
         input_path = params.get("input", "")
         output_path = params.get("output", "")
@@ -132,7 +132,7 @@ class TopazAdapter(BaseSoftwareAdapter):
         cmd = self._build_cmd(input_path, output_path, model, scale=scale)
         return self._run_topaz(cmd, params)
 
-    def _interpolate(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _interpolate(self, params: dict[str, Any]) -> dict[str, Any]:
         """视频补帧/慢动作。"""
         input_path = params.get("input", "")
         output_path = params.get("output", "")
@@ -144,7 +144,7 @@ class TopazAdapter(BaseSoftwareAdapter):
         ]
         return self._run_topaz(cmd, params, input_path, output_path)
 
-    def _denoise(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _denoise(self, params: dict[str, Any]) -> dict[str, Any]:
         """视频降噪。"""
         input_path = params.get("input", "")
         output_path = params.get("output", "")
@@ -152,7 +152,7 @@ class TopazAdapter(BaseSoftwareAdapter):
         cmd = self._build_cmd(input_path, output_path, "nyx")
         return self._run_topaz(cmd, params)
 
-    def _stabilize(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _stabilize(self, params: dict[str, Any]) -> dict[str, Any]:
         """视频稳定。"""
         input_path = params.get("input", "")
         output_path = params.get("output", "")
@@ -168,7 +168,7 @@ class TopazAdapter(BaseSoftwareAdapter):
         output_path: str,
         model: str,
         scale: int = 2,
-    ) -> List[str]:
+    ) -> list[str]:
         """构建 Topaz CLI 命令。"""
         cmd = [
             "--model", model,
@@ -178,11 +178,11 @@ class TopazAdapter(BaseSoftwareAdapter):
 
     def _run_topaz(
         self,
-        args: List[str],
-        params: Dict[str, Any],
+        args: list[str],
+        params: dict[str, Any],
         input_path: str = "",
         output_path: str = "",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """运行 Topaz 命令。"""
         exe = self.config.executable_path
         if not exe:
@@ -219,7 +219,7 @@ class TopazAdapter(BaseSoftwareAdapter):
             return {"success": False, "error": f"Topaz not found at: {exe}"}
 
     @staticmethod
-    def _common_paths() -> List[str]:
+    def _common_paths() -> list[str]:
         """Topaz Video AI 常见安装路径。"""
         return [
             r"C:\Program Files\Topaz Labs LLC\Topaz Video AI\topazcli.exe",

@@ -1,9 +1,9 @@
+import json
 import os
 import sys
-import json
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from collections import Counter
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -89,6 +89,6 @@ file_size_kb = os.path.getsize(OUTPUT_FILE) / 1024
 
 print(f"EVIDENCE SAVED: output/evidence/kb_effect_inventory_20260818.json  ({total_effects} effects catalogued)")
 print(f"File size: {file_size_kb:.1f} KB")
-print(f"First 5 effects:")
+print("First 5 effects:")
 for i, e in enumerate(effects_sample[:5]):
     print(f"  {i+1}. {e['name']} [{e['category']}]")

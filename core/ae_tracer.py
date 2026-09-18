@@ -26,24 +26,25 @@ AE 专用追踪工具 - 全链路追踪 v1.0
 """
 from __future__ import annotations
 
-import threading
-
 import asyncio
+import logging
+import threading
 import time
 import uuid
-import logging
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
+from core.event_bus import AEEvent, publish_ae_event
 from core.observability import (
-    global_tracer,
-    global_metrics,
-    global_logger,
-    create_context,
     ObservabilityContext,
+    create_context,
+    global_logger,
+    global_metrics,
+    global_tracer,
+)
+from core.observability import (
     Span as ObsSpan,
 )
-from core.event_bus import publish_ae_event, AEEvent
 
 logger = logging.getLogger(__name__)
 
@@ -56,15 +57,15 @@ class AEOperationSpan:
     
     trace_id: str
     span_id: str
-    parent_span_id: Optional[str] = None
+    parent_span_id: str | None = None
     operation_name: str = ""
     channel: str = ""
     status: str = "running"
     start_time: float = 0.0
     end_time: float = 0.0
-    attributes: Dict[str, Any] = field(default_factory=dict)
-    events: List[Dict[str, Any]] = field(default_factory=list)
-    error: Optional[str] = None
+    attributes: dict[str, Any] = field(default_factory=dict)
+    events: list[dict[str, Any]] = field(default_factory=list)
+    error: str | None = None
     
     @property
     def duration_ms(self) -> float:
@@ -100,9 +101,9 @@ class AETracer:
     
     def __init__(self, service_name: str = "ae-bridge"):
         self._service_name = service_name
-        self._current_trace_id: Optional[str] = None
-        self._current_span: Optional[AEOperationSpan] = None
-        self._span_stack: List[AEOperationSpan] = []
+        self._current_trace_id: str | None = None
+        self._current_span: AEOperationSpan | None = None
+        self._span_stack: list[AEOperationSpan] = []
         # 保护 _span_stack / _current_span 的并发访问。
         # 使用 RLock：span 允许嵌套（父子 span），同一线程可重入。
         self._span_lock = threading.RLock()
@@ -122,8 +123,8 @@ class AETracer:
     def start_span(
         self,
         operation_name: str,
-        trace_id: Optional[str] = None,
-        parent_span: Optional[AEOperationSpan] = None,
+        trace_id: str | None = None,
+        parent_span: AEOperationSpan | None = None,
         channel: str = "",
         **attributes: Any,
     ) -> AEOperationSpan:
@@ -151,11 +152,11 @@ class AETracer:
         self._publish_operation_event(span, "started")
         
         # 记录指标
-        global_metrics.increment(f"ae.operation.started", operation=operation_name)
+        global_metrics.increment("ae.operation.started", operation=operation_name)
         
         return span
     
-    def end_span(self, span: Optional[AEOperationSpan] = None, status: str = "success") -> None:
+    def end_span(self, span: AEOperationSpan | None = None, status: str = "success") -> None:
         """结束指定的 Span"""
         if span is None:
             span = self._current_span
@@ -177,13 +178,13 @@ class AETracer:
         
         # 记录指标
         global_metrics.histogram(
-            f"ae.operation.duration",
+            "ae.operation.duration",
             span.duration_ms,
             operation=span.operation_name,
             status=status,
         )
         global_metrics.increment(
-            f"ae.operation.completed",
+            "ae.operation.completed",
             operation=span.operation_name,
             status=status,
         )
@@ -198,7 +199,7 @@ class AETracer:
         span.set_attribute("error_message", str(error))
         
         global_metrics.increment(
-            f"ae.operation.errors",
+            "ae.operation.errors",
             operation=span.operation_name,
             error_type=type(error).__name__,
         )
@@ -208,9 +209,9 @@ class AETracer:
         operation_name: str,
         func: Callable[..., T],
         *args: Any,
-        trace_id: Optional[str] = None,
+        trace_id: str | None = None,
         **kwargs: Any,
-    ) -> Tuple[T, AEOperationSpan]:
+    ) -> tuple[T, AEOperationSpan]:
         """在追踪上下文中运行函数"""
         span = self.start_span(operation_name, trace_id=trace_id, **kwargs)
         try:
@@ -267,7 +268,7 @@ class AETracer:
         obs_span.attributes.update(span.attributes)
         global_tracer.end_span(obs_span, span.status)
     
-    def get_active_spans(self) -> List[AEOperationSpan]:
+    def get_active_spans(self) -> list[AEOperationSpan]:
         """获取所有活跃的 Span"""
         return list(self._span_stack)
 
@@ -344,7 +345,7 @@ class AETraceContext:
     def __init__(
         self,
         operation_name: str,
-        trace_id: Optional[str] = None,
+        trace_id: str | None = None,
         tracer: AETracer = ae_tracer,
         **attributes: Any,
     ):
@@ -352,7 +353,7 @@ class AETraceContext:
         self._trace_id = trace_id
         self._tracer = tracer
         self._attributes = attributes
-        self._span: Optional[AEOperationSpan] = None
+        self._span: AEOperationSpan | None = None
     
     @property
     def trace_id(self) -> str:
@@ -360,7 +361,7 @@ class AETraceContext:
         return self._span.trace_id if self._span else self._tracer.current_trace_id
     
     @property
-    def span(self) -> Optional[AEOperationSpan]:
+    def span(self) -> AEOperationSpan | None:
         """获取当前 Span"""
         return self._span
     
@@ -387,7 +388,7 @@ class AETraceContext:
 
 def start_ae_operation(
     operation_name: str,
-    trace_id: Optional[str] = None,
+    trace_id: str | None = None,
     channel: str = "",
     **attributes: Any,
 ) -> AEOperationSpan:

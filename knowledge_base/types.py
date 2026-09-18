@@ -26,13 +26,13 @@ class MdBlock:
     block_type: BlockType
     content: str
     level: int = 0  # heading level (1-6)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class TableRow:
     """表格行。"""
-    columns: Dict[str, str]  # header -> value
+    columns: dict[str, str]  # header -> value
 
 
 @dataclass
@@ -52,8 +52,8 @@ class TransitionRecipe:
     transition_type: str
     display_name: str
     effect_match: str
-    params: Dict[str, Any] = field(default_factory=dict)
-    animate: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
+    animate: dict[str, Any] = field(default_factory=dict)
     source_file: str = ""
 
 
@@ -75,8 +75,8 @@ class StyleRecipe:
     display_name: str
     category: str
     description: str
-    keywords: List[str] = field(default_factory=list)
-    effects: List[Dict[str, Any]] = field(default_factory=list)
+    keywords: list[str] = field(default_factory=list)
+    effects: list[dict[str, Any]] = field(default_factory=list)
     source_file: str = ""
 
 
@@ -85,7 +85,7 @@ class KnowledgeItem:
     """通用知识条目。"""
     item_type: str
     title: str
-    content: Dict[str, Any]
+    content: dict[str, Any]
     source_file: str
     confidence: float = 0.8
     extracted_by: str = "rule"  # "rule" | "llm"

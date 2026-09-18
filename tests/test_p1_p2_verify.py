@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """P1 反馈闭环 + P2 贝叶斯自动observe 验证"""
-import sys, os, time, json
+import json
+import os
+import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -39,7 +42,7 @@ def test_feedback_loop():
     # 2. FeedbackExecutor
     from pipeline.feedback_executor import FeedbackExecutor
     fb = FeedbackExecutor(ffmpeg_bin=r"C:\ffmpeg\bin\ffmpeg.exe")
-    print(f"  [FeedbackExecutor] initialized OK")
+    print("  [FeedbackExecutor] initialized OK")
     
     # 3. 生成反馈建议
     if hasattr(fb, 'generate_feedback'):
@@ -65,7 +68,7 @@ def test_bayesian_auto_observe():
     print("P2: BAYESIAN AUTO-OBSERVE LOOP")
     print("=" * 60)
     
-    from core.bayesian_optimizer import get_optimizer, PARAMETER_SPACES
+    from core.bayesian_optimizer import PARAMETER_SPACES, get_optimizer
     
     optimizer = get_optimizer()
     print(f"  [Bayesian] initialized, {len(PARAMETER_SPACES)} effect spaces")
@@ -117,7 +120,7 @@ def test_learning_persistence():
     from learning.persistent_learning_loop import PersistentLearningLoop
     
     loop = PersistentLearningLoop()
-    print(f"  [LearningLoop] initialized")
+    print("  [LearningLoop] initialized")
     
     # 验证持久化文件存在
     state_dir = Path(os.environ.get('APPDATA', '')) / "AE-Knowledge-Vault" / "learning-state"

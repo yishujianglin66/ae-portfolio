@@ -22,20 +22,20 @@ Live Preview — 实时预览管道
 
 from __future__ import annotations
 
+import base64
+import io
 import json
 import math
 import os
+import queue
 import sys
-import time
 import threading
-import base64
-import io
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union, Callable
+import time
+from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
-from collections import deque
-import queue
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -53,9 +53,9 @@ class PreviewMode(Enum):
 @dataclass
 class PreviewOverlay:
     """预览叠加信息"""
-    timecode: Optional[str] = None
-    frame_number: Optional[int] = None
-    subtitle: Optional[str] = None
+    timecode: str | None = None
+    frame_number: int | None = None
+    subtitle: str | None = None
     safe_zone: bool = True      # 安全框
     grid: bool = False          # 三分构图线
     histogram: bool = False     # 直方图
@@ -71,7 +71,7 @@ class PreviewConfig:
     mode: PreviewMode = PreviewMode.LOCAL
     quality: int = 80            # JPEG 质量 (WebSocket模式)
     overlay: PreviewOverlay = field(default_factory=PreviewOverlay)
-    apply_lut: Optional[str] = None  # LUT 文件路径
+    apply_lut: str | None = None  # LUT 文件路径
 
 
 # ================================================================
@@ -82,7 +82,7 @@ class FrameBuffer:
 
     def __init__(self, max_frames: int = 300):
         self.max_frames = max_frames
-        self._frames: Dict[int, Any] = {}
+        self._frames: dict[int, Any] = {}
         self._keys: deque = deque()
         self._lock = threading.Lock()
 
@@ -98,18 +98,18 @@ class FrameBuffer:
                 old_key = self._keys.popleft()
                 del self._frames[old_key]
 
-    def get(self, frame_number: int) -> Optional[Any]:
+    def get(self, frame_number: int) -> Any | None:
         with self._lock:
             return self._frames.get(frame_number)
 
-    def get_latest(self) -> Optional[Tuple[int, Any]]:
+    def get_latest(self) -> tuple[int, Any] | None:
         with self._lock:
             if self._keys:
                 key = self._keys[-1]
                 return key, self._frames[key]
             return None
 
-    def get_range(self, start: int, end: int) -> List[Any]:
+    def get_range(self, start: int, end: int) -> list[Any]:
         with self._lock:
             return [self._frames.get(k) for k in self._keys if start <= k <= end and k in self._frames]
 
@@ -133,8 +133,8 @@ class LivePreview:
         self.config = config or PreviewConfig()
         self.frame_buffer = FrameBuffer(max_frames=300)
         self._running = False
-        self._threads: List[threading.Thread] = []
-        self._clients: Dict[str, Any] = {}
+        self._threads: list[threading.Thread] = []
+        self._clients: dict[str, Any] = {}
         self._frame_queue: queue.Queue = queue.Queue(maxsize=30)
 
         # 统计
@@ -301,9 +301,9 @@ class LivePreview:
     def _websocket_server_loop(self, host: str, port: int):
         """WebSocket 服务器循环"""
         try:
+            import cv2
             from flask import Flask, Response
             from flask_socketio import SocketIO, emit
-            import cv2
 
             app = Flask(__name__)
             app.config['SECRET_KEY'] = 'ae-preview'
@@ -397,12 +397,12 @@ class LivePreview:
     def start_ndi_preview(self, source_name: str = "AE-Knowledge-Vault") -> threading.Thread:
         """启动 NDI 预览（需要 NDI SDK）"""
         try:
-            import numpy as np
             import cv2
 
             # NDI 需要额外安装
             # pip install ndi-python
             import NDIlib as ndi
+            import numpy as np
         except ImportError:
             print("[LivePreview] NDI SDK not installed. Visit: https://ndi.video")
             return None
@@ -474,7 +474,7 @@ class LivePreview:
     # ================================================================
     #  统计
     # ================================================================
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取预览统计"""
         elapsed = time.time() - self._start_time if self._start_time > 0 else 0
         return {

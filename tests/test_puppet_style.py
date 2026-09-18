@@ -1,6 +1,6 @@
-import sys
 import asyncio
 import importlib
+import sys
 
 mf = importlib.import_module("media-fetcher")
 MediaFetcher = mf.MediaFetcher

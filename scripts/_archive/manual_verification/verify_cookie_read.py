@@ -1,4 +1,5 @@
 import pytest
+
 pytest.importorskip("browser_cookie3")
 import browser_cookie3
 import requests

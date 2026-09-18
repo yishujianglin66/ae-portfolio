@@ -1,5 +1,8 @@
 """_probe_part_deep.py — Particular 深层参数探测 v2（jsx 文件通道, 免拼接转义）"""
-import json, time, uuid, os
+import json
+import os
+import time
+import uuid
 from pathlib import Path
 
 bd = Path(__file__).resolve().parent.parent / ".ae-mcp-bridge"

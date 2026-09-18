@@ -1,9 +1,13 @@
 """测试带预设名的序列创建"""
-import asyncio, sys, time
+import asyncio
+import sys
+import time
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve() / "puppet-automation"))
 from src.engines.premiere.pr_bridge_client import PRBridgeClient, PRBridgeError
+
 
 async def test():
     c = PRBridgeClient()

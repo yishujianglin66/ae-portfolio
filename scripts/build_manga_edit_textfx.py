@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """MangaEdit TextFX - Bridge执行JSX + aerender渲染全自动"""
-import json, time, subprocess, sys
-from pathlib import Path
+import json
+import subprocess
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 JSX_PATH = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\temp\manga_edit_textfx.jsx")
 BRIDGE_CMD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_command.json")
@@ -120,7 +123,7 @@ if __name__ == "__main__":
         print("\n[FAIL] 渲染失败")
         sys.exit(1)
     print(f"\n{'='*60}")
-    print(f"ALL DONE!")
+    print("ALL DONE!")
     print(f"输出: {OUTPUT_PATH}")
     print(f"工程: {AEP_PATH}")
     print(f"{'='*60}")

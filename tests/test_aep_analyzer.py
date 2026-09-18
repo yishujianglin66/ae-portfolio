@@ -8,20 +8,20 @@ from __future__ import annotations
 import json
 import os
 import tempfile
-import pytest
 from typing import Any, Dict
+
+import pytest
 
 from aep_analyzer.analyzer import AEPAnalyzer
 from aep_analyzer.knowledge_extractor import KnowledgeExtractor
 from aep_analyzer.report import ReportGenerator
 from aep_analyzer.template_learner import TemplateLearner
 
-
 # ============================================================================
 # Mock Data
 # ============================================================================
 
-def _make_mock_report() -> Dict[str, Any]:
+def _make_mock_report() -> dict[str, Any]:
     """创建模拟分析报告。"""
     return {
         "project": {
@@ -411,7 +411,7 @@ class TestKnowledgeExtractor:
         assert usage["standard_effect_count"] == 5
 
     def test_empty_report(self) -> None:
-        empty: Dict[str, Any] = {"compositions": [], "effectsByType": {},
+        empty: dict[str, Any] = {"compositions": [], "effectsByType": {},
                                   "techniques": [], "stats": {}}
         knowledge = self.extractor.extract_all(empty)
         assert knowledge["effect_chains"] == []

@@ -10,11 +10,11 @@ test_ai_honest_degradation.py — AI 伪实现诚实降级逻辑测试
 """
 from __future__ import annotations
 
+import asyncio
 import os
 import sys
 import tempfile
 import unittest
-import asyncio
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent

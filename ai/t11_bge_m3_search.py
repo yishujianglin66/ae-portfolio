@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 """T11: 验证BGE-M3加载 + 构建语义索引"""
-import sys, json, time
+import json
+import sys
+import time
 from pathlib import Path
+
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 import os as _os
+
 # 修复1: 默认使用HF中国镜像（解决SSL超时/连接失败）
 if not _os.environ.get("HF_ENDPOINT"):
     _os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
@@ -15,6 +19,7 @@ if not _os.environ.get("HF_ENDPOINT"):
 print("[T11] 加载BGE-M3...")
 t0 = time.time()
 from sentence_transformers import SentenceTransformer
+
 
 # 修复2+3: 两层加载兜底 + 可操作错误信息
 class BGEOfflineUnavailableError(Exception):

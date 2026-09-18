@@ -24,10 +24,10 @@ from __future__ import annotations
 import json
 import os
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -58,14 +58,14 @@ class MotionIntensity(str, Enum):
 class FrameAnalysis:
     """单帧分析结果"""
     timestamp: float                    # 时间戳（秒）
-    color_histogram: List[float]        # 颜色直方图（简化为 8 bin）
-    dominant_color: Tuple[int, int, int]  # 主色调 (B, G, R)
+    color_histogram: list[float]        # 颜色直方图（简化为 8 bin）
+    dominant_color: tuple[int, int, int]  # 主色调 (B, G, R)
     edge_density: float                 # 边缘密度 (0-1)
     brightness: float                   # 亮度 (0-255)
     motion_magnitude: float             # 运动幅度
     has_face: bool                      # 是否检测到人脸
     face_count: int                     # 人脸数量
-    features: Dict[str, float]          # 其他特征
+    features: dict[str, float]          # 其他特征
 
 
 @dataclass
@@ -74,7 +74,7 @@ class MaterialTag:
     video_path: str                     # 视频路径
     duration: float                     # 时长（秒）
     fps: float                          # 帧率
-    resolution: Tuple[int, int]         # 分辨率 (width, height)
+    resolution: tuple[int, int]         # 分辨率 (width, height)
     
     # 内容标签
     scene_type: str                     # 场景类型
@@ -86,11 +86,11 @@ class MaterialTag:
     avg_brightness: float               # 平均亮度
     avg_edge_density: float             # 平均边缘密度
     avg_motion: float                   # 平均运动幅度
-    dominant_colors: List[Tuple[int, int, int]]  # 主色调列表
+    dominant_colors: list[tuple[int, int, int]]  # 主色调列表
     
     # 时间线特征
-    scene_changes: List[float]          # 场景切换时间点
-    high_motion_regions: List[Dict]     # 高运动区域
+    scene_changes: list[float]          # 场景切换时间点
+    high_motion_regions: list[dict]     # 高运动区域
     
     # 元数据
     confidence: float                   # 置信度 (0-1)
@@ -144,7 +144,7 @@ class VisualContentAnalyzer:
     def analyze_video(
         self, 
         video_path: str,
-        output_json: Optional[str] = None,
+        output_json: str | None = None,
     ) -> MaterialTag:
         """
         分析视频素材，生成内容标签。
@@ -157,6 +157,7 @@ class VisualContentAnalyzer:
             MaterialTag 素材标签
         """
         import time
+
         import numpy as np
         
         self._ensure_cv2()
@@ -179,7 +180,7 @@ class VisualContentAnalyzer:
         max_samples = min(self.max_samples, total_frames // sample_interval)
 
         # 采样分析
-        frame_analyses: List[FrameAnalysis] = []
+        frame_analyses: list[FrameAnalysis] = []
         prev_frame = None
         sample_count = 0
 
@@ -276,7 +277,7 @@ class VisualContentAnalyzer:
             }
         )
 
-    def _get_dominant_color(self, frame) -> Tuple[int, int, int]:
+    def _get_dominant_color(self, frame) -> tuple[int, int, int]:
         """获取主色调"""
         import numpy as np
         
@@ -303,11 +304,11 @@ class VisualContentAnalyzer:
 
     def _aggregate_analysis(
         self,
-        analyses: List[FrameAnalysis],
+        analyses: list[FrameAnalysis],
         video_path: str,
         duration: float,
         fps: float,
-        resolution: Tuple[int, int],
+        resolution: tuple[int, int],
     ) -> MaterialTag:
         """汇总分析结果"""
         import numpy as np
@@ -388,7 +389,7 @@ class VisualContentAnalyzer:
 
     def _infer_scene_type(
         self,
-        analyses: List[FrameAnalysis],
+        analyses: list[FrameAnalysis],
         avg_edge_density: float,
         avg_motion: float,
         has_character: bool,
@@ -408,7 +409,7 @@ class VisualContentAnalyzer:
         else:
             return SceneType.UNKNOWN.value
 
-    def _classify_color_tone(self, analyses: List[FrameAnalysis]) -> str:
+    def _classify_color_tone(self, analyses: list[FrameAnalysis]) -> str:
         """分类色调"""
         import numpy as np
         
@@ -432,7 +433,7 @@ class VisualContentAnalyzer:
         else:
             return "neutral"
 
-    def _detect_scene_changes(self, analyses: List[FrameAnalysis]) -> List[float]:
+    def _detect_scene_changes(self, analyses: list[FrameAnalysis]) -> list[float]:
         """检测场景切换点"""
         import numpy as np
         
@@ -454,9 +455,9 @@ class VisualContentAnalyzer:
 
     def _find_high_motion_regions(
         self, 
-        analyses: List[FrameAnalysis],
+        analyses: list[FrameAnalysis],
         threshold: float = 10.0,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """查找高运动区域"""
         regions = []
         start = None
@@ -493,9 +494,9 @@ class VisualContentAnalyzer:
 
     def build_material_index(
         self,
-        video_paths: List[str],
+        video_paths: list[str],
         output_json: str,
-    ) -> Dict[str, MaterialTag]:
+    ) -> dict[str, MaterialTag]:
         """
         批量分析视频素材，构建素材索引。
 
@@ -536,7 +537,7 @@ def analyze_material(video_path: str) -> MaterialTag:
     return analyzer.analyze_video(video_path)
 
 
-def build_material_index(video_paths: List[str], output_json: str) -> Dict[str, MaterialTag]:
+def build_material_index(video_paths: list[str], output_json: str) -> dict[str, MaterialTag]:
     """批量构建素材索引"""
     analyzer = VisualContentAnalyzer()
     return analyzer.build_material_index(video_paths, output_json)

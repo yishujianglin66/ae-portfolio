@@ -23,11 +23,11 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from scripts.m2_auto_iterate import render_tree  # noqa: E402
-from core.image_fx import pick_fx_layers  # noqa: E402
-from core.sfx_layer import plan_sfx, mix_sfx  # noqa: E402
 from core.cnn_scorer import score_video_mode  # noqa: E402
+from core.image_fx import pick_fx_layers  # noqa: E402
+from core.sfx_layer import mix_sfx, plan_sfx  # noqa: E402
 from knowledge.style_card import load_card  # noqa: E402
+from scripts.m2_auto_iterate import render_tree  # noqa: E402
 
 OUT_DIR = PROJECT / "output" / "grand_finale"
 DUR = 5.0
@@ -36,7 +36,7 @@ DIMS = ["score_dynamism", "score_composition", "score_color_harmony",
 
 
 def build_tree():
-    from core.composition_tree import LayerSpec, CompositionTree, EffectRef
+    from core.composition_tree import CompositionTree, EffectRef, LayerSpec
     FOOTAGE = "data/real_amv_test/DL_FATE_r978_BV1qb411C79B_p1.mp4"
     tree = CompositionTree(
         comp_name="Grand_Finale", style_card="edit", duration=DUR,

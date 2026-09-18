@@ -21,9 +21,10 @@
 """
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
 from typing import List
+
+import pytest
 
 
 # ============================================================
@@ -301,7 +302,7 @@ class TestFormatTimecode:
 # ============================================================
 class TestRoundtrip:
     def test_srt_roundtrip(self):
-        from ae.subtitle_system import SubtitleParser, SubtitleGenerator, SubtitleItem
+        from ae.subtitle_system import SubtitleGenerator, SubtitleItem, SubtitleParser
 
         original = [
             SubtitleItem(index=1, start_time=0.0, end_time=2.5, text="你好"),
@@ -319,7 +320,7 @@ class TestRoundtrip:
         assert abs(parsed[1].end_time - 5.0) < 0.001
 
     def test_vtt_roundtrip(self):
-        from ae.subtitle_system import SubtitleParser, SubtitleGenerator, SubtitleItem
+        from ae.subtitle_system import SubtitleGenerator, SubtitleItem, SubtitleParser
 
         original = [
             SubtitleItem(index=1, start_time=0.0, end_time=2.5, text="A"),

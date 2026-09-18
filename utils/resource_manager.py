@@ -18,8 +18,8 @@
 from __future__ import annotations
 
 import os
-import time
 import threading
+import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -42,7 +42,7 @@ class CPUInfo:
     physical_cores: int = 0
     logical_cores: int = 0
     usage_percent: float = 0.0
-    per_core_usage: List[float] = field(default_factory=list)
+    per_core_usage: list[float] = field(default_factory=list)
     freq_current: float = 0.0
     freq_min: float = 0.0
     freq_max: float = 0.0
@@ -91,8 +91,8 @@ class ResourceSnapshot:
     timestamp: float = field(default_factory=time.time)
     cpu: CPUInfo = field(default_factory=CPUInfo)
     memory: MemoryInfo = field(default_factory=MemoryInfo)
-    gpus: List[GPUInfo] = field(default_factory=list)
-    disks: List[DiskInfo] = field(default_factory=list)
+    gpus: list[GPUInfo] = field(default_factory=list)
+    disks: list[DiskInfo] = field(default_factory=list)
 
 
 @dataclass
@@ -129,10 +129,10 @@ class ResourceManager:
 
     _detection_done = False  # 类级别标志，确保检测日志只打一次
 
-    def __init__(self, thresholds: Optional[ResourceThresholds] = None):
+    def __init__(self, thresholds: ResourceThresholds | None = None):
         self._thresholds = thresholds or ResourceThresholds()
         self._lock = threading.RLock()
-        self._history: List[ResourceSnapshot] = []
+        self._history: list[ResourceSnapshot] = []
         self._max_history = 60
         self._psutil_available = False
         self._cuda_available = False
@@ -236,9 +236,9 @@ class ResourceManager:
     # GPU 信息
     # --------------------------------------------------------------------
 
-    def get_gpu_info(self) -> List[GPUInfo]:
+    def get_gpu_info(self) -> list[GPUInfo]:
         """获取 GPU 信息"""
-        gpus: List[GPUInfo] = []
+        gpus: list[GPUInfo] = []
 
         if self._pynvml_available:
             try:
@@ -314,13 +314,13 @@ class ResourceManager:
     # 磁盘信息
     # --------------------------------------------------------------------
 
-    def get_disk_info(self, paths: Optional[List[str]] = None) -> List[DiskInfo]:
+    def get_disk_info(self, paths: list[str] | None = None) -> list[DiskInfo]:
         """获取磁盘信息
 
         Args:
             paths: 要检查的路径列表，None 则检查当前工作目录所在磁盘
         """
-        disks: List[DiskInfo] = []
+        disks: list[DiskInfo] = []
 
         if paths is None:
             paths = [os.getcwd()]
@@ -370,7 +370,7 @@ class ResourceManager:
     # 综合快照
     # --------------------------------------------------------------------
 
-    def get_snapshot(self, disk_paths: Optional[List[str]] = None) -> ResourceSnapshot:
+    def get_snapshot(self, disk_paths: list[str] | None = None) -> ResourceSnapshot:
         """获取资源快照
 
         Args:
@@ -393,7 +393,7 @@ class ResourceManager:
 
         return snapshot
 
-    def get_history(self) -> List[ResourceSnapshot]:
+    def get_history(self) -> list[ResourceSnapshot]:
         """获取历史快照"""
         with self._lock:
             return list(self._history)
@@ -402,7 +402,7 @@ class ResourceManager:
     # 阈值检查
     # --------------------------------------------------------------------
 
-    def check_thresholds(self, snapshot: Optional[ResourceSnapshot] = None) -> Dict[str, Any]:
+    def check_thresholds(self, snapshot: ResourceSnapshot | None = None) -> dict[str, Any]:
         """检查资源阈值
 
         Args:
@@ -414,8 +414,8 @@ class ResourceManager:
         if snapshot is None:
             snapshot = self.get_snapshot()
 
-        warnings: List[Dict[str, Any]] = []
-        critical: List[Dict[str, Any]] = []
+        warnings: list[dict[str, Any]] = []
+        critical: list[dict[str, Any]] = []
         is_critical = False
 
         if snapshot.cpu.usage_percent > self._thresholds.cpu_percent:
@@ -510,7 +510,7 @@ class ResourceManager:
     # 任务资源评估
     # --------------------------------------------------------------------
 
-    def can_accept_task(self, requirement: TaskResourceRequirement) -> Tuple[bool, Dict[str, Any]]:
+    def can_accept_task(self, requirement: TaskResourceRequirement) -> tuple[bool, dict[str, Any]]:
         """评估是否能接受任务
 
         Args:
@@ -630,7 +630,7 @@ class ResourceManager:
     # 统计信息
     # --------------------------------------------------------------------
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """获取资源摘要"""
         snapshot = self.get_snapshot()
         thresholds_result = self.check_thresholds(snapshot)
@@ -675,10 +675,10 @@ class ResourceManager:
 # 模块单例
 # ============================================================================
 
-_default_manager: Optional[ResourceManager] = None
+_default_manager: ResourceManager | None = None
 
 
-def get_resource_manager(thresholds: Optional[ResourceThresholds] = None) -> ResourceManager:
+def get_resource_manager(thresholds: ResourceThresholds | None = None) -> ResourceManager:
     """获取默认资源管理器实例"""
     global _default_manager
     if _default_manager is None:

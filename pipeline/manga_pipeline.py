@@ -28,14 +28,14 @@ TEMPLATE_PATH = Path(__file__).resolve().parent / "templates" / "manga_edit.json
 JSX_DIR = PROJECT_ROOT / "ae" / "scripts" / "manga"
 
 
-def load_template() -> Dict[str, Any]:
+def load_template() -> dict[str, Any]:
     """加载漫剪管线模板。"""
     if not TEMPLATE_PATH.exists():
         raise FileNotFoundError(f"模板不存在: {TEMPLATE_PATH}")
     return json.loads(TEMPLATE_PATH.read_text(encoding="utf-8"))
 
 
-def render_jsx_template(template_path: Path, params: Dict[str, Any]) -> str:
+def render_jsx_template(template_path: Path, params: dict[str, Any]) -> str:
     """将 JSX 模板中的 {{KEY}} 占位符替换为实际参数值。
 
     Args:
@@ -134,10 +134,10 @@ def build_speed_lines_jsx(
 
 
 def run_manga_pipeline(
-    image_paths: List[Path],
+    image_paths: list[Path],
     audio_path: Path,
-    output_dir: Optional[Path] = None,
-) -> Dict[str, Any]:
+    output_dir: Path | None = None,
+) -> dict[str, Any]:
     """执行漫剪管线。
 
     Args:
@@ -158,7 +158,7 @@ def run_manga_pipeline(
         output_dir = PROJECT_ROOT / "output" / run_id
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest: Dict[str, Any] = {
+    manifest: dict[str, Any] = {
         "run_id": run_id,
         "template": "manga_edit",
         "inputs": {

@@ -80,7 +80,8 @@ class TestDegradation:
 
     def test_unreadable_video(self):
         from models.atmosphere.torii_annotator import (
-            ToriiAtmosphereAnnotator, _sample_frames,
+            ToriiAtmosphereAnnotator,
+            _sample_frames,
         )
         assert _sample_frames(r"Z:\no\such\video.mp4") is None
         ann = ToriiAtmosphereAnnotator(model_dir=r"Z:\no\such\dir")
@@ -90,7 +91,8 @@ class TestDegradation:
 class TestMockedInference:
     def test_annotate_maps_result(self, monkeypatch):
         from models.atmosphere.torii_annotator import (
-            AtmosphereResult, ToriiAtmosphereAnnotator,
+            AtmosphereResult,
+            ToriiAtmosphereAnnotator,
         )
 
         class FakeOut:

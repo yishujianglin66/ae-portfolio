@@ -13,11 +13,11 @@
 依赖注入：
 适配器通过可选对象注入，单元测试时可注入 Mock。
 """
-from .puppet_adapter import PuppetEngineAdapter, BaseAEAdapter
+from .au_adapter import AUAdapterFactory, BaseAUAdapter, MCPClientAUAdapter, PuppetEngineAUAdapter
 from .mcp_adapter import MCPClientAdapter
-from .pr_adapter import PRAdapter, BasePRAdapter
-from .ps_adapter import BasePSAdapter, MCPClientPSAdapter, PuppetEnginePSAdapter, PSAdapterFactory
-from .au_adapter import BaseAUAdapter, MCPClientAUAdapter, PuppetEngineAUAdapter, AUAdapterFactory
+from .pr_adapter import BasePRAdapter, PRAdapter
+from .ps_adapter import BasePSAdapter, MCPClientPSAdapter, PSAdapterFactory, PuppetEnginePSAdapter
+from .puppet_adapter import BaseAEAdapter, PuppetEngineAdapter
 
 __all__ = [
     "BaseAEAdapter",

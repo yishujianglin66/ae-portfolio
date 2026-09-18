@@ -35,11 +35,12 @@ Cycles 3渲2 渲染动画序列。零蒙皮、零变形风险 (Live2D 式部件�
   5. Cycles 渲染 48 帧动画序列
   6. 输出 PNG (FFmpeg 合成由上层完成)
 """
-import bpy
-from mathutils import Vector, Matrix
 import math
 import os
 import sys
+
+import bpy
+from mathutils import Matrix, Vector
 
 
 def parse_args():

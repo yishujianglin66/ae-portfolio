@@ -7,12 +7,12 @@
 4. Pipeline 集成验证
 """
 
-import os
-import sys
-import time
 import json
-import tempfile
+import os
 import subprocess
+import sys
+import tempfile
+import time
 from pathlib import Path
 
 # 确保项目根目录在 path 中
@@ -47,7 +47,7 @@ def create_test_video(output_path: str, duration: int = 3) -> bool:
         print(f"[ffmpeg] 测试视频创建成功: {Path(output_path).stat().st_size} bytes")
         return True
     else:
-        print(f"[ffmpeg] 测试视频创建失败")
+        print("[ffmpeg] 测试视频创建失败")
         if result.stderr:
             print(f"  stderr: {result.stderr.decode('gbk', errors='ignore')[:300]}")
         return False
@@ -59,7 +59,7 @@ def test_photoshop_real():
     print("[测试 1] Photoshop 真实模式 - 生成木质纹理")
     print("=" * 60)
 
-    from adobe_suite_integration import PhotoshopIntegrator, PhotoshopConfig
+    from adobe_suite_integration import PhotoshopConfig, PhotoshopIntegrator
 
     ps = PhotoshopIntegrator(PhotoshopConfig(mode="real"))
 
@@ -86,7 +86,7 @@ def test_photoshop_real():
     )
 
     if result.success:
-        print(f"\n  ✓ 纹理生成成功!")
+        print("\n  ✓ 纹理生成成功!")
         print(f"    材质: {result.material_type}")
         print(f"    模式: {result.mode}")
         print(f"    耗时: {result.duration:.2f}s")
@@ -112,7 +112,7 @@ def test_premiere_real():
     print("[测试 2] Premiere Pro 真实模式 - 时间线组装")
     print("=" * 60)
 
-    from adobe_suite_integration import PremiereIntegrator, PremiereConfig
+    from adobe_suite_integration import PremiereConfig, PremiereIntegrator
 
     pr = PremiereIntegrator(PremiereConfig(mode="real"))
 
@@ -151,7 +151,7 @@ def test_premiere_real():
     )
 
     if result.success:
-        print(f"\n  ✓ 时间线组装成功!")
+        print("\n  ✓ 时间线组装成功!")
         print(f"    片段数: {result.clips_assembled}")
         print(f"    转场数: {result.transitions_applied}")
         print(f"    模式: {result.mode}")
@@ -170,7 +170,7 @@ def test_media_encoder_real():
     print("[测试 3] Media Encoder 真实模式 - 批量渲染")
     print("=" * 60)
 
-    from adobe_suite_integration import MediaEncoderIntegrator, MediaEncoderConfig
+    from adobe_suite_integration import MediaEncoderConfig, MediaEncoderIntegrator
 
     me = MediaEncoderIntegrator(MediaEncoderConfig(mode="real"))
 
@@ -212,7 +212,7 @@ def test_media_encoder_real():
     )
 
     if result.success:
-        print(f"\n  ✓ 批量渲染成功!")
+        print("\n  ✓ 批量渲染成功!")
         print(f"    处理文件数: {result.files_processed}")
         print(f"    模式: {result.mode}")
         print(f"    耗时: {result.total_duration:.2f}s")

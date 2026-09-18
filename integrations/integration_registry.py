@@ -60,21 +60,21 @@ class IntegrationInfo:
     source_repo: str
     layer: LayerLevel
     status: IntegrationStatus = IntegrationStatus.NOT_INSTALLED
-    adapter_class: Optional[str] = None
-    adapter_instance: Optional[Any] = None
+    adapter_class: str | None = None
+    adapter_instance: Any | None = None
     operations_count: int = 0
     priority: str = "P2"  # P0/P1/P2
     description: str = ""
-    defects_addressed: List[str] = field(default_factory=list)
+    defects_addressed: list[str] = field(default_factory=list)
     last_check: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class IntegrationRegistry:
     """开源项目统一集成注册中心"""
 
     # 所有已知集成项目的元数据
-    KNOWN_INTEGRATIONS: Dict[str, Dict[str, Any]] = {
+    KNOWN_INTEGRATIONS: dict[str, dict[str, Any]] = {
         # ── P0 ──────────────────────────────────────────────────────
         "adobe_mcp": {
             "display_name": "Adobe MCP (45工具/8应用)",
@@ -374,10 +374,10 @@ class IntegrationRegistry:
     }
 
     def __init__(self):
-        self._integrations: Dict[str, IntegrationInfo] = {}
+        self._integrations: dict[str, IntegrationInfo] = {}
         self._initialized = False
 
-    def discover_all(self) -> Dict[str, IntegrationInfo]:
+    def discover_all(self) -> dict[str, IntegrationInfo]:
         """发现并初始化所有已知集成"""
         for name, meta in self.KNOWN_INTEGRATIONS.items():
             info = IntegrationInfo(
@@ -434,7 +434,7 @@ class IntegrationRegistry:
         logger.info("[Registry] Discovered %d integrations", len(self._integrations))
         return self._integrations
 
-    def health_check(self) -> Dict[str, Dict[str, Any]]:
+    def health_check(self) -> dict[str, dict[str, Any]]:
         """全量健康检查"""
         if not self._initialized:
             self.discover_all()
@@ -452,22 +452,22 @@ class IntegrationRegistry:
             }
         return report
 
-    def get(self, name: str) -> Optional[Any]:
+    def get(self, name: str) -> Any | None:
         """获取指定集成适配器实例"""
         if not self._initialized:
             self.discover_all()
         info = self._integrations.get(name)
         return info.adapter_instance if info else None
 
-    def get_info(self, name: str) -> Optional[IntegrationInfo]:
+    def get_info(self, name: str) -> IntegrationInfo | None:
         """获取指定集成信息"""
         if not self._initialized:
             self.discover_all()
         return self._integrations.get(name)
 
-    def list_by_layer(self) -> Dict[int, List[str]]:
+    def list_by_layer(self) -> dict[int, list[str]]:
         """按层级列出所有集成"""
-        result: Dict[int, List[str]] = {}
+        result: dict[int, list[str]] = {}
         for name, info in self._integrations.items():
             layer = info.layer.value
             if layer not in result:
@@ -475,9 +475,9 @@ class IntegrationRegistry:
             result[layer].append(name)
         return result
 
-    def list_by_priority(self) -> Dict[str, List[str]]:
+    def list_by_priority(self) -> dict[str, list[str]]:
         """按优先级列出"""
-        result: Dict[str, List[str]] = {}
+        result: dict[str, list[str]] = {}
         for name, info in self._integrations.items():
             p = info.priority
             if p not in result:
@@ -485,7 +485,7 @@ class IntegrationRegistry:
             result[p].append(name)
         return result
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """生成集成摘要"""
         if not self._initialized:
             self.discover_all()
@@ -511,7 +511,7 @@ class IntegrationRegistry:
 
 # ── 全局单例 ─────────────────────────────────────────────────────────────
 
-_registry: Optional[IntegrationRegistry] = None
+_registry: IntegrationRegistry | None = None
 
 
 def get_registry() -> IntegrationRegistry:
@@ -522,7 +522,7 @@ def get_registry() -> IntegrationRegistry:
     return _registry
 
 
-def quick_test() -> Dict[str, Any]:
+def quick_test() -> dict[str, Any]:
     """快速验证测试"""
     registry = get_registry()
     registry.discover_all()
@@ -542,7 +542,7 @@ def get_registry() -> IntegrationRegistry:
     return _registry
 
 
-def quick_test() -> Dict[str, Any]:
+def quick_test() -> dict[str, Any]:
     """快速验证测试"""
     registry = get_registry()
     registry.discover_all()

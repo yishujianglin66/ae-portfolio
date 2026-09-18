@@ -2,9 +2,10 @@
 # 边缘融合模板 - 实现前景与背景的自然边缘过渡
 # 适用于合成时消除边缘瑕疵、溢出、硬边等问题
 
-from fx import *
 import os
 import time
+
+from fx import *
 
 
 def create_pipeline(
@@ -259,7 +260,7 @@ def create_pipeline(
     meta.setValue("noiseMatch", str(noise_match), 0)
     meta.setValue("task", "edge_blend", 0)
 
-    print(f"\n=== 边缘融合管线创建完成 ===")
+    print("\n=== 边缘融合管线创建完成 ===")
     print(f"前景: {foreground_path}")
     print(f"背景: {background_path}")
     print(f"输出: {output_path}")
@@ -271,7 +272,7 @@ def create_pipeline(
     print(f"色彩匹配: {'是' if color_match else '否'}")
     print(f"噪点匹配: {'是' if noise_match else '否'}")
     print(f"节点数: {session.numNodes}")
-    print(f"\n下一步: 绘制Roto形状，执行渲染")
+    print("\n下一步: 绘制Roto形状，执行渲染")
 
     return proj, session
 

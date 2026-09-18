@@ -30,17 +30,26 @@ from typing import Any, Dict, List, Optional, Tuple
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from core.llm_gateway import (
-    LLMGateway, LLMConfig, LLMResponse, TaskType, ModelTier,
-    llm_gateway, chat_with_routing, chat_with_cascade, get_cascade_stats
+    LLMConfig,
+    LLMGateway,
+    LLMResponse,
+    ModelTier,
+    TaskType,
+    chat_with_cascade,
+    chat_with_routing,
+    get_cascade_stats,
+    llm_gateway,
 )
+from core.local_model_adapter import DEFAULT_MODELS, LocalModelAdapter, LocalModelConfig, LocalModelType
 from core.security import (
-    SecurityManager, SecurityLevel, SecurityContext,
-    SecurityScanResult, AuditLogEntry, get_security_manager
+    AuditLogEntry,
+    SecurityContext,
+    SecurityLevel,
+    SecurityManager,
+    SecurityScanResult,
+    get_security_manager,
 )
-from core.local_model_adapter import (
-    LocalModelAdapter, LocalModelConfig, LocalModelType, DEFAULT_MODELS
-)
-from models.deployment.model_registry import ModelRegistry, ModelInfo
+from models.deployment.model_registry import ModelInfo, ModelRegistry
 
 
 @dataclass
@@ -50,28 +59,28 @@ class TestCaseResult:
     success: bool
     latency_ms: float = 0.0
     error: str = ""
-    details: Dict[str, Any] = field(default_factory=dict)
-    assertions: List[str] = field(default_factory=list)
+    details: dict[str, Any] = field(default_factory=dict)
+    assertions: list[str] = field(default_factory=list)
 
 
 @dataclass
 class IntegrationTestReport:
     report_name: str = "全局集成测试报告"
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
     total_tests: int = 0
     passed_tests: int = 0
     failed_tests: int = 0
     total_latency_ms: float = 0.0
-    module_results: Dict[str, List[TestCaseResult]] = field(default_factory=dict)
-    summary: Dict[str, Any] = field(default_factory=dict)
+    module_results: dict[str, list[TestCaseResult]] = field(default_factory=dict)
+    summary: dict[str, Any] = field(default_factory=dict)
 
 
 class GlobalIntegrationTest:
     def __init__(self, output_dir: str = "models/output"):
         self.output_dir = output_dir
         self.report = IntegrationTestReport()
-        self._test_results: List[TestCaseResult] = []
+        self._test_results: list[TestCaseResult] = []
         self._security_manager = get_security_manager()
         self._model_registry = ModelRegistry(os.path.join(output_dir, "model_registry"))
 
@@ -213,7 +222,7 @@ class GlobalIntegrationTest:
                         else:
                             lines.append(f"- **{key}**: {value}")
                 if result.assertions:
-                    lines.append(f"- **断言**:")
+                    lines.append("- **断言**:")
                     for assertion in result.assertions:
                         lines.append(f"  - {assertion}")
                 lines.append("")
@@ -265,7 +274,7 @@ class GlobalIntegrationTest:
     # 测试模块1: LLM网关分层路由架构验证
     # -------------------------------------------------------------------------
 
-    async def test_llm_gateway_tiered_routing(self) -> List[TestCaseResult]:
+    async def test_llm_gateway_tiered_routing(self) -> list[TestCaseResult]:
         """测试LLM网关分层路由架构"""
         results = []
         gw = LLMGateway()
@@ -317,7 +326,7 @@ class GlobalIntegrationTest:
     # 测试模块2: 置信度级联路由验证
     # -------------------------------------------------------------------------
 
-    async def test_confidence_cascade_routing(self) -> List[TestCaseResult]:
+    async def test_confidence_cascade_routing(self) -> list[TestCaseResult]:
         """测试置信度级联路由（置信度<0.7自动升级）"""
         results = []
         gw = LLMGateway()
@@ -327,7 +336,7 @@ class GlobalIntegrationTest:
 
         assertions = []
         assertions.append(f"级联阈值配置: {threshold}")
-        assertions.append(f"预期阈值: 0.7")
+        assertions.append("预期阈值: 0.7")
 
         results.append(TestCaseResult(
             test_name="置信度阈值配置验证",
@@ -339,7 +348,7 @@ class GlobalIntegrationTest:
 
         assertions = []
         assertions.append(f"最大升级次数配置: {max_upgrades}")
-        assertions.append(f"预期次数: 2")
+        assertions.append("预期次数: 2")
 
         results.append(TestCaseResult(
             test_name="最大升级次数配置验证",
@@ -397,7 +406,7 @@ class GlobalIntegrationTest:
     # 测试模块3: Agent安全执行层验证
     # -------------------------------------------------------------------------
 
-    def test_agent_security_layer(self) -> List[TestCaseResult]:
+    def test_agent_security_layer(self) -> list[TestCaseResult]:
         """测试Agent安全执行层（安全分级、审计、熔断）"""
         results = []
         sm = SecurityManager()
@@ -447,7 +456,7 @@ class GlobalIntegrationTest:
 
         return results
 
-    def _test_security_scanning(self, sm: SecurityManager) -> List[TestCaseResult]:
+    def _test_security_scanning(self, sm: SecurityManager) -> list[TestCaseResult]:
         """测试安全扫描功能"""
         results = []
 
@@ -495,7 +504,7 @@ class GlobalIntegrationTest:
 
         return results
 
-    def _test_circuit_breaker(self, sm: SecurityManager) -> List[TestCaseResult]:
+    def _test_circuit_breaker(self, sm: SecurityManager) -> list[TestCaseResult]:
         """测试熔断机制"""
         results = []
         sm.reset_circuit_breaker()
@@ -517,7 +526,7 @@ class GlobalIntegrationTest:
 
             is_fused = sm.check_circuit_breaker()
             assertions.append(f"5次违规后熔断状态: {is_fused}")
-            assertions.append(f"预期熔断状态: True")
+            assertions.append("预期熔断状态: True")
 
             success = is_fused
 
@@ -550,7 +559,7 @@ class GlobalIntegrationTest:
 
         return results
 
-    def _test_audit_logging(self, sm: SecurityManager) -> List[TestCaseResult]:
+    def _test_audit_logging(self, sm: SecurityManager) -> list[TestCaseResult]:
         """测试审计日志功能"""
         results = []
 
@@ -603,7 +612,7 @@ class GlobalIntegrationTest:
     # 测试模块4: 本地模型适配验证
     # -------------------------------------------------------------------------
 
-    async def test_local_model_adaptation(self) -> List[TestCaseResult]:
+    async def test_local_model_adaptation(self) -> list[TestCaseResult]:
         """测试本地模型适配（BGE嵌入、Qwen-2小模型）"""
         results = []
 
@@ -685,7 +694,7 @@ class GlobalIntegrationTest:
     # 测试模块5: 多智能体协作验证
     # -------------------------------------------------------------------------
 
-    async def test_multi_agent_collaboration(self) -> List[TestCaseResult]:
+    async def test_multi_agent_collaboration(self) -> list[TestCaseResult]:
         """测试多智能体协作（风格分析→代码生成→参数优化→质量审核）"""
         results = []
 
@@ -773,7 +782,7 @@ class GlobalIntegrationTest:
     # 测试模块6: 模型仓库功能验证
     # -------------------------------------------------------------------------
 
-    def test_model_registry(self) -> List[TestCaseResult]:
+    def test_model_registry(self) -> list[TestCaseResult]:
         """测试模型仓库功能（注册、查询、A/B测试）"""
         results = []
         registry = ModelRegistry(os.path.join(self.output_dir, "model_registry_test"))

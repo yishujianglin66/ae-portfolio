@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """通过Windows COM自动化执行AE JSX脚本"""
-import sys, time
+import sys
+import time
+
 sys.stdout.reconfigure(encoding='utf-8')
 
 try:
@@ -15,7 +17,7 @@ except ImportError:
     try:
         import comtypes.client
         ae = comtypes.client.CreateObject("AfterFX.Application")
-        print(f"✓ comtypes连接成功!")
+        print("✓ comtypes连接成功!")
     except Exception as e:
         print(f"✗ comtypes也失败: {e}")
 except Exception as e:

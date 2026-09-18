@@ -62,13 +62,13 @@ import time
 import traceback
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 # 枚举从 prompts 子包导出（避免循环导入）
 from pipeline.prompts.creative_planning import (
+    STYLE_PRESET_MAP,
     ContentType,
     StylePreset,
-    STYLE_PRESET_MAP,
     build_system_prompt,
     build_user_prompt,
 )
@@ -76,8 +76,8 @@ from pipeline.prompts.creative_planning import (
 # 仅类型检查时导入，避免运行时循环依赖
 if TYPE_CHECKING:
     from ae.unified_ae_client import UnifiedAEClient
-    from integrations.ae_to_davinci_pipeline import AEToDavinciPipeline
     from core.llm_gateway import LLMGateway, LLMResponse
+    from integrations.ae_to_davinci_pipeline import AEToDavinciPipeline
 
 
 logger = logging.getLogger(__name__)
@@ -108,10 +108,10 @@ class CreativeRequest:
     style: StylePreset = StylePreset.CINEMATIC
     duration: float = 10.0
     output_path: str = "output/auto_generated.mp4"
-    resolution: Tuple[int, int] = (1920, 1080)
+    resolution: tuple[int, int] = (1920, 1080)
     frame_rate: float = 30.0
-    additional_params: Dict[str, Any] = field(default_factory=dict)
-    progress_callback: Optional[Callable[[str, float], None]] = None
+    additional_params: dict[str, Any] = field(default_factory=dict)
+    progress_callback: Callable[[str, float], None] | None = None
 
 
 @dataclass
@@ -136,17 +136,17 @@ class CreativePlan:
     comp_name: str
     duration: float
     fps: float
-    resolution: Tuple[int, int]
-    background: Dict[str, Any]
-    layers: List[Dict[str, Any]] = field(default_factory=list)
-    keyframes: List[Dict[str, Any]] = field(default_factory=list)
-    effects: List[Dict[str, Any]] = field(default_factory=list)
-    text_content: Optional[str] = None
-    text_style: Optional[Dict[str, Any]] = None
-    color_grading: Optional[Dict[str, Any]] = None
+    resolution: tuple[int, int]
+    background: dict[str, Any]
+    layers: list[dict[str, Any]] = field(default_factory=list)
+    keyframes: list[dict[str, Any]] = field(default_factory=list)
+    effects: list[dict[str, Any]] = field(default_factory=list)
+    text_content: str | None = None
+    text_style: dict[str, Any] | None = None
+    color_grading: dict[str, Any] | None = None
     estimated_complexity: float = 1.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为 dict（方便持久化、调试）。"""
         return {
             "comp_name": self.comp_name,
@@ -180,15 +180,15 @@ class CreativeResult:
     """
 
     success: bool
-    output_path: Optional[str] = None
-    plan: Optional[CreativePlan] = None
-    execution_log: List[Dict[str, Any]] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    metrics: Dict[str, float] = field(default_factory=dict)
+    output_path: str | None = None
+    plan: CreativePlan | None = None
+    execution_log: list[dict[str, Any]] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    metrics: dict[str, float] = field(default_factory=dict)
     total_duration_sec: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "output_path": self.output_path,
@@ -227,9 +227,9 @@ class MinimalCreativeLoop:
 
     def __init__(
         self,
-        ae_client: Optional[Any] = None,
-        ae_to_davinci: Optional[Any] = None,
-        llm_gateway: Optional[Any] = None,
+        ae_client: Any | None = None,
+        ae_to_davinci: Any | None = None,
+        llm_gateway: Any | None = None,
     ) -> None:
         """初始化最小创意闭环。
 
@@ -255,7 +255,7 @@ class MinimalCreativeLoop:
             self.llm = LLMGateway()
 
         # 图层名 → 索引缓存（一次合成内复用）
-        self._layer_index_cache: Dict[Tuple[str, str], int] = {}
+        self._layer_index_cache: dict[tuple[str, str], int] = {}
 
     # -----------------------------------------------------------------
     # 主入口
@@ -577,7 +577,7 @@ class MinimalCreativeLoop:
             return self._fallback_plan(request)
 
     @staticmethod
-    def _extract_json(text: str) -> Optional[str]:
+    def _extract_json(text: str) -> str | None:
         """从 LLM 响应中提取 JSON 字符串。"""
         if not text:
             return None
@@ -620,9 +620,9 @@ class MinimalCreativeLoop:
 
     def _normalize_background(
         self,
-        bg: Optional[Dict[str, Any]],
+        bg: dict[str, Any] | None,
         request: CreativeRequest,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """规范化背景字段。"""
         if not isinstance(bg, dict):
             return {"type": "solid", "color": [0.0, 0.0, 0.0]}
@@ -658,9 +658,9 @@ class MinimalCreativeLoop:
 
     def _normalize_color_grading(
         self,
-        cg: Optional[Dict[str, Any]],
+        cg: dict[str, Any] | None,
         request: CreativeRequest,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """规范化调色字段，确保 preset_name 一定存在。"""
         if not isinstance(cg, dict):
             return {
@@ -714,7 +714,7 @@ class MinimalCreativeLoop:
             f"Auto_{request.style.value}_{int(time.time()) % 100000}"
         )
 
-        layers: List[Dict[str, Any]] = [
+        layers: list[dict[str, Any]] = [
             {
                 "type": "text",
                 "name": "MainText",
@@ -732,7 +732,7 @@ class MinimalCreativeLoop:
         ]
 
         # 关键帧：简单的淡入 + 缩放入场
-        keyframes: List[Dict[str, Any]] = [
+        keyframes: list[dict[str, Any]] = [
             {
                 "layer_name": "MainText",
                 "property": "Opacity",
@@ -875,7 +875,7 @@ class MinimalCreativeLoop:
     def _create_layer(
         self,
         comp_name: str,
-        layer_spec: Dict[str, Any],
+        layer_spec: dict[str, Any],
         result: CreativeResult,
     ) -> None:
         """创建单个图层。"""
@@ -954,7 +954,7 @@ class MinimalCreativeLoop:
     def _create_keyframe(
         self,
         comp_name: str,
-        kf_spec: Dict[str, Any],
+        kf_spec: dict[str, Any],
         result: CreativeResult,
     ) -> None:
         """创建关键帧。"""
@@ -986,7 +986,7 @@ class MinimalCreativeLoop:
     def _apply_effect(
         self,
         comp_name: str,
-        eff_spec: Dict[str, Any],
+        eff_spec: dict[str, Any],
         result: CreativeResult,
     ) -> None:
         """应用效果。"""
@@ -1027,7 +1027,7 @@ class MinimalCreativeLoop:
             self._layer_index_cache[(comp_name, layer_name)] = idx
 
     @staticmethod
-    def _extract_layer_index(create_resp: Any) -> Optional[int]:
+    def _extract_layer_index(create_resp: Any) -> int | None:
         """从 UnifiedAEClient 的创建响应中提取 layer_index。
 
         响应格式约定：
@@ -1059,7 +1059,7 @@ class MinimalCreativeLoop:
         self,
         comp_name: str,
         layer_name: str,
-    ) -> Optional[int]:
+    ) -> int | None:
         """查找图层索引（优先缓存，否则通过 AE 客户端查询）。"""
         cached = self._layer_index_cache.get((comp_name, layer_name))
         if cached is not None:

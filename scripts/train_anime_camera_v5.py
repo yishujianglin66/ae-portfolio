@@ -29,7 +29,7 @@ import torch
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -64,14 +64,14 @@ REVERSE_PAIR = {
 
 def load_trainable(labels_path: str, min_conf: float = 0.7,
                    time_reverse: bool = True,
-                   data_root: str = "") -> List[Dict[str, Any]]:
+                   data_root: str = "") -> list[dict[str, Any]]:
     """加载 VLM 标注, 六类映射, 过滤 complex/低置信/缺失文件。
 
     支持合并多个 jsonl (v3 合并格式: 用换行分隔的多文件路径)。
     """
     # 支持多文件合并 (vlm_labels_v3 = v1+v2+本地新标的合并)
     label_files = [p.strip() for p in labels_path.split("|") if p.strip()]
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for lf in label_files:
         p = Path(lf)
         if not p.exists():
@@ -88,7 +88,7 @@ def load_trainable(labels_path: str, min_conf: float = 0.7,
     logger.info("标签文件加载: %d 行 (来自 %d 文件)", len(rows), len(label_files))
 
     # 去重 (同一 shot_id 可能出现在多个文件, 保留最新的)
-    seen: Dict[str, Dict[str, Any]] = {}
+    seen: dict[str, dict[str, Any]] = {}
     for r in rows:
         sid = r.get("shot_id", "")
         if sid:
@@ -107,7 +107,7 @@ def load_trainable(labels_path: str, min_conf: float = 0.7,
             if cp:
                 r["clip_path"] = str(Path(data_root) / _basename_from_cross_platform(cp))
 
-    out: List[Dict[str, Any]] = []
+    out: list[dict[str, Any]] = []
     skipped = {"complex": 0, "low_conf": 0, "missing_clip": 0, "bad_dir": 0}
     n_reversed = 0
     for r in rows:
@@ -190,7 +190,7 @@ def _build_layer_decay_param_groups(model, lr: float, weight_decay: float,
                  "lr": lr, "weight_decay": weight_decay}]
 
     # 分组: 按参数名中的 layer.{i} / blocks.{i} 提取深度
-    layer_groups: Dict[int, List] = {}
+    layer_groups: dict[int, list] = {}
     no_decay_groups = {"layernorm": [], "bias": []}
     other_params = []
 
@@ -248,8 +248,8 @@ class ClipDataset(torch.utils.data.Dataset):
     🟡 支持 Repeated Augmentation: 同视频采样 num_sample 个不同增强副本
     """
 
-    def __init__(self, samples: List[Dict[str, Any]],
-                 label_to_idx: Dict[str, int],
+    def __init__(self, samples: list[dict[str, Any]],
+                 label_to_idx: dict[str, int],
                  num_sample: int = 2,
                  is_train: bool = True):
         self.samples = samples
@@ -260,7 +260,7 @@ class ClipDataset(torch.utils.data.Dataset):
     def __len__(self) -> int:
         return len(self.samples) * self.num_sample
 
-    def _load_frames(self, clip: str, copy_id: int = 0) -> Optional[np.ndarray]:
+    def _load_frames(self, clip: str, copy_id: int = 0) -> np.ndarray | None:
         from decord import VideoReader, cpu
         try:
             vr = VideoReader(clip, ctx=cpu(0), width=IMG_SIZE, height=IMG_SIZE)
@@ -282,7 +282,7 @@ class ClipDataset(torch.utils.data.Dataset):
         except Exception:  # noqa: BLE001
             return None
 
-    def __getitem__(self, idx: int) -> Dict[str, Any]:
+    def __getitem__(self, idx: int) -> dict[str, Any]:
         sample_idx = idx // self.num_sample
         copy_id = idx % self.num_sample
         s = self.samples[sample_idx]
@@ -322,7 +322,7 @@ class ClipDataset(torch.utils.data.Dataset):
         return {"pixel_values": frames_tensor, "labels": self.label_to_idx[s["label"]]}
 
 
-def _collate_batch(batch: List[Dict[str, Any]]) -> Dict[str, Any]:
+def _collate_batch(batch: list[dict[str, Any]]) -> dict[str, Any]:
     """模块级 collate (Windows spawn 可 pickle)。
 
     v5 改进: label smoothing 由 loss_fn 处理, 这里只做归一化。
@@ -337,7 +337,7 @@ def _collate_batch(batch: List[Dict[str, Any]]) -> Dict[str, Any]:
     return {"pixel_values": videos, "labels": lab}
 
 
-def _mixup_batch(batch: Dict[str, Any], num_classes: int, alpha: float = 0.2):
+def _mixup_batch(batch: dict[str, Any], num_classes: int, alpha: float = 0.2):
     """Mixup 增强 (运镜类间语义重叠, mixup 提升泛化)。
 
     v4 在 60% 饱和, 部分原因是过拟合到训练分布; mixup 平滑决策边界。
@@ -481,8 +481,8 @@ def main() -> int:
 
     # 2. 模型加载 (三模式: transformers VideoMAE v1 / VideoMAEv2 自定义代码)
     # v5.2: VideoMAEv2 (OpenGVLab 自定义架构) 走独立分支 —— 通过加载 modeling_videomaev2.py 源码
-    import os as _os
     import json as _json
+    import os as _os
 
     def _is_videomaev2(path_or_id: str) -> bool:
         """识别是否为 VideoMAEv2 目录/权重: config.json 的 model_type == 'VideoMAEv2_Base'"""
@@ -509,9 +509,10 @@ def main() -> int:
           - VideoMAEv2 的包装类写的不够完整, 导致加载尾阶段炸
         所以这里直接把两个文件当作普通源码 exec 进来, 然后手动 safetensors.load_state_dict。
         """
+        import pathlib as _pl
         import sys as _sys
         import types as _types
-        import pathlib as _pl
+
         from safetensors.torch import load_file as _load_sf
 
         mdl_path = _pl.Path(model_dir)
@@ -638,8 +639,8 @@ def main() -> int:
 
             def save_pretrained(self, out_dir, **kw):
                 # 保存: 优先 safetensors + config.json (标准 HF 格式)
-                import pathlib as _pl
                 import json as _json
+                import pathlib as _pl
                 out_p = _pl.Path(out_dir)
                 out_p.mkdir(parents=True, exist_ok=True)
                 # config
@@ -778,10 +779,10 @@ def main() -> int:
     logger.info("全参微调: 可训练 %d / %d (%.2f%%)", n_train, n_all, 100 * n_train / max(1, n_all))
 
     # 5. 训练 (SOTA: Layer Decay + SoftTargetCE + Mixup/CutMix + Warmup+Cosine + Weight Decay 0.05)
-    from torch.utils.data import DataLoader
-    from timm.loss import SoftTargetCrossEntropy
-    from timm.data import Mixup
     import torch
+    from timm.data import Mixup
+    from timm.loss import SoftTargetCrossEntropy
+    from torch.utils.data import DataLoader
 
     # SOTA: SoftTargetCrossEntropy (配合 mixup, 替代 LabelSmoothingCE)
     # 类权重通过 sample weight 实现 (SoftTargetCE 不直接支持 weight 参数)
@@ -851,7 +852,7 @@ def main() -> int:
 
     best_acc = 0.0
     best_epoch = 0
-    history: List[Dict[str, Any]] = []
+    history: list[dict[str, Any]] = []
     t0 = time.time()
     for epoch in range(args.epochs):
         model.train()

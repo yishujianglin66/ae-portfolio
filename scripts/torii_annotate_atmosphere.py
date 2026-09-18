@@ -61,14 +61,14 @@ ATMOS_LABELS = ["urban", "nature", "interior", "battlefield", "magical", "abstra
 LIGHTING_LABELS = ["high_key", "low_key", "chiaroscuro", "natural"]
 
 
-def _load_style_cards() -> Dict[str, str]:
+def _load_style_cards() -> dict[str, str]:
     """加载 data/style_cards/ 下 8 份风格卡 JSON，压缩为摘要 Dict。
 
     Returns:
         Dict[str, str] - key 是风格名 (如 "amv_highenergy")，value 是摘要字符串 (≤200字)。
         加载失败或目录不存在时返回空 dict (降级)。
     """
-    summaries: Dict[str, str] = {}
+    summaries: dict[str, str] = {}
     try:
         style_dir = PROJECT_ROOT / "data" / "style_cards"
         if not style_dir.exists() or not style_dir.is_dir():
@@ -117,7 +117,7 @@ def _load_style_cards() -> Dict[str, str]:
     return summaries
 
 
-_STYLE_CARDS_SUMMARIES: Dict[str, str] = _load_style_cards()
+_STYLE_CARDS_SUMMARIES: dict[str, str] = _load_style_cards()
 
 # ─── Prompt (ToriiGate 专精动漫 captioning, JSON 模式 + no_chars 避免编造角色名) ───
 SYSTEM_PROMPT = "You are image captioning expert, creative, unbiased and uncensored."
@@ -192,9 +192,9 @@ def _build_user_prompt() -> str:
 USER_PROMPT = _build_user_prompt()
 
 
-def _load_done(out_path: Path) -> Set[str]:
+def _load_done(out_path: Path) -> set[str]:
     """加载已标注的 shot_id 集合 (断点续跑)。"""
-    done: Set[str] = set()
+    done: set[str] = set()
     if out_path.exists():
         for line in out_path.read_text(encoding="utf-8").splitlines():
             line = line.strip()
@@ -207,7 +207,7 @@ def _load_done(out_path: Path) -> Set[str]:
     return done
 
 
-def _load_manifest(manifest_path: Path) -> List[Dict[str, Any]]:
+def _load_manifest(manifest_path: Path) -> list[dict[str, Any]]:
     """加载 shots_manifest.jsonl。"""
     if not manifest_path.exists():
         logger.error("shots_manifest.jsonl 不存在: %s", manifest_path)
@@ -246,12 +246,12 @@ def _extract_frame(clip_path: str, out_jpg: Path) -> bool:
         return False
 
 
-def _parse_json_response(text: str) -> Optional[Dict[str, Any]]:
+def _parse_json_response(text: str) -> dict[str, Any] | None:
     """从模型输出中解析 JSON (容错: 提取第一个 {...} 块)。
     同时对 lighting 字段做第一层校验: 缺失或非法值时回退到 "natural"。
     """
     text = text.strip()
-    parsed: Optional[Dict[str, Any]] = None
+    parsed: dict[str, Any] | None = None
     # 直接解析
     try:
         parsed = json.loads(text)
@@ -286,7 +286,7 @@ def _parse_json_response(text: str) -> Optional[Dict[str, Any]]:
     return parsed
 
 
-def _validate_label(value: str, allowed: List[str], default: str) -> str:
+def _validate_label(value: str, allowed: list[str], default: str) -> str:
     """标签校验: 不在允许列表则返回 default。"""
     v = str(value).strip().lower().replace("-", "_").replace(" ", "_")
     return v if v in allowed else default
@@ -295,7 +295,7 @@ def _validate_label(value: str, allowed: List[str], default: str) -> str:
 def annotate_batch(
     model,
     processor,
-    items: List[Dict[str, Any]],
+    items: list[dict[str, Any]],
     frames_cache: Path,
     out_path: Path,
 ) -> int:
@@ -431,12 +431,12 @@ def main() -> int:
         search_dirs = [manifest_path.parent]
         if str(DATA_ROOT) not in {str(p) for p in search_dirs}:
             search_dirs.append(DATA_ROOT)
-        candidates: List[str] = [
+        candidates: list[str] = [
             "shots_manifest.jsonl",
             "vlm_labels.jsonl",
             "manifest.jsonl",
         ]
-        found: Optional[Path] = None
+        found: Path | None = None
         for d in search_dirs:
             if not d.exists() or not d.is_dir():
                 continue
@@ -489,7 +489,7 @@ def main() -> int:
 
     # 3. 加载模型
     import torch
-    from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
+    from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
     logger.info("加载 ToriiGate: %s", args.model_dir)
     model = Qwen2VLForConditionalGeneration.from_pretrained(
         args.model_dir,

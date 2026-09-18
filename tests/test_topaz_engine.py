@@ -30,11 +30,11 @@ _stale = [k for k in sys.modules if k == 'engines' or k.startswith('engines.')]
 for _k in _stale:
     del sys.modules[_k]
 
+import pytest
 from src.config.settings import settings
 from src.engines.base import BaseEngine, EngineResult
 from src.engines.topaz.engine import TopazEngine
 
-import pytest
 
 @pytest.fixture
 def engine():

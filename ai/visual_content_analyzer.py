@@ -14,14 +14,14 @@ Visual Content Analyzer - 视觉模型素材内容分析
     result = analyzer.analyze("video.mp4", num_frames=8)
     # result = {"scenes": [...], "tags": [...], "summary": "..."}
 """
+import base64
+import json
 import os
 import sys
-import json
-import time
-import base64
 import tempfile
+import time
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
@@ -67,7 +67,7 @@ class VisualContentAnalyzer:
 
     def analyze(self, video_path: str,
                 num_frames: int = 8,
-                prompt: str = None) -> Dict[str, Any]:
+                prompt: str = None) -> dict[str, Any]:
         """
         分析视频内容。
 
@@ -101,7 +101,7 @@ class VisualContentAnalyzer:
 
         return result
 
-    def _extract_keyframes(self, video_path: str, num_frames: int) -> List[str]:
+    def _extract_keyframes(self, video_path: str, num_frames: int) -> list[str]:
         """从视频抽取关键帧图片"""
         import cv2
 
@@ -162,8 +162,8 @@ class VisualContentAnalyzer:
 
         return frame_paths
 
-    def _call_vision_api(self, frame_paths: List[str],
-                         prompt: str = None) -> Dict[str, Any]:
+    def _call_vision_api(self, frame_paths: list[str],
+                         prompt: str = None) -> dict[str, Any]:
         """四层叠加视觉分析: ARK视觉 → DuckMiss → SiliconFlow → OpenCV+LLM → 规则回退"""
 
         # === Layer 1: ARK 视觉 Endpoint (主力) ===
@@ -203,8 +203,8 @@ class VisualContentAnalyzer:
         log("  所有分析不可用, 使用规则分析", "WARN")
         return self._fallback_analysis()
 
-    def _call_ark_vision(self, frame_paths: List[str],
-                          prompt: str = None) -> Optional[Dict]:
+    def _call_ark_vision(self, frame_paths: list[str],
+                          prompt: str = None) -> dict | None:
         """Layer 1: ARK 视觉 Endpoint 直接分析图片"""
         if not self.ark_key:
             return None
@@ -251,8 +251,8 @@ class VisualContentAnalyzer:
             log(f"  ARK 视觉失败: {e}", "WARN")
             return None
 
-    def _call_duckmiss_vision(self, frame_paths: List[str],
-                               prompt: str = None) -> Optional[Dict]:
+    def _call_duckmiss_vision(self, frame_paths: list[str],
+                               prompt: str = None) -> dict | None:
         """Layer 2: DuckMiss Claude 视觉模型分析图片"""
         if not self.dm_key:
             return None
@@ -300,8 +300,8 @@ class VisualContentAnalyzer:
             log(f"  DuckMiss 视觉失败: {e}", "WARN")
             return None
 
-    def _call_siliconflow_vision(self, frame_paths: List[str],
-                                  prompt: str = None) -> Optional[Dict]:
+    def _call_siliconflow_vision(self, frame_paths: list[str],
+                                  prompt: str = None) -> dict | None:
         """Layer 1: 调用 SiliconFlow 视觉模型直接分析图片"""
         if not self.sf_key:
             return None
@@ -353,8 +353,8 @@ class VisualContentAnalyzer:
             log(f"  SiliconFlow 失败: {e}", "WARN")
             return None
 
-    def _call_opencv_llm(self, frame_paths: List[str],
-                          prompt: str = None) -> Optional[Dict]:
+    def _call_opencv_llm(self, frame_paths: list[str],
+                          prompt: str = None) -> dict | None:
         """Layer 2: OpenCV 特征提取 + ARK 文本 LLM 推断"""
         cv_features = self._extract_cv_features(frame_paths)
         if not cv_features:
@@ -367,7 +367,7 @@ class VisualContentAnalyzer:
 只返回JSON。"""
         return self._call_ark_text_llm(llm_prompt)
 
-    def _extract_cv_features(self, frame_paths: List[str]) -> List[Dict]:
+    def _extract_cv_features(self, frame_paths: list[str]) -> list[dict]:
         """用 OpenCV 提取每帧视觉特征"""
         import cv2
         import numpy as np
@@ -401,7 +401,7 @@ class VisualContentAnalyzer:
             })
         return features
 
-    def _call_ark_text_llm(self, prompt: str) -> Optional[Dict]:
+    def _call_ark_text_llm(self, prompt: str) -> dict | None:
         """调用 ARK 文本 LLM"""
         import urllib.request
         if not self.ark_key:
@@ -427,7 +427,7 @@ class VisualContentAnalyzer:
             log(f"  ARK LLM 失败: {e}", "ERROR")
             return None
 
-    def _parse_json_response(self, text: str) -> Optional[Dict]:
+    def _parse_json_response(self, text: str) -> dict | None:
         """从模型响应中解析 JSON"""
         # 尝试直接解析
         try:
@@ -455,7 +455,7 @@ class VisualContentAnalyzer:
 
         return None
 
-    def _fallback_analysis(self) -> Dict[str, Any]:
+    def _fallback_analysis(self) -> dict[str, Any]:
         """规则回退分析"""
         return {
             "summary": "视觉模型不可用, 使用基础分析",
@@ -477,7 +477,7 @@ if __name__ == "__main__":
     v17 = r"D:\AE-Work\output\VinlandSaga_Battle_V17.mp4"
     if os.path.exists(v17):
         result = analyzer.analyze(v17, num_frames=6)
-        print(f"\n结果:")
+        print("\n结果:")
         print(json.dumps(result, ensure_ascii=False, indent=2)[:1000])
     else:
         print(f"视频不存在: {v17}")

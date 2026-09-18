@@ -3,8 +3,8 @@
 """预设执行引擎实战测试 - 验证所有分类的预设生成与执行流程"""
 from __future__ import annotations
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -16,8 +16,8 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from ae.preset_system import PresetSystem, PRESET_CATEGORIES
 from ae.preset_executor import PresetExecutor, PresetLibrary, initialize_default_combinations
+from ae.preset_system import PRESET_CATEGORIES, PresetSystem
 
 
 def main():

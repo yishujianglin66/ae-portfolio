@@ -12,9 +12,9 @@ Date: 2026-07-14
 
 import json
 import re
-from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Union
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 
 @dataclass
@@ -23,7 +23,7 @@ class EffectMapping:
     match_name: str
     display_name: str
     category: str
-    properties: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    properties: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 @dataclass
@@ -31,8 +31,8 @@ class MCPToolSchema:
     """MCP工具Schema"""
     name: str
     description: str
-    input_schema: Dict[str, Any]
-    output_schema: Optional[Dict[str, Any]] = None
+    input_schema: dict[str, Any]
+    output_schema: dict[str, Any] | None = None
 
 
 class AEKnowledgeIntegrator:
@@ -44,10 +44,10 @@ class AEKnowledgeIntegrator:
         self.scripts_path = self.vault_path / "AE-Scripts"
 
         # 效果matchName缓存
-        self._effect_cache: Dict[str, EffectMapping] = {}
+        self._effect_cache: dict[str, EffectMapping] = {}
 
         # MCP工具缓存
-        self._mcp_tools: Dict[str, MCPToolSchema] = {}
+        self._mcp_tools: dict[str, MCPToolSchema] = {}
 
         # 加载数据
         self._load_effect_mappings()
@@ -276,7 +276,7 @@ class AEKnowledgeIntegrator:
 
         self._mcp_tools = mcp_tools_data
 
-    def search_effect_matchname(self, effect_name: str) -> Optional[EffectMapping]:
+    def search_effect_matchname(self, effect_name: str) -> EffectMapping | None:
         """
         搜索效果的matchName
 
@@ -298,7 +298,7 @@ class AEKnowledgeIntegrator:
 
         return None
 
-    def get_mcp_tool_schema(self, tool_name: str) -> Optional[MCPToolSchema]:
+    def get_mcp_tool_schema(self, tool_name: str) -> MCPToolSchema | None:
         """
         获取MCP工具Schema
 
@@ -310,7 +310,7 @@ class AEKnowledgeIntegrator:
         """
         return self._mcp_tools.get(tool_name)
 
-    def generate_jsx_script(self, operation: str, params: Dict[str, Any]) -> str:
+    def generate_jsx_script(self, operation: str, params: dict[str, Any]) -> str:
         """
         生成ExtendScript脚本
 
@@ -332,7 +332,7 @@ class AEKnowledgeIntegrator:
         else:
             return f"// Unknown operation: {operation}"
 
-    def _generate_add_effect_script(self, params: Dict[str, Any]) -> str:
+    def _generate_add_effect_script(self, params: dict[str, Any]) -> str:
         """生成添加效果脚本"""
         layer_name = params.get("layerName", "Layer 1")
         effect_match_name = params.get("effectMatchName", "ADBE Glo2")
@@ -381,7 +381,7 @@ class AEKnowledgeIntegrator:
 '''
         return script
 
-    def _generate_set_keyframe_script(self, params: Dict[str, Any]) -> str:
+    def _generate_set_keyframe_script(self, params: dict[str, Any]) -> str:
         """生成设置关键帧脚本"""
         layer_name = params.get("layerName", "Layer 1")
         property_path = params.get("propertyPath", "Transform/Position")
@@ -468,7 +468,7 @@ class AEKnowledgeIntegrator:
 '''
         return script
 
-    def _generate_create_comp_script(self, params: Dict[str, Any]) -> str:
+    def _generate_create_comp_script(self, params: dict[str, Any]) -> str:
         """生成创建合成脚本"""
         name = params.get("name", "Comp 1")
         width = params.get("width", 1920)
@@ -503,7 +503,7 @@ class AEKnowledgeIntegrator:
 '''
         return script
 
-    def _generate_create_text_layer_script(self, params: Dict[str, Any]) -> str:
+    def _generate_create_text_layer_script(self, params: dict[str, Any]) -> str:
         """生成创建文字图层脚本"""
         comp_name = params.get("compName", "Comp 1")
         layer_name = params.get("layerName", "Text")
@@ -553,7 +553,7 @@ class AEKnowledgeIntegrator:
 '''
         return script
 
-    def list_available_scripts(self) -> List[str]:
+    def list_available_scripts(self) -> list[str]:
         """列出所有可用的ScriptUI脚本"""
         scripts_dir = self.scripts_path / "ScriptUI Panels"
         if not scripts_dir.exists():
@@ -565,7 +565,7 @@ class AEKnowledgeIntegrator:
 
         return sorted(scripts)
 
-    def get_script_metadata(self, script_name: str) -> Dict[str, Any]:
+    def get_script_metadata(self, script_name: str) -> dict[str, Any]:
         """获取脚本元数据"""
         script_path = self.scripts_path / "ScriptUI Panels" / script_name
         if not script_path.exists():

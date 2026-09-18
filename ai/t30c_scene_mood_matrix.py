@@ -43,14 +43,14 @@ class SceneMoodMatrix:
     基于VLM全量标注的共现统计，为导演系统提供数据驱动的素材匹配决策。
     """
 
-    def __init__(self, proto_v2_path: Optional[str] = None):
+    def __init__(self, proto_v2_path: str | None = None):
         path = Path(proto_v2_path) if proto_v2_path else PROTO_V2
         self._raw: dict = {}
-        self._scene_mood: Dict[str, Dict[str, int]] = {}   # scene → {mood → count}
-        self._mood_scene: Dict[str, Dict[str, int]] = {}   # mood → {scene → count}
-        self._scene_totals: Dict[str, int] = {}
-        self._mood_totals: Dict[str, int] = {}
-        self._ip_profiles: Dict[str, dict] = {}
+        self._scene_mood: dict[str, dict[str, int]] = {}   # scene → {mood → count}
+        self._mood_scene: dict[str, dict[str, int]] = {}   # mood → {scene → count}
+        self._scene_totals: dict[str, int] = {}
+        self._mood_totals: dict[str, int] = {}
+        self._ip_profiles: dict[str, dict] = {}
         self._total_frames = 0
         self._load(path)
 
@@ -92,7 +92,7 @@ class SceneMoodMatrix:
 
     # ── 核心查询 ──────────────────────────────────────────
 
-    def recommend_moods(self, scene_type: str, top_k: int = 3) -> List[Tuple[str, float]]:
+    def recommend_moods(self, scene_type: str, top_k: int = 3) -> list[tuple[str, float]]:
         """给定场景类型 → 推荐最佳情绪组合(按条件概率降序)。
 
         Returns:
@@ -105,7 +105,7 @@ class SceneMoodMatrix:
         ranked = sorted(mood_counts.items(), key=lambda x: -x[1])
         return [(m, c / total) for m, c in ranked[:top_k]]
 
-    def recommend_scenes(self, mood: str, top_k: int = 3) -> List[Tuple[str, float]]:
+    def recommend_scenes(self, mood: str, top_k: int = 3) -> list[tuple[str, float]]:
         """给定情绪 → 推荐最佳场景类型(按条件概率降序)。
 
         Returns:
@@ -140,7 +140,7 @@ class SceneMoodMatrix:
         max_pmi = 1.0 / min(p_scene, p_mood) if min(p_scene, p_mood) > 0 else 1
         return min(1.0, pmi_raw / max_pmi) if max_pmi > 0 else 0.0
 
-    def get_ip_profile(self, ip_name: str) -> Optional[dict]:
+    def get_ip_profile(self, ip_name: str) -> dict | None:
         """获取指定IP的场景/情绪分布特征。
 
         Args:
@@ -159,11 +159,11 @@ class SceneMoodMatrix:
                 return prof
         return None
 
-    def list_ips_with_vlm(self) -> List[str]:
+    def list_ips_with_vlm(self) -> list[str]:
         """列出所有有VLM数据的IP"""
         return list(self._ip_profiles.keys())
 
-    def scene_mood_table(self) -> Dict[str, Dict[str, float]]:
+    def scene_mood_table(self) -> dict[str, dict[str, float]]:
         """返回完整的场景→情绪概率分布表(归一化)。
 
         Returns:
@@ -176,7 +176,7 @@ class SceneMoodMatrix:
                 result[scene] = {m: c / total for m, c in mood_counts.items()}
         return result
 
-    def best_scene_mood_pairs(self, top_k: int = 10) -> List[Tuple[str, str, float]]:
+    def best_scene_mood_pairs(self, top_k: int = 10) -> list[tuple[str, str, float]]:
         """返回共现频率最高的场景×情绪组合。
 
         Returns:

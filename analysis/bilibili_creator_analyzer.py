@@ -26,17 +26,17 @@ Bilibili Creator Analyzer - UP 主视频知识解构器
 """
 from __future__ import annotations
 
-import os
-import sys
-import json
-import time
-import base64
 import asyncio
+import base64
+import json
+import os
 import re
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+import sys
+import time
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -67,10 +67,10 @@ class VideoInfo:
     comment_count: int
     upload_date: str
     description: str
-    tags: List[str] = field(default_factory=list)
-    extracted_keyframes: List[str] = field(default_factory=list)
-    visual_analysis: Dict[str, Any] = field(default_factory=dict)
-    style_fingerprint: Dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    extracted_keyframes: list[str] = field(default_factory=list)
+    visual_analysis: dict[str, Any] = field(default_factory=dict)
+    style_fingerprint: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -84,7 +84,7 @@ class CreatorProfile:
     subscribers: int
     total_videos: int
     total_views: int
-    videos: List[VideoInfo] = field(default_factory=list)
+    videos: list[VideoInfo] = field(default_factory=list)
 
 
 @dataclass
@@ -103,11 +103,11 @@ class AnalysisReport:
     analysis_level: str
     total_videos_analyzed: int
     overall_summary: str
-    content_strategy: Dict[str, Any] = field(default_factory=dict)
-    visual_style: Dict[str, Any] = field(default_factory=dict)
-    editing_patterns: Dict[str, Any] = field(default_factory=dict)
-    production_techniques: List[ProductionTechnique] = field(default_factory=list)
-    suggested_improvements: List[str] = field(default_factory=list)
+    content_strategy: dict[str, Any] = field(default_factory=dict)
+    visual_style: dict[str, Any] = field(default_factory=dict)
+    editing_patterns: dict[str, Any] = field(default_factory=dict)
+    production_techniques: list[ProductionTechnique] = field(default_factory=list)
+    suggested_improvements: list[str] = field(default_factory=list)
     timestamp: str = field(default_factory=lambda: time.strftime("%Y-%m-%d %H:%M:%S"))
 
 
@@ -116,7 +116,7 @@ class BilibiliCreatorAnalyzer:
 
     def __init__(
         self,
-        output_base_dir: Optional[str] = None,
+        output_base_dir: str | None = None,
         max_videos: int = 5,
         analysis_level: AnalysisLevel = AnalysisLevel.MEDIUM,
     ):
@@ -138,7 +138,7 @@ class BilibiliCreatorAnalyzer:
         from core import config as core_config
         self.config = core_config.load_config()
 
-    async def analyze_creator(self, home_url: str, bv_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    async def analyze_creator(self, home_url: str, bv_ids: list[str] | None = None) -> dict[str, Any]:
         """分析 UP 主
 
         Args:
@@ -186,7 +186,7 @@ class BilibiliCreatorAnalyzer:
             "analyzed_videos": selected_videos,
         }
 
-    def _fetch_via_bv_list(self, bv_ids: List[str], home_url: str) -> CreatorProfile:
+    def _fetch_via_bv_list(self, bv_ids: list[str], home_url: str) -> CreatorProfile:
         """直接用 BV 号列表 + view API 获取视频信息"""
         uid = self._extract_uid(home_url) or ""
         videos = []
@@ -330,7 +330,7 @@ class BilibiliCreatorAnalyzer:
         # Step A: 获取 UP 主基本信息
         name, avatar, description = "野喵要吃草_", "", ""
         try:
-            info_url = f"https://api.bilibili.com/x/web-interface/view?bvid="
+            info_url = "https://api.bilibili.com/x/web-interface/view?bvid="
             # 先用 nav API 获取 UP 主名称
             nav_req = urllib.request.Request(
                 f"https://api.bilibili.com/x/web-interface/zone?mid={uid}",
@@ -380,10 +380,10 @@ class BilibiliCreatorAnalyzer:
             videos=videos,
         )
 
-    def _extract_bv_ids_from_page(self, uid: str) -> List[str]:
+    def _extract_bv_ids_from_page(self, uid: str) -> list[str]:
         """从 UP 主主页 HTML 中提取 BV 号"""
-        import urllib.request
         import re as regex
+        import urllib.request
 
         try:
             url = f"https://space.bilibili.com/{uid}/video"
@@ -413,7 +413,7 @@ class BilibiliCreatorAnalyzer:
             log(f"  从主页提取 BV 号失败: {e}", "WARN", indent=2)
             return []
 
-    def _fetch_video_detail(self, bv_id: str) -> Optional[VideoInfo]:
+    def _fetch_video_detail(self, bv_id: str) -> VideoInfo | None:
         """用 view API 获取单个视频的详细信息"""
         import urllib.request
 
@@ -454,7 +454,7 @@ class BilibiliCreatorAnalyzer:
             log(f"  获取视频 {bv_id} 信息失败: {e}", "WARN", indent=3)
             return None
 
-    def _find_bilibili_cookie(self) -> Optional[str]:
+    def _find_bilibili_cookie(self) -> str | None:
         """查找 B 站 Cookie 文件（AE_WORK_DIR / BILIBILI_COOKIE_PATH 可覆盖）"""
         try:
             from core.paths import cookies_dir
@@ -471,7 +471,7 @@ class BilibiliCreatorAnalyzer:
                 return path
         return None
 
-    def _get_wbi_mixin_key(self) -> Optional[str]:
+    def _get_wbi_mixin_key(self) -> str | None:
         """获取 B 站 wbi 签名所需的 mixin_key"""
         import urllib.request
 
@@ -512,7 +512,7 @@ class BilibiliCreatorAnalyzer:
             log(f"  获取 wbi key 失败: {e}", "WARN", indent=2)
             return None
 
-    def _sign_wbi(self, params: Dict[str, str], mixin_key: str) -> Dict[str, str]:
+    def _sign_wbi(self, params: dict[str, str], mixin_key: str) -> dict[str, str]:
         """对请求参数进行 wbi 签名"""
         import hashlib
 
@@ -525,7 +525,7 @@ class BilibiliCreatorAnalyzer:
         params["w_rid"] = w_rid
         return params
 
-    def _extract_uid(self, url: str) -> Optional[str]:
+    def _extract_uid(self, url: str) -> str | None:
         """从 UP 主主页 URL 提取 UID"""
         patterns = [
             r"space\.bilibili\.com/(\d+)",
@@ -538,7 +538,7 @@ class BilibiliCreatorAnalyzer:
                 return match.group(1)
         return None
 
-    def _select_representative_videos(self, videos: List[VideoInfo]) -> List[VideoInfo]:
+    def _select_representative_videos(self, videos: list[VideoInfo]) -> list[VideoInfo]:
         """选择代表性视频（按播放量排序，兼顾多样性）"""
         if not videos:
             return []
@@ -584,18 +584,18 @@ class BilibiliCreatorAnalyzer:
             # 视觉分析
             analysis = await self._analyze_frames(keyframes, video)
             video.visual_analysis = analysis
-            log(f"    视觉分析完成", indent=3)
+            log("    视觉分析完成", indent=3)
 
             # 风格指纹提取（新）
             fingerprint = await self._extract_style_fingerprint(video_path, video)
             video.style_fingerprint = fingerprint
-            log(f"    风格指纹提取完成", indent=3)
+            log("    风格指纹提取完成", indent=3)
 
         except Exception as e:
             log(f"    分析失败: {e}", "ERROR", indent=3)
             video.visual_analysis = await self._analyze_thumbnail(video)
 
-    async def _download_video(self, video: VideoInfo, output_dir: Path) -> Dict[str, Any]:
+    async def _download_video(self, video: VideoInfo, output_dir: Path) -> dict[str, Any]:
         """下载 B 站视频"""
         from bilibili_downloader import BilibiliDownloader
 
@@ -610,7 +610,7 @@ class BilibiliCreatorAnalyzer:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _extract_keyframes(self, video_path: str, output_dir: Path) -> List[str]:
+    async def _extract_keyframes(self, video_path: str, output_dir: Path) -> list[str]:
         """从视频抽取关键帧"""
         try:
             from media.media_preprocessor import MediaPreprocessor
@@ -628,7 +628,7 @@ class BilibiliCreatorAnalyzer:
             log(f"      抽帧失败: {e}", "WARN", indent=4)
             return []
 
-    async def _analyze_frames(self, frame_paths: List[str], video: VideoInfo) -> Dict[str, Any]:
+    async def _analyze_frames(self, frame_paths: list[str], video: VideoInfo) -> dict[str, Any]:
         """调用视觉模型分析帧"""
         try:
             from analysis.visual_content_analyzer import VisualContentAnalyzer
@@ -651,7 +651,7 @@ class BilibiliCreatorAnalyzer:
             log(f"      视觉分析失败: {e}", "WARN", indent=4)
             return await self._analyze_thumbnail(video)
 
-    async def _extract_style_fingerprint(self, video_path: str, video: VideoInfo) -> Dict[str, Any]:
+    async def _extract_style_fingerprint(self, video_path: str, video: VideoInfo) -> dict[str, Any]:
         """提取视频风格指纹"""
         try:
             from video.style_extractor import VideoStyleExtractor
@@ -667,10 +667,11 @@ class BilibiliCreatorAnalyzer:
             log(f"      风格指纹提取失败: {e}", "WARN", indent=4)
             return {}
 
-    async def _analyze_thumbnail(self, video: VideoInfo) -> Dict[str, Any]:
+    async def _analyze_thumbnail(self, video: VideoInfo) -> dict[str, Any]:
         """分析视频封面（降级方案）"""
         try:
             import urllib.request
+
             from analysis.visual_content_analyzer import VisualContentAnalyzer
 
             # 下载封面
@@ -699,7 +700,7 @@ class BilibiliCreatorAnalyzer:
             log(f"      封面分析失败: {e}", "WARN", indent=4)
             return {"analysis_mode": "fallback", "summary": "无法进行视觉分析"}
 
-    async def _generate_report(self, profile: CreatorProfile, analyzed_videos: List[VideoInfo]) -> AnalysisReport:
+    async def _generate_report(self, profile: CreatorProfile, analyzed_videos: list[VideoInfo]) -> AnalysisReport:
         """生成完整分析报告"""
         all_visual_analyses = [v.visual_analysis for v in analyzed_videos if v.visual_analysis]
         all_tags = [tag for v in analyzed_videos for tag in v.tags]
@@ -777,7 +778,7 @@ UP 主信息:
 
         return report
 
-    def _integrate_style_knowledge(self, report: AnalysisReport, analyzed_videos: List[VideoInfo]) -> Dict[str, Any]:
+    def _integrate_style_knowledge(self, report: AnalysisReport, analyzed_videos: list[VideoInfo]) -> dict[str, Any]:
         """整合风格知识并生成AE脚本"""
         from video.style_knowledge_integrator import StyleKnowledgeIntegrator
 
@@ -793,7 +794,7 @@ UP 主信息:
 
         integrator.export_to_style_library(knowledge)
 
-        log(f"  风格知识整合完成!", indent=2)
+        log("  风格知识整合完成!", indent=2)
         log(f"    独特风格元素: {', '.join(knowledge.unique_style_elements)}", indent=3)
         log(f"    风格标签: {', '.join(knowledge.aggregated_fingerprint.get('style_tags', []))}", indent=3)
 
@@ -804,7 +805,7 @@ UP 主信息:
             "ae_effect_preset": knowledge.ae_effect_preset,
         }
 
-    async def _call_llm_for_summary(self, prompt: str) -> Dict[str, Any]:
+    async def _call_llm_for_summary(self, prompt: str) -> dict[str, Any]:
         """调用 LLM 生成总结（多 Provider 降级）"""
         providers = self._get_llm_providers()
 
@@ -819,7 +820,7 @@ UP 主信息:
 
         return self._empty_summary()
 
-    def _get_llm_providers(self) -> List[Dict[str, str]]:
+    def _get_llm_providers(self) -> list[dict[str, str]]:
         """获取可用的 LLM Provider 列表"""
         # 从 .env.doubao 读取配置
         env_path = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.env.doubao")
@@ -840,7 +841,7 @@ UP 主信息:
         ]
         return [p for p in providers if p["api_key"]]
 
-    async def _call_llm_provider(self, provider: Dict[str, str], prompt: str) -> Optional[Dict[str, Any]]:
+    async def _call_llm_provider(self, provider: dict[str, str], prompt: str) -> dict[str, Any] | None:
         """调用单个 LLM Provider"""
         import urllib.request
 
@@ -873,7 +874,7 @@ UP 主信息:
             return self._parse_json_response(content)
         return None
 
-    def _empty_summary(self) -> Dict[str, Any]:
+    def _empty_summary(self) -> dict[str, Any]:
         return {
             "overall_summary": "无法生成详细分析，需配置 LLM API Key",
             "content_strategy": {},
@@ -883,7 +884,7 @@ UP 主信息:
             "suggested_improvements": [],
         }
 
-    def _parse_json_response(self, text: str) -> Dict[str, Any]:
+    def _parse_json_response(self, text: str) -> dict[str, Any]:
         """解析 JSON 响应"""
         try:
             return json.loads(text)
@@ -908,7 +909,7 @@ UP 主信息:
 
         return {}
 
-    def _save_report(self, report: AnalysisReport, style_knowledge: Dict[str, Any] = None) -> str:
+    def _save_report(self, report: AnalysisReport, style_knowledge: dict[str, Any] = None) -> str:
         """保存分析报告"""
         safe_name = re.sub(r'[\\/:*?"<>|\n\r]', "_", report.creator.name)
         timestamp = time.strftime("%Y%m%d_%H%M%S")
@@ -949,7 +950,7 @@ UP 主信息:
     def print_report(self, report: AnalysisReport):
         """打印报告摘要"""
         print("\n" + "=" * 80)
-        print(f" UP 主视频知识解构报告")
+        print(" UP 主视频知识解构报告")
         print("=" * 80)
         print(f"\n📌 UP 主: {report.creator.name}")
         print(f"   主页: {report.creator.url}")
@@ -957,11 +958,11 @@ UP 主信息:
         print(f"   分析深度: {report.analysis_level} | 分析视频数: {report.total_videos_analyzed}")
         print(f"   生成时间: {report.timestamp}")
 
-        print(f"\n📊 整体评价:")
+        print("\n📊 整体评价:")
         print(f"   {report.overall_summary}")
 
         if report.content_strategy:
-            print(f"\n🎯 内容策略:")
+            print("\n🎯 内容策略:")
             cs = report.content_strategy
             print(f"   主题方向: {', '.join(cs.get('themes', []))}")
             print(f"   叙事模式: {cs.get('narrative_pattern', '')}")
@@ -969,7 +970,7 @@ UP 主信息:
             print(f"   封面策略: {cs.get('cover_strategy', '')}")
 
         if report.visual_style:
-            print(f"\n🎨 视觉风格:")
+            print("\n🎨 视觉风格:")
             vs = report.visual_style
             print(f"   调色风格: {vs.get('color_palette', '')}")
             print(f"   构图特点: {vs.get('composition', '')}")
@@ -977,7 +978,7 @@ UP 主信息:
             print(f"   文字风格: {vs.get('text_style', '')}")
 
         if report.editing_patterns:
-            print(f"\n✂️ 剪辑模式:")
+            print("\n✂️ 剪辑模式:")
             ep = report.editing_patterns
             print(f"   节奏特点: {ep.get('pace', '')}")
             print(f"   转场方式: {ep.get('transitions', '')}")
@@ -985,7 +986,7 @@ UP 主信息:
             print(f"   特效运用: {ep.get('effects', '')}")
 
         if report.production_techniques:
-            print(f"\n💡 核心生产技巧:")
+            print("\n💡 核心生产技巧:")
             for i, technique in enumerate(sorted(report.production_techniques, key=lambda t: t.priority), 1):
                 priority = "★★★" if technique.priority <= 2 else "★★" if technique.priority == 3 else "★"
                 print(f"   {i}. [{priority}] {technique.category}: {technique.description}")
@@ -993,7 +994,7 @@ UP 主信息:
                     print(f"      证据: {technique.evidence}")
 
         if report.suggested_improvements:
-            print(f"\n🚀 改进建议:")
+            print("\n🚀 改进建议:")
             for i, suggestion in enumerate(report.suggested_improvements, 1):
                 print(f"   {i}. {suggestion}")
 
@@ -1005,11 +1006,11 @@ UP 主信息:
 # ================================================================
 async def analyze_bilibili_creator(
     home_url: str,
-    output_dir: Optional[str] = None,
+    output_dir: str | None = None,
     max_videos: int = 5,
     analysis_level: str = "medium",
-    bv_ids: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    bv_ids: list[str] | None = None,
+) -> dict[str, Any]:
     """便捷函数：分析 B 站 UP 主"""
     level_map = {
         "light": AnalysisLevel.LIGHT,
@@ -1026,7 +1027,7 @@ async def analyze_bilibili_creator(
 
     if result.get("style_knowledge"):
         sk = result["style_knowledge"]
-        print(f"\n🎨 风格知识整合结果:")
+        print("\n🎨 风格知识整合结果:")
         print(f"   独特风格元素: {', '.join(sk.get('unique_elements', []))}")
         if sk.get("ae_effect_preset"):
             effects = sk["ae_effect_preset"].get("effects", [])
@@ -1034,7 +1035,7 @@ async def analyze_bilibili_creator(
             for ef in effects:
                 print(f"     - {ef.get('effectName', '')}")
         if sk.get("outputs"):
-            print(f"   输出文件:")
+            print("   输出文件:")
             for key, path in sk["outputs"].items():
                 print(f"     - {key}: {path}")
 

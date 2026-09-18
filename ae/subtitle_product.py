@@ -32,10 +32,9 @@ import json
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-from .timeline_ir import IRTrack, IRClip, IRTrackType
-
+from .timeline_ir import IRClip, IRTrack, IRTrackType
 
 # ================================================================
 #  枚举定义
@@ -70,14 +69,14 @@ class SubtitleStylePreset:
     name: str
     font_family: str = "Arial"
     font_size: int = 48
-    font_color: List[float] = field(default_factory=lambda: [1.0, 1.0, 1.0])
-    stroke_color: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
+    font_color: list[float] = field(default_factory=lambda: [1.0, 1.0, 1.0])
+    stroke_color: list[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     stroke_width: float = 2.0
     background_enabled: bool = False
-    background_color: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0, 0.6])
+    background_color: list[float] = field(default_factory=lambda: [0.0, 0.0, 0.0, 0.6])
     background_padding: int = 10
     glow_enabled: bool = False
-    glow_color: List[float] = field(default_factory=lambda: [0.0, 0.5, 1.0])
+    glow_color: list[float] = field(default_factory=lambda: [0.0, 0.5, 1.0])
     glow_radius: float = 15.0
     position_y: float = 0.85
     alignment: str = "center"
@@ -86,7 +85,7 @@ class SubtitleStylePreset:
     animation_out: str = "none"
     animation_duration: float = 0.3
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "font_family": self.font_family,
@@ -113,7 +112,7 @@ class SubtitleStylePreset:
 #  内置预设
 # ================================================================
 
-_BUILTIN_PRESETS: Dict[str, SubtitleStylePreset] = {
+_BUILTIN_PRESETS: dict[str, SubtitleStylePreset] = {
     "douyin": SubtitleStylePreset(
         name="抖音风",
         font_family="PingFang SC",
@@ -196,15 +195,15 @@ class SubtitleSegment:
     start_time: float
     end_time: float
     text: str
-    translation: Optional[str] = None  # 翻译文本 (双语)
-    speaker: Optional[str] = None      # 说话人
+    translation: str | None = None  # 翻译文本 (双语)
+    speaker: str | None = None      # 说话人
     confidence: float = 1.0
 
 
 @dataclass
 class SubtitleResult:
     """字幕处理结果"""
-    segments: List[SubtitleSegment] = field(default_factory=list)
+    segments: list[SubtitleSegment] = field(default_factory=list)
     style: SubtitleStylePreset = field(default_factory=lambda: _BUILTIN_PRESETS["bilibili"])
     language: str = "zh"
     total_duration: float = 0.0
@@ -251,7 +250,7 @@ class SubtitleStyler:
     """
 
     # 关键词 → 预设映射
-    KEYWORD_PRESET_MAP: Dict[str, str] = {
+    KEYWORD_PRESET_MAP: dict[str, str] = {
         "抖音": "douyin",
         "短视频": "douyin",
         "douyin": "douyin",
@@ -284,9 +283,9 @@ class SubtitleStyler:
     def recommend_style(
         self,
         creative_desc: str = "",
-        platform: Optional[str] = None,
+        platform: str | None = None,
         language: str = "zh",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         推荐字幕样式。
 
@@ -337,11 +336,11 @@ class SubtitleStyler:
 
         return preset.to_dict()
 
-    def get_preset(self, name: str) -> Optional[SubtitleStylePreset]:
+    def get_preset(self, name: str) -> SubtitleStylePreset | None:
         """获取预设"""
         return _BUILTIN_PRESETS.get(name)
 
-    def list_presets(self) -> List[str]:
+    def list_presets(self) -> list[str]:
         """列出所有预设名"""
         return list(_BUILTIN_PRESETS.keys())
 
@@ -441,7 +440,7 @@ class SubtitlePipeline:
 
     def process_segments(
         self,
-        segments: List[Dict[str, Any]],
+        segments: list[dict[str, Any]],
         style: str = "bilibili",
         language: str = "zh",
     ) -> SubtitleResult:
@@ -508,7 +507,7 @@ class SubtitlePipeline:
     # ----------------------------------------------------------
 
     @staticmethod
-    def _parse_srt(content: str) -> List[SubtitleSegment]:
+    def _parse_srt(content: str) -> list[SubtitleSegment]:
         """解析 SRT 文本"""
         segments = []
         blocks = content.strip().split("\n\n")
@@ -554,8 +553,8 @@ class SubtitlePipeline:
     # ----------------------------------------------------------
 
     def _optimize_segments(
-        self, segments: List[SubtitleSegment]
-    ) -> List[SubtitleSegment]:
+        self, segments: list[SubtitleSegment]
+    ) -> list[SubtitleSegment]:
         """字幕优化管道"""
         segments = self._fix_overlaps(segments)
         if self.auto_merge:
@@ -565,8 +564,8 @@ class SubtitlePipeline:
         return segments
 
     def _fix_overlaps(
-        self, segments: List[SubtitleSegment]
-    ) -> List[SubtitleSegment]:
+        self, segments: list[SubtitleSegment]
+    ) -> list[SubtitleSegment]:
         """修复时间重叠"""
         if not segments:
             return segments
@@ -589,8 +588,8 @@ class SubtitlePipeline:
         return result
 
     def _merge_short_segments(
-        self, segments: List[SubtitleSegment]
-    ) -> List[SubtitleSegment]:
+        self, segments: list[SubtitleSegment]
+    ) -> list[SubtitleSegment]:
         """合并过短的字幕 (duration < 0.3s 且相邻)"""
         if len(segments) <= 1:
             return segments
@@ -624,8 +623,8 @@ class SubtitlePipeline:
         return result
 
     def _split_long_segments(
-        self, segments: List[SubtitleSegment]
-    ) -> List[SubtitleSegment]:
+        self, segments: list[SubtitleSegment]
+    ) -> list[SubtitleSegment]:
         """拆分过长字幕 (>max_chars_per_line)"""
         result = []
         for seg in segments:
@@ -678,6 +677,6 @@ def quick_subtitle_track(
     return pipeline.to_ir_track(result, track_index)
 
 
-def get_builtin_styles() -> Dict[str, Dict[str, Any]]:
+def get_builtin_styles() -> dict[str, dict[str, Any]]:
     """获取所有内置样式预设"""
     return {name: preset.to_dict() for name, preset in _BUILTIN_PRESETS.items()}

@@ -1,5 +1,10 @@
 """E2E 全智能验证脚本 - 真实 ModelScope API 调用"""
-import sys, os, asyncio, json, time
+import asyncio
+import json
+import os
+import sys
+import time
+
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 for d in [".", "learning", "core", "effects", "ae"]:
     p = os.path.join(_ROOT, d)
@@ -10,7 +15,8 @@ if _ROOT not in sys.path:
 import warnings; warnings.filterwarnings("ignore")
 import logging; logging.disable(logging.WARNING)
 
-from core.llm_gateway import _load_dotenv_manual, llm_gateway, TaskType
+from core.llm_gateway import TaskType, _load_dotenv_manual, llm_gateway
+
 _load_dotenv_manual(override=True)
 llm_gateway.configure_from_env()
 llm_gateway.configure_providers_from_env()
@@ -67,7 +73,7 @@ print("  [PASS] ModelScope 直接调用成功!")
 # Step 3: optimize_enhanced LLM 增强
 # ============================================================
 print("\n[Step 3] optimize_enhanced LLM 增强路径...")
-from parameter_optimizer import ParameterOptimizer, ParameterContext
+from parameter_optimizer import ParameterContext, ParameterOptimizer
 
 optimizer = ParameterOptimizer()
 ctx = ParameterContext(effect_name="Gaussian Blur", intensity=0.8, style_name="cinematic")
@@ -87,7 +93,7 @@ extra_params = enhanced_keys - local_keys
 if extra_params or result_enhanced.confidence > result_local.confidence:
     print(f"  [PASS] LLM 增强路径生效! 额外参数: {extra_params}")
 else:
-    print(f"  [INFO] LLM 增强未产生额外差异(建议与本地重合或LLM降级)")
+    print("  [INFO] LLM 增强未产生额外差异(建议与本地重合或LLM降级)")
 
 # ============================================================
 # Step 4: 学习闭环

@@ -1,5 +1,8 @@
 """_probe_fx_params.py — 四大插件参数布局探测（独立文件输出, 绕开 ae_result 竞态）"""
-import json, time, uuid, os
+import json
+import os
+import time
+import uuid
 from pathlib import Path
 
 bd = Path(__file__).resolve().parent.parent / ".ae-mcp-bridge"

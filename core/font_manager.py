@@ -26,7 +26,6 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 _FONT_CONFIG = _PROJECT_ROOT / "config" / "font_presets.json"
 _INSTALLED_FONTS_LIST = Path(r"D:\AE-Work\installed_fonts.txt")
@@ -35,10 +34,10 @@ _INSTALLED_FONTS_LIST = Path(r"D:\AE-Work\installed_fonts.txt")
 class FontManager:
     """统一字体资源管理器 - AE字体风格化引擎"""
 
-    def __init__(self, config_path: Optional[Path] = None):
+    def __init__(self, config_path: Path | None = None):
         self._config_path = config_path or _FONT_CONFIG
-        self._config: Dict[str, Any] = {}
-        self._installed_cache: Optional[set] = None
+        self._config: dict[str, Any] = {}
+        self._installed_cache: set | None = None
         if self._config_path.exists():
             with open(self._config_path, "r", encoding="utf-8") as f:
                 self._config = json.load(f)
@@ -58,11 +57,11 @@ class FontManager:
     def installed_count(self) -> int:
         return self._config.get("installed_count", 0)
 
-    def categories(self) -> List[str]:
+    def categories(self) -> list[str]:
         """返回所有字体分类键"""
         return list(self._config.get("categories", {}).keys())
 
-    def get_preset(self, key: str) -> Optional[Dict[str, Any]]:
+    def get_preset(self, key: str) -> dict[str, Any] | None:
         """通过 key 获取单条字体预设"""
         for cat_data in self._config.get("categories", {}).values():
             for f in cat_data.get("fonts", []):
@@ -70,7 +69,7 @@ class FontManager:
                     return f
         return None
 
-    def get_scene_font(self, scene: str) -> Optional[Dict[str, Any]]:
+    def get_scene_font(self, scene: str) -> dict[str, Any] | None:
         """根据场景键返回对应字体预设
 
         scene ∈ {intro_hero, build_emotion, drop_battle_cn, break_quote, ...}
@@ -81,7 +80,7 @@ class FontManager:
             return None
         return self.get_preset(font_key)
 
-    def list_presets(self, category: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_presets(self, category: str | None = None) -> list[dict[str, Any]]:
         """列出所有字体预设，可按分类过滤"""
         if category:
             return self._config.get("categories", {}).get(category, {}).get("fonts", [])
@@ -118,7 +117,7 @@ class FontManager:
         self._installed_cache = installed
         return installed
 
-    def is_font_installed(self, font_name: str, postscript: Optional[str] = None) -> bool:
+    def is_font_installed(self, font_name: str, postscript: str | None = None) -> bool:
         """检查字体是否已安装（按文件名、显示名或PostScript名）
 
         Args:
@@ -148,12 +147,12 @@ class FontManager:
                     return True
         return False
 
-    def _preset_check_keys(self, preset: Dict[str, Any]) -> List[str]:
+    def _preset_check_keys(self, preset: dict[str, Any]) -> list[str]:
         """获取一个预设的所有可能匹配名(显示名+PostScript紧凑型)"""
         names = [preset.get("name", ""), preset.get("postscript", "")]
         return [n for n in names if n]
 
-    def validate_all_presets(self) -> List[Dict[str, Any]]:
+    def validate_all_presets(self) -> list[dict[str, Any]]:
         """验证所有预设的字体是否已安装"""
         results = []
         for preset in self.list_presets():
@@ -327,7 +326,7 @@ return JSON.stringify(_r);}})();'''
     # ============ 批量方案生成 ============
 
     def generate_v17_text_plan_jsx(
-        self, scene_presets: List[Dict[str, Any]], width: float = 1080
+        self, scene_presets: list[dict[str, Any]], width: float = 1080
     ) -> str:
         """根据场景-字体方案列表批量生成 V17 字幕系统 JSX
 
@@ -352,7 +351,7 @@ return JSON.stringify(_r);}})();'''
 
     # ============ 风格化经验摘要 ============
 
-    def get_styling_guide(self) -> Dict[str, str]:
+    def get_styling_guide(self) -> dict[str, str]:
         """返回风格化设计经验摘要"""
         return {
             "scene_to_font": (
@@ -379,7 +378,7 @@ return JSON.stringify(_r);}})();'''
 
 
 # 便捷工厂
-_default_manager: Optional[FontManager] = None
+_default_manager: FontManager | None = None
 
 
 def get_font_manager() -> FontManager:

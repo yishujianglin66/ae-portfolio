@@ -10,9 +10,9 @@
 4. learn 写入学习记录 (PersistentLearningLoop)
 5. 输出 pipeline_result.json 可复核
 """
-import sys
-import os
 import json
+import os
+import sys
 import time
 from pathlib import Path
 
@@ -51,7 +51,7 @@ def main():
     # 2. 导入管线
     print("\n[2] Importing UnifiedPipeline...")
     try:
-        from pipeline.unified_pipeline import UnifiedPipeline, PipelineConfig, PipelineMode
+        from pipeline.unified_pipeline import PipelineConfig, PipelineMode, UnifiedPipeline
         print("    OK")
     except Exception as e:
         print(f"    FAILED: {e}")
@@ -103,7 +103,7 @@ def main():
     status = result_dict.get("status", "unknown")
     print(f"    Pipeline status: {status}")
     if status == "failed":
-        errors.append(f"Pipeline status=failed")
+        errors.append("Pipeline status=failed")
     
     # 5.2 检查各阶段
     stages = result_dict.get("stages", {})

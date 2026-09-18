@@ -70,7 +70,7 @@ def _row_of_emb_idx():
 
 def _cnn_pred_production(gold, rows, row_of_emb, emb_arr):
     """生产头预测（含黄金标定, in-sample 乐观偏差参考）。"""
-    from core.cnn_scorer import load_head, _pred_to_scores  # noqa: F401
+    from core.cnn_scorer import _pred_to_scores, load_head  # noqa: F401
     _ = load_head()  # 触发加载, 与原行为一致
     n = len(gold)
     out = np.zeros((n, len(DIMS)))

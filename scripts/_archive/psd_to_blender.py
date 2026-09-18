@@ -7,14 +7,15 @@ psd_to_blender.py - 从 PSD 提取图层并生成 Blender 图像平面导入脚�
 3. 生成 Blender Python 脚本，将 PNG 作为图像平面导入
 4. 匹配 AE 分析中的图层名称
 """
+import json
 import os
 import sys
-import json
 from pathlib import Path
+
+from PIL import Image
 
 # psd-tools
 from psd_tools import PSDImage
-from PIL import Image
 
 
 def extract_psd_layers(psd_path: str, output_dir: str) -> list:
@@ -92,7 +93,7 @@ def generate_blender_import_script(
         "import bpy",
         "import os",
         "",
-        f"# 打开已有 blend 文件",
+        "# 打开已有 blend 文件",
         f'bpy.ops.wm.open_mainfile(filepath=r"{blend_file_path}")',
         "",
         "# === 导入图像平面 ===",
@@ -157,7 +158,7 @@ def main():
     output_script = r"C:\Users\Administrator\Desktop\ae_blender_with_images.py"
 
     if not os.path.isfile(psd_path):
-        print(f"PSD file not found!")
+        print("PSD file not found!")
         return
 
     print("=" * 60)

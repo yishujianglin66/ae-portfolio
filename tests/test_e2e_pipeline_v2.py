@@ -52,9 +52,9 @@ class TestResult:
     name: str
     passed: bool
     duration_ms: float = 0.0
-    details: Dict[str, Any] = field(default_factory=dict)
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    details: dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -67,8 +67,8 @@ class AcceptanceReport:
     skipped: int = 0
     pass_rate: float = 0.0
     total_duration_ms: float = 0.0
-    results: List[TestResult] = field(default_factory=list)
-    summary: Dict[str, Any] = field(default_factory=dict)
+    results: list[TestResult] = field(default_factory=list)
+    summary: dict[str, Any] = field(default_factory=dict)
 
 
 # ============================================================
@@ -226,16 +226,16 @@ def test_keyframe_animation() -> TestResult:
 
     try:
         from core.jsx_keyframe_animator import (
-            EntranceAnimator,
-            TextAnimator,
+            AnimationOrchestrator,
             BeatSyncAnimator,
             CameraAnimator,
+            CameraStyle,
             EffectPulseAnimator,
-            AnimationOrchestrator,
-            beats_from_times,
+            EntranceAnimator,
             EntranceStyle,
             TextAnimationStyle,
-            CameraStyle,
+            TextAnimator,
+            beats_from_times,
         )
 
         tests = {}
@@ -341,8 +341,8 @@ def test_jsx_generation_v2() -> TestResult:
     start = time.time()
 
     try:
-        from core.style_preset_adapter import style_to_atomic_params
         from core.jsx_generator import generate_jsx_from_style_v2
+        from core.style_preset_adapter import style_to_atomic_params
 
         beat_test = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 
@@ -411,10 +411,11 @@ def test_jsx_v2_critical_regressions() -> TestResult:
     start = time.time()
 
     try:
-        from core.style_preset_adapter import style_to_atomic_params
-        from core.jsx_generator import generate_jsx_from_style_v2
-        from core.jsx_keyframe_animator import BeatSyncAnimator, CameraAnimator, EffectPulseAnimator
         from core.ae_render_verifier import RenderQueueManager
+        from core.jsx_generator import generate_jsx_from_style_v2
+        from core.style_preset_adapter import style_to_atomic_params
+
+        from core.jsx_keyframe_animator import BeatSyncAnimator, CameraAnimator, EffectPulseAnimator
 
         atomic = style_to_atomic_params("amv_pull_zoom", 0.85)
         beats = [0.5, 1.0, 1.5, 2.0]
@@ -539,7 +540,10 @@ def test_ae_verifier() -> TestResult:
 
     try:
         from core.ae_render_verifier import (
-            JsxValidator, RenderQueueManager, EndToEndVerifier, quick_static_check,
+            EndToEndVerifier,
+            JsxValidator,
+            RenderQueueManager,
+            quick_static_check,
         )
 
         # 5.1 JSX静态验证
@@ -652,13 +656,13 @@ async def test_full_pipeline() -> TestResult:
 # JSX批量生成（可选）
 # ============================================================
 
-def generate_all_jsx(output_dir: str) -> Dict[str, str]:
+def generate_all_jsx(output_dir: str) -> dict[str, str]:
     """为所有8种风格生成JSX脚本并保存文件"""
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
-    from core.style_preset_adapter import style_to_atomic_params
     from core.jsx_generator import generate_jsx_from_style_v2
+    from core.style_preset_adapter import style_to_atomic_params
 
     beat_test = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
     results = {}
@@ -694,7 +698,7 @@ async def run_all_tests(mode: str = "quick") -> AcceptanceReport:
     total_start = time.time()
 
     # 快速模式
-    tests: List[Tuple[str, callable]] = [
+    tests: list[tuple[str, callable]] = [
         ("风格分类回归", test_style_classification),
         ("效果组合引擎", test_style_combo_engine),
     ]
@@ -784,11 +788,11 @@ def print_report(report: AcceptanceReport):
     print(f"  版本: {report.version}")
     print(f"  时间: {report.timestamp}")
     print(f"  模式: {'快速' if report.total_tests <= 3 else '完整'}")
-    print(f"-" * 60)
+    print("-" * 60)
     print(f"  通过: {report.passed} | 失败: {report.failed} | 总计: {report.total_tests}")
     print(f"  通过率: {report.pass_rate:.1%}")
     print(f"  耗时: {report.total_duration_ms:.0f}ms")
-    print(f"-" * 60)
+    print("-" * 60)
 
     for r in report.results:
         icon = "PASS" if r.passed else "FAIL"
@@ -802,7 +806,7 @@ def print_report(report: AcceptanceReport):
                 print(f"      {k}: {v}")
 
     if report.failed > 0:
-        print(f"\n  失败项详情:")
+        print("\n  失败项详情:")
         for r in report.results:
             if not r.passed and r.errors:
                 print(f"    {r.name}:")

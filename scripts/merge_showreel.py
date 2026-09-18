@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """将20个扩充片段合并为一个带标题标注的预览视频"""
-import subprocess, os, sys, json
+import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
@@ -127,12 +130,12 @@ for i, clip in enumerate(CLIPS):
         dur = get_duration(dst)
         print(f"    -> {dur:.1f}s ({'竖屏' if is_vertical else '横屏'})")
     else:
-        print(f"    -> FAILED")
+        print("    -> FAILED")
 
 print(f"\n  成功预处理: {len(processed)}/{len(CLIPS)} 个片段")
 
 # Step 3: 生成concat列表
-print(f"\nStep 3: 生成拼接列表...")
+print("\nStep 3: 生成拼接列表...")
 concat_file = TEMP_DIR / "concat_list.txt"
 with open(concat_file, 'w', encoding='utf-8') as f:
     for i, proc_file in enumerate(processed):
@@ -143,7 +146,7 @@ with open(concat_file, 'w', encoding='utf-8') as f:
 print(f"  拼接列表: {concat_file}")
 
 # Step 4: 拼接
-print(f"\nStep 4: 拼接最终预览视频...")
+print("\nStep 4: 拼接最终预览视频...")
 cmd = [
     'ffmpeg', '-y', '-f', 'concat', '-safe', '0',
     '-i', str(concat_file),
@@ -157,17 +160,17 @@ if ok and OUTPUT.exists():
     mb = OUTPUT.stat().st_size / (1024*1024)
     dur = get_duration(OUTPUT)
     print(f"\n{'='*60}")
-    print(f"SUCCESS!")
+    print("SUCCESS!")
     print(f"  Output: {OUTPUT}")
     print(f"  Size: {mb:.1f} MB")
     print(f"  Duration: {dur:.1f}s ({dur/60:.1f} min)")
     print(f"  Resolution: {W}x{H} @ {FPS}fps")
     print(f"{'='*60}")
 else:
-    print(f"\nFAILED: 输出文件未生成")
+    print("\nFAILED: 输出文件未生成")
 
 # Step 5: 生成时间戳清单
-print(f"\nStep 5: 生成时间戳清单...")
+print("\nStep 5: 生成时间戳清单...")
 timeline = []
 current_time = 0.0
 for i, proc_file in enumerate(processed):

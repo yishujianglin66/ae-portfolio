@@ -2,9 +2,10 @@
 # Alpha合成模板 - 基于Alpha通道的前后景合成
 # 适用于将Roto生成的遮罩应用于合成场景
 
-from fx import *
 import os
 import time
+
+from fx import *
 
 
 def create_pipeline(
@@ -188,7 +189,7 @@ def create_pipeline(
     meta.setValue("edgeTreatment", edge_treatment, 0)
     meta.setValue("task", "alpha_composite", 0)
 
-    print(f"\n=== Alpha合成管线创建完成 ===")
+    print("\n=== Alpha合成管线创建完成 ===")
     print(f"前景: {foreground_path}")
     print(f"背景: {background_path}")
     print(f"输出: {output_path}")
@@ -196,7 +197,7 @@ def create_pipeline(
     print(f"预乘: {premult}")
     print(f"Alpha增益: {alpha_boost}")
     print(f"边缘处理: {edge_treatment}")
-    print(f"\n下一步: 绘制Roto形状，执行渲染")
+    print("\n下一步: 绘制Roto形状，执行渲染")
 
     return proj, session
 

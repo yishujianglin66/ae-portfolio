@@ -37,7 +37,7 @@ def main() -> int:
     rows = [json.loads(l) for l in REVIEWED.read_text(encoding="utf-8").splitlines()
             if l.strip()]
     clf = AnimeCameraClassifier()
-    out: List[Dict[str, Any]] = []
+    out: list[dict[str, Any]] = []
     t0 = time.time()
     for i, r in enumerate(rows):
         clip = r["clip_path"]

@@ -18,11 +18,13 @@ import cv2
 import numpy as np
 import torch
 import torch.nn.functional as F
-from core.torch_runtime import infer_ctx, get_device
 
 # torchvision>=0.17 兼容: read_video 移入子模块且 0.28 需 pytorch.fb 布局(缺失)
 # → 用 cv2 自实现等价函数注入 (全帧 RGB TCHW + fps 元数据)
 import torchvision  # noqa: E402
+
+from core.torch_runtime import get_device, infer_ctx
+
 if not hasattr(torchvision.io, "read_video"):
     def _read_video_cv2(filename: str, pts_unit: str = "sec", output_format: str = "TCHW"):
         cap = cv2.VideoCapture(filename)
@@ -44,7 +46,9 @@ sys.path.insert(0, str(PROJECT / "external" / "matanyone" / "repo"))
 sys.path.insert(0, str(PROJECT / "scripts"))
 
 from infer_segment_video_enhanced import (  # noqa: E402
-    build_image_predictor, sam_single_frame_predict, YOLOFallbackDetector,
+    YOLOFallbackDetector,
+    build_image_predictor,
+    sam_single_frame_predict,
 )
 
 
@@ -63,8 +67,8 @@ def build_processor(ckpt: str, device: str):
                       "num_prototypes": 128, "max_num_tokens": 10000, "buffer_tokens": 2000},
     })
     cfg.model = model_cfg
-    from matanyone.model.matanyone import MatAnyone
     from matanyone.inference.inference_core import InferenceCore
+    from matanyone.model.matanyone import MatAnyone
     matanyone = MatAnyone(cfg, single_object=True).to(device).eval()
     mw = torch.load(ckpt, map_location="cpu")
     matanyone.load_weights(mw)
@@ -150,8 +154,8 @@ def main() -> int:
 
     def get_auto_gen():
         if _auto_gen_holder["g"] is None:
-            from sam2.build_sam import build_sam2
             from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
+            from sam2.build_sam import build_sam2
             _sam2 = build_sam2(config_file="configs/sam2.1/sam2.1_hiera_l.yaml",
                                ckpt_path=params["sam2_checkpoint"], device="cuda",
                                mode="eval", apply_postprocessing=True)

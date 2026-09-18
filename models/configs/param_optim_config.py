@@ -3,7 +3,7 @@
 参考 Antares "精悍够用" 哲学：用最小参数量实现 AE 效果参数的智能优化
 """
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -23,7 +23,7 @@ class ParamOptimConfig:
     base_model: str = "gpt2"
     """推荐基座模型（GPT-2 小型，用于序列到序列的参数生成）"""
     
-    alternative_base_models: List[str] = field(default_factory=lambda: [
+    alternative_base_models: list[str] = field(default_factory=lambda: [
         "distilgpt2",
         "gpt2",
         "facebook/bart-base",
@@ -43,7 +43,7 @@ class ParamOptimConfig:
     output_type: str = "parameter_values"
     """输出类型：parameter_values (参数值 JSON)"""
     
-    supported_effects: List[str] = field(default_factory=lambda: [
+    supported_effects: list[str] = field(default_factory=lambda: [
         "ADBE_Lumetri_Color",
         "ADBE_Sharpen",
         "ADBE_Vignette",
@@ -75,7 +75,7 @@ class ParamOptimConfig:
     lora_dropout: float = 0.05
     """LoRA dropout"""
     
-    lora_target_modules: List[str] = field(default_factory=lambda: [
+    lora_target_modules: list[str] = field(default_factory=lambda: [
         "c_attn", "c_proj",
     ])
     """LoRA 目标模块"""
@@ -125,7 +125,7 @@ class ParamOptimConfig:
     data_augmentation: bool = True
     """是否启用数据增强"""
     
-    augmentation_types: List[str] = field(default_factory=lambda: [
+    augmentation_types: list[str] = field(default_factory=lambda: [
         "parameter_jitter",
         "style_description_paraphrase",
         "parameter_masking",
@@ -142,7 +142,7 @@ class ParamOptimConfig:
     rl_reward_type: str = "style_similarity"
     """RL 奖励类型：style_similarity / human_preference / combined"""
     
-    evaluation_metrics: List[str] = field(default_factory=lambda: [
+    evaluation_metrics: list[str] = field(default_factory=lambda: [
         "parameter_accuracy",
         "style_similarity",
         "param_range_validity",

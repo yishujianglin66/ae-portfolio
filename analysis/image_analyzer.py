@@ -6,10 +6,10 @@
 3. 对比度分析
 4. 生成自适应调色建议
 """
-import os
 import json
 import math
-from typing import Dict, List, Tuple, Any
+import os
+from typing import Any, Dict, List, Tuple
 
 
 class ImageAnalyzer:
@@ -35,7 +35,7 @@ class ImageAnalyzer:
         except ImportError:
             pass
     
-    def analyze(self, image_path: str) -> Dict[str, Any]:
+    def analyze(self, image_path: str) -> dict[str, Any]:
         """分析图片，返回完整的特征数据
         
         Args:
@@ -55,7 +55,7 @@ class ImageAnalyzer:
         else:
             return self._analyze_fallback(image_path)
     
-    def _analyze_with_cv2(self, image_path: str) -> Dict[str, Any]:
+    def _analyze_with_cv2(self, image_path: str) -> dict[str, Any]:
         """使用 OpenCV 分析图片"""
         cv2 = self._cv2
         np = self._np
@@ -141,7 +141,7 @@ class ImageAnalyzer:
             "suggestions": suggestions,
         }
     
-    def _analyze_with_pil(self, image_path: str) -> Dict[str, Any]:
+    def _analyze_with_pil(self, image_path: str) -> dict[str, Any]:
         """使用 Pillow 分析图片"""
         Image = self._Image
         ImageStat = self._ImageStat
@@ -203,7 +203,7 @@ class ImageAnalyzer:
             "suggestions": suggestions,
         }
     
-    def _analyze_fallback(self, image_path: str) -> Dict[str, Any]:
+    def _analyze_fallback(self, image_path: str) -> dict[str, Any]:
         """无图像处理库时的降级分析（仅基于文件大小估算）"""
         file_size = os.path.getsize(image_path)
         
@@ -219,7 +219,7 @@ class ImageAnalyzer:
             }
         }
     
-    def _generate_suggestions(self, **kwargs) -> Dict[str, Any]:
+    def _generate_suggestions(self, **kwargs) -> dict[str, Any]:
         """根据分析结果生成自适应调色建议
         
         Returns:
@@ -287,7 +287,7 @@ class ImageAnalyzer:
             "temperature": "warm" if rb_ratio > 1.05 else ("cool" if rb_ratio < 0.95 else "neutral"),
         }
     
-    def analyze_batch(self, image_paths: List[str]) -> List[Dict[str, Any]]:
+    def analyze_batch(self, image_paths: list[str]) -> list[dict[str, Any]]:
         """批量分析图片
         
         Args:
@@ -301,7 +301,7 @@ class ImageAnalyzer:
             results.append(self.analyze(path))
         return results
     
-    def get_average_suggestions(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def get_average_suggestions(self, results: list[dict[str, Any]]) -> dict[str, Any]:
         """计算多张图片的平均调色建议
         
         Args:
@@ -356,7 +356,7 @@ def main():
                     print(f"  亮度: mean={result['brightness']['mean']:.1f}, min={result['brightness']['min']}, max={result['brightness']['max']}")
                     print(f"  对比度: {result['contrast']}")
                     sug = result["suggestions"]
-                    print(f"  调色建议:")
+                    print("  调色建议:")
                     print(f"    亮度调整: {sug['brightness_adjust']}")
                     print(f"    对比度调整: {sug['contrast_adjust']}")
                     print(f"    饱和度调整: {sug['saturation_adjust']}")

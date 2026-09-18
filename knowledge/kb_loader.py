@@ -18,17 +18,17 @@ kb_loader.py - 知识库程序化加载器（核心）
 - 支持增量更新（文件变更检测）
 - 外部接口：get_effect_map(), get_transition_map(), get_color_presets(), search()
 """
-import os
-import re
-import json
-import time
 import glob
 import hashlib
-import threading
+import json
 import math
-from dataclasses import dataclass, asdict, field
+import os
+import re
+import threading
+import time
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -44,9 +44,9 @@ class Evidence:
     confidence: float = 0.0                             # 0.0~1.0，由 score 归一化得出
     timestamp_ms: int = field(default_factory=lambda: int(time.time() * 1000))
     evidence_level: str = "WEAK"                        # STRONG / MEDIUM / WEAK（与置信度映射）
-    raw: Dict[str, Any] = field(default_factory=dict)   # 原始字段（如 keyword/match_name/score 等，供排障）
+    raw: dict[str, Any] = field(default_factory=dict)   # 原始字段（如 keyword/match_name/score 等，供排障）
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @staticmethod
@@ -89,16 +89,16 @@ class KBLoader:
     def __init__(self):
         if self._initialized:
             return
-        self._effect_map: Dict[str, str] = {}
-        self._transition_map: Dict[str, Any] = {}
-        self._color_presets: Dict[str, Any] = {}
-        self._code_templates: Dict[str, List[str]] = {}
-        self._content_index: List[Dict[str, Any]] = []  # 正文内容块索引
+        self._effect_map: dict[str, str] = {}
+        self._transition_map: dict[str, Any] = {}
+        self._color_presets: dict[str, Any] = {}
+        self._code_templates: dict[str, list[str]] = {}
+        self._content_index: list[dict[str, Any]] = []  # 正文内容块索引
         # 向量化检索 P1（REFRAG 风格词级稀疏向量 + TF-IDF 打分，零依赖纯 Python）
-        self._doc_freq: Dict[str, int] = {}              # 词 → 文档频次（DF）
-        self._chunk_term_freq: List[Dict[str, int]] = []  # 每个 content chunk 的词频向量
+        self._doc_freq: dict[str, int] = {}              # 词 → 文档频次（DF）
+        self._chunk_term_freq: list[dict[str, int]] = []  # 每个 content chunk 的词频向量
         self._num_docs: int = 0
-        self._stats: Dict[str, Any] = {}
+        self._stats: dict[str, Any] = {}
         self._initialized = True
         self._load_or_scan()
 
@@ -195,7 +195,7 @@ class KBLoader:
               f"调色预设:{len(self._color_presets)}, 正文块:{len(self._content_index)}, "
               f"耗时:{self._stats['parse_time']:.1f}s")
 
-    def _parse_files_parallel(self, files: List[str], threads: int = 8) -> List[Dict]:
+    def _parse_files_parallel(self, files: list[str], threads: int = 8) -> list[dict]:
         """多线程解析文件"""
         results = []
         lock = threading.Lock()
@@ -228,7 +228,7 @@ class KBLoader:
 
         return results
 
-    def _parse_file(self, filepath: str) -> Dict[str, Any]:
+    def _parse_file(self, filepath: str) -> dict[str, Any]:
         """解析单个文件"""
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
@@ -260,7 +260,7 @@ class KBLoader:
 
         return result
 
-    def _extract_content_chunks(self, content: str, filepath: str, filename: str) -> List[Dict[str, Any]]:
+    def _extract_content_chunks(self, content: str, filepath: str, filename: str) -> list[dict[str, Any]]:
         """按 ## 章节标题切分正文，生成可检索的内容块"""
         chunks = []
         # 按 ## 级标题切分
@@ -285,7 +285,7 @@ class KBLoader:
             })
         return chunks
 
-    def _parse_effect_tables(self, content: str, effect_map: Dict):
+    def _parse_effect_tables(self, content: str, effect_map: dict):
         """解析效果关键词→matchName映射表格"""
         tables = re.findall(r'\|([^\n]+)\|\n\|[-:| ]+\|\n((?:\|[^\n]+\|\n?)+)', content, re.MULTILINE)
         for header, rows_text in tables:
@@ -324,7 +324,7 @@ class KBLoader:
                     if kw not in effect_map:
                         effect_map[kw] = full_name
 
-    def _parse_transition_recipes(self, content: str, filename: str, transition_map: Dict):
+    def _parse_transition_recipes(self, content: str, filename: str, transition_map: dict):
         """解析转场类型→实现映射"""
         transition_patterns = [
             (r"(linear_wipe|radial_wipe|zoom_blur|glitch|light_leak|ink_spread|card_flip|block_dissolve|fade|slide)",
@@ -336,7 +336,7 @@ class KBLoader:
                 if trans_type not in transition_map:
                     transition_map[trans_type] = {"display_name": self._get_transition_display(trans_type)}
 
-    def _parse_color_presets(self, content: str, filename: str, color_presets: Dict):
+    def _parse_color_presets(self, content: str, filename: str, color_presets: dict):
         """解析调色预设参数"""
         # 查找调色参数块
         lut_pattern = re.compile(r"(?i)(?:LUT|调色预设|颜色配置)\s*[:：]\s*(.*?)\n", re.DOTALL)
@@ -350,7 +350,7 @@ class KBLoader:
                 if name not in color_presets:
                     color_presets[name] = {"source": filename, "params": preset_text[:100]}
 
-    def _parse_code_templates(self, content: str, filename: str, code_templates: Dict):
+    def _parse_code_templates(self, content: str, filename: str, code_templates: dict):
         """解析代码模板"""
         code_blocks = re.findall(r'```(\w+)?\n([\s\S]*?)```', content, re.MULTILINE)
         for lang, code in code_blocks:
@@ -363,25 +363,25 @@ class KBLoader:
                     "code": code.strip()[:2000],
                 })
 
-    def _merge_effect_map(self, new_map: Dict):
+    def _merge_effect_map(self, new_map: dict):
         """合并效果映射（知识库优先）"""
         for kw, mn in new_map.items():
             if kw not in self._effect_map:
                 self._effect_map[kw] = mn
 
-    def _merge_transition_map(self, new_map: Dict):
+    def _merge_transition_map(self, new_map: dict):
         """合并转场映射"""
         for trans_type, data in new_map.items():
             if trans_type not in self._transition_map:
                 self._transition_map[trans_type] = data
 
-    def _merge_color_presets(self, new_map: Dict):
+    def _merge_color_presets(self, new_map: dict):
         """合并调色预设"""
         for name, data in new_map.items():
             if name not in self._color_presets:
                 self._color_presets[name] = data
 
-    def _merge_code_templates(self, new_map: Dict):
+    def _merge_code_templates(self, new_map: dict):
         """合并代码模板"""
         for lang, templates in new_map.items():
             if lang not in self._code_templates:
@@ -404,25 +404,25 @@ class KBLoader:
         }
         return mapping.get(trans_type, trans_type)
 
-    def get_effect_map(self) -> Dict[str, str]:
+    def get_effect_map(self) -> dict[str, str]:
         """获取效果关键词→matchName映射"""
         return self._effect_map
 
-    def get_transition_map(self) -> Dict[str, Any]:
+    def get_transition_map(self) -> dict[str, Any]:
         """获取转场类型→实现映射"""
         return self._transition_map
 
-    def get_color_presets(self) -> Dict[str, Any]:
+    def get_color_presets(self) -> dict[str, Any]:
         """获取调色预设"""
         return self._color_presets
 
-    def get_code_templates(self, lang: Optional[str] = None) -> Dict[str, Any]:
+    def get_code_templates(self, lang: str | None = None) -> dict[str, Any]:
         """获取代码模板"""
         if lang:
             return self._code_templates.get(lang, [])
         return self._code_templates
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计信息"""
         return self._stats
 
@@ -430,7 +430,7 @@ class KBLoader:
     # 知识检索增强（Phase 4）
     # --------------------------------------------------------------------
 
-    def search(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    def search(self, query: str, top_k: int = 5) -> list[dict[str, Any]]:
         """按关键词搜索知识库内容（混合检索：结构化映射 + 关键词 + TF-IDF 向量）。
 
         向后兼容：返回 ``List[Dict]`` 与老接口保持一致，但每个 Dict 新增证据字段
@@ -441,7 +441,7 @@ class KBLoader:
         """
         query_lower = query.lower().strip()
         query_terms = set(query_lower.split())
-        results: List[Dict[str, Any]] = []
+        results: list[dict[str, Any]] = []
 
         # 1. 搜索效果映射
         for kw, match_name in self._effect_map.items():
@@ -520,7 +520,7 @@ class KBLoader:
             r.setdefault("source", r.get("source", ""))
         return top_results
 
-    def _search_content(self, query_lower: str, query_terms: set, top_k: int = 5) -> List[Dict[str, Any]]:
+    def _search_content(self, query_lower: str, query_terms: set, top_k: int = 5) -> list[dict[str, Any]]:
         """搜索正文内容块（关键词命中）"""
         results = []
         for chunk in self._content_index:
@@ -546,7 +546,7 @@ class KBLoader:
     # --------------------------------------------------------------------
 
     @staticmethod
-    def _term_tokenize(text: str) -> List[str]:
+    def _term_tokenize(text: str) -> list[str]:
         """混合分词：中英文按非字母数字切分 + 中文按字符切分，避免依赖 jieba。
 
         - 英文连续 token 保留原词（effect / transition 等技术词）
@@ -556,8 +556,8 @@ class KBLoader:
             return []
         text_lower = text.lower()
         # 拆成块：连续的 [a-z0-9_\-] 是一个英文块；其余字符是中文/符号块
-        tokens: List[str] = []
-        buf: List[str] = []
+        tokens: list[str] = []
+        buf: list[str] = []
         for ch in text_lower:
             is_ascii_alnum = (ch.isascii() and ch.isalnum()) or ch in "_-"
             if is_ascii_alnum:
@@ -584,7 +584,7 @@ class KBLoader:
         for chunk in self._content_index:
             blob = f"{chunk.get('title', '')} {chunk.get('body', '')} {chunk.get('keywords', '')}"
             tokens = self._term_tokenize(blob)
-            tf: Dict[str, int] = {}
+            tf: dict[str, int] = {}
             for tok in tokens:
                 tf[tok] = tf.get(tok, 0) + 1
             # DF：同一 token 在该文档出现多次只计 1
@@ -592,7 +592,7 @@ class KBLoader:
                 self._doc_freq[tok] = self._doc_freq.get(tok, 0) + 1
             self._chunk_term_freq.append(tf)
 
-    def search_vector(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    def search_vector(self, query: str, top_k: int = 5) -> list[dict[str, Any]]:
         """TF-IDF 余弦相似度检索。返回格式与 search 对齐（Dict 列表）。
 
         当 BGE-M3 / sentence-transformers 等本地稠密模型就绪后，可把
@@ -604,11 +604,11 @@ class KBLoader:
         if not query_tokens:
             return []
         # Query TF-IDF 向量
-        q_tf: Dict[str, int] = {}
+        q_tf: dict[str, int] = {}
         for t in query_tokens:
             q_tf[t] = q_tf.get(t, 0) + 1
         num_docs = max(1, self._num_docs)
-        scored: List[tuple] = []
+        scored: list[tuple] = []
         for i, doc_tf in enumerate(self._chunk_term_freq):
             dot = 0.0
             q_norm2 = 0.0
@@ -633,7 +633,7 @@ class KBLoader:
             if cosine > 0:
                 scored.append((cosine, i))
         scored.sort(key=lambda x: x[0], reverse=True)
-        out: List[Dict[str, Any]] = []
+        out: list[dict[str, Any]] = []
         for cosine, i in scored[:top_k]:
             chunk = self._content_index[i]
             body_preview = chunk.get("body", "")[:300]
@@ -651,7 +651,7 @@ class KBLoader:
     # OmniScientist 证据闭环（第一阶 · 感知层统一 Evidence 输出）
     # --------------------------------------------------------------------
 
-    def search_evidences(self, query: str, top_k: int = 5) -> List[Evidence]:
+    def search_evidences(self, query: str, top_k: int = 5) -> list[Evidence]:
         """返回统一证据束（List[Evidence]）。作为 Agent 工作流的标准输入。
 
         - Perception Agent 直接消费本接口
@@ -660,7 +660,7 @@ class KBLoader:
         """
         raw = self.search(query, top_k=top_k)
         now_ms = int(time.time() * 1000)
-        evs: List[Evidence] = []
+        evs: list[Evidence] = []
         for r in raw:
             rtype = r.get("type", "unknown")
             if rtype == "effect_mapping":

@@ -1,6 +1,6 @@
-import subprocess
 import json
 import os
+import subprocess
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -13,8 +13,8 @@ class FFmpegToolkit:
         self.ffmpeg = self.config["tools"]["ffmpeg"]
         self.ffprobe = self.config["tools"]["ffprobe"]
     
-    def extract_audio(self, input_file: str, output_file: Optional[str] = None, 
-                      format: str = "mp3", bitrate: str = None) -> Dict:
+    def extract_audio(self, input_file: str, output_file: str | None = None, 
+                      format: str = "mp3", bitrate: str = None) -> dict:
         """
         从视频中提取音频
         :param input_file: 输入视频文件路径
@@ -70,8 +70,8 @@ class FFmpegToolkit:
             return {"success": False, "error": str(e)}
     
     def extract_video_segment(self, input_file: str, start_time: float, 
-                              duration: float, output_file: Optional[str] = None,
-                              preserve_audio: bool = True) -> Dict:
+                              duration: float, output_file: str | None = None,
+                              preserve_audio: bool = True) -> dict:
         """
         截取视频片段
         :param input_file: 输入视频文件路径
@@ -130,7 +130,7 @@ class FFmpegToolkit:
             return {"success": False, "error": str(e)}
     
     def extract_audio_segment(self, input_file: str, start_time: float, 
-                              duration: float, output_file: Optional[str] = None) -> Dict:
+                              duration: float, output_file: str | None = None) -> dict:
         """
         截取音频片段
         """
@@ -180,7 +180,7 @@ class FFmpegToolkit:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    def get_media_info(self, input_file: str) -> Dict:
+    def get_media_info(self, input_file: str) -> dict:
         """
         获取媒体文件信息
         """
@@ -222,7 +222,7 @@ class FFmpegToolkit:
             return {"success": False, "error": str(e)}
     
     def convert_video_format(self, input_file: str, output_file: str, 
-                             target_format: str = "mp4") -> Dict:
+                             target_format: str = "mp4") -> dict:
         """
         转换视频格式
         """
@@ -272,7 +272,7 @@ class FFmpegToolkit:
         }
         return codec_map.get(format, "libmp3lame")
     
-    def test_ffmpeg(self) -> Dict:
+    def test_ffmpeg(self) -> dict:
         """测试FFmpeg和FFprobe可用性"""
         ffmpeg_available = False
         ffprobe_available = False

@@ -53,7 +53,6 @@ from integrations.davinci_color_grading import (
     NodeType,
 )
 
-
 # ============================================================================
 # 工具
 # ============================================================================
@@ -194,7 +193,7 @@ def build_custom_curve_lua(
     clip_index: int = 0,
     node_index: int = 0,
     curve_type: str | CurveType = CurveType.CUSTOM,
-    points: Optional[List[float]] = None,
+    points: list[float] | None = None,
 ) -> str:
     """生成设置自定义曲线的 Lua 脚本。
 
@@ -296,9 +295,9 @@ def build_qualifier_lua(
     project_name: str = "",
     clip_index: int = 0,
     node_index: int = 0,
-    hue_range: Tuple[float, float] = (0.0, 360.0),
-    sat_range: Tuple[float, float] = (0.0, 1.0),
-    lum_range: Tuple[float, float] = (0.0, 1.0),
+    hue_range: tuple[float, float] = (0.0, 360.0),
+    sat_range: tuple[float, float] = (0.0, 1.0),
+    lum_range: tuple[float, float] = (0.0, 1.0),
     invert: bool = False,
 ) -> str:
     """生成 Qualifier 限定器选择脚本。"""
@@ -386,7 +385,7 @@ def build_apply_preset_lua(
     project_name: str = "",
     clip_index: int = 0,
     node_index: int = 0,
-    preset: Optional[ColorGradingPreset] = None,
+    preset: ColorGradingPreset | None = None,
     balance_type: str | ColorBalanceType = ColorBalanceType.RGB,
 ) -> str:
     """生成应用整套预设的 Lua 脚本。"""
@@ -437,9 +436,9 @@ print("DONE")
 def build_full_grading_lua(
     project_name: str = "",
     clip_index: int = 0,
-    preset: Optional[ColorGradingPreset] = None,
-    custom_curves: Optional[dict] = None,
-    lut_path: Optional[str] = None,
+    preset: ColorGradingPreset | None = None,
+    custom_curves: dict | None = None,
+    lut_path: str | None = None,
     node_label: str = "",
 ) -> str:
     """生成一站式调色 Lua（包含色轮 + 曲线 + LUT + 节点元数据）。
@@ -497,8 +496,8 @@ def build_full_grading_lua(
 
 def build_batch_grade_lua(
     project_name: str = "",
-    clip_indices: Optional[List[int]] = None,
-    preset: Optional[ColorGradingPreset] = None,
+    clip_indices: list[int] | None = None,
+    preset: ColorGradingPreset | None = None,
     node_index: int = 0,
 ) -> str:
     """生成对多个片段应用同一预设的 Lua 脚本。"""

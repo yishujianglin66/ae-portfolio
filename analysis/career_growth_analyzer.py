@@ -23,13 +23,13 @@
     knowledge = engine.search_knowledge("锂电池维护", platforms=["知乎", "小红书"])
 """
 
-import os
 import json
+import os
 import time
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
-from dataclasses import dataclass, field, asdict
-from typing import Dict, Any, List, Optional
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 try:
     from ai_agent import V4Agent
@@ -44,13 +44,13 @@ class DailyRecord:
     date: str
     weekday: str
     content: str
-    work_content: List[str] = field(default_factory=list)
-    learning_points: List[str] = field(default_factory=list)
-    difficulties: List[str] = field(default_factory=list)
-    emotions: List[str] = field(default_factory=list)
+    work_content: list[str] = field(default_factory=list)
+    learning_points: list[str] = field(default_factory=list)
+    difficulties: list[str] = field(default_factory=list)
+    emotions: list[str] = field(default_factory=list)
     psychological_journey: str = ""
-    growth_points: List[str] = field(default_factory=list)
-    improvement_suggestions: List[str] = field(default_factory=list)
+    growth_points: list[str] = field(default_factory=list)
+    improvement_suggestions: list[str] = field(default_factory=list)
     created_at: str = ""
     analyzed_at: str = ""
     model_used: str = "deepseek-v4-pro"
@@ -61,10 +61,10 @@ class MonthlyReport:
     """月度报告数据结构"""
     month: str
     total_days: int
-    records: List[DailyRecord]
+    records: list[DailyRecord]
     overall_growth: str = ""
     psychological_trajectory: dict = field(default_factory=dict)
-    skill_progress: Dict[str, Any] = field(default_factory=dict)
+    skill_progress: dict[str, Any] = field(default_factory=dict)
     key_achievements: list = field(default_factory=list)
     areas_for_improvement: list = field(default_factory=list)
     next_month_goals: list = field(default_factory=list)
@@ -149,7 +149,7 @@ class CareerGrowthEngine:
 
 请用专业、鼓励、有指导性的语气生成报告。"""
 
-    def __init__(self, data_dir: Optional[str] = None):
+    def __init__(self, data_dir: str | None = None):
         if data_dir is None:
             self.data_dir = Path(__file__).parent / "14-职场学习成长档案"
         else:
@@ -157,7 +157,7 @@ class CareerGrowthEngine:
         self.records_dir = self.data_dir / "01-日常记录"
         self.reports_dir = self.data_dir / "02-月度报告"
         self._v4_agent = None
-        self._records: Dict[str, DailyRecord] = {}
+        self._records: dict[str, DailyRecord] = {}
         self._ensure_dirs()
         self._load_records()
 
@@ -191,7 +191,7 @@ class CareerGrowthEngine:
             self._v4_agent = V4Agent()
         return self._v4_agent
 
-    def record_day(self, content: str, date: Optional[str] = None) -> DailyRecord:
+    def record_day(self, content: str, date: str | None = None) -> DailyRecord:
         """记录一天的内容（对话式输入）
 
         Args:
@@ -307,7 +307,7 @@ class CareerGrowthEngine:
         self._save_monthly_report(report)
         return report
 
-    def _load_month_records(self, month_str: str) -> List[DailyRecord]:
+    def _load_month_records(self, month_str: str) -> list[DailyRecord]:
         """从文件加载月度记录"""
         records = []
         if not self.records_dir.exists():
@@ -359,7 +359,7 @@ class CareerGrowthEngine:
             f"---\n\n*生成时间：{report.generated_at}*\n"
         )
 
-    def search_knowledge(self, query: str, platforms: Optional[List[str]] = None) -> Dict[str, Any]:
+    def search_knowledge(self, query: str, platforms: list[str] | None = None) -> dict[str, Any]:
         """搜索知识补充
 
         Args:
@@ -386,7 +386,7 @@ class CareerGrowthEngine:
         return f"{min(dates)} ~ {max(dates)}（共{len(self._records)}条记录）"
 
 
-_engine: Optional[CareerGrowthEngine] = None
+_engine: CareerGrowthEngine | None = None
 
 
 def get_engine() -> CareerGrowthEngine:
@@ -397,7 +397,7 @@ def get_engine() -> CareerGrowthEngine:
     return _engine
 
 
-def record_day(content: str, date: Optional[str] = None) -> DailyRecord:
+def record_day(content: str, date: str | None = None) -> DailyRecord:
     """快捷函数：记录一天"""
     return get_engine().record_day(content, date)
 

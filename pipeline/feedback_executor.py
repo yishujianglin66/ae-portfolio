@@ -12,16 +12,20 @@
 Author: AE-Knowledge-Vault Team
 """
 
-import os
 import json
 import logging
-from typing import Dict, List, Optional, Tuple
+import os
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
 
 try:
     from pipeline.ffmpeg_edit_engine import (
-        FFmpegEditEngine, FFmpegFilterBuilder,
-        ColorGradeParams, SharpenParams, VignetteParams, SpeedParams
+        ColorGradeParams,
+        FFmpegEditEngine,
+        FFmpegFilterBuilder,
+        SharpenParams,
+        SpeedParams,
+        VignetteParams,
     )
     _FFMPEG_ENGINE_AVAILABLE = True
 except Exception:  # ImportError or any init error
@@ -95,7 +99,7 @@ class AdjustmentMapper:
     """
 
     @staticmethod
-    def map_feedback(quality_report: Dict) -> List[AdjustmentAction]:
+    def map_feedback(quality_report: dict) -> list[AdjustmentAction]:
         """
         将质检报告映射为调整动作列表
         
@@ -230,7 +234,7 @@ class AdjustmentMapper:
         return actions
 
     @staticmethod
-    def actions_to_filter_builder(actions: List[AdjustmentAction]) -> FFmpegFilterBuilder:
+    def actions_to_filter_builder(actions: list[AdjustmentAction]) -> FFmpegFilterBuilder:
         """将调整动作列表转换为 FFmpeg 滤镜链
 
         合并策略:
@@ -315,7 +319,7 @@ class FeedbackExecutor:
         else:
             self.engine = FFmpegEditEngine(ffmpeg_bin)
         self._optimizer = None
-        self._adjustment_log: List[Dict] = []  # M2.6: 参数调整轨迹记录
+        self._adjustment_log: list[dict] = []  # M2.6: 参数调整轨迹记录
         
         if use_bayesian_optimizer:
             try:
@@ -324,8 +328,8 @@ class FeedbackExecutor:
             except Exception as e:
                 logger.debug(f"[FeedbackExecutor] Bayesian optimizer unavailable: {e}")
 
-    def execute(self, input_video: str, quality_report: Dict,
-                output: str = "") -> Dict:
+    def execute(self, input_video: str, quality_report: dict,
+                output: str = "") -> dict:
         """
         执行反馈调整
         
@@ -402,7 +406,7 @@ class FeedbackExecutor:
         }
 
     def execute_multi_pass(self, input_video: str, quality_report_fn,
-                           max_passes: int = 3, threshold: float = 70.0) -> Dict:
+                           max_passes: int = 3, threshold: float = 70.0) -> dict:
         """
         多轮迭代优化 — 反复质检+调整直到达标
         
@@ -479,8 +483,8 @@ class FeedbackExecutor:
     # ----------------------------------------------------------------
 
     def _optimize_actions(
-        self, actions: List[AdjustmentAction], quality_report: Dict
-    ) -> List[AdjustmentAction]:
+        self, actions: list[AdjustmentAction], quality_report: dict
+    ) -> list[AdjustmentAction]:
         """使用贝叶斯优化器推荐最优参数替换默认参数"""
         if self._optimizer is None:
             return actions
@@ -529,8 +533,8 @@ class FeedbackExecutor:
         return optimized
 
     def _record_adjustment(
-        self, actions: List[AdjustmentAction], before_score: float,
-        success: bool, quality_report: Dict
+        self, actions: list[AdjustmentAction], before_score: float,
+        success: bool, quality_report: dict
     ) -> None:
         """M2.6: 记录参数调整轨迹，供后续学习"""
         import time
@@ -573,6 +577,6 @@ class FeedbackExecutor:
                     except Exception:
                         pass
 
-    def get_adjustment_log(self) -> List[Dict]:
+    def get_adjustment_log(self) -> list[dict]:
         """M2.6: 获取参数调整轨迹日志"""
         return list(self._adjustment_log)

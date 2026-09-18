@@ -31,14 +31,14 @@ AUDIT = PROJ / "data" / "evolution" / "render_audit.jsonl"
 _GATE_RE = re.compile(r"\[(PASS|FAIL)\] ([^:]+): (.+)")
 
 
-def _load_json(p: Path) -> Optional[Dict[str, Any]]:
+def _load_json(p: Path) -> dict[str, Any] | None:
     try:
         return json.loads(p.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
 
 
-def cuts_stats(segs: List[Dict]) -> Dict[str, Any]:
+def cuts_stats(segs: list[dict]) -> dict[str, Any]:
     """切点统计：数量 + 间隔中位/极值（量化"卡点密度与呼吸"）。"""
     starts = sorted(s["start_time"] for s in segs
                     if s.get("start_time", 0) > 0.05)
@@ -53,14 +53,14 @@ def cuts_stats(segs: List[Dict]) -> Dict[str, Any]:
     }
 
 
-def speed_stats(segs: List[Dict]) -> Dict[str, Any]:
+def speed_stats(segs: list[dict]) -> dict[str, Any]:
     sp = [round(float(s.get("speed", 1.0)), 2) for s in segs if s.get("speed")]
     jumps = sum(1 for i in range(len(sp) - 1) if abs(sp[i + 1] - sp[i]) >= 0.4)
     return {"dist": dict(Counter(str(x) for x in sp)), "jumps": jumps}
 
 
-def camera_stats(segs: List[Dict],
-                 motion_labels: Optional[Dict]) -> Dict[str, Any]:
+def camera_stats(segs: list[dict],
+                 motion_labels: dict | None) -> dict[str, Any]:
     """运镜：编排端 technique 分布 + 感知端 motion 标注分布。"""
     tech = Counter(str(s.get("zoompan_effect")) for s in segs
                    if s.get("zoompan_effect"))
@@ -69,7 +69,7 @@ def camera_stats(segs: List[Dict],
     return {"technique_dist": dict(tech), "motion_label_dist": dict(ml)}
 
 
-def parse_gate_stdout(text: str) -> Dict[str, Any]:
+def parse_gate_stdout(text: str) -> dict[str, Any]:
     """解析 render_gate.py 的 [PASS|FAIL] name: detail 输出 + ACCEPT/REJECT。"""
     checks = re.findall(_GATE_RE, text)
     detail = {name.strip(): d.strip() for _, name, d in checks}
@@ -81,8 +81,8 @@ def parse_gate_stdout(text: str) -> Dict[str, Any]:
     }
 
 
-def gate_from(run_dir: Path, tag: str, bgm: Optional[str] = None,
-              timeout: int = 900) -> Dict[str, Any]:
+def gate_from(run_dir: Path, tag: str, bgm: str | None = None,
+              timeout: int = 900) -> dict[str, Any]:
     cmd = [sys.executable, str(PROJ / "scripts" / "render_gate.py"),
            str(run_dir), tag]
     if bgm:
@@ -96,7 +96,7 @@ def gate_from(run_dir: Path, tag: str, bgm: Optional[str] = None,
                 "accepted": None, "error": type(e).__name__}
 
 
-def rules_snapshot() -> List[Dict[str, str]]:
+def rules_snapshot() -> list[dict[str, str]]:
     try:
         from scripts.rule_registry import active_rules
         return [{"rule_id": r.get("rule_id"),
@@ -106,7 +106,7 @@ def rules_snapshot() -> List[Dict[str, str]]:
         return []
 
 
-def ae_failures(run_dir: Path) -> List[Dict[str, Any]]:
+def ae_failures(run_dir: Path) -> list[dict[str, Any]]:
     """读取 ae_failures.json（桥接失败结构化 #3 产物）。"""
     p = run_dir / "ae_failures.json"
     if not p.exists():
@@ -115,12 +115,12 @@ def ae_failures(run_dir: Path) -> List[Dict[str, Any]]:
     return data if isinstance(data, list) else []
 
 
-def build_audit(run_dir: Path, tag: str, bgm: Optional[str] = None,
-                run_gate: bool = True) -> Dict[str, Any]:
+def build_audit(run_dir: Path, tag: str, bgm: str | None = None,
+                run_gate: bool = True) -> dict[str, Any]:
     pr = _load_json(run_dir / "production_report.json") or {}
     unirep = _load_json(run_dir / "unified_report.json") or {}
     segs = pr.get("script", {}).get("segments") or pr.get("segments") or []
-    rec: Dict[str, Any] = {
+    rec: dict[str, Any] = {
         "schema": "render_audit_v1",
         "ts": time.strftime("%Y-%m-%d %H:%M:%S"),
         "run_tag": tag,
@@ -142,13 +142,13 @@ def build_audit(run_dir: Path, tag: str, bgm: Optional[str] = None,
     return rec
 
 
-def append(rec: Dict[str, Any]) -> None:
+def append(rec: dict[str, Any]) -> None:
     AUDIT.parent.mkdir(parents=True, exist_ok=True)
     with open(AUDIT, "a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
 
-def cmd_audit(run_dir: str, tag: str, bgm: Optional[str], no_gate: bool) -> int:
+def cmd_audit(run_dir: str, tag: str, bgm: str | None, no_gate: bool) -> int:
     rec = build_audit(Path(run_dir), tag, bgm, run_gate=not no_gate)
     append(rec)
     g = rec["gate"]

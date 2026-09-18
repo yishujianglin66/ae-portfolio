@@ -5,9 +5,9 @@ import time
 import cv2
 import numpy as np
 import torch
-from core.torch_runtime import infer_ctx, get_device
-
 from transformers import Owlv2ForObjectDetection, Owlv2Processor
+
+from core.torch_runtime import get_device, infer_ctx
 
 print("loading Owlv2...", file=sys.stderr)
 model = Owlv2ForObjectDetection.from_pretrained(

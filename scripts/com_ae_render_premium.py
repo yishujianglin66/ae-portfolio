@@ -256,7 +256,7 @@ def main():
     print(f"[OK] Generated JSX code: {len(jsx_code)} bytes, {jsx_code.count(chr(10))} lines")
 
     # Step 1: Launch After Effects via COM
-    print(f"\n[Step 1/4] Launching After Effects via COM...")
+    print("\n[Step 1/4] Launching After Effects via COM...")
     try:
         ae_app = win32com.client.Dispatch("AfterFX.Application")
         print(f"  [OK] Connected to AfterFX (version: {ae_app.Version})")
@@ -268,14 +268,14 @@ def main():
             subprocess.Popen([r"C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\AfterFX.exe"])
             time.sleep(10)  # Wait for AE to start
             ae_app = win32com.client.Dispatch("AfterFX.Application")
-            print(f"  [OK] Connected after manual launch")
+            print("  [OK] Connected after manual launch")
         except Exception as e2:
             print(f"[ERROR] Still cannot connect: {e2}")
             return 1
 
     # Step 2: Execute JSX via DoScript
     print(f"\n[Step 2/4] Executing JSX script ({len(effects)} effects)...")
-    print(f"  This may take several minutes...")
+    print("  This may take several minutes...")
     t0 = time.time()
 
     try:
@@ -288,7 +288,7 @@ def main():
         return 1
 
     # Step 3: Save project
-    print(f"\n[Step 3/4] Saving project...")
+    print("\n[Step 3/4] Saving project...")
     try:
         ae_app.Project.Save(AEP_PATH)
         print(f"  [OK] Project saved: {AEP_PATH}")
@@ -300,12 +300,12 @@ def main():
     # Close AE
     try:
         ae_app.Quit()
-        print(f"  [OK] AfterFX closed")
+        print("  [OK] AfterFX closed")
     except:
         pass
 
     # Step 4: Run aerender
-    print(f"\n[Step 4/4] Running aerender...")
+    print("\n[Step 4/4] Running aerender...")
     print(f"  Output: {MP4_OUT}")
 
     t0 = time.time()
@@ -329,17 +329,17 @@ def main():
                 print(f"  stderr (last 500 chars): {r.stderr[-500:]}")
 
     except subprocess.TimeoutExpired:
-        print(f"[ERROR] aerender timed out after 3600s")
+        print("[ERROR] aerender timed out after 3600s")
         return 1
     except Exception as e:
         print(f"[ERROR] aerender failed: {e}")
         return 1
 
     # Verify output
-    print(f"\n[Verification]")
+    print("\n[Verification]")
     if MP4_OUT.exists() and MP4_OUT.stat().st_size > 10000:
         size_mb = MP4_OUT.stat().st_size / (1024*1024)
-        print(f"[SUCCESS] Premium effects render completed!")
+        print("[SUCCESS] Premium effects render completed!")
         print(f"  Output: {MP4_OUT}")
         print(f"  Size: {size_mb:.1f} MB")
         print(f"\n[OK] FINAL PRODUCT READY: {MP4_OUT}")

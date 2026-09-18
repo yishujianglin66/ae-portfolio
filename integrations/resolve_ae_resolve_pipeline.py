@@ -113,7 +113,7 @@ class AEBridgeLite:
         return r.get("status") == "success"
 
     def execute_jsx(self, jsx_body: str, timeout: float = 60.0,
-                    retries: int = 2) -> Dict[str, Any]:
+                    retries: int = 2) -> dict[str, Any]:
         """执行 JSX 函数体（自动加 return 前缀，与 return 同行避免 ASI 陷阱）。
 
         【实测踩坑】文件轮询存在偶发命令丢失竞态：ping 正常但紧随的
@@ -134,7 +134,7 @@ class AEBridgeLite:
             r = self._send(payload, timeout)
         return r
 
-    def _send(self, payload: Dict[str, Any], timeout: float) -> Dict[str, Any]:
+    def _send(self, payload: dict[str, Any], timeout: float) -> dict[str, Any]:
         os.makedirs(_BRIDGE_DIR, exist_ok=True)
         # 记录发送前结果文件 mtime，要求严格增大才读取（防读旧结果）
         res_mtime_before = os.path.getmtime(_RES_FILE) if os.path.exists(_RES_FILE) else 0.0
@@ -196,23 +196,23 @@ class ResolveAeResolvePipeline:
 
     COMP_NAME = "hybrid_comp"
 
-    def __init__(self, bridge: Optional[Any] = None):
+    def __init__(self, bridge: Any | None = None):
         self.vrs = bridge or VrsResolveBridge()
         self.engine = self.vrs.engine
         self.ae = AEBridgeLite()
-        self.last_report: Dict[str, Any] = {}
+        self.last_report: dict[str, Any] = {}
 
     # ------------------------------------------------------------------
     # FFmpeg-only 降级模式：使用 ProductionDirector
     # ------------------------------------------------------------------
     def run_ffmpeg_only(
         self,
-        clip_paths: List[str],
+        clip_paths: list[str],
         bgm_path: str,
         output_path: str,
-        lyrics: Optional[List] = None,
+        lyrics: list | None = None,
         bgm_start_sec: float = 0.0,
-        target_duration: Optional[float] = None,
+        target_duration: float | None = None,
         fps: int = 24,
         target_ip: str = "",
         strict: bool = True,
@@ -230,7 +230,7 @@ class ResolveAeResolvePipeline:
             allow_mixed: 是否允许多IP混剪类素材
             verify_content: 是否对成片进行VLM内容复核
         """
-        logger.info(f"使用 ProductionDirector FFmpeg 降级模式" +
+        logger.info("使用 ProductionDirector FFmpeg 降级模式" +
                     (f" (目标IP: {target_ip})" if target_ip else ""))
         from ai.production_director import ProductionDirector
 
@@ -266,10 +266,10 @@ class ResolveAeResolvePipeline:
     # ------------------------------------------------------------------
     # 主入口
     # ------------------------------------------------------------------
-    def run(self, clip_paths: List[str], bgm_path: str, output_path: str,
+    def run(self, clip_paths: list[str], bgm_path: str, output_path: str,
             title: str = "AMV MIX", subtitle: str = "",
-            beat_group: int = 4, transitions: Optional[List[str]] = None,
-            lut_path: Optional[str] = None,
+            beat_group: int = 4, transitions: list[str] | None = None,
+            lut_path: str | None = None,
             speed_ramp: bool = True, fps: int = 24,
             beat_offset: float = 0.0,
             output_dir: str = "") -> str:
@@ -288,7 +288,7 @@ class ResolveAeResolvePipeline:
         # ---------- 【第四轮新增】逐镜头差异化调色（Stage A 前） ----------
         # 在剪辑前对每个素材施加风格化调色，确保每个镜头有独特的色彩倾向
         clips_for_edit = list(clip_paths)
-        graded_clips: List[str] = []
+        graded_clips: list[str] = []
         for ci, clip in enumerate(clips_for_edit):
             graded = self._grade_clip_for_style(clip, ci, work)
             graded_clips.append(graded)
@@ -323,7 +323,7 @@ class ResolveAeResolvePipeline:
         logger.info(f"Stage A 切点检测: {len(cut_times)} 个切点")
 
         # ---------- 智能导演：逐镜头特征提取 ----------
-        shot_analysis: List[Dict[str, Any]] = []
+        shot_analysis: list[dict[str, Any]] = []
         if build_smart_text_jsx is not None and cut_times:
             # 切点之间的片段就是各镜头段落
             for si, ct in enumerate(cut_times):
@@ -474,7 +474,7 @@ class ResolveAeResolvePipeline:
     # 切点检测（供 Stage B 文字密度优化）
     # ------------------------------------------------------------------
     def _detect_cuts(self, video_path: str,
-                     threshold: float = 0.25) -> List[float]:
+                     threshold: float = 0.25) -> list[float]:
         """ffmpeg scene 检测实际切点时间戳（去重 0.15s 窗口）。"""
         cmd = ["ffmpeg", "-i", video_path,
                "-vf", f"select=gt(scene\\,{threshold}),showinfo",
@@ -483,7 +483,7 @@ class ResolveAeResolvePipeline:
                            encoding="utf-8", errors="ignore", timeout=300)
         cuts = sorted(float(t) for t in re.findall(
             r'pts_time:([\d.]+)', r.stderr))
-        merged: List[float] = []
+        merged: list[float] = []
         for t in cuts:
             if not merged or t - merged[-1] > 0.15:
                 merged.append(t)
@@ -494,8 +494,8 @@ class ResolveAeResolvePipeline:
     # ------------------------------------------------------------------
     def _ae_title_pass(self, footage: str, work: str, title: str,
                        subtitle: str, duration: float, fps: int,
-                       cut_times: Optional[List[float]] = None,
-                       shot_analysis: Optional[List[Dict[str, Any]]] = None) -> str:
+                       cut_times: list[float] | None = None,
+                       shot_analysis: list[dict[str, Any]] | None = None) -> str:
         """AE 导入中间文件 → 建合成 → 智能文字动画 → 渲染。
 
         【第三轮优化】文字动画由智能导演系统驱动：
@@ -610,7 +610,7 @@ class ResolveAeResolvePipeline:
     # ------------------------------------------------------------------
     # 降级文字动画（智能导演不可用时）
     # ------------------------------------------------------------------
-    def _build_fallback_text_jsx(self, cut_times: List[float],
+    def _build_fallback_text_jsx(self, cut_times: list[float],
                                   duration: float) -> str:
         """简单缩放+淡入淡出文字动画（每切点一个，有完整出入场）。"""
         labels = ["\u6226\u3044", "VINLAND", "SAGA", "\u51b0\u6d77\u6218\u8a18",
@@ -676,8 +676,8 @@ class ResolveAeResolvePipeline:
     # Stage C: 轻统一调色 + BGM 混音（第四轮：不再全片重调色）
     # ------------------------------------------------------------------
     def _grade_and_mix(self, src: str, bgm_path: str, output_path: str,
-                       lut_path: Optional[str],
-                       cut_times: Optional[List[float]] = None) -> None:
+                       lut_path: str | None,
+                       cut_times: list[float] | None = None) -> None:
         """Stage C 自适应调色 + 混音。
 
         【第五轮升级】引入 AdaptiveColorGrader 逐镜头色彩分析 + 自适应调色：

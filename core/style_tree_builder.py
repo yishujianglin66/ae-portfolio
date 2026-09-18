@@ -42,8 +42,12 @@ from typing import Any, Dict, List, Optional, Tuple
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from core.composition_tree import (  # noqa: E402
-    CompositionTree, LayerSpec, EffectRef, AnimationSpec,
-    build_template, validate_composition_tree,
+    AnimationSpec,
+    CompositionTree,
+    EffectRef,
+    LayerSpec,
+    build_template,
+    validate_composition_tree,
 )
 
 # ── 基础模板映射 ─────────────────────────────────────────────────────
@@ -70,7 +74,7 @@ _TEXTFX_TO_ENTRANCE = {
 _DEFAULT_ENTRANCE = "fade_in"
 
 # 每卡内置调色板 {main, glow, accent}（content.colors 优先）
-_STYLE_PALETTES: Dict[str, Dict[str, str]] = {
+_STYLE_PALETTES: dict[str, dict[str, str]] = {
     "amv_highenergy": {"main": "#FF0000", "glow": "#FF4500", "accent": "#FFD700"},
     "hardcore_battle": {"main": "#FF2200", "glow": "#FF3300", "accent": "#FFFFFF"},
     "cyberpunk": {"main": "#00F0FF", "glow": "#00BFFF", "accent": "#E0FFFF"},
@@ -89,14 +93,14 @@ _INTENSITY_LEVELS = ("subtle", "moderate", "intense")
 @dataclass
 class BuildResult:
     """风格卡→合成树构建结果"""
-    tree: Optional[CompositionTree] = None
+    tree: CompositionTree | None = None
     style_id: str = ""
     base_template: str = ""
     offline: bool = True           # 是否走离线规则路径（prompt 入口有意义）
-    trace: List[str] = field(default_factory=list)     # 映射决策轨迹（honest）
-    warnings: List[str] = field(default_factory=list)
+    trace: list[str] = field(default_factory=list)     # 映射决策轨迹（honest）
+    warnings: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "style_id": self.style_id, "base_template": self.base_template,
             "offline": self.offline, "trace": self.trace,
@@ -127,7 +131,7 @@ def _intensity_from_motion(mi: int) -> str:
     return "subtle"
 
 
-def _entrance_from_motion(mi: int) -> Tuple[str, int]:
+def _entrance_from_motion(mi: int) -> tuple[str, int]:
     """motion_intensity → (入场预设, 时长ms)。text_fx 显式 action 优先于本表。"""
     if mi >= 7:
         return "scale_bounce", 500
@@ -137,7 +141,7 @@ def _entrance_from_motion(mi: int) -> Tuple[str, int]:
 
 
 # prompt 关键词 → 风格 id（离线兜底）
-_KEYWORD_RULES: List[Tuple[Tuple[str, ...], str]] = [
+_KEYWORD_RULES: list[tuple[tuple[str, ...], str]] = [
     (("高燃", "燃", "战斗", "热血", "打击", "快节奏", "踩点"), "amv_highenergy"),
     (("赛博", "未来", "霓虹", "cyber", "科幻", "全息"), "cyberpunk"),
     (("抒情", "温柔", "治愈", "安静", "氛围", "慢", "ins"), "ambient_calm"),
@@ -160,7 +164,7 @@ class StyleTreeBuilder:
         self.llm_enabled = bool(llm_enabled)
 
     # ── 主入口 ───────────────────────────────────────────────────
-    def build(self, card_or_prompt: Any, content: Optional[Dict[str, Any]] = None,
+    def build(self, card_or_prompt: Any, content: dict[str, Any] | None = None,
               grid: Any = None) -> BuildResult:
         """自动识别入口：StyleCard/style_id → 规则路径；str(prompt) → prompt 路径"""
         if isinstance(card_or_prompt, str):
@@ -173,14 +177,14 @@ class StyleTreeBuilder:
         """风格 id 形如 amv_highenergy（无空格无标点的下划线串）"""
         return bool(re.fullmatch(r"[a-z0-9_]{4,40}", s.strip()))
 
-    def build_from_card(self, card: Any, content: Optional[Dict[str, Any]] = None,
+    def build_from_card(self, card: Any, content: dict[str, Any] | None = None,
                         grid: Any = None) -> BuildResult:
         """风格卡 → CompositionTree（确定性规则映射，离线）"""
         card_dict = self._coerce_card(card)
         style_id = card_dict.get("style_id", "")
         base = _STYLE_TO_BASE.get(style_id, _DEFAULT_BASE)
-        trace: List[str] = []
-        warnings: List[str] = []
+        trace: list[str] = []
+        warnings: list[str] = []
         if style_id not in _STYLE_TO_BASE:
             warnings.append(f"未知风格卡 {style_id or '空'} → 回退 {_DEFAULT_BASE} 基底")
             trace.append(f"base: {_DEFAULT_BASE} (fallback)")
@@ -206,7 +210,7 @@ class StyleTreeBuilder:
         return BuildResult(tree=tree, style_id=style_id, base_template=base,
                            offline=True, trace=trace, warnings=warnings)
 
-    def build_from_prompt(self, prompt: str, content: Optional[Dict[str, Any]] = None,
+    def build_from_prompt(self, prompt: str, content: dict[str, Any] | None = None,
                           grid: Any = None) -> BuildResult:
         """一句话 prompt → CompositionTree。
 
@@ -214,9 +218,9 @@ class StyleTreeBuilder:
         关键词规则兜底。offline 字段诚实标注实际路径。
         """
         content = dict(content or {})
-        parsed: Dict[str, Any] = {}
+        parsed: dict[str, Any] = {}
         offline = True
-        warnings: List[str] = []
+        warnings: list[str] = []
         if self.llm_enabled:
             try:
                 parsed = self._parse_via_llm(prompt)
@@ -251,8 +255,8 @@ class StyleTreeBuilder:
         return result
 
     # ── 三旋钮参数化 ─────────────────────────────────────────────
-    def _apply_knobs(self, tree: CompositionTree, card: Dict[str, Any],
-                     content: Dict[str, Any], trace: List[str]) -> None:
+    def _apply_knobs(self, tree: CompositionTree, card: dict[str, Any],
+                     content: dict[str, Any], trace: list[str]) -> None:
         mi = _clamp_knob(card.get("motion_intensity"))
         vv = _clamp_knob(card.get("visual_variance"))
         info = _clamp_knob(card.get("information_density"))
@@ -321,12 +325,12 @@ class StyleTreeBuilder:
                      f"variance={vv} density={info}")
 
     @staticmethod
-    def _card_default_title(card: Dict[str, Any]) -> str:
+    def _card_default_title(card: dict[str, Any]) -> str:
         name = str(card.get("name", ""))
         return name if name else "AE SYNTH"
 
-    def _apply_textfx(self, tree: CompositionTree, card: Dict[str, Any],
-                      trace: List[str]) -> None:
+    def _apply_textfx(self, tree: CompositionTree, card: dict[str, Any],
+                      trace: list[str]) -> None:
         """text_fx.action 显式映射入场预设（优先于三旋钮推导）"""
         textfx = card.get("text_fx") or []
         if not textfx:
@@ -344,7 +348,7 @@ class StyleTreeBuilder:
     # ── 节拍预埋（M3 联动，可选）──────────────────────────────────
     @staticmethod
     def _seed_beat_events(tree: CompositionTree, grid: Any,
-                          trace: List[str]) -> None:
+                          trace: list[str]) -> None:
         """BeatGrid → 预埋 beat_events（M3 仍可再富化，不冲突）"""
         try:
             kicks = list(getattr(grid, "kick", []) or [])
@@ -371,9 +375,10 @@ class StyleTreeBuilder:
             trace.append(f"beat_seed: {added} 事件（kick→{target_text}, strong→{target_fx}）")
 
     # ── prompt 解析 ──────────────────────────────────────────────
-    def _parse_via_llm(self, prompt: str) -> Dict[str, Any]:
+    def _parse_via_llm(self, prompt: str) -> dict[str, Any]:
         """LLM 解析 prompt → 参数 dict。任何失败抛异常（调用方兜底）。"""
         import asyncio
+
         from core.llm_gateway import llm_gateway  # 惰性导入
 
         system = (
@@ -398,7 +403,7 @@ class StyleTreeBuilder:
         return data
 
     @staticmethod
-    def _parse_by_keywords(prompt: str) -> Dict[str, Any]:
+    def _parse_by_keywords(prompt: str) -> dict[str, Any]:
         for kws, style_id in _KEYWORD_RULES:
             if any(k in prompt for k in kws):
                 return {"style_id": style_id}
@@ -424,7 +429,7 @@ class StyleTreeBuilder:
                     "preferred_cameras", "forbidden_cameras", "anti_patterns")
 
     @staticmethod
-    def _normalize_card_dict(d: Dict[str, Any]) -> Dict[str, Any]:
+    def _normalize_card_dict(d: dict[str, Any]) -> dict[str, Any]:
         """dict 形式（如 StyleCard.to_dict()）→ 旋钮扁平化到顶层"""
         out = dict(d)
         tp = d.get("taste_profile") or {}
@@ -435,7 +440,7 @@ class StyleTreeBuilder:
         return out
 
     @classmethod
-    def _coerce_card(cls, card: Any) -> Dict[str, Any]:
+    def _coerce_card(cls, card: Any) -> dict[str, Any]:
         """StyleCard 对象 / style_id 字符串 / dict → 统一扁平 dict"""
         if isinstance(card, str):
             try:

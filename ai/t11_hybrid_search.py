@@ -109,7 +109,7 @@ def _log(msg: str):
     print(f"[T11] {msg}", flush=True)
 
 
-def load_intel_cache() -> List[Dict]:
+def load_intel_cache() -> list[dict]:
     """加载material_intel缓存"""
     entries = []
     for f in sorted(INTEL_CACHE.glob("*.json")):
@@ -138,7 +138,7 @@ def load_intel_cache() -> List[Dict]:
     return entries
 
 
-def enrich_with_pseudolabels(entries: List[Dict], max_per_ip: int = 50) -> List[Dict]:
+def enrich_with_pseudolabels(entries: list[dict], max_per_ip: int = 50) -> list[dict]:
     """从伪标签采样帧描述扩充索引(每IP最多max_per_ip条)"""
     pseudo_path = Path(r"D:\aot_corpus\pseudolabels.json")
     if not pseudo_path.exists():
@@ -214,7 +214,7 @@ def enrich_with_pseudolabels(entries: List[Dict], max_per_ip: int = 50) -> List[
     return entries
 
 
-def build_semantic_index(entries: List[Dict], model) -> np.ndarray:
+def build_semantic_index(entries: list[dict], model) -> np.ndarray:
     """用BGE-M3编码所有description"""
     descriptions = [e["description"] or e["primary_ip"] for e in entries]
     _log(f"编码 {len(descriptions)} 条description...")
@@ -224,7 +224,7 @@ def build_semantic_index(entries: List[Dict], model) -> np.ndarray:
     return embeddings
 
 
-def rrf_fusion(keyword_results: List[str], semantic_results: List[str], k=60) -> List[str]:
+def rrf_fusion(keyword_results: list[str], semantic_results: list[str], k=60) -> list[str]:
     """RRF融合: score = sum(1/(k+rank))"""
     scores = {}
     for rank, item in enumerate(keyword_results):
@@ -234,7 +234,7 @@ def rrf_fusion(keyword_results: List[str], semantic_results: List[str], k=60) ->
     return sorted(scores.keys(), key=lambda x: scores[x], reverse=True)
 
 
-def keyword_search(entries: List[Dict], query: str) -> List[str]:
+def keyword_search(entries: list[dict], query: str) -> list[str]:
     """关键词搜索(增强版: 子串+角色别名+IP视觉关键词+2-gram)"""
     results = []
     query_lower = query.lower()
@@ -271,8 +271,8 @@ def keyword_search(entries: List[Dict], query: str) -> List[str]:
     return results
 
 
-def semantic_search(embeddings: np.ndarray, entries: List[Dict],
-                    query_embedding: np.ndarray, top_k: int = 10) -> List[str]:
+def semantic_search(embeddings: np.ndarray, entries: list[dict],
+                    query_embedding: np.ndarray, top_k: int = 10) -> list[str]:
     """语义搜索: 余弦相似度Top-K"""
     query_norm = query_embedding / np.linalg.norm(query_embedding)
     emb_norm = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
@@ -327,16 +327,16 @@ def _get_reranker():
     return _RERANKER
 
 
-def _entry_text(e: Dict) -> str:
+def _entry_text(e: dict) -> str:
     """喂给重排器的文档文本（与基准 v2 同口径）。"""
     parts = [e.get("description", ""), " ".join(e.get("ip_names", [])),
              e.get("mood", ""), e.get("scene_type", "")]
     return " ".join(p for p in parts if p).strip() or e.get("primary_ip", "")
 
 
-def semantic_rerank_search(entries: List[Dict], embeddings: np.ndarray,
+def semantic_rerank_search(entries: list[dict], embeddings: np.ndarray,
                            model, query: str, top_k: int = 10,
-                           pool_size: int = RERANK_POOL) -> List[Dict]:
+                           pool_size: int = RERANK_POOL) -> list[dict]:
     """自然语言分支：纯语义候选池 + CrossEncoder 重排（基准 v2 D 臂）。"""
     query_emb = model.encode([query])[0]
     pool_hashes = semantic_search(embeddings, entries, query_emb, top_k=pool_size)
@@ -350,9 +350,9 @@ def semantic_rerank_search(entries: List[Dict], embeddings: np.ndarray,
     return [pool[i] for i in order]
 
 
-def norm_filter_search(entries: List[Dict], embeddings: np.ndarray,
+def norm_filter_search(entries: list[dict], embeddings: np.ndarray,
                        model, query: str, top_k: int = 10,
-                       pool_size: int = RERANK_POOL) -> List[Dict]:
+                       pool_size: int = RERANK_POOL) -> list[dict]:
     """归一化过滤路由（R3 收官架构 v4，heldout R@10=1.000 实测）。
 
     API 多数票归一化识别 IP → 候选限定该 IP → 语义排序 → CrossEncoder 重排；
@@ -381,8 +381,8 @@ def norm_filter_search(entries: List[Dict], embeddings: np.ndarray,
     return [pool[i] for i in np.argsort(scores)[::-1][:top_k]]
 
 
-def hybrid_search(entries: List[Dict], embeddings: np.ndarray,
-                  model, query: str, top_k: int = 10) -> List[Dict]:
+def hybrid_search(entries: list[dict], embeddings: np.ndarray,
+                  model, query: str, top_k: int = 10) -> list[dict]:
     """混合检索: 关键词+语义RRF融合（分流启用时按 decide_route 路由）"""
     route = decide_route(query)
     if route == "norm_filter":
@@ -506,7 +506,7 @@ def run_t11():
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     _log(f"\n{'='*60}")
-    _log(f"✅ T11混合检索完成")
+    _log("✅ T11混合检索完成")
     _log(f"   平均Top5召回: {avg_recall:.3f}")
     _log(f"   报告: {report_path}")
     _log(f"{'='*60}")

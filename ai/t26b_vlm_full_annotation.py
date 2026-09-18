@@ -16,11 +16,11 @@ r"""T26b: VLM全量标注管线 — SiliconFlow Qwen3-VL-8B 标注全部65714帧
 from __future__ import annotations
 
 import base64
+import io
 import json
 import os
 import sys
 import time
-import io
 from pathlib import Path
 from typing import Optional
 
@@ -137,7 +137,7 @@ def save_checkpoint(done_frames: set, total_results: int, total_cost: float, sta
     CKPT_FILE.write_text(json.dumps(ckpt, ensure_ascii=False), encoding="utf-8")
 
 
-def annotate_frame(client, img_path: str) -> Optional[dict]:
+def annotate_frame(client, img_path: str) -> dict | None:
     """标注单帧"""
     try:
         with open(img_path, "rb") as f:
@@ -309,7 +309,7 @@ def run_full_annotation():
     agree_rate = stats["agree"] / max(stats["agree"] + stats["disagree"], 1)
 
     _log(f"\n{'='*60}")
-    _log(f"全量标注完成!")
+    _log("全量标注完成!")
     _log(f"  总帧数: {len(all_frames)}")
     _log(f"  已标注: {total_results}")
     _log(f"  耗时: {elapsed/3600:.1f}h ({elapsed:.0f}s)")

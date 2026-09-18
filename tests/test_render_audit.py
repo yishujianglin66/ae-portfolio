@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """render_audit 纯函数测试——不落盘、不跑 ffmpeg、不碰真实规则库。"""
 import json
+
 from scripts.render_audit import (
     build_audit,
     camera_stats,

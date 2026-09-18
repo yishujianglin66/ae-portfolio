@@ -41,26 +41,25 @@ AE AI Agent 端到端流程管理器 v2.0 - 企业级架构重构版
 │  └── 素材检索                                                          │
 └────────────────────────────────────────────────────────────────────────┘
 """
-import os
-import json
-import time
-import math
-import hashlib
-import logging
 import asyncio
-from datetime import datetime
-from typing import List, Dict, Optional, Tuple, Any, Callable
+import hashlib
+import json
+import logging
+import math
+import os
+import time
 from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # Pipeline 数据模型（从 core.pipeline.models 导入，保持向后兼容）
 from core.pipeline.models import (
-    PerceptionResult,
-    UnderstandingResult,
-    PlanningResult,
     ExecutionResult,
     FeedbackResult,
+    PerceptionResult,
+    PlanningResult,
+    UnderstandingResult,
 )
-
 
 # ============================================================================
 # 以下为 AEAgentPipeline 主类
@@ -126,9 +125,15 @@ class AEAgentPipeline:
 
         try:
             from core.observability import (
-                ObservabilityContext, create_context, set_global_context,
-                log_info, log_warning, log_error, log_debug,
-                increment_counter, record_histogram
+                ObservabilityContext,
+                create_context,
+                increment_counter,
+                log_debug,
+                log_error,
+                log_info,
+                log_warning,
+                record_histogram,
+                set_global_context,
             )
             self._observability = create_context()
             set_global_context(self._observability)
@@ -151,7 +156,7 @@ class AEAgentPipeline:
             self.log_warning(f"ConfigManager 加载失败: {e}")
 
         try:
-            from core.event_bus import EventBus, event_bus, publish_pipeline_event, publish_error, EventCategory
+            from core.event_bus import EventBus, EventCategory, event_bus, publish_error, publish_pipeline_event
             self._event_bus = event_bus
             self._publish_pipeline_event = self._publish_with_correlation
             self._publish_error = self._publish_error_with_correlation
@@ -190,7 +195,7 @@ class AEAgentPipeline:
         # LLM 网关 (OmniRoute 兼容)
         self._llm_gateway = None
         try:
-            from core.llm_gateway import LLMGateway, LLMConfig, TaskType
+            from core.llm_gateway import LLMConfig, LLMGateway, TaskType
             self._llm_gateway = LLMGateway()
             self._llm_gateway.configure_from_env()
 
@@ -294,7 +299,7 @@ class AEAgentPipeline:
                 "ae": {"command_file": "./ae_command.json", "result_file": "./ae_result.json"}
             }
 
-    def _publish_with_correlation(self, event_type: str, payload: Dict = None) -> None:
+    def _publish_with_correlation(self, event_type: str, payload: dict = None) -> None:
         """发布带 correlation_id 的工作流事件（用于请求追踪）"""
         if not self._event_bus:
             return
@@ -310,7 +315,7 @@ class AEAgentPipeline:
             pass
 
     def _publish_error_with_correlation(
-        self, event_type: str, error=None, payload: Dict = None
+        self, event_type: str, error=None, payload: dict = None
     ) -> None:
         """发布带 correlation_id 的错误事件"""
         if not self._event_bus:
@@ -354,7 +359,7 @@ class AEAgentPipeline:
         except Exception:
             pass
 
-    def get_event_stats(self) -> Dict:
+    def get_event_stats(self) -> dict:
         """获取事件总线统计信息"""
         if not self._event_bus:
             return {}
@@ -363,7 +368,7 @@ class AEAgentPipeline:
         except Exception:
             return {}
 
-    def get_recent_events(self, limit: int = 20) -> List[Dict]:
+    def get_recent_events(self, limit: int = 20) -> list[dict]:
         """获取最近的事件历史（用于调试和追溯）"""
         if not self._event_bus:
             return []
@@ -404,7 +409,7 @@ class AEAgentPipeline:
 
         @self._event_bus.subscribe(event_category=EventCategory.SILHOUETTE, event_type="silhouette.completed")
         def on_silhouette_completed(event):
-            self.log_info(f"Silhouette task completed")
+            self.log_info("Silhouette task completed")
             increment_counter("silhouette.completions")
 
         @self._event_bus.subscribe(event_category=EventCategory.AE, event_type="ae.execute")
@@ -417,7 +422,7 @@ class AEAgentPipeline:
             error_msg = event.payload.get("error_message", "")
             self.log_error(f"Error occurred [{error_type}]: {error_msg}")
 
-    def _on_workflow_progress(self, progress: float, info: Dict):
+    def _on_workflow_progress(self, progress: float, info: dict):
         self.log_info(f"Workflow progress: {progress * 100:.1f}% ({info['completed']}/{info['total']})")
         if self._state_machine:
             self._state_machine._context.progress = progress
@@ -453,7 +458,7 @@ class AEAgentPipeline:
             self._publish_pipeline_event("pipeline.cancelled")
             self.log_info("Pipeline 已取消")
 
-    def get_workflow_stats(self) -> Dict:
+    def get_workflow_stats(self) -> dict:
         """获取当前工作流统计信息（任务状态、耗时、重试次数）"""
         if not self._orchestrator:
             return {}
@@ -491,7 +496,7 @@ class AEAgentPipeline:
             return
 
         try:
-            from core.event_bus import EventCategory, Event
+            from core.event_bus import Event, EventCategory
 
             def on_planning_completed(event: Event):
                 """规划完成事件 → 触发参数优化日志记录"""
@@ -629,7 +634,7 @@ class AEAgentPipeline:
         self.topaz_enhancer = None
         self.topaz_enabled = False
         try:
-            from topaz_integration import TopazEnhancer, TopazConfig
+            from topaz_integration import TopazConfig, TopazEnhancer
             self.topaz_enhancer = TopazEnhancer()
             self.topaz_enabled = True
             self.log_info("TopazEnhancer 加载成功 (Topaz Video AI 画质增强)")
@@ -684,7 +689,7 @@ class AEAgentPipeline:
         self.mediapipe_integrator = None
         self.mediapipe_enabled = False
         try:
-            from mediapipe_integration import MediaPipeIntegrator, MediaPipeConfig
+            from mediapipe_integration import MediaPipeConfig, MediaPipeIntegrator
             self.mediapipe_integrator = MediaPipeIntegrator(
                 MediaPipeConfig(
                     mode="auto",
@@ -790,7 +795,7 @@ class AEAgentPipeline:
             self.effect_generator_factory = None
 
         try:
-            from parameter_mapper import ParameterMapper, MapperContext
+            from parameter_mapper import MapperContext, ParameterMapper
             self.parameter_mapper = ParameterMapper()
         except ImportError:
             self.parameter_mapper = None
@@ -908,7 +913,7 @@ class AEAgentPipeline:
         # ===== Phase5 模块初始化 =====
         # result_verifier：执行结果验证器（通过 MCP 回读对比）
         try:
-            from result_verifier import ResultVerifier, RealMcpClient
+            from result_verifier import RealMcpClient, ResultVerifier
             # 延迟注入 RealMcpClient（在执行时才创建 AECommandClient）
             self._result_verifier = ResultVerifier()
             self._result_verifier_mcp_class = RealMcpClient
@@ -962,7 +967,7 @@ class AEAgentPipeline:
             return "hold"
         return "linear"
 
-    def compile_planning_to_jsx(self, planning: PlanningResult) -> Dict:
+    def compile_planning_to_jsx(self, planning: PlanningResult) -> dict:
         if self.ts_compiler is None:
             return {
                 "success": False,
@@ -1107,10 +1112,10 @@ class AEAgentPipeline:
 
     def run_pipeline(self,
                      music_path: str,
-                     clip_paths: List[str],
+                     clip_paths: list[str],
                      user_prompt: str = "",
                      style_preset: str = "default",
-                     use_orchestrator: bool = True) -> Dict:
+                     use_orchestrator: bool = True) -> dict:
         """
         运行完整的端到端流程
 
@@ -1202,13 +1207,13 @@ class AEAgentPipeline:
     # ==================================================================
 
     def compose_style_effects(self, style_name: str, layer_name: str = "layer_001",
-                              intensity: float = 1.0) -> Dict:
+                              intensity: float = 1.0) -> dict:
         """组合风格效果"""
         if not self.effect_composer:
             raise RuntimeError("EffectComposer 未加载")
         return self.effect_composer.compose(style_name, intensity=intensity, layer_name=layer_name)
 
-    def recommend_styles(self, keywords: List[str], limit: int = 5) -> List[Dict]:
+    def recommend_styles(self, keywords: list[str], limit: int = 5) -> list[dict]:
         """推荐风格"""
         if not self.effect_composer:
             return []
@@ -1216,16 +1221,16 @@ class AEAgentPipeline:
 
     def orchestrate_beat_show(self, layer_name: str, bpm: float = 120.0,
                               duration: float = 5.0, style: str = "energetic",
-                              structure_template: str = "short_hook") -> Dict:
+                              structure_template: str = "short_hook") -> dict:
         """编排节拍秀"""
         from beat_orchestrator import BeatOrchestrator
         orchestrator = BeatOrchestrator(bpm=bpm)
         return orchestrator.generate_full_beat_show(layer_name, duration, style, structure_template)
 
-    def orchestrate_scenes(self, scenes: List[Dict], transition_type: str = "crossfade",
-                           transition_duration: float = 0.5) -> Dict:
+    def orchestrate_scenes(self, scenes: list[dict], transition_type: str = "crossfade",
+                           transition_duration: float = 0.5) -> dict:
         """多场景编排"""
-        from scene_orchestrator import SceneOrchestrator, Scene, Transition
+        from scene_orchestrator import Scene, SceneOrchestrator, Transition
         orch = SceneOrchestrator()
         for s in scenes:
             orch.add_scene(Scene(name=s["name"], duration=s["duration"]))
@@ -1244,9 +1249,9 @@ class AEAgentPipeline:
 
     def apply_camera_move(self, layer_name: str, move_type: str = "push",
                           duration: float = 2.0, start_scale: float = 100.0,
-                          end_scale: float = 120.0) -> List[Dict]:
+                          end_scale: float = 120.0) -> list[dict]:
         """应用摄像机运动"""
-        from scene_orchestrator import SceneOrchestrator, Scene, CameraMove
+        from scene_orchestrator import CameraMove, Scene, SceneOrchestrator
         orch = SceneOrchestrator()
         scene = Scene(name="cam", duration=duration, layer_name=layer_name)
         move = CameraMove(type=move_type, duration=duration,
@@ -1254,8 +1259,8 @@ class AEAgentPipeline:
         return orch.apply_camera_move(scene, move, layer_name)
 
     def run_with_feedback(self, user_input: str, intent_type: str,
-                          execute_fn, expected: Dict,
-                          base_confidence: float = 0.5) -> Dict:
+                          execute_fn, expected: dict,
+                          base_confidence: float = 0.5) -> dict:
         """带反馈循环的执行"""
         from feedback_loop_manager import FeedbackLoopManager
         manager = self.feedback_manager or FeedbackLoopManager()
@@ -1293,8 +1298,8 @@ class AEAgentPipeline:
             "suggestion": suggestion,
         }
 
-    def orchestrate_full(self, perception: Dict, understanding: Dict,
-                         layer_name: str = "main_layer") -> Dict:
+    def orchestrate_full(self, perception: dict, understanding: dict,
+                         layer_name: str = "main_layer") -> dict:
         """全流程编排（效果 + 关键帧）"""
         style = understanding.get("style", "cinematic")
         bpm = perception.get("audio", {}).get("bpm", 120)
@@ -1333,7 +1338,7 @@ class AEAgentPipeline:
     # Phase4 公共包装方法
     # ==================================================================
 
-    def parse_nlu(self, text: str) -> Dict:
+    def parse_nlu(self, text: str) -> dict:
         """NLU 解析"""
         import dataclasses
         if not self.nlu_parser:
@@ -1345,7 +1350,7 @@ class AEAgentPipeline:
             "slots": dataclasses.asdict(intent.slots) if intent.slots else {},
         }
 
-    def parse_effect_description(self, text: str, intent_type: str = None) -> Dict:
+    def parse_effect_description(self, text: str, intent_type: str = None) -> dict:
         """效果描述解析"""
         import dataclasses
         if not self.effect_description_parser:
@@ -1353,7 +1358,7 @@ class AEAgentPipeline:
         desc = self.effect_description_parser.parse(text, intent_type)
         return dataclasses.asdict(desc)
 
-    def generate_clarification(self, intent: Dict) -> Dict:
+    def generate_clarification(self, intent: dict) -> dict:
         """生成澄清问题"""
         from nlu_parser import Intent, IntentSlots
         if not self.clarification_engine:
@@ -1380,7 +1385,7 @@ class AEAgentPipeline:
         }
 
     def optimize_parameters(self, effect_name: str, style_name: str = None,
-                            intensity: float = 0.5, **kwargs) -> Dict:
+                            intensity: float = 0.5, **kwargs) -> dict:
         """参数优化"""
         from parameter_optimizer import ParameterContext
         if not self.parameter_optimizer:
@@ -1399,7 +1404,7 @@ class AEAgentPipeline:
             "confidence": result.confidence,
         }
 
-    def nlu_to_effect(self, text: str) -> Dict:
+    def nlu_to_effect(self, text: str) -> dict:
         """NLU → 效果一站式转换"""
         # 1. NLU 解析
         nlu_result = self.parse_nlu(text)
@@ -1429,8 +1434,8 @@ class AEAgentPipeline:
         }
 
     async def _run_with_orchestrator(
-        self, music_path: str, clip_paths: List[str], user_prompt: str, style_preset: str
-    ) -> Dict:
+        self, music_path: str, clip_paths: list[str], user_prompt: str, style_preset: str
+    ) -> dict:
         """使用工作流编排器执行流程"""
         self._perception_result = None
         self._understanding_result = None
@@ -1489,8 +1494,8 @@ class AEAgentPipeline:
         return results
 
     def _run_traditional(
-        self, music_path: str, clip_paths: List[str], user_prompt: str, style_preset: str
-    ) -> Dict:
+        self, music_path: str, clip_paths: list[str], user_prompt: str, style_preset: str
+    ) -> dict:
         """传统顺序执行模式"""
         self.log_info("="*70)
         self.log_info("🎬 AE AI Agent 端到端流程")
@@ -1554,7 +1559,7 @@ class AEAgentPipeline:
 
         return results
 
-    def perceive(self, music_path: str, clip_paths: List[str]) -> PerceptionResult:
+    def perceive(self, music_path: str, clip_paths: list[str]) -> PerceptionResult:
         perception = PerceptionResult()
 
         if self._state_machine:
@@ -1673,7 +1678,7 @@ class AEAgentPipeline:
         self,
         perception: PerceptionResult,
         music_path: str,
-        clip_paths: List[str],
+        clip_paths: list[str],
     ) -> None:
         """Phase 2 感知层增强：媒体元数据 + 镜头分割 + librosa 深度音频分析
 
@@ -1755,9 +1760,9 @@ class AEAgentPipeline:
                 self.log_warning(f"librosa 音频分析增强失败: {e}")
 
     def _enhance_with_topaz(
-        self, perception: PerceptionResult, clip_paths: List[str],
+        self, perception: PerceptionResult, clip_paths: list[str],
         preset: str = None, output_dir: str = None
-    ) -> List[str]:
+    ) -> list[str]:
         """Topaz 画质增强预处理
 
         对输入视频进行画质增强（超分/降噪/补帧），返回增强后的视频路径列表。
@@ -1851,9 +1856,9 @@ class AEAgentPipeline:
         return enhanced_paths
 
     def _enhance_with_resolve_color(
-        self, perception: PerceptionResult, clip_paths: List[str],
+        self, perception: PerceptionResult, clip_paths: list[str],
         preset: str = None
-    ) -> List[str]:
+    ) -> list[str]:
         """DaVinci Resolve 专业调色增强
 
         对输入视频进行 DaVinci Resolve 调色处理，返回调色后的视频路径列表。
@@ -1949,7 +1954,7 @@ class AEAgentPipeline:
 
     def _enhance_with_ai_video(
         self, understanding: UnderstandingResult, perception: PerceptionResult
-    ) -> List[str]:
+    ) -> list[str]:
         """AI 视频生成增强（RunwayML / Pika）
 
         根据理解结果中的 AI 视频生成请求，调用 AI 视频生成器生成视频。
@@ -2020,7 +2025,7 @@ class AEAgentPipeline:
 
     def _enhance_with_blender(
         self, understanding: UnderstandingResult, perception: PerceptionResult
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Blender 3D 场景生成增强
 
         根据理解结果中的 Blender 场景请求，生成 Blender 3D 场景配置。
@@ -2208,7 +2213,7 @@ class AEAgentPipeline:
             return
 
         try:
-            from nlu_parser import Intent, IntentType, IntentSlots
+            from nlu_parser import Intent, IntentSlots, IntentType
 
             intent = Intent(
                 type=understanding.nlu_intent_type or IntentType.UNKNOWN,
@@ -2381,7 +2386,7 @@ class AEAgentPipeline:
         except Exception as e:
             self.log_warning(f"LLM 增强失败（不影响主流程）: {e}")
 
-    def _extract_keywords(self, prompt: str) -> List[str]:
+    def _extract_keywords(self, prompt: str) -> list[str]:
         keywords = []
         style_keywords = ["cinematic", "fast", "slow", "epic", "minimal", "vibrant",
                           "muted", "dramatic", "playful", "elegant", "dark", "bright"]
@@ -2848,7 +2853,7 @@ class AEAgentPipeline:
                 # 生成统计信息（ReportStats dataclass → dict）
                 stats_obj = r2o.analyze_report(understanding.analysis_report)
                 # 按操作类型计数
-                ops_by_type: Dict[str, int] = {}
+                ops_by_type: dict[str, int] = {}
                 for op in plan.compiler_operations:
                     op_type = op.get("op", "unknown")
                     ops_by_type[op_type] = ops_by_type.get(op_type, 0) + 1
@@ -3017,7 +3022,7 @@ class AEAgentPipeline:
 
     def _generate_silhouette_operations(
         self, understanding: UnderstandingResult, perception: PerceptionResult
-    ) -> List[Dict]:
+    ) -> list[dict]:
         task = understanding.silhouette_task
         if not task:
             return []
@@ -3026,7 +3031,7 @@ class AEAgentPipeline:
         if perception.clip_features:
             source_path = perception.clip_features[0].get("source_path", "")
 
-        ops: List[Dict] = []
+        ops: list[dict] = []
 
         if task == "roto":
             ops.append({
@@ -3097,7 +3102,7 @@ class AEAgentPipeline:
 
         return ops
 
-    def _create_composition(self, understanding: UnderstandingResult) -> Dict:
+    def _create_composition(self, understanding: UnderstandingResult) -> dict:
         return {
             "name": f"AI Generated - {understanding.style}",
             "width": 1920,
@@ -3108,7 +3113,7 @@ class AEAgentPipeline:
             "backgroundColor": [0, 0, 0]
         }
 
-    def _create_layers(self, understanding: UnderstandingResult, perception: PerceptionResult) -> List[Dict]:
+    def _create_layers(self, understanding: UnderstandingResult, perception: PerceptionResult) -> list[dict]:
         layers = []
 
         if perception.music_features:
@@ -3171,7 +3176,7 @@ class AEAgentPipeline:
 
         return layers
 
-    def _sort_clips_by_motion(self, clips: List[Dict], style: str) -> List[Dict]:
+    def _sort_clips_by_motion(self, clips: list[dict], style: str) -> list[dict]:
         def get_motion(x):
             return (x.get("motion_analysis", {}).get("avg_motion_intensity", 0)
                     or x.get("motion_features", {}).get("avg_motion", 0)
@@ -3183,7 +3188,7 @@ class AEAgentPipeline:
         else:
             return clips
 
-    def _classify_motion_level(self, clip: Dict) -> str:
+    def _classify_motion_level(self, clip: dict) -> str:
         motion = (clip.get("motion_analysis", {}).get("avg_motion_intensity", 0)
                   or clip.get("motion_features", {}).get("avg_motion", 0)
                   or clip.get("features", {}).get("avg_motion", 0))
@@ -3194,7 +3199,7 @@ class AEAgentPipeline:
         else:
             return "low"
 
-    def _create_effects(self, understanding: UnderstandingResult, layers: List[Dict]) -> List[Dict]:
+    def _create_effects(self, understanding: UnderstandingResult, layers: list[dict]) -> list[dict]:
         """
         创建效果列表（结合效果知识图谱搜索 + NLU 精细意图 + 风格配方）
         优先级：NLU 精细意图 > 风格配方 > 默认效果
@@ -3257,7 +3262,7 @@ class AEAgentPipeline:
         # 通过 effect_name_map 解析效果名→matchName
         effect_name_map_available = self._effect_name_map is not None
 
-        def _resolve_effect(effect_entry: Dict) -> Dict:
+        def _resolve_effect(effect_entry: dict) -> dict:
             """通过 effect_name_map 解析效果名，补充 matchName"""
             result = dict(effect_entry)
             effect_name = result.get("effectName", "")
@@ -3305,7 +3310,7 @@ class AEAgentPipeline:
 
         return effects
 
-    def _enhance_effects_with_knowledge_graph(self, effects: List[Dict], understanding: UnderstandingResult) -> List[Dict]:
+    def _enhance_effects_with_knowledge_graph(self, effects: list[dict], understanding: UnderstandingResult) -> list[dict]:
         """
         通过效果知识图谱搜索增强效果列表
         1. 根据 NLU 精细意图搜索匹配效果
@@ -3313,7 +3318,7 @@ class AEAgentPipeline:
         3. 合并去重，保留原有效果
         """
         try:
-            from effect_knowledge_graph import search_effects_enhanced, recommend_style_enhanced
+            from effect_knowledge_graph import recommend_style_enhanced, search_effects_enhanced
 
             enhanced_effects = list(effects)
             seen_effects = {e["effectName"] for e in effects}
@@ -3396,8 +3401,8 @@ class AEAgentPipeline:
             return effects
 
     def _enhance_with_composition_engine(
-        self, effects: List[Dict], understanding: UnderstandingResult
-    ) -> List[Dict]:
+        self, effects: list[dict], understanding: UnderstandingResult
+    ) -> list[dict]:
         """
         使用 EffectCompositionEngine 进行智能效果组合
         - 基于关键词组合新效果（synergy 加成）
@@ -3479,7 +3484,7 @@ class AEAgentPipeline:
             self.log_warning(f"效果组合引擎增强失败（不影响主流程）: {e}")
             return effects
 
-    def list_available_styles(self) -> List[Dict]:
+    def list_available_styles(self) -> list[dict]:
         """列出所有可用的风格预设（直接访问 STYLE_TEMPLATES）"""
         if not self._style_templates:
             return []
@@ -3495,7 +3500,7 @@ class AEAgentPipeline:
             for name, tpl in self._style_templates.items()
         ]
 
-    def get_style_template(self, style_name: str) -> Optional[Dict]:
+    def get_style_template(self, style_name: str) -> dict | None:
         """获取指定风格的完整模板（直接访问 STYLE_TEMPLATES）"""
         if not self._style_templates:
             return None
@@ -3503,7 +3508,7 @@ class AEAgentPipeline:
 
     def apply_style_with_intensity(
         self, style_name: str, intensity: float = 1.0
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """按强度系数应用风格模板，返回带强度缩放的效果列表"""
         template = self.get_style_template(style_name)
         if not template:
@@ -3531,8 +3536,8 @@ class AEAgentPipeline:
         return scaled_effects
 
     def _enhance_with_effect_generators(
-        self, effects: List[Dict], understanding: UnderstandingResult
-    ) -> List[Dict]:
+        self, effects: list[dict], understanding: UnderstandingResult
+    ) -> list[dict]:
         """使用 EffectGeneratorFactory 智能生成/优化效果参数
 
         为已选效果提供智能参数生成，根据强度关键词和风格调整参数值。
@@ -3598,9 +3603,9 @@ class AEAgentPipeline:
             self.log_warning(f"效果生成器增强失败（不影响主流程）: {e}")
             return effects
 
-    def _enhance_with_style_templates(self, effects: List[Dict],
+    def _enhance_with_style_templates(self, effects: list[dict],
                                        understanding: UnderstandingResult,
-                                       layers: List[Dict]) -> List[Dict]:
+                                       layers: list[dict]) -> list[dict]:
         """EffectComposer 风格模板增强 — 根据风格匹配补充效果"""
         if not getattr(self, "effect_composer", None) or not understanding.style:
             return effects
@@ -3675,7 +3680,8 @@ class AEAgentPipeline:
             return plan
 
         try:
-            from scene_orchestrator import Scene, CameraMove, Transition as SceneTransition
+            from scene_orchestrator import CameraMove, Scene
+            from scene_orchestrator import Transition as SceneTransition
 
             orchestrator = self.scene_orchestrator
             orchestrator.scenes = []
@@ -3912,7 +3918,7 @@ class AEAgentPipeline:
         - 微缩场景效果
         """
         try:
-            from puppet_style_engine import PuppetStyleEngine, PuppetStyleConfig
+            from puppet_style_engine import PuppetStyleConfig, PuppetStyleEngine
         except ImportError:
             return
 
@@ -4027,7 +4033,7 @@ class AEAgentPipeline:
         except Exception as e:
             self.log_warning(f"木偶风格化增强失败（不影响主流程）: {e}")
 
-    def _optimize_effects(self, effects: List[Dict], understanding: UnderstandingResult) -> List[Dict]:
+    def _optimize_effects(self, effects: list[dict], understanding: UnderstandingResult) -> list[dict]:
         """
         LLM 增强参数优化（记忆缓存 + 本地规则 + LLM 建议）
         失败时自动降级为原效果列表，不影响主流程
@@ -4036,7 +4042,7 @@ class AEAgentPipeline:
             return effects
 
         try:
-            from parameter_optimizer import ParameterOptimizer, ParameterContext
+            from parameter_optimizer import ParameterContext, ParameterOptimizer
 
             optimizer = ParameterOptimizer()
             optimized_effects = []
@@ -4119,8 +4125,8 @@ class AEAgentPipeline:
         self,
         understanding: UnderstandingResult,
         perception: PerceptionResult,
-        layers: List[Dict],
-    ) -> List[Dict]:
+        layers: list[dict],
+    ) -> list[dict]:
         """使用 BeatOrchestrator 生成节拍同步关键帧"""
         if not self.beat_orchestrator:
             return []
@@ -4180,7 +4186,7 @@ class AEAgentPipeline:
         return all_keyframes
 
     def _create_keyframes(self, understanding: UnderstandingResult,
-                          perception: PerceptionResult, layers: List[Dict]) -> List[Dict]:
+                          perception: PerceptionResult, layers: list[dict]) -> list[dict]:
         keyframes = []
 
         # 优先使用 BeatOrchestrator 生成节拍同步关键帧
@@ -4326,7 +4332,7 @@ class AEAgentPipeline:
 
         return keyframes
 
-    def _create_transitions(self, understanding: UnderstandingResult, layers: List[Dict]) -> List[Dict]:
+    def _create_transitions(self, understanding: UnderstandingResult, layers: list[dict]) -> list[dict]:
         transitions = []
 
         transition_types = {
@@ -4441,7 +4447,7 @@ class AEAgentPipeline:
             f"{total_effects} 个效果, {total_keyframes} 个关键帧, {total_layers} 个图层"
         )
 
-    def _build_timeline(self, layers: List[Dict], transitions: List[Dict]) -> List[Dict]:
+    def _build_timeline(self, layers: list[dict], transitions: list[dict]) -> list[dict]:
         timeline = []
 
         for layer in layers:
@@ -4466,7 +4472,7 @@ class AEAgentPipeline:
 
         return sorted(timeline, key=lambda x: x["startTime"])
 
-    def _determine_execution_order(self) -> List[str]:
+    def _determine_execution_order(self) -> list[str]:
         return [
             "createComposition",
             "importFootage",
@@ -4478,8 +4484,8 @@ class AEAgentPipeline:
         ]
 
     def _compiler_ops_to_commands(
-        self, compiler_operations: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+        self, compiler_operations: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         """将 Phase3 compiler_operations 转换为 MCP 客户端可执行的命令格式
 
         report_to_ops 生成的操作格式：
@@ -4489,12 +4495,12 @@ class AEAgentPipeline:
 
         MCP 客户端命令格式：{op: str, params: Dict}
         """
-        commands: List[Dict[str, Any]] = []
-        ref_to_name_map: Dict[str, str] = {}  # ref -> 实际名称/索引映射
+        commands: list[dict[str, Any]] = []
+        ref_to_name_map: dict[str, str] = {}  # ref -> 实际名称/索引映射
 
         for op_data in compiler_operations:
             op_type = op_data.get("op", "")
-            params: Dict[str, Any] = {}
+            params: dict[str, Any] = {}
 
             if op_type == "createComp":
                 params = {
@@ -4639,7 +4645,7 @@ class AEAgentPipeline:
                             "status": "pending",
                             "message": sil_result.get("message", "需手动在 Silhouette 中完成")
                         })
-                        self.log_info(f"  │   │   ⏳ 待 Silhouette 中手动完成")
+                        self.log_info("  │   │   ⏳ 待 Silhouette 中手动完成")
                     elif sil_result.get("status") == "fallback":
                         result.silhouette_artifacts.append({
                             "command": cmd_type,
@@ -4677,7 +4683,7 @@ class AEAgentPipeline:
                         planning = self._apply_silhouette_to_ae(
                             sil_out, planning
                         )
-                    self.log_info(f"  │   └─ 📤 Silhouette 输出已应用到 AE 规划")
+                    self.log_info("  │   └─ 📤 Silhouette 输出已应用到 AE 规划")
 
                 if self._state_machine:
                     if sil_failed:
@@ -4758,10 +4764,16 @@ class AEAgentPipeline:
                     # 构造失败信息并获取恢复动作
                     try:
                         from failure_recovery import (
-                            ExecutionResult as FRExecution,
-                            ExpectedParameters as FRExpected,
-                            ExpectedProperty as FRProp,
                             ErrorCode,
+                        )
+                        from failure_recovery import (
+                            ExecutionResult as FRExecution,
+                        )
+                        from failure_recovery import (
+                            ExpectedParameters as FRExpected,
+                        )
+                        from failure_recovery import (
+                            ExpectedProperty as FRProp,
                         )
 
                         error_msg = ae_result.get("message", ae_result.get("error", "Unknown"))
@@ -4846,7 +4858,7 @@ class AEAgentPipeline:
                                     if adj_prop.name in current_params:
                                         current_params[adj_prop.name] = adj_prop.value
                                 retry_count += 1
-                                self.log_warning(f"  │   │   🔄 重试: 参数已调整")
+                                self.log_warning("  │   │   🔄 重试: 参数已调整")
                                 continue
 
                         elif recovery_action.action == "retry_with_longer_timeout":
@@ -4905,7 +4917,7 @@ class AEAgentPipeline:
             if self._state_machine:
                 self._state_machine.ae_executed()
 
-            self.log_info(f"  ├─ 渲染视频...")
+            self.log_info("  ├─ 渲染视频...")
             output_dir = self._config.get("output", {}).get("default_dir", "./output") if isinstance(self._config, dict) else "./output"
             os.makedirs(output_dir, exist_ok=True)
             output_path = os.path.join(output_dir, f"output_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4")
@@ -5006,7 +5018,7 @@ class AEAgentPipeline:
         })
         return result
 
-    def _execute_silhouette(self, planning: PlanningResult) -> Dict:
+    def _execute_silhouette(self, planning: PlanningResult) -> dict:
         if not planning.silhouette_operations or not self.silhouette_executor:
             return {"status": "skipped"}
 
@@ -5029,7 +5041,7 @@ class AEAgentPipeline:
         self,
         planning: PlanningResult,
         user_input: str = "",
-    ) -> Dict:
+    ) -> dict:
         """使用 HybridCoordinator 执行完整的混合流程
 
         流程：Silhouette → 数据转换 → AE 导入
@@ -5148,7 +5160,7 @@ class AEAgentPipeline:
         )
         return self._execute_fallback(last_error)
 
-    def _execute_fallback(self, error, task_type: str = "roto") -> Dict:
+    def _execute_fallback(self, error, task_type: str = "roto") -> dict:
         """执行降级策略：Silhouette 不可用时回退到 AE 原生工具
 
         消费 intent_router.FALLBACK_MAP 生成实际的 AE 降级操作列表。
@@ -5177,7 +5189,7 @@ class AEAgentPipeline:
         }
 
     def _apply_silhouette_to_ae(
-        self, silhouette_output: Dict, planning: PlanningResult
+        self, silhouette_output: dict, planning: PlanningResult
     ) -> PlanningResult:
         """将 Silhouette 输出自动应用到 AE 规划中
 
@@ -5256,7 +5268,7 @@ class AEAgentPipeline:
 
         return planning
 
-    def _silhouette_fallback(self, task_type: str = "roto") -> Dict:
+    def _silhouette_fallback(self, task_type: str = "roto") -> dict:
         """Silhouette 降级：使用 AE 原生工具替代
 
         消费 intent_router.FALLBACK_MAP 生成实际的 AE 降级操作：
@@ -5449,8 +5461,12 @@ class AEAgentPipeline:
         if verifier:
             try:
                 from result_verifier import (
-                    ExpectedParameters as RVExpected,
                     ExecutionResult as RVExecution,
+                )
+                from result_verifier import (
+                    ExpectedParameters as RVExpected,
+                )
+                from result_verifier import (
                     ExpectedProperty,
                 )
 
@@ -5515,11 +5531,19 @@ class AEAgentPipeline:
         if learning_loop:
             try:
                 from learning_loop import (
-                    ExpectedParameters as LLExpected,
                     ExecutionResult as LLExecution,
-                    VerificationResult as LLVerification,
+                )
+                from learning_loop import (
+                    ExpectedParameters as LLExpected,
+                )
+                from learning_loop import (
                     ExpectedProperty as LLProp,
+                )
+                from learning_loop import (
                     UserFeedback,
+                )
+                from learning_loop import (
+                    VerificationResult as LLVerification,
                 )
 
                 # 构造 ExpectedParameters
@@ -5629,10 +5653,16 @@ class AEAgentPipeline:
         if failure_recovery and not execution.success:
             try:
                 from failure_recovery import (
-                    ExpectedParameters as FRExpected,
-                    ExecutionResult as FRExecution,
-                    ExpectedProperty as FRProp,
                     ErrorCode,
+                )
+                from failure_recovery import (
+                    ExecutionResult as FRExecution,
+                )
+                from failure_recovery import (
+                    ExpectedParameters as FRExpected,
+                )
+                from failure_recovery import (
+                    ExpectedProperty as FRProp,
                 )
 
                 # 推断错误码
@@ -5780,7 +5810,7 @@ class AEAgentPipeline:
         return min(1.0, confidence)
 
     def _generate_suggestions(self, planning: PlanningResult,
-                              execution: ExecutionResult) -> List[str]:
+                              execution: ExecutionResult) -> list[str]:
         suggestions = []
 
         if len(planning.layers) < 3:
@@ -5793,7 +5823,7 @@ class AEAgentPipeline:
             suggestions.append("渲染输出路径未设置，请检查输出配置")
 
         try:
-            from effect_knowledge_graph import find_conflicts, check_boundaries
+            from effect_knowledge_graph import check_boundaries, find_conflicts
 
             for effect in planning.effects:
                 effect_name = effect.get("effectName", "")
@@ -5820,7 +5850,7 @@ class AEAgentPipeline:
 
     def _extract_patterns(self, perception: PerceptionResult,
                           understanding: UnderstandingResult,
-                          planning: PlanningResult) -> Dict:
+                          planning: PlanningResult) -> dict:
         patterns = {}
 
         if perception.music_features:
@@ -5868,6 +5898,6 @@ class AEAgentPipeline:
             confidence=confidence,
         )
 
-    def _generate_pipeline_id(self, music_path: str, clip_paths: List[str]) -> str:
+    def _generate_pipeline_id(self, music_path: str, clip_paths: list[str]) -> str:
         unique_str = f"{music_path}_{'_'.join(clip_paths)}_{datetime.now().isoformat()}"
         return hashlib.md5(unique_str.encode()).hexdigest()

@@ -56,7 +56,7 @@ _MEDIA_EXTENSIONS = {
 }
 
 # ── 进程内任务注册表 ──
-_TASKS: Dict[str, Dict[str, Any]] = {}
+_TASKS: dict[str, dict[str, Any]] = {}
 _TASKS_LOCK = threading.Lock()
 
 
@@ -83,9 +83,9 @@ def _get_unified_downloader():
         return None
 
 
-def _check_capabilities() -> Dict[str, Any]:
+def _check_capabilities() -> dict[str, Any]:
     """探测下载器及依赖可用性，用于 /status graceful 展示。"""
-    caps: Dict[str, Any] = {}
+    caps: dict[str, Any] = {}
 
     _ensure_downloader_dir_in_path()
 
@@ -163,7 +163,7 @@ def _register_task(url: str, **extra: Any) -> str:
     return task_id
 
 
-def _finish_task(task_id: str, result: Optional[Dict[str, Any]] = None, error: Optional[str] = None) -> None:
+def _finish_task(task_id: str, result: dict[str, Any] | None = None, error: str | None = None) -> None:
     """标记任务完成（成功或失败）。"""
     with _TASKS_LOCK:
         task = _TASKS.get(task_id)
@@ -175,7 +175,7 @@ def _finish_task(task_id: str, result: Optional[Dict[str, Any]] = None, error: O
         task["error"] = error
 
 
-def _list_tasks() -> List[Dict[str, Any]]:
+def _list_tasks() -> list[dict[str, Any]]:
     """返回全部任务（按创建时间倒序）。"""
     with _TASKS_LOCK:
         tasks = list(_TASKS.values())
@@ -204,7 +204,7 @@ class MediaDownloadRequest(BaseModel):
 
 @router.get("/media/status")
 async def media_status(
-    task_id: Optional[str] = Query(None, description="按 task_id 查询单个任务状态"),
+    task_id: str | None = Query(None, description="按 task_id 查询单个任务状态"),
 ):
     """查询素材下载器的可用性、依赖能力及下载任务状态。
 
@@ -317,8 +317,8 @@ async def media_download(req: MediaDownloadRequest):
 
 @router.get("/media/list")
 async def media_list(
-    output_dir: Optional[str] = Query(None, description="素材目录，默认使用默认素材目录"),
-    extension: Optional[str] = Query(None, description="按扩展名过滤，如 .mp4"),
+    output_dir: str | None = Query(None, description="素材目录，默认使用默认素材目录"),
+    extension: str | None = Query(None, description="按扩展名过滤，如 .mp4"),
     limit: int = Query(200, ge=1, le=1000, description="返回条数上限"),
 ):
     """列出已下载素材（默认素材目录及其子目录下）。"""
@@ -331,7 +331,7 @@ async def media_list(
     if not base_dir.exists():
         return {"success": True, "base_dir": str(base_dir), "total": 0, "files": []}
 
-    files: List[Dict[str, Any]] = []
+    files: list[dict[str, Any]] = []
     for p in base_dir.rglob("*"):
         if not p.is_file():
             continue

@@ -19,14 +19,13 @@ API 文档：https://developer.jamendo.com/v3.0
     2. JSON 输入模式：python jamendo_client.py --json-input '{"func":"search_tracks","params":{...}}'
 """
 
+import json
 import os
 import sys
-import json
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 import requests
-
 
 # =============================================================================
 # 常量定义
@@ -91,7 +90,7 @@ class JamendoClient:
     通过 client_id 鉴权，封装曲目搜索、详情查询、下载能力。
     """
 
-    def __init__(self, client_id: str, output_dir: Optional[str] = None):
+    def __init__(self, client_id: str, output_dir: str | None = None):
         """
         初始化客户端
 
@@ -112,7 +111,7 @@ class JamendoClient:
     # 内部工具方法
     # -------------------------------------------------------------------------
 
-    def _build_params(self, **kwargs) -> Dict[str, str]:
+    def _build_params(self, **kwargs) -> dict[str, str]:
         """构造请求参数，自动附加 client_id"""
         params = {"client_id": self.client_id, "format": "json"}
         for k, v in kwargs.items():
@@ -130,9 +129,9 @@ class JamendoClient:
     def _request(
         self,
         url: str,
-        params: Optional[Dict] = None,
+        params: dict | None = None,
         method: str = "GET",
-    ) -> Dict:
+    ) -> dict:
         """
         发起 HTTP 请求并返回 JSON
 
@@ -186,7 +185,7 @@ class JamendoClient:
 
         return data
 
-    def _download_file(self, url: str, output_path: str) -> Dict:
+    def _download_file(self, url: str, output_path: str) -> dict:
         """
         下载文件到本地
 
@@ -237,7 +236,7 @@ class JamendoClient:
         include: str = "musicinfo+licenses",
         imagesize: str = "200",
         order: str = "popularity_total",
-    ) -> Dict:
+    ) -> dict:
         """
         搜索曲目
 
@@ -289,7 +288,7 @@ class JamendoClient:
 
         return self._request(JAMENDO_TRACKS_ENDPOINT, params)
 
-    def get_track(self, track_id: str, audioformat: str = "mp32") -> Dict:
+    def get_track(self, track_id: str, audioformat: str = "mp32") -> dict:
         """
         获取单曲信息
 
@@ -321,7 +320,7 @@ class JamendoClient:
         limit: int = 20,
         offset: int = 0,
         audioformat: str = "mp32",
-    ) -> Dict:
+    ) -> dict:
         """
         按情绪搜索曲目
 
@@ -350,7 +349,7 @@ class JamendoClient:
         limit: int = 20,
         offset: int = 0,
         audioformat: str = "mp32",
-    ) -> Dict:
+    ) -> dict:
         """
         按曲风搜索曲目
 
@@ -377,7 +376,7 @@ class JamendoClient:
         limit: int = 20,
         offset: int = 0,
         audioformat: str = "mp32",
-    ) -> Dict:
+    ) -> dict:
         """
         按 BPM 范围搜索曲目
 
@@ -403,7 +402,7 @@ class JamendoClient:
     # 曲风列表
     # -------------------------------------------------------------------------
 
-    def get_genres(self, limit: int = 100) -> Dict:
+    def get_genres(self, limit: int = 100) -> dict:
         """
         获取所有曲风列表
 
@@ -424,9 +423,9 @@ class JamendoClient:
     def download_track(
         self,
         track_id: str,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         audioformat: str = "mp32",
-    ) -> Dict:
+    ) -> dict:
         """
         下载音乐文件
 
@@ -489,7 +488,7 @@ class JamendoClient:
 # 统一结果格式化（供 unified_search 使用）
 # =============================================================================
 
-def normalize_track_result(raw: Dict) -> Dict:
+def normalize_track_result(raw: dict) -> dict:
     """
     将 Jamendo 曲目结果归一化为统一格式
 

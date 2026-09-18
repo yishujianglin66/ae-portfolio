@@ -9,18 +9,18 @@
   5. 关键帧动画 —— 其中2个镜头用 bezier 缩放/位移动画
 输出：output\\phase3_showcase\\combined_showcase.mp4（含真实 BGM 音轨）
 """
-import sys
-import os
 import json
+import os
 import shlex
 import subprocess
+import sys
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
 from integrations.resolve_engine import (
+    Keyframe,
     ResolveAutomationEngine,
     TransitionConfig,
-    Keyframe,
 )
 
 WORKSPACE = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault"
@@ -223,12 +223,12 @@ def main():
     print("=" * 78)
     print(f"  File    : {final_out}")
     print(f"  Duration: {info['duration']:.1f}s | Size: {info['size_mb']:.1f}MB | Res: {info['res']}")
-    print(f"  Techniques fused:")
+    print("  Techniques fused:")
     print(f"    1. Beat-sync    : {n_shots} shots @ {SHOT_DUR:.1f}s aligned to beat grid")
-    print(f"    2. Speed ramp   : fast(1->2.2x) / slow(1->0.6x) shots")
+    print("    2. Speed ramp   : fast(1->2.2x) / slow(1->0.6x) shots")
     print(f"    3. Transitions  : {'/'.join(transition_cycle)}")
-    print(f"    4. Color        : per-shot LUT+colorwheel + global Teal&Orange")
-    print(f"    5. Keyframes    : push-in / pan (bezier) shots")
+    print("    4. Color        : per-shot LUT+colorwheel + global Teal&Orange")
+    print("    5. Keyframes    : push-in / pan (bezier) shots")
     ok = info['duration'] > 2.0
     print(f"\n  Status: {'PASS' if ok else 'FAIL'}")
     return ok

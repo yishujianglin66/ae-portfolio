@@ -5,9 +5,13 @@ t33b_fix_and_identify.py — 修复提取问题 + VLM识别pending目录
 2. 用VLM识别 pending_do_you_mean 目录的IP
 3. 为所有新帧生成scene/mood标签
 """
-import os, sys, json, subprocess, time
-from pathlib import Path
+import json
+import os
+import subprocess
+import sys
+import time
 from collections import Counter
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 

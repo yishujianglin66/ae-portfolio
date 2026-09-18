@@ -96,18 +96,18 @@ class BridgeMetadata:
     source: str = ""
     target: str = ""
     created_at: float = field(default_factory=time.time)
-    extra: Dict[str, Any] = field(default_factory=dict)
+    extra: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class BridgeCommand:
     command_id: str = ""
     action: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     priority: Priority = Priority.NORMAL
     ttl_ms: int = DEFAULT_TTL_MS
-    metadata: Optional[BridgeMetadata] = None
-    signature: Optional[str] = None
+    metadata: BridgeMetadata | None = None
+    signature: str | None = None
 
 
 @dataclass
@@ -122,18 +122,18 @@ class BridgeResponse:
     command_id: str = ""
     status: CommandStatus = CommandStatus.PENDING
     result: Any = None
-    error: Optional[str] = None
-    error_code: Optional[ErrorCode] = None
-    signature: Optional[str] = None
-    metadata: Optional[BridgeMetadata] = None
+    error: str | None = None
+    error_code: ErrorCode | None = None
+    signature: str | None = None
+    metadata: BridgeMetadata | None = None
 
 
 class BridgeClient:
     """最小重建客户端：构造兼容；真实文件桥执行明确报错。"""
 
     def __init__(self, bridge_dir: str = "", signature_enabled: bool = True,
-                 secret: Optional[str] = None,
-                 secret_file: Optional[str] = None,
+                 secret: str | None = None,
+                 secret_file: str | None = None,
                  poll_interval: float = DEFAULT_POLL_INTERVAL,
                  max_retries: int = DEFAULT_MAX_RETRIES,
                  **kwargs: Any) -> None:

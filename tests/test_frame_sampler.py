@@ -4,8 +4,10 @@ TDD: 用 ffmpeg 合成测试视频, 验证 probe_video 和 sample_frame_stats �
 """
 import shutil
 import subprocess
-import pytest
 from pathlib import Path
+
+import pytest
+
 from core.frame_sampler import FrameStats, probe_video, sample_frame_stats
 
 HAS_FFMPEG = shutil.which("ffmpeg") is not None

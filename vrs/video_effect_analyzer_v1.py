@@ -14,18 +14,19 @@
 
 依赖：pip install scenedetect opencv-python scikit-image numpy scipy
 """
-import os
 import json
+import os
 import subprocess
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from datetime import datetime
+
 
 class VideoEffectAnalyzer:
     def __init__(self, config_path: str = None):
         self.config = self._load_config(config_path) if config_path else {}
     
-    def _load_config(self, path: str) -> Dict:
+    def _load_config(self, path: str) -> dict:
         try:
             with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -36,7 +37,7 @@ class VideoEffectAnalyzer:
     #  一、完整分析入口
     # ============================================================
     
-    def analyze_video(self, video_path: str, detail_level: str = "full") -> Dict:
+    def analyze_video(self, video_path: str, detail_level: str = "full") -> dict:
         """
         完整视频效果逆向分析
         :param video_path: 视频文件路径
@@ -108,7 +109,7 @@ class VideoEffectAnalyzer:
     #  二、基础信息获取
     # ============================================================
     
-    def _get_basic_info(self, video_path: str) -> Dict:
+    def _get_basic_info(self, video_path: str) -> dict:
         """获取视频基础信息"""
         import cv2
         
@@ -147,7 +148,7 @@ class VideoEffectAnalyzer:
     #  三、帧采样
     # ============================================================
     
-    def _sample_frames(self, video_path: str, interval: int = 5) -> List[Dict]:
+    def _sample_frames(self, video_path: str, interval: int = 5) -> list[dict]:
         """按间隔采样视频帧，提取特征"""
         import cv2
         import numpy as np
@@ -249,10 +250,10 @@ class VideoEffectAnalyzer:
     #  四、场景/镜头检测
     # ============================================================
     
-    def _detect_scenes(self, video_path: str) -> List[Dict]:
+    def _detect_scenes(self, video_path: str) -> list[dict]:
         """使用PySceneDetect检测场景切换"""
         try:
-            from scenedetect import detect, ContentDetector, ThresholdDetector
+            from scenedetect import ContentDetector, ThresholdDetector, detect
             
             # 硬切检测
             scenes = detect(video_path, ContentDetector(threshold=27.0))
@@ -277,7 +278,7 @@ class VideoEffectAnalyzer:
         except Exception as e:
             return [{"error": str(e)}]
     
-    def _detect_scenes_opencv(self, video_path: str) -> List[Dict]:
+    def _detect_scenes_opencv(self, video_path: str) -> list[dict]:
         """OpenCV帧差法场景检测（备用方案）"""
         import cv2
         import numpy as np
@@ -341,7 +342,7 @@ class VideoEffectAnalyzer:
     #  五、转场分析
     # ============================================================
     
-    def _analyze_transitions(self, frames_data: List[Dict]) -> List[Dict]:
+    def _analyze_transitions(self, frames_data: list[dict]) -> list[dict]:
         """分析转场效果类型"""
         if len(frames_data) < 2:
             return []
@@ -416,7 +417,7 @@ class VideoEffectAnalyzer:
     #  六、色彩调色分析
     # ============================================================
     
-    def _analyze_color_grading(self, frames_data: List[Dict]) -> Dict:
+    def _analyze_color_grading(self, frames_data: list[dict]) -> dict:
         """分析整体色彩调色风格"""
         if not frames_data:
             return {}
@@ -525,7 +526,7 @@ class VideoEffectAnalyzer:
     #  七、运动/速度分析
     # ============================================================
     
-    def _analyze_motion(self, frames_data: List[Dict]) -> Dict:
+    def _analyze_motion(self, frames_data: list[dict]) -> dict:
         """分析运动和速度变化"""
         import numpy as np
         
@@ -606,7 +607,7 @@ class VideoEffectAnalyzer:
     #  八、视觉效果检测
     # ============================================================
     
-    def _detect_visual_effects(self, frames_data: List[Dict]) -> Dict:
+    def _detect_visual_effects(self, frames_data: list[dict]) -> dict:
         """检测视觉特效"""
         import numpy as np
         
@@ -680,7 +681,7 @@ class VideoEffectAnalyzer:
     #  九、剪辑节奏分析
     # ============================================================
     
-    def _analyze_rhythm(self, scenes: List[Dict], transitions: List[Dict], motion: Dict) -> Dict:
+    def _analyze_rhythm(self, scenes: list[dict], transitions: list[dict], motion: dict) -> dict:
         """分析视频剪辑节奏"""
         import numpy as np
         
@@ -719,7 +720,7 @@ class VideoEffectAnalyzer:
     #  十、生成AE参数表
     # ============================================================
     
-    def _generate_ae_parameters(self, analysis: Dict) -> Dict:
+    def _generate_ae_parameters(self, analysis: dict) -> dict:
         """从分析结果生成AE可执行的参数表"""
         ae_params = {
             "composition": {
@@ -796,7 +797,7 @@ class VideoEffectAnalyzer:
     #  十一、生成提示词
     # ============================================================
     
-    def _generate_prompts(self, analysis: Dict) -> Dict:
+    def _generate_prompts(self, analysis: dict) -> dict:
         """生成自然语言提示词，用于MCP端控制AE"""
         color = analysis.get("color_grading", {})
         motion = analysis.get("motion_analysis", {})
@@ -813,7 +814,7 @@ class VideoEffectAnalyzer:
         style_desc += f"相机运动为{motion.get('camera_motion', '固定')}。"
         
         # MCP执行提示词
-        mcp_prompt = f"请帮我创建一个AE合成，应用以下效果：\n"
+        mcp_prompt = "请帮我创建一个AE合成，应用以下效果：\n"
         
         if color.get("ae_lumetri_params"):
             lp = color["ae_lumetri_params"]

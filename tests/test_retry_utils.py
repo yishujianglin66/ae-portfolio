@@ -13,22 +13,22 @@ from __future__ import annotations
 import os
 import sys
 import time
+from unittest.mock import MagicMock, call, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, call
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.retry_utils import (
+    ProgressCallback,
     RetryConfig,
     RetryResult,
-    retry_with_backoff,
-    call_with_retry,
-    ProgressCallback,
     SubProgressReporter,
-    progress_context,
+    call_with_retry,
     exponential_backoff,
+    progress_context,
+    retry_with_backoff,
 )
-
 
 # ============================================================
 # 数据类测试

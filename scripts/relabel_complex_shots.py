@@ -55,7 +55,7 @@ PROMPT = """你是专业的运镜分析专家。下面按时间顺序给出了�
 {"direction": "zoom_in", "confidence": 0.9}""" % FRAMES_PER_SHOT
 
 
-def extract_frames(clip_path: str) -> List[str]:
+def extract_frames(clip_path: str) -> list[str]:
     import tempfile
     tmp = Path(tempfile.mkdtemp(prefix="relabel_"))
     r = subprocess.run([FFMPEG, "-i", clip_path], capture_output=True,
@@ -83,8 +83,8 @@ def extract_frames(clip_path: str) -> List[str]:
     return frames
 
 
-def relabel(client, frames_b64: List[str]) -> Tuple[Optional[Dict[str, Any]], float]:
-    content: List[Dict[str, Any]] = [{"type": "text", "text": PROMPT}]
+def relabel(client, frames_b64: list[str]) -> tuple[dict[str, Any] | None, float]:
+    content: list[dict[str, Any]] = [{"type": "text", "text": PROMPT}]
     for fb in frames_b64:
         content.append({"type": "image_url", "image_url": {
             "url": f"data:image/jpeg;base64,{fb}", "detail": "low"}})

@@ -27,7 +27,7 @@ DETAIL = PROJECT_ROOT / "models" / "output" / "flow_vlm_eval.jsonl"
 W, H = 320, 240
 
 
-def dense_flow(clip: str) -> Dict[str, float]:
+def dense_flow(clip: str) -> dict[str, float]:
     frames = _read_frames(clip, max_frames=50, target_fps=10)
     if len(frames) < 3:
         return {"n_frames": 0}
@@ -62,12 +62,12 @@ def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     rows = [json.loads(l) for l in DETAIL.read_text(encoding="utf-8").splitlines() if l.strip()]
-    by_label: Dict[str, List[Dict[str, Any]]] = {}
+    by_label: dict[str, list[dict[str, Any]]] = {}
     for r in rows:
         by_label.setdefault(r["vlm_label"], []).append(r)
 
     # 每类取 12 条
-    picks: List[Dict[str, Any]] = []
+    picks: list[dict[str, Any]] = []
     for lab in ("zoom_in", "zoom_out", "pan_left", "pan_right", "static"):
         picks.extend(by_label.get(lab, [])[:12])
 

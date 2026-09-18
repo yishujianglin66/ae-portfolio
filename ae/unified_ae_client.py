@@ -50,7 +50,7 @@ except ImportError:
     _EVENT_BUS_AVAILABLE = False
 
 try:
-    from core.ae_tracer import start_ae_operation, end_ae_operation, ae_tracer
+    from core.ae_tracer import ae_tracer, end_ae_operation, start_ae_operation
     _TRACER_AVAILABLE = True
 except ImportError:
     _TRACER_AVAILABLE = False
@@ -90,11 +90,11 @@ class AEOperation:
     name: str
     channel: AEChannel = AEChannel.AUTO
     method: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     requires_gui: bool = False
     estimated_duration: float = 1.0
     is_idempotent: bool = False
-    fallback: Optional["AEOperation"] = None
+    fallback: "AEOperation" | None = None
 
     def __post_init__(self) -> None:
         if not self.method:
@@ -109,11 +109,11 @@ class AEChannelStats:
     success_count: int = 0
     failure_count: int = 0
     total_latency_ms: float = 0.0
-    last_call_time: Optional[float] = None
-    last_error: Optional[str] = None
+    last_call_time: float | None = None
+    last_error: str | None = None
     consecutive_failures: int = 0
 
-    def record(self, success: bool, latency_ms: float, error: Optional[str] = None) -> None:
+    def record(self, success: bool, latency_ms: float, error: str | None = None) -> None:
         """记录一次调用结果。"""
         self.total_calls += 1
         self.total_latency_ms += latency_ms
@@ -138,7 +138,7 @@ class AEChannelStats:
             return 0.0
         return self.total_latency_ms / self.total_calls
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "total_calls": self.total_calls,
             "success_count": self.success_count,
@@ -175,7 +175,7 @@ class ChannelSelector:
         FAILURE_THRESHOLD: 连续失败多少次认为通道不健康
     """
 
-    RULES: Dict[str, AEChannel] = {
+    RULES: dict[str, AEChannel] = {
         # 渲染：puppet 通道最稳（aerender 无界面）
         "render": AEChannel.PUPPET,
         "render_segment": AEChannel.PUPPET,
@@ -187,7 +187,7 @@ class ChannelSelector:
         # 其它通用操作：AUTO（按健康度选）
     }
 
-    GUI_REQUIRED: Set[str] = {
+    GUI_REQUIRED: set[str] = {
         "execute_atom_script",
         "set_layer_expression",
     }
@@ -198,8 +198,8 @@ class ChannelSelector:
     def select(
         cls,
         op_name: str,
-        context: Optional[Dict[str, Any]] = None,
-        stats: Optional[Dict[AEChannel, AEChannelStats]] = None,
+        context: dict[str, Any] | None = None,
+        stats: dict[AEChannel, AEChannelStats] | None = None,
     ) -> AEChannel:
         """选择最合适的通道。
 
@@ -259,7 +259,7 @@ class ChannelSelector:
         return AEChannel.PUPPET
 
     @classmethod
-    def _is_healthy(cls, channel: AEChannel, stats: Dict[AEChannel, AEChannelStats]) -> bool:
+    def _is_healthy(cls, channel: AEChannel, stats: dict[AEChannel, AEChannelStats]) -> bool:
         """通道是否健康（连续失败未超阈值）。"""
         s = stats.get(channel)
         if s is None:
@@ -268,7 +268,7 @@ class ChannelSelector:
 
     @classmethod
     def _fallback_channel(
-        cls, current: AEChannel, stats: Dict[AEChannel, AEChannelStats]
+        cls, current: AEChannel, stats: dict[AEChannel, AEChannelStats]
     ) -> AEChannel:
         """从当前通道选一个备选。"""
         candidates = [c for c in (AEChannel.PUPPET, AEChannel.MCP) if c != current]
@@ -286,7 +286,7 @@ class ChannelSelector:
 class UnifiedAEError(Exception):
     """UnifiedAEClient 基础异常。"""
 
-    def __init__(self, message: str, channel: Optional[str] = None) -> None:
+    def __init__(self, message: str, channel: str | None = None) -> None:
         self.message = message
         self.channel = channel
         super().__init__(message)
@@ -300,7 +300,7 @@ class UnifiedAEError(Exception):
 class AllChannelsFailedError(UnifiedAEError):
     """所有通道均失败时抛出。"""
 
-    def __init__(self, op_name: str, errors: List[Tuple[str, str]]) -> None:
+    def __init__(self, op_name: str, errors: list[tuple[str, str]]) -> None:
         self.op_name = op_name
         self.errors = errors
         msg = f"操作 {op_name} 所有通道均失败: " + "; ".join(
@@ -328,13 +328,13 @@ class UnifiedAEClient:
 
     def __init__(
         self,
-        puppet_engine: Optional[Any] = None,
-        mcp_client: Optional[Any] = None,
+        puppet_engine: Any | None = None,
+        mcp_client: Any | None = None,
         default_channel: AEChannel = AEChannel.AUTO,
         enable_fallback: bool = True,
         stats_enabled: bool = True,
-        puppet_adapter_factory: Optional[Callable[..., Any]] = None,
-        mcp_adapter_factory: Optional[Callable[..., Any]] = None,
+        puppet_adapter_factory: Callable[..., Any] | None = None,
+        mcp_adapter_factory: Callable[..., Any] | None = None,
     ) -> None:
         """初始化统一客户端。
 
@@ -352,10 +352,10 @@ class UnifiedAEClient:
         self.stats_enabled = stats_enabled
 
         # 通道实例（懒加载）
-        self._puppet: Optional[Any] = None
-        self._mcp: Optional[Any] = None
-        self._puppet_ready: Optional[bool] = None
-        self._mcp_ready: Optional[bool] = None
+        self._puppet: Any | None = None
+        self._mcp: Any | None = None
+        self._puppet_ready: bool | None = None
+        self._mcp_ready: bool | None = None
 
         # 注入 / 工厂
         self._puppet_inject = puppet_engine
@@ -364,7 +364,7 @@ class UnifiedAEClient:
         self._mcp_factory = mcp_adapter_factory
 
         # 统计
-        self._stats: Dict[AEChannel, AEChannelStats] = {
+        self._stats: dict[AEChannel, AEChannelStats] = {
             AEChannel.PUPPET: AEChannelStats(),
             AEChannel.MCP: AEChannelStats(),
         }
@@ -451,7 +451,7 @@ class UnifiedAEClient:
             stats=self._stats if self.stats_enabled else None,
         )
 
-    def _execute_puppet(self, op: AEOperation) -> Dict[str, Any]:
+    def _execute_puppet(self, op: AEOperation) -> dict[str, Any]:
         """在 puppet 通道上执行操作。"""
         adapter = self._get_puppet()
         method = getattr(adapter, op.method, None)
@@ -466,7 +466,7 @@ class UnifiedAEClient:
             result = {"success": True, "data": result, "channel": "puppet"}
         return result
 
-    def _execute_mcp(self, op: AEOperation) -> Dict[str, Any]:
+    def _execute_mcp(self, op: AEOperation) -> dict[str, Any]:
         """在 MCP 通道上执行操作。"""
         # 快速失败：MCP 通道不可用时不要走真实连接等待 30s TTL
         if not self.is_mcp_available():
@@ -488,7 +488,7 @@ class UnifiedAEClient:
             result = {"success": True, "data": result, "channel": "mcp"}
         return result
 
-    def _execute_with_fallback(self, op: AEOperation) -> Dict[str, Any]:
+    def _execute_with_fallback(self, op: AEOperation) -> dict[str, Any]:
         """执行操作，支持降级。
 
         流程：
@@ -498,7 +498,7 @@ class UnifiedAEClient:
         4. 全部失败 → 抛 ``AllChannelsFailedError``。
         """
         primary = self._select_channel(op)
-        tried: List[Tuple[str, str]] = []
+        tried: list[tuple[str, str]] = []
         
         span = None
         if _TRACER_AVAILABLE:
@@ -570,11 +570,11 @@ class UnifiedAEClient:
 
     def _iter_channels(
         self, primary: AEChannel, op: AEOperation
-    ) -> List[AEChannel]:
+    ) -> list[AEChannel]:
         """生成执行通道顺序（含降级链）。"""
-        order: List[AEChannel] = []
+        order: list[AEChannel] = []
         # 用户在 op.fallback 中显式声明的降级链优先
-        cur: Optional[AEOperation] = op
+        cur: AEOperation | None = op
         while cur is not None:
             if cur.channel not in (AEChannel.AUTO,):
                 order.append(cur.channel)
@@ -590,8 +590,8 @@ class UnifiedAEClient:
                 order.append(other)
 
         # 去重保序
-        seen: Set[AEChannel] = set()
-        deduped: List[AEChannel] = []
+        seen: set[AEChannel] = set()
+        deduped: list[AEChannel] = []
         for c in order:
             if c not in seen:
                 deduped.append(c)
@@ -612,7 +612,7 @@ class UnifiedAEClient:
         fps: float = 30.0,
         duration: float = 10.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建合成。"""
         op = AEOperation(
             name="create_composition",
@@ -630,7 +630,7 @@ class UnifiedAEClient:
         )
         return self._execute_with_fallback(op)
 
-    def list_compositions(self) -> List[Dict[str, Any]]:
+    def list_compositions(self) -> list[dict[str, Any]]:
         """列出所有合成。"""
         op = AEOperation(
             name="list_compositions",
@@ -656,7 +656,7 @@ class UnifiedAEClient:
         comp_name: str,
         text: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建文字图层。"""
         op = AEOperation(
             name="create_text_layer",
@@ -669,9 +669,9 @@ class UnifiedAEClient:
     def create_solid_layer(
         self,
         comp_name: str,
-        color: List[float],
+        color: list[float],
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建固态层。"""
         op = AEOperation(
             name="create_solid_layer",
@@ -685,7 +685,7 @@ class UnifiedAEClient:
         comp_name: str,
         shape_type: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="create_shape_layer",
             params={"comp_name": comp_name, "shape_type": shape_type, **kwargs},
@@ -698,7 +698,7 @@ class UnifiedAEClient:
         self,
         comp_name: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="add_adjustment_layer",
             params={"comp_name": comp_name, **kwargs},
@@ -713,7 +713,7 @@ class UnifiedAEClient:
         comp_name: str,
         layer_index: int,
         **properties: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="set_layer_properties",
             params={
@@ -731,7 +731,7 @@ class UnifiedAEClient:
         comp_name: str,
         layer_index: int,
         blend_mode: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="set_blend_mode",
             params={
@@ -748,7 +748,7 @@ class UnifiedAEClient:
         comp_name: str,
         layer_index: int,
         matte_type: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="set_track_matte",
             params={
@@ -765,7 +765,7 @@ class UnifiedAEClient:
         comp_name: str,
         layer_index: int,
         parent_index: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="set_parent_layer",
             params={
@@ -787,7 +787,7 @@ class UnifiedAEClient:
         property_name: str,
         time: float,
         value: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="set_layer_keyframe",
             params={
@@ -809,7 +809,7 @@ class UnifiedAEClient:
         property_path: str,
         key_index: int,
         easing_type: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="set_keyframe_easing",
             channel=AEChannel.MCP,
@@ -831,7 +831,7 @@ class UnifiedAEClient:
         layer_index: int,
         property_name: str,
         expression: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="set_layer_expression",
             channel=AEChannel.MCP,
@@ -853,8 +853,8 @@ class UnifiedAEClient:
         comp_name: str,
         layer_index: int,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        settings: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="apply_effect",
             params={
@@ -873,7 +873,7 @@ class UnifiedAEClient:
         comp_name: str,
         layer_index: int,
         template_name: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="apply_effect_template",
             channel=AEChannel.MCP,
@@ -891,8 +891,8 @@ class UnifiedAEClient:
         self,
         comp_name: str,
         layer_index: int,
-        effects: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        effects: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="batch_add_effects",
             params={
@@ -912,7 +912,7 @@ class UnifiedAEClient:
         comp_name: str,
         layer_index: int,
         **mask_params: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         op = AEOperation(
             name="set_layer_mask",
             params={
@@ -933,7 +933,7 @@ class UnifiedAEClient:
         output_path: str,
         format: str = "h264",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """渲染合成（默认走 puppet 通道，aerender CLI 渲染）。"""
         op = AEOperation(
             name="render",
@@ -954,7 +954,7 @@ class UnifiedAEClient:
         self,
         script: str,
         dry_run: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """执行原子脚本（默认走 MCP 通道）。"""
         op = AEOperation(
             name="execute_atom_script",
@@ -969,61 +969,61 @@ class UnifiedAEClient:
     # 异步 API（a 前缀）
     # ==================================================================
 
-    async def acreate_composition(self, **kwargs) -> Dict[str, Any]:
+    async def acreate_composition(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.create_composition, **kwargs)
 
-    async def alist_compositions(self) -> List[Dict[str, Any]]:
+    async def alist_compositions(self) -> list[dict[str, Any]]:
         return await asyncio.to_thread(self.list_compositions)
 
-    async def acreate_text_layer(self, **kwargs) -> Dict[str, Any]:
+    async def acreate_text_layer(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.create_text_layer, **kwargs)
 
-    async def acreate_solid_layer(self, **kwargs) -> Dict[str, Any]:
+    async def acreate_solid_layer(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.create_solid_layer, **kwargs)
 
-    async def acreate_shape_layer(self, **kwargs) -> Dict[str, Any]:
+    async def acreate_shape_layer(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.create_shape_layer, **kwargs)
 
-    async def aadd_adjustment_layer(self, **kwargs) -> Dict[str, Any]:
+    async def aadd_adjustment_layer(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.add_adjustment_layer, **kwargs)
 
-    async def aset_layer_properties(self, **kwargs) -> Dict[str, Any]:
+    async def aset_layer_properties(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.set_layer_properties, **kwargs)
 
-    async def aset_blend_mode(self, **kwargs) -> Dict[str, Any]:
+    async def aset_blend_mode(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.set_blend_mode, **kwargs)
 
-    async def aset_track_matte(self, **kwargs) -> Dict[str, Any]:
+    async def aset_track_matte(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.set_track_matte, **kwargs)
 
-    async def aset_parent_layer(self, **kwargs) -> Dict[str, Any]:
+    async def aset_parent_layer(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.set_parent_layer, **kwargs)
 
-    async def aset_layer_keyframe(self, **kwargs) -> Dict[str, Any]:
+    async def aset_layer_keyframe(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.set_layer_keyframe, **kwargs)
 
-    async def aset_keyframe_easing(self, **kwargs) -> Dict[str, Any]:
+    async def aset_keyframe_easing(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.set_keyframe_easing, **kwargs)
 
-    async def aset_layer_expression(self, **kwargs) -> Dict[str, Any]:
+    async def aset_layer_expression(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.set_layer_expression, **kwargs)
 
-    async def aapply_effect(self, **kwargs) -> Dict[str, Any]:
+    async def aapply_effect(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.apply_effect, **kwargs)
 
-    async def aapply_effect_template(self, **kwargs) -> Dict[str, Any]:
+    async def aapply_effect_template(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.apply_effect_template, **kwargs)
 
-    async def abatch_add_effects(self, **kwargs) -> Dict[str, Any]:
+    async def abatch_add_effects(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.batch_add_effects, **kwargs)
 
-    async def aset_layer_mask(self, **kwargs) -> Dict[str, Any]:
+    async def aset_layer_mask(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.set_layer_mask, **kwargs)
 
-    async def arender(self, **kwargs) -> Dict[str, Any]:
+    async def arender(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.render, **kwargs)
 
-    async def aexecute_atom_script(self, **kwargs) -> Dict[str, Any]:
+    async def aexecute_atom_script(self, **kwargs) -> dict[str, Any]:
         return await asyncio.to_thread(self.execute_atom_script, **kwargs)
 
     # ==================================================================
@@ -1056,7 +1056,7 @@ class UnifiedAEClient:
     # 统计
     # ==================================================================
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取调用统计。"""
         with self._lock:
             return {

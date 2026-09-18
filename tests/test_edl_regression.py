@@ -23,12 +23,11 @@ import pytest
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from scripts.edl import build_edl, lint_edl, save_edl, EDL_SCHEMA_VERSION  # noqa: E402
+from scripts.edl import EDL_SCHEMA_VERSION, build_edl, lint_edl, save_edl  # noqa: E402
 from scripts.render_regression import (  # noqa: E402
     compare_to_baseline,
     make_baseline,
 )
-
 
 # ---------------------------------------------------------------- fixtures
 

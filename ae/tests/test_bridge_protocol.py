@@ -2,25 +2,26 @@
 from __future__ import annotations
 
 import json
-import pytest
 from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, mock_open, patch
+
+import pytest
 
 from ae.bridge_protocol import (
-    BridgeCommand,
-    BridgeResponse,
-    BridgeError,
-    CommandStatus,
-    ErrorCode,
-    generate_signature,
-    verify_signature,
-    BridgeClient,
-    DeadLetterQueue,
-    FileLock,
-    ChannelStatus,
     BridgeChannel,
+    BridgeClient,
+    BridgeCommand,
+    BridgeError,
+    BridgeResponse,
+    ChannelStatus,
+    CommandStatus,
+    DeadLetterQueue,
+    ErrorCode,
+    FileLock,
+    generate_signature,
     sanitize_command_for_dead_letter,
+    verify_signature,
 )
 
 

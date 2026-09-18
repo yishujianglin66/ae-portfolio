@@ -35,7 +35,7 @@ def _audio(p):
 
 
 def _band(y, sr, lo, hi):
-    from numpy.fft import rfft, irfft
+    from numpy.fft import irfft, rfft
     F = rfft(y); fr = np.fft.rfftfreq(len(y), 1 / sr)
     F[(fr < lo) | (fr > hi)] = 0
     return float(np.sum(irfft(F, len(y)) ** 2))

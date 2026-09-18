@@ -25,7 +25,7 @@ class TestAECompositeStageUnit:
 
     def test_import(self):
         """模块可导入"""
-        from pipeline.stages.ae_composite import AECompositeStage, AECompositeResult, COMP_DEFINITIONS
+        from pipeline.stages.ae_composite import COMP_DEFINITIONS, AECompositeResult, AECompositeStage
         assert len(COMP_DEFINITIONS) == 3
         assert COMP_DEFINITIONS[0]["id"] == "Comp_Intro"
 

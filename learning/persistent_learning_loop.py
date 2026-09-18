@@ -11,26 +11,30 @@ Phase 5 - 持久化学习循环
 对应架构设计文档 7.5 节 LearningLoop + 持久化扩展
 """
 
-import os
 import json
-import time
+import os
 import random
 import threading
+import time
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, field, asdict
+from typing import Any, Dict, List, Optional, Tuple
 
 from learning_loop import (
-    LearningLoop,
     CaseStore,
-    DefaultValueStore,
-    ParameterTemplate,
-    ExpectedParameters,
-    ExecutionResult as LRExecutionResult,
-    VerificationResult as LRVerificationResult,
-    UserFeedback,
-    ExecutionRecord,
     ConfidenceAdjustment,
+    DefaultValueStore,
+    ExecutionRecord,
+    ExpectedParameters,
+    LearningLoop,
+    ParameterTemplate,
+    UserFeedback,
+)
+from learning_loop import (
+    ExecutionResult as LRExecutionResult,
+)
+from learning_loop import (
+    VerificationResult as LRVerificationResult,
 )
 
 
@@ -80,7 +84,7 @@ class PersistentCaseStore(CaseStore):
     def __init__(self, storage: FileSystemStorage):
         super().__init__()
         self._storage = storage
-        self._templates: Dict[str, ParameterTemplate] = {}
+        self._templates: dict[str, ParameterTemplate] = {}
         self._load()
 
     def _load(self) -> None:
@@ -122,7 +126,7 @@ class PersistentCaseStore(CaseStore):
         self._templates[template.id] = template
         self._save()
 
-    def find_templates(self, effect_match_name: str) -> List[ParameterTemplate]:
+    def find_templates(self, effect_match_name: str) -> list[ParameterTemplate]:
         return sorted(
             [t for t in self._templates.values()
              if t.effect_match_name == effect_match_name],
@@ -137,7 +141,7 @@ class PersistentCaseStore(CaseStore):
             t.last_used = datetime.now().isoformat()
             self._save()
 
-    def get_all_templates(self) -> List[ParameterTemplate]:
+    def get_all_templates(self) -> list[ParameterTemplate]:
         return list(self._templates.values())
 
 
@@ -147,7 +151,7 @@ class PersistentDefaultValueStore(DefaultValueStore):
     def __init__(self, storage: FileSystemStorage):
         super().__init__()
         self._storage = storage
-        self._store: Dict[str, Tuple[Any, float]] = {}
+        self._store: dict[str, tuple[Any, float]] = {}
         self._load()
 
     def _load(self) -> None:
@@ -174,7 +178,7 @@ class PersistentDefaultValueStore(DefaultValueStore):
         self._store[key] = (value, weight)
         self._save()
 
-    def get_all(self) -> Dict[str, Any]:
+    def get_all(self) -> dict[str, Any]:
         result = {}
         for key, (value, _) in self._store.items():
             result[key] = value
@@ -184,7 +188,7 @@ class PersistentDefaultValueStore(DefaultValueStore):
 class PersistentLearningLoop(LearningLoop):
     """持久化学习循环 - 继承 LearningLoop 并添加持久化能力"""
 
-    def __init__(self, storage: Optional[FileSystemStorage] = None,
+    def __init__(self, storage: FileSystemStorage | None = None,
                  auto_save: bool = True,
                  checkpoint_enabled: bool = True):
         self._pstorage = storage or FileSystemStorage()
@@ -243,7 +247,7 @@ class PersistentLearningLoop(LearningLoop):
             })
         self._pstorage.save(CONFIDENCE_ADJUSTMENTS_FILE, data)
 
-    def _dict_to_record(self, data: Dict[str, Any]) -> ExecutionRecord:
+    def _dict_to_record(self, data: dict[str, Any]) -> ExecutionRecord:
         expected = ExpectedParameters(
             comp_name=data.get("expected", {}).get("compName", ""),
             layer_index=data.get("expected", {}).get("layerIndex", 0),
@@ -279,7 +283,7 @@ class PersistentLearningLoop(LearningLoop):
             reasoning_path=data.get("reasoningPath"),
         )
 
-    def _record_to_dict(self, record: ExecutionRecord) -> Dict[str, Any]:
+    def _record_to_dict(self, record: ExecutionRecord) -> dict[str, Any]:
         expected = record.expected
         expected_dict = {
             "compName": getattr(expected, "comp_name", ""),
@@ -380,8 +384,8 @@ class PersistentLearningLoop(LearningLoop):
         expected: ExpectedParameters,
         execution: LRExecutionResult,
         verification: LRVerificationResult,
-        user_feedback: Optional[UserFeedback] = None,
-        reasoning_path: Optional[List[str]] = None,
+        user_feedback: UserFeedback | None = None,
+        reasoning_path: list[str] | None = None,
     ) -> ExecutionRecord:
         record = super().record_execution(
             user_input, intent_type, expected,
@@ -428,7 +432,7 @@ class PersistentLearningLoop(LearningLoop):
         except Exception:
             return False
 
-    def list_checkpoints(self) -> List[str]:
+    def list_checkpoints(self) -> list[str]:
         """列出所有检查点"""
         if not os.path.exists(CHECKPOINTS_DIR):
             return []
@@ -437,11 +441,11 @@ class PersistentLearningLoop(LearningLoop):
             if d.startswith("checkpoint_")
         ], reverse=True)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取持久化统计信息"""
         from learning_loop import LearningMetrics
 
-        metrics: Dict[str, Any] = {
+        metrics: dict[str, Any] = {
             "persistent": True,
             "state_dir": STATE_DIR,
             "auto_save": self._auto_save,

@@ -8,9 +8,12 @@
 5. 诊断：验证 8 个图层都创建成功
 6. aerender 渲染到 mp4
 """
-import json, time, subprocess, sys
-from pathlib import Path
+import json
+import subprocess
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_CMD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_command.json")
 BRIDGE_RESULT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_result.json")
@@ -245,7 +248,7 @@ def step5_render():
         size_mb = avi_output.stat().st_size / (1024*1024)
         print(f"\n  OK: {avi_output} ({size_mb:.2f} MB)")
         return True
-    print(f"\n  渲染完成但输出文件不存在")
+    print("\n  渲染完成但输出文件不存在")
     return False
 
 

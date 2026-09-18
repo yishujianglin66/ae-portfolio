@@ -17,6 +17,7 @@ import subprocess
 import sys
 
 import pytest
+
 pytestmark = pytest.mark.real_davinci  # 需真实 DaVinci Resolve + 真实素材/BGM 环境
 
 ROOT = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault"

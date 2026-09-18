@@ -23,7 +23,7 @@ if media_core.exists():
     # 所有 .aex 文件（递归）
     all_aex = sorted(media_core.rglob("*.aex"))
     all_prm = sorted(media_core.rglob("*.prm"))
-    print(f"=== 递归统计 ===")
+    print("=== 递归统计 ===")
     print(f"  .aex 文件: {len(all_aex)} 个")
     print(f"  .prm 文件: {len(all_prm)} 个")
     print()

@@ -9,6 +9,7 @@ sys.path.insert(0, str(_PROJECT_ROOT / "puppet-automation"))
 
 from src.engines.premiere.pr_bridge_client import PRBridgeClient, PRBridgeError
 
+
 def make_client():
     c = PRBridgeClient()
     c._preferred_protocol = "cep"

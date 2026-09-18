@@ -120,7 +120,7 @@ def _safe_filename(name: str, max_length: int = 100) -> str:
     return cleaned or "bilibili_video"
 
 
-def _resolve_cookie_path(cookie_path: Optional[str] = None) -> Optional[str]:
+def _resolve_cookie_path(cookie_path: str | None = None) -> str | None:
     """解析 cookie 文件路径。
 
     优先级：
@@ -134,7 +134,7 @@ def _resolve_cookie_path(cookie_path: Optional[str] = None) -> Optional[str]:
     Returns:
         存在的 cookie 文件路径，或 None
     """
-    candidates: List[str] = []
+    candidates: list[str] = []
     if cookie_path:
         candidates.append(cookie_path)
     candidates.append(DEFAULT_COOKIE_PATH)
@@ -148,12 +148,12 @@ def _resolve_cookie_path(cookie_path: Optional[str] = None) -> Optional[str]:
 def _build_base_options(
     output_dir: str,
     output_template: str = OUTPUT_TEMPLATE,
-    cookie_path: Optional[str] = None,
+    cookie_path: str | None = None,
     quality: str = "1080p",
     audio_only: bool = False,
-    proxy: Optional[str] = None,
-    extra: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    proxy: str | None = None,
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """构建 yt-dlp 选项字典。
 
     Args:
@@ -170,7 +170,7 @@ def _build_base_options(
     """
     os.makedirs(output_dir, exist_ok=True)
 
-    options: Dict[str, Any] = {
+    options: dict[str, Any] = {
         # 输出路径模板
         "outtmpl": os.path.join(output_dir, output_template),
         # 忽略错误继续下载
@@ -237,7 +237,7 @@ def _build_base_options(
     return options
 
 
-def _parse_yt_dlp_info(info: Dict[str, Any]) -> Dict[str, Any]:
+def _parse_yt_dlp_info(info: dict[str, Any]) -> dict[str, Any]:
     """从 yt-dlp info 字典中提取统一格式的视频信息。
 
     Args:
@@ -277,8 +277,8 @@ class BilibiliDownloader:
 
     def __init__(
         self,
-        cookie_path: Optional[str] = None,
-        proxy: Optional[str] = None,
+        cookie_path: str | None = None,
+        proxy: str | None = None,
     ) -> None:
         """初始化下载器。
 
@@ -294,7 +294,7 @@ class BilibiliDownloader:
 
     # ---------- 核心功能 ----------
 
-    def get_video_info(self, url: str) -> Dict[str, Any]:
+    def get_video_info(self, url: str) -> dict[str, Any]:
         """获取视频元数据。
 
         Args:
@@ -316,7 +316,7 @@ class BilibiliDownloader:
             - thumbnail: 封面 URL
             - error: 错误信息（失败时）
         """
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "video_id": "",
             "title": "",
@@ -374,9 +374,9 @@ class BilibiliDownloader:
     def download_video(
         self,
         url: str,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         quality: str = "1080p",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """下载 B站视频。
 
         Args:
@@ -397,7 +397,7 @@ class BilibiliDownloader:
         if output_dir is None:
             output_dir = DEFAULT_OUTPUT_DIR
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "file_path": None,
             "title": "",
@@ -430,9 +430,9 @@ class BilibiliDownloader:
             )
 
             # 收集下载文件路径
-            downloaded_paths: List[str] = []
+            downloaded_paths: list[str] = []
 
-            def _filepath_hook(d: Dict[str, Any]) -> None:
+            def _filepath_hook(d: dict[str, Any]) -> None:
                 if d.get("status") == "finished":
                     filepath = d.get("info_dict", {}).get("filepath")
                     if filepath and filepath not in downloaded_paths:
@@ -479,8 +479,8 @@ class BilibiliDownloader:
     def download_audio(
         self,
         url: str,
-        output_dir: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        output_dir: str | None = None,
+    ) -> dict[str, Any]:
         """下载 B站视频并提取音频为 MP3。
 
         Args:
@@ -499,7 +499,7 @@ class BilibiliDownloader:
         if output_dir is None:
             output_dir = DEFAULT_BGM_DIR
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "file_path": None,
             "title": "",
@@ -529,9 +529,9 @@ class BilibiliDownloader:
                 output_template="%(title)s.%(ext)s",
             )
 
-            downloaded_paths: List[str] = []
+            downloaded_paths: list[str] = []
 
-            def _filepath_hook(d: Dict[str, Any]) -> None:
+            def _filepath_hook(d: dict[str, Any]) -> None:
                 if d.get("status") == "finished":
                     filepath = d.get("info_dict", {}).get("filepath")
                     if filepath and filepath not in downloaded_paths:
@@ -567,11 +567,11 @@ class BilibiliDownloader:
 
     def download_batch(
         self,
-        urls: List[str],
-        output_dir: Optional[str] = None,
+        urls: list[str],
+        output_dir: str | None = None,
         quality: str = "1080p",
         audio_only: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """批量下载 B站视频。
 
         Args:
@@ -591,7 +591,7 @@ class BilibiliDownloader:
         if output_dir is None:
             output_dir = DEFAULT_BGM_DIR if audio_only else DEFAULT_OUTPUT_DIR
 
-        results: List[Dict[str, Any]] = []
+        results: list[dict[str, Any]] = []
         succeeded = 0
         failed = 0
 
@@ -632,8 +632,8 @@ class BilibiliDownloader:
 
     @staticmethod
     def _find_latest_file(
-        directory: str, extensions: List[str]
-    ) -> Optional[str]:
+        directory: str, extensions: list[str]
+    ) -> str | None:
         """在目录中查找最新的指定扩展名文件。
 
         Args:
@@ -646,7 +646,7 @@ class BilibiliDownloader:
         if not os.path.exists(directory):
             return None
 
-        candidates: List[tuple] = []
+        candidates: list[tuple] = []
         for name in os.listdir(directory):
             for ext in extensions:
                 if name.lower().endswith(ext.lower()):
@@ -666,8 +666,8 @@ class BilibiliDownloader:
         return candidates[0][1]
 
     def validate_cookie(
-        self, cookie_path: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, cookie_path: str | None = None
+    ) -> dict[str, Any]:
         """验证 Cookie 文件有效性。
 
         Args:
@@ -678,7 +678,7 @@ class BilibiliDownloader:
         """
         path = cookie_path or self.cookie_path or DEFAULT_COOKIE_PATH
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "valid": False,
             "cookie_path": path,
             "exists": False,
@@ -723,14 +723,14 @@ def _sanitize_error(error_msg: str) -> str:
     for pattern in _SENSITIVE_PATTERNS:
         sanitized = re.sub(
             rf'({pattern}\s*[=:]\s*)[^\s,;"\}}]+',
-            rf'\1[REDACTED]',
+            r'\1[REDACTED]',
             sanitized,
             flags=re.IGNORECASE,
         )
     return sanitized
 
 
-def _handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
+def _handle_request(request: dict[str, Any]) -> dict[str, Any]:
     """处理 --json-input 协议请求。
 
     Args:
@@ -746,7 +746,7 @@ def _handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
         return {"success": False, "error": "缺少 func 字段"}
 
     # 初始化下载器
-    init_kwargs: Dict[str, Any] = {}
+    init_kwargs: dict[str, Any] = {}
     if "cookie_path" in params:
         init_kwargs["cookie_path"] = params.pop("cookie_path")
     if "proxy" in params:

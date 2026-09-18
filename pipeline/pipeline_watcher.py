@@ -48,7 +48,7 @@ class PipelineWatcher:
 
     def __init__(
         self,
-        queue_root: Optional[str | Path] = None,
+        queue_root: str | Path | None = None,
         max_retries: int = 1,
     ):
         self.root = Path(queue_root) if queue_root else DEFAULT_QUEUE_ROOT
@@ -59,13 +59,13 @@ class PipelineWatcher:
         for d in (self.pending, self.running, self.done, self.failed):
             d.mkdir(parents=True, exist_ok=True)
         self.max_retries = max(0, int(max_retries))
-        self.ledger: List[Dict[str, Any]] = []
+        self.ledger: list[dict[str, Any]] = []
 
     # ------------------------------------------------------------------
     #  队列操作
     # ------------------------------------------------------------------
 
-    def submit(self, spec: Dict[str, Any], task_id: str = "") -> Path:
+    def submit(self, spec: dict[str, Any], task_id: str = "") -> Path:
         """提交任务规格到 pending 队列, 返回规格文件路径"""
         tid = task_id or f"task_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         path = self.pending / f"{tid}.json"
@@ -75,10 +75,10 @@ class PipelineWatcher:
         logger.info(f"[Watcher] submitted {tid}")
         return path
 
-    def _pending_tasks(self) -> List[Path]:
+    def _pending_tasks(self) -> list[Path]:
         return sorted(self.pending.glob("*.json"))
 
-    def _load_spec(self, path: Path) -> Dict[str, Any]:
+    def _load_spec(self, path: Path) -> dict[str, Any]:
         # utf-8-sig: 兼容 Windows 工具写出的带 BOM 规格文件
         return json.loads(path.read_text(encoding="utf-8-sig"))
 
@@ -86,7 +86,7 @@ class PipelineWatcher:
     #  执行
     # ------------------------------------------------------------------
 
-    def _build_config(self, spec: Dict[str, Any]):
+    def _build_config(self, spec: dict[str, Any]):
         """规格 → PipelineConfig; 未知字段忽略 (防规格文件写坏导致调度器崩溃)"""
         from pipeline.unified_pipeline import PipelineConfig
 
@@ -97,7 +97,7 @@ class PipelineWatcher:
             logger.warning(f"[Watcher] spec unknown fields ignored: {skipped}")
         return PipelineConfig(**kwargs)
 
-    def _record_failure_to_memory(self, task_id: str, error: Exception, spec: Dict):
+    def _record_failure_to_memory(self, task_id: str, error: Exception, spec: dict):
         """失败写入错误记忆 (复用 feedback_loop.ErrorPatternMemory), 失败不阻塞调度"""
         try:
             from pipeline.feedback_loop import ErrorPatternMemory
@@ -113,7 +113,7 @@ class PipelineWatcher:
         except Exception as e:
             logger.warning(f"[Watcher] ErrorMemory write failed: {e}")
 
-    def _run_one(self, spec_path: Path) -> Dict[str, Any]:
+    def _run_one(self, spec_path: Path) -> dict[str, Any]:
         """执行单个任务: pending → running → done/failed"""
         from pipeline.unified_pipeline import UnifiedPipeline
 
@@ -121,7 +121,7 @@ class PipelineWatcher:
         running_path = self.running / spec_path.name
         spec_path.replace(running_path)
 
-        entry: Dict[str, Any] = {
+        entry: dict[str, Any] = {
             "task_id": task_id,
             "started_at": datetime.now().isoformat(),
         }
@@ -175,7 +175,7 @@ class PipelineWatcher:
         self.ledger.append(entry)
         return entry
 
-    def drain_pending(self) -> List[Dict[str, Any]]:
+    def drain_pending(self) -> list[dict[str, Any]]:
         """处理当前 pending 队列中的全部任务 (串行)"""
         results = []
         for spec_path in self._pending_tasks():
@@ -197,7 +197,7 @@ class PipelineWatcher:
             time.sleep(max(1.0, float(interval_sec)))
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="AE-Knowledge-Vault 无人值守管线调度器")
     parser.add_argument("--queue", default=str(DEFAULT_QUEUE_ROOT), help="队列根目录")
     parser.add_argument("--loop", action="store_true", help="常驻轮询模式")

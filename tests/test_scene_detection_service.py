@@ -10,13 +10,12 @@ SceneDetectionService 单元测试 - PySceneDetect 场景检测服务
 """
 
 import asyncio
+import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
-
-import sys
-import os
 
 # 添加项目根目录和puppet-automation到路径
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

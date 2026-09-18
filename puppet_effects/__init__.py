@@ -10,11 +10,11 @@ puppet_effects 包
 - face_puppet: 面部木偶化效果
 """
 
-from .material_effects import MaterialEffects
-from .stop_motion import StopMotionEffect, StopMotionConfig
-from .joint_system import JointPoint, JointConfig, JointSystem
-from .mini_scene import MiniSceneConfig, MiniSceneEffect
 from .face_puppet import FacePuppetConfig, FacePuppetEffect
+from .joint_system import JointConfig, JointPoint, JointSystem
+from .material_effects import MaterialEffects
+from .mini_scene import MiniSceneConfig, MiniSceneEffect
+from .stop_motion import StopMotionConfig, StopMotionEffect
 
 __all__ = [
     "MaterialEffects",

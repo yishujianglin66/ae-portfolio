@@ -16,8 +16,8 @@ from typing import Any, Optional
 
 from loguru import logger
 
-from src.engines.comfyui import ComfyUIEngine
 from src.engines.base import EngineResult
+from src.engines.comfyui import ComfyUIEngine
 
 
 @dataclass
@@ -27,8 +27,8 @@ class WorkflowInfo:
     display_name: str
     description: str = ""
     category: str = "general"
-    style: Optional[str] = None  # e.g. "wooden", "stop_motion"
-    file_path: Optional[Path] = None
+    style: str | None = None  # e.g. "wooden", "stop_motion"
+    file_path: Path | None = None
     builtin: bool = False
 
 
@@ -45,8 +45,8 @@ class WorkflowManager:
 
     def __init__(
         self,
-        engine: Optional[ComfyUIEngine] = None,
-        workflows_dir: Optional[Path] = None,
+        engine: ComfyUIEngine | None = None,
+        workflows_dir: Path | None = None,
     ) -> None:
         self.engine = engine
         self.workflows_dir = Path(workflows_dir) if workflows_dir else Path("data/comfyui_workflows")
@@ -57,7 +57,7 @@ class WorkflowManager:
     # Workflow discovery
     # ============================================================
 
-    def list_workflows(self, category: Optional[str] = None) -> list[WorkflowInfo]:
+    def list_workflows(self, category: str | None = None) -> list[WorkflowInfo]:
         """List all available workflows (builtin + user)."""
         workflows: dict[str, WorkflowInfo] = {}
 
@@ -108,7 +108,7 @@ class WorkflowManager:
             result = [w for w in result if w.category == category]
         return sorted(result, key=lambda w: (not w.builtin, w.name))
 
-    def get_workflow(self, name: str) -> Optional[dict[str, Any]]:
+    def get_workflow(self, name: str) -> dict[str, Any] | None:
         """Load a workflow by name. Returns raw ComfyUI prompt dict."""
         # Check built-in first
         if name in BUILTIN_WORKFLOWS:
@@ -125,14 +125,14 @@ class WorkflowManager:
 
         return None
 
-    def _find_user_workflow(self, name: str) -> Optional[WorkflowInfo]:
+    def _find_user_workflow(self, name: str) -> WorkflowInfo | None:
         """Find a user workflow by name."""
         for w in self.list_workflows():
             if w.name == name and not w.builtin:
                 return w
         return None
 
-    def _get_builtin(self, name: str) -> Optional[dict[str, Any]]:
+    def _get_builtin(self, name: str) -> dict[str, Any] | None:
         """Get a built-in workflow by name (with caching)."""
         if name in self._builtin_cache:
             return self._builtin_cache[name]
@@ -157,7 +157,7 @@ class WorkflowManager:
         self,
         name: str,
         workflow: dict[str, Any],
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
         overwrite: bool = True,
     ) -> Path:
         """Save a user workflow to disk."""
@@ -196,8 +196,8 @@ class WorkflowManager:
     async def execute_workflow(
         self,
         workflow_name: str,
-        params: Optional[dict[str, Any]] = None,
-        output_dir: Optional[Path] = None,
+        params: dict[str, Any] | None = None,
+        output_dir: Path | None = None,
     ) -> EngineResult:
         """Execute a named workflow with optional parameter substitution.
 
@@ -231,7 +231,7 @@ class WorkflowManager:
     async def execute_raw(
         self,
         workflow: dict[str, Any],
-        output_dir: Optional[Path] = None,
+        output_dir: Path | None = None,
     ) -> EngineResult:
         """Execute a raw workflow dict."""
         if not self.engine:

@@ -2,9 +2,9 @@
 测试 PR MCPBridgeCEP 扩展是否正常工作
 直接测试 CEP 协议（cmd_<id>.jsx → res_<id>.json）
 """
-import sys
 import asyncio
 import json
+import sys
 import time
 from pathlib import Path
 
@@ -50,13 +50,13 @@ async def test_cep_protocol():
 
     print()
     print("1. 测试桥接连接 (ping)...")
-    print(f"   (等待 CEP 扩展响应，最长 10 秒)")
+    print("   (等待 CEP 扩展响应，最长 10 秒)")
     print()
 
     try:
         # 尝试 ping
         r = await client.ping()
-        print(f"   ✅ 桥接在线!")
+        print("   ✅ 桥接在线!")
         data = r.get("data", {})
         print(f"      PR 版本: {data.get('appVersion', 'unknown')}")
         print(f"      项目: {data.get('project', '无')}")
@@ -87,12 +87,12 @@ async def test_standalone_protocol():
     client._preferred_protocol = "standalone"
 
     print("2. 测试 Standalone 协议 (pr_command.json)...")
-    print(f"   (等待 pr_mcp_bridge.jsx 响应，最长 10 秒)")
+    print("   (等待 pr_mcp_bridge.jsx 响应，最长 10 秒)")
     print()
 
     try:
         r = await client.ping()
-        print(f"   ✅ Standalone 桥接在线!")
+        print("   ✅ Standalone 桥接在线!")
         data = r.get("data", {})
         print(f"      PR 版本: {data.get('appVersion', 'unknown')}")
         print(f"      项目: {data.get('project', '无')}")
@@ -137,7 +137,7 @@ async def test_import_media():
     ])
 
     if not video_files:
-        print(f"   ⚠️ 没有找到素材文件")
+        print("   ⚠️ 没有找到素材文件")
         return False
 
     print(f"4. 测试导入素材 ({len(video_files)} 个文件)...")
@@ -175,7 +175,7 @@ async def test_add_to_timeline():
         return True
     except PRBridgeError as e:
         print(f"   ❌ 素材上轨失败: {e}")
-        print(f"   (可能因为素材名不是 TestSeq_1)")
+        print("   (可能因为素材名不是 TestSeq_1)")
         return False
 
 

@@ -17,13 +17,13 @@ from __future__ import annotations
 
 from knowledge_base.types import (
     BlockType,
-    MdBlock,
-    TableRow,
-    EffectMapping,
-    TransitionRecipe,
     ColorPreset,
-    StyleRecipe,
+    EffectMapping,
     KnowledgeItem,
+    MdBlock,
+    StyleRecipe,
+    TableRow,
+    TransitionRecipe,
 )
 
 __all__ = [

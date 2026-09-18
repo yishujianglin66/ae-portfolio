@@ -1,13 +1,14 @@
 """config.settings 单元测试 - 全局配置管理"""
 import os
 import sys
-import pytest
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config.settings import Settings, PROJECT_ROOT
+from config.settings import PROJECT_ROOT, Settings
 
 
 class TestSettings:

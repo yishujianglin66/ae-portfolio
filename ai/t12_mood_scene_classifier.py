@@ -4,9 +4,13 @@
 从VLM缓存+规则启发式生成训练标签，CLIP帧嵌入→轻量MLP→mood/scene_type预测。
 验收: VLM缺席时两字段非空率100%，置信上限0.6。
 """
-import json, os, sys, time
-from pathlib import Path
+import json
+import os
+import sys
+import time
 from collections import Counter
+from pathlib import Path
+
 import numpy as np
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -189,7 +193,7 @@ def main():
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"\n{'='*60}")
-    print(f"✅ T12结构验证通过")
+    print("✅ T12结构验证通过")
     print(f"   VLM标签: {len(vlm_labels)}")
     print(f"   启发式标签: {len(heur_labels)}")
     print(f"   模型: {model_path}")

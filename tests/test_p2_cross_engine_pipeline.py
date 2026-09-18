@@ -214,10 +214,10 @@ class TestBridgesPackage:
     def test_exports_all_bridges(self):
         from bridges import (
             BlenderAEBridge,
-            TopazDaVinciBridge,
-            SilhouetteAEBridge,
             C4DAEBridge,
             PipelineOrchestrator,
+            SilhouetteAEBridge,
+            TopazDaVinciBridge,
         )
         assert BlenderAEBridge is not None
         assert TopazDaVinciBridge is not None

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -39,18 +39,18 @@ class EvolutionMessage:
     run_id: str
     version_id: str = ""
     scope: str = ""                            # 版本作用域（同一任务类型才可比）
-    payload: Dict[str, Any] = field(default_factory=dict)
-    score: Optional[float] = None
+    payload: dict[str, Any] = field(default_factory=dict)
+    score: float | None = None
     trajectory_ref: str = ""                   # 轨迹文件引用
     tokens_used: int = 0                       # 成本观测
     cost_usd: float = 0.0
     timestamp: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "EvolutionMessage":
+    def from_dict(cls, d: dict[str, Any]) -> "EvolutionMessage":
         valid_keys = {f for f in cls.__dataclass_fields__}  # type: ignore[attr-defined]
         return cls(**{k: v for k, v in d.items() if k in valid_keys})
 
@@ -61,11 +61,11 @@ class BenchmarkTask:
     id: str
     task_type: str                             # style_transfer / effect_apply / color_grade ...
     input: str                                 # 任务描述
-    expected_output: Dict[str, Any] = field(default_factory=dict)
+    expected_output: dict[str, Any] = field(default_factory=dict)
     rubrics: str = ""                          # 隐藏评分标准（仅 Evaluator 可见）
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -76,15 +76,15 @@ class EvaluationResult:
     scope: str
     score: float                               # 综合评分 0-100
     deterministic_score: float = 0.0           # 确定性指标分（VMAF/SSIM/VQA）
-    rubric_score: Optional[float] = None       # LLM 语义评分（Rubrics）
+    rubric_score: float | None = None       # LLM 语义评分（Rubrics）
     passed: bool = False
-    checks: Dict[str, Any] = field(default_factory=dict)
-    notes: List[str] = field(default_factory=list)
+    checks: dict[str, Any] = field(default_factory=dict)
+    notes: list[str] = field(default_factory=list)
     tokens_used: int = 0
     cost_usd: float = 0.0
     timestamp: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -92,7 +92,7 @@ class EvaluationResult:
 #  成本上限策略（风险控制）
 # ============================================================================
 
-COST_LIMITS: Dict[str, int] = {
+COST_LIMITS: dict[str, int] = {
     "single_evaluation": 100_000,     # 单次评测 ≤ 10万 token
     "single_optimization": 200_000,   # 单次优化 ≤ 20万 token
     "evolution_cycle": 500_000,       # 单轮进化 ≤ 50万 token
@@ -112,7 +112,7 @@ def within_cost_limit(kind: str, tokens_used: int) -> bool:
 #  文件持久化工具 — 文件即真相
 # ============================================================================
 
-def append_jsonl(path: Path, record: Dict[str, Any]) -> None:
+def append_jsonl(path: Path, record: dict[str, Any]) -> None:
     """追加一条 JSON 记录到 JSONL 文件（原子性：先写临时文件再替换不适用于追加，直接追加）"""
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "a", encoding="utf-8") as f:

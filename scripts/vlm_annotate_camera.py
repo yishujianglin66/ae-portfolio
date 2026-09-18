@@ -95,8 +95,8 @@ def _load_done() -> set:
     return done
 
 
-def stratified_sample(shots: List[Dict[str, Any]], n_total: int,
-                      seed: int = 42, oped_weight: float = 1.5) -> List[Dict[str, Any]]:
+def stratified_sample(shots: list[dict[str, Any]], n_total: int,
+                      seed: int = 42, oped_weight: float = 1.5) -> list[dict[str, Any]]:
     """按 (anime, source_type) 加权分层抽样。
 
     oped 权重 1.5 (OP/ED 镜头语言规范, 是金标准素材);
@@ -107,7 +107,7 @@ def stratified_sample(shots: List[Dict[str, Any]], n_total: int,
     if n_total >= len(shots):
         return shots
     rng = random.Random(seed)
-    groups: Dict[Tuple[str, str], List[Dict[str, Any]]] = collections.defaultdict(list)
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = collections.defaultdict(list)
     for s in shots:
         groups[(s.get("anime", ""), s.get("source_type", ""))].append(s)
 
@@ -115,8 +115,8 @@ def stratified_sample(shots: List[Dict[str, Any]], n_total: int,
     w_total = sum(len(v) * weights[g] for g, v in groups.items())
 
     # 加权比例分配 (floor + 按小数部分补足)
-    alloc: Dict[Tuple[str, str], int] = {}
-    fracs: List[Tuple[float, Tuple[str, str]]] = []
+    alloc: dict[tuple[str, str], int] = {}
+    fracs: list[tuple[float, tuple[str, str]]] = []
     assigned = 0
     for g, v in groups.items():
         exact = len(v) * weights[g] / w_total * n_total
@@ -130,7 +130,7 @@ def stratified_sample(shots: List[Dict[str, Any]], n_total: int,
             alloc[g] += 1
             assigned += 1
 
-    picked: List[Dict[str, Any]] = []
+    picked: list[dict[str, Any]] = []
     for g, v in groups.items():
         k = min(alloc[g], len(v))
         picked.extend(rng.sample(v, k))
@@ -138,8 +138,8 @@ def stratified_sample(shots: List[Dict[str, Any]], n_total: int,
     return picked
 
 
-def extract_frames(clip_path: str, dur_sec: Optional[float] = None,
-                   n: int = FRAMES_PER_SHOT) -> List[str]:
+def extract_frames(clip_path: str, dur_sec: float | None = None,
+                   n: int = FRAMES_PER_SHOT) -> list[str]:
     """从镜头切片抽 n 帧 (单次 ffmpeg 调用, fps 滤镜均匀采样), 返回 base64 JPEG。
 
     性能: 原来 5 次 ffmpeg 调用 (探测+逐帧), 云上并发时磁盘打架;
@@ -168,11 +168,11 @@ def extract_frames(clip_path: str, dur_sec: Optional[float] = None,
     return frames[:n] if frames else []
 
 
-def annotate_shot(client, frames_b64: List[str],
-                  model: Any = VLM_MODEL) -> Tuple[Optional[Dict[str, Any]], float]:
+def annotate_shot(client, frames_b64: list[str],
+                  model: Any = VLM_MODEL) -> tuple[dict[str, Any] | None, float]:
     """调 VLM 标注单镜头, 返回 (结果, 成本)。model 可为 str 或列表 (回退链)。"""
     models = model if isinstance(model, (list, tuple)) else [model]
-    content: List[Dict[str, Any]] = [{"type": "text", "text": PROMPT}]
+    content: list[dict[str, Any]] = [{"type": "text", "text": PROMPT}]
     for fb in frames_b64:
         content.append({"type": "image_url", "image_url": {
             "url": f"data:image/jpeg;base64,{fb}", "detail": "low"}})
@@ -208,7 +208,7 @@ def annotate_shot(client, frames_b64: List[str],
     return None, 0.0
 
 
-def _validate(result: Dict[str, Any]) -> bool:
+def _validate(result: dict[str, Any]) -> bool:
     if result.get("direction") not in ANNOTATION_LABEL_SCHEMA["direction"]:
         return False
     if result.get("speed") not in ANNOTATION_LABEL_SCHEMA["speed"]:
@@ -264,6 +264,7 @@ def main() -> int:
         return 0
 
     import os
+
     from openai import OpenAI
     api_key = os.environ.get("SILICONFLOW_API_KEY", "")
     ms_key = os.environ.get("MODELSCOPE_API_KEY", "")
@@ -319,7 +320,7 @@ def main() -> int:
     done_count = 0
     count_lock = threading.Lock()
 
-    def _annotate_one(args_i: Tuple[int, Dict[str, Any]]) -> None:
+    def _annotate_one(args_i: tuple[int, dict[str, Any]]) -> None:
         nonlocal total_cost, n_ok, n_fail, n_human, done_count
         i, shot = args_i
         ch_name, ch_client, ch_model = channels[i % len(channels)]

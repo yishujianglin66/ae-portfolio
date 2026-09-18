@@ -55,7 +55,7 @@ class DiagnosticResult:
     fix_code: str = ""
     confidence: float = 0.0
     root_cause: str = ""
-    alternatives: List[str] = field(default_factory=list)
+    alternatives: list[str] = field(default_factory=list)
     source: str = "none"  # "llm" | "rule_engine" | "none"
     latency_ms: float = 0.0
     error: str = ""
@@ -180,7 +180,7 @@ ENGINE_KNOWN_PITFALLS = """
 # 规则引擎降级（LLM不可用时的兜底诊断）
 # -----------------------------------------------------------------------------
 
-RULE_BASED_DIAGNOSTICS: List[Dict[str, Any]] = [
+RULE_BASED_DIAGNOSTICS: list[dict[str, Any]] = [
     # === AE ExtendScript ===
     {
         "pattern": r"(?i)matchname|match_name|property.*not found",
@@ -394,7 +394,7 @@ class ErrorDiagnostician:
 
     def __init__(self, min_confidence: float = 0.5, stats_file: str = "data/diagnostician_stats.json"):
         self._gateway = None  # 延迟加载
-        self._diagnosis_cache: Dict[str, tuple] = {}  # key -> (result, timestamp)
+        self._diagnosis_cache: dict[str, tuple] = {}  # key -> (result, timestamp)
         self._min_confidence = min_confidence  # S2.4: 可配置最小置信度
         self._stats_file = Path(stats_file)
         self._stats = self._load_statistics()
@@ -413,7 +413,7 @@ class ErrorDiagnostician:
     async def diagnose(
         self,
         error: Exception,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
         use_llm: bool = True,
     ) -> DiagnosticResult:
         """诊断错误并生成修复建议
@@ -472,14 +472,14 @@ class ErrorDiagnostician:
             self._save_statistics()
 
     def _rule_based_diagnose(
-        self, error: Exception, context: Dict[str, Any]
+        self, error: Exception, context: dict[str, Any]
     ) -> DiagnosticResult:
         """规则引擎诊断（基于正则匹配已知模式）"""
         error_msg = str(error)
         error_type = type(error).__name__
         combined_text = f"{error_type}: {error_msg}"
 
-        best_match: Optional[Dict] = None
+        best_match: dict | None = None
         best_score = 0.0
 
         for rule in RULE_BASED_DIAGNOSTICS:
@@ -518,7 +518,7 @@ class ErrorDiagnostician:
         )
 
     async def _llm_diagnose(
-        self, error: Exception, context: Dict[str, Any]
+        self, error: Exception, context: dict[str, Any]
     ) -> DiagnosticResult:
         """LLM深度诊断"""
         try:
@@ -548,7 +548,7 @@ class ErrorDiagnostician:
             return DiagnosticResult(success=False, error=str(e))
 
     def _build_diagnostic_prompt(
-        self, error: Exception, context: Dict[str, Any]
+        self, error: Exception, context: dict[str, Any]
     ) -> str:
         """构建诊断Prompt（包含领域知识 + Few-shot示例）"""
         error_type = type(error).__name__
@@ -642,13 +642,13 @@ class ErrorDiagnostician:
                 source="llm",
             )
 
-    def _make_cache_key(self, error: Exception, context: Dict[str, Any]) -> str:
+    def _make_cache_key(self, error: Exception, context: dict[str, Any]) -> str:
         """生成缓存键"""
         error_sig = f"{type(error).__name__}:{str(error)[:100]}"
         ctx_keys = sorted(context.keys()) if context else []
         return f"{error_sig}|{'|'.join(ctx_keys[:5])}"
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取诊断统计信息"""
         # 清理过期缓存
         now = time.time()
@@ -671,7 +671,7 @@ class ErrorDiagnostician:
         """清除诊断缓存"""
         self._diagnosis_cache.clear()
 
-    def _load_statistics(self) -> Dict[str, Any]:
+    def _load_statistics(self) -> dict[str, Any]:
         """S2.5: 从磁盘加载诊断统计"""
         default_stats = {
             "total_diagnoses": 0,
@@ -702,7 +702,7 @@ class ErrorDiagnostician:
 # 全局单例
 # -----------------------------------------------------------------------------
 
-_diagnostician_instance: Optional[ErrorDiagnostician] = None
+_diagnostician_instance: ErrorDiagnostician | None = None
 
 
 def get_diagnostician() -> ErrorDiagnostician:

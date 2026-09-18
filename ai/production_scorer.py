@@ -53,14 +53,14 @@ def _log(m: str):
 
 # ---------------- 维度1: 节奏(P3.1复用) ----------------
 
-def dim_rhythm(cuts: List[float], beats: List[float], duration: float) -> float:
+def dim_rhythm(cuts: list[float], beats: list[float], duration: float) -> float:
     from ai.rhythm_reward import score_plan
     return float(max(0.0, min(1.0, score_plan(cuts, beats, duration))))
 
 
 # ---------------- 维度2: 镜头健康度 ----------------
 
-def dim_shot(cuts: List[float], duration: float, beats: List[float] = None,
+def dim_shot(cuts: list[float], duration: float, beats: list[float] = None,
              rhythm_score: float = 0.0) -> float:
     """镜头时长健康度: 理想镜头0.5-6s，惩罚过短/过长与极端方差。
     最终分与节奏分几何加权 — 防止均匀网格利用时长理想区间刷分
@@ -96,12 +96,12 @@ def dim_shot(cuts: List[float], duration: float, beats: List[float] = None,
 
 # ---------------- 维度3: 音频能量匹配 ----------------
 
-def energy_peak_rate(cuts: List[float], wav_path: str,
+def energy_peak_rate(cuts: list[float], wav_path: str,
                      tol_ms: float = 150.0) -> float:
     """切点落在音频onset峰(声音突变点)±tol_ms内的比例。
     用onset而非原始RMS峰 — 标定发现RMS峰密集导致随机切点大量碰运气命中。"""
-    import numpy as np
     import librosa
+    import numpy as np
     if not cuts:
         return 0.0
     y, sr = librosa.load(wav_path, sr=22050)
@@ -116,7 +116,7 @@ def energy_peak_rate(cuts: List[float], wav_path: str,
 
 # ---------------- T13 v2: BPM感知 + 密度归一化 ----------------
 
-def beat_regularity(beats: List[float]) -> float:
+def beat_regularity(beats: list[float]) -> float:
     """节拍间隔变异系数(越小越规律); 教程类BGM/无节拍素材会很高。"""
     import numpy as np
     if len(beats) < 5:
@@ -125,7 +125,7 @@ def beat_regularity(beats: List[float]) -> float:
     return float(d.std() / max(d.mean(), 1e-6))
 
 
-def estimate_bpm(beats: List[float]) -> float:
+def estimate_bpm(beats: list[float]) -> float:
     import numpy as np
     if len(beats) < 5:
         return 0.0
@@ -136,8 +136,8 @@ def estimate_bpm(beats: List[float]) -> float:
 
 def _onsets_and_strength(wav_path: str):
     """返回(onset时刻, onset强度归一化, 音频时长) — 带缓存, 单次加载"""
-    import numpy as np
     import librosa
+    import numpy as np
     if not hasattr(_onsets_and_strength, "cache"):
         _onsets_and_strength.cache = {}
     ck = str(wav_path)
@@ -173,8 +173,8 @@ def _chance_hit_rate(onsets, dur_a: float, n_cuts: int, tol: float,
     return tot / 40.0
 
 
-def energy_peak_rate_v2(cuts: List[float], wav_path: str,
-                        tol_ms: float = 150.0) -> Dict[str, float]:
+def energy_peak_rate_v2(cuts: list[float], wav_path: str,
+                        tol_ms: float = 150.0) -> dict[str, float]:
     """机会修正能量分(v2.2): 扣除蒙特卡洛实测随机碰撞基线。
     随机切点命中率≈基线 → 归一后≈0; 真实踩点显著高于机会 → 保留高分。
     (v2.0的cap公式恒=1失效; v2.1的泊松基线高估, 实测误杀真实踩点)"""
@@ -196,8 +196,8 @@ def energy_peak_rate_v2(cuts: List[float], wav_path: str,
             "e_rand": round(e_rand, 4), "n_onsets": len(onsets)}
 
 
-def accent_anchor_rate(cuts: List[float], wav_path: str,
-                       tol_ms: float = 150.0, pct: float = ONSET_PCT) -> Dict[str, float]:
+def accent_anchor_rate(cuts: list[float], wav_path: str,
+                       tol_ms: float = 150.0, pct: float = ONSET_PCT) -> dict[str, float]:
     """强onset锚定率(v2.2): 切点落在强度≥pct分位的显著音乐事件±tol内的比例,
     同样做蒙特卡洛机会修正。真实剪辑者对重音敏感→高; 网格/随机无差别落点→≈0。"""
     import numpy as np
@@ -220,7 +220,7 @@ def accent_anchor_rate(cuts: List[float], wav_path: str,
             "n_strong": len(strong)}
 
 
-def structure_corr(cuts: List[float], wav_path: str, n_bins: int = 8) -> float:
+def structure_corr(cuts: list[float], wav_path: str, n_bins: int = 8) -> float:
     """结构相关性(v2.5): 分箱后切点密度与onset密度的Pearson相关。
     真实剪辑跟随音乐结构(副歌密/主歌疏)→正相关; 均匀网格/随机→≈0。
     门控: 切点<6时相关系数纯噪声, 直接置0; 显著性门控(t检验, df=n_bins-2):
@@ -247,9 +247,9 @@ def structure_corr(cuts: List[float], wav_path: str, n_bins: int = 8) -> float:
     return round(r * shrink, 4)
 
 
-def shot_quantization(cuts: List[float], bi: float,
+def shot_quantization(cuts: list[float], bi: float,
                       duration: float, wav_path: str = None,
-                      n_cuts_ref: int = None) -> Dict[str, float]:
+                      n_cuts_ref: int = None) -> dict[str, float]:
     """镜头时长拍量化(v2.6): 镜头跨度接近整数拍的比例(蒙特卡洛机会修正)。
     真实AMV镜头从一拍切到另一拍→时长≈整数×节拍间隔(八度已由音频级
     全局网格确定, 不可刷分); 门控: 镜头<6时置0; 小样本收缩
@@ -304,7 +304,7 @@ def shot_quantization(cuts: List[float], bi: float,
             "q_base": round(base, 3)}
 
 
-def _mech_penalty(cuts: List[float], bi: float = 0.0) -> float:
+def _mech_penalty(cuts: list[float], bi: float = 0.0) -> float:
     """机械均匀惩罚(v2.9分级): 切点间隔CV极低且切点够多 = 均匀网格陷阱。
     分级依据: 间隔均值≈节拍间隔(每拍一切/每半拍一切)是真实存在的
     AMV风格(如灵笼踩点), 保守罚0.10; 间隔≈节拍整数倍(k≥2)的均匀网格
@@ -323,7 +323,7 @@ def _mech_penalty(cuts: List[float], bi: float = 0.0) -> float:
     return 0.30
 
 
-def _double_tempo_grid(wav_path: str, beats: List[float]):
+def _double_tempo_grid(wav_path: str, beats: list[float]):
     """音频级八度判定(与方案无关, 不可刷分): 若相邻节拍中点处普遍存在
     强onset, 说明真实节奏是2倍速(librosa报半速) → 返回补中点网格,
     否则返回原网格。"""
@@ -349,7 +349,7 @@ def _double_tempo_grid(wav_path: str, beats: List[float]):
     return ba, False
 
 
-def _hard_rate_grid(cuts: List[float], ba, bi: float) -> Dict[str, float]:
+def _hard_rate_grid(cuts: list[float], ba, bi: float) -> dict[str, float]:
     """给定节拍网格的硬踩拍率(v2.7, 自适应容差+密度上限+轻度去重衰减)。
     过密切点=真实切点+0.15s副本会重复认领同一拍把命中率刷高:
       1. 密度上限: 命中率不超过 n_beats_in_span/n_cuts(每切点独占一拍硬上限);
@@ -373,7 +373,7 @@ def _hard_rate_grid(cuts: List[float], ba, bi: float) -> Dict[str, float]:
             "uniq": round(uniq, 4)}
 
 
-def _phase_concentration(cuts: List[float], ba, bi: float) -> Dict[str, float]:
+def _phase_concentration(cuts: list[float], ba, bi: float) -> dict[str, float]:
     """相位集中度(v3.0, Rayleigh检验+局部间隔归一): 切点相对节拍的相位
     分布是否集中。真实踩点AMV即使存在系统性相位偏移, 相位也高度集中。
     v3.0: 相位按每个切点到最近节拍的距离/该处局部节拍间隔归一 —
@@ -405,7 +405,7 @@ def _phase_concentration(cuts: List[float], ba, bi: float) -> Dict[str, float]:
     return {"conc": round(min(1.0, R), 4), "R": round(R, 3)}
 
 
-def _micro_burst_penalty(cuts: List[float], duration: float) -> float:
+def _micro_burst_penalty(cuts: list[float], duration: float) -> float:
     """微镜头爆发惩罚(v2.6): 用最长微镜头连击(runMax)而非占比。
     标定: 真实快切AMV占比可达0.5但连击≤5(节奏性快切); 过密切点在每拍后
     0.15s加副本→连击常≥7(失控碎切)。按超出连击阈值线性扣分。"""
@@ -425,7 +425,7 @@ def _micro_burst_penalty(cuts: List[float], duration: float) -> float:
     return round(min(0.20, (mx - 5) * 0.03), 4)
 
 
-def _stutter_penalty(cuts: List[float], duration: float) -> float:
+def _stutter_penalty(cuts: list[float], duration: float) -> float:
     """机械结巴惩罚(v3.0, 孤立回声对): 过密切点=真实+0.15s精确副本,
     每个副本形成"短gap(0.15)+长gap"的孤立双切模式; 而真实快切/闪切
     风格是连续短gap序列(快切列车, runMax≥2)。因此只统计孤立回声切点:
@@ -448,8 +448,8 @@ def _stutter_penalty(cuts: List[float], duration: float) -> float:
     return round(min(0.20, frac * 0.4), 4)
 
 
-def score_production_v2(cuts: List[float], beats: List[float], duration: float,
-                        wav_path: str) -> Dict[str, float]:
+def score_production_v2(cuts: list[float], beats: list[float], duration: float,
+                        wav_path: str) -> dict[str, float]:
     """T13 v2.5升级打分器: 六维信号融合 + 蒙特卡洛机会修正 + 反机械均匀惩罚
     + 反过密刷分(重复拍去重/密度上限/微镜头爆发惩罚)。
     rhythm=模型节奏分×0.5+硬踩拍率×0.5(克制模型对随机切点的系统性误判);
@@ -505,8 +505,8 @@ def score_production_v2(cuts: List[float], beats: List[float], duration: float,
 
 # ---------------- 综合打分 ----------------
 
-def score_production(cuts: List[float], beats: List[float], duration: float,
-                     wav_path: str) -> Dict[str, float]:
+def score_production(cuts: list[float], beats: list[float], duration: float,
+                     wav_path: str) -> dict[str, float]:
     """综合成片质量打分 — 导演系统最终择优入口"""
     r = dim_rhythm(cuts, beats, duration)
     s = dim_shot(cuts, duration, beats, rhythm_score=r)
@@ -522,10 +522,10 @@ def score_production(cuts: List[float], beats: List[float], duration: float,
 # ---------------- 多方案择优验证 ----------------
 
 def demo():
-    import numpy as np
-    from ai.rhythm_reward import (detect_beats, detect_cuts,
-                                  refine_beats_with_onsets, soft_beat_score)
     import cv2
+    import numpy as np
+
+    from ai.rhythm_reward import detect_beats, detect_cuts, refine_beats_with_onsets, soft_beat_score
 
     ds_videos = {s["video"] for s in json.loads(DATASET.read_text(encoding="utf-8"))}
     wav_dir = ROOT / "cache" / "rhythm_wav"

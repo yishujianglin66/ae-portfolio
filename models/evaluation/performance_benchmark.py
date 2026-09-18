@@ -10,24 +10,24 @@
 - 成本（token/usd）：输入/输出 token 成本
 - 准确率：分类任务的预测准确率
 """
+import asyncio
+import json
+import logging
+import math
 import os
+import statistics
 import sys
 import time
-import math
-import json
-import asyncio
-import logging
-import statistics
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Callable
 from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, PROJECT_ROOT)
 
 from models.configs.style_classify_config import StyleClassifyConfig
-from models.deployment.inference_server import InferenceServer, InferenceConfig
-from models.utils.metrics import accuracy, precision, recall, f1_score
+from models.deployment.inference_server import InferenceConfig, InferenceServer
+from models.utils.metrics import accuracy, f1_score, precision, recall
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -46,7 +46,7 @@ class BenchmarkConfig:
     """预热运行次数"""
     num_test_runs: int = 50
     """正式测试运行次数"""
-    batch_sizes: List[int] = field(default_factory=lambda: [1, 8, 16, 32])
+    batch_sizes: list[int] = field(default_factory=lambda: [1, 8, 16, 32])
     """测试批次大小列表"""
     timeout_ms: int = 30000
     """超时时间（毫秒）"""
@@ -58,7 +58,7 @@ class BenchmarkConfig:
     """日志文件名"""
     local_model_path: str = "models/deployment/model_registry"
     """本地模型路径"""
-    llm_gateway_config: Dict[str, Any] = field(default_factory=dict)
+    llm_gateway_config: dict[str, Any] = field(default_factory=dict)
     """LLM 网关配置"""
     enable_local_test: bool = True
     """是否启用本地模型测试"""
@@ -79,7 +79,7 @@ class LatencyStats:
     p99_ms: float = 0.0
     std_ms: float = 0.0
     variance_ms: float = 0.0
-    latencies: List[float] = field(default_factory=list)
+    latencies: list[float] = field(default_factory=list)
 
 
 @dataclass
@@ -132,9 +132,9 @@ class ModelPerformance:
     throughput: ThroughputStats = field(default_factory=ThroughputStats)
     cost: CostStats = field(default_factory=CostStats)
     accuracy: AccuracyStats = field(default_factory=AccuracyStats)
-    benchmark_config: Dict[str, Any] = field(default_factory=dict)
+    benchmark_config: dict[str, Any] = field(default_factory=dict)
     """测试配置参数"""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     """额外元数据"""
 
 
@@ -145,10 +145,10 @@ class BenchmarkResult:
     test_time: str = ""
     test_duration_seconds: float = 0.0
     benchmark_config: BenchmarkConfig = field(default_factory=BenchmarkConfig)
-    system_info: Dict[str, Any] = field(default_factory=dict)
-    local_model_performance: Optional[ModelPerformance] = None
-    llm_performance: Optional[ModelPerformance] = None
-    comparison_summary: Dict[str, Any] = field(default_factory=dict)
+    system_info: dict[str, Any] = field(default_factory=dict)
+    local_model_performance: ModelPerformance | None = None
+    llm_performance: ModelPerformance | None = None
+    comparison_summary: dict[str, Any] = field(default_factory=dict)
 
 
 # -----------------------------------------------------------------------------
@@ -189,7 +189,7 @@ class SyntheticDataGenerator:
         self._rng_state = (1103515245 * self._rng_state + 12345) & 0x7fffffff
         return self._rng_state / 0x7fffffff
 
-    def generate_style_fingerprint(self, style_label: str) -> List[float]:
+    def generate_style_fingerprint(self, style_label: str) -> list[float]:
         """生成风格指纹特征向量（14维）
 
         Args:
@@ -246,7 +246,7 @@ class SyntheticDataGenerator:
 
         return prompt_templates.get(style_label, "分析这段视频的风格")
 
-    def generate_sample(self) -> Dict[str, Any]:
+    def generate_sample(self) -> dict[str, Any]:
         """生成单个测试样本
 
         Returns:
@@ -261,7 +261,7 @@ class SyntheticDataGenerator:
             "prompt": self.generate_text_prompt(style_label),
         }
 
-    def generate_samples(self, count: int) -> List[Dict[str, Any]]:
+    def generate_samples(self, count: int) -> list[dict[str, Any]]:
         """生成多个测试样本
 
         Args:
@@ -284,7 +284,7 @@ class StatisticsCalculator:
     """统计计算器"""
 
     @staticmethod
-    def calculate_latency_stats(latencies: List[float]) -> LatencyStats:
+    def calculate_latency_stats(latencies: list[float]) -> LatencyStats:
         """计算延迟统计
 
         Args:
@@ -398,8 +398,8 @@ class StatisticsCalculator:
 
     @staticmethod
     def calculate_accuracy_stats(
-        y_true: List[str],
-        y_pred: List[str],
+        y_true: list[str],
+        y_pred: list[str],
     ) -> AccuracyStats:
         """计算准确率统计
 
@@ -448,7 +448,7 @@ class SystemInfoCollector:
     """系统信息收集器"""
 
     @staticmethod
-    def collect() -> Dict[str, Any]:
+    def collect() -> dict[str, Any]:
         """收集系统信息
 
         Returns:
@@ -544,7 +544,7 @@ class LocalModelTester:
             logger.error(f"加载本地模型失败: {e}")
             return False
 
-    def _predict(self, features: List[float]) -> str:
+    def _predict(self, features: list[float]) -> str:
         """执行单样本预测
 
         Args:
@@ -566,7 +566,7 @@ class LocalModelTester:
             logger.debug(f"推理失败，使用模拟结果: {e}")
             return self._simulate_prediction(features)
 
-    def _simulate_prediction(self, features: List[float]) -> str:
+    def _simulate_prediction(self, features: list[float]) -> str:
         """模拟预测（框架模式）
 
         Args:
@@ -578,7 +578,7 @@ class LocalModelTester:
         idx = int(sum(features) * len(self._labels) * 0.5) % len(self._labels)
         return self._labels[idx]
 
-    def _batch_predict(self, samples: List[Dict[str, Any]]) -> List[str]:
+    def _batch_predict(self, samples: list[dict[str, Any]]) -> list[str]:
         """批量预测
 
         Args:
@@ -593,7 +593,7 @@ class LocalModelTester:
             predictions.append(pred)
         return predictions
 
-    def run_benchmark(self, samples: List[Dict[str, Any]]) -> ModelPerformance:
+    def run_benchmark(self, samples: list[dict[str, Any]]) -> ModelPerformance:
         """运行本地模型性能测试
 
         Args:
@@ -695,7 +695,7 @@ class LLMAPITester:
     def _load_gateway(self) -> bool:
         """加载 LLM 网关"""
         try:
-            from core.llm_gateway import LLMGateway, LLMConfig, TaskType
+            from core.llm_gateway import LLMConfig, LLMGateway, TaskType
 
             llm_config = LLMConfig()
             llm_config.configure_from_env()
@@ -710,7 +710,7 @@ class LLMAPITester:
             logger.error(f"加载 LLM 网关失败: {e}")
             return False
 
-    async def _predict_async(self, prompt: str) -> Tuple[str, float, int, int]:
+    async def _predict_async(self, prompt: str) -> tuple[str, float, int, int]:
         """异步执行预测
 
         Args:
@@ -749,7 +749,7 @@ class LLMAPITester:
             logger.debug(f"LLM 请求异常，使用模拟结果: {e}")
             return self._simulate_predict(prompt)
 
-    def _simulate_predict(self, prompt: str) -> Tuple[str, float, int, int]:
+    def _simulate_predict(self, prompt: str) -> tuple[str, float, int, int]:
         """模拟预测（无网关模式）
 
         Args:
@@ -763,7 +763,7 @@ class LLMAPITester:
         latency_ms = 100 + (hash(prompt) % 500)
         return self._labels[idx], latency_ms, len(prompt) // 4, 1
 
-    async def _batch_predict_async(self, samples: List[Dict[str, Any]]) -> List[Tuple[str, float, int, int]]:
+    async def _batch_predict_async(self, samples: list[dict[str, Any]]) -> list[tuple[str, float, int, int]]:
         """批量异步预测
 
         Args:
@@ -775,7 +775,7 @@ class LLMAPITester:
         tasks = [self._predict_async(sample["prompt"]) for sample in samples]
         return await asyncio.gather(*tasks)
 
-    async def run_benchmark_async(self, samples: List[Dict[str, Any]]) -> ModelPerformance:
+    async def run_benchmark_async(self, samples: list[dict[str, Any]]) -> ModelPerformance:
         """运行大模型 API 性能测试
 
         Args:
@@ -963,9 +963,9 @@ class ReportGenerator:
         return "\n".join(lines)
 
     @staticmethod
-    def _add_model_section(lines: List[str], perf: ModelPerformance):
+    def _add_model_section(lines: list[str], perf: ModelPerformance):
         """添加单个模型的性能报告章节"""
-        lines.append(f"### 模型信息")
+        lines.append("### 模型信息")
         lines.append("")
         lines.append(f"- 模型名称: {perf.model_name}")
         lines.append(f"- 模型类型: {'本地模型' if perf.model_type == 'local' else '大模型 API'}")
@@ -975,11 +975,11 @@ class ReportGenerator:
             lines.append(f"- 描述: {perf.metadata.get('model_description', '')}")
         lines.append("")
 
-        lines.append(f"### 延迟指标")
+        lines.append("### 延迟指标")
         lines.append("")
         lat = perf.latency
-        lines.append(f"| 指标 | 值 (ms) |")
-        lines.append(f"|------|---------|")
+        lines.append("| 指标 | 值 (ms) |")
+        lines.append("|------|---------|")
         lines.append(f"| 平均值 | {lat.avg_ms:.2f} |")
         lines.append(f"| 中位数 | {lat.median_ms:.2f} |")
         lines.append(f"| 最小值 | {lat.min_ms:.2f} |")
@@ -990,11 +990,11 @@ class ReportGenerator:
         lines.append(f"| 方差 | {lat.variance_ms:.2f} |")
         lines.append("")
 
-        lines.append(f"### 吞吐量指标")
+        lines.append("### 吞吐量指标")
         lines.append("")
         thr = perf.throughput
-        lines.append(f"| 指标 | 值 |")
-        lines.append(f"|------|-----|")
+        lines.append("| 指标 | 值 |")
+        lines.append("|------|-----|")
         lines.append(f"| QPS (每秒请求数) | {thr.qps:.2f} |")
         lines.append(f"| 样本/秒 | {thr.samples_per_second:.2f} |")
         lines.append(f"| Token/秒 | {thr.tokens_per_second:.2f} |")
@@ -1002,11 +1002,11 @@ class ReportGenerator:
         lines.append(f"| 总样本数 | {thr.total_samples} |")
         lines.append("")
 
-        lines.append(f"### 成本指标")
+        lines.append("### 成本指标")
         lines.append("")
         cost = perf.cost
-        lines.append(f"| 指标 | 值 |")
-        lines.append(f"|------|-----|")
+        lines.append("| 指标 | 值 |")
+        lines.append("|------|-----|")
         lines.append(f"| 总成本 | ${cost.cost_usd:.6f} |")
         lines.append(f"| 单请求成本 | ${cost.cost_per_request_usd:.6f} |")
         lines.append(f"| 单 Token 成本 | ${cost.cost_per_token_usd:.8f} |")
@@ -1015,11 +1015,11 @@ class ReportGenerator:
         lines.append(f"| 总 Token 数 | {cost.total_tokens} |")
         lines.append("")
 
-        lines.append(f"### 准确率指标")
+        lines.append("### 准确率指标")
         lines.append("")
         acc = perf.accuracy
-        lines.append(f"| 指标 | 值 |")
-        lines.append(f"|------|-----|")
+        lines.append("| 指标 | 值 |")
+        lines.append("|------|-----|")
         lines.append(f"| 准确率 | {acc.accuracy:.4f} |")
         lines.append(f"| 宏平均精确率 | {acc.precision_macro:.4f} |")
         lines.append(f"| 宏平均召回率 | {acc.recall_macro:.4f} |")
@@ -1031,15 +1031,15 @@ class ReportGenerator:
         lines.append("")
 
     @staticmethod
-    def _add_comparison_section(lines: List[str], result: BenchmarkResult):
+    def _add_comparison_section(lines: list[str], result: BenchmarkResult):
         """添加性能对比章节"""
         local = result.local_model_performance
         llm = result.llm_performance
 
         lines.append("### 对比摘要")
         lines.append("")
-        lines.append(f"| 指标 | 本地模型 | 大模型 API | 差异倍数 |")
-        lines.append(f"|------|----------|------------|----------|")
+        lines.append("| 指标 | 本地模型 | 大模型 API | 差异倍数 |")
+        lines.append("|------|----------|------------|----------|")
 
         lat_ratio = llm.latency.avg_ms / local.latency.avg_ms if local.latency.avg_ms > 0 else float('inf')
         thr_ratio = local.throughput.qps / llm.throughput.qps if llm.throughput.qps > 0 else float('inf')
@@ -1065,7 +1065,7 @@ class ReportGenerator:
         lines.append("")
 
     @staticmethod
-    def _add_latency_distribution(lines: List[str], latency: LatencyStats):
+    def _add_latency_distribution(lines: list[str], latency: LatencyStats):
         """添加延迟分布直方图"""
         if not latency.latencies:
             lines.append("*无延迟数据*")
@@ -1082,8 +1082,8 @@ class ReportGenerator:
             else:
                 counts[-1] += 1
 
-        lines.append(f"| 延迟区间 (ms) | 数量 | 占比 |")
-        lines.append(f"|---------------|------|------|")
+        lines.append("| 延迟区间 (ms) | 数量 | 占比 |")
+        lines.append("|---------------|------|------|")
         total = len(latency.latencies)
         for i in range(len(bins) - 1):
             count = counts[i]
@@ -1092,7 +1092,7 @@ class ReportGenerator:
         lines.append(f"| [{bins[-2]}, ∞) | {counts[-1]} | {counts[-1]/total:.2%} |")
 
     @staticmethod
-    def _add_conclusion_section(lines: List[str], result: BenchmarkResult):
+    def _add_conclusion_section(lines: list[str], result: BenchmarkResult):
         """添加结论章节"""
         lines.append("根据测试结果，以下是关键发现：")
         lines.append("")
@@ -1137,7 +1137,7 @@ class ReportGenerator:
 class PerformanceBenchmark:
     """端到端性能测试框架"""
 
-    def __init__(self, config: Optional[BenchmarkConfig] = None):
+    def __init__(self, config: BenchmarkConfig | None = None):
         """初始化测试框架
 
         Args:
@@ -1201,9 +1201,9 @@ class PerformanceBenchmark:
 
         logger.info(f"测试结果 JSON 已保存到: {json_path}")
 
-    def _to_dict(self) -> Dict[str, Any]:
+    def _to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
-        def perf_to_dict(perf: Optional[ModelPerformance]) -> Optional[Dict[str, Any]]:
+        def perf_to_dict(perf: ModelPerformance | None) -> dict[str, Any] | None:
             if perf is None:
                 return None
 

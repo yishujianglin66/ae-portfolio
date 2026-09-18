@@ -1,5 +1,8 @@
 """Check download capabilities and try to download anime."""
-import shutil, subprocess, sys, os
+import os
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 print("=== Download Tools Check ===\n")
@@ -44,7 +47,7 @@ sys.path.insert(0, str(Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\
 try:
     from auto_downloader import AutoDownloader
     ad = AutoDownloader()
-    print(f"OK")
+    print("OK")
     print(f"  aria2 binary: {getattr(ad.aria2, 'binary_path', 'N/A')}")
     # Start daemon
     try:

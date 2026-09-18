@@ -25,7 +25,7 @@ from loguru import logger
 # 产品注册表：key → (exe 文件名, 快捷方式名关键词, DisplayName 关键词, 候选目录)
 # ---------------------------------------------------------------------------
 
-ADOBE_PRODUCTS: Dict[str, Dict[str, object]] = {
+ADOBE_PRODUCTS: dict[str, dict[str, object]] = {
     "after_effects": {
         "exe_name": "AfterFX.exe",
         "shortcut_kw": "After Effects",
@@ -91,12 +91,12 @@ ADOBE_PRODUCTS: Dict[str, Dict[str, object]] = {
 }
 
 # 进程内缓存：product_key → exe 路径（None 表示已确认未找到）
-_cache: Dict[str, Optional[Path]] = {}
+_cache: dict[str, Path | None] = {}
 
 
-def _start_menu_dirs() -> List[Path]:
+def _start_menu_dirs() -> list[Path]:
     """系统 + 用户开始菜单 Programs 目录"""
-    dirs: List[Path] = []
+    dirs: list[Path] = []
     program_data = os.environ.get("ProgramData")
     if program_data:
         dirs.append(Path(program_data) / "Microsoft" / "Windows" / "Start Menu" / "Programs")
@@ -106,7 +106,7 @@ def _start_menu_dirs() -> List[Path]:
     return [d for d in dirs if d.exists()]
 
 
-def _resolve_shortcut_targets(keyword: str) -> List[Path]:
+def _resolve_shortcut_targets(keyword: str) -> list[Path]:
     """解析开始菜单中包含 keyword 的 .lnk 目标（仅 Windows，失败静默）
 
     优先 win32com（pywin32）；不可用时降级 PowerShell WScript.Shell 一次性批量解析。
@@ -121,7 +121,7 @@ def _resolve_shortcut_targets(keyword: str) -> List[Path]:
     except Exception:
         shell = None
     if shell is not None:
-        targets: List[Path] = []
+        targets: list[Path] = []
         for base in _start_menu_dirs():
             try:
                 for lnk in base.rglob("*.lnk"):
@@ -141,7 +141,7 @@ def _resolve_shortcut_targets(keyword: str) -> List[Path]:
     return _resolve_shortcuts_via_powershell(keyword)
 
 
-def _resolve_shortcuts_via_powershell(keyword: str) -> List[Path]:
+def _resolve_shortcuts_via_powershell(keyword: str) -> list[Path]:
     """PowerShell WScript.Shell 批量解析快捷方式（win32com 缺失时的兜底）"""
     import subprocess
     dirs = _start_menu_dirs()
@@ -162,7 +162,7 @@ def _resolve_shortcuts_via_powershell(keyword: str) -> List[Path]:
         )
     except Exception:
         return []
-    targets: List[Path] = []
+    targets: list[Path] = []
     for line in (proc.stdout or "").splitlines():
         line = line.strip().strip('"')
         if line and Path(line).exists():
@@ -170,7 +170,7 @@ def _resolve_shortcuts_via_powershell(keyword: str) -> List[Path]:
     return targets
 
 
-def _search_registry(display_kw: str, exe_name: str) -> Optional[Path]:
+def _search_registry(display_kw: str, exe_name: str) -> Path | None:
     """注册表 Uninstall 条目查找（DisplayIcon / InstallLocation）"""
     if os.name != "nt":
         return None
@@ -216,7 +216,7 @@ def _search_registry(display_kw: str, exe_name: str) -> Optional[Path]:
     return None
 
 
-def find_adobe_exe(product: str, force_check: bool = False) -> Optional[Path]:
+def find_adobe_exe(product: str, force_check: bool = False) -> Path | None:
     """发现指定 Adobe 产品的 exe 路径（未安装返回 None）。
 
     Args:
@@ -277,9 +277,9 @@ def is_adobe_installed(product: str) -> bool:
     return find_adobe_exe(product) is not None
 
 
-def scan_all_adobe(force_check: bool = False) -> Dict[str, Dict[str, object]]:
+def scan_all_adobe(force_check: bool = False) -> dict[str, dict[str, object]]:
     """扫描全部已注册 Adobe 产品的安装状态（供诊断/仪表盘使用）"""
-    report: Dict[str, Dict[str, object]] = {}
+    report: dict[str, dict[str, object]] = {}
     for key in ADOBE_PRODUCTS:
         exe = find_adobe_exe(key, force_check=force_check)
         report[key] = {

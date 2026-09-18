@@ -46,10 +46,10 @@ class QualityAssessment:
     passed: bool = False             # 是否达标
     threshold: float = 70.0          # 达标阈值
     method: str = ""                 # vmaf / ssim_only / basic_fallback
-    worst_segment: Dict[str, float] = field(default_factory=dict)  # 最差片段
-    frame_scores: List[float] = field(default_factory=list)        # 逐帧分数(采样)
+    worst_segment: dict[str, float] = field(default_factory=dict)  # 最差片段
+    frame_scores: list[float] = field(default_factory=list)        # 逐帧分数(采样)
     error: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class VMAFAdapter:
@@ -63,7 +63,7 @@ class VMAFAdapter:
         self._ffmpeg = ffmpeg_bin or shutil.which("ffmpeg") or "ffmpeg"
         self._ffprobe = shutil.which("ffprobe") or "ffprobe"
         self._threshold = threshold
-        self._has_vmaf: Optional[bool] = None
+        self._has_vmaf: bool | None = None
 
     @property
     def available(self) -> bool:
@@ -122,7 +122,7 @@ class VMAFAdapter:
         result.passed = result.vmaf_score >= threshold if result.vmaf_score > 0 else result.ssim_score >= (threshold / 100.0)
         return result
 
-    def quick_check(self, video_path: str) -> Dict[str, Any]:
+    def quick_check(self, video_path: str) -> dict[str, Any]:
         """快速质量检查(不计算VMAF，仅元数据)
         
         用于管线中间环节的轻量级验证。
@@ -183,7 +183,7 @@ class VMAFAdapter:
 
             if proc.returncode != 0:
                 # libvmaf 失败，降级到 SSIM
-                logger.debug(f"[VMAF] libvmaf failed, fallback to SSIM")
+                logger.debug("[VMAF] libvmaf failed, fallback to SSIM")
                 return self._assess_with_ssim_psnr(distorted, reference)
 
             # 解析 VMAF JSON 日志
@@ -311,7 +311,7 @@ class VMAFAdapter:
             metadata=info,
         )
 
-    def _probe_video(self, video_path: str) -> Dict[str, Any]:
+    def _probe_video(self, video_path: str) -> dict[str, Any]:
         """ffprobe 获取视频元数据"""
         try:
             cmd = [

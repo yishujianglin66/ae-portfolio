@@ -11,19 +11,20 @@
 8. AudioEditJSXGenerator - JSX 输出结构验证
 9. EditDecisionGenerator.generate - 集成:空输入/边界输入/完整输入
 """
+import math
 import os
 import sys
+
 import pytest
-import math
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.audio_edit_engine import (
-    EditDecisionGenerator,
-    SpeedRampGenerator,
-    AudioEditJSXGenerator,
     AudioAnalyzerAdapter,
     AudioEditEngine,
+    AudioEditJSXGenerator,
+    EditDecisionGenerator,
+    SpeedRampGenerator,
 )
 
 

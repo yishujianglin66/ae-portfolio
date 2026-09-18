@@ -12,6 +12,7 @@ sys.path.insert(0, str(project_root))
 from core.style_pipeline import analyze_video_style
 from core.style_preset_adapter import style_to_atomic_params
 
+
 async def test_real_video(video_path: str):
     print("=" * 70)
     print(f" 真实漫剪视频测试: {video_path}")
@@ -47,7 +48,7 @@ async def test_real_video(video_path: str):
     # 打印概率分布
     probs = style_result.get('probabilities', {})
     if probs:
-        print(f"\n  Top-5 风格概率:")
+        print("\n  Top-5 风格概率:")
         sorted_probs = sorted(probs.items(), key=lambda x: x[1], reverse=True)[:5]
         for style, prob in sorted_probs:
             print(f"    {style:25s} {prob:6.2%}")

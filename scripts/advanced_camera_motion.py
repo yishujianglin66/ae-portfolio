@@ -13,9 +13,13 @@
 
 用法: py -3.12 scripts/advanced_camera_motion.py
 """
-import json, time, sys, os, subprocess
-from pathlib import Path
+import json
+import os
+import subprocess
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -109,7 +113,7 @@ def render_comp(comp_name, output_path, duration_sec=3.0, wait=120):
     r = send_bridge(jsx, wait=wait)
     ok, data = parse_result(r)
     if ok:
-        print(f"  ✓ 渲染完成")
+        print("  ✓ 渲染完成")
     else:
         print(f"  ✗ 渲染失败: {data}")
     return ok
@@ -118,8 +122,8 @@ def render_comp(comp_name, output_path, duration_sec=3.0, wait=120):
 def verify_animation(video_path, threshold=15):
     """用ffmpeg提取帧 + PIL像素差验证动画存在"""
     try:
-        from PIL import Image
         import numpy as np
+        from PIL import Image
     except ImportError:
         print("  ! PIL/numpy不可用, 跳过验证")
         return True
@@ -144,10 +148,10 @@ def verify_animation(video_path, threshold=15):
     
     print(f"  YAVG = {yavg:.1f} (阈值>{threshold})")
     if yavg > threshold:
-        print(f"  ✓ 动画验证通过")
+        print("  ✓ 动画验证通过")
         return True
     else:
-        print(f"  ✗ 动画不明显!")
+        print("  ✗ 动画不明显!")
         return False
 
 
@@ -242,7 +246,7 @@ def create_dolly_zoom():
     r = send_bridge(jsx)
     ok, data = parse_result(r)
     if ok:
-        print(f"  ✓ 合成创建成功")
+        print("  ✓ 合成创建成功")
         return True
     else:
         print(f"  ✗ 失败: {data}")
@@ -345,7 +349,7 @@ def create_orbit_pushin():
     r = send_bridge(jsx)
     ok, data = parse_result(r)
     if ok:
-        print(f"  ✓ 合成创建成功")
+        print("  ✓ 合成创建成功")
         return True
     else:
         print(f"  ✗ 失败: {data}")
@@ -427,7 +431,7 @@ def create_handheld_shake():
     r = send_bridge(jsx)
     ok, data = parse_result(r)
     if ok:
-        print(f"  ✓ 合成创建成功")
+        print("  ✓ 合成创建成功")
         return True
     else:
         print(f"  ✗ 失败: {data}")
@@ -544,7 +548,7 @@ def create_parallax_layers():
     r = send_bridge(jsx)
     ok, data = parse_result(r)
     if ok:
-        print(f"  ✓ 合成创建成功")
+        print("  ✓ 合成创建成功")
         return True
     else:
         print(f"  ✗ 失败: {data}")
@@ -690,7 +694,7 @@ def create_motion_curve():
     r = send_bridge(jsx)
     ok, data = parse_result(r)
     if ok:
-        print(f"  ✓ 合成创建成功")
+        print("  ✓ 合成创建成功")
         return True
     else:
         print(f"  ✗ 失败: {data}")

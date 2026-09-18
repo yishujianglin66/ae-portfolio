@@ -40,7 +40,7 @@ CK_MODULE = CK_DIR / "CorridorKeyModule"
 CK_CKPT_DIR = CK_MODULE / "checkpoints"
 
 
-def _find_checkpoint() -> Optional[Path]:
+def _find_checkpoint() -> Path | None:
     """查找 checkpoint — 同时支持 .pth 和 .safetensors
 
     实际下载产物为 CorridorKey_v1.0.safetensors (~380MB),
@@ -74,13 +74,13 @@ class CorridorKeyAdapter:
         "list_alpha_hint_generators", "get_architecture",
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._source_available = CK_DIR.is_dir()
         self._module_available = CK_MODULE.is_dir()
         self._env_check = self._check_environment()
 
-    def _check_environment(self) -> Dict[str, Any]:
+    def _check_environment(self) -> dict[str, Any]:
         """检测运行环境"""
         checks = {
             "source_cloned": self._source_available,
@@ -144,10 +144,10 @@ class CorridorKeyAdapter:
     def check_available(self) -> bool:
         return self._source_available
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
         start = time.time()
         try:
@@ -183,7 +183,7 @@ class CorridorKeyAdapter:
                 "duration_ms": (time.time() - start) * 1000,
             }
 
-    def _get_model_info(self) -> Dict[str, Any]:
+    def _get_model_info(self) -> dict[str, Any]:
         """获取模型信息"""
         info = {
             "model_name": "CorridorKey v1.0",
@@ -209,7 +209,7 @@ class CorridorKeyAdapter:
 
         return info
 
-    def _get_architecture(self) -> Dict[str, Any]:
+    def _get_architecture(self) -> dict[str, Any]:
         """获取架构详情"""
         arch = {
             "project": "CorridorKey",
@@ -263,7 +263,7 @@ class CorridorKeyAdapter:
 
         return arch
 
-    def _list_alpha_hint_generators(self) -> Dict[str, Any]:
+    def _list_alpha_hint_generators(self) -> dict[str, Any]:
         """列出可用的 AlphaHint 生成器"""
         generators = [
             {
@@ -297,7 +297,7 @@ class CorridorKeyAdapter:
             "available_count": sum(1 for g in generators if g["available"]),
         }
 
-    def _key_green_screen(self, params: Dict) -> Dict:
+    def _key_green_screen(self, params: dict) -> dict:
         """执行绿幕抠像 (真实推理, 基于实战验证的 backend API)
 
         已知坑位 (已在实战中验证并规避):
@@ -398,11 +398,11 @@ class CorridorKeyAdapter:
         finally:
             os.chdir(prev_cwd)
 
-    def _batch_key(self, params: Dict) -> Dict:
+    def _batch_key(self, params: dict) -> dict:
         """批量抠像"""
         return self._key_green_screen(params)
 
-    def _generate_alpha_hint(self, params: Dict) -> Dict:
+    def _generate_alpha_hint(self, params: dict) -> dict:
         """生成 AlphaHint"""
         generator = params.get("generator", "BiRefNet")
         return {
@@ -411,14 +411,14 @@ class CorridorKeyAdapter:
             "note": f"Use {generator} module to generate alpha hint",
         }
 
-    def _cleanup_matte(self, params: Dict) -> Dict:
+    def _cleanup_matte(self, params: dict) -> dict:
         """清理 Matte"""
         return {
             "status": "info",
             "note": "Matte cleanup is part of the CorridorKey inference pipeline",
         }
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         return {
             "source_available": self._source_available,
             "can_run_inference": self._env_check.get("can_run_inference", False),

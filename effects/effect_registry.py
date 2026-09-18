@@ -19,7 +19,7 @@ effect_description_parser 之间的映射重复维护问题。
 
 向后兼容：保留 KEYWORD_TO_EFFECT_MAP 名称，现有 import 无需修改。
 """
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 __all__ = [
     "KEYWORD_TO_EFFECT_MAP",
@@ -37,7 +37,7 @@ __all__ = [
 # ---------------------------------------------------------------------------
 # 关键词 -> 效果 matchName 权威映射（覆盖 VRS VISION 60+ 效果类型）
 # ---------------------------------------------------------------------------
-KEYWORD_TO_EFFECT_MAP: Dict[str, str] = {
+KEYWORD_TO_EFFECT_MAP: dict[str, str] = {
     # ── blur 模糊类 ──────────────────────────────────────────
     "模糊": "ADBE Gaussian Blur 2",
     "blur": "ADBE Gaussian Blur 2",
@@ -221,13 +221,13 @@ KEYWORD_TO_EFFECT_MAP: Dict[str, str] = {
 }
 
 # 硬编码 fallback（知识库加载失败时使用）
-_HARDCODED_EFFECT_MAP: Dict[str, str] = dict(KEYWORD_TO_EFFECT_MAP)
+_HARDCODED_EFFECT_MAP: dict[str, str] = dict(KEYWORD_TO_EFFECT_MAP)
 
 # ---------------------------------------------------------------------------
 # 知识库集成：从 10-风格化剪辑知识库/ 动态加载效果映射
 # 知识库映射优先，硬编码 fallback 补充缺失条目
 # ---------------------------------------------------------------------------
-_KB_RAW_MAP: Dict[str, str] = {}
+_KB_RAW_MAP: dict[str, str] = {}
 try:
     from knowledge_base.kb_loader import KnowledgeBaseLoader
     _kb_loader = KnowledgeBaseLoader.get_instance()
@@ -254,7 +254,7 @@ KEYWORD_TO_EFFECT_MAP.update(_CRITICAL_MAPPINGS)
 # ---------------------------------------------------------------------------
 # 效果显示名（用于 UI 展示）
 # ---------------------------------------------------------------------------
-EFFECT_DISPLAY_NAMES: Dict[str, str] = {
+EFFECT_DISPLAY_NAMES: dict[str, str] = {
     # blur 模糊类
     "ADBE Gaussian Blur 2": "高斯模糊",
     "ADBE Camera Lens Blur": "相机镜头模糊",
@@ -340,6 +340,7 @@ EFFECT_DISPLAY_NAMES: Dict[str, str] = {
 # 3) 不覆盖硬编码映射与关键映射
 # ---------------------------------------------------------------------------
 import re as _re_gate
+
 _KB_MATCHNAME_GATE_RE = _re_gate.compile(r'^(ADBE|CC|TC|RB|VC|BCC|E3D|BLEND)')
 for _kb_kw, _kb_mn in list(_KB_RAW_MAP.items()):
     _kb_kw_l = _kb_kw.lower()
@@ -356,7 +357,7 @@ for _kb_kw, _kb_mn in list(_KB_RAW_MAP.items()):
 # 效果参数数据库 — 每个效果的常用参数、范围、默认值
 # 用于 EffectReproducer 参数映射和范围验证
 # ---------------------------------------------------------------------------
-EFFECT_PARAMS_DB: Dict[str, Dict[str, Any]] = {
+EFFECT_PARAMS_DB: dict[str, dict[str, Any]] = {
     "ADBE Gaussian Blur 2": {
         "params": {
             "Blurriness": {"type": "number", "min": 0, "max": 1000, "default": 10},
@@ -603,7 +604,7 @@ EFFECT_PARAMS_DB: Dict[str, Dict[str, Any]] = {
 # ---------------------------------------------------------------------------
 # 效果分类索引
 # ---------------------------------------------------------------------------
-EFFECT_CATEGORIES: Dict[str, List[str]] = {
+EFFECT_CATEGORIES: dict[str, list[str]] = {
     "blur": ["ADBE Gaussian Blur 2", "ADBE Camera Lens Blur", "ADBE Directional Blur",
              "CC Radial Fast Blur", "ADBE Box Blur", "ADBE Compound Blur"],
     "glow": ["ADBE Glo2", "ADBE Inner Glow", "ADBE Starglow", "RB Deep Glow",
@@ -639,7 +640,7 @@ def get_all_effect_keywords() -> list:
     return list(KEYWORD_TO_EFFECT_MAP.keys())
 
 
-def get_effect_params(match_name: str) -> Optional[Dict[str, Any]]:
+def get_effect_params(match_name: str) -> dict[str, Any] | None:
     """根据 matchName 获取效果参数定义。
 
     Returns:
@@ -648,7 +649,7 @@ def get_effect_params(match_name: str) -> Optional[Dict[str, Any]]:
     return EFFECT_PARAMS_DB.get(match_name)
 
 
-def get_effects_by_category(category: str) -> List[str]:
+def get_effects_by_category(category: str) -> list[str]:
     """返回指定分类下的所有效果 matchName 列表。"""
     return EFFECT_CATEGORIES.get(category, [])
 
@@ -660,6 +661,7 @@ _KB_LOADED = False
 
 # matchName 合法前缀规则
 import re as _re
+
 _VALID_MATCHNAME_RE = _re.compile(r'^(ADBE|CC|TC|RB|VC|BCC|E3D|BLEND)')
 
 def _load_knowledge_base():

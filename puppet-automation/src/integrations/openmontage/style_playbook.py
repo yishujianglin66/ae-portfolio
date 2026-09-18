@@ -14,7 +14,6 @@ from loguru import logger
 
 from .pipeline_runtime import OPENMONTAGE_ROOT
 
-
 STYLES_DIR = OPENMONTAGE_ROOT / "styles"
 
 
@@ -22,15 +21,15 @@ STYLES_DIR = OPENMONTAGE_ROOT / "styles"
 class DesignTokens:
     """设计 token（颜色、字体、动效等）。"""
 
-    chart_palette: List[str] = field(default_factory=list)
-    scale_system: Dict[str, float] = field(default_factory=dict)
-    weight_matrix: Dict[str, int] = field(default_factory=dict)
-    color_rules: Dict[str, Any] = field(default_factory=dict)
-    fonts: Dict[str, str] = field(default_factory=dict)
-    motion: Dict[str, Any] = field(default_factory=dict)
-    audio: Dict[str, Any] = field(default_factory=dict)
+    chart_palette: list[str] = field(default_factory=list)
+    scale_system: dict[str, float] = field(default_factory=dict)
+    weight_matrix: dict[str, int] = field(default_factory=dict)
+    color_rules: dict[str, Any] = field(default_factory=dict)
+    fonts: dict[str, str] = field(default_factory=dict)
+    motion: dict[str, Any] = field(default_factory=dict)
+    audio: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "chart_palette": self.chart_palette,
             "scale_system": self.scale_system,
@@ -49,16 +48,16 @@ class StylePlaybook:
     name: str
     path: Path
     description: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     tokens: DesignTokens = field(default_factory=DesignTokens)
-    typography: Dict[str, Any] = field(default_factory=dict)
-    visual_language: Dict[str, Any] = field(default_factory=dict)
-    motion_design: Dict[str, Any] = field(default_factory=dict)
-    audio_design: Dict[str, Any] = field(default_factory=dict)
-    asset_constraints: Dict[str, Any] = field(default_factory=dict)
-    raw: Dict[str, Any] = field(default_factory=dict)
+    typography: dict[str, Any] = field(default_factory=dict)
+    visual_language: dict[str, Any] = field(default_factory=dict)
+    motion_design: dict[str, Any] = field(default_factory=dict)
+    audio_design: dict[str, Any] = field(default_factory=dict)
+    asset_constraints: dict[str, Any] = field(default_factory=dict)
+    raw: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "description": self.description,
@@ -75,12 +74,12 @@ class StylePlaybook:
 class StylePlaybookLoader:
     """风格手册加载器。"""
 
-    def __init__(self, styles_dir: Optional[Path] = None):
+    def __init__(self, styles_dir: Path | None = None):
         self.styles_dir = styles_dir or STYLES_DIR
-        self._cache: Dict[str, StylePlaybook] = {}
+        self._cache: dict[str, StylePlaybook] = {}
         logger.info(f"风格手册加载器初始化: {self.styles_dir}")
 
-    def list_playbooks(self) -> List[str]:
+    def list_playbooks(self) -> list[str]:
         """列出所有风格手册。"""
         if not self.styles_dir.exists():
             return []
@@ -124,7 +123,7 @@ class StylePlaybookLoader:
         logger.info(f"已加载风格手册: {name}")
         return playbook
 
-    def load_all(self) -> List[StylePlaybook]:
+    def load_all(self) -> list[StylePlaybook]:
         """加载所有风格手册。"""
         playbooks = []
         for name in self.list_playbooks():
@@ -134,7 +133,7 @@ class StylePlaybookLoader:
                 logger.error(f"加载风格手册 {name} 失败: {e}")
         return playbooks
 
-    def get_playbook_info(self, name: str) -> Dict[str, Any]:
+    def get_playbook_info(self, name: str) -> dict[str, Any]:
         """获取风格手册概要。"""
         pb = self.load(name)
         return {
@@ -148,7 +147,7 @@ class StylePlaybookLoader:
             "has_typography": bool(pb.typography),
         }
 
-    def apply_to_ae_comp(self, playbook_name: str, comp_name: str) -> Dict[str, Any]:
+    def apply_to_ae_comp(self, playbook_name: str, comp_name: str) -> dict[str, Any]:
         """生成 AE 合成的应用指令。
 
         Args:

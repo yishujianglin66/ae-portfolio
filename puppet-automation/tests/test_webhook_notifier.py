@@ -19,18 +19,17 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
+from src.services.resource_monitor import ResourceMonitorService
 from src.services.webhook_notifier import (
-    AlertRecord,
     PLATFORM_DINGTALK,
     PLATFORM_FEISHU,
     PLATFORM_WECHAT,
+    AlertRecord,
     WebhookNotifier,
     create_notifier_from_settings,
     detect_hostname,
     sanitize_url,
 )
-from src.services.resource_monitor import ResourceMonitorService
 
 
 # ============================================================
@@ -42,14 +41,14 @@ class MockResponse:
     def __init__(
         self,
         status_code: int = 200,
-        json_data: Optional[Dict[str, Any]] = None,
+        json_data: dict[str, Any] | None = None,
         text: str = "",
     ) -> None:
         self.status_code = status_code
         self._json = json_data if json_data is not None else {"errcode": 0}
         self.text = text or ""
 
-    def json(self) -> Dict[str, Any]:
+    def json(self) -> dict[str, Any]:
         return self._json
 
 
@@ -61,13 +60,13 @@ class MockAsyncClient:
 
     def __init__(
         self,
-        responses: List[MockResponse],
-        exc: Optional[Exception] = None,
+        responses: list[MockResponse],
+        exc: Exception | None = None,
         record_calls: bool = True,
     ) -> None:
         self._responses = list(responses)
         self._exc = exc
-        self.calls: List[Dict[str, Any]] = [] if record_calls else []
+        self.calls: list[dict[str, Any]] = [] if record_calls else []
         self._record = record_calls
 
     async def __aenter__(self) -> "MockAsyncClient":
@@ -76,7 +75,7 @@ class MockAsyncClient:
     async def __aexit__(self, *args: Any) -> None:
         return None
 
-    async def post(self, url: str, json: Optional[Dict[str, Any]] = None) -> MockResponse:
+    async def post(self, url: str, json: dict[str, Any] | None = None) -> MockResponse:
         if self._record:
             self.calls.append({"url": url, "json": json})
         if self._exc is not None:
@@ -454,7 +453,7 @@ class TestRetryLogic:
 
         class FlakyClient:
             def __init__(self) -> None:
-                self.calls: List[Dict[str, Any]] = []
+                self.calls: list[dict[str, Any]] = []
 
             async def __aenter__(self) -> "FlakyClient":
                 return self
@@ -566,9 +565,9 @@ class TestSustainedAlertStateMachine:
 
     def _make_service(
         self,
-        notifier: Optional[WebhookNotifier] = None,
-        sustained_thresholds: Optional[Dict[str, float]] = None,
-        sustained_seconds: Optional[Dict[str, int]] = None,
+        notifier: WebhookNotifier | None = None,
+        sustained_thresholds: dict[str, float] | None = None,
+        sustained_seconds: dict[str, int] | None = None,
     ) -> ResourceMonitorService:
         return ResourceMonitorService(
             interval=0.01,

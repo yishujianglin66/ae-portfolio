@@ -14,20 +14,19 @@ FFmpeg 编辑引擎 — 真实视频处理能力
 Author: AE-Knowledge-Vault Team
 """
 
-import os
 import json
+import logging
+import os
 import shutil
 import subprocess
 import tempfile
-import logging
+from dataclasses import asdict, dataclass, field
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass, field, asdict
 
 logger = logging.getLogger(__name__)
 
 from core.paths import ffmpeg_bin as _default_ffmpeg
 from core.paths import ffprobe_bin as _default_ffprobe
-
 
 # ============================================================
 # 数据结构
@@ -107,9 +106,9 @@ class FFmpegFilterBuilder:
     """
 
     def __init__(self):
-        self._filters: List[str] = []
+        self._filters: list[str] = []
 
-    def color_grade(self, params: Optional[ColorGradeParams] = None) -> 'FFmpegFilterBuilder':
+    def color_grade(self, params: ColorGradeParams | None = None) -> 'FFmpegFilterBuilder':
         """添加调色滤镜"""
         p = params or ColorGradeParams()
         # eq: brightness, contrast, saturation, gamma
@@ -131,7 +130,7 @@ class FFmpegFilterBuilder:
             self._filters.append(cb)
         return self
 
-    def sharpen(self, params: Optional[SharpenParams] = None) -> 'FFmpegFilterBuilder':
+    def sharpen(self, params: SharpenParams | None = None) -> 'FFmpegFilterBuilder':
         """添加锐化滤镜 (unsharp)"""
         p = params or SharpenParams()
         if p.amount <= 0.01:
@@ -146,13 +145,13 @@ class FFmpegFilterBuilder:
         self._filters.append(f"unsharp={lx}:{ly}:{la:.2f}:{cx}:{cy}:{ca:.2f}")
         return self
 
-    def blur(self, params: Optional[BlurParams] = None) -> 'FFmpegFilterBuilder':
+    def blur(self, params: BlurParams | None = None) -> 'FFmpegFilterBuilder':
         """添加模糊滤镜"""
         p = params or BlurParams()
         self._filters.append(f"boxblur={p.radius_x:.1f}:{p.radius_y:.1f}")
         return self
 
-    def vignette(self, params: Optional[VignetteParams] = None) -> 'FFmpegFilterBuilder':
+    def vignette(self, params: VignetteParams | None = None) -> 'FFmpegFilterBuilder':
         """添加暗角效果
 
         FFmpeg vignette 的 x0/y0 是**像素坐标**(默认 w/2, h/2)，
@@ -166,7 +165,7 @@ class FFmpegFilterBuilder:
         )
         return self
 
-    def speed(self, params: Optional[SpeedParams] = None) -> 'FFmpegFilterBuilder':
+    def speed(self, params: SpeedParams | None = None) -> 'FFmpegFilterBuilder':
         """添加速度控制"""
         p = params or SpeedParams()
         if abs(p.video_factor - 1.0) > 0.01:
@@ -292,7 +291,7 @@ class TransitionEngine:
     @staticmethod
     def apply_transition(input_a: str, input_b: str, output: str,
                          transition: str = "fade", duration: float = 0.5,
-                         offset: Optional[float] = None,
+                         offset: float | None = None,
                          ffmpeg_bin: str = "") -> bool:
         """
         在两个视频之间应用转场效果
@@ -340,8 +339,8 @@ class TransitionEngine:
             return False
 
     @staticmethod
-    def chain_transitions(inputs: List[str], output: str,
-                          transitions: List[str], durations: List[float],
+    def chain_transitions(inputs: list[str], output: str,
+                          transitions: list[str], durations: list[float],
                           ffmpeg_bin: str = "") -> bool:
         """
         链式转场: 多个视频依次应用转场
@@ -489,7 +488,7 @@ class FFmpegEditEngine:
 
     def apply_filters(self, input_video: str, output: str,
                       filter_builder: FFmpegFilterBuilder,
-                      total_duration: Optional[float] = None) -> bool:
+                      total_duration: float | None = None) -> bool:
         """
         应用滤镜链到视频
         
@@ -511,7 +510,7 @@ class FFmpegEditEngine:
         # 高质量编码: CRF 18 (视觉无损) + preset slow (质量优先) + 码率上限约束 + scale 到 1080p
         _scale = "scale=1920:1080:flags=lanczos"
         vf = f"{vf},{_scale}" if vf else _scale
-        cmd: List[str] = [self.ffmpeg_bin, "-y", "-hide_banner", "-i", input_video, "-vf", vf]
+        cmd: list[str] = [self.ffmpeg_bin, "-y", "-hide_banner", "-i", input_video, "-vf", vf]
         # 时长处理: 显式 -t 防止滤镜(setpts/trim 等)改变时长后输出漂移
         if total_duration and total_duration > 0:
             cmd.extend(["-t", f"{float(total_duration):.3f}"])
@@ -557,12 +556,12 @@ class FFmpegEditEngine:
             return True  # 默认按有音频处理, 让 FFmpeg 自己处理
 
     def process_clip(self, input_video: str, output: str,
-                     color: Optional[ColorGradeParams] = None,
-                     sharpen: Optional[SharpenParams] = None,
-                     vignette: Optional[VignetteParams] = None,
-                     speed: Optional[SpeedParams] = None,
-                     text: Optional[TextOverlayParams] = None,
-                     target_aspect: Optional[Tuple[int, int]] = None,
+                     color: ColorGradeParams | None = None,
+                     sharpen: SharpenParams | None = None,
+                     vignette: VignetteParams | None = None,
+                     speed: SpeedParams | None = None,
+                     text: TextOverlayParams | None = None,
+                     target_aspect: tuple[int, int] | None = None,
                      fade_in: float = 0.0,
                      fade_out: float = 0.0) -> bool:
         """
@@ -607,9 +606,9 @@ class FFmpegEditEngine:
 
         return self.apply_filters(input_video, output, fb, total_dur)
 
-    def concat_with_transitions(self, clips: List[str], output: str,
-                                transitions: Optional[List[str]] = None,
-                                durations: Optional[List[float]] = None) -> bool:
+    def concat_with_transitions(self, clips: list[str], output: str,
+                                transitions: list[str] | None = None,
+                                durations: list[float] | None = None) -> bool:
         """带转场的多片段拼接"""
         if not clips:
             return False
@@ -663,7 +662,7 @@ class FFmpegEditEngine:
         except Exception:
             return 10.0  # 默认10秒
 
-    def get_video_info(self, filepath: str) -> Dict:
+    def get_video_info(self, filepath: str) -> dict:
         """获取视频信息"""
         fp = self.ffprobe_bin
         info = {"file": filepath, "exists": os.path.isfile(filepath)}

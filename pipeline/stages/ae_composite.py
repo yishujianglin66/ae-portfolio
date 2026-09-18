@@ -38,12 +38,12 @@ COMP_DEFINITIONS = [
 class AECompositeResult:
     """S3 AE 合成结果"""
     success: bool
-    aep_path: Optional[str] = None
-    renders: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    aep_path: str | None = None
+    renders: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     elapsed_s: float = 0.0
     bridge_available: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class AECompositeStage:
@@ -80,10 +80,10 @@ class AECompositeStage:
 
     async def run(
         self,
-        source_videos: List[str | Path],
+        source_videos: list[str | Path],
         output_dir: str | Path,
-        preset_dir: Optional[str | Path] = None,
-        comp_definitions: Optional[List[Dict]] = None,
+        preset_dir: str | Path | None = None,
+        comp_definitions: list[dict] | None = None,
     ) -> AECompositeResult:
         """执行 S3 AE 合成。
 
@@ -102,8 +102,8 @@ class AECompositeStage:
         renders_dir.mkdir(parents=True, exist_ok=True)
 
         comps = comp_definitions or COMP_DEFINITIONS
-        errors: List[str] = []
-        renders: List[str] = []
+        errors: list[str] = []
+        renders: list[str] = []
 
         # Step 0: Bridge 探测
         try:
@@ -193,8 +193,8 @@ class AECompositeStage:
         comp_name: str,
         output_path: Path,
         duration_s: float,
-        source_video: Optional[str | Path],
-        preset_path: Optional[Path],
+        source_video: str | Path | None,
+        preset_path: Path | None,
     ):
         """渲染单个合成"""
         logger.info(f"[S3] 开始渲染 {comp_name} ({duration_s}s)")

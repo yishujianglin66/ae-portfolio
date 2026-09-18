@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """TextFX 特效组合生成器测试"""
 
-import sys
 import os
+import sys
 import unittest
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

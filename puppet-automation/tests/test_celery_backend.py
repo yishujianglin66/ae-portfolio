@@ -314,9 +314,9 @@ class TestOrchestratorWithMockedCelery:
             assert "test_job_001" not in orch._task_ids
 
     def test_get_state_uses_celery_when_enabled(self, mock_engines, tmp_path, sample_job):
+        from src.models.pipeline import PipelineState, TaskStatus
         from src.orchestrator import PipelineOrchestrator
         from src.workers import celery_backend
-        from src.models.pipeline import PipelineState, TaskStatus
 
         remote_state = PipelineState(
             job_id="test_job_001",
@@ -332,9 +332,9 @@ class TestOrchestratorWithMockedCelery:
         assert state.overall_status == TaskStatus.SUCCESS
 
     def test_list_jobs_merges_redis_jobs(self, mock_engines, tmp_path, sample_job):
+        from src.models.pipeline import PipelineState, TaskStatus
         from src.orchestrator import PipelineOrchestrator
         from src.workers import celery_backend
-        from src.models.pipeline import PipelineState, TaskStatus
 
         redis_state = PipelineState(
             job_id="remote-only",
@@ -364,8 +364,8 @@ class TestBackendAdapter:
         assert celery_backend.hydrate_state("any") is None
 
     def test_hydrate_state_handles_json_dicts(self):
-        from src.workers import celery_backend
         from src.models.pipeline import PipelineState, TaskStatus
+        from src.workers import celery_backend
 
         raw = {
             "job_id": "h1",
@@ -394,8 +394,8 @@ class TestBackendAdapter:
             assert celery_backend.hydrate_state("bad") is None
 
     def test_persist_state_no_op_when_disabled(self):
-        from src.workers import celery_backend
         from src.models.pipeline import PipelineState
+        from src.workers import celery_backend
         # Should not raise
         celery_backend.persist_state(PipelineState(job_id="x"))
 

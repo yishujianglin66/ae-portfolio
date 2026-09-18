@@ -35,7 +35,6 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from pipeline.stages import resolve_ffmpeg, resolve_ffprobe
 
-
 # ============================================================================
 #  数据结构
 # ============================================================================
@@ -49,11 +48,11 @@ class CriticVerdict:
     prior: float = 0.0                            # 先验：数字孪生链式成功率
     posterior: float = 0.0                        # 后验：原子检查通过率
     alpha: float = 0.3                            # 先验权重
-    atomic_checks: Dict[str, bool] = field(default_factory=dict)
-    reasons: List[str] = field(default_factory=list)
+    atomic_checks: dict[str, bool] = field(default_factory=dict)
+    reasons: list[str] = field(default_factory=list)
     elapsed_ms: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -73,7 +72,7 @@ class CriticAbortError(Exception):
 #  轻量检测工具（真跑 ffprobe / ffmpeg signalstats，不引入额外依赖）
 # ============================================================================
 
-def _run(cmd: List[str], timeout: float = 120) -> subprocess.CompletedProcess:
+def _run(cmd: list[str], timeout: float = 120) -> subprocess.CompletedProcess:
     return subprocess.run(
         [str(c) for c in cmd],
         capture_output=True, text=True, timeout=timeout,
@@ -100,7 +99,7 @@ _SAMPLE_W, _SAMPLE_H = 320, 180
 _FRAME_BYTES = _SAMPLE_W * _SAMPLE_H
 
 
-def sample_frame_stats(path: Path, n_frames: int = 5) -> Tuple[float, float]:
+def sample_frame_stats(path: Path, n_frames: int = 5) -> tuple[float, float]:
     """采样 n 帧统计 (Y均值, 采样帧间平均绝对差分)。
 
     - Y 均值：采样帧平均亮度，全黑帧 ≈ 16（H.264 纯黑编码偏置，实测非 0）
@@ -165,7 +164,7 @@ class StageCritic:
 
     def __init__(
         self,
-        digital_twin: Optional[Any] = None,
+        digital_twin: Any | None = None,
         alpha: float = 0.3,
         threshold_continue: float = 0.6,
         threshold_abort: float = 0.3,
@@ -176,12 +175,12 @@ class StageCritic:
         self.threshold_continue = threshold_continue
         self.threshold_abort = threshold_abort
         self.max_retry = max_retry
-        self._retry_counts: Dict[str, int] = {}
-        self.reports: List[CriticVerdict] = []
+        self._retry_counts: dict[str, int] = {}
+        self.reports: list[CriticVerdict] = []
 
     # ---- 先验估值 ----------------------------------------------------------
 
-    def _prior_success_rate(self, stage: str, context: Dict[str, Any]) -> float:
+    def _prior_success_rate(self, stage: str, context: dict[str, Any]) -> float:
         """数字孪生链式成功率；不可用时返回 0.5 中性值。"""
         if self.digital_twin is None:
             return 0.5
@@ -203,16 +202,16 @@ class StageCritic:
 
     # ---- 原子检查：S2→S3 边界 ----------------------------------------------
 
-    def _checks_s2(self, artifacts: Dict[str, Path],
-                   context: Dict[str, Any]) -> Dict[str, Tuple[bool, str, bool]]:
+    def _checks_s2(self, artifacts: dict[str, Path],
+                   context: dict[str, Any]) -> dict[str, tuple[bool, str, bool]]:
         """返回 {检查名: (通过与否, 原因, 是否硬性)}"""
-        checks: Dict[str, Tuple[bool, str, bool]] = {}
+        checks: dict[str, tuple[bool, str, bool]] = {}
         beats_path = artifacts.get("beats_json")
         audio_path = artifacts.get("audio")
 
         # 1. 节拍文件存在且非空
         beats_ok = False
-        beats_data: Dict[str, Any] = {}
+        beats_data: dict[str, Any] = {}
         if beats_path and beats_path.exists() and beats_path.stat().st_size > 0:
             try:
                 beats_data = json.loads(beats_path.read_text(encoding="utf-8"))
@@ -250,9 +249,9 @@ class StageCritic:
 
     # ---- 原子检查：S3→S4 边界 ----------------------------------------------
 
-    def _checks_s3(self, artifacts: Dict[str, Path],
-                   context: Dict[str, Any]) -> Dict[str, Tuple[bool, str, bool]]:
-        checks: Dict[str, Tuple[bool, str, bool]] = {}
+    def _checks_s3(self, artifacts: dict[str, Path],
+                   context: dict[str, Any]) -> dict[str, tuple[bool, str, bool]]:
+        checks: dict[str, tuple[bool, str, bool]] = {}
         renders = artifacts.get("renders_list", [])  # List[Path]
 
         # 1. 渲染产物存在且 > 100KB
@@ -305,9 +304,9 @@ class StageCritic:
 
     # ---- 原子检查：S5→S6 边界 ----------------------------------------------
 
-    def _checks_s5(self, artifacts: Dict[str, Path],
-                   context: Dict[str, Any]) -> Dict[str, Tuple[bool, str, bool]]:
-        checks: Dict[str, Tuple[bool, str, bool]] = {}
+    def _checks_s5(self, artifacts: dict[str, Path],
+                   context: dict[str, Any]) -> dict[str, tuple[bool, str, bool]]:
+        checks: dict[str, tuple[bool, str, bool]] = {}
         graded = artifacts.get("graded_mov")
         renders = artifacts.get("renders_list", [])
 
@@ -350,8 +349,8 @@ class StageCritic:
         "S5": _checks_s5,
     }
 
-    def evaluate(self, stage: str, artifacts: Dict[str, Any],
-                 context: Optional[Dict[str, Any]] = None) -> CriticVerdict:
+    def evaluate(self, stage: str, artifacts: dict[str, Any],
+                 context: dict[str, Any] | None = None) -> CriticVerdict:
         """执行原子检查并给出三态裁决。
 
         artifacts 约定键：
@@ -415,7 +414,7 @@ class StageCritic:
 
     # ---- 报告导出 ------------------------------------------------------------
 
-    def export_reports(self) -> List[Dict[str, Any]]:
+    def export_reports(self) -> list[dict[str, Any]]:
         """导出全部裁决为 JSON 可序列化列表（写入 manifest.critic_reports）。"""
         return [v.to_dict() for v in self.reports]
 

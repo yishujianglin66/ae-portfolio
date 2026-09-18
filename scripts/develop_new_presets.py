@@ -9,9 +9,12 @@
 
 每个预设单独渲染3秒视频验证
 """
-import json, time, sys, os
-from pathlib import Path
+import json
+import os
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -522,7 +525,7 @@ def main():
             print(f"FAIL: {detail}")
     
     # 验证
-    print(f"\n[Verify] 输出文件:")
+    print("\n[Verify] 输出文件:")
     for f in sorted(OUTPUT_DIR.glob("NEW_*.mp4")):
         print(f"  {f.name} ({f.stat().st_size//(1024)}KB)")
     

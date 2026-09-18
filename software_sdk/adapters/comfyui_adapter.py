@@ -61,14 +61,14 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
 
     def __init__(
         self,
-        config: Optional[SoftwareConfig] = None,
-        logger: Optional[logging.Logger] = None,
+        config: SoftwareConfig | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         if config is None:
             config = SoftwareConfig(software=SoftwareType.COMFYUI)
         super().__init__(config, logger)
         self._base_url = os.environ.get("COMFYUI_URL", self.DEFAULT_URL)
-        self._system_stats: Optional[Dict] = None
+        self._system_stats: dict | None = None
 
     def _initialize_capabilities(self) -> SoftwareCapabilities:
         return SoftwareCapabilities(
@@ -104,7 +104,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
         self._status = ConnectionStatus.DISCONNECTED
         return True
 
-    def execute_task(self, task: Task) -> Dict[str, Any]:
+    def execute_task(self, task: Task) -> dict[str, Any]:
         """执行 ComfyUI 任务。"""
         task_name = task.name.lower()
 
@@ -121,7 +121,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
 
         return {"success": False, "error": f"Unknown task: {task_name}"}
 
-    def _generate_image(self, task: Task) -> Dict[str, Any]:
+    def _generate_image(self, task: Task) -> dict[str, Any]:
         """图像生成。"""
         prompt = task.params.get("prompt", "")
         negative = task.params.get("negative_prompt", "blurry, low quality, distorted")
@@ -134,7 +134,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
         workflow = self._build_image_workflow(prompt, negative, width, height, model, steps)
         return self._submit_and_wait(workflow, output_path, max_wait=120)
 
-    def _generate_video(self, task: Task) -> Dict[str, Any]:
+    def _generate_video(self, task: Task) -> dict[str, Any]:
         """视频生成。"""
         prompt = task.params.get("prompt", "")
         width = task.params.get("width", 720)
@@ -146,7 +146,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
         workflow = self._build_video_workflow(prompt, width, height, frames, model)
         return self._submit_and_wait(workflow, output_path, max_wait=600)
 
-    def _image_to_video(self, task: Task) -> Dict[str, Any]:
+    def _image_to_video(self, task: Task) -> dict[str, Any]:
         """图生视频。"""
         image_path = task.params.get("image_path", "")
         prompt = task.params.get("prompt", "")
@@ -157,7 +157,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
         return self._submit_and_wait(workflow, output_path, max_wait=600)
 
     def _build_image_workflow(self, prompt: str, negative: str,
-                              w: int, h: int, model: str, steps: int) -> Dict:
+                              w: int, h: int, model: str, steps: int) -> dict:
         """构建图像生成工作流。"""
         ckpt = f"{model}.safetensors" if not model.endswith(".safetensors") else model
         return {
@@ -177,7 +177,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
         }
 
     def _build_video_workflow(self, prompt: str, w: int, h: int,
-                              frames: int, model: str) -> Dict:
+                              frames: int, model: str) -> dict:
         """构建视频生成工作流。"""
         ckpt = f"{model}.gguf" if "wan" in model else f"{model}.safetensors"
         return {
@@ -196,7 +196,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
             }
         }
 
-    def _build_i2v_workflow(self, image_path: str, prompt: str, model: str) -> Dict:
+    def _build_i2v_workflow(self, image_path: str, prompt: str, model: str) -> dict:
         """构建图生视频工作流。"""
         return {
             "prompt": {
@@ -214,7 +214,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
             }
         }
 
-    def _submit_and_wait(self, workflow: Dict, output_path: str, max_wait: int = 300) -> Dict:
+    def _submit_and_wait(self, workflow: dict, output_path: str, max_wait: int = 300) -> dict:
         """提交工作流并等待完成。"""
         try:
             # 提交
@@ -239,7 +239,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _queue_prompt(self, workflow: Dict) -> str:
+    def _queue_prompt(self, workflow: dict) -> str:
         data = json.dumps(workflow).encode("utf-8")
         req = urllib.request.Request(
             f"{self._base_url}/prompt", data=data,
@@ -248,7 +248,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
         with urllib.request.urlopen(req, timeout=30) as resp:
             return json.loads(resp.read().decode("utf-8")).get("prompt_id", "")
 
-    def _wait_for_completion(self, prompt_id: str, max_wait: int) -> Optional[Dict]:
+    def _wait_for_completion(self, prompt_id: str, max_wait: int) -> dict | None:
         start = time.time()
         while time.time() - start < max_wait:
             try:
@@ -264,7 +264,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
             time.sleep(5)
         return None
 
-    def _download(self, file_info: Dict, output_path: str) -> Dict:
+    def _download(self, file_info: dict, output_path: str) -> dict:
         filename = file_info.get("filename", "")
         subfolder = file_info.get("subfolder", "")
         ftype = file_info.get("type", "output")
@@ -272,7 +272,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
         urllib.request.urlretrieve(url, output_path)
         return {"success": True, "path": output_path, "source": "ComfyUI"}
 
-    def _get_models(self) -> Dict[str, Any]:
+    def _get_models(self) -> dict[str, Any]:
         """获取已安装模型列表。"""
         try:
             req = urllib.request.Request(f"{self._base_url}/object_info/CheckpointLoaderSimple")
@@ -283,7 +283,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _run_custom_workflow(self, task: Task) -> Dict[str, Any]:
+    def _run_custom_workflow(self, task: Task) -> dict[str, Any]:
         """运行用户自定义工作流 JSON。"""
         workflow = task.params.get("workflow", {})
         output_path = task.params.get("output_path", "comfyui_custom.png")
@@ -291,7 +291,7 @@ class ComfyUIAdapter(BaseSoftwareAdapter):
             return {"success": False, "error": "No workflow provided"}
         return self._submit_and_wait(workflow, output_path, max_wait=task.params.get("timeout", 300))
 
-    def get_gpu_info(self) -> Dict[str, Any]:
+    def get_gpu_info(self) -> dict[str, Any]:
         """获取 GPU 信息。"""
         if self._system_stats:
             devices = self._system_stats.get("devices", [])

@@ -6,8 +6,8 @@ Useful for debugging and monitoring pipeline execution.
 
 from __future__ import annotations
 
-from src.plugins.base import HookPlugin, PluginContext, PluginPriority
 from src.models.pipeline import TaskStatus
+from src.plugins.base import HookPlugin, PluginContext, PluginPriority
 
 
 class ProgressLoggerPlugin(HookPlugin):

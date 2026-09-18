@@ -36,8 +36,8 @@ import numpy as np
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from core.visual_scorer import score_video  # noqa: E402
 from core.torch_runtime import get_device, infer_ctx  # noqa: E402
+from core.visual_scorer import score_video  # noqa: E402
 
 SAMPLES = PROJECT / "data" / "param_tuning" / "train_samples.jsonl"
 EMB = PROJECT / "data" / "param_tuning" / "clip_vitl14_emb.npz"
@@ -71,7 +71,7 @@ def _load_clip():
     return _clip_model, _clip_preprocess
 
 
-def encode_frames(frame_paths: List[str]) -> np.ndarray:
+def encode_frames(frame_paths: list[str]) -> np.ndarray:
     """4 帧 → 768 维嵌入（L2 归一化帧均值, 与 encode_tuning_frames.py 完全一致）"""
     import torch
     model, preprocess = _load_clip()
@@ -85,7 +85,7 @@ def encode_frames(frame_paths: List[str]) -> np.ndarray:
     return emb
 
 
-def encode_video(video_path: str, n_frames: int = N_FRAMES) -> Optional[np.ndarray]:
+def encode_video(video_path: str, n_frames: int = N_FRAMES) -> np.ndarray | None:
     """视频均匀抽 n_frames 帧 → 编码（与 collect_tuning_data 抽帧一致）"""
     import cv2
     cap = cv2.VideoCapture(video_path)
@@ -149,7 +149,7 @@ def load_head():
     return _head
 
 
-def _pred_to_scores(emb: np.ndarray) -> Dict[str, float]:
+def _pred_to_scores(emb: np.ndarray) -> dict[str, float]:
     head = load_head()
     pred = head["model"].predict(emb.reshape(1, -1))[0]
     scores = {}
@@ -164,7 +164,7 @@ def _pred_to_scores(emb: np.ndarray) -> Dict[str, float]:
 
 # ── 评分入口 ──────────────────────────────────────────────────────
 
-def local_score(video_path: str) -> Dict:
+def local_score(video_path: str) -> dict:
     """完全本地评分（7 维, 秒级, 无 API 依赖）。"""
     emb = encode_video(video_path)
     if emb is None:
@@ -174,7 +174,7 @@ def local_score(video_path: str) -> Dict:
             "source": "cnn", "confident": list(CONFIDENT_DIMS)}
 
 
-def hybrid_score(video_path: str) -> Dict:
+def hybrid_score(video_path: str) -> dict:
     """置信维本地 + 其余 qwen（迭代闭环默认）。每维标注来源。"""
     scores = {}
     source = {}
@@ -221,6 +221,7 @@ def unload_clip():
     _clip_preprocess = None
     try:
         import gc
+
         import torch
         gc.collect()
         if torch.cuda.is_available():
@@ -229,7 +230,7 @@ def unload_clip():
         pass
 
 
-def score_video_mode(video_path: str, mode: str = "hybrid") -> Dict:
+def score_video_mode(video_path: str, mode: str = "hybrid") -> dict:
     """按模式分派评分（迭代闭环入口）。评分完即释放 CLIP 显存 —
     阶段⑤后还有经验采集等 GPU 步骤, ViT-L 常驻会挤爆 8GB 卡 (OOM 修复)。"""
     try:

@@ -11,15 +11,16 @@ AE 统一 MCP Server
 """
 
 import json
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # 统一路径引导：注入 rendering/tools/web 等子目录，修复跨目录 import
 # （ae_render_engine 等依赖位于 rendering/，不在本脚本所在的根目录）
-import bootstrap  # noqa: E402
-
 from fastmcp import FastMCP
+
+import bootstrap  # noqa: E402
 
 mcp = FastMCP("AE-Tools")
 
@@ -57,7 +58,7 @@ def ae_render_status(job_id: str) -> dict:
 @mcp.tool()
 def nex_render(template: str, composition: str, output: str, assets_json: str = "[]") -> dict:
     """通过nexrender数据驱动渲染（assets_json: [{src,type,layer_name}]）"""
-    from nexrender_integration import NexrenderIntegration, NexAsset
+    from nexrender_integration import NexAsset, NexrenderIntegration
     nex = NexrenderIntegration()
     assets = [NexAsset(**a) for a in json.loads(assets_json)]
     job = nex.create_job(template=template, composition=composition, output=output, assets=assets)
@@ -99,7 +100,7 @@ def ae_clear_cache() -> dict:
 @mcp.tool()
 def queue_add(project: str, composition: str, output: str, priority: str = "NORMAL") -> dict:
     """添加渲染任务到队列"""
-    from ae_render_queue import RenderQueueManager, Priority
+    from ae_render_queue import Priority, RenderQueueManager
     qm = RenderQueueManager()
     qm.load_persisted()
     pri = Priority[priority.upper()] if priority.upper() in Priority.__members__ else Priority.NORMAL
@@ -155,7 +156,7 @@ def template_register(project_path: str, name: str, category: str = "general", t
 @mcp.tool()
 def watch_add_rule(folder: str, file_types_json: str = '["any"]', action: str = "import") -> dict:
     """添加文件夹监控规则"""
-    from ae_watch_folder import WatchFolderTrigger, WatchRule, FileType
+    from ae_watch_folder import FileType, WatchFolderTrigger, WatchRule
     wf = WatchFolderTrigger()
     types = [FileType(t) for t in json.loads(file_types_json)]
     wf.add_rule(WatchRule(folder=folder, file_types=types, action=action))

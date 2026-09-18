@@ -14,9 +14,9 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from core.director_scorer import DirectorQualityScorer, BASELINE  # noqa: E402
+from core.camera_language import CAMERA_IDS, CameraLanguageLibrary  # noqa: E402
+from core.director_scorer import BASELINE, DirectorQualityScorer  # noqa: E402
 from core.narrative_arc import NarrativeArcPlanner, StyleProfile  # noqa: E402
-from core.camera_language import CameraLanguageLibrary, CAMERA_IDS  # noqa: E402
 
 PASS = 0
 FAIL = 0

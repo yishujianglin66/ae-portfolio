@@ -10,17 +10,17 @@
     results = reg.verify_all()      # ffprobe 逐项校验
     reg.save_manifest()             # 写 output_manifest.json
 """
+import datetime
 import json
 import os
 import subprocess
-import datetime
 from typing import Any, Dict, List, Optional
 
 DELIVERY_ROOT = "D:/AE-Work/文档/hybrid_pipeline"
 MANIFEST_NAME = "output_manifest.json"
 
 
-def _ffprobe(path: str) -> Dict[str, Any]:
+def _ffprobe(path: str) -> dict[str, Any]:
     """ffprobe 探测: 返回 {ok, duration, width, height, codec, error}"""
     cmd = [
         "ffprobe", "-v", "error", "-print_format", "json",
@@ -54,11 +54,11 @@ class OutputRegistry:
 
     def __init__(self, delivery_root: str = DELIVERY_ROOT):
         self.root = delivery_root.replace("\\", "/")
-        self.entries: List[Dict[str, Any]] = []
+        self.entries: list[dict[str, Any]] = []
 
     # ── 登记 ────────────────────────────────────────────────
     def register(self, path: str, name: str = "", category: str = "video",
-                 meta: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                 meta: dict[str, Any] | None = None) -> dict[str, Any]:
         """登记产物。path 可为相对交付目录的文件名或绝对路径。"""
         abs_path = path if os.path.isabs(path) else os.path.join(self.root, path)
         abs_path = abs_path.replace("\\", "/")
@@ -93,11 +93,11 @@ class OutputRegistry:
         return added
 
     # ── 校验 ────────────────────────────────────────────────
-    def verify_all(self) -> List[Dict[str, Any]]:
+    def verify_all(self) -> list[dict[str, Any]]:
         """对全部登记项做存在性 + ffprobe 可播放性校验, 结果写回 entry"""
         results = []
         for e in self.entries:
-            res: Dict[str, Any] = {"name": e["name"], "path": e["path"]}
+            res: dict[str, Any] = {"name": e["name"], "path": e["path"]}
             if not os.path.exists(e["path"]):
                 res["status"] = "MISSING"
             else:
@@ -143,7 +143,7 @@ class OutputRegistry:
         return "\n".join(lines)
 
 
-_REG: Optional[OutputRegistry] = None
+_REG: OutputRegistry | None = None
 
 
 def get_registry() -> OutputRegistry:

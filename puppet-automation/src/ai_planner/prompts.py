@@ -20,13 +20,12 @@ from typing import Any, Dict, List
 
 from loguru import logger
 
-
 # ============================================================
 # 资源清单注入配置
 # ============================================================
 
 # 资源类别 → 中文标签映射（用于资源清单展示）
-_RESOURCE_CATEGORY_LABELS: Dict[str, str] = {
+_RESOURCE_CATEGORY_LABELS: dict[str, str] = {
     "fonts": "字体",
     "luts": "LUT 调色预设",
     "effects": "特效贴图",
@@ -236,12 +235,12 @@ async def build_resource_context(limit_per_category: int = 30) -> str:
 
     # 顶部摘要
     try:
-        summary: Dict[str, int] = resource_index_service.get_index_summary()
+        summary: dict[str, int] = resource_index_service.get_index_summary()
     except Exception as exc:  # noqa: BLE001
         logger.debug(f"获取资源索引摘要失败: {exc}")
         summary = {}
 
-    lines: List[str] = ["## 资源库可用资源清单"]
+    lines: list[str] = ["## 资源库可用资源清单"]
 
     if summary:
         lines.append("")
@@ -260,7 +259,7 @@ async def build_resource_context(limit_per_category: int = 30) -> str:
     for category in _RESOURCE_CONTEXT_CATEGORIES:
         label = _RESOURCE_CATEGORY_LABELS.get(category, category)
         try:
-            entries: List[Dict[str, Any]] = await resource_index_service.list_resources_by_type(
+            entries: list[dict[str, Any]] = await resource_index_service.list_resources_by_type(
                 category, limit=limit_per_category, offset=0
             )
         except Exception as exc:  # noqa: BLE001 — 单类别失败不应影响其他类别

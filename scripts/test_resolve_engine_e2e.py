@@ -3,16 +3,15 @@ Resolve Engine E2E Test
 ========================
 端到端验证: 素材导入 → 时间线 → CDL调色 → 变速 → 变换 → 渲染
 """
-import sys
 import os
+import sys
 import time
 
 # 添加项目根目录到路径
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.resolve_engine import (
-    ResolveAutomationEngine, CDLConfig, TransformConfig, ResolveError
-)
+from integrations.resolve_engine import CDLConfig, ResolveAutomationEngine, ResolveError, TransformConfig
+
 
 def test_section(name):
     print(f"\n{'='*60}")
@@ -89,7 +88,7 @@ def main():
             saturation=1.15
         )
         engine.apply_cdl(project_name, "Main_TL", 1, cdl)
-        print(f"  [PASS] CDL 调色应用成功 (item 1)")
+        print("  [PASS] CDL 调色应用成功 (item 1)")
         results["passed"] += 1
         results["tests"].append(("CDL调色", "PASS"))
     except Exception as e:
@@ -103,7 +102,7 @@ def main():
     test_section("Test 4: 预设调色 (teal_orange)")
     try:
         engine.apply_preset_grade(project_name, 2, "teal_orange")
-        print(f"  [PASS] teal_orange 预设应用成功 (item 2)")
+        print("  [PASS] teal_orange 预设应用成功 (item 2)")
         results["passed"] += 1
         results["tests"].append(("预设调色", "PASS"))
     except Exception as e:
@@ -117,7 +116,7 @@ def main():
     test_section("Test 5: 变速 (2x)")
     try:
         engine.set_speed(project_name, 1, 2.0)
-        print(f"  [PASS] 变速 2x 应用成功 (item 1)")
+        print("  [PASS] 变速 2x 应用成功 (item 1)")
         results["passed"] += 1
         results["tests"].append(("变速", "PASS"))
     except Exception as e:
@@ -136,7 +135,7 @@ def main():
             rotation=5.0, opacity=90
         )
         engine.set_transform(project_name, 1, tf)
-        print(f"  [PASS] 变换应用成功 (item 1)")
+        print("  [PASS] 变换应用成功 (item 1)")
         results["passed"] += 1
         results["tests"].append(("变换", "PASS"))
     except Exception as e:
@@ -152,7 +151,7 @@ def main():
         for page in ["edit", "color", "fusion", "deliver", "edit"]:
             engine.switch_page(page)
             print(f"  [OK] → {page}")
-        print(f"  [PASS] 所有页面切换成功")
+        print("  [PASS] 所有页面切换成功")
         results["passed"] += 1
         results["tests"].append(("页面切换", "PASS"))
     except Exception as e:
@@ -195,7 +194,7 @@ def main():
     # Summary
     # ============================================================
     print(f"\n{'='*60}")
-    print(f"  E2E 测试结果汇总")
+    print("  E2E 测试结果汇总")
     print(f"{'='*60}")
     for name, status in results["tests"]:
         icon = "[OK]" if "PASS" in status else "[FAIL]"

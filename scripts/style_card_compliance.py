@@ -36,8 +36,8 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from knowledge.style_card import load_card  # noqa: E402
 from core.cnn_scorer import score_video_mode  # noqa: E402
+from knowledge.style_card import load_card  # noqa: E402
 
 # 评分维度 → 旋钮映射 (键: 旋钮, 值: (评分键, 置信度, 方向))
 KNOB_MAP = [

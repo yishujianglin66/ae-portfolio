@@ -1,9 +1,11 @@
 import os
 import sys
+
 import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from effect_composer import EffectComposer, StyleTemplate, EffectSettings
+from effect_composer import EffectComposer, EffectSettings, StyleTemplate
 
 
 class TestEffectComposerInitialization:

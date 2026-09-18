@@ -1,6 +1,10 @@
 """探测 Particular Sprite（精灵贴图）设置路径: 粒子类型值 + 精灵图层引用"""
-import json, time, uuid, os
+import json
+import os
+import time
+import uuid
 from pathlib import Path
+
 bd = Path(__file__).resolve().parent.parent / ".ae-mcp-bridge"
 cmd_id = str(uuid.uuid4())[:8]
 out_file = bd / f"_sprite_{cmd_id}.txt"

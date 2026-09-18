@@ -10,15 +10,16 @@
 from __future__ import annotations
 
 import json
-import sys
 import os
+import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from clip_searcher import get_model, encode_text, encode_image, cosine_similarity, load_index
+from clip_searcher import cosine_similarity, encode_image, encode_text, get_model, load_index
 
 
 class HybridRetriever:
@@ -37,7 +38,7 @@ class HybridRetriever:
         query: str,
         index_path: str,
         top_k: int = 20
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         CLIP语义搜索
         
@@ -87,7 +88,7 @@ class HybridRetriever:
         image_path: str,
         index_path: str,
         top_k: int = 20
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         图片搜索
         
@@ -134,13 +135,13 @@ class HybridRetriever:
     
     def filter_by_audio_features(
         self,
-        items: List[Dict[str, Any]],
-        target_bpm: Optional[float] = None,
-        bpm_range: Optional[tuple] = None,
-        mood: Optional[str] = None,
-        genre: Optional[str] = None,
-        duration_range: Optional[tuple] = None
-    ) -> List[Dict[str, Any]]:
+        items: list[dict[str, Any]],
+        target_bpm: float | None = None,
+        bpm_range: tuple | None = None,
+        mood: str | None = None,
+        genre: str | None = None,
+        duration_range: tuple | None = None
+    ) -> list[dict[str, Any]]:
         """
         根据音频特征过滤结果
         
@@ -168,7 +169,7 @@ class HybridRetriever:
                 item_bpm = float(audio_features["bpm"])
                 if bpm_range:
                     if bpm_range[0] <= item_bpm <= bpm_range[1]:
-                        reasons.append(f"BPM在范围内")
+                        reasons.append("BPM在范围内")
                     else:
                         bpm_diff = abs(item_bpm - target_bpm)
                         score *= max(0.3, 1.0 - bpm_diff / 60)
@@ -216,14 +217,14 @@ class HybridRetriever:
         query: str,
         index_path: str,
         top_k: int = 20,
-        target_bpm: Optional[float] = None,
-        bpm_range: Optional[tuple] = None,
-        mood: Optional[str] = None,
-        genre: Optional[str] = None,
-        duration_range: Optional[tuple] = None,
+        target_bpm: float | None = None,
+        bpm_range: tuple | None = None,
+        mood: str | None = None,
+        genre: str | None = None,
+        duration_range: tuple | None = None,
         semantic_weight: float = 0.7,
         audio_weight: float = 0.3
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         联合检索：CLIP语义 + 音频特征
         
@@ -288,7 +289,7 @@ def main() -> None:
         action = input_json.get("action", "")
         
         retriever = HybridRetriever()
-        result: Dict[str, Any] = {"success": False, "results": []}
+        result: dict[str, Any] = {"success": False, "results": []}
         
         if action == "semantic_search":
             query = input_json.get("query", "")

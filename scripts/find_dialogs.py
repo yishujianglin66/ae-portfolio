@@ -2,6 +2,7 @@
 """Find all dialog windows."""
 import win32gui
 
+
 def enum_windows_callback(hwnd, results):
     try:
         title = win32gui.GetWindowText(hwnd)

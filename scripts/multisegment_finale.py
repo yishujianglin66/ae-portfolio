@@ -40,12 +40,13 @@ from typing import Any, Dict, List, Tuple
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from scripts.m2_auto_iterate import render_tree  # noqa: E402
-from core.image_fx import pick_fx_layer  # noqa: E402
-from core.sfx_layer import plan_sfx, mix_sfx, _load_index  # noqa: E402
-from core.lut_pipeline import load_sampling  # noqa: E402
-from core.cnn_scorer import score_video_mode  # noqa: E402
 import cv2  # noqa: E402
+
+from core.cnn_scorer import score_video_mode  # noqa: E402
+from core.image_fx import pick_fx_layer  # noqa: E402
+from core.lut_pipeline import load_sampling  # noqa: E402
+from core.sfx_layer import _load_index, mix_sfx, plan_sfx  # noqa: E402
+from scripts.m2_auto_iterate import render_tree  # noqa: E402
 
 DUR = 10.0
 SMART_IN_CACHE: dict = {}
@@ -64,7 +65,7 @@ SOURCES = [
 TITLE_TEXT = "MULTI CLASH"  # 跨段主标题
 
 # 段间过渡类型 (固定语义, 用于 report + 后续达标度校验)
-TRANSITIONS: Dict[Tuple[str, str], str] = {
+TRANSITIONS: dict[tuple[str, str], str] = {
     ("intro", "build"): "hard_cut",            # 节奏加速点
     ("build", "drop"): "hard_cut_fx_burst",    # 硬切 + 光效爆发 (drop 起始撞拍贴图)
     ("drop", "outro"): "cross_fade",           # 交叉淡化 (时间重叠模拟)
@@ -73,7 +74,7 @@ TRANSITIONS: Dict[Tuple[str, str], str] = {
 SEGMENT_ORDER = ["intro", "build", "drop", "outro"]
 
 # 每段参数差异 (对应 multishot_replica 的 pp 字典的子集 + 段独有旋钮)
-SEGMENT_PROFILES: Dict[str, Dict[str, Any]] = {
+SEGMENT_PROFILES: dict[str, dict[str, Any]] = {
     "intro": {
         "start": 0.0, "end": 2.5, "n_shots": 1, "shot_dur": 2.5,
         "punch_amount": 6, "shake_amp": 6, "shake_freq": 2.0,
@@ -145,7 +146,7 @@ def smart_in(src_rel: str, need: float, k: int = 6) -> float:
     return round(best, 2)
 
 
-def _ramp_for(style: str, shot_dur: float) -> List[Dict[str, float]]:
+def _ramp_for(style: str, shot_dur: float) -> list[dict[str, float]]:
     """按段风格生成镜头变速曲线 (与 multishot_replica speed_ramps 同格式)。
 
     ramps.t 用层局部时间 (0 ~ shot_dur), 与 speed_ramp_jsx 约定一致,
@@ -168,9 +169,9 @@ def _ramp_for(style: str, shot_dur: float) -> List[Dict[str, float]]:
     return [{"t": 0.0, "v": 1.0}, {"t": shot_dur, "v": 1.0}]
 
 
-def _beats_for_segment(seg: str, pp: Dict[str, Any],
+def _beats_for_segment(seg: str, pp: dict[str, Any],
                        seg_start: float, seg_end: float,
-                       first_layer_id: str) -> List[Dict[str, Any]]:
+                       first_layer_id: str) -> list[dict[str, Any]]:
     """按 beat_density 在段内均匀生成节拍事件。
 
     密度语义: density 1.0 → 每 0.5s 一拍; 0.4 → 每 1.25s 一拍。
@@ -179,7 +180,7 @@ def _beats_for_segment(seg: str, pp: Dict[str, Any],
     span = seg_end - seg_start
     spacing = max(0.3, 0.5 / max(pp["beat_density"], 0.1))
     n = max(1, int(span / spacing))
-    beats: List[Dict[str, Any]] = []
+    beats: list[dict[str, Any]] = []
     for i in range(n):
         # drop 段第一拍锚定到段起始 (build→drop 边界撞拍)
         if seg == "drop" and i == 0:
@@ -200,16 +201,16 @@ def _beats_for_segment(seg: str, pp: Dict[str, Any],
     return beats
 
 
-def build_tree(style_card: str = "edit") -> Tuple[Any, Dict[str, Any]]:
+def build_tree(style_card: str = "edit") -> tuple[Any, dict[str, Any]]:
     """构建四段合成树 (方案A: 单 CompositionTree, 全程 10s)。
 
     返回 (tree, stats) — stats 含每段镜头/粒子/文字统计 + 段间过渡信息。
     """
-    from core.composition_tree import LayerSpec, CompositionTree, EffectRef
+    from core.composition_tree import CompositionTree, EffectRef, LayerSpec
 
-    layers: List[LayerSpec] = []
-    beat_events: List[Dict[str, Any]] = []
-    stats: Dict[str, Any] = {
+    layers: list[LayerSpec] = []
+    beat_events: list[dict[str, Any]] = []
+    stats: dict[str, Any] = {
         "segments": {},
         "transitions": {f"{a}->{b}": t for (a, b), t in TRANSITIONS.items()},
     }
@@ -221,7 +222,7 @@ def build_tree(style_card: str = "edit") -> Tuple[Any, Dict[str, Any]]:
         seg_start, seg_end = pp["start"], pp["end"]
         n_shots = pp["n_shots"]
         shot_dur = pp["shot_dur"]
-        seg_shot_ids: List[str] = []
+        seg_shot_ids: list[str] = []
         first_layer_id = f"{seg}_shot0"
 
         # ── 镜头层 (footage) ────────────────────────────────────
@@ -241,7 +242,7 @@ def build_tree(style_card: str = "edit") -> Tuple[Any, Dict[str, Any]]:
             ramps = _ramp_for(pp["ramp_style"], shot_dur) if pp["use_ramps"] else None
             lid = f"{seg}_shot{i}"
 
-            content: Dict[str, Any] = {
+            content: dict[str, Any] = {
                 "path": str(PROJECT / src), "matting_mode": "rgba",
                 "fit": "cover", "source_dur": sd,
                 "source_in": round(in_s, 2),
@@ -382,7 +383,7 @@ def build_tree(style_card: str = "edit") -> Tuple[Any, Dict[str, Any]]:
     return tree, stats
 
 
-def _pick_lut_cube() -> Tuple[str, str]:
+def _pick_lut_cube() -> tuple[str, str]:
     """选 LUT 主题 + cube (优先冷色调强化 drop 段爆发对比)。"""
     pools = load_sampling()
     # 优先主题顺序: 冷色调 (高燃/对比) → HDR → 任意第一个
@@ -501,7 +502,7 @@ def main() -> int:
     print(f"  SFX: {len(sfx)} 个落点 → {final}")
 
     # ── ⑤ hybrid 评分 ──────────────────────────────────────────
-    print(f"\n[4/4] hybrid 评分 (整体)...")
+    print("\n[4/4] hybrid 评分 (整体)...")
     s = score_video_mode(str(final), "hybrid")
     sc = {d: s["scores"].get(d, 0) for d in DIMS}
     print(f"  整体: overall={sc['score_overall']:.2f} | "

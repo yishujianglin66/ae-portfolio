@@ -20,9 +20,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
-from core.torch_runtime import infer_ctx, get_device
 from torchvision import transforms
 from transformers import AutoModelForImageSegmentation
+
+from core.torch_runtime import get_device, infer_ctx
 
 VOC_ROOT = Path("/root/autodl-tmp/datasets/VOC2012")
 SEG_DIR = VOC_ROOT / "SegmentationClass"

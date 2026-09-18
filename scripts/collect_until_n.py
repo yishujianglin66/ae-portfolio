@@ -71,7 +71,7 @@ def main() -> int:
                 print(f"[collect] 本轮返回码 {r.returncode}, 5s 后重试", flush=True)
                 time.sleep(5)
         except subprocess.TimeoutExpired:
-            print(f"[collect] 本轮超时, 检查后继续", flush=True)
+            print("[collect] 本轮超时, 检查后继续", flush=True)
             time.sleep(10)
         except Exception as e:  # noqa: BLE001
             print(f"[collect] 异常: {e}, 30s 后继续", flush=True)

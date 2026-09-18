@@ -69,10 +69,10 @@ except ImportError:
 # =====================================================================
 # AE / FFmpeg 引擎：puppet-automation 是带横线的目录，惰性导入
 # =====================================================================
-_AE_ENGINE_CLS: Optional[type] = None
-_FF_ENGINE_CLS: Optional[type] = None
-_LLM_GATEWAY_CLS: Optional[type] = None
-_LLM_TASK_TYPE: Optional[Any] = None
+_AE_ENGINE_CLS: type | None = None
+_FF_ENGINE_CLS: type | None = None
+_LLM_GATEWAY_CLS: type | None = None
+_LLM_TASK_TYPE: Any | None = None
 
 
 def _ensure_engines_imported() -> None:
@@ -121,7 +121,7 @@ def _ensure_engines_imported() -> None:
 # =====================================================================
 
 # 综合相似度加权
-SIMILARITY_WEIGHTS: Dict[str, float] = {
+SIMILARITY_WEIGHTS: dict[str, float] = {
     "color": 0.3,
     "structure": 0.4,
     "motion": 0.2,
@@ -129,7 +129,7 @@ SIMILARITY_WEIGHTS: Dict[str, float] = {
 }
 
 # 每轮参数调整幅度（v2 起，幅度递减）
-ADJUSTMENT_SCALE: Dict[int, float] = {
+ADJUSTMENT_SCALE: dict[int, float] = {
     2: 0.30,  # v2: ±30%
     3: 0.20,  # v3: ±20%
     4: 0.10,  # v4: ±10%
@@ -175,10 +175,10 @@ class IterationOptimizer:
 
     def __init__(
         self,
-        compiler_bridge: Optional[Any] = None,
-        ae_engine: Optional[Any] = None,
-        ffmpeg_engine: Optional[Any] = None,
-        llm_gateway: Optional[Any] = None,
+        compiler_bridge: Any | None = None,
+        ae_engine: Any | None = None,
+        ffmpeg_engine: Any | None = None,
+        llm_gateway: Any | None = None,
         output_dir: Path | str = "output/vrs_iteration",
         render_timeout: int = DEFAULT_RENDER_TIMEOUT,
     ) -> None:
@@ -256,7 +256,7 @@ class IterationOptimizer:
                 "stop_reason": f"参考视频不存在: {reference_video}",
             }
 
-        iterations: List[Dict[str, Any]] = []
+        iterations: list[dict[str, Any]] = []
         current_analysis = deepcopy(initial_analysis)
         prev_similarity = 0.0
         last_improvement = 0.0
@@ -314,7 +314,7 @@ class IterationOptimizer:
                 comparison.get("brightness_sim", 0),
             )
 
-            iteration_record: Dict[str, Any] = {
+            iteration_record: dict[str, Any] = {
                 "version": version,
                 "rendered_path": str(rendered_path),
                 "comparison": comparison,
@@ -677,14 +677,14 @@ class IterationOptimizer:
         # 按时间戳对齐帧（允许不同帧率）
         aligned_pairs = self._align_frames(ref_frames, gen_frames)
 
-        color_sims: List[float] = []
-        struct_sims: List[float] = []
-        motion_sims: List[float] = []
-        bright_sims: List[float] = []
-        frame_details: List[Dict[str, Any]] = []
+        color_sims: list[float] = []
+        struct_sims: list[float] = []
+        motion_sims: list[float] = []
+        bright_sims: list[float] = []
+        frame_details: list[dict[str, Any]] = []
 
-        prev_ref_gray: Optional[Any] = None
-        prev_gen_gray: Optional[Any] = None
+        prev_ref_gray: Any | None = None
+        prev_gen_gray: Any | None = None
 
         for idx, (ref_frame, gen_frame, ts) in enumerate(aligned_pairs):
             ref_img = cv2.imread(str(ref_frame))
@@ -800,8 +800,8 @@ class IterationOptimizer:
         cap.release()
 
     def _align_frames(
-        self, ref_frames: List[Path], gen_frames: List[Path]
-    ) -> List[Tuple[Path, Path, float]]:
+        self, ref_frames: list[Path], gen_frames: list[Path]
+    ) -> list[tuple[Path, Path, float]]:
         """按时间戳对齐两个视频的帧。
 
         帧文件名约定：frame_%06d.png（按序号排序）。
@@ -814,7 +814,7 @@ class IterationOptimizer:
         Returns:
             对齐后的 (ref_frame, gen_frame, timestamp) 三元组列表
         """
-        pairs: List[Tuple[Path, Path, float]] = []
+        pairs: list[tuple[Path, Path, float]] = []
         n = min(len(ref_frames), len(gen_frames))
         for i in range(n):
             ts = i / SAMPLE_FPS
@@ -1039,7 +1039,7 @@ class IterationOptimizer:
         Returns:
             [{param_path, current_value, suggested_value, reason, delta}]
         """
-        adjustments: List[Dict[str, Any]] = []
+        adjustments: list[dict[str, Any]] = []
 
         color_sim = float(comparison.get("color_sim", 1.0))
         struct_sim = float(comparison.get("structure_sim", 1.0))
@@ -1201,7 +1201,7 @@ class IterationOptimizer:
 
     def _infer_reference_warmer(
         self, frame_details: list
-    ) -> Optional[bool]:
+    ) -> bool | None:
         """从 frame_details 推断参考视频是否更暖。
 
         简化启发式：当 color_sim 偏低且有帧数据时，默认认为参考偏暖（保守策略）。
@@ -1211,13 +1211,13 @@ class IterationOptimizer:
 
     def _infer_reference_more_saturated(
         self, frame_details: list
-    ) -> Optional[bool]:
+    ) -> bool | None:
         """推断参考视频是否更饱和。"""
         return True if frame_details else None
 
     def _infer_reference_higher_contrast(
         self, frame_details: list
-    ) -> Optional[bool]:
+    ) -> bool | None:
         """推断参考视频是否对比度更高。"""
         return True if frame_details else None
 
@@ -1325,7 +1325,7 @@ class IterationOptimizer:
                     return item
         return None
 
-    def _find_in_list(self, lst: list, pred: str) -> Optional[dict]:
+    def _find_in_list(self, lst: list, pred: str) -> dict | None:
         """按谓词从列表中查找元素。"""
         if "=" in pred:
             k, _, v = pred.partition("=")
@@ -1349,7 +1349,7 @@ class IterationOptimizer:
         Returns:
             缩放后的调整列表
         """
-        scaled: List[Dict[str, Any]] = []
+        scaled: list[dict[str, Any]] = []
         ratio = scale / 0.3  # 以 v2 的 30% 为基准
         for adj in adjustments:
             new_adj = dict(adj)
@@ -1486,7 +1486,7 @@ class IterationOptimizer:
 
     async def _extract_key_frames(
         self, video_path: str, count: int = 3
-    ) -> List[Path]:
+    ) -> list[Path]:
         """抽取关键帧（首、中、尾均匀采样）。
 
         Args:
@@ -1513,7 +1513,7 @@ class IterationOptimizer:
 
         # 均匀采样 count 帧
         positions = [int(total * (i + 1) / (count + 1)) for i in range(count)]
-        paths: List[Path] = []
+        paths: list[Path] = []
         for i, pos in enumerate(positions):
             cap.set(cv2.CAP_PROP_POS_FRAMES, pos)
             ret, frame = cap.read()
@@ -1559,7 +1559,7 @@ class IterationOptimizer:
         if not iterations:
             return "# VRS 迭代优化报告\n\n无迭代记录。"
 
-        lines: List[str] = []
+        lines: list[str] = []
         lines.append("# VRS 迭代优化报告")
         lines.append("")
         lines.append(f"生成时间：{time.strftime('%Y-%m-%d %H:%M:%S')}")

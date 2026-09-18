@@ -4,8 +4,8 @@
 """
 
 import os
-import sys
 import subprocess
+import sys
 import time
 
 OUTPUT_DIR = r"D:\AE-Work\视频素材库\冰海战记新素材"
@@ -61,7 +61,7 @@ def main():
                 print(f"  成功! {found_files[0]} ({size/1024/1024:.2f} MB)")
                 results.append({"id": v["id"], "path": filepath, "desc": v["desc"], "size": size, "success": True})
             else:
-                print(f"  下载成功但文件未找到")
+                print("  下载成功但文件未找到")
                 results.append({"id": v["id"], "path": None, "desc": v["desc"], "success": False, "error": "File not found"})
         else:
             print(f"  失败: {msg[:300]}")

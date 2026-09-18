@@ -65,9 +65,9 @@ class ResourceMonitorService:
     def __init__(
         self,
         interval: float = 5.0,
-        notifier: Optional[WebhookNotifier] = None,
-        sustained_thresholds: Optional[Dict[str, float]] = None,
-        sustained_seconds: Optional[Dict[str, int]] = None,
+        notifier: WebhookNotifier | None = None,
+        sustained_thresholds: dict[str, float] | None = None,
+        sustained_seconds: dict[str, int] | None = None,
     ) -> None:
         """初始化资源监控服务。
 
@@ -83,39 +83,39 @@ class ResourceMonitorService:
         """
         self.interval = interval
         self._running: bool = False
-        self._samples: List[Dict[str, Any]] = []
+        self._samples: list[dict[str, Any]] = []
         self._max_samples: int = 100  # 保留最近 100 个采样
-        self._alerts: List[Dict[str, Any]] = []
-        self._thresholds: Dict[str, float] = {
+        self._alerts: list[dict[str, Any]] = []
+        self._thresholds: dict[str, float] = {
             "cpu_percent": 90.0,
             "memory_percent": 85.0,
             "disk_percent": 90.0,
         }
         # 持续告警阈值（百分比）：达到此阈值并持续 sustained_seconds 秒后触发 webhook
-        self._sustained_thresholds: Dict[str, float] = sustained_thresholds or {
+        self._sustained_thresholds: dict[str, float] = sustained_thresholds or {
             "cpu_percent": 90.0,
             "memory_percent": 90.0,
             "disk_percent": 95.0,
         }
-        self._sustained_seconds: Dict[str, int] = sustained_seconds or {
+        self._sustained_seconds: dict[str, int] = sustained_seconds or {
             "cpu_percent": 30,
             "memory_percent": 30,
             "disk_percent": 60,
         }
         # Webhook 通知器
-        self._notifier: Optional[WebhookNotifier] = notifier
+        self._notifier: WebhookNotifier | None = notifier
         # 持续告警状态追踪：metric -> AlertRecord
-        self._sustained_alerts: Dict[str, AlertRecord] = {}
+        self._sustained_alerts: dict[str, AlertRecord] = {}
         # 告警事件历史记录（含 webhook 发送结果），用于 API 查询
-        self._alert_history: List[Dict[str, Any]] = []
+        self._alert_history: list[dict[str, Any]] = []
         self._max_alert_history: int = 200
         # GPU 监控句柄，懒初始化
         self._nvml_initialized: bool = False
         self._gpu_device_count: int = 0
         # 后台采样任务句柄
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
         # 采样起点时间，用于计算统计区间
-        self._started_at: Optional[float] = None
+        self._started_at: float | None = None
 
     # ------------------------------------------------------------------
     # GPU 初始化
@@ -135,11 +135,11 @@ class ResourceMonitorService:
             logger.warning(f"pynvml 初始化失败，GPU 监控将不可用: {e}")
             self._nvml_initialized = False
 
-    def _sample_gpu(self) -> List[Dict[str, Any]]:
+    def _sample_gpu(self) -> list[dict[str, Any]]:
         """采集所有 NVIDIA GPU 的状态。失败时返回空列表。"""
         if not _PYNVML_AVAILABLE or not self._nvml_initialized:
             return []
-        gpus: List[Dict[str, Any]] = []
+        gpus: list[dict[str, Any]] = []
         for idx in range(self._gpu_device_count):
             try:
                 handle = pynvml.nvmlDeviceGetHandleByIndex(idx)
@@ -163,7 +163,7 @@ class ResourceMonitorService:
     # ------------------------------------------------------------------
     # 快照采集
     # ------------------------------------------------------------------
-    async def get_snapshot(self) -> Dict[str, Any]:
+    async def get_snapshot(self) -> dict[str, Any]:
         """获取当前资源快照。
 
         Returns:
@@ -177,7 +177,7 @@ class ResourceMonitorService:
                 "reason": "psutil not installed",
             }
 
-        def _collect() -> Dict[str, Any]:
+        def _collect() -> dict[str, Any]:
             cpu_percent = psutil.cpu_percent(interval=None)
             cpu_per_core = psutil.cpu_percent(interval=None, percpu=True)
             mem = psutil.virtual_memory()
@@ -187,7 +187,7 @@ class ResourceMonitorService:
             except Exception:
                 # Windows 下根路径可能为驱动器，回退到 C:
                 disk = psutil.disk_usage("C:\\")
-            load_avg: Optional[List[float]] = None
+            load_avg: list[float] | None = None
             try:
                 # loadavg 仅在 POSIX 上可用
                 load_avg = list(psutil.getloadavg())
@@ -297,7 +297,7 @@ class ResourceMonitorService:
     # ------------------------------------------------------------------
     # 告警
     # ------------------------------------------------------------------
-    async def _check_thresholds(self, snapshot: Dict[str, Any]) -> None:
+    async def _check_thresholds(self, snapshot: dict[str, Any]) -> None:
         """根据阈值检查最新快照，必要时生成告警。
 
         本方法同时执行两类检查：
@@ -589,7 +589,7 @@ class ResourceMonitorService:
         if len(self._alert_history) > self._max_alert_history:
             del self._alert_history[: len(self._alert_history) - self._max_alert_history]
 
-    def get_alerts(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_alerts(self, limit: int = 10) -> list[dict[str, Any]]:
         """获取最近的告警列表。
 
         Args:
@@ -602,7 +602,7 @@ class ResourceMonitorService:
             return []
         return list(reversed(self._alerts[-limit:]))
 
-    def get_sustained_alerts(self) -> List[Dict[str, Any]]:
+    def get_sustained_alerts(self) -> list[dict[str, Any]]:
         """获取当前所有指标的持续告警状态。
 
         Returns:
@@ -611,7 +611,7 @@ class ResourceMonitorService:
         """
         return [r.to_dict() for r in self._sustained_alerts.values()]
 
-    def get_alert_history(self, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_alert_history(self, limit: int = 50) -> list[dict[str, Any]]:
         """获取告警事件历史记录（含 webhook 发送结果）。
 
         Args:
@@ -636,7 +636,7 @@ class ResourceMonitorService:
             return False
         return await self._notifier.test()
 
-    def get_notifier_stats(self) -> Optional[Dict[str, Any]]:
+    def get_notifier_stats(self) -> dict[str, Any] | None:
         """获取 webhook 通知器统计信息。"""
         if self._notifier is None:
             return None
@@ -650,7 +650,7 @@ class ResourceMonitorService:
     # ------------------------------------------------------------------
     # 统计
     # ------------------------------------------------------------------
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计信息（平均值/最大值/当前值）。
 
         Returns:
@@ -678,14 +678,14 @@ class ResourceMonitorService:
             monitoring_seconds = time.time() - self._started_at
 
         # GPU 统计：取所有样本中最后一个 GPU 的均值/峰值
-        gpu_percents: List[float] = []
-        gpu_mem_percents: List[float] = []
+        gpu_percents: list[float] = []
+        gpu_mem_percents: list[float] = []
         for s in self._samples:
             for g in s.get("gpu", []) or []:
                 gpu_percents.append(float(g.get("gpu_percent", 0.0)))
                 gpu_mem_percents.append(float(g.get("memory_percent", 0.0)))
 
-        def _stats(values: List[float]) -> Dict[str, float]:
+        def _stats(values: list[float]) -> dict[str, float]:
             if not values:
                 return {"avg": 0.0, "max": 0.0, "current": 0.0}
             return {
@@ -713,7 +713,7 @@ class ResourceMonitorService:
             "latest": latest,
         }
 
-    def get_history(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_history(self, limit: int = 100) -> list[dict[str, Any]]:
         """获取历史采样数据。
 
         Args:
@@ -740,6 +740,6 @@ class ResourceMonitorService:
         self._thresholds[metric] = float(value)
         logger.info(f"资源告警阈值更新: {metric}={value}")
 
-    def get_thresholds(self) -> Dict[str, float]:
+    def get_thresholds(self) -> dict[str, float]:
         """获取当前阈值配置副本。"""
         return dict(self._thresholds)

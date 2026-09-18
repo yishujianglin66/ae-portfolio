@@ -2,27 +2,27 @@
 import json
 import os
 import sys
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.config import (
+    ConfigManager,
     ConfigSource,
     ConfigValidator,
-    ConfigManager,
-    config_manager,
-    load_config,
-    get_config,
-    get_str,
-    get_int,
-    get_float,
-    get_bool,
-    get_list,
-    get_dict,
-    set_config,
     check_dependencies,
+    config_manager,
+    get_bool,
+    get_config,
+    get_dict,
+    get_float,
+    get_int,
+    get_list,
+    get_str,
+    load_config,
+    set_config,
 )
-
 
 # ============================================================================
 # Fixtures

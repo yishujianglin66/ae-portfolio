@@ -13,13 +13,13 @@ Phase 6: 全链路错误诊断报告
 执行: py -3.12 test_v17_full_pipeline.py
 """
 
+import json
 import os
+import shlex
+import subprocess
 import sys
 import time
-import json
 import traceback
-import subprocess
-import shlex
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 os.environ["PATH"] += os.pathsep + r"D:\app\FormatFactory"
@@ -397,9 +397,7 @@ def phase5_unified_pipeline():
     print("=" * 60)
 
     try:
-        from unified_tool_integrator import (
-            UnifiedToolIntegrator, ToolType, WorkflowPreset, WORKFLOW_PRESETS
-        )
+        from unified_tool_integrator import WORKFLOW_PRESETS, ToolType, UnifiedToolIntegrator, WorkflowPreset
 
         # 5.1 创建调度器
         integrator = UnifiedToolIntegrator(
@@ -483,10 +481,10 @@ def phase6_report():
             phases[current_phase]["failed"] += 1
             phases[current_phase]["errors"].append(f"{name}: {r['detail']}")
 
-    print(f"\n  === 全链路测试汇总 ===")
+    print("\n  === 全链路测试汇总 ===")
     print(f"  总计: {total} | 通过: {passed} | 失败: {failed} | 通过率: {passed/total*100:.1f}%")
 
-    print(f"\n  === 分模块统计 ===")
+    print("\n  === 分模块统计 ===")
     for phase, stats in phases.items():
         rate = stats["passed"] / stats["total"] * 100 if stats["total"] > 0 else 0
         status = "OK" if rate == 100 else "WARN" if rate >= 80 else "FAIL"
@@ -535,7 +533,7 @@ def phase6_report():
 
     # 文本日志
     with open(LOG_FILE, "w", encoding="utf-8") as f:
-        f.write(f"V17 全链路实战测试日志\n")
+        f.write("V17 全链路实战测试日志\n")
         f.write(f"时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
         f.write(f"目标: {V17_VIDEO}\n")
         f.write(f"{'='*60}\n\n")
@@ -547,7 +545,7 @@ def phase6_report():
                 f.write(f"  {entry}\n")
             f.write("\n")
 
-        f.write(f"=== 详细结果 ===\n")
+        f.write("=== 详细结果 ===\n")
         for r in results:
             tag = "PASS" if r["passed"] else "FAIL"
             f.write(f"  [{tag}] {r['name']}: {r['detail']}\n")

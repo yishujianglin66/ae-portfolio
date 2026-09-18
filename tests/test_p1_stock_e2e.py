@@ -30,7 +30,6 @@ from pipeline.stock_footage import (
     VideoResult,
 )
 
-
 # ============================================================================
 # 真实 E2E 开关：通过环境变量 AEKV_RUN_E2E=1 启用（测试文件内的
 # pytest_addoption 不生效，仅 conftest/插件可注册命令行选项）

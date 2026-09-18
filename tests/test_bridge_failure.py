@@ -4,7 +4,11 @@ import json
 from pathlib import Path
 
 from core.bridge_failure import (
-    classify, from_reason, BridgeFailure, failures_summary, CATEGORIES,
+    CATEGORIES,
+    BridgeFailure,
+    classify,
+    failures_summary,
+    from_reason,
 )
 
 

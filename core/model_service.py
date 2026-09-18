@@ -61,9 +61,9 @@ class ModelService:
             return
         
         self._style_classifier = None
-        self._style_classifier_info: Optional[ModelInfo] = None
+        self._style_classifier_info: ModelInfo | None = None
         self._param_optimizer = None
-        self._param_optimizer_info: Optional[ModelInfo] = None
+        self._param_optimizer_info: ModelInfo | None = None
         
         # 性能统计
         self._stats = {
@@ -80,7 +80,7 @@ class ModelService:
     
     # ========== 风格分类器 ==========
     
-    def load_style_classifier(self) -> Tuple[bool, str]:
+    def load_style_classifier(self) -> tuple[bool, str]:
         """加载风格分类器
         
         Returns:
@@ -131,7 +131,7 @@ class ModelService:
             logger.error(f"加载风格分类器失败: {e}")
             return False, str(e)
     
-    def classify_style(self, features: List[float]) -> Dict[str, Any]:
+    def classify_style(self, features: list[float]) -> dict[str, Any]:
         """分类风格
         
         Args:
@@ -227,11 +227,11 @@ class ModelService:
         
         return result
     
-    def get_style_classifier_info(self) -> Optional[ModelInfo]:
+    def get_style_classifier_info(self) -> ModelInfo | None:
         """获取风格分类器信息"""
         return self._style_classifier_info
     
-    def get_model_info(self, model_name: str) -> Dict[str, Any]:
+    def get_model_info(self, model_name: str) -> dict[str, Any]:
         """获取模型信息（通用接口）
         
         Args:
@@ -282,7 +282,7 @@ class ModelService:
     
     # ========== 参数优化器 ==========
     
-    def load_param_optimizer(self) -> Tuple[bool, str]:
+    def load_param_optimizer(self) -> tuple[bool, str]:
         """加载参数优化器
         
         Returns:
@@ -319,7 +319,7 @@ class ModelService:
             logger.error(f"加载参数优化器失败: {e}")
             return False, str(e)
     
-    def optimize_params(self, style: str, base_params: Dict[str, float]) -> Dict[str, Any]:
+    def optimize_params(self, style: str, base_params: dict[str, float]) -> dict[str, Any]:
         """优化AE参数
         
         Args:
@@ -351,8 +351,8 @@ class ModelService:
         start_time = time.time()
         
         try:
-            import torch
             import numpy as np
+            import torch
             
             # 构建输入向量（简化版）
             # 实际需要将style转换为one-hot，base_params归一化
@@ -394,13 +394,13 @@ class ModelService:
         
         return result
     
-    def get_param_optimizer_info(self) -> Optional[ModelInfo]:
+    def get_param_optimizer_info(self) -> ModelInfo | None:
         """获取参数优化器信息"""
         return self._param_optimizer_info
     
     # ========== 统计信息 ==========
     
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取性能统计"""
         stats = self._stats.copy()
         
@@ -420,7 +420,7 @@ class ModelService:
         
         return stats
     
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查"""
         return {
             "style_classifier_loaded": self._style_classifier is not None,
@@ -439,16 +439,16 @@ model_service = ModelService()
 
 # ========== 便捷函数 ==========
 
-def classify_style(features: List[float]) -> Dict[str, Any]:
+def classify_style(features: list[float]) -> dict[str, Any]:
     """便捷函数：分类风格"""
     return model_service.classify_style(features)
 
 
-def optimize_params(style: str, base_params: Dict[str, float]) -> Dict[str, Any]:
+def optimize_params(style: str, base_params: dict[str, float]) -> dict[str, Any]:
     """便捷函数：优化参数"""
     return model_service.optimize_params(style, base_params)
 
 
-def get_model_stats() -> Dict[str, Any]:
+def get_model_stats() -> dict[str, Any]:
     """便捷函数：获取统计"""
     return model_service.get_stats()

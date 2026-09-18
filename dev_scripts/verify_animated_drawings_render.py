@@ -10,9 +10,8 @@ import sys
 import time
 from pathlib import Path
 
-import yaml
-
 import numpy as np
+import yaml
 
 # numpy 2.x 兼容：官方代码使用已移除的 np.bool8
 if not hasattr(np, "bool8"):

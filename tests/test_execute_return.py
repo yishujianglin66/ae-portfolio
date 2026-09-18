@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-import sys, json
+import json
+import sys
+
 sys.path.insert(0, r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 from ae_mcp_client import AECommandClient
 

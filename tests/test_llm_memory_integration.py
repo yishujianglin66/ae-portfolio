@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 def test_llm_gateway_config():
     """测试 LLM 网关配置"""
-    from core.llm_gateway import LLMGateway, LLMConfig, TaskType
+    from core.llm_gateway import LLMConfig, LLMGateway, TaskType
 
     # 默认配置
     gw = LLMGateway()
@@ -283,7 +283,7 @@ def test_memory_stats():
 
 def test_dual_model_review_interface():
     """测试双模型对抗审查接口（不实际调用 LLM）"""
-    from core.llm_gateway import LLMGateway, LLMConfig
+    from core.llm_gateway import LLMConfig, LLMGateway
 
     # 未配置的网关，dual_model_review 应返回两个失败响应
     gw = LLMGateway()
@@ -298,6 +298,7 @@ def test_dual_model_review_interface():
 def test_pipeline_integration():
     """测试与 AEAgentPipeline 的集成"""
     import tempfile
+
     from ae_agent_pipeline import AEAgentPipeline
     from core.memory_store import MemoryStore
 
@@ -339,6 +340,7 @@ def test_pipeline_integration():
 def test_pipeline_confidence_cache():
     """测试 Pipeline 置信度缓存（使用记忆系统）"""
     import tempfile
+
     from ae_agent_pipeline import AEAgentPipeline
     from core.memory_store import MemoryStore
 

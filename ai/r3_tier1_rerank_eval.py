@@ -63,8 +63,11 @@ def run_eval():
     from sentence_transformers import CrossEncoder, SentenceTransformer
 
     from ai.t11_hybrid_search import (
-        TEST_QUERIES, build_semantic_index, enrich_with_pseudolabels,
-        hybrid_search, load_intel_cache,
+        TEST_QUERIES,
+        build_semantic_index,
+        enrich_with_pseudolabels,
+        hybrid_search,
+        load_intel_cache,
     )
 
     _log("=" * 60)

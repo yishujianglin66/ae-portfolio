@@ -16,9 +16,9 @@
 
 from __future__ import annotations
 
+import json
 import os
 import sys
-import json
 import tempfile
 from pathlib import Path
 
@@ -95,7 +95,7 @@ def run_integrator_http_poc():
         r = client.get("/api/v1/presets")
         check("GET /presets 无 token → 必须 401", 401, r.status_code, r.text)
 
-        r = client.get(f"/api/v1/workflow/fake-wid")
+        r = client.get("/api/v1/workflow/fake-wid")
         check("GET /workflow/fake 无 token → 必须 401", 401, r.status_code, r.text)
 
         r = client.get("/api/v1/workflows/active")
@@ -170,9 +170,10 @@ def run_subrouter_auth_poc():
     print(" SUB-ROUTER 统一认证 HTTP POC（VULN-003 修复验证）")
     print("=" * 72)
 
-    from fastapi import FastAPI, APIRouter, Depends, HTTPException, Query
-    from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
     from typing import Optional
+
+    from fastapi import APIRouter, Depends, FastAPI, HTTPException, Query
+    from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
     from fastapi.testclient import TestClient
 
     MCP_TOKEN = "mcp-secret-99887766"
@@ -182,7 +183,7 @@ def run_subrouter_auth_poc():
     _security = HTTPBearer(auto_error=False)
 
     def require_mcp_auth(
-        credentials: Optional[HTTPAuthorizationCredentials] = Depends(_security),
+        credentials: HTTPAuthorizationCredentials | None = Depends(_security),
     ) -> bool:
         """完全复刻 main.py 的 require_mcp_auth 简化版（模拟 production 严格模式）"""
         token = credentials.credentials if credentials else ""

@@ -1,7 +1,7 @@
-import sys
-import os
 import importlib
 import json
+import os
+import sys
 
 # 读取FFmpeg路径
 config = json.load(open("c:/Users/Administrator/Desktop/AE-Knowledge-Vault/config/media-config.json", encoding="utf-8"))
@@ -60,11 +60,11 @@ result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
 
 if result.returncode == 0 and os.path.exists(output_final):
     size = os.path.getsize(output_final)
-    print(f"  ✓ 处理完成!")
+    print("  ✓ 处理完成!")
     print(f"  输出: {output_final}")
     print(f"  大小: {size/1024/1024:.2f} MB")
 else:
-    print(f"  ✗ 处理失败")
+    print("  ✗ 处理失败")
     print(f"  错误: {result.stderr[:500]}")
     
     # 简化滤镜重试
@@ -90,7 +90,7 @@ else:
     
     if result2.returncode == 0 and os.path.exists(output_final):
         size = os.path.getsize(output_final)
-        print(f"  ✓ 简化处理完成!")
+        print("  ✓ 简化处理完成!")
         print(f"  输出: {output_final}")
         print(f"  大小: {size/1024/1024:.2f} MB")
     else:

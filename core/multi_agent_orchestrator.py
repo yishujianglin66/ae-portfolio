@@ -39,7 +39,7 @@ class Agent:
     def __init__(self, name: str):
         self.name = name
 
-    async def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, task: dict[str, Any]) -> dict[str, Any]:
         raise NotImplementedError
 
 
@@ -55,7 +55,7 @@ class PlannerAgent(Agent):
         except Exception as e:
             logger.warning(f"[Planner] AI Director not available: {e}")
 
-    async def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, task: dict[str, Any]) -> dict[str, Any]:
         """分解任务为执行计划。"""
         prompt = task.get("prompt", "")
 
@@ -76,7 +76,7 @@ class PlannerAgent(Agent):
         # Fallback：规则分解
         return self._rule_based_decompose(prompt)
 
-    def _rule_based_decompose(self, prompt: str) -> Dict[str, Any]:
+    def _rule_based_decompose(self, prompt: str) -> dict[str, Any]:
         """基于规则的简单分解。"""
         # 检测关键词
         is_battle = any(kw in prompt for kw in ["战斗", "燃向", "战斗场景", "battle"])
@@ -108,7 +108,7 @@ class MaterialAgent(Agent):
         except Exception as e:
             logger.warning(f"[Material] OpenMontage not available: {e}")
 
-    async def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, task: dict[str, Any]) -> dict[str, Any]:
         """搜集素材。"""
         query = task.get("query", "")
         sources = task.get("sources", None)
@@ -143,7 +143,7 @@ class MaterialAgent(Agent):
             "count": len(results),
         }
 
-    def _scan_local_library(self, query: str) -> List[Dict[str, Any]]:
+    def _scan_local_library(self, query: str) -> list[dict[str, Any]]:
         """扫描本地素材库。"""
         library_paths = [
             Path(r"D:\AE-Work\resources\footage"),
@@ -182,7 +182,7 @@ class VisionAgent(Agent):
         except Exception as e:
             logger.warning(f"[Vision] VisualAnalyzer not available: {e}")
 
-    async def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, task: dict[str, Any]) -> dict[str, Any]:
         """分析视频素材。"""
         video_path = task.get("video_path")
         if not video_path or not Path(video_path).exists():
@@ -203,7 +203,7 @@ class VisionAgent(Agent):
         # Fallback：基础分析
         return await asyncio.to_thread(self._basic_analysis, video_path)
 
-    def _basic_analysis(self, video_path: str) -> Dict[str, Any]:
+    def _basic_analysis(self, video_path: str) -> dict[str, Any]:
         """基础OpenCV分析。"""
         try:
             import cv2
@@ -238,7 +238,7 @@ class AudioAgent(Agent):
         except Exception as e:
             logger.warning(f"[Audio] Whisper not available: {e}")
 
-    async def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, task: dict[str, Any]) -> dict[str, Any]:
         """处理音频任务。"""
         task_type = task.get("type", "transcribe")
         audio_path = task.get("audio_path")
@@ -255,7 +255,7 @@ class AudioAgent(Agent):
 
         return {"success": False, "error": f"Unknown audio task: {task_type}"}
 
-    async def _transcribe(self, audio_path: str, task: Dict) -> Dict[str, Any]:
+    async def _transcribe(self, audio_path: str, task: dict) -> dict[str, Any]:
         """语音转文字。"""
         if self._whisper:
             try:
@@ -275,7 +275,7 @@ class AudioAgent(Agent):
 
         return {"success": False, "error": "Whisper not available"}
 
-    async def _generate_srt(self, audio_path: str, task: Dict) -> Dict[str, Any]:
+    async def _generate_srt(self, audio_path: str, task: dict) -> dict[str, Any]:
         """生成SRT字幕。"""
         output_srt = task.get("output_srt", Path(audio_path).with_suffix(".srt"))
 
@@ -295,7 +295,7 @@ class AudioAgent(Agent):
 
         return {"success": False, "error": "Whisper not available"}
 
-    async def _analyze_bpm(self, audio_path: str) -> Dict[str, Any]:
+    async def _analyze_bpm(self, audio_path: str) -> dict[str, Any]:
         """分析BPM。"""
         try:
             import librosa
@@ -322,7 +322,7 @@ class ComposerAgent(Agent):
         except Exception as e:
             logger.warning(f"[Composer] MoviePy not available: {e}")
 
-    async def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, task: dict[str, Any]) -> dict[str, Any]:
         """执行合成任务。"""
         compose_type = task.get("type", "preview")
 
@@ -335,7 +335,7 @@ class ComposerAgent(Agent):
 
         return {"success": False, "error": f"Unknown compose type: {compose_type}"}
 
-    async def _quick_preview(self, task: Dict) -> Dict[str, Any]:
+    async def _quick_preview(self, task: dict) -> dict[str, Any]:
         """MoviePy快速预览。"""
         clips = task.get("clips", [])
         output = task.get("output", "preview.mp4")
@@ -357,7 +357,7 @@ class ComposerAgent(Agent):
 
         return {"success": False, "error": "MoviePy not available"}
 
-    async def _ae_compose(self, task: Dict) -> Dict[str, Any]:
+    async def _ae_compose(self, task: dict) -> dict[str, Any]:
         """AE精细合成。"""
         # 通过MCP Bridge发送JSX
         jsx = task.get("jsx", "")
@@ -374,7 +374,7 @@ class ComposerAgent(Agent):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _burn_subtitles(self, task: Dict) -> Dict[str, Any]:
+    async def _burn_subtitles(self, task: dict) -> dict[str, Any]:
         """烧录字幕。"""
         video = task.get("video")
         srt = task.get("srt")
@@ -413,7 +413,7 @@ class EnhancerAgent(Agent):
         except Exception as e:
             logger.warning(f"[Enhancer] Topaz not available: {e}")
 
-    async def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, task: dict[str, Any]) -> dict[str, Any]:
         """执行增强任务。"""
         enhance_type = task.get("type", "interpolate")
         input_path = task.get("input")
@@ -429,7 +429,7 @@ class EnhancerAgent(Agent):
 
         return {"success": False, "error": f"Unknown enhance type: {enhance_type}"}
 
-    async def _interpolate(self, input_path: str, output_path: str, task: Dict) -> Dict[str, Any]:
+    async def _interpolate(self, input_path: str, output_path: str, task: dict) -> dict[str, Any]:
         """帧插值。"""
         # 优先使用RIFE（免费快速），备选Topaz
         if self._rife:
@@ -462,7 +462,7 @@ class EnhancerAgent(Agent):
 
         return {"success": False, "error": "No interpolation engine available"}
 
-    async def _upscale(self, input_path: str, output_path: str, task: Dict) -> Dict[str, Any]:
+    async def _upscale(self, input_path: str, output_path: str, task: dict) -> dict[str, Any]:
         """超分。"""
         if self._topaz:
             try:
@@ -494,7 +494,7 @@ class ColoristAgent(Agent):
         except Exception as e:
             logger.warning(f"[Colorist] DaVinci not available: {e}")
 
-    async def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, task: dict[str, Any]) -> dict[str, Any]:
         """执行调色任务。"""
         input_path = task.get("input")
         output_path = task.get("output")
@@ -532,7 +532,7 @@ class MaskAgent(Agent):
         except Exception as e:
             logger.warning(f"[Mask] SAM2 not available: {e}")
 
-    async def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, task: dict[str, Any]) -> dict[str, Any]:
         """执行遮罩任务。"""
         video_path = task.get("video")
         output_dir = task.get("output_dir")
@@ -572,7 +572,7 @@ class MultiAgentOrchestrator:
         }
         logger.info("[Orchestrator] Multi-agent system initialized")
 
-    async def produce(self, prompt: str, **kwargs) -> Dict[str, Any]:
+    async def produce(self, prompt: str, **kwargs) -> dict[str, Any]:
         """端到端视频生成。
 
         Args:
@@ -675,7 +675,7 @@ class MultiAgentOrchestrator:
 
         return results
 
-    async def _gather_materials(self, script: Dict, kwargs: Dict) -> Dict[str, Any]:
+    async def _gather_materials(self, script: dict, kwargs: dict) -> dict[str, Any]:
         """搜集素材。"""
         query = script.get("prompt", "")
         result = await self.agents["material"].execute({
@@ -684,7 +684,7 @@ class MultiAgentOrchestrator:
         })
         return {"materials": result}
 
-    async def _process_audio(self, audio_path: str, kwargs: Dict) -> Dict[str, Any]:
+    async def _process_audio(self, audio_path: str, kwargs: dict) -> dict[str, Any]:
         """处理音频。"""
         result = await self.agents["audio"].execute({
             "type": kwargs.get("audio_task", "transcribe"),
@@ -694,7 +694,7 @@ class MultiAgentOrchestrator:
         })
         return {"audio": result}
 
-    async def _enhance(self, compose_result: Dict, kwargs: Dict) -> Dict[str, Any]:
+    async def _enhance(self, compose_result: dict, kwargs: dict) -> dict[str, Any]:
         """质量增强。"""
         output = compose_result.get("output")
         if not output:
@@ -708,7 +708,7 @@ class MultiAgentOrchestrator:
         })
         return {"enhance": result}
 
-    async def _color_grade(self, compose_result: Dict, kwargs: Dict) -> Dict[str, Any]:
+    async def _color_grade(self, compose_result: dict, kwargs: dict) -> dict[str, Any]:
         """调色。"""
         output = compose_result.get("output")
         if not output:
@@ -721,7 +721,7 @@ class MultiAgentOrchestrator:
         })
         return {"color": result}
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """获取所有Agent状态。"""
         return {
             name: {

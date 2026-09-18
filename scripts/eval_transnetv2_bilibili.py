@@ -37,7 +37,7 @@ TRANSNET_THRESHOLD = 0.5
 TOLERANCE_FRAMES = 5
 
 
-def transnetv2_cuts(video_path: str, model) -> Optional[np.ndarray]:
+def transnetv2_cuts(video_path: str, model) -> np.ndarray | None:
     """TransNetV2 逐帧预测 → 切点帧索引 (上升沿)。"""
     video_frames, single_pred, _ = model.predict_video(video_path, quiet=True)
     pred = single_pred.cpu().numpy() if hasattr(single_pred, "cpu") else np.asarray(single_pred)
@@ -49,7 +49,7 @@ def transnetv2_cuts(video_path: str, model) -> Optional[np.ndarray]:
     return np.array(cuts, dtype=np.int64), int(video_frames.shape[0])
 
 
-def pyscenedetect_cuts(video_path: str) -> Optional[np.ndarray]:
+def pyscenedetect_cuts(video_path: str) -> np.ndarray | None:
     """PySceneDetect ContentDetector 切点帧索引。"""
     from scenedetect import ContentDetector, detect
     scenes = detect(str(video_path), ContentDetector(threshold=27.0), show_progress=False)
@@ -95,10 +95,10 @@ def main() -> int:
         videos = videos[:args.limit]
     print(f"[eval] {len(videos)} videos")
 
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
     t0 = time.time()
     for i, vp in enumerate(videos):
-        row: Dict[str, Any] = {"video": str(vp)}
+        row: dict[str, Any] = {"video": str(vp)}
         try:
             tn_cuts, tn_frames = transnetv2_cuts(str(vp), model)
             row["transnet_frames"] = tn_frames

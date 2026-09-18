@@ -1,11 +1,11 @@
+import hashlib
+import hmac
 import json
 import os
 import sys
 import time
-import hmac
-import hashlib
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 from ae_bridge_base import AEBridgeClient
 
@@ -85,7 +85,7 @@ class MCPBridgeClient(AEBridgeClient):
         # secret 已通过构造函数传入，此处返回环境变量值作为 fallback
         return os.environ.get("MCP_BRIDGE_SECRET", "")
 
-    def _is_result_ready(self, result: Dict[str, Any]) -> bool:
+    def _is_result_ready(self, result: dict[str, Any]) -> bool:
         """MCP Bridge 协议：status 字段为 success/error/timeout 时结果就绪。"""
         return result.get('status') in ['success', 'error', 'timeout']
 

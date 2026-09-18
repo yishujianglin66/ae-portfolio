@@ -58,12 +58,12 @@ class TaskPersistence:
     负责任务状态的持久化存储与恢复。
     """
 
-    def __init__(self, config: Optional[PersistenceConfig] = None):
+    def __init__(self, config: PersistenceConfig | None = None):
         self._config = config or PersistenceConfig()
         self._lock = threading.RLock()
-        self._tasks: Dict[str, Dict[str, Any]] = {}
-        self._history: List[Dict[str, Any]] = []
-        self._auto_save_timer: Optional[threading.Timer] = None
+        self._tasks: dict[str, dict[str, Any]] = {}
+        self._history: list[dict[str, Any]] = []
+        self._auto_save_timer: threading.Timer | None = None
         self._running = False
         self._closed = False
 
@@ -207,7 +207,7 @@ class TaskPersistence:
     # 任务管理
     # --------------------------------------------------------------------
 
-    def save_task(self, task_id: str, task_data: Dict[str, Any]):
+    def save_task(self, task_id: str, task_data: dict[str, Any]):
         """保存任务状态
 
         Args:
@@ -226,7 +226,7 @@ class TaskPersistence:
         if self._config.save_on_change:
             self._save_tasks()
 
-    def get_task(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def get_task(self, task_id: str) -> dict[str, Any] | None:
         """获取任务数据
 
         Args:
@@ -238,12 +238,12 @@ class TaskPersistence:
         with self._lock:
             return self._tasks.get(task_id)
 
-    def get_all_tasks(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_tasks(self) -> dict[str, dict[str, Any]]:
         """获取所有任务"""
         with self._lock:
             return dict(self._tasks)
 
-    def get_pending_tasks(self) -> List[Dict[str, Any]]:
+    def get_pending_tasks(self) -> list[dict[str, Any]]:
         """获取待执行任务（用于重启恢复）"""
         pending = []
         with self._lock:
@@ -319,8 +319,8 @@ class TaskPersistence:
         self,
         limit: int = 100,
         offset: int = 0,
-        status: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        status: str | None = None,
+    ) -> list[dict[str, Any]]:
         """获取历史记录
 
         Args:
@@ -339,7 +339,7 @@ class TaskPersistence:
 
         return history[offset:offset + limit]
 
-    def get_history_count(self, status: Optional[str] = None) -> int:
+    def get_history_count(self, status: str | None = None) -> int:
         """获取历史记录数量"""
         with self._lock:
             if status:
@@ -403,13 +403,13 @@ class TaskPersistence:
     # 统计信息
     # --------------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取持久化统计信息"""
         with self._lock:
             task_count = len(self._tasks)
             history_count = len(self._history)
 
-            status_counts: Dict[str, int] = {}
+            status_counts: dict[str, int] = {}
             for task_data in self._tasks.values():
                 status = task_data.get("status", "unknown")
                 status_counts[status] = status_counts.get(status, 0) + 1
@@ -448,10 +448,10 @@ class TaskPersistence:
 # 模块单例
 # ============================================================================
 
-_default_persistence: Optional[TaskPersistence] = None
+_default_persistence: TaskPersistence | None = None
 
 
-def get_task_persistence(config: Optional[PersistenceConfig] = None) -> TaskPersistence:
+def get_task_persistence(config: PersistenceConfig | None = None) -> TaskPersistence:
     """获取默认持久化管理器实例"""
     global _default_persistence
     if _default_persistence is None:
@@ -468,8 +468,8 @@ if __name__ == "__main__":
     print("任务持久化模块测试")
     print("=" * 60)
 
-    import tempfile
     import shutil
+    import tempfile
 
     tmp_dir = tempfile.mkdtemp(prefix="task_persist_test_")
     print(f"\n测试目录: {tmp_dir}")
@@ -526,4 +526,4 @@ if __name__ == "__main__":
 
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
-        print(f"\n测试目录已清理")
+        print("\n测试目录已清理")

@@ -13,7 +13,6 @@ import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
-
 # ============================================================================
 # 数据类
 # ============================================================================
@@ -51,7 +50,7 @@ class JointConfig:
         auto_limit: 是否启用关节限位
     """
 
-    joint_points: List[JointPoint] = field(default_factory=list)
+    joint_points: list[JointPoint] = field(default_factory=list)
     show_joint_seams: bool = True
     seam_radius: float = 8.0
     show_strings: bool = False
@@ -73,7 +72,7 @@ class JointSystem:
     并支持从关节跟踪数据生成关键帧动画。
     """
 
-    _presets: Dict[str, 'JointConfig'] = None
+    _presets: dict[str, 'JointConfig'] = None
 
     def __init__(self) -> None:
         if JointSystem._presets is None:
@@ -89,7 +88,7 @@ class JointSystem:
         config: JointConfig,
         layer_name: str,
         duration: float,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成关节化效果
 
         Args:
@@ -100,10 +99,10 @@ class JointSystem:
         Returns:
             包含 effects, keyframes, layers, expressions 的字典
         """
-        effects: List[Dict[str, Any]] = []
-        keyframes: List[Dict[str, Any]] = []
-        layers: List[Dict[str, Any]] = []
-        expressions: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
+        keyframes: list[dict[str, Any]] = []
+        layers: list[dict[str, Any]] = []
+        expressions: list[dict[str, Any]] = []
 
         if config.show_joint_seams:
             seam_effects = JointSystem._generate_joint_seams(config, layer_name)
@@ -134,8 +133,8 @@ class JointSystem:
         self,
         config: JointConfig,
         layer_name: str,
-        joint_data: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        joint_data: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """根据关节跟踪数据生成关键帧动画
 
         Args:
@@ -147,12 +146,12 @@ class JointSystem:
         Returns:
             关键帧列表
         """
-        keyframes: List[Dict[str, Any]] = []
+        keyframes: list[dict[str, Any]] = []
 
         joint_names = [jp.name for jp in config.joint_points]
 
         for joint_name in joint_names:
-            joint_kfs: List[Tuple[float, float, float]] = []
+            joint_kfs: list[tuple[float, float, float]] = []
 
             for frame_data in joint_data:
                 time = frame_data.get("time", 0.0)
@@ -200,9 +199,9 @@ class JointSystem:
 
     @staticmethod
     def estimate_joints_from_bbox(
-        bbox: Dict[str, float],
+        bbox: dict[str, float],
         body_type: str = "human",
-    ) -> List[JointPoint]:
+    ) -> list[JointPoint]:
         """从人物边界框估算关节点位置（无跟踪数据时的降级方案）
 
         Args:
@@ -283,12 +282,12 @@ class JointSystem:
     def _generate_joint_seams(
         config: JointConfig,
         layer_name: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成关节缝效果
 
         在每个关节点位置绘制椭圆形接缝，使用 Circle 效果。
         """
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
 
         for i, jp in enumerate(config.joint_points):
             seam_name = f"JointSeam_{jp.name}"
@@ -313,14 +312,14 @@ class JointSystem:
         config: JointConfig,
         layer_name: str,
         duration: float,
-    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
         """生成提线效果
 
         从顶部悬挂点到关节点的连线，使用 Beam 效果。
         """
-        layers: List[Dict[str, Any]] = []
-        keyframes: List[Dict[str, Any]] = []
-        expressions: List[Dict[str, Any]] = []
+        layers: list[dict[str, Any]] = []
+        keyframes: list[dict[str, Any]] = []
+        expressions: list[dict[str, Any]] = []
 
         top_joints = [
             jp for jp in config.joint_points
@@ -380,12 +379,12 @@ class JointSystem:
     def _generate_joint_gaps(
         config: JointConfig,
         layer_name: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成关节间隙效果
 
         在关节位置创建微小的暗色间隙，模拟木偶分段感。
         """
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
 
         limb_pairs = JointSystem._get_limb_joint_pairs(config.joint_points)
 
@@ -415,10 +414,10 @@ class JointSystem:
 
     @staticmethod
     def _get_limb_joint_pairs(
-        joints: List[JointPoint],
-    ) -> List[Tuple[JointPoint, JointPoint]]:
+        joints: list[JointPoint],
+    ) -> list[tuple[JointPoint, JointPoint]]:
         """获取肢体关节对列表（用于间隙生成）"""
-        pairs: List[Tuple[JointPoint, JointPoint]] = []
+        pairs: list[tuple[JointPoint, JointPoint]] = []
         joint_map = {j.name: j for j in joints}
 
         limb_connections = [
@@ -447,9 +446,9 @@ class JointSystem:
     # ------------------------------------------------------------------------
 
     @staticmethod
-    def _init_presets() -> Dict[str, JointConfig]:
+    def _init_presets() -> dict[str, JointConfig]:
         """初始化预设配置库"""
-        presets: Dict[str, JointConfig] = {}
+        presets: dict[str, JointConfig] = {}
 
         # --- 17点人体关节 ---
         human_17_joints = [

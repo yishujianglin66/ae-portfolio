@@ -59,16 +59,16 @@ import traceback
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Literal, Optional, Tuple
 
 # 在类型检查阶段导入以避免循环引用（运行时按需懒加载）
 if TYPE_CHECKING:
     from ae.unified_ae_client import UnifiedAEClient
-    from integrations.davinci_fuscript import ResolveColorEngine
     from integrations.davinci_color_grading import (
         ColorGrader,
         ColorGradingPreset,
     )
+    from integrations.davinci_fuscript import ResolveColorEngine
 
 logger = logging.getLogger(__name__)
 
@@ -133,9 +133,9 @@ class AEExportSpec:
     comp_name: str
     output_path: str
     format: AEExportFormat = "mov_prores_4444"
-    resolution: Tuple[int, int] = (1920, 1080)
+    resolution: tuple[int, int] = (1920, 1080)
     frame_rate: float = 30.0
-    duration: Optional[float] = None
+    duration: float | None = None
     start_time: float = 0.0
     quality: RenderQuality = "best"
     with_audio: bool = True
@@ -143,7 +143,7 @@ class AEExportSpec:
     include_keyframes: bool = True
     include_compositions: bool = True
 
-    def to_render_args(self) -> Dict[str, Any]:
+    def to_render_args(self) -> dict[str, Any]:
         """转换为 UnifiedAEClient.render 的参数。"""
         return {
             "comp_name": self.comp_name,
@@ -186,12 +186,12 @@ class DavinciGradingSpec:
 
     project_name: str
     timeline_name: str = "AE_Imported"
-    preset_name: Optional[str] = None
-    custom_preset: Optional["ColorGradingPreset"] = None
+    preset_name: str | None = None
+    custom_preset: "ColorGradingPreset" | None = None
     grade_all_clips: bool = True
-    specific_clip_indices: Optional[List[int]] = None
-    export_lut: Optional[str] = None
-    segment_presets: Optional[Dict[str, str]] = None
+    specific_clip_indices: list[int] | None = None
+    export_lut: str | None = None
+    segment_presets: dict[str, str] | None = None
 
     def validate(self) -> None:
         """校验规格合法性。"""
@@ -233,21 +233,21 @@ class DavinciRenderSpec:
 
     output_path: str
     format: DavinciRenderFormat = "mp4_h264"
-    resolution: Tuple[int, int] = (1920, 1080)
+    resolution: tuple[int, int] = (1920, 1080)
     frame_rate: float = 30.0
     codec: str = "H.264"
     quality: str = "High"
     render_audio: bool = True
-    bitrate: Optional[int] = None          # Mbps
-    crf: Optional[int] = None              # 0-51
-    gop_size: Optional[int] = None         # 帧
+    bitrate: int | None = None          # Mbps
+    crf: int | None = None              # 0-51
+    gop_size: int | None = None         # 帧
     interlaced: bool = False
     render_range: str = "all"              # "all" or "in_out"
-    start_frame: Optional[int] = None
-    end_frame: Optional[int] = None
-    metadata: Optional[Dict[str, str]] = None
+    start_frame: int | None = None
+    end_frame: int | None = None
+    metadata: dict[str, str] | None = None
 
-    def to_resolve_render_settings(self) -> Dict[str, Any]:
+    def to_resolve_render_settings(self) -> dict[str, Any]:
         """转换为 Resolve 渲染设置字典。"""
         settings = {
             "SelectAllFrames": self.render_range == "all",
@@ -349,17 +349,17 @@ class PipelineResult:
     """
 
     success: bool
-    ae_export_path: Optional[str] = None
-    davinci_project_path: Optional[str] = None
-    final_output_path: Optional[str] = None
-    intermediate_files: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    metrics: Dict[str, float] = field(default_factory=dict)
+    ae_export_path: str | None = None
+    davinci_project_path: str | None = None
+    final_output_path: str | None = None
+    intermediate_files: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    metrics: dict[str, float] = field(default_factory=dict)
     started_at: datetime = field(default_factory=datetime.now)
-    finished_at: Optional[datetime] = None
+    finished_at: datetime | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """序列化为字典（方便持久化和报告）。"""
         return {
             "success": self.success,
@@ -386,7 +386,7 @@ class PipelineResult:
 
 # 高层 API 预设名 → 调色规格预设名
 # 风格化场景推荐预设
-STYLE_PRESET_MAP: Dict[str, str] = {
+STYLE_PRESET_MAP: dict[str, str] = {
     "cinematic_teal_orange": "cinematic_teal_orange",
     "vintage_film": "vintage_film",
     "music_video_punch": "music_video_punch",
@@ -420,17 +420,17 @@ class PipelineCheckpoint:
     """
 
     stage: str
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=datetime.now)
-    ae_export_spec: Optional[Dict[str, Any]] = None
-    davinci_grading_spec: Optional[Dict[str, Any]] = None
-    davinci_render_spec: Optional[Dict[str, Any]] = None
-    metrics: Dict[str, float] = field(default_factory=dict)
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    ae_export_spec: dict[str, Any] | None = None
+    davinci_grading_spec: dict[str, Any] | None = None
+    davinci_render_spec: dict[str, Any] | None = None
+    metrics: dict[str, float] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     pipeline_version: str = "1.0.0"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "stage": self.stage,
             "data": self.data,
@@ -445,7 +445,7 @@ class PipelineCheckpoint:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "PipelineCheckpoint":
+    def from_dict(cls, data: dict[str, Any]) -> "PipelineCheckpoint":
         return cls(
             stage=data["stage"],
             data=data.get("data", {}),
@@ -491,7 +491,7 @@ class CheckpointManager:
             json.dump(data, f, ensure_ascii=False, indent=2)
         logger.info(f"Checkpoint saved: {self.checkpoint_path}")
 
-    def load(self) -> Optional[PipelineCheckpoint]:
+    def load(self) -> PipelineCheckpoint | None:
         """加载检查点文件。
 
         Returns:
@@ -526,7 +526,7 @@ class CheckpointManager:
             return (stage_order.index(checkpoint.stage) + 1) / len(stage_order)
         return 0.0
 
-    def list_checkpoints(self) -> List[str]:
+    def list_checkpoints(self) -> list[str]:
         """列出所有检查点文件。"""
         return sorted(
             str(p) for p in self.checkpoint_dir.glob("*.json") if p.is_file()
@@ -553,7 +553,7 @@ class AEToDavinciPipeline:
     """
 
     # 各阶段权重（用于进度汇报）
-    STAGE_WEIGHTS: Dict[str, Tuple[float, float]] = {
+    STAGE_WEIGHTS: dict[str, tuple[float, float]] = {
         "ae_export": (0.0, 0.4),
         "davinci_import": (0.4, 0.5),
         "davinci_grade": (0.5, 0.8),
@@ -565,8 +565,8 @@ class AEToDavinciPipeline:
 
     def __init__(
         self,
-        ae_client: Optional["UnifiedAEClient"] = None,
-        davinci_engine: Optional["ResolveColorEngine"] = None,
+        ae_client: "UnifiedAEClient" | None = None,
+        davinci_engine: "ResolveColorEngine" | None = None,
         work_dir: str = "output/pipeline",
         temp_dir: str = "output/pipeline/temp",
         checkpoint_dir: str = "output/pipeline/checkpoints",
@@ -581,8 +581,8 @@ class AEToDavinciPipeline:
             checkpoint_dir: 检查点存储目录。
         """
         # AE 客户端可按需懒加载（避免在无 AE 环境导入时炸错）
-        self.ae: Optional["UnifiedAEClient"] = ae_client
-        self.davinci: Optional["ResolveColorEngine"] = davinci_engine
+        self.ae: "UnifiedAEClient" | None = ae_client
+        self.davinci: "ResolveColorEngine" | None = davinci_engine
 
         self.work_dir = Path(work_dir)
         self.temp_dir = Path(temp_dir)
@@ -593,7 +593,7 @@ class AEToDavinciPipeline:
         self.checkpoint_manager = CheckpointManager(checkpoint_dir=checkpoint_dir)
 
         # 内部状态
-        self._grader: Optional["ColorGrader"] = None
+        self._grader: "ColorGrader" | None = None
 
     # ==================================================================
     # 依赖懒加载
@@ -628,7 +628,7 @@ class AEToDavinciPipeline:
 
     def _report(
         self,
-        callback: Optional[ProgressCallback],
+        callback: ProgressCallback | None,
         stage: str,
         progress: float,
     ) -> None:
@@ -653,7 +653,7 @@ class AEToDavinciPipeline:
         ae_spec: AEExportSpec,
         grading_spec: DavinciGradingSpec,
         render_spec: DavinciRenderSpec,
-        progress_callback: Optional[ProgressCallback] = None,
+        progress_callback: ProgressCallback | None = None,
     ) -> PipelineResult:
         """执行完整协作链路（同步）。
 
@@ -785,12 +785,12 @@ class AEToDavinciPipeline:
     def _save_checkpoint(
         self,
         stage: str,
-        data: Dict[str, Any],
-        ae_export_spec: Optional[Dict[str, Any]] = None,
-        davinci_grading_spec: Optional[Dict[str, Any]] = None,
-        davinci_render_spec: Optional[Dict[str, Any]] = None,
-        metrics: Optional[Dict[str, float]] = None,
-        warnings: Optional[List[str]] = None,
+        data: dict[str, Any],
+        ae_export_spec: dict[str, Any] | None = None,
+        davinci_grading_spec: dict[str, Any] | None = None,
+        davinci_render_spec: dict[str, Any] | None = None,
+        metrics: dict[str, float] | None = None,
+        warnings: list[str] | None = None,
     ) -> None:
         """保存检查点。"""
         checkpoint = PipelineCheckpoint(
@@ -804,7 +804,7 @@ class AEToDavinciPipeline:
         )
         self.checkpoint_manager.save(checkpoint)
 
-    def load_checkpoint(self) -> Optional[PipelineCheckpoint]:
+    def load_checkpoint(self) -> PipelineCheckpoint | None:
         """加载检查点。"""
         return self.checkpoint_manager.load()
 
@@ -882,7 +882,7 @@ class AEToDavinciPipeline:
         self,
         spec: AEExportSpec,
         output_path: Path,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """AE 导出为 XML/AAF 交换格式。
 
         通过生成 JSX 脚本让 AE 导出 Final Cut Pro XML 或 AAF 文件，
@@ -1171,7 +1171,7 @@ try {{
         self,
         spec: DavinciGradingSpec,
         result: PipelineResult,
-    ) -> Optional["ColorGradingPreset"]:
+    ) -> "ColorGradingPreset" | None:
         """解析调色预设。"""
         if spec.custom_preset is not None:
             return spec.custom_preset
@@ -1196,7 +1196,7 @@ try {{
         spec: DavinciGradingSpec,
         grader: "ColorGrader",
         result: PipelineResult,
-    ) -> List[int]:
+    ) -> list[int]:
         """确定要调色的片段索引列表。"""
         if spec.specific_clip_indices is not None:
             return list(spec.specific_clip_indices)
@@ -1223,7 +1223,7 @@ try {{
     @staticmethod
     def _find_latest_render(
         directory: Path, ext: str
-    ) -> Optional[Path]:
+    ) -> Path | None:
         """在指定目录中查找最新生成的渲染产物。"""
         try:
             candidates = sorted(
@@ -1244,7 +1244,7 @@ try {{
         ae_spec: AEExportSpec,
         grading_spec: DavinciGradingSpec,
         render_spec: DavinciRenderSpec,
-        progress_callback: Optional[ProgressCallback] = None,
+        progress_callback: ProgressCallback | None = None,
     ) -> PipelineResult:
         """异步执行完整协作链路（在默认 executor 中调度 run）。
 
@@ -1265,7 +1265,7 @@ try {{
         grading_spec: DavinciGradingSpec,
         render_spec: DavinciRenderSpec,
         checkpoint_dir: str = "output/pipeline/checkpoints",
-        progress_callback: Optional[ProgressCallback] = None,
+        progress_callback: ProgressCallback | None = None,
     ) -> PipelineResult:
         """带检查点的执行，支持断点续传。
 
@@ -1434,7 +1434,7 @@ try {{
                         pass
 
     # 供 cleanup 使用的中间产物记录
-    _tracked_intermediates: List[str] = []
+    _tracked_intermediates: list[str] = []
 
     # ==================================================================
     # 高层便捷 API
@@ -1444,10 +1444,10 @@ try {{
         self,
         comp_name: str,
         output_path: str,
-        duration: Optional[float],
+        duration: float | None,
         preset_name: str,
         render_format: str = "mp4_h264",
-    ) -> Tuple[AEExportSpec, DavinciGradingSpec, DavinciRenderSpec]:
+    ) -> tuple[AEExportSpec, DavinciGradingSpec, DavinciRenderSpec]:
         """为某个风格化预设构造三段规格（供 run_*_xxx 使用）。"""
         ae_spec = AEExportSpec(
             comp_name=comp_name,
@@ -1470,7 +1470,7 @@ try {{
         self,
         comp_name: str,
         output_path: str,
-        duration: Optional[float] = None,
+        duration: float | None = None,
     ) -> PipelineResult:
         """运行"电影感青橙"风格化（AE 导出 → DaVinci 青橙调色 → 渲染）。"""
         specs = self._build_specs_for_style(
@@ -1485,7 +1485,7 @@ try {{
         self,
         comp_name: str,
         output_path: str,
-        duration: Optional[float] = None,
+        duration: float | None = None,
     ) -> PipelineResult:
         """运行"复古胶片"风格化。"""
         specs = self._build_specs_for_style(
@@ -1500,7 +1500,7 @@ try {{
         self,
         comp_name: str,
         output_path: str,
-        duration: Optional[float] = None,
+        duration: float | None = None,
     ) -> PipelineResult:
         """运行"音乐 MV 冲击"风格化。"""
         specs = self._build_specs_for_style(
@@ -1516,7 +1516,7 @@ try {{
         comp_name: str,
         output_path: str,
         preset_name: str,
-        duration: Optional[float] = None,
+        duration: float | None = None,
     ) -> PipelineResult:
         """使用指定预设运行（预设键名见 integrations.color_presets.BUILTIN_PRESETS）。"""
         specs = self._build_specs_for_style(
@@ -1532,7 +1532,7 @@ try {{
         comp_name: str,
         output_path: str,
         lut_path: str,
-        duration: Optional[float] = None,
+        duration: float | None = None,
     ) -> PipelineResult:
         """使用自定义 LUT 运行（通过 resolve_fuscript 的 apply_lut 能力，融合到 color 配置里）。"""
         # 构造一个 cinematic 占位 preset，然后通过 segment_presets 注入 LUT
@@ -1579,7 +1579,7 @@ def quick_pipeline(
     comp_name: str,
     output_path: str,
     style: str = "cinematic_teal_orange",
-    duration: Optional[float] = None,
+    duration: float | None = None,
 ) -> PipelineResult:
     """一行式协作链路入口（默认电影感青橙风格化）。
 

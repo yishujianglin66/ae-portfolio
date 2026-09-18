@@ -20,12 +20,12 @@ media-fetcher.py
      - 优先读取 cookies.txt 文件（如有手动导出的）
      - 其次自动从 Edge 浏览器提取（支持 Edge 运行中）
 """
-import subprocess
 import json
 import os
 import re
 import shutil
 import sqlite3
+import subprocess
 import tempfile
 import uuid
 from pathlib import Path
@@ -36,7 +36,7 @@ CONFIG_PATH = Path(__file__).parent / "config" / "media-config.json"
 _VIDEO_EXTS = (".mp4", ".webm", ".mov", ".avi", ".mkv", ".flv", ".m4v")
 
 # 平台 URL 识别正则（按优先级排序，越具体越靠前）
-_PLATFORM_PATTERNS: List[Tuple[str, str]] = [
+_PLATFORM_PATTERNS: list[tuple[str, str]] = [
     ("douyin",      r"(douyin\.com|iesdouyin\.com|v\.douyin\.com|douyinvod)"),
     ("bilibili",    r"(bilibili\.com|b23\.tv|bilivideo)"),
     ("youtube",     r"(youtube\.com|youtu\.be|googlevideo)"),
@@ -61,7 +61,7 @@ class MediaFetcher:
         )
         self._fallback_browser = self.config["download"].get("fallback_browser", "edge")
 
-    def _load_config(self, path: Path) -> Dict:
+    def _load_config(self, path: Path) -> dict:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
 
@@ -78,7 +78,7 @@ class MediaFetcher:
         os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Edge\User Data\Profile 2\Network\Cookies"),
     ]
 
-    def auto_export_cookies(self, domains: Optional[List[str]] = None) -> Dict:
+    def auto_export_cookies(self, domains: list[str] | None = None) -> dict:
         """
         自动从 Edge 提取 cookies 并导出为 Netscape 格式文件。
         支持 Edge 运行中（复制 SQLite 绕过文件锁）。
@@ -238,14 +238,14 @@ class MediaFetcher:
 
         return {"success": True, "exported": exported}
 
-    def _find_edge_cookie_db(self) -> Optional[str]:
+    def _find_edge_cookie_db(self) -> str | None:
         """查找 Edge cookies 数据库路径"""
         for path in self._EDGE_COOKIE_PATHS:
             if os.path.exists(path):
                 return path
         return None
 
-    def _read_sqlite_cookies(self, db_path: str, domains: List[str]) -> Dict:
+    def _read_sqlite_cookies(self, db_path: str, domains: list[str]) -> dict:
         """从 SQLite 数据库读取 cookies（不依赖 keyring 解密，直接读取值）"""
         result = {}
         try:
@@ -302,7 +302,7 @@ class MediaFetcher:
 
         return result
 
-    def _domain_to_platform(self, domain: str) -> Optional[str]:
+    def _domain_to_platform(self, domain: str) -> str | None:
         """域名 → 平台名映射"""
         mapping = {
             ".douyin.com": "douyin", ".iesdouyin.com": "douyin",
@@ -359,8 +359,8 @@ class MediaFetcher:
     # ------------------------------------------------------------------
     # 公共 API
     # ------------------------------------------------------------------
-    def download_video(self, url: str, output_dir: Optional[str] = None,
-                       audio_only: bool = False, quality: str = "best") -> Dict:
+    def download_video(self, url: str, output_dir: str | None = None,
+                       audio_only: bool = False, quality: str = "best") -> dict:
         """
         下载视频：
           - 直链视频文件 → requests 流式下载
@@ -385,13 +385,13 @@ class MediaFetcher:
 
         return result
 
-    def download_bgm(self, url: str, output_dir: Optional[str] = None) -> Dict:
+    def download_bgm(self, url: str, output_dir: str | None = None) -> dict:
         """仅下载音频"""
         if output_dir is None:
             output_dir = self.config["directories"]["bgm_library"]
         return self.download_video(url, output_dir=output_dir, audio_only=True)
 
-    def download_batch(self, urls: List[str], audio_only: bool = False) -> List[Dict]:
+    def download_batch(self, urls: list[str], audio_only: bool = False) -> list[dict]:
         """批量下载"""
         results = []
         for url in urls:
@@ -399,7 +399,7 @@ class MediaFetcher:
             results.append(result)
         return results
 
-    def get_video_info(self, url: str) -> Dict:
+    def get_video_info(self, url: str) -> dict:
         """获取视频元信息（不下载）"""
         yt_dlp = self.config["tools"]["yt_dlp"]
         platform = self._detect_platform(url)
@@ -431,7 +431,7 @@ class MediaFetcher:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def search_youtube(self, query: str, max_results: int = 5) -> Dict:
+    def search_youtube(self, query: str, max_results: int = 5) -> dict:
         """搜索YouTube视频"""
         yt_dlp = self.config["tools"]["yt_dlp"]
         cmd = [
@@ -463,7 +463,7 @@ class MediaFetcher:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def list_platforms(self) -> Dict:
+    def list_platforms(self) -> dict:
         """列出所有平台配置状态（用于前端展示）"""
         result = {}
         for name, cfg in self.config["platforms"].items():
@@ -489,7 +489,7 @@ class MediaFetcher:
         path = url.split("?")[0].split("#")[0].lower()
         return any(path.endswith(ext) for ext in _VIDEO_EXTS)
 
-    def _download_direct(self, url: str, output_dir: str) -> Dict:
+    def _download_direct(self, url: str, output_dir: str) -> dict:
         import requests
         try:
             filename = url.split("/")[-1].split("?")[0].split("#")[0]
@@ -531,7 +531,7 @@ class MediaFetcher:
     # yt-dlp 下载（统一平台策略）
     # ------------------------------------------------------------------
     def _download_with_ytdlp(self, url: str, output_dir: str,
-                             audio_only: bool, quality: str) -> Dict:
+                             audio_only: bool, quality: str) -> dict:
         yt_dlp = self.config["tools"]["yt_dlp"]
         temp_path = os.path.join(output_dir, "%(title)s.%(ext)s")
         platform = self._detect_platform(url)
@@ -611,13 +611,14 @@ class MediaFetcher:
 
         return result
 
-    def _download_douyin_playwright(self, url: str, output_dir: str) -> Dict:
+    def _download_douyin_playwright(self, url: str, output_dir: str) -> dict:
         """
         Playwright 备选方案：抖音视频下载
         当 yt-dlp 失败时使用，通过浏览器渲染页面提取视频地址
         """
         import asyncio
         import re
+
         import requests as req
 
         result = {
@@ -628,7 +629,8 @@ class MediaFetcher:
         }
 
         try:
-            from playwright.async_api import async_playwright, TimeoutError as PWTimeout
+            from playwright.async_api import TimeoutError as PWTimeout
+            from playwright.async_api import async_playwright
         except ImportError:
             result["error"] = "playwright 未安装"
             return result
@@ -839,7 +841,7 @@ class MediaFetcher:
             pass
         return False
 
-    def _apply_common_opts(self, cmd: List[str]) -> None:
+    def _apply_common_opts(self, cmd: list[str]) -> None:
         """应用通用 yt-dlp 选项：UA、SSL、重试"""
         cmd.extend([
             "--user-agent", self._UA,
@@ -848,7 +850,7 @@ class MediaFetcher:
             "--fragment-retries", str(self.config["download"].get("retries", 3)),
         ])
 
-    def _apply_format_opts(self, cmd: List[str], audio_only: bool, quality: str) -> None:
+    def _apply_format_opts(self, cmd: list[str], audio_only: bool, quality: str) -> None:
         """应用格式选项"""
         if audio_only:
             cmd.extend(["-f", "ba/best", "--extract-audio", "--audio-format", "mp3"])
@@ -860,8 +862,8 @@ class MediaFetcher:
             else:
                 cmd.extend(["-f", "bestvideo+bestaudio/best"])
 
-    def _apply_platform_opts(self, cmd: List[str], platform: str,
-                             platform_cfg: Dict, info_only: bool) -> None:
+    def _apply_platform_opts(self, cmd: list[str], platform: str,
+                             platform_cfg: dict, info_only: bool) -> None:
         """应用平台特定选项：cookies、Referer、extractor-args"""
         if not platform_cfg or not platform_cfg.get("enabled", False):
             return
@@ -930,7 +932,7 @@ class MediaFetcher:
                 return name
         return "unknown"
 
-    def _get_platform_cfg(self, platform: str) -> Dict:
+    def _get_platform_cfg(self, platform: str) -> dict:
         """获取平台配置"""
         return self.config.get("platforms", {}).get(platform, {})
 
@@ -988,7 +990,7 @@ def main():
         elif cmd == "status":
             pass  # 继续下面的状态展示
         else:
-            print(f"用法: py -3.11 media-fetcher.py [status|auto-export-cookies]")
+            print("用法: py -3.11 media-fetcher.py [status|auto-export-cookies]")
             return
 
     print("=" * 64)

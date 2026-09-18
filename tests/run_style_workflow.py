@@ -28,8 +28,9 @@ async def main() -> int:
     parser.add_argument("--search-keywords", nargs="*", default=[], help="附加搜索关键词")
     args = parser.parse_args()
 
-    from core.workflow_orchestrator import WorkflowContext, WorkflowOrchestrator
     from core.workflow_tasks_video import build_style_pipeline
+
+    from core.workflow_orchestrator import WorkflowContext, WorkflowOrchestrator
 
     video = Path(args.video)
     if not video.exists():

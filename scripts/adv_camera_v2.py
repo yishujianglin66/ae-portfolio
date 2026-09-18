@@ -4,9 +4,13 @@
 =====================================================================
 修复: 100ms高频轮询捕获bridge响应(防止MCP面板删除result文件)
 """
-import json, time, sys, os, subprocess
-from pathlib import Path
+import json
+import os
+import subprocess
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -101,8 +105,8 @@ def render_comp(comp_name, output_path, wait=90):
 def verify_animation(video_path, threshold=15):
     """帧差异验证"""
     try:
-        from PIL import Image
         import numpy as np
+        from PIL import Image
     except ImportError:
         print("  ! PIL不可用,跳过验证")
         return True

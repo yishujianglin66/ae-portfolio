@@ -1,4 +1,6 @@
-import zipfile, os, shutil
+import os
+import shutil
+import zipfile
 
 z = r'C:\Users\Administrator\Desktop\ffmpeg.zip'
 d = r'C:\ffmpeg'
@@ -16,6 +18,7 @@ for dp, dn, fn in os.walk(d):
 
 # Add to user PATH permanently (HKCU)
 import winreg
+
 key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Environment", 0, winreg.KEY_ALL_ACCESS)
 try:
     current_path = winreg.QueryValueEx(key, "Path")[0]
@@ -35,6 +38,7 @@ os.environ["PATH"] = os.environ.get("PATH", "") + ";" + bin_dir
 
 # Verify
 import subprocess
+
 result = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True)
 print(result.stdout.split('\n')[0])
 print("FFmpeg installed successfully!")

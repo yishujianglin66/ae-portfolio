@@ -80,7 +80,7 @@ _PROMPT_TEMPLATE = """你是资深AMV/燃向混剪剪辑导演, 精通镜头语�
 """
 
 
-def _clean_json(text: str) -> Optional[Dict[str, Any]]:
+def _clean_json(text: str) -> dict[str, Any] | None:
     """剥离围栏/注释后解析 JSON, 失败返回 None"""
     t = text.strip()
     fence = re.search(r"```(?:json)?\s*(.*?)```", t, re.S)
@@ -101,13 +101,13 @@ def _clean_json(text: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def _validate_plan(plan: Dict[str, Any], arcs: List[Dict[str, Any]]) -> Optional[str]:
+def _validate_plan(plan: dict[str, Any], arcs: list[dict[str, Any]]) -> str | None:
     """校验 LLM 输出, 返回错误描述 (None=通过)"""
     if not isinstance(plan, dict) or "arcs" not in plan:
         return "缺少 arcs 字段"
     if not isinstance(plan["arcs"], list) or len(plan["arcs"]) != len(arcs):
         return f"arcs 数量 {len(plan.get('arcs', []))} != 输入 {len(arcs)}"
-    punches: List[float] = []
+    punches: list[float] = []
     for a in plan["arcs"]:
         if a.get("start") is None or a.get("end") is None:
             return "弧段缺 start/end"
@@ -149,12 +149,12 @@ def _validate_plan(plan: Dict[str, Any], arcs: List[Dict[str, Any]]) -> Optional
 
 
 def design_shot_plan(
-    arcs: List[Dict[str, Any]],
-    cache_dir: Optional[Path] = None,
+    arcs: list[dict[str, Any]],
+    cache_dir: Path | None = None,
     bgm_stem: str = "bgm",
     model: str = "pro",
     force_refresh: bool = False,
-) -> Optional[Dict[str, Any]]:
+) -> dict[str, Any] | None:
     """调用 API 模型生成镜头设计计划; 失败返回 None (规则兜底)。
 
     Args:

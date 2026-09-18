@@ -5,9 +5,12 @@
   摄像机推进 1677KB / 摄像机环绕 2491KB / Z视差 4930KB / CC粒子 11620KB / 点光 1116KB
 硬性约束: opacity 0-100; ES3语法(禁let/const/箭头函数); 逐字动画只用ADBE Text Opacity
 """
-import json, time, subprocess, sys
-from pathlib import Path
+import json
+import subprocess
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_CMD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_command.json")
 BRIDGE_RESULT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_result.json")

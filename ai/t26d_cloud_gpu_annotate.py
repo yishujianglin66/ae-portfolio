@@ -74,7 +74,7 @@ def load_model():
     """加载Qwen3-VL-8B模型到GPU"""
     _log(f"加载模型: {MODEL_NAME}")
     import torch
-    from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
+    from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 
     model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
         MODEL_NAME, torch_dtype="auto", device_map="auto",
@@ -139,7 +139,7 @@ def save_checkpoint(done_frames, total):
         ensure_ascii=False), encoding="utf-8")
 
 
-def parse_response(text: str) -> Optional[dict]:
+def parse_response(text: str) -> dict | None:
     text = text.strip()
     if text.startswith("```"):
         lines = text.split("\n")
@@ -277,7 +277,7 @@ def run_cloud_annotation():
     agree_rate = stats["agree"] / max(stats["agree"] + stats["disagree"], 1)
 
     _log(f"\n{'='*60}")
-    _log(f"云GPU标注完成!")
+    _log("云GPU标注完成!")
     _log(f"  总帧数: {len(all_frames)}")
     _log(f"  已标注: {total_results}")
     _log(f"  耗时: {elapsed/3600:.1f}h")

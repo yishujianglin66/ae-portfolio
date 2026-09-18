@@ -22,8 +22,8 @@ PROJECT_ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 sys.path.insert(0, str(PROJECT_ROOT / "puppet-automation"))
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
-from src.engines.sam2.engine import SAM2Engine
 from saliency_prompt import find_prompts_with_visualization
+from src.engines.sam2.engine import SAM2Engine
 
 FFMPEG = r"C:\ffmpeg\bin\ffmpeg.exe"
 FFPROBE = r"C:\ffmpeg\bin\ffprobe.exe"
@@ -358,14 +358,14 @@ async def process_long_video(engine: SAM2Engine, stem: str) -> dict:
         print(f"\n  [段 {seg_idx + 1}/{num_segments}] 帧 {start_frame}-{end_frame - 1} ({num_frames} 帧)")
 
         seg_video = TEMP_DIR / f"{stem}_seg{seg_idx:03d}.mp4"
-        print(f"    切段...")
+        print("    切段...")
         if not cut_segment(src, seg_video, start_frame, num_frames):
             seg_errors.append(f"seg{seg_idx}: 切段失败")
             continue
 
         prompts = find_segment_prompts(seg_video, seg_idx)
         if not prompts:
-            print(f"    无显著性候选点，跳过")
+            print("    无显著性候选点，跳过")
             seg_errors.append(f"seg{seg_idx}: 无prompt")
             seg_video.unlink(missing_ok=True)
             continue
@@ -401,7 +401,7 @@ async def process_long_video(engine: SAM2Engine, stem: str) -> dict:
                     break
                 else:
                     seg_errors.append(f"seg{seg_idx}: 无遮罩生成")
-                    print(f"    无遮罩生成")
+                    print("    无遮罩生成")
             except Exception as e:
                 seg_errors.append(f"seg{seg_idx}: {e}")
                 print(f"    推理异常: {e}")
@@ -419,7 +419,7 @@ async def process_long_video(engine: SAM2Engine, stem: str) -> dict:
 
         if actual_copied == 0:
             seg_errors.append(f"seg{seg_idx}: 复制遮罩全部失败（保留临时目录）")
-            print(f"    ⚠ 复制失败！不清理临时目录以便手动重跑 copy")
+            print("    ⚠ 复制失败！不清理临时目录以便手动重跑 copy")
             # 不清理 seg_mask_dir，保留推理结果
             seg_video.unlink(missing_ok=True)  # 切段视频可以重切
             continue
@@ -492,7 +492,7 @@ print(f"RESULT filled={{filled}} encode_fail={{encode_fails}} write_fail={{write
 
     elapsed = round(time.time() - t0, 0)
 
-    print(f"\n  合成透明 MOV...")
+    print("\n  合成透明 MOV...")
     if not merge_masks_to_mov(src, all_masks_dir, mov):
         return {"stem": stem, "success": False, "error": "MOV 合成失败",
                 "elapsed": elapsed, "mask_count": total_masks}

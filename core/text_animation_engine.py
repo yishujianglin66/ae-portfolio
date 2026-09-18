@@ -16,7 +16,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-
 # ============================================================================
 # 1. 核心枚举与数据类
 # ============================================================================
@@ -82,7 +81,7 @@ class AnimationParams:
     easing: EasingType = EasingType.EASE_OUT
     intensity: float = 1.0
     direction: str = "forward"
-    offset: Tuple[float, float] = (0.0, 0.0)
+    offset: tuple[float, float] = (0.0, 0.0)
     per_char_delay: float = 0.0
     blur_amount: float = 20.0
     scale_factor: float = 1.5
@@ -100,8 +99,8 @@ class TextStyle:
     font_size: float = 72.0
     font_weight: str = "bold"
     font_style: str = "normal"
-    fill_color: Tuple[float, float, float, float] = (1.0, 1.0, 1.0, 1.0)
-    stroke_color: Tuple[float, float, float, float] = (0.0, 0.0, 0.0, 1.0)
+    fill_color: tuple[float, float, float, float] = (1.0, 1.0, 1.0, 1.0)
+    stroke_color: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 1.0)
     stroke_width: float = 0.0
     letter_spacing: float = 0.0
     line_spacing: float = 1.2
@@ -118,11 +117,11 @@ class TextAnimationPreset:
     type: TextAnimationType
     duration: float = 1.0
     easing: EasingType = EasingType.EASE_OUT
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     description: str = ""
     category: str = "basic"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "type": self.type.value,
@@ -134,7 +133,7 @@ class TextAnimationPreset:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "TextAnimationPreset":
+    def from_dict(cls, data: dict[str, Any]) -> "TextAnimationPreset":
         return cls(
             name=data["name"],
             type=TextAnimationType(data["type"]),
@@ -165,8 +164,8 @@ class AETextAnimator:
         self.comp_height = comp_height
         self.frame_rate = frame_rate
         self.duration = duration
-        self._layers: List[str] = []
-        self._animations: List[str] = []
+        self._layers: list[str] = []
+        self._animations: list[str] = []
 
     def _easing_expression(self, easing: EasingType) -> str:
         """生成 AE 表达式缓动函数"""
@@ -186,7 +185,7 @@ class AETextAnimator:
         }
         return easing_map.get(easing, "easeOut")
 
-    def create_text_layer(self, text: str, style: Optional[TextStyle] = None,
+    def create_text_layer(self, text: str, style: TextStyle | None = None,
                           layer_name: str = "Text Layer") -> str:
         """创建文本图层
 
@@ -225,7 +224,7 @@ textLayer.anchorPoint.setValue([textLayer.width / 2, textLayer.height / 2]);
         return jsx
 
     def apply_animation(self, layer_name: str, anim_type: TextAnimationType,
-                        params: Optional[AnimationParams] = None) -> str:
+                        params: AnimationParams | None = None) -> str:
         """应用动画预设到文本图层
 
         Args:
@@ -484,7 +483,7 @@ layer.opacity.setValueAtTime({end_f/self.frame_rate}, 0);
         )
 
     def create_typewriter_effect(self, layer_name: str,
-                                  params: Optional[AnimationParams] = None) -> str:
+                                  params: AnimationParams | None = None) -> str:
         """创建打字机效果（带光标闪烁）
 
         Args:
@@ -518,7 +517,7 @@ textProp.expression = typeExpr;
 
     def create_per_char_animation(self, layer_name: str,
                                    anim_type: TextAnimationType,
-                                   params: Optional[AnimationParams] = None) -> str:
+                                   params: AnimationParams | None = None) -> str:
         """创建逐字符动画（使用 Text Animator）
 
         Args:
@@ -566,7 +565,7 @@ animProp.setValueAtTime({end_f/self.frame_rate}, {config['end']});
 '''
 
     def create_path_text(self, layer_name: str,
-                         params: Optional[AnimationParams] = None) -> str:
+                         params: AnimationParams | None = None) -> str:
         """创建路径文字动画
 
         Args:
@@ -611,7 +610,7 @@ pathOptions.property("ADBE Text Path Margin").expression = pathAnimExpr;
 '''
 
     def create_particle_text(self, layer_name: str,
-                             params: Optional[AnimationParams] = None) -> str:
+                             params: AnimationParams | None = None) -> str:
         """创建粒子文字（汇聚/发散）效果
 
         Args:
@@ -648,7 +647,7 @@ if (particleDisperse) {{
 '''
 
     def create_3d_text_animation(self, layer_name: str,
-                                  params: Optional[AnimationParams] = None) -> str:
+                                  params: AnimationParams | None = None) -> str:
         """创建3D翻转动画
 
         Args:
@@ -682,7 +681,7 @@ if (bevelFx) {{
 '''
 
     def create_glitch_text(self, layer_name: str,
-                            params: Optional[AnimationParams] = None) -> str:
+                            params: AnimationParams | None = None) -> str:
         """创建故障文字效果（RGB分离+位移）
 
         Args:
@@ -751,7 +750,7 @@ tintB.property("Map White To").setValue([0, 0, 1]);
 bLayer.property("Transform").property("Position").expression = shiftExprB;
 '''
 
-    def get_presets(self) -> List[TextAnimationPreset]:
+    def get_presets(self) -> list[TextAnimationPreset]:
         """获取20+内置动画预设"""
         return [
             TextAnimationPreset(
@@ -887,9 +886,9 @@ bLayer.property("Transform").property("Position").expression = shiftExprB;
             ),
         ]
 
-    def generate_jsx(self, text: str, style: Optional[TextStyle] = None,
-                     anim_type: Optional[TextAnimationType] = None,
-                     anim_params: Optional[AnimationParams] = None) -> str:
+    def generate_jsx(self, text: str, style: TextStyle | None = None,
+                     anim_type: TextAnimationType | None = None,
+                     anim_params: AnimationParams | None = None) -> str:
         """生成完整的 AE JSX 脚本
 
         Args:
@@ -960,7 +959,7 @@ class PRTextAnimator:
         self.duration = duration
 
     def create_essential_graphics_text(self, text: str,
-                                        style: Optional[TextStyle] = None,
+                                        style: TextStyle | None = None,
                                         layer_name: str = "EG Text") -> str:
         """创建 Essential Graphics 风格的文本（MOGRT 兼容）
 
@@ -1056,8 +1055,8 @@ if (clip) {{
 }}
 '''
 
-    def create_title_sequence(self, titles: List[str],
-                              style: Optional[TextStyle] = None,
+    def create_title_sequence(self, titles: list[str],
+                              style: TextStyle | None = None,
                               per_title_duration: float = 3.0,
                               transition: str = "cross_dissolve") -> str:
         """创建标题卡序列
@@ -1104,7 +1103,7 @@ var activeSeq = proj.activeSequence;
 '''
 
     def create_lower_third(self, name_text: str, title_text: str,
-                           style: Optional[TextStyle] = None,
+                           style: TextStyle | None = None,
                            position: str = "bottom_left") -> str:
         """创建 Lower Third 字幕条
 
@@ -1169,8 +1168,8 @@ tp.setValue(td);
 titleClip.position.setValue([{pos_x - 200}, {pos_y + 30}]);
 '''
 
-    def create_scrolling_credits(self, credits_lines: List[str],
-                                  style: Optional[TextStyle] = None,
+    def create_scrolling_credits(self, credits_lines: list[str],
+                                  style: TextStyle | None = None,
                                   scroll_speed: float = 50.0) -> str:
         """创建滚动字幕（演职员表）
 
@@ -1215,8 +1214,8 @@ creditsClip.position.setValueAtTime(0, [{self.width/2}, startY]);
 creditsClip.position.setValueAtTime({scroll_duration}, [{self.width/2}, endY]);
 '''
 
-    def generate_pr_script(self, text: str, style: Optional[TextStyle] = None,
-                           anim_type: Optional[str] = None) -> str:
+    def generate_pr_script(self, text: str, style: TextStyle | None = None,
+                           anim_type: str | None = None) -> str:
         """生成完整的 Premiere Pro JSX 脚本
 
         Args:
@@ -1284,11 +1283,11 @@ class TextEffectPreset:
     """文本效果预设"""
     name: str
     type: TextEffectType
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
     description: str = ""
     category: str = "basic"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "type": self.type.value,
@@ -1311,7 +1310,7 @@ class PSTextEffectGenerator:
         self.doc_height = doc_height
         self.resolution = resolution
 
-    def create_text_layer(self, text: str, style: Optional[TextStyle] = None,
+    def create_text_layer(self, text: str, style: TextStyle | None = None,
                           layer_name: str = "Text Layer") -> str:
         """创建 PSD 文本图层
 
@@ -1355,7 +1354,7 @@ textItem.color = color;
 '''
 
     def apply_layer_style(self, layer_name: str, effect_type: str,
-                          params: Optional[Dict[str, Any]] = None) -> str:
+                          params: dict[str, Any] | None = None) -> str:
         """应用图层样式（投影、发光、斜面、描边、渐变叠加等）
 
         Args:
@@ -1387,7 +1386,7 @@ textItem.color = color;
 
         return effect_func(layer_name, params)
 
-    def _drop_shadow_style(self, layer_name: str, params: Dict[str, Any]) -> str:
+    def _drop_shadow_style(self, layer_name: str, params: dict[str, Any]) -> str:
         """投影样式"""
         angle = params.get("angle", 120)
         distance = params.get("distance", 10)
@@ -1419,7 +1418,7 @@ desc.putList(charIDToTypeID("Lefx"), list);
 executeAction(charIDToTypeID("Lefx"), desc, DialogModes.NO);
 '''
 
-    def _outer_glow_style(self, layer_name: str, params: Dict[str, Any]) -> str:
+    def _outer_glow_style(self, layer_name: str, params: dict[str, Any]) -> str:
         """外发光样式"""
         size = params.get("size", 20)
         spread = params.get("spread", 10)
@@ -1448,7 +1447,7 @@ desc.putList(charIDToTypeID("Lefx"), list);
 executeAction(charIDToTypeID("Lefx"), desc, DialogModes.NO);
 '''
 
-    def _bevel_emboss_style(self, layer_name: str, params: Dict[str, Any]) -> str:
+    def _bevel_emboss_style(self, layer_name: str, params: dict[str, Any]) -> str:
         """斜面和浮雕样式"""
         size = params.get("size", 10)
         depth = params.get("depth", 100)
@@ -1480,7 +1479,7 @@ desc.putList(charIDToTypeID("Lefx"), list);
 executeAction(charIDToTypeID("Lefx"), desc, DialogModes.NO);
 '''
 
-    def _stroke_style(self, layer_name: str, params: Dict[str, Any]) -> str:
+    def _stroke_style(self, layer_name: str, params: dict[str, Any]) -> str:
         """描边样式"""
         size = params.get("size", 3)
         color = params.get("color", [0.0, 0.0, 0.0])
@@ -1506,7 +1505,7 @@ desc.putList(charIDToTypeID("Lefx"), list);
 executeAction(charIDToTypeID("Lefx"), desc, DialogModes.NO);
 '''
 
-    def _gradient_overlay_style(self, layer_name: str, params: Dict[str, Any]) -> str:
+    def _gradient_overlay_style(self, layer_name: str, params: dict[str, Any]) -> str:
         """渐变叠加样式"""
         angle = params.get("angle", 90)
         scale = params.get("scale", 100)
@@ -1533,15 +1532,15 @@ desc.putList(charIDToTypeID("Lefx"), list);
 executeAction(charIDToTypeID("Lefx"), desc, DialogModes.NO);
 '''
 
-    def _inner_shadow_style(self, layer_name: str, params: Dict[str, Any]) -> str:
+    def _inner_shadow_style(self, layer_name: str, params: dict[str, Any]) -> str:
         """内阴影样式"""
         return self._drop_shadow_style(layer_name, params)
 
-    def _inner_glow_style(self, layer_name: str, params: Dict[str, Any]) -> str:
+    def _inner_glow_style(self, layer_name: str, params: dict[str, Any]) -> str:
         """内发光样式"""
         return self._outer_glow_style(layer_name, params)
 
-    def _color_overlay_style(self, layer_name: str, params: Dict[str, Any]) -> str:
+    def _color_overlay_style(self, layer_name: str, params: dict[str, Any]) -> str:
         """颜色叠加样式"""
         opacity = params.get("opacity", 100)
         return f'''
@@ -1560,11 +1559,11 @@ desc.putList(charIDToTypeID("Lefx"), list);
 executeAction(charIDToTypeID("Lefx"), desc, DialogModes.NO);
 '''
 
-    def _satin_style(self, layer_name: str, params: Dict[str, Any]) -> str:
+    def _satin_style(self, layer_name: str, params: dict[str, Any]) -> str:
         """光泽样式"""
         return self._drop_shadow_style(layer_name, params)
 
-    def create_metal_text(self, text: str, style: Optional[TextStyle] = None) -> str:
+    def create_metal_text(self, text: str, style: TextStyle | None = None) -> str:
         """创建金属文字效果
 
         Args:
@@ -1585,8 +1584,8 @@ executeAction(charIDToTypeID("Lefx"), desc, DialogModes.NO);
 {self.apply_layer_style("Metal_Text", "drop_shadow", {{"distance": 5, "size": 10, "opacity": 50}})}
 '''
 
-    def create_neon_text(self, text: str, style: Optional[TextStyle] = None,
-                         glow_color: Optional[List[float]] = None) -> str:
+    def create_neon_text(self, text: str, style: TextStyle | None = None,
+                         glow_color: list[float] | None = None) -> str:
         """创建霓虹发光文字
 
         Args:
@@ -1615,7 +1614,7 @@ app.backgroundColor = bgColor;
 {self.apply_layer_style("Neon_Text", "inner_glow", {{"size": 10, "opacity": 80}})}
 '''
 
-    def create_3d_text_ps(self, text: str, style: Optional[TextStyle] = None,
+    def create_3d_text_ps(self, text: str, style: TextStyle | None = None,
                           extrude_depth: int = 30) -> str:
         """创建 3D 挤压文字效果
 
@@ -1637,7 +1636,7 @@ app.backgroundColor = bgColor;
 {self.apply_layer_style("3D_Text", "drop_shadow", {{"distance": 20, "size": 15, "opacity": 60}})}
 '''
 
-    def create_fire_text(self, text: str, style: Optional[TextStyle] = None) -> str:
+    def create_fire_text(self, text: str, style: TextStyle | None = None) -> str:
         """创建火焰文字效果
 
         Args:
@@ -1663,7 +1662,7 @@ app.backgroundColor = bgColor;
 {self.apply_layer_style("Fire_Text", "inner_glow", {{"size": 15, "opacity": 90}})}
 '''
 
-    def create_glass_text(self, text: str, style: Optional[TextStyle] = None) -> str:
+    def create_glass_text(self, text: str, style: TextStyle | None = None) -> str:
         """创建玻璃/透明文字效果
 
         Args:
@@ -1708,8 +1707,8 @@ layer.textItem.warpHorizontalDistortion = {horizontal_distortion};
 layer.textItem.warpVerticalDistortion = {vertical_distortion};
 '''
 
-    def generate_ps_script(self, text: str, style: Optional[TextStyle] = None,
-                           effect_type: Optional[TextEffectType] = None) -> str:
+    def generate_ps_script(self, text: str, style: TextStyle | None = None,
+                           effect_type: TextEffectType | None = None) -> str:
         """生成完整的 Photoshop JSX 脚本
 
         Args:
@@ -1769,7 +1768,7 @@ class ResolveTextAnimator:
         self.frame_rate = frame_rate
 
     def create_text_plus_node(self, text: str,
-                               style: Optional[TextStyle] = None,
+                               style: TextStyle | None = None,
                                node_name: str = "TextPlus") -> str:
         """创建 Fusion Text+ 节点设置
 
@@ -1871,7 +1870,7 @@ Tools = ordered() {{
 '''
 
     def create_fusion_title(self, text: str,
-                            style: Optional[TextStyle] = None,
+                            style: TextStyle | None = None,
                             title_style: str = "modern") -> str:
         """创建 Fusion 标题宏
 
@@ -1958,7 +1957,7 @@ Tools = ordered() {{
 '''
 
     def generate_setting_file(self, text: str,
-                               style: Optional[TextStyle] = None,
+                               style: TextStyle | None = None,
                                anim_type: str = "fade_in") -> str:
         """生成 .setting 文件
 
@@ -1990,9 +1989,9 @@ class BlenderTextGenerator:
         self.scene_name = scene_name
 
     def create_3d_text(self, text: str,
-                        style: Optional[TextStyle] = None,
+                        style: TextStyle | None = None,
                         extrude_depth: float = 0.2,
-                        location: Tuple[float, float, float] = (0.0, 0.0, 0.0),
+                        location: tuple[float, float, float] = (0.0, 0.0, 0.0),
                         object_name: str = "3D_Text") -> str:
         """创建挤压 3D 文本
 
@@ -2051,7 +2050,7 @@ text_obj.data.bevel_resolution = {bevel_resolution}
 '''
 
     def create_material(self, object_name: str,
-                         base_color: Tuple[float, float, float, float] = (1.0, 1.0, 1.0, 1.0),
+                         base_color: tuple[float, float, float, float] = (1.0, 1.0, 1.0, 1.0),
                          metallic: float = 0.5,
                          roughness: float = 0.2,
                          material_name: str = "TextMaterial") -> str:
@@ -2164,7 +2163,7 @@ obj.keyframe_insert(data_path="scale", frame={end_frame})
         return anim_map.get(anim_type, anim_map["fade_in"])
 
     def generate_blend_script(self, text: str,
-                               style: Optional[TextStyle] = None,
+                               style: TextStyle | None = None,
                                anim_type: str = "fade_in",
                                extrude_depth: float = 0.2) -> str:
         """生成完整的 Blender Python 脚本
@@ -2232,7 +2231,7 @@ class FontInfo:
     is_monospace: bool = False
     supports_chinese: bool = False
     supports_japanese: bool = False
-    style_tags: List[str] = field(default_factory=list)
+    style_tags: list[str] = field(default_factory=list)
     file_path: str = ""
     designer: str = ""
     license: str = ""
@@ -2242,8 +2241,8 @@ class FontRegistry:
     """字体注册表 - 字体发现、元数据管理与分类"""
 
     def __init__(self):
-        self._fonts: Dict[str, FontInfo] = {}
-        self._categories: Dict[str, List[str]] = {}
+        self._fonts: dict[str, FontInfo] = {}
+        self._categories: dict[str, list[str]] = {}
         self._init_default_fonts()
 
     def _init_default_fonts(self) -> None:
@@ -2314,7 +2313,7 @@ class FontRegistry:
         self._fonts[font_info.name] = font_info
         self._build_categories()
 
-    def get_font(self, name: str) -> Optional[FontInfo]:
+    def get_font(self, name: str) -> FontInfo | None:
         """获取字体信息
 
         Args:
@@ -2325,7 +2324,7 @@ class FontRegistry:
         """
         return self._fonts.get(name)
 
-    def list_fonts(self) -> List[FontInfo]:
+    def list_fonts(self) -> list[FontInfo]:
         """列出所有注册字体
 
         Returns:
@@ -2333,7 +2332,7 @@ class FontRegistry:
         """
         return list(self._fonts.values())
 
-    def list_by_category(self, category: str) -> List[FontInfo]:
+    def list_by_category(self, category: str) -> list[FontInfo]:
         """按分类列出字体
 
         Args:
@@ -2345,7 +2344,7 @@ class FontRegistry:
         names = self._categories.get(category, [])
         return [self._fonts[name] for name in names if name in self._fonts]
 
-    def search_fonts(self, keyword: str) -> List[FontInfo]:
+    def search_fonts(self, keyword: str) -> list[FontInfo]:
         """搜索字体
 
         Args:
@@ -2363,7 +2362,7 @@ class FontRegistry:
                 results.append(font)
         return results
 
-    def discover_fonts(self, directory: str) -> List[str]:
+    def discover_fonts(self, directory: str) -> list[str]:
         """从目录发现字体文件
 
         Args:
@@ -2405,9 +2404,9 @@ class TypographyEngine:
         self.font_registry = FontRegistry()
 
     def calculate_typography_scale(self, base_size: float = 16.0,
-                                    ratio: Optional[float] = None,
+                                    ratio: float | None = None,
                                     steps_up: int = 6,
-                                    steps_down: int = 2) -> Dict[str, float]:
+                                    steps_down: int = 2) -> dict[str, float]:
         """计算模块化字体比例缩放
 
         Args:
@@ -2437,7 +2436,7 @@ class TypographyEngine:
         return scale
 
     def get_font_pairing(self, style: FontStyle = FontStyle.MODERN
-                         ) -> Tuple[str, str]:
+                         ) -> tuple[str, str]:
         """获取字体配对建议（标题 + 正文）
 
         Args:
@@ -2461,9 +2460,9 @@ class TypographyEngine:
 
         return pairings.get(style, pairings[FontStyle.MODERN])
 
-    def check_wcag_contrast(self, foreground: Tuple[float, float, float, float],
-                             background: Tuple[float, float, float, float],
-                             level: str = "AA") -> Dict[str, Any]:
+    def check_wcag_contrast(self, foreground: tuple[float, float, float, float],
+                             background: tuple[float, float, float, float],
+                             level: str = "AA") -> dict[str, Any]:
         """检查 WCAG 2.1 对比度合规性
 
         Args:
@@ -2499,8 +2498,8 @@ class TypographyEngine:
             "recommendation": "PASS" if passes_normal else "FAIL - increase contrast",
         }
 
-    def _calculate_contrast_ratio(self, fg: Tuple[float, float, float],
-                                   bg: Tuple[float, float, float]) -> float:
+    def _calculate_contrast_ratio(self, fg: tuple[float, float, float],
+                                   bg: tuple[float, float, float]) -> float:
         """计算两种颜色的对比度
 
         Args:
@@ -2518,7 +2517,7 @@ class TypographyEngine:
 
         return (lighter + 0.05) / (darker + 0.05)
 
-    def _relative_luminance(self, color: Tuple[float, float, float]) -> float:
+    def _relative_luminance(self, color: tuple[float, float, float]) -> float:
         """计算相对亮度（WCAG 定义）
 
         Args:
@@ -2539,7 +2538,7 @@ class TypographyEngine:
         return 0.2126 * r + 0.7152 * g + 0.0722 * b
 
     def calculate_line_height(self, font_size: float,
-                               line_height_ratio: Optional[float] = None
+                               line_height_ratio: float | None = None
                                ) -> float:
         """计算最佳行高
 
@@ -2597,7 +2596,7 @@ class TypographyEngine:
 
         return round(base_spacing + adjustment, 3)
 
-    def suggest_font_for_style(self, style: FontStyle) -> List[FontInfo]:
+    def suggest_font_for_style(self, style: FontStyle) -> list[FontInfo]:
         """根据风格推荐字体
 
         Args:
@@ -2620,7 +2619,7 @@ class EffectFactory:
     """
 
     def __init__(self):
-        self._presets: Dict[str, TextEffectPreset] = {}
+        self._presets: dict[str, TextEffectPreset] = {}
         self._init_presets()
 
     def _init_presets(self) -> None:
@@ -2772,7 +2771,7 @@ class EffectFactory:
             self._presets[preset.name] = preset
 
     def create_effect(self, effect_type: TextEffectType,
-                      params: Optional[Dict[str, Any]] = None) -> TextEffectPreset:
+                      params: dict[str, Any] | None = None) -> TextEffectPreset:
         """创建效果实例
 
         Args:
@@ -2792,7 +2791,7 @@ class EffectFactory:
             description=f"Custom {effect_type.value} effect"
         )
 
-    def get_preset(self, name: str) -> Optional[TextEffectPreset]:
+    def get_preset(self, name: str) -> TextEffectPreset | None:
         """获取预设效果
 
         Args:
@@ -2803,7 +2802,7 @@ class EffectFactory:
         """
         return self._presets.get(name)
 
-    def list_presets(self, category: Optional[str] = None) -> List[TextEffectPreset]:
+    def list_presets(self, category: str | None = None) -> list[TextEffectPreset]:
         """列出所有预设
 
         Args:
@@ -2817,7 +2816,7 @@ class EffectFactory:
             presets = [p for p in presets if p.category == category]
         return presets
 
-    def stack_effects(self, effects: List[TextEffectPreset]) -> List[TextEffectPreset]:
+    def stack_effects(self, effects: list[TextEffectPreset]) -> list[TextEffectPreset]:
         """堆叠多个效果
 
         Args:
@@ -2869,12 +2868,12 @@ class AnimationTemplate:
     animation_type: TextAnimationType
     style: TextStyle
     params: AnimationParams
-    effects: List[TextEffectPreset] = field(default_factory=list)
-    software_targets: List[SoftwareTarget] = field(default_factory=list)
+    effects: list[TextEffectPreset] = field(default_factory=list)
+    software_targets: list[SoftwareTarget] = field(default_factory=list)
     thumbnail: str = ""
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "name": self.name,
@@ -2901,7 +2900,7 @@ class AnimationTemplate:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "AnimationTemplate":
+    def from_dict(cls, data: dict[str, Any]) -> "AnimationTemplate":
         style_data = data.get("style", {})
         params_data = data.get("params", {})
 
@@ -2939,7 +2938,7 @@ class TemplateEngine:
     """
 
     def __init__(self):
-        self._templates: Dict[str, AnimationTemplate] = {}
+        self._templates: dict[str, AnimationTemplate] = {}
         self._build_builtin_templates()
 
     def _build_builtin_templates(self) -> None:
@@ -3157,8 +3156,8 @@ class TemplateEngine:
 
     def apply_template(self, template: AnimationTemplate,
                         text: str,
-                        style_overrides: Optional[Dict[str, Any]] = None
-                        ) -> Dict[str, Any]:
+                        style_overrides: dict[str, Any] | None = None
+                        ) -> dict[str, Any]:
         """应用模板到新文本
 
         Args:
@@ -3191,7 +3190,7 @@ class TemplateEngine:
             "effects": template.effects,
         }
 
-    def get_template(self, template_id: str) -> Optional[AnimationTemplate]:
+    def get_template(self, template_id: str) -> AnimationTemplate | None:
         """获取模板
 
         Args:
@@ -3202,9 +3201,9 @@ class TemplateEngine:
         """
         return self._templates.get(template_id)
 
-    def list_templates(self, category: Optional[str] = None,
-                        search: Optional[str] = None
-                        ) -> List[AnimationTemplate]:
+    def list_templates(self, category: str | None = None,
+                        search: str | None = None
+                        ) -> list[AnimationTemplate]:
         """列出模板
 
         Args:
@@ -3230,7 +3229,7 @@ class TemplateEngine:
 
         return templates
 
-    def get_categories(self) -> List[str]:
+    def get_categories(self) -> list[str]:
         """获取所有模板分类
 
         Returns:
@@ -3266,13 +3265,13 @@ class UnifiedTextAPI:
         return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
 
     def create_text(self,
-                    text: Optional[str] = None,
-                    target: Optional[SoftwareTarget] = None,
-                    style: Optional[TextStyle] = None,
+                    text: str | None = None,
+                    target: SoftwareTarget | None = None,
+                    style: TextStyle | None = None,
                     *,
-                    software: Optional[str] = None,
-                    position: Optional[Tuple[float, float]] = None,
-                    params: Optional[Dict] = None,
+                    software: str | None = None,
+                    position: tuple[float, float] | None = None,
+                    params: dict | None = None,
                     **kwargs) -> str:
         """统一创建文本
 
@@ -3371,8 +3370,8 @@ class UnifiedTextAPI:
     def animate_text(self, text: str,
                      target: SoftwareTarget = SoftwareTarget.AFTER_EFFECTS,
                      anim_type: TextAnimationType = TextAnimationType.FADE_IN,
-                     style: Optional[TextStyle] = None,
-                     params: Optional[AnimationParams] = None) -> str:
+                     style: TextStyle | None = None,
+                     params: AnimationParams | None = None) -> str:
         """统一动画 API
 
         Args:
@@ -3435,8 +3434,8 @@ class UnifiedTextAPI:
     def apply_effect(self, text: str,
                      target: SoftwareTarget = SoftwareTarget.PHOTOSHOP,
                      effect_type: TextEffectType = TextEffectType.GLOW,
-                     style: Optional[TextStyle] = None,
-                     effect_params: Optional[Dict[str, Any]] = None) -> str:
+                     style: TextStyle | None = None,
+                     effect_params: dict[str, Any] | None = None) -> str:
         """统一文本效果 API
 
         Args:
@@ -3461,8 +3460,8 @@ class UnifiedTextAPI:
 
     def export_to_software(self, text: str,
                            target: SoftwareTarget,
-                           template: Optional[AnimationTemplate] = None,
-                           output_path: Optional[str] = None) -> str:
+                           template: AnimationTemplate | None = None,
+                           output_path: str | None = None) -> str:
         """导出到目标软件
 
         Args:
@@ -3513,9 +3512,9 @@ class UnifiedTextAPI:
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(script)
 
-    def batch_create(self, text_items: List[Dict[str, Any]],
+    def batch_create(self, text_items: list[dict[str, Any]],
                       target: SoftwareTarget = SoftwareTarget.AFTER_EFFECTS
-                      ) -> List[str]:
+                      ) -> list[str]:
         """批量创建文本动画
 
         Args:
@@ -3567,14 +3566,14 @@ def main():
         params=AnimationParams(duration=1.2, easing=EasingType.EASE_OUT_BOUNCE),
     )
     print(f"AE 脚本长度: {len(ae_script)} 字符")
-    print(f"包含动画: BOUNCE_IN")
+    print("包含动画: BOUNCE_IN")
     print()
 
     print("[2] 排版引擎演示")
     print("-" * 50)
     typography = TypographyEngine()
     scale = typography.calculate_typography_scale(16, TypographyEngine.GOLDEN_RATIO, 5, 2)
-    print(f"字体比例 (黄金比例, 基准16px):")
+    print("字体比例 (黄金比例, 基准16px):")
     for name, size in scale.items():
         print(f"  {name:>6}: {size:>7.2f}px")
     print()

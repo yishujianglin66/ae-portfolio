@@ -28,7 +28,6 @@ from loguru import logger
 from ...config import settings
 from ..base import BaseEngine, EngineResult
 
-
 # SadTalker 项目根目录与兼容补丁目录
 _SADTALKER_ROOT = Path("D:/AE-Work/sadtalker")
 _SADTALKER_VENV_PYTHON = _SADTALKER_ROOT / "venv" / "Scripts" / "python.exe"
@@ -49,8 +48,8 @@ class SadTalkerEngine(BaseEngine):
 
     def __init__(
         self,
-        executable_path: Optional[Path | str] = None,
-        sadtalker_root: Optional[Path] = None,
+        executable_path: Path | str | None = None,
+        sadtalker_root: Path | None = None,
     ):
         self.sadtalker_root = Path(sadtalker_root) if sadtalker_root else _SADTALKER_ROOT
         path = Path(executable_path) if executable_path else _SADTALKER_VENV_PYTHON
@@ -83,11 +82,11 @@ class SadTalkerEngine(BaseEngine):
         self,
         source_image: Path | str,
         driven_audio: Path | str,
-        output_path: Optional[Path | str] = None,
-        result_dir: Optional[Path | str] = None,
+        output_path: Path | str | None = None,
+        result_dir: Path | str | None = None,
         preprocess: str = "crop",
         size: int = 256,
-        enhancer: Optional[str] = None,
+        enhancer: str | None = None,
         still_mode: bool = False,
         pose_style: int = 0,
         expression_scale: float = 1.0,
@@ -219,8 +218,8 @@ class SadTalkerEngine(BaseEngine):
         self,
         cmd: list[str],
         timeout: int = 1800,
-        cwd: Optional[Path] = None,
-        env: Optional[dict] = None,
+        cwd: Path | None = None,
+        env: dict | None = None,
     ) -> tuple[int, str, str]:
         """运行子进程并捕获输出（带自定义环境变量）。"""
         import subprocess
@@ -246,7 +245,7 @@ class SadTalkerEngine(BaseEngine):
             return -1, "", str(e)
 
     @staticmethod
-    def _find_latest_video(result_dir: Path) -> Optional[Path]:
+    def _find_latest_video(result_dir: Path) -> Path | None:
         """在结果目录中查找最新生成的视频文件。
 
         SadTalker 在 result_dir 下创建时间戳子目录，

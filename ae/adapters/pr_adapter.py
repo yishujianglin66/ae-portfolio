@@ -34,17 +34,17 @@ class BasePRAdapter:
         self,
         name: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("create_sequence")
 
-    def list_sequences(self) -> List[Dict[str, Any]]:
+    def list_sequences(self) -> list[dict[str, Any]]:
         return self._not_implemented("list_sequences")
 
     def import_media(
         self,
-        files: List[str],
+        files: list[str],
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("import_media")
 
     def add_to_sequence(
@@ -53,16 +53,16 @@ class BasePRAdapter:
         track_index: int = 0,
         position: float = 0.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("add_to_sequence")
 
     def apply_effect(
         self,
         clip_name: str,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("apply_effect")
 
     def export_sequence(
@@ -70,17 +70,17 @@ class BasePRAdapter:
         output_path: str,
         preset: str = "H.264",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("export_sequence")
 
     def execute_script(
         self,
         script: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("execute_script")
 
-    def _not_implemented(self, method_name: str) -> Dict[str, Any]:
+    def _not_implemented(self, method_name: str) -> dict[str, Any]:
         return {
             "success": False,
             "error": f"method '{method_name}' not implemented in {self.name}",
@@ -116,7 +116,7 @@ class PRAdapter(BasePRAdapter):
         self._client = PRMCP()
         return self._client
 
-    def _wrap(self, payload: Any) -> Dict[str, Any]:
+    def _wrap(self, payload: Any) -> dict[str, Any]:
         if isinstance(payload, dict):
             d = dict(payload)
             d.setdefault("channel", self.name)
@@ -124,7 +124,7 @@ class PRAdapter(BasePRAdapter):
             return d
         return {"success": True, "data": payload, "channel": self.name}
 
-    def _wrap_list(self, payload: Any) -> List[Dict[str, Any]]:
+    def _wrap_list(self, payload: Any) -> list[dict[str, Any]]:
         if isinstance(payload, list):
             return [
                 {**item, "channel": self.name} if isinstance(item, dict) else {"data": item, "channel": self.name}
@@ -144,11 +144,11 @@ class PRAdapter(BasePRAdapter):
         self,
         name: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.create_sequence(name=name, **kwargs))
 
-    def list_sequences(self) -> List[Dict[str, Any]]:
+    def list_sequences(self) -> list[dict[str, Any]]:
         try:
             client = self._ensure_client()
         except Exception:
@@ -168,9 +168,9 @@ class PRAdapter(BasePRAdapter):
 
     def import_media(
         self,
-        files: List[str],
+        files: list[str],
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.import_media(files=files, **kwargs))
 
@@ -180,7 +180,7 @@ class PRAdapter(BasePRAdapter):
         track_index: int = 0,
         position: float = 0.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(
             client.add_to_sequence(
@@ -195,9 +195,9 @@ class PRAdapter(BasePRAdapter):
         self,
         clip_name: str,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(
             client.apply_effect(
@@ -213,7 +213,7 @@ class PRAdapter(BasePRAdapter):
         output_path: str,
         preset: str = "H.264",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.export_sequence(output_path=output_path, preset=preset, **kwargs))
 
@@ -222,7 +222,7 @@ class PRAdapter(BasePRAdapter):
         output_path: str,
         preset: str = "H.264",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self.export_sequence(output_path=output_path, preset=preset, **kwargs)
 
     def execute_script(
@@ -230,7 +230,7 @@ class PRAdapter(BasePRAdapter):
         script: str,
         dry_run: bool = False,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         if dry_run:
             return {
@@ -241,23 +241,23 @@ class PRAdapter(BasePRAdapter):
             }
         return self._wrap(client.execute_script(script=script))
 
-    def new_project(self, name: str, path: Optional[str] = None, **kwargs: Any) -> Dict[str, Any]:
+    def new_project(self, name: str, path: str | None = None, **kwargs: Any) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.new_project(name=name, path=path, **kwargs))
 
-    def open_project(self, path: str, **kwargs: Any) -> Dict[str, Any]:
+    def open_project(self, path: str, **kwargs: Any) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.open_project(path=path, **kwargs))
 
-    def save_project(self, path: Optional[str] = None, **kwargs: Any) -> Dict[str, Any]:
+    def save_project(self, path: str | None = None, **kwargs: Any) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.save_project(path=path, **kwargs))
 
-    def close_project(self, **kwargs: Any) -> Dict[str, Any]:
+    def close_project(self, **kwargs: Any) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.close_project(**kwargs))
 
-    def get_project_info(self) -> Dict[str, Any]:
+    def get_project_info(self) -> dict[str, Any]:
         client = self._ensure_client()
         info = client.get_project_info()
         return {
@@ -268,11 +268,11 @@ class PRAdapter(BasePRAdapter):
             "success": True,
         }
 
-    def get_sequence_info(self, sequence_name: str, **kwargs: Any) -> Dict[str, Any]:
+    def get_sequence_info(self, sequence_name: str, **kwargs: Any) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.get_sequence_info(sequence_name=sequence_name, **kwargs))
 
-    def delete_sequence(self, sequence_name: str, **kwargs: Any) -> Dict[str, Any]:
+    def delete_sequence(self, sequence_name: str, **kwargs: Any) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.delete_sequence(sequence_name=sequence_name, **kwargs))
 
@@ -282,7 +282,7 @@ class PRAdapter(BasePRAdapter):
         track_index: int = 0,
         position: float = 0.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self.add_to_sequence(clip_name=clip_name, track_index=track_index, position=position, **kwargs)
 
     def cut_clip(
@@ -291,7 +291,7 @@ class PRAdapter(BasePRAdapter):
         clip_index: int,
         cut_time: float,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.cut_clip(track_index=track_index, clip_index=clip_index, cut_time=cut_time, **kwargs))
 
@@ -301,7 +301,7 @@ class PRAdapter(BasePRAdapter):
         clip_index: int,
         split_time: float,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.split_clip(track_index=track_index, clip_index=clip_index, split_time=split_time, **kwargs))
 
@@ -310,7 +310,7 @@ class PRAdapter(BasePRAdapter):
         track_index: int,
         clip_index: int,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.delete_clip(track_index=track_index, clip_index=clip_index, **kwargs))
 
@@ -319,7 +319,7 @@ class PRAdapter(BasePRAdapter):
         clip_name: str,
         effect_name: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.remove_effect(clip_name=clip_name, effect_name=effect_name, **kwargs))
 
@@ -328,7 +328,7 @@ class PRAdapter(BasePRAdapter):
         clip_name: str,
         effect_name: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         client = self._ensure_client()
         return self._wrap(client.get_effect_params(clip_name=clip_name, effect_name=effect_name, **kwargs))
 

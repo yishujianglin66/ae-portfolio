@@ -213,7 +213,9 @@ def main() -> int:
     print("  [STEP-2] 运行 UnifiedPipeline 七阶段 (三项能力同时生效)")
     print("=" * 78)
     from pipeline.unified_pipeline import (
-        UnifiedPipeline, PipelineConfig, PipelineResult,
+        PipelineConfig,
+        PipelineResult,
+        UnifiedPipeline,
     )
 
     cfg = PipelineConfig(
@@ -323,7 +325,7 @@ def main() -> int:
         _print_check("VRS effects 非空", len(vrs_effects) > 0, f"len={len(vrs_effects)}")
         _print_check("VRS confidence > 0.5", confidence > 0.5, f"confidence={confidence}")
     else:
-        print(f"    [FAIL] 未取到 vrs_result")
+        print("    [FAIL] 未取到 vrs_result")
 
     # ====================================================================
     # CHECK-C: 能力1 plan 消费 VRS (P2-1+P2-3 核心)
@@ -365,7 +367,7 @@ def main() -> int:
                           f"vrs_sources={[e.get('vrs_source') for e in effect_stack]}")
         plan_ok = c1 and c2 and c3 and c4
     else:
-        print(f"    [FAIL] plan 阶段结果缺失或无 data")
+        print("    [FAIL] plan 阶段结果缺失或无 data")
 
     # ====================================================================
     # CHECK-D: 能力3 VRS effects 与 effect_stack 一致性 (P2-3)
@@ -403,7 +405,7 @@ def main() -> int:
         _print_check("至少 1 个 VRS 效果在 effect_stack 中有对应条目 (vrs_source 匹配)",
                      consistency_ok, f"hit_count={sum(1 for r in consistency_rows if r['stack_hit'])}")
     else:
-        print(f"    [FAIL] vrs_effects 或 effect_stack 为空，无法对照")
+        print("    [FAIL] vrs_effects 或 effect_stack 为空，无法对照")
 
     # ====================================================================
     # CHECK-E: 能力2 多素材混剪 (P2-2 核心)
@@ -459,7 +461,7 @@ def main() -> int:
                           f"unique={len(set(source_files))}")
         exec_ok = c1 and c2 and c3 and c4 and c5 and c6 and c7
     else:
-        print(f"    [FAIL] execute 阶段结果缺失或无 data")
+        print("    [FAIL] execute 阶段结果缺失或无 data")
 
     # ====================================================================
     # CHECK-F: 能力4 七阶段全 DONE (已在 CHECK-A 汇总)
@@ -469,7 +471,7 @@ def main() -> int:
     print("=" * 78)
     _print_check("七阶段全部 DONE (7/7)", seven_stages_ok,
                  f"done={done_count}/7")
-    print(f"    各阶段耗时:")
+    print("    各阶段耗时:")
     for s in STAGE_ORDER:
         print(f"      {s:10s}: {stage_durations.get(s, 0.0):.2f}s  [{status_by_stage.get(s, 'MISSING')}]")
     print(f"    总耗时 (run_all): {elapsed_run_all:.2f}s")
@@ -553,7 +555,7 @@ def main() -> int:
                      score_ok, f"score={quality_score}")
         verify_ok = has_opt_field and score_ok
     else:
-        print(f"    [FAIL] verify 阶段结果缺失或无 data")
+        print("    [FAIL] verify 阶段结果缺失或无 data")
 
     # ====================================================================
     # CHECK-I: 多素材内容差异 (输出 = 多段拼接, 非单段)

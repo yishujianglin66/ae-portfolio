@@ -27,17 +27,17 @@ CLI 工具: topazcli.exe 或 Topaz Video AI.exe --cli
 - simulate: 模拟执行，生成模拟结果（用于测试和流程验证）
 - auto    : 优先真实模式，失败自动降级到模拟模式
 """
-import os
-import sys
-import json
-import time
-import subprocess
-import tempfile
 import asyncio
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple, Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 DEFAULT_TOPAZ_HOME = Path(r"D:\top\Topaz Video AI Pro")
 TOPAZ_HOME = Path(os.environ.get("TOPAZ_HOME", str(DEFAULT_TOPAZ_HOME)))
@@ -79,7 +79,7 @@ NVIDIA_GB300_MODELS = [
     "chronos",
 ]
 
-def detect_gpu_capabilities() -> Dict[str, Any]:
+def detect_gpu_capabilities() -> dict[str, Any]:
     """检测 GPU 能力，特别是 NVIDIA GB300 Blackwell Ultra。
 
     Returns:
@@ -212,16 +212,16 @@ class TopazResult:
     input_path: str = ""
     output_path: str = ""
     duration: float = 0.0
-    original_size: Tuple[int, int] = (0, 0)
-    output_size: Tuple[int, int] = (0, 0)
+    original_size: tuple[int, int] = (0, 0)
+    output_size: tuple[int, int] = (0, 0)
     original_fps: float = 0.0
     output_fps: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
     mode: str = "simulate"
     model: str = ""
 
 
-TOPAZ_PRESETS: Dict[str, Dict[str, Any]] = {
+TOPAZ_PRESETS: dict[str, dict[str, Any]] = {
     "default": {
         "model": "proteus",
         "scale": 1.0,
@@ -393,7 +393,7 @@ class TopazEnhancer:
     - TensorRT 优化模型推理
     """
 
-    def __init__(self, config: Optional[TopazConfig] = None):
+    def __init__(self, config: TopazConfig | None = None):
         """初始化 TopazEnhancer。
 
         Args:
@@ -435,7 +435,7 @@ class TopazEnhancer:
         
         return optimized
 
-    def _find_cli(self) -> Optional[Path]:
+    def _find_cli(self) -> Path | None:
         """查找 Topaz CLI 可执行文件。
 
         Returns:
@@ -493,7 +493,7 @@ class TopazEnhancer:
         """
         return self._available
 
-    def get_available_models(self) -> List[str]:
+    def get_available_models(self) -> list[str]:
         """获取可用的 AI 模型列表。
 
         Returns:
@@ -501,7 +501,7 @@ class TopazEnhancer:
         """
         return list(AVAILABLE_MODELS)
 
-    def _get_video_info(self, video_path: str) -> Dict[str, Any]:
+    def _get_video_info(self, video_path: str) -> dict[str, Any]:
         """获取视频基本信息（分辨率、帧率等）。
 
         Args:
@@ -534,7 +534,7 @@ class TopazEnhancer:
         output_path: str,
         config: TopazConfig,
         gpu_id: int = -1,
-    ) -> List[str]:
+    ) -> list[str]:
         """构建 Topaz CLI 命令参数列表。
 
         Args:
@@ -601,7 +601,7 @@ class TopazEnhancer:
     def estimate_duration(
         self,
         input_path: str,
-        config: Optional[TopazConfig] = None,
+        config: TopazConfig | None = None,
     ) -> float:
         """估算处理时间（基于视频时长、复杂度和GPU能力）。
 
@@ -661,9 +661,9 @@ class TopazEnhancer:
     def enhance_video(
         self,
         input_path: str,
-        output_path: Optional[str] = None,
-        config: Optional[TopazConfig] = None,
-        callback: Optional[Callable[[float, str], None]] = None,
+        output_path: str | None = None,
+        config: TopazConfig | None = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> TopazResult:
         """主方法：增强视频。
 
@@ -751,7 +751,7 @@ class TopazEnhancer:
         input_path: str,
         output_path: str,
         config: TopazConfig,
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> TopazResult:
         """真实模式：通过 subprocess 调用 Topaz CLI。
 
@@ -841,7 +841,7 @@ class TopazEnhancer:
         input_path: str,
         output_path: str,
         config: TopazConfig,
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> TopazResult:
         """模拟模式：不真正调用 Topaz，生成模拟结果。
 
@@ -910,12 +910,12 @@ class TopazEnhancer:
 
     def batch_enhance(
         self,
-        input_paths: List[str],
-        output_dir: Optional[str] = None,
-        config: Optional[TopazConfig] = None,
-        callback: Optional[Callable[[int, int, TopazResult], None]] = None,
+        input_paths: list[str],
+        output_dir: str | None = None,
+        config: TopazConfig | None = None,
+        callback: Callable[[int, int, TopazResult], None] | None = None,
         parallel: bool = False,
-    ) -> List[TopazResult]:
+    ) -> list[TopazResult]:
         """批量处理视频。
 
         Args:
@@ -937,11 +937,11 @@ class TopazEnhancer:
 
     def _batch_enhance_sequential(
         self,
-        input_paths: List[str],
-        output_dir: Optional[str],
+        input_paths: list[str],
+        output_dir: str | None,
         config: TopazConfig,
-        callback: Optional[Callable[[int, int, TopazResult], None]],
-    ) -> List[TopazResult]:
+        callback: Callable[[int, int, TopazResult], None] | None,
+    ) -> list[TopazResult]:
         """顺序批量处理视频。
 
         Args:
@@ -975,11 +975,11 @@ class TopazEnhancer:
 
     def _batch_enhance_parallel(
         self,
-        input_paths: List[str],
-        output_dir: Optional[str],
+        input_paths: list[str],
+        output_dir: str | None,
         config: TopazConfig,
-        callback: Optional[Callable[[int, int, TopazResult], None]],
-    ) -> List[TopazResult]:
+        callback: Callable[[int, int, TopazResult], None] | None,
+    ) -> list[TopazResult]:
         """并行批量处理视频（利用多GPU）。
 
         Args:
@@ -1001,7 +1001,7 @@ class TopazEnhancer:
 
         print(f"[TopazEnhancer] Parallel batch processing with {max_workers} workers")
 
-        def process_single(idx: int, input_path: str) -> Tuple[int, TopazResult]:
+        def process_single(idx: int, input_path: str) -> tuple[int, TopazResult]:
             gpu_id = idx % self._gpu_capabilities["gpu_count"] if \
                 self._gpu_capabilities["gpu_count"] > 0 else -1
             
@@ -1035,11 +1035,11 @@ class TopazEnhancer:
 
     async def async_batch_enhance(
         self,
-        input_paths: List[str],
-        output_dir: Optional[str] = None,
-        config: Optional[TopazConfig] = None,
-        callback: Optional[Callable[[int, int, TopazResult], None]] = None,
-    ) -> List[TopazResult]:
+        input_paths: list[str],
+        output_dir: str | None = None,
+        config: TopazConfig | None = None,
+        callback: Callable[[int, int, TopazResult], None] | None = None,
+    ) -> list[TopazResult]:
         """异步批量处理视频。
 
         Args:
@@ -1146,7 +1146,7 @@ def _run_self_tests():
         if attrs_ok:
             print(f"  ✓ TopazConfig 包含所有必需属性 ({len(required_attrs)} 个)")
         else:
-            print(f"  ✗ TopazConfig 缺少必需属性")
+            print("  ✗ TopazConfig 缺少必需属性")
         results.append(("config_dataclass", attrs_ok))
     except Exception as e:
         print(f"  ✗ TopazConfig 错误: {e}")
@@ -1164,7 +1164,7 @@ def _run_self_tests():
         if attrs_ok:
             print(f"  ✓ TopazResult 包含所有必需属性 ({len(required_attrs)} 个)")
         else:
-            print(f"  ✗ TopazResult 缺少必需属性")
+            print("  ✗ TopazResult 缺少必需属性")
         results.append(("result_dataclass", attrs_ok))
     except Exception as e:
         print(f"  ✗ TopazResult 错误: {e}")
@@ -1173,7 +1173,7 @@ def _run_self_tests():
     print("\n[测试 4/8] 检查 TopazEnhancer 初始化...")
     try:
         enhancer = TopazEnhancer(config=TopazConfig(mode="simulate"))
-        print(f"  ✓ TopazEnhancer 初始化成功")
+        print("  ✓ TopazEnhancer 初始化成功")
         print(f"    - Mode: {enhancer.config.mode}")
         print(f"    - Available: {enhancer.is_available()}")
         results.append(("enhancer_init", True))
@@ -1190,7 +1190,7 @@ def _run_self_tests():
             print(f"    {models[:5]}...")
             results.append(("available_models", True))
         else:
-            print(f"  ✗ 模型列表为空或格式错误")
+            print("  ✗ 模型列表为空或格式错误")
             results.append(("available_models", False))
     except Exception as e:
         print(f"  ✗ get_available_models 错误: {e}")
@@ -1213,7 +1213,7 @@ def _run_self_tests():
         )
 
         if result.success and Path(result.output_path).exists():
-            print(f"  ✓ 模拟模式增强成功")
+            print("  ✓ 模拟模式增强成功")
             print(f"    - 输入分辨率: {result.original_size}")
             print(f"    - 输出分辨率: {result.output_size}")
             print(f"    - 模式: {result.mode}")
@@ -1240,7 +1240,7 @@ def _run_self_tests():
             print(f"    - Sharpen: {config.sharpen}")
             results.append(("preset_create", True))
         else:
-            print(f"  ✗ 预设参数不匹配")
+            print("  ✗ 预设参数不匹配")
             results.append(("preset_create", False))
     except Exception as e:
         print(f"  ✗ create_config_from_preset 错误: {e}")

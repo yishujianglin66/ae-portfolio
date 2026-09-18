@@ -5,12 +5,12 @@ generate_ae_validation_script.py - 生成 AE 验证脚本
 用于在 AE 2026 真机上验证效果参数的准确性
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from effect_knowledge_graph import EFFECT_KNOWLEDGE_GRAPH, CATEGORIES, EffectParameter
+from effect_knowledge_graph import CATEGORIES, EFFECT_KNOWLEDGE_GRAPH, EffectParameter
 
 
 def generate_jsx_validation_script():

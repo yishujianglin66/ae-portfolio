@@ -11,10 +11,10 @@
 from __future__ import annotations
 
 import json
-import sys
 import math
-from typing import List, Dict, Any, Optional
+import sys
 from collections import defaultdict
+from typing import Any, Dict, List, Optional
 
 
 class SmartRanker:
@@ -55,18 +55,18 @@ class SmartRanker:
         "tense": {"semantic": 1.1, "audio": 1.2, "popularity": 1.0},
     }
     
-    def __init__(self, weights: Optional[Dict[str, float]] = None):
+    def __init__(self, weights: dict[str, float] | None = None):
         self.weights = weights or self.DEFAULT_WEIGHTS.copy()
     
     def rank(
         self,
-        results: List[Dict[str, Any]],
-        query_mood: Optional[str] = None,
-        query_genre: Optional[str] = None,
-        query_bpm: Optional[float] = None,
+        results: list[dict[str, Any]],
+        query_mood: str | None = None,
+        query_genre: str | None = None,
+        query_bpm: float | None = None,
         diversity: bool = True,
         top_k: int = 20
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         智能排序
         
@@ -98,11 +98,11 @@ class SmartRanker:
     
     def _score_results(
         self,
-        results: List[Dict[str, Any]],
-        query_mood: Optional[str],
-        query_genre: Optional[str],
-        query_bpm: Optional[float]
-    ) -> List[Dict[str, Any]]:
+        results: list[dict[str, Any]],
+        query_mood: str | None,
+        query_genre: str | None,
+        query_bpm: float | None
+    ) -> list[dict[str, Any]]:
         """计算各项分数并融合"""
         scored = []
         
@@ -171,7 +171,7 @@ class SmartRanker:
         
         return scored
     
-    def _calculate_popularity_score(self, result: Dict[str, Any]) -> float:
+    def _calculate_popularity_score(self, result: dict[str, Any]) -> float:
         """计算热度分数"""
         view_count = result.get("view_count", 0)
         like_count = result.get("like_count", 0)
@@ -189,7 +189,7 @@ class SmartRanker:
         # 热度 = 观看量(0.5) + 点赞量(0.3) + 下载量(0.2)
         return view_norm * 0.5 + like_norm * 0.3 + download_norm * 0.2
     
-    def _calculate_freshness_score(self, result: Dict[str, Any]) -> float:
+    def _calculate_freshness_score(self, result: dict[str, Any]) -> float:
         """计算新鲜度分数"""
         # 假设metadata中有upload_time或timestamp
         metadata = result.get("metadata", {})
@@ -221,7 +221,7 @@ class SmartRanker:
         
         return 0.5
     
-    def _calculate_duration_match_score(self, result: Dict[str, Any], query_bpm: Optional[float]) -> float:
+    def _calculate_duration_match_score(self, result: dict[str, Any], query_bpm: float | None) -> float:
         """计算时长匹配分数
         
         根据BPM推断期望时长，匹配度越高分数越高
@@ -247,7 +247,7 @@ class SmartRanker:
         
         return max(0.0, 1.0 - diff_ratio)
     
-    def _calculate_bpm_match_score(self, result: Dict[str, Any], query_bpm: Optional[float]) -> float:
+    def _calculate_bpm_match_score(self, result: dict[str, Any], query_bpm: float | None) -> float:
         """计算BPM匹配分数"""
         if query_bpm is None:
             return 0.5
@@ -262,7 +262,7 @@ class SmartRanker:
         
         return max(0.0, 1.0 - diff_ratio * 2)
     
-    def _calculate_keyword_match_score(self, result: Dict[str, Any], query_genre: Optional[str], query_mood: Optional[str]) -> float:
+    def _calculate_keyword_match_score(self, result: dict[str, Any], query_genre: str | None, query_mood: str | None) -> float:
         """计算关键词匹配分数"""
         matches = 0
         total = 0
@@ -286,7 +286,7 @@ class SmartRanker:
         
         return matches / total
     
-    def _ensure_diversity(self, results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _ensure_diversity(self, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """
         保障结果多样性（优化版）
         
@@ -423,7 +423,7 @@ class SmartRanker:
         
         return adjusted
     
-    def adjust_weights(self, preferences: Dict[str, float]) -> None:
+    def adjust_weights(self, preferences: dict[str, float]) -> None:
         """
         根据用户偏好调整权重
         
@@ -434,7 +434,7 @@ class SmartRanker:
             if key in self.weights:
                 self.weights[key] = min(max(self.weights[key] * adjustment, 0.01), 0.99)
     
-    def get_weight_summary(self) -> Dict[str, float]:
+    def get_weight_summary(self) -> dict[str, float]:
         """获取当前权重配置"""
         return self.weights.copy()
 
@@ -454,7 +454,7 @@ def main() -> None:
         input_json = json.loads(sys.argv[2])
         action = input_json.get("action", "")
         
-        result: Dict[str, Any] = {"success": False, "results": []}
+        result: dict[str, Any] = {"success": False, "results": []}
         
         if action == "rank":
             results = input_json.get("results", [])

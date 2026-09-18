@@ -12,8 +12,16 @@
   py -3.12 scripts/pr_fullauto_orchestrator.py --action import_and_arrange
 """
 from __future__ import annotations
-import ctypes, ctypes.wintypes as wintypes
-import json, os, shutil, subprocess, sys, time, io
+
+import ctypes
+import ctypes.wintypes as wintypes
+import io
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
@@ -182,7 +190,7 @@ def verify_export(export_path: Path, timeout: int = 60) -> bool:
                         print(f"  ✓ 导出成功! 文件: {p.name} 大小: {size/1024/1024:.2f} MB")
                         return True
         time.sleep(3)
-    print(f"  ✗ 导出文件未出现或太小")
+    print("  ✗ 导出文件未出现或太小")
     return False
 
 # ============================================================
@@ -213,11 +221,11 @@ def main():
         print(f"    {p.name} ({p.stat().st_size/1024/1024:.1f} MB)")
     
     # Step 1: 部署 Startup 脚本
-    print(f"\n[Step 1] 部署 Startup 脚本...")
+    print("\n[Step 1] 部署 Startup 脚本...")
     deploy_startup_script()
     
     # Step 2: 构建命令
-    print(f"\n[Step 2] 构建命令...")
+    print("\n[Step 2] 构建命令...")
     cmd = {
         "action": args.action,
         "files": media_paths,
@@ -232,7 +240,7 @@ def main():
         print("\n[跳过重启] 等待 PR 启动并执行...")
     else:
         # Step 3: 关闭 PR
-        print(f"\n[Step 3] 关闭 PR...")
+        print("\n[Step 3] 关闭 PR...")
         if is_pr_running():
             if not close_pr(timeout=30):
                 print("  ✗ 无法关闭 PR，中止")
@@ -241,7 +249,7 @@ def main():
             print("  PR 未运行")
         
         # Step 4: 启动 PR
-        print(f"\n[Step 4] 启动 PR...")
+        print("\n[Step 4] 启动 PR...")
         time.sleep(2)
         if not launch_pr():
             print("  ✗ PR 启动失败")
@@ -249,7 +257,7 @@ def main():
         print("  ✓ PR 进程已启动")
     
     # Step 5: 等待 Startup 脚本执行完成
-    print(f"\n[Step 5] 等待 Startup 脚本执行...")
+    print("\n[Step 5] 等待 Startup 脚本执行...")
     # PR 启动后需要时间加载（Startup 脚本在项目打开后执行）
     time.sleep(10)
     dismiss_dialogs()
@@ -257,7 +265,7 @@ def main():
     result = wait_for_result(timeout=200)
     
     if result:
-        print(f"\n[结果]")
+        print("\n[结果]")
         print(f"  成功: {result.get('success')}")
         print(f"  步骤: {json.dumps(result.get('steps', {}), ensure_ascii=False, indent=4)}")
         if result.get("error"):
@@ -268,10 +276,10 @@ def main():
         result_file.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     
     # Step 6: 验证导出
-    print(f"\n[Step 6] 验证导出产物...")
+    print("\n[Step 6] 验证导出产物...")
     if verify_export(export_path, timeout=60):
         print(f"\n{'='*70}")
-        print(f"  ✓✓✓ 全链路成功!")
+        print("  ✓✓✓ 全链路成功!")
         print(f"  导出: {export_path}")
         print(f"  大小: {export_path.stat().st_size/1024/1024:.2f} MB")
         print(f"{'='*70}")
@@ -279,9 +287,9 @@ def main():
     else:
         # 检查日志获取更多信息
         if LOG_FILE.exists():
-            print(f"\n  Startup 日志:")
+            print("\n  Startup 日志:")
             print(LOG_FILE.read_text(encoding="utf-8", errors="replace")[-1000:])
-        print(f"\n  ✗ 导出验证失败")
+        print("\n  ✗ 导出验证失败")
         return 1
 
 if __name__ == "__main__":

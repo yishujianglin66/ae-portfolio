@@ -1,5 +1,8 @@
 """Check aria2 availability and try to start daemon."""
-import sys, subprocess, shutil, os
+import os
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\media")))
@@ -19,6 +22,7 @@ for drive in ["C:\\", "D:\\"]:
 
 # Try AutoDownloader
 from auto_downloader import AutoDownloader
+
 ad = AutoDownloader()
 print(f"\naria2 binary: {getattr(ad.aria2, 'binary_path', 'N/A')}")
 
@@ -47,6 +51,6 @@ print("\n=== Summary ===")
 print("Can search anime: YES (MaterialSearcher + Mikanani/Bilibili)")
 print(f"Can download: {'YES' if ad.aria2.is_available() else 'NO (aria2 not available)'}")
 print(f"Can extract frames: YES (ffmpeg at {shutil.which('ffmpeg')})")
-print(f"Can train locally: YES (GPU available)")
+print("Can train locally: YES (GPU available)")
 _du = shutil.disk_usage("D:\\")
 print(f"Disk space: {_du.free / (1024**3):.0f} GB free")

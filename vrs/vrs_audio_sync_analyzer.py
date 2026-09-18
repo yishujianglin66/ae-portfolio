@@ -156,7 +156,7 @@ class RhythmEvent:
     beat_strength: float
     deviation_ms: float
     sync_level: str            # strong / weak / none
-    source_detail: Dict[str, Any] = field(default_factory=dict)
+    source_detail: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -164,9 +164,9 @@ class BeatDrivenEffect:
     """音频驱动的 AE 效果推断"""
     effect_type: str           # beat_bounce / bass_glow / high_flash / energy_blur
     audio_source: str          # beat / bass / high / energy
-    trigger_times: List[float]
-    intensity_curve: List[float]
-    ae_params: Dict[str, Any]
+    trigger_times: list[float]
+    intensity_curve: list[float]
+    ae_params: dict[str, Any]
     confidence: float
 
 
@@ -293,8 +293,8 @@ class AudioSyncAnalyzer:
     async def analyze_sync(
         self,
         video_path: str,
-        audio_path: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        audio_path: str | None = None,
+    ) -> dict[str, Any]:
         """
         分析视频与音频的同步关系（主入口，异步）。
 
@@ -323,8 +323,8 @@ class AudioSyncAnalyzer:
             logger.error(f"音频分析失败: {audio_features.get('error')}")
             return {"success": False, "error": audio_features.get("error", "音频分析失败")}
 
-        beats: List[float] = audio_features.get("beat_times", [])
-        energy_curve: List[Dict[str, float]] = audio_features.get("energy_curve", [])
+        beats: list[float] = audio_features.get("beat_times", [])
+        energy_curve: list[dict[str, float]] = audio_features.get("energy_curve", [])
 
         # 3. 分析视频（用于获取事件）
         video_analysis = await self._analyze_video_async(video_path)
@@ -366,7 +366,7 @@ class AudioSyncAnalyzer:
             audio_features.get("segments", []),
         )
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": True,
             "audio_features": {
                 "bpm": audio_features.get("bpm", 0.0),
@@ -465,11 +465,11 @@ class AudioSyncAnalyzer:
     # ------------------------------------------------------------------
     # 2. 音频特征分析
     # ------------------------------------------------------------------
-    async def analyze_audio_features_async(self, audio_path: str) -> Dict[str, Any]:
+    async def analyze_audio_features_async(self, audio_path: str) -> dict[str, Any]:
         """异步包装：分析音频特征。"""
         return await asyncio.to_thread(self.analyze_audio_features, audio_path)
 
-    def analyze_audio_features(self, audio_path: str) -> Dict[str, Any]:
+    def analyze_audio_features(self, audio_path: str) -> dict[str, Any]:
         """
         分析音频特征，调用现有 AudioAnalyzer 或 LibrosaAudioAnalyzer。
 
@@ -515,13 +515,13 @@ class AudioSyncAnalyzer:
         }
 
     def _normalize_audio_result(
-        self, raw: Dict[str, Any], audio_p: Path, source: str
-    ) -> Dict[str, Any]:
+        self, raw: dict[str, Any], audio_p: Path, source: str
+    ) -> dict[str, Any]:
         """将不同来源的音频分析结果归一化为统一格式。"""
         features = raw.get("features", raw)
 
         # beat_times 可能在顶层或 features 中
-        beat_times: List[float] = (
+        beat_times: list[float] = (
             raw.get("beat_times") or features.get("beats") or features.get("beat_times") or []
         )
         beat_times = [round(float(t), 4) for t in beat_times]
@@ -566,8 +566,8 @@ class AudioSyncAnalyzer:
     def _normalize_energy_curve(
         self,
         raw: Any,
-        beat_times: List[float],
-    ) -> List[Dict[str, float]]:
+        beat_times: list[float],
+    ) -> list[dict[str, float]]:
         """将多种 energy_curve 格式归一化为 [{time, value}, ...]。"""
         if not raw:
             # 兜底：用节拍时间生成默认能量曲线
@@ -612,11 +612,11 @@ class AudioSyncAnalyzer:
 
         return [{"time": t, "value": 0.5} for t in beat_times]
 
-    def _normalize_segments(self, raw: Any) -> List[Dict[str, Any]]:
+    def _normalize_segments(self, raw: Any) -> list[dict[str, Any]]:
         """归一化段落列表为 [{start, end, label, energy}]。"""
         if not raw:
             return []
-        out: List[Dict[str, Any]] = []
+        out: list[dict[str, Any]] = []
         for i, seg in enumerate(raw):
             if isinstance(seg, dict):
                 start = float(seg.get("start", seg.get("start_time", 0.0)))
@@ -640,7 +640,7 @@ class AudioSyncAnalyzer:
                 })
         return out
 
-    def _analyze_audio_librosa_direct(self, audio_p: Path) -> Dict[str, Any]:
+    def _analyze_audio_librosa_direct(self, audio_p: Path) -> dict[str, Any]:
         """直连 librosa 分析（无封装层时的最后兜底）。"""
         if not _LIBROSA_AVAILABLE or not _NUMPY_AVAILABLE:
             return {"success": False, "error": "librosa/numpy 未安装"}
@@ -681,7 +681,7 @@ class AudioSyncAnalyzer:
             mood, genre = "happy", "pop"
 
         # 段落估算（按 4 个均分段）
-        segments: List[Dict[str, Any]] = []
+        segments: list[dict[str, Any]] = []
         if duration > 0:
             seg_count = 4
             seg_len = duration / seg_count
@@ -714,11 +714,11 @@ class AudioSyncAnalyzer:
     # ------------------------------------------------------------------
     # 3. 视频分析（内部）
     # ------------------------------------------------------------------
-    async def _analyze_video_async(self, video_path: str) -> Dict[str, Any]:
+    async def _analyze_video_async(self, video_path: str) -> dict[str, Any]:
         """异步包装：调用 VideoEffectAnalyzer。"""
         return await asyncio.to_thread(self._analyze_video, video_path)
 
-    def _analyze_video(self, video_path: str) -> Dict[str, Any]:
+    def _analyze_video(self, video_path: str) -> dict[str, Any]:
         """调用 VideoEffectAnalyzer 获取视频事件。"""
         analyzer = self._get_video_analyzer()
         if analyzer is None:
@@ -755,9 +755,9 @@ class AudioSyncAnalyzer:
     # ------------------------------------------------------------------
     def detect_rhythm_events(
         self,
-        analysis_result: Dict[str, Any],
-        beats: List[float],
-    ) -> List[RhythmEvent]:
+        analysis_result: dict[str, Any],
+        beats: list[float],
+    ) -> list[RhythmEvent]:
         """
         将视频事件（转场/速度变化/效果变化）与音频节拍对齐。
 
@@ -773,7 +773,7 @@ class AudioSyncAnalyzer:
         video_events = self._collect_video_events(analysis_result)
         logger.debug(f"从视频分析中提取 {len(video_events)} 个事件")
 
-        rhythm_events: List[RhythmEvent] = []
+        rhythm_events: list[RhythmEvent] = []
         for ev in video_events:
             time_s = ev["time"]
             event_type = ev["type"]
@@ -815,9 +815,9 @@ class AudioSyncAnalyzer:
         rhythm_events.sort(key=lambda e: e.time)
         return rhythm_events
 
-    def _collect_video_events(self, analysis_result: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _collect_video_events(self, analysis_result: dict[str, Any]) -> list[dict[str, Any]]:
         """从视频分析结果中提取所有时间事件（转场 + 速度变化 + 效果变化 + 场景切换）。"""
-        events: List[Dict[str, Any]] = []
+        events: list[dict[str, Any]] = []
 
         # 转场
         for t in analysis_result.get("transitions", []) or []:
@@ -864,8 +864,8 @@ class AudioSyncAnalyzer:
         return events
 
     def _find_nearest_beat(
-        self, time_s: float, beats: List[float]
-    ) -> Tuple[float, int]:
+        self, time_s: float, beats: list[float]
+    ) -> tuple[float, int]:
         """找到距离 time_s 最近的节拍及其索引。"""
         if not beats:
             return 0.0, 0
@@ -879,7 +879,7 @@ class AudioSyncAnalyzer:
                 best_idx = i
         return beats[best_idx], best_idx
 
-    def _estimate_beat_strength(self, beat_idx: int, beats: List[float]) -> float:
+    def _estimate_beat_strength(self, beat_idx: int, beats: list[float]) -> float:
         """
         估算节拍强度：基于 4/4 拍结构，强拍 (idx % 4 == 0) 强度最高。
         """
@@ -900,11 +900,11 @@ class AudioSyncAnalyzer:
     # ------------------------------------------------------------------
     def _build_sync_points(
         self,
-        rhythm_events: List[RhythmEvent],
-        beats: List[float],
-    ) -> List[SyncPoint]:
+        rhythm_events: list[RhythmEvent],
+        beats: list[float],
+    ) -> list[SyncPoint]:
         """从节奏事件中提取同步点（仅保留 on_beat 的事件）。"""
-        sync_points: List[SyncPoint] = []
+        sync_points: list[SyncPoint] = []
         for ev in rhythm_events:
             if not ev.on_beat:
                 continue
@@ -923,9 +923,9 @@ class AudioSyncAnalyzer:
     # ------------------------------------------------------------------
     def infer_beat_driven_effects(
         self,
-        rhythm_events: List[RhythmEvent],
-        energy_curve: List[Dict[str, float]],
-    ) -> List[BeatDrivenEffect]:
+        rhythm_events: list[RhythmEvent],
+        energy_curve: list[dict[str, float]],
+    ) -> list[BeatDrivenEffect]:
         """
         推断音频驱动的效果：
             - beat_bounce:    节拍上的 Scale 弹跳
@@ -933,7 +933,7 @@ class AudioSyncAnalyzer:
             - high_flash:     高频驱动的闪烁
             - energy_blur:    能量峰值驱动的模糊
         """
-        effects: List[BeatDrivenEffect] = []
+        effects: list[BeatDrivenEffect] = []
 
         # 提取踩拍事件
         on_beat_events = [e for e in rhythm_events if e.on_beat]
@@ -945,7 +945,7 @@ class AudioSyncAnalyzer:
         if beat_triggers:
             bounce_curve = self._align_intensity_to_triggers(beat_triggers, on_beat_events)
             # 为每个触发时间生成 3 个关键帧（1.0 → 1.05 → 1.0 弹跳）
-            bounce_keyframes: List[Dict[str, Any]] = []
+            bounce_keyframes: list[dict[str, Any]] = []
             for t, v in zip(beat_triggers, bounce_curve):
                 peak = round(105.0 * (0.8 + 0.2 * v), 2)
                 bounce_keyframes.append({"time": round(t, 4), "value": [100, 100], "easing": "ease_out"})
@@ -972,7 +972,7 @@ class AudioSyncAnalyzer:
                 energy_curve, threshold_percent=0.7, min_interval=0.3
             )
             if bass_triggers:
-                glow_keyframes: List[Dict[str, Any]] = []
+                glow_keyframes: list[dict[str, Any]] = []
                 for t, v in zip(bass_triggers, bass_intensity):
                     glow_keyframes.append({"time": round(t, 4), "value": round(0.3 + v * 0.7, 3), "easing": "ease_out"})
                     glow_keyframes.append({"time": round(t + 0.2, 4), "value": 0.3, "easing": "ease_in"})
@@ -995,7 +995,7 @@ class AudioSyncAnalyzer:
         if energy_curve:
             flash_triggers, flash_intensity = self._find_flash_points(energy_curve)
             if flash_triggers:
-                flash_keyframes: List[Dict[str, Any]] = []
+                flash_keyframes: list[dict[str, Any]] = []
                 for t in flash_triggers:
                     flash_keyframes.append({"time": round(t, 4), "value": 100, "easing": "linear"})
                     flash_keyframes.append({"time": round(t + 0.05, 4), "value": 0, "easing": "linear"})
@@ -1019,7 +1019,7 @@ class AudioSyncAnalyzer:
                 energy_curve, threshold_percent=0.85, min_interval=0.5
             )
             if blur_triggers:
-                blur_keyframes: List[Dict[str, Any]] = []
+                blur_keyframes: list[dict[str, Any]] = []
                 for t, v in zip(blur_triggers, blur_intensity):
                     blur_keyframes.append({"time": round(t, 4), "value": round(v * 30, 2), "easing": "ease_out"})
                     blur_keyframes.append({"time": round(t + 0.3, 4), "value": 0, "easing": "ease_in"})
@@ -1040,10 +1040,10 @@ class AudioSyncAnalyzer:
         return effects
 
     def _align_intensity_to_triggers(
-        self, triggers: List[float], events: List[RhythmEvent]
-    ) -> List[float]:
+        self, triggers: list[float], events: list[RhythmEvent]
+    ) -> list[float]:
         """将事件强度对齐到触发时间列表。"""
-        intensity_map: Dict[float, float] = {}
+        intensity_map: dict[float, float] = {}
         for e in events:
             t = e.source_detail.get("nearest_beat", e.time)
             intensity_map[round(t, 4)] = max(
@@ -1053,10 +1053,10 @@ class AudioSyncAnalyzer:
 
     def _find_energy_peaks(
         self,
-        energy_curve: List[Dict[str, float]],
+        energy_curve: list[dict[str, float]],
         threshold_percent: float = 0.7,
         min_interval: float = 0.3,
-    ) -> Tuple[List[float], List[float]]:
+    ) -> tuple[list[float], list[float]]:
         """在能量曲线中寻找峰值（用于 bass_glow / energy_blur）。"""
         if not energy_curve:
             return [], []
@@ -1065,8 +1065,8 @@ class AudioSyncAnalyzer:
         max_v = max(values) if values else 0.0
         threshold = max_v * threshold_percent
 
-        triggers: List[float] = []
-        intensities: List[float] = []
+        triggers: list[float] = []
+        intensities: list[float] = []
         last_trigger = -1.0
 
         for i, point in enumerate(energy_curve):
@@ -1088,14 +1088,14 @@ class AudioSyncAnalyzer:
 
     def _find_flash_points(
         self,
-        energy_curve: List[Dict[str, float]],
-    ) -> Tuple[List[float], List[float]]:
+        energy_curve: list[dict[str, float]],
+    ) -> tuple[list[float], list[float]]:
         """寻找能量快速跳变点（用于 high_flash）。"""
         if len(energy_curve) < 3:
             return [], []
 
-        triggers: List[float] = []
-        intensities: List[float] = []
+        triggers: list[float] = []
+        intensities: list[float] = []
         values = [p.get("value", 0.0) for p in energy_curve]
         max_v = max(values) if values else 0.0
 
@@ -1118,15 +1118,15 @@ class AudioSyncAnalyzer:
     # ------------------------------------------------------------------
     def build_sync_keyframes(
         self,
-        beats: List[float],
-        energy_curve: List[Dict[str, float]],
-    ) -> List[Dict[str, Any]]:
+        beats: list[float],
+        energy_curve: list[dict[str, float]],
+    ) -> list[dict[str, Any]]:
         """
         生成节拍同步的关键帧序列：
             - Scale 关键帧（1.0 → 1.05 → 1.0 弹跳）
             - 强拍额外生成发光强度关键帧
         """
-        keyframes: List[Dict[str, Any]] = []
+        keyframes: list[dict[str, Any]] = []
         if not beats:
             return keyframes
 
@@ -1180,8 +1180,8 @@ class AudioSyncAnalyzer:
         return keyframes
 
     def _build_energy_lookup(
-        self, energy_curve: List[Dict[str, float]]
-    ) -> List[Tuple[float, float]]:
+        self, energy_curve: list[dict[str, float]]
+    ) -> list[tuple[float, float]]:
         """构建 (time, value) 排序列表用于快速查找。"""
         if not energy_curve:
             return []
@@ -1192,7 +1192,7 @@ class AudioSyncAnalyzer:
 
     def _lookup_energy(
         self,
-        energy_map: List[Tuple[float, float]],
+        energy_map: list[tuple[float, float]],
         time_s: float,
     ) -> float:
         """在能量映射中查找指定时间的能量值（线性插值）。"""
@@ -1222,9 +1222,9 @@ class AudioSyncAnalyzer:
     # ------------------------------------------------------------------
     def generate_audio_reactive_expressions(
         self,
-        beats: List[float],
-        energy_curve: List[Dict[str, float]],
-    ) -> List[Dict[str, Any]]:
+        beats: list[float],
+        energy_curve: list[dict[str, float]],
+    ) -> list[dict[str, Any]]:
         """
         生成音频驱动 AE 表达式。
 
@@ -1234,7 +1234,7 @@ class AudioSyncAnalyzer:
             - 节拍触发的正弦波缩放
             - 能量驱动的发光
         """
-        expressions: List[Dict[str, Any]] = []
+        expressions: list[dict[str, Any]] = []
 
         if not beats:
             return expressions
@@ -1294,7 +1294,7 @@ class AudioSyncAnalyzer:
 
         return expressions
 
-    def _estimate_bpm_from_beats(self, beats: List[float]) -> float:
+    def _estimate_bpm_from_beats(self, beats: list[float]) -> float:
         """根据节拍时间序列估算 BPM。"""
         if len(beats) < 2:
             return 0.0
@@ -1305,7 +1305,7 @@ class AudioSyncAnalyzer:
         avg_interval = sum(intervals) / len(intervals)
         return 60.0 / avg_interval if avg_interval > 0 else 0.0
 
-    def _compute_avg_energy(self, energy_curve: List[Dict[str, float]]) -> float:
+    def _compute_avg_energy(self, energy_curve: list[dict[str, float]]) -> float:
         """计算能量曲线的平均值。"""
         if not energy_curve:
             return 0.5
@@ -1317,9 +1317,9 @@ class AudioSyncAnalyzer:
     # ------------------------------------------------------------------
     def _compute_sync_score(
         self,
-        rhythm_events: List[RhythmEvent],
-        beats: List[float],
-        energy_curve: List[Dict[str, float]],
+        rhythm_events: list[RhythmEvent],
+        beats: list[float],
+        energy_curve: list[dict[str, float]],
     ) -> float:
         """
         综合同步分数：
@@ -1357,21 +1357,21 @@ class AudioSyncAnalyzer:
 
     def _match_sections(
         self,
-        scenes: List[Dict[str, Any]],
-        segments: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        scenes: list[dict[str, Any]],
+        segments: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """将视频场景与音频段落对应。"""
         if not scenes or not segments:
             return []
 
-        mapping: List[Dict[str, Any]] = []
+        mapping: list[dict[str, Any]] = []
         for seg in segments:
             seg_start = seg.get("start", 0.0)
             seg_end = seg.get("end", 0.0)
             seg_label = seg.get("label", "unknown")
 
             # 找出落在该段落内的场景
-            matched_scenes: List[int] = []
+            matched_scenes: list[int] = []
             for sc in scenes:
                 sc_start = float(sc.get("start_time", sc.get("start", 0.0)))
                 if seg_start <= sc_start < seg_end:
@@ -1390,7 +1390,7 @@ class AudioSyncAnalyzer:
     # ------------------------------------------------------------------
     # 序列化辅助
     # ------------------------------------------------------------------
-    def _rhythm_event_to_dict(self, e: RhythmEvent) -> Dict[str, Any]:
+    def _rhythm_event_to_dict(self, e: RhythmEvent) -> dict[str, Any]:
         return {
             "time": e.time,
             "event_type": e.event_type,
@@ -1401,7 +1401,7 @@ class AudioSyncAnalyzer:
             "source_detail": e.source_detail,
         }
 
-    def _sync_point_to_dict(self, p: SyncPoint) -> Dict[str, Any]:
+    def _sync_point_to_dict(self, p: SyncPoint) -> dict[str, Any]:
         return {
             "video_time": p.video_time,
             "beat_time": p.beat_time,
@@ -1409,7 +1409,7 @@ class AudioSyncAnalyzer:
             "deviation_ms": p.deviation_ms,
         }
 
-    def _beat_driven_effect_to_dict(self, e: BeatDrivenEffect) -> Dict[str, Any]:
+    def _beat_driven_effect_to_dict(self, e: BeatDrivenEffect) -> dict[str, Any]:
         return {
             "effect_type": e.effect_type,
             "audio_source": e.audio_source,
@@ -1443,7 +1443,7 @@ def _run_test() -> None:
 
     analyzer = AudioSyncAnalyzer()
 
-    audio_path: Optional[str] = None
+    audio_path: str | None = None
     if not args.extract and Path(args.audio).exists():
         audio_path = args.audio
         logger.info(f"使用提供的音频: {audio_path}")

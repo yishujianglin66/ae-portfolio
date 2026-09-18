@@ -27,7 +27,7 @@ class KnowledgeExtractor:
     5. 调色模式 - 常用调色效果组合
     """
 
-    def extract_all(self, report: Dict[str, Any]) -> Dict[str, Any]:
+    def extract_all(self, report: dict[str, Any]) -> dict[str, Any]:
         """提取所有知识维度。
 
         Args:
@@ -47,8 +47,8 @@ class KnowledgeExtractor:
         }
 
     def extract_effect_chains(
-        self, report: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, report: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """提取效果链模式。
 
         分析哪些效果经常在同一图层上组合使用。
@@ -57,7 +57,7 @@ class KnowledgeExtractor:
             效果链列表，按出现频率排序
         """
         chain_counter: Counter = Counter()
-        chain_details: Dict[str, Dict[str, Any]] = {}
+        chain_details: dict[str, dict[str, Any]] = {}
 
         for comp in report.get("compositions", []):
             for layer in comp.get("layers", []):
@@ -84,7 +84,7 @@ class KnowledgeExtractor:
                 chain_details[chain_key]["count"] += 1
 
         # 按频率排序
-        result: List[Dict[str, Any]] = []
+        result: list[dict[str, Any]] = []
         for chain_key, count in chain_counter.most_common(20):
             detail = chain_details[chain_key]
             detail["frequency"] = count
@@ -93,8 +93,8 @@ class KnowledgeExtractor:
         return result
 
     def extract_keyframe_patterns(
-        self, report: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, report: dict[str, Any]
+    ) -> dict[str, Any]:
         """提取关键帧动画模式。
 
         分析关键帧的缓动类型分布、时间间隔模式等。
@@ -103,11 +103,11 @@ class KnowledgeExtractor:
             关键帧模式字典
         """
         interpolation_types: Counter = Counter()
-        ease_speeds: List[float] = []
-        animated_properties: List[str] = []
+        ease_speeds: list[float] = []
+        animated_properties: list[str] = []
         total_keyframes = 0
-        bezier_curves: List[Dict[str, Any]] = []
-        property_timelines: Dict[str, List[Dict[str, Any]]] = {}
+        bezier_curves: list[dict[str, Any]] = []
+        property_timelines: dict[str, list[dict[str, Any]]] = {}
 
         for comp in report.get("compositions", []):
             for layer in comp.get("layers", []):
@@ -120,7 +120,7 @@ class KnowledgeExtractor:
                         total_keyframes += len(kfs)
                         if kfs:
                             animated_properties.append(prop_name)
-                        timeline: List[Dict[str, Any]] = []
+                        timeline: list[dict[str, Any]] = []
                         for kf in kfs:
                             interp = kf.get("interpolation", {})
                             for direction in ["in", "out"]:
@@ -135,7 +135,7 @@ class KnowledgeExtractor:
                             bezier_in = kf.get("inBezier", kf.get("bezierIn"))
                             bezier_out = kf.get("outBezier", kf.get("bezierOut"))
                             if bezier_in or bezier_out:
-                                curve_info: Dict[str, Any] = {
+                                curve_info: dict[str, Any] = {
                                     "layer": layer_name,
                                     "property": prop_name,
                                     "time": kf.get("time", 0),
@@ -205,8 +205,8 @@ class KnowledgeExtractor:
         }
 
     def extract_layer_organization(
-        self, report: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, report: dict[str, Any]
+    ) -> dict[str, Any]:
         """提取图层组织模式。
 
         分析命名规范、层级结构、父子关系等。
@@ -214,8 +214,8 @@ class KnowledgeExtractor:
         Returns:
             图层组织模式字典
         """
-        layer_names: List[str] = []
-        parent_relationships: List[Dict[str, str]] = []
+        layer_names: list[str] = []
+        parent_relationships: list[dict[str, str]] = []
         type_distribution: Counter = Counter()
         naming_patterns: Counter = Counter()
 
@@ -254,8 +254,8 @@ class KnowledgeExtractor:
         }
 
     def extract_technique_tags(
-        self, report: Dict[str, Any]
-    ) -> List[str]:
+        self, report: dict[str, Any]
+    ) -> list[str]:
         """提取技法标签。
 
         Returns:
@@ -264,8 +264,8 @@ class KnowledgeExtractor:
         return list(report.get("techniques", []))
 
     def extract_color_patterns(
-        self, report: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, report: dict[str, Any]
+    ) -> dict[str, Any]:
         """提取调色模式。
 
         分析调色效果的组合和使用频率。
@@ -298,8 +298,8 @@ class KnowledgeExtractor:
         }
 
     def extract_common_effects(
-        self, report: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        self, report: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """提取最常用的效果排名。
 
         Returns:
@@ -312,7 +312,7 @@ class KnowledgeExtractor:
             reverse=True,
         )
 
-        result: List[Dict[str, Any]] = []
+        result: list[dict[str, Any]] = []
         for name, data in sorted_effects[:30]:
             result.append({
                 "name": name,
@@ -324,16 +324,16 @@ class KnowledgeExtractor:
         return result
 
     def extract_plugin_usage(
-        self, report: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, report: dict[str, Any]
+    ) -> dict[str, Any]:
         """提取第三方插件使用情况。
 
         Returns:
             插件使用字典
         """
         effects_by_type = report.get("effectsByType", {})
-        plugins: Dict[str, int] = {}
-        standard: Dict[str, int] = {}
+        plugins: dict[str, int] = {}
+        standard: dict[str, int] = {}
 
         for name, data in effects_by_type.items():
             count = data.get("count", 0)

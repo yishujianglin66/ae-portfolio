@@ -72,25 +72,25 @@ class ScheduledTask:
     task_id: str = field(default_factory=lambda: f"sched_{uuid.uuid4().hex[:12]}")
     name: str = ""
     func: Callable[..., Any] = None
-    args: Tuple = ()
-    kwargs: Dict[str, Any] = field(default_factory=dict)
+    args: tuple = ()
+    kwargs: dict[str, Any] = field(default_factory=dict)
     queue: str = "default"
     retries: int = 0
     max_retries: int = 3
     timeout: float = 300.0
-    eta: Optional[float] = None  # 延迟执行时间
+    eta: float | None = None  # 延迟执行时间
     countdown: float = 0.0  # 倒计时（秒）
-    expires: Optional[float] = None  # 过期时间
+    expires: float | None = None  # 过期时间
     result: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     state: TaskState = TaskState.QUEUED
     created_at: float = field(default_factory=time.time)
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
-    worker_id: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    started_at: float | None = None
+    completed_at: float | None = None
+    worker_id: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "task_id": self.task_id,
             "name": self.name,
@@ -122,7 +122,7 @@ class WorkerInfo:
     worker_id: str
     hostname: str = ""
     pid: int = 0
-    queues: List[str] = field(default_factory=lambda: ["default"])
+    queues: list[str] = field(default_factory=lambda: ["default"])
     concurrency: int = 1
     last_heartbeat: float = field(default_factory=time.time)
     active_tasks: int = 0
@@ -130,7 +130,7 @@ class WorkerInfo:
     total_failed: int = 0
     is_online: bool = True
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "worker_id": self.worker_id,
             "hostname": self.hostname,
@@ -155,7 +155,7 @@ class TaskQueue:
 
     def __init__(self, name: str = "default"):
         self._name = name
-        self._heap: List[ScheduledTask] = []
+        self._heap: list[ScheduledTask] = []
         self._lock = threading.Lock()
         self._not_empty = threading.Condition(self._lock)
         self._size = 0
@@ -171,7 +171,7 @@ class TaskQueue:
             self._size += 1
             self._not_empty.notify()
 
-    def get(self, timeout: float = 1.0) -> Optional[ScheduledTask]:
+    def get(self, timeout: float = 1.0) -> ScheduledTask | None:
         """获取任务（阻塞）"""
         with self._not_empty:
             if not self._heap:
@@ -182,7 +182,7 @@ class TaskQueue:
                 return task
             return None
 
-    def peek(self) -> Optional[ScheduledTask]:
+    def peek(self) -> ScheduledTask | None:
         """查看队列头部任务（不取出）"""
         with self._lock:
             return self._heap[0] if self._heap else None
@@ -209,7 +209,7 @@ class ResultStore:
     """任务结果存储"""
 
     def __init__(self, max_size: int = 10000):
-        self._results: Dict[str, ScheduledTask] = {}
+        self._results: dict[str, ScheduledTask] = {}
         self._lock = threading.RLock()
         self._max_size = max_size
 
@@ -222,7 +222,7 @@ class ResultStore:
                 for t in oldest[:len(self._results) - self._max_size]:
                     del self._results[t.task_id]
 
-    def get(self, task_id: str) -> Optional[ScheduledTask]:
+    def get(self, task_id: str) -> ScheduledTask | None:
         """获取任务结果"""
         with self._lock:
             return self._results.get(task_id)
@@ -235,7 +235,7 @@ class ResultStore:
                 return True
             return False
 
-    def get_all(self) -> List[Dict[str, Any]]:
+    def get_all(self) -> list[dict[str, Any]]:
         """获取所有结果"""
         with self._lock:
             return [t.to_dict() for t in self._results.values()]
@@ -254,18 +254,18 @@ class CronScheduler:
     """定时任务调度器（简化版 cron）"""
 
     def __init__(self):
-        self._schedules: Dict[str, Dict[str, Any]] = {}
+        self._schedules: dict[str, dict[str, Any]] = {}
         self._lock = threading.RLock()
         self._running = False
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
 
     def add_schedule(
         self,
         name: str,
         func: Callable,
         interval: float,
-        args: Tuple = (),
-        kwargs: Optional[Dict[str, Any]] = None,
+        args: tuple = (),
+        kwargs: dict[str, Any] | None = None,
         queue: str = "default",
     ):
         """添加定时任务
@@ -300,7 +300,7 @@ class CronScheduler:
                 return True
             return False
 
-    def start(self, submit_func: Callable[[Callable, Tuple, Dict, str], str]):
+    def start(self, submit_func: Callable[[Callable, tuple, dict, str], str]):
         """启动调度器"""
         self._running = True
         self._submit_func = submit_func
@@ -337,7 +337,7 @@ class CronScheduler:
             self._thread.join(timeout=5)
         _logger.info("定时任务调度器已停止")
 
-    def get_schedules(self) -> List[Dict[str, Any]]:
+    def get_schedules(self) -> list[dict[str, Any]]:
         """获取所有定时任务"""
         with self._lock:
             return [
@@ -362,10 +362,10 @@ class Worker:
 
     def __init__(
         self,
-        worker_id: Optional[str] = None,
-        queues: Optional[List[str]] = None,
+        worker_id: str | None = None,
+        queues: list[str] | None = None,
         concurrency: int = 2,
-        scheduler: Optional[DistributedScheduler] = None,
+        scheduler: DistributedScheduler | None = None,
     ):
         self.worker_id = worker_id or f"worker_{uuid.uuid4().hex[:8]}"
         self.queues = queues or ["default"]
@@ -378,7 +378,7 @@ class Worker:
             queues=self.queues,
             concurrency=concurrency,
         )
-        self._threads: List[threading.Thread] = []
+        self._threads: list[threading.Thread] = []
         self._running = False
         self._stop_event = threading.Event()
 
@@ -423,7 +423,7 @@ class Worker:
                 continue
             self._execute_task(task)
 
-    def _fetch_task(self) -> Optional[ScheduledTask]:
+    def _fetch_task(self) -> ScheduledTask | None:
         """从队列获取任务"""
         if not self._scheduler:
             return None
@@ -496,8 +496,8 @@ class Worker:
 
     def _run_with_timeout(self, task: ScheduledTask) -> Any:
         """带超时执行"""
-        result_container: List[Any] = [None]
-        exception_container: List[Optional[Exception]] = [None]
+        result_container: list[Any] = [None]
+        exception_container: list[Exception | None] = [None]
 
         def target():
             try:
@@ -532,9 +532,9 @@ class DistributedScheduler:
     管理多个队列、worker 和定时任务，提供统一的任务调度接口。
     """
 
-    def __init__(self, default_queues: Optional[List[str]] = None):
-        self._queues: Dict[str, TaskQueue] = {}
-        self._workers: Dict[str, Worker] = {}
+    def __init__(self, default_queues: list[str] | None = None):
+        self._queues: dict[str, TaskQueue] = {}
+        self._workers: dict[str, Worker] = {}
         self._result_store = ResultStore()
         self._cron = CronScheduler()
         self._lock = threading.RLock()
@@ -542,14 +542,14 @@ class DistributedScheduler:
         for q in (default_queues or ["default"]):
             self._queues[q] = TaskQueue(q)
 
-        self._heartbeat_thread: Optional[threading.Thread] = None
+        self._heartbeat_thread: threading.Thread | None = None
         self._running = False
 
     # --------------------------------------------------------------------
     # 队列管理
     # --------------------------------------------------------------------
 
-    def get_queue(self, name: str) -> Optional[TaskQueue]:
+    def get_queue(self, name: str) -> TaskQueue | None:
         """获取队列"""
         with self._lock:
             return self._queues.get(name)
@@ -561,7 +561,7 @@ class DistributedScheduler:
                 self._queues[name] = TaskQueue(name)
             return self._queues[name]
 
-    def get_queue_stats(self) -> Dict[str, int]:
+    def get_queue_stats(self) -> dict[str, int]:
         """获取队列统计"""
         with self._lock:
             return {name: q.size for name, q in self._queues.items()}
@@ -573,8 +573,8 @@ class DistributedScheduler:
     def submit(
         self,
         func: Callable[..., Any],
-        args: Tuple = (),
-        kwargs: Optional[Dict[str, Any]] = None,
+        args: tuple = (),
+        kwargs: dict[str, Any] | None = None,
         queue: str = "default",
         priority: int = 5,
         name: str = "",
@@ -634,12 +634,12 @@ class DistributedScheduler:
     # 任务查询
     # --------------------------------------------------------------------
 
-    def get_result(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def get_result(self, task_id: str) -> dict[str, Any] | None:
         """获取任务结果"""
         task = self._result_store.get(task_id)
         return task.to_dict() if task else None
 
-    def wait_for_result(self, task_id: str, timeout: float = 60.0) -> Optional[Dict[str, Any]]:
+    def wait_for_result(self, task_id: str, timeout: float = 60.0) -> dict[str, Any] | None:
         """等待任务结果"""
         start = time.time()
         while time.time() - start < timeout:
@@ -666,8 +666,8 @@ class DistributedScheduler:
 
     def add_worker(
         self,
-        worker_id: Optional[str] = None,
-        queues: Optional[List[str]] = None,
+        worker_id: str | None = None,
+        queues: list[str] | None = None,
         concurrency: int = 2,
     ) -> Worker:
         """添加 Worker"""
@@ -689,7 +689,7 @@ class DistributedScheduler:
         if worker:
             worker.stop(timeout=timeout)
 
-    def get_workers(self) -> List[Dict[str, Any]]:
+    def get_workers(self) -> list[dict[str, Any]]:
         """获取所有 Worker 信息"""
         with self._lock:
             return [w.info.to_dict() for w in self._workers.values()]
@@ -719,8 +719,8 @@ class DistributedScheduler:
         name: str,
         func: Callable,
         interval: float,
-        args: Tuple = (),
-        kwargs: Optional[Dict[str, Any]] = None,
+        args: tuple = (),
+        kwargs: dict[str, Any] | None = None,
         queue: str = "default",
     ):
         """添加定时任务"""
@@ -730,7 +730,7 @@ class DistributedScheduler:
         """移除定时任务"""
         return self._cron.remove_schedule(name)
 
-    def get_cron_schedules(self) -> List[Dict[str, Any]]:
+    def get_cron_schedules(self) -> list[dict[str, Any]]:
         """获取定时任务列表"""
         return self._cron.get_schedules()
 
@@ -773,7 +773,7 @@ class DistributedScheduler:
     # 统计
     # --------------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取统计信息"""
         with self._lock:
             total_queued = sum(q.size for q in self._queues.values())
@@ -800,7 +800,7 @@ class DistributedScheduler:
 # 任务装饰器（兼容 Celery 风格）
 # ============================================================================
 
-_default_scheduler: Optional[DistributedScheduler] = None
+_default_scheduler: DistributedScheduler | None = None
 
 
 def get_scheduler() -> DistributedScheduler:

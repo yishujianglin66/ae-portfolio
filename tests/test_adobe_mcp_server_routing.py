@@ -18,15 +18,16 @@ test_adobe_mcp_server_routing.py — AdobeMCPServer 路由与工具分派测试
 - 工具路由错误（如 _call_tool 未识别 tool_name）会让 MCP 客户端拿到
   误导性的 error 响应，难以排查。
 """
+import importlib.util
+import io
+import json
 import os
 import sys
-import json
-import io
-import importlib.util
 import tempfile
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # 注意：此处故意不将 bridges/ 加入 sys.path，以避免污染其他测试模块

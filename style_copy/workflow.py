@@ -14,25 +14,25 @@ style_copy/workflow.py
   - ffmpeg_generator.py
 """
 
+import json
 import os
 import sys
-import json
 import tempfile
 from pathlib import Path
 from typing import Dict, Optional
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from style_copy.ffmpeg_generator import FFmpegCommandGenerator
 from style_copy.input_parser import InputParser
 from style_copy.style_analyzer import StyleAnalyzer, get_analyzer
 from style_copy.tool_orchestrator import ToolOrchestrator
-from style_copy.ffmpeg_generator import FFmpegCommandGenerator
 
 
 class StyleCopyWorkflow:
     """视频风格智能复制工作流"""
     
-    def __init__(self, work_dir: Optional[str] = None):
+    def __init__(self, work_dir: str | None = None):
         self.work_dir = Path(work_dir) if work_dir else Path(tempfile.mkdtemp(prefix="style_copy_"))
         self.work_dir.mkdir(parents=True, exist_ok=True)
         
@@ -47,7 +47,7 @@ class StyleCopyWorkflow:
             "data": {}
         }
     
-    def run(self, input_str: str) -> Dict:
+    def run(self, input_str: str) -> dict:
         """执行完整工作流"""
         try:
             # Step 1: 输入解析
@@ -142,7 +142,7 @@ def main():
     
     input_str = " ".join(sys.argv[1:])
     
-    print(f"开始执行风格复制工作流...")
+    print("开始执行风格复制工作流...")
     print(f"输入: {input_str[:50]}...")
     
     workflow = StyleCopyWorkflow()

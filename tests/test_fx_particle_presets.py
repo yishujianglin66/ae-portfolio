@@ -121,7 +121,7 @@ class TestClientInstantiation:
         """未知粒子类型在不触发 Bridge 的情况下直接返回错误。"""
         with tempfile.TemporaryDirectory() as tmp:
             client = ParticleFXClient(history_dir=str(Path(tmp) / "hist"))
-            result: Dict[str, Any] = client.generate("Comp 1", "not_a_real_type")
+            result: dict[str, Any] = client.generate("Comp 1", "not_a_real_type")
             assert result["status"] == "error"
             history = client.get_history()
             assert len(history) == 1

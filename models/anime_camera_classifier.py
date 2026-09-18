@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+
 from core.torch_runtime import get_device, infer_ctx
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -61,7 +62,7 @@ class AnimeCameraClassifier:
     """动漫运镜分类器 (自动识别 fine/coarse schema + 阈值校准 + 光流降级)。"""
 
     def __init__(self, lora_dir: str = DEFAULT_LORA_DIR,
-                 thresholds_path: Optional[str] = None,
+                 thresholds_path: str | None = None,
                  model_dir: str = MODEL_DIR):
         self.lora_dir = lora_dir
         self.model_dir = model_dir
@@ -73,7 +74,7 @@ class AnimeCameraClassifier:
         self._model = None
         self._device = None
 
-    def _load_meta_labels(self) -> List[str]:
+    def _load_meta_labels(self) -> list[str]:
         meta = Path(self.lora_dir) / "meta.json"
         if not meta.exists():
             logger.warning("meta.json not found at %s, falling back to COARSE_LABELS", meta)
@@ -89,7 +90,7 @@ class AnimeCameraClassifier:
         return [str(x) for x in data["labels"]]
 
     @staticmethod
-    def _load_thresholds(path: str, labels: List[str]) -> Optional[Dict[str, float]]:
+    def _load_thresholds(path: str, labels: list[str]) -> dict[str, float] | None:
         """加载逐类阈值; 不可用时返回 None 表示"不做门控", 绝不伪造默认值。
 
         伪造默认值会静默退化: 粗类键对 v2 7 类是空交集, 七个标签会共用
@@ -166,7 +167,7 @@ class AnimeCameraClassifier:
             self._model = None
             return False
 
-    def _predict(self, video_path: str) -> Optional[Dict[str, Any]]:
+    def _predict(self, video_path: str) -> dict[str, Any] | None:
         """LoRA 前向 (手动归一化 + 逐类阈值)。"""
         if not self._ensure_model():
             return None
@@ -209,7 +210,7 @@ class AnimeCameraClassifier:
                 "confidence": float(probs[pred]),
                 "probs": {self.labels[i]: float(probs[i]) for i in range(len(self.labels))}}
 
-    def classify_video(self, video_path: str) -> Dict[str, Any]:
+    def classify_video(self, video_path: str) -> dict[str, Any]:
         """完整分类: LoRA (fine 直接输出 / coarse 加光流细分) + 降级链。"""
         if not Path(video_path).exists():
             # 快速失败: 不存在的文件不得触发模型加载

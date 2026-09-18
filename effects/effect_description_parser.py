@@ -1,6 +1,6 @@
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
 import re
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -8,14 +8,14 @@ class VocabRef:
     id: str
     name: str
     matchedKeyword: str
-    suggestedEffect: Optional[str] = None
+    suggestedEffect: str | None = None
     confidence: float = 1.0
 
 
 @dataclass
 class ColorRef:
     keyword: str
-    rgb: List[float]
+    rgb: list[float]
     temperature: str = "neutral"
 
 
@@ -33,12 +33,12 @@ class TemporalRef:
 
 @dataclass
 class EffectDescription:
-    effectKeywords: List[VocabRef] = field(default_factory=list)
-    styleKeywords: List[VocabRef] = field(default_factory=list)
-    directionKeywords: List[str] = field(default_factory=list)
-    intensityKeywords: List[IntensityRef] = field(default_factory=list)
-    colorKeywords: List[ColorRef] = field(default_factory=list)
-    temporalKeywords: List[TemporalRef] = field(default_factory=list)
+    effectKeywords: list[VocabRef] = field(default_factory=list)
+    styleKeywords: list[VocabRef] = field(default_factory=list)
+    directionKeywords: list[str] = field(default_factory=list)
+    intensityKeywords: list[IntensityRef] = field(default_factory=list)
+    colorKeywords: list[ColorRef] = field(default_factory=list)
+    temporalKeywords: list[TemporalRef] = field(default_factory=list)
 
 
 VOCAB_MAP = {
@@ -161,7 +161,7 @@ TEMPORAL_MAP = {
 }
 
 
-VOCAB_NAMES: Dict[str, str] = {
+VOCAB_NAMES: dict[str, str] = {
     "VT-001": "均匀模糊扩散",
     "VT-002": "快速模糊",
     "VT-003": "分形噪波",
@@ -188,7 +188,7 @@ VOCAB_NAMES: Dict[str, str] = {
 }
 
 
-VOCAB_EFFECTS: Dict[str, str] = {
+VOCAB_EFFECTS: dict[str, str] = {
     "VT-001": "ADBE Gaussian Blur 2",
     "VT-002": "ADBE Fast Blur",
     "VT-003": "ADBE Fractal Noise",
@@ -210,7 +210,7 @@ VOCAB_EFFECTS: Dict[str, str] = {
 }
 
 
-STYLE_RECIPES: Dict[str, Dict[str, Any]] = {
+STYLE_RECIPES: dict[str, dict[str, Any]] = {
     "赛博朋克": {
         "effectIds": ["VT-303", "VT-101", "VT-504"],
         "description": "青品色调 + 边缘发光 + 镜头畸变",
@@ -254,7 +254,7 @@ STYLE_RECIPES: Dict[str, Dict[str, Any]] = {
 }
 
 
-def _build_scan_index(mapping: Dict[str, Any]):
+def _build_scan_index(mapping: dict[str, Any]):
     """构建关键词扫描索引：预编译 alternation regex + lower 查找表。
 
     用 lookahead 断言使 finditer 能匹配重叠子串，保持与原 `in` 检查一致的行为
@@ -275,7 +275,7 @@ _INTENSITY_SCAN_RE, _INTENSITY_LOOKUP = _build_scan_index(INTENSITY_MAP)
 _TEMPORAL_SCAN_RE, _TEMPORAL_LOOKUP = _build_scan_index(TEMPORAL_MAP)
 
 
-def scan_vocab(input_text: str) -> List[VocabRef]:
+def scan_vocab(input_text: str) -> list[VocabRef]:
     refs = []
     seen = set()
     for m in _VOCAB_SCAN_RE.finditer(input_text):
@@ -295,7 +295,7 @@ def scan_vocab(input_text: str) -> List[VocabRef]:
     return refs
 
 
-def scan_colors(input_text: str) -> List[ColorRef]:
+def scan_colors(input_text: str) -> list[ColorRef]:
     refs = []
     seen = set()
     for m in _COLOR_SCAN_RE.finditer(input_text):
@@ -312,7 +312,7 @@ def scan_colors(input_text: str) -> List[ColorRef]:
     return refs
 
 
-def scan_intensity(input_text: str) -> List[IntensityRef]:
+def scan_intensity(input_text: str) -> list[IntensityRef]:
     refs = []
     seen = set()
     for m in _INTENSITY_SCAN_RE.finditer(input_text):
@@ -325,7 +325,7 @@ def scan_intensity(input_text: str) -> List[IntensityRef]:
     return refs
 
 
-def scan_temporal(input_text: str) -> List[TemporalRef]:
+def scan_temporal(input_text: str) -> list[TemporalRef]:
     refs = []
     seen = set()
     for m in _TEMPORAL_SCAN_RE.finditer(input_text):
@@ -339,7 +339,7 @@ def scan_temporal(input_text: str) -> List[TemporalRef]:
 
 
 class EffectDescriptionParser:
-    def parse(self, input_text: str, intent_type: Optional[str] = None) -> EffectDescription:
+    def parse(self, input_text: str, intent_type: str | None = None) -> EffectDescription:
         result = EffectDescription()
 
         if not input_text or not input_text.strip():
@@ -405,7 +405,7 @@ class EffectDescriptionParser:
 
         return result
 
-    def _extract_directions(self, input_text: str) -> List[str]:
+    def _extract_directions(self, input_text: str) -> list[str]:
         directions = []
         dir_map = [
             {"keyword": "向上", "value": "up"},
@@ -428,7 +428,7 @@ class EffectDescriptionParser:
                 directions.append(d["value"])
         return directions
 
-    def _extract_style_name(self, input_text: str) -> Optional[str]:
+    def _extract_style_name(self, input_text: str) -> str | None:
         for style in STYLE_RECIPES.keys():
             if style.lower() in input_text.lower():
                 return style
@@ -439,15 +439,15 @@ class EffectDescriptionParser:
 effect_description_parser = EffectDescriptionParser()
 
 
-def get_style_recipe(style_name: str) -> Optional[Dict[str, Any]]:
+def get_style_recipe(style_name: str) -> dict[str, Any] | None:
     return STYLE_RECIPES.get(style_name.lower())
 
 
-def get_all_styles() -> List[str]:
+def get_all_styles() -> list[str]:
     return list(STYLE_RECIPES.keys())
 
 
-def get_vocab_stats() -> Dict[str, Any]:
+def get_vocab_stats() -> dict[str, Any]:
     by_category = {}
     for vid in VOCAB_NAMES.keys():
         if vid.startswith("VT-"):

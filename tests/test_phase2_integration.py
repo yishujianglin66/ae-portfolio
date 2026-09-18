@@ -6,7 +6,7 @@ Phase 2 集成验证测试
 import os
 import sys
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -17,10 +17,9 @@ if PROJECT_ROOT not in sys.path:
 from ae_agent_pipeline import (
     AEAgentPipeline,
     PerceptionResult,
-    UnderstandingResult,
     PlanningResult,
+    UnderstandingResult,
 )
-
 
 # ============================================================
 # 夹具

@@ -2,10 +2,11 @@
 # 多通道EXR导出模板 - 生成包含多个遮罩通道的EXR序列
 # 适用于为下游合成软件（Nuke/AE）提供完整遮罩数据
 
-from fx import *
-import os
 import json
+import os
 import time
+
+from fx import *
 
 
 def create_pipeline(
@@ -218,14 +219,14 @@ def create_pipeline(
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
 
-    print(f"\n=== 管线创建完成 ===")
+    print("\n=== 管线创建完成 ===")
     print(f"源素材: {source_path}")
     print(f"输出路径: {output_path}")
     print(f"通道数: {len(channels) + 1} (含RGBA)")
     print(f"色彩空间: {color_space}")
     print(f"压缩: {compression}")
     print(f"清单文件: {manifest_path}")
-    print(f"\n下一步: 手动绘制各通道Roto形状，然后执行渲染")
+    print("\n下一步: 手动绘制各通道Roto形状，然后执行渲染")
 
     return proj, session
 

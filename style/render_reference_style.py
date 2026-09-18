@@ -16,8 +16,8 @@
 import importlib.util
 import json
 import subprocess
-import time
 import tempfile
+import time
 from pathlib import Path
 
 project_root = Path(__file__).parent

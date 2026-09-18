@@ -1,8 +1,9 @@
 # Sequence Repair Template
 # 序列修复模板 - 适用于长序列多帧修复
 
-from fx import *
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=24.0):

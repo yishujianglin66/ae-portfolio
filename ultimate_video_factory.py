@@ -26,12 +26,12 @@ Ultimate Video Factory - 一句话出视频终极系统
         style="cinematic"
     )
 """
+import json
 import os
 import sys
-import json
 import time
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
@@ -76,13 +76,13 @@ class UltimateVideoFactory:
         return self._audio_engine
 
     def produce(self, prompt: str,
-                material_urls: List[str] = None,
-                material_paths: List[str] = None,
+                material_urls: list[str] = None,
+                material_paths: list[str] = None,
                 reference_video: str = None,
                 audio_path: str = None,
                 style: str = "cinematic",
                 auto_ae: bool = True,
-                resolution: str = "1080x1920") -> Dict[str, Any]:
+                resolution: str = "1080x1920") -> dict[str, Any]:
         """
         一句话出视频 - 完整流程。
 
@@ -296,7 +296,7 @@ class UltimateVideoFactory:
 
         return report
 
-    def _parse_intent(self, prompt: str, resolution: str) -> Dict[str, Any]:
+    def _parse_intent(self, prompt: str, resolution: str) -> dict[str, Any]:
         """解析用户意图"""
         intent = {"duration": 30, "orientation": "vertical", "mood": "epic"}
 
@@ -326,9 +326,9 @@ class UltimateVideoFactory:
 
         return intent
 
-    def _collect_materials(self, urls: List[str] = None,
-                           paths: List[str] = None,
-                           intent: Dict = None) -> List[str]:
+    def _collect_materials(self, urls: list[str] = None,
+                           paths: list[str] = None,
+                           intent: dict = None) -> list[str]:
         """搜集素材"""
         files = []
         collector = self.director.collector
@@ -348,7 +348,7 @@ class UltimateVideoFactory:
 
         return files
 
-    def _analyze_materials(self, material_files: List[str]) -> List[Dict]:
+    def _analyze_materials(self, material_files: list[str]) -> list[dict]:
         """视觉分析"""
         analyses = []
         for mf in material_files[:5]:
@@ -360,7 +360,7 @@ class UltimateVideoFactory:
                 log(f"  分析失败: {e}", "ERROR")
         return analyses
 
-    def _generate_beat_sync_jsx(self, audio_features: Dict, script: Dict) -> str:
+    def _generate_beat_sync_jsx(self, audio_features: dict, script: dict) -> str:
         """生成节拍同步 JSX"""
         beats = audio_features.get("beats", [])
         energy_vals = audio_features.get("energy_values", [])
@@ -420,5 +420,5 @@ if __name__ == "__main__":
         auto_ae=False,
     )
 
-    print(f"\n最终报告:")
+    print("\n最终报告:")
     print(json.dumps(result.get("phases", {}), ensure_ascii=False, indent=2)[:800])

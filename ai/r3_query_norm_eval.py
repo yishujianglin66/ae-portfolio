@@ -136,7 +136,9 @@ def run_norm(queries: list):
     """Phase 1: VLM 4bit 文本-only 归一化（断点续传缓存）。"""
     import torch
     from transformers import (
-        AutoModelForImageTextToText, AutoProcessor, BitsAndBytesConfig,
+        AutoModelForImageTextToText,
+        AutoProcessor,
+        BitsAndBytesConfig,
     )
 
     cache = load_norm_cache()
@@ -380,7 +382,9 @@ def run_retrieval(norm: dict):
 
     from ai.r3_benchmark_v2 import HELD_OUT_QUERIES
     from ai.t11_hybrid_search import (
-        TEST_QUERIES, build_semantic_index, enrich_with_pseudolabels,
+        TEST_QUERIES,
+        build_semantic_index,
+        enrich_with_pseudolabels,
         semantic_rerank_search,
     )
 
@@ -466,7 +470,7 @@ def run_retrieval(norm: dict):
         _log(f"  [{qset_name}] n={s['n']}  IP识别率={s['ip_identification_acc']}"
              f"  R@10={s['recall@10']}  nDCG={s['nDCG@10']}  MRR={s['MRR@10']}"
              f"  路由={s['route_dist']}")
-    _log(f"  基线对照: heldout D臂 bag R@10=0.394 / legacy A臂 R@10=1.000")
+    _log("  基线对照: heldout D臂 bag R@10=0.394 / legacy A臂 R@10=1.000")
 
     EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
     report = {

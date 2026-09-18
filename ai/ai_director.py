@@ -14,14 +14,14 @@ Phase 5: AE 执行 → 自动渲染输出成品
     director = AIDirector()
     result = director.produce("利威尔高燃混剪, 30秒, 竖屏")
 """
+import importlib
+import json
 import os
 import sys
-import json
 import time
 import traceback
-import importlib
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
@@ -31,7 +31,7 @@ OUTPUT_DIR = PROJECT_ROOT / "output_director"
 ENV_FILE = PROJECT_ROOT / ".env.doubao"
 
 # ── 加载 API 配置 ──
-def _load_env() -> Dict[str, str]:
+def _load_env() -> dict[str, str]:
     env = {}
     if ENV_FILE.exists():
         with open(ENV_FILE, "r", encoding="utf-8") as f:
@@ -71,7 +71,7 @@ class MaterialCollector:
         except Exception as e:
             log(f"MediaFetcher 不可用: {e}", "WARN")
 
-    def collect_from_urls(self, urls: List[str]) -> List[Dict]:
+    def collect_from_urls(self, urls: list[str]) -> list[dict]:
         """从给定 URL 列表下载素材"""
         self._init_fetcher()
         results = []
@@ -86,7 +86,7 @@ class MaterialCollector:
                 log(f"  下载失败: {e}", "ERROR")
         return results
 
-    def collect_from_local(self, paths: List[str]) -> List[Dict]:
+    def collect_from_local(self, paths: list[str]) -> list[dict]:
         """使用本地已有素材"""
         results = []
         for p in paths:
@@ -104,7 +104,7 @@ class MaterialCollector:
                 log(f"  文件不存在: {p}", "WARN")
         return results
 
-    def scan_local_library(self, directory: str = None) -> List[Dict]:
+    def scan_local_library(self, directory: str = None) -> list[dict]:
         """扫描本地素材库"""
         scan_dir = Path(directory) if directory else Path(r"D:\AE-Work\output")
         if not scan_dir.exists():
@@ -127,7 +127,7 @@ class MaterialCollector:
 class VisualAnalyzer:
     """分析视频素材的视觉特征"""
 
-    def analyze(self, video_path: str) -> Dict[str, Any]:
+    def analyze(self, video_path: str) -> dict[str, Any]:
         """用 OpenCV 分析视频视觉特征"""
         import cv2
         import numpy as np
@@ -227,7 +227,7 @@ class VisualAnalyzer:
             return "medium"
         return "low"
 
-    def _avg_color(self, colors: List[Dict]) -> Dict:
+    def _avg_color(self, colors: list[dict]) -> dict:
         if not colors:
             return {"r": 128, "g": 128, "b": 128}
         n = len(colors)
@@ -258,8 +258,8 @@ class ScriptGenerator:
                          ENV.get("ARK_MODEL_FLASH", "deepseek-v4-flash-260425")))
 
     def generate_script(self, user_prompt: str,
-                        material_analyses: List[Dict],
-                        style: str = "cinematic") -> Dict[str, Any]:
+                        material_analyses: list[dict],
+                        style: str = "cinematic") -> dict[str, Any]:
         """生成完整剪辑剧本"""
         log(f"生成剧本: 风格={style}")
 
@@ -345,7 +345,7 @@ class ScriptGenerator:
             log("  LLM 调用失败，使用规则生成 fallback 剧本", "WARN")
             return self._fallback_script(user_prompt, material_analyses, style)
 
-    def _call_llm(self, system: str, user: str) -> Optional[Dict]:
+    def _call_llm(self, system: str, user: str) -> dict | None:
         """调用 LLM API (优先 llm_gateway 网关, DuckMiss/ARK 直连兜底)"""
         # 优先走统一网关（收编直连调用，由网关负责路由/降级/脱敏）
         result = self._call_via_gateway(system, user)
@@ -369,7 +369,7 @@ class ScriptGenerator:
         log("  所有 LLM API 不可用，使用 fallback", "WARN")
         return None
     
-    def _call_via_gateway(self, system: str, user: str) -> Optional[Dict]:
+    def _call_via_gateway(self, system: str, user: str) -> dict | None:
         """通过 core/llm_gateway 统一网关调用 LLM
 
         异步网关在同步上下文中通过 asyncio.run 桥接；若 import 失败或已有
@@ -377,6 +377,7 @@ class ScriptGenerator:
         """
         try:
             import asyncio
+
             from core.llm_gateway import llm_gateway
         except Exception as e:
             log(f"  llm_gateway 不可用，降级直连: {e}", "DEBUG")
@@ -423,7 +424,7 @@ class ScriptGenerator:
         return parsed
 
     @staticmethod
-    def _extract_json(content: str) -> Optional[Dict]:
+    def _extract_json(content: str) -> dict | None:
         """从 LLM 返回文本中提取 JSON (多级降级)"""
         if not content or not content.strip():
             return None
@@ -456,7 +457,7 @@ class ScriptGenerator:
                 pass
         return None
 
-    def _call_ark(self, system: str, user: str) -> Optional[Dict]:
+    def _call_ark(self, system: str, user: str) -> dict | None:
         """火山方舟 ARK API"""
         try:
             import urllib.request
@@ -489,7 +490,7 @@ class ScriptGenerator:
             log(f"  ARK API 异常: {e}", "WARN")
             return None
     
-    def _call_duckmiss(self, system: str, user: str, key: str = None) -> Optional[Dict]:
+    def _call_duckmiss(self, system: str, user: str, key: str = None) -> dict | None:
         """DuckMiss API (Claude)"""
         try:
             import urllib.request
@@ -546,8 +547,8 @@ class ScriptGenerator:
             pass
         return f"参考风格: {style}"
 
-    def _fallback_script(self, prompt: str, analyses: List[Dict],
-                         style: str) -> Dict[str, Any]:
+    def _fallback_script(self, prompt: str, analyses: list[dict],
+                         style: str) -> dict[str, Any]:
         """规则 fallback 剧本 — V2: NarrativeArcPlanner 能量包络版
 
         替代均分五等份: 段落时长比按能量包络(12/24/34/12/18)，
@@ -565,8 +566,8 @@ class ScriptGenerator:
                 w, h = 1080, 1920  # 竖屏
 
         # 叙事弧线规划 (风格参数化)
+        from core.camera_language import CAMERA_IDS, CameraLanguageLibrary
         from core.narrative_arc import NarrativeArcPlanner, StyleProfile
-        from core.camera_language import CameraLanguageLibrary, CAMERA_IDS
         try:
             planner_profile = StyleProfile().to_planner_profile(style or "")
         except Exception:
@@ -582,7 +583,7 @@ class ScriptGenerator:
         text_map = {"intro": "VINLAND SAGA", "build": "战斗开始",
                     "drop": "全力爆发", "break": "寂静时刻",
                     "outro": "传说不灭", "breath_break": ""}
-        used_cams: List[str] = []
+        used_cams: list[str] = []
         segments = []
         for i, seg in enumerate(arc_segments):
             st = seg["type"]
@@ -658,8 +659,8 @@ class ScriptGenerator:
 class ScriptToJSXTranslator:
     """将 AI 剧本翻译为 AE 可执行的 JSX 脚本"""
 
-    def translate(self, script: Dict[str, Any],
-                  material_paths: List[str]) -> str:
+    def translate(self, script: dict[str, Any],
+                  material_paths: list[str]) -> str:
         """生成完整 JSX 脚本"""
         log("翻译剧本 → JSX...")
 
@@ -690,18 +691,18 @@ class ScriptToJSXTranslator:
         for i, mp in enumerate(material_paths):
             safe_path = mp.replace("\\", "/")
             jsx_lines.append(f'var mat_{i+1} = null;')
-            jsx_lines.append(f'try {{')
+            jsx_lines.append('try {')
             jsx_lines.append(f'  var io_{i+1} = new ImportOptions(File("{safe_path}"));')
             jsx_lines.append(f'  mat_{i+1} = app.project.importFile(io_{i+1});')
             jsx_lines.append(f'  mat_{i+1}.name = "Material_{i+1}";')
-            jsx_lines.append(f'}} catch(e) {{ }}')
+            jsx_lines.append('} catch(e) { }')
         jsx_lines.append("")
 
         # 3. 按段落创建图层和效果
         jsx_lines.append("// 3. 段落编排")
         # V2: 12运镜库 (8基础带Ease + 4真实3D摄像机null链) — 延迟导入避免硬依赖
         try:
-            from core.camera_language import CameraLanguageLibrary, CAMERA_IDS_3D
+            from core.camera_language import CAMERA_IDS_3D, CameraLanguageLibrary
             camlib = CameraLanguageLibrary()
         except Exception:
             camlib = None
@@ -783,7 +784,7 @@ class ScriptToJSXTranslator:
             jsx_lines.append(f'  {op_prop}.setValueAtTime({seg_start + 0.3}, 100);')
             jsx_lines.append(f'  {op_prop}.setValueAtTime({seg_end - 0.3}, 100);')
             jsx_lines.append(f'  {op_prop}.setValueAtTime({seg_end}, 0);')
-            jsx_lines.append(f'}}')
+            jsx_lines.append('}')
 
             # 文字叠加
             if text_ov and text_ov.get("text"):
@@ -798,11 +799,11 @@ class ScriptToJSXTranslator:
 
                 # 位置映射
                 pos_map = {
-                    "top": f"[W/2, H*0.15, 0]",
-                    "center": f"[W/2, H/2, 0]",
-                    "bottom": f"[W/2, H*0.85, 0]",
+                    "top": "[W/2, H*0.15, 0]",
+                    "center": "[W/2, H/2, 0]",
+                    "bottom": "[W/2, H*0.85, 0]",
                 }
-                pos_jsx = pos_map.get(position, f"[W/2, H/2, 0]")
+                pos_jsx = pos_map.get(position, "[W/2, H/2, 0]")
 
                 jsx_lines.append(f'// Text: {txt}')
                 jsx_lines.append(f'var txt{seg_i} = mainComp.layers.addText("{txt}");')
@@ -853,16 +854,16 @@ class ScriptToJSXTranslator:
                     ae_fx = self._map_effect_name(fx_name)
                     if ae_fx:
                         jsx_lines.append(f'  try {{ seg{seg_i}_layer.property("ADBE Effect Parade").addProperty("{ae_fx}"); }} catch(e) {{}}')
-                jsx_lines.append(f'}}')
+                jsx_lines.append('}')
 
             jsx_lines.append("")
 
         # 4. 调色调整层
         jsx_lines.append("// 4. 调色调整层")
-        jsx_lines.append(f'var colorAdj = mainComp.layers.addSolid([0.5,0.5,0.5], "Color_Grade", W, H, 1, TOTAL_DUR);')
-        jsx_lines.append(f'colorAdj.adjustmentLayer = true;')
-        jsx_lines.append(f'colorAdj.moveToEnd();')
-        jsx_lines.append(f'var lumetri = colorAdj.property("ADBE Effect Parade").addProperty("ADBE Lumetri");')
+        jsx_lines.append('var colorAdj = mainComp.layers.addSolid([0.5,0.5,0.5], "Color_Grade", W, H, 1, TOTAL_DUR);')
+        jsx_lines.append('colorAdj.adjustmentLayer = true;')
+        jsx_lines.append('colorAdj.moveToEnd();')
+        jsx_lines.append('var lumetri = colorAdj.property("ADBE Effect Parade").addProperty("ADBE Lumetri");')
         if color_grade.get("temperature"):
             jsx_lines.append(f'try {{ lumetri.property("Temperature").setValue({color_grade["temperature"]}); }} catch(e) {{}}')
         if color_grade.get("contrast"):
@@ -873,12 +874,12 @@ class ScriptToJSXTranslator:
 
         # 5. 摄像机 (3D)
         jsx_lines.append("// 5. 摄像机")
-        jsx_lines.append(f'var cam = mainComp.layers.addCamera("Director_Cam", [W/2, H/2]);')
-        jsx_lines.append(f'var camOpt = cam.property("ADBE Camera Options Group");')
-        jsx_lines.append(f'try {{ camOpt.property("ADBE Camera Zoom").setValue(W); }} catch(e) {{}}')
-        jsx_lines.append(f'try {{ camOpt.property("ADBE Camera Depth of Field").setValue(1); }} catch(e) {{}}')
+        jsx_lines.append('var cam = mainComp.layers.addCamera("Director_Cam", [W/2, H/2]);')
+        jsx_lines.append('var camOpt = cam.property("ADBE Camera Options Group");')
+        jsx_lines.append('try { camOpt.property("ADBE Camera Zoom").setValue(W); } catch(e) {}')
+        jsx_lines.append('try { camOpt.property("ADBE Camera Depth of Field").setValue(1); } catch(e) {}')
         # 摄像机缓慢推进
-        cam_pos = f'cam.property("ADBE Transform Group").property("ADBE Position")'
+        cam_pos = 'cam.property("ADBE Transform Group").property("ADBE Position")'
         jsx_lines.append(f'{cam_pos}.setValueAtTime(0, [W/2, H/2, -500]);')
         jsx_lines.append(f'{cam_pos}.setValueAtTime(TOTAL_DUR, [W/2, H/2, -300]);')
         jsx_lines.append("")
@@ -887,17 +888,17 @@ class ScriptToJSXTranslator:
         jsx_lines.append("// 6. 渲染输出")
         out_path = str(OUTPUT_DIR).replace("\\", "/")
         jsx_lines.append(f'var outDir = new Folder("{out_path}");')
-        jsx_lines.append(f'if (!outDir.exists) outDir.create();')
-        jsx_lines.append(f'mainComp.renderSettings = {{')
-        jsx_lines.append(f'  "outputModule": "Lossless",')
-        jsx_lines.append(f'}};')
+        jsx_lines.append('if (!outDir.exists) outDir.create();')
+        jsx_lines.append('mainComp.renderSettings = {')
+        jsx_lines.append('  "outputModule": "Lossless",')
+        jsx_lines.append('};')
         jsx_lines.append("")
-        jsx_lines.append(f'var rqItem = app.project.renderQueue.items.add(mainComp);')
-        jsx_lines.append(f'var om = rqItem.outputModule(1);')
+        jsx_lines.append('var rqItem = app.project.renderQueue.items.add(mainComp);')
+        jsx_lines.append('var om = rqItem.outputModule(1);')
         jsx_lines.append(f'om.file = new File("{out_path}/director_output.mp4");')
-        jsx_lines.append(f'app.project.renderQueue.render();')
+        jsx_lines.append('app.project.renderQueue.render();')
         jsx_lines.append("")
-        jsx_lines.append(f'JSON.stringify({{success: true, comp: mainComp.name, layers: mainComp.numLayers}});')
+        jsx_lines.append('JSON.stringify({success: true, comp: mainComp.name, layers: mainComp.numLayers});')
 
         jsx_code = "\n".join(jsx_lines)
         log(f"  JSX 生成完成: {len(jsx_lines)} 行, {len(jsx_code)} 字符")
@@ -906,7 +907,7 @@ class ScriptToJSXTranslator:
     def _map_effect_name(self, name: str) -> str:
         """效果名映射: 显示名 → AE matchName（使用 effect_registry + 知识库）"""
         try:
-            from effects.effect_registry import get_effect_matchname, KEYWORD_TO_EFFECT_MAP
+            from effects.effect_registry import KEYWORD_TO_EFFECT_MAP, get_effect_matchname
             ae_fx = get_effect_matchname(name)
             if ae_fx:
                 return ae_fx
@@ -982,7 +983,7 @@ class AEExecutor:
         self.client = None
         return True
 
-    def execute_jsx(self, jsx_code: str) -> Dict:
+    def execute_jsx(self, jsx_code: str) -> dict:
         """执行 JSX 脚本"""
         if self.client:
             try:
@@ -993,7 +994,7 @@ class AEExecutor:
         else:
             return self._execute_via_filesystem(jsx_code)
 
-    def _execute_via_filesystem(self, jsx_code: str) -> Dict:
+    def _execute_via_filesystem(self, jsx_code: str) -> dict:
         """通过文件系统执行 (ae_command.json → ae_result.json)"""
         cmd_file = PROJECT_ROOT / "ae_command.json"
         res_file = PROJECT_ROOT / "ae_result.json"
@@ -1067,15 +1068,15 @@ class AIDirector:
         return self._stage3d
 
     def produce(self, user_prompt: str,
-                material_urls: List[str] = None,
-                material_paths: List[str] = None,
+                material_urls: list[str] = None,
+                material_paths: list[str] = None,
                 style: str = "cinematic",
                 auto_launch_ae: bool = True,
                 enable_3d_stage: bool = True,
                 enable_style_migration: bool = True,
                 reference_video: str = None,
                 audio_path: str = None,
-                enable_audio_edit: bool = True) -> Dict[str, Any]:
+                enable_audio_edit: bool = True) -> dict[str, Any]:
         """
         完整生产流程。
 

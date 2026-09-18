@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """调试增强版JSX - 逐步测试"""
-import json, time, sys
-from pathlib import Path
+import json
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 

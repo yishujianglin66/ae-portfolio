@@ -22,7 +22,7 @@ class SceneDetectionService:
         except ImportError:
             logger.warning("PySceneDetect not available, falling back to basic detection")
 
-    async def detect_scenes(self, video_path: str | Path, threshold: float = 30.0, min_scene_len: int = 15) -> Dict[str, Any]:
+    async def detect_scenes(self, video_path: str | Path, threshold: float = 30.0, min_scene_len: int = 15) -> dict[str, Any]:
         """Detect scenes in video using PySceneDetect."""
         video_path = Path(video_path)
         if not video_path.exists():
@@ -67,7 +67,7 @@ class SceneDetectionService:
             "min_scene_len": min_scene_len,
         }
 
-    async def _basic_detection(self, video_path: str | Path) -> Dict[str, Any]:
+    async def _basic_detection(self, video_path: str | Path) -> dict[str, Any]:
         """Basic scene detection using OpenCV."""
         import cv2
 
@@ -125,7 +125,7 @@ class SceneDetectionService:
             "fps": round(fps, 2),
         }
 
-    async def extract_keyframes(self, video_path: str | Path, scene_threshold: float = 30.0) -> Dict[str, Any]:
+    async def extract_keyframes(self, video_path: str | Path, scene_threshold: float = 30.0) -> dict[str, Any]:
         """Extract keyframes from video scenes."""
         video_path = Path(video_path)
         if not video_path.exists():

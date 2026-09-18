@@ -21,16 +21,17 @@ AE Bridge 可观测性测试
 from __future__ import annotations
 
 import asyncio
-import time
-import uuid
-from typing import Any, Dict, List, Optional
-from unittest.mock import Mock, patch, MagicMock
-
-import pytest
 
 # 确保项目根目录在 Python 路径中
 import sys
+import time
+import uuid
 from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
+
 PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -459,8 +460,9 @@ class TestBridgeClientTracing:
 
     def test_bridge_command_tracing(self, test_config):
         """测试 Bridge 命令追踪。"""
-        from ae.bridge_protocol import BridgeClient, BridgeServer
         import shutil
+
+        from ae.bridge_protocol import BridgeClient, BridgeServer
         
         bridge_dir = test_config.output_dir / "test_bridge_tracing"
         if bridge_dir.exists():
@@ -507,7 +509,7 @@ class TestUnifiedAEClientTracing:
 
     def test_unified_client_tracing(self):
         """测试 UnifiedAEClient 追踪集成。"""
-        from ae.unified_ae_client import UnifiedAEClient, AEOperation, AEChannel
+        from ae.unified_ae_client import AEChannel, AEOperation, UnifiedAEClient
         from core.ae_tracer import ae_tracer
         
         puppet_mock = Mock()
@@ -529,7 +531,7 @@ class TestUnifiedAEClientTracing:
 
     def test_unified_client_tracing_fallback(self):
         """测试 UnifiedAEClient 降级追踪。"""
-        from ae.unified_ae_client import UnifiedAEClient, AEChannel, AllChannelsFailedError
+        from ae.unified_ae_client import AEChannel, AllChannelsFailedError, UnifiedAEClient
         from core.ae_tracer import ae_tracer
         
         puppet_mock = Mock()
@@ -673,7 +675,7 @@ class TestTraceIdPropagation:
 
     def test_trace_id_setter(self):
         """测试设置全局 trace_id。"""
-        from core.ae_tracer import set_trace_id, get_trace_id
+        from core.ae_tracer import get_trace_id, set_trace_id
         
         new_trace_id = "custom_trace_12345"
         set_trace_id(new_trace_id)
@@ -690,7 +692,7 @@ class TestConvenienceFunctions:
 
     def test_start_end_ae_operation(self):
         """测试便捷函数 start_ae_operation / end_ae_operation。"""
-        from core.ae_tracer import start_ae_operation, end_ae_operation, ae_tracer
+        from core.ae_tracer import ae_tracer, end_ae_operation, start_ae_operation
         
         span = start_ae_operation("test_op", channel="mcp")
         

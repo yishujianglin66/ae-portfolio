@@ -63,10 +63,10 @@ from __future__ import annotations
 
 import json
 import sys
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 sys.stdout.reconfigure(encoding="utf-8")
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -79,11 +79,11 @@ class SpeedSegment:
     end: float = 1.0
     speed: float = 1.0      # 速度倍率
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return asdict(self)
 
     @staticmethod
-    def from_dict(d: Dict) -> "SpeedSegment":
+    def from_dict(d: dict) -> "SpeedSegment":
         return SpeedSegment(**d)
 
 
@@ -93,11 +93,11 @@ class Transition:
     type: str = "cut"       # cut|dissolve|wipe
     duration: float = 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return asdict(self)
 
     @staticmethod
-    def from_dict(d: Dict) -> "Transition":
+    def from_dict(d: dict) -> "Transition":
         return Transition(**d)
 
 
@@ -111,26 +111,26 @@ class TextOverlay:
     start: float = 0.0               # 相对镜头入点(秒)
     duration: float = 2.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return asdict(self)
 
     @staticmethod
-    def from_dict(d: Dict) -> "TextOverlay":
+    def from_dict(d: dict) -> "TextOverlay":
         return TextOverlay(**d)
 
 
 @dataclass
 class CDL:
     """ASC CDL调色参数"""
-    slope: List[float] = field(default_factory=lambda: [1.0, 1.0, 1.0])
-    offset: List[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
-    power: List[float] = field(default_factory=lambda: [1.0, 1.0, 1.0])
+    slope: list[float] = field(default_factory=lambda: [1.0, 1.0, 1.0])
+    offset: list[float] = field(default_factory=lambda: [0.0, 0.0, 0.0])
+    power: list[float] = field(default_factory=lambda: [1.0, 1.0, 1.0])
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return asdict(self)
 
     @staticmethod
-    def from_dict(d: Dict) -> "CDL":
+    def from_dict(d: dict) -> "CDL":
         return CDL(**d)
 
 
@@ -142,19 +142,19 @@ class ShotUnit:
     in_tc: float = 0.0
     out_tc: float = 0.0
     duration: float = 0.0
-    speed_curve: List[SpeedSegment] = field(default_factory=list)
-    transition: Optional[Transition] = None
+    speed_curve: list[SpeedSegment] = field(default_factory=list)
+    transition: Transition | None = None
     ip: str = ""
-    characters: List[str] = field(default_factory=list)
+    characters: list[str] = field(default_factory=list)
     mood: str = "neutral"
     scene_type: str = "unknown"
-    text_overlay: Optional[TextOverlay] = None
-    cdl: Optional[CDL] = None
+    text_overlay: TextOverlay | None = None
+    cdl: CDL | None = None
     lut: str = ""
     aesthetic_score: float = 0.0
     rhythm_score: float = 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         d = {
             "shot_id": self.shot_id,
             "source_video": self.source_video,
@@ -180,7 +180,7 @@ class ShotUnit:
         return d
 
     @staticmethod
-    def from_dict(d: Dict) -> "ShotUnit":
+    def from_dict(d: dict) -> "ShotUnit":
         shot = ShotUnit(
             shot_id=d.get("shot_id", 0),
             source_video=d.get("source_video", ""),
@@ -216,11 +216,11 @@ class ShotScriptMetadata:
     created: str = ""
     director_version: str = "1.0"
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return asdict(self)
 
     @staticmethod
-    def from_dict(d: Dict) -> "ShotScriptMetadata":
+    def from_dict(d: dict) -> "ShotScriptMetadata":
         return ShotScriptMetadata(**d)
 
 
@@ -231,11 +231,11 @@ class GlobalSettings:
     fps: int = 30
     color_space: str = "Rec.709"
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return asdict(self)
 
     @staticmethod
-    def from_dict(d: Dict) -> "GlobalSettings":
+    def from_dict(d: dict) -> "GlobalSettings":
         return GlobalSettings(**d)
 
 
@@ -243,10 +243,10 @@ class GlobalSettings:
 class ShotScript:
     """镜头脚本 — 导演系统输出，执行器输入"""
     metadata: ShotScriptMetadata = field(default_factory=ShotScriptMetadata)
-    shots: List[ShotUnit] = field(default_factory=list)
+    shots: list[ShotUnit] = field(default_factory=list)
     global_settings: GlobalSettings = field(default_factory=GlobalSettings)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "version": "1.0",
             "metadata": self.metadata.to_dict(),
@@ -261,7 +261,7 @@ class ShotScript:
         path.write_text(self.to_json(), encoding="utf-8")
 
     @staticmethod
-    def from_dict(d: Dict) -> "ShotScript":
+    def from_dict(d: dict) -> "ShotScript":
         script = ShotScript(
             metadata=ShotScriptMetadata.from_dict(d.get("metadata", {})),
             global_settings=GlobalSettings.from_dict(d.get("global_settings", {})),
@@ -276,7 +276,7 @@ class ShotScript:
 
     # ---------------- 校验 ----------------
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """校验ShotScript完整性，返回错误列表(空=通过)"""
         errors = []
         if not self.shots:
@@ -305,7 +305,7 @@ class ShotScript:
 
     # ---------------- 统计 ----------------
 
-    def summary(self) -> Dict:
+    def summary(self) -> dict:
         """生成ShotScript统计摘要"""
         ips = {}
         moods = {}

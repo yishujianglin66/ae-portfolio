@@ -1,5 +1,5 @@
-﻿import shutil
-import os
+﻿import os
+import shutil
 
 panelsDir = r"C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\Scripts\ScriptUI Panels"
 
@@ -7,7 +7,7 @@ panelsDir = r"C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\Scri
 oldFile = os.path.join(panelsDir, "ae_mcp_auto_listener.jsx")
 if os.path.exists(oldFile):
     os.remove(oldFile)
-    print(f"已删除旧脚本: ae_mcp_auto_listener.jsx")
+    print("已删除旧脚本: ae_mcp_auto_listener.jsx")
 
 # 部署修复后的 v26
 src = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\ae_mcp_bridge_v26.jsx"

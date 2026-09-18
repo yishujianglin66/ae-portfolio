@@ -3,9 +3,11 @@
 用法: py -3.12 scripts/gen_advanced_presets.py [direction]
   direction: 1-6 或 all
 """
-import json, sys, os
-from pathlib import Path
+import json
+import os
+import sys
 from datetime import datetime
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG = ROOT / "config" / "text_animation_presets.json"

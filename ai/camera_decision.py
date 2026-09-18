@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Optional, Sequence
 
 from core.camera_movement_classifier import (
     CAMERA_LABELS,
-    classify_video,
     batch_classify,
+    classify_video,
 )
 
 logger = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ _CAM_INV_CACHE_DIR = os.path.join(
 # ============================================================
 
 # 互补运镜表: 素材已有运镜 → 推荐的叠加运镜 (避免同质化)
-_COMPLEMENT_MAP: Dict[str, str] = {
+_COMPLEMENT_MAP: dict[str, str] = {
     "static":   "zoom_in",
     "pan_left": "zoom_in",
     "pan_right": "zoom_out",
@@ -65,7 +65,7 @@ class SourceCameraInventory:
     """
 
     def __init__(self) -> None:
-        self._cache: Dict[str, Dict[str, Any]] = {}
+        self._cache: dict[str, dict[str, Any]] = {}
         self._lora_clf = None  # 懒加载 LoRA 分类器 (A5)
         self._hier_clf = None  # 懒加载分层 CNN+VLM (L0.5, 2026-08-27 接入)
 
@@ -100,7 +100,7 @@ class SourceCameraInventory:
         if self._hier_clf is not None:
             return self._hier_clf
         try:
-            from models.camera_classifier.camera_classifier_hierarchical                 import HierarchicalCameraClassifier
+            from models.camera_classifier.camera_classifier_hierarchical import HierarchicalCameraClassifier
             self._hier_clf = HierarchicalCameraClassifier()
             logger.info("分层 CNN+VLM 运镜分类器就绪 (L0.5)")
             return self._hier_clf
@@ -126,7 +126,7 @@ class SourceCameraInventory:
         except Exception:  # noqa: BLE001
             pass
 
-    def analyze(self, video_path: str) -> Dict[str, Any]:
+    def analyze(self, video_path: str) -> dict[str, Any]:
         """分析单个素材的运镜。双层缓存:
           L0 LoRA 动漫运镜分类器 (A5, 高精度) → L1 整文件缓存 → L2 分段光流
         """
@@ -231,7 +231,7 @@ class SourceCameraInventory:
         return entry
 
 
-    def _disk_cache_put(self, video_path: str, entry: Dict[str, Any]) -> Dict[str, Any]:
+    def _disk_cache_put(self, video_path: str, entry: dict[str, Any]) -> dict[str, Any]:
         """L0.5 分层分类结果的磁盘缓存 (键与 L1 读侧一致, 失败不阻断)。"""
         try:
             _st = os.stat(video_path)
@@ -246,7 +246,7 @@ class SourceCameraInventory:
             pass
         return entry
 
-    def batch_analyze(self, video_paths: Sequence[str]) -> Dict[str, Dict[str, Any]]:
+    def batch_analyze(self, video_paths: Sequence[str]) -> dict[str, dict[str, Any]]:
         """批量分析。"""
         return {vp: self.analyze(vp) for vp in video_paths}
 
@@ -275,7 +275,7 @@ class SourceCameraInventory:
 
 # 衔接兼容矩阵 (0.0=生硬, 1.0=极平滑)
 # 对称矩阵, 键排序后查表
-_TRANSITION_COMPAT: Dict[tuple, float] = {}
+_TRANSITION_COMPAT: dict[tuple, float] = {}
 
 
 def _init_transition_matrix() -> None:
@@ -346,7 +346,7 @@ def transition_compatibility(camera_a: str, camera_b: str) -> float:
 # ============================================================
 
 # 情绪弧段 → 推荐运镜列表 (按优先级排序)
-_EMOTION_CAMERA_MAP: Dict[str, List[str]] = {
+_EMOTION_CAMERA_MAP: dict[str, list[str]] = {
     "intro":  ["static", "zoom_in", "zoom_out"],
     "build":  ["pan_left", "pan_right", "diag_pan"],
     "drop":   ["zoom_in", "push", "zoom_back"],
@@ -356,12 +356,12 @@ _EMOTION_CAMERA_MAP: Dict[str, List[str]] = {
 }
 
 # 默认运镜池 (未知情绪)
-_DEFAULT_CAMERA_SUGGESTIONS: List[str] = [
+_DEFAULT_CAMERA_SUGGESTIONS: list[str] = [
     "pan_left", "pan_right", "zoom_in", "zoom_out", "static",
 ]
 
 
-def emotion_camera_suggest(mood: str) -> List[str]:
+def emotion_camera_suggest(mood: str) -> list[str]:
     """根据情绪弧段推荐运镜列表 (按优先级排序)。
 
     Args:
@@ -418,7 +418,7 @@ def suggest_camera_for_shot(
 
     # 反锁死: 排除最近窗口内已用过的运镜 (候选池有剩余时才排除,
     # 避免过度约束导致降级到互补表)
-    _window: List[str] = []
+    _window: list[str] = []
     if recent:
         _window = list(recent)[-max_repeat:]
         _fresh = [c for c in candidates if c not in _window]

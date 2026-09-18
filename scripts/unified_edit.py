@@ -236,7 +236,9 @@ def stage4b_apply_sfx(
     """④-b SFX v2.1 音乐性增强 (真实节拍从引擎 decision log)."""
     import random as _random
     import subprocess as _sp
-    from core.sfx_layer import _load_index as _sfx_index, shorten_sfx, SFX_TAIL_S
+
+    from core.sfx_layer import SFX_TAIL_S, shorten_sfx
+    from core.sfx_layer import _load_index as _sfx_index
     
     final = output_dir / (tag + "_final.mp4")
     _fallback_src = input_video
@@ -356,7 +358,8 @@ def stage4b_apply_sfx(
     # 背景: run61 底轨已 -9.1 LUFS / TP +0.2 dBFS，任何附加能量必然削波。
     _budget = {"sfx_scale": 1.0, "base_gain_db": 0.0, "verdict": "unknown"}
     try:
-        from core.audio_budget import measure as _ab_measure, budget as _ab_budget
+        from core.audio_budget import budget as _ab_budget
+        from core.audio_budget import measure as _ab_measure
         _bm = _ab_measure(input_video)
         _budget = _ab_budget(_bm, n_sfx=len(plan))
         print(f"    [音频预算] {_budget['verdict']}: {_budget['note']}")
@@ -519,7 +522,7 @@ def main() -> int:
         # --- P0 确定性渲染框架: EDL 落盘 (吸收 HyperFrames 渲染清单 + video-use EDL 设计)
         # 非侵入: 失败只记日志, 绝不阻断主管线
         try:
-            from scripts.edl import build_edl, save_edl, lint_edl
+            from scripts.edl import build_edl, lint_edl, save_edl
             _pr_path = out_dir / "production_report.json"
             if _pr_path.exists():
                 _edl = build_edl(_pr_path, bgm_path=args.bgm, sources=sources,
@@ -648,7 +651,12 @@ def main() -> int:
     if os.environ.get("AEKV_MASTER_DELIVER", "1") == "1":
         try:
             from scripts.master_deliver import (
-                measure_loudness as _md_measure, encode_master as _md_encode,
+                encode_master as _md_encode,
+            )
+            from scripts.master_deliver import (
+                measure_loudness as _md_measure,
+            )
+            from scripts.master_deliver import (
                 verify_audio as _md_verify,
             )
             _md_src = Path(final_video)
@@ -669,7 +677,8 @@ def main() -> int:
     # 吸收 AKROSS Con 交付规格；不达标只告警不阻断（保留成片供诊断），
     # 但把结论写进报告与 evidence，避免"检测了却不管"。
     try:
-        from scripts.check_delivery_spec import check_one as _spec_check, SPEC as _SPEC
+        from scripts.check_delivery_spec import SPEC as _SPEC
+        from scripts.check_delivery_spec import check_one as _spec_check
         _spec = dict(_SPEC)
         # 短样片按实际时长放宽下限（AKROSS 原始口径是 1-15 分钟）
         _spec["duration_sec"] = (min(_spec["duration_sec"][0], args.duration * 0.8),

@@ -17,13 +17,13 @@ DeepSeek V4 推理客户端
     新代码请勿直接 import，请改用 core.llm_gateway.llm_gateway.chat()。
 """
 
+import json
 import os
 import sys
-import json
 import time
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional, Callable
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 # 尝试导入 requests，如果不存在则使用 urllib
 try:
@@ -31,8 +31,8 @@ try:
     HAS_REQUESTS = True
 except ImportError:
     HAS_REQUESTS = False
-    import urllib.request
     import urllib.error
+    import urllib.request
 
 
 @dataclass
@@ -46,7 +46,7 @@ class ProjectState:
     jsx_scripts: int = 74
     
     # 已完成的功能
-    completed: List[str] = field(default_factory=lambda: [
+    completed: list[str] = field(default_factory=lambda: [
         "工具链统一管理器 (toolchain_manager.py)",
         "工具链RESTful API (toolchain_api.py)",
         "前端工具链管理页面 (ToolchainPanel.tsx)",
@@ -65,7 +65,7 @@ class ProjectState:
     ])
     
     # 待完善的功能
-    pending: List[str] = field(default_factory=lambda: [
+    pending: list[str] = field(default_factory=lambda: [
         "AI Agent层集成 - 自然语言到工具调用",
         "DeepSeek V4 Tool Calls 对接",
         "知识库智能问答系统",
@@ -76,7 +76,7 @@ class ProjectState:
     ])
     
     # 技术栈
-    tech_stack: Dict[str, List[str]] = field(default_factory=lambda: {
+    tech_stack: dict[str, list[str]] = field(default_factory=lambda: {
         "backend": ["FastAPI", "SQLite", "JWT", "Prometheus"],
         "frontend": ["React", "Zustand", "TailwindCSS", "Vite"],
         "engines": ["AE", "Topaz", "Blender", "FFmpeg", "DaVinci", "Silhouette"],
@@ -96,17 +96,17 @@ class DeepSeekV4Client:
         "pro": "deepseek-v4-pro",      # 1.6T 参数，对标顶级闭源
     }
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: str | None = None):
         self.api_key = api_key or os.environ.get("DEEPSEEK_API_KEY", "")
-        self.conversation_history: List[Dict[str, Any]] = []
+        self.conversation_history: list[dict[str, Any]] = []
         
-    def _get_headers(self) -> Dict[str, str]:
+    def _get_headers(self) -> dict[str, str]:
         return {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
     
-    def _http_post(self, url: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _http_post(self, url: str, data: dict[str, Any]) -> dict[str, Any]:
         """发送POST请求"""
         if HAS_REQUESTS:
             response = requests.post(url, headers=self._get_headers(), json=data, timeout=120)
@@ -126,10 +126,10 @@ class DeepSeekV4Client:
         self,
         message: str,
         model: str = "pro",
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         use_reasoning: bool = False,
-        tools: Optional[List[Dict[str, Any]]] = None,
-    ) -> Dict[str, Any]:
+        tools: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
         """发送对话请求
         
         Args:

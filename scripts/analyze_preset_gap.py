@@ -3,13 +3,14 @@
 """分析知识库预设与JSON预设的缺口"""
 from __future__ import annotations
 
+import os
 import re
 import sys
-import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from pathlib import Path
+
 from ae.preset_system import PresetSystem
 
 

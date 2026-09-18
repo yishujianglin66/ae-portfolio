@@ -48,14 +48,14 @@ PLATFORM_FEISHU = "feishu"
 SUPPORTED_PLATFORMS = {PLATFORM_WECHAT, PLATFORM_DINGTALK, PLATFORM_FEISHU}
 
 # 指标 → 中文描述映射
-METRIC_LABELS: Dict[str, str] = {
+METRIC_LABELS: dict[str, str] = {
     "cpu_percent": "CPU 使用率",
     "memory_percent": "内存使用率",
     "disk_percent": "磁盘使用率",
 }
 
 # 指标 → 处置建议
-METRIC_SUGGESTIONS: Dict[str, str] = {
+METRIC_SUGGESTIONS: dict[str, str] = {
     "cpu_percent": "检查渲染任务或杀掉异常进程",
     "memory_percent": "关闭不必要的程序或重启服务",
     "disk_percent": "清理临时文件或转移素材到其他磁盘",
@@ -112,15 +112,15 @@ class AlertRecord:
     state: str  # normal / warning / critical / sustained_alert / notifying / notified / recovering
     value: float = 0.0
     threshold: float = 0.0
-    first_breach_at: Optional[float] = None  # 首次超过阈值的时间戳
+    first_breach_at: float | None = None  # 首次超过阈值的时间戳
     sustained_seconds: int = 0
-    last_notified_at: Optional[float] = None  # 最近一次发送 webhook 的时间
-    last_recovery_at: Optional[float] = None
+    last_notified_at: float | None = None  # 最近一次发送 webhook 的时间
+    last_recovery_at: float | None = None
     notification_sent: bool = False
     recovery_sent: bool = False
     error: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "alert_type": self.alert_type,
             "metric": self.metric,
@@ -205,9 +205,9 @@ class WebhookNotifier:
         self.hostname = hostname or detect_hostname()
 
         # 限流记账：alert_type -> 最近一次成功发送的时间戳
-        self._last_sent: Dict[str, float] = {}
+        self._last_sent: dict[str, float] = {}
         # 发送中标记，避免同一告警类型并发发送
-        self._in_flight: Dict[str, bool] = {}
+        self._in_flight: dict[str, bool] = {}
 
     # ------------------------------------------------------------------
     # 公开接口
@@ -342,7 +342,7 @@ class WebhookNotifier:
             logger.info(f"测试告警发送成功: host={host} platform={self.platform}")
         return success
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取通知器统计信息。"""
         return {
             "platform": self.platform,
@@ -357,7 +357,7 @@ class WebhookNotifier:
     # ------------------------------------------------------------------
     # 限流
     # ------------------------------------------------------------------
-    def _can_send(self, key: str, quiet_seconds: Optional[float] = None) -> bool:
+    def _can_send(self, key: str, quiet_seconds: float | None = None) -> bool:
         """检查当前是否可以发送指定 key 的通知。
 
         Args:
@@ -382,7 +382,7 @@ class WebhookNotifier:
     async def _send_with_retry(
         self,
         key: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         event: str,
     ) -> bool:
         """发送 HTTP POST 请求，失败时按 ``max_retries`` 重试。
@@ -439,7 +439,7 @@ class WebhookNotifier:
     async def _post_once(
         self,
         url: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
     ) -> tuple[bool, str]:
         """执行一次 HTTP POST。
 
@@ -502,7 +502,7 @@ class WebhookNotifier:
         sustained_seconds: int,
         hostname: str,
         suggestion: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """根据平台分发到具体的 payload 构造器。"""
         if self.platform == PLATFORM_WECHAT:
             return self._build_wechat_payload(
@@ -522,7 +522,7 @@ class WebhookNotifier:
         raise ValueError(f"不支持的平台: {self.platform}")
 
     @staticmethod
-    def _format_timestamp(ts: Optional[float] = None) -> str:
+    def _format_timestamp(ts: float | None = None) -> str:
         """格式化时间戳为 ``YYYY-MM-DD HH:MM:SS``。"""
         if ts is None:
             ts = time.time()
@@ -538,13 +538,13 @@ class WebhookNotifier:
         sustained_seconds: int,
         hostname: str,
         suggestion: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """企业微信 Markdown 消息。"""
         metric_label = METRIC_LABELS.get(metric, metric)
         if event == "recovery":
             title = "✅ 资源恢复"
             lines = [
-                f"## ✅ 资源恢复",
+                "## ✅ 资源恢复",
                 f"**类型**: {metric_label} 已恢复正常",
                 f"**主机**: {hostname}",
                 f"**最近告警值**: {value:.1f}%",
@@ -554,16 +554,16 @@ class WebhookNotifier:
         elif event == "test":
             title = "🔔 测试告警"
             lines = [
-                f"## 🔔 测试告警",
+                "## 🔔 测试告警",
                 f"**主机**: {hostname}",
-                f"**平台**: 企业微信",
+                "**平台**: 企业微信",
                 f"**时间**: {self._format_timestamp()}",
                 f"**说明**: {suggestion or '这是一条测试消息'}",
             ]
         else:
             title = "🚨 资源告警"
             lines = [
-                f"## 🚨 资源告警",
+                "## 🚨 资源告警",
                 f"**类型**: {metric_label} 持续高负载",
                 f"**主机**: {hostname}",
                 f"**当前值**: {value:.1f}%",
@@ -587,7 +587,7 @@ class WebhookNotifier:
         sustained_seconds: int,
         hostname: str,
         suggestion: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """钉钉 Markdown 消息。"""
         metric_label = METRIC_LABELS.get(metric, metric)
         if event == "recovery":
@@ -635,7 +635,7 @@ class WebhookNotifier:
         sustained_seconds: int,
         hostname: str,
         suggestion: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """飞书 Interactive Card 消息。"""
         metric_label = METRIC_LABELS.get(metric, metric)
 
@@ -661,7 +661,7 @@ class WebhookNotifier:
                 {"tag": "div", "text": {"tag": "lark_md",
                     "content": f"**主机**: {hostname}"}},
                 {"tag": "div", "text": {"tag": "lark_md",
-                    "content": f"**平台**: 飞书"}},
+                    "content": "**平台**: 飞书"}},
                 {"tag": "div", "text": {"tag": "lark_md",
                     "content": f"**时间**: {self._format_timestamp()}"}},
                 {"tag": "div", "text": {"tag": "lark_md",
@@ -704,7 +704,7 @@ class WebhookNotifier:
 # ============================================================
 # 工厂函数
 # ============================================================
-def create_notifier_from_settings(settings_obj: Any) -> Optional[WebhookNotifier]:
+def create_notifier_from_settings(settings_obj: Any) -> WebhookNotifier | None:
     """根据 ``Settings`` 实例创建 ``WebhookNotifier``。
 
     当 ``webhook_enabled=False`` 或 URL 为空时返回 ``None``。

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """诊断: 检查jsx_template实际内容 + 对比batch_render_textfx成功模式"""
-import json, sys
+import json
+import sys
+
 sys.stdout.reconfigure(encoding='utf-8')
 from pathlib import Path
 
@@ -98,7 +100,7 @@ if tpl:
         print("  No obvious issues")
     
     # 显示模板的开头结构
-    print(f"\n  Template starts with:")
+    print("\n  Template starts with:")
     lines = tpl.split('\n')[:10]
     for l in lines:
         print(f"    | {l}")

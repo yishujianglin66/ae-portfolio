@@ -17,15 +17,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
 from intent_router import (
-    TaskRoute,
-    IntentRouter,
-    _MemoryStore,
+    AE_EFFECT_KEYWORDS,
     FALLBACK_MAP,
     HYBRID_CONNECTORS,
     SILHOUETTE_KEYWORDS,
-    AE_EFFECT_KEYWORDS,
+    IntentRouter,
+    TaskRoute,
+    _MemoryStore,
 )
-
 
 # ============================================================================
 # TaskRoute 数据类

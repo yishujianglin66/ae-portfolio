@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Test render for Vinland Saga composition"""
-from ae_mcp_client import AECommandClient
 import json
-import time
 import os
+import time
+
+from ae_mcp_client import AECommandClient
 
 c = AECommandClient(signature_enabled=False, timeout=30)
 
@@ -58,7 +59,7 @@ else:
 # Final check
 if os.path.exists(output_path):
     size_mb = os.path.getsize(output_path) / (1024 * 1024)
-    print(f"\n=== RENDER SUCCESS ===")
+    print("\n=== RENDER SUCCESS ===")
     print(f"  File: {output_path}")
     print(f"  Size: {size_mb:.1f} MB")
 else:

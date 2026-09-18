@@ -44,9 +44,9 @@ UPDATABLE_KEYS = (
 )
 
 
-def load_env_values(path: Path) -> Dict[str, str]:
+def load_env_values(path: Path) -> dict[str, str]:
     """读取 .env 风格文件中所有 key=value（含被注释行的现值，用于默认回退）"""
-    values: Dict[str, str] = {}
+    values: dict[str, str] = {}
     if not path.exists():
         return values
     with open(path, "r", encoding="utf-8") as f:
@@ -59,7 +59,7 @@ def load_env_values(path: Path) -> Dict[str, str]:
     return values
 
 
-def verify_claude_key(base_url: str, api_key: str, model: str, timeout: int = 25) -> Tuple[bool, str]:
+def verify_claude_key(base_url: str, api_key: str, model: str, timeout: int = 25) -> tuple[bool, str]:
     """用最小请求在线验证 Claude(DuckMiss) key 是否有效。
 
     Returns:
@@ -104,7 +104,7 @@ def verify_claude_key(base_url: str, api_key: str, model: str, timeout: int = 25
         return False, f"{type(e).__name__}: {e}"
 
 
-def update_env_file(path: Path, updates: Dict[str, str]) -> int:
+def update_env_file(path: Path, updates: dict[str, str]) -> int:
     """将 updates 写入 .env.doubao：命中已有行则原位替换，未命中则追加。
 
     Returns:
@@ -142,6 +142,7 @@ def refresh_gateway_and_verify(model: str) -> bool:
     """
     try:
         import asyncio
+
         from core.llm_gateway import llm_gateway
 
         llm_gateway.ensure_configured(force=True)

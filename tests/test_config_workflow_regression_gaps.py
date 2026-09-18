@@ -9,14 +9,13 @@
 import os
 import sys
 import tempfile
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.config import ConfigManager
-
 
 # ============================================================================
 # Fixtures
@@ -87,7 +86,7 @@ class TestWorkflowSkipOnFailureSemantics:
     @pytest.fixture
     def orch(self):
         """新编排器 + 3 个任务：t0（起点）→ t1（会失败但可跳过）→ t2（依赖 t1）。"""
-        from core.workflow_orchestrator import WorkflowOrchestrator, TaskDefinition, TaskType
+        from core.workflow_orchestrator import TaskDefinition, TaskType, WorkflowOrchestrator
         o = WorkflowOrchestrator(max_concurrent_tasks=2)
 
         async def _t0(**kw):  # 用 **kwargs 接收所有参数，避免签名不匹配
@@ -160,7 +159,7 @@ class TestWorkflowFallbackAlsoFails:
     """fallback_func 也抛异常 → 状态正确为 FAILED，update_success_rate 异常不冒泡。"""
 
     def test_fallback_failure_ends_in_failed_not_running(self):
-        from core.workflow_orchestrator import WorkflowOrchestrator, TaskDefinition, TaskType
+        from core.workflow_orchestrator import TaskDefinition, TaskType, WorkflowOrchestrator
         orch = WorkflowOrchestrator(max_concurrent_tasks=1)
 
         async def _main_fail(**kw):
@@ -182,7 +181,7 @@ class TestWorkflowFallbackAlsoFails:
 
         import asyncio
         ctx = asyncio.run(orch.run())
-        from core.workflow_orchestrator import WorkflowStatus, TaskStatus
+        from core.workflow_orchestrator import TaskStatus, WorkflowStatus
 
         # 工作流整体 = FAILED（因为 skip_on_failure=False）
         assert ctx.status == WorkflowStatus.FAILED

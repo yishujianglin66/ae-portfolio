@@ -24,7 +24,6 @@ from integrations.davinci_color_grading import (
     ColorWheelValues,
 )
 
-
 # 预设库所在目录
 PRESETS_DIR: Path = Path(__file__).resolve().parent
 
@@ -33,7 +32,7 @@ PRESETS_DIR: Path = Path(__file__).resolve().parent
 # 内置预设库（BUILTIN_PRESETS）
 # ============================================================================
 
-BUILTIN_PRESETS: Dict[str, ColorGradingPreset] = {
+BUILTIN_PRESETS: dict[str, ColorGradingPreset] = {
     "cinematic_teal_orange": ColorGradingPreset(
         name="Cinematic Teal & Orange",
         description="经典电影感青橙调色，阴影偏青、高光偏暖，对应好莱坞主流调色。",
@@ -161,7 +160,7 @@ BUILTIN_PRESETS: Dict[str, ColorGradingPreset] = {
 # 访问器函数
 # ============================================================================
 
-def get_preset(name: str) -> Optional[ColorGradingPreset]:
+def get_preset(name: str) -> ColorGradingPreset | None:
     """按预设名获取内存中的内置预设。
 
     Args:
@@ -173,17 +172,17 @@ def get_preset(name: str) -> Optional[ColorGradingPreset]:
     return BUILTIN_PRESETS.get(name)
 
 
-def list_preset_names() -> List[str]:
+def list_preset_names() -> list[str]:
     """返回所有内置预设的键名列表。"""
     return list(BUILTIN_PRESETS.keys())
 
 
-def list_presets() -> List[ColorGradingPreset]:
+def list_presets() -> list[ColorGradingPreset]:
     """返回所有内置预设对象列表。"""
     return list(BUILTIN_PRESETS.values())
 
 
-def presets_by_tag(tag: str) -> List[ColorGradingPreset]:
+def presets_by_tag(tag: str) -> list[ColorGradingPreset]:
     """按标签筛选预设。
 
     Args:
@@ -196,7 +195,7 @@ def presets_by_tag(tag: str) -> List[ColorGradingPreset]:
     return [p for p in BUILTIN_PRESETS.values() if any(t.lower() == tag_lower for t in p.tags)]
 
 
-def get_preset_file_path(name: str) -> Optional[Path]:
+def get_preset_file_path(name: str) -> Path | None:
     """获取预设对应 JSON 落盘文件的预期路径（不要求文件已存在）。"""
     candidate = PRESETS_DIR / f"{name}.json"
     return candidate if candidate.exists() else None
@@ -208,7 +207,7 @@ def load_preset_from_file(file_path: str | Path) -> ColorGradingPreset:
     if not file_path.exists():
         raise FileNotFoundError(f"Preset file not found: {file_path}")
     with open(file_path, "r", encoding="utf-8") as f:
-        data: Dict[str, Any] = json.load(f)
+        data: dict[str, Any] = json.load(f)
     return ColorGradingPreset.from_dict(data)
 
 
@@ -221,11 +220,11 @@ def save_preset_to_file(preset: ColorGradingPreset, file_path: str | Path) -> Pa
     return file_path
 
 
-def export_all_builtin_presets(target_dir: str | Path | None = None) -> List[Path]:
+def export_all_builtin_presets(target_dir: str | Path | None = None) -> list[Path]:
     """将所有内置预设导出为 JSON 文件。返回写入路径列表。"""
     target = Path(target_dir) if target_dir else PRESETS_DIR
     target.mkdir(parents=True, exist_ok=True)
-    written: List[Path] = []
+    written: list[Path] = []
     for key, preset in BUILTIN_PRESETS.items():
         path = target / f"{key}.json"
         save_preset_to_file(preset, path)

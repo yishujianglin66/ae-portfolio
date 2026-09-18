@@ -8,6 +8,7 @@
 - 输出 JSON 总结文件，便于后续质量门解析
 """
 from __future__ import annotations
+
 import json
 import sys
 import tempfile
@@ -18,7 +19,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "puppet-automation"))
 
-from tools.unified_tool_integrator import UnifiedToolIntegrator, PhaseStatus  # noqa: E402
+from tools.unified_tool_integrator import PhaseStatus, UnifiedToolIntegrator  # noqa: E402
 
 
 def _run_one(name: str, preset_id: str, integrator: UnifiedToolIntegrator):

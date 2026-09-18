@@ -1,5 +1,6 @@
 import os
 import sys
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -34,7 +35,7 @@ class TestPuppetStyleEngine:
         assert "shadow_puppet" in style_names
 
     def test_wooden_puppet_style(self):
-        from puppet_style_engine import PuppetStyleEngine, PuppetStyleConfig
+        from puppet_style_engine import PuppetStyleConfig, PuppetStyleEngine
         engine = PuppetStyleEngine()
         config = PuppetStyleConfig(
             style_type="wooden_puppet",
@@ -49,7 +50,7 @@ class TestPuppetStyleEngine:
         assert isinstance(result.layers, list)
 
     def test_style_intensity_scaling(self):
-        from puppet_style_engine import PuppetStyleEngine, PuppetStyleConfig
+        from puppet_style_engine import PuppetStyleConfig, PuppetStyleEngine
         engine = PuppetStyleEngine()
         config_low = PuppetStyleConfig(style_type="wooden_puppet", intensity=0.5)
         config_high = PuppetStyleConfig(style_type="wooden_puppet", intensity=2.0)
@@ -58,7 +59,7 @@ class TestPuppetStyleEngine:
         assert len(result_low.effects) == len(result_high.effects)
 
     def test_marionette_with_strings(self):
-        from puppet_style_engine import PuppetStyleEngine, PuppetStyleConfig
+        from puppet_style_engine import PuppetStyleConfig, PuppetStyleEngine
         engine = PuppetStyleEngine()
         config = PuppetStyleConfig(style_type="marionette", intensity=1.0)
         result = engine.generate_style(config, "marionette_layer", 3.0)
@@ -100,7 +101,7 @@ class TestStopMotion:
         assert "handheld_shaky" in presets
 
     def test_generate_effects(self):
-        from puppet_effects.stop_motion import StopMotionEffect, StopMotionConfig
+        from puppet_effects.stop_motion import StopMotionConfig, StopMotionEffect
         config = StopMotionConfig(fps=12, jitter_amount=2.0, flicker_amount=5.0, camera_shake=1.0)
         result = StopMotionEffect.generate_effects(config, "layer", 5.0)
         assert isinstance(result, dict)
@@ -119,7 +120,7 @@ class TestJointSystem:
             assert len(config.joint_points) > 0
 
     def test_generate_joint_effects(self):
-        from puppet_effects.joint_system import JointSystem, JointConfig, JointPoint
+        from puppet_effects.joint_system import JointConfig, JointPoint, JointSystem
         joints = [
             JointPoint(name="head", x=960, y=200),
             JointPoint(name="left_shoulder", x=860, y=350, side="left"),
@@ -149,7 +150,7 @@ class TestMiniScene:
         assert "marionette_stage" in presets
 
     def test_generate_mini_scene(self):
-        from puppet_effects.mini_scene import MiniSceneEffect, MiniSceneConfig
+        from puppet_effects.mini_scene import MiniSceneConfig, MiniSceneEffect
         config = MiniSceneConfig(
             tilt_shift=True,
             stage_lighting=True,
@@ -213,7 +214,7 @@ class TestPipelinePuppetIntegration:
         assert understanding.route_type == "hybrid"
 
     def test_puppet_roto_operation_generation(self, pipeline):
-        from ae_agent_pipeline import UnderstandingResult, PerceptionResult
+        from ae_agent_pipeline import PerceptionResult, UnderstandingResult
         understanding = UnderstandingResult()
         understanding.silhouette_task = "puppet_roto"
         perception = PerceptionResult()
@@ -237,7 +238,7 @@ class TestPipelinePuppetIntegration:
             pytest.fail("_enhance_with_puppet_style raised exception")
 
     def test_plan_with_puppet_style(self, pipeline):
-        from ae_agent_pipeline import UnderstandingResult, PerceptionResult
+        from ae_agent_pipeline import PerceptionResult, UnderstandingResult
         understanding = UnderstandingResult()
         understanding.style = "wooden_puppet"
         understanding.intensity = 1.0
@@ -255,7 +256,7 @@ class TestPipelinePuppetIntegration:
 
 class TestRegressionBugs:
     def test_mediapipe_simulate_no_math_random_crash(self):
-        from mediapipe_integration import MediaPipeIntegrator, MediaPipeConfig, MediaPipeResult
+        from mediapipe_integration import MediaPipeConfig, MediaPipeIntegrator, MediaPipeResult
         config = MediaPipeConfig(mode="simulate", detect_pose=True, detect_face=True)
         integrator = MediaPipeIntegrator(config)
         result = MediaPipeResult()
@@ -274,7 +275,8 @@ class TestRegressionBugs:
             raise
 
     def test_mini_scene_preset_not_mutated(self):
-        from puppet_style_engine import PuppetStyleEngine, PuppetStyleConfig
+        from puppet_style_engine import PuppetStyleConfig, PuppetStyleEngine
+
         from puppet_effects.mini_scene import MiniSceneEffect
         engine = PuppetStyleEngine()
         presets_before = MiniSceneEffect.get_presets()
@@ -297,7 +299,8 @@ class TestRegressionBugs:
             f"MiniScene preset dof_blur mutated: {dof_blur_before} -> {theater_after.dof_blur}"
 
     def test_joint_preset_not_mutated(self):
-        from puppet_style_engine import PuppetStyleEngine, PuppetStyleConfig
+        from puppet_style_engine import PuppetStyleConfig, PuppetStyleEngine
+
         from puppet_effects.joint_system import JointSystem
         engine = PuppetStyleEngine()
         preset_before = JointSystem.get_standard_joint_preset("simple_puppet")
@@ -318,7 +321,8 @@ class TestRegressionBugs:
             f"Joint preset joint_gap mutated: {joint_gap_before} -> {preset_after.joint_gap}"
 
     def test_multiple_intensity_calls_consistent(self):
-        from puppet_style_engine import PuppetStyleEngine, PuppetStyleConfig
+        from puppet_style_engine import PuppetStyleConfig, PuppetStyleEngine
+
         from puppet_effects.mini_scene import MiniSceneEffect
         engine = PuppetStyleEngine()
         presets = MiniSceneEffect.get_presets()

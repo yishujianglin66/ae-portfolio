@@ -23,13 +23,13 @@ MediaPipe 集成模块 - 人物自动识别与姿态提取
 - 边界框 → PuppetStyleConfig 的 bbox 参数
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
-import os
 import json
-import time
 import math
+import os
 import random
+import time
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
 
 try:
     import cv2
@@ -40,9 +40,9 @@ except ImportError:
 _MEDIAPIPE_AVAILABLE = False
 try:
     import mediapipe as mp
+    from mediapipe.framework.formats import landmark_pb2
     from mediapipe.tasks import python
     from mediapipe.tasks.python import vision
-    from mediapipe.framework.formats import landmark_pb2
     _MEDIAPIPE_AVAILABLE = True
 except ImportError:
     pass
@@ -104,12 +104,12 @@ class FaceLandmark:
         jaw: 下巴位置
         face_bbox: 面部边界框
     """
-    left_eye: Dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
-    right_eye: Dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
-    mouth: Dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0, "width": 0.0, "height": 0.0})
-    nose: Dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
-    jaw: Dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
-    face_bbox: Dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0, "width": 0.0, "height": 0.0})
+    left_eye: dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
+    right_eye: dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
+    mouth: dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0, "width": 0.0, "height": 0.0})
+    nose: dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
+    jaw: dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0})
+    face_bbox: dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0, "width": 0.0, "height": 0.0})
 
 
 @dataclass
@@ -125,10 +125,10 @@ class PersonDetection:
         confidence: 检测置信度
     """
     person_id: int = 0
-    bbox: Dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0, "width": 0.0, "height": 0.0})
-    pose_landmarks: List[PoseLandmark] = field(default_factory=list)
-    face_landmarks: Optional[FaceLandmark] = None
-    hands_landmarks: Dict[str, List[Dict[str, float]]] = field(default_factory=dict)
+    bbox: dict[str, float] = field(default_factory=lambda: {"x": 0.0, "y": 0.0, "width": 0.0, "height": 0.0})
+    pose_landmarks: list[PoseLandmark] = field(default_factory=list)
+    face_landmarks: FaceLandmark | None = None
+    hands_landmarks: dict[str, list[dict[str, float]]] = field(default_factory=dict)
     confidence: float = 0.0
 
 
@@ -156,7 +156,7 @@ class MediaPipeResult:
     width: int = 0
     height: int = 0
     fps: float = 30.0
-    detections: List[Dict[str, Any]] = field(default_factory=list)
+    detections: list[dict[str, Any]] = field(default_factory=list)
     error: str = ""
 
 
@@ -197,7 +197,7 @@ class MediaPipeIntegrator:
         "ankle_right": ["right_ankle"],
     }
     
-    def __init__(self, config: Optional[MediaPipeConfig] = None):
+    def __init__(self, config: MediaPipeConfig | None = None):
         self.config = config or MediaPipeConfig()
         self._pose_detector = None
         self._face_detector = None
@@ -336,7 +336,7 @@ class MediaPipeIntegrator:
         return result
     
     def _process_frame(self, frame: Any, frame_idx: int, fps: float, 
-                       width: int, height: int) -> Dict[str, Any]:
+                       width: int, height: int) -> dict[str, Any]:
         """处理单帧图像
         
         Args:
@@ -411,7 +411,7 @@ class MediaPipeIntegrator:
         return result
     
     def _extract_pose_person(self, landmarks: Any, width: int, height: int, 
-                             person_id: int) -> Dict[str, Any]:
+                             person_id: int) -> dict[str, Any]:
         """从姿态结果提取人物数据
         
         Args:
@@ -530,7 +530,7 @@ class MediaPipeIntegrator:
             },
         )
     
-    def _extract_hand_data(self, landmarks: Any, width: int, height: int) -> List[Dict[str, float]]:
+    def _extract_hand_data(self, landmarks: Any, width: int, height: int) -> list[dict[str, float]]:
         """提取手部关键点数据
         
         Args:
@@ -599,7 +599,7 @@ class MediaPipeIntegrator:
         
         return result
     
-    def _generate_simulated_detections(self, result: MediaPipeResult) -> List[Dict[str, Any]]:
+    def _generate_simulated_detections(self, result: MediaPipeResult) -> list[dict[str, Any]]:
         """生成模拟检测数据
         
         Args:
@@ -655,7 +655,7 @@ class MediaPipeIntegrator:
         
         return detections
     
-    def _generate_simulated_pose(self, bbox: Dict[str, float]) -> List[Dict[str, Any]]:
+    def _generate_simulated_pose(self, bbox: dict[str, float]) -> list[dict[str, Any]]:
         """生成模拟姿态数据
         
         Args:
@@ -705,7 +705,7 @@ class MediaPipeIntegrator:
         
         return joints
     
-    def _generate_simulated_face(self, bbox: Dict[str, float]) -> FaceLandmark:
+    def _generate_simulated_face(self, bbox: dict[str, float]) -> FaceLandmark:
         """生成模拟面部数据
         
         Args:
@@ -761,7 +761,7 @@ class MediaPipeIntegrator:
             },
         )
     
-    def convert_to_puppet_format(self, result: MediaPipeResult) -> Dict[str, Any]:
+    def convert_to_puppet_format(self, result: MediaPipeResult) -> dict[str, Any]:
         """将 MediaPipe 结果转换为木偶风格化引擎可用的格式
         
         Args:
@@ -823,7 +823,7 @@ class MediaPipeIntegrator:
             "duration": result.duration,
         }
     
-    def _convert_joint_data(self, result: MediaPipeResult) -> List[Dict[str, Any]]:
+    def _convert_joint_data(self, result: MediaPipeResult) -> list[dict[str, Any]]:
         """转换关节数据为木偶风格化引擎可用的格式
         
         Args:
@@ -859,7 +859,7 @@ class MediaPipeIntegrator:
         
         return joint_data
     
-    def _map_landmark_to_joint(self, landmark_name: str) -> Optional[str]:
+    def _map_landmark_to_joint(self, landmark_name: str) -> str | None:
         """将 MediaPipe 关键点名称映射为关节名称
         
         Args:
@@ -938,7 +938,7 @@ if __name__ == "__main__":
     
     integrator = MediaPipeIntegrator(config)
     
-    print(f"\n[配置信息]")
+    print("\n[配置信息]")
     print(f"  模式: {integrator.get_mode()}")
     print(f"  MediaPipe 可用: {integrator.is_available()}")
     print(f"  检测姿态: {config.detect_pose}")
@@ -946,9 +946,9 @@ if __name__ == "__main__":
     print(f"  检测手部: {config.detect_hands}")
     print(f"  采样间隔: {config.sample_interval} 帧")
     
-    print(f"\n[测试 1] 模拟模式处理")
-    import tempfile
+    print("\n[测试 1] 模拟模式处理")
     import subprocess
+    import tempfile
     
     test_video = None
     ffmpeg_path = r"D:\app\FormatFactory\ffmpeg.exe"
@@ -972,7 +972,7 @@ if __name__ == "__main__":
     
     if test_video and os.path.exists(test_video):
         print(f"  测试视频: {os.path.basename(test_video)}")
-        print(f"  开始处理...")
+        print("  开始处理...")
         
         start_time = time.time()
         result = integrator.process_video(test_video)
@@ -996,7 +996,7 @@ if __name__ == "__main__":
                 print(f"    面部数据: {'有' if person.get('face_landmarks') else '无'}")
         
         puppet_format = integrator.convert_to_puppet_format(result)
-        print(f"  木偶格式转换:")
+        print("  木偶格式转换:")
         print(f"    bbox: {'有' if puppet_format['bbox'] else '无'}")
         print(f"    joint_data: {len(puppet_format['joint_data'])} 帧")
         print(f"    face_data: {'有' if puppet_format['face_data'] else '无'}")
@@ -1009,9 +1009,9 @@ if __name__ == "__main__":
         if os.path.exists(output_path):
             os.unlink(output_path)
     else:
-        print(f"  跳过（无 ffmpeg）")
+        print("  跳过（无 ffmpeg）")
     
-    print(f"\n[测试 2] 直接生成模拟数据")
+    print("\n[测试 2] 直接生成模拟数据")
     sim_result = MediaPipeResult()
     sim_result.width = 1280
     sim_result.height = 720
@@ -1028,7 +1028,7 @@ if __name__ == "__main__":
     puppet_format = integrator.convert_to_puppet_format(sim_result)
     print(f"  joint_data 帧数: {len(puppet_format['joint_data'])}")
     
-    print(f"\n[测试 3] 关节映射")
+    print("\n[测试 3] 关节映射")
     test_landmarks = ["nose", "left_shoulder", "right_elbow", "left_knee", "unknown"]
     for lm in test_landmarks:
         joint = integrator._map_landmark_to_joint(lm)

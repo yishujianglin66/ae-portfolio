@@ -43,13 +43,14 @@
     }
 """
 
+import json
 import os
 import sys
-import json
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
-from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError as FuturesTimeoutError
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from difflib import SequenceMatcher
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 # 将本文件所在目录加入 sys.path，便于导入同级模块
 _THIS_DIR = Path(__file__).parent.resolve()
@@ -57,13 +58,12 @@ if str(_THIS_DIR) not in sys.path:
     sys.path.insert(0, str(_THIS_DIR))
 
 # 导入三个客户端
-import pixabay_client
-import pexels_client
 import jamendo_client
-from pixabay_client import PixabayClient, PixabayError
-from pexels_client import PexelsClient, PexelsError
+import pexels_client
+import pixabay_client
 from jamendo_client import JamendoClient, JamendoError
-
+from pexels_client import PexelsClient, PexelsError
+from pixabay_client import PixabayClient, PixabayError
 
 # =============================================================================
 # 常量定义
@@ -105,7 +105,7 @@ class MissingAPIKeyError(UnifiedSearchError):
 # 工具函数
 # =============================================================================
 
-def _load_api_keys() -> Dict[str, str]:
+def _load_api_keys() -> dict[str, str]:
     """
     从环境变量或配置文件加载所有 API Key
 
@@ -158,7 +158,7 @@ def _normalize_title_similarity(a: str, b: str) -> float:
     return SequenceMatcher(None, clean_a, clean_b).ratio()
 
 
-def _dedup_results(results: List[Dict], threshold: float = TITLE_SIMILARITY_THRESHOLD) -> List[Dict]:
+def _dedup_results(results: list[dict], threshold: float = TITLE_SIMILARITY_THRESHOLD) -> list[dict]:
     """
     基于标题相似度去重
 
@@ -168,8 +168,8 @@ def _dedup_results(results: List[Dict], threshold: float = TITLE_SIMILARITY_THRE
     :param threshold: 相似度阈值
     :return: 去重后的列表
     """
-    deduped: List[Dict] = []
-    seen_titles: List[str] = []
+    deduped: list[dict] = []
+    seen_titles: list[str] = []
     for item in results:
         title = (item.get("title") or "").strip()
         is_dup = False
@@ -196,7 +196,7 @@ def _safe_call(
     *args,
     timeout: float = PER_PLATFORM_TIMEOUT,
     **kwargs,
-) -> Dict:
+) -> dict:
     """
     安全调用单个平台函数，捕获所有异常
 
@@ -231,7 +231,7 @@ def _search_pixabay(
     query: str,
     media_type: str,
     per_page: int,
-) -> Dict:
+) -> dict:
     """
     Pixabay 平台搜索封装
 
@@ -244,7 +244,7 @@ def _search_pixabay(
     if not api_key:
         return {"platform": "pixabay", "items": [], "error": "缺少 API Key"}
     client = PixabayClient(api_key=api_key)
-    items: List[Dict] = []
+    items: list[dict] = []
     error = ""
     try:
         if media_type in ("videos", "all"):
@@ -272,14 +272,14 @@ def _search_pexels(
     query: str,
     media_type: str,
     per_page: int,
-) -> Dict:
+) -> dict:
     """
     Pexels 平台搜索封装
     """
     if not api_key:
         return {"platform": "pexels", "items": [], "error": "缺少 API Key"}
     client = PexelsClient(api_key=api_key)
-    items: List[Dict] = []
+    items: list[dict] = []
     error = ""
     try:
         if media_type in ("videos", "all"):
@@ -304,7 +304,7 @@ def _search_jamendo(
     query: str,
     media_type: str,
     per_page: int,
-) -> Dict:
+) -> dict:
     """
     Jamendo 平台搜索封装（仅音乐）
     """
@@ -314,7 +314,7 @@ def _search_jamendo(
     if media_type not in ("music", "all"):
         return {"platform": "jamendo", "items": [], "error": "Jamendo 仅支持音乐搜索"}
     client = JamendoClient(client_id=client_id)
-    items: List[Dict] = []
+    items: list[dict] = []
     error = ""
     try:
         raw = client.search_tracks(query=query, limit=min(per_page, 200))
@@ -339,7 +339,7 @@ class UnifiedSearch:
     单平台失败不影响其他平台结果。
     """
 
-    def __init__(self, api_keys: Optional[Dict[str, str]] = None):
+    def __init__(self, api_keys: dict[str, str] | None = None):
         """
         初始化
 
@@ -353,7 +353,7 @@ class UnifiedSearch:
         query: str,
         media_type: str = "all",
         per_page: int = 10,
-    ) -> Dict:
+    ) -> dict:
         """
         跨平台搜索
 
@@ -370,7 +370,7 @@ class UnifiedSearch:
             raise ValueError(f"per_page 范围 1-200，当前 {per_page}")
 
         # 构造任务列表
-        tasks: Dict[str, Callable[[], Dict]] = {}
+        tasks: dict[str, Callable[[], dict]] = {}
         if media_type in ("videos", "images", "all"):
             if self.api_keys.get("pixabay_api_key"):
                 tasks["pixabay"] = lambda: _search_pixabay(
@@ -396,8 +396,8 @@ class UnifiedSearch:
             }
 
         # 并行执行
-        results: List[Dict] = []
-        errors: Dict[str, str] = {}
+        results: list[dict] = []
+        errors: dict[str, str] = {}
         with ThreadPoolExecutor(max_workers=min(MAX_WORKERS, len(tasks))) as pool:
             future_map = {pool.submit(_safe_call, fn): name for name, fn in tasks.items()}
             for future in as_completed(future_map):
@@ -429,7 +429,7 @@ class UnifiedSearch:
             "raw_count_before_dedup": len(results),
         }
 
-    def search_videos(self, query: str, per_page: int = 10) -> Dict:
+    def search_videos(self, query: str, per_page: int = 10) -> dict:
         """
         跨平台视频搜索
 
@@ -441,7 +441,7 @@ class UnifiedSearch:
         """
         return self.search_all(query, media_type="videos", per_page=per_page)
 
-    def search_images(self, query: str, per_page: int = 10) -> Dict:
+    def search_images(self, query: str, per_page: int = 10) -> dict:
         """
         跨平台图片搜索
 
@@ -453,7 +453,7 @@ class UnifiedSearch:
         """
         return self.search_all(query, media_type="images", per_page=per_page)
 
-    def search_music(self, query: str, per_page: int = 10) -> Dict:
+    def search_music(self, query: str, per_page: int = 10) -> dict:
         """
         跨平台音乐搜索
 
@@ -471,7 +471,7 @@ class UnifiedSearch:
         media_id: str,
         output_dir: str,
         quality: str = "hd",
-    ) -> Dict:
+    ) -> dict:
         """
         统一下载接口
 
@@ -545,7 +545,7 @@ class UnifiedSearch:
 # 便捷函数
 # =============================================================================
 
-def search_all(api_keys: Dict[str, str], query: str, media_type: str = "all", per_page: int = 10) -> Dict:
+def search_all(api_keys: dict[str, str], query: str, media_type: str = "all", per_page: int = 10) -> dict:
     """
     便捷函数：跨平台搜索（一次性调用）
 
@@ -559,25 +559,25 @@ def search_all(api_keys: Dict[str, str], query: str, media_type: str = "all", pe
     return engine.search_all(query=query, media_type=media_type, per_page=per_page)
 
 
-def search_videos(api_keys: Dict[str, str], query: str, per_page: int = 10) -> Dict:
+def search_videos(api_keys: dict[str, str], query: str, per_page: int = 10) -> dict:
     """便捷函数：跨平台视频搜索"""
     engine = UnifiedSearch(api_keys=api_keys)
     return engine.search_videos(query=query, per_page=per_page)
 
 
-def search_music(api_keys: Dict[str, str], query: str, per_page: int = 10) -> Dict:
+def search_music(api_keys: dict[str, str], query: str, per_page: int = 10) -> dict:
     """便捷函数：跨平台音乐搜索"""
     engine = UnifiedSearch(api_keys=api_keys)
     return engine.search_music(query=query, per_page=per_page)
 
 
 def download_media(
-    api_keys: Dict[str, str],
+    api_keys: dict[str, str],
     platform: str,
     media_id: str,
     output_dir: str,
     quality: str = "hd",
-) -> Dict:
+) -> dict:
     """
     便捷函数：统一下载
 

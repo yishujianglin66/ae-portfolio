@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """E2E 测试 - 需要 AE 运行环境"""
 import pytest
+
 pytestmark = pytest.mark.real_ae
 
-import sys, json
+import json
+import sys
+
 sys.path.insert(0, r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 from ae_mcp_client import AECommandClient
 

@@ -120,20 +120,20 @@ class TestBridgesPackageExports:
 
     def test_all_10_exports_importable(self):
         from bridges import (
-            AdobeBridgeAdapter,
             AdobeApp,
-            AppStatus,
+            AdobeBridgeAdapter,
             AppInfo,
-            BatchResult,
-            UnifiedBridgeBase,
-            PRBridgeClient,
-            PSBridgeClient,
+            AppStatus,
             AUBridgeClient,
+            BatchResult,
             BlenderAEBridge,
-            TopazDaVinciBridge,
-            SilhouetteAEBridge,
             C4DAEBridge,
             PipelineOrchestrator,
+            PRBridgeClient,
+            PSBridgeClient,
+            SilhouetteAEBridge,
+            TopazDaVinciBridge,
+            UnifiedBridgeBase,
         )
         names = [
             AdobeBridgeAdapter, AdobeApp, AppStatus, AppInfo, BatchResult,

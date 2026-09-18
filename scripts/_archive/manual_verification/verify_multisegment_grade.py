@@ -5,13 +5,24 @@ r"""
 对每个片段应用不同的 DCTL 调色预设 + Fusion 微调，
 最终渲染输出到同目录。
 """
-import sys, os, time, tempfile, subprocess, ctypes, shutil
+import ctypes
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
 from integrations.davinci_fuscript import (
-    ResolveColorEngine, ColorGradeConfig, RenderConfig,
-    find_lut_for_preset, find_dctl_for_preset
+    ColorGradeConfig,
+    RenderConfig,
+    ResolveColorEngine,
+    find_dctl_for_preset,
+    find_lut_for_preset,
 )
+
 
 def get_long_path(short_path):
     buf = ctypes.create_unicode_buffer(1024)
@@ -65,7 +76,7 @@ else:
     print("\n[1/6] Resolve already running ✓")
 
 # Step 2: 验证素材存在
-print(f"\n[2/6] Verifying media files...")
+print("\n[2/6] Verifying media files...")
 valid_videos = []
 for v in SELECTED_VIDEOS:
     if os.path.isfile(v):
@@ -82,7 +93,7 @@ if not valid_videos:
 print(f"  Total: {len(valid_videos)} videos")
 
 # Step 3: 显示分段调色方案
-print(f"\n[3/6] Segment grading plan:")
+print("\n[3/6] Segment grading plan:")
 print(f"  {'Segment':<30} {'Preset':<15} {'LUT/DCTL'}")
 print(f"  {'-'*30} {'-'*15} {'-'*40}")
 for key, preset in SEGMENT_PRESETS.items():
@@ -92,7 +103,7 @@ for key, preset in SEGMENT_PRESETS.items():
     print(f"  {key:<30} {preset:<15} [{ext}] {lut_name}")
 
 # Step 4: 构建配置
-print(f"\n[4/6] Building pipeline configuration...")
+print("\n[4/6] Building pipeline configuration...")
 default_preset = "cinematic"
 default_lut = find_lut_for_preset(default_preset)
 safe_lut = engine._safe_lut_path(default_lut) if default_lut else None
@@ -121,7 +132,7 @@ print(f"  Render: {render_config.format} / {render_config.codec} / {render_confi
 print(f"  Output: {OUTPUT_DIR}")
 
 # Step 5: 构建并执行 Lua 管线
-print(f"\n[5/6] Building Lua pipeline script...")
+print("\n[5/6] Building Lua pipeline script...")
 project_name = "MultiSegment_Grade_E2E"
 timeline_name = "MultiSegmentTimeline"
 
@@ -159,8 +170,8 @@ for line in lines:
 print("  --- End Preview ---\n")
 
 # 执行
-print(f"[6/6] Executing pipeline via fuscript.exe...")
-print(f"  This may take several minutes for rendering...")
+print("[6/6] Executing pipeline via fuscript.exe...")
+print("  This may take several minutes for rendering...")
 start_time = time.time()
 
 proc = subprocess.run(

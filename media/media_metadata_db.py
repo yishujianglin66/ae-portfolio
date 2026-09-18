@@ -64,7 +64,7 @@ class MediaItem:
     updated_at: str = ""
     extra: str = "{}"          # JSON 扩展字段
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
 
@@ -110,7 +110,7 @@ CREATE INDEX IF NOT EXISTS idx_file_ext ON media_items(file_ext);
 class MediaMetadataDB:
     """素材元数据 SQLite 数据库"""
 
-    def __init__(self, db_path: Optional[str] = None):
+    def __init__(self, db_path: str | None = None):
         self._db_path = db_path or str(_DEFAULT_DB_PATH)
         os.makedirs(os.path.dirname(self._db_path), exist_ok=True)
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False)
@@ -161,7 +161,7 @@ class MediaMetadataDB:
             )
             return cursor.lastrowid
 
-    def add_items_batch(self, items: List[Dict[str, Any]]) -> int:
+    def add_items_batch(self, items: list[dict[str, Any]]) -> int:
         """批量添加，返回添加数量。"""
         count = 0
         with self._transaction():
@@ -187,11 +187,11 @@ class MediaMetadataDB:
                 count += 1
         return count
 
-    def get_item(self, item_id: int) -> Optional[MediaItem]:
+    def get_item(self, item_id: int) -> MediaItem | None:
         row = self._conn.execute("SELECT * FROM media_items WHERE id=?", (item_id,)).fetchone()
         return self._row_to_item(row) if row else None
 
-    def get_item_by_path(self, file_path: str) -> Optional[MediaItem]:
+    def get_item_by_path(self, file_path: str) -> MediaItem | None:
         row = self._conn.execute("SELECT * FROM media_items WHERE file_path=?", (file_path,)).fetchone()
         return self._row_to_item(row) if row else None
 
@@ -224,7 +224,7 @@ class MediaMetadataDB:
         limit: int = 50,
         offset: int = 0,
         order_by: str = "updated_at DESC",
-    ) -> List[MediaItem]:
+    ) -> list[MediaItem]:
         """条件搜索素材"""
         conditions = []
         params: list = []
@@ -278,7 +278,7 @@ class MediaMetadataDB:
         rows = self._conn.execute(sql, params).fetchall()
         return [self._row_to_item(r) for r in rows]
 
-    def full_text_search(self, query: str, limit: int = 20) -> List[MediaItem]:
+    def full_text_search(self, query: str, limit: int = 20) -> list[MediaItem]:
         """全文搜索（文件名/标签/情绪/曲风）"""
         like = f"%{query}%"
         sql = """
@@ -293,7 +293,7 @@ class MediaMetadataDB:
     # 统计
     # ------------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取素材库统计信息"""
         total = self._conn.execute("SELECT COUNT(*) FROM media_items").fetchone()[0]
         by_type = dict(self._conn.execute(
@@ -327,7 +327,7 @@ class MediaMetadataDB:
     # JSON 迁移
     # ------------------------------------------------------------------
 
-    def migrate_from_json_index(self, json_path: str) -> Dict[str, int]:
+    def migrate_from_json_index(self, json_path: str) -> dict[str, int]:
         """从 CLIP index.json 迁移数据到 SQLite"""
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)

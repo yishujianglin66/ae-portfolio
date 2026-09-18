@@ -1,8 +1,10 @@
 """生成 MattingEngine E2E 实测对比预览图（总体 + 发丝放大）。"""
-import sys, os
+import os
+import sys
+from pathlib import Path
+
 import cv2
 import numpy as np
-from pathlib import Path
 
 ROOT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 OUT = ROOT / "tests" / "output" / "matting_e2e"
@@ -125,8 +127,8 @@ def hair_detail_crops():
         col1 = add_header(src_big, f"{name}  crop  2x")
         col2 = add_header(mod_comp, f"MODNet checker 2x  ({name})")
         col3 = add_header(rmbg_comp, f"RMBG-1.4 checker 2x  ({name})")
-        col4 = add_header(mod_pink, f"MODNet pink-bg 2x")
-        col5 = add_header(rmbg_pink, f"RMBG-1.4 pink-bg 2x")
+        col4 = add_header(mod_pink, "MODNet pink-bg 2x")
+        col5 = add_header(rmbg_pink, "RMBG-1.4 pink-bg 2x")
         row = np.concatenate([col1, col2, col3, col4, col5], axis=1)
         out = OUT / f"02_{name}_2x.jpg"
         imwrite(out, row)

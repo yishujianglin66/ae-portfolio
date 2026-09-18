@@ -8,8 +8,8 @@
 参考 Antares 哲学：量化评估，精悍够用
 """
 import logging
-from typing import Any, Dict, List, Optional, Tuple
 from collections import defaultdict
+from typing import Any, Dict, List, Optional, Tuple
 
 from .evaluator_base import BaseEvaluator, EvaluationConfig, EvaluationResult
 
@@ -41,8 +41,8 @@ class StyleClassifyEvaluator(BaseEvaluator):
             config: 评估配置
         """
         super().__init__(config)
-        self._labels: List[str] = []
-        self._label_to_idx: Dict[str, int] = {}
+        self._labels: list[str] = []
+        self._label_to_idx: dict[str, int] = {}
 
     def load_model(self, model_path: str) -> None:
         """加载待评估的模型
@@ -132,7 +132,7 @@ class StyleClassifyEvaluator(BaseEvaluator):
         
         return self._end_evaluation(result)
 
-    def _get_test_data(self) -> List[Any]:
+    def _get_test_data(self) -> list[Any]:
         """获取测试数据
         
         Returns:
@@ -149,7 +149,7 @@ class StyleClassifyEvaluator(BaseEvaluator):
         
         return []
 
-    def _get_true_label(self, sample: Any) -> Optional[str]:
+    def _get_true_label(self, sample: Any) -> str | None:
         """获取真实标签
         
         Args:
@@ -164,7 +164,7 @@ class StyleClassifyEvaluator(BaseEvaluator):
             return sample.get('label', sample.get('style'))
         return None
 
-    def _predict(self, sample: Any) -> Tuple[str, Dict[str, float]]:
+    def _predict(self, sample: Any) -> tuple[str, dict[str, float]]:
         """预测（框架模式下返回模拟结果）
         
         Args:
@@ -191,7 +191,7 @@ class StyleClassifyEvaluator(BaseEvaluator):
         
         return true_label or "unknown", {}
 
-    def calculate_metrics(self, predictions: List[str], references: List[str]) -> Dict[str, float]:
+    def calculate_metrics(self, predictions: list[str], references: list[str]) -> dict[str, float]:
         """计算分类评估指标
         
         Args:
@@ -217,7 +217,7 @@ class StyleClassifyEvaluator(BaseEvaluator):
         
         return metrics
 
-    def _calculate_accuracy(self, predictions: List[str], references: List[str]) -> float:
+    def _calculate_accuracy(self, predictions: list[str], references: list[str]) -> float:
         """计算准确率
         
         Args:
@@ -235,9 +235,9 @@ class StyleClassifyEvaluator(BaseEvaluator):
 
     def _calculate_macro_metrics(
         self, 
-        predictions: List[str], 
-        references: List[str]
-    ) -> Tuple[float, float, float]:
+        predictions: list[str], 
+        references: list[str]
+    ) -> tuple[float, float, float]:
         """计算宏平均指标
         
         Args:
@@ -277,9 +277,9 @@ class StyleClassifyEvaluator(BaseEvaluator):
 
     def _calculate_weighted_metrics(
         self, 
-        predictions: List[str], 
-        references: List[str]
-    ) -> Tuple[float, float, float]:
+        predictions: list[str], 
+        references: list[str]
+    ) -> tuple[float, float, float]:
         """计算加权平均指标
         
         Args:
@@ -322,8 +322,8 @@ class StyleClassifyEvaluator(BaseEvaluator):
 
     def _calculate_top_k_accuracy(
         self, 
-        prediction_probs: List[Dict[str, float]], 
-        references: List[str],
+        prediction_probs: list[dict[str, float]], 
+        references: list[str],
         k: int = 3
     ) -> float:
         """计算 Top-K 准确率
@@ -357,9 +357,9 @@ class StyleClassifyEvaluator(BaseEvaluator):
 
     def _build_confusion_matrix(
         self, 
-        predictions: List[str], 
-        references: List[str]
-    ) -> Dict[str, Dict[str, int]]:
+        predictions: list[str], 
+        references: list[str]
+    ) -> dict[str, dict[str, int]]:
         """构建混淆矩阵
         
         Args:
@@ -385,9 +385,9 @@ class StyleClassifyEvaluator(BaseEvaluator):
 
     def _calculate_per_class_metrics(
         self, 
-        predictions: List[str], 
-        references: List[str]
-    ) -> Dict[str, Dict[str, float]]:
+        predictions: list[str], 
+        references: list[str]
+    ) -> dict[str, dict[str, float]]:
         """计算每个类别的指标
         
         Args:

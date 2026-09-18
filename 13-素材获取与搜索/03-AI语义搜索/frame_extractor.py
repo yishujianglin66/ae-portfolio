@@ -6,12 +6,12 @@
 from __future__ import annotations
 
 import json
-import sys
 import os
+import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional
-import cv2
+from typing import Any, Dict, List, Optional
 
+import cv2
 
 # 临时帧保存目录
 TEMP_FRAME_DIR = "D:/AE-Work/临时帧/"
@@ -26,7 +26,7 @@ def extract_frames(
     video_path: str,
     interval: float = 5.0,
     max_frames: int = 20
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     从视频中等间隔抽取关键帧
 
@@ -46,7 +46,7 @@ def extract_frames(
     """
     ensure_temp_dir()
 
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "frames": [],
         "video_info": {}
@@ -132,7 +132,7 @@ def extract_key_frames(
     video_path: str,
     threshold: float = 30.0,
     max_frames: int = 30
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     提取关键帧（基于场景变化检测）
     使用帧差法检测场景切换点，提取切换后的帧
@@ -147,7 +147,7 @@ def extract_key_frames(
     """
     ensure_temp_dir()
 
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "frames": [],
         "video_info": {}
@@ -248,7 +248,7 @@ def extract_all_frames_from_directory(
     interval: float = 5.0,
     max_frames_per_video: int = 20,
     method: str = "interval"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     批量处理目录下所有视频
 
@@ -261,7 +261,7 @@ def extract_all_frames_from_directory(
     返回:
         包含所有视频处理结果的字典
     """
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "success": False,
         "videos": [],
         "total_frames": 0,
@@ -337,7 +337,7 @@ def main() -> None:
         input_json = json.loads(sys.argv[2])
         action = input_json.get("action", "")
 
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
 
         if action == "extract_frames":
             video_path = input_json.get("video_path", "")

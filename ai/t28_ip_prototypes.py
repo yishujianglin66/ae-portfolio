@@ -227,7 +227,7 @@ def build_prototypes():
     _log(f"报告: {report_path}")
     
     # 打印前10个IP
-    _log(f"\n前10个IP原型:")
+    _log("\n前10个IP原型:")
     for i, (cn, data) in enumerate(list(prototypes.items())[:10]):
         _log(f"  {cn:20s} | {data['name_en']:35s} | tier={data['tier']}")
     

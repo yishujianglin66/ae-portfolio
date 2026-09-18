@@ -184,7 +184,7 @@ def _render_procedural(kind: str, prompt: str, size: int, out_path: Path) -> Non
 
 
 def generate_fx_material(prompt: str, kind: str = "glow",
-                         out_dir: Optional[str] = None,
+                         out_dir: str | None = None,
                          size: int = 1024,
                          prefer: str = "auto") -> str:
     """生成特效素材，返回透明 PNG 绝对路径。

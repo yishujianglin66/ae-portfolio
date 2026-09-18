@@ -23,18 +23,25 @@ from typing import Any, Dict, List, Optional
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.composition_tree import (
-    CompositionTree, LayerSpec, EffectRef, AnimationSpec,
+    AnimationSpec,
+    CompositionTree,
+    EffectRef,
+    LayerSpec,
     validate_composition_tree,
 )
 from core.jsx_keyframe_animator import (
-    EntranceAnimator, EntranceStyle, AnimationDirection,
-    LayerAnimation, AnimationTrack, Keyframe, EaseType,
+    AnimationDirection,
+    AnimationTrack,
+    EaseType,
+    EntranceAnimator,
+    EntranceStyle,
+    Keyframe,
+    LayerAnimation,
 )
-from core.layer_builders import (
-    LayerBuildContext, build_footage_layer, build_layer, js_str)
+from core.layer_builders import LayerBuildContext, build_footage_layer, build_layer, js_str
 
 # 入场动画预设名 → EntranceStyle 映射（树模板预设 → 动画器风格）
-PRESET_TO_STYLE: Dict[str, EntranceStyle] = {
+PRESET_TO_STYLE: dict[str, EntranceStyle] = {
     "fade_in": EntranceStyle.FADE_IN,
     "scale_bounce": EntranceStyle.SCALE_UP,
     "scale_up": EntranceStyle.SCALE_UP,
@@ -56,7 +63,7 @@ from core.effect_registry import PARAM_POSITION_INDEX as MATCH_PARAM_MAP  # noqa
 
 # 动画轨道属性路径 → matchName 嵌套链（AE 2025 中文版 property() 不支持斜杠多段路径，
 # 真机探测确认：单段显示名/matchName 均可，但 "Transform/Opacity" 这种斜杠路径返回 null）
-_PROP_PATH_MAP: Dict[str, List[str]] = {
+_PROP_PATH_MAP: dict[str, list[str]] = {
     "Transform/Opacity": ["ADBE Transform Group", "ADBE Opacity"],
     "Transform/Position": ["ADBE Transform Group", "ADBE Position"],
     "Transform/Scale": ["ADBE Transform Group", "ADBE Scale"],
@@ -69,7 +76,7 @@ _PROP_PATH_MAP: Dict[str, List[str]] = {
 }
 
 
-def _prop_chain_js(prop_path: str) -> Optional[str]:
+def _prop_chain_js(prop_path: str) -> str | None:
     """把 'Transform/Opacity' 转成嵌套 .property(\"matchName\") 调用链；未知路径返回 None"""
     segs = _PROP_PATH_MAP.get(prop_path)
     if not segs:
@@ -78,7 +85,7 @@ def _prop_chain_js(prop_path: str) -> Optional[str]:
 
 
 # combo 简名 → 效果库 combo_id（EffectLayerBuilder.EFFECT_COMBOS 的 31 组合）
-COMBO_ALIAS: Dict[str, str] = {
+COMBO_ALIAS: dict[str, str] = {
     "neon_glow": "effect_neon_pulse",
     "cyber_glow": "effect_neon_sign",
     "hologram": "effect_hologram_hud",
@@ -93,11 +100,11 @@ class JsxProjectBuilder:
     """CompositionTree → 单个 JSX 工程脚本"""
 
     def __init__(self):
-        self._warnings: List[str] = []
-        self._post_lines: List[str] = []  # 全图层构建完后追加（track matte moveAfter 等跨图层操作）
+        self._warnings: list[str] = []
+        self._post_lines: list[str] = []  # 全图层构建完后追加（track matte moveAfter 等跨图层操作）
 
     @property
-    def warnings(self) -> List[str]:
+    def warnings(self) -> list[str]:
         return self._warnings
 
     # ── 主入口 ────────────────────────────────────────────────
@@ -109,7 +116,7 @@ class JsxProjectBuilder:
             raise ValueError(f"合成树校验失败: {res['errors']}")
         self._warnings.extend(res["warnings"])
 
-        lines: List[str] = []
+        lines: list[str] = []
         ctx = LayerBuildContext(tree, self._warnings, self._post_lines)
         lines.append("(function() {")
         lines.append("  var _result = {};")
@@ -117,7 +124,7 @@ class JsxProjectBuilder:
         lines.append("    var proj = app.project;")
         lines.append(f"    var comp = proj.items.addComp(\"{js_str(tree.comp_name)}\", "
                      f"{tree.width}, {tree.height}, 1.0, {tree.duration}, {tree.fps});")
-        lines.append(f"    comp.bgColor = [0, 0, 0];")
+        lines.append("    comp.bgColor = [0, 0, 0];")
         # 图层循环（z_index 升序 = AE 图层栈从底到顶）
         for layer in sorted(tree.layers, key=lambda l: l.z_index):
             lines.extend(self._build_layer(ctx, layer))
@@ -135,7 +142,7 @@ class JsxProjectBuilder:
         return "\n".join(lines)
 
     # ── 图层构建 ──────────────────────────────────────────────
-    def build_batches(self, tree: CompositionTree, max_chars: int = 24000) -> List[str]:
+    def build_batches(self, tree: CompositionTree, max_chars: int = 24000) -> list[str]:
         """分块生成 (2026-08-17): ExtendScript 单脚本 ~32KB 截断 — 30 层树 JSX 55KB,
         后半被静默丢弃 → drop/outro 层从未创建, 成片后半黑屏 (seg1-3 实测)。
         分批: 首批建 comp, 后续批按 comp 名找回继续加层, 尾批跑 post_lines。
@@ -202,14 +209,14 @@ class JsxProjectBuilder:
             batches.append(head + "\n".join(cur) + "\n" + tail_last)
         return batches
 
-    def _build_layer(self, ctx: LayerBuildContext, layer: LayerSpec) -> List[str]:
+    def _build_layer(self, ctx: LayerBuildContext, layer: LayerSpec) -> list[str]:
         """类型创建分派（core/layer_builders.py）+ 类型无关后处理。
 
         gen_fx 在此校验素材已预备（resolve 在 execute() 预备阶段完成），
         JSX 生成复用 footage 路径。
         """
         var = f"layer{layer.z_index}"
-        lines: List[str] = [f"    // ── 图层 {layer.id} ({layer.type}) ──"]
+        lines: list[str] = [f"    // ── 图层 {layer.id} ({layer.type}) ──"]
         if layer.type == "gen_fx":
             # M6: 素材已在 execute() 预备阶段生成并写回 content.path，
             # JSX 生成完全复用 footage 导入逻辑
@@ -253,7 +260,7 @@ class JsxProjectBuilder:
         """
         if not tree.beat_events:
             return
-        by_type: Dict[str, List[float]] = {}
+        by_type: dict[str, list[float]] = {}
         for ev in tree.beat_events:
             by_type.setdefault(str(ev.get("beat_type", "any")), []).append(float(ev.get("time", 0)))
         kicks = by_type.get("kick", [])
@@ -267,14 +274,13 @@ class JsxProjectBuilder:
                 if name in fx and not fx[name].get("times"):
                     fx[name]["times"] = sorted({round(t, 3) for t in src})
 
-    def _build_edit_fx(self, layer: LayerSpec, var: str) -> List[str]:
+    def _build_edit_fx(self, layer: LayerSpec, var: str) -> list[str]:
         """edit_fx 注入: content.edit_fx = {punch:{...}, shake:{...}, rgb_burst:{...}, glow_hit:{...}}"""
         fx = layer.content.get("edit_fx")
         if not fx:
             return []
-        from core.edit_fx_vocabulary import (
-            zoom_punch_jsx, shake_jsx, rgb_burst_jsx, glow_hit_jsx)
-        lines: List[str] = [f"    // ── edit_fx（节拍语汇）──"]
+        from core.edit_fx_vocabulary import glow_hit_jsx, rgb_burst_jsx, shake_jsx, zoom_punch_jsx
+        lines: list[str] = ["    // ── edit_fx（节拍语汇）──"]
         try:
             if "punch" in fx:
                 p = fx["punch"]
@@ -299,7 +305,7 @@ class JsxProjectBuilder:
             self._warnings.append(f"图层 {layer.id} edit_fx 注入失败: {e}")
         return lines
 
-    def _build_char_animator(self, layer: LayerSpec, var: str) -> List[str]:
+    def _build_char_animator(self, layer: LayerSpec, var: str) -> list[str]:
         """字符级动画（M7）: AE Text Animator 脚手架 + Offset 扫动 stagger。
 
         content.char_anim = {"preset": "tracking_stagger", "duration_ms": 450,
@@ -350,12 +356,12 @@ class JsxProjectBuilder:
             self._warnings.append(f"图层 {layer.id} char_anim 生成失败: {e}")
         return lines
 
-    def _build_effects(self, layer: LayerSpec, var: str) -> List[str]:
-        lines: List[str] = []
+    def _build_effects(self, layer: LayerSpec, var: str) -> list[str]:
+        lines: list[str] = []
         for eff in layer.effects:
             if eff.kind == "combo":
                 try:
-                    from core.jsx_keyframe_animator import get_effect_builder, AnimationIntensity
+                    from core.jsx_keyframe_animator import AnimationIntensity, get_effect_builder
                     builder = get_effect_builder()
                     combo_id = COMBO_ALIAS.get(eff.value, eff.value)
                     if combo_id != eff.value:
@@ -389,8 +395,8 @@ class JsxProjectBuilder:
                         self._warnings.append(f"match 效果 {mn} 参数 {pname} 无索引映射，跳过")
         return lines
 
-    def _build_animations(self, layer: LayerSpec, idx: int, var: str) -> List[str]:
-        lines: List[str] = []
+    def _build_animations(self, layer: LayerSpec, idx: int, var: str) -> list[str]:
+        lines: list[str] = []
         animator = EntranceAnimator()
         start = layer.time_range[0]
         # entrance
@@ -447,7 +453,7 @@ class JsxProjectBuilder:
 class SynthesisOrchestrator:
     """树 → JSX → Bridge → 结果（M1b 执行入口）"""
 
-    def __init__(self, builder: Optional[JsxProjectBuilder] = None):
+    def __init__(self, builder: JsxProjectBuilder | None = None):
         self.builder = builder or JsxProjectBuilder()
 
     def generate_jsx(self, tree: CompositionTree) -> str:
@@ -455,7 +461,7 @@ class SynthesisOrchestrator:
 
     def execute(self, tree: CompositionTree, client: Any = None,
                 dry_run: bool = False,
-                sections: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+                sections: list[dict[str, Any]] | None = None) -> dict[str, Any]:
         """校验 → gen_fx 素材预备 → 段落编排 → 生成 → 执行。
 
         sections: [{"type":"drop","start":..,"end":..}] 传入则按段落变奏编排

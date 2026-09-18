@@ -49,7 +49,7 @@ class TestPRProcessManager:
 
     def test_pr_metrics(self):
         """测试获取 PR 进程指标。"""
-        from ae.pr_process_manager import PRProcessManager, PRMetrics
+        from ae.pr_process_manager import PRMetrics, PRProcessManager
 
         manager = PRProcessManager()
         metrics = manager.get_pr_metrics()
@@ -110,7 +110,7 @@ class TestPRProcessManager:
         from ae.pr_process_manager import PRProcessManager, PRState
 
         manager = PRProcessManager()
-        states_seen: List[tuple] = []
+        states_seen: list[tuple] = []
 
         def callback(old_state: PRState, new_state: PRState):
             states_seen.append((old_state, new_state))
@@ -122,7 +122,7 @@ class TestPRProcessManager:
 
     def test_launch_mode_setting(self):
         """测试启动模式设置。"""
-        from ae.pr_process_manager import PRProcessManager, LaunchMode
+        from ae.pr_process_manager import LaunchMode, PRProcessManager
 
         manager = PRProcessManager()
         manager.set_launch_mode(LaunchMode.NORMAL)
@@ -136,8 +136,9 @@ class TestPRProcessManager:
 
     def test_workspace_setting(self):
         """测试工作区设置。"""
-        from ae.pr_process_manager import PRProcessManager
         from pathlib import Path
+
+        from ae.pr_process_manager import PRProcessManager
 
         manager = PRProcessManager()
 
@@ -211,7 +212,7 @@ class TestPRMCP:
 
     def test_pr_mcp_error_mapping(self):
         """测试错误映射功能。"""
-        from ae.pr_mcp_client import PRMCP, PRNotFoundError, PRInvalidArgumentError, PRPermissionDeniedError
+        from ae.pr_mcp_client import PRMCP, PRInvalidArgumentError, PRNotFoundError, PRPermissionDeniedError
 
         client = PRMCP()
 
@@ -435,13 +436,13 @@ class TestPRExceptions:
     def test_pr_mcp_exceptions(self):
         """测试 PR MCP 客户端异常。"""
         from ae.pr_mcp_client import (
-            PRError,
             PRConnectionError,
-            PRTimeoutError,
-            PRNotFoundError,
+            PRError,
             PRInvalidArgumentError,
+            PRNotFoundError,
             PRPermissionDeniedError,
             PRServerError,
+            PRTimeoutError,
             PRUnknownError,
         )
 
@@ -479,7 +480,7 @@ class TestPRIntegration:
 
     def test_adapter_import_from_package(self):
         """测试从包导入适配器。"""
-        from ae.adapters import PRAdapter, BasePRAdapter
+        from ae.adapters import BasePRAdapter, PRAdapter
 
         assert PRAdapter is not None
         assert BasePRAdapter is not None
@@ -487,11 +488,11 @@ class TestPRIntegration:
     def test_process_manager_import(self):
         """测试导入进程管理器。"""
         from ae.pr_process_manager import (
-            PRProcessManager,
-            PRState,
+            CloseMethod,
             HealthStatus,
             LaunchMode,
-            CloseMethod,
+            PRProcessManager,
+            PRState,
         )
 
         assert PRProcessManager is not None

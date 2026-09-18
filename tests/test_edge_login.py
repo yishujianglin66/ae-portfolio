@@ -1,5 +1,7 @@
 import asyncio
+
 from playwright.async_api import async_playwright
+
 
 async def main():
     print("=== 尝试连接Edge用户数据目录 ===")

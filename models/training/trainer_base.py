@@ -2,11 +2,11 @@
 训练器基类 - 定义训练流程的统一接口
 参考 Antares 的工程哲学：小模型、精调、垂直场景
 """
+import logging
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
-import time
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class TrainingConfig:
     save_steps: int = 100
     eval_steps: int = 100
     early_stopping_patience: int = 3
-    target_params_million: Optional[float] = None
+    target_params_million: float | None = None
     """目标参数量（百万），Antares式精悍够用"""
 
 
@@ -52,7 +52,7 @@ class TrainingResult:
     total_epochs: int = 0
     train_loss: float = 0.0
     eval_loss: float = 0.0
-    eval_metrics: Dict[str, float] = field(default_factory=dict)
+    eval_metrics: dict[str, float] = field(default_factory=dict)
     params_million: float = 0.0
     """实际参数量（百万）"""
     training_time_seconds: float = 0.0
@@ -75,7 +75,7 @@ class BaseTrainer(ABC):
             config: 训练配置
         """
         self.config = config
-        self._callbacks: List[Callable] = []
+        self._callbacks: list[Callable] = []
         self._step = 0
         self._epoch = 0
         self._train_dataset = None
@@ -112,7 +112,7 @@ class BaseTrainer(ABC):
         pass
 
     @abstractmethod
-    def evaluate(self) -> Dict[str, float]:
+    def evaluate(self) -> dict[str, float]:
         """评估模型
         
         Returns:

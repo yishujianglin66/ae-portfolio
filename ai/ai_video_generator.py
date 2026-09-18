@@ -21,17 +21,17 @@ RunwayML / Pika AI 视频生成集成模块 v1.0
 - simulate: 模拟执行，生成模拟结果（用于测试和流程验证）
 - auto    : 优先真实模式，失败自动降级到模拟模式
 """
-import os
-import sys
 import json
+import os
+import shutil
+import sys
+import tempfile
 import time
 import uuid
-import shutil
-import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple, Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 OUTPUT_BASE = Path(os.environ.get("AE_WORK_DIR", r"D:\AE-Work"))
 
@@ -86,7 +86,7 @@ class AIVideoConfig:
     seed: int = -1
     aspect_ratio: str = "16:9"
     motion_bucket: int = 127
-    camera_motion: Dict[str, Any] = field(default_factory=dict)
+    camera_motion: dict[str, Any] = field(default_factory=dict)
     output_dir: str = str(OUTPUT_BASE / "ai_video_output")
     poll_interval: int = 5
     max_wait_time: int = 600
@@ -122,11 +122,11 @@ class AIVideoResult:
     width: int = 0
     height: int = 0
     fps: float = 0.0
-    error: Optional[str] = None
+    error: str | None = None
     seed: int = -1
 
 
-AI_VIDEO_PRESETS: Dict[str, Dict[str, Dict[str, Any]]] = {
+AI_VIDEO_PRESETS: dict[str, dict[str, dict[str, Any]]] = {
     "runway": {
         "cinematic": {
             "prompt_template": "cinematic film, {prompt}, shot on Arri Alexa, 35mm film grain, shallow depth of field, dramatic lighting, color graded, movie scene",
@@ -302,7 +302,7 @@ class AIVideoGenerator:
     支持真实模式、模拟模式和自动降级模式。
     """
 
-    def __init__(self, config: Optional[AIVideoConfig] = None):
+    def __init__(self, config: AIVideoConfig | None = None):
         """初始化 AIVideoGenerator。
 
         Args:
@@ -332,7 +332,7 @@ class AIVideoGenerator:
             return bool(PIKA_API_KEY)
         return False
 
-    def is_available(self, provider: Optional[str] = None) -> bool:
+    def is_available(self, provider: str | None = None) -> bool:
         """检查指定提供商是否可用。
 
         Args:
@@ -400,7 +400,7 @@ class AIVideoGenerator:
             return "real" if self.is_available(provider) else "simulate"
         return mode
 
-    def get_provider_presets(self, provider: str) -> Dict[str, Dict[str, Any]]:
+    def get_provider_presets(self, provider: str) -> dict[str, dict[str, Any]]:
         """获取提供商的风格预设。
 
         Args:
@@ -462,8 +462,8 @@ class AIVideoGenerator:
 
     def generate(
         self,
-        config: Optional[AIVideoConfig] = None,
-        callback: Optional[Callable[[float, str], None]] = None,
+        config: AIVideoConfig | None = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> AIVideoResult:
         """主方法：生成视频。
 
@@ -507,7 +507,7 @@ class AIVideoGenerator:
             real_result = self._run_real_mode(cfg, provider, callback)
             result = real_result
             if not real_result.success and cfg.mode == "auto":
-                print(f"[AIVideoGenerator] Real mode failed, falling back to simulate")
+                print("[AIVideoGenerator] Real mode failed, falling back to simulate")
                 if callback:
                     callback(0.2, "Real mode failed, falling back to simulate mode...")
                 sim_result = self._run_simulate_mode(cfg, provider, callback)
@@ -522,8 +522,8 @@ class AIVideoGenerator:
     def text_to_video(
         self,
         prompt: str,
-        config: Optional[AIVideoConfig] = None,
-        callback: Optional[Callable[[float, str], None]] = None,
+        config: AIVideoConfig | None = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> AIVideoResult:
         """文生视频。
 
@@ -544,8 +544,8 @@ class AIVideoGenerator:
         self,
         image_path: str,
         prompt: str,
-        config: Optional[AIVideoConfig] = None,
-        callback: Optional[Callable[[float, str], None]] = None,
+        config: AIVideoConfig | None = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> AIVideoResult:
         """图生视频。
 
@@ -577,8 +577,8 @@ class AIVideoGenerator:
         self,
         video_path: str,
         prompt: str,
-        config: Optional[AIVideoConfig] = None,
-        callback: Optional[Callable[[float, str], None]] = None,
+        config: AIVideoConfig | None = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> AIVideoResult:
         """视频延伸。
 
@@ -608,9 +608,9 @@ class AIVideoGenerator:
 
     def batch_generate(
         self,
-        configs: List[AIVideoConfig],
-        callback: Optional[Callable[[int, int, AIVideoResult], None]] = None,
-    ) -> List[AIVideoResult]:
+        configs: list[AIVideoConfig],
+        callback: Callable[[int, int, AIVideoResult], None] | None = None,
+    ) -> list[AIVideoResult]:
         """批量生成视频。
 
         Args:
@@ -636,7 +636,7 @@ class AIVideoGenerator:
         self,
         config: AIVideoConfig,
         provider: str,
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> AIVideoResult:
         """真实模式：通过 requests 调用 REST API。
 
@@ -785,8 +785,8 @@ class AIVideoGenerator:
         config: AIVideoConfig,
         provider: str,
         api_key: str,
-        callback: Optional[Callable[[float, str], None]] = None,
-    ) -> Optional[str]:
+        callback: Callable[[float, str], None] | None = None,
+    ) -> str | None:
         """轮询任务状态直到完成或超时。
 
         Args:
@@ -891,7 +891,7 @@ class AIVideoGenerator:
         self,
         config: AIVideoConfig,
         provider: str,
-        callback: Optional[Callable[[float, str], None]] = None,
+        callback: Callable[[float, str], None] | None = None,
     ) -> AIVideoResult:
         """模拟模式：不真正调用 API，生成模拟结果。
 
@@ -1100,7 +1100,7 @@ def _run_self_tests():
         if attrs_ok:
             print(f"  ✓ AIVideoConfig 包含所有必需属性 ({len(required_attrs)} 个)")
         else:
-            print(f"  ✗ AIVideoConfig 缺少必需属性")
+            print("  ✗ AIVideoConfig 缺少必需属性")
         results.append(("config_dataclass", attrs_ok))
     except Exception as e:
         print(f"  ✗ AIVideoConfig 错误: {e}")
@@ -1118,7 +1118,7 @@ def _run_self_tests():
         if attrs_ok:
             print(f"  ✓ AIVideoResult 包含所有必需属性 ({len(required_attrs)} 个)")
         else:
-            print(f"  ✗ AIVideoResult 缺少必需属性")
+            print("  ✗ AIVideoResult 缺少必需属性")
         results.append(("result_dataclass", attrs_ok))
     except Exception as e:
         print(f"  ✗ AIVideoResult 错误: {e}")
@@ -1127,7 +1127,7 @@ def _run_self_tests():
     print("\n[测试 4/10] 检查 AIVideoGenerator 初始化...")
     try:
         gen = AIVideoGenerator(config=AIVideoConfig(mode="simulate"))
-        print(f"  ✓ AIVideoGenerator 初始化成功")
+        print("  ✓ AIVideoGenerator 初始化成功")
         print(f"    - Mode: {gen.config.mode}")
         print(f"    - Runway available: {gen.is_available('runway')}")
         print(f"    - Pika available: {gen.is_available('pika')}")
@@ -1168,7 +1168,7 @@ def _run_self_tests():
         )
 
         if result.success and Path(result.output_path).exists():
-            print(f"  ✓ 文生视频模拟成功")
+            print("  ✓ 文生视频模拟成功")
             print(f"    - Provider: {result.provider}")
             print(f"    - 分辨率: {result.width}x{result.height}")
             print(f"    - FPS: {result.fps}")
@@ -1198,7 +1198,7 @@ def _run_self_tests():
         )
 
         if result.success and Path(result.output_path).exists():
-            print(f"  ✓ 图生视频模拟成功")
+            print("  ✓ 图生视频模拟成功")
             print(f"    - Provider: {result.provider}")
             print(f"    - 任务 ID: {result.task_id}")
             print(f"    - 进度回调次数: {len(progress_log)}")
@@ -1222,7 +1222,7 @@ def _run_self_tests():
         )
 
         if result.success and Path(result.output_path).exists():
-            print(f"  ✓ 视频延伸模拟成功")
+            print("  ✓ 视频延伸模拟成功")
             print(f"    - Provider: {result.provider}")
             print(f"    - 种子: {result.seed}")
             results.append(("simulate_video_extend", True))
@@ -1239,13 +1239,13 @@ def _run_self_tests():
     try:
         config = create_config_from_preset("cinematic", "runway")
         if config.provider == "runway" and config.motion_bucket == 120:
-            print(f"  ✓ 预设创建成功 (cinematic @ runway)")
+            print("  ✓ 预设创建成功 (cinematic @ runway)")
             print(f"    - motion_bucket: {config.motion_bucket}")
             print(f"    - 分辨率: {config.width}x{config.height}")
             print(f"    - duration: {config.duration}s")
             results.append(("preset_create", True))
         else:
-            print(f"  ✗ 预设参数不匹配")
+            print("  ✗ 预设参数不匹配")
             results.append(("preset_create", False))
     except Exception as e:
         print(f"  ✗ create_config_from_preset 错误: {e}")

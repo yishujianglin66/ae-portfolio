@@ -24,20 +24,19 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from ae.ae_mcp_client import (
+    AECommandError,
+    AEConnectionError,
     AEMCPClient,
     AEMCPError,
-    AEConnectionError,
-    AECommandError,
     AENotFoundError,
-    CompositionBuilder,
-    LayerBuilder,
-    EffectStack,
     BlendMode,
-    TrackMatteType,
+    CompositionBuilder,
     EasingType,
+    EffectStack,
+    LayerBuilder,
+    TrackMatteType,
     create_client,
 )
-
 
 BRIDGE_DIR = r"C:\Users\Administrator\Documents\ae-mcp-bridge"
 
@@ -115,12 +114,12 @@ def example_3_composition_management() -> None:
         )
         print(f"✓ 合成创建成功: {result.get('name')}")
 
-        print(f"\n修改合成设置...")
+        print("\n修改合成设置...")
         result = client.set_composition_settings(
             comp_name=comp_name,
             duration=10.0,
         )
-        print(f"✓ 合成设置已更新")
+        print("✓ 合成设置已更新")
 
     except AEMCPError as e:
         print(f"错误: {e}")
@@ -159,7 +158,7 @@ def example_4_layer_creation() -> None:
             layer_name="Background",
             color=[0.2, 0.3, 0.5],
         )
-        print(f"✓ 固态层创建成功")
+        print("✓ 固态层创建成功")
 
         print("\n创建形状图层...")
         result = client.create_shape_layer(
@@ -170,14 +169,14 @@ def example_4_layer_creation() -> None:
             size=[200, 200],
             position=[300, 300],
         )
-        print(f"✓ 形状图层创建成功")
+        print("✓ 形状图层创建成功")
 
         print("\n添加调整图层...")
         result = client.add_adjustment_layer(
             comp_name=comp_name,
             layer_name="Adjustment",
         )
-        print(f"✓ 调整图层添加成功")
+        print("✓ 调整图层添加成功")
 
         print("\n设置图层属性...")
         result = client.set_layer_properties(
@@ -189,7 +188,7 @@ def example_4_layer_creation() -> None:
                 "opacity": 80,
             },
         )
-        print(f"✓ 图层属性已更新")
+        print("✓ 图层属性已更新")
 
         print("\n设置混合模式...")
         result = client.set_blend_mode(
@@ -197,7 +196,7 @@ def example_4_layer_creation() -> None:
             layer_name="Circle",
             blend_mode=BlendMode.ADD,
         )
-        print(f"✓ 混合模式已设置为 ADD")
+        print("✓ 混合模式已设置为 ADD")
 
         print("\n设置运动模糊...")
         result = client.set_motion_blur(
@@ -205,7 +204,7 @@ def example_4_layer_creation() -> None:
             layer_name="Circle",
             enabled=True,
         )
-        print(f"✓ 运动模糊已启用")
+        print("✓ 运动模糊已启用")
 
     except AEMCPError as e:
         print(f"错误: {e}")
@@ -300,7 +299,7 @@ def example_6_effects() -> None:
             effect_name="高斯模糊",
             properties={"Blurriness": 10},
         )
-        print(f"✓ 高斯模糊效果已应用")
+        print("✓ 高斯模糊效果已应用")
 
         print("\n设置效果属性...")
         result = client.set_effect_property(
@@ -310,7 +309,7 @@ def example_6_effects() -> None:
             property_name="Blurriness",
             value=20,
         )
-        print(f"✓ 效果属性已更新")
+        print("✓ 效果属性已更新")
 
         print("\n查看图层效果列表...")
         effects = client.list_effects(comp_name, "Adjustment")
@@ -388,7 +387,7 @@ def example_8_layer_builder() -> None:
             .apply_effect("高斯模糊", {"Blurriness": 0})
             .build()
         )
-        print(f"✓ 图层配置完成")
+        print("✓ 图层配置完成")
         print(f"  属性设置: {'成功' if 'properties' in result else '跳过'}")
         print(f"  关键帧: {'成功' if 'keyframes' in result else '跳过'}")
         print(f"  效果: {len(result.get('effects', []))} 个")
@@ -422,7 +421,7 @@ def example_9_effect_stack() -> None:
             .add("高斯模糊", {"Blurriness": 2})
             .apply()
         )
-        print(f"✓ 批量效果应用完成")
+        print("✓ 批量效果应用完成")
 
         print("\n查看已应用的效果...")
         effects = stack.list_effects()
@@ -581,7 +580,7 @@ def example_13_track_matte_and_parent() -> None:
             matte_layer="TextMatte",
             matte_type=TrackMatteType.ALPHA,
         )
-        print(f"✓ 轨道遮罩已设置")
+        print("✓ 轨道遮罩已设置")
 
         print("\n创建空对象作为父图层...")
         client.create_null_layer(comp_name, "ParentNull")
@@ -592,7 +591,7 @@ def example_13_track_matte_and_parent() -> None:
             child_layer="TextMatte",
             parent_layer="ParentNull",
         )
-        print(f"✓ 父子关系已设置")
+        print("✓ 父子关系已设置")
 
     except AEMCPError as e:
         print(f"错误: {e}")

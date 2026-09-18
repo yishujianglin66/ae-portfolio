@@ -56,7 +56,7 @@ class AnimeContentTagger:
         self.input_name = self.sess.get_inputs()[0].name
         self.variant = variant
 
-    def tag_image(self, img_rgb: np.ndarray) -> Dict[str, float]:
+    def tag_image(self, img_rgb: np.ndarray) -> dict[str, float]:
         """单帧 (H,W,3 uint8 RGB) → 5 类概率 (argmax 为标签)。"""
         from PIL import Image
         pil = Image.fromarray(img_rgb).resize((INPUT_SIZE, INPUT_SIZE), Image.BICUBIC)
@@ -68,7 +68,7 @@ class AnimeContentTagger:
         probs = e / e.sum()
         return {LABELS[i]: float(probs[i]) for i in range(len(LABELS))}
 
-    def tag_video(self, video_path: str, n_frames: int = 16) -> Dict[str, Any]:
+    def tag_video(self, video_path: str, n_frames: int = 16) -> dict[str, Any]:
         """视频 → 均匀采样 n_frames 帧 → 帧级 argmax 标签 + 视频级多数投票。"""
         from decord import VideoReader, cpu
         vr = VideoReader(str(video_path), ctx=cpu(0))
@@ -82,8 +82,8 @@ class AnimeContentTagger:
             idxs = [round(i * step) for i in range(n_frames)]
         frames = vr.get_batch(idxs).asnumpy()  # (T,H,W,3) RGB uint8
 
-        votes: Dict[str, int] = {l: 0 for l in LABELS}
-        mean_probs: Dict[str, float] = {l: 0.0 for l in LABELS}
+        votes: dict[str, int] = {l: 0 for l in LABELS}
+        mean_probs: dict[str, float] = {l: 0.0 for l in LABELS}
         for f in frames:
             probs = self.tag_image(f)
             votes[max(probs, key=probs.get)] += 1
@@ -130,7 +130,7 @@ def main() -> int:
         videos = videos[:args.limit]
     print(f"[tag] {len(videos)} videos x {args.n_frames} frames")
 
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
     t0 = time.time()
     for i, vp in enumerate(videos):
         try:

@@ -2,15 +2,15 @@
 
 不依赖 Adobe 软件，纯 Python + ffmpeg（moviepy）。
 """
+import json
 import os
 import sys
 import time
-import json
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
-from moviepy import VideoFileClip, concatenate_videoclips, TextClip, CompositeVideoClip
+from moviepy import CompositeVideoClip, TextClip, VideoFileClip, concatenate_videoclips
 from moviepy.video.fx import FadeIn, FadeOut
 
 from core.video_analyzer_accelerated import AcceleratedVideoAnalyzer

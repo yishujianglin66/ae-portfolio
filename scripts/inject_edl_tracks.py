@@ -26,7 +26,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from scripts.edl import (  # noqa: E402
-    load_edl, save_edl, lint_edl, EDL_SCHEMA_VERSION,
+    EDL_SCHEMA_VERSION,
+    lint_edl,
+    load_edl,
+    save_edl,
 )
 
 RUN_DIR_PATTERN = r"unified_(?:run\d+|r1_fixed_v\d+)"   # 与两 build 脚本对齐

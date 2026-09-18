@@ -16,13 +16,13 @@ Author: AE-Knowledge-Vault Team
 from __future__ import annotations
 
 import json
+import logging
 import os
 import subprocess
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import logging
 logger = logging.getLogger(__name__)
 
 # 支持的媒体文件扩展名
@@ -58,21 +58,21 @@ class ScanResult:
     """扫描结果"""
     directory: str
     total_files: int = 0
-    videos: List[MediaInfo] = field(default_factory=list)
-    audios: List[MediaInfo] = field(default_factory=list)
-    images: List[MediaInfo] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    videos: list[MediaInfo] = field(default_factory=list)
+    audios: list[MediaInfo] = field(default_factory=list)
+    images: list[MediaInfo] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     scan_time_sec: float = 0.0
 
     @property
-    def video_paths(self) -> List[str]:
+    def video_paths(self) -> list[str]:
         return [v.path for v in self.videos]
 
     @property
     def total_video_duration(self) -> float:
         return sum(v.duration for v in self.videos)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "directory": self.directory,
             "total_files": self.total_files,
@@ -211,7 +211,7 @@ class MaterialScanner:
         )
         return result
 
-    def _probe_video(self, filepath: Path) -> Optional[MediaInfo]:
+    def _probe_video(self, filepath: Path) -> MediaInfo | None:
         """用 ffprobe 提取视频元数据"""
         try:
             cmd = [
@@ -271,7 +271,7 @@ class MaterialScanner:
             logger.debug(f"ffprobe failed for {filepath.name}: {e}")
             return None
 
-    def _probe_audio(self, filepath: Path) -> Optional[MediaInfo]:
+    def _probe_audio(self, filepath: Path) -> MediaInfo | None:
         """用 ffprobe 提取音频元数据"""
         try:
             cmd = [
@@ -370,11 +370,11 @@ class MaterialScanner:
 
         return min(1.0, round(score, 3))
 
-    def get_best_videos(self, result: ScanResult, count: int = 5) -> List[MediaInfo]:
+    def get_best_videos(self, result: ScanResult, count: int = 5) -> list[MediaInfo]:
         """获取质量最好的 N 个视频"""
         return result.videos[:count]
 
-    def get_plan_materials(self, result: ScanResult) -> Dict[str, Any]:
+    def get_plan_materials(self, result: ScanResult) -> dict[str, Any]:
         """生成供 plan 阶段消费的素材摘要"""
         videos = result.videos
         return {

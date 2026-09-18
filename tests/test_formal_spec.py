@@ -4,12 +4,11 @@ import pytest
 
 from core.formal_spec import (
     AERenderTimeout,
-    FFmpegParamBoundary,
     FanPositionConstraint,
+    FFmpegParamBoundary,
     InvariantViolation,
     check_invariants,
 )
-
 
 # ============================================================================
 # 原有合法测试（保留）

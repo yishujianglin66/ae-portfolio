@@ -11,7 +11,7 @@ import sys
 import winreg
 from pathlib import Path
 
-from fontTools.ttLib import TTFont, TTCollection
+from fontTools.ttLib import TTCollection, TTFont
 
 ROOT = Path(__file__).resolve().parent.parent
 USER_DIR = Path(os.environ["LOCALAPPDATA"]) / "Microsoft" / "Windows" / "Fonts"

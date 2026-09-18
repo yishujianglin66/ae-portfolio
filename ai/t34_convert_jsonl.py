@@ -1,7 +1,7 @@
 """Convert merged training data to JSONL format for t32 training."""
 import json
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
 
 MERGED_DATA = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\data\multi_ip_training\merged_training_data.json")
 OUTPUT_JSONL = Path(r"D:\multi_ip_corpus\merged_vlm.jsonl")

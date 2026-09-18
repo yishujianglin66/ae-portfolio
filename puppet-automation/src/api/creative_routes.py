@@ -35,8 +35,8 @@ if str(PROJECT_ROOT) not in sys.path:
 async def recommend_shot(
     mood: str = Query(..., description="情绪标签: intense/calm/epic/tense/climax/..."),
     content: str = Query("", description="内容描述: battle/dialogue/landscape/..."),
-    prev_scale: Optional[str] = Query(None, description="前镜头景别"),
-    beat_time: Optional[float] = Query(None, description="节拍时间点"),
+    prev_scale: str | None = Query(None, description="前镜头景别"),
+    beat_time: float | None = Query(None, description="节拍时间点"),
 ):
     """根据情绪和内容推荐最优镜头参数。"""
     try:
@@ -53,7 +53,7 @@ async def recommend_shot(
 
 
 @router.post("/cinematic/shot/optimize-script")
-async def optimize_script(script: Dict[str, Any]):
+async def optimize_script(script: dict[str, Any]):
     """优化整个剧本的镜头语言。
 
     输入: {"segments": [{"mood": "...", "content": "..."}, ...]}
@@ -88,7 +88,7 @@ async def recommend_transition(
 
 
 @router.post("/cinematic/continuity/check")
-async def check_continuity(segments: List[Dict[str, Any]]):
+async def check_continuity(segments: list[dict[str, Any]]):
     """检查镜头连续性，报告可能不自然的跳跃。"""
     try:
         from scene.cinematic_intelligence import CinematicIntelligence
@@ -121,7 +121,7 @@ async def list_moods():
 # ============================================================
 
 @router.post("/director/produce")
-async def director_produce(params: Dict[str, Any]):
+async def director_produce(params: dict[str, Any]):
     """完整导演生产流程。
 
     从一句话描述到成品视频的完整自动化创作链。
@@ -142,6 +142,7 @@ async def director_produce(params: Dict[str, Any]):
     """
     try:
         from ai.ai_director import AIDirector
+
         from ..engines.base import validate_path_safety
         output_dir = params.get("output_dir", str(PROJECT_ROOT / "output_director"))
         director = AIDirector(output_dir=output_dir)
@@ -177,7 +178,7 @@ async def director_produce(params: Dict[str, Any]):
 
 
 @router.post("/director/generate-script")
-async def director_generate_script(params: Dict[str, Any]):
+async def director_generate_script(params: dict[str, Any]):
     """仅生成 AI 剧本（不执行后续步骤）。"""
     try:
         from ai.ai_director import ScriptGenerator
@@ -194,7 +195,7 @@ async def director_generate_script(params: Dict[str, Any]):
 
 
 @router.post("/director/translate-jsx")
-async def director_translate_jsx(params: Dict[str, Any]):
+async def director_translate_jsx(params: dict[str, Any]):
     """将剧本翻译为 JSX 脚本。"""
     try:
         from ai.ai_director import ScriptToJSXTranslator
@@ -210,10 +211,11 @@ async def director_translate_jsx(params: Dict[str, Any]):
 
 
 @router.post("/director/analyze-materials")
-async def director_analyze_materials(params: Dict[str, Any]):
+async def director_analyze_materials(params: dict[str, Any]):
     """分析素材视频的视觉特征。"""
     try:
         from ai.ai_director import VisualAnalyzer
+
         from ..engines.base import validate_path_safety
         analyzer = VisualAnalyzer()
         results = []
@@ -236,7 +238,7 @@ async def director_analyze_materials(params: Dict[str, Any]):
 # ============================================================
 
 @router.post("/replica/analyze-music")
-async def replica_analyze_music(params: Dict[str, Any]):
+async def replica_analyze_music(params: dict[str, Any]):
     """分析音乐文件（BPM/节拍/能量曲线）。"""
     try:
         from video.video_generator import VideoGenerator
@@ -252,7 +254,7 @@ async def replica_analyze_music(params: Dict[str, Any]):
 
 
 @router.post("/replica/analyze-clips")
-async def replica_analyze_clips(params: Dict[str, Any]):
+async def replica_analyze_clips(params: dict[str, Any]):
     """分析视频片段（色彩/运动/时长）。"""
     try:
         from video.video_generator import VideoGenerator
@@ -266,7 +268,7 @@ async def replica_analyze_clips(params: Dict[str, Any]):
 
 
 @router.post("/replica/match-audio-video")
-async def replica_match_audio_video(params: Dict[str, Any]):
+async def replica_match_audio_video(params: dict[str, Any]):
     """音画匹配 — 根据音乐节奏自动排列片段。"""
     try:
         from video.video_generator import VideoGenerator
@@ -281,7 +283,7 @@ async def replica_match_audio_video(params: Dict[str, Any]):
 
 
 @router.post("/replica/generate-timeline")
-async def replica_generate_timeline(params: Dict[str, Any]):
+async def replica_generate_timeline(params: dict[str, Any]):
     """生成完整时间轴计划（含图层/效果/关键帧）。"""
     try:
         from video.video_generator import VideoGenerator
@@ -296,7 +298,7 @@ async def replica_generate_timeline(params: Dict[str, Any]):
 
 
 @router.post("/replica/run-pipeline")
-async def replica_run_pipeline(params: Dict[str, Any]):
+async def replica_run_pipeline(params: dict[str, Any]):
     """运行完整复刻流水线（分析+匹配+时间轴+可选AE执行）。"""
     try:
         from video.video_generator import VideoGenerator
@@ -315,7 +317,7 @@ async def replica_run_pipeline(params: Dict[str, Any]):
 
 
 @router.post("/replica/run-enhanced")
-async def replica_run_enhanced(params: Dict[str, Any]):
+async def replica_run_enhanced(params: dict[str, Any]):
     """运行增强版复刻流水线（四引擎集成）。"""
     try:
         from video.video_generator import VideoGenerator
@@ -340,7 +342,7 @@ async def replica_run_enhanced(params: Dict[str, Any]):
 # ============================================================
 
 @router.post("/style/extract")
-async def style_extract(params: Dict[str, Any]):
+async def style_extract(params: dict[str, Any]):
     """从参考视频中提取风格指纹。
 
     请求体: {"video_path": "..."}
@@ -371,7 +373,7 @@ async def style_extract(params: Dict[str, Any]):
 
 
 @router.post("/style/match")
-async def style_match(params: Dict[str, Any]):
+async def style_match(params: dict[str, Any]):
     """将风格指纹匹配到预设风格。"""
     try:
         from video.style_migrator import StyleMigrator
@@ -401,7 +403,7 @@ async def style_presets():
 # ============================================================
 
 @router.post("/creative/full-pipeline")
-async def creative_full_pipeline(params: Dict[str, Any]):
+async def creative_full_pipeline(params: dict[str, Any]):
     """一键创意全流程 — 导演+镜头语言+风格迁移+复刻的组合。
 
     这是最强大的端点，整合所有创意模块。
@@ -419,7 +421,7 @@ async def creative_full_pipeline(params: Dict[str, Any]):
     }
     """
     start = time.time()
-    report: Dict[str, Any] = {"phases": {}}
+    report: dict[str, Any] = {"phases": {}}
 
     try:
         # ── Phase 1: 导演生产 ──

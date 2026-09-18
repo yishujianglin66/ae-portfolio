@@ -32,11 +32,11 @@ class CostEntry:
     cost_usd: float
     tokens_input: int = 0
     tokens_output: int = 0
-    pipeline: Optional[str] = None
-    stage: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    pipeline: str | None = None
+    stage: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "timestamp": self.timestamp,
             "provider": self.provider,
@@ -61,7 +61,7 @@ class CostTracker:
         total_budget_usd: float = 10.0,
         reserve_pct: float = 0.10,
         policy: BudgetPolicy = BudgetPolicy.WARN,
-        log_path: Optional[Path] = None,
+        log_path: Path | None = None,
     ):
         self.total_budget_usd = total_budget_usd
         self.reserve_pct = reserve_pct
@@ -69,8 +69,8 @@ class CostTracker:
         self.log_path = log_path or Path(
             r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\data\cost_log.jsonl"
         )
-        self._entries: List[CostEntry] = []
-        self._alerts: List[str] = []
+        self._entries: list[CostEntry] = []
+        self._alerts: list[str] = []
         logger.info(
             f"CostTracker 初始化: budget=${total_budget_usd}, "
             f"reserve={reserve_pct * 100}%, policy={policy.value}"
@@ -102,9 +102,9 @@ class CostTracker:
         cost_usd: float,
         tokens_input: int = 0,
         tokens_output: int = 0,
-        pipeline: Optional[str] = None,
-        stage: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        pipeline: str | None = None,
+        stage: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> CostEntry:
         """记录一次成本。
 
@@ -161,11 +161,11 @@ class CostTracker:
         except Exception as e:
             logger.warning(f"成本日志写入失败: {e}")
 
-    def get_report(self) -> Dict[str, Any]:
+    def get_report(self) -> dict[str, Any]:
         """获取成本报告。"""
-        by_provider: Dict[str, float] = {}
-        by_action: Dict[str, float] = {}
-        by_pipeline: Dict[str, float] = {}
+        by_provider: dict[str, float] = {}
+        by_action: dict[str, float] = {}
+        by_pipeline: dict[str, float] = {}
         for e in self._entries:
             by_provider[e.provider] = by_provider.get(e.provider, 0) + e.cost_usd
             by_action[e.action] = by_action.get(e.action, 0) + e.cost_usd
@@ -188,7 +188,7 @@ class CostTracker:
             else 0,
         }
 
-    def get_top_spenders(self, n: int = 5) -> List[CostEntry]:
+    def get_top_spenders(self, n: int = 5) -> list[CostEntry]:
         """获取支出最高的 n 个条目。"""
         return sorted(self._entries, key=lambda e: e.cost_usd, reverse=True)[:n]
 

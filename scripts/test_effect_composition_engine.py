@@ -2,20 +2,20 @@
 test_effect_composition_engine.py - 效果组合推理引擎单元测试
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from effect_composition_engine import EffectCompositionEngine
 from effect_knowledge_graph import (
+    CATEGORIES,
     EFFECT_KNOWLEDGE_GRAPH,
     EFFECT_RELATIONS,
     get_effect_count,
-    search_effects,
     get_synergy_effects,
-    CATEGORIES,
+    search_effects,
 )
-from effect_composition_engine import EffectCompositionEngine
 
 
 def run_all_tests():
@@ -172,7 +172,7 @@ def run_all_tests():
     ]
     analysis = engine.analyze_combination(test_effects)
 
-    print(f"\n组合分析:")
+    print("\n组合分析:")
     print(f"  总效果数: {analysis['total_effects']}")
     print(f"  覆盖类别: {analysis['categories_covered']}")
     print(f"  平均置信度: {analysis['average_confidence']}")
@@ -247,7 +247,7 @@ def run_all_tests():
         keywords=["发光", "渐变", "模糊"],
         max_effects=5,
     )
-    print(f"\n效果排序:")
+    print("\n效果排序:")
     for i, effect in enumerate(result.effects):
         print(f"  {i+1}. {effect['displayName']} - {effect['category']}")
 

@@ -27,36 +27,48 @@ Phase 4 - AI 智能调度引擎主入口 (Python 版)
   - 支持 Silhouette 任务生成（roto/track/paint/export）
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
 import re
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+
+from effect_description_parser import (
+    ColorRef,
+    EffectDescription,
+    EffectDescriptionParser,
+    IntensityRef,
+    TemporalRef,
+    VocabRef,
+)
+from effect_generators import (
+    EffectGeneratorFactory,
+    EffectParams,
+    GeneratorContext,
+    effect_generator_factory,
+)
+from intent_router import IntentRouter, TaskRoute
 
 # 现有 Python 模块
 from nlu_parser import (
-    NLUParser, Intent, IntentType, IntentSlots, ProjectContext,
     ConfidenceThresholds,
+    Intent,
+    IntentSlots,
+    IntentType,
+    NLUParser,
+    ProjectContext,
 )
-from effect_description_parser import (
-    EffectDescriptionParser, EffectDescription,
-    VocabRef, ColorRef, IntensityRef, TemporalRef,
-)
-from parameter_mapper import ParameterMapper, ParameterMapping, MapperContext
-from effect_generators import (
-    EffectGeneratorFactory, EffectParams, GeneratorContext,
-    effect_generator_factory,
-)
+from parameter_mapper import MapperContext, ParameterMapper, ParameterMapping
 from parameter_optimizer import (
-    ParameterOptimizer, ParameterContext, OptimizedParameters,
+    OptimizedParameters,
+    ParameterContext,
+    ParameterOptimizer,
 )
-from intent_router import IntentRouter, TaskRoute
-from vocabulary_map import scan_vocab, scan_colors, scan_intensity, scan_temporal
-
+from vocabulary_map import scan_colors, scan_intensity, scan_temporal, scan_vocab
 
 # ============================================================================
 # 效果名规范化映射（对齐 TS EFFECT_NAME_MAPPING）
 # ============================================================================
 
-EFFECT_NAME_MAPPING: Dict[str, str] = {
+EFFECT_NAME_MAPPING: dict[str, str] = {
     "发光": "glow",
     "辉光": "glow",
     "glow": "glow",
@@ -114,7 +126,7 @@ _STYLE_KEYWORDS = [
 ]
 
 
-def map_effect_name(effect_name: str) -> Optional[str]:
+def map_effect_name(effect_name: str) -> str | None:
     """将用户输入的效果名规范化为生成器可识别的名称
 
     对齐 TS mapEffectName。
@@ -146,11 +158,11 @@ def map_effect_name(effect_name: str) -> Optional[str]:
 @dataclass
 class SchedulerOptions:
     """调度器选项"""
-    project_context: Optional[ProjectContext] = None
+    project_context: ProjectContext | None = None
     target_layer_ref: str = "selected"
     enable_optimization: bool = True
     performance_mode: bool = False
-    target_style: Optional[str] = None
+    target_style: str | None = None
 
 
 @dataclass
@@ -160,27 +172,27 @@ class NLUPipelineResult:
     effect_description: EffectDescription
     understood: bool
     needs_clarification: bool
-    clarification_question: Optional[str] = None
-    clarification_options: Optional[List[str]] = None
+    clarification_question: str | None = None
+    clarification_options: list[str] | None = None
 
 
 @dataclass
 class SchedulerResult:
     """调度器最终结果"""
     success: bool
-    intent: Optional[Intent] = None
-    effect_description: Optional[EffectDescription] = None
-    mappings: List[ParameterMapping] = field(default_factory=list)
-    generated_effects: List[EffectParams] = field(default_factory=list)
-    optimizations: List[OptimizedParameters] = field(default_factory=list)
-    operations: List[Dict[str, Any]] = field(default_factory=list)
-    silhouette_operations: List[Dict[str, Any]] = field(default_factory=list)
-    route: Optional[TaskRoute] = None
+    intent: Intent | None = None
+    effect_description: EffectDescription | None = None
+    mappings: list[ParameterMapping] = field(default_factory=list)
+    generated_effects: list[EffectParams] = field(default_factory=list)
+    optimizations: list[OptimizedParameters] = field(default_factory=list)
+    operations: list[dict[str, Any]] = field(default_factory=list)
+    silhouette_operations: list[dict[str, Any]] = field(default_factory=list)
+    route: TaskRoute | None = None
     confidence: float = 0.0
     needs_clarification: bool = False
-    clarification_question: Optional[str] = None
-    clarification_options: Optional[List[str]] = None
-    error: Optional[str] = None
+    clarification_question: str | None = None
+    clarification_options: list[str] | None = None
+    error: str | None = None
 
 
 # ============================================================================
@@ -231,7 +243,7 @@ class AIScheduler:
     # ------------------------------------------------------------------
 
     def run_nlu_pipeline(
-        self, input_text: str, context: Optional[ProjectContext] = None
+        self, input_text: str, context: ProjectContext | None = None
     ) -> NLUPipelineResult:
         """运行 NLU 管线：NLUParser + EffectDescriptionParser
 
@@ -280,7 +292,7 @@ class AIScheduler:
             return "是否需要指定颜色？"
         return "请明确您想要的效果"
 
-    def _generate_clarification_options(self, intent: Intent) -> List[str]:
+    def _generate_clarification_options(self, intent: Intent) -> list[str]:
         """生成追问选项"""
         if intent.type == IntentType.ADD_EFFECT:
             return ["发光", "模糊", "粒子", "调色", "扭曲"]
@@ -308,8 +320,8 @@ class AIScheduler:
              用 parameter_mapper 映射
           3. 对每个 mapping，若未在步骤1生成过，用 generator_factory 补充
         """
-        mappings: List[ParameterMapping] = []
-        generated_effects: List[EffectParams] = []
+        mappings: list[ParameterMapping] = []
+        generated_effects: list[EffectParams] = []
         seen_match_names: set = set()
 
         # 1. 从 intent.slots.effectName 直接生成
@@ -355,7 +367,7 @@ class AIScheduler:
 
         return mappings, generated_effects
 
-    def _extract_modifiers(self, nlu_result: NLUPipelineResult) -> Dict:
+    def _extract_modifiers(self, nlu_result: NLUPipelineResult) -> dict:
         """从 NLU 结果中提取修饰词上下文
 
         对齐 TS extractModifiers。
@@ -383,13 +395,13 @@ class AIScheduler:
 
     def generate_silhouette_operations(
         self, intent: Intent, user_input: str = ""
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成 Silhouette 操作序列
 
         对齐 TS generateSilhouetteOperations。
         使用与 pipeline 兼容的 {command, params} 结构。
         """
-        operations: List[Dict[str, Any]] = []
+        operations: list[dict[str, Any]] = []
         task_type = self._detect_silhouette_task_type(intent, user_input)
 
         if not task_type:
@@ -440,8 +452,8 @@ class AIScheduler:
         return operations
 
     def _detect_silhouette_task_type(
-        self, intent: Optional[Intent], user_input: str
-    ) -> Optional[str]:
+        self, intent: Intent | None, user_input: str
+    ) -> str | None:
         """从 intent 和用户输入中检测 Silhouette 任务类型"""
         # 优先从 user_input 检测；intent 为 None 时（纯 Silhouette 路由）
         # 仅依赖 user_input
@@ -465,15 +477,15 @@ class AIScheduler:
     # ------------------------------------------------------------------
 
     def optimize_parameters(
-        self, effects: List[EffectParams]
-    ) -> List[OptimizedParameters]:
+        self, effects: list[EffectParams]
+    ) -> list[OptimizedParameters]:
         """优化参数
 
         对齐 TS optimizeParameters。
         Python ParameterOptimizer.optimize 接收 ParameterContext，
         所以需要从 EffectParams 构建上下文。
         """
-        results: List[OptimizedParameters] = []
+        results: list[OptimizedParameters] = []
         for effect in effects:
             context = self._build_optimizer_context(effect)
             try:
@@ -511,16 +523,16 @@ class AIScheduler:
 
     def build_operations(
         self,
-        effects: List[EffectParams],
+        effects: list[EffectParams],
         layer_ref: str = "selected",
-        context: Optional[ProjectContext] = None,
-    ) -> List[Dict[str, Any]]:
+        context: ProjectContext | None = None,
+    ) -> list[dict[str, Any]]:
         """构建 AE 操作序列
 
         对齐 TS buildOperations。
         输出格式与 pipeline.execute() 消费的操作格式一致。
         """
-        operations: List[Dict[str, Any]] = []
+        operations: list[dict[str, Any]] = []
 
         # 如果目标是 "selected"，创建基础合成和图层
         if layer_ref == "selected":
@@ -652,7 +664,7 @@ class AIScheduler:
                 mappings, generated_effects = self.generate_parameters(
                     nlu_result
                 )
-                optimizations: List[OptimizedParameters] = []
+                optimizations: list[OptimizedParameters] = []
                 optimized_effects = generated_effects
 
                 if options.enable_optimization:
@@ -711,7 +723,7 @@ class AIScheduler:
         # 4. 纯 AE 任务
         mappings, generated_effects = self.generate_parameters(nlu_result)
 
-        optimizations: List[OptimizedParameters] = []
+        optimizations: list[OptimizedParameters] = []
         optimized_effects = generated_effects
 
         if options.enable_optimization:
@@ -790,7 +802,7 @@ class AIScheduler:
     # 查询 API
     # ------------------------------------------------------------------
 
-    def list_supported_effects(self) -> List[str]:
+    def list_supported_effects(self) -> list[str]:
         """列出所有支持的效果名"""
         return self.generator_factory.list_available_generators()
 
@@ -800,7 +812,7 @@ class AIScheduler:
 
     def get_generator_info(
         self, effect_name: str
-    ) -> Optional[Dict[str, str]]:
+    ) -> dict[str, str] | None:
         """获取效果生成器信息"""
         name_map = {
             "glow": {"displayName": "Glow", "matchName": "ADBE Glo2"},

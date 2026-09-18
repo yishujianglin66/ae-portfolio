@@ -1,12 +1,17 @@
 """CompositionTree 单元测试（M1a 验收）"""
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.composition_tree import (
-    CompositionTree, LayerSpec, EffectRef, AnimationSpec,
-    validate_composition_tree, build_template, STYLE_CARDS,
+    STYLE_CARDS,
+    AnimationSpec,
+    CompositionTree,
+    EffectRef,
+    LayerSpec,
+    build_template,
+    validate_composition_tree,
 )
 
 passed = failed = 0

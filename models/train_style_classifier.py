@@ -91,7 +91,7 @@ FEATURE_NAMES = [
 ]
 
 
-def load_dataset(data_path: str) -> List[Dict]:
+def load_dataset(data_path: str) -> list[dict]:
     samples = []
     path = Path(data_path)
 
@@ -115,7 +115,7 @@ def load_dataset(data_path: str) -> List[Dict]:
     return samples
 
 
-def preprocess_features(samples: List[Dict], target_dim: int = 24) -> Tuple[np.ndarray, np.ndarray, List[Dict]]:
+def preprocess_features(samples: list[dict], target_dim: int = 24) -> tuple[np.ndarray, np.ndarray, list[dict]]:
     features = []
     labels = []
     metadatas = []
@@ -152,7 +152,7 @@ def preprocess_features(samples: List[Dict], target_dim: int = 24) -> Tuple[np.n
     return np.array(features, dtype=np.float32), np.array(labels, dtype=np.int64), metadatas
 
 
-def normalize_features(features: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def normalize_features(features: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     if features.size == 0:
         return features, np.array([]), np.array([])
 
@@ -165,7 +165,7 @@ def normalize_features(features: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np
     return normalized, means, stds
 
 
-def split_data(features: np.ndarray, labels: np.ndarray, split_ratio: float = 0.8, seed: int = 42) -> Tuple:
+def split_data(features: np.ndarray, labels: np.ndarray, split_ratio: float = 0.8, seed: int = 42) -> tuple:
     np.random.seed(seed)
     indices = np.random.permutation(len(features))
 
@@ -248,7 +248,7 @@ class StyleClassifier:
         return total
 
 
-def compute_loss(probs: np.ndarray, labels: np.ndarray, class_weights: Optional[np.ndarray] = None) -> float:
+def compute_loss(probs: np.ndarray, labels: np.ndarray, class_weights: np.ndarray | None = None) -> float:
     eps = 1e-10
     log_probs = -np.log(probs[np.arange(len(labels)), labels] + eps)
     if class_weights is not None:
@@ -258,7 +258,7 @@ def compute_loss(probs: np.ndarray, labels: np.ndarray, class_weights: Optional[
 
 
 def train_one_epoch(model: StyleClassifier, features: np.ndarray, labels: np.ndarray,
-                    batch_size: int, lr: float, class_weights: Optional[np.ndarray] = None) -> float:
+                    batch_size: int, lr: float, class_weights: np.ndarray | None = None) -> float:
     total_loss = 0.0
     count = 0
 
@@ -309,7 +309,7 @@ def train_one_epoch(model: StyleClassifier, features: np.ndarray, labels: np.nda
     return total_loss / count if count > 0 else 0.0
 
 
-def evaluate(model: StyleClassifier, features: np.ndarray, labels: np.ndarray) -> Dict[str, float]:
+def evaluate(model: StyleClassifier, features: np.ndarray, labels: np.ndarray) -> dict[str, float]:
     probs = model.predict_probs(features)
     preds = np.argmax(probs, axis=-1)
     correct = np.sum(preds == labels)
@@ -326,7 +326,7 @@ def evaluate(model: StyleClassifier, features: np.ndarray, labels: np.ndarray) -
     }
 
 
-def evaluate_detailed(model: StyleClassifier, features: np.ndarray, labels: np.ndarray) -> Dict:
+def evaluate_detailed(model: StyleClassifier, features: np.ndarray, labels: np.ndarray) -> dict:
     probs = model.predict_probs(features)
     preds = np.argmax(probs, axis=-1)
     total = len(labels)
@@ -419,7 +419,7 @@ def save_model(model: StyleClassifier, output_dir: str, means: np.ndarray, stds:
     print(f"模型保存到: {output_path / 'model.json'}")
 
 
-def load_model(model_path: str) -> Tuple[StyleClassifier, np.ndarray, np.ndarray]:
+def load_model(model_path: str) -> tuple[StyleClassifier, np.ndarray, np.ndarray]:
     path = Path(model_path) / "model.json"
 
     with open(path, encoding="utf-8") as f:
@@ -439,7 +439,7 @@ def load_model(model_path: str) -> Tuple[StyleClassifier, np.ndarray, np.ndarray
     return model, np.array(data["means"]), np.array(data["stds"])
 
 
-def generate_report(results: List[Dict], output_path: str) -> None:
+def generate_report(results: list[dict], output_path: str) -> None:
     output_dir = Path(output_path).parent
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -531,7 +531,7 @@ def generate_report(results: List[Dict], output_path: str) -> None:
         f1 = best_result.get('per_class_f1', [0.0] * len(STYLE_LABELS))[i]
         report += f"| {label} | {f1:.4f} |\n"
 
-    report += f"""
+    report += """
 ---
 
 ## 超参数分析
@@ -552,7 +552,7 @@ def generate_report(results: List[Dict], output_path: str) -> None:
         best_f1 = max(f1_vals)
         report += f"- **{dim}**: 平均 F1 = {avg_f1:.4f}, 最佳 F1 = {best_f1:.4f}\n"
 
-    report += f"""
+    report += """
 
 ### hidden_layers 影响
 """
@@ -570,7 +570,7 @@ def generate_report(results: List[Dict], output_path: str) -> None:
         best_f1 = max(f1_vals)
         report += f"- **{layers}层**: 平均 F1 = {avg_f1:.4f}, 最佳 F1 = {best_f1:.4f}\n"
 
-    report += f"""
+    report += """
 
 ### learning_rate 影响
 """
@@ -588,7 +588,7 @@ def generate_report(results: List[Dict], output_path: str) -> None:
         best_f1 = max(f1_vals)
         report += f"- **{lr:.1e}**: 平均 F1 = {avg_f1:.4f}, 最佳 F1 = {best_f1:.4f}\n"
 
-    report += f"""
+    report += """
 
 ### dropout 影响
 """

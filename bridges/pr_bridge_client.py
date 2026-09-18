@@ -18,9 +18,9 @@ Python 端 Premiere Pro MCP Bridge 通信客户端。
 """
 from __future__ import annotations
 
+import json
 import os
 import time
-import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -32,11 +32,11 @@ class PRBridgeClient(AEBridgeClient):
 
     def __init__(
         self,
-        bridge_dir: Optional[str | Path] = None,
+        bridge_dir: str | Path | None = None,
         timeout: int = 15,
         poll_interval: float = 0.3,
         signature_enabled: bool = False,
-        secret: Optional[str] = None,
+        secret: str | None = None,
     ):
         # 默认使用项目根目录下的 .pr-mcp-bridge/
         if bridge_dir is None:
@@ -70,7 +70,7 @@ class PRBridgeClient(AEBridgeClient):
         except OSError:
             return ""
 
-    def _is_result_ready(self, result: Dict[str, Any]) -> bool:
+    def _is_result_ready(self, result: dict[str, Any]) -> bool:
         """判断结果是否就绪：status 字段为 success/error 即就绪。"""
         return result.get("status") in ("success", "error")
 
@@ -81,9 +81,9 @@ class PRBridgeClient(AEBridgeClient):
     def send_command(
         self,
         command: str,
-        script: Optional[str] = None,
-        timeout: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        script: str | None = None,
+        timeout: int | None = None,
+    ) -> dict[str, Any]:
         """发送命令到 Premiere Pro 并等待结果。
 
         Args:
@@ -101,7 +101,7 @@ class PRBridgeClient(AEBridgeClient):
         self.clear_result()
 
         # 构建命令
-        cmd_data: Dict[str, Any] = {
+        cmd_data: dict[str, Any] = {
             "command": command,
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "processed": False,
@@ -127,19 +127,19 @@ class PRBridgeClient(AEBridgeClient):
 
         return result
 
-    def ping(self, timeout: int = 5) -> Dict[str, Any]:
+    def ping(self, timeout: int = 5) -> dict[str, Any]:
         """发送 Ping 命令，检测 Bridge 是否在线。"""
         return self.send_command("ping", timeout=timeout)
 
-    def get_project_info(self, timeout: int = 5) -> Dict[str, Any]:
+    def get_project_info(self, timeout: int = 5) -> dict[str, Any]:
         """获取当前 Premiere 项目信息。"""
         return self.send_command("getProjectInfo", timeout=timeout)
 
-    def list_sequences(self, timeout: int = 5) -> Dict[str, Any]:
+    def list_sequences(self, timeout: int = 5) -> dict[str, Any]:
         """列出所有序列。"""
         return self.send_command("listSequences", timeout=timeout)
 
-    def execute_script(self, script: str, timeout: int = 15) -> Dict[str, Any]:
+    def execute_script(self, script: str, timeout: int = 15) -> dict[str, Any]:
         """执行 ExtendScript 代码。
 
         Args:

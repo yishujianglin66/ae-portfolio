@@ -59,10 +59,10 @@ class BaseAEAdapter:
         width: int,
         height: int,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("create_composition")
 
-    def list_compositions(self) -> List[Dict[str, Any]]:
+    def list_compositions(self) -> list[dict[str, Any]]:
         return self._not_implemented("list_compositions")
 
     # -- 图层创建 --
@@ -71,15 +71,15 @@ class BaseAEAdapter:
         comp_name: str,
         text: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("create_text_layer")
 
     def create_solid_layer(
         self,
         comp_name: str,
-        color: List[float],
+        color: list[float],
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("create_solid_layer")
 
     def create_shape_layer(
@@ -87,14 +87,14 @@ class BaseAEAdapter:
         comp_name: str,
         shape_type: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("create_shape_layer")
 
     def add_adjustment_layer(
         self,
         comp_name: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("add_adjustment_layer")
 
     # -- 图层属性 --
@@ -103,7 +103,7 @@ class BaseAEAdapter:
         comp_name: str,
         layer_index: int,
         **properties: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("set_layer_properties")
 
     def set_blend_mode(
@@ -111,7 +111,7 @@ class BaseAEAdapter:
         comp_name: str,
         layer_index: int,
         blend_mode: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("set_blend_mode")
 
     def set_track_matte(
@@ -119,7 +119,7 @@ class BaseAEAdapter:
         comp_name: str,
         layer_index: int,
         matte_type: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("set_track_matte")
 
     def set_parent_layer(
@@ -127,7 +127,7 @@ class BaseAEAdapter:
         comp_name: str,
         layer_index: int,
         parent_index: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("set_parent_layer")
 
     # -- 动画 --
@@ -138,7 +138,7 @@ class BaseAEAdapter:
         property_name: str,
         time: float,
         value: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("set_layer_keyframe")
 
     def set_keyframe_easing(
@@ -148,7 +148,7 @@ class BaseAEAdapter:
         property_path: str,
         key_index: int,
         easing_type: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("set_keyframe_easing")
 
     def set_layer_expression(
@@ -157,7 +157,7 @@ class BaseAEAdapter:
         layer_index: int,
         property_name: str,
         expression: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("set_layer_expression")
 
     # -- 效果 --
@@ -166,8 +166,8 @@ class BaseAEAdapter:
         comp_name: str,
         layer_index: int,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        settings: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         return self._not_implemented("apply_effect")
 
     def apply_effect_template(
@@ -175,15 +175,15 @@ class BaseAEAdapter:
         comp_name: str,
         layer_index: int,
         template_name: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("apply_effect_template")
 
     def batch_add_effects(
         self,
         comp_name: str,
         layer_index: int,
-        effects: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        effects: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         return self._not_implemented("batch_add_effects")
 
     # -- 蒙版 --
@@ -192,7 +192,7 @@ class BaseAEAdapter:
         comp_name: str,
         layer_index: int,
         **mask_params: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("set_layer_mask")
 
     # -- 渲染 --
@@ -202,7 +202,7 @@ class BaseAEAdapter:
         output_path: str,
         format: str = "h264",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("render")
 
     # -- 高级 --
@@ -210,11 +210,11 @@ class BaseAEAdapter:
         self,
         script: str,
         dry_run: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return self._not_implemented("execute_atom_script")
 
     # -- 内部辅助 --
-    def _not_implemented(self, method_name: str) -> Dict[str, Any]:
+    def _not_implemented(self, method_name: str) -> dict[str, Any]:
         """返回未实现标记。"""
         return {
             "success": False,
@@ -245,13 +245,13 @@ class PuppetEngineAdapter(BaseAEAdapter):
     requires_gui = False
 
     # 预留给 UnitTest 注入的工厂
-    _engine_factory: Optional[Callable[[], Any]] = None
+    _engine_factory: Callable[[], Any] | None = None
 
     def __init__(
         self,
-        ae_exe_path: Optional[str] = None,
-        render_path: Optional[str] = None,
-        project_root: Optional[str] = None,
+        ae_exe_path: str | None = None,
+        render_path: str | None = None,
+        project_root: str | None = None,
         engine: Any = None,
     ) -> None:
         """初始化 puppet-automation 适配器。
@@ -267,9 +267,9 @@ class PuppetEngineAdapter(BaseAEAdapter):
         self._render_path = render_path
         self._project_root = project_root
         self._engine_override = engine
-        self._engine: Optional[Any] = None
+        self._engine: Any | None = None
         self._module_loaded = False
-        self._load_error: Optional[str] = None
+        self._load_error: str | None = None
 
     # ------------------------------------------------------------------
     # 引擎加载
@@ -288,7 +288,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
 
         module = self._import_engine_module()
         # 构造 AEEngine
-        kwargs: Dict[str, Any] = {}
+        kwargs: dict[str, Any] = {}
         if self._ae_exe_path:
             kwargs["executable_path"] = self._ae_exe_path
         engine_cls = module.AEEngine
@@ -355,7 +355,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
             pass
         return asyncio.run(coro)
 
-    def _to_dict(self, result: Any) -> Dict[str, Any]:
+    def _to_dict(self, result: Any) -> dict[str, Any]:
         """将 EngineResult 归一化为 dict。"""
         if result is None:
             return {"success": False, "error": "empty result", "channel": self.name}
@@ -364,7 +364,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
             d.setdefault("channel", self.name)
             return d
         # EngineResult
-        d: Dict[str, Any] = {
+        d: dict[str, Any] = {
             "success": bool(getattr(result, "success", False)),
             "metadata": dict(getattr(result, "metadata", {}) or {}),
             "channel": self.name,
@@ -412,7 +412,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         fps: float = 30.0,
         duration: float = 10.0,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建合成（puppet-automation 实现）。
 
         Args:
@@ -436,7 +436,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         )
         return self._to_dict(result)
 
-    def list_compositions(self) -> List[Dict[str, Any]]:
+    def list_compositions(self) -> list[dict[str, Any]]:
         """列出当前项目中的所有合成（puppet 实现）。
 
         Returns:
@@ -488,12 +488,12 @@ class PuppetEngineAdapter(BaseAEAdapter):
         self,
         comp_name: str,
         text: str,
-        layer_name: Optional[str] = None,
-        font_size: Optional[float] = None,
-        fill_color: Optional[List[float]] = None,
-        position: Optional[List[float]] = None,
+        layer_name: str | None = None,
+        font_size: float | None = None,
+        fill_color: list[float] | None = None,
+        position: list[float] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建文字图层（puppet 实现）。
 
         puppet-automation 通过 ``add_layer(layer_type='text')`` 间接实现。
@@ -516,12 +516,12 @@ class PuppetEngineAdapter(BaseAEAdapter):
     def create_solid_layer(
         self,
         comp_name: str,
-        color: List[float],
-        layer_name: Optional[str] = None,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
+        color: list[float],
+        layer_name: str | None = None,
+        width: int | None = None,
+        height: int | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         engine = self._ensure_engine()
         result = self._run_async(
             engine.add_layer(
@@ -541,10 +541,10 @@ class PuppetEngineAdapter(BaseAEAdapter):
         self,
         comp_name: str,
         shape_type: str,
-        layer_name: Optional[str] = None,
-        fill_color: Optional[List[float]] = None,
+        layer_name: str | None = None,
+        fill_color: list[float] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         engine = self._ensure_engine()
         result = self._run_async(
             engine.add_layer(
@@ -563,9 +563,9 @@ class PuppetEngineAdapter(BaseAEAdapter):
         self,
         comp_name: str,
         layer_name: str = "Adjustment",
-        effects: Optional[List[Dict[str, Any]]] = None,
+        effects: list[dict[str, Any]] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         engine = self._ensure_engine()
         result = self._run_async(
             engine.add_adjustment_layer(
@@ -587,7 +587,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         comp_name: str,
         layer_index: int,
         **properties: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """批量设置图层属性（puppet 实现）。
 
         通过 ``set_keyframes`` 与 inline 脚本组合完成；本方法支持直接传
@@ -596,7 +596,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         engine = self._ensure_engine()
         if not properties:
             return {"success": False, "error": "无属性可设置", "channel": self.name}
-        last_result: Dict[str, Any] = {"success": True, "channel": self.name}
+        last_result: dict[str, Any] = {"success": True, "channel": self.name}
         for prop_name, prop_value in properties.items():
             property_path = f"Transform/{prop_name.capitalize()}"
             keyframes = [{"time": 0.0, "value": prop_value, "easingType": "linear"}]
@@ -620,7 +620,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         layer_index: int,
         blend_mode: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         engine = self._ensure_engine()
         result = self._run_async(
             engine.set_blend_mode(
@@ -638,7 +638,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         layer_index: int,
         matte_type: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         engine = self._ensure_engine()
         result = self._run_async(
             engine.set_track_matte(
@@ -656,7 +656,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         layer_index: int,
         parent_index: int,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """设置父图层（puppet 通过 inline script）。"""
         engine = self._ensure_engine()
         script = f"""
@@ -689,7 +689,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         time: float,
         value: Any,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         engine = self._ensure_engine()
         # puppet-automation 的 property_path 形如 "Transform/Position"
         property_path = (
@@ -716,7 +716,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         key_index: int,
         easing_type: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """puppet 实现：通过对关键帧时间点的最近帧应用缓动。
 
         实现细节：调用 ``set_keyframes`` 传入单帧指定 easingType，
@@ -767,7 +767,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         property_name: str,
         expression: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """puppet 实现：通过 inline script 设置表达式。"""
         engine = self._ensure_engine()
         property_path = (
@@ -809,9 +809,9 @@ class PuppetEngineAdapter(BaseAEAdapter):
         comp_name: str,
         layer_index: int,
         effect_name: str,
-        settings: Optional[Dict[str, Any]] = None,
+        settings: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         engine = self._ensure_engine()
         result = self._run_async(
             engine.add_effect(
@@ -830,7 +830,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         layer_index: int,
         template_name: str,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """puppet 通道对 .ffx 预设支持较好（``apply_preset``）。"""
         preset_path = kwargs.get("preset_path") or template_name
         engine = self._ensure_engine()
@@ -848,9 +848,9 @@ class PuppetEngineAdapter(BaseAEAdapter):
         self,
         comp_name: str,
         layer_index: int,
-        effects: List[Dict[str, Any]],
+        effects: list[dict[str, Any]],
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """批量添加效果（puppet 实现）。"""
         engine = self._ensure_engine()
         applied = 0
@@ -884,7 +884,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         layer_index: int,
         shape: str = "rect",
         **mask_params: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """puppet 实现：通过 inline script 添加蒙版。"""
         engine = self._ensure_engine()
         feathering = mask_params.get("feathering", 0.0)
@@ -922,7 +922,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         output_path: str,
         format: str = "h264",
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """puppet 通道最适合渲染（aerender CLI）。"""
         engine = self._ensure_engine()
         project_path = kwargs.get("project_path")
@@ -971,7 +971,7 @@ class PuppetEngineAdapter(BaseAEAdapter):
         script: str,
         dry_run: bool = False,
         **kwargs: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """执行任意 ExtendScript（puppet 实现）。"""
         engine = self._ensure_engine()
         if dry_run:

@@ -16,8 +16,8 @@ Stage 3D Director - 3D 舞台编排系统
 """
 import json
 import math
-from typing import Dict, List, Optional, Tuple
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 
 class Stage3DDirector:
@@ -35,7 +35,7 @@ class Stage3DDirector:
     # ================================================================
     #  1. 多平面视差设置
     # ================================================================
-    def setup_parallax_layers(self, material_vars: List[str],
+    def setup_parallax_layers(self, material_vars: list[str],
                               z_spacing: float = 300) -> str:
         """
         设置多平面视差图层。
@@ -66,7 +66,7 @@ class Stage3DDirector:
             lines.append(f"  pLayer{i}.threeDLayer = true;")
             lines.append(f"  pLayer{i}.property('ADBE Transform Group').property('ADBE Position').setValue([{self.cx}, {self.cy}, {z:.0f}]);")
             lines.append(f"  pLayer{i}.property('ADBE Transform Group').property('ADBE Scale').setValue([{scale:.1f}, {scale:.1f}]);")
-            lines.append(f"}}")
+            lines.append("}")
 
         return "\n".join(lines)
 
@@ -92,14 +92,14 @@ class Stage3DDirector:
         lines = []
         lines.append(f"// Camera: {movement} ({speed}, intensity={intensity})")
         lines.append(f"var cam = mainComp.layers.addCamera('Stage3D_Cam', [{self.cx}, {self.cy}]);")
-        lines.append(f"cam.threeDLayer = true;")
-        lines.append(f"var camOpt = cam.property('ADBE Camera Options Group');")
+        lines.append("cam.threeDLayer = true;")
+        lines.append("var camOpt = cam.property('ADBE Camera Options Group');")
         lines.append(f"try {{ camOpt.property('ADBE Camera Zoom').setValue({self.W * 0.8:.0f}); }} catch(e) {{}}")
-        lines.append(f"try {{ camOpt.property('ADBE Camera Depth of Field').setValue(1); }} catch(e) {{}}")
+        lines.append("try { camOpt.property('ADBE Camera Depth of Field').setValue(1); } catch(e) {}")
         lines.append(f"try {{ camOpt.property('ADBE Camera Focus Distance').setValue({abs(start_z):.0f}); }} catch(e) {{}}")
-        lines.append(f"try {{ camOpt.property('ADBE Camera Aperture').setValue(28); }} catch(e) {{}}")
-        lines.append(f"try {{ camOpt.property('ADBE Camera Blur Level').setValue(120); }} catch(e) {{}}")
-        lines.append(f"try {{ camOpt.property('ADBE Iris Shape').setValue(3); }} catch(e) {{}}")
+        lines.append("try { camOpt.property('ADBE Camera Aperture').setValue(28); } catch(e) {}")
+        lines.append("try { camOpt.property('ADBE Camera Blur Level').setValue(120); } catch(e) {}")
+        lines.append("try { camOpt.property('ADBE Iris Shape').setValue(3); } catch(e) {}")
 
         cam_pos = "cam.property('ADBE Transform Group').property('ADBE Position')"
         cam_rot = "cam.property('ADBE Transform Group').property('ADBE Rotation Y')"
@@ -154,10 +154,10 @@ class Stage3DDirector:
             lines.append(f"{cam_pos}.setValueAtTime(0, [{self.cx}, {self.cy}, {start_z}]);")
             lines.append(f"{cam_pos}.expression = 'wiggle(3, {8 * intensity:.0f}) + value';")
             lines.append(f"var camRig = mainComp.layers.addNull({self.DUR});")
-            lines.append(f"camRig.name = 'Camera_Rig';")
-            lines.append(f"camRig.threeDLayer = true;")
-            lines.append(f"cam.parent = camRig;")
-            lines.append(f"var rigRot = camRig.property('ADBE Transform Group').property('ADBE Rotation Y');")
+            lines.append("camRig.name = 'Camera_Rig';")
+            lines.append("camRig.threeDLayer = true;")
+            lines.append("cam.parent = camRig;")
+            lines.append("var rigRot = camRig.property('ADBE Transform Group').property('ADBE Rotation Y');")
             lines.append(f"rigRot.setValueAtTime(0, {-3 * intensity:.1f});")
             lines.append(f"rigRot.setValueAtTime({self.DUR}, {3 * intensity:.1f});")
 
@@ -168,11 +168,11 @@ class Stage3DDirector:
     # ================================================================
     def three_point_lighting(self,
                              key_intensity: float = 100,
-                             key_color: Tuple[float, float, float] = (1.0, 0.96, 0.9),
+                             key_color: tuple[float, float, float] = (1.0, 0.96, 0.9),
                              fill_intensity: float = 35,
-                             fill_color: Tuple[float, float, float] = (0.85, 0.92, 1.0),
+                             fill_color: tuple[float, float, float] = (0.85, 0.92, 1.0),
                              rim_intensity: float = 65,
-                             rim_color: Tuple[float, float, float] = (0.9, 0.95, 1.0),
+                             rim_color: tuple[float, float, float] = (0.9, 0.95, 1.0),
                              shadows: bool = True) -> str:
         """
         生成三点布光系统。
@@ -188,40 +188,40 @@ class Stage3DDirector:
         kx = self.cx + self.W * 0.2
         ky = self.cy - self.H * 0.25
         kz = -350
-        lines.append(f"// Key Light (主光)")
+        lines.append("// Key Light (主光)")
         lines.append(f"var keyLight = mainComp.layers.addLight('Key_Light', [{kx:.0f}, {ky:.0f}]);")
-        lines.append(f"keyLight.threeDLayer = true;")
-        lines.append(f"keyLight.property('ADBE Light Options Group').property('ADBE Light Type').setValue(0);")  # Point
+        lines.append("keyLight.threeDLayer = true;")
+        lines.append("keyLight.property('ADBE Light Options Group').property('ADBE Light Type').setValue(0);")  # Point
         lines.append(f"keyLight.property('ADBE Light Options Group').property('ADBE Light Intensity').setValue({key_intensity});")
         lines.append(f"keyLight.property('ADBE Light Options Group').property('ADBE Light Color').setValue([{key_color[0]}, {key_color[1]}, {key_color[2]}]);")
         if shadows:
-            lines.append(f"keyLight.property('ADBE Light Options Group').property('ADBE Casts Shadows').setValue(1);")
-            lines.append(f"keyLight.property('ADBE Light Options Group').property('ADBE Light Shadow Darkness').setValue(75);")
-            lines.append(f"keyLight.property('ADBE Light Options Group').property('ADBE Light Shadow Diffusion').setValue(12);")
+            lines.append("keyLight.property('ADBE Light Options Group').property('ADBE Casts Shadows').setValue(1);")
+            lines.append("keyLight.property('ADBE Light Options Group').property('ADBE Light Shadow Darkness').setValue(75);")
+            lines.append("keyLight.property('ADBE Light Options Group').property('ADBE Light Shadow Diffusion').setValue(12);")
         lines.append(f"keyLight.property('ADBE Transform Group').property('ADBE Position').setValue([{kx:.0f}, {ky:.0f}, {kz}]);")
 
         # Fill Light (补光)
         fx = self.cx - self.W * 0.15
         fy = self.cy + self.H * 0.1
         fz = -100
-        lines.append(f"// Fill Light (补光)")
+        lines.append("// Fill Light (补光)")
         lines.append(f"var fillLight = mainComp.layers.addLight('Fill_Light', [{fx:.0f}, {fy:.0f}]);")
-        lines.append(f"fillLight.threeDLayer = true;")
+        lines.append("fillLight.threeDLayer = true;")
         lines.append(f"fillLight.property('ADBE Light Options Group').property('ADBE Light Intensity').setValue({fill_intensity});")
         lines.append(f"fillLight.property('ADBE Light Options Group').property('ADBE Light Color').setValue([{fill_color[0]}, {fill_color[1]}, {fill_color[2]}]);")
-        lines.append(f"fillLight.property('ADBE Light Options Group').property('ADBE Casts Shadows').setValue(0);")
+        lines.append("fillLight.property('ADBE Light Options Group').property('ADBE Casts Shadows').setValue(0);")
         lines.append(f"fillLight.property('ADBE Transform Group').property('ADBE Position').setValue([{fx:.0f}, {fy:.0f}, {fz}]);")
 
         # Rim Light (轮廓光)
         rx = self.cx + self.W * 0.2
         ry = self.cy - self.H * 0.1
         rz = 300
-        lines.append(f"// Rim Light (轮廓光)")
+        lines.append("// Rim Light (轮廓光)")
         lines.append(f"var rimLight = mainComp.layers.addLight('Rim_Light', [{rx:.0f}, {ry:.0f}]);")
-        lines.append(f"rimLight.threeDLayer = true;")
+        lines.append("rimLight.threeDLayer = true;")
         lines.append(f"rimLight.property('ADBE Light Options Group').property('ADBE Light Intensity').setValue({rim_intensity});")
         lines.append(f"rimLight.property('ADBE Light Options Group').property('ADBE Light Color').setValue([{rim_color[0]}, {rim_color[1]}, {rim_color[2]}]);")
-        lines.append(f"rimLight.property('ADBE Light Options Group').property('ADBE Casts Shadows').setValue(0);")
+        lines.append("rimLight.property('ADBE Light Options Group').property('ADBE Casts Shadows').setValue(0);")
         lines.append(f"rimLight.property('ADBE Transform Group').property('ADBE Position').setValue([{rx:.0f}, {ry:.0f}, {rz}]);")
 
         return "\n".join(lines)
@@ -246,48 +246,48 @@ class Stage3DDirector:
         if transition_type == "cube_flip_y":
             # Y 轴立方体翻转: 两个面 + 旋转
             lines.append(f"var transPivot = mainComp.layers.addNull({duration});")
-            lines.append(f"transPivot.name = 'TransPivot';")
-            lines.append(f"transPivot.threeDLayer = true;")
+            lines.append("transPivot.name = 'TransPivot';")
+            lines.append("transPivot.threeDLayer = true;")
             lines.append(f"transPivot.property('ADBE Transform Group').property('ADBE Position').setValue([{self.cx}, {self.cy}, 0]);")
-            lines.append(f"var transRot = transPivot.property('ADBE Transform Group').property('ADBE Rotation Y');")
-            lines.append(f"transRot.setValueAtTime(0, 0);")
+            lines.append("var transRot = transPivot.property('ADBE Transform Group').property('ADBE Rotation Y');")
+            lines.append("transRot.setValueAtTime(0, 0);")
             lines.append(f"transRot.setValueAtTime({duration}, -90);")
 
         elif transition_type == "cube_flip_x":
             lines.append(f"var transPivot = mainComp.layers.addNull({duration});")
-            lines.append(f"transPivot.name = 'TransPivot';")
-            lines.append(f"transPivot.threeDLayer = true;")
+            lines.append("transPivot.name = 'TransPivot';")
+            lines.append("transPivot.threeDLayer = true;")
             lines.append(f"transPivot.property('ADBE Transform Group').property('ADBE Position').setValue([{self.cx}, {self.cy}, 0]);")
-            lines.append(f"var transRot = transPivot.property('ADBE Transform Group').property('ADBE Rotation X');")
-            lines.append(f"transRot.setValueAtTime(0, 0);")
+            lines.append("var transRot = transPivot.property('ADBE Transform Group').property('ADBE Rotation X');")
+            lines.append("transRot.setValueAtTime(0, 0);")
             lines.append(f"transRot.setValueAtTime({duration}, 90);")
 
         elif transition_type == "page_turn":
             # 书页翻转: 锚点移到左边缘 + Y 旋转
             lines.append(f"var pageLayer = mainComp.layers.addSolid([0,0,0], 'PageTurn', {self.W}, {self.H}, 1, {duration});")
-            lines.append(f"pageLayer.threeDLayer = true;")
+            lines.append("pageLayer.threeDLayer = true;")
             lines.append(f"pageLayer.property('ADBE Transform Group').property('ADBE Anchor Point').setValue([0, {self.cy}, 0]);")
             lines.append(f"pageLayer.property('ADBE Transform Group').property('ADBE Position').setValue([0, {self.cy}, 0]);")
-            lines.append(f"var pageRot = pageLayer.property('ADBE Transform Group').property('ADBE Rotation Y');")
-            lines.append(f"pageRot.setValueAtTime(0, 0);")
+            lines.append("var pageRot = pageLayer.property('ADBE Transform Group').property('ADBE Rotation Y');")
+            lines.append("pageRot.setValueAtTime(0, 0);")
             lines.append(f"pageRot.setValueAtTime({duration}, -180);")
 
         elif transition_type == "door_open":
             # 开门效果: 两扇门向两侧旋转
             half_w = self.W / 2
-            lines.append(f"// Left door")
+            lines.append("// Left door")
             lines.append(f"var doorL = mainComp.layers.addSolid([0,0,0], 'Door_L', {half_w}, {self.H}, 1, {duration});")
-            lines.append(f"doorL.threeDLayer = true;")
+            lines.append("doorL.threeDLayer = true;")
             lines.append(f"doorL.property('ADBE Transform Group').property('ADBE Anchor Point').setValue([{half_w}, {self.cy}, 0]);")
             lines.append(f"doorL.property('ADBE Transform Group').property('ADBE Position').setValue([0, {self.cy}, 0]);")
-            lines.append(f"doorL.property('ADBE Transform Group').property('ADBE Rotation Y').setValueAtTime(0, 0);")
+            lines.append("doorL.property('ADBE Transform Group').property('ADBE Rotation Y').setValueAtTime(0, 0);")
             lines.append(f"doorL.property('ADBE Transform Group').property('ADBE Rotation Y').setValueAtTime({duration}, -90);")
-            lines.append(f"// Right door")
+            lines.append("// Right door")
             lines.append(f"var doorR = mainComp.layers.addSolid([0,0,0], 'Door_R', {half_w}, {self.H}, 1, {duration});")
-            lines.append(f"doorR.threeDLayer = true;")
+            lines.append("doorR.threeDLayer = true;")
             lines.append(f"doorR.property('ADBE Transform Group').property('ADBE Anchor Point').setValue([0, {self.cy}, 0]);")
             lines.append(f"doorR.property('ADBE Transform Group').property('ADBE Position').setValue([{half_w}, {self.cy}, 0]);")
-            lines.append(f"doorR.property('ADBE Transform Group').property('ADBE Rotation Y').setValueAtTime(0, 0);")
+            lines.append("doorR.property('ADBE Transform Group').property('ADBE Rotation Y').setValueAtTime(0, 0);")
             lines.append(f"doorR.property('ADBE Transform Group').property('ADBE Rotation Y').setValueAtTime({duration}, 90);")
 
         elif transition_type == "card_wipe":
@@ -318,20 +318,20 @@ class Stage3DDirector:
         """焦点从一处转移到另一处 (景深效果)"""
         lines = []
         lines.append(f"// Rack Focus: Z={focus_from_z} -> Z={focus_to_z}")
-        lines.append(f"try {{")
-        lines.append(f"  var focusDist = camOpt.property('ADBE Camera Focus Distance');")
+        lines.append("try {")
+        lines.append("  var focusDist = camOpt.property('ADBE Camera Focus Distance');")
         lines.append(f"  focusDist.setValueAtTime({time_start}, {abs(focus_from_z):.0f});")
         lines.append(f"  focusDist.setValueAtTime({time_end}, {abs(focus_to_z):.0f});")
-        lines.append(f"}} catch(e) {{}}")
+        lines.append("} catch(e) {}")
         return "\n".join(lines)
 
     # ================================================================
     #  6. 完整舞台生成
     # ================================================================
-    def generate_full_stage(self, material_paths: List[str],
+    def generate_full_stage(self, material_paths: list[str],
                             camera_movement: str = "push_in",
                             lighting_mood: str = "cinematic",
-                            transitions: List[Dict] = None) -> str:
+                            transitions: list[dict] = None) -> str:
         """
         生成完整 3D 舞台 JSX。
 
@@ -348,7 +348,7 @@ class Stage3DDirector:
 
         # 1. 创建合成
         lines.append(f"var mainComp = app.project.items.addComp('Stage3D_{int(__import__('time').time())}', {self.W}, {self.H}, 1, {self.DUR}, {self.FPS});")
-        lines.append(f"mainComp.bgColor = [0.05, 0.05, 0.08];")
+        lines.append("mainComp.bgColor = [0.05, 0.05, 0.08];")
         lines.append("")
 
         # 2. 导入素材
@@ -400,16 +400,16 @@ class Stage3DDirector:
 
         # 7. 调整层 (全局调色)
         lines.append("// --- Color Grade Adjustment ---")
-        lines.append(f"var colorAdj = mainComp.layers.addSolid([0.5,0.5,0.5], 'Color_Grade', W, H, 1, DUR);")
-        lines.append(f"colorAdj.adjustmentLayer = true;")
-        lines.append(f"colorAdj.moveToEnd();")
-        lines.append(f"var lumetri = colorAdj.property('ADBE Effect Parade').addProperty('ADBE Lumetri');")
-        lines.append(f"try {{ lumetri.property('Contrast').setValue(20); }} catch(e) {{}}")
-        lines.append(f"try {{ lumetri.property('Saturation').setValue(15); }} catch(e) {{}}")
+        lines.append("var colorAdj = mainComp.layers.addSolid([0.5,0.5,0.5], 'Color_Grade', W, H, 1, DUR);")
+        lines.append("colorAdj.adjustmentLayer = true;")
+        lines.append("colorAdj.moveToEnd();")
+        lines.append("var lumetri = colorAdj.property('ADBE Effect Parade').addProperty('ADBE Lumetri');")
+        lines.append("try { lumetri.property('Contrast').setValue(20); } catch(e) {}")
+        lines.append("try { lumetri.property('Saturation').setValue(15); } catch(e) {}")
         lines.append("")
 
         # 8. 结果
-        lines.append(f"JSON.stringify({{success: true, comp: mainComp.name, layers: mainComp.numLayers, stage3d: true}});")
+        lines.append("JSON.stringify({success: true, comp: mainComp.name, layers: mainComp.numLayers, stage3d: true});")
 
         return "\n".join(lines)
 

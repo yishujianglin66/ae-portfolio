@@ -57,7 +57,7 @@ def _log(msg: str):
     print(f"[T22-e2e] {msg}", flush=True)
 
 
-def load_intel_entries() -> List[Dict]:
+def load_intel_entries() -> list[dict]:
     """加载material_intel缓存 + 伪标签扩充(与T11一致)"""
     entries = []
     # 1. material_intel
@@ -140,7 +140,7 @@ def load_intel_entries() -> List[Dict]:
     return entries
 
 
-def keyword_character_search(entries: List[Dict], char_name: str) -> List[str]:
+def keyword_character_search(entries: list[dict], char_name: str) -> list[str]:
     """关键词匹配: 在描述/角色名/IP名中搜索角色(增强版)"""
     results = []
     char_lower = char_name.lower()
@@ -159,9 +159,9 @@ def keyword_character_search(entries: List[Dict], char_name: str) -> List[str]:
     return results
 
 
-def clip_semantic_search(entries: List[Dict], query: str,
+def clip_semantic_search(entries: list[dict], query: str,
                          model, tokenizer, device: str,
-                         top_k: int = 10) -> List[Tuple[str, float]]:
+                         top_k: int = 10) -> list[tuple[str, float]]:
     """CLIP语义搜索: 编码查询→与条目描述计算余弦相似度"""
     import torch
 
@@ -199,8 +199,8 @@ def run_e2e_verification():
     _log("T22: 角色检索e2e验证")
     _log("=" * 60)
 
-    import torch
     import open_clip
+    import torch
 
     device = get_device()
     _log(f"设备: {device}")
@@ -265,7 +265,7 @@ def run_e2e_verification():
     # 4. 汇总
     avg_kw = np.mean([r["keyword_top10_precision"] for r in results])
     avg_clip = np.mean([r["clip_top10_precision"] for r in results])
-    _log(f"\n[4/4] 汇总:")
+    _log("\n[4/4] 汇总:")
     _log(f"  关键词Top10平均精确率: {avg_kw:.3f}")
     _log(f"  CLIP语义Top10平均精确率: {avg_clip:.3f}")
 
@@ -284,7 +284,7 @@ def run_e2e_verification():
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     _log(f"\n{'='*60}")
-    _log(f"✅ T22 e2e验证完成")
+    _log("✅ T22 e2e验证完成")
     _log(f"   关键词精确率: {avg_kw:.3f}")
     _log(f"   CLIP语义精确率: {avg_clip:.3f}")
     _log(f"   报告: {report_path}")

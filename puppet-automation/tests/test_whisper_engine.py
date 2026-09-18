@@ -1,11 +1,10 @@
 """Tests for WhisperEngine."""
 from __future__ import annotations
 
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 import pytest
-
 from src.engines.base import BaseEngine
 from src.engines.whisper import WhisperEngine
 

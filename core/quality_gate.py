@@ -61,14 +61,14 @@ class QualityContext:
         extra: 额外上下文（如配置、元数据）
     """
     output_path: str = ""
-    vmaf_score: Optional[float] = None
+    vmaf_score: float | None = None
     duration_sec: float = 0.0
-    resolution: Optional[Tuple[int, int]] = None
-    target_resolution: Optional[Tuple[int, int]] = None
-    audio_peak_db: Optional[float] = None
+    resolution: tuple[int, int] | None = None
+    target_resolution: tuple[int, int] | None = None
+    audio_peak_db: float | None = None
     file_size_mb: float = 0.0
     stages_success: bool = True
-    extra: Dict[str, Any] = field(default_factory=dict)
+    extra: dict[str, Any] = field(default_factory=dict)
 
     # 时长范围配置（可被规则读取）
     min_duration_sec: float = 5.0
@@ -128,10 +128,10 @@ class RuleResult:
     score: float = 0.0
     severity: str = "info"
     reason: str = ""
-    issue: Optional[QualityIssue] = None
+    issue: QualityIssue | None = None
     # 原子检查项拆解（atomic checks，向后兼容：默认空 dict 不影响旧规则）
     # 格式: {"check_name": {"passed": bool, "value": Any, "threshold": str}}
-    atomic_checks: Dict[str, Any] = field(default_factory=dict)
+    atomic_checks: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -147,8 +147,8 @@ class QualityGateResult:
     """
     status: str = "PASS"
     overall_score: float = 0.0
-    rule_results: List[RuleResult] = field(default_factory=list)
-    issues: List[QualityIssue] = field(default_factory=list)
+    rule_results: list[RuleResult] = field(default_factory=list)
+    issues: list[QualityIssue] = field(default_factory=list)
     timestamp: float = 0.0
 
     @property
@@ -156,14 +156,14 @@ class QualityGateResult:
         """是否通过质量门"""
         return self.status == "PASS"
 
-    def to_atomic_report(self) -> Dict[str, Any]:
+    def to_atomic_report(self) -> dict[str, Any]:
         """导出原子项级报告（VibeLifeBench atomic checks 思想）。
 
         逐项可判定、可定位、可统计；任一失败项可回溯到引入阶段
         （introduced_by 由规则层填充，默认 None）。向后兼容：
         旧规则无 atomic_checks 时退化为规则级条目。
         """
-        items: List[Dict[str, Any]] = []
+        items: list[dict[str, Any]] = []
         for rr in self.rule_results:
             if rr.atomic_checks:
                 for name, detail in rr.atomic_checks.items():
@@ -245,7 +245,7 @@ class VmafThresholdRule(QualityRule):
                 passed=True,
                 score=0.5,
                 severity="warning",
-                reason=f"VMAF 未测量，跳过评估（默认 0.5 分）",
+                reason="VMAF 未测量，跳过评估（默认 0.5 分）",
             )
         score = max(0.0, min(1.0, vmaf / 100.0))
         passed = vmaf >= self.threshold
@@ -300,7 +300,7 @@ class DurationRule(QualityRule):
                 passed=False,
                 score=0.0,
                 severity="error",
-                reason=f"时长未测量或为 0",
+                reason="时长未测量或为 0",
                 issue=QualityIssue(
                     rule_id=self.rule_id,
                     severity="error",
@@ -361,7 +361,7 @@ class ResolutionRule(QualityRule):
     rule_name = "Resolution Match"
     weight = 1.0
 
-    def __init__(self, target: Optional[Tuple[int, int]] = None):
+    def __init__(self, target: tuple[int, int] | None = None):
         self.target = target
 
     def evaluate(self, context: QualityContext) -> RuleResult:
@@ -523,7 +523,7 @@ class FileSizeRule(QualityRule):
                 issue=QualityIssue(
                     rule_id=self.rule_id,
                     severity="warning",
-                    message=f"文件过小，可能码率过低",
+                    message="文件过小，可能码率过低",
                     actual=size,
                     expected=f"≥ {lo:.1f} MB",
                 ),
@@ -539,7 +539,7 @@ class FileSizeRule(QualityRule):
                 issue=QualityIssue(
                     rule_id=self.rule_id,
                     severity="warning",
-                    message=f"文件过大，可能码率过高或编码低效",
+                    message="文件过大，可能码率过高或编码低效",
                     actual=size,
                     expected=f"≤ {hi:.1f} MB",
                 ),
@@ -842,11 +842,11 @@ class BeatAlignmentRule(QualityRule):
         )
 
     @staticmethod
-    def _parse_xml_markers(xml_path: Path) -> List[float]:
+    def _parse_xml_markers(xml_path: Path) -> list[float]:
         """从 FCP XML 解析标记点时间（秒）。"""
         import xml.etree.ElementTree as ET
 
-        markers: List[float] = []
+        markers: list[float] = []
         try:
             tree = ET.parse(str(xml_path))
             root = tree.getroot()
@@ -1026,7 +1026,7 @@ class QualityGate:
     """
 
     def __init__(self):
-        self._rules: List[QualityRule] = []
+        self._rules: list[QualityRule] = []
         # 注册内置规则
         self._register_builtin_rules()
 
@@ -1068,7 +1068,7 @@ class QualityGate:
                 return True
         return False
 
-    def list_rules(self) -> List[str]:
+    def list_rules(self) -> list[str]:
         """列出所有规则 ID"""
         return [r.rule_id for r in self._rules]
 
@@ -1082,8 +1082,8 @@ class QualityGate:
             QualityGateResult
         """
         import time
-        rule_results: List[RuleResult] = []
-        issues: List[QualityIssue] = []
+        rule_results: list[RuleResult] = []
+        issues: list[QualityIssue] = []
         total_weighted = 0.0
         total_weight = 0.0
         has_error = False
@@ -1133,7 +1133,7 @@ class QualityGate:
     def get_blocking_issues(
         self,
         result: QualityGateResult,
-    ) -> List[QualityIssue]:
+    ) -> list[QualityIssue]:
         """获取阻塞性问题（severity=error 的问题）
 
         Args:
@@ -1147,7 +1147,7 @@ class QualityGate:
     def suggest_mitigations(
         self,
         result: QualityGateResult,
-    ) -> List[Mitigation]:
+    ) -> list[Mitigation]:
         """根据问题生成修复建议
 
         Args:
@@ -1156,7 +1156,7 @@ class QualityGate:
         Returns:
             修复建议列表
         """
-        mitigations: List[Mitigation] = []
+        mitigations: list[Mitigation] = []
         # 内置修复策略表
         strategy = {
             "vmaf_threshold": Mitigation(
@@ -1213,7 +1213,7 @@ class QualityGate:
 #  全局单例
 # ============================================================================
 
-_global_quality_gate: Optional[QualityGate] = None
+_global_quality_gate: QualityGate | None = None
 _global_quality_gate_lock = threading.Lock()
 
 

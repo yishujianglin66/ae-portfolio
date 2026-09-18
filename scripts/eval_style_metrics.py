@@ -40,15 +40,14 @@ from typing import Dict, List, Optional, Tuple
 _PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
-from core.style_spec_extractor import StyleSpecExtractor, StyleSpec
-
+from core.style_spec_extractor import StyleSpec, StyleSpecExtractor
 
 # ================================================================
 #  SFD: 风格特征距离
 # ================================================================
 
 # local 模式各维度的合理范围（用于 minmax 归一化，与训练数据尺度一致）
-_LOCAL_DIM_RANGES: List[Tuple[str, float, float]] = [
+_LOCAL_DIM_RANGES: list[tuple[str, float, float]] = [
     ("cut_rate",            0.0,   4.0),
     ("avg_shot_duration",   0.2,   5.0),
     ("beat_sync_ratio",     0.0,   1.0),
@@ -60,7 +59,7 @@ _LOCAL_DIM_RANGES: List[Tuple[str, float, float]] = [
 ]
 
 
-def _spec_to_local_vector(spec: StyleSpec) -> List[float]:
+def _spec_to_local_vector(spec: StyleSpec) -> list[float]:
     """StyleSpec → 8维本地特征向量（minmax归一化）"""
     raw = {
         "cut_rate": spec.cut_rate,
@@ -79,7 +78,7 @@ def _spec_to_local_vector(spec: StyleSpec) -> List[float]:
     return vec
 
 
-def _cosine_distance(a: List[float], b: List[float]) -> float:
+def _cosine_distance(a: list[float], b: list[float]) -> float:
     dot = sum(x * y for x, y in zip(a, b))
     na = math.sqrt(sum(x * x for x in a))
     nb = math.sqrt(sum(y * y for y in b))
@@ -89,7 +88,7 @@ def _cosine_distance(a: List[float], b: List[float]) -> float:
 
 
 def compute_sfd_local(extractor: StyleSpecExtractor,
-                      output_video: str, reference_video: str) -> Dict:
+                      output_video: str, reference_video: str) -> dict:
     """本地模式 SFD — 两条视频各提一份 StyleSpec 后算余弦距离"""
     print(f"[SFD-local] 分析成片: {Path(output_video).name}")
     spec_out = extractor.extract(output_video, analyze_motion=True)
@@ -111,7 +110,7 @@ def compute_sfd_local(extractor: StyleSpecExtractor,
     }
 
 
-def compute_sfd_vrs(output_video: str, reference_video: str) -> Dict:
+def compute_sfd_vrs(output_video: str, reference_video: str) -> dict:
     """VRS 全链路 SFD — 24维特征余弦距离（注意：会消耗 VLM API 配额）"""
     from core.style_pipeline import analyze_video_style_sync
 
@@ -137,7 +136,7 @@ def compute_sfd_vrs(output_video: str, reference_video: str) -> Dict:
 
 def compute_cbe(extractor: StyleSpecExtractor, output_video: str,
                 bgm_path: str, bgm_start_sec: float = 0.0,
-                window_ms: float = 250.0) -> Dict:
+                window_ms: float = 250.0) -> dict:
     """成片切点 vs BGM 节拍的踩拍误差。
 
     切点：scdet 检测成片实际切点。
@@ -185,7 +184,7 @@ def compute_cbe(extractor: StyleSpecExtractor, output_video: str,
 #  TD: 转场多样性（审计 production_report.json）
 # ================================================================
 
-def compute_td(report_dir: str) -> Dict:
+def compute_td(report_dir: str) -> dict:
     report_path = Path(report_dir) / "production_report.json"
     if not report_path.exists():
         return {"td": None, "error": f"未找到审计报告: {report_path}"}
@@ -214,13 +213,15 @@ def compute_td(report_dir: str) -> Dict:
 # ================================================================
 
 def compute_color_kl(output_video: str, reference_video: str,
-                     sample_frames: int = 60) -> Dict:
+                     sample_frames: int = 60) -> dict:
     """颜色分布 KL 散度 — 衡量成片与参考片的 HSV 直方图差异。
 
     比 SFD 的单点饱和度/亮度值更细粒度：直接比较颜色分布形状。
     KL(P||Q) = Σ P(i) * log(P(i)/Q(i))，越小越相似。
     """
-    import subprocess, tempfile, os
+    import os
+    import subprocess
+    import tempfile
     try:
         import cv2
         import numpy as np
@@ -277,9 +278,9 @@ def compute_color_kl(output_video: str, reference_video: str,
         kl_qp = np.sum(q * np.log(q / p))
         return float((kl_pq + kl_qp) / 2)
 
-    print(f"[KL] 采样成片帧...")
+    print("[KL] 采样成片帧...")
     frames_out = _extract_frames(output_video, sample_frames)
-    print(f"[KL] 采样参考片帧...")
+    print("[KL] 采样参考片帧...")
     frames_ref = _extract_frames(reference_video, sample_frames)
 
     if not frames_out or not frames_ref:
@@ -322,7 +323,7 @@ def main():
     parser.add_argument("--out-json", default="", help="结果保存JSON路径")
     args = parser.parse_args()
 
-    result: Dict = {"metrics": {}}
+    result: dict = {"metrics": {}}
     extractor = StyleSpecExtractor()
 
     if args.output and args.reference:

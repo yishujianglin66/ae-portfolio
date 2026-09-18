@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """API 集成测试脚本"""
 
-import urllib.request
-import urllib.error
 import json
+import urllib.error
+import urllib.request
 
 base = "http://127.0.0.1:8000"
 
@@ -80,6 +80,7 @@ for u in data.get("users", []):
 assert code == 200
 
 import time
+
 _unique_user = f"testuser_{int(time.time())}"
 
 # 7. 创建新用户

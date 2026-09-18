@@ -5,10 +5,10 @@ report_to_ops.py - 决策树解析报告 → 编译器输入 转换层
 对齐 TS: compiler/src/phase3/report-to-ops.ts
 """
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Union
 from datetime import datetime
-from effect_name_map import find_by_name
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+from effect_name_map import find_by_name
 
 __all__ = [
     "VisualFeature",
@@ -36,9 +36,9 @@ class VisualFeature:
     """视觉特征条目"""
     term_id: str
     term_name: str
-    time_range: Optional[Tuple[float, float]] = None
-    intensity: Optional[float] = None
-    confidence: Optional[float] = None
+    time_range: tuple[float, float] | None = None
+    intensity: float | None = None
+    confidence: float | None = None
 
 
 @dataclass
@@ -46,10 +46,10 @@ class EffectEntry:
     """效果识别条目"""
     effect_id: str
     effect_name: str
-    start_frame: Optional[int] = None
-    end_frame: Optional[int] = None
-    confidence: Optional[float] = None
-    evidence: List[str] = field(default_factory=list)
+    start_frame: int | None = None
+    end_frame: int | None = None
+    confidence: float | None = None
+    evidence: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -57,9 +57,9 @@ class ParameterEntry:
     """参数条目"""
     effect_id: str
     parameter: str
-    value: Union[float, str, bool, List[float]] = 0.0
-    value_range: Optional[Tuple[float, float]] = None
-    confidence: Optional[float] = None
+    value: Union[float, str, bool, list[float]] = 0.0
+    value_range: tuple[float, float] | None = None
+    confidence: float | None = None
 
 
 @dataclass
@@ -68,17 +68,17 @@ class TimelineEntry:
     effect_id: str
     start_frame: int = 0
     end_frame: int = 0
-    duration_frames: Optional[int] = None
-    duration_seconds: Optional[float] = None
+    duration_frames: int | None = None
+    duration_seconds: float | None = None
 
 
 @dataclass
 class KeyframeSpec:
     """关键帧规格"""
     frame: int
-    value: Union[float, List[float]] = 0.0
+    value: Union[float, list[float]] = 0.0
     easing: str = "linear"
-    bezier: Optional[Tuple[float, float, float, float]] = None
+    bezier: tuple[float, float, float, float] | None = None
 
 
 @dataclass
@@ -86,36 +86,36 @@ class KeyframeEntry:
     """关键帧条目"""
     effect_id: str
     parameter: str
-    keyframes: List[KeyframeSpec] = field(default_factory=list)
-    keyframe_count: Optional[int] = None
+    keyframes: list[KeyframeSpec] = field(default_factory=list)
+    keyframe_count: int | None = None
 
 
 @dataclass
 class AnalysisReport:
     """分析报告（对应 8.1 解析报告 YAML Schema）"""
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    visual_features: List[VisualFeature] = field(default_factory=list)
-    effects: List[EffectEntry] = field(default_factory=list)
-    parameters: List[ParameterEntry] = field(default_factory=list)
-    timeline: List[TimelineEntry] = field(default_factory=list)
-    keyframes: List[KeyframeEntry] = field(default_factory=list)
-    confidence: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    visual_features: list[VisualFeature] = field(default_factory=list)
+    effects: list[EffectEntry] = field(default_factory=list)
+    parameters: list[ParameterEntry] = field(default_factory=list)
+    timeline: list[TimelineEntry] = field(default_factory=list)
+    keyframes: list[KeyframeEntry] = field(default_factory=list)
+    confidence: dict[str, Any] | None = None
 
 
 @dataclass
 class ReportToOpsOptions:
     """转换选项（全部 Optional，使用 ?? 语义应用默认值）"""
-    comp_name: Optional[str] = None
-    comp_width: Optional[int] = None
-    comp_height: Optional[int] = None
-    comp_duration: Optional[float] = None
-    comp_frame_rate: Optional[float] = None
-    target_layer_ref: Optional[str] = None
-    min_confidence: Optional[float] = None
-    generate_set_property: Optional[bool] = None
-    generate_set_keyframe: Optional[bool] = None
-    default_layer_type: Optional[str] = None
-    default_layer_name: Optional[str] = None
+    comp_name: str | None = None
+    comp_width: int | None = None
+    comp_height: int | None = None
+    comp_duration: float | None = None
+    comp_frame_rate: float | None = None
+    target_layer_ref: str | None = None
+    min_confidence: float | None = None
+    generate_set_property: bool | None = None
+    generate_set_keyframe: bool | None = None
+    default_layer_type: str | None = None
+    default_layer_name: str | None = None
 
 
 @dataclass
@@ -123,12 +123,12 @@ class ReportStats:
     """报告统计信息"""
     total_effects: int = 0
     mapped_effects: int = 0
-    unknown_effects: List[str] = field(default_factory=list)
+    unknown_effects: list[str] = field(default_factory=list)
     total_parameters: int = 0
     total_keyframes: int = 0
     avg_confidence: float = 0.0
     generated_ops: int = 0
-    ops_by_type: Dict[str, int] = field(default_factory=dict)
+    ops_by_type: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
@@ -143,8 +143,8 @@ class CompilerMetadata:
 @dataclass
 class CompilerInput:
     """编译器输入"""
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    operations: List[Dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    operations: list[dict[str, Any]] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -156,7 +156,7 @@ def _map_easing_string(easing: str) -> str:
     if not easing:
         return "linear"
     lower = easing.lower()
-    easing_map: Dict[str, str] = {
+    easing_map: dict[str, str] = {
         "linear": "linear",
         "ease_in": "ease_in",
         "easein": "ease_in",
@@ -181,8 +181,8 @@ def _frame_to_time(frame: int, fps: float) -> float:
 
 
 def _bezier_to_ease_params(
-    bezier: Optional[Tuple[float, float, float, float]]
-) -> Tuple[float, float]:
+    bezier: tuple[float, float, float, float] | None
+) -> tuple[float, float]:
     """贝塞尔曲线转缓动参数 (speed, influence)"""
     if not bezier or len(bezier) != 4:
         return (0.0, 33.0)
@@ -195,7 +195,7 @@ def _bezier_to_ease_params(
 
 def _pick_value_in_range(
     value: Any,
-    value_range: Optional[Tuple[float, float]]
+    value_range: tuple[float, float] | None
 ) -> Any:
     """选择值，若 value 为空则取范围中点"""
     if value is not None:
@@ -211,7 +211,7 @@ def _pick_value_in_range(
 
 def report_to_ops(
     report: AnalysisReport,
-    options: Optional[ReportToOpsOptions] = None
+    options: ReportToOpsOptions | None = None
 ) -> CompilerInput:
     """将分析报告转换为编译器操作列表
 
@@ -263,12 +263,12 @@ def report_to_ops(
         if opts.default_layer_name is not None else "Target Layer"
     )
 
-    operations: List[Dict[str, Any]] = []
+    operations: list[dict[str, Any]] = []
     ref_counter = {
         "comp": 0, "layer": 0, "fx": 0, "kf": 0, "prop": 0,
         "expr": 0, "mask": 0, "blend": 0, "parent": 0, "matte": 0,
     }
-    effect_id_to_ref_map: Dict[str, Dict[str, Any]] = {}
+    effect_id_to_ref_map: dict[str, dict[str, Any]] = {}
 
     # 1. 创建合成
     comp_ref = "comp_main"
@@ -289,7 +289,7 @@ def report_to_ops(
     if not target_layer_ref:
         ref_counter["layer"] += 1
         target_layer_ref = f"layer_{str(ref_counter['layer']).zfill(3)}"
-        add_layer_op: Dict[str, Any] = {
+        add_layer_op: dict[str, Any] = {
             "op": "addLayer",
             "ref": target_layer_ref,
             "compRef": comp_ref,
@@ -514,7 +514,7 @@ def analyze_report(report: AnalysisReport) -> ReportStats:
     keyframes = report.keyframes or []
 
     mapped_effects = 0
-    unknown_effects: List[str] = []
+    unknown_effects: list[str] = []
     for e in effects:
         entry = find_by_name(e.effect_name)
         if entry:

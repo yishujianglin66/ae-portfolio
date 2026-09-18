@@ -3,16 +3,17 @@ CDL 转换精度测试
 =================
 验证 Resolve CDL → FFmpeg eq 滤镜的转换精度
 """
-import sys
 import os
-import time
 import subprocess
+import sys
+import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.resolve_engine import ResolveAutomationEngine, CDLConfig
-
 import pytest
+
+from integrations.resolve_engine import CDLConfig, ResolveAutomationEngine
+
 pytestmark = pytest.mark.real_davinci  # 需真实 DaVinci Resolve 环境
 
 def test_cdl_conversion():
@@ -50,7 +51,7 @@ def test_cdl_conversion():
     )
     
     engine.apply_cdl(project_name, "CDL_TL", 1, strong_cdl)
-    print(f"Applied CDL:")
+    print("Applied CDL:")
     print(f"  Slope:   ({strong_cdl.slope[0]:.2f}, {strong_cdl.slope[1]:.2f}, {strong_cdl.slope[2]:.2f})")
     print(f"  Offset:  ({strong_cdl.offset[0]:.2f}, {strong_cdl.offset[1]:.2f}, {strong_cdl.offset[2]:.2f})")
     print(f"  Power:   ({strong_cdl.power[0]:.2f}, {strong_cdl.power[1]:.2f}, {strong_cdl.power[2]:.2f})")
@@ -69,7 +70,7 @@ def test_cdl_conversion():
         cdl_available = False
     else:
         cdl_data = items[0]["cdl"]
-        print(f"Read CDL from Resolve:")
+        print("Read CDL from Resolve:")
         print(f"  Slope R/G/B:   {cdl_data['slope_r']:.2f} / {cdl_data['slope_g']:.2f} / {cdl_data['slope_b']:.2f}")
         print(f"  Offset R/G/B:  {cdl_data['offset_r']:.2f} / {cdl_data['offset_g']:.2f} / {cdl_data['offset_b']:.2f}")
         print(f"  Power R/G/B:   {cdl_data['power_r']:.2f} / {cdl_data['power_g']:.2f} / {cdl_data['power_b']:.2f}")
@@ -122,14 +123,14 @@ def test_cdl_conversion():
             print("❌ POOR: Significant quality loss detected")
         
         # 建议用户用视频播放器肉眼对比两个文件
-        print(f"\n📺 Please visually compare these two files in a video player:")
+        print("\n📺 Please visually compare these two files in a video player:")
         print(f"  FFmpeg:  {output_path}")
         print(f"  Native:  {native_path}")
-        print(f"\nLook for differences in:")
-        print(f"  • Contrast (对比度)")
-        print(f"  • Color temperature (色温)")
-        print(f"  • Saturation (饱和度)")
-        print(f"  • Shadow/highlight detail (阴影/高光细节)")
+        print("\nLook for differences in:")
+        print("  • Contrast (对比度)")
+        print("  • Color temperature (色温)")
+        print("  • Saturation (饱和度)")
+        print("  • Shadow/highlight detail (阴影/高光细节)")
         
     else:
         print(f"Native render file not found: {native_path}")

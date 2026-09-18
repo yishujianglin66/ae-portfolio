@@ -51,15 +51,15 @@ class EngineMetadata:
     """
     name: str
     version: str = "1.0"
-    capabilities: List[str] = field(default_factory=list)
+    capabilities: list[str] = field(default_factory=list)
     cost_per_sec: float = 0.0
     quality_tier: str = "medium"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "EngineMetadata":
+    def from_dict(cls, data: dict[str, Any]) -> "EngineMetadata":
         return cls(
             name=data.get("name", ""),
             version=data.get("version", "1.0"),
@@ -95,7 +95,7 @@ class EngineRegistry:
     DEFAULT_STATE_FILE = "data/engine_registry/registry_state.json"
 
     # 单例用 — 不要直接访问，使用 get_engine_registry()
-    def __init__(self, state_file: Optional[str] = None):
+    def __init__(self, state_file: str | None = None):
         """初始化注册中心
         
         Args:
@@ -105,11 +105,11 @@ class EngineRegistry:
         self._state_file.parent.mkdir(parents=True, exist_ok=True)
 
         # 引擎类注册表: name -> (engine_class, metadata)
-        self._engines: Dict[str, Dict[str, Any]] = {}
+        self._engines: dict[str, dict[str, Any]] = {}
         # 执行历史: engine_name -> {stage -> [records]}
-        self._history: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
+        self._history: dict[str, dict[str, list[dict[str, Any]]]] = {}
         # 选择记录: path_id -> {engine, reason, timestamp} 用于 explain
-        self._choice_log: Dict[str, Dict[str, Any]] = {}
+        self._choice_log: dict[str, dict[str, Any]] = {}
 
         self._lock = threading.RLock()
         self._load_state()
@@ -121,7 +121,7 @@ class EngineRegistry:
     def register(
         self,
         engine_name: str,
-        engine_class: Type,
+        engine_class: type,
         metadata: EngineMetadata,
     ) -> None:
         """注册引擎类与元数据
@@ -146,7 +146,7 @@ class EngineRegistry:
             )
             self._save_state()
 
-    def get(self, engine_name: str) -> Optional[Type]:
+    def get(self, engine_name: str) -> type | None:
         """获取引擎类
         
         Args:
@@ -159,18 +159,18 @@ class EngineRegistry:
             entry = self._engines.get(engine_name)
             return entry["class"] if entry else None
 
-    def get_metadata(self, engine_name: str) -> Optional[EngineMetadata]:
+    def get_metadata(self, engine_name: str) -> EngineMetadata | None:
         """获取引擎元数据"""
         with self._lock:
             entry = self._engines.get(engine_name)
             return entry["metadata"] if entry else None
 
-    def list_available(self) -> List[str]:
+    def list_available(self) -> list[str]:
         """列出所有已注册引擎名"""
         with self._lock:
             return list(self._engines.keys())
 
-    def list_by_capability(self, capability: str) -> List[str]:
+    def list_by_capability(self, capability: str) -> list[str]:
         """按能力筛选引擎
         
         Args:
@@ -224,7 +224,7 @@ class EngineRegistry:
                 self._history[engine_name][stage] = self._history[engine_name][stage][-200:]
             self._save_state()
 
-    def get_statistics(self, engine_name: str) -> Dict[str, Any]:
+    def get_statistics(self, engine_name: str) -> dict[str, Any]:
         """获取引擎的执行统计
         
         Args:
@@ -236,7 +236,7 @@ class EngineRegistry:
         """
         with self._lock:
             history = self._history.get(engine_name, {})
-            all_records: List[Dict[str, Any]] = []
+            all_records: list[dict[str, Any]] = []
             for stage_records in history.values():
                 all_records.extend(stage_records)
 
@@ -263,9 +263,9 @@ class EngineRegistry:
     def select_best(
         self,
         stage: str,
-        context: Optional[Any] = None,
-        candidates: Optional[List[str]] = None,
-    ) -> Optional[str]:
+        context: Any | None = None,
+        candidates: list[str] | None = None,
+    ) -> str | None:
         """基于历史成功率选择最优引擎
         
         评分函数 (贝叶斯平滑 + 多因子):
@@ -297,7 +297,7 @@ class EngineRegistry:
             if not candidates:
                 return None
 
-            scored: List[tuple] = []
+            scored: list[tuple] = []
             for name in candidates:
                 stats = self.get_statistics(name)
                 meta = self.get_metadata(name) or EngineMetadata(name=name)
@@ -341,12 +341,12 @@ class EngineRegistry:
                     "engine": best,
                     "score": scored[0][0],
                     "candidates": list(candidates),
-                    "reason": f"Bayesian-smoothed success rate * quality * speed * tier",
+                    "reason": "Bayesian-smoothed success rate * quality * speed * tier",
                     "timestamp": time.time(),
                 }
             return best
 
-    def explain_choice(self, path_id: str) -> Dict[str, Any]:
+    def explain_choice(self, path_id: str) -> dict[str, Any]:
         """解释某次选择决策
         
         Args:
@@ -358,7 +358,7 @@ class EngineRegistry:
         with self._lock:
             return dict(self._choice_log.get(path_id, {}))
 
-    def list_recent_choices(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def list_recent_choices(self, limit: int = 10) -> list[dict[str, Any]]:
         """列出最近的选择记录"""
         with self._lock:
             sorted_choices = sorted(
@@ -434,11 +434,11 @@ class EngineRegistry:
 #  单例工厂
 # ============================================================================
 
-_global_registry: Optional[EngineRegistry] = None
+_global_registry: EngineRegistry | None = None
 _registry_lock = threading.Lock()
 
 
-def get_engine_registry(state_file: Optional[str] = None) -> EngineRegistry:
+def get_engine_registry(state_file: str | None = None) -> EngineRegistry:
     """获取全局 EngineRegistry 单例
     
     Args:

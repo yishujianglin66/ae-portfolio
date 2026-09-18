@@ -28,8 +28,8 @@ from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
-_device_cache: Optional[str] = None
-_vram_total: Optional[float] = None
+_device_cache: str | None = None
+_vram_total: float | None = None
 
 
 def get_device() -> str:
@@ -59,7 +59,7 @@ def _gpu_name() -> str:
     return "unknown"
 
 
-def vram_info() -> Tuple[float, float]:
+def vram_info() -> tuple[float, float]:
     """返回 (已用GB, 总GB); 无 CUDA 时返回 (0.0, 0.0)。"""
     global _vram_total
     try:
@@ -86,7 +86,7 @@ def clear_cache() -> None:
 
 
 @contextmanager
-def infer_ctx(device: Optional[str] = None, dtype: str = "float16"):
+def infer_ctx(device: str | None = None, dtype: str = "float16"):
     """推理上下文: no_grad + autocast 组合。
 
     Args:

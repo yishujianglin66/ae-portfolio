@@ -60,7 +60,7 @@ class HanddrawnStyler:
         "doodle",
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._cv2_available = self._check_cv2()
         self._pil_available = self._check_pil()
@@ -89,8 +89,8 @@ class HanddrawnStyler:
         input_path: str,
         output_path: str = "handdrawn_output.png",
         style: str = "pencil_sketch",
-        params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """将图像转化为手绘风格
 
         Args:
@@ -116,7 +116,7 @@ class HanddrawnStyler:
         self,
         frame_data,  # numpy array or PIL Image
         style: str = "pencil_sketch",
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
     ) -> Any:
         """处理单帧 (用于视频管线)
 
@@ -146,7 +146,7 @@ class HanddrawnStyler:
             return np.array(result_img)
         return result_img
 
-    def _stylize_cv2(self, input_path, output_path, style, params) -> Dict[str, Any]:
+    def _stylize_cv2(self, input_path, output_path, style, params) -> dict[str, Any]:
         """使用 OpenCV + Pillow 进行风格化"""
         import cv2
         import numpy as np
@@ -186,7 +186,7 @@ class HanddrawnStyler:
             "backend": "opencv",
         }
 
-    def _stylize_pil_only(self, input_path, output_path, style, params) -> Dict[str, Any]:
+    def _stylize_pil_only(self, input_path, output_path, style, params) -> dict[str, Any]:
         """仅使用 Pillow 的风格化 (无 OpenCV 降级)"""
         from PIL import Image, ImageFilter, ImageOps
 
@@ -363,8 +363,8 @@ class HanddrawnStyler:
         input_dir: str,
         output_dir: str,
         style: str = "pencil_sketch",
-        params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """批量风格化视频帧序列
 
         Args:

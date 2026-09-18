@@ -47,7 +47,7 @@ class PreprocessResult:
     mode: str = ""  # silence / motion / combined
     method: str = ""  # auto_editor / ffmpeg_fallback
     error: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def reduction_ratio(self) -> float:
@@ -133,11 +133,11 @@ class AutoEditorAdapter:
 
     def preprocess_batch(
         self,
-        video_paths: List[str],
+        video_paths: list[str],
         mode: str = "silence",
         output_dir: str = "",
         **kwargs,
-    ) -> List[PreprocessResult]:
+    ) -> list[PreprocessResult]:
         """批量预处理多个视频文件"""
         results = []
         for vp in video_paths:
@@ -154,7 +154,7 @@ class AutoEditorAdapter:
         video_path: str,
         threshold_db: float = -30.0,
         min_duration: float = 0.5,
-    ) -> List[Dict[str, float]]:
+    ) -> list[dict[str, float]]:
         """仅检测静音片段(不剪除)，返回时间段列表
         
         Returns:
@@ -318,8 +318,8 @@ class AutoEditorAdapter:
 
     @staticmethod
     def _invert_segments(
-        silence_segments: List[Dict[str, float]], total_duration: float
-    ) -> List[Dict[str, float]]:
+        silence_segments: list[dict[str, float]], total_duration: float
+    ) -> list[dict[str, float]]:
         """将静音段反转为保留段"""
         keep = []
         prev_end = 0.0

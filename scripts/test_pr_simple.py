@@ -1,9 +1,11 @@
 """PR 简单操作测试 - 逐步测试每个操作。"""
-import sys
 import pathlib
+import sys
+
 sys.path.insert(0, str(pathlib.Path("puppet-automation").resolve()))
 
 import asyncio
+
 from src.engines.premiere.pr_bridge_client import PRBridgeClient, PRBridgeError
 
 

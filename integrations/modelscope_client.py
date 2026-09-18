@@ -9,9 +9,9 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import time
-import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 # 配置加载
 # ---------------------------------------------------------------------------
 
-def _load_env() -> Dict[str, str]:
+def _load_env() -> dict[str, str]:
     """从 .env 文件加载配置"""
     env_path = Path(__file__).parent.parent / ".env"
     config = {}
@@ -66,7 +66,7 @@ class ChatResponse:
     content: str
     model: str
     reasoning_content: str = ""
-    usage: Dict[str, int] = field(default_factory=dict)
+    usage: dict[str, int] = field(default_factory=dict)
     raw_chunks: int = 0
 
 
@@ -75,7 +75,7 @@ class VisionResponse:
     content: str
     model: str
     reasoning_content: str = ""
-    usage: Dict[str, int] = field(default_factory=dict)
+    usage: dict[str, int] = field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -87,9 +87,9 @@ class ModelScopeClient:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
-        default_model: Optional[str] = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        default_model: str | None = None,
         timeout: int = 120,
     ):
         self.api_key = api_key or DEFAULT_API_KEY
@@ -115,11 +115,11 @@ class ModelScopeClient:
 
     def chat(
         self,
-        messages: List[Dict[str, str]],
-        model: Optional[str] = None,
+        messages: list[dict[str, str]],
+        model: str | None = None,
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
     ) -> ChatResponse:
         """发送聊天请求，自动使用流式模式并聚合结果"""
         model = model or self.default_model
@@ -159,11 +159,11 @@ class ModelScopeClient:
 
     def chat_stream(
         self,
-        messages: List[Dict[str, str]],
-        model: Optional[str] = None,
+        messages: list[dict[str, str]],
+        model: str | None = None,
         max_tokens: int = 4096,
         temperature: float = 0.7,
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
     ) -> Generator[str, None, None]:
         """流式生成器，逐token返回"""
         model = model or self.default_model
@@ -254,7 +254,7 @@ class ModelScopeClient:
         self,
         image_url: str,
         prompt: str = "请描述这张图片的内容",
-        model: Optional[str] = None,
+        model: str | None = None,
         max_tokens: int = 2048,
     ) -> VisionResponse:
         """视觉理解：分析图片内容"""
@@ -298,7 +298,7 @@ class ModelScopeClient:
     # 便捷方法
     # ------------------------------------------------------------------
 
-    def quick(self, prompt: str, model: Optional[str] = None) -> str:
+    def quick(self, prompt: str, model: str | None = None) -> str:
         """快速单轮对话"""
         resp = self.chat(
             [{"role": "user", "content": prompt}],
@@ -322,7 +322,7 @@ class ModelScopeClient:
         result = self.vision(data_url, prompt)
         return result.content
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取客户端统计"""
         return {
             "total_calls": self.total_calls,
@@ -333,7 +333,7 @@ class ModelScopeClient:
             "default_model": self.default_model,
         }
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """健康检查：验证API连通性"""
         start = time.time()
         try:
@@ -357,7 +357,7 @@ class ModelScopeClient:
 # 全局单例
 # ---------------------------------------------------------------------------
 
-_global_client: Optional[ModelScopeClient] = None
+_global_client: ModelScopeClient | None = None
 
 
 def get_client() -> ModelScopeClient:

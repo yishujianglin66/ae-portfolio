@@ -14,7 +14,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
-from core.torch_runtime import infer_ctx, get_device
+
+from core.torch_runtime import get_device, infer_ctx
 
 COCO_ROOT = Path("/root/autodl-pub/COCO2017")
 VAL_IMG = COCO_ROOT / "val2017"

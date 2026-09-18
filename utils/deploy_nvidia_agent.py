@@ -12,15 +12,15 @@ NVIDIA Agent Toolkit 部署脚本
     python deploy_nvidia_agent.py --configure
     python deploy_nvidia_agent.py --validate
 """
-import os
-import sys
 import json
-import time
+import os
 import subprocess
+import sys
 import tempfile
-from pathlib import Path
+import time
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 DEFAULT_INSTALL_DIR = Path(r"C:\Program Files\NVIDIA\Agent Toolkit")
 DEFAULT_API_PORT = 8000
@@ -40,9 +40,9 @@ class DeployConfig:
     fallback_to_cloud: bool = True
 
 class NVIDIAInstaller:
-    def __init__(self, config: Optional[DeployConfig] = None):
+    def __init__(self, config: DeployConfig | None = None):
         self.config = config or DeployConfig()
-        self._steps_completed: List[str] = []
+        self._steps_completed: list[str] = []
 
     def run_install(self) -> bool:
         print("=" * 70)
@@ -113,7 +113,7 @@ class NVIDIAInstaller:
         if python_version >= (3, 10):
             print(f"    ✓ Python {python_version.major}.{python_version.minor}.{python_version.micro}")
         else:
-            print(f"    ✗ Python 版本过低，需要 3.10+")
+            print("    ✗ Python 版本过低，需要 3.10+")
             return False
 
         print("  - 检查磁盘空间...")
@@ -126,7 +126,7 @@ class NVIDIAInstaller:
         self._steps_completed.append("system_check")
         return True
 
-    def _detect_gpus(self) -> Dict[str, Any]:
+    def _detect_gpus(self) -> dict[str, Any]:
         result = {
             "gpu_count": 0,
             "gpu_names": [],
@@ -345,7 +345,7 @@ class NVIDIAInstaller:
             (model_dir / "config.json").write_text('{"name": "' + model["name"] + '"}')
             
             time.sleep(0.5)
-            print(f"      ✓ 已下载")
+            print("      ✓ 已下载")
 
         print("    ✓ 所有模型下载完成")
 

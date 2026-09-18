@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 # ── 类别映射 ────────────────────────────────────────────────────────────
 
 # MovieShots movement 原始标签 -> 项目 CAMERA_LABELS (core/camera_movement_classifier.py)
-MOVEMENT_TO_PROJECT: Dict[str, str] = {
+MOVEMENT_TO_PROJECT: dict[str, str] = {
     "Static": "static",
     "Motion": "pan_left",        # 平移/旋转合并类: 细分类留待推理侧 (见 infer 模块)
     "Pull": "zoom_out",
@@ -58,10 +58,10 @@ MOVEMENT_TO_PROJECT: Dict[str, str] = {
 }
 
 # MovieShots scale 标签 (景别, 可作辅助任务/特征)
-SCALE_LABELS: List[str] = ["LS", "FS", "MS", "CS", "ECS"]
+SCALE_LABELS: list[str] = ["LS", "FS", "MS", "CS", "ECS"]
 
 # 项目可用运镜标签全集 (与 CAMERA_LABELS 对齐)
-PROJECT_CAMERA_LABELS: List[str] = [
+PROJECT_CAMERA_LABELS: list[str] = [
     "static", "pan_left", "pan_right", "zoom_in", "zoom_out",
     "tilt_up", "tilt_down", "zoom_back", "diag_pan", "orbit",
     "push", "complex", "unknown",
@@ -76,14 +76,14 @@ class MovieShotSample:
     movement_label: str    # 项目标签 (映射后)
     movement_raw: str      # 原始标签 (Static/Motion/...)
     movement_value: int    # 原始数值
-    scale_label: Optional[str] = None   # 景别 (可选)
-    scale_value: Optional[int] = None
+    scale_label: str | None = None   # 景别 (可选)
+    scale_value: int | None = None
     source: str = ""       # v1/v2/v3
     video_path: str = ""   # 对应视频/关键帧路径 (下载后填充)
-    frame_indices: List[int] = field(default_factory=list)  # 镜头帧范围 (v3)
+    frame_indices: list[int] = field(default_factory=list)  # 镜头帧范围 (v3)
 
 
-def _iter_movieshots_json(path: str) -> List[MovieShotSample]:
+def _iter_movieshots_json(path: str) -> list[MovieShotSample]:
     """读取单个 MovieShots JSON, 返回样本列表。
 
     兼容三种结构:
@@ -104,7 +104,7 @@ def _iter_movieshots_json(path: str) -> List[MovieShotSample]:
     else:
         movies = data
 
-    samples: List[MovieShotSample] = []
+    samples: list[MovieShotSample] = []
     for mid, shots in movies.items():
         if not isinstance(shots, dict):
             continue
@@ -136,15 +136,15 @@ class MovieShotsDataset(BaseDataset):
 
     def __init__(self, config: DatasetConfig):
         super().__init__(config)
-        self._label_to_idx: Dict[str, int] = {}
-        self._idx_to_label: Dict[int, str] = {}
+        self._label_to_idx: dict[str, int] = {}
+        self._idx_to_label: dict[int, str] = {}
         for idx, label in enumerate(PROJECT_CAMERA_LABELS):
             self._label_to_idx[label] = idx
             self._idx_to_label[idx] = label
 
     # ── 加载 ────────────────────────────────────────────────────────────
 
-    def load_data(self, data_path: str) -> List[MovieShotSample]:
+    def load_data(self, data_path: str) -> list[MovieShotSample]:
         """从目录或单文件加载标注。
 
         data_path 可以是:
@@ -152,7 +152,7 @@ class MovieShotsDataset(BaseDataset):
           - 单个 JSON 文件
           - JSONL (本项目统一格式: 每行一个样本)
         """
-        samples: List[MovieShotSample] = []
+        samples: list[MovieShotSample] = []
 
         if os.path.isdir(data_path):
             # 按优先级加载 v1/v2/v3
@@ -190,7 +190,7 @@ class MovieShotsDataset(BaseDataset):
 
     # ── 预处理 / 校验 / 增强 ────────────────────────────────────────────
 
-    def preprocess(self, data: List[MovieShotSample]) -> List[MovieShotSample]:
+    def preprocess(self, data: list[MovieShotSample]) -> list[MovieShotSample]:
         """过滤掉 unknown / 无效样本。"""
         out = []
         for s in data:
@@ -201,13 +201,13 @@ class MovieShotsDataset(BaseDataset):
     def validate_sample(self, sample: MovieShotSample) -> bool:
         return sample.movement_label in self._label_to_idx and sample.movement_label != "unknown"
 
-    def augment_sample(self, sample: MovieShotSample) -> List[MovieShotSample]:
+    def augment_sample(self, sample: MovieShotSample) -> list[MovieShotSample]:
         """运镜标签是离散类, 不做特征级增强 (样本级增强在训练侧做视频变换)。"""
         return []
 
     # ── 导出工具 ────────────────────────────────────────────────────────
 
-    def to_jsonl(self, out_path: str, samples: Optional[List[MovieShotSample]] = None) -> int:
+    def to_jsonl(self, out_path: str, samples: list[MovieShotSample] | None = None) -> int:
         """把样本集导出为 JSONL (本项目统一训练格式)。"""
         if samples is None:
             samples = self._train_data + self._val_data + self._test_data
@@ -226,7 +226,7 @@ class MovieShotsDataset(BaseDataset):
         return len(samples)
 
 
-def build_label_stats(samples: List[MovieShotSample]) -> Dict[str, int]:
+def build_label_stats(samples: list[MovieShotSample]) -> dict[str, int]:
     """统计运镜标签分布。"""
     from collections import Counter
     return dict(Counter(s.movement_label for s in samples))

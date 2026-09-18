@@ -2,15 +2,16 @@
 from __future__ import annotations
 
 import asyncio
-import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from ae.bridge_maintenance import (
+    BridgeMaintenanceService,
+    DeadLetterRetryService,
     DiskCleaner,
     DiskCleanerConfig,
-    DeadLetterRetryService,
-    BridgeMaintenanceService,
 )
 
 

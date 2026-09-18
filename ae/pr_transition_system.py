@@ -20,10 +20,10 @@ Premiere Pro 转场效果系统
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, asdict, field
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 
 class TransitionType(str, Enum):
@@ -105,12 +105,12 @@ class TransitionParam:
     
     transition_type: TransitionType = TransitionType.CROSS_DISSOLVE
     duration: float = 1.0
-    direction: Optional[TransitionDirection] = None
+    direction: TransitionDirection | None = None
     ease_in: float = 0.0
     ease_out: float = 1.0
     softness: float = 0.0
     border_width: float = 0.0
-    border_color: List[float] = field(default_factory=lambda: [0, 0, 0])
+    border_color: list[float] = field(default_factory=lambda: [0, 0, 0])
     
     zoom_amount: float = 1.5
     rotation_angle: float = 360.0
@@ -118,9 +118,9 @@ class TransitionParam:
     shake_intensity: float = 10.0
     glitch_amount: float = 5.0
     
-    custom_settings: Optional[Dict[str, Any]] = None
+    custom_settings: dict[str, Any] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
         result["transition_type"] = self.transition_type.value
         if self.direction:
@@ -134,7 +134,7 @@ class PremiereTransitionSystem:
     def __init__(self, pr_client=None):
         self.pr_client = pr_client
 
-    def get_transition_info(self, transition_type: TransitionType) -> Dict[str, Any]:
+    def get_transition_info(self, transition_type: TransitionType) -> dict[str, Any]:
         """获取转场效果信息。"""
         info = {
             TransitionType.CROSS_DISSOLVE: {
@@ -342,7 +342,7 @@ class PremiereTransitionSystem:
             "icon": "❓",
         })
 
-    def list_transitions(self) -> List[Dict[str, Any]]:
+    def list_transitions(self) -> list[dict[str, Any]]:
         """列出所有可用转场效果。"""
         transitions = []
         for t_type in TransitionType:
@@ -357,7 +357,7 @@ class PremiereTransitionSystem:
             })
         return transitions
 
-    def list_categories(self) -> List[str]:
+    def list_categories(self) -> list[str]:
         """列出转场分类。"""
         categories = set()
         for t_type in TransitionType:
@@ -365,7 +365,7 @@ class PremiereTransitionSystem:
             categories.add(info["category"])
         return sorted(list(categories))
 
-    def get_transitions_by_category(self, category: str) -> List[Dict[str, Any]]:
+    def get_transitions_by_category(self, category: str) -> list[dict[str, Any]]:
         """按分类获取转场效果。"""
         transitions = []
         for t_type in TransitionType:
@@ -958,7 +958,7 @@ class PremiereTransitionSystem:
         track_index: int,
         clip_index: int,
         params: TransitionParam,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """应用转场效果。"""
         script = self.generate_advanced_transition_script(track_index, clip_index, params)
         
@@ -976,8 +976,8 @@ class PremiereTransitionSystem:
 
     async def apply_transitions_batch(
         self,
-        transitions: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        transitions: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """批量应用转场效果。"""
         results = []
         for t in transitions:

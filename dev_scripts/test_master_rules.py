@@ -14,8 +14,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from core.camera_language import (  # noqa: E402
-    CameraLanguageLibrary, load_master_rules, CAMERA_IDS)
+from core.camera_language import CAMERA_IDS, CameraLanguageLibrary, load_master_rules  # noqa: E402
 
 PASS = 0
 FAIL = 0

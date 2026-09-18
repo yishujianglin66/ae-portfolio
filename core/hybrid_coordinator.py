@@ -40,8 +40,8 @@ class ExecutionOptions:
     enable_fallback: bool = True
     max_retries: int = 3
     retry_delay_ms: int = 2000
-    project_context: Optional[Dict] = None
-    on_progress: Optional[Callable] = None  # (phase: str, progress: float, message: str) -> None
+    project_context: dict | None = None
+    on_progress: Callable | None = None  # (phase: str, progress: float, message: str) -> None
 
 
 @dataclass
@@ -50,7 +50,7 @@ class PhaseResult:
     phase: str  # silhouette | data_transfer | ae | fallback
     status: str  # pending | running | success | error | fallback
     duration_ms: float = 0
-    outputs: List[str] = field(default_factory=list)
+    outputs: list[str] = field(default_factory=list)
     error: str = ""
 
 
@@ -58,9 +58,9 @@ class PhaseResult:
 class HybridExecutionResult:
     """完整执行结果"""
     status: str  # pending | running | success | error | fallback
-    route: Optional[TaskRoute] = None
-    phases: List[PhaseResult] = field(default_factory=list)
-    silhouette_output: Optional[Dict] = None
+    route: TaskRoute | None = None
+    phases: list[PhaseResult] = field(default_factory=list)
+    silhouette_output: dict | None = None
     ae_script: str = ""
     error: str = ""
     total_duration_ms: float = 0
@@ -83,7 +83,7 @@ class HybridCoordinator:
       5. AE 阶段生成 JSX 脚本（含 Matte 导入、Track Matte 设置、效果应用）
     """
 
-    def __init__(self, intent_router: Optional[IntentRouter] = None) -> None:
+    def __init__(self, intent_router: IntentRouter | None = None) -> None:
         self._router = intent_router or IntentRouter()
 
     # ------------------------------------------------------------------
@@ -93,7 +93,7 @@ class HybridCoordinator:
     def execute(
         self,
         user_input: str,
-        options: Optional[ExecutionOptions] = None,
+        options: ExecutionOptions | None = None,
     ) -> HybridExecutionResult:
         """
         执行完整流程。
@@ -114,7 +114,7 @@ class HybridCoordinator:
 
         # 1. 路由决策
         route = self._router.route(user_input, options.project_context)
-        phases: List[PhaseResult] = []
+        phases: list[PhaseResult] = []
 
         # 未知路由，直接返回错误
         if route.type == "unknown":
@@ -126,7 +126,7 @@ class HybridCoordinator:
             )
 
         # 2. 按执行顺序处理
-        silhouette_output: Optional[Dict] = None
+        silhouette_output: dict | None = None
         ae_script: str = ""
         used_fallback = False
 
@@ -286,7 +286,7 @@ class HybridCoordinator:
 
     def _execute_data_transfer(
         self,
-        silhouette_output: Dict,
+        silhouette_output: dict,
         options: ExecutionOptions,
     ) -> PhaseResult:
         """执行数据转换阶段，将 Silhouette 输出转为 AE 可用格式"""
@@ -330,7 +330,7 @@ class HybridCoordinator:
     def _execute_ae_phase(
         self,
         route: TaskRoute,
-        silhouette_output: Optional[Dict],
+        silhouette_output: dict | None,
         options: ExecutionOptions,
     ) -> PhaseResult:
         """执行 AE 阶段，生成 JSX 脚本并写入文件"""
@@ -382,7 +382,7 @@ class HybridCoordinator:
         fn: Callable[[], T],
         max_retries: int,
         retry_delay_ms: int,
-        on_progress: Optional[Callable] = None,
+        on_progress: Callable | None = None,
     ) -> T:
         """
         带重试的执行。采用指数退避策略，delay * (i+1)。
@@ -399,7 +399,7 @@ class HybridCoordinator:
         Raises:
             最后一次重试的异常
         """
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
 
         for i in range(max_retries):
             try:
@@ -450,7 +450,7 @@ class HybridCoordinator:
             options.on_progress("fallback", 0.5, fallback.get("message", ""))
 
         # 生成降级 AE 脚本
-        jsx_lines: List[str] = []
+        jsx_lines: list[str] = []
         jsx_lines.append("// 降级 AE 脚本: Silhouette 不可用")
         jsx_lines.append(f"// 原因: {fallback.get('condition', '')}")
         jsx_lines.append(f"// 提示: {fallback.get('message', '')}")
@@ -476,7 +476,7 @@ class HybridCoordinator:
     # 读取 Silhouette 输出
     # ------------------------------------------------------------------
 
-    def _read_silhouette_output(self, output_path: str) -> Optional[Dict]:
+    def _read_silhouette_output(self, output_path: str) -> dict | None:
         """
         读取 Silhouette 输出文件并校验。
 
@@ -514,7 +514,7 @@ class HybridCoordinator:
     def _generate_ae_jsx(
         self,
         route: TaskRoute,
-        silhouette_output: Optional[Dict],
+        silhouette_output: dict | None,
         options: ExecutionOptions,
     ) -> str:
         """
@@ -526,7 +526,7 @@ class HybridCoordinator:
           - Paint: 导入修复帧
           - AE 效果: 添加效果
         """
-        lines: List[str] = []
+        lines: list[str] = []
         lines.append("// AE JSX 脚本: 由 HybridCoordinator 自动生成")
         lines.append(f"// 任务类型: {route.type}")
         lines.append("(function() {")
@@ -627,9 +627,9 @@ class HybridCoordinator:
 
     def _transfer_data(
         self,
-        silhouette_output: Dict,
+        silhouette_output: dict,
         options: ExecutionOptions,
-    ) -> Dict:
+    ) -> dict:
         """
         Silhouette → AE 数据转换。
 

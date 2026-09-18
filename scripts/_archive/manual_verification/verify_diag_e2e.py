@@ -1,11 +1,17 @@
 """E2E 诊断测试 - 需要 DaVinci Resolve 运行环境"""
 import pytest
+
 pytestmark = pytest.mark.integration
 
-import sys, os, time, tempfile, shutil
+import os
+import shutil
+import sys
+import tempfile
+import time
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.davinci_fuscript import ResolveColorEngine, ColorGradeConfig, find_lut_for_preset
+from integrations.davinci_fuscript import ColorGradeConfig, ResolveColorEngine, find_lut_for_preset
 
 engine = ResolveColorEngine()
 
@@ -70,6 +76,7 @@ with open(script_path, "w", encoding="utf-8") as f:
     f.write(lua_script)
 
 import subprocess
+
 proc = subprocess.run(
     [str(engine.fuscript_path), "-lua", script_path],
     capture_output=True, text=True, timeout=60,
@@ -84,13 +91,13 @@ print(f"\nReturn code: {proc.returncode}")
 
 shutil.rmtree(script_dir, ignore_errors=True)
 """E2E 诊断测试 - 显示调色每一步的详细输出"""
+import shutil
 import sys
 import tempfile
-import shutil
 from pathlib import Path
 
 sys.path.insert(0, r'c:\Users\Administrator\Desktop\AE-Knowledge-Vault')
-from integrations.davinci_fuscript import ResolveColorEngine, ColorGradeConfig
+from integrations.davinci_fuscript import ColorGradeConfig, ResolveColorEngine
 
 # 创建测试视频
 test_dir = Path(tempfile.gettempdir()) / "resolve_diag"

@@ -1,5 +1,5 @@
 """AE 命令生成器 - 将规划结果转换为 AE 可执行的 JSON 命令序列"""
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 class AECommandGenerator:
@@ -10,8 +10,8 @@ class AECommandGenerator:
         height: int = 1080,
         duration: float = 5,
         frame_rate: int = 30,
-        bg_color: List[int] = None
-    ) -> List[Dict[str, Any]]:
+        bg_color: list[int] = None
+    ) -> list[dict[str, Any]]:
         return [{
             "op": "createComposition",
             "params": {
@@ -24,7 +24,7 @@ class AECommandGenerator:
             }
         }]
 
-    def generate_import_footage(self, file_paths: List[str]) -> List[Dict[str, Any]]:
+    def generate_import_footage(self, file_paths: list[str]) -> list[dict[str, Any]]:
         commands = []
         for path in file_paths:
             commands.append({
@@ -39,7 +39,7 @@ class AECommandGenerator:
         layer_name: str,
         file_path: str,
         start_time: float = 0
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         return [{
             "op": "placeFootageInComp",
             "params": {
@@ -54,9 +54,9 @@ class AECommandGenerator:
         self,
         layer_name: str,
         effect_match_name: str,
-        settings: Dict[str, Any],
+        settings: dict[str, Any],
         comp_name: str = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         params = {
             "layerName": layer_name,
             "effectMatchName": effect_match_name,
@@ -77,7 +77,7 @@ class AECommandGenerator:
         value: Any,
         ease_type: str = "linear",
         comp_name: str = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         params = {
             "layerName": layer_name,
             "propertyName": property_name,
@@ -98,7 +98,7 @@ class AECommandGenerator:
         output_path: str,
         format: str = "mp4",
         quality: str = "high"
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         return [{
             "op": "renderComposition",
             "params": {
@@ -109,7 +109,7 @@ class AECommandGenerator:
             }
         }]
 
-    def generate_from_planning_result(self, planning_result: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def generate_from_planning_result(self, planning_result: dict[str, Any]) -> list[dict[str, Any]]:
         commands = []
         comp_name = planning_result.get("composition", {}).get("name", "AI_Generated")
 
@@ -167,15 +167,15 @@ class AECommandGenerator:
         comp_name: str = "E2E_音乐视频",
         frame_dir: str = "D:/AE-Work/视频素材库/frames",
         bgm_path: str = "",
-        beat_times: List[float] = None,
-        energy_peaks: List[float] = None,
-        peak_values: List[float] = None,
+        beat_times: list[float] = None,
+        energy_peaks: list[float] = None,
+        peak_values: list[float] = None,
         bpm: float = 0.0,
         width: int = 576,
         height: int = 768,
         duration: float = 12.0,
         fps: int = 30,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         return [{
             "op": "e2eMusicVideo",
             "params": {
@@ -199,7 +199,7 @@ class AECommandGenerator:
         property_path: str,
         expression: str,
         comp_name: str = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # 生成 setExpression 命令：为指定属性设置表达式
         params = {
             "layerName": layer_name,
@@ -216,9 +216,9 @@ class AECommandGenerator:
     def generate_add_mask(
         self,
         layer_name: str,
-        mask_path: List[Any],
+        mask_path: list[Any],
         comp_name: str = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # 生成 addMask 命令：为图层添加遮罩
         params = {
             "layerName": layer_name,
@@ -236,7 +236,7 @@ class AECommandGenerator:
         layer_name: str,
         blend_mode: str,
         comp_name: str = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # 生成 setBlendMode 命令：设置图层混合模式
         params = {
             "layerName": layer_name,
@@ -254,7 +254,7 @@ class AECommandGenerator:
         child_layer: str,
         parent_layer: str,
         comp_name: str = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # 生成 setParent 命令：设置图层父级
         params = {
             "layerName": child_layer,
@@ -273,7 +273,7 @@ class AECommandGenerator:
         matte_layer_name: str,
         matte_type: str,
         comp_name: str = None
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # 生成 setTrackMatte 命令：设置轨道遮罩
         params = {
             "layerName": layer_name,

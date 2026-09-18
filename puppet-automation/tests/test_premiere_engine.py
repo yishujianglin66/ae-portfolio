@@ -572,6 +572,7 @@ class TestCreativePattern:
     def test_apply_creative_pattern_in_execute_impl(self):
         """_execute_impl 必须包含 creative_pattern 分支。"""
         import inspect
+
         from src.engines.premiere.engine import PremiereEngine
         source = inspect.getsource(PremiereEngine._execute_impl)
         assert '"apply_creative_pattern"' in source or "'apply_creative_pattern'" in source
@@ -607,6 +608,7 @@ class TestAudioMixing:
     def test_audio_dispatch_entries(self):
         """_execute_impl 必须包含所有音频操作分支。"""
         import inspect
+
         from src.engines.premiere.engine import PremiereEngine
         source = inspect.getsource(PremiereEngine._execute_impl)
         audio_actions = [
@@ -651,6 +653,7 @@ class TestAdvancedWorkflow:
     def test_advanced_dispatch_entries(self):
         """_execute_impl 必须包含所有高级操作分支。"""
         import inspect
+
         from src.engines.premiere.engine import PremiereEngine
         source = inspect.getsource(PremiereEngine._execute_impl)
         actions = [
@@ -699,6 +702,7 @@ class TestNewApiEndpoints:
     @pytest.fixture
     def app(self):
         from unittest.mock import AsyncMock, MagicMock
+
         from src.api.main import app
         from src.engines.base import EngineResult
 

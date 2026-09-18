@@ -5,27 +5,27 @@ Phase A1: 测试先行
 """
 from __future__ import annotations
 
-import pytest
 import logging
-from typing import Any, Dict, Optional, Set
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict, Optional, Set
 
-from software_sdk.types import (
-    SoftwareType,
-    ConnectionStatus,
-    TaskStatus,
-    TaskPriority,
-    SoftwareCapability,
-    FallbackStrategyType,
-    SoftwareStatus,
-    SoftwareCapabilities,
-    Task,
-    SoftwareConfig,
-)
+import pytest
+
 from software_sdk.base import BaseSoftwareAdapter
 from software_sdk.registry import SoftwareRegistry
-
+from software_sdk.types import (
+    ConnectionStatus,
+    FallbackStrategyType,
+    SoftwareCapabilities,
+    SoftwareCapability,
+    SoftwareConfig,
+    SoftwareStatus,
+    SoftwareType,
+    Task,
+    TaskPriority,
+    TaskStatus,
+)
 
 # ============================================================================
 # Types Tests

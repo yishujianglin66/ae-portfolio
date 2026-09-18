@@ -1,5 +1,6 @@
 """测试 PySceneDetect 场景检测集成"""
 import sys
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
 from integrations.davinci_fuscript import ResolveColorEngine

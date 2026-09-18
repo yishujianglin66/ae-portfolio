@@ -16,15 +16,14 @@ pipeline/presets.py - 模板预设系统
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
 from dataclasses import replace
-
+from typing import Any, Dict, List, Optional
 
 # ============================================================================
 #  预设模板库
 # ============================================================================
 
-PRESETS: Dict[str, Dict[str, Any]] = {
+PRESETS: dict[str, dict[str, Any]] = {
     "high_energy": {
         "name": "高燃混剪",
         "description": "快节奏、强视觉冲击的混剪风格",
@@ -136,7 +135,7 @@ PRESETS: Dict[str, Dict[str, Any]] = {
 }
 
 
-def list_presets() -> List[Dict[str, str]]:
+def list_presets() -> list[dict[str, str]]:
     """列出所有可用预设模板"""
     return [
         {"key": k, "name": v["name"], "description": v["description"]}
@@ -144,7 +143,7 @@ def list_presets() -> List[Dict[str, str]]:
     ]
 
 
-def get_preset(preset_key: str) -> Optional[Dict[str, Any]]:
+def get_preset(preset_key: str) -> dict[str, Any] | None:
     """获取指定预设"""
     return PRESETS.get(preset_key)
 

@@ -1,8 +1,9 @@
-import os
 import json
+import os
 import shutil
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
 from learning.training_state_manager import TrainingStateManager
 
 MEMORY_DIR = r"D:\AE-Work\训练归档\记忆存储"
@@ -11,7 +12,7 @@ BACKUP_DIR = os.path.join(MEMORY_DIR, "backups")
 
 class SystemMemory:
     def __init__(self):
-        self.memory: Dict[str, Any] = {}
+        self.memory: dict[str, Any] = {}
         self.state_manager = TrainingStateManager()
         self._ensure_directories()
         self._load_memory()
@@ -34,7 +35,7 @@ class SystemMemory:
             json.dump(self.memory, f, ensure_ascii=False, indent=2)
         
         self._create_backup()
-        print(f"💾 系统记忆已保存")
+        print("💾 系统记忆已保存")
     
     def _create_backup(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -57,7 +58,7 @@ class SystemMemory:
         }
         self._save_memory()
     
-    def recall(self, key: str) -> Optional[Any]:
+    def recall(self, key: str) -> Any | None:
         entry = self.memory.get(key)
         if entry:
             entry["last_accessed"] = datetime.now().isoformat()
@@ -72,7 +73,7 @@ class SystemMemory:
             self._save_memory()
             print(f"🗑️ 已遗忘: {key}")
     
-    def search(self, query: str, category: str = None) -> List[Dict]:
+    def search(self, query: str, category: str = None) -> list[dict]:
         results = []
         for key, entry in self.memory.items():
             if query.lower() in key.lower() or query.lower() in entry.get("description", "").lower():
@@ -87,14 +88,14 @@ class SystemMemory:
                 })
         return sorted(results, key=lambda x: x["access_count"], reverse=True)
     
-    def get_category(self, category: str) -> List[Dict]:
+    def get_category(self, category: str) -> list[dict]:
         return [
             {"key": key, **entry}
             for key, entry in self.memory.items()
             if entry["category"] == category
         ]
     
-    def save_training_result(self, training_id: str, result: Dict):
+    def save_training_result(self, training_id: str, result: dict):
         key = f"training_{training_id}"
         self.remember(
             key,
@@ -103,10 +104,10 @@ class SystemMemory:
             description=f"训练结果: {result.get('title', '未知')}"
         )
     
-    def load_training_result(self, training_id: str) -> Optional[Dict]:
+    def load_training_result(self, training_id: str) -> dict | None:
         return self.recall(f"training_{training_id}")
     
-    def save_project_state(self, project_name: str, state: Dict):
+    def save_project_state(self, project_name: str, state: dict):
         key = f"project_{project_name}"
         self.remember(
             key,
@@ -115,10 +116,10 @@ class SystemMemory:
             description=f"项目状态: {project_name}"
         )
     
-    def load_project_state(self, project_name: str) -> Optional[Dict]:
+    def load_project_state(self, project_name: str) -> dict | None:
         return self.recall(f"project_{project_name}")
     
-    def save_user_preferences(self, preferences: Dict):
+    def save_user_preferences(self, preferences: dict):
         self.remember(
             "user_preferences",
             preferences,
@@ -126,10 +127,10 @@ class SystemMemory:
             description="用户偏好设置"
         )
     
-    def load_user_preferences(self) -> Dict:
+    def load_user_preferences(self) -> dict:
         return self.recall("user_preferences") or {}
     
-    def save_workflow_template(self, template_name: str, template: Dict):
+    def save_workflow_template(self, template_name: str, template: dict):
         key = f"workflow_{template_name}"
         self.remember(
             key,
@@ -138,13 +139,13 @@ class SystemMemory:
             description=f"工作流模板: {template_name}"
         )
     
-    def load_workflow_template(self, template_name: str) -> Optional[Dict]:
+    def load_workflow_template(self, template_name: str) -> dict | None:
         return self.recall(f"workflow_{template_name}")
     
-    def get_all_workflow_templates(self) -> List[Dict]:
+    def get_all_workflow_templates(self) -> list[dict]:
         return self.get_category("workflow")
     
-    def save_experiment_report(self, experiment_id: str, report: Dict):
+    def save_experiment_report(self, experiment_id: str, report: dict):
         key = f"experiment_{experiment_id}"
         self.remember(
             key,
@@ -153,14 +154,14 @@ class SystemMemory:
             description=f"实验报告: {report.get('title', '未知')}"
         )
     
-    def load_experiment_report(self, experiment_id: str) -> Optional[Dict]:
+    def load_experiment_report(self, experiment_id: str) -> dict | None:
         return self.recall(f"experiment_{experiment_id}")
     
-    def get_recent_experiments(self, count: int = 10) -> List[Dict]:
+    def get_recent_experiments(self, count: int = 10) -> list[dict]:
         experiments = self.get_category("experiment")
         return sorted(experiments, key=lambda x: x["created_at"], reverse=True)[:count]
     
-    def save_lesson_learned(self, lesson: str, context: Dict = None):
+    def save_lesson_learned(self, lesson: str, context: dict = None):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         key = f"lesson_{timestamp}"
         self.remember(
@@ -170,14 +171,14 @@ class SystemMemory:
             description=lesson[:50]
         )
     
-    def get_all_lessons(self) -> List[Dict]:
+    def get_all_lessons(self) -> list[dict]:
         return sorted(
             self.get_category("lesson"),
             key=lambda x: x["created_at"],
             reverse=True
         )
     
-    def save_audio_analysis(self, audio_path: str, analysis: Dict):
+    def save_audio_analysis(self, audio_path: str, analysis: dict):
         import hashlib
         file_hash = hashlib.md5(audio_path.encode()).hexdigest()[:16]
         key = f"audio_analysis_{file_hash}"
@@ -188,12 +189,12 @@ class SystemMemory:
             description=f"音频分析: {os.path.basename(audio_path)}"
         )
     
-    def load_audio_analysis(self, audio_path: str) -> Optional[Dict]:
+    def load_audio_analysis(self, audio_path: str) -> dict | None:
         import hashlib
         file_hash = hashlib.md5(audio_path.encode()).hexdigest()[:16]
         return self.recall(f"audio_analysis_{file_hash}")
     
-    def save_video_match(self, bgm_path: str, matches: List[Dict]):
+    def save_video_match(self, bgm_path: str, matches: list[dict]):
         import hashlib
         file_hash = hashlib.md5(bgm_path.encode()).hexdigest()[:16]
         key = f"video_match_{file_hash}"
@@ -204,12 +205,12 @@ class SystemMemory:
             description=f"视频匹配结果: {os.path.basename(bgm_path)}"
         )
     
-    def load_video_match(self, bgm_path: str) -> Optional[Dict]:
+    def load_video_match(self, bgm_path: str) -> dict | None:
         import hashlib
         file_hash = hashlib.md5(bgm_path.encode()).hexdigest()[:16]
         return self.recall(f"video_match_{file_hash}")
     
-    def get_memory_summary(self) -> Dict:
+    def get_memory_summary(self) -> dict:
         categories = {}
         for entry in self.memory.values():
             cat = entry["category"]

@@ -1,6 +1,6 @@
-import sys
-import os
 import importlib
+import os
+import sys
 
 mf = importlib.import_module("media-fetcher")
 MediaFetcher = mf.MediaFetcher

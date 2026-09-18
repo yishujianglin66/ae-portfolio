@@ -14,14 +14,13 @@ style_copy 端到端离线串联测试（片 B）
   - 提示词输入 → workflow 不进入 FFmpeg 真实执行分支（DAG 计划即产物）
 全部离线、确定性、可复现，不触网不触外部二进制。
 """
-import bootstrap  # noqa: F401  确保项目子目录在 sys.path
-
 import pytest
 
+import bootstrap  # noqa: F401  确保项目子目录在 sys.path
 from style_copy import style_analyzer
+from style_copy.ffmpeg_generator import FFmpegCommandGenerator
 from style_copy.style_analyzer import LocalStyleAnalyzer
 from style_copy.workflow import StyleCopyWorkflow
-from style_copy.ffmpeg_generator import FFmpegCommandGenerator
 
 
 @pytest.fixture

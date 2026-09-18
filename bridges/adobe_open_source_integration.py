@@ -24,10 +24,10 @@ adobe_open_source_integration.py — 开源项目集成层
 
 from __future__ import annotations
 
-import os
-import sys
 import json
+import os
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -77,7 +77,7 @@ class AdobeCOMAutomation:
             self._available = False
         return self._available
     
-    def execute_jsx(self, app_key: str, jsx_code: str, timeout: int = 30) -> Dict:
+    def execute_jsx(self, app_key: str, jsx_code: str, timeout: int = 30) -> dict:
         """通过COM在Adobe软件中执行ExtendScript
         
         Args:
@@ -122,7 +122,7 @@ try {{
         except Exception as e:
             return {"success": False, "error": str(e)}
     
-    def execute_powershell(self, ps_code: str, timeout: int = 30) -> Dict:
+    def execute_powershell(self, ps_code: str, timeout: int = 30) -> dict:
         """直接执行PowerShell脚本 (用于COM操作)"""
         try:
             result = subprocess.run(
@@ -202,7 +202,7 @@ class PremiereMCPIntegration:
     通过文件IPC与CEP插件通信
     """
     
-    def __init__(self, temp_dir: Optional[str] = None):
+    def __init__(self, temp_dir: str | None = None):
         self.temp_dir = Path(temp_dir) if temp_dir else Path(__file__).parent / ".premiere-mcp-bridge"
         self.temp_dir.mkdir(parents=True, exist_ok=True)
         self.npm_path = Path(r"C:\Users\Administrator\AppData\Roaming\npm\node_modules\premiere-pro-mcp")
@@ -218,7 +218,7 @@ class PremiereMCPIntegration:
             return len(list(tools_dir.glob("*.js")))
         return 0
     
-    def list_tool_modules(self) -> List[str]:
+    def list_tool_modules(self) -> list[str]:
         """列出所有工具模块"""
         tools_dir = self.npm_path / "dist" / "tools"
         if not tools_dir.exists():
@@ -285,7 +285,7 @@ class AdobeOpenSourceIntegration:
         
         return "none"
     
-    def execute(self, app_key: str, command: str, **kwargs) -> Dict:
+    def execute(self, app_key: str, command: str, **kwargs) -> dict:
         """统一执行入口 — 自动选择最佳方式"""
         method = self.get_best_method(app_key)
         
@@ -312,7 +312,7 @@ class AdobeOpenSourceIntegration:
         lines.append("=" * 60)
         
         # adobe-mcp
-        lines.append(f"\n[1] adobe-mcp (COM自动化)")
+        lines.append("\n[1] adobe-mcp (COM自动化)")
         lines.append(f"    状态: {'可用' if self.com.is_available() else '不可用'}")
         if self.com.is_available():
             # 只检查已安装且运行中的
@@ -322,10 +322,10 @@ class AdobeOpenSourceIntegration:
                     running = installed[app_key]["running"]
                     lines.append(f"    {app_key}: {'运行中' if running else '未运行'}")
             else:
-                lines.append(f"    (无法检测已安装软件)")
+                lines.append("    (无法检测已安装软件)")
         
         # premiere-pro-mcp
-        lines.append(f"\n[2] premiere-pro-mcp (269工具)")
+        lines.append("\n[2] premiere-pro-mcp (269工具)")
         lines.append(f"    状态: {'已安装' if self.pr_mcp.is_available() else '未安装'}")
         if self.pr_mcp.is_available():
             lines.append(f"    工具模块: {self.pr_mcp.get_tool_count()}个")
@@ -333,7 +333,7 @@ class AdobeOpenSourceIntegration:
             lines.append(f"    模块列表: {', '.join(modules[:10])}{'...' if len(modules) > 10 else ''}")
         
         # 自研Bridge
-        lines.append(f"\n[3] 自研文件Bridge")
+        lines.append("\n[3] 自研文件Bridge")
         if self._detect:
             installed = self._detect()
             lines.append(f"    已安装: {len(installed)}个Adobe软件")
@@ -341,7 +341,7 @@ class AdobeOpenSourceIntegration:
                 lines.append(f"    {key}: {'运行中' if info['running'] else '未运行'}")
         
         # 最佳方式
-        lines.append(f"\n[4] 推荐通信方式")
+        lines.append("\n[4] 推荐通信方式")
         for app_key in ["photoshop", "premiere", "after_effects", "media_encoder"]:
             method = self.get_best_method(app_key)
             lines.append(f"    {app_key}: {method}")

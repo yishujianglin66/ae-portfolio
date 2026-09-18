@@ -1,9 +1,12 @@
 # Silhouette fx API 验证 - 逐步排查版
 import pytest
+
 pytest.importorskip("fx")
-from fx import *
 import os
 import traceback
+
+from fx import *
+
 
 class TestFxAPI(Action):
 	def __init__(self):
@@ -46,7 +49,7 @@ class TestFxAPI(Action):
 			# Test 5: Object - 尝试不同构造方式
 			try:
 				obj = Object()
-				f.write(f"[PASS] Object() created\n")
+				f.write("[PASS] Object() created\n")
 			except Exception as e:
 				f.write(f"[FAIL] Object(): {e}\n")
 				try:
@@ -88,21 +91,21 @@ class TestFxAPI(Action):
 				src = Node("SourceNode")
 				blur = Node("BlurNode")
 				pipe = Pipe(src.outputs[0], blur.inputs[0])
-				f.write(f"[PASS] Pipe created\n")
+				f.write("[PASS] Pipe created\n")
 			except Exception as e:
 				f.write(f"[FAIL] Pipe: {e}\n")
 			
 			# Test 10: Project
 			try:
 				proj = Project()
-				f.write(f"[PASS] Project() created\n")
+				f.write("[PASS] Project() created\n")
 			except Exception as e:
 				f.write(f"[FAIL] Project(): {e}\n")
 			
 			# Test 11: Session
 			try:
 				session = Session()
-				f.write(f"[PASS] Session() created\n")
+				f.write("[PASS] Session() created\n")
 			except Exception as e:
 				f.write(f"[FAIL] Session(): {e}\n")
 				try:

@@ -115,7 +115,7 @@ def _safe_filename(name: str, max_length: int = 100) -> str:
     return cleaned or "youtube_video"
 
 
-def _resolve_cookie_path(cookie_path: Optional[str] = None) -> Optional[str]:
+def _resolve_cookie_path(cookie_path: str | None = None) -> str | None:
     """解析 cookie 文件路径。
 
     优先级：
@@ -123,7 +123,7 @@ def _resolve_cookie_path(cookie_path: Optional[str] = None) -> Optional[str]:
     2. 默认路径 D:/AE-Work/cookies/youtube_cookies.txt
     3. 项目内 cookies/youtube_cookies.txt
     """
-    candidates: List[str] = []
+    candidates: list[str] = []
     if cookie_path:
         candidates.append(cookie_path)
     candidates.append(DEFAULT_COOKIE_PATH)
@@ -137,12 +137,12 @@ def _resolve_cookie_path(cookie_path: Optional[str] = None) -> Optional[str]:
 def _build_base_options(
     output_dir: str,
     output_template: str = OUTPUT_TEMPLATE,
-    cookie_path: Optional[str] = None,
+    cookie_path: str | None = None,
     quality: str = DEFAULT_QUALITY,
     audio_only: bool = False,
-    proxy: Optional[str] = None,
-    extra: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    proxy: str | None = None,
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """构建 yt-dlp 选项字典。
 
     Args:
@@ -159,7 +159,7 @@ def _build_base_options(
     """
     os.makedirs(output_dir, exist_ok=True)
 
-    options: Dict[str, Any] = {
+    options: dict[str, Any] = {
         "outtmpl": os.path.join(output_dir, output_template),
         "ignoreerrors": True,
         "no_warnings": True,
@@ -214,7 +214,7 @@ def _build_base_options(
     return options
 
 
-def _parse_yt_dlp_info(info: Dict[str, Any]) -> Dict[str, Any]:
+def _parse_yt_dlp_info(info: dict[str, Any]) -> dict[str, Any]:
     """从 yt-dlp info 字典中提取统一格式的视频信息。"""
     return {
         "success": True,
@@ -247,8 +247,8 @@ class YouTubeDownloader:
 
     def __init__(
         self,
-        cookie_path: Optional[str] = None,
-        proxy: Optional[str] = None,
+        cookie_path: str | None = None,
+        proxy: str | None = None,
     ) -> None:
         """初始化下载器。
 
@@ -264,7 +264,7 @@ class YouTubeDownloader:
 
     # ---------- 核心功能 ----------
 
-    def get_video_info(self, url: str) -> Dict[str, Any]:
+    def get_video_info(self, url: str) -> dict[str, Any]:
         """获取视频元数据。
 
         Args:
@@ -273,7 +273,7 @@ class YouTubeDownloader:
         Returns:
             视频信息字典
         """
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "video_id": "",
             "title": "",
@@ -329,9 +329,9 @@ class YouTubeDownloader:
     def download_video(
         self,
         url: str,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         quality: str = DEFAULT_QUALITY,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """下载 YouTube 视频。
 
         Args:
@@ -345,7 +345,7 @@ class YouTubeDownloader:
         if output_dir is None:
             output_dir = DEFAULT_OUTPUT_DIR
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "file_path": None,
             "title": "",
@@ -376,9 +376,9 @@ class YouTubeDownloader:
                 proxy=self.proxy,
             )
 
-            downloaded_paths: List[str] = []
+            downloaded_paths: list[str] = []
 
-            def _filepath_hook(d: Dict[str, Any]) -> None:
+            def _filepath_hook(d: dict[str, Any]) -> None:
                 if d.get("status") == "finished":
                     filepath = d.get("info_dict", {}).get("filepath")
                     if filepath and filepath not in downloaded_paths:
@@ -413,8 +413,8 @@ class YouTubeDownloader:
     def download_audio(
         self,
         url: str,
-        output_dir: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        output_dir: str | None = None,
+    ) -> dict[str, Any]:
         """下载 YouTube 视频并提取音频为 MP3。
 
         Args:
@@ -427,7 +427,7 @@ class YouTubeDownloader:
         if output_dir is None:
             output_dir = DEFAULT_BGM_DIR
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "file_path": None,
             "title": "",
@@ -456,9 +456,9 @@ class YouTubeDownloader:
                 output_template=OUTPUT_TEMPLATE,
             )
 
-            downloaded_paths: List[str] = []
+            downloaded_paths: list[str] = []
 
-            def _filepath_hook(d: Dict[str, Any]) -> None:
+            def _filepath_hook(d: dict[str, Any]) -> None:
                 if d.get("status") == "finished":
                     filepath = d.get("info_dict", {}).get("filepath")
                     if filepath and filepath not in downloaded_paths:
@@ -491,7 +491,7 @@ class YouTubeDownloader:
 
     def search_videos(
         self, query: str, max_results: int = 10
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """搜索 YouTube 视频。
 
         使用 yt-dlp 的 `ytsearch{N}:query` 语法。
@@ -507,7 +507,7 @@ class YouTubeDownloader:
             - count: 结果数量
             - videos: 视频信息列表
         """
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "query": query,
             "count": 0,
@@ -538,7 +538,7 @@ class YouTubeDownloader:
                 result["count"] = 0
                 return result
 
-            videos: List[Dict[str, Any]] = []
+            videos: list[dict[str, Any]] = []
             for entry in info["entries"]:
                 if not entry:
                     continue
@@ -568,9 +568,9 @@ class YouTubeDownloader:
     def download_subtitles(
         self,
         url: str,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         lang: str = "zh-Hans",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """下载 YouTube 视频字幕。
 
         Args:
@@ -588,7 +588,7 @@ class YouTubeDownloader:
         if output_dir is None:
             output_dir = DEFAULT_SUBTITLE_DIR
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "success": False,
             "subtitle_paths": [],
             "languages": [],
@@ -620,9 +620,9 @@ class YouTubeDownloader:
                 },
             )
 
-            subtitle_paths: List[str] = []
+            subtitle_paths: list[str] = []
 
-            def _filepath_hook(d: Dict[str, Any]) -> None:
+            def _filepath_hook(d: dict[str, Any]) -> None:
                 # 检测字幕文件
                 if d.get("status") == "finished":
                     filepath = d.get("info_dict", {}).get("filepath")
@@ -656,13 +656,13 @@ class YouTubeDownloader:
 
     @staticmethod
     def _find_latest_file(
-        directory: str, extensions: List[str]
-    ) -> Optional[str]:
+        directory: str, extensions: list[str]
+    ) -> str | None:
         """在目录中查找最新的指定扩展名文件。"""
         if not os.path.exists(directory):
             return None
 
-        candidates: List[tuple] = []
+        candidates: list[tuple] = []
         for name in os.listdir(directory):
             for ext in extensions:
                 if name.lower().endswith(ext.lower()):
@@ -683,9 +683,9 @@ class YouTubeDownloader:
     @staticmethod
     def _find_recent_files(
         directory: str,
-        extensions: List[str],
+        extensions: list[str],
         max_age_seconds: int = 300,
-    ) -> List[str]:
+    ) -> list[str]:
         """查找目录中最近修改的文件。
 
         Args:
@@ -702,7 +702,7 @@ class YouTubeDownloader:
         import time
 
         now = time.time()
-        files: List[str] = []
+        files: list[str] = []
         for name in os.listdir(directory):
             for ext in extensions:
                 if name.lower().endswith(ext.lower()):
@@ -729,14 +729,14 @@ def _sanitize_error(error_msg: str) -> str:
     for pattern in _SENSITIVE_PATTERNS:
         sanitized = re.sub(
             rf'({pattern}\s*[=:]\s*)[^\s,;"\}}]+',
-            rf'\1[REDACTED]',
+            r'\1[REDACTED]',
             sanitized,
             flags=re.IGNORECASE,
         )
     return sanitized
 
 
-def _handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
+def _handle_request(request: dict[str, Any]) -> dict[str, Any]:
     """处理 --json-input 协议请求。"""
     func_name = request.get("func")
     params = request.get("params", {}) or {}
@@ -745,7 +745,7 @@ def _handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
         return {"success": False, "error": "缺少 func 字段"}
 
     # 初始化下载器
-    init_kwargs: Dict[str, Any] = {}
+    init_kwargs: dict[str, Any] = {}
     if "cookie_path" in params:
         init_kwargs["cookie_path"] = params.pop("cookie_path")
     if "proxy" in params:

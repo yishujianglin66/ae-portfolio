@@ -11,9 +11,10 @@ import sys
 import time
 
 sys.path.insert(0, ".")
-from core.style_tree_builder import StyleTreeBuilder
+from core.ae_bridge_runner import BRIDGE, send_jsx_and_wait
+
 from core.beatlock import BeatGrid, compose
-from core.ae_bridge_runner import send_jsx_and_wait, BRIDGE
+from core.style_tree_builder import StyleTreeBuilder
 
 AUDIOMAP = r"tmp/audiomap_52a283d2.json"
 

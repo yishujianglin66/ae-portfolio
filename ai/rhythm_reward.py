@@ -59,7 +59,7 @@ def extract_audio(video_path: str, out_wav: str) -> bool:
     return r.returncode == 0 and Path(out_wav).exists()
 
 
-def detect_beats(wav_path: str) -> Tuple[List[float], float]:
+def detect_beats(wav_path: str) -> tuple[list[float], float]:
     import librosa
     y, sr = librosa.load(wav_path, sr=22050)
     tempo_raw, frames = librosa.beat.beat_track(y=y, sr=sr)
@@ -68,12 +68,12 @@ def detect_beats(wav_path: str) -> Tuple[List[float], float]:
     return beats, tempo
 
 
-def refine_beats_with_onsets(wav_path: str, beats: List[float]) -> List[float]:
+def refine_beats_with_onsets(wav_path: str, beats: list[float]) -> list[float]:
     """用onset峰值微对齐节拍相位 — 修正librosa节拍帧的系统性滞后。
     诊断发现: 未校准节拍与真实AMV切点存在0.2-0.4拍系统性相位偏差，
     导致标签反转。每个节拍吸附到±0.25拍内最强onset峰。"""
-    import numpy as np
     import librosa
+    import numpy as np
     y, sr = librosa.load(wav_path, sr=22050)
     onset_env = librosa.onset.onset_strength(y=y, sr=sr)
     onset_frames = librosa.onset.onset_detect(y=y, sr=sr, onset_envelope=onset_env)
@@ -93,7 +93,7 @@ def refine_beats_with_onsets(wav_path: str, beats: List[float]) -> List[float]:
     return refined
 
 
-def detect_cuts(video_path: str, threshold: float = 0.25) -> List[float]:
+def detect_cuts(video_path: str, threshold: float = 0.25) -> list[float]:
     import re
     cmd = [FFMPEG, "-i", video_path,
            "-vf", f"select='gt(scene,{threshold})',showinfo",
@@ -101,14 +101,14 @@ def detect_cuts(video_path: str, threshold: float = 0.25) -> List[float]:
     r = subprocess.run(cmd, capture_output=True, text=True,
                        encoding="utf-8", errors="ignore", timeout=300)
     cuts = sorted(float(t) for t in re.findall(r"pts_time:([\d.]+)", r.stderr))
-    merged: List[float] = []
+    merged: list[float] = []
     for t in cuts:
         if not merged or t - merged[-1] > 0.15:
             merged.append(t)
     return merged
 
 
-def on_beat_rate(cuts: List[float], beats: List[float],
+def on_beat_rate(cuts: list[float], beats: list[float],
                  tol_ms: float = TOLERANCE_MS) -> float:
     """硬踩拍率(辅助指标) — 自适应容差 min(tol_ms, 0.2*节拍间隔)"""
     if not cuts or not beats:
@@ -121,7 +121,7 @@ def on_beat_rate(cuts: List[float], beats: List[float],
     return hit / len(cuts)
 
 
-def soft_beat_score(cuts: List[float], beats: List[float]) -> float:
+def soft_beat_score(cuts: list[float], beats: list[float]) -> float:
     """软踩拍得分(主标签): 每切点 max(0, 1 - dev/(bi/2)) 均值。
     相比硬踩拍率提供连续梯度，能有效区分真实切点/小抖动/大抖动/偏移。"""
     if not cuts or not beats:
@@ -136,7 +136,7 @@ def soft_beat_score(cuts: List[float], beats: List[float]) -> float:
 
 # ---------------- 特征 ----------------
 
-def cut_features(cuts: List[float], beats: List[float], duration: float) -> Dict[str, float]:
+def cut_features(cuts: list[float], beats: list[float], duration: float) -> dict[str, float]:
     """从候选切点方案提取特征(不含偏差真值，供模型学习)"""
     import numpy as np
     if not cuts:
@@ -320,8 +320,8 @@ def train():
     import numpy as np
     from scipy.stats import spearmanr
     from sklearn.ensemble import GradientBoostingRegressor
-    from sklearn.model_selection import GroupKFold
     from sklearn.metrics import mean_absolute_error, r2_score
+    from sklearn.model_selection import GroupKFold
 
     samples = json.loads(DATASET.read_text(encoding="utf-8"))
     X = np.array([[s["features"][k] for k in FEATURE_KEYS] for s in samples])
@@ -414,9 +414,10 @@ def train():
 
 # ---------------- 推理与择优 ----------------
 
-def score_plan(cuts: List[float], beats: List[float], duration: float) -> float:
+def score_plan(cuts: list[float], beats: list[float], duration: float) -> float:
     """奖励模型打分 — 导演系统多方案择优入口(含保序校准)"""
     import pickle
+
     import numpy as np
     bundle = pickle.loads(MODEL_PKL.read_bytes())
     if isinstance(bundle, dict):  # 新版: {regressor, calibrator}

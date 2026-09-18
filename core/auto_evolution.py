@@ -58,7 +58,7 @@ except ImportError:
 KNOWLEDGE_PATH = EVO_DIR / "evolution_knowledge.jsonl"
 
 
-def distill_review_knowledge(reviews: List[Dict], sink_path: str = None) -> int:
+def distill_review_knowledge(reviews: list[dict], sink_path: str = None) -> int:
     """将 review 结果蒸馏为知识行追加落盘(D4 修复: 知识积累停滞)。
 
     返回新增条数; 同 run_id 不重复写入。
@@ -124,14 +124,14 @@ def _load_processed() -> set:
     return processed
 
 
-def _mark_processed(output_path: str, record: Dict):
+def _mark_processed(output_path: str, record: dict):
     """标记为已处理"""
     PROCESSED_LOG.parent.mkdir(parents=True, exist_ok=True)
     with open(PROCESSED_LOG, "a", encoding="utf-8") as f:
         f.write(json.dumps({"output_path": output_path, **record}, ensure_ascii=False) + "\n")
 
 
-def _probe_video(path: str) -> Dict[str, Any]:
+def _probe_video(path: str) -> dict[str, Any]:
     """用 ffprobe 探测视频信息"""
     try:
         r = subprocess.run(
@@ -165,7 +165,7 @@ def scan_and_capture() -> int:
     Returns:
         新发现并处理的视频数量
     """
-    from core.self_evolution_engine import get_evolution_engine, ExecutionRecord
+    from core.self_evolution_engine import ExecutionRecord, get_evolution_engine
 
     processed = _load_processed()
     engine = get_evolution_engine()
@@ -248,15 +248,15 @@ def scan_and_capture() -> int:
 # 2. 进化循环
 # ============================================================
 
-def run_evolution_cycle(task_type: str = "style_transfer", iterations: int = 2) -> Dict:
+def run_evolution_cycle(task_type: str = "style_transfer", iterations: int = 2) -> dict:
     """执行一轮进化循环
 
     Returns:
         进化报告摘要
     """
-    from core.evolution.run_evolution import EvolutionLoop
     from core.evolution.evaluator import EvolutionEvaluator
     from core.evolution.optimizer_agent import get_optimizer_agent
+    from core.evolution.run_evolution import EvolutionLoop
     from core.evolution.version_manager import get_version_manager
 
     logger.info(f"Starting evolution cycle: task={task_type}, iterations={iterations}")
@@ -282,7 +282,7 @@ def run_evolution_cycle(task_type: str = "style_transfer", iterations: int = 2) 
 # 3. 回归验收
 # ============================================================
 
-def run_acceptance() -> Dict:
+def run_acceptance() -> dict:
     """跑回归验收
 
     Returns:
@@ -315,7 +315,7 @@ def run_acceptance() -> Dict:
 # 4. 每日例行
 # ============================================================
 
-def daily_routine() -> Dict:
+def daily_routine() -> dict:
     """每日例行任务: 采集 → 进化 → 验收 → 汇总
 
     Returns:
@@ -422,7 +422,7 @@ def register_scheduled_task():
     ]
 
     logger.info(f"Registering scheduled task: {task_name}")
-    logger.info(f"  Schedule: Daily at 03:00")
+    logger.info("  Schedule: Daily at 03:00")
 
     try:
         r = subprocess.run(
@@ -511,7 +511,7 @@ def _print_status():
     if state_path.exists():
         with open(state_path, "r", encoding="utf-8") as f:
             state = json.load(f)
-        print(f"\nEvolution state:")
+        print("\nEvolution state:")
         print(f"  review_history: {len(state.get('review_history', []))} reviews")
         print(f"  last_evolution_run: {state.get('last_evolution_run', 0)}")
 
@@ -554,11 +554,11 @@ def _print_status():
             encoding="utf-8", errors="replace", timeout=10,
         )
         if r.returncode == 0:
-            print(f"\nScheduled task: REGISTERED (AE_Vault_Daily_Evolution)")
+            print("\nScheduled task: REGISTERED (AE_Vault_Daily_Evolution)")
         else:
-            print(f"\nScheduled task: NOT REGISTERED")
+            print("\nScheduled task: NOT REGISTERED")
     except Exception:
-        print(f"\nScheduled task: UNKNOWN")
+        print("\nScheduled task: UNKNOWN")
 
     print("\n" + "=" * 60)
 

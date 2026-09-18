@@ -12,10 +12,16 @@ t34_vlm_annotate_and_train.py — VLM标注 + 均衡采样LoRA训练
 - 多IP新帧: ~1,600帧 (D:\multi_ip_corpus\)
 - 伪标签: 50,454帧 (D:\aot_corpus\pseudolabels.json)
 """
-import os, sys, json, subprocess, time, base64, shutil
-from pathlib import Path
-from collections import Counter, defaultdict
+import base64
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
 import urllib.request
+from collections import Counter, defaultdict
+from pathlib import Path
 
 # ── 路径配置 ─────────────────────────────────────────
 PROJECT_ROOT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")

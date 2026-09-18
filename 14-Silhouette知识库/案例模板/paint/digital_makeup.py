@@ -1,8 +1,9 @@
 # Digital Makeup Template
 # 数字化妆模板 - 适用于皮肤修复、瑕疵去除、妆容调整
 
-from fx import *
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=24.0):

@@ -62,8 +62,8 @@ class UserFeedbackEntry:
 
     run_id: str
     feedback_type: FeedbackType
-    adjusted_params: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    rating: Optional[int] = None
+    adjusted_params: dict[str, dict[str, Any]] = field(default_factory=dict)
+    rating: int | None = None
     comment: str = ""
     timestamp: str = ""
 
@@ -78,13 +78,13 @@ class LearningTriggerResult:
 
     success: bool
     strategy: str  # "success_learn" | "deviation_learn" | "failure_learn"
-    record_id: Optional[str] = None
-    template_id: Optional[str] = None
+    record_id: str | None = None
+    template_id: str | None = None
     default_values_updated: int = 0
     confidence_boosted: bool = False
     confidence_penalized: bool = False
     message: str = ""
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
 
 # ============================================================================
@@ -111,7 +111,7 @@ class FeedbackApi:
             return feedback_api.submit_feedback_dict(payload)
     """
 
-    def __init__(self, history_dir: Optional[str] = None):
+    def __init__(self, history_dir: str | None = None):
         # 反馈历史文件：与 PersistentLearningLoop 同根 %APPDATA%/AE-Knowledge-Vault
         if history_dir is None:
             if os.name == "nt":
@@ -149,12 +149,12 @@ class FeedbackApi:
         self,
         run_id: str,
         feedback_type: str,
-        adjusted_params: Optional[Dict[str, Dict[str, Any]]] = None,
-        rating: Optional[int] = None,
+        adjusted_params: dict[str, dict[str, Any]] | None = None,
+        rating: int | None = None,
         comment: str = "",
-        plan_context: Optional[Dict[str, Any]] = None,
-        execute_context: Optional[Dict[str, Any]] = None,
-        verify_context: Optional[Dict[str, Any]] = None,
+        plan_context: dict[str, Any] | None = None,
+        execute_context: dict[str, Any] | None = None,
+        verify_context: dict[str, Any] | None = None,
     ) -> LearningTriggerResult:
         """提交用户反馈，触发对应学习策略
 
@@ -210,7 +210,8 @@ class FeedbackApi:
         )
 
         # 5. 构造 UserFeedback dataclass
-        from learning.learning_loop import UserFeedback as ULUserFeedback, FinalParam
+        from learning.learning_loop import FinalParam
+        from learning.learning_loop import UserFeedback as ULUserFeedback
 
         user_feedback = None
         if ftype == FeedbackType.SATISFIED:
@@ -222,7 +223,7 @@ class FeedbackApi:
             )
             strategy = "success_learn"
         elif ftype == FeedbackType.ADJUSTED:
-            fp_list: List[FinalParam] = []
+            fp_list: list[FinalParam] = []
             for _, params_dict in (adjusted_params or {}).items():
                 for pname, pval in params_dict.items():
                     fp_list.append(FinalParam(name=pname, value=pval))
@@ -315,7 +316,7 @@ class FeedbackApi:
             message=f"{strategy} 已触发，record_id={record_id}",
         )
 
-    def submit_feedback_dict(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def submit_feedback_dict(self, payload: dict[str, Any]) -> dict[str, Any]:
         """字典式接口（适用于 FastAPI 反序列化的 dict）"""
         try:
             result = self.submit_feedback(
@@ -347,18 +348,18 @@ class FeedbackApi:
         self,
         run_id: str,
         ftype: FeedbackType,
-        plan_context: Optional[Dict[str, Any]],
-        execute_context: Optional[Dict[str, Any]],
-        verify_context: Optional[Dict[str, Any]],
-        adjusted_params: Optional[Dict[str, Dict[str, Any]]],
+        plan_context: dict[str, Any] | None,
+        execute_context: dict[str, Any] | None,
+        verify_context: dict[str, Any] | None,
+        adjusted_params: dict[str, dict[str, Any]] | None,
     ):
         """从上下文构造 ExpectedParameters / ExecutionResult / VerificationResult"""
         from learning.learning_loop import (
+            ExecutionResult,
             ExpectedParameters,
             ExpectedProperty,
-            ExecutionResult,
-            VerificationResult,
             FinalParam,
+            VerificationResult,
         )
 
         # ExpectedParameters
@@ -404,7 +405,7 @@ class FeedbackApi:
         ]
 
         # Final params（adjusted 场景）
-        final_params: Optional[List[FinalParam]] = None
+        final_params: list[FinalParam] | None = None
         if ftype == FeedbackType.ADJUSTED and adjusted_params:
             final_params = []
             for _, params_dict in adjusted_params.items():
@@ -420,8 +421,8 @@ class FeedbackApi:
     def _update_optimizer_from_adjustment(
         self,
         run_id: str,
-        adjusted_params: Dict[str, Dict[str, Any]],
-        verify_context: Optional[Dict[str, Any]],
+        adjusted_params: dict[str, dict[str, Any]],
+        verify_context: dict[str, Any] | None,
     ) -> int:
         """用户调整参数后，把新参数作为观测写入贝叶斯优化器
 
@@ -430,8 +431,8 @@ class FeedbackApi:
         if self._optimizer is None:
             return 0
 
-        from learning.learning_bridge import LearningBridge
         from core.bayesian_optimizer import PARAMETER_SPACES
+        from learning.learning_bridge import LearningBridge
 
         score = (verify_context or {}).get("score", 75.0)
         render_time = (verify_context or {}).get("render_time_sec", 0.0)
@@ -471,10 +472,10 @@ class FeedbackApi:
         self,
         run_id: str,
         ftype: FeedbackType,
-        adjusted_params: Optional[Dict[str, Dict[str, Any]]],
-        rating: Optional[int],
+        adjusted_params: dict[str, dict[str, Any]] | None,
+        rating: int | None,
         comment: str,
-        plan_context: Optional[Dict[str, Any]],
+        plan_context: dict[str, Any] | None,
     ) -> None:
         """把反馈写入 MemoryStore"""
         if self._memory_store is None:
@@ -569,10 +570,10 @@ class FeedbackApi:
     #  查询接口：供前端展示
     # ------------------------------------------------------------------
 
-    def get_learning_stats(self) -> Dict[str, Any]:
+    def get_learning_stats(self) -> dict[str, Any]:
         """获取学习系统统计，供前端仪表盘展示"""
         self._ensure_loaded()
-        stats: Dict[str, Any] = {}
+        stats: dict[str, Any] = {}
         if self._learner:
             stats["persistent_learning_loop"] = self._learner.get_stats()
         if self._optimizer:
@@ -605,7 +606,7 @@ class FeedbackApi:
 # ============================================================================
 
 
-_global_feedback_api: Optional[FeedbackApi] = None
+_global_feedback_api: FeedbackApi | None = None
 
 
 def get_feedback_api() -> FeedbackApi:

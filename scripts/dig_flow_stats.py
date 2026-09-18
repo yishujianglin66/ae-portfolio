@@ -26,7 +26,7 @@ from core.camera_movement_classifier import _classify_from_stats  # noqa: E402
 DETAIL = PROJECT_ROOT / "models" / "output" / "flow_vlm_eval.jsonl"
 
 
-def qdist(vals: List[float], edges: List[float]) -> Dict[str, int]:
+def qdist(vals: list[float], edges: list[float]) -> dict[str, int]:
     out = Counter()
     for v in vals:
         b = ">%.1f" % edges[-1]
@@ -46,7 +46,7 @@ def main() -> int:
     rows = [json.loads(l) for l in DETAIL.read_text(encoding="utf-8").splitlines() if l.strip()]
     print(f"明细样本: {len(rows)}")
 
-    by_label: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    by_label: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for r in rows:
         by_label[r["vlm_label"]].append(r)
 

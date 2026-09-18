@@ -1,6 +1,10 @@
 """探测粒子类型参数(96/97)合法枚举值 + 属性名"""
-import json, time, uuid, os
+import json
+import os
+import time
+import uuid
 from pathlib import Path
+
 bd = Path(__file__).resolve().parent.parent / ".ae-mcp-bridge"
 cmd_id = str(uuid.uuid4())[:8]
 out_file = bd / f"_pty_{cmd_id}.txt"

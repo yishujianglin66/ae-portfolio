@@ -19,7 +19,7 @@ import math
 import random
 import re
 import sys
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -52,11 +52,11 @@ def safe_output_path(path: str | Path, root: Path = PROJECT_ROOT) -> Path:
 @dataclass
 class StyleSample:
     sample_id: str
-    features: Dict[str, float]
+    features: dict[str, float]
     label: str
     label_id: int
     source: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -65,10 +65,10 @@ class JSXCodeSample:
     code: str
     task_type: str
     description: str
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
     source: str
     code_length: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class StyleDatasetBuilder:
@@ -115,7 +115,7 @@ class StyleDatasetBuilder:
         self.fingerprint_dir = project_root / "output_director" / "ae_10_tutorials_style"
         self.style_test_dir = project_root / "output_director" / "style_test"
         self.amv_masters_dir = project_root / "12-漫剪拉镜大师"
-        self.samples: List[StyleSample] = []
+        self.samples: list[StyleSample] = []
 
     def collect_from_fingerprints(self) -> int:
         count = 0
@@ -131,7 +131,7 @@ class StyleDatasetBuilder:
                 count += 1
         return count
 
-    def _parse_fingerprint(self, fp_file: Path) -> Optional[StyleSample]:
+    def _parse_fingerprint(self, fp_file: Path) -> StyleSample | None:
         try:
             with open(fp_file, encoding="utf-8") as f:
                 data = json.load(f)
@@ -168,7 +168,7 @@ class StyleDatasetBuilder:
         except Exception:
             return None
 
-    def _build_full_features(self, data: Dict, label: str) -> Dict[str, float]:
+    def _build_full_features(self, data: dict, label: str) -> dict[str, float]:
         """构建完整的24维特征向量"""
         features = {
             "brightness": float(data.get("brightness", 50)),
@@ -206,7 +206,7 @@ class StyleDatasetBuilder:
         features = self._apply_style_feature_presets(features, label)
         return features
 
-    def _apply_style_feature_presets(self, features: Dict[str, float], label: str) -> Dict[str, float]:
+    def _apply_style_feature_presets(self, features: dict[str, float], label: str) -> dict[str, float]:
         """根据风格标签应用预设特征值"""
         presets = {
             "cinematic": {
@@ -438,7 +438,7 @@ class StyleDatasetBuilder:
 
         return count
 
-    def _extract_amv_features(self, content: str, label: str) -> Dict[str, float]:
+    def _extract_amv_features(self, content: str, label: str) -> dict[str, float]:
         features = self._build_full_features({}, label)
 
         text = content.lower()
@@ -726,7 +726,7 @@ class StyleDatasetBuilder:
 
         return len(self.samples)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         label_counts = {}
         for sample in self.samples:
             label_counts[sample.label] = label_counts.get(sample.label, 0) + 1
@@ -748,7 +748,7 @@ class JSXDatasetBuilder:
         self.expression_lib_path = project_root / "output_director" / "ae_project_analysis" / "replicate_templates" / "expression_template_library.json"
         self.style_presets_dir = project_root / "output_director" / "ae_project_analysis" / "style_presets"
         self.replicate_dir = project_root / "output_director" / "ae_project_analysis" / "replicate_templates"
-        self.samples: List[JSXCodeSample] = []
+        self.samples: list[JSXCodeSample] = []
 
     def collect_from_presets(self) -> int:
         count = 0
@@ -865,7 +865,7 @@ class JSXDatasetBuilder:
 
         return count
 
-    def _generate_effect_code(self, match_name: str, params: Dict[str, Any]) -> str:
+    def _generate_effect_code(self, match_name: str, params: dict[str, Any]) -> str:
         param_strs = []
         for param_name, param_value in params.items():
             if isinstance(param_value, list):
@@ -934,7 +934,7 @@ for (var key in params) {{
 
         return len(self.samples)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         task_counts = {}
         total_length = 0
 
@@ -990,10 +990,10 @@ def main():
             print(f"  数据增强新增样本: {count}")
 
         stats = builder.get_stats()
-        print(f"\n  数据集统计:")
+        print("\n  数据集统计:")
         print(f"  总样本数: {stats['total_samples']}")
         print(f"  特征维度: {stats['feature_dim']}")
-        print(f"  标签分布:")
+        print("  标签分布:")
         for k, v in sorted(stats['label_distribution'].items()):
             print(f"    {k}: {v}")
 

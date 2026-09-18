@@ -10,10 +10,10 @@ V4Agent 单元测试 - AI多模型协作层
 """
 
 import os
-import unittest
-from unittest.mock import MagicMock, patch, PropertyMock
-
 import sys
+import unittest
+from unittest.mock import MagicMock, PropertyMock, patch
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 

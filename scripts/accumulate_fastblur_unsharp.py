@@ -51,7 +51,7 @@ def _count_obs(opt):
 
 
 def main() -> None:
-    from core.bayesian_optimizer import get_optimizer, BayesianParameterOptimizer
+    from core.bayesian_optimizer import BayesianParameterOptimizer, get_optimizer
 
     opt: BayesianParameterOptimizer = get_optimizer()
     before = _count_obs(opt)
@@ -98,7 +98,7 @@ def main() -> None:
 
     # 验证迁移学习：从 Glow 推断 CC_StarGlow
     transfer = opt2.transfer_knowledge("Glow", "CC_StarGlow")
-    print(f"\nTransfer Glow -> CC_StarGlow:")
+    print("\nTransfer Glow -> CC_StarGlow:")
     print(f"  confidence={transfer.transfer_confidence:.2f}, params={transfer.transferred_params}")
     assert transfer.transfer_confidence >= 0.3, f"Glow->CC_StarGlow confidence too low: {transfer.transfer_confidence}"
     print("  ✅ Transfer learning PASSED")

@@ -36,7 +36,7 @@ def _video_name(path: str) -> str:
     return Path(path).name
 
 
-def load_content_tags(path: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
+def load_content_tags(path: Path | None = None) -> dict[str, dict[str, Any]]:
     """内容标签 (A6 产物, list 格式) → {文件名: {dominant, votes, mean_probs}}。"""
     p = Path(path) if path else _CONTENT_TAGS
     if not p.exists():
@@ -49,7 +49,7 @@ def load_content_tags(path: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
     results = data.get("results") or []
     if isinstance(results, dict):
         results = [results]
-    out: Dict[str, Dict[str, Any]] = {}
+    out: dict[str, dict[str, Any]] = {}
     for r in results:
         if not isinstance(r, dict) or "video" not in r:
             continue
@@ -62,12 +62,12 @@ def load_content_tags(path: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
     return out
 
 
-def load_atmosphere_tags(anno_dir: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
+def load_atmosphere_tags(anno_dir: Path | None = None) -> dict[str, dict[str, Any]]:
     """氛围标签 (W6 产物) → {文件名: {atmosphere, energy, ...}}。"""
     d = Path(anno_dir) if anno_dir else _ATMO_DIR
     if not d.is_dir():
         return {}
-    merged: Dict[str, Dict[str, Any]] = {}
+    merged: dict[str, dict[str, Any]] = {}
     for f in sorted(d.glob("*.json")):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
@@ -80,12 +80,12 @@ def load_atmosphere_tags(anno_dir: Optional[Path] = None) -> Dict[str, Dict[str,
 
 
 def fuse_material_tags(
-    video_names: Optional[Iterable[str]] = None,
-    camera_tags: Optional[Dict[str, str]] = None,
-    out_path: Optional[Path] = None,
-    content_path: Optional[Path] = None,
-    anno_dir: Optional[Path] = None,
-) -> Dict[str, Dict[str, Any]]:
+    video_names: Iterable[str] | None = None,
+    camera_tags: dict[str, str] | None = None,
+    out_path: Path | None = None,
+    content_path: Path | None = None,
+    anno_dir: Path | None = None,
+) -> dict[str, dict[str, Any]]:
     """三源融合 → 统一素材画像。
 
     Args:
@@ -104,11 +104,11 @@ def fuse_material_tags(
 
     names = set(video_names) if video_names is not None else (
         set(content) | set(atmo) | set(camera))
-    fused: Dict[str, Dict[str, Any]] = {}
+    fused: dict[str, dict[str, Any]] = {}
     for name in sorted(names):
         c = content.get(name) or {}
         a = atmo.get(name) or {}
-        entry: Dict[str, Any] = {
+        entry: dict[str, Any] = {
             "content": c.get("dominant"),
             "content_votes": c.get("votes", {}),
             "atmosphere": a.get("atmosphere"),

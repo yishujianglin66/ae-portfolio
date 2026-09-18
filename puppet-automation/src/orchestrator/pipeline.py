@@ -33,7 +33,6 @@ from ..models.pipeline import (
     VideoMetadata,
 )
 
-
 # ============================================================
 # Phase Implementations
 # ============================================================
@@ -140,7 +139,7 @@ class Phase1Preprocess(PhaseBase):
             result.error = str(e)
             return result
 
-    async def _probe_video(self, video_path: str) -> Optional[VideoMetadata]:
+    async def _probe_video(self, video_path: str) -> VideoMetadata | None:
         """Probe video metadata using ffprobe."""
         ffmpeg = self.engines.get("ffmpeg")
         if not ffmpeg:
@@ -148,8 +147,8 @@ class Phase1Preprocess(PhaseBase):
             return None
 
         try:
-            import subprocess
             import json as _json
+            import subprocess
 
             cmd = [
                 str(ffmpeg.executable_path.parent / "ffprobe.exe"),
@@ -261,8 +260,8 @@ class Phase1Preprocess(PhaseBase):
         """Detect faces in video frames."""
         try:
             # Try using ultralytics YOLO for face detection
-            from ultralytics import YOLO
             import numpy as np
+            from ultralytics import YOLO
 
             model_dir = settings.models_dir / "yolo"
             model_path = model_dir / "yolov8n-face.pt"
@@ -326,7 +325,7 @@ class Phase1Preprocess(PhaseBase):
             logger.warning(f"[Phase1] Pose estimation failed: {e}")
             return []
 
-    async def _analyze_audio(self, video_path: str) -> Optional[AudioAnalysis]:
+    async def _analyze_audio(self, video_path: str) -> AudioAnalysis | None:
         """Analyze audio track (BPM, beats, energy)."""
         ffmpeg = self.engines.get("ffmpeg")
         if not ffmpeg:
@@ -334,6 +333,7 @@ class Phase1Preprocess(PhaseBase):
 
         try:
             import subprocess
+
             import numpy as np
 
             # Extract audio to wav
@@ -503,10 +503,10 @@ class Phase2Keying(PhaseBase):
         """
         start = time.time()
         try:
-            from rembg import remove
-            from PIL import Image
-            import numpy as np
             import cv2
+            import numpy as np
+            from PIL import Image
+            from rembg import remove
 
             cap = cv2.VideoCapture(input_path)
             if not cap.isOpened():
@@ -682,7 +682,7 @@ class Phase3Stylize(PhaseBase):
 
         return config
 
-    async def _try_comfyui_style(self, job: PipelineJob, output_dir: Path) -> Optional[dict[str, Any]]:
+    async def _try_comfyui_style(self, job: PipelineJob, output_dir: Path) -> dict[str, Any] | None:
         """Try to apply style via ComfyUI. Returns metadata or None."""
         comfy = self.engines.get("comfyui")
         if not comfy:
@@ -755,7 +755,7 @@ class Phase3Stylize(PhaseBase):
             logger.warning(f"[Phase3] ComfyUI stylization error (will skip): {e}")
             return None
 
-    def _find_phase2_input(self, job: PipelineJob, output_dir: Path) -> Optional[Path]:
+    def _find_phase2_input(self, job: PipelineJob, output_dir: Path) -> Path | None:
         """Find a suitable input image for ComfyUI from Phase2 or raw input."""
         # Try Phase2 keyed output (first frame)
         phase2_dir = self.work_dir / "phase2"
@@ -941,7 +941,7 @@ class PipelineOrchestrator:
     def __init__(
         self,
         engines: dict[str, Any],
-        base_work_dir: Optional[Path] = None,
+        base_work_dir: Path | None = None,
         enable_persistence: bool = True,
         enable_plugins: bool = True,
     ) -> None:
@@ -963,12 +963,12 @@ class PipelineOrchestrator:
         # is enabled.  Used by ``cancel_job`` to forward revokes.
         self._task_ids: dict[str, str] = {}
         # Database persistence layer (lazy init)
-        self._db: Optional[Any] = None
-        self._job_repo: Optional[Any] = None
-        self._phase_repo: Optional[Any] = None
-        self._perception_repo: Optional[Any] = None
+        self._db: Any | None = None
+        self._job_repo: Any | None = None
+        self._phase_repo: Any | None = None
+        self._perception_repo: Any | None = None
         # Plugin manager (lazy init)
-        self._plugin_mgr: Optional[Any] = None
+        self._plugin_mgr: Any | None = None
         self._plugins_initialized: bool = False
 
     async def _init_plugins(self) -> None:
@@ -977,7 +977,7 @@ class PipelineOrchestrator:
             return
         self._plugins_initialized = True
         try:
-            from src.plugins import plugin_manager, PluginContext
+            from src.plugins import PluginContext, plugin_manager
             self._plugin_mgr = plugin_manager
             # Discover and register built-in plugins
             self._plugin_mgr.discover_builtin()
@@ -994,9 +994,9 @@ class PipelineOrchestrator:
         self,
         job: PipelineJob,
         state: PipelineState,
-        phase: Optional[PipelinePhase] = None,
-        phase_result: Optional[PhaseResult] = None,
-        work_dir: Optional[Path] = None,
+        phase: PipelinePhase | None = None,
+        phase_result: PhaseResult | None = None,
+        work_dir: Path | None = None,
     ) -> Any:
         """Build a PluginContext for the current pipeline state."""
         from src.plugins import PluginContext
@@ -1011,7 +1011,7 @@ class PipelineOrchestrator:
 
     async def _run_plugin_hooks(
         self, hook_name: str, ctx: Any
-    ) -> Optional[PhaseResult]:
+    ) -> PhaseResult | None:
         """Run a plugin hook if plugins are enabled."""
         if not self.enable_plugins or not self._plugin_mgr:
             return None
@@ -1021,7 +1021,7 @@ class PipelineOrchestrator:
             logger.warning(f"[Orchestrator] Plugin hook '{hook_name}' error: {e}")
             return None
 
-    async def _run_plugin_filters(self, ctx: Any) -> Optional[PhaseResult]:
+    async def _run_plugin_filters(self, ctx: Any) -> PhaseResult | None:
         """Run plugin filters for the current phase."""
         if not self.enable_plugins or not self._plugin_mgr:
             return None
@@ -1036,7 +1036,7 @@ class PipelineOrchestrator:
         if self._db is not None or not self.enable_persistence:
             return
         try:
-            from ..persistence.database import Database, JobRepository, PhaseRepository, PerceptionRepository
+            from ..persistence.database import Database, JobRepository, PerceptionRepository, PhaseRepository
 
             self._db = Database(settings.database_url)
             await self._db.connect()
@@ -1135,7 +1135,7 @@ class PipelineOrchestrator:
         logger.info(f"[Orchestrator] Created job {job.job_id}")
         return state
 
-    def get_state(self, job_id: str) -> Optional[PipelineState]:
+    def get_state(self, job_id: str) -> PipelineState | None:
         """Get current state of a job.
 
         If Celery is enabled, attempt to merge the locally-cached state with
@@ -1386,6 +1386,7 @@ class PipelineOrchestrator:
         try:
             # Build a minimal context for the cancel hook
             from src.plugins import PluginContext
+
             # We don't have the full job object here, create a minimal stub
             from ..models.pipeline import PipelineJob
             job = PipelineJob(job_id=job_id, input_video="", phases=[])

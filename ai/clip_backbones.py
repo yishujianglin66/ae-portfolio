@@ -53,7 +53,7 @@ class _LaionBackbone:
         self.tok = open_clip.get_tokenizer("ViT-B-32")
         self.model.eval().to(DEVICE)
 
-    def encode_images(self, paths: List[Path]) -> np.ndarray:
+    def encode_images(self, paths: list[Path]) -> np.ndarray:
         from PIL import Image
         outs = []
         for i in range(0, len(paths), 64):
@@ -70,13 +70,13 @@ class _LaionBackbone:
                         .float().cpu().numpy())
         return np.concatenate(outs, 0)
 
-    def encode_texts(self, texts: List[str]) -> np.ndarray:
+    def encode_texts(self, texts: list[str]) -> np.ndarray:
         t = self.tok(texts).to(DEVICE)
         with infer_ctx(DEVICE):
             v = self.model.encode_text(t)
         return (v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9)).float().cpu().numpy()
 
-    def class_texts(self, name_en: str) -> List[str]:
+    def class_texts(self, name_en: str) -> list[str]:
         return [p.format(name_en) for p in EN_PROMPTS]
 
 
@@ -100,7 +100,7 @@ class _CnClipBackbone:
                 return t[:, 0] if attr == "last_hidden_state" and t.dim() == 3 else t
         raise TypeError(f"无法解析模型输出: {type(v)}")
 
-    def encode_images(self, paths: List[Path]) -> np.ndarray:
+    def encode_images(self, paths: list[Path]) -> np.ndarray:
         from PIL import Image
         outs = []
         for i in range(0, len(paths), 32):
@@ -117,7 +117,7 @@ class _CnClipBackbone:
                         .float().cpu().numpy())
         return np.concatenate(outs, 0)
 
-    def encode_texts(self, texts: List[str]) -> np.ndarray:
+    def encode_texts(self, texts: list[str]) -> np.ndarray:
         outs = []
         for i in range(0, len(texts), 64):
             inputs = self.proc(text=texts[i:i + 64], return_tensors="pt",
@@ -128,7 +128,7 @@ class _CnClipBackbone:
                         .float().cpu().numpy())
         return np.concatenate(outs, 0)
 
-    def class_texts(self, name_cn: str) -> List[str]:
+    def class_texts(self, name_cn: str) -> list[str]:
         return [p.format(name_cn) for p in CN_PROMPTS]
 
 
@@ -144,7 +144,7 @@ class _LaionLargeBackbone:
         self.tok = open_clip.get_tokenizer("ViT-L-14")
         self.model.eval().to(DEVICE)
 
-    def encode_images(self, paths: List[Path]) -> np.ndarray:
+    def encode_images(self, paths: list[Path]) -> np.ndarray:
         from PIL import Image
         outs = []
         for i in range(0, len(paths), 32):
@@ -161,13 +161,13 @@ class _LaionLargeBackbone:
                         .float().cpu().numpy())
         return np.concatenate(outs, 0)
 
-    def encode_texts(self, texts: List[str]) -> np.ndarray:
+    def encode_texts(self, texts: list[str]) -> np.ndarray:
         t = self.tok(texts).to(DEVICE)
         with infer_ctx(DEVICE):
             v = self.model.encode_text(t)
         return (v / v.norm(dim=-1, keepdim=True).clamp_min(1e-9)).float().cpu().numpy()
 
-    def class_texts(self, name_en: str) -> List[str]:
+    def class_texts(self, name_en: str) -> list[str]:
         return [p.format(name_en) for p in EN_PROMPTS]
 
 
@@ -177,7 +177,7 @@ class BackboneRegistry:
     _BUILDERS = None
 
     def __init__(self):
-        self._inst: Dict[str, object] = {}
+        self._inst: dict[str, object] = {}
 
     def get(self, name: str):
         if name not in self._inst:
@@ -193,7 +193,7 @@ class BackboneRegistry:
             self._inst[name] = cls()
         return self._inst[name]
 
-    def class_protos(self, name: str, ip: str, aliases: Dict[str, str]) -> np.ndarray:
+    def class_protos(self, name: str, ip: str, aliases: dict[str, str]) -> np.ndarray:
         """类文本原型: laion用英文别名, cclip用中文名(中文空间原生优势)"""
         bb = self.get(name)
         if name == "cclip":
@@ -204,10 +204,10 @@ class BackboneRegistry:
         return v.mean(0)
 
 
-def ensemble_frame_scores(scores_by_bb: Dict[str, Dict[str, float]],
-                          weights: Dict[str, float]) -> List[tuple]:
+def ensemble_frame_scores(scores_by_bb: dict[str, dict[str, float]],
+                          weights: dict[str, float]) -> list[tuple]:
     """T6: 帧级多底座分数加权融合 → [(ip, fused)] 降序"""
-    fused: Dict[str, float] = {}
+    fused: dict[str, float] = {}
     wsum = sum(weights.values())
     for bb, scores in scores_by_bb.items():
         w = weights.get(bb, 0.0) / wsum

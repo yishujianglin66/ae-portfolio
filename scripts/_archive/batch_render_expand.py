@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Phase 1+2 扩充渲染：20个新特效组合，填补风格缺口"""
-import json, time, subprocess, sys
-from pathlib import Path
+import json
+import subprocess
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 BRIDGE_CMD = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_command.json")
 BRIDGE_RESULT = Path(r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\.ae-mcp-bridge\ae_result.json")
@@ -210,7 +213,7 @@ def gen_jsx(c):
         L.scale.setValueAtTime(0.3,[100,100]);
 """
     elif anim == "push_in":
-        jsx += f"""
+        jsx += """
         L.scale.setValueAtTime(0,[40,40]);
         L.scale.setValueAtTime(1,[100,100]);
         L.opacity.setValueAtTime(0,0);
@@ -496,7 +499,7 @@ if __name__ == "__main__":
     for r in rendered:
         print(f"  {r['comp']} -> {r['file']} ({r['size_mb']} MB)")
 
-    print(f"\n=== ALL FILES IN OUTPUT DIR ===")
+    print("\n=== ALL FILES IN OUTPUT DIR ===")
     total = 0
     for f in sorted(OUTPUT_DIR.glob("*.mp4")):
         mb = f.stat().st_size / (1024*1024)

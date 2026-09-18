@@ -8,14 +8,15 @@ JSX代码生成训练器 - 构建50M参数级别的Transformer代码生成模型
 - 支持输入风格描述，输出AE JSX代码
 - 追求实验室精度，优化生成质量
 """
-import os
 import logging
+import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from .trainer_base import BaseTrainer, TrainingConfig, TrainingResult
-from .lora_trainer import LoRAConfig
 from core.torch_runtime import infer_ctx
+
+from .lora_trainer import LoRAConfig
+from .trainer_base import BaseTrainer, TrainingConfig, TrainingResult
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +128,7 @@ class JSXCodeTrainer(BaseTrainer):
             train_data: 训练数据（JSONL文件路径或数据集对象）
             eval_data: 评估数据
         """
-        logger.info(f"Loading JSX dataset")
+        logger.info("Loading JSX dataset")
         
         if not self._dependencies_available:
             self._train_dataset = train_data
@@ -135,7 +136,7 @@ class JSXCodeTrainer(BaseTrainer):
             return
         
         try:
-            from datasets import load_dataset, Dataset
+            from datasets import Dataset, load_dataset
             
             if isinstance(train_data, str):
                 train_dataset = load_dataset("json", data_files=train_data, split="train")
@@ -171,7 +172,7 @@ class JSXCodeTrainer(BaseTrainer):
             logger.error(f"Failed to load dataset: {e}")
             raise
 
-    def _process_sample(self, sample: Dict[str, Any]) -> Dict[str, Any]:
+    def _process_sample(self, sample: dict[str, Any]) -> dict[str, Any]:
         """处理单个样本
         
         Args:
@@ -198,8 +199,9 @@ class JSXCodeTrainer(BaseTrainer):
         
         try:
             import torch
+            from peft import LoraConfig as PeftLoraConfig
+            from peft import get_peft_model
             from transformers import AutoModelForCausalLM, AutoTokenizer
-            from peft import LoraConfig as PeftLoraConfig, get_peft_model
 
             self._tokenizer = AutoTokenizer.from_pretrained(
                 self.jsx_config.base_model_path,
@@ -264,8 +266,9 @@ class JSXCodeTrainer(BaseTrainer):
     def _execute_training(self) -> TrainingResult:
         """执行实际训练逻辑"""
         import time
+
         import torch
-        from transformers import TrainingArguments, Trainer, DataCollatorForLanguageModeling
+        from transformers import DataCollatorForLanguageModeling, Trainer, TrainingArguments
 
         output_dir = os.path.join(self.config.output_dir, self.config.model_name)
         os.makedirs(output_dir, exist_ok=True)
@@ -354,7 +357,7 @@ class JSXCodeTrainer(BaseTrainer):
 
         return result
 
-    def _tokenize_function(self, examples: Dict[str, List[str]]) -> Dict[str, List[List[int]]]:
+    def _tokenize_function(self, examples: dict[str, list[str]]) -> dict[str, list[list[int]]]:
         """Tokenize函数"""
         return self._tokenizer(
             examples["text"],
@@ -384,7 +387,7 @@ class JSXCodeTrainer(BaseTrainer):
         logger.info(f"Simulated training: params={result.params_million:.2f}M")
         return result
 
-    def evaluate(self) -> Dict[str, float]:
+    def evaluate(self) -> dict[str, float]:
         """评估模型"""
         logger.info("Evaluating JSX code generation model")
         
@@ -396,7 +399,7 @@ class JSXCodeTrainer(BaseTrainer):
                 logger.warning("No eval dataset available")
                 return {}
             
-            from transformers import Trainer, DataCollatorForLanguageModeling
+            from transformers import DataCollatorForLanguageModeling, Trainer
             
             data_collator = DataCollatorForLanguageModeling(
                 tokenizer=self._tokenizer,

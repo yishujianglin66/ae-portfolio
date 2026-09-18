@@ -124,7 +124,7 @@ def main() -> int:
     res = judge(video, args.n_shots, args.dur, args.threshold)
 
     print(f"视频: {video.name}  ({res['n_frames']} 帧 / {res['fps']} fps / {res['duration']}s)")
-    print(f"主判据: 局部显著性 (切点邻帧差 > 3× 镜内中位)")
+    print("主判据: 局部显著性 (切点邻帧差 > 3× 镜内中位)")
     print(f"参考判据: 帧差 > {res['threshold']} (LUT 归一化后过严)")
     print(f"预期切点: {res['expected_cuts']} 个  |  硬切(主判据): {res['hard_cuts']}/{res['expected_cuts']}"
           f"  |  硬切(参考): {res['hard_cuts_threshold']}/{res['expected_cuts']}")

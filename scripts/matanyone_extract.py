@@ -22,7 +22,9 @@ sys.path.insert(0, str(PROJECT / "external" / "matanyone" / "repo"))
 sys.path.insert(0, str(PROJECT / "scripts"))
 
 from infer_segment_video_enhanced import (  # noqa: E402
-    build_image_predictor, sam_single_frame_predict, YOLOFallbackDetector,
+    YOLOFallbackDetector,
+    build_image_predictor,
+    sam_single_frame_predict,
 )
 
 
@@ -87,8 +89,8 @@ def main() -> int:
     import os
     os.chdir(str(_repo / "matanyone" / "utils"))  # hydra config_path 相对 cwd 解析
     try:
-        from matanyone.utils.get_default_model import get_matanyone_model
         from matanyone.inference.inference_core import InferenceCore
+        from matanyone.utils.get_default_model import get_matanyone_model
         from matanyone.utils.inference_utils import read_frame_from_videos
     finally:
         os.chdir(str(_old_cwd))

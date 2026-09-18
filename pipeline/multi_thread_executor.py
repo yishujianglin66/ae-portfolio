@@ -30,7 +30,8 @@ import threading
 import time
 import uuid
 from collections import defaultdict, deque
-from concurrent.futures import ThreadPoolExecutor, Future, as_completed, TimeoutError as FuturesTimeoutError
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -58,12 +59,12 @@ class StageState(Enum):
 class StageDefinition:
     """阶段定义"""
     name: str
-    handler: Callable[..., Dict[str, Any]]
-    deps: List[str] = field(default_factory=list)
+    handler: Callable[..., dict[str, Any]]
+    deps: list[str] = field(default_factory=list)
     timeout: float = 300.0          # 超时秒数
     max_retries: int = 1            # 最大重试次数
     priority: int = 0               # 优先级（高优先先调度）
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -71,10 +72,10 @@ class StageExecution:
     """阶段执行状态（线程安全）"""
     definition: StageDefinition
     state: StageState = StageState.PENDING
-    result: Optional[Dict[str, Any]] = None
+    result: dict[str, Any] | None = None
     error: str = ""
-    start_time: Optional[float] = None
-    end_time: Optional[float] = None
+    start_time: float | None = None
+    end_time: float | None = None
     attempt: int = 0
     thread_name: str = ""
     _lock: threading.Lock = field(default_factory=threading.Lock)
@@ -92,7 +93,7 @@ class StageExecution:
             self.thread_name = thread_name
             self.attempt += 1
 
-    def set_done(self, result: Dict[str, Any]):
+    def set_done(self, result: dict[str, Any]):
         with self._lock:
             self.state = StageState.DONE
             self.result = result
@@ -110,7 +111,7 @@ class StageExecution:
             self.error = reason
             self.end_time = time.time()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.definition.name,
             "state": self.state.value,
@@ -130,8 +131,8 @@ class StageDAG:
     """阶段 DAG — 管理依赖关系 + 拓扑排序"""
 
     def __init__(self):
-        self._stages: Dict[str, StageDefinition] = {}
-        self._reverse_deps: Dict[str, List[str]] = defaultdict(list)
+        self._stages: dict[str, StageDefinition] = {}
+        self._reverse_deps: dict[str, list[str]] = defaultdict(list)
 
     def add_stage(self, stage: StageDefinition):
         """添加阶段"""
@@ -173,7 +174,7 @@ class StageDAG:
                 if _dfs(node):
                     raise ValueError("Circular dependency detected in stage DAG")
 
-    def get_ready_stages(self, completed: Set[str], running: Set[str]) -> List[str]:
+    def get_ready_stages(self, completed: set[str], running: set[str]) -> list[str]:
         """获取所有依赖已完成的待执行阶段"""
         ready = []
         for name, stage in self._stages.items():
@@ -185,7 +186,7 @@ class StageDAG:
         ready.sort(key=lambda n: -self._stages[n].priority)
         return ready
 
-    def get_all_names(self) -> List[str]:
+    def get_all_names(self) -> list[str]:
         return list(self._stages.keys())
 
     def get_stage(self, name: str) -> StageDefinition:
@@ -210,8 +211,8 @@ class PipelineMonitor:
         self.skipped_stages = 0
         self.start_time = time.time()
         self._lock = threading.Lock()
-        self._events: List[Dict[str, Any]] = []
-        self._callbacks: List[Callable] = []
+        self._events: list[dict[str, Any]] = []
+        self._callbacks: list[Callable] = []
 
     def on_stage_start(self, name: str, thread: str):
         event = {
@@ -267,14 +268,14 @@ class PipelineMonitor:
         """添加进度回调 cb(event_dict)"""
         self._callbacks.append(cb)
 
-    def _notify(self, event: Dict):
+    def _notify(self, event: dict):
         for cb in self._callbacks:
             try:
                 cb(event)
             except Exception:
                 pass
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         with self._lock:
             elapsed = time.time() - self.start_time
             return {
@@ -301,12 +302,12 @@ class ExecutionResult:
     """执行结果"""
     run_id: str
     success: bool
-    stages: Dict[str, StageExecution] = field(default_factory=dict)
+    stages: dict[str, StageExecution] = field(default_factory=dict)
     total_duration_sec: float = 0.0
-    errors: List[str] = field(default_factory=list)
-    monitor_status: Dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    monitor_status: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "run_id": self.run_id,
             "success": self.success,
@@ -336,21 +337,21 @@ class MultiThreadExecutor:
         self.max_workers = max_workers
         self.default_timeout = default_timeout
         self.dag = StageDAG()
-        self._executions: Dict[str, StageExecution] = {}
-        self._monitor: Optional[PipelineMonitor] = None
-        self._shared_context: Dict[str, Any] = {}
+        self._executions: dict[str, StageExecution] = {}
+        self._monitor: PipelineMonitor | None = None
+        self._shared_context: dict[str, Any] = {}
         self._context_lock = threading.Lock()
-        self._completed: Set[str] = set()
-        self._failed: Set[str] = set()
-        self._running: Set[str] = set()
+        self._completed: set[str] = set()
+        self._failed: set[str] = set()
+        self._running: set[str] = set()
         self._all_done = threading.Event()
 
     def add_stage(
         self,
         name: str,
-        handler: Callable[..., Dict[str, Any]],
-        deps: Optional[List[str]] = None,
-        timeout: Optional[float] = None,
+        handler: Callable[..., dict[str, Any]],
+        deps: list[str] | None = None,
+        timeout: float | None = None,
         max_retries: int = 1,
         priority: int = 0,
         **metadata,
@@ -399,7 +400,7 @@ class MultiThreadExecutor:
         logger.info(f"[EXECUTOR] Starting run {run_id} with {total} stages, "
                     f"max_workers={self.max_workers}")
         print(f"\n{'='*60}")
-        print(f"  Multi-Thread Pipeline Executor v1.0")
+        print("  Multi-Thread Pipeline Executor v1.0")
         print(f"  Run ID: {run_id}")
         print(f"  Stages: {total} | Workers: {self.max_workers}")
         print(f"{'='*60}\n")
@@ -413,7 +414,7 @@ class MultiThreadExecutor:
         # 主调度循环
         with ThreadPoolExecutor(max_workers=self.max_workers,
                                 thread_name_prefix="Stage") as pool:
-            futures: Dict[Future, str] = {}
+            futures: dict[Future, str] = {}
 
             while True:
                 # 检查完成条件
@@ -564,7 +565,7 @@ class MultiThreadExecutor:
 
         return False
 
-    def _check_skip_conditions(self) -> List[str]:
+    def _check_skip_conditions(self) -> list[str]:
         """检查并标记需要跳过的阶段（依赖失败）"""
         skipped = []
         for name, execution in self._executions.items():
@@ -583,7 +584,7 @@ class MultiThreadExecutor:
                     break
         return skipped
 
-    def _get_skipped(self) -> Set[str]:
+    def _get_skipped(self) -> set[str]:
         return {n for n, e in self._executions.items() if e.state == StageState.SKIPPED}
 
     def _print_summary(self, result: ExecutionResult):
@@ -603,7 +604,7 @@ class MultiThreadExecutor:
             print(f"  {icon:6s} {name:20s} | {state:8s} | {dur:>8s} | {thread}")
 
         if result.errors:
-            print(f"\n  Errors:")
+            print("\n  Errors:")
             for err in result.errors:
                 print(f"    - {err}")
         print()
@@ -750,9 +751,9 @@ def create_video_pipeline_executor(
 
 def main():
     """CLI 入口"""
+    import argparse
     import os
     import sys
-    import argparse
     ap = argparse.ArgumentParser(description="多线程管线执行器")
     ap.add_argument("video", nargs="?", help="输入视频路径")
     ap.add_argument("-o", "--output-dir", default=r"D:\AE-Work\output")

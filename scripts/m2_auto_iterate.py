@@ -21,8 +21,8 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from core.visual_scorer import score_video, score_closeup, iterate_parameters, pick_target_dim  # noqa: E402
 from core.cnn_scorer import score_video_mode  # noqa: E402
+from core.visual_scorer import iterate_parameters, pick_target_dim, score_closeup, score_video  # noqa: E402
 
 
 def render_tree(tree, out_mp4: str, aep_name: str, lut: dict = None) -> bool:
@@ -154,7 +154,7 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # 初始树（真实素材全要素）
-    from core.composition_tree import LayerSpec, CompositionTree, EffectRef
+    from core.composition_tree import CompositionTree, EffectRef, LayerSpec
     DUR = 5.0
     FOOTAGE = "data/real_amv_test/DL_FATE_r978_BV1qb411C79B_p1.mp4"
     tree = CompositionTree(

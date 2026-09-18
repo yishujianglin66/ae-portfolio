@@ -45,7 +45,7 @@ MAX_SHOT_SEC = 8.0              # 最大镜头时长
 FFMPEG = "ffmpeg"
 
 
-def detect_cuts(video_path: str, model) -> Tuple[np.ndarray, float]:
+def detect_cuts(video_path: str, model) -> tuple[np.ndarray, float]:
     """TransNetV2 切点帧索引 + fps。"""
     from transnetv2_pytorch import TransNetV2 as _T
     video_frames, single_pred, _ = model.predict_video(video_path, quiet=True)
@@ -77,7 +77,7 @@ def detect_cuts(video_path: str, model) -> Tuple[np.ndarray, float]:
     return np.array(merged, dtype=np.int64), fps
 
 
-def segment_shots(total_frames: int, fps: float, cuts: np.ndarray) -> List[Dict[str, Any]]:
+def segment_shots(total_frames: int, fps: float, cuts: np.ndarray) -> list[dict[str, Any]]:
     """切点 → 镜头段 [(start_frame, end_frame, duration_sec)]。"""
     boundaries = [0] + list(cuts) + [total_frames]
     shots = []

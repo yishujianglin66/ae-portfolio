@@ -13,7 +13,6 @@ import math
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
-
 # ============================================================================
 # 数据类
 # ============================================================================
@@ -62,7 +61,7 @@ class MiniSceneEffect:
     并通过调整层统一管理。
     """
 
-    _presets: Dict[str, 'MiniSceneConfig'] = None
+    _presets: dict[str, 'MiniSceneConfig'] = None
 
     def __init__(self) -> None:
         if MiniSceneEffect._presets is None:
@@ -80,7 +79,7 @@ class MiniSceneEffect:
         comp_width: int,
         comp_height: int,
         duration: float,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成微缩场景效果
 
         Args:
@@ -93,13 +92,13 @@ class MiniSceneEffect:
         Returns:
             包含 effects, keyframes, layers, adjustment_layers 的字典
         """
-        effects: List[Dict[str, Any]] = []
-        keyframes: List[Dict[str, Any]] = []
-        layers: List[Dict[str, Any]] = []
-        adjustment_layers: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
+        keyframes: list[dict[str, Any]] = []
+        layers: list[dict[str, Any]] = []
+        adjustment_layers: list[dict[str, Any]] = []
 
         adj_layer_name = "MiniScene_Adjustment"
-        adj_effects: List[Dict[str, Any]] = []
+        adj_effects: list[dict[str, Any]] = []
 
         if config.tilt_shift:
             tilt_effects = MiniSceneEffect._generate_tilt_shift(config, comp_width, comp_height)
@@ -144,7 +143,7 @@ class MiniSceneEffect:
         }
 
     @staticmethod
-    def get_presets() -> Dict[str, MiniSceneConfig]:
+    def get_presets() -> dict[str, MiniSceneConfig]:
         """获取所有预设配置
 
         Returns:
@@ -163,13 +162,13 @@ class MiniSceneEffect:
         config: MiniSceneConfig,
         comp_width: int,
         comp_height: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成移轴模糊效果
 
         使用 Compound Blur + 渐变蒙版实现上下渐变模糊，
         中间清晰带高度约 30%。
         """
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
 
         center_y = comp_height * 0.5
         band_height = comp_height * 0.3
@@ -221,12 +220,12 @@ class MiniSceneEffect:
         config: MiniSceneConfig,
         comp_width: int,
         comp_height: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成景深效果
 
         使用 Camera Lens Blur 模拟真实镜头景深。
         """
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
 
         effects.append({
             "effectName": "Camera Lens Blur",
@@ -254,14 +253,14 @@ class MiniSceneEffect:
         comp_width: int,
         comp_height: int,
         duration: float,
-    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         """生成舞台灯光效果
 
         使用 Radial Wipe + 叠加模式模拟聚光灯效果，
         2 盏主灯左右对称，从上方照射。
         """
-        effects: List[Dict[str, Any]] = []
-        keyframes: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
+        keyframes: list[dict[str, Any]] = []
 
         cx = comp_width / 2.0
         cy = comp_height * 0.15
@@ -322,12 +321,12 @@ class MiniSceneEffect:
         config: MiniSceneConfig,
         comp_width: int,
         comp_height: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """生成暗角效果
 
         使用 Circle + Invert + 叠加模式实现边缘压暗。
         """
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
 
         cx = comp_width / 2.0
         cy = comp_height / 2.0
@@ -359,7 +358,7 @@ class MiniSceneEffect:
         layer_name: str,
         comp_width: int,
         comp_height: int,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成地面投影效果
 
         使用椭圆 + 模糊 + 低透明度模拟地面阴影。
@@ -421,9 +420,9 @@ class MiniSceneEffect:
     # ------------------------------------------------------------------------
 
     @staticmethod
-    def _init_presets() -> Dict[str, MiniSceneConfig]:
+    def _init_presets() -> dict[str, MiniSceneConfig]:
         """初始化预设配置库"""
-        presets: Dict[str, MiniSceneConfig] = {}
+        presets: dict[str, MiniSceneConfig] = {}
 
         presets["theater_stage"] = MiniSceneConfig(
             tilt_shift=True,

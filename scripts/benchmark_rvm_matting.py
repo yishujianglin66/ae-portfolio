@@ -32,7 +32,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 import torch
-from core.torch_runtime import infer_ctx, get_device
+
+from core.torch_runtime import get_device, infer_ctx
 
 PROJECT = Path(__file__).resolve().parents[1]
 DEFAULT_VIDEO = PROJECT / "data" / "real_amv_test" / "DL_黑岩射手_r924_BV1NL4y1H7u7.mp4"

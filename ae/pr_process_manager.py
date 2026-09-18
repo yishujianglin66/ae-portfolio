@@ -85,7 +85,7 @@ except ImportError:
 
 
 DEFAULT_LISTENER = Path(__file__).parent.parent / "premiere_mcp_listener.jsx"
-DEFAULT_SEARCH_PATHS: List[Path] = [
+DEFAULT_SEARCH_PATHS: list[Path] = [
     Path(r"C:\Program Files\Adobe\Adobe Premiere Pro 2025\Premiere Pro.exe"),
     Path(r"D:\Program Files\Adobe\Adobe Premiere Pro 2025\Premiere Pro.exe"),
     Path(r"E:\Program Files\Adobe\Adobe Premiere Pro 2025\Premiere Pro.exe"),
@@ -158,7 +158,7 @@ class InvalidStateTransitionError(PRProcessError):
 class PRMetrics:
     """Premiere Pro 进程指标数据。"""
 
-    pid: Optional[int]
+    pid: int | None
     cpu_percent: float
     memory_mb: float
     memory_percent: float
@@ -169,7 +169,7 @@ class PRMetrics:
 
     def __init__(
         self,
-        pid: Optional[int] = None,
+        pid: int | None = None,
         cpu_percent: float = 0.0,
         memory_mb: float = 0.0,
         memory_percent: float = 0.0,
@@ -186,7 +186,7 @@ class PRMetrics:
         self.uptime_seconds = uptime_seconds
         self.timestamp = time.time()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "pid": self.pid,
             "cpu_percent": round(self.cpu_percent, 2),
@@ -204,22 +204,22 @@ class HealthReport:
     """健康检查报告。"""
 
     status: HealthStatus
-    details: Dict[str, Any]
-    recommendations: List[str]
+    details: dict[str, Any]
+    recommendations: list[str]
     timestamp: float
 
     def __init__(
         self,
         status: HealthStatus = HealthStatus.HEALTHY,
-        details: Optional[Dict[str, Any]] = None,
-        recommendations: Optional[List[str]] = None,
+        details: dict[str, Any] | None = None,
+        recommendations: list[str] | None = None,
     ):
         self.status = status
         self.details = details or {}
         self.recommendations = recommendations or []
         self.timestamp = time.time()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "status": self.status.value,
             "details": self.details,
@@ -231,7 +231,7 @@ class HealthReport:
 class _Win32API:
     """Win32 API 封装，优雅降级。"""
 
-    _available: Optional[bool] = None
+    _available: bool | None = None
 
     WM_CLOSE = 0x0010
     WM_COMMAND = 0x0111
@@ -279,7 +279,7 @@ class _Win32API:
             return False
 
     @staticmethod
-    def _get_window_thread_process_id(hwnd) -> Tuple[int, int]:
+    def _get_window_thread_process_id(hwnd) -> tuple[int, int]:
         try:
             pid = wintypes.DWORD()
             tid = ctypes.windll.user32.GetWindowThreadProcessId(
@@ -292,15 +292,15 @@ class _Win32API:
     @classmethod
     def find_windows(
         cls,
-        title_keyword: Optional[str] = None,
-        class_name: Optional[str] = None,
-        pid: Optional[int] = None,
+        title_keyword: str | None = None,
+        class_name: str | None = None,
+        pid: int | None = None,
         visible_only: bool = True,
-    ) -> List[int]:
+    ) -> list[int]:
         if not cls.is_available():
             return []
 
-        results: List[int] = []
+        results: list[int] = []
 
         def enum_callback(hwnd, lParam):
             if visible_only and not cls._is_window_visible(hwnd):
@@ -336,7 +336,7 @@ class _Win32API:
         return results
 
     @classmethod
-    def find_pr_main_window(cls, pid: Optional[int] = None) -> Optional[int]:
+    def find_pr_main_window(cls, pid: int | None = None) -> int | None:
         if not cls.is_available():
             return None
 
@@ -396,35 +396,35 @@ class PRProcessManager:
 
     def __init__(
         self,
-        pr_exe_path: Optional[str] = None,
-        listener_script_path: Optional[str] = None,
+        pr_exe_path: str | None = None,
+        listener_script_path: str | None = None,
         close_timeout: int = DEFAULT_CLOSE_TIMEOUT,
         force_kill_timeout: int = DEFAULT_FORCE_KILL_TIMEOUT,
         start_timeout: int = DEFAULT_START_TIMEOUT,
         memory_leak_threshold_ratio: float = MEMORY_LEAK_THRESHOLD_RATIO,
         memory_leak_window_size: int = MEMORY_LEAK_WINDOW_SIZE,
     ):
-        self.pr_exe_path: Optional[Path] = None
-        self.listener_script_path: Optional[Path] = None
+        self.pr_exe_path: Path | None = None
+        self.listener_script_path: Path | None = None
         self.close_timeout: int = close_timeout
         self.force_kill_timeout: int = force_kill_timeout
         self.start_timeout: int = start_timeout
         self.memory_leak_threshold_ratio: float = memory_leak_threshold_ratio
         self.memory_leak_window_size: int = memory_leak_window_size
 
-        self._last_status: Dict[str, Any] = {}
+        self._last_status: dict[str, Any] = {}
         self._started_by_manager: bool = False
-        self._pr_pid: Optional[int] = None
+        self._pr_pid: int | None = None
         self._state: PRState = PRState.OFF
-        self._state_callbacks: List[Callable[[PRState, PRState], None]] = []
-        self._metrics_history: Deque[PRMetrics] = deque(
+        self._state_callbacks: list[Callable[[PRState, PRState], None]] = []
+        self._metrics_history: deque[PRMetrics] = deque(
             maxlen=memory_leak_window_size
         )
-        self._health_history: Deque[HealthReport] = deque(maxlen=20)
-        self._last_close_method: Optional[CloseMethod] = None
-        self._workspace_path: Optional[Path] = None
+        self._health_history: deque[HealthReport] = deque(maxlen=20)
+        self._last_close_method: CloseMethod | None = None
+        self._workspace_path: Path | None = None
         self._launch_mode: LaunchMode = LaunchMode.NORMAL
-        self._extra_args: List[str] = []
+        self._extra_args: list[str] = []
         self._crash_count: int = 0
         self._recovery_count: int = 0
         self._lock = threading.RLock()
@@ -511,7 +511,7 @@ class PRProcessManager:
 
     def _sync_state_from_process(self) -> None:
         running = self._is_running_fast()
-        callbacks_to_invoke: List[Tuple[PRState, PRState]] = []
+        callbacks_to_invoke: list[tuple[PRState, PRState]] = []
         with self._lock:
             if not running:
                 if self._state in (PRState.STARTING, PRState.RUNNING, PRState.RECOVERING):
@@ -544,7 +544,7 @@ class PRProcessManager:
                         pass
 
     @staticmethod
-    def _find_pr_executable() -> Optional[Path]:
+    def _find_pr_executable() -> Path | None:
         for p in DEFAULT_SEARCH_PATHS:
             if p.exists():
                 return p.resolve()
@@ -559,7 +559,7 @@ class PRProcessManager:
         return None
 
     @staticmethod
-    def _find_listener_script() -> Optional[Path]:
+    def _find_listener_script() -> Path | None:
         candidate = DEFAULT_LISTENER
         if candidate.exists():
             return candidate.resolve()
@@ -644,7 +644,7 @@ class PRProcessManager:
             pass
         return None
 
-    def get_pr_pid(self) -> Optional[int]:
+    def get_pr_pid(self) -> int | None:
         proc = self._get_pr_process()
         if proc:
             with self._lock:
@@ -654,7 +654,7 @@ class PRProcessManager:
             self._pr_pid = None
         return None
 
-    def get_pr_status(self) -> Dict[str, Any]:
+    def get_pr_status(self) -> dict[str, Any]:
         running = self.is_pr_running()
         with self._lock:
             state_val = self._state.value
@@ -741,7 +741,7 @@ class PRProcessManager:
             self._metrics_history.append(metrics)
         return metrics
 
-    def detect_memory_leak(self) -> Tuple[bool, Dict[str, Any]]:
+    def detect_memory_leak(self) -> tuple[bool, dict[str, Any]]:
         with self._lock:
             history_len = len(self._metrics_history)
             if history_len < 3:
@@ -774,8 +774,8 @@ class PRProcessManager:
 
     def is_pr_healthy(self) -> HealthReport:
         report = HealthReport()
-        details: Dict[str, Any] = {}
-        recommendations: List[str] = []
+        details: dict[str, Any] = {}
+        recommendations: list[str] = []
 
         if not self.is_pr_running():
             report.status = HealthStatus.CRASHED
@@ -875,7 +875,7 @@ class PRProcessManager:
 
         return False
 
-    def clear_crash_state(self) -> Dict[str, Any]:
+    def clear_crash_state(self) -> dict[str, Any]:
         result = {
             "registry_keys_cleared": [],
             "files_removed": [],
@@ -1003,7 +1003,7 @@ class PRProcessManager:
         with self._lock:
             self._launch_mode = mode
 
-    def set_workspace(self, workspace_path: Optional[str | Path]) -> None:
+    def set_workspace(self, workspace_path: str | Path | None) -> None:
         if workspace_path is None:
             with self._lock:
                 self._workspace_path = None
@@ -1014,11 +1014,11 @@ class PRProcessManager:
         with self._lock:
             self._workspace_path = p.resolve()
 
-    def set_extra_args(self, args: List[str]) -> None:
+    def set_extra_args(self, args: list[str]) -> None:
         with self._lock:
             self._extra_args = list(args)
 
-    def _build_launch_args(self) -> List[str]:
+    def _build_launch_args(self) -> list[str]:
         if not self.pr_exe_path:
             raise PRProcessError("Premiere Pro 可执行文件路径未设置")
 
@@ -1027,7 +1027,7 @@ class PRProcessManager:
             workspace_path = self._workspace_path
             extra_args = list(self._extra_args)
 
-        args: List[str] = [str(self.pr_exe_path)]
+        args: list[str] = [str(self.pr_exe_path)]
 
         if launch_mode == LaunchMode.SAFE_MODE:
             args.append("-safe")
@@ -1044,8 +1044,8 @@ class PRProcessManager:
 
     def start_pr_with_listener(
         self,
-        mode: Optional[LaunchMode] = None,
-        workspace: Optional[str | Path] = None,
+        mode: LaunchMode | None = None,
+        workspace: str | Path | None = None,
     ) -> bool:
         if self.is_pr_running():
             logger.info("Premiere Pro is already running.")
@@ -1192,8 +1192,8 @@ class PRProcessManager:
 
     def start_pr_async(
         self,
-        mode: Optional[LaunchMode] = None,
-        workspace: Optional[str | Path] = None,
+        mode: LaunchMode | None = None,
+        workspace: str | Path | None = None,
     ) -> "Future[bool]":
         future: Future[bool] = Future()
 
@@ -1214,7 +1214,7 @@ class PRProcessManager:
         logger.info("Premiere Pro async start initiated (thread: pr-async-start)")
         return future
 
-    def close_pr(self, timeout: Optional[int] = None) -> bool:
+    def close_pr(self, timeout: int | None = None) -> bool:
         if not self.is_pr_running():
             logger.info("Premiere Pro is not running.")
             try:
@@ -1234,7 +1234,7 @@ class PRProcessManager:
 
         return self._close_pr_gracefully_or_force(wait_timeout)
 
-    def _close_pr_gracefully_or_force(self, timeout: Optional[int] = None) -> bool:
+    def _close_pr_gracefully_or_force(self, timeout: int | None = None) -> bool:
         wait_timeout = timeout if timeout is not None else self.close_timeout
         closed_via_wm = False
 
@@ -1242,7 +1242,7 @@ class PRProcessManager:
             pid = self.get_pr_pid()
             hwnd = _Win32API.find_pr_main_window(pid=pid)
             if hwnd:
-                logger.info(f"Found Premiere Pro window, sending WM_CLOSE...")
+                logger.info("Found Premiere Pro window, sending WM_CLOSE...")
                 if _Win32API.send_wm_close(hwnd):
                     closed_via_wm = True
                     with self._lock:

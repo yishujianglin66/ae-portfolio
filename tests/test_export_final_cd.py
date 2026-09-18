@@ -28,7 +28,6 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 from pipeline.stages.export_final_cd import ExportCDResult, ExportFinalCD
 
-
 # ============================================================================
 #  辅助工具
 # ============================================================================
@@ -41,10 +40,10 @@ def _make_engine_result(success: bool, **kwargs):
     @dataclass
     class MockEngineResult:
         success: bool = True
-        output_path: Optional[Path] = None
-        metadata: Dict[str, Any] = field(default_factory=dict)
-        error: Optional[str] = None
-        error_code: Optional[str] = None
+        output_path: Path | None = None
+        metadata: dict[str, Any] = field(default_factory=dict)
+        error: str | None = None
+        error_code: str | None = None
         duration_seconds: float = 0.0
 
     return MockEngineResult(success=success, **kwargs)

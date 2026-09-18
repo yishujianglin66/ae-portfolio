@@ -5,10 +5,10 @@ JSX 代码数据集 - 用于 AE JSX 代码生成小模型
 参考 Antares 哲学：高质量垂直领域代码数据是小模型成功的关键
 """
 import json
-import os
-import re
-import random
 import logging
+import os
+import random
+import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -26,7 +26,7 @@ class JSXSample:
     """输入上下文（可选）"""
     output: str
     """输出的 JSX 代码"""
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
     """元数据"""
 
     def __post_init__(self):
@@ -60,7 +60,7 @@ class JSXCodeDataset(BaseDataset):
             r'function\s+(\w+)\s*\(',
         ]
 
-    def load_data(self, data_path: str) -> List[JSXSample]:
+    def load_data(self, data_path: str) -> list[JSXSample]:
         """从 JSONL 文件加载 JSX 代码数据
         
         Args:
@@ -81,7 +81,7 @@ class JSXCodeDataset(BaseDataset):
         
         return samples
 
-    def _load_file(self, filepath: str) -> List[JSXSample]:
+    def _load_file(self, filepath: str) -> list[JSXSample]:
         """加载单个文件
         
         Args:
@@ -122,7 +122,7 @@ class JSXCodeDataset(BaseDataset):
         
         return samples
 
-    def _dict_to_sample(self, data: Dict[str, Any]) -> Optional[JSXSample]:
+    def _dict_to_sample(self, data: dict[str, Any]) -> JSXSample | None:
         """将字典转换为 JSXSample
         
         Args:
@@ -151,7 +151,7 @@ class JSXCodeDataset(BaseDataset):
         except Exception:
             return None
 
-    def preprocess(self, data: List[JSXSample]) -> List[JSXSample]:
+    def preprocess(self, data: list[JSXSample]) -> list[JSXSample]:
         """数据预处理
         
         清理代码格式，标准化缩进等。
@@ -281,7 +281,7 @@ class JSXCodeDataset(BaseDataset):
         
         return len(stack) == 0
 
-    def augment_sample(self, sample: JSXSample) -> List[JSXSample]:
+    def augment_sample(self, sample: JSXSample) -> list[JSXSample]:
         """数据增强 - 从单个样本生成多个变体
         
         增强策略：
@@ -314,7 +314,7 @@ class JSXCodeDataset(BaseDataset):
         
         return augmented
 
-    def _rename_variables(self, sample: JSXSample) -> Optional[JSXSample]:
+    def _rename_variables(self, sample: JSXSample) -> JSXSample | None:
         """变量名替换增强
         
         Args:
@@ -356,7 +356,7 @@ class JSXCodeDataset(BaseDataset):
             logger.warning(f"Variable rename augmentation failed: {e}")
             return None
 
-    def _add_comments(self, sample: JSXSample) -> Optional[JSXSample]:
+    def _add_comments(self, sample: JSXSample) -> JSXSample | None:
         """添加注释增强
         
         Args:
@@ -400,7 +400,7 @@ class JSXCodeDataset(BaseDataset):
             logger.warning(f"Add comments augmentation failed: {e}")
             return None
 
-    def _remove_comments(self, sample: JSXSample) -> Optional[JSXSample]:
+    def _remove_comments(self, sample: JSXSample) -> JSXSample | None:
         """删除注释增强
         
         Args:

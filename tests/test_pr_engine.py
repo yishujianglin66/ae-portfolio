@@ -31,9 +31,9 @@ PUPPET_ROOT = PROJECT_ROOT / "puppet-automation"
 if str(PUPPET_ROOT) not in sys.path:
     sys.path.insert(0, str(PUPPET_ROOT))
 
+from src.engines.base import EngineResult  # noqa: E402
 from src.engines.pr.engine import PREngine  # noqa: E402
 from src.engines.premiere.engine import PremiereEngine  # noqa: E402
-from src.engines.base import EngineResult  # noqa: E402
 
 
 class TestPREngineDeprecationContract:

@@ -42,8 +42,8 @@ class RetryConfig:
     base_delay: float = 1.0
     max_delay: float = 60.0
     backoff_factor: float = 2.0
-    retryable_exceptions: Tuple[Type[Exception], ...] = (Exception,)
-    on_retry: Optional[Callable[[int, Exception, float], None]] = None
+    retryable_exceptions: tuple[type[Exception], ...] = (Exception,)
+    on_retry: Callable[[int, Exception, float], None] | None = None
 
 
 @dataclass
@@ -53,8 +53,8 @@ class RetryResult:
     success: bool = False
     attempts: int = 0
     total_delay: float = 0.0
-    last_error: Optional[Exception] = None
-    errors: List[str] = field(default_factory=list)
+    last_error: Exception | None = None
+    errors: list[str] = field(default_factory=list)
 
 
 def retry_with_backoff(
@@ -62,8 +62,8 @@ def retry_with_backoff(
     base_delay: float = 1.0,
     max_delay: float = 60.0,
     backoff_factor: float = 2.0,
-    retryable_exceptions: Tuple[Type[Exception], ...] = (Exception,),
-    on_retry: Optional[Callable[[int, Exception, float], None]] = None,
+    retryable_exceptions: tuple[type[Exception], ...] = (Exception,),
+    on_retry: Callable[[int, Exception, float], None] | None = None,
 ) -> Callable[[Callable[..., T]], Callable[..., T]]:
     """重试装饰器（指数退避）
 
@@ -89,7 +89,7 @@ def retry_with_backoff(
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs) -> T:
                 delay = base_delay
-                last_exception: Optional[Exception] = None
+                last_exception: Exception | None = None
 
                 for attempt in range(1 + max_retries):
                     try:
@@ -119,7 +119,7 @@ def retry_with_backoff(
             @functools.wraps(func)
             def sync_wrapper(*args, **kwargs) -> T:
                 delay = base_delay
-                last_exception: Optional[Exception] = None
+                last_exception: Exception | None = None
 
                 for attempt in range(1 + max_retries):
                     try:
@@ -152,8 +152,8 @@ def retry_with_backoff(
 def call_with_retry(
     func: Callable[..., T],
     args: tuple = (),
-    kwargs: Optional[Dict[str, Any]] = None,
-    config: Optional[RetryConfig] = None,
+    kwargs: dict[str, Any] | None = None,
+    config: RetryConfig | None = None,
     **retry_kwargs,
 ) -> RetryResult:
     """使用重试调用函数（非装饰器模式）
@@ -215,7 +215,7 @@ class ProgressCallback:
 
     def __init__(
         self,
-        callback: Optional[Callable[[float, str], None]],
+        callback: Callable[[float, str], None] | None,
         total_steps: int = 1,
         start_msg: str = "",
         complete_msg: str = "Complete",
@@ -339,7 +339,7 @@ class SubProgressReporter:
 
 @contextmanager
 def progress_context(
-    callback: Optional[Callable[[float, str], None]],
+    callback: Callable[[float, str], None] | None,
     start_msg: str = "",
     complete_msg: str = "Complete",
 ):

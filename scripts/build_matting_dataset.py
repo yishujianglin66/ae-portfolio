@@ -56,7 +56,7 @@ def ensure_dirs(out: Path):
 
 
 def save_pair(out: Path, prefix: str, img: np.ndarray, mask_bin: np.ndarray,
-              stem: str, src: str, manifest: List[Dict]):
+              stem: str, src: str, manifest: list[dict]):
     """mask_bin: bool/HxW (True=前景). 保真写原图 + 二值 mask."""
     assert mask_bin.ndim == 2, \
         f"mask 必须 2D, 实际 {mask_bin.shape} (3D 会写出三通道 mask 污染训练集)"
@@ -70,7 +70,7 @@ def save_pair(out: Path, prefix: str, img: np.ndarray, mask_bin: np.ndarray,
     manifest.append({"name": name, "source": src, "h": h, "w": w})
 
 
-def extract_voc(voc: Path, out: Path, manifest: List[Dict], max_n: Optional[int]):
+def extract_voc(voc: Path, out: Path, manifest: list[dict], max_n: int | None):
     # 路径探测 (2026-08-15): 兼容 <root>/VOC2012 与 <root>/VOCdevkit/VOC2012
     for cand in (voc, voc / "VOC2012", voc / "VOCdevkit" / "VOC2012"):
         if (cand / "SegmentationClass").exists() and (cand / "JPEGImages").exists():
@@ -122,7 +122,7 @@ def extract_voc(voc: Path, out: Path, manifest: List[Dict], max_n: Optional[int]
     return n
 
 
-def extract_cityscapes(cs: Path, out: Path, manifest: List[Dict], max_n: Optional[int]):
+def extract_cityscapes(cs: Path, out: Path, manifest: list[dict], max_n: int | None):
     n = 0
     # 路径探测 (2026-08-15): 兼容两种云端布局
     #   A. --cityscapes 传数据集根: <root>/gtFine, <root>/leftImg8bit
@@ -163,7 +163,7 @@ def extract_cityscapes(cs: Path, out: Path, manifest: List[Dict], max_n: Optiona
     return n
 
 
-def extract_ade(ade: Path, out: Path, manifest: List[Dict], max_n: Optional[int]):
+def extract_ade(ade: Path, out: Path, manifest: list[dict], max_n: int | None):
     # 路径探测 (2026-08-15): 兼容 <root>/ADEChallengeData2016 与 <root>/ADE20K_2016_2017
     for cand in (ade, ade / "ADEChallengeData2016"):
         if (cand / "annotations" / "training").exists():
@@ -196,7 +196,7 @@ def extract_ade(ade: Path, out: Path, manifest: List[Dict], max_n: Optional[int]
     return n
 
 
-def link_anime(anime: Path, out: Path, manifest: List[Dict], max_n: Optional[int]):
+def link_anime(anime: Path, out: Path, manifest: list[dict], max_n: int | None):
     imgs_dir = anime / "imgs"
     masks_dir = anime / "masks"
     if not imgs_dir.exists():
@@ -238,7 +238,7 @@ def main() -> int:
 
     out = Path(args.out)
     ensure_dirs(out)
-    manifest: List[Dict] = []
+    manifest: list[dict] = []
     total = 0
 
     if args.anime:

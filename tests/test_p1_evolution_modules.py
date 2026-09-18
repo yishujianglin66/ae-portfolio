@@ -124,7 +124,7 @@ def test_benchmark_builder():
 # ============================================================
 def test_optimizer_agent():
     print("\n[Test 3: OptimizerAgent]")
-    from core.evolution.optimizer_agent import OptimizerAgent, SAFE_ADJUSTABLE_PARAMS
+    from core.evolution.optimizer_agent import SAFE_ADJUSTABLE_PARAMS, OptimizerAgent
 
     with tempfile.TemporaryDirectory() as tmp:
         opt = OptimizerAgent(proposals_dir=str(Path(tmp) / "proposals"))
@@ -175,9 +175,9 @@ def test_optimizer_agent():
 # ============================================================
 def test_evolution_loop_simulation():
     print("\n[Test 4: EvolutionLoop simulation]")
-    from core.evolution.run_evolution import EvolutionLoop
     from core.evolution.evaluator import EvolutionEvaluator
     from core.evolution.optimizer_agent import OptimizerAgent
+    from core.evolution.run_evolution import EvolutionLoop
     from core.evolution.version_manager import VersionManager
 
     with tempfile.TemporaryDirectory() as tmp:

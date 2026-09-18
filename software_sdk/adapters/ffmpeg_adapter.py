@@ -5,9 +5,9 @@
 """
 from __future__ import annotations
 
+import logging
 import os
 import shutil
-import logging
 import subprocess
 from typing import Any, List, Optional
 
@@ -39,14 +39,14 @@ class FFmpegAdapter(BaseSoftwareAdapter):
 
     def __init__(
         self,
-        config: Optional[SoftwareConfig] = None,
-        logger: Optional[logging.Logger] = None,
+        config: SoftwareConfig | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         if config is None:
             config = SoftwareConfig(software=SoftwareType.FFMPEG)
         super().__init__(config, logger)
-        self._ffmpeg_path: Optional[str] = None
-        self._ffprobe_path: Optional[str] = None
+        self._ffmpeg_path: str | None = None
+        self._ffprobe_path: str | None = None
 
     def _initialize_capabilities(self) -> SoftwareCapabilities:
         return SoftwareCapabilities(
@@ -153,7 +153,7 @@ class FFmpegAdapter(BaseSoftwareAdapter):
     # ------------------------------------------------------------------
     # 内部：subprocess 执行
     # ------------------------------------------------------------------
-    def _run_ffmpeg(self, args: List[str], timeout: int = 300) -> dict:
+    def _run_ffmpeg(self, args: list[str], timeout: int = 300) -> dict:
         """执行 ffmpeg 命令。
 
         Args:

@@ -40,7 +40,7 @@ class SAM2Engine(BaseEngine):
     def __init__(
         self,
         executable_path: Path | str = sys.executable,
-        model_dir: Optional[Path] = None,
+        model_dir: Path | None = None,
     ):
         self.model_dir = model_dir or _DEFAULT_MODEL_DIR
         self.model_dir.mkdir(parents=True, exist_ok=True)
@@ -60,7 +60,7 @@ class SAM2Engine(BaseEngine):
                 "Run: pip install -i https://pypi.tuna.tsinghua.edu.cn/simple sam2"
             )
 
-    def _find_checkpoint(self) -> Optional[Path]:
+    def _find_checkpoint(self) -> Path | None:
         """在 model_dir 下查找 SAM2 权重文件（诚实降级：无权重则拒绝推理）。"""
         if not self.model_dir.exists():
             return None
@@ -95,7 +95,7 @@ class SAM2Engine(BaseEngine):
         self,
         video_path: Path | str,
         output_dir: Path | str,
-        prompts: Optional[List[Dict[str, Any]]] = None,
+        prompts: list[dict[str, Any]] | None = None,
         model_size: str = "base",  # base/large
     ) -> EngineResult:
         """自动生成视频遮罩序列。
@@ -261,7 +261,7 @@ class SAM2Engine(BaseEngine):
         self,
         video_path: Path,
         output_dir: Path,
-        prompts: Optional[List[Dict]],
+        prompts: list[dict] | None,
         model_size: str,
     ) -> None:
         """运行 SAM2 遮罩生成（同步方法，在线程中执行）。"""
@@ -290,7 +290,7 @@ class SAM2Engine(BaseEngine):
         self,
         video_path: Path | str,
         output_dir: Path | str,
-        prompts: Optional[List[Dict[str, Any]]] = None,
+        prompts: list[dict[str, Any]] | None = None,
         model_size: str = "base",
         mask_prefix: str = "mask_",
         start_frame: int = 0,
@@ -368,7 +368,7 @@ class SAM2Engine(BaseEngine):
         self,
         mask_dir: Path | str,
         output_path: Path | str,
-        video_path: Optional[Path | str] = None,
+        video_path: Path | str | None = None,
         shape_name: str = "sam2_shape",
         simplify_tolerance: float = 1.0,
     ) -> EngineResult:
@@ -387,8 +387,8 @@ class SAM2Engine(BaseEngine):
         Returns:
             EngineResult 包含形状数量、帧数等元数据
         """
-        import time
         import json
+        import time
 
         start = time.time()
         mask_dir = Path(mask_dir)
@@ -441,7 +441,7 @@ class SAM2Engine(BaseEngine):
         self,
         video_path: Path,
         output_dir: Path,
-        prompts: Optional[List[Dict[str, Any]]],
+        prompts: list[dict[str, Any]] | None,
         model_size: str,
         mask_prefix: str,
         start_frame: int,
@@ -472,7 +472,7 @@ class SAM2Engine(BaseEngine):
         mask_dir: Path,
         shape_name: str,
         simplify_tolerance: float,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """运行形状导出（同步方法，在线程中执行）。"""
         logger.info(f"[SAM2] Exporting silhouette shape from: {mask_dir}")
 
@@ -540,8 +540,8 @@ class SAM2Engine(BaseEngine):
         self,
         video_path: Path | str,
         output_path: Path | str,
-        positive_points: List[Dict[str, int]],
-        negative_points: Optional[List[Dict[str, int]]] = None,
+        positive_points: list[dict[str, int]],
+        negative_points: list[dict[str, int]] | None = None,
         model_size: str = "base",
     ) -> EngineResult:
         """基于点提示精修分割结果。

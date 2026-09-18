@@ -72,7 +72,7 @@ if str(_PARENT_ROOT) not in sys.path:
 # 默认配置与阶段定义
 # =============================================================================
 
-DEFAULT_OPTIONS: Dict[str, Any] = {
+DEFAULT_OPTIONS: dict[str, Any] = {
     "detail_level": "standard",        # quick/standard/full
     "enable_vision": True,             # 启用 VISION LLM
     "enable_rag": True,                # 启用知识库增强
@@ -87,7 +87,7 @@ DEFAULT_OPTIONS: Dict[str, Any] = {
 }
 
 # 阶段定义：(stage_id, stage_name, weight) - weight 总和为 1.0
-STAGES: List[tuple] = [
+STAGES: list[tuple] = [
     ("cv_vision_analysis", "CV+VISION深度分析", 0.25),
     ("rag_enhancement", "知识库增强", 0.10),
     ("audio_sync_analysis", "音画同步分析", 0.15),
@@ -113,7 +113,7 @@ class VRSOrchestrator:
 
     VERSION: str = "2.0"
 
-    def __init__(self, config: Optional[dict] = None) -> None:
+    def __init__(self, config: dict | None = None) -> None:
         """初始化编排器。
 
         Args:
@@ -130,20 +130,20 @@ class VRSOrchestrator:
                 - render: 是否渲染
                 - cleanup_temp: 是否清理临时文件
         """
-        self.config: Dict[str, Any] = {**DEFAULT_OPTIONS, **(config or {})}
+        self.config: dict[str, Any] = {**DEFAULT_OPTIONS, **(config or {})}
 
         # 子模块懒加载缓存
-        self._analyzer_v2: Optional[Any] = None
-        self._rag: Optional[Any] = None
-        self._structure_inferrer: Optional[Any] = None
-        self._compiler_bridge: Optional[Any] = None
-        self._audio_sync_analyzer: Optional[Any] = None
-        self._iteration_optimizer: Optional[Any] = None
-        self._ae_engine: Optional[Any] = None
-        self._davinci_bridge: Optional[Any] = None
+        self._analyzer_v2: Any | None = None
+        self._rag: Any | None = None
+        self._structure_inferrer: Any | None = None
+        self._compiler_bridge: Any | None = None
+        self._audio_sync_analyzer: Any | None = None
+        self._iteration_optimizer: Any | None = None
+        self._ae_engine: Any | None = None
+        self._davinci_bridge: Any | None = None
 
         # 模块可用性标记
-        self._module_available: Dict[str, bool] = {
+        self._module_available: dict[str, bool] = {
             "analyzer_v2": True,
             "rag": True,
             "structure_inferrer": True,
@@ -215,7 +215,7 @@ class VRSOrchestrator:
                 raise
         return self._compiler_bridge
 
-    def _get_audio_sync_analyzer(self) -> Optional[Any]:
+    def _get_audio_sync_analyzer(self) -> Any | None:
         """懒加载 AudioSyncAnalyzer（可能不可用）"""
         if not self._module_available["audio_sync_analyzer"]:
             return None
@@ -229,7 +229,7 @@ class VRSOrchestrator:
                 self._logger.warning(f"AudioSyncAnalyzer 不可用，将跳过音画同步分析: {e}")
         return self._audio_sync_analyzer
 
-    def _get_iteration_optimizer(self) -> Optional[Any]:
+    def _get_iteration_optimizer(self) -> Any | None:
         """懒加载 IterationOptimizer（可能不可用）"""
         if not self._module_available["iteration_optimizer"]:
             return None
@@ -243,7 +243,7 @@ class VRSOrchestrator:
                 self._logger.warning(f"IterationOptimizer 不可用，将跳过迭代优化: {e}")
         return self._iteration_optimizer
 
-    def _get_ae_engine(self) -> Optional[Any]:
+    def _get_ae_engine(self) -> Any | None:
         """懒加载 AEEngine（可能不可用）"""
         if not self._module_available["ae_engine"]:
             return None
@@ -261,7 +261,7 @@ class VRSOrchestrator:
                 self._logger.warning(f"AEEngine 不可用，渲染阶段将降级: {e}")
         return self._ae_engine
 
-    def _get_davinci_bridge(self) -> Optional[Any]:
+    def _get_davinci_bridge(self) -> Any | None:
         """懒加载 VRSDavinciBridge（可能不可用）"""
         if not self._module_available.get("davinci_bridge", True):
             return None
@@ -295,7 +295,7 @@ class VRSOrchestrator:
         except Exception as e:
             self._logger.error(f"保存 JSON 失败 {path}: {e}")
 
-    def _merge_options(self, options: Optional[dict]) -> Dict[str, Any]:
+    def _merge_options(self, options: dict | None) -> dict[str, Any]:
         """合并传入的 options 与默认配置"""
         return {**self.config, **(options or {})}
 
@@ -306,8 +306,8 @@ class VRSOrchestrator:
     async def reverse_engineer(
         self,
         video_path: str,
-        options: Optional[dict] = None,
-    ) -> Dict[str, Any]:
+        options: dict | None = None,
+    ) -> dict[str, Any]:
         """端到端视频效果逆向分析与复现。
 
         完整流程：
@@ -345,8 +345,8 @@ class VRSOrchestrator:
         self._logger.info(f"开始端到端逆向分析: {video_path}")
         self._logger.info(f"输出目录: {output_dir}")
 
-        errors: List[Dict[str, str]] = []
-        result: Dict[str, Any] = {
+        errors: list[dict[str, str]] = []
+        result: dict[str, Any] = {
             "output_dir": str(output_dir),
             "video_path": video_path,
             "errors": errors,
@@ -434,8 +434,8 @@ class VRSOrchestrator:
     async def analyze(
         self,
         video_path: str,
-        options: Optional[dict] = None,
-    ) -> Dict[str, Any]:
+        options: dict | None = None,
+    ) -> dict[str, Any]:
         """纯 CV 视频风格分析（不依赖 LLM，不渲染）。
 
         供 unified_pipeline._run_vrs_analysis 调用。使用 OpenCV 抽帧 + ffprobe
@@ -492,7 +492,7 @@ class VRSOrchestrator:
         self,
         video_path: str,
         detail_level: str = "standard",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """仅分析不复现（不渲染、不迭代）。
 
         适用于用户只想了解视频用了什么效果的场景。
@@ -516,7 +516,7 @@ class VRSOrchestrator:
             return {"success": False, "error": f"视频文件不存在: {video_path}"}
 
         output_dir = self._prepare_output_dir(video_path)
-        errors: List[Dict[str, str]] = []
+        errors: list[dict[str, str]] = []
         opts = {**self.config, "detail_level": detail_level, "render": False, "enable_iteration": False}
 
         self._logger.info(f"仅分析模式: {video_path} (detail={detail_level})")
@@ -573,7 +573,7 @@ class VRSOrchestrator:
         self,
         analysis_result: dict,
         output_dir: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """从分析结果生成 AE 工程（不渲染）。
 
         输出：CompilerInput JSON、ExtendScript 脚本、MCP 命令序列。
@@ -591,7 +591,7 @@ class VRSOrchestrator:
         """
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
-        errors: List[Dict[str, str]] = []
+        errors: list[dict[str, str]] = []
 
         compile_result = await self._stage_compilation(
             analysis_result, self.config, output_path, errors
@@ -614,7 +614,7 @@ class VRSOrchestrator:
         reference_video: str,
         analysis_result: dict,
         max_iterations: int = 5,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """带迭代优化的完整复现。
 
         Args:
@@ -631,7 +631,7 @@ class VRSOrchestrator:
             }
         """
         output_dir = self._prepare_output_dir(reference_video)
-        errors: List[Dict[str, str]] = []
+        errors: list[dict[str, str]] = []
         opts = {
             **self.config,
             "enable_iteration": True,
@@ -658,8 +658,8 @@ class VRSOrchestrator:
     async def stream_reverse_engineer(
         self,
         video_path: str,
-        options: Optional[dict] = None,
-    ) -> AsyncGenerator[Dict[str, Any], None]:
+        options: dict | None = None,
+    ) -> AsyncGenerator[dict[str, Any], None]:
         """流式版本：通过 async generator 逐步产出各阶段结果。
 
         用途：前端实时展示进度。
@@ -688,7 +688,7 @@ class VRSOrchestrator:
             return
 
         output_dir = self._prepare_output_dir(video_path)
-        errors: List[Dict[str, str]] = []
+        errors: list[dict[str, str]] = []
         cumulative_weight = 0.0
 
         self._logger.info(f"流式逆向分析启动: {video_path}")
@@ -860,7 +860,7 @@ class VRSOrchestrator:
         Returns:
             Markdown 格式字符串
         """
-        lines: List[str] = []
+        lines: list[str] = []
         lines.append("# VRS v2.0 视频逆向分析报告")
         lines.append("")
         lines.append(f"- 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -1026,8 +1026,8 @@ class VRSOrchestrator:
         video_path: str,
         opts: dict,
         output_dir: Path,
-        errors: List[Dict[str, str]],
-    ) -> Dict[str, Any]:
+        errors: list[dict[str, str]],
+    ) -> dict[str, Any]:
         """阶段 1: CV+VISION 深度分析"""
         self._logger.info("阶段 1: CV+VISION 深度分析")
         try:
@@ -1046,11 +1046,11 @@ class VRSOrchestrator:
 
     async def _stage_rag_enhancement(
         self,
-        analysis_data: Dict[str, Any],
+        analysis_data: dict[str, Any],
         opts: dict,
         output_dir: Path,
-        errors: List[Dict[str, str]],
-    ) -> Dict[str, Any]:
+        errors: list[dict[str, str]],
+    ) -> dict[str, Any]:
         """阶段 2: 知识库 RAG 增强"""
         if not opts.get("enable_rag", True):
             self._logger.info("阶段 2: RAG 增强已禁用，跳过")
@@ -1080,8 +1080,8 @@ class VRSOrchestrator:
         video_path: str,
         opts: dict,
         output_dir: Path,
-        errors: List[Dict[str, str]],
-    ) -> Dict[str, Any]:
+        errors: list[dict[str, str]],
+    ) -> dict[str, Any]:
         """阶段 3: 音画同步分析"""
         if not opts.get("enable_audio_sync", True):
             self._logger.info("阶段 3: 音画同步分析已禁用，跳过")
@@ -1110,12 +1110,12 @@ class VRSOrchestrator:
 
     async def _stage_structure_inference(
         self,
-        enhanced_data: Dict[str, Any],
-        analysis_data: Dict[str, Any],
+        enhanced_data: dict[str, Any],
+        analysis_data: dict[str, Any],
         opts: dict,
         output_dir: Path,
-        errors: List[Dict[str, str]],
-    ) -> Dict[str, Any]:
+        errors: list[dict[str, str]],
+    ) -> dict[str, Any]:
         """阶段 4: 合成结构推断"""
         if not opts.get("enable_structure", True):
             self._logger.info("阶段 4: 结构推断已禁用，跳过")
@@ -1150,14 +1150,14 @@ class VRSOrchestrator:
 
     async def _stage_compilation(
         self,
-        enhanced_data: Dict[str, Any],
+        enhanced_data: dict[str, Any],
         opts: dict,
         output_dir: Path,
-        errors: List[Dict[str, str]],
-    ) -> Dict[str, Any]:
+        errors: list[dict[str, str]],
+    ) -> dict[str, Any]:
         """阶段 5: 编译生成 AE 脚本"""
         self._logger.info("阶段 5: 编译生成 AE 脚本")
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "compiler_input_path": None,
             "script_path": None,
             "mcp_commands_path": None,
@@ -1216,11 +1216,11 @@ class VRSOrchestrator:
 
     async def _stage_rendering(
         self,
-        compile_result: Dict[str, Any],
+        compile_result: dict[str, Any],
         opts: dict,
         output_dir: Path,
-        errors: List[Dict[str, str]],
-    ) -> Optional[str]:
+        errors: list[dict[str, str]],
+    ) -> str | None:
         """阶 6: 渲染输出（支持 AE + DaVinci 双路径）"""
         if not opts.get("render", True):
             self._logger.info("阶段 6: 渲染已禁用，跳过")
@@ -1287,11 +1287,11 @@ class VRSOrchestrator:
     async def _stage_iteration_optimization(
         self,
         reference_video: str,
-        analysis_data: Dict[str, Any],
+        analysis_data: dict[str, Any],
         opts: dict,
         output_dir: Path,
-        errors: List[Dict[str, str]],
-    ) -> Dict[str, Any]:
+        errors: list[dict[str, str]],
+    ) -> dict[str, Any]:
         """阶段 7: 迭代优化"""
         self._logger.info("阶段 7: 迭代优化")
         optimizer = self._get_iteration_optimizer()
@@ -1316,7 +1316,7 @@ class VRSOrchestrator:
             report_path = output_dir / "09_iteration_report.md"
             try:
                 with open(report_path, "w", encoding="utf-8") as f:
-                    f.write(f"# 迭代优化报告\n\n")
+                    f.write("# 迭代优化报告\n\n")
                     f.write(f"- 最大迭代次数: {max_iter}\n")
                     f.write(f"- 目标相似度: {target_sim}\n")
                     f.write(f"- 实际迭代次数: {result.get('iterations', 0)}\n")
@@ -1428,9 +1428,9 @@ async def _cli_demo() -> None:
         print("请先放置一个测试视频到该路径，或使用 --analyze <your_video> 指定路径")
         return
 
-    print(f"=== VRS v2.0 演示模式 ===")
+    print("=== VRS v2.0 演示模式 ===")
     print(f"视频: {sample}")
-    print(f"模式: analyze_only（仅分析，不渲染不迭代）")
+    print("模式: analyze_only（仅分析，不渲染不迭代）")
     print()
 
     orchestrator = VRSOrchestrator()

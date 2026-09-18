@@ -3,8 +3,8 @@
 测试运镜分类器的集成
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # 添加项目路径

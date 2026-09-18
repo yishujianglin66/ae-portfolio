@@ -13,6 +13,7 @@ print(f"状态码: {resp.status_code}")
 print()
 
 import re
+
 match = re.search(r'video/(\d+)', resp.url)
 if match:
     print(f"视频ID: {match.group(1)}")

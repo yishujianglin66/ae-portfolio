@@ -27,6 +27,7 @@ import os
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
+
 from core.torch_runtime import infer_ctx
 
 logger = logging.getLogger(__name__)
@@ -41,7 +42,7 @@ FRAME_SIZE = 224
 
 # MovieShots 运镜 5 类 → 项目 CAMERA_LABELS 映射
 # (与 models/train_movieshots_camera.py 的映射约定一致)
-MOVIESHOTS_TO_PROJECT: Dict[str, str] = {
+MOVIESHOTS_TO_PROJECT: dict[str, str] = {
     "Static": "static",
     "Motion": "pan_left",
     "Pull": "zoom_out",
@@ -50,7 +51,7 @@ MOVIESHOTS_TO_PROJECT: Dict[str, str] = {
 }
 
 # 项目标签 → MovieShots 标签 (反向)
-PROJECT_TO_MOVIESHOTS: Dict[str, str] = {
+PROJECT_TO_MOVIESHOTS: dict[str, str] = {
     v: k for k, v in MOVIESHOTS_TO_PROJECT.items()
 }
 
@@ -58,7 +59,7 @@ PROJECT_TO_MOVIESHOTS: Dict[str, str] = {
 # (ai-forever/kandinsky-videomae-large-camera-motion, 多标签头)
 KANDINSKY_DEFAULT_MODEL_DIR = (
     r"D:\AE-Data\Models\VideoMAE-MovieShots\kandinsky-large")
-KANDINSKY_TO_PROJECT: Dict[str, str] = {
+KANDINSKY_TO_PROJECT: dict[str, str] = {
     "arc_left": "orbit", "arc_right": "orbit",
     "dolly_in": "push", "dolly_out": "zoom_out",
     "pan_left": "pan_left", "pan_right": "pan_right",
@@ -129,9 +130,9 @@ class VideoMAECameraClassifier:
 
     def __init__(self, model_dir: str = DEFAULT_MODEL_DIR,
                  conf_threshold: float = 0.45,
-                 device: Optional[str] = None,
+                 device: str | None = None,
                  multilabel: bool = False,
-                 label_map: Optional[Dict[str, str]] = None,
+                 label_map: dict[str, str] | None = None,
                  sigmoid_threshold: float = 0.5) -> None:
         self.model_dir = model_dir
         self.conf_threshold = conf_threshold
@@ -141,8 +142,8 @@ class VideoMAECameraClassifier:
         self.sigmoid_threshold = sigmoid_threshold
         self._proc = None
         self._model = None
-        self._labels: Optional[list] = None
-        self._load_error: Optional[str] = None
+        self._labels: list | None = None
+        self._load_error: str | None = None
         self._n_infer = 0
         self._total_infer_sec = 0.0
 
@@ -170,11 +171,11 @@ class VideoMAECameraClassifier:
             logger.warning("[VideoMAE] %s", self._load_error)
             return False
         try:
+            import torch
             from transformers import (
                 VideoMAEForVideoClassification,
                 VideoMAEImageProcessor,
             )
-            import torch
 
             self._proc = VideoMAEImageProcessor.from_pretrained(self.model_dir)
             self._model = VideoMAEForVideoClassification.from_pretrained(
@@ -201,7 +202,7 @@ class VideoMAECameraClassifier:
 
     # ── 推理 ──────────────────────────────────────────────
 
-    def classify(self, video_path: str) -> Optional[Dict[str, Any]]:
+    def classify(self, video_path: str) -> dict[str, Any] | None:
         """对单个视频做运镜分类。
 
         Returns:
@@ -251,7 +252,7 @@ class VideoMAECameraClassifier:
             return None
 
     def _classify_multilabel(self, logits, elapsed: float,
-                             video_path: str) -> Optional[Dict[str, Any]]:
+                             video_path: str) -> dict[str, Any] | None:
         """多标签头 (kandinsky-large): sigmoid 阈值 → 取最高分有效类。
 
         未定义类 (undefined) 或全部低于阈值 → None (回退规则分类器)。
@@ -283,11 +284,11 @@ class VideoMAECameraClassifier:
             ],
         }
 
-    def batch_classify(self, video_paths) -> Dict[str, Optional[Dict[str, Any]]]:
+    def batch_classify(self, video_paths) -> dict[str, dict[str, Any] | None]:
         """批量分类。返回 {path: result|None}。"""
         return {p: self.classify(p) for p in video_paths}
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         return {
             "loaded": self._model is not None,
             "n_infer": self._n_infer,
@@ -300,8 +301,8 @@ class VideoMAECameraClassifier:
 
 
 # 模块级单例
-_SINGLETON: Optional[VideoMAECameraClassifier] = None
-_KANDINSKY_SINGLETON: Optional[VideoMAECameraClassifier] = None
+_SINGLETON: VideoMAECameraClassifier | None = None
+_KANDINSKY_SINGLETON: VideoMAECameraClassifier | None = None
 
 
 def get_videomae_classifier(**kwargs) -> VideoMAECameraClassifier:
@@ -327,7 +328,7 @@ def get_kandinsky_classifier(**kwargs) -> VideoMAECameraClassifier:
     return _KANDINSKY_SINGLETON
 
 
-def classify_cascade(video_path: str) -> Optional[Dict[str, Any]]:
+def classify_cascade(video_path: str) -> dict[str, Any] | None:
     """三级级联运镜分类 (2026-08-14 A/B 评估结论):
 
     1. kandinsky-large (18 类, 高精度低召回): 有标签直接用

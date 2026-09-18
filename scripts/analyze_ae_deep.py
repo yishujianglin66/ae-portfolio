@@ -13,7 +13,7 @@ AE_ROOT = Path("C:/Program Files/Adobe/Adobe After Effects 2025")
 RES_ROOT = Path("D:/AE-Work/resources")
 OUTPUT_PATH = Path("D:/AE-Work/ae_resource_gap_analysis.txt")
 
-output_lines: List[str] = []
+output_lines: list[str] = []
 
 
 def log(line: str = "") -> None:
@@ -21,10 +21,10 @@ def log(line: str = "") -> None:
     print(line)
 
 
-def scan_plugins() -> Dict[str, List[Path]]:
+def scan_plugins() -> dict[str, list[Path]]:
     """扫描所有 .aex 插件，按顶层目录分组"""
     plugins_dir = AE_ROOT / "Support Files" / "Plug-ins"
-    result: Dict[str, List[Path]] = {}
+    result: dict[str, list[Path]] = {}
     if not plugins_dir.exists():
         return result
     for top_dir in plugins_dir.iterdir():
@@ -34,7 +34,7 @@ def scan_plugins() -> Dict[str, List[Path]]:
     return result
 
 
-def scan_scripts() -> List[Path]:
+def scan_scripts() -> list[Path]:
     """扫描所有脚本文件"""
     scripts_dir = AE_ROOT / "Support Files" / "Scripts"
     if not scripts_dir.exists():
@@ -51,7 +51,7 @@ def main() -> None:
     if AE_ROOT.exists():
         total_size = sum(f.stat().st_size for f in AE_ROOT.rglob("*") if f.is_file())
         total_files = sum(1 for f in AE_ROOT.rglob("*") if f.is_file())
-        log(f"  状态: 已安装")
+        log("  状态: 已安装")
         log(f"  路径: {AE_ROOT}")
         log(f"  总大小: {total_size / 1024**3:.2f} GB")
         log(f"  文件数: {total_files:,}")

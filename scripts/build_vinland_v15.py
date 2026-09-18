@@ -6,11 +6,11 @@
 """
 from __future__ import annotations
 
-import re
-import sys
-import subprocess
-from pathlib import Path
 import asyncio
+import re
+import subprocess
+import sys
+from pathlib import Path
 
 # ============ 路径配置 ============
 V14_SAFE = Path(r"D:\AE-Work\output\vinland_saga_v14_safe.jsx")
@@ -182,7 +182,7 @@ async def render_aep():
 
         if proc.returncode == 0 and V15_OUTPUT.exists():
             size_mb = V15_OUTPUT.stat().st_size / (1024 * 1024)
-            print(f"✅ 渲染成功!")
+            print("✅ 渲染成功!")
             print(f"   文件: {V15_OUTPUT}")
             print(f"   大小: {size_mb:.2f} MB")
             return True

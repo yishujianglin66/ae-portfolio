@@ -117,8 +117,8 @@ def dit_boundary():
     bf16_gb = total * 2 / 1024**3
     print(f"[DiT-14B] config: dim={dim}, layers={layers}, heads={heads}, ffn={ffn}")
     print(f"[DiT-14B] 参数估算 ≈ {total / 1e9:.1f}B, bf16 权重 ≈ {bf16_gb:.1f} GB")
-    print(f"[DiT-14B] 边界: 权重文件 62.5GB 未下载(网络/磁盘限制)；"
-          f"即使有也远超 8GB 显存 -> 完整推理需多卡/分片或 1.3B 蒸馏权重")
+    print("[DiT-14B] 边界: 权重文件 62.5GB 未下载(网络/磁盘限制)；"
+          "即使有也远超 8GB 显存 -> 完整推理需多卡/分片或 1.3B 蒸馏权重")
 
 
 def run():
@@ -138,7 +138,7 @@ def run():
     print(f"  WanVAE   : {vae_peak:.0f} MiB [OK] GPU 可驻留")
     print(f"  CLIP     : {clip_peak:.0f} MiB [OK] GPU 可驻留")
     print(f"  T5(bf16) : 权重 {t5_gb:.1f} GB > 8 GB -> 必须 t5_cpu=True 或分片")
-    print(f"  DiT-14B  : 权重缺失且 >8GB 显存 -> 完整推理不可行（已记录边界）")
+    print("  DiT-14B  : 权重缺失且 >8GB 显存 -> 完整推理不可行（已记录边界）")
     assert vae_peak < 8 * 1024 and clip_peak < 8 * 1024, "组件显存峰值超 8GB"
     print("VERIFY OK")
 

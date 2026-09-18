@@ -15,13 +15,13 @@ os.environ["HF_HUB_OFFLINE"] = "1"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "13-素材获取与搜索" / "03-AI语义搜索"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from semantic_parser import SemanticParser, ParsedQuery
-from smart_ranker import SmartRanker
-from user_preference import UserPreferenceLearner, UserAction, UserProfile
-from multimodal_retriever import RRFFusion, CLAPEncoder, MultimodalRetriever
 from audio_feature_extractor import AudioFeatureExtractor, AudioFeatureSet
 from cross_platform_searcher import CrossPlatformSearcher
+from multimodal_retriever import CLAPEncoder, MultimodalRetriever, RRFFusion
+from semantic_parser import ParsedQuery, SemanticParser
 from smart_matcher import SmartMatcher
+from smart_ranker import SmartRanker
+from user_preference import UserAction, UserPreferenceLearner, UserProfile
 
 
 class TestSemanticParser(unittest.TestCase):

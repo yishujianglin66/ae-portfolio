@@ -96,7 +96,9 @@ def main() -> int:
     # 1. 构造管线配置 + 运行七阶段
     # ====================================================================
     from pipeline.unified_pipeline import (
-        UnifiedPipeline, PipelineConfig, PipelineResult,
+        PipelineConfig,
+        PipelineResult,
+        UnifiedPipeline,
     )
 
     cfg = PipelineConfig(
@@ -202,7 +204,7 @@ def main() -> int:
         _print_check("VRS effects 非空", len(effects) > 0, f"len={len(effects)}")
         _print_check("VRS confidence > 0.5", confidence > 0.5, f"confidence={confidence}")
     else:
-        print(f"    [FAIL] 未取到 vrs_result")
+        print("    [FAIL] 未取到 vrs_result")
 
     # ====================================================================
     # 4. plan 阶段 effect_stack 验证（核心）
@@ -244,7 +246,7 @@ def main() -> int:
                           f"vrs_sources={[e.get('vrs_source') for e in effect_stack]}")
         plan_ok = c1 and c2 and c3 and c4
     else:
-        print(f"    [FAIL] plan 阶段结果缺失或无 data")
+        print("    [FAIL] plan 阶段结果缺失或无 data")
 
     # ====================================================================
     # 5. VRS effects 与 effect_stack 对照表（一致性证明）
@@ -287,7 +289,7 @@ def main() -> int:
         _print_check("所有 VRS effects 都在 effect_stack 中找到映射",
                      consistency_ok, f"rows={len(consistency_rows)}")
     else:
-        print(f"    [FAIL] vrs_effects 或 effect_stack 为空，无法对照")
+        print("    [FAIL] vrs_effects 或 effect_stack 为空，无法对照")
 
     # ====================================================================
     # 6. execute 阶段验证 — 使用 plan 的 effect_stack，不走兜底
@@ -327,7 +329,7 @@ def main() -> int:
                           effects_applied >= 2, f"effects_applied={effects_applied}")
         exec_ok = c1 and c2 and c3 and c4
     else:
-        print(f"    [FAIL] execute 阶段结果缺失或无 data")
+        print("    [FAIL] execute 阶段结果缺失或无 data")
 
     # ====================================================================
     # 7. verify 阶段分数验证
@@ -355,7 +357,7 @@ def main() -> int:
         _print_check(f"score > {MIN_VERIFY_SCORE}",
                      verify_ok, f"score={quality_score}")
     else:
-        print(f"    [FAIL] verify 阶段结果缺失或无 data")
+        print("    [FAIL] verify 阶段结果缺失或无 data")
 
     # ====================================================================
     # 8. 输出视频 ffprobe 元数据验证

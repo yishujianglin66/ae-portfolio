@@ -23,31 +23,30 @@ API 端点:
     GET  /api/v1/workflows/active       - 获取所有活跃工作流
 """
 
+import argparse
+import json
 import os
 import sys
-import json
-import time
 import threading
-import argparse
+import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+import uvicorn
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-import uvicorn
 
 # 确保可以导入
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from unified_tool_integrator import (
+    PhaseStatus,
+    StepResult,
     UnifiedToolIntegrator,
     WorkflowResult,
-    StepResult,
-    PhaseStatus,
 )
-
 
 # ============================================================================
 # 请求/响应模型
@@ -56,24 +55,24 @@ from unified_tool_integrator import (
 class WorkflowRunRequest(BaseModel):
     """工作流启动请求"""
     preset_id: str = Field(..., description="工作流预设ID")
-    input_params: Optional[Dict[str, Any]] = Field(default=None, description="输入参数")
-    mode: Optional[str] = Field(default=None, description="执行模式 real/simulate/auto")
-    max_workers: Optional[int] = Field(default=None, description="并行最大线程数")
+    input_params: dict[str, Any] | None = Field(default=None, description="输入参数")
+    mode: str | None = Field(default=None, description="执行模式 real/simulate/auto")
+    max_workers: int | None = Field(default=None, description="并行最大线程数")
 
 
 class V4OrchestrateRequest(BaseModel):
     """V4智能编排请求"""
     request: str = Field(..., description="自然语言需求描述")
-    model: Optional[str] = Field(default="pro", description="V4模型: pro/flash")
-    dry_run: Optional[bool] = Field(default=False, description="仅生成工作流不执行")
-    mode: Optional[str] = Field(default=None, description="执行模式 real/simulate/auto")
+    model: str | None = Field(default="pro", description="V4模型: pro/flash")
+    dry_run: bool | None = Field(default=False, description="仅生成工作流不执行")
+    mode: str | None = Field(default=None, description="执行模式 real/simulate/auto")
 
 
 class CheckpointResumeRequest(BaseModel):
     """检查点恢复请求"""
     checkpoint_path: str = Field(..., description="检查点文件路径")
     preset_id: str = Field(..., description="工作流预设ID")
-    input_params: Optional[Dict[str, Any]] = Field(default=None, description="输入参数")
+    input_params: dict[str, Any] | None = Field(default=None, description="输入参数")
 
 
 class WorkflowStatusResponse(BaseModel):
@@ -91,7 +90,7 @@ class WorkflowStatusResponse(BaseModel):
     finished_at: str
     error: str
     summary: str
-    output_files: List[str]
+    output_files: list[str]
     log_file_path: str
     report_file_path: str
     checkpoint_path: str
@@ -108,22 +107,22 @@ class IntegratorAPIServer:
         self,
         default_mode: str = "auto",
         output_dir: str = r"D:\AE-Work\_integrator_output",
-        preset_file: Optional[str] = None,
-        config_file: Optional[str] = None,
+        preset_file: str | None = None,
+        config_file: str | None = None,
     ):
         self._default_mode = default_mode
         self._output_dir = output_dir
         self._preset_file = preset_file
         self._config_file = config_file
         self._lock = threading.Lock()
-        self._workflow_threads: Dict[str, threading.Thread] = {}
-        self._workflow_results: Dict[str, WorkflowResult] = {}
-        self._integrators: Dict[str, UnifiedToolIntegrator] = {}
+        self._workflow_threads: dict[str, threading.Thread] = {}
+        self._workflow_results: dict[str, WorkflowResult] = {}
+        self._integrators: dict[str, UnifiedToolIntegrator] = {}
 
         # 创建共享的 integrator 实例（用于查询工具/预设）
         self._shared_integrator = self._create_integrator()
 
-    def _create_integrator(self, mode: Optional[str] = None, max_workers: int = 4) -> UnifiedToolIntegrator:
+    def _create_integrator(self, mode: str | None = None, max_workers: int = 4) -> UnifiedToolIntegrator:
         """创建新的 integrator 实例"""
         return UnifiedToolIntegrator(
             default_mode=mode or self._default_mode,
@@ -134,7 +133,7 @@ class IntegratorAPIServer:
         )
 
     def run_workflow_async(self, workflow_id: str, integrator: UnifiedToolIntegrator,
-                           preset_id: str, input_params: Dict[str, Any]):
+                           preset_id: str, input_params: dict[str, Any]):
         """在后台线程中执行工作流"""
         try:
             result = integrator.run_workflow(preset_id, input_params)
@@ -153,7 +152,7 @@ class IntegratorAPIServer:
             with self._lock:
                 self._workflow_results[workflow_id] = error_result
 
-    def start_workflow(self, request: WorkflowRunRequest) -> Dict[str, Any]:
+    def start_workflow(self, request: WorkflowRunRequest) -> dict[str, Any]:
         """启动工作流（异步）"""
         # 验证预设存在
         presets = self._shared_integrator.list_presets()
@@ -232,7 +231,7 @@ class IntegratorAPIServer:
             checkpoint_path=result.checkpoint_path,
         )
 
-    def pause_workflow(self, workflow_id: str) -> Dict[str, Any]:
+    def pause_workflow(self, workflow_id: str) -> dict[str, Any]:
         """暂停工作流"""
         with self._lock:
             integrator = self._integrators.get(workflow_id)
@@ -241,7 +240,7 @@ class IntegratorAPIServer:
         integrator.pause_workflow(workflow_id)
         return {"workflow_id": workflow_id, "action": "paused", "message": "暂停请求已发送"}
 
-    def resume_workflow(self, workflow_id: str) -> Dict[str, Any]:
+    def resume_workflow(self, workflow_id: str) -> dict[str, Any]:
         """恢复工作流"""
         with self._lock:
             integrator = self._integrators.get(workflow_id)
@@ -250,7 +249,7 @@ class IntegratorAPIServer:
         integrator.resume_workflow(workflow_id)
         return {"workflow_id": workflow_id, "action": "resumed", "message": "恢复请求已发送"}
 
-    def cancel_workflow(self, workflow_id: str) -> Dict[str, Any]:
+    def cancel_workflow(self, workflow_id: str) -> dict[str, Any]:
         """取消工作流"""
         with self._lock:
             integrator = self._integrators.get(workflow_id)
@@ -259,7 +258,7 @@ class IntegratorAPIServer:
         integrator.cancel_workflow(workflow_id)
         return {"workflow_id": workflow_id, "action": "cancelled", "message": "取消请求已发送"}
 
-    def resume_from_checkpoint(self, request: CheckpointResumeRequest) -> Dict[str, Any]:
+    def resume_from_checkpoint(self, request: CheckpointResumeRequest) -> dict[str, Any]:
         """从检查点恢复工作流"""
         resolved = Path(request.checkpoint_path).resolve()
         allowed_root = Path(self._output_dir).resolve()
@@ -300,7 +299,7 @@ class IntegratorAPIServer:
         }
 
     def _run_checkpoint_resume(self, workflow_id: str, integrator: UnifiedToolIntegrator,
-                                checkpoint_path: str, preset_id: str, input_params: Dict[str, Any]):
+                                checkpoint_path: str, preset_id: str, input_params: dict[str, Any]):
         """后台执行检查点恢复"""
         try:
             result = integrator.resume_from_checkpoint(checkpoint_path, preset_id, input_params)
@@ -318,7 +317,7 @@ class IntegratorAPIServer:
             with self._lock:
                 self._workflow_results[workflow_id] = error_result
 
-    def get_active_workflows(self) -> List[Dict[str, Any]]:
+    def get_active_workflows(self) -> list[dict[str, Any]]:
         """获取所有活跃工作流"""
         active = []
         with self._lock:
@@ -334,15 +333,15 @@ class IntegratorAPIServer:
                     })
         return active
 
-    def get_tools(self) -> Dict[str, Any]:
+    def get_tools(self) -> dict[str, Any]:
         """获取所有工具信息"""
         return self._shared_integrator.get_all_tools_info()
 
-    def get_presets(self) -> List[Dict[str, Any]]:
+    def get_presets(self) -> list[dict[str, Any]]:
         """获取所有预设"""
         return self._shared_integrator.list_presets()
 
-    def v4_orchestrate(self, request: V4OrchestrateRequest) -> Dict[str, Any]:
+    def v4_orchestrate(self, request: V4OrchestrateRequest) -> dict[str, Any]:
         """V4智能编排 - 自然语言到工具链执行"""
         try:
             from v4_orchestrator import V4Orchestrator
@@ -384,8 +383,8 @@ class IntegratorAPIServer:
 def create_app(
     default_mode: str = "auto",
     output_dir: str = r"D:\AE-Work\_integrator_output",
-    preset_file: Optional[str] = None,
-    config_file: Optional[str] = None,
+    preset_file: str | None = None,
+    config_file: str | None = None,
 ) -> FastAPI:
     """创建 FastAPI 应用"""
     app = FastAPI(

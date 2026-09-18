@@ -39,12 +39,12 @@ def _log(msg: str):
     print(f"[T24] {msg}", flush=True)
 
 
-def student_predict_all(model_path: Path) -> List[Dict]:
+def student_predict_all(model_path: Path) -> list[dict]:
     """用学生模型推理全库帧"""
     import torch
+    from PIL import Image
     from torch.utils.data import DataLoader
     from torchvision import transforms
-    from PIL import Image
 
     checkpoint = torch.load(model_path, map_location="cpu", weights_only=False)
     class_names = checkpoint.get("class_names", [])

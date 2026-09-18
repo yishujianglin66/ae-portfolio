@@ -12,24 +12,24 @@
     py -3.11 test_unified_integrator.py --test bler_d3_composite  # 测试单个工作流
 """
 
+import json
 import os
 import sys
-import json
 import time
 import traceback
-from pathlib import Path
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # 确保可以导入
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from unified_tool_integrator import (
+    WORKFLOW_PRESETS,
+    PhaseStatus,
+    StepResult,
     UnifiedToolIntegrator,
     WorkflowResult,
-    StepResult,
-    PhaseStatus,
-    WORKFLOW_PRESETS,
 )
 
 
@@ -51,7 +51,7 @@ class TestSuiteResult:
     total: int = 0
     passed: int = 0
     failed: int = 0
-    test_results: List[TestResult] = field(default_factory=list)
+    test_results: list[TestResult] = field(default_factory=list)
     total_duration_ms: float = 0
 
     @property
@@ -64,7 +64,7 @@ class TestSuiteResult:
 class IntegratorTestSuite:
     """统一调度器测试套件"""
 
-    def __init__(self, verbose: bool = False, output_dir: Optional[Path] = None):
+    def __init__(self, verbose: bool = False, output_dir: Path | None = None):
         self.verbose = verbose
         self.results = TestSuiteResult()
         if output_dir is None:
@@ -139,22 +139,22 @@ class IntegratorTestSuite:
     def test_basic_import(self):
         """测试基本导入"""
         from unified_tool_integrator import (
-            UnifiedToolIntegrator,
-            FFmpegAdapter,
-            TopazAdapter,
-            BlenderAdapter,
             AEAdapter,
-            PremiereProAdapter,
-            PhotoshopAdapter,
+            AuditionAdapter,
+            BlenderAdapter,
+            ExecutionMode,
+            FFmpegAdapter,
             IllustratorAdapter,
             MediaEncoderAdapter,
-            AuditionAdapter,
-            WorkflowResult,
-            StepResult,
             PhaseStatus,
+            PhotoshopAdapter,
+            PremiereProAdapter,
+            StepResult,
             ToolType,
+            TopazAdapter,
+            UnifiedToolIntegrator,
             WorkflowPreset,
-            ExecutionMode,
+            WorkflowResult,
         )
         assert UnifiedToolIntegrator is not None
         assert FFmpegAdapter is not None
@@ -201,7 +201,7 @@ class IntegratorTestSuite:
 
     def test_premiere_pro_adapter(self):
         """测试Premiere Pro适配器"""
-        from unified_tool_integrator import PremiereProAdapter, ToolConfig, ToolType, PhaseStatus
+        from unified_tool_integrator import PhaseStatus, PremiereProAdapter, ToolConfig, ToolType
         adapter = PremiereProAdapter(ToolConfig(
             tool_type=ToolType.PREMIERE.value,
             mode="simulate",
@@ -218,7 +218,7 @@ class IntegratorTestSuite:
 
     def test_photoshop_adapter(self):
         """测试Photoshop适配器"""
-        from unified_tool_integrator import PhotoshopAdapter, ToolConfig, ToolType, PhaseStatus
+        from unified_tool_integrator import PhaseStatus, PhotoshopAdapter, ToolConfig, ToolType
         adapter = PhotoshopAdapter(ToolConfig(
             tool_type=ToolType.PHOTOSHOP.value,
             mode="simulate",
@@ -233,7 +233,7 @@ class IntegratorTestSuite:
 
     def test_illustrator_adapter(self):
         """测试Illustrator适配器"""
-        from unified_tool_integrator import IllustratorAdapter, ToolConfig, ToolType, PhaseStatus
+        from unified_tool_integrator import IllustratorAdapter, PhaseStatus, ToolConfig, ToolType
         adapter = IllustratorAdapter(ToolConfig(
             tool_type=ToolType.ILLUSTRATOR.value,
             mode="simulate",
@@ -248,7 +248,7 @@ class IntegratorTestSuite:
 
     def test_media_encoder_adapter(self):
         """测试Media Encoder适配器"""
-        from unified_tool_integrator import MediaEncoderAdapter, ToolConfig, ToolType, PhaseStatus
+        from unified_tool_integrator import MediaEncoderAdapter, PhaseStatus, ToolConfig, ToolType
         adapter = MediaEncoderAdapter(ToolConfig(
             tool_type=ToolType.MEDIA_ENCODER.value,
             mode="simulate",
@@ -264,7 +264,7 @@ class IntegratorTestSuite:
 
     def test_audition_adapter(self):
         """测试Audition适配器"""
-        from unified_tool_integrator import AuditionAdapter, ToolConfig, ToolType, PhaseStatus
+        from unified_tool_integrator import AuditionAdapter, PhaseStatus, ToolConfig, ToolType
         adapter = AuditionAdapter(ToolConfig(
             tool_type=ToolType.AUDITION.value,
             mode="simulate",
@@ -769,7 +769,7 @@ def main():
             if step.error:
                 print(f"       错误: {step.error}")
             if args.verbose and step.log:
-                print(f"       日志:")
+                print("       日志:")
                 for line in step.log[-5:]:
                     print(f"         {line}")
         return 0 if result.status == PhaseStatus.SUCCESS.value else 1

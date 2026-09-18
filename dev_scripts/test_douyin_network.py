@@ -1,10 +1,13 @@
 import asyncio
 import os
 from pathlib import Path
+
 import pytest
+
 pytest.importorskip("playwright")
-from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
 import requests
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
+from playwright.async_api import async_playwright
 
 OUTPUT_DIR = Path("D:/AE-Work/test_douyin")
 
@@ -86,7 +89,7 @@ async def main():
                     break
 
         if video_download_url:
-            print(f"  ✓ 找到视频下载地址:")
+            print("  ✓ 找到视频下载地址:")
             print(f"    {video_download_url}")
             print()
 

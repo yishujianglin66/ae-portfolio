@@ -9,10 +9,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config.mcp_signature import (
+    _canonicalize,
+    generate_secret,
     sign_command,
     verify_command,
-    generate_secret,
-    _canonicalize,
 )
 
 

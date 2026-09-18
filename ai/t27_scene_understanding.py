@@ -18,9 +18,9 @@ r"""T27: 细粒度场景/角色/情绪理解 — 统一分析管线。
 from __future__ import annotations
 
 import json
+import random
 import sys
 import time
-import random
 from collections import Counter
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -31,11 +31,11 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from core.torch_runtime import get_device, infer_ctx
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+from core.torch_runtime import get_device, infer_ctx
 
 MODEL_DIR = ROOT / "models"
 REPORT_DIR = ROOT / "reports"
@@ -248,7 +248,7 @@ class SceneUnderstandingPipeline:
         
         return result
     
-    def analyze_batch(self, img_paths: List[str]) -> List[dict]:
+    def analyze_batch(self, img_paths: list[str]) -> list[dict]:
         """批量分析"""
         results = []
         for i, path in enumerate(img_paths):
@@ -289,9 +289,9 @@ def train_scene_classifier(vlm_labels_path: Path = None, epochs=10, batch_size=3
     _log(f"场景分布: {dict(dist)}")
     
     # 构建数据集
-    from torchvision import transforms
-    from torch.utils.data import Dataset, DataLoader
     from PIL import Image
+    from torch.utils.data import DataLoader, Dataset
+    from torchvision import transforms
     
     transform = transforms.Compose([
         transforms.Resize((224, 224)),

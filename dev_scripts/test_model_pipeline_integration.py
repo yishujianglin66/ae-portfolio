@@ -18,10 +18,10 @@ from typing import Any, Dict, List
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from core.model_service import model_service, classify_style, optimize_params
+from core.model_service import classify_style, model_service, optimize_params
 
 
-def extract_video_features(video_path: str) -> List[float]:
+def extract_video_features(video_path: str) -> list[float]:
     """模拟：从视频提取特征
     
     实际应该调用：
@@ -76,7 +76,7 @@ def extract_video_features(video_path: str) -> List[float]:
     ]
 
 
-def analyze_stage(video_path: str) -> Dict[str, Any]:
+def analyze_stage(video_path: str) -> dict[str, Any]:
     """分析阶段：调用风格分类器"""
     print(f"\n[ANALYZE] 分析视频: {video_path}")
     
@@ -111,9 +111,9 @@ def analyze_stage(video_path: str) -> Dict[str, Any]:
     }
 
 
-def plan_stage(analyze_result: Dict[str, Any]) -> Dict[str, Any]:
+def plan_stage(analyze_result: dict[str, Any]) -> dict[str, Any]:
     """规划阶段：调用参数优化器"""
-    print(f"\n[PLAN] 基于风格规划参数")
+    print("\n[PLAN] 基于风格规划参数")
     
     start_time = time.time()
     
@@ -155,9 +155,9 @@ def plan_stage(analyze_result: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def execute_stage(plan_result: Dict[str, Any]) -> Dict[str, Any]:
+def execute_stage(plan_result: dict[str, Any]) -> dict[str, Any]:
     """执行阶段：生成AE脚本（未来可接入JSX生成器）"""
-    print(f"\n[EXECUTE] 生成AE脚本")
+    print("\n[EXECUTE] 生成AE脚本")
     
     # 当前使用compiler原子编译器
     # 未来可接入JSX生成器
@@ -187,7 +187,7 @@ if (comp) {{
     }
 
 
-def run_pipeline(video_path: str) -> Dict[str, Any]:
+def run_pipeline(video_path: str) -> dict[str, Any]:
     """运行完整管线"""
     print("=" * 60)
     print("模型接入管线测试")
@@ -220,7 +220,7 @@ def run_pipeline(video_path: str) -> Dict[str, Any]:
     
     # 模型服务统计
     stats = model_service.get_stats()
-    print(f"\n模型服务统计:")
+    print("\n模型服务统计:")
     print(f"  风格分类调用: {stats['style_classify_calls']}次")
     print(f"  参数优化调用: {stats['param_optim_calls']}次")
     print(f"  平均延迟(分类): {stats['style_classify_avg_ms']:.2f}ms")

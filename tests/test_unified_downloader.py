@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "13-素材获取与搜索" / "01-下载器"))
 
-from unified_downloader import UnifiedDownloader, detect_platform, _ModuleLoader
+from unified_downloader import UnifiedDownloader, _ModuleLoader, detect_platform
 
 
 class TestUnifiedDownloaderDetection(unittest.TestCase):

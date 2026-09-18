@@ -2,11 +2,11 @@
 
 这个脚本直接启动 MCP 服务器并通过 stdio 通信，不依赖 CEP 插件状态。
 """
-import sys
-import pathlib
-import json
 import asyncio
+import json
+import pathlib
 import subprocess
+import sys
 
 NODE_PATH = r"C:\Users\Administrator\AppData\Roaming\npm\node_modules\premiere-pro-mcp\dist\index.js"
 BRIDGE_DIR = r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\.premiere-mcp-bridge"
@@ -27,7 +27,7 @@ async def test():
     print("✅ 桥接目录已清理")
 
     # 2. 启动 MCP 服务器
-    print(f"\n启动 MCP 服务器...")
+    print("\n启动 MCP 服务器...")
     env = {
         "PREMIERE_TEMP_DIR": BRIDGE_DIR,
         "PREMIERE_TIMEOUT_MS": "30000",
@@ -94,7 +94,7 @@ async def test():
     # 6. 调用 import_media
     import_tool = next((t for t in tools if t["name"] == "import_media"), None)
     if import_tool:
-        print(f"\n调用 import_media...")
+        print("\n调用 import_media...")
         call_msg = {
             "jsonrpc": "2.0",
             "id": 3,

@@ -10,8 +10,8 @@
   6. 视频抽帧采样
 """
 import asyncio
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -20,8 +20,14 @@ import numpy as np
 import pytest
 
 from core.visual_eval_gateway import (
-    VisualEvalGateway, get_rubric, parse_score_json, weighted_total,
-    Rubric, DimensionScore, RUBRIC_AE_DEFAULT, RUBRIC_TEXT_FOCUS,
+    RUBRIC_AE_DEFAULT,
+    RUBRIC_TEXT_FOCUS,
+    DimensionScore,
+    Rubric,
+    VisualEvalGateway,
+    get_rubric,
+    parse_score_json,
+    weighted_total,
 )
 
 

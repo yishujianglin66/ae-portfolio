@@ -26,6 +26,7 @@ def main() -> int:
     print(f"对照集: {len(control)} 条高置信单一方向")
 
     import os
+
     from openai import OpenAI
     api_key = os.environ.get("SILICONFLOW_API_KEY", "")
     if not api_key:

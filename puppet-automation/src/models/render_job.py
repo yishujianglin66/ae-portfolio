@@ -6,10 +6,9 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Optional
-
 
 # ============================================================
 # 渲染状态常量
@@ -69,13 +68,13 @@ class RenderJob:
     current_frame: int = 0
     total_frames: int = 0
     fps: float = 30.0
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
+    started_at: str | None = None
+    completed_at: str | None = None
     elapsed_seconds: float = 0.0
-    estimated_remaining_seconds: Optional[float] = None
-    failure_reason: Optional[str] = None
+    estimated_remaining_seconds: float | None = None
+    failure_reason: str | None = None
     retry_count: int = 0
-    metadata: Optional[str] = None  # JSON 字符串
+    metadata: str | None = None  # JSON 字符串
     created_at: str = field(default_factory=_utc_now_iso)
     updated_at: str = field(default_factory=_utc_now_iso)
 

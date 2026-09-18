@@ -94,12 +94,12 @@ class VrsResolveBridge:
     # zoompan 表达式中单个脉冲约 ~120 字符，Windows 命令行安全上限约束脉冲数
     MAX_PULSES_PER_SEGMENT = 7
 
-    def __init__(self, engine: Optional[Any] = None,
+    def __init__(self, engine: Any | None = None,
                  use_vrs: bool = True) -> None:
         self.engine = engine or ResolveAutomationEngine()
         self.use_vrs = use_vrs and _vrs_mod is not None
         self._analyzer = None
-        self.last_analysis: Dict[str, Any] = {}
+        self.last_analysis: dict[str, Any] = {}
         if not self.use_vrs:
             logger.warning("VRS AudioSyncAnalyzer 不可用，降级为引擎内置节拍检测")
 
@@ -112,7 +112,7 @@ class VrsResolveBridge:
         return self._analyzer
 
     def analyze(self, audio_path: str,
-                video_path: Optional[str] = None) -> Dict[str, Any]:
+                video_path: str | None = None) -> dict[str, Any]:
         """
         分析音频（可选参考视频）得到节拍/能量/踩拍效果。
 
@@ -193,8 +193,8 @@ class VrsResolveBridge:
     # 2. VRS 关键帧 → 引擎 Keyframe 转换
     # ------------------------------------------------------------------
     @staticmethod
-    def vrs_keyframes_to_engine(sync_keyframes: List[Dict[str, Any]],
-                                prop: str = "scale") -> List[Any]:
+    def vrs_keyframes_to_engine(sync_keyframes: list[dict[str, Any]],
+                                prop: str = "scale") -> list[Any]:
         """
         将 VRS sync_keyframes（{property,time,value,easing}）转换为
         resolve_engine Keyframe 列表。scale 值(1.0基线)自动转为 zoompan 缩放倍率。
@@ -212,11 +212,11 @@ class VrsResolveBridge:
     # ------------------------------------------------------------------
     # 3. 踩拍脉冲表达式（beat_bounce → zoompan z 表达式）
     # ------------------------------------------------------------------
-    def build_beat_pulse_expression(self, beats: List[float],
+    def build_beat_pulse_expression(self, beats: list[float],
                                     seg_duration: float,
-                                    amplitudes: Optional[List[float]] = None,
+                                    amplitudes: list[float] | None = None,
                                     fps: int = 24,
-                                    base_zoom: float = 1.06) -> Optional[str]:
+                                    base_zoom: float = 1.06) -> str | None:
         """
         为单个镜头片段构建踩拍缩放脉冲表达式（zoompan z 用，时间变量 on/fps）。
 
@@ -265,9 +265,9 @@ class VrsResolveBridge:
     # ------------------------------------------------------------------
     # 4. 能量闪光表达式（high_flash → overlay enable）
     # ------------------------------------------------------------------
-    def find_flash_points(self, energy_curve: List[Dict[str, float]],
+    def find_flash_points(self, energy_curve: list[dict[str, float]],
                           threshold_percent: float = 0.85,
-                          min_interval: float = 0.4) -> List[float]:
+                          min_interval: float = 0.4) -> list[float]:
         """在能量曲线中找高能量尖峰（闪光触发时间，秒）。"""
         if not energy_curve:
             return []
@@ -291,12 +291,12 @@ class VrsResolveBridge:
     # ------------------------------------------------------------------
     # 5. VRS 驱动踩拍混剪管线（主入口）
     # ------------------------------------------------------------------
-    def build_vrs_montage(self, clip_paths: List[str], bgm_path: str,
+    def build_vrs_montage(self, clip_paths: list[str], bgm_path: str,
                           output_path: str,
                           beat_group: int = 2,
-                          reference_video: Optional[str] = None,
-                          transitions: Optional[List[str]] = None,
-                          lut_path: Optional[str] = None,
+                          reference_video: str | None = None,
+                          transitions: list[str] | None = None,
+                          lut_path: str | None = None,
                           enable_flash: bool = True,
                           enable_bounce: bool = True,
                           fps: int = 24,
@@ -331,7 +331,7 @@ class VrsResolveBridge:
         analysis = self.analyze(bgm_path, reference_video)
         if not analysis.get("success") or not analysis.get("beats"):
             raise ResolveError("VRS/降级节拍分析失败，无可用节拍")
-        beats: List[float] = analysis["beats"]
+        beats: list[float] = analysis["beats"]
         bpm = analysis.get("bpm", 0.0)
         energy_curve = analysis.get("energy_curve", [])
         logger.info(f"Montage: source={analysis['source']}, bpm={bpm:.1f}, "
@@ -346,7 +346,7 @@ class VrsResolveBridge:
         boundaries = [0.0] + list(cut_beats)
         bgm_dur = self.engine._get_media_duration(bgm_path) or beats[-1] + 1.0
         # 去掉过短尾段
-        shot_bounds: List[Tuple[float, float]] = []
+        shot_bounds: list[tuple[float, float]] = []
         for i in range(len(boundaries) - 1):
             a, b = boundaries[i], boundaries[i + 1]
             if b - a >= 0.3:
@@ -366,7 +366,7 @@ class VrsResolveBridge:
         # 导致后续每个切点提前累积量而漂移出拍。
         # 补偿：第 i 个镜头（非末尾）时长预加长其后转场时长 t_i，
         # 则 Σd_j - Σt_j = Σ拍区间，切点精确回到节拍上。
-        t_durs: List[float] = []
+        t_durs: list[float] = []
         if transitions and len(shot_bounds) >= 2:
             for i in range(len(shot_bounds) - 1):
                 next_dur = shot_bounds[i + 1][1] - shot_bounds[i + 1][0]
@@ -378,7 +378,7 @@ class VrsResolveBridge:
         os.makedirs(work_dir, exist_ok=True)
         codec = self.engine._get_encoder_args(quality="fast")
 
-        segments: List[str] = []
+        segments: list[str] = []
         for si, (a, b) in enumerate(shot_bounds):
             seg_dur = b - a
             # 补偿后的实际渲染时长（末尾镜头不加）
@@ -491,7 +491,7 @@ class VrsResolveBridge:
     # 6. VRS 关键帧动画桥接（sync_keyframes → set_keyframe_animation）
     # ------------------------------------------------------------------
     def apply_vrs_sync_keyframes(self, source_path: str, output_path: str,
-                                 sync_keyframes: List[Dict[str, Any]],
+                                 sync_keyframes: list[dict[str, Any]],
                                  mode: str = "ease", fps: int = 24) -> str:
         """
         把 VRS sync_keyframes 中的 scale 弹跳应用为引擎关键帧动画。
@@ -506,9 +506,9 @@ class VrsResolveBridge:
     # ------------------------------------------------------------------
     # 7. 切点-节拍偏差量化（质量指标）
     # ------------------------------------------------------------------
-    def measure_sync_quality(self, video_path: str, beats: List[float],
+    def measure_sync_quality(self, video_path: str, beats: list[float],
                              scene_threshold: float = 0.2,
-                             tolerance_ms: float = 120.0) -> Dict[str, Any]:
+                             tolerance_ms: float = 120.0) -> dict[str, Any]:
         """
         量化成片的音画同步质量：用场景突变检测提取实际切点，
         与目标节拍匹配，输出偏差统计。
@@ -526,13 +526,13 @@ class VrsResolveBridge:
                            encoding="utf-8", errors="ignore", timeout=300)
         cuts = sorted(float(t) for t in _re.findall(r'pts_time:([\d.]+)', r.stderr))
         # 去重（转场帧可能连续多帧超阈）
-        merged: List[float] = []
+        merged: list[float] = []
         for t in cuts:
             if not merged or t - merged[-1] > 0.15:
                 merged.append(t)
         cuts = merged
 
-        deviations: List[float] = []
+        deviations: list[float] = []
         matched = 0
         for t in cuts:
             best = min(beats, key=lambda b: abs(b - t)) if beats else 0.0

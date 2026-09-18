@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """快速测试AE Bridge连通性"""
-import json, time, sys
-from pathlib import Path
+import json
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
 
 sys.stdout.reconfigure(encoding='utf-8')
 

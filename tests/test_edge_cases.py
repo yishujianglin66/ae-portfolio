@@ -10,9 +10,9 @@
     py -3.11 test_edge_cases.py -v  # 详细输出
 """
 
+import json
 import os
 import sys
-import json
 import time
 import traceback
 from pathlib import Path
@@ -20,21 +20,21 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from unified_tool_integrator import (
-    UnifiedToolIntegrator,
-    WorkflowResult,
-    StepResult,
-    PhaseStatus,
-    ToolType,
-    ToolConfig,
     AEAdapter,
-    PremiereProAdapter,
-    PhotoshopAdapter,
+    AuditionAdapter,
+    BlenderAdapter,
+    FFmpegAdapter,
     IllustratorAdapter,
     MediaEncoderAdapter,
-    AuditionAdapter,
-    FFmpegAdapter,
+    PhaseStatus,
+    PhotoshopAdapter,
+    PremiereProAdapter,
+    StepResult,
+    ToolConfig,
+    ToolType,
     TopazAdapter,
-    BlenderAdapter,
+    UnifiedToolIntegrator,
+    WorkflowResult,
 )
 
 
@@ -220,7 +220,7 @@ def test_all_workflow_presets():
                 failures.append(f"{preset['id']}: 状态={result.status}, 错误={result.error}")
         except Exception as e:
             failures.append(f"{preset['id']}: 异常={e}")
-    assert len(failures) == 0, f"以下预设执行失败:\n" + "\n".join(failures)
+    assert len(failures) == 0, "以下预设执行失败:\n" + "\n".join(failures)
 
 
 def test_adobe_adapters_all_operations():

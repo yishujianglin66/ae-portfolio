@@ -12,19 +12,20 @@
 9. MusicalSection dataclass 验证
 10. BeatSyncConfig dataclass 验证
 """
+import math
 import os
 import sys
+
 import pytest
-import math
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.beat_orchestrator import (
+    BEAT_EFFECT_STYLES,
+    MUSICAL_STRUCTURE_TEMPLATES,
     BeatOrchestrator,
     BeatSyncConfig,
     MusicalSection,
-    MUSICAL_STRUCTURE_TEMPLATES,
-    BEAT_EFFECT_STYLES,
 )
 
 

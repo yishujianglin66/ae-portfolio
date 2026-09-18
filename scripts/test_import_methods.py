@@ -1,4 +1,6 @@
-import json, os, time
+import json
+import os
+import time
 
 bridge_dir = os.path.expanduser("~") + "\\Documents\\ae-mcp-bridge"
 

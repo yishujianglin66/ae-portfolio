@@ -28,15 +28,15 @@ BASELINE = {
 class DirectorQualityScorer:
     """对导演产出的 script/stats 做五项量化评分 (0-100)"""
 
-    def __init__(self, rules: Optional[Dict[str, Any]] = None):
+    def __init__(self, rules: dict[str, Any] | None = None):
         if rules is None:
             with open(MASTER_RULES_PATH, encoding="utf-8") as f:
                 rules = json.load(f)
         self.rules = rules
 
     # ── 单项1: 节拍对齐 ─────────────────────────────────────
-    def score_beat_alignment(self, cut_times: List[float], bpm: float,
-                             fps: int = 30) -> Dict[str, Any]:
+    def score_beat_alignment(self, cut_times: list[float], bpm: float,
+                             fps: int = 30) -> dict[str, Any]:
         """切点到最近拍/半拍网格的最大误差(帧), <1帧为满分"""
         if bpm <= 0 or not cut_times:
             return {"score": 0.0, "max_error_frames": None,
@@ -60,7 +60,7 @@ class DirectorQualityScorer:
                 "cut_count": len(cut_times)}
 
     # ── 单项2: 运镜多样性 ───────────────────────────────────
-    def score_camera_diversity(self, movements: List[str]) -> Dict[str, Any]:
+    def score_camera_diversity(self, movements: list[str]) -> dict[str, Any]:
         """运镜种类≥6满分; 连续3段同运镜扣分"""
         if not movements:
             return {"score": 0.0, "unique": 0, "detail": "no movements"}
@@ -76,7 +76,7 @@ class DirectorQualityScorer:
                 "movements_used": sorted(set(movements))}
 
     # ── 单项3: 弧线完整度 ───────────────────────────────────
-    def score_arc_completeness(self, segments: List[Dict]) -> Dict[str, Any]:
+    def score_arc_completeness(self, segments: list[dict]) -> dict[str, Any]:
         """五段齐全+能量字段+breath break+时长比符合包络"""
         if not segments:
             return {"score": 0.0, "detail": "no segments"}
@@ -105,7 +105,7 @@ class DirectorQualityScorer:
                 len(set(round(d, 2) for d in durs)) > 1}
 
     # ── 单项4: 三维组合覆盖率 ───────────────────────────────
-    def score_combo_coverage(self, combo_stats: Dict[str, Any]) -> Dict[str, Any]:
+    def score_combo_coverage(self, combo_stats: dict[str, Any]) -> dict[str, Any]:
         """特效×动画×字体组合多样性 ≥70% 满分"""
         total = combo_stats.get("total_combo_uses", 0)
         unique = combo_stats.get("unique_combos", 0)
@@ -120,7 +120,7 @@ class DirectorQualityScorer:
                 "unique": unique, "total": total}
 
     # ── 单项5: 反模式检测 ───────────────────────────────────
-    def score_anti_patterns(self, evidence: Dict[str, Any]) -> Dict[str, Any]:
+    def score_anti_patterns(self, evidence: dict[str, Any]) -> dict[str, Any]:
         """依据 master_rules.anti_patterns 扣分 (100分起扣)
 
         evidence 字段: has_ease(bool) / max_scale(float) /
@@ -149,10 +149,10 @@ class DirectorQualityScorer:
                 "hits": hits}
 
     # ── 总评 ────────────────────────────────────────────────
-    def score_card(self, script: Dict[str, Any],
-                   combo_stats: Optional[Dict[str, Any]] = None,
-                   evidence: Optional[Dict[str, Any]] = None,
-                   fps: int = 30) -> Dict[str, Any]:
+    def score_card(self, script: dict[str, Any],
+                   combo_stats: dict[str, Any] | None = None,
+                   evidence: dict[str, Any] | None = None,
+                   fps: int = 30) -> dict[str, Any]:
         """一次调用产出五项+总分 (权重 25/20/20/15/20)"""
         bpm = script.get("bpm", 128)
         cuts = []
@@ -184,7 +184,7 @@ class DirectorQualityScorer:
                 "baseline": BASELINE}
 
     @staticmethod
-    def format_report(card: Dict[str, Any]) -> str:
+    def format_report(card: dict[str, Any]) -> str:
         lines = [f"DirectorQualityScorer 总分: {card['total_score']}/100 "
                  f"({'达标' if card['passed'] else '未达标'})"]
         for k, m in card["metrics"].items():

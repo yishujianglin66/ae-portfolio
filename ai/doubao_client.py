@@ -42,7 +42,7 @@ import os
 import sys
 import time
 from enum import Enum
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
 try:
     import requests
@@ -243,9 +243,9 @@ class DoubaoClient:
 """
     
     def __init__(self, 
-                 api_key: Optional[str] = None,
+                 api_key: str | None = None,
                  platform: DoubaoPlatform = DoubaoPlatform.OPEN_PLATFORM,
-                 ark_endpoint_id: Optional[str] = None):
+                 ark_endpoint_id: str | None = None):
         self.api_key = api_key or os.environ.get("DOUBAO_API_KEY", "")
         if not self.api_key:
             raise ValueError("未设置 DOUBAO_API_KEY 环境变量")
@@ -430,7 +430,7 @@ class DoubaoClient:
         completion = usage.get("completion_tokens", 0) / 1_000_000
         return prompt * in_price + completion * out_price
 
-    def list_available_models(self) -> Dict[str, List[str]]:
+    def list_available_models(self) -> dict[str, list[str]]:
         """列出当前平台可用的模型"""
         if self.platform == DoubaoPlatform.OPEN_PLATFORM:
             return {
@@ -492,7 +492,7 @@ _client = None
 
 
 def get_client(platform: DoubaoPlatform = DoubaoPlatform.OPEN_PLATFORM,
-               ark_endpoint_id: Optional[str] = None) -> DoubaoClient:
+               ark_endpoint_id: str | None = None) -> DoubaoClient:
     global _client
     if _client is None:
         _client = DoubaoClient(platform=platform, ark_endpoint_id=ark_endpoint_id)

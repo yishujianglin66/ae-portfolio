@@ -106,7 +106,10 @@ def main() -> int:
     # 1. 构造管线配置 + 运行七阶段
     # ====================================================================
     from pipeline.unified_pipeline import (
-        UnifiedPipeline, PipelineConfig, PipelineResult, StageStatus,
+        PipelineConfig,
+        PipelineResult,
+        StageStatus,
+        UnifiedPipeline,
     )
     cfg = PipelineConfig(
         input_topic=INPUT_TOPIC,
@@ -214,7 +217,7 @@ def main() -> int:
             "style_tags_count": len(style_tags), "confidence": confidence,
         }
     else:
-        print(f"    [FAIL] perceive 阶段结果缺失或无 data")
+        print("    [FAIL] perceive 阶段结果缺失或无 data")
 
     # ====================================================================
     # 4. execute 真混剪验证 (P1-1)
@@ -265,13 +268,13 @@ def main() -> int:
             "effects_applied": effects_applied, "mix_method": mix_method,
         }
     else:
-        print(f"    [FAIL] execute 阶段结果缺失")
+        print("    [FAIL] execute 阶段结果缺失")
 
     # ffprobe 验证 execute 输出
     exec_ffprobe_ok = False
     exec_probe = {}
     if exec_ok and exec_output and Path(exec_output).exists():
-        print(f"\n    [ffprobe] 验证 execute 输出元数据:")
+        print("\n    [ffprobe] 验证 execute 输出元数据:")
         exec_probe = run_ffprobe(exec_output)
         if "error" in exec_probe:
             print(f"    [FAIL] ffprobe 失败: {exec_probe.get('error', '')}")
@@ -331,14 +334,14 @@ def main() -> int:
         print(f"    [run_all] initial_score        : {initial_score}")
         print(f"    [run_all] reasoning            : {opt_reasoning}")
         if opt_history:
-            print(f"    [run_all] 分数曲线:")
+            print("    [run_all] 分数曲线:")
             for h in opt_history:
                 print(f"      - pass={h.get('pass')}  score={h.get('score')}  file={Path(h.get('file','')).name}")
 
     # 若 run_all 初次未触发多轮优化 (history<2 或 optimization_applied=False),
     # 用 FFmpeg boxblur 制造低分版, 在同一管线实例上重跑 _run_verify() 强制触发
     if (not opt_applied) or len(opt_history) < 2:
-        print(f"\n    [STEP-3.5] run_all 未触发完整多轮优化, 用 boxblur 低分版强制触发")
+        print("\n    [STEP-3.5] run_all 未触发完整多轮优化, 用 boxblur 低分版强制触发")
         render_sr = pipeline._results.get("render")
         original_render_output = ""
         if render_sr and render_sr.data:
@@ -396,7 +399,7 @@ def main() -> int:
                     print(f"    [MULTIPASS] initial_score        : {initial_score}")
                     print(f"    [MULTIPASS] reasoning            : {opt_reasoning}")
                     if opt_history:
-                        print(f"    [MULTIPASS] 分数曲线:")
+                        print("    [MULTIPASS] 分数曲线:")
                         for h in opt_history:
                             print(f"      - pass={h.get('pass')}  score={h.get('score')}  file={Path(h.get('file','')).name}")
 
@@ -404,7 +407,7 @@ def main() -> int:
                     if verify_sr and isinstance(verify_sr.data, dict):
                         verify_sr.data.update(mp_verify_data)
         else:
-            print(f"    [SKIP] render 输出不存在, 无法强制触发")
+            print("    [SKIP] render 输出不存在, 无法强制触发")
 
     # 多轮优化核心断言
     print(f"\n    [核心断言] 多轮自动优化 (来源: {multipass_source})")

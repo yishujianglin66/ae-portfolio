@@ -26,7 +26,7 @@ class QwenMMAdapter:
         key = os.environ.get("QWEN_API_KEY", "") or os.environ.get("DASHSCOPE_API_KEY", "")
         return bool(key)
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         """列出可用操作"""
         return [
             "vision_understand",       # 多模态视觉理解
@@ -38,7 +38,7 @@ class QwenMMAdapter:
             "visual_comparison",       # 视觉对比
         ]
 
-    def execute(self, operation: str, **kwargs) -> Dict[str, Any]:
+    def execute(self, operation: str, **kwargs) -> dict[str, Any]:
         """执行操作（委托给 llm_gateway）"""
         from core.llm_gateway import get_gateway
         gw = get_gateway()

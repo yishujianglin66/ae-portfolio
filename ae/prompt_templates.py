@@ -5,14 +5,14 @@ LLM 提示词模板 - 用于解析用户创意描述并生成结构化任务图
 支持多种 LLM 模型（DeepSeek, GPT-4, Claude 等）
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 def _generate_preset_capabilities(preset_system=None) -> str:
     """生成预设能力清单文本，注入到LLM提示词中"""
     if preset_system is None:
         try:
-            from .preset_system import PresetSystem, PRESET_CATEGORIES
+            from .preset_system import PRESET_CATEGORIES, PresetSystem
             preset_system = PresetSystem()
         except Exception:
             return ""
@@ -62,7 +62,7 @@ class PromptTemplate:
         self.user_prompt = user_prompt
         self.model = model
 
-    def format(self, **kwargs) -> Dict[str, str]:
+    def format(self, **kwargs) -> dict[str, str]:
         """格式化提示词"""
         system = self.system_prompt
         user = self.user_prompt
@@ -414,7 +414,7 @@ def get_template(name: str) -> PromptTemplate:
     return PROMPT_TEMPLATES.get(name)
 
 
-def list_templates() -> List[str]:
+def list_templates() -> list[str]:
     """列出所有可用模板"""
     return list(PROMPT_TEMPLATES.keys())
 
@@ -422,7 +422,7 @@ def list_templates() -> List[str]:
 def build_creative_analysis_prompt(
     creative_description: str,
     preset_system=None
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """构建创意分析提示词（含预设能力清单）"""
     prompts = CREATIVE_ANALYSIS.format(creative_description=creative_description)
     # 注入预设能力清单
@@ -436,8 +436,8 @@ def build_creative_analysis_prompt(
 
 
 def build_parameter_optimization_prompt(
-    description: str, current_params: Dict[str, Any]
-) -> Dict[str, str]:
+    description: str, current_params: dict[str, Any]
+) -> dict[str, str]:
     """构建参数优化提示词"""
     import json
 
@@ -447,16 +447,16 @@ def build_parameter_optimization_prompt(
     )
 
 
-def build_style_transfer_prompt(reference_description: str) -> Dict[str, str]:
+def build_style_transfer_prompt(reference_description: str) -> dict[str, str]:
     """构建风格迁移提示词"""
     return STYLE_TRANSFER.format(reference_description=reference_description)
 
 
 def build_subtitle_optimization_prompt(
-    subtitles: List[Dict[str, Any]],
+    subtitles: list[dict[str, Any]],
     language: str = "zh",
     style: str = "default",
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """构建字幕优化提示词"""
     import json
 

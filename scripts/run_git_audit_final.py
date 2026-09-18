@@ -1,6 +1,6 @@
-import subprocess
-import os
 import json
+import os
+import subprocess
 from datetime import datetime
 
 REPO_ROOT = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault"
@@ -283,10 +283,10 @@ def main():
     print(f"C组提案: {len(c_proposal_files)} files")
     print(f"D组风险文件: {len(d_files)} files, {d_bytes} bytes")
     print(f"\nJSON 已写入: {OUTPUT_FILE}")
-    print(f"\nGIT AUDIT + EVIDENCE COMMIT DONE: output/evidence/git_audit_and_commits_20260818.json")
+    print("\nGIT AUDIT + EVIDENCE COMMIT DONE: output/evidence/git_audit_and_commits_20260818.json")
     print(f"  Modified files audit: {len(all_files_audit)}")
     print(f"  Real commit hash (Group A evidence): {commit_short_hash} (status: ok)")
-    print(f"  Proposed commits ready: 2 (code_fixes + puppet_sync)")
+    print("  Proposed commits ready: 2 (code_fixes + puppet_sync)")
     if d_files:
         print(f"  ⚠ 风险提示: 组D有 {len(d_files)} 个未知文件，请人工审核！")
 

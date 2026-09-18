@@ -516,7 +516,7 @@ def run_auto_edit(export: bool = False) -> dict:
         result["steps"]["save"] = "OK (Ctrl+S)"
         if export:
             result["steps"]["export"] = "TIMEOUT"
-        print(f"    [OK] Ctrl+S 保存已发送")
+        print("    [OK] Ctrl+S 保存已发送")
 
     result["status"] = "success"
     result["completed"] = time.strftime("%Y-%m-%d %H:%M:%S")

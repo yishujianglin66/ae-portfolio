@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 import sys
-import urllib.request
 import urllib.error
+import urllib.request
 from pathlib import Path
 
 BASE_URL = "http://127.0.0.1:8765"
@@ -70,7 +70,7 @@ def test_tool(name: str, args: dict | None = None, desc: str = "") -> bool:
         print(f"    ❌ {result.get('error', 'unknown error')[:100]}")
         return False
 
-    print(f"    ⚠️  无响应内容")
+    print("    ⚠️  无响应内容")
     return False
 
 

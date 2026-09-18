@@ -27,10 +27,10 @@ import threading
 import time
 import uuid
 from collections import defaultdict, deque
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-from datetime import datetime
 
 try:
     from logger import get_logger
@@ -72,15 +72,15 @@ class AlertSeverity(str, Enum):
 @dataclass(frozen=True)
 class LabelSet:
     """标签集合"""
-    labels: Tuple[Tuple[str, str], ...]
+    labels: tuple[tuple[str, str], ...]
 
     @classmethod
-    def from_dict(cls, labels: Optional[Dict[str, str]] = None) -> "LabelSet":
+    def from_dict(cls, labels: dict[str, str] | None = None) -> "LabelSet":
         if not labels:
             return cls(labels=())
         return cls(labels=tuple(sorted(labels.items())))
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         return dict(self.labels)
 
     def to_str(self) -> str:
@@ -105,22 +105,22 @@ class Counter:
     def __init__(self, name: str, help_text: str = ""):
         self.name = name
         self.help = help_text
-        self._values: Dict[LabelSet, float] = defaultdict(float)
+        self._values: dict[LabelSet, float] = defaultdict(float)
         self._lock = threading.RLock()
 
-    def inc(self, value: float = 1.0, labels: Optional[Dict[str, str]] = None) -> None:
+    def inc(self, value: float = 1.0, labels: dict[str, str] | None = None) -> None:
         if value < 0:
             raise ValueError("Counter 只能递增")
         ls = LabelSet.from_dict(labels)
         with self._lock:
             self._values[ls] += value
 
-    def get(self, labels: Optional[Dict[str, str]] = None) -> float:
+    def get(self, labels: dict[str, str] | None = None) -> float:
         ls = LabelSet.from_dict(labels)
         with self._lock:
             return self._values.get(ls, 0.0)
 
-    def samples(self) -> List[MetricSample]:
+    def samples(self) -> list[MetricSample]:
         with self._lock:
             return [
                 MetricSample(self.name, ls, val)
@@ -144,28 +144,28 @@ class Gauge:
     def __init__(self, name: str, help_text: str = ""):
         self.name = name
         self.help = help_text
-        self._values: Dict[LabelSet, float] = defaultdict(float)
+        self._values: dict[LabelSet, float] = defaultdict(float)
         self._lock = threading.RLock()
 
-    def set(self, value: float, labels: Optional[Dict[str, str]] = None) -> None:
+    def set(self, value: float, labels: dict[str, str] | None = None) -> None:
         ls = LabelSet.from_dict(labels)
         with self._lock:
             self._values[ls] = value
 
-    def inc(self, value: float = 1.0, labels: Optional[Dict[str, str]] = None) -> None:
+    def inc(self, value: float = 1.0, labels: dict[str, str] | None = None) -> None:
         ls = LabelSet.from_dict(labels)
         with self._lock:
             self._values[ls] += value
 
-    def dec(self, value: float = 1.0, labels: Optional[Dict[str, str]] = None) -> None:
+    def dec(self, value: float = 1.0, labels: dict[str, str] | None = None) -> None:
         self.inc(-value, labels)
 
-    def get(self, labels: Optional[Dict[str, str]] = None) -> float:
+    def get(self, labels: dict[str, str] | None = None) -> float:
         ls = LabelSet.from_dict(labels)
         with self._lock:
             return self._values.get(ls, 0.0)
 
-    def samples(self) -> List[MetricSample]:
+    def samples(self) -> list[MetricSample]:
         with self._lock:
             return [
                 MetricSample(self.name, ls, val)
@@ -191,18 +191,18 @@ class Histogram:
     )
 
     def __init__(self, name: str, help_text: str = "",
-                 buckets: Optional[Tuple[float, ...]] = None):
+                 buckets: tuple[float, ...] | None = None):
         self.name = name
         self.help = help_text
         self.buckets = buckets or self.DEFAULT_BUCKETS
-        self._counts: Dict[LabelSet, List[int]] = defaultdict(
+        self._counts: dict[LabelSet, list[int]] = defaultdict(
             lambda: [0] * (len(self.buckets) + 1)
         )
-        self._sums: Dict[LabelSet, float] = defaultdict(float)
-        self._totals: Dict[LabelSet, int] = defaultdict(int)
+        self._sums: dict[LabelSet, float] = defaultdict(float)
+        self._totals: dict[LabelSet, int] = defaultdict(int)
         self._lock = threading.RLock()
 
-    def observe(self, value: float, labels: Optional[Dict[str, str]] = None) -> None:
+    def observe(self, value: float, labels: dict[str, str] | None = None) -> None:
         ls = LabelSet.from_dict(labels)
         with self._lock:
             idx = 0
@@ -219,7 +219,7 @@ class Histogram:
             self._sums[ls] += value
             self._totals[ls] += 1
 
-    def samples(self) -> List[MetricSample]:
+    def samples(self) -> list[MetricSample]:
         with self._lock:
             samples = []
             for ls in self._counts:
@@ -257,7 +257,7 @@ class Histogram:
             lines.append(f"{sample.name}{sample.labels.to_str()} {sample.value}")
         return "\n".join(lines)
 
-    def quantile(self, q: float, labels: Optional[Dict[str, str]] = None) -> float:
+    def quantile(self, q: float, labels: dict[str, str] | None = None) -> float:
         """估算分位数 (基于 bucket)"""
         ls = LabelSet.from_dict(labels)
         with self._lock:
@@ -283,17 +283,17 @@ class Summary:
         self.help = help_text
         self.window_size = window_size
         self.max_samples = max_samples
-        self._samples: Dict[LabelSet, deque] = defaultdict(
+        self._samples: dict[LabelSet, deque] = defaultdict(
             lambda: deque(maxlen=max_samples)
         )
         self._lock = threading.RLock()
 
-    def observe(self, value: float, labels: Optional[Dict[str, str]] = None) -> None:
+    def observe(self, value: float, labels: dict[str, str] | None = None) -> None:
         ls = LabelSet.from_dict(labels)
         with self._lock:
             self._samples[ls].append((time.time(), value))
 
-    def quantile(self, q: float, labels: Optional[Dict[str, str]] = None) -> float:
+    def quantile(self, q: float, labels: dict[str, str] | None = None) -> float:
         ls = LabelSet.from_dict(labels)
         now = time.time()
         with self._lock:
@@ -307,7 +307,7 @@ class Summary:
         idx = max(0, min(len(samples) - 1, int(q * len(samples))))
         return samples[idx]
 
-    def samples(self) -> List[MetricSample]:
+    def samples(self) -> list[MetricSample]:
         result = []
         for q in (0.5, 0.9, 0.99):
             with self._lock:
@@ -358,7 +358,7 @@ class AlertRule:
     duration: float = 0.0  # 持续时间 (秒), 0=立即触发
     severity: AlertSeverity = AlertSeverity.WARNING
     message: str = ""
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
     def evaluate(self, registry: "MetricsRegistry") -> bool:
         value = self.expression(registry)
@@ -385,12 +385,12 @@ class Alert:
     state: AlertState
     value: float
     started_at: float
-    fired_at: Optional[float] = None
-    resolved_at: Optional[float] = None
+    fired_at: float | None = None
+    resolved_at: float | None = None
     last_evaluated: float = field(default_factory=time.time)
     notifications_sent: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "alert_id": self.alert_id,
             "name": self.rule.name,
@@ -413,13 +413,13 @@ class AlertManager:
 
     def __init__(self, registry: "MetricsRegistry"):
         self.registry = registry
-        self._rules: List[AlertRule] = []
-        self._active_alerts: Dict[str, Alert] = {}  # rule_name -> Alert
-        self._history: List[Alert] = []
+        self._rules: list[AlertRule] = []
+        self._active_alerts: dict[str, Alert] = {}  # rule_name -> Alert
+        self._history: list[Alert] = []
         self._lock = threading.RLock()
-        self._notifiers: List[Callable[[Alert], None]] = []
+        self._notifiers: list[Callable[[Alert], None]] = []
         self._running = False
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
         self._eval_interval = 5.0
 
     def add_rule(self, rule: AlertRule) -> None:
@@ -430,7 +430,7 @@ class AlertManager:
     def add_notifier(self, notifier: Callable[[Alert], None]) -> None:
         self._notifiers.append(notifier)
 
-    def evaluate(self) -> List[Alert]:
+    def evaluate(self) -> list[Alert]:
         """评估所有规则, 返回本次新触发/状态变更的告警列表"""
         changed = []
         with self._lock:
@@ -526,11 +526,11 @@ class AlertManager:
                 _logger.error(f"告警评估异常: {e}")
             time.sleep(self._eval_interval)
 
-    def list_active_alerts(self) -> List[Alert]:
+    def list_active_alerts(self) -> list[Alert]:
         with self._lock:
             return list(self._active_alerts.values())
 
-    def list_history(self, limit: int = 100) -> List[Alert]:
+    def list_history(self, limit: int = 100) -> list[Alert]:
         with self._lock:
             return list(self._history[-limit:])
 
@@ -543,7 +543,7 @@ class MetricsRegistry:
     """指标注册中心"""
 
     def __init__(self):
-        self._metrics: Dict[str, Union[Counter, Gauge, Histogram, Summary]] = {}
+        self._metrics: dict[str, Union[Counter, Gauge, Histogram, Summary]] = {}
         self._lock = threading.RLock()
         self._init_default_metrics()
 
@@ -651,10 +651,10 @@ class MetricsRegistry:
             raise KeyError(f"Summary 不存在: {name}")
         return m
 
-    def get(self, name: str) -> Optional[Union[Counter, Gauge, Histogram, Summary]]:
+    def get(self, name: str) -> Union[Counter, Gauge, Histogram, Summary] | None:
         return self._metrics.get(name)
 
-    def list_metrics(self) -> List[str]:
+    def list_metrics(self) -> list[str]:
         with self._lock:
             return list(self._metrics.keys())
 
@@ -669,7 +669,7 @@ class MetricsRegistry:
                 lines.append(exported)
         return "\n".join(lines) + "\n"
 
-    def export_dict(self) -> Dict[str, Any]:
+    def export_dict(self) -> dict[str, Any]:
         """导出为字典 (JSON 友好)"""
         result = {}
         with self._lock:
@@ -702,7 +702,7 @@ class SystemCollector:
         self.registry = registry
         self.interval = interval
         self._running = False
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
         self._start_time = time.time()
 
     def start(self) -> None:
@@ -913,9 +913,9 @@ def create_metrics_endpoint(registry: MetricsRegistry):
 # 单例
 # ============================================================================
 
-_registry: Optional[MetricsRegistry] = None
-_alert_manager: Optional[AlertManager] = None
-_system_collector: Optional[SystemCollector] = None
+_registry: MetricsRegistry | None = None
+_alert_manager: AlertManager | None = None
+_system_collector: SystemCollector | None = None
 
 
 def get_metrics_registry() -> MetricsRegistry:
@@ -981,7 +981,7 @@ def _run_tests():
         counter.inc(-1)
         assert False
     except ValueError:
-        print(f"  负值拒绝: OK")
+        print("  负值拒绝: OK")
 
     # ---------- 3. Gauge ----------
     print("\n3. Gauge...")
@@ -1150,7 +1150,7 @@ def _run_tests():
         print(f"  CPU: {cpu:.1f}%")
         print(f"  内存: {mem:.1f}%")
     except ImportError:
-        print(f"  psutil 未安装, 跳过 CPU/内存采集")
+        print("  psutil 未安装, 跳过 CPU/内存采集")
 
     disk = registry.gauge("system_disk_percent").get()
     disk_free = registry.gauge("system_disk_free_bytes").get()
@@ -1163,7 +1163,7 @@ def _run_tests():
     print(f"  线程已启动: {alert_mgr._thread.is_alive()}")
     time.sleep(1.5)
     alert_mgr.stop()
-    print(f"  线程已停止")
+    print("  线程已停止")
 
     # ---------- 16. FastAPI 集成 ----------
     print("\n16. FastAPI 集成...")
@@ -1172,8 +1172,8 @@ def _run_tests():
         endpoint = create_metrics_endpoint(registry)
         assert callable(middleware)
         assert callable(endpoint)
-        print(f"  中间件创建: OK")
-        print(f"  端点函数创建: OK")
+        print("  中间件创建: OK")
+        print("  端点函数创建: OK")
         # 端点输出
         output = endpoint()
         assert "# TYPE" in output
@@ -1232,7 +1232,7 @@ def _run_tests():
         started_at=time.time(),
     )
     wh(fake_alert)
-    print(f"  Webhook 失败容错: OK")
+    print("  Webhook 失败容错: OK")
 
     # ---------- 20. 统计 ----------
     print("\n20. 统计...")

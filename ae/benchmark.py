@@ -162,9 +162,9 @@ class BenchmarkRunner:
             config: 基准测试配置
         """
         self.config = config
-        self.results: Dict[str, Any] = {}
-        self.start_time: Optional[datetime] = None
-        self.end_time: Optional[datetime] = None
+        self.results: dict[str, Any] = {}
+        self.start_time: datetime | None = None
+        self.end_time: datetime | None = None
 
     def run(self) -> int:
         """运行基准测试。
@@ -241,7 +241,7 @@ class BenchmarkRunner:
 
         return exit_code
 
-    def _run_pytest(self, suite: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_pytest(self, suite: dict[str, Any]) -> dict[str, Any]:
         """运行 pytest 测试。
 
         Args:
@@ -251,7 +251,7 @@ class BenchmarkRunner:
             测试结果字典
         """
         import io
-        from contextlib import redirect_stdout, redirect_stderr
+        from contextlib import redirect_stderr, redirect_stdout
 
         args = list(suite["pytest_args"])
 
@@ -368,7 +368,7 @@ class BenchmarkRunner:
 
         return passed, failed, skipped, total
 
-    def _run_mcp_validation(self, suite: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_mcp_validation(self, suite: dict[str, Any]) -> dict[str, Any]:
         """运行 MCP 工具验证套件。
 
         通过动态导入 MCPToolValidationSuite 执行端到端验证。
@@ -384,7 +384,7 @@ class BenchmarkRunner:
         import io
         import json
         import tempfile
-        from contextlib import redirect_stdout, redirect_stderr
+        from contextlib import redirect_stderr, redirect_stdout
 
         start = time.time()
         stdout_capture = io.StringIO()
@@ -392,7 +392,7 @@ class BenchmarkRunner:
 
         # 通过临时文件传递 report dict（避免 stdout 解析脆弱）
         tmp_report = Path(tempfile.gettempdir()) / f"mcp_val_{os.getpid()}_{int(start*1000)}.json"
-        result_holder: Dict[str, Any] = {"report_path": str(tmp_report), "error": None}
+        result_holder: dict[str, Any] = {"report_path": str(tmp_report), "error": None}
 
         try:
             from ae.tests.test_mcp_tools_validation import (
@@ -490,7 +490,7 @@ class BenchmarkRunner:
         }
 
     def _save_aggregated_mcp_report(
-        self, data: Dict[str, Any], suite: Dict[str, Any]
+        self, data: dict[str, Any], suite: dict[str, Any]
     ) -> None:
         """将 MCP 验证数据保存为聚合报告。"""
         # 由 _generate_report 在主流程中根据 self.results 写出，
@@ -540,8 +540,8 @@ class BenchmarkRunner:
         return passed, failed, skipped, total
 
     def _aggregate_mcp_results(
-        self, all_results: List[Dict[str, Any]], suite: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, all_results: list[dict[str, Any]], suite: dict[str, Any]
+    ) -> dict[str, Any]:
         """聚合 MCP 验证多次迭代的结果。"""
         if not all_results:
             return {
@@ -586,8 +586,8 @@ class BenchmarkRunner:
         }
 
     def _aggregate_results(
-        self, all_results: List[Dict[str, Any]], suite: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, all_results: list[dict[str, Any]], suite: dict[str, Any]
+    ) -> dict[str, Any]:
         """聚合多次迭代的结果。
 
         Args:

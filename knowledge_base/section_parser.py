@@ -25,7 +25,7 @@ class SectionParser:
     # 匹配 **key**: value 或 - **key**: value
     _KV_RE = re.compile(r"[-*]?\s*\*{0,2}([^*:]+)\*{0,2}\s*[:：]\s*(.+)")
 
-    def extract_sections(self, blocks: List[MdBlock]) -> List[Dict[str, Any]]:
+    def extract_sections(self, blocks: list[MdBlock]) -> list[dict[str, Any]]:
         """按标题提取章节列表。
 
         Args:
@@ -42,8 +42,8 @@ class SectionParser:
         if not blocks:
             return []
 
-        sections: List[Dict[str, Any]] = []
-        current_section: Optional[Dict[str, Any]] = None
+        sections: list[dict[str, Any]] = []
+        current_section: dict[str, Any] | None = None
 
         for block in blocks:
             if block.block_type == BlockType.HEADING:
@@ -68,8 +68,8 @@ class SectionParser:
         return sections
 
     def find_section(
-        self, sections: List[Dict[str, Any]], title: str
-    ) -> Optional[Dict[str, Any]]:
+        self, sections: list[dict[str, Any]], title: str
+    ) -> dict[str, Any] | None:
         """按标题查找章节（不区分大小写）。
 
         Args:
@@ -85,7 +85,7 @@ class SectionParser:
                 return section
         return None
 
-    def extract_key_value_pairs(self, section: Dict[str, Any]) -> Dict[str, str]:
+    def extract_key_value_pairs(self, section: dict[str, Any]) -> dict[str, str]:
         """从章节内容中提取 key-value 对。
 
         支持格式：
@@ -99,7 +99,7 @@ class SectionParser:
         Returns:
             key-value 字典
         """
-        kv: Dict[str, str] = {}
+        kv: dict[str, str] = {}
 
         for block in section.get("blocks", []):
             if block.block_type in (BlockType.PARAGRAPH, BlockType.LIST):

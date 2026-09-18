@@ -82,7 +82,7 @@ async def run_benchmark():
     print(f"    音频文件: {audio_size / 1024:.1f} KB")
 
     # Step 2: 初始化引擎
-    print(f"\n[2/5] 初始化 WhisperEngine...")
+    print("\n[2/5] 初始化 WhisperEngine...")
     venv_python = PROJECT_ROOT / "puppet-automation" / "venv" / "Scripts" / "python.exe"
     engine = WhisperEngine(executable_path=venv_python)
     print(f"    faster_whisper available: {engine._faster_whisper is not None}")
@@ -97,7 +97,7 @@ async def run_benchmark():
     }
 
     # Step 3: CPU 基准（openai-whisper, base 模型）
-    print(f"\n[3/5] CPU 基准测试 (openai-whisper base)...")
+    print("\n[3/5] CPU 基准测试 (openai-whisper base)...")
     engine_cpu = WhisperEngine(executable_path=venv_python, use_faster=False)
     if engine_cpu._whisper is not None:
         t0 = time.time()
@@ -130,7 +130,7 @@ async def run_benchmark():
         })
 
     # Step 4: GPU 基准（faster-whisper, base 模型, float16）
-    print(f"\n[4/5] GPU 基准测试 (faster-whisper base float16)...")
+    print("\n[4/5] GPU 基准测试 (faster-whisper base float16)...")
     if engine._faster_whisper is not None:
         t0 = time.time()
         gpu_result = await engine.transcribe(
@@ -162,7 +162,7 @@ async def run_benchmark():
         })
 
     # Step 5: GPU 基准（faster-whisper, medium 模型, float16）
-    print(f"\n[5/5] GPU 基准测试 (faster-whisper medium float16)...")
+    print("\n[5/5] GPU 基准测试 (faster-whisper medium float16)...")
     if engine._faster_whisper is not None:
         t0 = time.time()
         gpu_med_result = await engine.transcribe(

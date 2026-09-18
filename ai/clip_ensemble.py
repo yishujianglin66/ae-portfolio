@@ -37,11 +37,18 @@ REPORT = ROOT / "reports" / "clip_ensemble_report.json"
 EMB_CACHE_DIR = ROOT / "cache" / "clip_embs"
 
 # 与 ip_proto_classifier 铁律常量完全一致(v1口径不漂移)
-from ai.ip_proto_classifier import (KNN_K, TXT_WEIGHT, C_CONF_PASS,
-                                     C_ACC_MARGIN_PASS, GOLDEN_TEST_FRAMES,
-                                     IP_ALIASES, extract_frames_bytes,
-                                     extract_frames_scene_aware)
-from ai.clip_backbones import BackboneRegistry, ensemble_frame_scores, BB_TAGS
+from ai.clip_backbones import BB_TAGS, BackboneRegistry, ensemble_frame_scores
+from ai.ip_proto_classifier import (
+    C_ACC_MARGIN_PASS,
+    C_CONF_PASS,
+    GOLDEN_TEST_FRAMES,
+    IP_ALIASES,
+    KNN_K,
+    TXT_WEIGHT,
+    extract_frames_bytes,
+    extract_frames_scene_aware,
+)
+
 # 权重网格: laion权重从0.3~1.0(cclip补余), 1.0即退化为v1纯laion口径
 WEIGHT_GRID = [round(w, 1) for w in np.arange(0.3, 1.05, 0.1)]
 
@@ -50,7 +57,7 @@ def _log(msg: str) -> None:
     print(f"[T6-ensemble] {msg}", flush=True)
 
 
-def _emb_cache_key(paths: List[Path]) -> str:
+def _emb_cache_key(paths: list[Path]) -> str:
     h = hashlib.md5()
     for p in paths:
         try:
@@ -79,7 +86,7 @@ class EnsembleKB:
             if g.get("primary_ip"):
                 all_cls.add(g["primary_ip"])
         self.classes = sorted(all_cls)
-        self.support_paths: Dict[str, List[Path]] = {}
+        self.support_paths: dict[str, list[Path]] = {}
         for ip in sorted(by_class):
             items = sorted(by_class[ip], key=lambda x: x["path"])
             paths = [ROOT / it["path"] for it in items]
@@ -88,8 +95,8 @@ class EnsembleKB:
                 self.support_paths[ip] = paths
 
         self.registry = registry
-        self.img_embs: Dict[str, Dict[str, np.ndarray]] = {}   # bb -> ip -> embs
-        self.txt_proto: Dict[str, Dict[str, np.ndarray]] = {}  # bb -> ip -> proto
+        self.img_embs: dict[str, dict[str, np.ndarray]] = {}   # bb -> ip -> embs
+        self.txt_proto: dict[str, dict[str, np.ndarray]] = {}  # bb -> ip -> proto
         for bb_name in ("laion", "cclip"):
             self._build_backbone(bb_name)
         n_sup = sum(len(v) for v in self.support_paths.values())
@@ -142,7 +149,7 @@ class EnsembleKB:
             except Exception:
                 pass
 
-    def frame_scores(self, bb_name: str, v: np.ndarray) -> Dict[str, float]:
+    def frame_scores(self, bb_name: str, v: np.ndarray) -> dict[str, float]:
         """单底座帧级分数(与v1 ProtoKB.frame_scores同口径)。"""
         n = np.linalg.norm(v)
         v = v / n if n > 1e-9 else v
@@ -157,7 +164,7 @@ class EnsembleKB:
         return out
 
 
-def _save_frames(jpegs: List[bytes]) -> Tuple[List[Path], tempfile.TemporaryDirectory]:
+def _save_frames(jpegs: list[bytes]) -> tuple[list[Path], tempfile.TemporaryDirectory]:
     td = tempfile.TemporaryDirectory()
     paths = []
     for i, jb in enumerate(jpegs):
@@ -168,9 +175,9 @@ def _save_frames(jpegs: List[bytes]) -> Tuple[List[Path], tempfile.TemporaryDire
 
 
 def predict_video_ensemble(video_path: str, kb: EnsembleKB,
-                           weights: Dict[str, float],
+                           weights: dict[str, float],
                            n_frames: int = GOLDEN_TEST_FRAMES,
-                           scene_aware: bool = False) -> Dict:
+                           scene_aware: bool = False) -> dict:
     raw = (extract_frames_scene_aware(video_path, n_frames) if scene_aware
            else extract_frames_bytes(video_path, n_frames))
     if not raw:
@@ -204,8 +211,8 @@ def predict_video_ensemble(video_path: str, kb: EnsembleKB,
 
 
 # ---------------------------------------------------------------- 验收
-def _eval_golden(kb: EnsembleKB, golden: Dict, weights: Dict[str, float],
-                 scene_aware: bool = False) -> Dict:
+def _eval_golden(kb: EnsembleKB, golden: dict, weights: dict[str, float],
+                 scene_aware: bool = False) -> dict:
     from ai.material_intelligence import ip_matches
     LIB = ROOT / "data" / "real_amv_test"
     seg = {"A-learnable": {"ok": 0, "tot": 0},

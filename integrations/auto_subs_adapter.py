@@ -41,7 +41,7 @@ class SubtitleSegment:
     start: float  # 秒
     end: float    # 秒
     text: str
-    speaker: Optional[str] = None
+    speaker: str | None = None
 
     @property
     def start_srt(self) -> str:
@@ -91,7 +91,7 @@ class AutoSubsAdapter:
         "batch_transcribe",
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._backend = None  # "faster_whisper" or "openai_whisper"
         self._model = None
@@ -145,10 +145,10 @@ class AutoSubsAdapter:
         """检查工具是否可用"""
         return self._backend is not None
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any]) -> dict[str, Any]:
         """执行操作"""
         start = time.time()
 
@@ -185,7 +185,7 @@ class AutoSubsAdapter:
                 "duration_ms": (time.time() - start) * 1000,
             }
 
-    def _transcribe(self, params: Dict) -> Dict:
+    def _transcribe(self, params: dict) -> dict:
         """转录音频文件"""
         audio_path = params.get("audio_path") or params.get("file_path")
         if not audio_path or not os.path.isfile(audio_path):
@@ -239,7 +239,7 @@ class AutoSubsAdapter:
             "audio_path": audio_path,
         }
 
-    def _generate_subtitle(self, params: Dict, fmt: str) -> Dict:
+    def _generate_subtitle(self, params: dict, fmt: str) -> dict:
         """生成字幕文件"""
         # 先转录
         transcribe_result = self._transcribe(params)
@@ -280,7 +280,7 @@ class AutoSubsAdapter:
             "file_size": os.path.getsize(output_path),
         }
 
-    def _translate(self, params: Dict) -> Dict:
+    def _translate(self, params: dict) -> dict:
         """翻译字幕到目标语言"""
         audio_path = params.get("audio_path") or params.get("file_path")
         target_lang = params.get("target_language", "en")
@@ -327,7 +327,7 @@ class AutoSubsAdapter:
             "segment_count": len(segments),
         }
 
-    def _batch_transcribe(self, params: Dict) -> Dict:
+    def _batch_transcribe(self, params: dict) -> dict:
         """批量转录多个音频文件"""
         files = params.get("file_paths", [])
         results = []
@@ -342,7 +342,7 @@ class AutoSubsAdapter:
     # ── 格式化方法 ─────────────────────────────────────────────
 
     @staticmethod
-    def _to_srt(segments: List[SubtitleSegment]) -> str:
+    def _to_srt(segments: list[SubtitleSegment]) -> str:
         lines = []
         for s in segments:
             lines.append(str(s.id))
@@ -352,7 +352,7 @@ class AutoSubsAdapter:
         return "\n".join(lines)
 
     @staticmethod
-    def _to_vtt(segments: List[SubtitleSegment]) -> str:
+    def _to_vtt(segments: list[SubtitleSegment]) -> str:
         lines = ["WEBVTT", ""]
         for s in segments:
             lines.append(f"{s.start_vtt} --> {s.end_vtt}")
@@ -361,18 +361,18 @@ class AutoSubsAdapter:
         return "\n".join(lines)
 
     @staticmethod
-    def _to_txt(segments: List[SubtitleSegment]) -> str:
+    def _to_txt(segments: list[SubtitleSegment]) -> str:
         return "\n".join(s.text for s in segments)
 
     @staticmethod
-    def _to_json(segments: List[SubtitleSegment]) -> str:
+    def _to_json(segments: list[SubtitleSegment]) -> str:
         data = [
             {"id": s.id, "start": s.start, "end": s.end, "text": s.text}
             for s in segments
         ]
         return json.dumps(data, ensure_ascii=False, indent=2)
 
-    def summary(self) -> Dict[str, Any]:
+    def summary(self) -> dict[str, Any]:
         """适配器状态摘要"""
         return {
             "backend": self._backend,

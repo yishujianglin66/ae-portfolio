@@ -55,7 +55,7 @@ _DEFAULT_DIM_WEIGHTS = {"dynamism": 2, "composition": 2, "color_harmony": 2,
                         "text_read": 2, "texture": 2, "pacing": 2}
 
 
-def get_dim_priority(style_card: str) -> Dict[str, int]:
+def get_dim_priority(style_card: str) -> dict[str, int]:
     """风格卡 → 维度优先级权重（未知卡回退均衡）。"""
     return STYLE_DIM_WEIGHTS.get(style_card, _DEFAULT_DIM_WEIGHTS)
 
@@ -79,7 +79,7 @@ def _load_env() -> None:
             os.environ.setdefault(k.strip(), v.strip())
 
 
-def _extract_json(text: str) -> Dict[str, Any]:
+def _extract_json(text: str) -> dict[str, Any]:
     m = re.search(r"\{.*\}", text, re.S)
     if not m:
         return {"scores": {}, "issues": [], "advice": "", "overall": 0}
@@ -105,7 +105,7 @@ def _frame_to_b64(path: str, max_side: int = 768) -> str:
     return base64.b64encode(buf.tobytes()).decode("ascii")
 
 
-def _call_qwen_vl(frames_b64: List[str], prompt: str) -> Dict[str, Any]:
+def _call_qwen_vl(frames_b64: list[str], prompt: str) -> dict[str, Any]:
     """直连 DashScope compatible-mode 多模态（OpenAI 兼容格式）。
 
     403/429（额度耗尽/限流）自动接入 core.llm_chain 多模型降级链
@@ -173,10 +173,11 @@ def _call_qwen_vl(frames_b64: List[str], prompt: str) -> Dict[str, Any]:
 
 
 def score_video(video_path: str, n_frames: int = 6,
-                prompt: str = _PROMPT) -> Dict[str, Any]:
+                prompt: str = _PROMPT) -> dict[str, Any]:
     """视频均匀抽帧聚合评分。"""
-    import cv2
     import tempfile
+
+    import cv2
     cap = cv2.VideoCapture(video_path)
     try:
         if not cap.isOpened():
@@ -187,7 +188,7 @@ def score_video(video_path: str, n_frames: int = 6,
         n = min(n_frames, total)
         step = (total - 1) / max(n - 1, 1)
         idxs = [round(i * step) for i in range(n)]
-        frames_b64: List[str] = []
+        frames_b64: list[str] = []
         with tempfile.TemporaryDirectory() as td:
             for gi in idxs:
                 cap.set(cv2.CAP_PROP_POS_FRAMES, gi)
@@ -222,7 +223,7 @@ _SEQUENCE_PROMPT = (
 
 
 def score_sequence(video_path: str, t_start: float, t_end: float,
-                   n_frames: int = 8, prompt: str = _SEQUENCE_PROMPT) -> Dict[str, Any]:
+                   n_frames: int = 8, prompt: str = _SEQUENCE_PROMPT) -> dict[str, Any]:
     """时序评分（M2f）: 指定时间窗口连续帧序列评分 pacing。
 
     旧 score_video 抽均匀帧（首/中/尾），pacing 只能靠模型推理。
@@ -230,8 +231,9 @@ def score_sequence(video_path: str, t_start: float, t_end: float,
     让模型真正看到"节拍处画面是否变化/定格/加速"——pacing 维度的硬证据。
     同时返回帧间差异统计（diffs）作为客观对照。
     """
-    import cv2
     import tempfile
+
+    import cv2
     import numpy as np
     cap = cv2.VideoCapture(video_path)
     try:
@@ -248,8 +250,8 @@ def score_sequence(video_path: str, t_start: float, t_end: float,
         idxs = [f0 + i * step for i in range(n) if f0 + i * step <= f1]
         if len(idxs) < 2:
             return {"error": "帧太少"}
-        frames_b64: List[str] = []
-        diffs: List[float] = []
+        frames_b64: list[str] = []
+        diffs: list[float] = []
         prev = None
         with tempfile.TemporaryDirectory() as td:
             for gi in idxs:
@@ -279,7 +281,7 @@ def score_sequence(video_path: str, t_start: float, t_end: float,
 
 
 def score_closeup(video_path: str, center_ratio: float = 0.5,
-                  frame_idx: Optional[int] = None) -> Dict[str, Any]:
+                  frame_idx: int | None = None) -> dict[str, Any]:
     """特写评分（M2a）: 裁中央 region 放大评分 texture 细节。
 
     解决全帧评分的 texture 振荡——全帧里粒子只占 5%, AI 看不清细节
@@ -287,8 +289,9 @@ def score_closeup(video_path: str, center_ratio: float = 0.5,
     层次, 给出可执行建议（2026-08-16 实测: 建议从"加大"变为
     "透明度渐变+动态变化"）。
     """
-    import cv2
     import tempfile
+
+    import cv2
     cap = cv2.VideoCapture(video_path)
     try:
         if not cap.isOpened():
@@ -317,13 +320,13 @@ def score_closeup(video_path: str, center_ratio: float = 0.5,
         return _call_qwen_vl([_frame_to_b64(str(fp))], _CLOSEUP_PROMPT)
 
 
-def score_frames(frame_paths: List[str], prompt: str = _PROMPT) -> Dict[str, Any]:
+def score_frames(frame_paths: list[str], prompt: str = _PROMPT) -> dict[str, Any]:
     """指定帧文件评分。"""
     return _call_qwen_vl([_frame_to_b64(p) for p in frame_paths], prompt)
 
 
-def iterate_parameters(tree, score: Dict[str, Any],
-                       target_dim: str = "dynamism") -> Dict[str, Any]:
+def iterate_parameters(tree, score: dict[str, Any],
+                       target_dim: str = "dynamism") -> dict[str, Any]:
     """参数迭代（M2 闭环 v2）: AI advice 语义驱动, 返回新树。
 
     v2 升级（2026-08-16）: 硬编码幅度方向只对部分维度有效（实测 text_read 方向
@@ -351,8 +354,8 @@ def iterate_parameters(tree, score: Dict[str, Any],
             "note": f"{target_dim}={cur} (advice 无匹配动作, 回退启发式)"}
 
 
-def pick_target_dim(score: Dict[str, Any], style_card: str = "edit",
-                    target: float = 7.0) -> Optional[str]:
+def pick_target_dim(score: dict[str, Any], style_card: str = "edit",
+                    target: float = 7.0) -> str | None:
     """M2e: 按风格卡权重选迭代维度。
 
     排序键 = (score 差距) / 权重 —— 低分且高优先级的维度先攻。
@@ -388,7 +391,7 @@ _ACTION_PROMPT = (
 )
 
 
-def _parse_advice_actions(advice: str, dim: str, cur: float) -> List[Dict[str, Any]]:
+def _parse_advice_actions(advice: str, dim: str, cur: float) -> list[dict[str, Any]]:
     if not advice.strip():
         return []
     _load_env()
@@ -431,7 +434,7 @@ _ACTION_MAP = {
 }
 
 
-def _apply_actions(tree, actions: List[Dict[str, Any]]) -> bool:
+def _apply_actions(tree, actions: list[dict[str, Any]]) -> bool:
     applied = False
     for a in actions:
         spec = _ACTION_MAP.get(a["param"])
@@ -471,7 +474,7 @@ def _apply_actions(tree, actions: List[Dict[str, Any]]) -> bool:
     return applied
 
 
-def _heuristic_fallback(tree, target_dim: str, cur: float) -> Dict[str, Any]:
+def _heuristic_fallback(tree, target_dim: str, cur: float) -> dict[str, Any]:
     """回退启发式（仅保留语义正确的方向, 2026-08-16 修正）:
       dynamism 低 → punch/shake 加强
       color_harmony 低 → 色差收敛

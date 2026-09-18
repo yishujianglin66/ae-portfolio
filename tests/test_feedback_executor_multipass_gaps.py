@@ -54,12 +54,12 @@ class TestMaxPassesHardCap:
         """调用方传 max_passes=100 → 实际最多执行 10 轮。"""
         call_count = {"report": 0, "execute": 0}
 
-        def report_fn(path: str) -> Dict[str, Any]:
+        def report_fn(path: str) -> dict[str, Any]:
             call_count["report"] += 1
             # 永远不达标，强制走完所有轮次
             return {"score": 10.0, "checks": {}, "suggestions": []}
 
-        def fake_execute(current: str, report: Dict, output: str = "") -> Dict:
+        def fake_execute(current: str, report: dict, output: str = "") -> dict:
             call_count["execute"] += 1
             return {"success": True, "output": output or current}
 
@@ -85,11 +85,11 @@ class TestMaxPassesHardCap:
         """max_passes=5（合法值）→ 不被钳位，执行 5 轮。"""
         call_count = {"report": 0}
 
-        def report_fn(path: str) -> Dict[str, Any]:
+        def report_fn(path: str) -> dict[str, Any]:
             call_count["report"] += 1
             return {"score": 5.0}
 
-        def fake_execute(current: str, report: Dict, output: str = "") -> Dict:
+        def fake_execute(current: str, report: dict, output: str = "") -> dict:
             return {"success": True, "output": output or current}
 
         executor_no_engine.execute = fake_execute  # type: ignore[assignment]
@@ -118,7 +118,7 @@ class TestMaxPassesClamping:
         """max_passes=0 → 钳位到 1，至少跑一轮。"""
         call_count = {"report": 0}
 
-        def report_fn(path: str) -> Dict[str, Any]:
+        def report_fn(path: str) -> dict[str, Any]:
             call_count["report"] += 1
             return {"score": 90.0}  # 第一轮就达标
 
@@ -141,7 +141,7 @@ class TestMaxPassesClamping:
         """max_passes=-5 → 钳位到 1。"""
         call_count = {"report": 0}
 
-        def report_fn(path: str) -> Dict[str, Any]:
+        def report_fn(path: str) -> dict[str, Any]:
             call_count["report"] += 1
             return {"score": 90.0}
 
@@ -163,7 +163,7 @@ class TestMaxPassesClamping:
         """max_passes="abc" → int() 抛 ValueError → 回退到 3。"""
         call_count = {"report": 0}
 
-        def report_fn(path: str) -> Dict[str, Any]:
+        def report_fn(path: str) -> dict[str, Any]:
             call_count["report"] += 1
             return {"score": 90.0}
 
@@ -188,7 +188,7 @@ class TestMaxPassesClamping:
         # 注意：int(2.7) 不会抛异常，返回 2
         call_count = {"report": 0}
 
-        def report_fn(path: str) -> Dict[str, Any]:
+        def report_fn(path: str) -> dict[str, Any]:
             call_count["report"] += 1
             return {"score": 90.0}
 
@@ -338,7 +338,7 @@ class TestExecuteReturnRobustness:
         """execute 返回 success=False → 早退，不再继续迭代。"""
         call_count = {"execute": 0}
 
-        def fake_execute(current: str, report: Dict, output: str = "") -> Dict:
+        def fake_execute(current: str, report: dict, output: str = "") -> dict:
             call_count["execute"] += 1
             return {"success": False, "error": "ffmpeg_failed", "output": current}
 
@@ -370,7 +370,7 @@ class TestEarlySuccess:
         """首轮 report 就达标 → passes=1，不调用 execute。"""
         call_count = {"execute": 0}
 
-        def report_fn(path: str) -> Dict[str, Any]:
+        def report_fn(path: str) -> dict[str, Any]:
             return {"score": 75.0}
 
         def fake_execute(*a, **kw):
@@ -401,7 +401,7 @@ class TestEarlySuccess:
         """第二轮达标 → passes=2。"""
         scores = iter([50.0, 80.0])
 
-        def report_fn(path: str) -> Dict[str, Any]:
+        def report_fn(path: str) -> dict[str, Any]:
             return {"score": next(scores)}
 
         executor_no_engine.execute = lambda *a, **kw: {"success": True, "output": a[2] if len(a) > 2 else "/fake/out.mp4"}
@@ -428,13 +428,13 @@ class TestMaxPassesExhausted:
         self, executor_no_engine: FeedbackExecutor
     ) -> None:
         """3 轮全部不达标 → success=False, passes=3。"""
-        report_calls: List[str] = []
+        report_calls: list[str] = []
 
-        def report_fn(path: str) -> Dict[str, Any]:
+        def report_fn(path: str) -> dict[str, Any]:
             report_calls.append(path)
             return {"score": 30.0}
 
-        def fake_execute(current: str, report: Dict, output: str = "") -> Dict:
+        def fake_execute(current: str, report: dict, output: str = "") -> dict:
             return {"success": True, "output": output or current}
 
         executor_no_engine.execute = fake_execute  # type: ignore[assignment]
@@ -459,7 +459,7 @@ class TestMaxPassesExhausted:
         """history 记录每轮的 pass/score/file。"""
         scores = iter([20.0, 30.0, 40.0])
 
-        def report_fn(path: str) -> Dict[str, Any]:
+        def report_fn(path: str) -> dict[str, Any]:
             return {"score": next(scores)}
 
         executor_no_engine.execute = lambda *a, **kw: {

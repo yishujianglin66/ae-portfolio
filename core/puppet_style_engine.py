@@ -16,18 +16,18 @@ puppet_style_engine.py
 8. shadow_puppet（皮影）
 """
 
-import os
 import json
+import os
 from dataclasses import dataclass, field, replace
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
+from puppet_effects.joint_system import JointConfig, JointPoint, JointSystem
 from puppet_effects.material_effects import MaterialEffects
-from puppet_effects.stop_motion import StopMotionEffect, StopMotionConfig
-from puppet_effects.joint_system import JointSystem, JointConfig, JointPoint
-from puppet_effects.mini_scene import MiniSceneEffect, MiniSceneConfig
+from puppet_effects.mini_scene import MiniSceneConfig, MiniSceneEffect
+from puppet_effects.stop_motion import StopMotionConfig, StopMotionEffect
 
 try:
-    from puppet_effects.face_puppet import FacePuppetEffect, FacePuppetConfig
+    from puppet_effects.face_puppet import FacePuppetConfig, FacePuppetEffect
     _FACE_PUPPET_AVAILABLE = True
 except ImportError:
     FacePuppetEffect = None
@@ -66,16 +66,16 @@ class PuppetStyleConfig:
     style_type: str = "wooden_puppet"
     intensity: float = 1.0
     material: str = "wood"
-    stop_motion: Dict[str, Any] = field(default_factory=dict)
-    joint_system: Dict[str, Any] = field(default_factory=dict)
-    mini_scene: Dict[str, Any] = field(default_factory=dict)
+    stop_motion: dict[str, Any] = field(default_factory=dict)
+    joint_system: dict[str, Any] = field(default_factory=dict)
+    mini_scene: dict[str, Any] = field(default_factory=dict)
     comp_width: int = 1920
     comp_height: int = 1080
-    bbox: Optional[Dict[str, float]] = None
+    bbox: dict[str, float] | None = None
     enable_face_puppet: bool = False
     face_preset: str = "classic_button"
-    face_data: Optional[Dict[str, Any]] = None
-    joint_data: Optional[List[Dict[str, Any]]] = None
+    face_data: dict[str, Any] | None = None
+    joint_data: list[dict[str, Any]] | None = None
     auto_detect_pose: bool = False
 
 
@@ -92,13 +92,13 @@ class PuppetStyleResult:
         face_effects: 面部效果列表
         face_expressions: 面部表达式列表
     """
-    effects: List[Dict[str, Any]] = field(default_factory=list)
-    keyframes: List[Dict[str, Any]] = field(default_factory=list)
-    layers: List[Dict[str, Any]] = field(default_factory=list)
-    expressions: List[Dict[str, Any]] = field(default_factory=list)
-    adjustment_layers: List[Dict[str, Any]] = field(default_factory=list)
-    face_effects: List[Dict[str, Any]] = field(default_factory=list)
-    face_expressions: List[Dict[str, Any]] = field(default_factory=list)
+    effects: list[dict[str, Any]] = field(default_factory=list)
+    keyframes: list[dict[str, Any]] = field(default_factory=list)
+    layers: list[dict[str, Any]] = field(default_factory=list)
+    expressions: list[dict[str, Any]] = field(default_factory=list)
+    adjustment_layers: list[dict[str, Any]] = field(default_factory=list)
+    face_effects: list[dict[str, Any]] = field(default_factory=list)
+    face_expressions: list[dict[str, Any]] = field(default_factory=list)
 
 
 class PuppetStyleEngine:
@@ -122,7 +122,7 @@ class PuppetStyleEngine:
         self.face_puppet_effect = FacePuppetEffect if _FACE_PUPPET_AVAILABLE else None
         self._style_presets = self._load_presets()
 
-    def _load_presets(self) -> Dict[str, Dict[str, Any]]:
+    def _load_presets(self) -> dict[str, dict[str, Any]]:
         """从外部 JSON 加载风格预设，失败时回退到内置默认
 
         Returns:
@@ -139,7 +139,7 @@ class PuppetStyleEngine:
             print(f"⚠️ 风格预设加载失败，使用内置默认: {e}")
         return self._build_builtin_presets()
 
-    def _build_builtin_presets(self) -> Dict[str, Dict[str, Any]]:
+    def _build_builtin_presets(self) -> dict[str, dict[str, Any]]:
         """构建内置风格预设（作为外部 JSON 的 fallback）
 
         Returns:
@@ -303,7 +303,7 @@ class PuppetStyleEngine:
             },
         }
 
-    def get_available_styles(self) -> List[Dict[str, Any]]:
+    def get_available_styles(self) -> list[dict[str, Any]]:
         """返回所有可用风格列表
 
         Returns:
@@ -321,7 +321,7 @@ class PuppetStyleEngine:
             })
         return styles
 
-    def get_style_preset(self, style_name: str) -> Optional[Dict[str, Any]]:
+    def get_style_preset(self, style_name: str) -> dict[str, Any] | None:
         """获取指定风格的预设配置
 
         Args:
@@ -332,7 +332,7 @@ class PuppetStyleEngine:
         """
         return self._style_presets.get(style_name)
 
-    def register_preset(self, name: str, preset: Dict[str, Any]) -> None:
+    def register_preset(self, name: str, preset: dict[str, Any]) -> None:
         """注册自定义风格预设（运行时动态扩展）
 
         Args:
@@ -459,7 +459,7 @@ class PuppetStyleEngine:
         return result
 
     def _clamp_intensity(self, intensity: float,
-                         intensity_range: List[float]) -> float:
+                         intensity_range: list[float]) -> float:
         """限制强度在有效范围内
 
         Args:
@@ -472,9 +472,9 @@ class PuppetStyleEngine:
         min_val, max_val = intensity_range
         return max(min_val, min(max_val, intensity))
 
-    def _build_joint_config(self, preset: Dict[str, Any],
+    def _build_joint_config(self, preset: dict[str, Any],
                             config: PuppetStyleConfig,
-                            layer_name: str) -> Optional[JointConfig]:
+                            layer_name: str) -> JointConfig | None:
         """构建关节系统配置
 
         Args:
@@ -522,9 +522,9 @@ class PuppetStyleEngine:
 
         return joint_config
 
-    def _build_mini_scene_config(self, preset: Dict[str, Any],
+    def _build_mini_scene_config(self, preset: dict[str, Any],
                                  config: PuppetStyleConfig,
-                                 intensity: float) -> Optional[MiniSceneConfig]:
+                                 intensity: float) -> MiniSceneConfig | None:
         """构建微缩场景配置
 
         Args:
@@ -563,7 +563,7 @@ class PuppetStyleEngine:
 
         return scene_config
 
-    def _should_enable_face_puppet(self, preset: Dict[str, Any],
+    def _should_enable_face_puppet(self, preset: dict[str, Any],
                                    config: PuppetStyleConfig) -> bool:
         """判断是否应该启鼈面部木偶化
 
@@ -585,10 +585,10 @@ class PuppetStyleEngine:
 
         return False
 
-    def _generate_face_puppet_effects(self, preset: Dict[str, Any],
+    def _generate_face_puppet_effects(self, preset: dict[str, Any],
                                     config: PuppetStyleConfig,
                                     layer_name: str,
-                                    duration: float) -> Optional[Dict[str, Any]]:
+                                    duration: float) -> dict[str, Any] | None:
         """生成面部木偶化效果
 
         Args:
@@ -755,7 +755,7 @@ if __name__ == "__main__":
     print("测试面部木偶化效果:")
     print(f"{'=' * 60}")
 
-    print(f"\n[测试 1] 默认风格自带面部木偶化 (wooden_puppet):")
+    print("\n[测试 1] 默认风格自带面部木偶化 (wooden_puppet):")
     config_face1 = PuppetStyleConfig(
         style_type="wooden_puppet",
         intensity=1.0,
@@ -767,11 +767,11 @@ if __name__ == "__main__":
     print(f"  面部效果数量: {len(result_face1.face_effects)}")
     print(f"  面部表达式数量: {len(result_face1.face_expressions)}")
     if result_face1.face_effects:
-        print(f"  前5个面部效果:")
+        print("  前5个面部效果:")
         for eff in result_face1.face_effects[:5]:
             print(f"    - {eff.get('displayName', '?')}")
 
-    print(f"\n[测试 2] 手动启鼈面部木偶化 (clay_puppet 默认关闭):")
+    print("\n[测试 2] 手动启鼈面部木偶化 (clay_puppet 默认关闭):")
     config_face2 = PuppetStyleConfig(
         style_type="clay_puppet",
         intensity=1.0,
@@ -785,7 +785,7 @@ if __name__ == "__main__":
     print(f"  面部效果数量: {len(result_face2.face_effects)}")
     print(f"  面部表达式数量: {len(result_face2.face_expressions)}")
 
-    print(f"\n[测试 3] 提供 face_data 面部特征点:")
+    print("\n[测试 3] 提供 face_data 面部特征点:")
     face_data = {
         "left_eye": {"x": 500, "y": 280},
         "right_eye": {"x": 620, "y": 280},
@@ -805,7 +805,7 @@ if __name__ == "__main__":
     print(f"  面部效果数量: {len(result_face3.face_effects)}")
     print(f"  总效果数量: {len(result_face3.effects)}")
 
-    print(f"\n[测试 4] 不同面部预设对比:")
+    print("\n[测试 4] 不同面部预设对比:")
     face_presets_to_test = ["classic_button", "porcelain_doll", "rag_doll", "stitched"]
     for preset_name in face_presets_to_test:
         config_test = PuppetStyleConfig(
@@ -820,7 +820,7 @@ if __name__ == "__main__":
         result_test = engine.generate_style(config_test, f"test_{preset_name}", 2.0)
         print(f"  {preset_name}: {len(result_test.face_effects)} 个面部效果")
 
-    print(f"\n[测试 5] 面部木偶化模块可用性检测:")
+    print("\n[测试 5] 面部木偶化模块可用性检测:")
     print(f"  FacePuppetEffect 可用: {_FACE_PUPPET_AVAILABLE}")
     print(f"  引擎 face_puppet_effect: {engine.face_puppet_effect is not None}")
 

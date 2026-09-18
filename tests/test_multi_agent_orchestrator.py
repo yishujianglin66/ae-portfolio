@@ -10,28 +10,28 @@
 """
 from __future__ import annotations
 
+import asyncio
 import os
 import sys
+
 import pytest
-import asyncio
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.style_transfer_agents import (
-    AgentRole,
-    AgentStatus,
     AgentConfig,
     AgentResult,
-    TaskDefinition,
+    AgentRole,
+    AgentStatus,
     BaseAgent,
-    StyleAnalysisAgent,
     CodeGenerationAgent,
+    MultiAgentOrchestrator,
     ParameterOptimizationAgent,
     QualityReviewAgent,
-    MultiAgentOrchestrator,
+    StyleAnalysisAgent,
+    TaskDefinition,
     run_style_transfer_pipeline,
 )
-
 
 # ============================================================
 # 枚举与数据类

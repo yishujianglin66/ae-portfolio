@@ -227,7 +227,7 @@ def main() -> int:
         print("decision: None (闭环内部异常，已隔离不影响管线)")
         return 1
     print(f"decision={decision.decision}  reason={decision.reason}")
-    print(f"messages_log: data/evolution/messages.jsonl")
+    print("messages_log: data/evolution/messages.jsonl")
 
     # ---- 能力注册表反馈闭环 ----
     try:

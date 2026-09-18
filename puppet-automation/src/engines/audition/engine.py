@@ -33,8 +33,8 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
-from ..base import BaseEngine, EngineResult  # noqa: E402
 from ...config.settings import get_settings
+from ..base import BaseEngine, EngineResult  # noqa: E402
 
 # Bridge Client 在项目根目录，延迟导入
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
@@ -49,7 +49,7 @@ class AuditionEngine(BaseEngine):
 
     def __init__(
         self,
-        executable_path: Optional[Path | str] = None,
+        executable_path: Path | str | None = None,
     ):
         self._settings = get_settings()
         self.au_path = self._resolve_executable(executable_path)
@@ -59,9 +59,9 @@ class AuditionEngine(BaseEngine):
 
         # 初始化 MCP Bridge Client（延迟导入，避免循环依赖）
         self._bridge_client = None
-        self._bridge_available: Optional[bool] = None  # None=未检测, True=在线, False=离线
+        self._bridge_available: bool | None = None  # None=未检测, True=在线, False=离线
 
-    def _resolve_executable(self, explicit: Optional[Path | str]) -> Optional[Path]:
+    def _resolve_executable(self, explicit: Path | str | None) -> Path | None:
         """解析可执行文件路径：显式参数 > settings配置 > 自动发现。"""
         if explicit:
             p = Path(explicit)
@@ -77,7 +77,7 @@ class AuditionEngine(BaseEngine):
         return self._find_audition()
 
     @staticmethod
-    def _find_audition() -> Optional[Path]:
+    def _find_audition() -> Path | None:
         """自动发现 Audition 安装路径。"""
         possible_paths = [
             r"C:\Program Files\Adobe\Adobe Audition 2025\Adobe Audition.exe",
@@ -173,7 +173,7 @@ class AuditionEngine(BaseEngine):
 
     async def match_loudness(
         self,
-        audio_paths: List[Path | str],
+        audio_paths: list[Path | str],
         target_lufs: float = -14.0,
         true_peak: float = -1.0,
     ) -> EngineResult:
@@ -237,7 +237,7 @@ class AuditionEngine(BaseEngine):
         self,
         audio_path: Path | str,
         output_path: Path | str,
-        repairs: Optional[List[str]] = None,
+        repairs: list[str] | None = None,
     ) -> EngineResult:
         """音频修复。
 
@@ -300,9 +300,9 @@ class AuditionEngine(BaseEngine):
         self,
         es_script: str,
         operation: str,
-        audio_path: Optional[Path | str] = None,
-        output_path: Optional[Path | str] = None,
-        extra_metadata: Optional[Dict[str, Any]] = None,
+        audio_path: Path | str | None = None,
+        output_path: Path | str | None = None,
+        extra_metadata: dict[str, Any] | None = None,
     ) -> EngineResult:
         """通过 MCP Bridge 或临时脚本文件执行 Audition ES 脚本。
 
@@ -330,7 +330,7 @@ class AuditionEngine(BaseEngine):
                 success = result.get("status") == "success"
                 error_msg = result.get("message", "") if not success else None
 
-                metadata: Dict[str, Any] = {
+                metadata: dict[str, Any] = {
                     "operation": operation,
                     "bridge_mode": "auto",
                     "result": result.get("result"),
@@ -358,9 +358,9 @@ class AuditionEngine(BaseEngine):
         script_file.write_text(xml_script, encoding="utf-8")
 
         logger.info(f"[Audition] Script prepared (fallback): {script_file}")
-        logger.info(f"[Audition] Run manually: Window > Batch Process > Load Script")
+        logger.info("[Audition] Run manually: Window > Batch Process > Load Script")
 
-        metadata: Dict[str, Any] = {
+        metadata: dict[str, Any] = {
             "script_path": str(script_file),
             "operation": operation,
             "bridge_mode": "manual_fallback",
@@ -379,9 +379,9 @@ class AuditionEngine(BaseEngine):
     def _build_xml_script(
         self,
         operation: str,
-        audio_path: Optional[Path | str],
-        output_path: Optional[Path | str],
-        metadata: Optional[Dict[str, Any]] = None,
+        audio_path: Path | str | None,
+        output_path: Path | str | None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """构建降级用的 XML 脚本。
 

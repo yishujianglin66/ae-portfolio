@@ -5,10 +5,11 @@
 """
 
 import sys
-from pathlib import Path
 import time
-import numpy as np
+from pathlib import Path
+
 import cv2
+import numpy as np
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent))

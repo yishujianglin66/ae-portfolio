@@ -13,9 +13,14 @@ t33_multi_ip_extract.py — 多IP帧提取管线
 
 输出: D:\multi_ip_corpus\{ip_name}\frames\frame_XXXX.jpg
 """
-import os, sys, json, subprocess, shutil, time
-from pathlib import Path
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
 from collections import defaultdict
+from pathlib import Path
 
 # ── 配置 ──────────────────────────────────────────────
 VIDEO_DIR = Path(r"D:\AE-Work\resources\video")
@@ -187,7 +192,7 @@ def extract_all_frames(candidates):
         # 获取视频信息
         info = get_video_info(video_path)
         if not info:
-            print(f"    ✗ 无法获取视频信息")
+            print("    ✗ 无法获取视频信息")
             continue
         
         duration = info['duration']

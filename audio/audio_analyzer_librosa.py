@@ -18,11 +18,13 @@ Phase 2-2 感知层增强 — 基于 librosa 的音频深度分析模块
 对齐文件: ae_agent_pipeline.py perceive() / beat_keyframe_mapper.py
 """
 from __future__ import annotations
-import os
+
 import logging
+import os
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +74,7 @@ class BeatInfo:
     strength: float = 0.0
     is_downbeat: bool = False
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "time": round(self.time, 4),
             "strength": round(self.strength, 4),
@@ -99,7 +101,7 @@ class AudioSegment:
     label: str = ""
     avg_energy: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "index": self.index,
             "start_time": round(self.start_time, 4),
@@ -146,24 +148,24 @@ class AudioAnalysisResult:
     sample_rate: int = 0
     bpm: float = 0.0
     bpm_confidence: float = 0.0
-    beats: List[BeatInfo] = field(default_factory=list)
-    downbeats: List[float] = field(default_factory=list)
+    beats: list[BeatInfo] = field(default_factory=list)
+    downbeats: list[float] = field(default_factory=list)
     spectral_centroid: float = 0.0
     spectral_bandwidth: float = 0.0
     spectral_rolloff: float = 0.0
     zero_crossing_rate: float = 0.0
     rms_energy: float = 0.0
-    energy_curve: Dict[str, List] = field(default_factory=dict)
-    mfccs: List[float] = field(default_factory=list)
-    chroma: List[float] = field(default_factory=list)
+    energy_curve: dict[str, list] = field(default_factory=dict)
+    mfccs: list[float] = field(default_factory=list)
+    chroma: list[float] = field(default_factory=list)
     tempo: float = 0.0
     key: str = ""
     mood: str = ""
     mood_score: float = 0.0
-    segments: List[AudioSegment] = field(default_factory=list)
+    segments: list[AudioSegment] = field(default_factory=list)
     from_cache: bool = False
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "error": self.error,
@@ -190,7 +192,7 @@ class AudioAnalysisResult:
             "from_cache": self.from_cache,
         }
 
-    def to_music_features(self) -> Dict[str, Any]:
+    def to_music_features(self) -> dict[str, Any]:
         """转换为 PerceptionResult.music_features 兼容格式
 
         与 EnhancedAudioAnalyzer.analyze_audio 输出 features 字段对齐，
@@ -243,7 +245,7 @@ class LibrosaAudioAnalyzer:
         sr: int = 22050,
         hop_length: int = 512,
         enable_cache: bool = True,
-        cache_dir: Optional[str] = None,
+        cache_dir: str | None = None,
     ):
         """
         Args:
@@ -378,7 +380,7 @@ class LibrosaAudioAnalyzer:
         if max_env <= 0:
             max_env = 1.0
 
-        beats: List[BeatInfo] = []
+        beats: list[BeatInfo] = []
         for i, t in enumerate(beat_times):
             frame_idx = beat_frames[i] if i < len(beat_frames) else 0
             strength = float(onset_env[frame_idx]) / max_env if frame_idx < onset_env.size else 0.0
@@ -513,7 +515,7 @@ class LibrosaAudioAnalyzer:
                 range(len(rms)), sr=sr, hop_length=self.hop_length
             )
 
-            segments: List[AudioSegment] = []
+            segments: list[AudioSegment] = []
             for i, start_t in enumerate(bound_times):
                 end_t = bound_times[i + 1] if i + 1 < len(bound_times) else result.duration
                 # 计算段落平均能量
@@ -533,7 +535,7 @@ class LibrosaAudioAnalyzer:
             pass
 
     @staticmethod
-    def _label_segments(n: int) -> List[str]:
+    def _label_segments(n: int) -> list[str]:
         """根据段落数量生成标签"""
         if n <= 1:
             return ["intro"]
@@ -558,7 +560,7 @@ class LibrosaAudioAnalyzer:
     # ------------------------------------------------------------------
 
     def _result_from_cache(
-        self, cached: Dict, audio_path: str
+        self, cached: dict, audio_path: str
     ) -> AudioAnalysisResult:
         """从缓存字典重建 AudioAnalysisResult"""
         beats = [BeatInfo(**b) for b in cached.get("beats", [])]

@@ -240,7 +240,7 @@ async def test_retry_mechanism(runner: TestRunner):
         await asyncio.sleep(0.01)
         if idx < 2:
             raise ValueError(f"flaky_{idx} attempt failed")
-        return await mock_bridge_send(f"flaky_final", {}, state)
+        return await mock_bridge_send("flaky_final", {}, state)
 
     max_retries = 3
     for attempt in range(max_retries):
@@ -358,7 +358,7 @@ async def main():
     print(" 多任务并发负载测试")
     print("=" * 60)
     print(f"  模式: {'小规模' if args.small else '全量'}")
-    print(f"  Bridge: 模拟（离线模式）")
+    print("  Bridge: 模拟（离线模式）")
     print(f"  时间: {datetime.now().isoformat()}")
     print()
 

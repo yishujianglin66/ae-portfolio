@@ -57,7 +57,6 @@ import cv2
 import numpy as np
 from loguru import logger
 
-
 # 默认 ffprobe 路径（Windows 常见路径 + PATH 兜底）
 _DEFAULT_FFPROBE_CANDIDATES = [
     "ffprobe",
@@ -94,7 +93,7 @@ class VRSRealAnalyzer:
     def __init__(
         self,
         num_frames: int = 72,
-        ffprobe_path: Optional[str] = None,
+        ffprobe_path: str | None = None,
         scene_diff_threshold: float = 0.12,
     ) -> None:
         """
@@ -116,7 +115,7 @@ class VRSRealAnalyzer:
     # 公开入口
     # ------------------------------------------------------------------
 
-    async def analyze(self, video_path: str) -> Dict[str, Any]:
+    async def analyze(self, video_path: str) -> dict[str, Any]:
         """分析视频，输出结构化风格特征 JSON。
 
         Args:
@@ -135,8 +134,8 @@ class VRSRealAnalyzer:
             }
 
         self._logger.info(f"VRSRealAnalyzer 开始分析: {video_path} (frames={self.num_frames})")
-        errors: List[str] = []
-        result: Dict[str, Any] = {
+        errors: list[str] = []
+        result: dict[str, Any] = {
             "source": "real_opencv_analysis",
             "success": True,
             "video_path": video_path,
@@ -220,7 +219,7 @@ class VRSRealAnalyzer:
     # ffprobe 元数据
     # ------------------------------------------------------------------
 
-    async def _probe_video(self, video_path: str, errors: List[str]) -> Dict[str, Any]:
+    async def _probe_video(self, video_path: str, errors: list[str]) -> dict[str, Any]:
         """用 ffprobe 提取视频基本信息。"""
         try:
             cmd = [
@@ -264,11 +263,11 @@ class VRSRealAnalyzer:
     async def _sample_frames(
         self,
         video_path: str,
-        basic_info: Dict[str, Any],
-        errors: List[str],
-    ) -> Tuple[List[np.ndarray], List[float]]:
+        basic_info: dict[str, Any],
+        errors: list[str],
+    ) -> tuple[list[np.ndarray], list[float]]:
         """均匀采样 N 帧，返回 (frames, frame_times_sec)。"""
-        def _do_sample() -> Tuple[List[np.ndarray], List[float]]:
+        def _do_sample() -> tuple[list[np.ndarray], list[float]]:
             cap = cv2.VideoCapture(video_path)
             if not cap.isOpened():
                 errors.append("OpenCV: VideoCapture.open failed")
@@ -287,8 +286,8 @@ class VRSRealAnalyzer:
                 else:
                     positions = np.linspace(0, max(total - 1, 0), self.num_frames).astype(int)
 
-                frames: List[np.ndarray] = []
-                times: List[float] = []
+                frames: list[np.ndarray] = []
+                times: list[float] = []
                 for pos in positions:
                     cap.set(cv2.CAP_PROP_POS_FRAMES, int(pos))
                     ret, frame = cap.read()
@@ -314,16 +313,16 @@ class VRSRealAnalyzer:
     # 色彩分析
     # ------------------------------------------------------------------
 
-    def _analyze_color(self, frames: List[np.ndarray]) -> Dict[str, Any]:
+    def _analyze_color(self, frames: list[np.ndarray]) -> dict[str, Any]:
         """色彩特征：亮度/对比度/饱和度/色相分布/主色调。"""
         if not frames:
             return {}
 
-        brightness_vals: List[float] = []
-        contrast_vals: List[float] = []
-        sat_vals: List[float] = []
+        brightness_vals: list[float] = []
+        contrast_vals: list[float] = []
+        sat_vals: list[float] = []
         hue_hist = np.zeros(12, dtype=np.float64)
-        all_pixels: List[np.ndarray] = []
+        all_pixels: list[np.ndarray] = []
 
         for frame in frames:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -376,7 +375,7 @@ class VRSRealAnalyzer:
 
     def _kmeans_dominant_colors(
         self, pixels: np.ndarray, k: int = 3
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """对像素做 k-means 聚类，返回前 k 个主色。"""
         pixels = np.float32(pixels)
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 1.0)
@@ -388,7 +387,7 @@ class VRSRealAnalyzer:
             return []
 
         total = len(labels) or 1
-        result: List[Dict[str, Any]] = []
+        result: list[dict[str, Any]] = []
         for i, center in enumerate(centers):
             ratio = float(np.sum(labels == i)) / total
             b, g, r = int(center[0]), int(center[1]), int(center[2])
@@ -407,10 +406,10 @@ class VRSRealAnalyzer:
 
     def _analyze_rhythm(
         self,
-        frames: List[np.ndarray],
-        frame_times: List[float],
-        basic_info: Dict[str, Any],
-    ) -> Tuple[Dict[str, Any], List[float]]:
+        frames: list[np.ndarray],
+        frame_times: list[float],
+        basic_info: dict[str, Any],
+    ) -> tuple[dict[str, Any], list[float]]:
         """节奏特征：场景切换点、平均镜头时长、节奏快慢。
 
         Returns:
@@ -426,7 +425,7 @@ class VRSRealAnalyzer:
             }, []
 
         # 帧间归一化差分（灰度 MSE / 255^2）
-        frame_diffs: List[float] = []
+        frame_diffs: list[float] = []
         for i in range(len(frames) - 1):
             g1 = cv2.cvtColor(frames[i], cv2.COLOR_BGR2GRAY)
             g2 = cv2.cvtColor(frames[i + 1], cv2.COLOR_BGR2GRAY)
@@ -434,7 +433,7 @@ class VRSRealAnalyzer:
             frame_diffs.append(float(diff) / (255.0 ** 2))
 
         # 场景切换点：差分超过阈值的位置
-        scene_cuts: List[float] = []
+        scene_cuts: list[float] = []
         for i, d in enumerate(frame_diffs):
             if d > self.scene_diff_threshold:
                 # 切换时间取相邻两帧的中点
@@ -479,12 +478,12 @@ class VRSRealAnalyzer:
     # 运动分析
     # ------------------------------------------------------------------
 
-    def _analyze_motion(self, frames: List[np.ndarray]) -> Dict[str, Any]:
+    def _analyze_motion(self, frames: list[np.ndarray]) -> dict[str, Any]:
         """运动特征：运动强度 + 方向分布（光流）。"""
         if len(frames) < 2:
             return {"intensity": 0.0, "direction_distribution": [], "dominant_direction": "static"}
 
-        magnitudes: List[float] = []
+        magnitudes: list[float] = []
         direction_bins = np.zeros(8, dtype=np.float64)  # 8 个方向 bin
 
         for i in range(len(frames) - 1):
@@ -532,11 +531,11 @@ class VRSRealAnalyzer:
 
     def _detect_transitions(
         self,
-        frames: List[np.ndarray],
-        frame_times: List[float],
-        frame_diffs: List[float],
-        basic_info: Dict[str, Any],
-    ) -> List[Dict[str, Any]]:
+        frames: list[np.ndarray],
+        frame_times: list[float],
+        frame_diffs: list[float],
+        basic_info: dict[str, Any],
+    ) -> list[dict[str, Any]]:
         """转场检测：硬切/淡入淡出/溶解。
 
         判定逻辑：
@@ -547,7 +546,7 @@ class VRSRealAnalyzer:
         if len(frames) < 3 or not frame_diffs:
             return []
 
-        transitions: List[Dict[str, Any]] = []
+        transitions: list[dict[str, Any]] = []
         # 亮度序列
         brightness = [
             float(cv2.cvtColor(f, cv2.COLOR_BGR2GRAY).mean()) / 255.0
@@ -609,13 +608,13 @@ class VRSRealAnalyzer:
 
     def _classify_style(
         self,
-        color: Dict[str, Any],
-        rhythm: Dict[str, Any],
-        motion: Dict[str, Any],
-        transitions: List[Dict[str, Any]],
-    ) -> List[str]:
+        color: dict[str, Any],
+        rhythm: dict[str, Any],
+        motion: dict[str, Any],
+        transitions: list[dict[str, Any]],
+    ) -> list[str]:
         """基于特征推断风格标签。"""
-        tags: List[str] = []
+        tags: list[str] = []
 
         # 色彩维度
         brightness = color.get("avg_brightness", 0.5)
@@ -683,12 +682,12 @@ class VRSRealAnalyzer:
 
     def _build_effects_list(
         self,
-        color: Dict[str, Any],
-        motion: Dict[str, Any],
-        transitions: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        color: dict[str, Any],
+        motion: dict[str, Any],
+        transitions: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """构造 effects 列表（兼容 unified_pipeline._run_analyze 读取）。"""
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
 
         # 转场效果
         for tr in transitions:
@@ -740,7 +739,7 @@ class VRSRealAnalyzer:
 
         return effects
 
-    def _build_color_grade(self, color: Dict[str, Any]) -> str:
+    def _build_color_grade(self, color: dict[str, Any]) -> str:
         """构造 color_grade 字符串标签（兼容 _run_analyze 读取）。"""
         if not color:
             return ""
@@ -748,7 +747,7 @@ class VRSRealAnalyzer:
         contrast = color.get("contrast", 0.0)
         sat = color.get("saturation", 0.0)
 
-        parts: List[str] = []
+        parts: list[str] = []
         if temp != "neutral":
             parts.append(temp)
         if sat >= 0.50:
@@ -761,7 +760,7 @@ class VRSRealAnalyzer:
             parts.append("low_contrast")
         return "_".join(parts) if parts else "neutral"
 
-    def _build_style(self, style_tags: List[str]) -> Dict[str, Any]:
+    def _build_style(self, style_tags: list[str]) -> dict[str, Any]:
         """构造 style 字典（兼容 _inject_vrs_to_config 读取 style.name）。"""
         # 选一个主风格名
         if "fast_paced" in style_tags and "high_contrast" in style_tags:

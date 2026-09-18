@@ -26,21 +26,21 @@
 - auto    : 优先真实模式，失败自动降级到模拟模式
 """
 
-import os
-import sys
-import json
-import time
 import copy
-import uuid
-import traceback
-import threading
+import json
+import os
 import re
+import sys
+import threading
+import time
+import traceback
+import uuid
 import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple, Callable, Union, Set
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 
 def _escape_extendscript_string(value: str) -> str:
@@ -199,7 +199,7 @@ class ToolConfig:
     enabled: bool = True
     install_path: str = ""
     mode: str = "auto"  # real/simulate/auto
-    extra_params: Dict[str, Any] = field(default_factory=dict)
+    extra_params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -210,8 +210,8 @@ class WorkflowStep:
     tool: str  # ToolType
     operation: str  # 操作类型，如 upscale/render/encode
     description: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
-    depends_on: List[str] = field(default_factory=list)  # 依赖的步骤ID
+    params: dict[str, Any] = field(default_factory=dict)
+    depends_on: list[str] = field(default_factory=list)  # 依赖的步骤ID
     enabled: bool = True
 
 
@@ -224,18 +224,18 @@ class StepResult:
     tool: str
     operation: str
     duration_ms: float = 0
-    output_files: List[str] = field(default_factory=list)
-    output_data: Dict[str, Any] = field(default_factory=dict)
+    output_files: list[str] = field(default_factory=list)
+    output_data: dict[str, Any] = field(default_factory=dict)
     error: str = ""
     used_fallback: bool = False
     mode_used: str = "simulate"  # real/simulate
-    log: List[str] = field(default_factory=list)
+    log: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "StepResult":
+    def from_dict(cls, d: dict[str, Any]) -> "StepResult":
         return cls(**d)
 
 
@@ -244,9 +244,9 @@ class WorkflowResult:
     """完整工作流执行结果"""
     workflow_name: str
     status: str  # PhaseStatus
-    steps: List[StepResult] = field(default_factory=list)
+    steps: list[StepResult] = field(default_factory=list)
     total_duration_ms: float = 0
-    output_files: List[str] = field(default_factory=list)
+    output_files: list[str] = field(default_factory=list)
     error: str = ""
     summary: str = ""
     started_at: str = ""
@@ -257,32 +257,32 @@ class WorkflowResult:
     checkpoint_path: str = ""
     paused: bool = False
 
-    def get_step(self, step_id: str) -> Optional[StepResult]:
+    def get_step(self, step_id: str) -> StepResult | None:
         for s in self.steps:
             if s.step_id == step_id:
                 return s
         return None
 
-    def successful_steps(self) -> List[StepResult]:
+    def successful_steps(self) -> list[StepResult]:
         return [s for s in self.steps if s.status == PhaseStatus.SUCCESS.value]
 
     @property
     def has_outputs(self) -> bool:
         return len(self.output_files) > 0
 
-    def failed_steps(self) -> List[StepResult]:
+    def failed_steps(self) -> list[StepResult]:
         return [s for s in self.steps if s.status == PhaseStatus.ERROR.value]
 
     def completed_step_ids(self) -> set:
         """已完成的步骤ID集合（成功或失败，不含跳过）"""
         return {s.step_id for s in self.steps if s.status in (PhaseStatus.SUCCESS.value, PhaseStatus.ERROR.value)}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
         return d
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "WorkflowResult":
+    def from_dict(cls, d: dict[str, Any]) -> "WorkflowResult":
         steps_data = d.pop("steps", [])
         steps = [StepResult.from_dict(s) for s in steps_data]
         return cls(steps=steps, **d)
@@ -299,11 +299,11 @@ class BaseToolAdapter:
         self.config = config
         self.tool_type = config.tool_type
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> StepResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> StepResult:
         """执行操作，由子类实现"""
         raise NotImplementedError
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         """列出支持的操作列表，由子类实现"""
         return []
 
@@ -346,7 +346,7 @@ class FFmpegAdapter(BaseToolAdapter):
         except Exception:
             return False
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return [
             "probe",
             "transcode",
@@ -360,7 +360,7 @@ class FFmpegAdapter(BaseToolAdapter):
             "batch_transcode",
         ]
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> StepResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> StepResult:
         result = self._make_result(
             step_id=params.get("step_id", f"ffmpeg_{operation}"),
             name=params.get("step_name", f"FFmpeg {operation}"),
@@ -399,7 +399,7 @@ class FFmpegAdapter(BaseToolAdapter):
         # auto
         return "real" if self.check_available() else "simulate"
 
-    def _execute_real(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_real(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         import subprocess
 
         input_file = params.get("input_file", "")
@@ -463,7 +463,7 @@ class FFmpegAdapter(BaseToolAdapter):
 
         return {"files": [output_file] if output_file else [], "data": {}}
 
-    def _execute_simulate(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_simulate(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         result.log.append(f"[FFmpeg] [模拟] 操作: {operation}")
         result.log.append(f"[FFmpeg] [模拟] 参数: {json.dumps(params, ensure_ascii=False)[:200]}")
 
@@ -486,7 +486,7 @@ class FFmpegAdapter(BaseToolAdapter):
             result.log.append(f"[FFmpeg] [模拟] 转码到: {codec}")
             output_data["codec"] = codec
         elif operation == "extract_audio":
-            result.log.append(f"[FFmpeg] [模拟] 提取音频轨道")
+            result.log.append("[FFmpeg] [模拟] 提取音频轨道")
             output_data["audio_extracted"] = True
         elif operation == "compress":
             crf = params.get("crf", 23)
@@ -502,14 +502,14 @@ class FFmpegAdapter(BaseToolAdapter):
             result.log.append(f"[FFmpeg] [模拟] 拼接 {len(input_files)} 个文件")
             output_data["concatenated"] = True
         elif operation == "watermark":
-            result.log.append(f"[FFmpeg] [模拟] 添加水印")
+            result.log.append("[FFmpeg] [模拟] 添加水印")
             output_data["watermarked"] = True
         elif operation == "extract_frames":
             fps = params.get("fps", 1)
             result.log.append(f"[FFmpeg] [模拟] 提取帧 ({fps}fps)")
             output_data["frames_extracted"] = True
         elif operation == "create_slideshow":
-            result.log.append(f"[FFmpeg] [模拟] 创建幻灯片")
+            result.log.append("[FFmpeg] [模拟] 创建幻灯片")
             output_data["slideshow_created"] = True
         elif operation == "batch_transcode":
             input_files = params.get("input_files", [])
@@ -542,7 +542,7 @@ class TopazAdapter(BaseToolAdapter):
     def check_available(self) -> bool:
         return os.path.exists(self._topaz_path)
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> StepResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> StepResult:
         result = self._make_result(
             step_id=params.get("step_id", f"topaz_{operation}"),
             name=params.get("step_name", f"Topaz {operation}"),
@@ -563,7 +563,7 @@ class TopazAdapter(BaseToolAdapter):
             result.status = PhaseStatus.SUCCESS.value
             result.output_files = output.get("files", [])
             result.output_data = output.get("data", {})
-            result.log.append(f"[Topaz] 执行成功")
+            result.log.append("[Topaz] 执行成功")
 
         except Exception as e:
             result.status = PhaseStatus.ERROR.value
@@ -580,7 +580,7 @@ class TopazAdapter(BaseToolAdapter):
             return "simulate"
         return "real" if self.check_available() else "simulate"
 
-    def _execute_real(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_real(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         import subprocess
 
         input_file = params.get("input_file", "")
@@ -607,7 +607,7 @@ class TopazAdapter(BaseToolAdapter):
 
         return {"files": [output_file], "data": {}}
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return [
             "enhance",
             "upscale",
@@ -623,7 +623,7 @@ class TopazAdapter(BaseToolAdapter):
             "export_image_sequence",
         ]
 
-    def _execute_simulate(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_simulate(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         result.log.append(f"[Topaz] [模拟] 操作: {operation}")
         model = params.get("model", "proteus")
         scale = params.get("scale", 1)
@@ -641,7 +641,7 @@ class TopazAdapter(BaseToolAdapter):
             result.log.append(f"[Topaz] [模拟] AI降噪处理 (强度: {params.get('strength', 'medium')})")
             output_data["denoised"] = True
         elif operation == "deinterlace":
-            result.log.append(f"[Topaz] [模拟] 反交错处理")
+            result.log.append("[Topaz] [模拟] 反交错处理")
             output_data["deinterlaced"] = True
         elif operation == "interpolate":
             target_fps = params.get("fps", 60)
@@ -649,26 +649,26 @@ class TopazAdapter(BaseToolAdapter):
             output_data["interpolated"] = True
             output_data["target_fps"] = target_fps
         elif operation == "stabilize":
-            result.log.append(f"[Topaz] [模拟] 视频防抖")
+            result.log.append("[Topaz] [模拟] 视频防抖")
             output_data["stabilized"] = True
         elif operation == "sharpen":
-            result.log.append(f"[Topaz] [模拟] AI锐化")
+            result.log.append("[Topaz] [模拟] AI锐化")
             output_data["sharpened"] = True
         elif operation == "face_enhance":
-            result.log.append(f"[Topaz] [模拟] 人脸增强")
+            result.log.append("[Topaz] [模拟] 人脸增强")
             output_data["face_enhanced"] = True
         elif operation == "batch_process":
             files = params.get("files", [])
             result.log.append(f"[Topaz] [模拟] 批量处理: {len(files)}个文件")
             output_data["batch_done"] = True
         elif operation == "export_prores":
-            result.log.append(f"[Topaz] [模拟] 输出 ProRes 格式")
+            result.log.append("[Topaz] [模拟] 输出 ProRes 格式")
             output_data["format"] = "prores"
         elif operation == "export_h264":
-            result.log.append(f"[Topaz] [模拟] 输出 H.264 格式")
+            result.log.append("[Topaz] [模拟] 输出 H.264 格式")
             output_data["format"] = "h264"
         elif operation == "export_image_sequence":
-            result.log.append(f"[Topaz] [模拟] 输出图片序列")
+            result.log.append("[Topaz] [模拟] 输出图片序列")
             output_data["format"] = "image_sequence"
 
         output_file = params.get("output_file", "")
@@ -693,7 +693,7 @@ class BlenderAdapter(BaseToolAdapter):
     def check_available(self) -> bool:
         return os.path.exists(self._blender_path)
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> StepResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> StepResult:
         result = self._make_result(
             step_id=params.get("step_id", f"blender_{operation}"),
             name=params.get("step_name", f"Blender {operation}"),
@@ -714,7 +714,7 @@ class BlenderAdapter(BaseToolAdapter):
             result.status = PhaseStatus.SUCCESS.value
             result.output_files = output.get("files", [])
             result.output_data = output.get("data", {})
-            result.log.append(f"[Blender] 执行成功")
+            result.log.append("[Blender] 执行成功")
 
         except Exception as e:
             result.status = PhaseStatus.ERROR.value
@@ -731,7 +731,7 @@ class BlenderAdapter(BaseToolAdapter):
             return "simulate"
         return "real" if self.check_available() else "simulate"
 
-    def _execute_real(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_real(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         import subprocess
         import tempfile
 
@@ -763,7 +763,7 @@ class BlenderAdapter(BaseToolAdapter):
 
         return {"files": files, "data": {"stdout": proc.stdout[:1000]}}
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return [
             "new_scene",
             "open_file",
@@ -787,7 +787,7 @@ class BlenderAdapter(BaseToolAdapter):
             "geometry_nodes",
         ]
 
-    def _execute_simulate(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_simulate(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         result.log.append(f"[Blender] [模拟] 操作: {operation}")
         engine = params.get("engine", "eevee")
         resolution = params.get("resolution", (1920, 1080))
@@ -824,7 +824,7 @@ class BlenderAdapter(BaseToolAdapter):
             result.log.append(f"[Blender] [模拟] 添加灯光: {light_type}")
             output_data["light_id"] = f"light_{light_type}"
         elif operation == "add_camera":
-            result.log.append(f"[Blender] [模拟] 添加摄像机")
+            result.log.append("[Blender] [模拟] 添加摄像机")
             output_data["camera_id"] = "cam_main"
         elif operation == "add_material":
             mat_name = params.get("material_name", "材质")
@@ -863,7 +863,7 @@ class BlenderAdapter(BaseToolAdapter):
             result.log.append(f"[Blender] [模拟] 运动跟踪: {os.path.basename(clip)}")
             output_data["tracked"] = True
         elif operation == "compositing_setup":
-            result.log.append(f"[Blender] [模拟] 设置合成节点")
+            result.log.append("[Blender] [模拟] 设置合成节点")
             output_data["compositing_setup"] = True
         elif operation == "run_script":
             script_name = params.get("script_name", "")
@@ -886,7 +886,7 @@ class BlenderAdapter(BaseToolAdapter):
 
         return {"files": files, "data": output_data}
 
-    def _gen_render_script(self, params: Dict[str, Any]) -> str:
+    def _gen_render_script(self, params: dict[str, Any]) -> str:
         output_dir = params.get("output_dir", "/tmp/render")
         engine = params.get("engine", "BLENDER_EEVEE")
         res_x = params.get("resolution", (1920, 1080))[0]
@@ -937,7 +937,7 @@ class AEAdapter(BaseToolAdapter):
         except ImportError:
             return os.path.exists(os.path.join(os.path.dirname(__file__), "ae_mcp_client.py"))
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> StepResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> StepResult:
         result = self._make_result(
             step_id=params.get("step_id", f"ae_{operation}"),
             name=params.get("step_name", f"AE {operation}"),
@@ -958,7 +958,7 @@ class AEAdapter(BaseToolAdapter):
             result.status = PhaseStatus.SUCCESS.value
             result.output_files = output.get("files", [])
             result.output_data = output.get("data", {})
-            result.log.append(f"[AE] 执行成功")
+            result.log.append("[AE] 执行成功")
 
         except Exception as e:
             result.status = PhaseStatus.ERROR.value
@@ -975,7 +975,7 @@ class AEAdapter(BaseToolAdapter):
             return "simulate"
         return "real" if self.check_available() else "simulate"
 
-    def _execute_real(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_real(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         try:
             from ae_mcp_client import AEMcpClient
             client = AEMcpClient()
@@ -998,7 +998,7 @@ class AEAdapter(BaseToolAdapter):
             files = [resp["output_file"]]
         return {"files": files, "data": resp}
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return [
             "create_comp",
             "import_footage",
@@ -1027,7 +1027,7 @@ class AEAdapter(BaseToolAdapter):
             "open_project",
         ]
 
-    def _execute_simulate(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_simulate(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         result.log.append(f"[AE] [模拟] 操作: {operation}")
         comp_name = params.get("comp_name", "未命名合成")
         width = params.get("width", 1920)
@@ -1124,7 +1124,7 @@ class AEAdapter(BaseToolAdapter):
             result.log.append(f"[AE] [模拟] 修剪合成: {start}s - {end}s")
             output_data["trimmed"] = True
         elif operation == "render":
-            result.log.append(f"[AE] [模拟] 渲染合成到队列")
+            result.log.append("[AE] [模拟] 渲染合成到队列")
             output_data["render_started"] = True
         elif operation == "render_queue_add":
             template = params.get("render_template", "无损")
@@ -1157,10 +1157,10 @@ class PremiereProAdapter(BaseToolAdapter):
         install_path = self.config.install_path or r"C:\Program Files\Adobe\Adobe Premiere Pro 2025"
         return os.path.exists(install_path)
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> StepResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> StepResult:
         result = self._make_result(
             step_id=params.get("step_id", f"pr_{operation}"),
             name=params.get("step_name", f"PR {operation}"),
@@ -1179,7 +1179,7 @@ class PremiereProAdapter(BaseToolAdapter):
             result.status = PhaseStatus.SUCCESS.value
             result.output_files = output.get("files", [])
             result.output_data = output.get("data", {})
-            result.log.append(f"[Premiere] 执行成功")
+            result.log.append("[Premiere] 执行成功")
         except Exception as e:
             result.status = PhaseStatus.ERROR.value
             result.error = str(e)
@@ -1195,7 +1195,7 @@ class PremiereProAdapter(BaseToolAdapter):
             return "simulate"
         return "real" if self.check_available() else "simulate"
 
-    def _execute_real(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_real(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         import subprocess
         import tempfile
 
@@ -1230,7 +1230,7 @@ class PremiereProAdapter(BaseToolAdapter):
         files = [output_file] if output_file else []
         return {"files": files, "data": {"operation": operation}}
 
-    def _find_executable(self) -> Optional[str]:
+    def _find_executable(self) -> str | None:
         """查找Premiere可执行文件"""
         search_paths = [
             self.config.install_path,
@@ -1245,7 +1245,7 @@ class PremiereProAdapter(BaseToolAdapter):
                         return exe_path
         return None
 
-    def _generate_script(self, operation: str, params: Dict[str, Any]) -> str:
+    def _generate_script(self, operation: str, params: dict[str, Any]) -> str:
         """生成Premiere ExtendScript"""
         proj_name = params.get("project_name", "Untitled")
         output_file = params.get("output_file", "")
@@ -1285,7 +1285,7 @@ app.enableQE();
 
         return script
 
-    def _execute_simulate(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_simulate(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         result.log.append(f"[Premiere] [模拟] 操作: {operation}")
 
         if operation == "create_project":
@@ -1299,14 +1299,14 @@ app.enableQE();
             preset = params.get("preset", "1080p_25fps")
             result.log.append(f"[Premiere] [模拟] 创建序列: {seq_name} ({preset})")
         elif operation == "color_grade":
-            result.log.append(f"[Premiere] [模拟] 应用 Lumetri 调色")
+            result.log.append("[Premiere] [模拟] 应用 Lumetri 调色")
         elif operation == "audio_mix":
-            result.log.append(f"[Premiere] [模拟] 音频混音处理")
+            result.log.append("[Premiere] [模拟] 音频混音处理")
         elif operation == "add_transition":
             trans = params.get("transition_type", "cross_dissolve")
             result.log.append(f"[Premiere] [模拟] 添加转场: {trans}")
         elif operation == "add_title":
-            result.log.append(f"[Premiere] [模拟] 添加文字标题")
+            result.log.append("[Premiere] [模拟] 添加文字标题")
         elif operation == "dynamic_link_to_ae":
             comp = params.get("ae_comp", "")
             result.log.append(f"[Premiere] [模拟] 动态链接到AE合成: {comp}")
@@ -1344,10 +1344,10 @@ class PhotoshopAdapter(BaseToolAdapter):
         install_path = self.config.install_path or r"C:\Program Files\Adobe\Adobe Photoshop 2025"
         return os.path.exists(install_path)
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> StepResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> StepResult:
         result = self._make_result(
             step_id=params.get("step_id", f"ps_{operation}"),
             name=params.get("step_name", f"PS {operation}"),
@@ -1366,7 +1366,7 @@ class PhotoshopAdapter(BaseToolAdapter):
             result.status = PhaseStatus.SUCCESS.value
             result.output_files = output.get("files", [])
             result.output_data = output.get("data", {})
-            result.log.append(f"[Photoshop] 执行成功")
+            result.log.append("[Photoshop] 执行成功")
         except Exception as e:
             result.status = PhaseStatus.ERROR.value
             result.error = str(e)
@@ -1382,7 +1382,7 @@ class PhotoshopAdapter(BaseToolAdapter):
             return "simulate"
         return "real" if self.check_available() else "simulate"
 
-    def _execute_real(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_real(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         import subprocess
         import tempfile
 
@@ -1417,7 +1417,7 @@ class PhotoshopAdapter(BaseToolAdapter):
         files = [output_file] if output_file else []
         return {"files": files, "data": {"operation": operation}}
 
-    def _find_executable(self) -> Optional[str]:
+    def _find_executable(self) -> str | None:
         """查找Photoshop可执行文件"""
         search_paths = [
             self.config.install_path,
@@ -1432,7 +1432,7 @@ class PhotoshopAdapter(BaseToolAdapter):
                         return exe_path
         return None
 
-    def _generate_script(self, operation: str, params: Dict[str, Any]) -> str:
+    def _generate_script(self, operation: str, params: dict[str, Any]) -> str:
         """生成Photoshop ExtendScript"""
         input_file = params.get("input_file", "")
         output_file = params.get("output_file", "")
@@ -1481,7 +1481,7 @@ class PhotoshopAdapter(BaseToolAdapter):
 
         return script
 
-    def _execute_simulate(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_simulate(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         result.log.append(f"[Photoshop] [模拟] 操作: {operation}")
 
         if operation == "open_document":
@@ -1495,7 +1495,7 @@ class PhotoshopAdapter(BaseToolAdapter):
             h = params.get("height", 1080)
             result.log.append(f"[Photoshop] [模拟] 调整尺寸: {w}x{h}")
         elif operation == "crop":
-            result.log.append(f"[Photoshop] [模拟] 图像裁剪")
+            result.log.append("[Photoshop] [模拟] 图像裁剪")
         elif operation == "adjust_color":
             adj = params.get("adjustment", "curves")
             result.log.append(f"[Photoshop] [模拟] 色彩调整: {adj}")
@@ -1506,24 +1506,24 @@ class PhotoshopAdapter(BaseToolAdapter):
             layer = params.get("layer_name", "")
             result.log.append(f"[Photoshop] [模拟] 添加图层: {layer}")
         elif operation == "add_mask":
-            result.log.append(f"[Photoshop] [模拟] 添加图层蒙版")
+            result.log.append("[Photoshop] [模拟] 添加图层蒙版")
         elif operation == "add_text":
             txt = params.get("text", "")
             result.log.append(f"[Photoshop] [模拟] 添加文字: {txt[:20]}")
         elif operation == "smart_object":
-            result.log.append(f"[Photoshop] [模拟] 转换为智能对象")
+            result.log.append("[Photoshop] [模拟] 转换为智能对象")
         elif operation == "batch_process":
             count = params.get("count", 1)
             result.log.append(f"[Photoshop] [模拟] 批处理: {count} 张图片")
         elif operation == "export_png":
-            result.log.append(f"[Photoshop] [模拟] 导出PNG")
+            result.log.append("[Photoshop] [模拟] 导出PNG")
         elif operation == "export_jpg":
             quality = params.get("quality", 90)
             result.log.append(f"[Photoshop] [模拟] 导出JPG (质量:{quality})")
         elif operation == "export_psd":
-            result.log.append(f"[Photoshop] [模拟] 保存PSD")
+            result.log.append("[Photoshop] [模拟] 保存PSD")
         elif operation == "remove_background":
-            result.log.append(f"[Photoshop] [模拟] 移除背景（选择主体）")
+            result.log.append("[Photoshop] [模拟] 移除背景（选择主体）")
         elif operation == "generative_fill":
             prompt = params.get("prompt", "")
             result.log.append(f"[Photoshop] [模拟] 生成式填充: {prompt[:30]}")
@@ -1552,10 +1552,10 @@ class IllustratorAdapter(BaseToolAdapter):
         install_path = self.config.install_path or r"C:\Program Files\Adobe\Adobe Illustrator 2025"
         return os.path.exists(install_path)
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> StepResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> StepResult:
         result = self._make_result(
             step_id=params.get("step_id", f"ai_{operation}"),
             name=params.get("step_name", f"Ai {operation}"),
@@ -1580,7 +1580,7 @@ class IllustratorAdapter(BaseToolAdapter):
             result.status = PhaseStatus.SUCCESS.value
             result.output_files = output.get("files", [])
             result.output_data = output.get("data", {})
-            result.log.append(f"[Illustrator] 执行成功")
+            result.log.append("[Illustrator] 执行成功")
         except Exception as e:
             result.status = PhaseStatus.ERROR.value
             result.error = str(e)
@@ -1596,7 +1596,7 @@ class IllustratorAdapter(BaseToolAdapter):
             return "simulate"
         return "real" if self.check_available() else "simulate"
 
-    def _execute_real(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_real(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         import subprocess
         import tempfile
 
@@ -1631,7 +1631,7 @@ class IllustratorAdapter(BaseToolAdapter):
         files = [output_file] if output_file else []
         return {"files": files, "data": {"operation": operation}}
 
-    def _find_executable(self) -> Optional[str]:
+    def _find_executable(self) -> str | None:
         """查找Illustrator可执行文件"""
         search_paths = [
             self.config.install_path,
@@ -1646,7 +1646,7 @@ class IllustratorAdapter(BaseToolAdapter):
                         return exe_path
         return None
 
-    def _generate_script(self, operation: str, params: Dict[str, Any]) -> str:
+    def _generate_script(self, operation: str, params: dict[str, Any]) -> str:
         """生成Illustrator ExtendScript"""
         output_file = params.get("output_file", "")
 
@@ -1688,7 +1688,7 @@ class IllustratorAdapter(BaseToolAdapter):
 
         return script
 
-    def _execute_simulate(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_simulate(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         result.log.append(f"[Illustrator] [模拟] 操作: {operation}")
 
         if operation == "create_document":
@@ -1709,20 +1709,20 @@ class IllustratorAdapter(BaseToolAdapter):
             style = params.get("style", "")
             result.log.append(f"[Illustrator] [模拟] 应用样式: {style}")
         elif operation == "create_logo":
-            result.log.append(f"[Illustrator] [模拟] 创建Logo设计")
+            result.log.append("[Illustrator] [模拟] 创建Logo设计")
         elif operation == "create_mograph":
-            result.log.append(f"[Illustrator] [模拟] 创建动态图形元素（MG）")
+            result.log.append("[Illustrator] [模拟] 创建动态图形元素（MG）")
         elif operation == "export_svg":
-            result.log.append(f"[Illustrator] [模拟] 导出SVG")
+            result.log.append("[Illustrator] [模拟] 导出SVG")
         elif operation == "export_ai":
-            result.log.append(f"[Illustrator] [模拟] 保存AI源文件")
+            result.log.append("[Illustrator] [模拟] 保存AI源文件")
         elif operation == "export_png":
-            result.log.append(f"[Illustrator] [模拟] 导出PNG")
+            result.log.append("[Illustrator] [模拟] 导出PNG")
         elif operation == "batch_export":
             count = params.get("count", 1)
             result.log.append(f"[Illustrator] [模拟] 批量导出: {count} 个文件")
         elif operation == "create_pattern":
-            result.log.append(f"[Illustrator] [模拟] 创建图案/纹理")
+            result.log.append("[Illustrator] [模拟] 创建图案/纹理")
 
         output_dir = params.get("output_dir", "")
         out_file = os.path.join(output_dir, f"{operation}_output.svg") if output_dir else ""
@@ -1743,10 +1743,10 @@ class MediaEncoderAdapter(BaseToolAdapter):
         install_path = self.config.install_path or r"C:\Program Files\Adobe\Adobe Media Encoder 2025"
         return os.path.exists(install_path)
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> StepResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> StepResult:
         result = self._make_result(
             step_id=params.get("step_id", f"me_{operation}"),
             name=params.get("step_name", f"ME {operation}"),
@@ -1765,7 +1765,7 @@ class MediaEncoderAdapter(BaseToolAdapter):
             result.status = PhaseStatus.SUCCESS.value
             result.output_files = output.get("files", [])
             result.output_data = output.get("data", {})
-            result.log.append(f"[MediaEncoder] 执行成功")
+            result.log.append("[MediaEncoder] 执行成功")
         except Exception as e:
             result.status = PhaseStatus.ERROR.value
             result.error = str(e)
@@ -1781,7 +1781,7 @@ class MediaEncoderAdapter(BaseToolAdapter):
             return "simulate"
         return "real" if self.check_available() else "simulate"
 
-    def _execute_real(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_real(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         import subprocess
 
         # 查找Media Encoder可执行文件
@@ -1821,7 +1821,7 @@ class MediaEncoderAdapter(BaseToolAdapter):
             # 其他操作，降级为模拟
             return self._execute_simulate(operation, params, result)
 
-    def _find_executable(self) -> Optional[str]:
+    def _find_executable(self) -> str | None:
         """查找Media Encoder可执行文件"""
         search_paths = [
             self.config.install_path,
@@ -1836,7 +1836,7 @@ class MediaEncoderAdapter(BaseToolAdapter):
                         return exe_path
         return None
 
-    def _execute_simulate(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_simulate(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         result.log.append(f"[MediaEncoder] [模拟] 操作: {operation}")
 
         if operation == "add_to_queue":
@@ -1856,7 +1856,7 @@ class MediaEncoderAdapter(BaseToolAdapter):
             fmt = params.get("format", "H.264")
             result.log.append(f"[MediaEncoder] [模拟] 批量编码: {count} 个文件 → {fmt}")
         elif operation == "create_proxy":
-            result.log.append(f"[MediaEncoder] [模拟] 创建代理文件")
+            result.log.append("[MediaEncoder] [模拟] 创建代理文件")
         elif operation == "export_h264":
             br = params.get("bitrate", "10 Mbps")
             result.log.append(f"[MediaEncoder] [模拟] 导出H.264 (码率: {br})")
@@ -1864,9 +1864,9 @@ class MediaEncoderAdapter(BaseToolAdapter):
             codec = params.get("prores_codec", "ProRes 422 HQ")
             result.log.append(f"[MediaEncoder] [模拟] 导出{codec}")
         elif operation == "export_hevc":
-            result.log.append(f"[MediaEncoder] [模拟] 导出H.265/HEVC")
+            result.log.append("[MediaEncoder] [模拟] 导出H.265/HEVC")
         elif operation == "status_monitor":
-            result.log.append(f"[MediaEncoder] [模拟] 队列状态监控")
+            result.log.append("[MediaEncoder] [模拟] 队列状态监控")
 
         output_dir = params.get("output_dir", "")
         out_file = os.path.join(output_dir, "encoded_output.mp4") if output_dir else ""
@@ -1891,10 +1891,10 @@ class AuditionAdapter(BaseToolAdapter):
         install_path = self.config.install_path or r"C:\Program Files\Adobe\Adobe Audition 2026"
         return os.path.exists(install_path)
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Dict[str, Any]) -> StepResult:
+    def execute(self, operation: str, params: dict[str, Any]) -> StepResult:
         result = self._make_result(
             step_id=params.get("step_id", f"au_{operation}"),
             name=params.get("step_name", f"AU {operation}"),
@@ -1919,7 +1919,7 @@ class AuditionAdapter(BaseToolAdapter):
             result.status = PhaseStatus.SUCCESS.value
             result.output_files = output.get("files", [])
             result.output_data = output.get("data", {})
-            result.log.append(f"[Audition] 执行成功")
+            result.log.append("[Audition] 执行成功")
         except Exception as e:
             result.status = PhaseStatus.ERROR.value
             result.error = str(e)
@@ -1935,24 +1935,24 @@ class AuditionAdapter(BaseToolAdapter):
             return "simulate"
         return "real" if self.check_available() else "simulate"
 
-    def _execute_real(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_real(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         result.log.append(f"[Audition] [真实] 操作: {operation}（通过Audition API调用）")
         result.used_fallback = True
         return self._execute_simulate(operation, params, result)
 
-    def _execute_simulate(self, operation: str, params: Dict[str, Any], result: StepResult) -> Dict:
+    def _execute_simulate(self, operation: str, params: dict[str, Any], result: StepResult) -> dict:
         result.log.append(f"[Audition] [模拟] 操作: {operation}")
 
         if operation == "import_audio":
             audio = params.get("file", "")
             result.log.append(f"[Audition] [模拟] 导入音频: {os.path.basename(audio)}")
         elif operation == "noise_reduction":
-            result.log.append(f"[Audition] [模拟] 降噪处理（自适应降噪）")
+            result.log.append("[Audition] [模拟] 降噪处理（自适应降噪）")
         elif operation == "audio_mix":
             tracks = params.get("tracks", 2)
             result.log.append(f"[Audition] [模拟] 混音: {tracks} 轨道")
         elif operation == "mastering":
-            result.log.append(f"[Audition] [模拟] 母带处理")
+            result.log.append("[Audition] [模拟] 母带处理")
         elif operation == "apply_effect":
             effect = params.get("effect", "")
             result.log.append(f"[Audition] [模拟] 应用音频效果: {effect}")
@@ -1960,14 +1960,14 @@ class AuditionAdapter(BaseToolAdapter):
             count = params.get("count", 1)
             result.log.append(f"[Audition] [模拟] 批量处理: {count} 个文件")
         elif operation == "export_wav":
-            result.log.append(f"[Audition] [模拟] 导出WAV")
+            result.log.append("[Audition] [模拟] 导出WAV")
         elif operation == "export_mp3":
             br = params.get("bitrate", "320 kbps")
             result.log.append(f"[Audition] [模拟] 导出MP3 (码率: {br})")
         elif operation == "voiceover":
-            result.log.append(f"[Audition] [模拟] 配音录制与处理")
+            result.log.append("[Audition] [模拟] 配音录制与处理")
         elif operation == "podcast":
-            result.log.append(f"[Audition] [模拟] 播客后期制作")
+            result.log.append("[Audition] [模拟] 播客后期制作")
 
         output_dir = params.get("output_dir", "")
         out_file = os.path.join(output_dir, f"{operation}_output.wav") if output_dir else ""
@@ -1978,7 +1978,7 @@ class AuditionAdapter(BaseToolAdapter):
 # 工作流预设定义
 # ============================================================================
 
-WORKFLOW_PRESETS: Dict[str, Dict[str, Any]] = {
+WORKFLOW_PRESETS: dict[str, dict[str, Any]] = {
     "enhance_quality": {
         "name": "视频质量增强流水线",
         "description": "使用Topaz AI进行超分辨率、降噪、插帧的质量增强",
@@ -2358,9 +2358,9 @@ class UnifiedToolIntegrator:
         self,
         default_mode: str = "auto",
         output_dir: str = r"D:\AE-Work\_integrator_output",
-        on_progress: Optional[Callable] = None,
-        preset_file: Optional[str] = None,
-        config_file: Optional[str] = None,
+        on_progress: Callable | None = None,
+        preset_file: str | None = None,
+        config_file: str | None = None,
         log_level: str = "INFO",
         max_retries: int = 2,
         enable_checkpoint: bool = True,
@@ -2383,9 +2383,9 @@ class UnifiedToolIntegrator:
         self._default_mode = default_mode
         self._output_dir = Path(output_dir)
         self._on_progress = on_progress
-        self._tools: Dict[str, BaseToolAdapter] = {}
-        self._external_presets: Dict[str, Any] = {}
-        self._tool_config: Dict[str, Any] = {}
+        self._tools: dict[str, BaseToolAdapter] = {}
+        self._external_presets: dict[str, Any] = {}
+        self._tool_config: dict[str, Any] = {}
         self._max_retries = max_retries
         self._logger = Logger(log_dir=str(self._output_dir / "logs"), log_level=log_level)
         self._enable_checkpoint = enable_checkpoint
@@ -2396,7 +2396,7 @@ class UnifiedToolIntegrator:
         self._pause_event = threading.Event()
         self._pause_event.set()  # 默认不暂停
         self._cancel_flag = False
-        self._active_workflows: Dict[str, WorkflowResult] = {}
+        self._active_workflows: dict[str, WorkflowResult] = {}
 
         if preset_file:
             self._load_presets_from_file(preset_file)
@@ -2497,7 +2497,7 @@ class UnifiedToolIntegrator:
             return "blender"
         return "adobe"
 
-    def _get_all_presets(self) -> Dict[str, Any]:
+    def _get_all_presets(self) -> dict[str, Any]:
         """获取所有预设（内置+外部）"""
         all_presets = {}
         all_presets.update(WORKFLOW_PRESETS)
@@ -2591,7 +2591,7 @@ class UnifiedToolIntegrator:
         else:
             raise ValueError(f"不支持的工具类型: {config.tool_type}")
 
-    def get_available_tools(self) -> Dict[str, bool]:
+    def get_available_tools(self) -> dict[str, bool]:
         """获取所有工具的可用状态"""
         status = {name: adapter.check_available() for name, adapter in self._tools.items()}
         # 合并开源工具状态
@@ -2620,7 +2620,7 @@ class UnifiedToolIntegrator:
             self._os_hub = None
             self._log(f"开源工具初始化失败: {e}", "WARNING")
 
-    def _execute_opensource_step(self, step: Dict[str, Any], result: Any) -> Dict[str, Any]:
+    def _execute_opensource_step(self, step: dict[str, Any], result: Any) -> dict[str, Any]:
         """执行开源工具步骤"""
         if not hasattr(self, '_os_hub') or self._os_hub is None:
             return {"files": [], "data": {"error": "OpenSourceHub not available"}}
@@ -2638,13 +2638,13 @@ class UnifiedToolIntegrator:
             "log": os_result.log,
         }
 
-    def get_tool_operations(self, tool_type: str) -> List[str]:
+    def get_tool_operations(self, tool_type: str) -> list[str]:
         """获取指定工具支持的操作列表"""
         if tool_type in self._tools:
             return self._tools[tool_type].list_operations()
         return []
 
-    def get_all_tools_info(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_tools_info(self) -> dict[str, dict[str, Any]]:
         """获取所有工具的详细信息"""
         info = {}
         for name, adapter in self._tools.items():
@@ -2655,7 +2655,7 @@ class UnifiedToolIntegrator:
             }
         return info
 
-    def list_presets(self) -> List[Dict[str, Any]]:
+    def list_presets(self) -> list[dict[str, Any]]:
         """列出所有可用的工作流预设"""
         presets = []
         all_presets = self._get_all_presets()
@@ -2674,19 +2674,19 @@ class UnifiedToolIntegrator:
     # 工作流控制：暂停 / 恢复 / 取消
     # ========================================================================
 
-    def pause_workflow(self, workflow_id: Optional[str] = None) -> bool:
+    def pause_workflow(self, workflow_id: str | None = None) -> bool:
         """暂停指定工作流（在工作流线程中检查暂停标志）"""
         self._pause_event.clear()
         self._log(f"工作流暂停请求已发送 (workflow_id={workflow_id or 'all'})")
         return True
 
-    def resume_workflow(self, workflow_id: Optional[str] = None) -> bool:
+    def resume_workflow(self, workflow_id: str | None = None) -> bool:
         """恢复暂停的工作流"""
         self._pause_event.set()
         self._log(f"工作流已恢复 (workflow_id={workflow_id or 'all'})")
         return True
 
-    def cancel_workflow(self, workflow_id: Optional[str] = None) -> bool:
+    def cancel_workflow(self, workflow_id: str | None = None) -> bool:
         """取消正在执行的工作流"""
         self._cancel_flag = True
         self._pause_event.set()  # 解除暂停阻塞，让工作流检测到取消
@@ -2697,7 +2697,7 @@ class UnifiedToolIntegrator:
         """检查是否处于暂停状态"""
         return not self._pause_event.is_set()
 
-    def get_active_workflows(self) -> Dict[str, Dict[str, Any]]:
+    def get_active_workflows(self) -> dict[str, dict[str, Any]]:
         """获取所有活跃工作流状态"""
         with self._control_lock:
             return {
@@ -2748,7 +2748,7 @@ class UnifiedToolIntegrator:
         self,
         checkpoint_path: str,
         preset_id: str,
-        input_params: Optional[Dict[str, Any]] = None,
+        input_params: dict[str, Any] | None = None,
     ) -> WorkflowResult:
         """从检查点恢复工作流执行"""
         previous = self.load_checkpoint(checkpoint_path)
@@ -2769,7 +2769,7 @@ class UnifiedToolIntegrator:
     # 依赖图与并行执行
     # ========================================================================
 
-    def _build_dependency_graph(self, steps_config: List[Dict[str, Any]]) -> Dict[str, Set[str]]:
+    def _build_dependency_graph(self, steps_config: list[dict[str, Any]]) -> dict[str, set[str]]:
         """构建步骤依赖图，返回 {step_id: set(依赖的step_id)}"""
         graph = {}
         for step in steps_config:
@@ -2782,10 +2782,10 @@ class UnifiedToolIntegrator:
 
     def _get_ready_steps(
         self,
-        graph: Dict[str, Set[str]],
-        completed: Set[str],
-        pending: Set[str],
-    ) -> List[str]:
+        graph: dict[str, set[str]],
+        completed: set[str],
+        pending: set[str],
+    ) -> list[str]:
         """获取当前可执行的步骤（依赖全部完成）"""
         ready = []
         for sid in pending:
@@ -2797,9 +2797,9 @@ class UnifiedToolIntegrator:
     def run_workflow(
         self,
         preset_id: str,
-        input_params: Optional[Dict[str, Any]] = None,
-        skip_step_ids: Optional[Set[str]] = None,
-        previous_result: Optional[WorkflowResult] = None,
+        input_params: dict[str, Any] | None = None,
+        skip_step_ids: set[str] | None = None,
+        previous_result: WorkflowResult | None = None,
     ) -> WorkflowResult:
         """
         执行预设工作流（支持并行执行、暂停/恢复、检查点）
@@ -2860,9 +2860,9 @@ class UnifiedToolIntegrator:
         graph = self._build_dependency_graph(steps_config)
         all_step_ids = set(graph.keys())
         pending = all_step_ids - skip_step_ids
-        completed: Set[str] = set(skip_step_ids)
+        completed: set[str] = set(skip_step_ids)
         # 从前序结果恢复 step_results_map
-        step_results_map: Dict[str, StepResult] = {}
+        step_results_map: dict[str, StepResult] = {}
         for sr in result.steps:
             step_results_map[sr.step_id] = sr
 
@@ -3040,11 +3040,11 @@ class UnifiedToolIntegrator:
 
     def _build_step_params(
         self,
-        step_conf: Dict[str, Any],
-        input_params: Dict[str, Any],
-        prev_results: Dict[str, StepResult],
+        step_conf: dict[str, Any],
+        input_params: dict[str, Any],
+        prev_results: dict[str, StepResult],
         job_dir: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """构建步骤参数，合并输入参数和前序步骤输出"""
         params = copy.deepcopy(step_conf.get("params", {}))
         params["step_id"] = step_conf["step_id"]
@@ -3074,7 +3074,7 @@ class UnifiedToolIntegrator:
 
         return params
 
-    def _execute_step(self, step_conf: Dict[str, Any], params: Dict[str, Any]) -> StepResult:
+    def _execute_step(self, step_conf: dict[str, Any], params: dict[str, Any]) -> StepResult:
         """执行单个步骤（带重试机制）"""
         tool_type = step_conf["tool"]
         operation = step_conf["operation"]
@@ -3317,7 +3317,7 @@ class UnifiedToolIntegrator:
 
     def run_custom_workflow(
         self,
-        steps: List[Dict[str, Any]],
+        steps: list[dict[str, Any]],
         workflow_name: str = "自定义工作流",
     ) -> WorkflowResult:
         """执行自定义工作流"""

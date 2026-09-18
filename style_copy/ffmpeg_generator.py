@@ -15,7 +15,6 @@ FFmpeg命令生成器 - 根据风格JSON生成滤镜命令
 import json
 from typing import Dict, List
 
-
 STYLE_TO_FILTER_MAP = {
     "color_temperature": {
         "warm": "colorbalance=rs=0.2:gs=0.15:bs=-0.1",
@@ -64,7 +63,7 @@ class FFmpegCommandGenerator:
     def __init__(self):
         self.filters = []
     
-    def generate_command(self, input_path: str, output_path: str, style: Dict) -> List[str]:
+    def generate_command(self, input_path: str, output_path: str, style: dict) -> list[str]:
         """生成完整的FFmpeg命令"""
         self.filters = []
         
@@ -92,7 +91,7 @@ class FFmpegCommandGenerator:
         
         return cmd
     
-    def _add_color_filters(self, style: Dict):
+    def _add_color_filters(self, style: dict):
         """添加调色滤镜"""
         temp = style.get("color_temperature", "neutral")
         if temp in STYLE_TO_FILTER_MAP["color_temperature"]:
@@ -106,7 +105,7 @@ class FFmpegCommandGenerator:
             if filt:
                 self.filters.append(filt)
     
-    def _add_effect_filters(self, style: Dict):
+    def _add_effect_filters(self, style: dict):
         """添加特效滤镜"""
         effects = style.get("effects", [])
         for effect in effects:
@@ -117,7 +116,7 @@ class FFmpegCommandGenerator:
                         self.filters.append(filt)
                     break
     
-    def _add_pace_filters(self, style: Dict):
+    def _add_pace_filters(self, style: dict):
         """添加节奏/变速滤镜"""
         pace = style.get("pace", "medium")
         if pace in STYLE_TO_FILTER_MAP["pace"]:
@@ -125,8 +124,8 @@ class FFmpegCommandGenerator:
             if filt:
                 self.filters.append(filt)
     
-    def generate_transition_command(self, input_paths: List[str], output_path: str, 
-                                    transition_type: str = "dissolve") -> List[str]:
+    def generate_transition_command(self, input_paths: list[str], output_path: str, 
+                                    transition_type: str = "dissolve") -> list[str]:
         """生成带转场的合并命令"""
         if len(input_paths) < 2:
             return ["ffmpeg", "-i", input_paths[0], "-y", output_path]

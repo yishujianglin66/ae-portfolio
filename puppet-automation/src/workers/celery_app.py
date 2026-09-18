@@ -35,7 +35,6 @@ from loguru import logger
 
 from ..config import settings
 
-
 # ============================================================
 # Celery app factory
 # ============================================================
@@ -169,7 +168,7 @@ def save_state_to_redis(state_dict: dict[str, Any]) -> None:
         logger.warning(f"Failed to persist state for {state_dict.get('job_id')}: {exc}")
 
 
-def load_state_from_redis(job_id: str) -> Optional[dict[str, Any]]:
+def load_state_from_redis(job_id: str) -> dict[str, Any] | None:
     r = get_redis()
     if isinstance(r, _NullRedis):
         return None
@@ -317,7 +316,7 @@ def run_phase4_render(project_path: str, options: dict[str, Any] | None = None):
 # Submission helper used by the orchestrator
 # ============================================================
 
-def submit_pipeline_job(job_dict: dict[str, Any]) -> Optional[str]:
+def submit_pipeline_job(job_dict: dict[str, Any]) -> str | None:
     """Submit a job to Celery.  Returns the Celery task id, or None if disabled.
 
     The caller is responsible for persisting the initial PENDING state.

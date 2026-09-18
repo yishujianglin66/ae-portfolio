@@ -58,7 +58,7 @@ def main():
     winreg.CloseKey(key)
     lines.append(f"DELETED({len(done)}): " + ", ".join(done))
     if skipped:
-        lines.append(f"SKIPPED: " + ", ".join(skipped))
+        lines.append("SKIPPED: " + ", ".join(skipped))
     LOG.parent.mkdir(parents=True, exist_ok=True)
     LOG.write_text("\n".join(lines), encoding="utf-8")
     print("\n".join(lines))

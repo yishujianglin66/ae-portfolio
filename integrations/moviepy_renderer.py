@@ -48,7 +48,7 @@ class RenderResult:
     segments_used: int = 0
     method: str = "moviepy"
     error: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class MoviePyRenderer:
@@ -63,7 +63,7 @@ class MoviePyRenderer:
 
     def __init__(self, ffmpeg_bin: str = ""):
         self._ffmpeg = ffmpeg_bin or shutil.which("ffmpeg") or "ffmpeg"
-        self._moviepy_available: Optional[bool] = None
+        self._moviepy_available: bool | None = None
 
     @property
     def available(self) -> bool:
@@ -83,7 +83,7 @@ class MoviePyRenderer:
 
     def render_segments(
         self,
-        segments: List[Dict[str, Any]],
+        segments: list[dict[str, Any]],
         output: str = "",
         transition: str = "crossfade",
         transition_duration: float = 0.5,
@@ -147,7 +147,7 @@ class MoviePyRenderer:
 
     def render_preview(
         self,
-        segments: List[Dict[str, Any]],
+        segments: list[dict[str, Any]],
         output: str = "",
         audio_path: str = "",
     ) -> RenderResult:
@@ -160,7 +160,7 @@ class MoviePyRenderer:
 
     def concatenate_clips(
         self,
-        clip_paths: List[str],
+        clip_paths: list[str],
         output: str = "",
         method: str = "stream_copy",
     ) -> RenderResult:
@@ -188,14 +188,17 @@ class MoviePyRenderer:
     # ------------------------------------------------------------------
 
     def _render_with_moviepy(
-        self, segments: List[Dict], output: str, transition: str,
+        self, segments: list[dict], output: str, transition: str,
         trans_dur: float, resolution: tuple, fps: float, audio_path: str
     ) -> RenderResult:
         """使用 MoviePy 渲染"""
         try:
             from moviepy.editor import (
-                VideoFileClip, concatenate_videoclips,
-                AudioFileClip, CompositeVideoClip, TextClip
+                AudioFileClip,
+                CompositeVideoClip,
+                TextClip,
+                VideoFileClip,
+                concatenate_videoclips,
             )
             from moviepy.video.fx.all import fadein, fadeout
 
@@ -271,7 +274,7 @@ class MoviePyRenderer:
             )
 
     def _render_with_ffmpeg(
-        self, segments: List[Dict], output: str,
+        self, segments: list[dict], output: str,
         resolution: tuple, fps: float, audio_path: str,
         stream_copy: bool = False
     ) -> RenderResult:

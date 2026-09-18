@@ -13,7 +13,6 @@ from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
-
 REMOTION_DIR = Path(
     r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault\external\OpenMontage\remotion-composer"
 )
@@ -27,18 +26,18 @@ class RemotionComponent:
     type: str  # text / image / chart / overlay
     path: Path
     description: str = ""
-    props_schema: Dict[str, Any] = field(default_factory=dict)
+    props_schema: dict[str, Any] = field(default_factory=dict)
 
 
 class RemotionBridge:
     """Remotion 合成桥接器。"""
 
-    def __init__(self, remotion_dir: Optional[Path] = None):
+    def __init__(self, remotion_dir: Path | None = None):
         self.remotion_dir = remotion_dir or REMOTION_DIR
-        self._components: Dict[str, RemotionComponent] = {}
+        self._components: dict[str, RemotionComponent] = {}
         logger.info(f"Remotion Bridge 初始化: {self.remotion_dir}")
 
-    def list_components(self) -> List[RemotionComponent]:
+    def list_components(self) -> list[RemotionComponent]:
         """列出所有 Remotion 组件。"""
         if self._components:
             return list(self._components.values())
@@ -85,7 +84,7 @@ class RemotionBridge:
             pass
         return ""
 
-    def get_component(self, name: str) -> Optional[RemotionComponent]:
+    def get_component(self, name: str) -> RemotionComponent | None:
         """按名称获取组件。"""
         for comp in self.list_components():
             if comp.name == name:
@@ -94,10 +93,10 @@ class RemotionBridge:
 
     def render_lyric_overlay(
         self,
-        subtitles: List[Dict[str, Any]],
+        subtitles: list[dict[str, Any]],
         output_path: Path | str,
-        style: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        style: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """生成歌词叠加层 Remotion 渲染配置。
 
         Args:
@@ -136,8 +135,8 @@ class RemotionBridge:
         self,
         text: str,
         output_path: Path | str,
-        style: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        style: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """生成 TextCard 渲染配置。"""
         style = style or {
             "backgroundColor": "#1a1a2e",
@@ -153,9 +152,9 @@ class RemotionBridge:
 
     def render_stat_card(
         self,
-        stats: List[Dict[str, Any]],
+        stats: list[dict[str, Any]],
         output_path: Path | str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成 StatCard 渲染配置。
 
         Args:
@@ -173,9 +172,9 @@ class RemotionBridge:
         self,
         video_path: str,
         title: str,
-        subtitle: Optional[str],
+        subtitle: str | None,
         output_path: Path | str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """生成 TitledVideo 渲染配置。"""
         config = {
             "composition": "TitledVideo",
@@ -190,7 +189,7 @@ class RemotionBridge:
 
     def export_props_json(
         self,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         output_path: Path | str,
     ) -> Path:
         """导出 props JSON 供 Remotion CLI 使用。"""
@@ -201,10 +200,10 @@ class RemotionBridge:
         logger.info(f"Remotion props 已导出: {output_path}")
         return output_path
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取 Remotion 组件统计。"""
         comps = self.list_components()
-        by_type: Dict[str, int] = {}
+        by_type: dict[str, int] = {}
         for c in comps:
             by_type[c.type] = by_type.get(c.type, 0) + 1
         return {

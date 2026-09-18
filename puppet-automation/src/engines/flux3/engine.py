@@ -45,7 +45,7 @@ class Flux3Engine:
         self,
         base_url: str = "https://api.bfl.ml/v1",
         api_key: str = "",
-        output_dir: Optional[Path] = None,
+        output_dir: Path | None = None,
         timeout: int = 1800,
         poll_interval: float = 5.0,
     ) -> None:
@@ -54,8 +54,8 @@ class Flux3Engine:
         self.output_dir = Path(output_dir) if output_dir else Path("data/flux3_output")
         self.timeout = timeout
         self.poll_interval = poll_interval
-        self._client: Optional[httpx.AsyncClient] = None
-        self._available: Optional[bool] = None
+        self._client: httpx.AsyncClient | None = None
+        self._available: bool | None = None
 
     @property
     def client(self) -> httpx.AsyncClient:
@@ -181,7 +181,7 @@ class Flux3Engine:
         self,
         job_id: str,
         endpoint: str = "results",
-        interval: Optional[float] = None,
+        interval: float | None = None,
     ) -> dict[str, Any]:
         """轮询任务直到完成。返回最终结果字典。"""
         poll_interval = interval or self.poll_interval
@@ -212,8 +212,8 @@ class Flux3Engine:
         self,
         url: str,
         save_dir: Path,
-        filename: Optional[str] = None,
-    ) -> Optional[Path]:
+        filename: str | None = None,
+    ) -> Path | None:
         """下载生成结果到本地。"""
         try:
             resp = await self.client.get(url)
@@ -239,9 +239,9 @@ class Flux3Engine:
         model: str = "flux-1.1-pro",
         width: int = 1024,
         height: int = 1024,
-        steps: Optional[int] = None,
-        seed: Optional[int] = None,
-        output_dir: Optional[Path] = None,
+        steps: int | None = None,
+        seed: int | None = None,
+        output_dir: Path | None = None,
         **kwargs: Any,
     ) -> EngineResult:
         """文生图。
@@ -324,11 +324,11 @@ class Flux3Engine:
         prompt: str,
         model: str = "flux-1.1-pro",
         strength: float = 0.7,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
-        steps: Optional[int] = None,
-        seed: Optional[int] = None,
-        output_dir: Optional[Path] = None,
+        width: int | None = None,
+        height: int | None = None,
+        steps: int | None = None,
+        seed: int | None = None,
+        output_dir: Path | None = None,
         **kwargs: Any,
     ) -> EngineResult:
         """图生图。
@@ -431,10 +431,10 @@ class Flux3Engine:
         height: int = 720,
         duration: float = 20.0,
         fps: int = 24,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         audio_enabled: bool = True,
-        audio_prompt: Optional[str] = None,
-        output_dir: Optional[Path] = None,
+        audio_prompt: str | None = None,
+        output_dir: Path | None = None,
         **kwargs: Any,
     ) -> EngineResult:
         """文生视频（Flux 3 原生音画同步）。
@@ -535,10 +535,10 @@ class Flux3Engine:
         model: str = "flux-3",
         duration: float = 20.0,
         fps: int = 24,
-        seed: Optional[int] = None,
+        seed: int | None = None,
         audio_enabled: bool = True,
-        audio_prompt: Optional[str] = None,
-        output_dir: Optional[Path] = None,
+        audio_prompt: str | None = None,
+        output_dir: Path | None = None,
         **kwargs: Any,
     ) -> EngineResult:
         """图生视频。
@@ -644,8 +644,8 @@ class Flux3Engine:
         prompt: str,
         model: str = "flux-3-audio",
         duration: float = 10.0,
-        seed: Optional[int] = None,
-        output_dir: Optional[Path] = None,
+        seed: int | None = None,
+        output_dir: Path | None = None,
         **kwargs: Any,
     ) -> EngineResult:
         """纯音频生成。
@@ -718,7 +718,7 @@ class Flux3Engine:
     # Internal helpers
     # ============================================================
 
-    async def _upload_image(self, image_path: Path) -> Optional[str]:
+    async def _upload_image(self, image_path: Path) -> str | None:
         """上传图像到 API，返回可访问的 URL。
 
         不同 Provider 上传方式不同，这里提供标准 multipart 上传实现。
@@ -741,7 +741,7 @@ class Flux3Engine:
     def _extract_output_url(
         data: dict[str, Any],
         media_type: str = "image",
-    ) -> Optional[str]:
+    ) -> str | None:
         """从 API 响应中提取输出文件 URL。
 
         兼容多种响应格式：

@@ -19,7 +19,7 @@ from core.fx.style_preset_engine import (
     get_style_preset_engine,
 )
 
-_TEMPLATE_BODY: Dict[str, Any] = {
+_TEMPLATE_BODY: dict[str, Any] = {
     "_meta": {"version": "1.0", "note": "test"},
     "templates": {
         "amv_highenergy": {

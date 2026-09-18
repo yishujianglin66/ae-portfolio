@@ -4,13 +4,14 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
-import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from pathlib import Path
+
 from ae.preset_system import PresetSystem
 
 

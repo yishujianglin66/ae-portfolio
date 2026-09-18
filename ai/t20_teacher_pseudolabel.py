@@ -25,8 +25,8 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from ai.clip_ensemble import EnsembleKB, BB_TAGS
 from ai.clip_backbones import BackboneRegistry, ensemble_frame_scores
+from ai.clip_ensemble import BB_TAGS, EnsembleKB
 
 CORPUS_META = Path(r"D:\aot_corpus\corpus_meta.json")
 CORPUS_FRAMES = Path(r"D:\aot_corpus\frames")

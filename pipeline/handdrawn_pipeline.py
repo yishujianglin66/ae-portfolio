@@ -71,20 +71,20 @@ class HanddrawnPipeline:
     4. FFmpeg — 最终编码
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         from core.handdrawn_styler import HanddrawnStyler
         self._styler = HanddrawnStyler(config)
 
     def produce(
         self,
-        keyframes: List[str],
+        keyframes: list[str],
         output_path: str = "output_handdrawn.mp4",
         style: str = "pencil_sketch",
         fps: int = 24,
         interpolation_factor: int = 4,
-        params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """端到端手书动画生产
 
         Args:
@@ -151,8 +151,8 @@ class HanddrawnPipeline:
         }
 
     def _stylize_keyframes(
-        self, keyframes: List[str], output_dir: Path, config: HanddrawnConfig
-    ) -> List[str]:
+        self, keyframes: list[str], output_dir: Path, config: HanddrawnConfig
+    ) -> list[str]:
         """风格化关键帧"""
         stylized = []
         for i, kf in enumerate(keyframes):
@@ -167,8 +167,8 @@ class HanddrawnPipeline:
         return stylized
 
     def _interpolate_frames(
-        self, frames: List[str], output_dir: Path, config: HanddrawnConfig
-    ) -> List[str]:
+        self, frames: list[str], output_dir: Path, config: HanddrawnConfig
+    ) -> list[str]:
         """中间帧补全
 
         策略:
@@ -247,8 +247,8 @@ class HanddrawnPipeline:
         return all_frames
 
     def _postprocess_frames(
-        self, frames: List[str], output_dir: Path, config: HanddrawnConfig
-    ) -> List[str]:
+        self, frames: list[str], output_dir: Path, config: HanddrawnConfig
+    ) -> list[str]:
         """后处理: 线条抖动 + 纹理"""
         if config.line_jitter <= 0:
             return frames
@@ -257,8 +257,8 @@ class HanddrawnPipeline:
         for i, frame_path in enumerate(frames):
             out_path = str(output_dir / f"final_{i:05d}.png")
             try:
-                from PIL import Image, ImageFilter
                 import numpy as np
+                from PIL import Image, ImageFilter
 
                 img = Image.open(frame_path).convert("RGB")
                 arr = np.array(img, dtype=np.int16)
@@ -281,8 +281,8 @@ class HanddrawnPipeline:
         return final
 
     def _encode_output(
-        self, frames: List[str], output_path: str, config: HanddrawnConfig
-    ) -> Dict[str, Any]:
+        self, frames: list[str], output_path: str, config: HanddrawnConfig
+    ) -> dict[str, Any]:
         """编码最终输出"""
         if not frames:
             return {"status": "error", "message": "No frames to encode"}
@@ -322,7 +322,7 @@ class HanddrawnPipeline:
             except Exception as e:
                 return {"status": "error", "message": str(e)}
 
-    def _frames_to_video(self, frames: List[str], output_path: str, fps: int = 4):
+    def _frames_to_video(self, frames: list[str], output_path: str, fps: int = 4):
         """帧序列 → 视频 (用于 RIFE 输入)"""
         with tempfile.TemporaryDirectory() as tmpdir:
             for i, f in enumerate(frames):
@@ -337,7 +337,7 @@ class HanddrawnPipeline:
             ]
             subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
-    def _extract_frames(self, video_path: str, output_dir: Path, prefix: str = "frame") -> List[str]:
+    def _extract_frames(self, video_path: str, output_dir: Path, prefix: str = "frame") -> list[str]:
         """视频 → 帧序列"""
         cmd = [
             "ffmpeg", "-y",

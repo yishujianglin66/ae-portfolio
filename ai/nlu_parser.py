@@ -1,6 +1,6 @@
-from dataclasses import dataclass, field
-from typing import Dict, Any, Optional, List
 import re
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 
 class IntentType:
@@ -21,15 +21,15 @@ class ConfidenceThresholds:
 
 @dataclass
 class IntentSlots:
-    effectName: Optional[str] = None
-    targetLayer: Optional[str] = None
-    animType: Optional[str] = None
-    paramName: Optional[str] = None
-    adjustDirection: Optional[str] = None
-    adjustAmount: Optional[str] = None
-    styleName: Optional[str] = None
-    color: Optional[str] = None
-    temporal: Optional[str] = None
+    effectName: str | None = None
+    targetLayer: str | None = None
+    animType: str | None = None
+    paramName: str | None = None
+    adjustDirection: str | None = None
+    adjustAmount: str | None = None
+    styleName: str | None = None
+    color: str | None = None
+    temporal: str | None = None
 
 
 @dataclass
@@ -38,14 +38,14 @@ class Intent:
     confidence: float
     slots: IntentSlots
     rawInput: str
-    matchedPattern: Optional[str] = None
+    matchedPattern: str | None = None
 
 
 @dataclass
 class ProjectContext:
-    activeCompName: Optional[str] = None
-    selectedLayers: Optional[List[Dict[str, Any]]] = None
-    compResolution: Optional[List[int]] = None
+    activeCompName: str | None = None
+    selectedLayers: list[dict[str, Any]] | None = None
+    compResolution: list[int] | None = None
     compFrameRate: int = 30
     compDuration: float = 5.0
 
@@ -232,7 +232,7 @@ class NLUParser:
         m = re.search(r"(?:在|at|from|to)?\s*(开头|结尾|中间|start|end|middle|\d+\s*(?:秒|s))", raw, re.IGNORECASE)
         return m.group(1).strip() if m else None
 
-    def parse(self, input_text: str, context: Optional[ProjectContext] = None) -> Intent:
+    def parse(self, input_text: str, context: ProjectContext | None = None) -> Intent:
         trimmed = input_text.strip()
         if not trimmed:
             return Intent(
@@ -297,7 +297,7 @@ class NLUParser:
     # ------------------------------------------------------------------
 
     def parse_enhanced(self, input_text: str,
-                       context: Optional[ProjectContext] = None) -> Intent:
+                       context: ProjectContext | None = None) -> Intent:
         """
         LLM 增强版解析 — 先用本地正则，LLM 可用时补充理解
         失败时自动降级为纯本地解析
@@ -308,7 +308,7 @@ class NLUParser:
 
         # 尝试导入 LLM 网关和记忆系统
         try:
-            from core.llm_gateway import llm_gateway, TaskType
+            from core.llm_gateway import TaskType, llm_gateway
             from core.memory_store import memory_store
         except ImportError:
             return local_intent
@@ -411,6 +411,7 @@ class NLUParser:
 
 
 import re as _re_module
+
 _json_re = _re_module.compile(r'\{[\s\S]*\}')
 
 

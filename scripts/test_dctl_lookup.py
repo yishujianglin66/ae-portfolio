@@ -1,8 +1,9 @@
 """测试 DCTL 预设查找"""
 import sys
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
-from integrations.davinci_fuscript import find_dctl_for_preset, find_lut_for_preset, DCTL_PRESET_MAP
+from integrations.davinci_fuscript import DCTL_PRESET_MAP, find_dctl_for_preset, find_lut_for_preset
 
 print("=== DCTL 预设查找测试 ===")
 for name in DCTL_PRESET_MAP:

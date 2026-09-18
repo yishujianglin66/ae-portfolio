@@ -11,12 +11,10 @@ style_copy 离线逻辑单测
 全部离线、确定性、可复现。
 """
 import bootstrap  # noqa: F401  确保项目子目录在 sys.path
-
 from style_copy.ffmpeg_generator import FFmpegCommandGenerator
-from style_copy.tool_orchestrator import ToolOrchestrator
-from style_copy.style_analyzer import LocalStyleAnalyzer
 from style_copy.input_parser import InputParser
-
+from style_copy.style_analyzer import LocalStyleAnalyzer
+from style_copy.tool_orchestrator import ToolOrchestrator
 
 # ---------------------------------------------------------------------------
 # FFmpegCommandGenerator

@@ -70,7 +70,7 @@ def create_bridge_dir() -> bool:
         test_file = BRIDGE_DIR / "test_write.tmp"
         test_file.write_text("test", encoding="utf-8")
         test_file.unlink()
-        print(f"  ✅ 读写权限验证通过")
+        print("  ✅ 读写权限验证通过")
 
         return True
     except Exception as e:
@@ -87,7 +87,7 @@ def verify_mcp_server() -> bool:
 
     dist_index = MCP_SERVER / "dist" / "index.js"
     if not dist_index.exists():
-        print(f"  ⚠️  dist 目录不存在，尝试构建...")
+        print("  ⚠️  dist 目录不存在，尝试构建...")
         return False
 
     print(f"  ✅ 构建产物存在: {dist_index}")
@@ -133,7 +133,7 @@ def main() -> int:
     print("  1. 打开 After Effects 2025")
     print(f"  2. 文件 → 脚本 → 运行脚本文件 → {BRIDGE_DIR_NAME}/bridge_listener.jsx")
     print("  3. 在 IDE 中配置 MCP Server，指向:")
-    print(f"     command: node")
+    print("     command: node")
     print(f"     args: [{str(dist_index)!r}]")
 
     return 0 if all_ok else 1

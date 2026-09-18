@@ -13,8 +13,11 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.audiovisual_correlator import (
-    AudioVisualCorrelator, BeatCutAlignment, OffBeatSegment,
-    CutSuggestion, SyncAnalysisResult,
+    AudioVisualCorrelator,
+    BeatCutAlignment,
+    CutSuggestion,
+    OffBeatSegment,
+    SyncAnalysisResult,
 )
 
 

@@ -41,7 +41,7 @@ def log(msg: str, level: str = "INFO"):
 # ================================================================
 
 # 情绪 → 推荐镜头参数
-EMOTION_CAMERA_MAP: Dict[str, Dict[str, Any]] = {
+EMOTION_CAMERA_MAP: dict[str, dict[str, Any]] = {
     # === 高燃/战斗 ===
     "intense": {
         "camera": ["shake", "quick_pan", "tracking", "orbit"],
@@ -146,7 +146,7 @@ EMOTION_CAMERA_MAP: Dict[str, Dict[str, Any]] = {
 }
 
 # 转场兼容性矩阵: (前一段情绪, 后一段情绪) → 推荐转场
-TRANSITION_COMPAT: Dict[Tuple[str, str], List[str]] = {
+TRANSITION_COMPAT: dict[tuple[str, str], list[str]] = {
     ("calm", "intense"): ["smash_cut", "impact", "flash"],
     ("intense", "calm"): ["fade", "dissolve", "blur_transition"],
     ("build", "climax"): ["impact", "flash_white", "zoom_through"],
@@ -160,7 +160,7 @@ TRANSITION_COMPAT: Dict[Tuple[str, str], List[str]] = {
 }
 
 # 镜头连续性规则: 避免不自然的景别跳跃
-SHOT_SCALE_ADJACENT: Dict[str, List[str]] = {
+SHOT_SCALE_ADJACENT: dict[str, list[str]] = {
     "extreme_wide": ["wide", "extreme_wide"],
     "wide": ["medium", "wide", "extreme_wide"],
     "medium": ["closeup", "medium", "wide"],
@@ -186,8 +186,8 @@ class CinematicIntelligence:
     # ----------------------------------------------------------------
 
     def recommend_shot(self, mood: str, content: str = "",
-                       prev_shot: Optional[Dict] = None,
-                       beat_time: Optional[float] = None) -> Dict[str, Any]:
+                       prev_shot: dict | None = None,
+                       beat_time: float | None = None) -> dict[str, Any]:
         """为单个段落推荐最优镜头参数
         
         Args:
@@ -224,7 +224,7 @@ class CinematicIntelligence:
         }
 
     def recommend_transition(self, prev_mood: str, curr_mood: str,
-                             prev_content: str = "", curr_content: str = "") -> Dict[str, Any]:
+                             prev_content: str = "", curr_content: str = "") -> dict[str, Any]:
         """推荐两段之间的最优转场"""
         key = (prev_mood, curr_mood)
         transitions = self.transition_compat.get(key, ["cut", "dissolve"])
@@ -239,7 +239,7 @@ class CinematicIntelligence:
         else:
             return {"type": transitions[0], "duration": 0.3, "confidence": 0.8}
 
-    def optimize_script(self, script_dict: Dict) -> Dict:
+    def optimize_script(self, script_dict: dict) -> dict:
         """优化整个剧本的镜头语言
         
         输入: EditScript.to_dict() 格式
@@ -281,7 +281,7 @@ class CinematicIntelligence:
         }
         return result
 
-    def analyze_continuity(self, segments: List[Dict]) -> List[Dict]:
+    def analyze_continuity(self, segments: list[dict]) -> list[dict]:
         """检查镜头连续性，报告可能不自然的跳跃"""
         issues = []
         for i in range(1, len(segments)):
@@ -324,7 +324,7 @@ class CinematicIntelligence:
     #  内部方法
     # ----------------------------------------------------------------
 
-    def _select_camera(self, candidates: List[str], content: str) -> str:
+    def _select_camera(self, candidates: list[str], content: str) -> str:
         """从候选镜头中选择最适合的"""
         if not candidates:
             return "static"
@@ -348,15 +348,15 @@ class CinematicIntelligence:
 
         return candidates[0]
 
-    def _select_scale(self, candidates: List[str],
-                      prev_shot: Optional[Dict]) -> str:
+    def _select_scale(self, candidates: list[str],
+                      prev_shot: dict | None) -> str:
         """选择景别"""
         if not candidates:
             return "medium"
         return candidates[0]
 
-    def _select_duration(self, duration_range: Tuple[float, float],
-                         beat_time: Optional[float] = None) -> float:
+    def _select_duration(self, duration_range: tuple[float, float],
+                         beat_time: float | None = None) -> float:
         """选择时长，如果有节拍信息则对齐"""
         min_d, max_d = duration_range
         if beat_time is not None:
@@ -366,8 +366,8 @@ class CinematicIntelligence:
             return max(min_d, min(max_d, optimal))
         return (min_d + max_d) / 2
 
-    def _ensure_continuity(self, prev_shot: Dict, camera: str,
-                           scale: str) -> Tuple[str, str]:
+    def _ensure_continuity(self, prev_shot: dict, camera: str,
+                           scale: str) -> tuple[str, str]:
         """确保镜头连续性，避免不自然跳跃"""
         prev_scale = prev_shot.get("scale", "medium")
         valid_scales = self.scale_adjacent.get(prev_scale, [])

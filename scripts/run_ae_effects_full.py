@@ -4,7 +4,11 @@
 自动启动AE → 创建合成 → 导入V17 → 文字动画 → 转场 → 渲染输出
 全部通过 execute_script (JSX) 实现
 """
-import os, sys, time, subprocess, json
+import json
+import os
+import subprocess
+import sys
+import time
 
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
@@ -29,7 +33,7 @@ def launch_ae():
     if is_running("AfterFX.exe"):
         log("AE 已在运行")
         return True
-    log(f"启动 AE...")
+    log("启动 AE...")
     subprocess.Popen([AE_EXE], shell=True)
     for i in range(90):
         time.sleep(1)

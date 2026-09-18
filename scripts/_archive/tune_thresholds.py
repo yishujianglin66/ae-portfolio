@@ -24,9 +24,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # repo root: _arch
 from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 try:
-    from scripts.train_anime_camera_lora import COARSE_LABELS, COARSE_MAP, NUM_FRAMES, IMG_SIZE  # noqa: E402
+    from scripts.train_anime_camera_lora import COARSE_LABELS, COARSE_MAP, IMG_SIZE, NUM_FRAMES  # noqa: E402
 except ImportError:  # 云端单文件执行
-    from train_anime_camera_lora import COARSE_LABELS, COARSE_MAP, NUM_FRAMES, IMG_SIZE  # noqa: E402
+    from train_anime_camera_lora import COARSE_LABELS, COARSE_MAP, IMG_SIZE, NUM_FRAMES  # noqa: E402
 
 MODEL_DIR = r"D:\AE-Data\Models\VideoMAE-MovieShots\movement"
 LORA_DIR = str(PROJECT_ROOT / "models" / "output" / "anime_camera_lora")
@@ -55,7 +55,7 @@ def load_frames(clip: str) -> np.ndarray:
     return frames
 
 
-def get_probs(model, clip: str, device) -> Optional[np.ndarray]:
+def get_probs(model, clip: str, device) -> np.ndarray | None:
     """手动归一化 (与训练一致, 绕开 processor 版本兼容问题)。"""
     import torch
     frames = load_frames(clip)  # (T,3,224,224) float32 0-255
@@ -84,8 +84,8 @@ def main() -> int:
 
     import torch
     device = get_device()
-    from transformers import VideoMAEForVideoClassification
     from peft import PeftModel
+    from transformers import VideoMAEForVideoClassification
     base = VideoMAEForVideoClassification.from_pretrained(args.model_dir, local_files_only=True)
     base.to(device)
     model = PeftModel.from_pretrained(base, args.lora_dir)
@@ -98,8 +98,8 @@ def main() -> int:
     samples = random.sample(labels, 300)
     print(f"调优集: {len(samples)} 条 (VLM 一致性)")
 
-    probs_list: List[np.ndarray] = []
-    truths: List[int] = []
+    probs_list: list[np.ndarray] = []
+    truths: list[int] = []
     for s in samples:
         coarse = COARSE_MAP.get(s["movement_label"])
         if coarse is None:

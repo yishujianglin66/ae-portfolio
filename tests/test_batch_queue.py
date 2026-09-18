@@ -11,22 +11,22 @@
 """
 import os
 import sys
-import time
 import threading
+import time
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from batch_queue import (
-    TaskStatus,
-    Task,
-    ProgressContext,
     BatchQueue,
     BatchResult,
-    get_default_queue,
+    ProgressContext,
+    Task,
+    TaskStatus,
     example_task,
+    get_default_queue,
 )
-
 
 # ============================================================================
 # TaskStatus 枚举测试

@@ -1,5 +1,8 @@
 """快速验证 AE Bridge 渲染路径"""
-import sys, os, json, time
+import json
+import os
+import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -7,6 +10,7 @@ sys.path.insert(0, str(ROOT))
 os.chdir(ROOT)
 
 from pipeline.stages.execution import ExecutionStage
+
 
 class FakeConfig:
     output_dir = "output_p0_e2e/ae_test"

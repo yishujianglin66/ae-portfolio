@@ -93,7 +93,7 @@ class EvolutionEvaluator:
 
     def evaluate_pipeline_result(
         self,
-        pipeline_result: Dict[str, Any],
+        pipeline_result: dict[str, Any],
         scope: str = "",
     ) -> EvaluationResult:
         """评测一次管线运行结果
@@ -106,7 +106,7 @@ class EvolutionEvaluator:
             EvaluationResult
         """
         run_id = pipeline_result.get("run_id", "unknown")
-        notes: List[str] = []
+        notes: list[str] = []
 
         # ---- 通道 1: 确定性指标评分 ----
         det_score, det_checks = self._score_deterministic(pipeline_result)
@@ -180,7 +180,7 @@ class EvolutionEvaluator:
     # ----------------------------------------------------------------
 
     def _score_deterministic(
-        self, pr: Dict[str, Any]
+        self, pr: dict[str, Any]
     ) -> tuple:
         """确定性指标评分（0-100）
 
@@ -190,7 +190,7 @@ class EvolutionEvaluator:
         3. pipeline_success (25%): 管线整体 status
         4. output_exists (15%): 输出文件是否存在
         """
-        checks: Dict[str, Any] = {}
+        checks: dict[str, Any] = {}
 
         # 1. 质检分 — 兼容两种结果格式:
         #    - 真实 PipelineResult.to_dict(): 顶层 quality_score（实测校准 2026-08）
@@ -250,9 +250,9 @@ class EvolutionEvaluator:
     #  P3-C: 风格属性匹配（确定性测量，消费 expected_output）
     # ----------------------------------------------------------------
 
-    def _measure_video_stats(self, path: str) -> Dict[str, Any]:
+    def _measure_video_stats(self, path: str) -> dict[str, Any]:
         """ffmpeg signalstats 实测亮度/饱和度/色温/对比度（永不抛异常）"""
-        stats: Dict[str, Any] = {"measured": False}
+        stats: dict[str, Any] = {"measured": False}
         if not path or not os.path.isfile(path):
             return stats
         ffmpeg = shutil.which("ffmpeg") or r"C:\ffmpeg\bin\ffmpeg.exe"
@@ -267,7 +267,7 @@ class EvolutionEvaluator:
             )
             blob = (r.stderr or "") + (r.stdout or "")
 
-            def _avg(key: str) -> Optional[float]:
+            def _avg(key: str) -> float | None:
                 vals = [float(v) for v in re.findall(r"\b" + key + r"=(\d+(?:\.\d+)?)", blob)]
                 return sum(vals) / len(vals) if vals else None
 
@@ -321,7 +321,7 @@ class EvolutionEvaluator:
             logger.debug("[Evaluator] bright_ratio failed: %s", e)
         return stats
 
-    def _score_style_match(self, pr: Dict[str, Any], output_path: str) -> Dict[str, Any]:
+    def _score_style_match(self, pr: dict[str, Any], output_path: str) -> dict[str, Any]:
         """风格属性匹配评分 (0-100)
 
         规则:
@@ -330,7 +330,7 @@ class EvolutionEvaluator:
         - 无断言且非黑屏 → 中性 50（不奖不重罚）
         - 失分归因写入 failures 供 Optimizer 消费
         """
-        detail: Dict[str, Any] = {
+        detail: dict[str, Any] = {
             "score": 0.0, "black_screen": False, "assertions": {},
             "failures": [], "video_stats": {},
         }
@@ -350,7 +350,7 @@ class EvolutionEvaluator:
             detail["failures"].append("产物黑屏(YAVG<20): style_match=0")
             return detail
 
-        sub_scores: List[float] = []
+        sub_scores: list[float] = []
         sat = vstats.get("satavg")
         u, v = vstats.get("uavg"), vstats.get("vavg")
         cr = vstats.get("contrast_range")
@@ -446,13 +446,13 @@ class EvolutionEvaluator:
     #  产物校验 (P2: 真实渲染产物接入)
     # ----------------------------------------------------------------
 
-    def _verify_artifact(self, output_path: str) -> Dict[str, Any]:
+    def _verify_artifact(self, output_path: str) -> dict[str, Any]:
         """校验渲染产物真实性 — ffprobe 实测时长/分辨率/编码
 
         适用于任何真实渲染引擎的产物 (ae_render/aerender/real_mix/ffmpeg)。
         永不抛异常；ffprobe 不可用时退化为文件大小判断。
         """
-        info: Dict[str, Any] = {
+        info: dict[str, Any] = {
             "exists": False, "size_mb": 0.0, "duration_sec": 0.0,
             "width": 0, "height": 0, "codec": "", "valid": False, "reason": "",
         }
@@ -510,7 +510,7 @@ class EvolutionEvaluator:
     # ----------------------------------------------------------------
 
     def _score_rubrics(
-        self, pr: Dict[str, Any], scope: str
+        self, pr: dict[str, Any], scope: str
     ) -> tuple:
         """LLM 语义评分 — 委托给 RubricsScorer (P1: 多次采样取中位数)
 
@@ -524,7 +524,7 @@ class EvolutionEvaluator:
         result = scorer.score(execution_summary=summary, scope=scope)
         return result.score, result.tokens_used, result.cost_usd, list(result.notes)
 
-    def _build_execution_summary(self, pr: Dict[str, Any]) -> str:
+    def _build_execution_summary(self, pr: dict[str, Any]) -> str:
         """构建管线执行摘要（供 LLM 评审）"""
         lines = [
             f"- 运行ID: {pr.get('run_id', 'unknown')}",
@@ -590,7 +590,7 @@ class EvolutionEvaluator:
     #  评测基准题目加载（P0 手动题目，P1 自动生成）
     # ----------------------------------------------------------------
 
-    def load_benchmark_tasks(self, split: str = "train", task_type: str = "") -> List[Dict[str, Any]]:
+    def load_benchmark_tasks(self, split: str = "train", task_type: str = "") -> list[dict[str, Any]]:
         """加载评测基准题目
 
         Args:
@@ -603,7 +603,7 @@ class EvolutionEvaluator:
         split_dir = self._benchmark_dir / split
         if not split_dir.exists():
             return []
-        tasks: List[Dict[str, Any]] = []
+        tasks: list[dict[str, Any]] = []
         for json_file in sorted(split_dir.glob("*.json")):
             data = read_json(json_file, [])
             if not isinstance(data, list):
@@ -619,7 +619,7 @@ class EvolutionEvaluator:
 #  全局单例
 # ============================================================================
 
-_global_evaluator: Optional[EvolutionEvaluator] = None
+_global_evaluator: EvolutionEvaluator | None = None
 
 
 def get_evolution_evaluator(

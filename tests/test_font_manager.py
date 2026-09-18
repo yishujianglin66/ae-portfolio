@@ -2,14 +2,14 @@
 import json
 import os
 import sys
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.font_manager import FontManager, get_font_manager
-
 
 # ============ 测试用配置数据 ============
 

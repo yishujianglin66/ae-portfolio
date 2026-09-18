@@ -52,7 +52,7 @@ BEAT_SFX_MAP = {
 
 # ① 瞬态前置补偿 (ms): 音效类型 → 提前量
 # impact 瞬态快, 只需微提前; whoosh/riser 需要铺垫时间
-PRE_COMP_MS: Dict[str, float] = {
+PRE_COMP_MS: dict[str, float] = {
     "impact": 45,
     "whoosh": 300,
     "riser":  350,
@@ -74,7 +74,7 @@ SUB_BOOM_LEAD_MS = 20    # sub-boom 比主 impact 提前 20ms
 # adelay 不截尾 → 几十条长尾全程叠加成"持续音墙": 掩蔽 BGM 鼓点 +
 # 峰值持续撞限幅器把鼓瞬态压平 (实测终版打击乐占比 0.056→0.003)。
 # 修复: 找文件能量峰, 只取 [峰前 head_s, 峰后 tail_s]。
-SFX_TAIL_S: Dict[str, float] = {
+SFX_TAIL_S: dict[str, float] = {
     "impact": 1.2,   # 撞击+自然衰减尾
     "whoosh": 0.9,   # 划过+短尾
     "riser":  1.5,   # 上升需要完整铺垫
@@ -96,7 +96,7 @@ def _load_index() -> dict:
 
 
 def shorten_sfx(path: str, tail_s: float, head_s: float = _SHORT_HEAD_S,
-                pool: str = "") -> Optional[str]:
+                pool: str = "") -> str | None:
     """裁出音效能量峰片段 (峰前 head_s → 峰后 tail_s), 缓存复用。
 
     返回 44.1k 双声道 wav 路径; 失败返回 None (调用方回退原文件)。
@@ -148,7 +148,7 @@ def shorten_sfx(path: str, tail_s: float, head_s: float = _SHORT_HEAD_S,
     return None
 
 
-def _ensure_sub_boom() -> Optional[str]:
+def _ensure_sub_boom() -> str | None:
     """生成 70Hz sub-boom (20ms attack + 150ms exp decay), 缓存到 data/sfx/_sub_boom.wav。"""
     path = PROJECT / "data" / "sfx" / "_sub_boom.wav"
     if path.exists():
@@ -170,7 +170,7 @@ def _ensure_sub_boom() -> Optional[str]:
 # ────────────────────────────────────────────────────────────────
 # 力度曲线: 段落能量 → 增益缩放
 # ────────────────────────────────────────────────────────────────
-def _velocity_scale(sections: Optional[Sequence[dict]], t: float,
+def _velocity_scale(sections: Sequence[dict] | None, t: float,
                     base_gain: float) -> float:
     """④ 根据段落能量缩放增益。
 
@@ -200,7 +200,7 @@ def _velocity_scale(sections: Optional[Sequence[dict]], t: float,
 
 
 def _pick_file(pool: list, last_pick: dict, pool_name: str,
-               rng: random.Random) -> Optional[str]:
+               rng: random.Random) -> str | None:
     """从池中选文件, 轮换避免连续重复。"""
     if not pool:
         return None
@@ -213,10 +213,10 @@ def _pick_file(pool: list, last_pick: dict, pool_name: str,
     return pick
 
 
-def plan_sfx(beat_events: List[dict], seed: int = 42,
-             pools_override: Optional[dict] = None,
-             sections: Optional[Sequence[dict]] = None,
-             onset_events: Optional[Sequence[dict]] = None) -> List[Tuple[str, float, float]]:
+def plan_sfx(beat_events: list[dict], seed: int = 42,
+             pools_override: dict | None = None,
+             sections: Sequence[dict] | None = None,
+             onset_events: Sequence[dict] | None = None) -> list[tuple[str, float, float]]:
     """节拍事件 → SFX 计划 [(file, t_start, gain)]。
 
     增强版 (v2):
@@ -232,9 +232,9 @@ def plan_sfx(beat_events: List[dict], seed: int = 42,
     """
     pools = pools_override or _load_index()
     rng = random.Random(seed)
-    plan: List[Tuple[str, float, float]] = []
+    plan: list[tuple[str, float, float]] = []
     last_pick: dict = {}
-    sub_boom_path: Optional[str] = None
+    sub_boom_path: str | None = None
 
     beat_times = [float(ev.get("time", 0)) for ev in beat_events]
 
@@ -292,9 +292,9 @@ def plan_sfx(beat_events: List[dict], seed: int = 42,
     return plan
 
 
-def mix_sfx(video_in: str, video_out: str, sfx_plan: List[Tuple[str, float, float]],
-            bgm: Optional[str] = None, bgm_gain: float = 0.7,
-            lut: Optional[dict] = None, crf: int = 17) -> bool:
+def mix_sfx(video_in: str, video_out: str, sfx_plan: list[tuple[str, float, float]],
+            bgm: str | None = None, bgm_gain: float = 0.7,
+            lut: dict | None = None, crf: int = 17) -> bool:
     """视频 + SFX (+可选 BGM) (+可选 LUT) 一次合成输出。
 
     每个音效 adelay 定位 + volume 增益, amix 归一混合; 视频流直通(可叠 LUT)。

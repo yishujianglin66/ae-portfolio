@@ -6,10 +6,10 @@ JSX代码生成模型训练主脚本
 运行方式：
     python models/train_jsx_code.py
 """
-import os
-import sys
 import json
 import logging
+import os
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -84,7 +84,7 @@ def train_model(train_path: str, val_path: str):
     """训练模型"""
     logger.info("=== Step 3: Training JSX code generation model ===")
     
-    from models.training.jsx_code_trainer import JSXCodeTrainingConfig, JSXCodeTrainer
+    from models.training.jsx_code_trainer import JSXCodeTrainer, JSXCodeTrainingConfig
     
     config = JSXCodeTrainingConfig(
         model_name="jsx-code-generator",
@@ -114,7 +114,7 @@ def train_model(train_path: str, val_path: str):
     logger.info("Starting training...")
     result = trainer.train()
     
-    logger.info(f"Training complete!")
+    logger.info("Training complete!")
     logger.info(f"  - Model path: {result.model_path}")
     logger.info(f"  - Train loss: {result.train_loss:.4f}")
     logger.info(f"  - Eval loss: {result.eval_loss:.4f}")
@@ -129,8 +129,8 @@ def evaluate_model(trainer, test_path: str):
     """评估模型"""
     logger.info("=== Step 4: Evaluating model ===")
     
-    from models.evaluation.jsx_code_evaluator import JSXCodeEvaluator
     from models.evaluation.evaluator_base import EvaluationConfig
+    from models.evaluation.jsx_code_evaluator import JSXCodeEvaluator
     
     eval_config = EvaluationConfig(
         eval_name="jsx_code_eval",
@@ -147,7 +147,7 @@ def evaluate_model(trainer, test_path: str):
     
     result = evaluator.evaluate()
     
-    logger.info(f"Evaluation complete!")
+    logger.info("Evaluation complete!")
     for metric, value in result.metrics.items():
         logger.info(f"  - {metric}: {value:.4f}")
     
@@ -158,7 +158,7 @@ def register_model(trainer, train_result, eval_result):
     """注册模型到仓库"""
     logger.info("=== Step 5: Registering model ===")
     
-    from models.deployment.model_registry import load_registry, ModelInfo
+    from models.deployment.model_registry import ModelInfo, load_registry
     
     registry = load_registry(sync=True)
     

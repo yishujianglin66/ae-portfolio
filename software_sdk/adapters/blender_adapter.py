@@ -6,8 +6,8 @@ software_sdk/adapters/blender_adapter.py - Blender 适配器
 """
 from __future__ import annotations
 
-import os
 import logging
+import os
 import subprocess
 import tempfile
 from typing import Any, Dict, List, Optional
@@ -35,8 +35,8 @@ class BlenderAdapter(BaseSoftwareAdapter):
 
     def __init__(
         self,
-        config: Optional[SoftwareConfig] = None,
-        logger: Optional[logging.Logger] = None,
+        config: SoftwareConfig | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         if config is None:
             config = SoftwareConfig(software=SoftwareType.BLENDER)
@@ -128,12 +128,12 @@ class BlenderAdapter(BaseSoftwareAdapter):
         finally:
             self._mark_task_end()
 
-    def _create_scene(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_scene(self, params: dict[str, Any]) -> dict[str, Any]:
         """创建 3D 场景。"""
         script = self._generate_scene_script(params)
         return self._run_blender_script(script)
 
-    def _import_model(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _import_model(self, params: dict[str, Any]) -> dict[str, Any]:
         """导入模型。"""
         model_path = params.get("path", "")
         if not model_path:
@@ -141,13 +141,13 @@ class BlenderAdapter(BaseSoftwareAdapter):
         script = self._generate_import_script(model_path, params)
         return self._run_blender_script(script)
 
-    def _render(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _render(self, params: dict[str, Any]) -> dict[str, Any]:
         """渲染输出。"""
         output_path = params.get("output", "render_output")
         script = self._generate_render_script(params)
         return self._run_blender_script(script)
 
-    def _export_for_ae(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_for_ae(self, params: dict[str, Any]) -> dict[str, Any]:
         """导出为 AE 兼容格式。"""
         self.logger.info("Exporting for AE...")
         return {
@@ -156,12 +156,12 @@ class BlenderAdapter(BaseSoftwareAdapter):
             "format": params.get("format", "fbx"),
         }
 
-    def _run_script(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_script(self, params: dict[str, Any]) -> dict[str, Any]:
         """运行自定义 Blender Python 脚本。"""
         script = params.get("script", "")
         return self._run_blender_script(script)
 
-    def _run_blender_script(self, script_content: str) -> Dict[str, Any]:
+    def _run_blender_script(self, script_content: str) -> dict[str, Any]:
         """运行 Blender Python 脚本。"""
         exe = self.config.executable_path
         if not exe:
@@ -198,7 +198,7 @@ class BlenderAdapter(BaseSoftwareAdapter):
             except OSError:
                 pass
 
-    def _generate_scene_script(self, params: Dict[str, Any]) -> str:
+    def _generate_scene_script(self, params: dict[str, Any]) -> str:
         """生成场景创建脚本。"""
         scene_name = params.get("name", "Scene")
         return f"""
@@ -213,7 +213,7 @@ print("Scene created: {scene_name}")
 """
 
     def _generate_import_script(
-        self, model_path: str, params: Dict[str, Any]
+        self, model_path: str, params: dict[str, Any]
     ) -> str:
         """生成模型导入脚本。"""
         ext = os.path.splitext(model_path)[1].lower()
@@ -236,7 +236,7 @@ import bpy
 print(f"Unsupported format: {ext}")
 """
 
-    def _generate_render_script(self, params: Dict[str, Any]) -> str:
+    def _generate_render_script(self, params: dict[str, Any]) -> str:
         """生成渲染脚本。"""
         output = params.get("output", "//render_####")
         fmt = params.get("format", "PNG")
@@ -250,7 +250,7 @@ print("Render complete")
 """
 
     @staticmethod
-    def _common_paths() -> List[str]:
+    def _common_paths() -> list[str]:
         """Blender 常见安装路径。"""
         return [
             r"D:\Blender\Blender 5.1.0\blender.exe",

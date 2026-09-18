@@ -17,10 +17,11 @@
 """
 from __future__ import annotations
 
-import sys
 import math
+import sys
 import traceback
-from mathutils import Vector, Matrix
+
+from mathutils import Matrix, Vector
 
 # 导入被测试模块
 # 必须将 puppeteer 模块所在目录加入 sys.path
@@ -653,7 +654,7 @@ def main() -> int:
     print(f"\n{'=' * 60}")
     print(f"  Result: {passed_count}/{test_count} passed")
     if passed_count == test_count:
-        print(f"  Status: ALL PASSED")
+        print("  Status: ALL PASSED")
     else:
         failed = [i+1 for i, r in enumerate(results) if not r]
         print(f"  Failed tests: {failed}")

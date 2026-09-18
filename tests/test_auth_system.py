@@ -12,37 +12,37 @@
 - AuthManager 认证管理器 (注册/登录/登出/刷新/权限)
 - 边界条件与异常容错
 """
+import json
 import os
 import sys
-import time
-import json
 import threading
+import time
+
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from auth_system import (
-    Role,
-    Permission,
+    MIN_SECRET_KEY_LENGTH,
     ROLE_PERMISSIONS,
-    hash_password,
-    verify_password,
-    jwt_encode,
-    jwt_decode,
-    _b64url_encode,
-    _b64url_decode,
-    _hmac_sha256,
-    User,
-    TokenPair,
     AuditLogEntry,
-    UserStore,
-    TokenBlacklist,
     AuditLogger,
     AuthManager,
+    Permission,
+    Role,
+    TokenBlacklist,
+    TokenPair,
+    User,
+    UserStore,
+    _b64url_decode,
+    _b64url_encode,
+    _hmac_sha256,
     _resolve_secret_key,
-    MIN_SECRET_KEY_LENGTH,
+    hash_password,
+    jwt_decode,
+    jwt_encode,
+    verify_password,
 )
-
 
 # ============================================================================
 # 角色与权限枚举测试

@@ -1,6 +1,6 @@
-import sys
-import os
 import importlib
+import os
+import sys
 
 style_copy = importlib.import_module("style_copy.workflow")
 StyleCopyWorkflow = style_copy.StyleCopyWorkflow

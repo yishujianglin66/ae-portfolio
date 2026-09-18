@@ -1,6 +1,7 @@
 """tests/test_style_card.py - 风格知识卡 schema 测试"""
 import json
-from knowledge.style_card import StyleCard, load_card, list_cards, get_taste_profile
+
+from knowledge.style_card import StyleCard, get_taste_profile, list_cards, load_card
 
 
 def test_load_amv_highenergy():

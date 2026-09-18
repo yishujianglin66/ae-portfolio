@@ -36,7 +36,7 @@ import numpy as np
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from core.torch_runtime import infer_ctx, get_device  # noqa: E402
+from core.torch_runtime import get_device, infer_ctx  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger("anime_camera_lora")
@@ -88,7 +88,7 @@ REVERSE_PAIR = {
 def load_trainable(labels_path: str, min_conf: float = 0.7,
                    schema: str = "coarse",
                    time_reverse: bool = True,
-                   data_root: str = "") -> List[Dict[str, Any]]:
+                   data_root: str = "") -> list[dict[str, Any]]:
     """加载 VLM 标注, 按 schema 映射标签, 过滤 complex/低置信。
 
     time_reverse=True: 对可逆方向对 (zoom_in↔zoom_out 等) 增加倒放样本,
@@ -157,8 +157,8 @@ def load_trainable(labels_path: str, min_conf: float = 0.7,
 class ClipDataset:
     """逐镜头视频数据集: 均匀采样 16 帧 → (T,3,224,224) uint8。"""
 
-    def __init__(self, samples: List[Dict[str, Any]], processor,
-                 label_to_idx: Dict[str, int]):
+    def __init__(self, samples: list[dict[str, Any]], processor,
+                 label_to_idx: dict[str, int]):
         self.samples = samples
         self.processor = processor
         self.label_to_idx = label_to_idx
@@ -166,7 +166,7 @@ class ClipDataset:
     def __len__(self) -> int:
         return len(self.samples)
 
-    def _load_frames(self, clip: str) -> Optional[np.ndarray]:
+    def _load_frames(self, clip: str) -> np.ndarray | None:
         from decord import VideoReader, cpu
         try:
             # 解码器原生缩放: 直接出 224x224, 比全尺寸解码+Resize 快数倍
@@ -187,7 +187,7 @@ class ClipDataset:
         except Exception:  # noqa: BLE001
             return None
 
-    def __getitem__(self, idx: int) -> Dict[str, Any]:
+    def __getitem__(self, idx: int) -> dict[str, Any]:
         s = self.samples[idx]
         frames = self._load_frames(s["clip"])
         if frames is None:
@@ -209,7 +209,7 @@ class ClipDataset:
         return {"pixel_values": frames, "labels": self.label_to_idx[s["coarse"]]}
 
 
-def _discover_lora_targets(model) -> List[str]:
+def _discover_lora_targets(model) -> list[str]:
     """动态发现 LoRA 目标模块 (VideoMAE 的 attention qkv/query/key/value)。"""
     targets = []
     for name, _ in model.named_modules():
@@ -223,7 +223,7 @@ def _discover_lora_targets(model) -> List[str]:
     return targets
 
 
-def _collate_batch(batch: List[Dict[str, Any]]) -> Dict[str, Any]:
+def _collate_batch(batch: list[dict[str, Any]]) -> dict[str, Any]:
     """模块级 collate (Windows spawn 多进程可 pickle)。
 
     手动归一化 (VideoMAE 预训练: ImageNet mean/std), 不依赖 processor 版本。

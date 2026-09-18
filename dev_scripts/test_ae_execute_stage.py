@@ -1,5 +1,7 @@
 """聚焦测试: AE Bridge 执行路径 (execute stage)"""
-import sys, os, time
+import os
+import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
@@ -7,6 +9,7 @@ sys.path.insert(0, str(ROOT))
 os.chdir(ROOT)
 
 from pipeline.stages.execution import ExecutionStage
+
 
 class FakeConfig:
     output_dir = "output_p0_e2e/ae_exec_test"
@@ -70,7 +73,7 @@ def main():
         print(f"   SUCCESS: AE render produced {project_path} ({size // 1024}KB)")
         return size > 10240
     elif exec_mode == "ffmpeg_fallback":
-        print(f"   FALLBACK: FFmpeg path used (AE render failed)")
+        print("   FALLBACK: FFmpeg path used (AE render failed)")
         if project_path and os.path.isfile(project_path):
             print(f"   But FFmpeg produced: {project_path}")
             return True

@@ -25,7 +25,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
+from unittest.mock import AsyncMock, MagicMock, PropertyMock, patch
 
 import pytest
 
@@ -40,7 +40,6 @@ from core.agent_reach_adapter import (
     SearchResponse,
     SearchResult,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

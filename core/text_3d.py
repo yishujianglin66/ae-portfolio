@@ -17,7 +17,7 @@ MIN_STACK_LAYERS = 12  # Z轴层叠最少层数 (验收标准)
 
 # 材质预设 → AE Material Options 参数
 # (Specular Intensity, Specular Shininess, Metal, Diffuse)
-MATERIAL_PRESETS: Dict[str, Dict[str, float]] = {
+MATERIAL_PRESETS: dict[str, dict[str, float]] = {
     "metal": {"specular": 90, "shininess": 40, "metal": 90, "diffuse": 70},
     "glass": {"specular": 100, "shininess": 80, "metal": 10, "diffuse": 40},
     "plastic": {"specular": 60, "shininess": 25, "metal": 0, "diffuse": 90},
@@ -26,7 +26,7 @@ MATERIAL_PRESETS: Dict[str, Dict[str, float]] = {
 }
 
 # 景深与能量挂钩: energy 0~1 → aperture/focusDistance
-def dof_params_from_energy(energy: float) -> Dict[str, float]:
+def dof_params_from_energy(energy: float) -> dict[str, float]:
     """能量越高 → 光圈越大(焦外越化), 对焦越贴近主体"""
     e = max(0.0, min(1.0, float(energy)))
     return {
@@ -54,7 +54,7 @@ class Text3DRenderer:
 
     @staticmethod
     def _ease(var: str, ease_speed: float, ease_infl: float,
-              n_keys: int) -> List[str]:
+              n_keys: int) -> list[str]:
         lines = []
         for k in range(1, n_keys + 1):
             lines.append(
@@ -188,7 +188,7 @@ class Text3DRenderer:
         return _validated_jsx("\n".join(parts))
 
     # ── 效果清单 (供矩阵扩展) ─────────────────────────────
-    def list_3d_styles(self) -> List[str]:
+    def list_3d_styles(self) -> list[str]:
         return ["z_stack_metal", "z_stack_glass", "z_stack_chrome",
                 "dof_high_energy", "dof_low_energy", "flip_y_in",
                 "flip_x_in", "flip_y_out", "segment_3d_full"]

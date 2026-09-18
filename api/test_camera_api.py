@@ -3,11 +3,13 @@
 运镜分类器API测试脚本
 """
 
-import requests
 import json
-import time
 import os
+import time
 from pathlib import Path
+
+import requests
+
 
 def test_api():
     """测试API接口"""

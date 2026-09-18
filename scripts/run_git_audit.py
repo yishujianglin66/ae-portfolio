@@ -1,6 +1,6 @@
-import subprocess
-import os
 import json
+import os
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -354,10 +354,10 @@ def main():
         real_commit_status = "ok"
     else:
         real_commit_status = "fail: " + (error_message[:60] if error_message else "unknown")
-    print(f"\nGIT AUDIT + EVIDENCE COMMIT DONE: output/evidence/git_audit_and_commits_20260818.json")
+    print("\nGIT AUDIT + EVIDENCE COMMIT DONE: output/evidence/git_audit_and_commits_20260818.json")
     print(f"  Modified files audit: {len(all_files_audit)}")
     print(f"  Real commit hash (Group A evidence): {commit_short_hash or '(none)'} (status: {real_commit_status})")
-    print(f"  Proposed commits ready: 2 (code_fixes + puppet_sync)")
+    print("  Proposed commits ready: 2 (code_fixes + puppet_sync)")
 
     if d_files:
         print(f"  ⚠ 风险提示: 组D有 {len(d_files)} 个未知文件，请人工审核！")

@@ -97,7 +97,7 @@ def _signal(path, cuts):
     y, sr = _video_audio(path)
     dur = len(y) / sr
     peak = float(np.max(np.abs(y))) if len(y) else 0.0
-    from numpy.fft import rfft, irfft
+    from numpy.fft import irfft, rfft
     F = rfft(y); fr = np.fft.rfftfreq(len(y), 1 / sr)
     F[(fr < 4000) | (fr > 12000)] = 0
     # 按时长归一: 否则 30s vs 180s 的整段能量总和不可比

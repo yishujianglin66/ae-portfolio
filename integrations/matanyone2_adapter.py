@@ -65,15 +65,15 @@ class MatAnyone2Adapter:
         "extract_alpha_sequence",
     ]
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._source_available = _MATANYONE2_DIR.is_dir()
         self._v1_available = _MATANYONE_V1_DIR.is_dir()
         self._simulate = not self._source_available
         self._env_check = self._check_environment()
 
-    def _check_environment(self) -> Dict[str, Any]:
-        checks: Dict[str, Any] = {
+    def _check_environment(self) -> dict[str, Any]:
+        checks: dict[str, Any] = {
             "source_cloned": self._source_available,
             "v1_available": self._v1_available,
             "simulate_mode": self._simulate,
@@ -119,10 +119,10 @@ class MatAnyone2Adapter:
     def check_available(self) -> bool:
         return self._source_available and self._env_check.get("dep_torch", False)
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         return self.SUPPORTED_OPERATIONS
 
-    def execute(self, operation: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute(self, operation: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
 
         handlers = {
@@ -140,7 +140,7 @@ class MatAnyone2Adapter:
             return handler()
         return {"status": "error", "message": f"Unknown operation: {operation}"}
 
-    def _get_model_info(self) -> Dict[str, Any]:
+    def _get_model_info(self) -> dict[str, Any]:
         return {
             "status": "success",
             "model_name": "MatAnyone 2",
@@ -168,7 +168,7 @@ class MatAnyone2Adapter:
             },
         }
 
-    def _estimate_vram(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _estimate_vram(self, params: dict[str, Any]) -> dict[str, Any]:
         resolution = params.get("resolution", "1080p")
         res_map = {
             "720p": (1280, 720),
@@ -193,7 +193,7 @@ class MatAnyone2Adapter:
             },
         }
 
-    def _compare_with_v1(self) -> Dict[str, Any]:
+    def _compare_with_v1(self) -> dict[str, Any]:
         return {
             "status": "success",
             "comparison": {
@@ -215,7 +215,7 @@ class MatAnyone2Adapter:
             "recommendation": "优先使用 v2，v1 作为降级方案",
         }
 
-    def _video_matting(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _video_matting(self, params: dict[str, Any]) -> dict[str, Any]:
         """视频抠图
 
         Args:
@@ -287,7 +287,7 @@ class MatAnyone2Adapter:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def _image_matting(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _image_matting(self, params: dict[str, Any]) -> dict[str, Any]:
         """单帧精细抠图"""
         image_path = params.get("image_path", "")
         if not image_path:
@@ -308,7 +308,7 @@ class MatAnyone2Adapter:
             **{k: v for k, v in params.items() if k not in ("image_path",)},
         })
 
-    def _extract_alpha_sequence(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_alpha_sequence(self, params: dict[str, Any]) -> dict[str, Any]:
         """提取 alpha 序列（PNG 帧）"""
         return self._video_matting({
             **params,
@@ -316,5 +316,5 @@ class MatAnyone2Adapter:
         })
 
 
-def get_adapter(config: Optional[Dict[str, Any]] = None) -> MatAnyone2Adapter:
+def get_adapter(config: dict[str, Any] | None = None) -> MatAnyone2Adapter:
     return MatAnyone2Adapter(config)

@@ -24,42 +24,42 @@ P0 用法:
 P1 用法:
     python -m core.evolution.run_evolution --task style_transfer --iterations 3
 """
-from core.evolution.protocol import (
-    BenchmarkTask,
-    COST_LIMITS,
-    EvaluationResult,
-    EvolutionMessage,
-    EvolutionMsgType,
-    within_cost_limit,
-)
-from core.evolution.evaluator import EvolutionEvaluator, get_evolution_evaluator
-from core.evolution.version_manager import (
-    VersionDecision,
-    VersionManager,
-    get_version_manager,
-)
-from core.evolution.runner import record_pipeline_run, get_evolution_runner
-from core.evolution.rubrics import (
-    RubricScoreResult,
-    RubricsScorer,
-    get_rubrics_scorer,
-)
-from core.evolution.benchmark_builder import (
-    BenchmarkBuilder,
-    get_benchmark_builder,
-)
-from core.evolution.optimizer_agent import (
-    OptimizationProposal,
-    OptimizerAgent,
-    get_optimizer_agent,
-)
 from core.evolution.agent_assets import (
     AgentAssetManager,
     PromptUpdateResult,
     get_agent_asset_manager,
 )
 from core.evolution.auto_benchmark import AutoBenchmark, get_auto_benchmark
+from core.evolution.benchmark_builder import (
+    BenchmarkBuilder,
+    get_benchmark_builder,
+)
+from core.evolution.evaluator import EvolutionEvaluator, get_evolution_evaluator
 from core.evolution.knowledge_sink import KnowledgeSink, get_knowledge_sink
+from core.evolution.optimizer_agent import (
+    OptimizationProposal,
+    OptimizerAgent,
+    get_optimizer_agent,
+)
+from core.evolution.protocol import (
+    COST_LIMITS,
+    BenchmarkTask,
+    EvaluationResult,
+    EvolutionMessage,
+    EvolutionMsgType,
+    within_cost_limit,
+)
+from core.evolution.rubrics import (
+    RubricScoreResult,
+    RubricsScorer,
+    get_rubrics_scorer,
+)
+from core.evolution.runner import get_evolution_runner, record_pipeline_run
+from core.evolution.version_manager import (
+    VersionDecision,
+    VersionManager,
+    get_version_manager,
+)
 
 __all__ = [
     "BenchmarkTask",

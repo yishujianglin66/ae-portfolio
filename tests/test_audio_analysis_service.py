@@ -10,13 +10,12 @@ AudioAnalysisService 单元测试 - Whisper + PyAnnote 服务
 """
 
 import asyncio
+import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch, mock_open
-
-import sys
-import os
+from unittest.mock import AsyncMock, MagicMock, mock_open, patch
 
 # 添加项目根目录和puppet-automation到路径
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

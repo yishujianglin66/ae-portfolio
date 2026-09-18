@@ -17,7 +17,7 @@ import time
 from typing import Any, Dict, Optional
 
 
-def _canonicalize(obj: Dict[str, Any]) -> str:
+def _canonicalize(obj: dict[str, Any]) -> str:
     """将对象序列化为规范 JSON 字符串（用于签名）。
 
     按 key 排序，确保相同内容产生相同的签名。
@@ -26,10 +26,10 @@ def _canonicalize(obj: Dict[str, Any]) -> str:
 
 
 def sign_command(
-    command_data: Dict[str, Any],
+    command_data: dict[str, Any],
     secret: str,
-    timestamp: Optional[int] = None,
-) -> Dict[str, Any]:
+    timestamp: int | None = None,
+) -> dict[str, Any]:
     """为命令数据添加签名。
 
     Args:
@@ -59,7 +59,7 @@ def sign_command(
 
 
 def verify_command(
-    signed_data: Dict[str, Any],
+    signed_data: dict[str, Any],
     secret: str,
     max_age_seconds: int = 300,
 ) -> bool:

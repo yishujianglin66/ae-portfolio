@@ -40,8 +40,8 @@ class ModelScopeIntegration:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        kb_root: Optional[str] = None,
+        api_key: str | None = None,
+        kb_root: str | None = None,
     ):
         """
         初始化魔搭集成
@@ -71,7 +71,7 @@ class ModelScopeIntegration:
         self,
         video_path: str,
         analysis_type: str = "comprehensive",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         分析AE素材视频
         
@@ -111,7 +111,7 @@ class ModelScopeIntegration:
         self,
         query: str,
         top_k: int = 5,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """
         搜索风格化剪辑知识库
         
@@ -129,7 +129,7 @@ class ModelScopeIntegration:
         prompt: str,
         style: str = "auto",
         size: str = "1920x1080",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         AI生成素材（文生图）
         
@@ -154,9 +154,9 @@ class ModelScopeIntegration:
     def batch_analyze_materials(
         self,
         material_dir: str,
-        output_dir: Optional[str] = None,
+        output_dir: str | None = None,
         file_pattern: str = "*.mp4",
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         批量分析素材目录
         
@@ -208,7 +208,7 @@ class ModelScopeIntegration:
         self.kb_searcher.build_index()
         print("✓ 索引构建完成")
     
-    def get_integration_status(self) -> Dict[str, Any]:
+    def get_integration_status(self) -> dict[str, Any]:
         """获取集成状态"""
         return {
             "api_key_configured": bool(self.api_key),
@@ -225,8 +225,8 @@ class ModelScopeIntegration:
 
 # 便捷函数
 def create_integration(
-    api_key: Optional[str] = None,
-    kb_root: Optional[str] = None,
+    api_key: str | None = None,
+    kb_root: str | None = None,
 ) -> ModelScopeIntegration:
     """创建魔搭集成实例"""
     return ModelScopeIntegration(api_key=api_key, kb_root=kb_root)

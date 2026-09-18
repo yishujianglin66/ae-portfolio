@@ -46,10 +46,10 @@ class MotionProfile:
     avg_magnitude: float = 0.0; max_magnitude: float = 0.0
     motion_variance: float = 0.0
     dominant_motion: CameraMotion = CameraMotion.UNKNOWN
-    motion_segments: List[Dict[str, Any]] = field(default_factory=list)
+    motion_segments: list[dict[str, Any]] = field(default_factory=list)
     shake_score: float = 0.0
-    shake_segments: List[Dict] = field(default_factory=list)
-    motion_curve: List[float] = field(default_factory=list)
+    shake_segments: list[dict] = field(default_factory=list)
+    motion_curve: list[float] = field(default_factory=list)
 
 @dataclass
 class ShotInfo:
@@ -60,9 +60,9 @@ class ShotInfo:
 @dataclass
 class ShotStructure:
     video_path: str; total_duration: float; total_shots: int
-    shots: List[ShotInfo] = field(default_factory=list)
+    shots: list[ShotInfo] = field(default_factory=list)
     asl: float = 0.0; cut_rate: float = 0.0; shot_duration_std: float = 0.0
-    transition_distribution: Dict[str, int] = field(default_factory=dict)
+    transition_distribution: dict[str, int] = field(default_factory=dict)
     rhythm_pattern: str = "uniform"
 
 @dataclass
@@ -75,9 +75,9 @@ class ArcSegment:
 @dataclass
 class NarrativeArc:
     video_path: str; total_duration: float
-    segments: List[ArcSegment] = field(default_factory=list)
+    segments: list[ArcSegment] = field(default_factory=list)
     overall_energy: float = 0.0
-    energy_range: Tuple[float, float] = (0.0, 0.0)
+    energy_range: tuple[float, float] = (0.0, 0.0)
     arc_shape: str = "unknown"
     structure_summary: str = ""
 
@@ -115,8 +115,8 @@ class TemporalAnalyzer:
         step = max(1, int(fps / self._sample_fps))
 
         prev_gray = None
-        vectors: List[MotionVector] = []
-        timestamps: List[float] = []
+        vectors: list[MotionVector] = []
+        timestamps: list[float] = []
 
         # 顺序读取 + 跳帧: cap.set 随机 seek 在 4K 长 GOP 视频上每次都要
         # 解关键帧链(实测单素材 300s+), 顺序 read 丢弃不要帧快一个数量级
@@ -149,8 +149,8 @@ class TemporalAnalyzer:
             video_path, duration, fps, total_frames, vectors, timestamps)
 
     def build_motion_profile(self, video_path: str, duration: float, fps: float,
-                             total_frames: int, vectors: List[MotionVector],
-                             timestamps: List[float]) -> MotionProfile:
+                             total_frames: int, vectors: list[MotionVector],
+                             timestamps: list[float]) -> MotionProfile:
         """从光流向量序列聚合出 MotionProfile。
 
         独立 helper：整文件分析与分段缓存合并共用同一聚合逻辑，
@@ -194,7 +194,7 @@ class TemporalAnalyzer:
         sample_step = max(1, int(fps / 5.0))
 
         prev_hist, prev_frame = None, None
-        boundaries: List[Tuple[float, float, str]] = []
+        boundaries: list[tuple[float, float, str]] = []
 
         # 顺序读取 + 跳帧 (同 analyze_motion: 避免 4K 随机 seek 解关键帧链)
         idx = 0
@@ -228,12 +228,12 @@ class TemporalAnalyzer:
         return self.build_shot_structure(video_path, duration, boundaries)
 
     def build_shot_structure(self, video_path: str, duration: float,
-                             boundaries: List[Tuple[float, float, str]]) -> ShotStructure:
+                             boundaries: list[tuple[float, float, str]]) -> ShotStructure:
         """从镜头边界列表聚合出 ShotStructure（整文件与分段缓存共用）。"""
         shots = self._build_shots(boundaries, duration)
         durs = [s.duration for s in shots]
         asl = float(np.mean(durs)) if durs else duration
-        dist: Dict[str, int] = {}
+        dist: dict[str, int] = {}
         for s in shots:
             dist[s.transition.value] = dist.get(s.transition.value, 0) + 1
 
@@ -246,8 +246,8 @@ class TemporalAnalyzer:
             rhythm_pattern=self._classify_rhythm(durs))
 
     def analyze_narrative_arc(self, ss: ShotStructure,
-                              motion: Optional[MotionProfile] = None,
-                              beat_times: Optional[List[float]] = None) -> NarrativeArc:
+                              motion: MotionProfile | None = None,
+                              beat_times: list[float] | None = None) -> NarrativeArc:
         """镜头结构+运动 → 叙事段落/弧线形状"""
         if not ss.shots:
             return NarrativeArc(video_path=ss.video_path, total_duration=ss.total_duration)
@@ -277,7 +277,7 @@ class TemporalAnalyzer:
             std_magnitude=round(float(np.std(mag)), 4),
             flow_coverage=round(float(np.mean(mag > 1.0)), 4))
 
-    def _classify_motion(self, vecs: List[MotionVector]) -> CameraMotion:
+    def _classify_motion(self, vecs: list[MotionVector]) -> CameraMotion:
         if not vecs:
             return CameraMotion.UNKNOWN
         dxs, dys, mags = [v.mean_dx for v in vecs], [v.mean_dy for v in vecs], \
@@ -305,8 +305,8 @@ class TemporalAnalyzer:
             return CameraMotion.TRACKING
         return CameraMotion.COMPLEX if avg_mag > 3.0 else CameraMotion.UNKNOWN
 
-    def _segment_motion(self, vecs: List[MotionVector],
-                        ts: List[float]) -> List[Dict[str, Any]]:
+    def _segment_motion(self, vecs: list[MotionVector],
+                        ts: list[float]) -> list[dict[str, Any]]:
         if len(vecs) < 3:
             return []
         mags = [v.magnitude for v in vecs]
@@ -326,8 +326,8 @@ class TemporalAnalyzer:
                      "avg_magnitude": round(float(np.mean(mags[start:])), 4)})
         return segs
 
-    def _detect_shake_segs(self, vecs: List[MotionVector],
-                           ts: List[float]) -> List[Dict]:
+    def _detect_shake_segs(self, vecs: list[MotionVector],
+                           ts: list[float]) -> list[dict]:
         if len(vecs) < 5:
             return []
         stds = [v.std_magnitude for v in vecs]
@@ -361,7 +361,7 @@ class TemporalAnalyzer:
             return TransitionType.DISSOLVE
         return TransitionType.HARD_CUT
 
-    def _build_shots(self, boundaries, duration) -> List[ShotInfo]:
+    def _build_shots(self, boundaries, duration) -> list[ShotInfo]:
         shots, prev_t = [], 0.0
         for t, conf, tt in boundaries:
             d = t - prev_t
@@ -381,7 +381,7 @@ class TemporalAnalyzer:
         return shots
 
     @staticmethod
-    def _classify_rhythm(durs: List[float]) -> str:
+    def _classify_rhythm(durs: list[float]) -> str:
         if len(durs) < 3:
             return "uniform"
         mid = len(durs) // 2
@@ -393,8 +393,8 @@ class TemporalAnalyzer:
         return "uniform" if np.std(durs) / max(np.mean(durs), 0.001) < 0.3 else "irregular"
 
     # ── 叙事弧线内部 ─────────────────────────────────────────
-    def _segment_narrative(self, shots: List[ShotInfo],
-                           motion: Optional[MotionProfile]) -> List[ArcSegment]:
+    def _segment_narrative(self, shots: list[ShotInfo],
+                           motion: MotionProfile | None) -> list[ArcSegment]:
         energies = []
         for s in shots:
             e = 1.0 / max(s.duration, 0.1)
@@ -407,7 +407,7 @@ class TemporalAnalyzer:
         mx = max(energies) or 1.0
         energies = [e / mx for e in energies]
 
-        segs: List[ArcSegment] = []
+        segs: list[ArcSegment] = []
         s0, ct = 0, self._energy_type(energies[0], 0)
         _LABELS = {ArcSegmentType.INTRO: "开场引入", ArcSegmentType.BUILDUP: "情绪积累",
                    ArcSegmentType.CLIMAX: "高潮段落", ArcSegmentType.RELEASE: "情绪释放",
@@ -450,7 +450,7 @@ class TemporalAnalyzer:
             segs = merged
         return segs
 
-    def _merge_short_segments(self, segments: List[ArcSegment]) -> List[ArcSegment]:
+    def _merge_short_segments(self, segments: list[ArcSegment]) -> list[ArcSegment]:
         """合并过短同类型相邻段"""
         if len(segments) <= 1:
             return segments
@@ -479,7 +479,7 @@ class TemporalAnalyzer:
         return ArcSegmentType.RELEASE
 
     @staticmethod
-    def _infer_shape(energies: List[float]) -> str:
+    def _infer_shape(energies: list[float]) -> str:
         if len(energies) < 3:
             return "flat"
         n3 = len(energies) // 3
@@ -492,7 +492,7 @@ class TemporalAnalyzer:
         return "flat"
 
     @staticmethod
-    def _build_summary(segs: List[ArcSegment], shape: str) -> str:
+    def _build_summary(segs: list[ArcSegment], shape: str) -> str:
         if not segs:
             return "无有效段落"
         labels = {"peak": "山峰形（中间高潮）", "valley": "山谷形（中间平缓）",
@@ -504,7 +504,7 @@ class TemporalAnalyzer:
         return f"{desc}，共 {len(segs)} 段：" + parts
 
     @staticmethod
-    def _downsample(values: List[float], n: int = 20) -> List[float]:
+    def _downsample(values: list[float], n: int = 20) -> list[float]:
         if len(values) <= n:
             return values
         chunk = len(values) / n
@@ -513,9 +513,10 @@ class TemporalAnalyzer:
     # ── RAFT GPU 光流 ──────────────────────────────────────────
     def _analyze_motion_raft(self, video_path: str) -> MotionProfile:
         """RAFT 大模型 GPU 光流 → 运镜分类（精度远高于 Farneback）"""
-        import cv2, torch
+        import cv2
+        import torch
         from PIL import Image
-        from torchvision.models.optical_flow import raft_large, Raft_Large_Weights
+        from torchvision.models.optical_flow import Raft_Large_Weights, raft_large
         device = get_device()
         model = raft_large(weights=Raft_Large_Weights.DEFAULT, progress=False)
         model = model.to(device).eval()
@@ -567,8 +568,8 @@ class TemporalAnalyzer:
     # ── TransNetV2 镜头检测 ────────────────────────────────────
     def _detect_shot_structure_transnet(self, video_path: str) -> ShotStructure:
         """TransNetV2 神经网络镜头检测（精度远高于直方图差异）"""
-        from transnetv2_pytorch import TransNetV2
         import cv2
+        from transnetv2_pytorch import TransNetV2
         device = get_device()
         model = TransNetV2(device=device)
         cap = cv2.VideoCapture(video_path)
@@ -600,7 +601,7 @@ class TemporalAnalyzer:
         shots = self._build_shots(boundaries, duration)
         durs = [s.duration for s in shots]
         asl = float(np.mean(durs)) if durs else duration
-        dist: Dict[str, int] = {}
+        dist: dict[str, int] = {}
         for s in shots:
             dist[s.transition.value] = dist.get(s.transition.value, 0) + 1
         return ShotStructure(

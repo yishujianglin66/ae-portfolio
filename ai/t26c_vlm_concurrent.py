@@ -20,15 +20,15 @@ r"""T26c: VLM并发标注管线 — 16线程并发 + 图片压缩加速。
 from __future__ import annotations
 
 import base64
+import io
 import json
 import os
 import sys
-import time
-import io
 import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Optional, Tuple
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -175,7 +175,7 @@ def save_checkpoint(done_frames: set, total_results: int, total_cost: float, sta
     CKPT_FILE.write_text(json.dumps(ckpt, ensure_ascii=False), encoding="utf-8")
 
 
-def annotate_single_frame(client, img_path: str) -> Tuple[Optional[dict], float]:
+def annotate_single_frame(client, img_path: str) -> tuple[dict | None, float]:
     """标注单帧（线程安全）"""
     try:
         img_b64 = compress_image(img_path)
@@ -223,7 +223,7 @@ def annotate_single_frame(client, img_path: str) -> Tuple[Optional[dict], float]
         return None, 0.0
 
 
-def process_frame(client, frame_path: Path, pseudo_idx: dict) -> Optional[dict]:
+def process_frame(client, frame_path: Path, pseudo_idx: dict) -> dict | None:
     """处理单帧：标注 + 比对 + 写入（线程安全）"""
     global _total_results, _total_cost, _last_log_count
 
@@ -340,8 +340,8 @@ def run_concurrent_annotation():
 
     # 4. 初始化API（每个线程需要独立的client）
     _log(f"[4/4] 初始化VLM API ({NUM_WORKERS}并发)...")
-    import openai
     import httpx
+    import openai
     # 关键修复: 设置60秒超时，防止线程永远挂起
     client = openai.OpenAI(
         api_key=VLM_API_KEY,
@@ -396,7 +396,7 @@ def run_concurrent_annotation():
                         last_progress_time = time.time()
                     elif time.time() - last_progress_time > STALL_TIMEOUT:
                         _log(f"  [看门狗] {STALL_TIMEOUT}秒无进度，自动退出！已处理{completed}帧")
-                        _log(f"  当前JSONL行数可断点续传，请重启脚本")
+                        _log("  当前JSONL行数可断点续传，请重启脚本")
                         raise RuntimeError("Stall detected - auto restart needed")
 
     finally:
@@ -409,7 +409,7 @@ def run_concurrent_annotation():
     agree_rate = _stats["agree"] / max(_stats["agree"] + _stats["disagree"], 1)
 
     _log(f"\n{'='*60}")
-    _log(f"并发标注完成!")
+    _log("并发标注完成!")
     _log(f"  总帧数: {len(all_frames)}")
     _log(f"  已标注: {_total_results}")
     _log(f"  耗时: {elapsed/3600:.1f}h ({elapsed:.0f}s)")

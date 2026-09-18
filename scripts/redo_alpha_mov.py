@@ -13,8 +13,8 @@ import os
 import shutil
 import subprocess
 import sys
-import time
 import tempfile
+import time
 from pathlib import Path
 
 import cv2
@@ -263,7 +263,7 @@ def main():
                 print(f"    SUBPROCESS_ERR: {merge_res.get('err_tail')[-600:]}")
             results.append({"name": name, "status": "fail_merge", "merge": merge_res})
             continue
-        print(f"  → 像素级 QC (30 samples)...")
+        print("  → 像素级 QC (30 samples)...")
         qc = qc_mov(mov_path, samples=30)
         print(f"    QC: avg_alpha={qc.get('avg_alpha_ratio', 0):.4f} "
               f"ne={qc.get('nonempty_sample_frames')}/{qc.get('sampled')} "

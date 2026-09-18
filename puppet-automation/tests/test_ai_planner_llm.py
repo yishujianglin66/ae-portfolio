@@ -12,13 +12,11 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
-
 from src.models.pipeline import (
     PipelinePhase,
     PuppetStyle,
     VideoMetadata,
 )
-
 
 # ============================================================
 # Helpers — 构造 mock gateway 响应
@@ -367,6 +365,7 @@ class TestGetLLM:
     def test_get_llm_returns_gateway_when_configured(self, monkeypatch):
         """有 API Key + base_url 时返回网关实例。"""
         from src.ai_planner.planner import _get_llm
+
         from core.llm_gateway import LLMConfig, llm_gateway
 
         # 重新配置网关为可用状态

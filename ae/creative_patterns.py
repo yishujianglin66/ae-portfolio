@@ -5,7 +5,7 @@
 每个模式定义了从创意描述到 AE 脚本执行的映射关系
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class CreativePattern:
@@ -15,9 +15,9 @@ class CreativePattern:
         self,
         name: str,
         description: str,
-        keywords: List[str],
-        script_sequence: List[Dict[str, Any]],
-        default_params: Dict[str, Any] = None,
+        keywords: list[str],
+        script_sequence: list[dict[str, Any]],
+        default_params: dict[str, Any] = None,
     ):
         self.name = name
         self.description = description
@@ -25,7 +25,7 @@ class CreativePattern:
         self.script_sequence = script_sequence
         self.default_params = default_params or {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "description": self.description,
@@ -612,7 +612,7 @@ CREATIVE_PATTERNS = [
 ]
 
 
-def find_patterns_by_keyword(keyword: str) -> List[CreativePattern]:
+def find_patterns_by_keyword(keyword: str) -> list[CreativePattern]:
     """根据关键词查找匹配的创意模式"""
     keyword_lower = keyword.lower()
     matches = []
@@ -633,8 +633,8 @@ def get_pattern_by_name(name: str) -> CreativePattern:
 
 
 def interpolate_params(
-    pattern: CreativePattern, user_params: Dict[str, Any]
-) -> List[Dict[str, Any]]:
+    pattern: CreativePattern, user_params: dict[str, Any]
+) -> list[dict[str, Any]]:
     """将用户参数插入到脚本序列中"""
     merged_params = {**pattern.default_params, **user_params}
     interpolated_sequence = []
@@ -656,7 +656,7 @@ def interpolate_params(
     return interpolated_sequence
 
 
-def interpolate_dict_params(d: Dict[str, Any], params: Dict[str, Any]) -> Dict[str, Any]:
+def interpolate_dict_params(d: dict[str, Any], params: dict[str, Any]) -> dict[str, Any]:
     """递归处理字典中的参数占位符"""
     result = {}
     for key, value in d.items():
@@ -678,8 +678,8 @@ def interpolate_dict_params(d: Dict[str, Any], params: Dict[str, Any]) -> Dict[s
 
 
 def generate_task_graph(
-    pattern_name: str, user_params: Dict[str, Any]
-) -> Dict[str, Any]:
+    pattern_name: str, user_params: dict[str, Any]
+) -> dict[str, Any]:
     """生成完整的任务图"""
     pattern = get_pattern_by_name(pattern_name)
     if not pattern:

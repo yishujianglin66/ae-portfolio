@@ -4,7 +4,10 @@
 验收: 2+ 条 accept + 1 条 rollback; sink.experience_text("motion_matting") 可读回
 """
 from __future__ import annotations
-import sys, time, json
+
+import json
+import sys
+import time
 from pathlib import Path
 
 ROOT = Path(r"C:\Users\Administrator\Desktop\AE-Knowledge-Vault")

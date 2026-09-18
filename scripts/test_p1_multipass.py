@@ -15,11 +15,11 @@
 """
 from __future__ import annotations
 
-import sys
-import os
 import json
-import time
+import os
 import subprocess
+import sys
+import time
 import traceback
 from pathlib import Path
 
@@ -96,7 +96,10 @@ def main() -> int:
 
     # 1. 构造管线配置
     from pipeline.unified_pipeline import (
-        UnifiedPipeline, PipelineConfig, PipelineResult, StageStatus,
+        PipelineConfig,
+        PipelineResult,
+        StageStatus,
+        UnifiedPipeline,
     )
     cfg = PipelineConfig(
         input_topic=INPUT_TOPIC,
@@ -206,7 +209,7 @@ def main() -> int:
             print(f"    [{mark}] {k}")
         verify_ok = all(checks.values())
     else:
-        print(f"    [FAIL] verify 阶段结果缺失或无 data")
+        print("    [FAIL] verify 阶段结果缺失或无 data")
 
     # 5. render 输出文件验证
     print("\n" + "=" * 76)
@@ -259,7 +262,7 @@ def main() -> int:
         else:
             print(f"    [FAIL] render 输出文件不存在: {render_output!r}")
     else:
-        print(f"    [FAIL] render 阶段结果缺失")
+        print("    [FAIL] render 阶段结果缺失")
 
     # 6. VideoQualityAssessor 最终评分 (独立验证, 不依赖 verify 缓存)
     print("\n" + "=" * 76)
@@ -288,7 +291,7 @@ def main() -> int:
             mark = "PASS" if vqa_ok else "FAIL"
             print(f"    [{mark}] VQA 产出有效分数 ({final_vqa_score:.1f})")
     else:
-        print(f"    [SKIP] 无 render 输出, 跳过 VQA")
+        print("    [SKIP] 无 render 输出, 跳过 VQA")
 
     # ====================================================================
     # STEP-3.5: 强制低分场景 — 验证 _run_verify 多轮优化真实触发

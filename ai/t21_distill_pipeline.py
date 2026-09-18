@@ -50,7 +50,7 @@ def _log(msg: str):
     print(f"[T21] {msg}", flush=True)
 
 
-def build_student_model(n_classes: int, class_names: List[str]):
+def build_student_model(n_classes: int, class_names: list[str]):
     """构建学生模型: ResNet18(升级) 或 原轻量CNN"""
     import torch
     import torch.nn as nn
@@ -58,7 +58,7 @@ def build_student_model(n_classes: int, class_names: List[str]):
     if USE_RESNET18:
         # 升级: 用预训练ResNet18作为学生(11.2M参数)
         try:
-            from torchvision.models import resnet18, ResNet18_Weights
+            from torchvision.models import ResNet18_Weights, resnet18
             model = resnet18(weights=ResNet18_Weights.DEFAULT)
         except Exception:
             from torchvision.models import resnet18
@@ -95,7 +95,7 @@ def build_student_model(n_classes: int, class_names: List[str]):
     # 原轻量CNN(回退)
     class StudentIPClassifier(nn.Module):
         """轻量IP分类学生模型(~2.5M参数)"""
-        def __init__(self, n_cls: int, names: List[str]):
+        def __init__(self, n_cls: int, names: list[str]):
             super().__init__()
             self.class_names = names
             self.features = nn.Sequential(
@@ -150,10 +150,10 @@ class PseudoLabelDataset:
 
 
 def prepare_dataset(pseudo_path: Path,
-                    val_ratio: float = 0.15) -> Tuple:
+                    val_ratio: float = 0.15) -> tuple:
     """从伪标签构建训练/验证数据集"""
     import torch
-    from torch.utils.data import Dataset, DataLoader
+    from torch.utils.data import DataLoader, Dataset
 
     pseudo = json.loads(pseudo_path.read_text(encoding="utf-8"))
     _log(f"伪标签: {len(pseudo)}帧")
@@ -208,8 +208,8 @@ def prepare_dataset(pseudo_path: Path,
     return train_loader, val_loader, valid_ips, ip2idx
 
 
-def train_student(train_loader, val_loader, class_names: List[str],
-                  device: str = "cuda") -> Dict:
+def train_student(train_loader, val_loader, class_names: list[str],
+                  device: str = "cuda") -> dict:
     """训练学生模型"""
     import torch
     import torch.nn as nn
@@ -341,7 +341,7 @@ def run_distillation():
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     _log(f"\n{'='*60}")
-    _log(f"✅ T21蒸馏完成")
+    _log("✅ T21蒸馏完成")
     _log(f"   学生模型: {report['model_path']}")
     _log(f"   最佳准确率: {train_result['best_val_acc']}")
     _log(f"   报告: {report_path}")

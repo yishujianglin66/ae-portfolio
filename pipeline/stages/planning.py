@@ -6,8 +6,8 @@ pipeline/stages/planning.py - 规划阶段
 from __future__ import annotations
 
 import json
-import os
 import logging
+import os
 from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ class PlanningStage:
     def __init__(self, config):
         self.config = config
 
-    def run(self, previous_data: Dict) -> Dict:
+    def run(self, previous_data: dict) -> dict:
         """执行规划阶段"""
         perceive = previous_data.get("perceive", {})
         analysis = previous_data.get("analyze", {})
@@ -52,7 +52,7 @@ class PlanningStage:
 
         return result
 
-    def _get_knowledge_context(self) -> Dict:
+    def _get_knowledge_context(self) -> dict:
         """从知识库获取风格上下文"""
         try:
             from knowledge_base.kb_loader import KnowledgeBaseLoader
@@ -64,7 +64,7 @@ class PlanningStage:
             logger.debug(f"Knowledge context failed: {e}")
             return {}
 
-    def _match_style(self, style_ref: str) -> Dict:
+    def _match_style(self, style_ref: str) -> dict:
         """风格匹配"""
         try:
             from knowledge_base.style_matcher import StyleMatcher
@@ -74,7 +74,7 @@ class PlanningStage:
             logger.debug(f"Style matching failed: {e}")
             return {}
 
-    def _generate_script(self, perceive: Dict, analysis: Dict, style: Dict) -> Dict:
+    def _generate_script(self, perceive: dict, analysis: dict, style: dict) -> dict:
         """生成剪辑剧本"""
         # 构建素材分析列表 (供 AIDirector 使用)
         materials = perceive.get("videos", [])
@@ -133,7 +133,7 @@ class PlanningStage:
         }
         return self._fallback_script(context)
 
-    def _fallback_script(self, context: Dict) -> Dict:
+    def _fallback_script(self, context: dict) -> dict:
         """降级剧本生成（无LLM）— 基于场景检测+节拍分析+情绪曲线生成有意义的剧本"""
         scenes = context.get("scenes", [])
         beats = context.get("beats", [])
@@ -267,7 +267,7 @@ class PlanningStage:
             "beat_count": len(beats),
         }
 
-    def _get_mood_at_time(self, mood_curve: List, t: float) -> str:
+    def _get_mood_at_time(self, mood_curve: list, t: float) -> str:
         """从情绪曲线获取指定时间点的情绪"""
         if not mood_curve:
             return "neutral"
@@ -292,7 +292,7 @@ class PlanningStage:
             "outro": "fade_out",
         }.get(mood, "cut")
 
-    def _suggest_effects(self, mood_curve: List, beats: List) -> List[Dict]:
+    def _suggest_effects(self, mood_curve: list, beats: list) -> list[dict]:
         """基于情绪和节拍建议效果"""
         effects = []
         if beats:

@@ -7,8 +7,8 @@ scripts/verify_three_tasks.py — 端到端验证三大任务
 """
 from __future__ import annotations
 
-import sys
 import json
+import sys
 import tempfile
 from pathlib import Path
 

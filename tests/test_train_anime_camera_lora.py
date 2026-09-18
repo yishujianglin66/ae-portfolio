@@ -11,7 +11,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 # ============================================================================
 # 全参模式 (--full-ft) 参数测试
 # ============================================================================
@@ -31,6 +30,7 @@ class TestFullFTMode:
 
         # 重新导入以应用参数
         import importlib
+
         import scripts.train_anime_camera_lora as train_script
         importlib.reload(train_script)
 
@@ -152,7 +152,7 @@ class TestSixClassSchema:
 
     def test_six_schema_maps_directions_correctly(self, tmp_path):
         """六类 schema 必须正确合并语义重叠和稀缺类。"""
-        from scripts.train_anime_camera_lora import load_trainable, SIX_MAP
+        from scripts.train_anime_camera_lora import SIX_MAP, load_trainable
 
         # 创建测试标签（包含应被合并的方向）
         labels_file = tmp_path / "six_labels.jsonl"

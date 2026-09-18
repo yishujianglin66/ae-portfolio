@@ -24,13 +24,13 @@ AE 桥接执行 → DaVinci Resolve 调色 串联为生产级端到端工作流�
     )
 """
 
+import json
 import os
 import sys
-import json
 import time
-from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Callable
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -58,7 +58,7 @@ class WorkflowConfig:
         save_report: 是否保存报告
     """
     mediapipe_mode: str = "auto"
-    style_types: List[str] = field(default_factory=lambda: ["wooden_puppet"])
+    style_types: list[str] = field(default_factory=lambda: ["wooden_puppet"])
     intensity: float = 1.0
     enable_face_puppet: bool = True
     execute_ae: bool = False
@@ -75,7 +75,7 @@ class StageResult:
     name: str
     success: bool
     duration: float = 0.0
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     error: str = ""
 
 
@@ -85,9 +85,9 @@ class WorkflowResult:
     success: bool = False
     total_duration: float = 0.0
     video_path: str = ""
-    stages: List[StageResult] = field(default_factory=list)
-    artifacts: List[Dict[str, Any]] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    stages: list[StageResult] = field(default_factory=list)
+    artifacts: list[dict[str, Any]] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     def add_stage(self, stage: StageResult):
         self.stages.append(stage)
@@ -119,7 +119,7 @@ class PuppetWorkflowOrchestrator:
         6. 报告生成 → JSON + Markdown
     """
 
-    def __init__(self, config: Optional[WorkflowConfig] = None):
+    def __init__(self, config: WorkflowConfig | None = None):
         self.config = config or WorkflowConfig()
         self._auto_processor = None
         self._ae_client = None
@@ -167,8 +167,8 @@ class PuppetWorkflowOrchestrator:
     def run(
         self,
         video_path: str,
-        style_types: Optional[List[str]] = None,
-        callback: Optional[Callable[[str, float, str], None]] = None,
+        style_types: list[str] | None = None,
+        callback: Callable[[str, float, str], None] | None = None,
     ) -> WorkflowResult:
         """运行完整工作流
 
@@ -206,7 +206,7 @@ class PuppetWorkflowOrchestrator:
 
         for i, style in enumerate(styles):
             progress = 0.2 + 0.3 * (i / max(total_styles, 1))
-            self._notify(callback, f"风格化生成", progress,
+            self._notify(callback, "风格化生成", progress,
                          f"生成 {style} ({i+1}/{total_styles})")
 
             stage2 = self._stage_generate_style(
@@ -282,10 +282,10 @@ class PuppetWorkflowOrchestrator:
 
     def run_batch(
         self,
-        video_paths: List[str],
-        style_types: Optional[List[str]] = None,
-        callback: Optional[Callable[[str, str, float, str], None]] = None,
-    ) -> List[WorkflowResult]:
+        video_paths: list[str],
+        style_types: list[str] | None = None,
+        callback: Callable[[str, str, float, str], None] | None = None,
+    ) -> list[WorkflowResult]:
         """批量处理多个视频
 
         Args:
@@ -315,7 +315,7 @@ class PuppetWorkflowOrchestrator:
 
         return results
 
-    def get_available_styles(self) -> List[Dict[str, Any]]:
+    def get_available_styles(self) -> list[dict[str, Any]]:
         """获取可用风格列表"""
         if self._auto_processor:
             return self._auto_processor.get_available_styles()
@@ -354,7 +354,7 @@ class PuppetWorkflowOrchestrator:
 
     def _stage_generate_style(
         self,
-        detection_data: Dict[str, Any],
+        detection_data: dict[str, Any],
         style_type: str,
         video_path: str,
         output_dir: str,
@@ -526,7 +526,7 @@ class PuppetWorkflowOrchestrator:
 
     def _notify(
         self,
-        callback: Optional[Callable],
+        callback: Callable | None,
         stage: str,
         progress: float,
         message: str,
@@ -539,7 +539,7 @@ class PuppetWorkflowOrchestrator:
                 pass
         print(f"  [{progress*100:.0f}%] {stage}: {message}")
 
-    def _generate_markdown_report(self, report: Dict) -> str:
+    def _generate_markdown_report(self, report: dict) -> str:
         """生成 Markdown 格式报告"""
         lines = [
             "# 木偶风格化工作流报告",
@@ -663,7 +663,7 @@ def main():
         print(f"  状态: {'✅ 成功' if result.success else '❌ 失败'}")
         print(f"  耗时: {result.total_duration}s")
 
-        print(f"\n  阶段:")
+        print("\n  阶段:")
         for s in result.stages:
             status = "✅" if s.success else "❌"
             print(f"    {status} {s.name} ({s.duration}s)")
@@ -671,14 +671,14 @@ def main():
                 print(f"       错误: {s.error}")
 
         if result.artifacts:
-            print(f"\n  输出文件:")
+            print("\n  输出文件:")
             for art in result.artifacts:
                 size = art.get("size", 0)
                 size_str = f" ({size} bytes)" if size else ""
                 print(f"    - {art['type']}: {os.path.basename(art.get('path', ''))}{size_str}")
 
         if result.errors:
-            print(f"\n  错误:")
+            print("\n  错误:")
             for err in result.errors:
                 print(f"    - {err}")
 

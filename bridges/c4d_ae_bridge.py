@@ -85,12 +85,12 @@ class C4DAEBridge:
         frame_count: int = 60,
         render_engine: str = "standard",
         import_to_ae: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """C4D 场景渲染 → AE 合成链路。"""
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "c4d_rendered": False,
             "ae_project_created": False,
             "asset_imported_to_ae": False,
@@ -176,12 +176,12 @@ class C4DAEBridge:
         text: str = "MOTION",
         resolution: tuple[int, int] = (1920, 1080),
         frame_count: int = 60,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """C4D MoGraph 运动图形 → AE 合成链路。"""
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "mograph_rendered": False,
             "ae_project_created": False,
             "asset_imported_to_ae": False,

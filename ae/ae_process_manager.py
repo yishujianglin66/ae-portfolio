@@ -34,7 +34,7 @@ except ImportError:
 # Constants
 # ---------------------------------------------------------------------------
 DEFAULT_LISTENER = Path(__file__).with_name("ae_mcp_auto_listener.jsx")
-DEFAULT_SEARCH_PATHS: List[Path] = [
+DEFAULT_SEARCH_PATHS: list[Path] = [
     Path(r"C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\AfterFX.exe"),
     Path(r"D:\Program Files\Adobe\Adobe After Effects 2025\Support Files\AfterFX.exe"),
     Path(r"E:\Program Files\Adobe\Adobe After Effects 2025\Support Files\AfterFX.exe"),
@@ -50,12 +50,12 @@ class AEProcessManager:
 
     def __init__(
         self,
-        ae_exe_path: Optional[str] = None,
-        listener_script_path: Optional[str] = None,
+        ae_exe_path: str | None = None,
+        listener_script_path: str | None = None,
     ):
-        self.ae_exe_path: Optional[Path] = None
-        self.listener_script_path: Optional[Path] = None
-        self._last_status: Dict = {}
+        self.ae_exe_path: Path | None = None
+        self.listener_script_path: Path | None = None
+        self._last_status: dict = {}
         self._started_by_manager: bool = False
 
         # Resolve AE executable
@@ -85,7 +85,7 @@ class AEProcessManager:
     # --------------- Discovery helpers ---------------
 
     @staticmethod
-    def _find_ae_executable() -> Optional[Path]:
+    def _find_ae_executable() -> Path | None:
         for p in DEFAULT_SEARCH_PATHS:
             if p.exists():
                 return p.resolve()
@@ -101,7 +101,7 @@ class AEProcessManager:
         return None
 
     @staticmethod
-    def _find_listener_script() -> Optional[Path]:
+    def _find_listener_script() -> Path | None:
         candidate = DEFAULT_LISTENER
         if candidate.exists():
             return candidate.resolve()
@@ -142,7 +142,7 @@ class AEProcessManager:
         except Exception:
             return False
 
-    def get_ae_status(self) -> Dict:
+    def get_ae_status(self) -> dict:
         """Return a dict with current AE process status."""
         running = self.is_ae_running()
         status = {
@@ -256,13 +256,13 @@ class AEProcessManager:
 # Optional REST API
 # ---------------------------------------------------------------------------
 class _AEStatusHandler(BaseHTTPRequestHandler):
-    manager: Optional[AEProcessManager] = None
+    manager: AEProcessManager | None = None
 
     def log_message(self, format, *args):
         # Suppress default HTTP logging
         pass
 
-    def _send_json(self, data: Dict, code: int = 200):
+    def _send_json(self, data: dict, code: int = 200):
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
         self.end_headers()

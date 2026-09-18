@@ -24,8 +24,8 @@ class ReportGenerator:
 
     def generate_json(
         self,
-        report: Dict[str, Any],
-        knowledge: Optional[Dict[str, Any]] = None,
+        report: dict[str, Any],
+        knowledge: dict[str, Any] | None = None,
         output_path: str = "",
     ) -> str:
         """生成 JSON 格式报告。
@@ -38,7 +38,7 @@ class ReportGenerator:
         Returns:
             JSON 字符串
         """
-        full_report: Dict[str, Any] = {
+        full_report: dict[str, Any] = {
             "meta": {
                 "generated_at": datetime.now().isoformat(),
                 "analyzer_version": "1.0.0",
@@ -59,8 +59,8 @@ class ReportGenerator:
 
     def generate_summary(
         self,
-        report: Dict[str, Any],
-        knowledge: Optional[Dict[str, Any]] = None,
+        report: dict[str, Any],
+        knowledge: dict[str, Any] | None = None,
     ) -> str:
         """生成可读文本摘要。
 
@@ -71,7 +71,7 @@ class ReportGenerator:
         Returns:
             文本摘要
         """
-        lines: List[str] = []
+        lines: list[str] = []
         lines.append("=" * 60)
         lines.append("AEP Analysis Report")
         lines.append("=" * 60)
@@ -83,7 +83,7 @@ class ReportGenerator:
 
         # Stats
         stats = report.get("stats", {})
-        lines.append(f"\n--- Statistics ---")
+        lines.append("\n--- Statistics ---")
         lines.append(f"Compositions: {stats.get('totalComps', 0)}")
         lines.append(f"Layers: {stats.get('totalLayers', 0)}")
         lines.append(f"Effects: {stats.get('totalEffects', 0)}")
@@ -94,7 +94,7 @@ class ReportGenerator:
         # Techniques
         techniques = report.get("techniques", [])
         if techniques:
-            lines.append(f"\n--- Techniques Detected ---")
+            lines.append("\n--- Techniques Detected ---")
             for t in techniques:
                 lines.append(f"  - {t}")
 
@@ -106,7 +106,7 @@ class ReportGenerator:
                 key=lambda x: x[1].get("count", 0),
                 reverse=True,
             )
-            lines.append(f"\n--- Top 10 Effects ---")
+            lines.append("\n--- Top 10 Effects ---")
             for name, data in sorted_effects[:10]:
                 count = data.get("count", 0)
                 plugin = " [Plugin]" if data.get("isPlugin") else ""
@@ -115,13 +115,13 @@ class ReportGenerator:
         # Precomp structure
         precomp_graph = report.get("precompGraph", {})
         if precomp_graph:
-            lines.append(f"\n--- Precomp Structure ---")
+            lines.append("\n--- Precomp Structure ---")
             for parent, children in precomp_graph.items():
                 lines.append(f"  {parent} -> {', '.join(children)}")
 
         # Knowledge summary
         if knowledge:
-            lines.append(f"\n--- Knowledge Extracted ---")
+            lines.append("\n--- Knowledge Extracted ---")
 
             # Effect chains
             chains = knowledge.get("effect_chains", [])
@@ -144,8 +144,8 @@ class ReportGenerator:
 
     def generate_markdown(
         self,
-        report: Dict[str, Any],
-        knowledge: Optional[Dict[str, Any]] = None,
+        report: dict[str, Any],
+        knowledge: dict[str, Any] | None = None,
     ) -> str:
         """生成 Markdown 格式报告。
 
@@ -156,7 +156,7 @@ class ReportGenerator:
         Returns:
             Markdown 字符串
         """
-        lines: List[str] = []
+        lines: list[str] = []
         proj = report.get("project", {})
         stats = report.get("stats", {})
 

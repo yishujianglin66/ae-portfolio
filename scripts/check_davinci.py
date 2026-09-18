@@ -1,5 +1,8 @@
 """检查 DaVinci Resolve 实际功能可用性"""
-import sys, os, traceback
+import os
+import sys
+import traceback
+
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
 # 1. Check DaVinciResolveScript module
@@ -19,6 +22,7 @@ except ImportError:
 
 # 2. Check our integration
 from davinci_resolve_integration import DavinciColorist
+
 c = DavinciColorist()
 print(f"\nDavinciColorist mode: {c.config.mode}")
 print(f"is_available: {c.is_available()}")
@@ -29,7 +33,7 @@ test_video = r"D:\AE-Work\output\VinlandSaga_Battle_V17.mp4"
 out = r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault\output_production\davinci_test.mp4"
 os.makedirs(os.path.dirname(out), exist_ok=True)
 
-print(f"\nTrying color_grade...")
+print("\nTrying color_grade...")
 try:
     result = c.color_grade(input_path=test_video, output_path=out)
     print(f"  result type: {type(result).__name__}")
@@ -45,6 +49,7 @@ except Exception as e:
 
 # 4. Check if Resolve process is running
 import subprocess
+
 r = subprocess.run("tasklist", capture_output=True, text=True, shell=True)
 print(f"\nResolve running: {'Resolve.exe' in r.stdout}")
 print(f"AE running: {'AfterFX.exe' in r.stdout}")

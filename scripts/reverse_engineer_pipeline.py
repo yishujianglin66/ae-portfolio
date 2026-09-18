@@ -22,9 +22,9 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import re as _re
 import sys
 from pathlib import Path
-import re as _re
 from typing import Any, Dict, List, Optional
 
 # 项目根目录
@@ -32,8 +32,8 @@ _PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
 from aep_binary_parser import AEPParser
+
 from aep_analyzer.knowledge_extractor import KnowledgeExtractor
-from aep_analyzer.template_learner import TemplateLearner
 from aep_analyzer.preset_generator import (
     STYLE_RECIPES,
     detect_matching_styles,
@@ -41,6 +41,7 @@ from aep_analyzer.preset_generator import (
     generate_preset_entry,
 )
 from aep_analyzer.report import ReportGenerator
+from aep_analyzer.template_learner import TemplateLearner
 
 logging.basicConfig(
     level=logging.INFO,
@@ -54,7 +55,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 # 已知的非效果 matchName 模式（属性组、变换维度、子参数容器等）
-_NON_EFFECT_PATTERNS: List[str] = [
+_NON_EFFECT_PATTERNS: list[str] = [
     r".*-\d{4}$",          # 子参数: ADBE Ramp-0000, ADBE Glo2-0004
     r".*_\d+$",            # 分离维度: ADBE Position_0, ADBE Scale_1
     r"^ADBE Group( End)?",  # 属性组
@@ -89,7 +90,7 @@ def _is_top_level_effect(match_name: str) -> bool:
     return True
 
 
-def _filter_top_effects(match_names: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _filter_top_effects(match_names: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """过滤出顶层效果 matchName 条目。"""
     return [mn for mn in match_names if _is_top_level_effect(mn.get("matchName", ""))]
 
@@ -98,7 +99,7 @@ def _filter_top_effects(match_names: List[Dict[str, Any]]) -> List[Dict[str, Any
 # 核心流水线
 # ---------------------------------------------------------------------------
 
-def scan_aep_binary(aep_path: Path) -> Dict[str, Any]:
+def scan_aep_binary(aep_path: Path) -> dict[str, Any]:
     """Step 1: 二进制扫描 AEP 文件。
 
     提取 compositions / layers / matchNames / file_paths 等。
@@ -116,7 +117,7 @@ def scan_aep_binary(aep_path: Path) -> Dict[str, Any]:
     return result
 
 
-def extract_knowledge(binary_result: Dict[str, Any]) -> Dict[str, Any]:
+def extract_knowledge(binary_result: dict[str, Any]) -> dict[str, Any]:
     """Step 2: 从二进制扫描结果提取知识。
 
     将 binary parser 的输出适配为 KnowledgeExtractor 期望的格式。
@@ -141,9 +142,9 @@ def extract_knowledge(binary_result: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def detect_styles_matches(
-    binary_result: Dict[str, Any],
+    binary_result: dict[str, Any],
     threshold: float = 0.4,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Step 3: 将提取的效果与已知风格配方匹配。"""
     logger.info("[3/5] 风格匹配...")
 
@@ -155,7 +156,7 @@ def detect_styles_matches(
             all_match_names.add(name)
 
     # 对每个合成/图层组做匹配
-    all_matches: List[Dict[str, Any]] = []
+    all_matches: list[dict[str, Any]] = []
     if all_match_names:
         all_matches = detect_matching_styles(list(all_match_names), threshold)
 
@@ -169,16 +170,16 @@ def detect_styles_matches(
 
 
 def generate_presets(
-    style_matches: List[Dict[str, Any]],
-    binary_result: Dict[str, Any],
-) -> Dict[str, Any]:
+    style_matches: list[dict[str, Any]],
+    binary_result: dict[str, Any],
+) -> dict[str, Any]:
     """Step 4: 生成 JSX 预设。
 
     对匹配到的风格生成预设；对未匹配的自定义效果链也尝试生成。
     """
     logger.info("[4/5] 生成 JSX 预设...")
 
-    preset_entries: List[Dict[str, Any]] = []
+    preset_entries: list[dict[str, Any]] = []
 
     # 匹配到的风格 -> 直接生成
     for match in style_matches:
@@ -209,18 +210,18 @@ def generate_presets(
 
 
 def save_outputs(
-    binary_result: Dict[str, Any],
-    knowledge: Dict[str, Any],
-    style_matches: List[Dict[str, Any]],
-    presets: Dict[str, Any],
+    binary_result: dict[str, Any],
+    knowledge: dict[str, Any],
+    style_matches: list[dict[str, Any]],
+    presets: dict[str, Any],
     output_dir: Path,
     aep_name: str = "project",
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Step 5: 保存所有输出文件。"""
     logger.info(f"[5/5] 保存输出到: {output_dir}")
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    outputs: Dict[str, str] = {}
+    outputs: dict[str, str] = {}
 
     # 1) 二进制扫描结果 JSON
     scan_path = output_dir / f"{aep_name}_scan.json"
@@ -265,19 +266,19 @@ def save_outputs(
 # 辅助函数
 # ---------------------------------------------------------------------------
 
-def _adapt_binary_to_report(binary_result: Dict[str, Any]) -> Dict[str, Any]:
+def _adapt_binary_to_report(binary_result: dict[str, Any]) -> dict[str, Any]:
     """将 AEPParser 输出适配为 KnowledgeExtractor 期望的 report 格式。"""
-    compositions: List[Dict[str, Any]] = []
+    compositions: list[dict[str, Any]] = []
 
     # 构建图层到合成的映射（简化：所有图层归入第一个合成）
-    layers_by_comp: Dict[int, List[Dict[str, Any]]] = {}
+    layers_by_comp: dict[int, list[dict[str, Any]]] = {}
     for layer_data in binary_result.get("layers", []):
         comp_idx = layer_data.get("composition_index", 0) or 0
         if comp_idx not in layers_by_comp:
             layers_by_comp[comp_idx] = []
 
         # 构建效果列表
-        effects: List[Dict[str, Any]] = []
+        effects: list[dict[str, Any]] = []
         layer_id = layer_data.get("index", -1)
         for mn in binary_result.get("match_names", []):
             if mn.get("layer_index", -1) == layer_id:
@@ -305,7 +306,7 @@ def _adapt_binary_to_report(binary_result: Dict[str, Any]) -> Dict[str, Any]:
         })
 
     # 构建 effectsByType（仅顶层效果）
-    effects_by_type: Dict[str, Dict[str, Any]] = {}
+    effects_by_type: dict[str, dict[str, Any]] = {}
     for mn in _filter_top_effects(binary_result.get("match_names", [])):
         name = mn.get("matchName", "")
         if name:
@@ -338,15 +339,15 @@ def _adapt_binary_to_report(binary_result: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _extract_custom_chains(
-    binary_result: Dict[str, Any],
-    style_matches: List[Dict[str, Any]],
-) -> List[Dict[str, Any]]:
+    binary_result: dict[str, Any],
+    style_matches: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """提取未被已知风格覆盖的自定义效果链。"""
     matched_keys = {m["style"] for m in style_matches}
-    custom: List[Dict[str, Any]] = []
+    custom: list[dict[str, Any]] = []
 
     # 按图层分组效果（仅顶层效果）
-    layer_effects: Dict[str, List[str]] = {}
+    layer_effects: dict[str, list[str]] = {}
     for mn in _filter_top_effects(binary_result.get("match_names", [])):
         layer_key = f"{mn.get('composition_index', 0)}_{mn.get('layer_index', -1)}"
         name = mn.get("matchName", "")
@@ -374,8 +375,8 @@ def _extract_custom_chains(
 
 
 def _generate_custom_chain_preset(
-    chain: Dict[str, Any],
-) -> Optional[Dict[str, Any]]:
+    chain: dict[str, Any],
+) -> dict[str, Any] | None:
     """为自定义效果链生成预设条目。"""
     effects = chain["effects"]
     if not effects:
@@ -427,13 +428,13 @@ def _generate_custom_chain_preset(
 
 
 def _generate_markdown_report(
-    binary_result: Dict[str, Any],
-    knowledge: Dict[str, Any],
-    style_matches: List[Dict[str, Any]],
-    presets: Dict[str, Any],
+    binary_result: dict[str, Any],
+    knowledge: dict[str, Any],
+    style_matches: list[dict[str, Any]],
+    presets: dict[str, Any],
 ) -> str:
     """生成 Markdown 格式的逆向分析报告。"""
-    lines: List[str] = []
+    lines: list[str] = []
     fi = binary_result.get("file_info", {})
     summary = binary_result.get("summary", {})
 
@@ -519,7 +520,7 @@ def _now_iso() -> str:
 def process_directory(
     aep_dir: Path,
     output_dir: Path,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """批量处理目录下所有 .aep 文件。"""
     aep_files = sorted(aep_dir.rglob("*.aep"))
     if not aep_files:
@@ -529,7 +530,7 @@ def process_directory(
     logger.info(f"找到 {len(aep_files)} 个 AEP 文件")
 
     learner = TemplateLearner()
-    all_outputs: Dict[str, Dict[str, str]] = {}
+    all_outputs: dict[str, dict[str, str]] = {}
 
     for aep_path in aep_files:
         logger.info(f"\n{'='*60}")
@@ -561,7 +562,7 @@ def process_directory(
     return all_outputs
 
 
-def process_single(aep_path: Path, output_dir: Path) -> Dict[str, str]:
+def process_single(aep_path: Path, output_dir: Path) -> dict[str, str]:
     """处理单个 AEP 文件的完整流水线。"""
     # Step 1: 二进制扫描
     binary_result = scan_aep_binary(aep_path)

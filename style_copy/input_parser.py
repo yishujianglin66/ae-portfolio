@@ -17,15 +17,14 @@ style_copy/input_parser.py
   - ffmpeg-toolkit.py 的视频处理
 """
 
+import importlib
+import json
 import os
 import re
-import json
 import subprocess
 import tempfile
 from pathlib import Path
 from typing import Dict, Optional, Tuple
-
-import importlib
 
 # 可选依赖: media-fetcher (视频下载)
 try:
@@ -61,7 +60,7 @@ class InputParser:
 
     SUPPORTED_PLATFORMS = {"youtube", "bilibili", "douyin", "kuaishou", "tiktok"}
 
-    def __init__(self, work_dir: Optional[str] = None):
+    def __init__(self, work_dir: str | None = None):
         # fail-closed：SceneDetector 缺失时明确报错（但不在导入期）
         if SceneDetector is None:
             raise RuntimeError(
@@ -73,7 +72,7 @@ class InputParser:
         self.fetcher = MediaFetcher() if MEDIA_FETCHER_AVAILABLE else None
         self.scene_detector = SceneDetector()
     
-    def parse(self, input_str: str) -> Dict:
+    def parse(self, input_str: str) -> dict:
         """解析用户输入"""
         if self._is_local_file(input_str):
             return self._handle_local_file(input_str)
@@ -93,7 +92,7 @@ class InputParser:
             return ext in (".mp4", ".webm", ".mov", ".avi", ".mkv", ".flv", ".m4v")
         return False
     
-    def _handle_local_file(self, video_path: str) -> Dict:
+    def _handle_local_file(self, video_path: str) -> dict:
         """处理本地视频文件"""
         import os
         
@@ -130,7 +129,7 @@ class InputParser:
             "work_dir": str(self.work_dir)
         }
     
-    def _extract_url(self, text: str) -> Optional[str]:
+    def _extract_url(self, text: str) -> str | None:
         """从文本中提取URL"""
         url_pattern = r"https?://[^\s<>\"']+"
         match = re.search(url_pattern, text)
@@ -138,7 +137,7 @@ class InputParser:
             return match.group(0)
         return None
     
-    def _handle_url(self, url: str) -> Dict:
+    def _handle_url(self, url: str) -> dict:
         """处理视频链接"""
         platform = self._detect_platform(url)
         
@@ -188,7 +187,7 @@ class InputParser:
             "work_dir": str(self.work_dir)
         }
     
-    def _handle_prompt(self, prompt: str) -> Dict:
+    def _handle_prompt(self, prompt: str) -> dict:
         """处理文本提示词"""
         return {
             "success": True,
@@ -232,7 +231,7 @@ class InputParser:
         except subprocess.CalledProcessError:
             return []
 
-    def _extract_audio(self, video_path: str) -> Optional[str]:
+    def _extract_audio(self, video_path: str) -> str | None:
         """提取音频"""
         audio_path = str(Path(video_path).with_suffix(".mp3"))
 

@@ -6,7 +6,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from rendering.ae_render_engine import (
-    AERenderEngine, RenderJob, RenderStatus, AerenderExitCode,
+    AERenderEngine,
+    AerenderExitCode,
+    RenderJob,
+    RenderStatus,
     detect_aerender,
 )
 
@@ -92,7 +95,7 @@ def main():
     )
     dt = time.time() - t0
 
-    print(f"\n[结果]")
+    print("\n[结果]")
     print(f"  状态: {job.status.value}")
     print(f"  耗时: {dt:.1f}s")
     print(f"  尝试次数: {job.attempts}")
@@ -110,13 +113,13 @@ def main():
         return 0
     else:
         diag = job.diagnostics
-        print(f"  失败!")
+        print("  失败!")
         if diag:
             print(f"  退出码: {diag.error_code}")
             print(f"  分类: {diag.error_category}")
             print(f"  描述: {diag.error_description}")
             print(f"  建议: {diag.suggestion}")
-            print(f"\n--- stdout tail ---")
+            print("\n--- stdout tail ---")
             print(diag.stdout_tail[-800:])
         print("\nFAIL")
         return 1

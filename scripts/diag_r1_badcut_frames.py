@@ -24,7 +24,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cut_visibility_v3 import ahash, hamming, probe_fps, frames_by_number  # noqa: E402
+from cut_visibility_v3 import ahash, frames_by_number, hamming, probe_fps  # noqa: E402
 
 WIN = 6  # 切点前后各取 6 帧
 

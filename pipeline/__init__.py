@@ -10,20 +10,34 @@ v2 特性:
   - 反馈闭环: QualityAgent → KB → 自迭代
   - 多线程 DAG 并行执行器
 """
-from pipeline.unified_pipeline import (
-    UnifiedPipeline, PipelineConfig, PipelineResult,
-    PipelineMode, StageStatus, StageResult, KnowledgeInjector,
-)
-from pipeline.presets import apply_preset, list_presets, get_preset, get_preset_context, PRESETS
 # batch_queue 中任务类名为 Task (旧名 BatchTask 已重命名, 此处保留别名兼容历史引用)
-from pipeline.batch_queue import BatchQueue, Task as BatchTask, TaskStatus
+from pipeline.batch_queue import BatchQueue, TaskStatus
+from pipeline.batch_queue import Task as BatchTask
+from pipeline.feedback_loop import (
+    AdjustmentAdvice,
+    FeedbackLoop,
+    FeedbackResult,
+    QualityIssue,
+    get_past_feedback,
+    get_success_patterns,
+    process_quality_feedback,
+)
 from pipeline.multi_thread_executor import (
-    MultiThreadExecutor, ExecutionResult, StageDAG, PipelineMonitor,
+    ExecutionResult,
+    MultiThreadExecutor,
+    PipelineMonitor,
+    StageDAG,
     create_video_pipeline_executor,
 )
-from pipeline.feedback_loop import (
-    FeedbackLoop, FeedbackResult, QualityIssue, AdjustmentAdvice,
-    process_quality_feedback, get_past_feedback, get_success_patterns,
+from pipeline.presets import PRESETS, apply_preset, get_preset, get_preset_context, list_presets
+from pipeline.unified_pipeline import (
+    KnowledgeInjector,
+    PipelineConfig,
+    PipelineMode,
+    PipelineResult,
+    StageResult,
+    StageStatus,
+    UnifiedPipeline,
 )
 
 __all__ = [

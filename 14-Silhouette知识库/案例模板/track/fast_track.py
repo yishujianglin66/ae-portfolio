@@ -1,9 +1,10 @@
 # Fast Tracking Template
 # 快速跟踪模板 - 适用于预览、快速迭代、简单运动场景
 
-from fx import *
 import json
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=30.0):

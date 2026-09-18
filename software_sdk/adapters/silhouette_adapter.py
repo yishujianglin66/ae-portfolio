@@ -6,8 +6,8 @@ software_sdk/adapters/silhouette_adapter.py - Silhouette 适配器
 """
 from __future__ import annotations
 
-import os
 import logging
+import os
 import subprocess
 from typing import Any, Dict, Optional
 
@@ -34,13 +34,13 @@ class SilhouetteAdapter(BaseSoftwareAdapter):
 
     def __init__(
         self,
-        config: Optional[SoftwareConfig] = None,
-        logger: Optional[logging.Logger] = None,
+        config: SoftwareConfig | None = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         if config is None:
             config = SoftwareConfig(software=SoftwareType.SILHOUETTE)
         super().__init__(config, logger)
-        self._process: Optional[subprocess.Popen] = None
+        self._process: subprocess.Popen | None = None
 
     def _initialize_capabilities(self) -> SoftwareCapabilities:
         return SoftwareCapabilities(
@@ -122,22 +122,22 @@ class SilhouetteAdapter(BaseSoftwareAdapter):
         finally:
             self._mark_task_end()
 
-    def _run_roto(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_roto(self, params: dict[str, Any]) -> dict[str, Any]:
         """运行 Roto 任务。"""
         self.logger.info("Running Silhouette Roto...")
         return self._run_command(["roto"], params)
 
-    def _run_paint(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_paint(self, params: dict[str, Any]) -> dict[str, Any]:
         """运行 Paint 任务。"""
         self.logger.info("Running Silhouette Paint...")
         return self._run_command(["paint"], params)
 
-    def _run_track(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_track(self, params: dict[str, Any]) -> dict[str, Any]:
         """运行 Track 任务。"""
         self.logger.info("Running Silhouette Track...")
         return self._run_command(["track"], params)
 
-    def _export_mask(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def _export_mask(self, params: dict[str, Any]) -> dict[str, Any]:
         """导出遮罩。"""
         self.logger.info("Exporting mask from Silhouette...")
         return {
@@ -147,8 +147,8 @@ class SilhouetteAdapter(BaseSoftwareAdapter):
         }
 
     def _run_command(
-        self, args: list, params: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, args: list, params: dict[str, Any]
+    ) -> dict[str, Any]:
         """运行 Silhouette 命令。"""
         exe = self.config.executable_path
         if not exe:

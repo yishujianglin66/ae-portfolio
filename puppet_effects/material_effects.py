@@ -12,8 +12,7 @@ material_effects.py
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Any
-
+from typing import Any, Dict, List
 
 __all__ = [
     "MaterialEffects",
@@ -36,7 +35,7 @@ class MaterialEffects:
             "metal_puppet": self.metal_puppet,
         }
 
-    def get_available_materials(self) -> List[str]:
+    def get_available_materials(self) -> list[str]:
         """获取所有可用材质列表
 
         Returns:
@@ -45,7 +44,7 @@ class MaterialEffects:
         return list(self._effect_catalog.keys())
 
     def generate(self, material_type: str, intensity: float = 1.0,
-                 layer_name: str = "layer_001") -> List[Dict[str, Any]]:
+                 layer_name: str = "layer_001") -> list[dict[str, Any]]:
         """生成指定材质的效果列表
 
         Args:
@@ -87,7 +86,7 @@ class MaterialEffects:
     # ------------------------------------------------------------------
     @staticmethod
     def wooden_puppet(intensity: float = 1.0,
-                      layer_name: str = "layer_001") -> List[Dict[str, Any]]:
+                      layer_name: str = "layer_001") -> list[dict[str, Any]]:
         """木质木偶效果
 
         效果组合：
@@ -185,7 +184,7 @@ class MaterialEffects:
     # ------------------------------------------------------------------
     @staticmethod
     def ceramic_puppet(intensity: float = 1.0,
-                       layer_name: str = "layer_001") -> List[Dict[str, Any]]:
+                       layer_name: str = "layer_001") -> list[dict[str, Any]]:
         """陶瓷木偶效果
 
         效果组合：
@@ -274,7 +273,7 @@ class MaterialEffects:
     # ------------------------------------------------------------------
     @staticmethod
     def cloth_puppet(intensity: float = 1.0,
-                     layer_name: str = "layer_001") -> List[Dict[str, Any]]:
+                     layer_name: str = "layer_001") -> list[dict[str, Any]]:
         """布偶/毛绒效果
 
         效果组合：
@@ -341,7 +340,7 @@ class MaterialEffects:
     # ------------------------------------------------------------------
     @staticmethod
     def clay_puppet(intensity: float = 1.0,
-                    layer_name: str = "layer_001") -> List[Dict[str, Any]]:
+                    layer_name: str = "layer_001") -> list[dict[str, Any]]:
         """黏土/橡皮泥效果
 
         效果组合：
@@ -405,7 +404,7 @@ class MaterialEffects:
     # ------------------------------------------------------------------
     @staticmethod
     def metal_puppet(intensity: float = 1.0,
-                     layer_name: str = "layer_001") -> List[Dict[str, Any]]:
+                     layer_name: str = "layer_001") -> list[dict[str, Any]]:
         """金属木偶效果
 
         效果组合：

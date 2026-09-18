@@ -1,8 +1,9 @@
 # Object Removal Template
 # 物体擦除模板 - 适用于大面积物体去除、背景重建
 
-from fx import *
 import os
+
+from fx import *
 
 
 def create_pipeline(source_path, output_path, frame_rate=24.0):

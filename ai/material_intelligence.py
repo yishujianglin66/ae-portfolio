@@ -29,12 +29,12 @@ MaterialIntelligence — 素材内容深度识别与智能匹配引擎
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import os
 import sys
 import time
-import hashlib
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -46,7 +46,7 @@ _PROJECT_ROOT = Path(__file__).parent.parent
 #  IP 别名归一化表 — canonical名 → 别名集合(全小写)
 # ================================================================
 
-IP_ALIASES: Dict[str, List[str]] = {
+IP_ALIASES: dict[str, list[str]] = {
     "进击的巨人": ["进击的巨人", "attack on titan", "aot", "snk",
                 "shingeki no kyojin", "shingeki", "進撃の巨人"],
     "FATE": ["fate", "fate/stay night", "fate stay night", "fate/zero",
@@ -70,7 +70,7 @@ IP_ALIASES: Dict[str, List[str]] = {
 }
 
 # 反向索引: 别名 → canonical名
-_ALIAS_TO_CANONICAL: Dict[str, str] = {}
+_ALIAS_TO_CANONICAL: dict[str, str] = {}
 for _canon, _aliases in IP_ALIASES.items():
     _canon_l = _canon.lower()
     _ALIAS_TO_CANONICAL[_canon_l] = _canon
@@ -123,7 +123,7 @@ class IPTag:
     ip_name: str = ""                    # 作品名 (如 "进击的巨人")
     ip_name_en: str = ""                 # 英文名 (如 "Attack on Titan")
     confidence: float = 0.0              # 识别置信度 0-1
-    characters: List[str] = field(default_factory=list)  # 识别到的角色
+    characters: list[str] = field(default_factory=list)  # 识别到的角色
     evidence: str = ""                   # 识别依据描述
 
 
@@ -133,7 +133,7 @@ class IPTimelineSegment:
     start: float = 0.0
     end: float = 0.0
     ip_name: str = ""            # canonical名
-    characters: List[str] = field(default_factory=list)
+    characters: list[str] = field(default_factory=list)
     confidence: float = 0.0
     description: str = ""
 
@@ -161,11 +161,11 @@ class MaterialIntelTag:
     filename: str = ""
     duration: float = 0.0
     fps: float = 0.0
-    resolution: Tuple[int, int] = (0, 0)
+    resolution: tuple[int, int] = (0, 0)
     file_hash: str = ""                  # 文件哈希(用于缓存)
 
     # VLM 语义识别
-    ip_tags: List[IPTag] = field(default_factory=list)
+    ip_tags: list[IPTag] = field(default_factory=list)
     primary_ip: str = ""                 # 最主要归属IP (canonical名)
     description: str = ""                # VLM对画面的自然语言描述
     is_mixed: bool = False               # 是否多IP混剪
@@ -175,9 +175,9 @@ class MaterialIntelTag:
     content: ContentTag = field(default_factory=ContentTag)
 
     # 时间线特征
-    scene_changes: List[float] = field(default_factory=list)
-    high_motion_regions: List[Dict] = field(default_factory=list)
-    ip_timeline: List[IPTimelineSegment] = field(default_factory=list)  # 逐段IP归属(原生视频理解)
+    scene_changes: list[float] = field(default_factory=list)
+    high_motion_regions: list[dict] = field(default_factory=list)
+    ip_timeline: list[IPTimelineSegment] = field(default_factory=list)  # 逐段IP归属(原生视频理解)
 
     # 元数据
     analysis_time: float = 0.0
@@ -185,7 +185,7 @@ class MaterialIntelTag:
     frame_count_analyzed: int = 0
 
     @property
-    def ip_names(self) -> List[str]:
+    def ip_names(self) -> list[str]:
         """所有识别到的IP名"""
         return [t.ip_name for t in self.ip_tags if t.ip_name]
 
@@ -239,7 +239,7 @@ class MaterialIntelTag:
             return True
         return False
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         d = {
             "video_path": self.video_path,
             "filename": self.filename,
@@ -292,12 +292,12 @@ class MaterialIndex:
     """素材索引 — 支持IP过滤和情绪匹配"""
 
     def __init__(self):
-        self.tags: Dict[str, MaterialIntelTag] = {}  # path -> tag
+        self.tags: dict[str, MaterialIntelTag] = {}  # path -> tag
 
     def add(self, tag: MaterialIntelTag):
         self.tags[tag.video_path] = tag
 
-    def filter_by_ip(self, ip_keyword: str, strict: bool = True) -> List[str]:
+    def filter_by_ip(self, ip_keyword: str, strict: bool = True) -> list[str]:
         """按IP关键词过滤素材，返回匹配的视频路径列表
 
         strict=True: 语义化严格匹配(含负面排除)，生产模式默认。
@@ -309,7 +309,7 @@ class MaterialIndex:
 
     def select_for_ip(self, target_ip: str,
                       allow_mixed: bool = False,
-                      allow_unknown: bool = False) -> Dict[str, List[str]]:
+                      allow_unknown: bool = False) -> dict[str, list[str]]:
         """生产级素材选择 — 返回 matched/excluded/mixed/unknown 四类。
 
         - matched:  匹配目标IP且内容类型合规的素材
@@ -317,7 +317,7 @@ class MaterialIndex:
         - unknown:  未识别出IP的素材 (默认排除)
         - excluded: 明确属于其他IP或教程类的素材
         """
-        result: Dict[str, List[str]] = {
+        result: dict[str, list[str]] = {
             "matched": [], "mixed": [], "unknown": [], "excluded": [],
         }
         if not target_ip:
@@ -346,7 +346,7 @@ class MaterialIndex:
                 result["excluded"].append(path)
         return result
 
-    def match_by_mood(self, target_mood: str, top_k: int = 5) -> List[str]:
+    def match_by_mood(self, target_mood: str, top_k: int = 5) -> list[str]:
         """按情绪匹配素材，返回最匹配的路径列表"""
         mood_map = {
             "epic": ["epic", "intense", "battle"],
@@ -380,7 +380,7 @@ class MaterialIndex:
 
     def get_smart_assignment(self, seg_idx: int, total_segs: int,
                              target_mood: str, target_ip: str = "",
-                             candidates: Optional[List[str]] = None) -> Optional[str]:
+                             candidates: list[str] | None = None) -> str | None:
         """为段落智能分配素材 — 同时考虑IP过滤和情绪匹配
 
         candidates: 显式候选集(生产模式由 select_for_ip 预先确定)。
@@ -425,7 +425,7 @@ class MaterialIndex:
             self.tags[p] = tag
 
     @staticmethod
-    def _from_dict(d: Dict) -> MaterialIntelTag:
+    def _from_dict(d: dict) -> MaterialIntelTag:
         ip_tags = [
             IPTag(ip_name=normalize_ip(t.get("ip_name", "")),
                   ip_name_en=t.get("ip_name_en", ""),
@@ -506,7 +506,7 @@ class MaterialIntelligenceEngine:
     def __init__(
         self,
         frame_sample_count: int = 4,
-        cache_dir: Optional[str] = None,
+        cache_dir: str | None = None,
         use_vlm: bool = True,
         use_cv: bool = True,
         use_local_classifier: bool = True,
@@ -529,7 +529,7 @@ class MaterialIntelligenceEngine:
             import cv2
             self._cv2 = cv2
 
-    def _load_env(self) -> Dict[str, str]:
+    def _load_env(self) -> dict[str, str]:
         if self._env is not None:
             return self._env
         env = {}
@@ -618,8 +618,8 @@ class MaterialIntelligenceEngine:
               f"耗时={tag.analysis_time:.1f}s")
         return tag
 
-    def build_index(self, video_paths: List[str],
-                    output_json: Optional[str] = None) -> MaterialIndex:
+    def build_index(self, video_paths: list[str],
+                    output_json: str | None = None) -> MaterialIndex:
         """批量分析视频素材，构建素材索引"""
         print(f"\n{'=' * 60}")
         print(f"素材智能索引构建 — {len(video_paths)} 个素材")
@@ -642,11 +642,11 @@ class MaterialIntelligenceEngine:
             print(f"\n索引已保存: {output_json}")
 
         # 统计
-        ip_counts: Dict[str, int] = {}
+        ip_counts: dict[str, int] = {}
         for tag in index.tags.values():
             ip = tag.primary_ip or "未识别"
             ip_counts[ip] = ip_counts.get(ip, 0) + 1
-        print(f"\nIP分布:")
+        print("\nIP分布:")
         for ip, count in sorted(ip_counts.items(), key=lambda x: -x[1]):
             print(f"  {ip}: {count} 个素材")
 
@@ -660,7 +660,7 @@ class MaterialIntelligenceEngine:
     #  CV 视觉特征分析
     # ================================================================
 
-    def _cv_analyze(self, video_path: str) -> Tuple[Dict, Dict, List[str]]:
+    def _cv_analyze(self, video_path: str) -> tuple[dict, dict, list[str]]:
         """OpenCV 视觉特征分析 + 帧采样"""
         import numpy as np
         cv2 = self._cv2
@@ -837,7 +837,7 @@ class MaterialIntelligenceEngine:
     #  VLM 语义识别
     # ================================================================
 
-    def build_frames_content_parts(self, frames_b64: List[str]) -> List:
+    def build_frames_content_parts(self, frames_b64: list[str]) -> list:
         """构建抽帧多模态请求内容(图像帧+标准分析提示词)，供各通道独立评测复用"""
         prompt = """你是一个专业的动漫视频内容分析专家。这些是从一段视频中均匀采样的帧画面，请仔细分析并输出以下信息。
 
@@ -880,7 +880,7 @@ class MaterialIntelligenceEngine:
         content_parts.append({"type": "text", "text": prompt})
         return content_parts
 
-    def _vlm_analyze(self, frames_b64: List[str], video_path: str) -> Tuple[Dict, str]:
+    def _vlm_analyze(self, frames_b64: list[str], video_path: str) -> tuple[dict, str]:
         """使用视觉大模型识别素材内容 — 三通道自动切换 + 重试"""
         if not frames_b64:
             return {}, ""
@@ -911,8 +911,8 @@ class MaterialIntelligenceEngine:
         print("    [WARN] VLM 全部通道失败，仅使用CV特征")
         return {}, ""
 
-    def _ark_video_native(self, video_path: str, env: Optional[Dict] = None,
-                          ask_timeline: bool = True) -> Tuple[Dict, str]:
+    def _ark_video_native(self, video_path: str, env: dict | None = None,
+                          ask_timeline: bool = True) -> tuple[dict, str]:
         """ARK 原生视频理解通道 — 直接传整段视频给 Seed-1.6-Vision。
 
         相比抽帧方案的优势：
@@ -939,8 +939,8 @@ class MaterialIntelligenceEngine:
                 tmp_dir.mkdir(parents=True, exist_ok=True)
                 shrunk = tmp_dir / f"{self._make_cache_key(video_path)}_v2.mp4"
                 if not shrunk.exists():
-                    import subprocess
                     import shutil
+                    import subprocess
                     try:
                         from core.paths import ffmpeg_bin as _paths_ffmpeg
                     except ImportError:
@@ -1030,7 +1030,7 @@ class MaterialIntelligenceEngine:
             print(f"    [VideoNative] {model} 失败: {str(e)[:120]}")
         return {}, ""
 
-    def get_ip_timeline(self, video_path: str) -> List[Dict]:
+    def get_ip_timeline(self, video_path: str) -> list[dict]:
         """获取视频的场景级IP时间线分段(原生视频理解)。
 
         返回 [{"start","end","ip_name","characters","confidence","description"}]，
@@ -1085,7 +1085,7 @@ class MaterialIntelligenceEngine:
                 "siliconflow-frames", "ark-frames")
 
     def call_channel(self, channel: str, video_path: str,
-                     frames_count: int = 6) -> Tuple[Optional[Dict], str]:
+                     frames_count: int = 6) -> tuple[dict | None, str]:
         """统一通道调度入口 — 四个VLM通道同一签名，互不降级。
 
         channel:
@@ -1114,7 +1114,7 @@ class MaterialIntelligenceEngine:
             return self._call_ark_vision(parts, env)
         raise ValueError(f"未知通道: {channel}，可选: {self.CHANNELS}")
 
-    def _call_duckmiss_vision(self, content_parts: List, env: Dict) -> Tuple[Optional[Dict], str]:
+    def _call_duckmiss_vision(self, content_parts: list, env: dict) -> tuple[dict | None, str]:
         """DuckMiss Claude Vision API"""
         api_key = env.get("DUCK_MISS_API_KEY", "")
         if not api_key:
@@ -1147,7 +1147,7 @@ class MaterialIntelligenceEngine:
             print(f"    [VLM] DuckMiss 失败: {e}")
         return None, ""
 
-    def _call_siliconflow_vision(self, content_parts: List, env: Dict) -> Tuple[Optional[Dict], str]:
+    def _call_siliconflow_vision(self, content_parts: list, env: dict) -> tuple[dict | None, str]:
         """SiliconFlow Qwen3-VL API — 备用视觉通道"""
         api_key = env.get("SILICONFLOW_API_KEY", "")
         if not api_key:
@@ -1179,7 +1179,7 @@ class MaterialIntelligenceEngine:
             print(f"    [VLM] SiliconFlow 失败: {e}")
         return None, ""
 
-    def _call_ark_vision(self, content_parts: List, env: Dict) -> Tuple[Optional[Dict], str]:
+    def _call_ark_vision(self, content_parts: list, env: dict) -> tuple[dict | None, str]:
         """ARK Vision API (豆包视觉模型) — 依次尝试新版模型名"""
         api_key = env.get("DOUBAO_API_KEY", "")
         if not api_key:
@@ -1195,8 +1195,8 @@ class MaterialIntelligenceEngine:
         ]
         candidates = [m for m in candidates if m]
 
-        import urllib.request
         import urllib.error
+        import urllib.request
         for model in candidates:
             try:
                 data = json.dumps({
@@ -1224,7 +1224,7 @@ class MaterialIntelligenceEngine:
                 continue
         return None, ""
 
-    def _parse_vlm_response(self, content: str) -> Optional[Dict]:
+    def _parse_vlm_response(self, content: str) -> dict | None:
         """解析VLM返回的JSON"""
         if not content:
             return None
@@ -1254,13 +1254,13 @@ class MaterialIntelligenceEngine:
     #  标签融合
     # ================================================================
 
-    def _fuse_tag(self, video_path: str, basic_info: Dict,
-                  cv_features: Dict, vlm_result: Dict) -> MaterialIntelTag:
+    def _fuse_tag(self, video_path: str, basic_info: dict,
+                  cv_features: dict, vlm_result: dict) -> MaterialIntelTag:
         """融合CV特征和VLM语义，生成最终标签"""
         p = Path(video_path)
 
         # IP标签 — 支持新版works数组格式，兼容旧版单ip_name格式
-        ip_tags: List[IPTag] = []
+        ip_tags: list[IPTag] = []
         primary_ip = ""
         is_mixed = False
         content_kind = "unknown"
@@ -1387,7 +1387,7 @@ class MaterialIntelligenceEngine:
     def _get_proto_kb(self):
         """懒加载本地CLIP原型知识库(进程内单例)"""
         if self._proto_kb is None:
-            from ai.ip_proto_classifier import ProtoKB, GOLDEN
+            from ai.ip_proto_classifier import GOLDEN, ProtoKB
             golden = json.loads(GOLDEN.read_text(encoding="utf-8")) if GOLDEN.exists() else {}
             self._proto_kb = ProtoKB.build(set(golden.keys()))
         return self._proto_kb
@@ -1400,7 +1400,7 @@ class MaterialIntelligenceEngine:
         2. VLM有结果但本地不一致 → 保留VLM, 记录分歧供人工复核
         3. VLM无结果且本地高置信(库内类+conf≥0.5+margin≥0.01) → 补位
         """
-        from ai.ip_proto_classifier import predict_video, C_CONF_PASS, C_ACC_MARGIN_PASS
+        from ai.ip_proto_classifier import C_ACC_MARGIN_PASS, C_CONF_PASS, predict_video
         kb = self._get_proto_kb()
         local = predict_video(video_path, kb)
         lip = local.get("primary_ip") or ""
@@ -1436,7 +1436,7 @@ class MaterialIntelligenceEngine:
     #  成片内容复核 — 生产交付的最后防线
     # ================================================================
 
-    def extract_frames_b64(self, video_path: str, count: int = 4) -> List[str]:
+    def extract_frames_b64(self, video_path: str, count: int = 4) -> list[str]:
         """从视频均匀抽帧并转base64 (供VLM复核)"""
         self._ensure_cv2()
         cv2 = self._cv2
@@ -1467,7 +1467,7 @@ class MaterialIntelligenceEngine:
 
     def extract_frames_window_b64(self, video_path: str,
                                   start_sec: float, end_sec: float,
-                                  count: int = 2) -> List[str]:
+                                  count: int = 2) -> list[str]:
         """按时间窗口抽帧转base64 — 素材语义分段分析 (2026-08-13 Stage2)。
 
         叙事角色(铺垫/爆发)需要匹配素材中对应语义的时间窗口,
@@ -1499,14 +1499,14 @@ class MaterialIntelligenceEngine:
         return frames_b64
 
     def verify_video_ip(self, video_path: str, target_ip: str,
-                        frame_count: int = 4) -> Dict[str, Any]:
+                        frame_count: int = 4) -> dict[str, Any]:
         """成片内容复核 — 抽帧让VLM确认成片确为目标IP内容。
 
         Returns:
             {"verified": bool, "reason": str, "model": str,
              "detected_ips": [str], "frames_checked": int}
         """
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "verified": False, "reason": "", "model": "",
             "detected_ips": [], "frames_checked": 0,
         }
@@ -1617,9 +1617,9 @@ if __name__ == "__main__":
             print(f"    - {Path(m).name}")
 
     # 测试情绪匹配
-    print(f"\n情绪匹配测试:")
+    print("\n情绪匹配测试:")
     for mood in ["battle", "calm", "dark"]:
         matched = index.match_by_mood(mood, top_k=3)
         print(f"  '{mood}': {[Path(m).name[:30] for m in matched]}")
 
-    print(f"\n完成!")
+    print("\n完成!")

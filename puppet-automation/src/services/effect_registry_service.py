@@ -26,11 +26,11 @@
 """
 from __future__ import annotations
 
-import json
 import csv
+import json
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass, field
 
 from loguru import logger
 
@@ -43,9 +43,9 @@ class EffectEntry:
     category: str = "other"
     plugin_package: str = ""
     description: str = ""
-    params: Dict[str, Any] = field(default_factory=dict)
-    usage_scenarios: List[str] = field(default_factory=list)
-    default_presets: List[Dict[str, Any]] = field(default_factory=list)
+    params: dict[str, Any] = field(default_factory=dict)
+    usage_scenarios: list[str] = field(default_factory=list)
+    default_presets: list[dict[str, Any]] = field(default_factory=list)
     source: str = ""
     confidence: float = 0.8
 
@@ -55,7 +55,7 @@ class EffectEntry:
             return getattr(self, key)
         return default
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典。"""
         return {
             "name": self.name,
@@ -80,10 +80,10 @@ class EffectRegistryService:
 
     def __init__(self) -> None:
         """初始化效果注册服务。"""
-        self._effects: Dict[str, EffectEntry] = {}
-        self._category_index: Dict[str, List[str]] = {}
-        self._plugin_index: Dict[str, List[str]] = {}
-        self._scenario_index: Dict[str, List[str]] = {}
+        self._effects: dict[str, EffectEntry] = {}
+        self._category_index: dict[str, list[str]] = {}
+        self._plugin_index: dict[str, list[str]] = {}
+        self._scenario_index: dict[str, list[str]] = {}
 
         self._initialized = False
         logger.info("EffectRegistryService 初始化完成")
@@ -112,9 +112,9 @@ class EffectRegistryService:
 
         try:
             from effect_registry import (
-                KEYWORD_TO_EFFECT_MAP,
-                EFFECT_PARAMS_DB,
                 EFFECT_CATEGORIES,
+                EFFECT_PARAMS_DB,
+                KEYWORD_TO_EFFECT_MAP,
             )
 
             for keyword, match_name in KEYWORD_TO_EFFECT_MAP.items():
@@ -242,7 +242,7 @@ class EffectRegistryService:
 
     def register_plugin_effects(
         self,
-        effects: List[Dict[str, Any]],
+        effects: list[dict[str, Any]],
         plugin_package: str = "",
     ) -> int:
         """批量注册插件效果。
@@ -293,7 +293,7 @@ class EffectRegistryService:
     # 公共 API - 效果查询
     # ========================================================================
 
-    def get_effect(self, match_name: str) -> Optional[EffectEntry]:
+    def get_effect(self, match_name: str) -> EffectEntry | None:
         """根据 matchName 获取效果信息。
 
         Args:
@@ -307,7 +307,7 @@ class EffectRegistryService:
 
         return self._effects.get(match_name.lower())
 
-    def get_all_effects(self) -> List[EffectEntry]:
+    def get_all_effects(self) -> list[EffectEntry]:
         """获取所有效果。
 
         Returns:
@@ -333,7 +333,7 @@ class EffectRegistryService:
     # 公共 API - 分类搜索
     # ========================================================================
 
-    def search_by_category(self, category: str) -> List[EffectEntry]:
+    def search_by_category(self, category: str) -> list[EffectEntry]:
         """按分类搜索效果。
 
         Args:
@@ -348,7 +348,7 @@ class EffectRegistryService:
         keys = self._category_index.get(category.lower(), [])
         return [self._effects[k] for k in keys if k in self._effects]
 
-    def get_categories(self) -> List[str]:
+    def get_categories(self) -> list[str]:
         """获取所有分类。
 
         Returns:
@@ -359,7 +359,7 @@ class EffectRegistryService:
 
         return list(self._category_index.keys())
 
-    def get_category_stats(self) -> Dict[str, int]:
+    def get_category_stats(self) -> dict[str, int]:
         """获取分类统计。
 
         Returns:
@@ -378,7 +378,7 @@ class EffectRegistryService:
         self,
         scenario: str,
         limit: int = 10,
-    ) -> List[EffectEntry]:
+    ) -> list[EffectEntry]:
         """根据场景推荐效果。
 
         Args:
@@ -442,7 +442,7 @@ class EffectRegistryService:
     # 公共 API - 插件包查询
     # ========================================================================
 
-    def get_plugin_packages(self) -> List[str]:
+    def get_plugin_packages(self) -> list[str]:
         """获取所有插件包名称。
 
         Returns:
@@ -453,7 +453,7 @@ class EffectRegistryService:
 
         return list(self._plugin_index.keys())
 
-    def get_effects_by_plugin(self, plugin_package: str) -> List[EffectEntry]:
+    def get_effects_by_plugin(self, plugin_package: str) -> list[EffectEntry]:
         """按插件包获取效果。
 
         Args:
@@ -468,7 +468,7 @@ class EffectRegistryService:
         keys = self._plugin_index.get(plugin_package, [])
         return [self._effects[k] for k in keys if k in self._effects]
 
-    def get_plugin_stats(self) -> Dict[str, int]:
+    def get_plugin_stats(self) -> dict[str, int]:
         """获取插件包统计。
 
         Returns:
@@ -487,10 +487,10 @@ class EffectRegistryService:
         self,
         query: str = "",
         keyword: str = "",
-        category: Optional[str] = None,
-        plugin_package: Optional[str] = None,
+        category: str | None = None,
+        plugin_package: str | None = None,
         limit: int = 20,
-    ) -> List[EffectEntry]:
+    ) -> list[EffectEntry]:
         """搜索效果。
 
         按名称、描述、分类进行模糊搜索。
@@ -545,7 +545,7 @@ class EffectRegistryService:
         results.sort(key=lambda x: x[0], reverse=True)
         return [entry for _, entry in results[:limit]]
 
-    def get_scenarios(self) -> List[str]:
+    def get_scenarios(self) -> list[str]:
         """获取所有使用场景。
 
         Returns:
@@ -560,7 +560,7 @@ class EffectRegistryService:
         self,
         scenario: str,
         limit: int = 50,
-    ) -> List[EffectEntry]:
+    ) -> list[EffectEntry]:
         """根据场景获取效果。
 
         Args:
@@ -661,7 +661,7 @@ class EffectRegistryService:
     # 公共 API - 统计
     # ========================================================================
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取效果统计信息。
 
         Returns:
@@ -679,16 +679,16 @@ class EffectRegistryService:
             "plugin_packages": len(self._plugin_index),
         }
 
-    def _get_source_stats(self) -> Dict[str, int]:
+    def _get_source_stats(self) -> dict[str, int]:
         """获取来源统计。"""
-        stats: Dict[str, int] = {}
+        stats: dict[str, int] = {}
         for entry in self._effects.values():
             source = entry.source or "unknown"
             stats[source] = stats.get(source, 0) + 1
         return stats
 
 
-_effect_registry_instance: Optional[EffectRegistryService] = None
+_effect_registry_instance: EffectRegistryService | None = None
 
 
 def get_effect_registry() -> EffectRegistryService:

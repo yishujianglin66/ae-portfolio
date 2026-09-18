@@ -9,6 +9,7 @@ sys.path.insert(0, str(_PROJECT_ROOT / "puppet-automation"))
 
 from src.engines.premiere.pr_bridge_client import PRBridgeClient
 
+
 async def test_cep():
     """强制使用 CEP 协议测试"""
     from src.engines.premiere.pr_bridge_client import PRBridgeError

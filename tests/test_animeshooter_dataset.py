@@ -13,8 +13,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from models.data.animeshooter_dataset import (  # noqa: E402
     SCHEMA,
-    AnimeShotSample,
     AnimeShooterDataset,
+    AnimeShotSample,
     _iter_annotation_json,
     _parse_clock,
     build_shot_stats,

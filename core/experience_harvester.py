@@ -23,16 +23,16 @@
 Author: AE-Knowledge-Vault Team
 """
 
+import hashlib
+import json
+import logging
 import os
 import re
-import json
 import time
-import logging
-import hashlib
-from pathlib import Path
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Any, Optional, Tuple, Set
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 
@@ -53,7 +53,7 @@ class StageExperience:
     engine_used: str = ""
     memory_mb: float = 0.0
     quality_score: float = 0.0
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -64,17 +64,17 @@ class ExperienceRecord:
     source_file: str = ""
     source_type: str = ""          # log / production_report / test_log / daily_note / structured_data
     # 各阶段经验
-    stages: List[StageExperience] = field(default_factory=list)
+    stages: list[StageExperience] = field(default_factory=list)
     # 汇总
     overall_success: bool = True
     total_duration: float = 0.0
     overall_quality: float = 0.0
     # 环境
-    engines_available: List[str] = field(default_factory=list)
+    engines_available: list[str] = field(default_factory=list)
     memory_total_gb: float = 0.0
     memory_available_gb: float = 0.0
     # 提取的错误模式
-    error_patterns: List[Dict[str, str]] = field(default_factory=list)
+    error_patterns: list[dict[str, str]] = field(default_factory=list)
     # 原始文本摘要
     raw_summary: str = ""
 
@@ -86,8 +86,8 @@ class HarvestReport:
     total_records_extracted: int = 0
     total_error_patterns: int = 0
     total_stage_experiences: int = 0
-    records_by_source: Dict[str, int] = field(default_factory=dict)
-    injection_results: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    records_by_source: dict[str, int] = field(default_factory=dict)
+    injection_results: dict[str, dict[str, Any]] = field(default_factory=dict)
     duration_sec: float = 0.0
 
 
@@ -108,7 +108,7 @@ class ProductionReportParser:
         "Phase 6": "verify",
     }
 
-    def parse(self, report_path: str) -> Optional[ExperienceRecord]:
+    def parse(self, report_path: str) -> ExperienceRecord | None:
         try:
             with open(report_path, "r", encoding="utf-8") as f:
                 report = json.load(f)
@@ -248,7 +248,7 @@ class ProductionReportParser:
 class TestLogParser:
     """解析 test_output_v17_full/ 下的全链路测试日志"""
 
-    def parse_report_json(self, path: str) -> Optional[ExperienceRecord]:
+    def parse_report_json(self, path: str) -> ExperienceRecord | None:
         """解析 v17_full_pipeline_report.json"""
         try:
             with open(path, "r", encoding="utf-8") as f:
@@ -319,7 +319,7 @@ class TestLogParser:
 
         return record
 
-    def parse_pipeline_log(self, path: str) -> Optional[ExperienceRecord]:
+    def parse_pipeline_log(self, path: str) -> ExperienceRecord | None:
         """解析 pipeline_log.txt"""
         try:
             with open(path, "r", encoding="utf-8") as f:
@@ -385,7 +385,7 @@ class SystemLogParser:
         "task-persistence": "render",
     }
 
-    def parse_log_file(self, path: str) -> Optional[ExperienceRecord]:
+    def parse_log_file(self, path: str) -> ExperienceRecord | None:
         """解析单个日志文件"""
         try:
             with open(path, "r", encoding="utf-8", errors="replace") as f:
@@ -453,7 +453,7 @@ class StructuredDataParser:
     def __init__(self, data_dir: str = "data"):
         self._data_dir = Path(data_dir)
 
-    def parse_error_patterns(self) -> List[Dict[str, str]]:
+    def parse_error_patterns(self) -> list[dict[str, str]]:
         """解析 data/error_patterns/error_patterns.json"""
         path = self._data_dir / "error_patterns" / "error_patterns.json"
         if not path.exists():
@@ -475,7 +475,7 @@ class StructuredDataParser:
         except Exception:
             return []
 
-    def parse_fallback_history(self) -> Dict[str, Any]:
+    def parse_fallback_history(self) -> dict[str, Any]:
         """解析 data/fallback_history.json"""
         path = self._data_dir / "fallback_history.json"
         if not path.exists():
@@ -486,7 +486,7 @@ class StructuredDataParser:
         except Exception:
             return {}
 
-    def parse_pipeline_runs(self) -> List[ExperienceRecord]:
+    def parse_pipeline_runs(self) -> list[ExperienceRecord]:
         """解析 data/pipeline_runs/ 下的历史管线运行记录
 
         每个 run_xxx 目录包含: pipeline_result.json + perceive/analyze/plan/execute/render/verify/learn.json
@@ -507,7 +507,7 @@ class StructuredDataParser:
                 logger.debug(f"[StructParser] Skip pipeline run {run_dir.name}: {e}")
         return records
 
-    def _parse_single_pipeline_run(self, run_dir: Path) -> Optional[ExperienceRecord]:
+    def _parse_single_pipeline_run(self, run_dir: Path) -> ExperienceRecord | None:
         """解析单个管线运行目录"""
         result_path = run_dir / "pipeline_result.json"
         if not result_path.exists():
@@ -523,7 +523,7 @@ class StructuredDataParser:
         mode = result.get("mode", "unknown")
 
         stages_data = result.get("stages", {})
-        stage_experiences: List[StageExperience] = []
+        stage_experiences: list[StageExperience] = []
 
         for stage_name, stage_info in stages_data.items():
             if stage_name.startswith("_"):
@@ -533,7 +533,7 @@ class StructuredDataParser:
             stage_error = stage_info.get("error", "")
             success = stage_status in ("done", "skipped", "success")
 
-            params: Dict[str, Any] = {}
+            params: dict[str, Any] = {}
             engine_used = None
             stage_quality = None
 
@@ -588,7 +588,7 @@ class StructuredDataParser:
             )
             stage_experiences.append(stage_exp)
 
-        error_patterns: List[Dict[str, str]] = []
+        error_patterns: list[dict[str, str]] = []
         if not overall_success:
             for stage_exp in stage_experiences:
                 if not stage_exp.success and stage_exp.error_msg:
@@ -613,7 +613,7 @@ class StructuredDataParser:
         )
         return record
 
-    def build_records_from_structured(self) -> List[ExperienceRecord]:
+    def build_records_from_structured(self) -> list[ExperienceRecord]:
         """从结构化数据构建经验记录"""
         records = []
 
@@ -745,7 +745,7 @@ class FlagshipManifestParser:
         "S7": "opencv",
     }
 
-    def parse_run_dir(self, run_dir: Path) -> Optional[ExperienceRecord]:
+    def parse_run_dir(self, run_dir: Path) -> ExperienceRecord | None:
         """解析单个旗舰管线运行目录"""
         manifest_path = run_dir / "manifest.json"
         if not manifest_path.exists():
@@ -770,16 +770,16 @@ class FlagshipManifestParser:
             overall_success = stages_data["S7"].get("passed", False)
 
         # 中途自评裁决索引：每阶段最后一次裁决（TEMPO 思想：边界评价即学习信号）
-        last_verdict: Dict[str, Dict[str, Any]] = {}
+        last_verdict: dict[str, dict[str, Any]] = {}
         for rep in critic_reports:
             st = rep.get("stage", "")
             if st:
                 last_verdict[st] = rep
 
         # 构建阶段经验
-        stage_experiences: List[StageExperience] = []
-        engines_used: Set[str] = set()
-        error_patterns: List[Dict[str, str]] = []
+        stage_experiences: list[StageExperience] = []
+        engines_used: set[str] = set()
+        error_patterns: list[dict[str, str]] = []
 
         for s_key, s_data in stages_data.items():
             if not s_key.startswith("S"):
@@ -923,7 +923,7 @@ class FlagshipManifestParser:
         )
         return record
 
-    def parse_all_runs(self, output_dir: Path) -> List[ExperienceRecord]:
+    def parse_all_runs(self, output_dir: Path) -> list[ExperienceRecord]:
         """扫描 output/ 下所有 flagship_* 目录"""
         records = []
         if not output_dir.exists():
@@ -949,7 +949,7 @@ class DailyNoteParser:
         (r"(?:降级|fallback|备选|容错)", "fallback"),
     ]
 
-    def parse_daily_note(self, path: str) -> Optional[ExperienceRecord]:
+    def parse_daily_note(self, path: str) -> ExperienceRecord | None:
         """解析单个开发日记"""
         try:
             with open(path, "r", encoding="utf-8") as f:
@@ -1049,8 +1049,8 @@ class ExperienceInjector:
         return str(self._data_dir / name)
 
     def inject_all(
-        self, records: List[ExperienceRecord]
-    ) -> Dict[str, Dict[str, Any]]:
+        self, records: list[ExperienceRecord]
+    ) -> dict[str, dict[str, Any]]:
         """向所有模块注入经验，返回各模块的注入结果"""
         results = {}
 
@@ -1095,12 +1095,11 @@ class ExperienceInjector:
     #  因果引擎注入
     # ----------------------------------------------------------------
 
-    def _inject_causal(self, records: List[ExperienceRecord]) -> Dict[str, Any]:
+    def _inject_causal(self, records: list[ExperienceRecord]) -> dict[str, Any]:
         """注入到因果推断引擎"""
         try:
-            from core.causal_engine import (
-                get_causal_engine, ExecutionRecord as CausalExecutionRecord
-            )
+            from core.causal_engine import ExecutionRecord as CausalExecutionRecord
+            from core.causal_engine import get_causal_engine
             engine = get_causal_engine(data_dir=self._state_dir("causal_engine"))
 
             before_stats = engine.get_statistics()
@@ -1147,7 +1146,7 @@ class ExperienceInjector:
     #  贝叶斯优化器注入
     # ----------------------------------------------------------------
 
-    def _inject_bayesian(self, records: List[ExperienceRecord]) -> Dict[str, Any]:
+    def _inject_bayesian(self, records: list[ExperienceRecord]) -> dict[str, Any]:
         """注入到贝叶斯参数优化器"""
         try:
             from core.bayesian_optimizer import get_optimizer
@@ -1213,7 +1212,7 @@ class ExperienceInjector:
             return {"error": str(e)}
 
     def _inject_synthetic_observations(
-        self, optimizer, records: List[ExperienceRecord]
+        self, optimizer, records: list[ExperienceRecord]
     ) -> int:
         """从错误模式和成功/失败记录中生成合成观测"""
         count = 0
@@ -1263,12 +1262,10 @@ class ExperienceInjector:
     #  数字孪生注入
     # ----------------------------------------------------------------
 
-    def _inject_twin(self, records: List[ExperienceRecord]) -> Dict[str, Any]:
+    def _inject_twin(self, records: list[ExperienceRecord]) -> dict[str, Any]:
         """注入到管线数字孪生"""
         try:
-            from core.pipeline_digital_twin import (
-                get_digital_twin, ExecutionObservation
-            )
+            from core.pipeline_digital_twin import ExecutionObservation, get_digital_twin
             twin = get_digital_twin(data_dir=self._state_dir("digital_twin"))
 
             before_stats = twin.get_statistics()
@@ -1336,7 +1333,7 @@ class ExperienceInjector:
     #  策略引擎注入
     # ----------------------------------------------------------------
 
-    def _inject_strategy(self, records: List[ExperienceRecord]) -> Dict[str, Any]:
+    def _inject_strategy(self, records: list[ExperienceRecord]) -> dict[str, Any]:
         """注入到元学习策略引擎"""
         try:
             from core.meta_strategy_engine import get_strategy_engine
@@ -1389,12 +1386,14 @@ class ExperienceInjector:
     #  自进化引擎注入
     # ----------------------------------------------------------------
 
-    def _inject_evolution(self, records: List[ExperienceRecord]) -> Dict[str, Any]:
+    def _inject_evolution(self, records: list[ExperienceRecord]) -> dict[str, Any]:
         """注入到自进化引擎并触发经验蒸馏"""
         try:
             from core.self_evolution_engine import (
-                get_evolution_engine,
                 ExecutionRecord as EvolutionRecord,
+            )
+            from core.self_evolution_engine import (
+                get_evolution_engine,
             )
             # self_evolution 数据目录收口到 core.paths（运行时产物移出代码仓库）
             try:
@@ -1448,6 +1447,7 @@ class ExperienceInjector:
             if successful or failed:
                 try:
                     import asyncio
+
                     from core.self_evolution_engine import ExecutionRecord as EvoRecord
                     distilled_result = asyncio.get_event_loop().run_until_complete(
                         engine.distill_experience(
@@ -1497,7 +1497,7 @@ class ExperienceInjector:
     #  持久化
     # ----------------------------------------------------------------
 
-    def _persist_records(self, records: List[ExperienceRecord]) -> None:
+    def _persist_records(self, records: list[ExperienceRecord]) -> None:
         """持久化经验记录到 data/execution_records/"""
         records_dir = self._data_dir / "execution_records"
         records_dir.mkdir(parents=True, exist_ok=True)
@@ -1538,7 +1538,7 @@ class ExperienceHarvester:
 
     def __init__(self, project_root: str = "."):
         self._root = Path(project_root)
-        self._records: List[ExperienceRecord] = []
+        self._records: list[ExperienceRecord] = []
 
         # 解析器
         self._prod_parser = ProductionReportParser()
@@ -1624,7 +1624,7 @@ class ExperienceHarvester:
 
         # 加载上次汲取状态
         state_path = self._root / "data" / "execution_records" / ".harvest_state.json"
-        prev_state: Dict[str, float] = {}  # file_path -> mtime
+        prev_state: dict[str, float] = {}  # file_path -> mtime
         if state_path.exists():
             try:
                 with open(state_path, "r", encoding="utf-8") as f:
@@ -1633,8 +1633,8 @@ class ExperienceHarvester:
                 prev_state = {}
 
         # 扫描所有数据源，但只处理新增/修改的文件
-        new_files: List[str] = []
-        current_state: Dict[str, float] = {}
+        new_files: list[str] = []
+        current_state: dict[str, float] = {}
 
         scan_dirs = [
             self._root / "output_production",
@@ -1871,11 +1871,11 @@ class ExperienceHarvester:
                 f"[Harvester] 旗舰管线产物: {len(flagship_records)} 条运行记录"
             )
 
-    def get_records(self) -> List[ExperienceRecord]:
+    def get_records(self) -> list[ExperienceRecord]:
         """获取所有提取的经验记录"""
         return list(self._records)
 
-    def _update_online_learner(self, records: List[ExperienceRecord]) -> None:
+    def _update_online_learner(self, records: list[ExperienceRecord]) -> None:
         """项目5: 使用 River 在线学习器实时更新阶段预测模型
 
         每条新记录都会更新对应阶段的:
@@ -1938,7 +1938,7 @@ class ExperienceHarvester:
 #  便捷函数
 # ============================================================================
 
-_harvester_instance: Optional[ExperienceHarvester] = None
+_harvester_instance: ExperienceHarvester | None = None
 
 
 def run_harvest(project_root: str = ".") -> HarvestReport:

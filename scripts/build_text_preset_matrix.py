@@ -4,7 +4,8 @@
 以 TextFX_Showcase.jsx 基准案例为 Ground Truth
 三维独立扩展: effect_combos(30+) + entrance_animations(25+) + font_library(50+)
 """
-import json, os
+import json
+import os
 from datetime import date
 
 OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
@@ -991,7 +992,7 @@ def print_stats(db):
     for ec in db["effect_combos"]:
         st = ec.get("visual_style","未分类")
         styles[st] = styles.get(st, 0) + 1
-    print(f"\n  特效风格分布:")
+    print("\n  特效风格分布:")
     for st, cnt in sorted(styles.items(), key=lambda x: -x[1]):
         print(f"    {st}: {cnt}")
     # 字体类别分布
@@ -999,7 +1000,7 @@ def print_stats(db):
     for fl in db["font_library"]:
         c = fl.get("category","未分类")
         cats[c] = cats.get(c, 0) + 1
-    print(f"\n  字体类别分布:")
+    print("\n  字体类别分布:")
     for c, cnt in sorted(cats.items(), key=lambda x: -x[1]):
         print(f"    {c}: {cnt}")
     # 评分分布
@@ -1007,7 +1008,7 @@ def print_stats(db):
     for ec in db["effect_combos"]:
         r = ec.get("quality_rating", 0)
         ratings[r] = ratings.get(r, 0) + 1
-    print(f"\n  特效评分分布:")
+    print("\n  特效评分分布:")
     for r in sorted(ratings.keys(), reverse=True):
         print(f"    {'★'*r}: {ratings[r]}套")
     # 基准验证
@@ -1020,7 +1021,7 @@ if __name__ == "__main__":
     db = build_database()
     errors = validate_database(db)
     if errors:
-        print(f"\n[ERROR] 验证失败:")
+        print("\n[ERROR] 验证失败:")
         for e in errors: print(f"  - {e}")
     else:
         print("[OK] 数据库验证通过")

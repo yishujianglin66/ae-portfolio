@@ -11,15 +11,15 @@ DaVinci Resolve Studio Automation Engine
 """
 
 import json
+import logging
 import os
 import shlex
 import subprocess
 import tempfile
 import time
-import logging
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Any, Tuple
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +33,9 @@ FUSCRIPT_PATH = r"D:\app\fuscript.exe"
 @dataclass
 class CDLConfig:
     """ASC CDL 调色配置"""
-    slope: Tuple[float, float, float] = (1.0, 1.0, 1.0)  # RGB 斜率
-    offset: Tuple[float, float, float] = (0.0, 0.0, 0.0)  # RGB 偏移
-    power: Tuple[float, float, float] = (1.0, 1.0, 1.0)   # RGB 幂
+    slope: tuple[float, float, float] = (1.0, 1.0, 1.0)  # RGB 斜率
+    offset: tuple[float, float, float] = (0.0, 0.0, 0.0)  # RGB 偏移
+    power: tuple[float, float, float] = (1.0, 1.0, 1.0)   # RGB 幂
     saturation: float = 1.0
 
 @dataclass
@@ -85,10 +85,10 @@ class ZoomTransition:
 class ItemEffect:
     """片段特效配置（FFmpeg 渲染时应用）"""
     item_index: int = 0
-    speed_curve: Optional[SpeedCurve] = None
-    ken_burns: Optional[KenBurnsConfig] = None
-    zoom_transition: Optional[ZoomTransition] = None
-    crop: Optional[Dict[str, float]] = None  # {left, right, top, bottom} 0.0-1.0
+    speed_curve: SpeedCurve | None = None
+    ken_burns: KenBurnsConfig | None = None
+    zoom_transition: ZoomTransition | None = None
+    crop: dict[str, float] | None = None  # {left, right, top, bottom} 0.0-1.0
 
 @dataclass
 class TransitionConfig:
@@ -99,9 +99,9 @@ class TransitionConfig:
 @dataclass
 class ColorWheelConfig:
     """三路色轮配置（阶段3：shadows/midtones/highlights）"""
-    shadows: Tuple[float, float, float] = (0.0, 0.0, 0.0)     # RGB 偏移 -1.0~1.0
-    midtones: Tuple[float, float, float] = (0.0, 0.0, 0.0)
-    highlights: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    shadows: tuple[float, float, float] = (0.0, 0.0, 0.0)     # RGB 偏移 -1.0~1.0
+    midtones: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    highlights: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
 @dataclass
 class Keyframe:
@@ -134,7 +134,7 @@ class ProjectInfo:
     name: str = ""
     timeline_count: int = 0
     current_timeline: str = ""
-    items: List[TimelineItemInfo] = field(default_factory=list)
+    items: list[TimelineItemInfo] = field(default_factory=list)
 
 
 # ============================================================================
@@ -158,15 +158,15 @@ class ResolveAutomationEngine:
         self.fuscript = fuscript_path
         self.timeout = timeout
         self._temp_dir = tempfile.mkdtemp(prefix="resolve_engine_")
-        self._media_path_map: Dict[str, str] = {}  # project_name -> {item_name: file_path}
-        self._cdl_config_map: Dict[str, Dict[int, CDLConfig]] = {}  # project_name -> {clip_index: CDLConfig}
+        self._media_path_map: dict[str, str] = {}  # project_name -> {item_name: file_path}
+        self._cdl_config_map: dict[str, dict[int, CDLConfig]] = {}  # project_name -> {clip_index: CDLConfig}
         
         # 阶段2：性能优化基础设施
-        self._proxy_original_map: Dict[str, str] = {}  # proxy_path -> original_path
-        self._proxy_media_map: Dict[str, Dict[str, str]] = {}  # project_name -> {item_name: original_path}
-        self._gpu_encoder_cache: Optional[str] = None  # GPU 编码器检测结果缓存
-        self._colorwheel_map: Dict[str, Dict[int, ColorWheelConfig]] = {}  # 阶段3：色轮配置
-        self._lut_file_map: Dict[str, Dict[int, str]] = {}  # 阶段3：LUT 文件映射
+        self._proxy_original_map: dict[str, str] = {}  # proxy_path -> original_path
+        self._proxy_media_map: dict[str, dict[str, str]] = {}  # project_name -> {item_name: original_path}
+        self._gpu_encoder_cache: str | None = None  # GPU 编码器检测结果缓存
+        self._colorwheel_map: dict[str, dict[int, ColorWheelConfig]] = {}  # 阶段3：色轮配置
+        self._lut_file_map: dict[str, dict[int, str]] = {}  # 阶段3：LUT 文件映射
         self._cache_dir = os.path.join(tempfile.gettempdir(), "resolve_render_cache")
         os.makedirs(self._cache_dir, exist_ok=True)
         
@@ -186,7 +186,7 @@ class ResolveAutomationEngine:
     # 内部方法
     # ----------------------------------------------------------------
     
-    def _execute_lua(self, lua_code: str) -> Dict[str, Any]:
+    def _execute_lua(self, lua_code: str) -> dict[str, Any]:
         """
         执行 Lua 脚本并解析 JSON 输出。
         
@@ -382,7 +382,7 @@ end
     # 素材导入与时间线
     # ----------------------------------------------------------------
     
-    def import_media(self, project_name: str, file_paths: List[str]) -> List[str]:
+    def import_media(self, project_name: str, file_paths: list[str]) -> list[str]:
         """导入素材到 MediaPool"""
         # 构建 Lua 数组
         lua_files = "{" + ", ".join(f'"{f.replace(chr(92), "/")}"' for f in file_paths) + "}"
@@ -416,7 +416,7 @@ end
         return result.get("names", [])
     
     def create_timeline_with_media(self, project_name: str, timeline_name: str, 
-                                   media_files: List[str]) -> Dict:
+                                   media_files: list[str]) -> dict:
         """创建项目 + 导入素材 + 创建时间线（一步完成）"""
         lua_media = "{" + ", ".join(f'"{f.replace(chr(92), "/")}"' for f in media_files) + "}"
         
@@ -633,7 +633,7 @@ end
         self.set_transform(project_name, item_index, start_tf)
         return True
     
-    def get_timeline_info(self, project_name: str) -> Dict:
+    def get_timeline_info(self, project_name: str) -> dict:
         """获取时间线详细信息（用于 FFmpeg 渲染决策）"""
         lua = self._wrap_lua(f'''
     local resolve = Resolve()
@@ -699,7 +699,7 @@ end
     # ----------------------------------------------------------------
     
     def _render_with_ffmpeg(self, project_name: str, output_path: str,
-                             effects: Optional[Dict[int, ItemEffect]] = None) -> str:
+                             effects: dict[int, ItemEffect] | None = None) -> str:
         """
         使用 FFmpeg 渲染（推荐）。
         从 Resolve 获取时间线信息，然后用 FFmpeg 处理素材并应用效果。
@@ -731,11 +731,11 @@ end
         except subprocess.CalledProcessError as e:
             raise ResolveError(f"FFmpeg failed: {e.stderr.decode()[:500] if e.stderr else str(e)}")
     
-    def _build_ffmpeg_command(self, project_name: str, items: List[Dict], output_path: str,
-                               media_map: Optional[Dict[str, str]] = None,
-                               effects: Optional[Dict[int, ItemEffect]] = None,
+    def _build_ffmpeg_command(self, project_name: str, items: list[dict], output_path: str,
+                               media_map: dict[str, str] | None = None,
+                               effects: dict[int, ItemEffect] | None = None,
                                fps: float = 24.0,
-                               apply_cdl_from_resolve: bool = True) -> List[str]:
+                               apply_cdl_from_resolve: bool = True) -> list[str]:
         """
         构建 FFmpeg 命令（支持多素材拼接 + 每片段特效 + CDL 调色）
         
@@ -1050,7 +1050,7 @@ end
 ''')
         
         # ✅ 异步执行 Lua 脚本（不等待返回）
-        logger.info(f"Starting native render (async)...")
+        logger.info("Starting native render (async)...")
         lua_thread = threading.Thread(
             target=self._execute_lua_async,
             args=(lua,),
@@ -1134,7 +1134,7 @@ end
     # 阶段2：代理媒体工作流
     # ----------------------------------------------------------------
     
-    def create_proxy_media(self, project_name: str, proxy_height: int = 1080) -> Dict[str, str]:
+    def create_proxy_media(self, project_name: str, proxy_height: int = 1080) -> dict[str, str]:
         """
         代理媒体工作流：将高分辨率素材（4K）自动降采样为 1080p 代理文件用于编辑。
         
@@ -1230,8 +1230,8 @@ end
     # 阶段2：渲染缓存机制
     # ----------------------------------------------------------------
     
-    def _get_cache_key(self, project_name: str, item: Dict,
-                       effect: Optional[ItemEffect] = None) -> str:
+    def _get_cache_key(self, project_name: str, item: dict,
+                       effect: ItemEffect | None = None) -> str:
         """基于片段参数生成缓存键（MD5 hash）"""
         import hashlib
         
@@ -1261,7 +1261,7 @@ end
         
         return hashlib.md5(raw.encode()).hexdigest()
     
-    def _get_cached_segment(self, cache_key: str) -> Optional[str]:
+    def _get_cached_segment(self, cache_key: str) -> str | None:
         """查找缓存的片段渲染结果"""
         cache_path = os.path.join(self._cache_dir, f"{cache_key}.mp4")
         if os.path.exists(cache_path) and os.path.getsize(cache_path) > 1024:
@@ -1281,11 +1281,11 @@ end
     # 阶段2：分段并行渲染
     # ----------------------------------------------------------------
     
-    def _build_single_segment_command(self, project_name: str, item: Dict,
+    def _build_single_segment_command(self, project_name: str, item: dict,
                                        idx: int, output_path: str,
-                                       media_map: Dict[str, str],
-                                       effects: Optional[Dict[int, ItemEffect]],
-                                       fps: float = 24.0) -> List[str]:
+                                       media_map: dict[str, str],
+                                       effects: dict[int, ItemEffect] | None,
+                                       fps: float = 24.0) -> list[str]:
         """
         构建单片段渲染命令（简化版滤镜，避免 zoompan lerp 语法问题）
         """
@@ -1350,7 +1350,7 @@ end
                 + codec_args + ["-an", "-r", str(int(fps)), output_path])
     
     def render_segments_parallel(self, project_name: str, output_path: str,
-                                  effects: Optional[Dict[int, ItemEffect]] = None,
+                                  effects: dict[int, ItemEffect] | None = None,
                                   max_workers: int = 4) -> str:
         """
         分段并行渲染：将时间线按片段拆分，多线程并行渲染，最后用 FFmpeg concat 拼接。
@@ -1456,7 +1456,7 @@ end
     # 1. 精准节拍剪辑
     # ----------------------------------------------------------------
     
-    def _get_media_duration(self, path: str) -> Optional[float]:
+    def _get_media_duration(self, path: str) -> float | None:
         """获取媒体文件时长（秒）"""
         cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration",
                "-of", "csv=p=0", path]
@@ -1466,8 +1466,8 @@ end
         except Exception:
             return None
     
-    def detect_beats(self, audio_path: str, bpm: Optional[float] = None,
-                     min_beat_interval: float = 0.3) -> List[float]:
+    def detect_beats(self, audio_path: str, bpm: float | None = None,
+                     min_beat_interval: float = 0.3) -> list[float]:
         """
         提取音频节拍点。
         
@@ -1507,9 +1507,9 @@ end
         logger.info(f"Detected {len(filtered)} beats via silencedetect")
         return filtered
     
-    def beat_sync_edit(self, clip_paths: List[str], audio_path: str,
-                       output_path: str, bpm: Optional[float] = None,
-                       transition: Optional[TransitionConfig] = None) -> str:
+    def beat_sync_edit(self, clip_paths: list[str], audio_path: str,
+                       output_path: str, bpm: float | None = None,
+                       transition: TransitionConfig | None = None) -> str:
         """
         精准节拍剪辑：自动对齐片段切换点到音频节拍。
         
@@ -1575,7 +1575,7 @@ end
     # ----------------------------------------------------------------
     
     def dynamic_speed_ramp(self, source_path: str, output_path: str,
-                            control_points: Optional[List[Tuple[float, float]]] = None,
+                            control_points: list[tuple[float, float]] | None = None,
                             fps: int = 24) -> str:
         """
         动态速度曲线：基于控制点的平滑变速（类似 PR Time Remapping）。
@@ -1677,8 +1677,8 @@ end
             return output_path
         raise ResolveError(f"Transition '{transition}' failed")
     
-    def render_with_transitions(self, clip_paths: List[str], output_path: str,
-                                 transitions: Optional[List[TransitionConfig]] = None) -> str:
+    def render_with_transitions(self, clip_paths: list[str], output_path: str,
+                                 transitions: list[TransitionConfig] | None = None) -> str:
         """
         多片段转场链式渲染：依次对相邻片段应用转场。
         
@@ -1755,7 +1755,7 @@ end
         logger.info(f"Color wheel tracked for item {item_index}")
         return True
     
-    def _get_avg_rgb(self, path: str, at_fraction: float = 0.5) -> Tuple[float, float, float]:
+    def _get_avg_rgb(self, path: str, at_fraction: float = 0.5) -> tuple[float, float, float]:
         """提取指定位置的单帧平均 RGB（scale=1:1 技巧，返回 0~1）"""
         dur = self._get_media_duration(path) or 0
         ss = max(0.0, dur * at_fraction - 0.1)
@@ -1789,7 +1789,7 @@ end
     # 5. 关键帧动画系统
     # ----------------------------------------------------------------
     
-    def build_keyframe_expression(self, keyframes: List[Keyframe],
+    def build_keyframe_expression(self, keyframes: list[Keyframe],
                                    mode: str = "linear",
                                    time_var: str = "t") -> str:
         """
@@ -1827,7 +1827,7 @@ end
         return expr
     
     def set_keyframe_animation(self, source_path: str, output_path: str,
-                                animations: Dict[str, List[Keyframe]],
+                                animations: dict[str, list[Keyframe]],
                                 mode: str = "linear", fps: int = 24) -> str:
         """
         关键帧动画系统：对 zoom/x/y/rotation/opacity 设置多关键帧动画。
@@ -1888,7 +1888,7 @@ end
     
     def render_timeline(self, project_name: str, output_path: str,
                         preset: str = "H.264 Master", use_ffmpeg: bool = True,
-                        effects: Optional[Dict[int, ItemEffect]] = None) -> str:
+                        effects: dict[int, ItemEffect] | None = None) -> str:
         """
         渲染当前时间线。
         
@@ -1962,14 +1962,14 @@ end
         return self.apply_cdl(project_name, "", item_index, presets[preset_name])
     
     def full_pipeline(self, project_name: str, timeline_name: str,
-                      media_files: List[str],
-                      grades: Optional[Dict[int, CDLConfig]] = None,
-                      speeds: Optional[Dict[int, float]] = None,
-                      transforms: Optional[Dict[int, TransformConfig]] = None,
-                      lut_map: Optional[Dict[int, str]] = None,
-                      effects: Optional[Dict[int, 'ItemEffect']] = None,
+                      media_files: list[str],
+                      grades: dict[int, CDLConfig] | None = None,
+                      speeds: dict[int, float] | None = None,
+                      transforms: dict[int, TransformConfig] | None = None,
+                      lut_map: dict[int, str] | None = None,
+                      effects: dict[int, 'ItemEffect'] | None = None,
                       output_path: str = "",
-                      render_preset: str = "H.264 Master") -> Dict:
+                      render_preset: str = "H.264 Master") -> dict:
         """
         完整管线：导入 → 时间线 → 调色 → 变速 → 变换 → 渲染
         """
@@ -2033,10 +2033,10 @@ class ResolveError(Exception):
 # 便捷函数
 # ============================================================================
 
-def quick_grade_and_render(media_files: List[str], output_path: str,
+def quick_grade_and_render(media_files: list[str], output_path: str,
                            preset_grade: str = "cinematic_warm",
                            speed: float = 1.0,
-                           project_name: str = "AutoGrade_Render") -> Dict:
+                           project_name: str = "AutoGrade_Render") -> dict:
     """快速调色+渲染一体化函数"""
     engine = ResolveAutomationEngine()
     

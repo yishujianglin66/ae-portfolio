@@ -34,7 +34,7 @@ import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Iterator
+from typing import Any, Dict, Iterator, List, Optional
 
 try:
     from logger import get_logger
@@ -169,7 +169,7 @@ class Database:
     );
     """
 
-    def __init__(self, config: Optional[DatabaseConfig] = None):
+    def __init__(self, config: DatabaseConfig | None = None):
         self._config = config or DatabaseConfig()
         self._lock = threading.RLock()
         self._local = threading.local()
@@ -220,7 +220,7 @@ class Database:
     # 任务 CRUD
     # --------------------------------------------------------------------
 
-    def insert_task(self, task_data: Dict[str, Any]) -> str:
+    def insert_task(self, task_data: dict[str, Any]) -> str:
         """插入任务"""
         task_id = task_data.get("task_id") or f"task_{uuid.uuid4().hex[:12]}"
         now = time.time()
@@ -254,7 +254,7 @@ class Database:
             )
         return task_id
 
-    def get_task(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def get_task(self, task_id: str) -> dict[str, Any] | None:
         """获取任务"""
         conn = self._get_connection()
         row = conn.execute(
@@ -262,7 +262,7 @@ class Database:
         ).fetchone()
         return self._row_to_task(row) if row else None
 
-    def update_task(self, task_id: str, updates: Dict[str, Any]) -> bool:
+    def update_task(self, task_id: str, updates: dict[str, Any]) -> bool:
         """更新任务"""
         set_clauses = []
         values = []
@@ -306,11 +306,11 @@ class Database:
 
     def query_tasks(
         self,
-        status: Optional[str] = None,
-        task_type: Optional[str] = None,
+        status: str | None = None,
+        task_type: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """查询任务"""
         query = "SELECT * FROM tasks"
         conditions = []
@@ -333,7 +333,7 @@ class Database:
         rows = conn.execute(query, params).fetchall()
         return [self._row_to_task(row) for row in rows]
 
-    def count_tasks(self, status: Optional[str] = None) -> int:
+    def count_tasks(self, status: str | None = None) -> int:
         """统计任务数量"""
         query = "SELECT COUNT(*) as cnt FROM tasks"
         params = []
@@ -346,7 +346,7 @@ class Database:
         return row["cnt"] if row else 0
 
     @staticmethod
-    def _row_to_task(row: sqlite3.Row) -> Dict[str, Any]:
+    def _row_to_task(row: sqlite3.Row) -> dict[str, Any]:
         """将数据库行转换为任务字典"""
         return {
             "task_id": row["task_id"],
@@ -372,7 +372,7 @@ class Database:
     # 项目 CRUD
     # --------------------------------------------------------------------
 
-    def insert_project(self, project_data: Dict[str, Any]) -> str:
+    def insert_project(self, project_data: dict[str, Any]) -> str:
         """插入项目"""
         project_id = project_data.get("project_id") or f"proj_{uuid.uuid4().hex[:12]}"
         now = time.time()
@@ -403,7 +403,7 @@ class Database:
             )
         return project_id
 
-    def get_project(self, project_id: str) -> Optional[Dict[str, Any]]:
+    def get_project(self, project_id: str) -> dict[str, Any] | None:
         """获取项目"""
         conn = self._get_connection()
         row = conn.execute(
@@ -413,10 +413,10 @@ class Database:
 
     def query_projects(
         self,
-        status: Optional[str] = None,
+        status: str | None = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """查询项目"""
         query = "SELECT * FROM projects"
         params = []
@@ -437,7 +437,7 @@ class Database:
             return cursor.rowcount > 0
 
     @staticmethod
-    def _row_to_project(row: sqlite3.Row) -> Dict[str, Any]:
+    def _row_to_project(row: sqlite3.Row) -> dict[str, Any]:
         return {
             "project_id": row["project_id"],
             "name": row["name"],
@@ -459,7 +459,7 @@ class Database:
     # 历史记录 CRUD
     # --------------------------------------------------------------------
 
-    def insert_history(self, record: Dict[str, Any]) -> str:
+    def insert_history(self, record: dict[str, Any]) -> str:
         """插入历史记录"""
         record_id = record.get("record_id") or f"hist_{uuid.uuid4().hex[:12]}"
 
@@ -483,8 +483,8 @@ class Database:
         self,
         limit: int = 50,
         offset: int = 0,
-        result_filter: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        result_filter: str | None = None,
+    ) -> list[dict[str, Any]]:
         """查询历史记录"""
         query = "SELECT * FROM history"
         params = []
@@ -519,7 +519,7 @@ class Database:
     # 插件配置 CRUD
     # --------------------------------------------------------------------
 
-    def save_plugin_config(self, plugin_id: str, config: Dict[str, Any], enabled: bool = False):
+    def save_plugin_config(self, plugin_id: str, config: dict[str, Any], enabled: bool = False):
         """保存插件配置"""
         with self.transaction() as conn:
             conn.execute(
@@ -534,7 +534,7 @@ class Database:
                 ),
             )
 
-    def get_plugin_config(self, plugin_id: str) -> Optional[Dict[str, Any]]:
+    def get_plugin_config(self, plugin_id: str) -> dict[str, Any] | None:
         """获取插件配置"""
         conn = self._get_connection()
         row = conn.execute(
@@ -549,7 +549,7 @@ class Database:
             "updated_at": row["updated_at"],
         }
 
-    def get_all_plugin_configs(self) -> List[Dict[str, Any]]:
+    def get_all_plugin_configs(self) -> list[dict[str, Any]]:
         """获取所有插件配置"""
         conn = self._get_connection()
         rows = conn.execute("SELECT * FROM plugin_configs").fetchall()
@@ -567,7 +567,7 @@ class Database:
     # 统计信息
     # --------------------------------------------------------------------
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """获取数据库统计信息"""
         conn = self._get_connection()
 
@@ -581,7 +581,7 @@ class Database:
         if os.path.exists(self._config.db_path):
             db_size = os.path.getsize(self._config.db_path)
 
-        task_status_counts: Dict[str, int] = {}
+        task_status_counts: dict[str, int] = {}
         for row in conn.execute("SELECT status, COUNT(*) as cnt FROM tasks GROUP BY status").fetchall():
             task_status_counts[row["status"]] = row["cnt"]
 
@@ -620,10 +620,10 @@ class Database:
 # 模块单例
 # ============================================================================
 
-_default_db: Optional[Database] = None
+_default_db: Database | None = None
 
 
-def get_database(config: Optional[DatabaseConfig] = None) -> Database:
+def get_database(config: DatabaseConfig | None = None) -> Database:
     """获取默认数据库实例"""
     global _default_db
     if _default_db is None:
@@ -640,8 +640,8 @@ if __name__ == "__main__":
     print("  数据库持久化模块测试")
     print("=" * 70)
 
-    import tempfile
     import shutil
+    import tempfile
 
     tmp_dir = tempfile.mkdtemp(prefix="db_test_")
     db_path = os.path.join(tmp_dir, "test.db")
@@ -729,4 +729,4 @@ if __name__ == "__main__":
 
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
-        print(f"\n临时目录已清理")
+        print("\n临时目录已清理")

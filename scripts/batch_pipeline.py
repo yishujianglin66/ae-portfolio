@@ -49,13 +49,13 @@ class PipelineTask:
     task_id: str
     video_path: str
     status: TaskStatus = TaskStatus.PENDING
-    result: Optional[Dict] = None
-    error: Optional[str] = None
+    result: dict | None = None
+    error: str | None = None
     attempts: int = 0
     max_retries: int = 3
     created_at: float = field(default_factory=time.time)
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    started_at: float | None = None
+    completed_at: float | None = None
 
     @property
     def duration(self) -> float:
@@ -63,7 +63,7 @@ class PipelineTask:
             return self.completed_at - self.started_at
         return 0.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "task_id": self.task_id,
             "video_path": self.video_path,
@@ -98,7 +98,7 @@ class BatchPipeline:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        self.tasks: Dict[str, PipelineTask] = {}
+        self.tasks: dict[str, PipelineTask] = {}
         self._semaphore = asyncio.Semaphore(max_concurrency)
         self._task_counter = 0
         self._progress_callback = None
@@ -139,7 +139,7 @@ class BatchPipeline:
             return True
         return False
 
-    def get_queue_status(self) -> Dict:
+    def get_queue_status(self) -> dict:
         """获取队列状态"""
         status_counts = {}
         for task in self.tasks.values():
@@ -202,11 +202,11 @@ class BatchPipeline:
                 if self._progress_callback:
                     self._progress_callback(self.get_queue_status())
 
-    async def _execute_pipeline(self, video_path: str) -> Dict[str, Any]:
+    async def _execute_pipeline(self, video_path: str) -> dict[str, Any]:
         """执行完整管线: 分析 → 分类 → JSX生成 → (可选)AE投递"""
+        from core.jsx_generator import save_jsx_to_file
         from core.style_pipeline import analyze_video_style
         from core.style_preset_adapter import style_to_atomic_params
-        from core.jsx_generator import save_jsx_to_file
 
         # Step 1: 风格分析
         style_result = await analyze_video_style(video_path, enable_vision=False)
@@ -248,9 +248,9 @@ class BatchPipeline:
 
         return result
 
-    async def _send_to_ae_bridge(self, jsx_path: Path) -> Dict:
+    async def _send_to_ae_bridge(self, jsx_path: Path) -> dict:
         """通过Bridge发送JSX到AE执行"""
-        from scripts.ae_automation import send_bridge_command, is_ae_running
+        from scripts.ae_automation import is_ae_running, send_bridge_command
 
         if not is_ae_running():
             return {"success": False, "error": "AE未运行"}
@@ -263,7 +263,7 @@ class BatchPipeline:
 
         return result
 
-    async def run(self) -> Dict:
+    async def run(self) -> dict:
         """执行所有待处理任务"""
         pending_tasks = [
             t for t in self.tasks.values()
@@ -308,7 +308,7 @@ class BatchPipeline:
         return report
 
 
-def print_progress(status: Dict):
+def print_progress(status: dict):
     """打印进度条"""
     total = status["total"]
     progress = status["progress"]

@@ -20,13 +20,13 @@ AIGCGenerator - AI生成补充素材
 - P4: DALL-E/Imagen (图片生成，用于静帧)
 """
 
+import json
 import os
 import sys
-import json
 import time
 import urllib.request
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -227,11 +227,11 @@ class BaseAIGCAdapter:
         return False
 
     def generate_video(self, prompt: str, output_path: str,
-                       duration: int = 4, size: str = "720x1280") -> Dict:
+                       duration: int = 4, size: str = "720x1280") -> dict:
         raise NotImplementedError
 
     def generate_image(self, prompt: str, output_path: str,
-                       size: str = "1024x1024") -> Dict:
+                       size: str = "1024x1024") -> dict:
         raise NotImplementedError
 
 
@@ -250,7 +250,7 @@ class DALLEAdapter(BaseAIGCAdapter):
         return bool(os.environ.get("OPENAI_API_KEY"))
 
     def generate_image(self, prompt: str, output_path: str,
-                       size: str = "1024x1024") -> Dict:
+                       size: str = "1024x1024") -> dict:
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
             return {"success": False, "error": "No OPENAI_API_KEY"}
@@ -306,7 +306,7 @@ class ImagenAdapter(BaseAIGCAdapter):
         return bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"))
 
     def generate_image(self, prompt: str, output_path: str,
-                       size: str = "1024x1024") -> Dict:
+                       size: str = "1024x1024") -> dict:
         api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
         if not api_key:
             return {"success": False, "error": "No GEMINI_API_KEY"}
@@ -361,7 +361,7 @@ class VeoAdapter(BaseAIGCAdapter):
         return bool(os.environ.get("FAL_KEY") or os.environ.get("GEMINI_API_KEY"))
 
     def generate_video(self, prompt: str, output_path: str,
-                       duration: int = 4, size: str = "720x1280") -> Dict:
+                       duration: int = 4, size: str = "720x1280") -> dict:
         api_key = os.environ.get("FAL_KEY") or os.environ.get("GEMINI_API_KEY")
         if not api_key:
             return {"success": False, "error": "No FAL_KEY or GEMINI_API_KEY"}
@@ -381,7 +381,7 @@ class VeoAdapter(BaseAIGCAdapter):
             return {"success": False, "error": str(e)}
 
     def _via_fal(self, api_key: str, prompt: str, output_path: str,
-                 duration: int, w: int, h: int) -> Dict:
+                 duration: int, w: int, h: int) -> dict:
         """通过 fal.ai 调用 Veo"""
         import urllib.request
 
@@ -417,7 +417,7 @@ class VeoAdapter(BaseAIGCAdapter):
         return self._poll_fal(api_key, request_id, output_path, prompt)
 
     def _poll_fal(self, api_key: str, request_id: str, output_path: str,
-                  prompt: str, max_wait: int = 300) -> Dict:
+                  prompt: str, max_wait: int = 300) -> dict:
         """轮询 fal.ai 任务状态"""
         import urllib.request
 
@@ -449,7 +449,7 @@ class VeoAdapter(BaseAIGCAdapter):
         return {"success": False, "error": f"Veo 生成超时 ({max_wait}s)"}
 
     def _via_gemini(self, api_key: str, prompt: str, output_path: str,
-                    duration: int, w: int, h: int) -> Dict:
+                    duration: int, w: int, h: int) -> dict:
         """通过 Google Gemini/Vertex API 调用 Veo"""
         import urllib.request
 
@@ -478,10 +478,10 @@ class VeoAdapter(BaseAIGCAdapter):
         return self._poll_gemini(api_key, op_name, output_path, prompt)
 
     def _poll_gemini(self, api_key: str, op_name: str, output_path: str,
-                     prompt: str, max_wait: int = 300) -> Dict:
+                     prompt: str, max_wait: int = 300) -> dict:
         """轮询 Gemini Veo operation"""
-        import urllib.request
         import base64
+        import urllib.request
 
         url = f"https://generativelanguage.googleapis.com/v1beta/{op_name}?key={api_key}"
         start = time.time()
@@ -528,7 +528,7 @@ class SoraAdapter(BaseAIGCAdapter):
         return bool(os.environ.get("OPENAI_API_KEY"))
 
     def generate_video(self, prompt: str, output_path: str,
-                       duration: int = 4, size: str = "720x1280") -> Dict:
+                       duration: int = 4, size: str = "720x1280") -> dict:
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
             return {"success": False, "error": "No OPENAI_API_KEY"}
@@ -586,14 +586,14 @@ class KlingAdapter(BaseAIGCAdapter):
     def is_available(self) -> bool:
         return bool(os.environ.get("KLING_API_KEY"))
 
-    def _headers(self, api_key: str) -> Dict:
+    def _headers(self, api_key: str) -> dict:
         return {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}",
         }
 
     def generate_video(self, prompt: str, output_path: str,
-                       duration: int = 5, size: str = "720x1280") -> Dict:
+                       duration: int = 5, size: str = "720x1280") -> dict:
         api_key = os.environ.get("KLING_API_KEY")
         if not api_key:
             return {"success": False, "error": "No KLING_API_KEY"}
@@ -634,7 +634,7 @@ class KlingAdapter(BaseAIGCAdapter):
             return {"success": False, "error": str(e)}
 
     def _poll_task(self, api_key: str, task_id: str, output_path: str,
-                   prompt: str, max_wait: int = 600) -> Dict:
+                   prompt: str, max_wait: int = 600) -> dict:
         """轮询可灵任务状态"""
         import urllib.request
 
@@ -678,7 +678,7 @@ class KlingAdapter(BaseAIGCAdapter):
         return {"success": False, "error": f"可灵超时 ({max_wait}s)"}
 
     def generate_image(self, prompt: str, output_path: str,
-                       size: str = "1024x1024") -> Dict:
+                       size: str = "1024x1024") -> dict:
         """可灵图片生成 (用于图生视频首帧)"""
         api_key = os.environ.get("KLING_API_KEY")
         if not api_key:
@@ -740,7 +740,7 @@ class ARKJimengAdapter(BaseAIGCAdapter):
         return bool(self.api_key)
 
     def generate_image(self, prompt: str, output_path: str,
-                       size: str = "1024x1024") -> Dict:
+                       size: str = "1024x1024") -> dict:
         """使用即梦 Seedream 生成图片
 
         注意：图像生成为临时直连 ARK API，统一网关尚未覆盖图像生成接口，待网关扩展后迁移。
@@ -787,7 +787,7 @@ class ARKJimengAdapter(BaseAIGCAdapter):
             return {"success": False, "error": str(e)}
 
     def generate_video(self, prompt: str, output_path: str,
-                       duration: int = 5, size: str = "720x1280") -> Dict:
+                       duration: int = 5, size: str = "720x1280") -> dict:
         """使用即梦 Seedance 1.5 生成视频 (2.0不可用)
 
         注意：视频生成为临时直连 ARK API（含异步任务轮询），统一网关尚未覆盖，待网关扩展后迁移。
@@ -834,7 +834,7 @@ class ARKJimengAdapter(BaseAIGCAdapter):
             return {"success": False, "error": str(e)}
 
     def _poll_video_task(self, task_id: str, output_path: str, prompt: str,
-                         max_wait: int = 300) -> Dict:
+                         max_wait: int = 300) -> dict:
         """轮询视频生成任务状态"""
         import urllib.request
         
@@ -926,7 +926,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
             return False
 
     def generate_video(self, prompt: str, output_path: str,
-                       duration: int = 5, size: str = "720x1280") -> Dict:
+                       duration: int = 5, size: str = "720x1280") -> dict:
         if not self.is_available():
             return {"success": False, "error": "ComfyUI not running on " + self.comfyui_url}
 
@@ -965,7 +965,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
             return {"success": False, "error": str(e)}
 
     def generate_image(self, prompt: str, output_path: str,
-                       size: str = "1024x1024") -> Dict:
+                       size: str = "1024x1024") -> dict:
         if not self.is_available():
             return {"success": False, "error": "ComfyUI not running"}
 
@@ -992,7 +992,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _build_video_workflow(self, prompt: str, w: int, h: int, frames: int) -> Dict:
+    def _build_video_workflow(self, prompt: str, w: int, h: int, frames: int) -> dict:
         """构建视频生成工作流 (优先 Wan 2.2 > HunyuanVideo > LTX)"""
         # 使用 Wan 2.2 作为默认 (画质最好、开源第一梯队)
         return {
@@ -1010,7 +1010,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
             }
         }
 
-    def _build_image_workflow(self, prompt: str, w: int, h: int) -> Dict:
+    def _build_image_workflow(self, prompt: str, w: int, h: int) -> dict:
         """构建图片生成工作流 (优先 Flux > SDXL)"""
         return {
             "prompt": {
@@ -1027,7 +1027,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
             }
         }
 
-    def _queue_prompt(self, workflow: Dict) -> str:
+    def _queue_prompt(self, workflow: dict) -> str:
         """提交工作流到 ComfyUI 队列"""
         import urllib.request
         data = json.dumps(workflow).encode("utf-8")
@@ -1041,7 +1041,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
             result = json.loads(resp.read().decode("utf-8"))
             return result.get("prompt_id", "")
 
-    def _wait_for_completion(self, prompt_id: str, max_wait: int = 300) -> Optional[Dict]:
+    def _wait_for_completion(self, prompt_id: str, max_wait: int = 300) -> dict | None:
         """等待 ComfyUI 任务完成"""
         import urllib.request
         start = time.time()
@@ -1059,7 +1059,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
                 time.sleep(5)
         return None
 
-    def _download_output(self, file_info: Dict, output_path: str, prompt: str) -> Dict:
+    def _download_output(self, file_info: dict, output_path: str, prompt: str) -> dict:
         """下载 ComfyUI 输出文件"""
         import urllib.request
         filename = file_info.get("filename", "")
@@ -1069,7 +1069,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
         _safe_download(url, output_path)
         return {"success": True, "path": output_path, "source": "ComfyUI", "prompt": prompt}
 
-    def _download_and_stitch(self, images: List[Dict], output_path: str, prompt: str) -> Dict:
+    def _download_and_stitch(self, images: list[dict], output_path: str, prompt: str) -> dict:
         """下载图片序列并用 ffmpeg 拼接为视频"""
         import subprocess
         import tempfile
@@ -1091,7 +1091,7 @@ class ComfyUIAdapter(BaseAIGCAdapter):
             return {"success": True, "path": output_path, "source": "ComfyUI(stitch)", "prompt": prompt}
         return {"success": False, "error": "ffmpeg stitch failed"}
 
-    def get_available_models(self) -> List[str]:
+    def get_available_models(self) -> list[str]:
         """获取 ComfyUI 已安装的模型列表"""
         try:
             import urllib.request
@@ -1118,7 +1118,7 @@ class MockAIGCAdapter(BaseAIGCAdapter):
         return True  # 总是可用
 
     def generate_video(self, prompt: str, output_path: str,
-                       duration: int = 4, size: str = "720x1280") -> Dict:
+                       duration: int = 4, size: str = "720x1280") -> dict:
         """生成一个测试视频 (纯色+文字)"""
         try:
             import subprocess
@@ -1129,7 +1129,7 @@ class MockAIGCAdapter(BaseAIGCAdapter):
                 "ffmpeg", "-y",
                 "-f", "lavfi",
                 "-i", f"color=c=blue:s={w}x{h}:d={duration}",
-                "-vf", f"drawtext=text='AIGC Placeholder':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2",
+                "-vf", "drawtext=text='AIGC Placeholder':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2",
                 "-c:v", "libx264", "-preset", "fast", "-crf", "28",
                 "-pix_fmt", "yuv420p",
                 output_path,
@@ -1151,7 +1151,7 @@ class MockAIGCAdapter(BaseAIGCAdapter):
             return {"success": False, "error": str(e)}
 
     def generate_image(self, prompt: str, output_path: str,
-                       size: str = "1024x1024") -> Dict:
+                       size: str = "1024x1024") -> dict:
         """生成一个测试图片 (纯色)"""
         try:
             from PIL import Image
@@ -1179,14 +1179,14 @@ class AIGCGenerator:
     当真实素材不足时，使用AI生成补充。
     """
 
-    def __init__(self, output_dir: Optional[Path] = None):
+    def __init__(self, output_dir: Path | None = None):
         self.output_dir = output_dir or OUTPUT_DIR
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         self.prompt_generator = PromptGenerator()
 
         # 注册适配器 (按优先级排序: 本地免费 > 云端国内 > 云端海外 > 图片 > 模拟)
-        self.adapters: List[BaseAIGCAdapter] = [
+        self.adapters: list[BaseAIGCAdapter] = [
             ComfyUIAdapter(),   # P0: ComfyUI 本地 GPU (零成本、离线可用)
             ARKJimengAdapter(), # P1: ARK即梦 (国内云端首选)
             KlingAdapter(),     # P2: 可灵 (国内云端备选)
@@ -1200,7 +1200,7 @@ class AIGCGenerator:
     def generate_supplementary(self, user_prompt: str,
                                missing_count: int = 1,
                                style: str = "cinematic",
-                               material_type: str = "video") -> List[Dict]:
+                               material_type: str = "video") -> list[dict]:
         """
         生成补充素材。
 
@@ -1213,7 +1213,7 @@ class AIGCGenerator:
         Returns:
             生成结果列表
         """
-        print(f"\n--- AIGCGenerator: AI生成补充素材 ---")
+        print("\n--- AIGCGenerator: AI生成补充素材 ---")
         log(f"需求: {missing_count} 个 {material_type}, 风格={style}")
 
         results = []
@@ -1263,7 +1263,7 @@ class AIGCGenerator:
         log(f"AI生成完成: {len(results)}/{missing_count}")
         return results
 
-    def list_available_services(self) -> List[Dict]:
+    def list_available_services(self) -> list[dict]:
         """列出所有可用的AI生成服务"""
         services = []
         for adapter in self.adapters:
@@ -1281,7 +1281,7 @@ class AIGCGenerator:
 #  快捷函数
 # ================================================================
 def generate_materials(user_prompt: str, missing_count: int = 1,
-                       style: str = "cinematic", material_type: str = "video") -> List[Dict]:
+                       style: str = "cinematic", material_type: str = "video") -> list[dict]:
     """快捷函数：生成补充素材"""
     generator = AIGCGenerator()
     return generator.generate_supplementary(user_prompt, missing_count, style, material_type)

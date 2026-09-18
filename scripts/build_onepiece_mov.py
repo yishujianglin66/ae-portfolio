@@ -1,11 +1,13 @@
 """海贼王 mask → BGRA 序列 → qtrle MOV + QC。单文件脚本。"""
 from __future__ import annotations
+
 import json
 import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
+
 import cv2
 import numpy as np
 

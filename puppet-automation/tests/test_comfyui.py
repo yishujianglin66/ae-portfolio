@@ -5,13 +5,12 @@ so tests don't require a running ComfyUI instance.
 """
 
 import json
-import pytest
-import httpx
 from pathlib import Path
 
-from src.engines.comfyui import ComfyUIEngine, WorkflowManager, WorkflowInfo
+import httpx
+import pytest
 from src.engines.base import EngineResult
-
+from src.engines.comfyui import ComfyUIEngine, WorkflowInfo, WorkflowManager
 
 # ============================================================
 # Fixtures

@@ -11,17 +11,20 @@
   7. prompt 入口：LLM mock 路径 + 关键词离线兜底（honest degradation）
   8. 所有构建产物通过 validate_composition_tree
 """
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
 
-from core.composition_tree import validate_composition_tree, build_template
 from core.beatlock import BeatGrid
+from core.composition_tree import build_template, validate_composition_tree
 from core.style_tree_builder import (
-    StyleTreeBuilder, BuildResult, _STYLE_TO_BASE, _TEXTFX_TO_ENTRANCE,
+    _STYLE_TO_BASE,
+    _TEXTFX_TO_ENTRANCE,
+    BuildResult,
+    StyleTreeBuilder,
 )
 
 
@@ -228,8 +231,8 @@ def test_prompt_llm_failure_falls_back():
 
 # ── 8. 与 M1b/M3 链路的兼容性 ────────────────────────────────────────
 def test_tree_feeds_orchestrator_and_beatlock():
-    from core.synthesis_orchestrator import JsxProjectBuilder
     from core.beatlock import BeatLock
+    from core.synthesis_orchestrator import JsxProjectBuilder
     result = _builder().build_from_card("amv_highenergy")
     jsx = JsxProjectBuilder().build(result.tree)
     assert "addComp" in jsx and 'status:"success"' in jsx

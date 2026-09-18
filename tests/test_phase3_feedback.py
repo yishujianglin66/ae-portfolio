@@ -1,13 +1,15 @@
 import os
 import sys
+
 import pytest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from feedback_loop_manager import (
-    FeedbackLoopManager,
-    ExecutionRecord,
-    VerificationResult,
     ERROR_RECOVERY_STRATEGIES,
+    ExecutionRecord,
+    FeedbackLoopManager,
+    VerificationResult,
 )
 
 

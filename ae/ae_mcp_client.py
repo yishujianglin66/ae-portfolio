@@ -1,11 +1,12 @@
-import os
 import json
+import os
 import re
 import time
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 
 from ae_bridge_base import AEBridgeClient
+
 from core.config import ConfigManager
 
 CONFIG_DIR = os.path.join(os.path.dirname(__file__), "config")
@@ -93,10 +94,10 @@ class AECommandClient(AEBridgeClient):
                 return ""
         return ""
 
-    def _canonical_json(self, data: Dict[str, Any]) -> str:
+    def _canonical_json(self, data: dict[str, Any]) -> str:
         return json.dumps(data, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
 
-    def send_command(self, op: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    def send_command(self, op: str, params: dict[str, Any]) -> dict[str, Any]:
         self.clear_result()
 
         command = {
@@ -130,7 +131,7 @@ class AECommandClient(AEBridgeClient):
         layer_name: str,
         keyframes: list,
         expressions: dict = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """批量写入关键帧到指定图层。
 
         Args:
@@ -167,7 +168,7 @@ class AECommandClient(AEBridgeClient):
         energy_peaks: list = None,
         peak_values: list = None,
         bpm: float = 120,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """一键创建音乐同步AE合成。
 
         内部调用 e2eMusicVideo MCP命令，在AE端一次性完成：
@@ -218,7 +219,7 @@ class AECommandClient(AEBridgeClient):
         height: int = 768,
         duration: float = 12,
         fps: int = 30,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """自动分析BGM并创建音乐同步AE合成（全自动）。
 
         在Python端用librosa分析BGM，然后将节拍/能量数据
@@ -283,7 +284,7 @@ class AECommandClient(AEBridgeClient):
         peak_values: list = None,
         bpm: float = 120,
         matte_path: str = "D:/AE-Work/silhouette_output/matte_[####].exr",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """创建音乐同步AE合成（使用Silhouette Roto Matte）。
 
         先调用Silhouette生成Roto遮罩，然后创建AE合成并应用Matte。
@@ -324,7 +325,7 @@ class AECommandClient(AEBridgeClient):
         mode: str = "real",
         tracking: str = None,
         output_format: str = "exr",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """调用Silhouette生成Roto遮罩（真实模式：自动启动Silhouette应用并渲染输出）。
 
         Args:
@@ -365,7 +366,7 @@ class AECommandClient(AEBridgeClient):
         search_area: int = None,
         accuracy: str = None,
         output_path: str = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """调用Silhouette执行跟踪（真实模式：自动启动Silhouette应用）。
 
         Args:
@@ -406,7 +407,7 @@ class AECommandClient(AEBridgeClient):
         preset: str = "clone_repair",
         exec_mode: str = "real",
         output_path: str = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """调用Silhouette执行Paint修复（真实模式：自动启动Silhouette应用并渲染输出）。
 
         Args:
@@ -435,15 +436,15 @@ class AECommandClient(AEBridgeClient):
             params["output_path"] = output_path
         return execute_silhouette_command("silhouette_paint", **params)
 
-    def run_silhouette_hair_keying(self, source_path: str, output_path: str = None) -> Dict[str, Any]:
+    def run_silhouette_hair_keying(self, source_path: str, output_path: str = None) -> dict[str, Any]:
         """使用毛发抠像预设执行Roto。"""
         return self.run_silhouette_roto(source_path, output_path, preset="hair_keying")
 
-    def run_silhouette_high_precision_track(self, source_path: str) -> Dict[str, Any]:
+    def run_silhouette_high_precision_track(self, source_path: str) -> dict[str, Any]:
         """使用高精度跟踪预设执行跟踪。"""
         return self.run_silhouette_track(source_path, preset="high_precision_track")
 
-    def run_silhouette_smart_repair(self, source_path: str) -> Dict[str, Any]:
+    def run_silhouette_smart_repair(self, source_path: str) -> dict[str, Any]:
         """使用智能修复预设执行Paint修复。"""
         return self.run_silhouette_paint(source_path, preset="smart_repair")
 
@@ -455,7 +456,7 @@ class AECommandClient(AEBridgeClient):
         mode: str = "real",
         matte_mode: str = "alpha",
         invert_matte: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """完整工作流：Silhouette Roto 生成 Matte → 导入 AE → 设置 Track Matte。
 
         一键完成从素材到 AE 合成的完整 Roto 工作流：
@@ -540,7 +541,7 @@ class AECommandClient(AEBridgeClient):
         preset: str = "planar_track",
         mode: str = "real",
         apply_to: str = "position",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """完整工作流：Silhouette 跟踪 → 导出数据 → 应用到 AE 图层。
 
         Args:
@@ -605,7 +606,7 @@ class AECommandClient(AEBridgeClient):
         paint_mode: str = "clone",
         preset: str = "clone_repair",
         mode: str = "real",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """完整工作流：Silhouette Paint 修复 → 导入 AE 合成。
 
         Args:
@@ -661,7 +662,7 @@ class AECommandClient(AEBridgeClient):
             "paint_output": paint_output,
         }
 
-    def _apply_matte_via_atom_script(self, matte_path: str, target_layer: str, matte_mode: str, comp_name: str = None) -> Dict[str, Any]:
+    def _apply_matte_via_atom_script(self, matte_path: str, target_layer: str, matte_mode: str, comp_name: str = None) -> dict[str, Any]:
         """通过 executeAtomScript 命令导入 Matte 并设置 Track Matte（兼容旧版 AE bridge）。
 
         Args:
@@ -762,7 +763,7 @@ class AECommandClient(AEBridgeClient):
         except Exception as e:
             return {"status": "error", "error": str(e)}
 
-    def _apply_tracking_via_atom_script(self, tracking_data_path: str, target_layer: str, apply_to: str) -> Dict[str, Any]:
+    def _apply_tracking_via_atom_script(self, tracking_data_path: str, target_layer: str, apply_to: str) -> dict[str, Any]:
         """通过 executeAtomScript 命令应用跟踪数据（兼容旧版 AE bridge）。"""
         VALID_APPLY_TO = {"position", "anchor"}
         if apply_to not in VALID_APPLY_TO:
@@ -834,7 +835,7 @@ class AECommandClient(AEBridgeClient):
         file_path: str,
         name: str = None,
         as_sequence: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """导入素材到 AE 项目。
 
         Args:
@@ -857,7 +858,7 @@ class AECommandClient(AEBridgeClient):
         target_layer: str,
         matte_layer: str,
         matte_type: str = "alpha",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """设置 AE 图层的 Track Matte。
 
         Args:

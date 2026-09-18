@@ -50,7 +50,8 @@ from config.settings import settings
 
 # ffmpeg/ffprobe 默认路径收口到 core/paths.py（AEK_FFMPEG / AEK_FFPROBE 可覆盖）
 try:
-    from core.paths import ffmpeg_bin as _paths_ffmpeg, ffprobe_bin as _paths_ffprobe
+    from core.paths import ffmpeg_bin as _paths_ffmpeg
+    from core.paths import ffprobe_bin as _paths_ffprobe
 except ImportError:
     _paths_ffmpeg = lambda: r"C:\ffmpeg\bin\ffmpeg.exe"
     _paths_ffprobe = lambda: r"C:\ffmpeg\bin\ffprobe.exe"
@@ -63,8 +64,8 @@ def try_h3_motion_transfer(
     target_style_ref: str,
     output_path: str,
     *,
-    logger: Optional[logging.Logger] = None,
-) -> Tuple[bool, str]:
+    logger: logging.Logger | None = None,
+) -> tuple[bool, str]:
     """尝试 H3 V2V Motion Transfer（动作迁移）：把 source_video 中动作迁移到 target_style_ref 形象上。
 
     失败不会抛异常，由调用方自行决定是否 fallback。
@@ -120,7 +121,6 @@ from pipeline.adaptive_fallback import (  # noqa: E402,F401
 )
 
 
-
 def try_h3_native_av_generate(
     prompt: str,
     output_path: str,
@@ -128,11 +128,11 @@ def try_h3_native_av_generate(
     duration_sec: int = 10,
     resolution: str = "768p",
     aspect_ratio: str = "16:9",
-    reference_images: Optional[List[str]] = None,
-    reference_videos: Optional[List[str]] = None,
-    reference_audios: Optional[List[str]] = None,
-    logger: Optional[logging.Logger] = None,
-) -> Tuple[bool, str]:
+    reference_images: list[str] | None = None,
+    reference_videos: list[str] | None = None,
+    reference_audios: list[str] | None = None,
+    logger: logging.Logger | None = None,
+) -> tuple[bool, str]:
     """尝试用 MiniMax H3 原生双声道音画同步生成（≤15s 短片推荐）。
 
     优点：跳过独立 BGM 匹配+合成步骤，一步生成带匹配 BGM 的视频；
@@ -191,7 +191,7 @@ class StageResult:
     """单阶段结果"""
     stage: str
     status: StageStatus
-    data: Dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
     error: str = ""
     duration_sec: float = 0.0
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -212,7 +212,7 @@ class PipelineConfig:
     project_name: str = ""
 
     # 阶段控制
-    skip_stages: List[str] = field(default_factory=list)
+    skip_stages: list[str] = field(default_factory=list)
     start_from: str = ""
 
     # 渲染
@@ -234,7 +234,7 @@ class PipelineConfig:
     enable_multi_agent: bool = True      # 启用多智能体执行
     max_quality_iterations: int = 3      # 最大质量迭代次数 (默认3, 上限5, 防止无限循环)
     min_quality_score: float = 60.0      # 最低质量分
-    publish_platforms: List[str] = field(default_factory=list)  # 发布平台
+    publish_platforms: list[str] = field(default_factory=list)  # 发布平台
     use_davinci_render: bool = False       # 启用 DaVinci 后处理渲染
     ffmpeg_bin: str = ""                   # FFmpeg 可执行文件路径 (空=自动搜索)
     use_compiler: bool = False              # 使用 compiler 确定性管线替代 LLM
@@ -322,7 +322,7 @@ class PipelineConfig:
         if str(self.visual_judge_quantize).lower() not in ("none", "4bit", "auto"):
             self.visual_judge_quantize = "auto"
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {k: v for k, v in self.__dict__.items()}
 
 
@@ -332,20 +332,20 @@ class PipelineResult:
     run_id: str
     status: str  # success / failed / partial
     mode: str = ""
-    stages: Dict[str, StageResult] = field(default_factory=dict)
+    stages: dict[str, StageResult] = field(default_factory=dict)
     output_path: str = ""
     project_path: str = ""
     total_duration_sec: float = 0.0
     quality_score: float = 0.0
     iterations: int = 0
-    errors: List[str] = field(default_factory=list)
-    vrs_analysis: Dict[str, Any] = field(default_factory=dict)
-    kb_context: Dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    vrs_analysis: dict[str, Any] = field(default_factory=dict)
+    kb_context: dict[str, Any] = field(default_factory=dict)
     # P2: 渲染链路追踪 — 供进化评测器识别真实渲染引擎 (ae_render/aerender/real_mix/ffmpeg)
     render_engine: str = ""
     execution_mode: str = ""
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "run_id": self.run_id,
             "status": self.status,
@@ -383,7 +383,7 @@ class KnowledgeInjector:
                 logger.warning(f"[KB] Loader init failed: {e}")
         return self._loader
 
-    def get_style_context(self, topic: str) -> Dict[str, Any]:
+    def get_style_context(self, topic: str) -> dict[str, Any]:
         """获取风格上下文 (规划阶段用)"""
         if not self.loader:
             return {}
@@ -394,7 +394,7 @@ class KnowledgeInjector:
             logger.debug(f"[KB] Style context failed: {e}")
             return {}
 
-    def get_effect_recommendations(self, mood: str, content_type: str) -> List[Dict]:
+    def get_effect_recommendations(self, mood: str, content_type: str) -> list[dict]:
         """获取效果推荐 (执行阶段用)"""
         if not self.loader:
             return []
@@ -406,7 +406,7 @@ class KnowledgeInjector:
         except Exception:
             return []
 
-    def get_transition_recommendations(self, prev_mood: str, curr_mood: str) -> List[str]:
+    def get_transition_recommendations(self, prev_mood: str, curr_mood: str) -> list[str]:
         """获取转场推荐"""
         if not self.loader:
             return []
@@ -417,7 +417,7 @@ class KnowledgeInjector:
         except Exception:
             return []
 
-    def get_color_grade_recommendations(self, style: str) -> List[str]:
+    def get_color_grade_recommendations(self, style: str) -> list[str]:
         """获取调色推荐"""
         if not self.loader:
             return []
@@ -428,7 +428,7 @@ class KnowledgeInjector:
         except Exception:
             return []
 
-    def write_feedback(self, project_id: str, feedback: Dict[str, Any]):
+    def write_feedback(self, project_id: str, feedback: dict[str, Any]):
         """将反馈写入知识库 (供未来项目参考)"""
         if not self.loader:
             return
@@ -459,7 +459,7 @@ class KnowledgeInjector:
         except Exception as e:
             logger.warning(f"[KB] Write feedback failed: {e}")
 
-    def get_past_feedback(self, style: str) -> List[Dict]:
+    def get_past_feedback(self, style: str) -> list[dict]:
         """获取历史反馈 (同类风格的成功/失败经验)"""
         feedback_dir = Path(settings.feedback_dir)
         if not feedback_dir.exists():
@@ -490,7 +490,7 @@ class UnifiedPipeline:
         self.config = config or PipelineConfig()
         self.run_id = f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}"
         self.mode = self.config.detect_mode()
-        self._results: Dict[str, StageResult] = {}
+        self._results: dict[str, StageResult] = {}
         self._persist_dir = Path("data/pipeline_runs") / self.run_id
         self._persist_dir.mkdir(parents=True, exist_ok=True)
 
@@ -502,7 +502,7 @@ class UnifiedPipeline:
         self._rendering = None
         self._compiler = None
         self._kb = KnowledgeInjector()
-        self._vrs_result: Dict[str, Any] = {}
+        self._vrs_result: dict[str, Any] = {}
         self._production_data = None  # VRS Bridge 转换结果
         self._iteration = 0
         self._enhanced_video_path = None  # 质量增强后的视频路径
@@ -515,12 +515,12 @@ class UnifiedPipeline:
         self._perf_baseline = None      # P4.5 PerformanceBaseline
         self._engine_registry = None     # P2.1 EngineRegistry
         # P4 产物血缘追踪 (art_id 列表，按 stage_name 索引)
-        self._artifact_ids: Dict[str, List[str]] = {}
-        self._perf_regressions: Dict[str, Dict] = {}  # P4.5b 阶段性能回归检测结果
+        self._artifact_ids: dict[str, list[str]] = {}
+        self._perf_regressions: dict[str, dict] = {}  # P4.5b 阶段性能回归检测结果
         # 【H级修复P2-2-A#4】本run级局部配置覆盖，防止 _should_skip_stage 直接改全局 config 造成副作用
-        self._local_overrides: Dict[str, Any] = {}
+        self._local_overrides: dict[str, Any] = {}
         # FX 节拍缓存：_extract_beats 三级降级结果按 run 缓存，避免重复 librosa 分析
-        self._beats_cache: Optional[list] = None
+        self._beats_cache: list | None = None
 
         self._log(f"Pipeline v2 created: {self.run_id}")
         self._log(f"Mode: {self.mode.value}")
@@ -934,7 +934,7 @@ class UnifiedPipeline:
                     files = list(mat_path.rglob("*"))
                     has_video = any(f.suffix.lower() in video_exts for f in files if f.is_file())
                     if not has_video:
-                        self._log(f"[P2/S3.1] Skipping perceive motion analysis: no video materials")
+                        self._log("[P2/S3.1] Skipping perceive motion analysis: no video materials")
                         # 不跳过perceive，但标记为图片模式（内部可简化）
                         return False
         
@@ -943,7 +943,7 @@ class UnifiedPipeline:
             social_platforms = {"tiktok", "douyin", "instagram", "youtube_shorts", "kuaishou"}
             is_social = any(p.lower() in social_platforms for p in self.config.publish_platforms)
             if is_social and self._cfg("use_davinci_render", False):
-                self._log(f"[P2/S3.2] Skipping DaVinci render: social media vertical video, using AE only")
+                self._log("[P2/S3.2] Skipping DaVinci render: social media vertical video, using AE only")
                 # 【H级修复P2-2-A#4】不直接修改全局 config（跨run有状态副作用）
                 # 改为存储在 self._local_overrides 中，仅影响本次 run 的后续读取
                 self._local_overrides["use_davinci_render"] = False
@@ -952,7 +952,7 @@ class UnifiedPipeline:
         # S3.3: REFERENCE_VIDEO模式下，如果VRS已提供完整分析，简化analyze
         if stage_name == "analyze" and self.mode == PipelineMode.REFERENCE_VIDEO:
             if self._vrs_result and self._vrs_result.get("effects"):
-                self._log(f"[P2/S3.3] Simplifying analyze: VRS already provided effect list")
+                self._log("[P2/S3.3] Simplifying analyze: VRS already provided effect list")
                 return False  # 保持运行但内部简化
         
         # S3.4: KB有完整风格映射时，简化plan阶段
@@ -1025,11 +1025,12 @@ class UnifiedPipeline:
         # 将 VRS 结果注入配置上下文
         self._inject_vrs_to_config()
 
-    def _basic_video_analysis(self, video_path: str) -> Dict:
+    def _basic_video_analysis(self, video_path: str) -> dict:
         """基础视频分析 (VRS 不可用时降级)"""
         result = {"source": "basic_analysis", "video_path": video_path}
         try:
             import subprocess
+
             from pipeline.stages import resolve_ffprobe
             ffprobe = resolve_ffprobe(self.config)
             probe = subprocess.run(
@@ -1122,7 +1123,7 @@ class UnifiedPipeline:
                 }
             )
 
-    def _load_system_lessons(self) -> List[Dict]:
+    def _load_system_lessons(self) -> list[dict]:
         """P2-3: 从 system_memory 加载历史教训（graceful degrade）"""
         try:
             import sys
@@ -1149,13 +1150,13 @@ class UnifiedPipeline:
             logger.debug(f"[P2-3] 教训加载失败: {e}")
             return []
 
-    def _load_postmortem_rules(self) -> List[Dict]:
+    def _load_postmortem_rules(self) -> list[dict]:
         """P2-3b: 从 data/postmortem/ 加载蒸馏规则（影响后续决策）"""
         try:
             archive_dir = Path(__file__).resolve().parent.parent / "data" / "postmortem"
             if not archive_dir.is_dir():
                 return []
-            rules: List[Dict] = []
+            rules: list[dict] = []
             # 读取最近 5 份报告的蒸馏规则
             reports = sorted(archive_dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
             for report_file in reports[:5]:
@@ -1172,7 +1173,7 @@ class UnifiedPipeline:
             logger.debug(f"[P2-3b] 蒸馏规则加载失败: {e}")
             return []
 
-    def _capability_feedback(self) -> Dict[str, Any]:
+    def _capability_feedback(self) -> dict[str, Any]:
         """回读能力注册表/进化提案，注入决策上下文（graceful degrade）。
 
         闭合进化闭环读侧断点：core/evolution/capability_feedback.py 的
@@ -1211,7 +1212,7 @@ class UnifiedPipeline:
         return run_stage(self, *args, **kwargs)
 
 
-    def _extract_engine_name(self, stage_name: str, data: Optional[Dict] = None) -> str:
+    def _extract_engine_name(self, stage_name: str, data: dict | None = None) -> str:
         """从阶段结果中提取引擎名，便于 EngineRegistry 记录真实执行的引擎"""
         if data:
             for key in ("render_engine", "engine", "execution_mode", "engine_name"):
@@ -1220,7 +1221,7 @@ class UnifiedPipeline:
                     return str(val)
         return stage_name
 
-    def _extract_quality_score(self, data: Optional[Dict]) -> float:
+    def _extract_quality_score(self, data: dict | None) -> float:
         """从阶段结果中提取质量分 (0-100)；异常样本或无分时默认成功满分 100"""
         if not data:
             return 100.0
@@ -1235,7 +1236,7 @@ class UnifiedPipeline:
                 continue
         return 100.0
 
-    def _extract_stage_artifact_path(self, stage_name: str, data: Optional[Dict]) -> str:
+    def _extract_stage_artifact_path(self, stage_name: str, data: dict | None) -> str:
         """从阶段结果中提取已落盘的产物文件路径"""
         if not data:
             return ""
@@ -1258,7 +1259,7 @@ class UnifiedPipeline:
         }
         return mapping.get(stage_name, "other")
 
-    def _record_stage_success(self, stage_name: str, data: Optional[Dict], duration: float):
+    def _record_stage_success(self, stage_name: str, data: dict | None, duration: float):
         """P2.1/P4.3/P4.5: 成功阶段统一登记 — 引擎执行历史 + 产物血缘 + 性能基线"""
         engine = self._extract_engine_name(stage_name, data)
         quality = self._extract_quality_score(data)
@@ -1349,7 +1350,7 @@ class UnifiedPipeline:
             except Exception as e:
                 logger.debug(f"[P2.1] engine_registry failure record failed: {e}")
 
-    def _query_error_memory(self, error: Exception, stage_name: str) -> Optional[Dict]:
+    def _query_error_memory(self, error: Exception, stage_name: str) -> dict | None:
         """P0: 查询错误记忆库获取修复方案"""
         try:
             from pipeline.feedback_loop import get_error_memory
@@ -1381,7 +1382,7 @@ class UnifiedPipeline:
         except Exception as e:
             logger.debug(f"[P0] Error pattern recording failed: {e}")
 
-    def _llm_diagnose_error(self, error: Exception, stage_name: str) -> Optional[Dict]:
+    def _llm_diagnose_error(self, error: Exception, stage_name: str) -> dict | None:
         """P1: LLM辅助错误诊断（同步包装，内部调用规则引擎 + 可选LLM）"""
         try:
             from core.error_diagnostician import get_diagnostician
@@ -1421,11 +1422,12 @@ class UnifiedPipeline:
             logger.debug(f"[P1] LLM diagnose failed: {e}")
             return None
 
-    def _query_causal_engine(self, error: Exception, stage_name: str) -> Optional[Dict]:
+    def _query_causal_engine(self, error: Exception, stage_name: str) -> dict | None:
         """M1: 查询因果引擎获取跨引擎诊断"""
         try:
-            from core.causal_engine import get_causal_engine, EngineFailure, EngineType, Intervention
             import asyncio
+
+            from core.causal_engine import EngineFailure, EngineType, Intervention, get_causal_engine
             engine = get_causal_engine()
             
             # 推断引擎类型
@@ -1491,8 +1493,9 @@ class UnifiedPipeline:
     def _run_digital_twin_prediction(self):
         """M3: 数字孪生执行前预测"""
         try:
-            from core.pipeline_digital_twin import get_digital_twin, InputSpecification, PipelineConfig
             import asyncio
+
+            from core.pipeline_digital_twin import InputSpecification, PipelineConfig, get_digital_twin
             twin = get_digital_twin()
             
             input_spec = InputSpecification(
@@ -1536,7 +1539,7 @@ class UnifiedPipeline:
         except Exception as e:
             logger.debug(f"[M3] Digital twin prediction failed: {e}")
 
-    def _build_engine_history_context(self) -> Dict[str, Any]:
+    def _build_engine_history_context(self) -> dict[str, Any]:
         """P2.1: 汇总 EngineRegistry 历史统计，作为策略引擎的决策先验。
 
         将各引擎在 execute/render 上的成功率/平均质量/平均耗时注入 user_constraints，
@@ -1571,8 +1574,9 @@ class UnifiedPipeline:
     def _select_execution_strategy(self):
         """L1: 策略引擎选择执行策略"""
         try:
-            from core.meta_strategy_engine import get_strategy_engine, TaskContext
             import asyncio
+
+            from core.meta_strategy_engine import TaskContext, get_strategy_engine
             engine = get_strategy_engine()
             
             context = TaskContext(
@@ -1619,8 +1623,9 @@ class UnifiedPipeline:
     def _trigger_self_evolution(self, pipeline_result, total_duration: float):
         """L3: 触发自进化引擎"""
         try:
-            from core.self_evolution_engine import get_evolution_engine, ExecutionRecord
             import asyncio
+
+            from core.self_evolution_engine import ExecutionRecord, get_evolution_engine
             engine = get_evolution_engine()
             
             # 构建执行记录
@@ -1841,15 +1846,16 @@ class UnifiedPipeline:
         except Exception as e:
             self._log(f"[Evolution] closed loop skipped: {e}", "WARN")
 
-    def _trigger_failure_postmortem(self, stage_name: str, error_msg: str, exception: Optional[Exception] = None):
+    def _trigger_failure_postmortem(self, stage_name: str, error_msg: str, exception: Exception | None = None):
         """P1-3: 失败复盘 — 将阶段失败自动接入 failure_postmortem 进行根因分析
 
         修复目标：failure_postmortem 模块此前完全脱离生产管线，
         现在每次阶段失败后自动生成复盘报告并归档，形成可检索的失败知识库。
         """
         try:
-            from core.failure_postmortem import get_failure_postmortem, FailureRecord
             import traceback
+
+            from core.failure_postmortem import FailureRecord, get_failure_postmortem
 
             tb_str = ""
             if exception:
@@ -1886,7 +1892,7 @@ class UnifiedPipeline:
     #  开源项目集成辅助方法 (项目1-4)
     # ------------------------------------------------------------------
 
-    def _preprocess_materials(self) -> Dict:
+    def _preprocess_materials(self) -> dict:
         """项目1: Auto-Editor 素材预处理(去静音/去静止)"""
         try:
             materials_dir = self.config.materials_dir
@@ -1918,7 +1924,7 @@ class UnifiedPipeline:
             logger.debug(f"[P1/AutoEditor] Preprocess skipped: {e}")
             return {"skipped": True, "reason": str(e)}
 
-    def _generate_beat_timeline(self) -> Dict:
+    def _generate_beat_timeline(self) -> dict:
         """项目4: Mugen 节奏卡点规划"""
         try:
             audio_path = self.config.audio_path
@@ -1945,7 +1951,7 @@ class UnifiedPipeline:
             logger.debug(f"[P4/Mugen] Beat timeline skipped: {e}")
             return {"available": False, "reason": str(e)}
 
-    def _moviepy_fallback_render(self, data: Dict, prev: Dict) -> Dict:
+    def _moviepy_fallback_render(self, data: dict, prev: dict) -> dict:
         """项目3: MoviePy 降级渲染(当AE/DaVinci无输出时)"""
         try:
             from integrations.moviepy_renderer import MoviePyRenderer
@@ -1983,7 +1989,7 @@ class UnifiedPipeline:
             logger.debug(f"[P3/MoviePy] Fallback render skipped: {e}")
             return data
 
-    def _assess_vmaf_quality(self, output_path: str) -> Optional[Dict]:
+    def _assess_vmaf_quality(self, output_path: str) -> dict | None:
         """项目2: VMAF 感知质量评估"""
         try:
             from integrations.vmaf_quality_adapter import VMAFAdapter
@@ -2011,7 +2017,7 @@ class UnifiedPipeline:
             logger.debug(f"[P2/VMAF] Quality assessment skipped: {e}")
             return None
 
-    def _run_perceive(self) -> Dict:
+    def _run_perceive(self) -> dict:
         """感知阶段：收集素材信息 + KB 注入 + 素材预处理(Auto-Editor) + 素材扫描"""
         data = self.perception.run(self._get_previous_data())
         # v2: KB 注入素材推荐
@@ -2077,7 +2083,7 @@ class UnifiedPipeline:
             data["vrs_result"] = self._vrs_result
         return data
 
-    def _run_analyze(self) -> Dict:
+    def _run_analyze(self) -> dict:
         """分析阶段：深度分析 + VRS 结果融合 + 多模态融合决策"""
         data = self.analysis.run(self._get_previous_data())
         # v2: 融合 VRS 分析结果
@@ -2097,7 +2103,7 @@ class UnifiedPipeline:
             data["multimodal_fusion"] = fusion
         return data
 
-    def _run_multimodal_fusion(self, data: Dict) -> Optional[Dict]:
+    def _run_multimodal_fusion(self, data: dict) -> dict | None:
         """P3: 多模态融合决策 — 将 MultimodalFusionHub 接入 analyze 阶段。
 
         用 topic 文本 + VRS 风格/效果 + 音频路径，通过融合决策头产出
@@ -2147,7 +2153,7 @@ class UnifiedPipeline:
             logger.debug(f"[P3] Multimodal fusion skipped: {e}")
             return None
 
-    def _run_plan(self) -> Dict:
+    def _run_plan(self) -> dict:
         """规划阶段：compiler 确定性路径 或 LLM 生成剧本 + KB 风格注入 + 节奏卡点(Mugen)
 
         S6 学习回读闭合：在 effect_stack 生成后，调用 LearningBridge 将三个学习系统
@@ -2218,7 +2224,7 @@ class UnifiedPipeline:
         return data
 
     def _inject_vrs_into_effect_stack(
-        self, llm_stack: List[Dict[str, Any]]
+        self, llm_stack: list[dict[str, Any]]
     ) -> tuple:
         """P2: 用 VRS 真分析数据驱动生成 effect_stack。
 
@@ -2260,7 +2266,7 @@ class UnifiedPipeline:
                 if kw in n:
                     vrs_name_keys.add(kw)
 
-        merged: List[Dict[str, Any]] = list(vrs_driven_stack)
+        merged: list[dict[str, Any]] = list(vrs_driven_stack)
         for eff in llm_stack:
             n = (eff.get("name") or "").lower()
             # 命中任一 VRS 已有效果关键词则跳过 LLM 版本
@@ -2287,7 +2293,7 @@ class UnifiedPipeline:
         return build_effect_stack_from_vrs(self, *args, **kwargs)
 
 
-    def _apply_learning_enhancement(self, effect_stack: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _apply_learning_enhancement(self, effect_stack: list[dict[str, Any]]) -> dict[str, Any]:
         """S6 学习回读增强：将三个学习系统的历史数据注入 effect_stack
 
         闭合学习闭环读侧断点：让 case-store.json 的参数模板、default-value-store.json
@@ -2342,7 +2348,7 @@ class UnifiedPipeline:
             self._log(f"[S6] LearningBridge failed: {e}", "WARN")
             return {"error": str(e), "enhanced_count": 0}
 
-    def _inject_harvested_experience(self, effect_stack: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _inject_harvested_experience(self, effect_stack: list[dict[str, Any]]) -> dict[str, Any]:
         """S6b: ExperienceHarvester 历史经验回读注入 effect_stack。
 
         用 build_records_from_structured() 重建历史 pipeline 记录，选取总体成功且
@@ -2384,7 +2390,7 @@ class UnifiedPipeline:
             logger.debug(f"[S6b] Harvested experience injection skipped: {e}")
             return {}
 
-    def _run_execute(self) -> Dict:
+    def _run_execute(self) -> dict:
         """执行阶段：多智能体协作 + KB 效果推荐 (支持质量迭代增强)
 
         S2闭环: 消费L1策略选择结果，根据策略动作类型调整执行模式
@@ -2502,7 +2508,7 @@ class UnifiedPipeline:
             result["fx_scripts"] = fx
         return result
 
-    def _apply_fx_scripts(self, result: Dict) -> Dict:
+    def _apply_fx_scripts(self, result: dict) -> dict:
         """P3: 将 core/fx 效果引擎接入 execute 阶段。
 
         根据 analyze 的多模态融合决策 + VRS 检测效果 + 卡点 beats，生成
@@ -2512,10 +2518,11 @@ class UnifiedPipeline:
         """
         try:
             from core.fx.particle_presets import (
-                build_particle_jsx, get_particle_fx_client,
+                build_particle_jsx,
+                get_particle_fx_client,
             )
-            from core.fx.text_impact import _build_jsx as build_text_jsx
             from core.fx.style_preset_engine import get_style_preset_engine
+            from core.fx.text_impact import _build_jsx as build_text_jsx
 
             out_dir = Path(self.config.output_dir)
             out_dir.mkdir(parents=True, exist_ok=True)
@@ -2612,7 +2619,7 @@ class UnifiedPipeline:
 
         # 兼容两种 beats 格式: float 列表(秒) 或 dict 列表({"time": 秒, "bpm": ...})
         # 此前只认 float，analyze 阶段产出的 dict 列表被全滤掉，导致 beats 误判为空
-        cleaned: List[float] = []
+        cleaned: list[float] = []
         for b in beats:
             if isinstance(b, (int, float)):
                 cleaned.append(float(b))
@@ -2658,7 +2665,7 @@ class UnifiedPipeline:
 
         graceful degrade: librosa 不可用或音频不可读时返回空，不影响 execute。
         """
-        candidates: List[str] = []
+        candidates: list[str] = []
         # 1) config.audio_path（管线主音频/BGM）
         cfg_audio = getattr(self.config, "audio_path", "") or ""
         if cfg_audio and os.path.isfile(str(cfg_audio)):
@@ -2708,7 +2715,7 @@ class UnifiedPipeline:
                 continue
         return []
 
-    def _ensure_real_mix_output(self, result: Dict) -> Dict:
+    def _ensure_real_mix_output(self, result: dict) -> dict:
         """P1 真混剪保障: 检查 execute 结果是否为真实视频文件, 否则调用真混剪流水线。
 
         判定真实视频: project_path 后缀为视频格式 AND 文件存在 AND size>1KB
@@ -2757,13 +2764,13 @@ class UnifiedPipeline:
         result["real_mix_error_code"] = mix_result.get("error_code", "UNKNOWN")
         return result
 
-    def _run_execute_real_mix(self) -> Dict:
+    def _run_execute_real_mix(self) -> dict:
         """真实混合执行阶段 (委托 pipeline.unified_pipeline_execute, 2026-08-14 拆分)。"""
         from pipeline.unified_pipeline_execute import run_execute_real_mix
         return run_execute_real_mix(self)
 
 
-    def _build_default_effect_stack(self) -> List[Dict]:
+    def _build_default_effect_stack(self) -> list[dict]:
         """构建默认 cyberpunk 风格效果栈 (当 plan 输出 effect_stack 为空时)。
 
         保证至少 2 个效果, 满足"用参考视频应用至少 2 个效果再输出"约束。
@@ -2812,7 +2819,7 @@ class UnifiedPipeline:
         ]
 
     def _apply_effect_to_filter_builder(
-        self, fb, eff: Dict, seg_dur: float
+        self, fb, eff: dict, seg_dur: float
     ) -> bool:
         """把 effect 描述应用到 FFmpegFilterBuilder, 返回是否应用了真实效果。
 
@@ -2824,7 +2831,10 @@ class UnifiedPipeline:
         会自动转为数值 (cool→-0.3, warm→+0.3, neutral→0.0)。
         """
         from pipeline.ffmpeg_edit_engine import (
-            ColorGradeParams, SharpenParams, VignetteParams, BlurParams,
+            BlurParams,
+            ColorGradeParams,
+            SharpenParams,
+            VignetteParams,
         )
         name = (eff.get("name", "") or "").lower()
         params = eff.get("params", {}) or {}
@@ -2923,7 +2933,7 @@ class UnifiedPipeline:
             applied = True
         return applied
 
-    def _run_render(self) -> Dict:
+    def _run_render(self) -> dict:
         """渲染阶段：输出成品 (支持 AE + DaVinci 双引擎 + 质量迭代)
 
         S3闭环: 消费M3数字孪生预测，当成功率预测<0.5时预防性降级
@@ -2935,7 +2945,7 @@ class UnifiedPipeline:
         if prev.get("execution_mode") == "quality_enhanced":
             enhanced_path = prev.get("project_path", "")
             if enhanced_path and Path(enhanced_path).exists():
-                self._log(f"Render: passing through quality-enhanced video")
+                self._log("Render: passing through quality-enhanced video")
                 return {
                     "output_path": enhanced_path,
                     "render_mode": "quality_passthrough",
@@ -3028,7 +3038,7 @@ class UnifiedPipeline:
 
         return data
 
-    def _davinci_post_process(self, base_data: Dict) -> Dict:
+    def _davinci_post_process(self, base_data: dict) -> dict:
         """DaVinci 后处理: 调色 + 最终渲染"""
         input_path = base_data.get("output_path", "")
         if not input_path or not Path(input_path).exists():
@@ -3064,13 +3074,13 @@ class UnifiedPipeline:
 
         return base_data
 
-    def _run_verify(self) -> Dict:
+    def _run_verify(self) -> dict:
         """质检阶段 (委托 pipeline.unified_pipeline_verify, 2026-08-14 拆分)。"""
         from pipeline.unified_pipeline_verify import run_verify
         return run_verify(self)
 
 
-    def _trace_artifact_manifest(self) -> Dict[str, Any]:
+    def _trace_artifact_manifest(self) -> dict[str, Any]:
         """P4.3b: 产物血缘追溯 — 导出本 run 的产物清单与上游血缘。
 
         用 export_manifest 汇总各阶段登记产物，并在 render 产物上做血缘回溯，
@@ -3100,7 +3110,7 @@ class UnifiedPipeline:
             logger.debug(f"[P4.3b] Artifact trace skipped: {e}")
             return {}
 
-    def _run_quality_gate(self, output_path: str, qa_result: Dict[str, Any]):
+    def _run_quality_gate(self, output_path: str, qa_result: dict[str, Any]):
         """P4.2: 对渲染产物执行 QualityGate 质量规则校验，结果附加到 qa_result。
 
         graceful degrade: QualityGate 不可用时仅记录 WARN，不影响 verify 结论。
@@ -3228,13 +3238,14 @@ class UnifiedPipeline:
         return run_learn(self, *args, **kwargs)
 
 
-    def _execute_with_agents(self) -> Dict:
+    def _execute_with_agents(self) -> dict:
         """通过 MultiAgentOrchestrator 执行"""
         plan = self._get_previous_data().get("plan", {})
         perceive = self._get_previous_data().get("perceive", {})
 
         try:
             import asyncio
+
             from core.multi_agent_orchestrator import MultiAgentOrchestrator
             mao = MultiAgentOrchestrator()
 
@@ -3351,7 +3362,7 @@ class UnifiedPipeline:
         self._apply_quality_enhancement(verify.data)
         return True
 
-    def _apply_quality_enhancement(self, verify_data: Dict):
+    def _apply_quality_enhancement(self, verify_data: dict):
         """将质检反馈转化为实际视频增强，存储增强路径供下轮迭代使用"""
         render = self._results.get("render")
         if not render or render.status != StageStatus.DONE:
@@ -3388,7 +3399,7 @@ class UnifiedPipeline:
         except Exception as e:
             self._log(f"Quality enhancement error: {e}", "WARN")
 
-    def _adjust_params_for_retry(self, verify_data: Dict):
+    def _adjust_params_for_retry(self, verify_data: dict):
         """P1 反馈闭环: 根据 verify 反馈调整 execute 参数, 让下轮重跑使用不同策略。
 
         调整策略:
@@ -3402,7 +3413,7 @@ class UnifiedPipeline:
         score = verify_data.get("final_score", verify_data.get("score", 0))
 
         # 将调整参数存入 _results 供下轮 execute 读取
-        retry_adjustments: Dict[str, Any] = {
+        retry_adjustments: dict[str, Any] = {
             "iteration": self._iteration + 1,
             "reason": f"score={score} < threshold={self.config.min_quality_score}",
             "recommendations": recommendations,
@@ -3465,7 +3476,7 @@ class UnifiedPipeline:
     #  辅助方法
     # ----------------------------------------------------------------
 
-    def _merge_style_sources(self, *style_dicts: Dict) -> Dict:
+    def _merge_style_sources(self, *style_dicts: dict) -> dict:
         """合并多个风格来源 (KB + VRS + 默认)"""
         merged = {}
         for d in style_dicts:
@@ -3475,7 +3486,7 @@ class UnifiedPipeline:
                         merged[k] = v
         return merged
 
-    def _get_previous_data(self) -> Dict:
+    def _get_previous_data(self) -> dict:
         """增强版上下文聚合器 (P4: 跨阶段上下文智能传播)
         
         确保关键上下文（VRS发现、KB推荐、历史反馈、错误记忆）在阶段间完整传播。
@@ -3513,7 +3524,7 @@ class UnifiedPipeline:
         
         return merged
     
-    def _get_relevant_error_patterns(self) -> Dict:
+    def _get_relevant_error_patterns(self) -> dict:
         """获取与当前上下文相关的错误模式 (P0集成)"""
         try:
             from pipeline.feedback_loop import get_error_memory
@@ -3734,10 +3745,10 @@ def _run_stage_with_invariants(self, stage_name: str) -> StageResult:
     return result
 
 
-def _formal_spec_context(self, stage_name: str, result: StageResult) -> Dict[str, Any]:
+def _formal_spec_context(self, stage_name: str, result: StageResult) -> dict[str, Any]:
     # L2(a): 先合并阶段数据，再设置固定键 stage/stage_result，
     # 防止阶段数据键（如 "stage"）覆盖固定键。
-    context: Dict[str, Any] = dict(result.data or {})
+    context: dict[str, Any] = dict(result.data or {})
     context["stage"] = stage_name
     context["stage_result"] = result
     return context

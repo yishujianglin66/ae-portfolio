@@ -56,7 +56,7 @@ class SegmentScore:
     reasoning_log: str = ""
 
     @property
-    def dimensions(self) -> Dict[str, float]:
+    def dimensions(self) -> dict[str, float]:
         return {
             "motion": round(self.motion, 4),
             "camera": round(self.camera, 4),
@@ -85,18 +85,18 @@ class HighlightScorer:
         "audio": 0.10,
     }
 
-    def __init__(self, sample_fps: int = 8, resize: Tuple[int, int] = (320, 180),
-                 weights: Optional[Dict[str, float]] = None,
+    def __init__(self, sample_fps: int = 8, resize: tuple[int, int] = (320, 180),
+                 weights: dict[str, float] | None = None,
                  motion_threshold: float = 40.0,
                  cache_enabled: bool = True,
-                 disk_cache_dir: Optional[str] = None,
+                 disk_cache_dir: str | None = None,
                  frame_extractor=None):
         self.sample_fps = sample_fps
         self.resize = resize
         self.weights = weights or self.DEFAULT_WEIGHTS.copy()
         self.motion_threshold = motion_threshold
         self.cache_enabled = cache_enabled
-        self._cache: Dict[str, SegmentScore] = {}
+        self._cache: dict[str, SegmentScore] = {}
         # v21d: 磁盘缓存 — 跨进程复用评分结果, 预扫描97s→秒级
         # 缓存键含 mtime+size+分析参数, 文件变更或参数变更自动失效
         self.disk_cache_dir = Path(disk_cache_dir) if disk_cache_dir else None
@@ -194,7 +194,7 @@ class HighlightScorer:
         return score
 
     def score_all_segments(self, video_path: str, segment_duration: float = 2.0,
-                           stride: Optional[float] = None) -> List[SegmentScore]:
+                           stride: float | None = None) -> list[SegmentScore]:
         """对整个视频按固定步长扫描打分
         
         Args:
@@ -230,7 +230,7 @@ class HighlightScorer:
     # v21d: 磁盘缓存
     # ────────────────────────────────────────────────
     def _disk_cache_path(self, video_path: str, segment_duration: float,
-                         stride: float) -> Optional[Path]:
+                         stride: float) -> Path | None:
         """缓存文件路径: 内容hash包含文件标识+分析参数, 任一变更即失效"""
         if not self.disk_cache_dir:
             return None
@@ -246,7 +246,7 @@ class HighlightScorer:
         return self.disk_cache_dir / f"{p.stem}_{digest}.json"
 
     def load_disk_cache(self, video_path: str, segment_duration: float = 2.0,
-                        stride: Optional[float] = None) -> Optional[List[SegmentScore]]:
+                        stride: float | None = None) -> list[SegmentScore] | None:
         """从磁盘加载整视频评分缓存, 无缓存返回None"""
         if stride is None:
             stride = segment_duration
@@ -270,9 +270,9 @@ class HighlightScorer:
         except (json.JSONDecodeError, KeyError, TypeError, OSError):
             return None
 
-    def save_disk_cache(self, video_path: str, scores: List[SegmentScore],
+    def save_disk_cache(self, video_path: str, scores: list[SegmentScore],
                         segment_duration: float = 2.0,
-                        stride: Optional[float] = None) -> bool:
+                        stride: float | None = None) -> bool:
         """将整视频评分写入磁盘缓存"""
         if stride is None:
             stride = segment_duration
@@ -294,7 +294,7 @@ class HighlightScorer:
             return False
 
     def rank_segments(self, video_path: str, segment_duration: float = 2.0,
-                      top_k: int = 10) -> List[SegmentScore]:
+                      top_k: int = 10) -> list[SegmentScore]:
         """对视频段落按高光分排序, 返回Top-K"""
         all_scores = self.score_all_segments(video_path, segment_duration)
         return sorted(all_scores, key=lambda s: s.total, reverse=True)[:top_k]
@@ -302,7 +302,7 @@ class HighlightScorer:
     # ────────────────────────────────────────────────────────────────
     # 内部方法
     # ────────────────────────────────────────────────────────────────
-    def _sample_frames(self, video_path: str, start_sec: float, end_sec: float) -> Tuple[List[np.ndarray], float, float]:
+    def _sample_frames(self, video_path: str, start_sec: float, end_sec: float) -> tuple[list[np.ndarray], float, float]:
         """从视频中采样帧 (按sample_fps, 缩小分辨率)
 
         P0: 若挂载 frame_extractor, 优先取SSIM自适应保留帧 (天然去重,
@@ -358,7 +358,7 @@ class HighlightScorer:
         cap.release()
         return frames, start_sec, end_sec
 
-    def _compute_motion(self, frames: List[np.ndarray]) -> float:
+    def _compute_motion(self, frames: list[np.ndarray]) -> float:
         """运动强度: 相邻帧像素差均值的归一化
         
         策略: 转为灰度 → 帧间绝对差 → 均值 → 归一化
@@ -379,7 +379,7 @@ class HighlightScorer:
         score = 1.0 / (1.0 + np.exp(-(avg_diff - 15.0) / 8.0))
         return float(np.clip(score, 0.0, 1.0))
 
-    def _compute_camera_movement(self, frames: List[np.ndarray]) -> float:
+    def _compute_camera_movement(self, frames: list[np.ndarray]) -> float:
         """运镜幅度: 通过帧间仿射变换估计全局运动
         
         策略: 相邻帧 → ORB特征 → 匹配 → 估计变换矩阵 → 提取平移/缩放幅度
@@ -439,7 +439,7 @@ class HighlightScorer:
         score = 1.0 / (1.0 + np.exp(-(avg_mag - 8.0) / 5.0))
         return float(np.clip(score, 0.0, 1.0))
 
-    def _compute_scene_changes(self, frames: List[np.ndarray]) -> float:
+    def _compute_scene_changes(self, frames: list[np.ndarray]) -> float:
         """场景切换密度: 检测帧间突变 (镜头切换)
         
         策略: 直方图比较 + 帧差超阈值 → 场景切换计数 → 密度归一化

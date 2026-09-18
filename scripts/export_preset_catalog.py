@@ -3,12 +3,12 @@
 """导出现有预设目录，按分类整理"""
 from __future__ import annotations
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ae.preset_system import PresetSystem, PRESET_CATEGORIES
+from ae.preset_system import PRESET_CATEGORIES, PresetSystem
 
 
 def main():

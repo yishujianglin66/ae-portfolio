@@ -8,16 +8,17 @@
 """
 
 import pytest
+
 from ae.pr_advanced_editing import (
-    EditMode,
-    MotionDirection,
-    WhipPanParam,
-    DynamicZoomParam,
-    SpeedRampParam,
-    KeyframePoint,
-    KeyframeAnimationParam,
     AdvancedEditParam,
+    DynamicZoomParam,
+    EditMode,
+    KeyframeAnimationParam,
+    KeyframePoint,
+    MotionDirection,
     PremiereAdvancedEditing,
+    SpeedRampParam,
+    WhipPanParam,
 )
 
 

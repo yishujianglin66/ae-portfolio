@@ -50,9 +50,9 @@ class MediaPoolClip:
     width: int = 1920
     height: int = 1080
     bin_path: str = "Master"
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "clip_id": self.clip_id,
             "name": self.name,
@@ -74,11 +74,11 @@ class TimelineClip:
     end_frame: int = 0
     in_point: int = 0
     out_point: int = 0
-    transition_in: Optional[str] = None
-    transition_out: Optional[str] = None
+    transition_in: str | None = None
+    transition_out: str | None = None
     speed: float = 1.0
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "clip_id": self.clip_id,
             "media_name": self.media_name,
@@ -116,7 +116,7 @@ class DaVinciTimelineManager:
         self._project = None
         self._available = False
         self._simulate_mode = False
-        self._simulated_project: Dict[str, Any] = {
+        self._simulated_project: dict[str, Any] = {
             "name": "",
             "timelines": {},
             "mediapool": {},
@@ -257,7 +257,7 @@ class DaVinciTimelineManager:
             return True
         return False
 
-    def list_timelines(self) -> List[str]:
+    def list_timelines(self) -> list[str]:
         """列出所有时间线"""
         if self._available and self._project:
             return self._project.GetTimelineList() or []
@@ -267,8 +267,8 @@ class DaVinciTimelineManager:
     #  MediaPool 管理
     # ----------------------------------------------------------------
 
-    def import_to_mediapool(self, file_paths: List[str],
-                            bin_name: str = "Master") -> List[MediaPoolClip]:
+    def import_to_mediapool(self, file_paths: list[str],
+                            bin_name: str = "Master") -> list[MediaPoolClip]:
         """导入素材到 MediaPool"""
         clips = []
         for fp in file_paths:
@@ -341,7 +341,7 @@ class DaVinciTimelineManager:
         self._simulated_project.setdefault("bins", {})[name] = []
         return True
 
-    def list_mediapool(self, bin_name: str = "Master") -> List[Dict]:
+    def list_mediapool(self, bin_name: str = "Master") -> list[dict]:
         """列出 MediaPool 内容"""
         if self._available and self._project:
             mp = self._project.GetMediaPool()
@@ -411,7 +411,7 @@ class DaVinciTimelineManager:
         logger.info(f"[Timeline][SIM] Set transition: {clip_name} -> {transition_type}")
         return True
 
-    def get_timeline_info(self) -> Dict:
+    def get_timeline_info(self) -> dict:
         """获取当前时间线信息"""
         if self._available and self._project:
             tl = self._project.GetCurrentTimeline()
@@ -465,7 +465,7 @@ class DaVinciTimelineManager:
         """生成模拟 EDL 内容"""
         lines = [
             "TITLE: Simulated EDL",
-            f"FCM: NON-DROP FRAME",
+            "FCM: NON-DROP FRAME",
             "",
         ]
         tl_name = list(self._simulated_project.get("timelines", {}).keys())

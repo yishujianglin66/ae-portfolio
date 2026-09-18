@@ -1,7 +1,9 @@
 """v6: 番剧级 3渲2 完整动画 — Toon BSDF 硬边色阶 + inverted-hull 描边 + 轮廓光 + 挥手"""
+import math
+import os
+
 import bpy
 from mathutils import Vector
-import math, os
 
 OBJ = r'D:/AE-Data/tools/models/bailixuance.obj'
 OUT = r'C:/Users/Administrator/Desktop/AE-Knowledge-Vault/output/puppeteer_v6'

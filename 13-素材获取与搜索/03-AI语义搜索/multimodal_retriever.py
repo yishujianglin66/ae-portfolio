@@ -16,16 +16,19 @@
 from __future__ import annotations
 
 import json
-import sys
 import os
+import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import hashlib
-from clip_searcher import get_model as get_clip_model, encode_text, encode_image, cosine_similarity, load_index
+
+from clip_searcher import cosine_similarity, encode_image, encode_text, load_index
+from clip_searcher import get_model as get_clip_model
 
 _OFFLINE_MODE = os.environ.get("AEK_OFFLINE_MODE", "").lower() == "true" or \
                 os.environ.get("AEK_OFFLINE_MODE", "") == "1" or \
@@ -83,7 +86,7 @@ class CLAPEncoder:
         vector /= np.linalg.norm(vector)
         return vector
     
-    def encode_text(self, text: str) -> Optional[np.ndarray]:
+    def encode_text(self, text: str) -> np.ndarray | None:
         """将文本编码为CLAP向量"""
         if self._use_mock:
             return self._mock_encode_text(text)
@@ -97,7 +100,7 @@ class CLAPEncoder:
             print(f"CLAP文本编码失败，使用模拟向量: {e}", file=sys.stderr)
             return self._mock_encode_text(text)
     
-    def encode_audio(self, audio_path: str) -> Optional[np.ndarray]:
+    def encode_audio(self, audio_path: str) -> np.ndarray | None:
         """将音频文件编码为CLAP向量"""
         if self._use_mock:
             return self._mock_encode_text(audio_path)
@@ -129,10 +132,10 @@ class RRFFusion:
     
     def fuse(
         self,
-        result_lists: List[List[Dict[str, Any]]],
+        result_lists: list[list[dict[str, Any]]],
         id_key: str = "file_path",
-        weights: Optional[List[float]] = None
-    ) -> List[Dict[str, Any]]:
+        weights: list[float] | None = None
+    ) -> list[dict[str, Any]]:
         """
         RRF倒数排名融合
         
@@ -151,8 +154,8 @@ class RRFFusion:
             weights = [1.0] * len(result_lists)
         
         # 计算每个文档的RRF分数
-        rrf_scores: Dict[str, float] = {}
-        item_map: Dict[str, Dict[str, Any]] = {}
+        rrf_scores: dict[str, float] = {}
+        item_map: dict[str, dict[str, Any]] = {}
         
         for list_idx, results in enumerate(result_lists):
             weight = weights[list_idx] if list_idx < len(weights) else 1.0
@@ -219,7 +222,7 @@ class MultimodalRetriever:
                           最终排序结果
     """
     
-    def __init__(self, index_path: Optional[str] = None):
+    def __init__(self, index_path: str | None = None):
         self.index_path = index_path
         self.clip_model = None
         self.clap_encoder = CLAPEncoder()
@@ -232,15 +235,15 @@ class MultimodalRetriever:
     def search(
         self,
         query: str,
-        index_path: Optional[str] = None,
+        index_path: str | None = None,
         top_k: int = 20,
-        target_bpm: Optional[float] = None,
-        bpm_range: Optional[tuple] = None,
-        mood: Optional[str] = None,
-        genre: Optional[str] = None,
+        target_bpm: float | None = None,
+        bpm_range: tuple | None = None,
+        mood: str | None = None,
+        genre: str | None = None,
         clip_weight: float = 1.0,
         clap_weight: float = 0.8
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         多模态融合搜索
         
@@ -292,7 +295,7 @@ class MultimodalRetriever:
         query: str,
         index_path: str,
         top_k: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """CLIP语义检索"""
         self._ensure_clip_model()
         if self.clip_model is None:
@@ -331,7 +334,7 @@ class MultimodalRetriever:
         query: str,
         index_path: str,
         top_k: int
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """CLAP音频语义检索"""
         query_vector = self.clap_encoder.encode_text(query)
         if query_vector is None:
@@ -366,12 +369,12 @@ class MultimodalRetriever:
     
     def _audio_filter(
         self,
-        items: List[Dict[str, Any]],
-        target_bpm: Optional[float] = None,
-        bpm_range: Optional[tuple] = None,
-        mood: Optional[str] = None,
-        genre: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+        items: list[dict[str, Any]],
+        target_bpm: float | None = None,
+        bpm_range: tuple | None = None,
+        mood: str | None = None,
+        genre: str | None = None
+    ) -> list[dict[str, Any]]:
         """Essentia特征硬过滤"""
         filtered = []
         
@@ -423,7 +426,7 @@ def main() -> None:
         input_json = json.loads(sys.argv[2])
         action = input_json.get("action", "")
         
-        result: Dict[str, Any] = {"success": False, "results": []}
+        result: dict[str, Any] = {"success": False, "results": []}
         
         if action == "search":
             query = input_json.get("query", "")

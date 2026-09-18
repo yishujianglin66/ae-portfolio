@@ -35,7 +35,7 @@ class BaseSoftwareAdapter(ABC):
     def __init__(
         self,
         config: SoftwareConfig,
-        logger: Optional[logging.Logger] = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         self.config = config
         self.software_type: SoftwareType = config.software
@@ -43,7 +43,7 @@ class BaseSoftwareAdapter(ABC):
         self._capabilities: SoftwareCapabilities = self._initialize_capabilities()
         self._active_tasks: int = 0
         self._lock = threading.Lock()
-        self._last_error: Optional[str] = None
+        self._last_error: str | None = None
         self.logger = logger or logging.getLogger(
             f"software_sdk.{self.software_type.value}"
         )

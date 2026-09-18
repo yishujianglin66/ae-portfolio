@@ -4,15 +4,17 @@
 验证2类CNN分类器在真实动漫视频上的性能
 """
 
-import sys
-import os
 import json
+import os
+import sys
 import time
-import numpy as np
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
+
+import numpy as np
+
 # Removed matplotlib/seaborn for compatibility
-from sklearn.metrics import confusion_matrix, balanced_accuracy_score, classification_report
+from sklearn.metrics import balanced_accuracy_score, classification_report, confusion_matrix
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent))
@@ -291,13 +293,13 @@ def main():
         print(f"平均推理时间: {analysis['avg_inference_time']:.3f}s ± {analysis['std_inference_time']:.3f}s")
         print(f"静态平均置信度: {analysis['avg_static_confidence']:.3f}")
         print(f"运动平均置信度: {analysis['avg_motion_confidence']:.3f}")
-        print(f"预期准确率: 0.6725")
+        print("预期准确率: 0.6725")
         print(f"相对预期性能: {analysis['balanced_accuracy']/0.6725:.2%}")
         
         if analysis['balanced_accuracy'] >= 0.65:
             print("\n[OK] 验证成功：准确率达到预期标准")
         else:
-            print(f"\n[WARNING] 验证警告：准确率低于预期阈值0.65")
+            print("\n[WARNING] 验证警告：准确率低于预期阈值0.65")
         
         # 保存报告和可视化
         print("\n4. Generating reports...")
@@ -312,7 +314,7 @@ def main():
             except:
                 pass  # 忽略删除失败的文件
         
-        print(f"\n验证完成！报告已保存至 validation_report.json 和 validation_results.png")
+        print("\n验证完成！报告已保存至 validation_report.json 和 validation_results.png")
         
         return analysis
         

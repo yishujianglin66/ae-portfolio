@@ -20,12 +20,13 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT))
 
-from scripts.m2_auto_iterate import render_tree  # noqa: E402
-from core.image_fx import pick_fx_layer  # noqa: E402
-from core.sfx_layer import plan_sfx, mix_sfx, _load_index  # noqa: E402
-from core.lut_pipeline import load_sampling, transcode_with_lut  # noqa: E402
-from core.cnn_scorer import score_video_mode  # noqa: E402
 import cv2  # noqa: E402
+
+from core.cnn_scorer import score_video_mode  # noqa: E402
+from core.image_fx import pick_fx_layer  # noqa: E402
+from core.lut_pipeline import load_sampling, transcode_with_lut  # noqa: E402
+from core.sfx_layer import _load_index, mix_sfx, plan_sfx  # noqa: E402
+from scripts.m2_auto_iterate import render_tree  # noqa: E402
 
 DUR = 8.0
 USE_RAMPS = True    # 2026-08-17: speed_ramp_jsx 已修复错峰层（offset/source_in 参数）, 可以安全开启
@@ -75,7 +76,7 @@ def smart_in(src_rel: str, need: float, k: int = 6) -> float:
 
 
 def build_tree(pp: dict):
-    from core.composition_tree import LayerSpec, CompositionTree, EffectRef
+    from core.composition_tree import CompositionTree, EffectRef, LayerSpec
     rng = random.Random(42)
 
     # 节拍: 1.5 切/s 画像 → 8s ≈ 12 拍, 8 镜头
