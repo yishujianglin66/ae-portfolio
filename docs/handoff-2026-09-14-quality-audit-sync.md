@@ -348,4 +348,38 @@ Boss 授权"按最推荐步骤推进"（=选项①：曝光/泛光过冲修正 +
 `apply_highlight_rolloff()`，参数固定枚举校验、ffmpeg 走参数列表 shell=False），并有契约测试
 `tests/test_grade_highlight_rolloff.py`（4 断言）。可作为 AE 出片后的标准收尾一步。
 
+### §9.5 查漏补缺轮（2026-09-17：自查 → 补缺 → 复验）
+
+- **CI 依赖核查**：`requirements.txt` 实含 `librosa>=0.10` / `soundfile>=0.12`（line 38-39）→ CI 正常安装时
+  音频测试可跑；但 CI 安装步骤有**失败回退分支**（仅 numpy/pillow/pydantic）→ 已给
+  `tests/test_mastercut_analyze_beat.py` 加 `pytest.importorskip("librosa")`（缺失时显式 skip 而非 error）。
+- **根因修正落地（可离线验证版）**：`build_master_polish.py --hl-safe`（默认关）把
+  `radial`/`radial_soft` 基数 ×0.7（70→49 / 35→24.5；`burst_radial` 为有意瞬时闪光不动）。
+  **dry-run JSX 实证**：开=有效值 20.99/28.84…，关=29.99/41.19…，比例精确 0.7，默认路径数值不变。
+  转"默认开"需一次 AE 渲染视觉复验（**AfterFX.exe 当前未运行**，桥不可用 → 留待）。
+- **⚠️ 全量验证卡死事故（真实回归，round2/round3 均在 ~99% 复现，诊断进行中）**：
+  同 CI 参数的全量跑两轮都停在 99% 无输出（round3 **无任何并发重活**仍复现 → 排除资源争用）。
+  py-spy 取栈实证：**两个 xdist worker 空闲等任务，控制器卡在 `dsession.loop_once→queue.get()`**，
+  且进程表显示 run 中途（+10min）有 worker 被**重启**过 → 判定为 **某测试静默击杀 worker**（无 timeout
+  触发痕迹、无失败标记 → 疑 C 扩展硬崩溃；本机 soundfile 的 C 库已知损坏，仅靠 audioread 回退）→
+  xdist 重启 worker → 控制器永等已丢失的结果 → **死锁**。round1（两日前，5621 passed）能跑完，
+  其后新增 = `analyze_beat` 重实现(引入 librosa.load) + 3 个新测试文件 → 嫌疑集中于此，但
+  新测试单独 + cov + xdist 复现**不卡**（6 passed/35.8s）→ 需全量上下文才触发。
+  **处置**：round4 用 `-v`（无 cov）复跑，崩溃时"已完成集合 vs collected_all.txt(5692)"差集
+  即为元凶。**CI 风险**：`quality-hardening.yml::full-suite-sharded` 在 windows-latest 同样
+  xdist+timeout 组合，若同因崩溃会同样挂死 job（有 timeout-minutes:90 兜底不至于挂仓库）。
+- **✅ 卡死定位与 CI 修复（2026-09-18 补）**：
+  round4（**去 cov**，`-v`）**1/1 顺利跑完**（15:34，5654 passed/37 skipped/1 failed，我方 6 个新测试全 PASSED）；
+  round5（**cov** + `-v`）**再次停在 99%** → 定性：**Windows 上 xdist×coverage 组合静默击杀 worker**。
+  round5 证据链：`-v` 日志冻结于 99%；worker 编号到 **gw3**（被杀后反复重启）；已完成集合 vs
+  `tmp/collected_all.txt`(5692) 差集缺**整模块**结果（`test_e2e_pipeline_flow` / `test_s3_ae_real` 等）；
+  全程无 timeout/失败标记（os._exit 丢缓冲）。统计：xdist+cov **3/3 卡死**，xdist 无 cov **1/1 通过**。
+  **修复**：`full-suite-sharded` job 改**串行**（去 `-n2 --dist=loadscope`、不再装 xdist）；
+  串行下 `--timeout=300` 超时会点名失败而非挂死。代价 wall≈2x（预算 90min 内）。
+  本地串行+cov 实跑验证进行中（结果回填）。
+- **顺带修复（round4 发现的既有 flaky）**：`test_llm_enhanced_paths::test_esbuild_compiles` 的
+  `npx esbuild` 满负载下超 30s 预算必假红（手动空载秒过 EXIT=0）→ 放宽至 120s（只防真挂死）。
+- **开场镜头（0.5s）修正位置澄清**：polish 阶段消费的是整条 `{tag}_lut.mp4` 单剪辑，分段 source 只用于
+  twx/rescue 覆盖层 → 换开场窗口须改**编辑层（unified_edit）重出片**，不是 polish 参数能解的。
+
 

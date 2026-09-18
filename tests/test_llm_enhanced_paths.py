@@ -396,7 +396,9 @@ class TestTSCompilation:
         result = subprocess.run(
             ["cmd", "/c", "npx", "esbuild", entry, "--bundle", "--platform=node",
              "--outfile=NUL", "--log-level=error"],
-            capture_output=True, text=True, timeout=30,
+            # npx 冷缓存/满负载(xdist 双 worker)下启动可远超 30s —— 2026-09-17 全量
+            # 实测 30s 必超时(手动空载则秒过)。放宽到 120s 只防真挂死, 不再制造假红。
+            capture_output=True, text=True, timeout=120,
             cwd=compiler_dir,
         )
         assert result.returncode == 0, f"esbuild failed: {result.stderr}"

@@ -74,13 +74,16 @@ jobs:
           if-no-files-found: warn
 
   full-suite-sharded:
-    # A4: 全量测试分片门(现仅 ~9 文件被强制, 5584 从未在 CI 跑过)。
-    #     pytest-xdist -n2 --dist=loadscope(GH Actions 2 核; loadscope 保同模块 fixture 不跨进程)。
+    # A4: 全量测试门(现仅 ~9 文件被强制, 5584 从未在 CI 跑过)。
     #     Windows spawn 注意: 主模块顶层重导入由 -p no:cacheprovider + AEK_ENVIRONMENT=test 缓解。
     #     A5(#7): 接入 coverage —— 使 pyproject 的 fail_under=29 ratchet 成为**活配置**
     #     (此前是死配置, 无任何 workflow 执行)。source 由 pyproject [tool.coverage.run] 提供,
-    #     故 bare `--cov` 即可, 不重复列包名。实测全量真实覆盖 29.70%, 地板 29 略低于实测。
-    #     先 continue-on-error 摸清真实通过基线; 连续两周绿后转 required(解 C2)。
+    #     故 bare `--cov` 即可, 不重复列包名。实测全量真实覆盖 29.70%(现 32.59%), 地板 29 略低于实测。
+    #     ⚠️ 2026-09-18 弃用 xdist(-n2): Windows 上 **xdist×coverage 组合会静默击杀 worker**
+    #     → 控制器永等已丢失结果 → 整个 run 死锁(本地 3/3 复现于 ~99%; 去 cov 即 1/1 顺利;
+    #     -v 日志见 worker 重启至 gw3, 差集缺整模块结果, 无任何 timeout/失败标记)。
+    #     改**串行**: 无 worker 即无死锁面; --timeout=300 在串行下超时会直接点名失败而非挂死。
+    #     代价: wall time 约 2x(预算 90min 内)。先 continue-on-error 摸基线; 连续两周绿后转 required(解 C2)。
     runs-on: windows-latest
     timeout-minutes: 90
     continue-on-error: true
@@ -94,12 +97,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt || pip install numpy pillow pydantic pydantic-settings
-          pip install pytest pytest-xdist pytest-timeout pytest-cov
-      - name: full suite sharded + coverage ratchet (baseline observation)
+          pip install pytest pytest-timeout pytest-cov
+      - name: full suite serial + coverage ratchet (baseline observation)
         env:
           AEK_ENVIRONMENT: test
         run: |
-          python -m pytest -n 2 --dist=loadscope -q --timeout=300 -p no:cacheprovider --ignore=mcp-extension --cov --cov-branch --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=29 2>&1 | Tee-Object full_sharded.txt
+          python -m pytest -q --timeout=300 -p no:cacheprovider --ignore=mcp-extension --cov --cov-branch --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=29 2>&1 | Tee-Object full_sharded.txt
       - name: upload result
         if: always()
         uses: actions/upload-artifact@v4
