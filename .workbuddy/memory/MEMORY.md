@@ -202,6 +202,11 @@ Python 3.11（.venv）/ Node 22 / ComfyUI / FFmpeg / MCP / After Effects 脚本 
   待探针项，执行第 0 步先探针；不过则退化方案=mask 层 sampleImage() 表达式驱动文字 opacity。
 - **试点产物**：`tmp/occlusion_pilot/`（3 帧 × 三种策略的叠图与 mask）、
   `tmp/sam2_pilot*.py`（可复跑）、`models/occlusion/sam2.1_hiera_tiny.pt`。
+- **第三方源码进仓库要"只留执行路径"**：sam2 tarball 解压后 Mimosa 在 `training/` 里报了
+  3 条"不安全反序列化"（torch.load/pickle 加载检查点，PyTorch 训练代码的标准写法）。
+  处置=**删除用不到的目录**（training/demo/notebooks/assets/sav_dataset/tools 全删，
+  53MB→811KB），只留 `sam2/` 推理包；冒烟验证 `build_sam2` 加载正常。
+  依据：我加载的检查点是官方 CDN 直连下载的，且推理路径根本不 import training/。
 
 ## AE 启动 / 注入纪律（2026-09-13 立，均有实录代价）
 - **严禁 force-kill AE**（`Stop-Process -Force`/`taskkill /F`）。后果链：force-kill → 下次启动弹
