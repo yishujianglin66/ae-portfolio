@@ -188,6 +188,10 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "real_davinci: 需要真实 DaVinci Resolve 环境的测试")
     config.addinivalue_line("markers", "real_render: 需要真实渲染引擎（C4D/Blender/AE）长时间执行的测试")
     config.addinivalue_line("markers", "silhouette: 需要 Silhouette 环境的测试")
+    config.addinivalue_line("markers", "simulate: 模拟桩测试（非真实集成）")
+    config.addinivalue_line("markers", "whisper: Whisper 音频模型集成")
+    config.addinivalue_line("markers", "rife: RIFE 视频插帧模型集成")
+    config.addinivalue_line("markers", "sam2: SAM2 分割模型集成")
 
 
 def pytest_collection_modifyitems(config, items):
