@@ -176,6 +176,33 @@ Python 3.11（.venv）/ Node 22 / ComfyUI / FFmpeg / MCP / After Effects 脚本 
 - **归因方法论**：末端反复试错无效时，换**逐环节量同一个客观指标**——哪一层发生量级跳变，
   问题就在那一层。这比在末端调参快得多。
 
+## 环境陷阱：系统代理残留导致"全网假性不可达"（2026-09-18 实证）
+- **症状**：代理软件退出后，Python urllib 访问任何站点（连 modelscope/清华源）都失败，
+  但 ping/TCP 直连全通。**根因**：注册表 `ProxyServer=127.0.0.1:7897` 且 `ProxyEnable` 仍=1，
+  urllib 按系统代理把请求塞进死端口。
+- **解法**：`urllib.request.ProxyHandler({})` 显式空代理=直连（不读注册表）。
+  实测直连可达：`dl.fbaipublicfiles.com`（SAM2 官方 CDN，**无需代理**）、GitHub
+  （codeload/raw/clone）、`hf-mirror.com`、`modelscope.cn`。
+- **git clone 会中途断**（网络 0.3MB/s 不稳，`early EOF`）→ 改 **codeload tarball + Range 断点续传**
+  （实测 53MB/114s 成功）。
+
+## 文字遮挡（人物挡字）可行性调研结论（2026-09-18，报告见 09-计划文件）
+- **基建全通**：RTX 4060 8GB + torch 2.13+cu126；SAM2.1 tiny(148MB) 官方 CDN 直连下载；
+  源码 tarball 下载后 `sys.path.insert` 即用（无需 pip 装）；CUDA 推理 ~1-2s/帧；依赖全在。
+- **质量不通过（有数据的否定结论）**：SAM 2.1 tiny 对本片素材（动漫线稿+重度模糊+高饱和）
+  三种提示策略全部失败——自动方框 10.9-18.8%(圈到背景)、单点 1.1-5.7%(局部碎片)、
+  多点+负点 3.4-61.7% 剧烈摆动且最好一帧 score 仅 0.13(过分割)。与"SAM2 训练于自然视频"
+  的已知限制一致；我们的素材细节已在剪辑阶段损失 10 倍，进一步恶化。
+- **候选排序**：ISNet(动漫专用, Apache-2.0, ~176MB, 逐帧无时序) > SAM2.1 base+(322MB 未测) >
+  SAM2Matting(代码已放**权重未全放**)；RVM 已排除(MIT 但真人训练, 动漫边缘差)。
+- **ISNet 下载未闭环**：hf-mirror 猜测路径 404（space/repo 两个 id 都不对），需找到正确 repo id
+  或走 modelscope/GitHub release。**这是执行计划的第一步**。
+- **设计已定**：mask PNG 序列 → AE 导入 → 文字层 Track Matte=Alpha Inverted；
+  ⚠️ AE 2025 的 track matte 脚本 API（setTrackMatte vs trackMatteType）是交接清单里的
+  待探针项，执行第 0 步先探针；不过则退化方案=mask 层 sampleImage() 表达式驱动文字 opacity。
+- **试点产物**：`tmp/occlusion_pilot/`（3 帧 × 三种策略的叠图与 mask）、
+  `tmp/sam2_pilot*.py`（可复跑）、`models/occlusion/sam2.1_hiera_tiny.pt`。
+
 ## AE 启动 / 注入纪律（2026-09-13 立，均有实录代价）
 - **严禁 force-kill AE**（`Stop-Process -Force`/`taskkill /F`）。后果链：force-kill → 下次启动弹
   "崩溃修复选项" → 若进**安全模式** → 第三方增效被禁（Sapphire 配方全失效）**且实测把
