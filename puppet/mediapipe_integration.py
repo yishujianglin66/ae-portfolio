@@ -66,6 +66,7 @@ class MediaPipeIntegrator:
         self.config = config
         self._mediapipe_available = False
         self._is_initialized = False
+        self.warnings: List[str] = []  # 添加 warnings 属性
         self._init_modules()
     
     def _init_modules(self):
