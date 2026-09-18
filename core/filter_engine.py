@@ -12,12 +12,18 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
+# =============================================================================
+# Logger setup
+# =============================================================================
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # 异常处理
