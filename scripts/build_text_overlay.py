@@ -69,10 +69,11 @@ ZONES = [
 # 回退: 把 cap/hold 改回旧值即恢复 v49 的密度 (旧值见 git 历史)。
 ZONE_CFG = {
     #            最小间距  最大保持  事件上限
-    "intro": {"gap": 1.6, "hold": 1.1, "cap": 2},
-    "build": {"gap": 1.10, "hold": 1.0, "cap": 4},
-    "drop":  {"gap": 0.75, "hold": 0.45, "cap": 10},
-    "outro": {"gap": 1.6, "hold": 1.2, "cap": 2},
+    # v53 频率对齐参照 (参照中位 79.7/min vs 本片 38/min → 间距收短让频率翻倍)
+    "intro": {"gap": 1.2, "hold": 0.8, "cap": 3},
+    "build": {"gap": 0.70, "hold": 0.7, "cap": 6},
+    "drop":  {"gap": 0.50, "hold": 0.35, "cap": 15},
+    "outro": {"gap": 1.2, "hold": 1.0, "cap": 2},
 }
 # 留白优先时不要把空档都填满 (补洞本为高密度服务) → drop 的最大空档放宽
 MAX_GAP_V50 = 1.6
@@ -139,6 +140,11 @@ def apply_layout(word: str, lay: str):
 
 ZONE_END_GUARD = 0.35     # 锚点距分区结束 <0.35s 不选 (会被钳成不可读短事件)
 DROP_POS_CYCLE = [(960, 540), (700, 380), (1220, 700)]   # v9: 内收 (v8 实证 620/1300 宽字超框)
+# v53 顶部横排 (参照集实证: 顶尖燃向文字 pos_y 中位 0.083 = 画面顶部, 不与角色抢位)
+# 8 部 burn+amv 参照的分布: x 0.312-0.438 (偏左), y 全部 0.083 (第一行网格 = 顶部)
+# 本片旧配置: 三点轮换 (700,380)/(960,540)/(1220,700) — 全在画面中部, 与角色面部/动作重叠
+DROP_POS_TOP = [(620, 90), (960, 90), (1300, 90)]           # 顶部横排三点 (x 分散, y 统一)
+BUILD_POS_TOP = [(620, 90), (1300, 90)]                      # build 交替左右
 ONSET_S_THR = 0.40         # 归一化强度阈值 (D4 口径 s≥0.5 收紧到 0.4 保覆盖)
 # v37 时段处理强度分级 (Boss: "应该局部或者某些时间段应用" / "感觉没啥变化")
 # 实证依据: 逐帧"成片 vs 原始素材"差异曲线显示 安静段(9.69) 竟强于 drop 段(8.00)
@@ -691,11 +697,12 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                 size = int(size * 0.8)
                 side_flip += 1
             elif style_id == "drop_impact":
-                # v4.1: 背景亮度感知选位 (双时刻加权, 防白字压高光; 回退轮换)
-                x, y = _pick_dark_pos(t_in, bg_video, bank_pos[zone], hold=hold)
+                # v53 顶部横排 (参照集实证: 顶尖燃向 pos_y=0.083, 不与角色抢位)
+                x, y = DROP_POS_TOP[bank_pos[zone] % len(DROP_POS_TOP)]
         else:  # side_alt
-            x = int(1920 * (0.30 if side_flip % 2 == 0 else 0.70))
-            y = int(1080 * 0.42)
+            # v53 build 也移顶部 (参照实证)
+            x = int(1920 * (0.32 if side_flip % 2 == 0 else 0.68))
+            y = int(1080 * 0.083)
             side_flip += 1
             if closeup:
                 y = int(1080 * (0.18 if side_flip % 2 == 0 else 0.82))
@@ -854,6 +861,11 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             #   达 869 → 上缘跑到 y=-54, 会被切掉 (只持续 ~0.1s, 但会被看见)。
             if n_lines >= 3:
                 y = 540                                    # 竖排高块居中, 上下各留出余量
+            # v54 顶部安全 y: v53 实测 AE 基线锚定 + JSX 锚定校正后, 字块以 y 为
+            # 视觉中心; 单行豁免高度守卫, 大字号 (>170px) 在 y=90 时弹性峰值
+            # 1.38×半高仍会越顶 → 按 size 的 0.49 倍半高 + 8px 余量抬高最低 y。
+            if y < 150:
+                y = max(y, int(round(size * 0.49)) + 8)
             for _ in range(14):
                 _peak_h = size * 1.25 * n_lines * 1.38
                 _room = 2.0 * min(y - 60, 1020 - y)
@@ -1380,6 +1392,15 @@ def build_jsx(events, out_aep: Path, nonce: str = "start"):
       // 改为 3D 图层自身的 Z 位移动画 (无摄像机时 AE 用默认视图, 2D 基底层零影响)。
       for (var i = 0; i < evs.length; i++) {{
         var ev = evs[i];
+        // v54 垂直锚定校正: AE 点文本 position 锚在首行基线 (非字块中心) —
+        // v53 顶部 y=90 时 198px 字形实测越顶 63px (40% 被裁)。探针量一次
+        // 层空间 rect (与 position 无关), 平移 ev.y 使"字块垂直中心=计划 y";
+        // 本事件后续 GL/TXT/kick/slide_back 表达式全走校正后的 ev.y。
+        var PR = comp.layers.addText(ev.word);
+        setDoc(PR, ev, ev.fill || [1, 1, 1], ev.strokeColor || [0, 0, 0], ev.strokeW || 0);
+        var RC = PR.sourceRectAtTime(ev.t_in + 0.2, false);
+        ev.y += -(RC.top + RC.height / 2);
+        PR.remove();
         var L = null, U = null, MV = null;
         if (ev.dbl) {{
           // 双描边: 底层 = 彩色外环(实心), 上层 = 白字 + 深色内描边
