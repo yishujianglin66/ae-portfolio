@@ -22,3 +22,4 @@ sentence-transformers>=2.3
 open-clip-torch>=2.0
 laion-clap>=1.0
 essentia>=2.1
+faiss-cpu>=1.9      # P2-A FAISS 知识服务所需的向量索引（test_faiss_knowledge_service 依赖）
