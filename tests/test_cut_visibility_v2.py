@@ -105,7 +105,7 @@ def hardcut_video(tmp_path_factory) -> Path:
          "-f", "lavfi", "-i", "testsrc=size=320x240:rate=24:duration=1",
          "-filter_complex", "[0][1][2]concat=n=3:v=1:a=0",
          "-c:v", "libx264", "-pix_fmt", "yuv420p", str(out)],
-        check=True,
+        check=True, timeout=120,
     )
     return out
 

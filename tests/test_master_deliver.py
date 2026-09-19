@@ -106,7 +106,7 @@ def clipped_video(tmp_path_factory) -> Path:
          "-filter_complex", "[1:a][2:a]amix=inputs=2:normalize=0,volume=20dB[a]",
          "-map", "0:v", "-map", "[a]",
          "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", str(out)],
-        check=True,
+        check=True, timeout=120,
     )
     return out
 

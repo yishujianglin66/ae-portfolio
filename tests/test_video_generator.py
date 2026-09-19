@@ -46,7 +46,9 @@ class TestVideoGenerator:
                 return path
         
         try:
-            result = subprocess.run(["where", "ffmpeg"], capture_output=True, text=True)
+            result = subprocess.run(
+                ["where", "ffmpeg"], capture_output=True, text=True, timeout=30
+            )
             if result.returncode == 0:
                 return result.stdout.strip()
         except:
