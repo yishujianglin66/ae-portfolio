@@ -23,7 +23,7 @@ def synthetic_video(tmp_path_factory) -> Path:
         ["ffmpeg", "-y", "-v", "quiet", "-f", "lavfi",
          "-i", "testsrc2=size=320x240:rate=10:duration=2",
          "-c:v", "libx264", "-pix_fmt", "yuv420p", str(out)],
-        check=True,
+        check=True, timeout=120,
     )
     return out
 
@@ -40,7 +40,7 @@ def audio_video(tmp_path_factory) -> Path:
          "-f", "lavfi", "-i", "sine=frequency=440:duration=2",
          "-c:v", "libx264", "-pix_fmt", "yuv420p",
          "-c:a", "aac", "-shortest", str(out)],
-        check=True,
+        check=True, timeout=120,
     )
     return out
 

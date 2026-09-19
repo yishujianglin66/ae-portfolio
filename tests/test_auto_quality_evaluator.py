@@ -21,7 +21,7 @@ def _make_video(path: Path, src: str, duration: float = 2.0):
         ["ffmpeg", "-y", "-v", "quiet", "-f", "lavfi",
          "-i", f"{src}=size=320x240:rate=10:duration={duration}",
          "-c:v", "libx264", "-pix_fmt", "yuv420p", str(path)],
-        check=True,
+        check=True, timeout=120,
     )
 
 
@@ -38,7 +38,7 @@ def two_videos(tmp_path_factory):
         ["ffmpeg", "-y", "-v", "quiet", "-f", "lavfi",
          "-i", "color=c=black:size=320x240:rate=10:duration=2",
          "-c:v", "libx264", "-pix_fmt", "yuv420p", str(b)],
-        check=True,
+        check=True, timeout=120,
     )
     return a, b
 

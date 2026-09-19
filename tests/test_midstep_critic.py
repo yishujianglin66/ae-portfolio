@@ -49,17 +49,17 @@ def fixture_dir(tmp_path_factory) -> Path:
         "-f", "lavfi", "-i", "sine=frequency=440:duration=8",
         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac",
         str(d / "normal.mp4"),
-    ], check=True)
+    ], check=True, timeout=180)
     subprocess.run([
         FFMPEG, "-y", "-v", "error",
         "-f", "lavfi", "-i", "color=black:size=640x360:rate=24:duration=8",
         "-c:v", "libx264", "-pix_fmt", "yuv420p", str(d / "black.mp4"),
-    ], check=True)
+    ], check=True, timeout=180)
     subprocess.run([
         FFMPEG, "-y", "-v", "error",
         "-f", "lavfi", "-i", "color=0x80A0C0:size=640x360:rate=24:duration=8",
         "-c:v", "libx264", "-pix_fmt", "yuv420p", str(d / "static.mp4"),
-    ], check=True)
+    ], check=True, timeout=180)
     return d
 
 
