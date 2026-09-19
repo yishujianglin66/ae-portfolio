@@ -69,13 +69,14 @@ ZONES = [
 # 回退: 把 cap/hold 改回旧值即恢复 v49 的密度 (旧值见 git 历史)。
 ZONE_CFG = {
     #            最小间距  最大保持  事件上限
-    # v55 参照停留口径 (tmp/ref_text_hold_size.py 实测 89 事件): 参照停留中位 3.0s
-    # P25-75 ≈1.5-4.6s, 每分钟仅 10-20 个事件 —— 文字是"钉住的图形锚点"而非弹幕。
-    # v53 把"80/min"误读为事件频率 (实为 0.5s 采样帧数=在屏覆盖率) → 机关枪化被拒收。
-    "intro": {"gap": 1.5, "hold": 1.2, "cap": 2},
-    "build": {"gap": 2.2, "hold": 1.4, "cap": 3},
-    "drop":  {"gap": 2.0, "hold": 1.6, "cap": 5},
-    "outro": {"gap": 1.8, "hold": 1.6, "cap": 2},
+    # v56 回退 v52 节拍语言 (Boss: "音乐节奏都踩不对"): drop 每两拍一词 (实测锚点
+    # 间距 0.92-0.94s), 每词精确停 0.45s 清场给下一拍 = 踩点。v55 的"参照停留 3s"
+    # 属于参照集的装饰性歌词语言, 不适用于本片的冲击词语言 (两次教训: 密度与停留
+    # 都以 v52 基线为准, 参照集只做定性参考)。
+    "intro": {"gap": 1.6, "hold": 1.1, "cap": 2},
+    "build": {"gap": 1.10, "hold": 1.0, "cap": 4},
+    "drop":  {"gap": 0.75, "hold": 0.45, "cap": 12},   # cap 12 = v52 实测事件数 (时间线 5 + 自动 7)
+    "outro": {"gap": 1.6, "hold": 1.2, "cap": 2},
 }
 # 留白优先时不要把空档都填满 (补洞本为高密度服务) → drop 的最大空档放宽
 MAX_GAP_V50 = 1.6
@@ -940,12 +941,12 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             #   ③ 缓入替弹跳: elastic=False 同时自动去掉踩拍上跳与砸入过冲 (JSX 侧按 elastic 门控)
             # 取色按背景反差, 但用**奶白/近墨**而非纯白/纯黑 (纯白在画面里是最亮的白, 显"喊")
             if not _punch:
-                # v55: Boss 时间线显式指定的字体优先于细体池 (無下限 DengXian-Bold
-                # 被 Light 池顶掉 = "细字没高级感"的直接来源之一)
-                if not _tl_font_override:
-                    _pool_light = LIGHT_POOLS["drop_calm"][scl]
-                    font = _pool_light[font_pos.get(("drop_calm", scl), 0) % len(_pool_light)]
-                    font_pos[("drop_calm", scl)] = font_pos.get(("drop_calm", scl), 0) + 1
+                # v56 回退 v52 行为: calm 细体池覆盖时间线字体 — 170-200px 细体大字
+                # 是 v52 艺术质感的组成部分 (Boss: "艺术字体设计不美观不如以前"),
+                # 时间线字体只在冲击档生效 (最強 LiSu / BREAK Anton / 虚式 FZCCHFW)。
+                _pool_light = LIGHT_POOLS["drop_calm"][scl]
+                font = _pool_light[font_pos.get(("drop_calm", scl), 0) % len(_pool_light)]
+                font_pos[("drop_calm", scl)] = font_pos.get(("drop_calm", scl), 0) + 1
                 # 字色改用**字期中段亮度**选 (与空心字同一教训): bg_class 取字期内最亮时刻,
                 #   对"白字+粗描边"安全, 但克制档默认无描边 → 字色必须匹配"文字真正停在那儿"
                 #   的背景。实测 #17 被判亮底配近墨, 而中段区域仅 51 → 近墨压深背景 ΔL 35, 隐形。
