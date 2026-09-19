@@ -69,11 +69,13 @@ ZONES = [
 # 回退: 把 cap/hold 改回旧值即恢复 v49 的密度 (旧值见 git 历史)。
 ZONE_CFG = {
     #            最小间距  最大保持  事件上限
-    # v53 频率对齐参照 (参照中位 79.7/min vs 本片 38/min → 间距收短让频率翻倍)
-    "intro": {"gap": 1.2, "hold": 0.8, "cap": 3},
-    "build": {"gap": 0.70, "hold": 0.7, "cap": 6},
-    "drop":  {"gap": 0.50, "hold": 0.35, "cap": 15},
-    "outro": {"gap": 1.2, "hold": 1.0, "cap": 2},
+    # v55 参照停留口径 (tmp/ref_text_hold_size.py 实测 89 事件): 参照停留中位 3.0s
+    # P25-75 ≈1.5-4.6s, 每分钟仅 10-20 个事件 —— 文字是"钉住的图形锚点"而非弹幕。
+    # v53 把"80/min"误读为事件频率 (实为 0.5s 采样帧数=在屏覆盖率) → 机关枪化被拒收。
+    "intro": {"gap": 1.5, "hold": 1.2, "cap": 2},
+    "build": {"gap": 2.2, "hold": 1.4, "cap": 3},
+    "drop":  {"gap": 2.0, "hold": 1.6, "cap": 5},
+    "outro": {"gap": 1.8, "hold": 1.6, "cap": 2},
 }
 # 留白优先时不要把空档都填满 (补洞本为高密度服务) → drop 的最大空档放宽
 MAX_GAP_V50 = 1.6
@@ -138,7 +140,7 @@ def apply_layout(word: str, lay: str):
     k = (len(word) + 1) // 2
     return word[:k] + "\r" + word[k:], 2
 
-ZONE_END_GUARD = 0.35     # 锚点距分区结束 <0.35s 不选 (会被钳成不可读短事件)
+ZONE_END_GUARD = 0.70     # 锚点距分区结束 <0.70s 不选 (v55: 0.35→0.70, 0.35s 短事件正是"看不清"源)
 DROP_POS_CYCLE = [(960, 540), (700, 380), (1220, 700)]   # v9: 内收 (v8 实证 620/1300 宽字超框)
 # v53 顶部横排 (参照集实证: 顶尖燃向文字 pos_y 中位 0.083 = 画面顶部, 不与角色抢位)
 # 8 部 burn+amv 参照的分布: x 0.312-0.438 (偏左), y 全部 0.083 (第一行网格 = 顶部)
@@ -264,7 +266,8 @@ CALM_TRACKING = 90          # 克制档用较宽字距 (编辑排版感), 而非
 # 极弱同色光晕 (threshold, radius, intensity): 与字同色、半径小、强度低 ——
 # 目的是"让字从画面里浮起来"而不是"发光"。冲击档是 (185,20,1.7) 的青色泛光, 两者量级差 ~6 倍。
 CALM_GLOW = (150, 11, 0.30)
-PUNCH_TOP_N = 3             # "偶发重音": 只给音乐局部强度最高的 N 个 drop 事件保留冲击处理
+PUNCH_TOP_N = 4             # v55: 3→4 — drop 仅 5 事件, 4 冲击+1 克制, 粗字重主导
+                            # "偶发重音": 只给音乐局部强度最高的 N 个 drop 事件保留冲击处理
 CALM_SMALL_PX = 140         # 克制档小字号门限 (低于此值补细描边, 见可读性兜底)
 CALM_MIN_DL = 55.0          # 字色与局部背景的最小亮度差 (低于此值补细描边)
 CALM_LIGHT_BG = 140.0       # 克制档"亮底"判据 (用字期中段亮度, 非 bg_class)
@@ -462,16 +465,26 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
     smax = smax if smax > 0 else 1.0
     seg_bounds = [(float(s["start_time"]), float(s["end_time"])) for s in segs]
 
-    # 1) 按强度贪心选锚点 (强优先, 间距护栏, 分区 cap)
-    picked = []          # [(t, s_norm, zone)]
+    # 0) v55 时间线锚点先入池: Boss 显式时刻 (data/text_overlay_timeline.json) 绕过
+    #    密度上限与间距护栏 (明确创作意图), 但**先于**自动挑选注入 — v50 的后注入
+    #    让自动事件不知道 Boss 锚点存在, 挤在 18.62±0.93s 处互相截短保持。
+    picked = []
+    for _it in (timeline or []):
+        _t = float(_it["t"])
+        if _shot_index(seg_bounds, _t) is None:
+            continue
+        picked.append((_t, 0.5, zone_of(_t)))
+
+    # 1) 按强度贪心选锚点 (强优先, 间距护栏, 分区 cap — 时间线已占额则自动让位)
     for zone, _lo, _hi in ZONES:
         cfg = ZONE_CFG[zone]
         cands = sorted(((t, s / smax) for t, s in onsets
                         if zone_of(t) == zone and s / smax >= ONSET_S_THR),
                        key=lambda x: -x[1])
         n_zone = 0
+        _tl_in_zone = sum(1 for _pt, _sn, _pz in picked if _pz == zone)
         for t, sn in cands:
-            if n_zone >= cfg["cap"]:
+            if _tl_in_zone + n_zone >= cfg["cap"]:
                 break
             # 间距护栏: 区内用本区 gap; 跨分区只做 0.30s 边界护栏
             # (原实现误用本区 gap 对全区已选事件检查, 会把 outro 开场锚点误杀)
@@ -526,17 +539,6 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
 
     if max_events:
         picked = sorted(picked, key=lambda x: -x[1])[:int(max_events)]
-
-    # v50 时间线锚点优先: 用户在 data/text_overlay_timeline.json 里**显式指定**的时刻
-    #   不受密度上限/间距裁剪 —— 那是明确的创作意图。实测留白优先档会把 7 条里的 2 条裁掉
-    #   (13.07s 最強 / 14.01s BREAK), 由 main() 的对账门禁暴出; 此处补回。
-    for _it in (timeline or []):
-        _t = float(_it["t"])
-        if any(abs(_t - _pt) < 0.30 for _pt, _, _ in picked):
-            continue
-        if _shot_index(seg_bounds, _t) is None:
-            continue
-        picked.append((_t, 0.5, zone_of(_t)))
     picked.sort(key=lambda x: x[0])
 
     # 2) 逐事件生成 (t_in=onset, t_out 见 hold_mode)
@@ -697,12 +699,13 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
                 size = int(size * 0.8)
                 side_flip += 1
             elif style_id == "drop_impact":
-                # v53 顶部横排 (参照集实证: 顶尖燃向 pos_y=0.083, 不与角色抢位)
-                x, y = DROP_POS_TOP[bank_pos[zone] % len(DROP_POS_TOP)]
+                # v55 回退 v52 亮度感知选位 (v53 顶部实验被拒收: "视觉不行")
+                # 双时刻加权防白字压高光, 回退轮换; v54 锚定校正保证字块真居中
+                x, y = _pick_dark_pos(t_in, bg_video, bank_pos[zone], hold=hold)
         else:  # side_alt
-            # v53 build 也移顶部 (参照实证)
-            x = int(1920 * (0.32 if side_flip % 2 == 0 else 0.68))
-            y = int(1080 * 0.083)
+            # v55 回退 v52 侧带 (y=0.42)
+            x = int(1920 * (0.30 if side_flip % 2 == 0 else 0.70))
+            y = int(1080 * 0.42)
             side_flip += 1
             if closeup:
                 y = int(1080 * (0.18 if side_flip % 2 == 0 else 0.82))
@@ -854,7 +857,8 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             tier = SIZE_TIERS[(_vo - 1) % len(SIZE_TIERS)]
             if _li >= XL_PROMOTE_LI:
                 tier = SIZE_TIER_XL                           # 最强拍升档: 音量跟着音乐走
-            size = max(60, int(round(size * tier)))
+            # v55 drop 字号下限 60→90: 60px 小字既读不清也无冲击力 ("看不清/不高级")
+            size = max(90, int(round(size * tier)))
             # v46 排版的高度守卫 —— **位置感知**: 约束不是"块高 ≤ 某个常数", 而是
             #   "块的上下缘在弹性峰值 (138%) 下都留在安全框内", 即 peak_h ≤ 2*min(y-60, 1020-y)。
             #   实测教训: 竖排 3 行放在 y=380 时, 块高 3×168 = 504 看似没问题, 但 ×1.38 峰值
@@ -936,9 +940,12 @@ def plan_events(segs, onsets, env_at, scenes, words, hold_mode="phrase",
             #   ③ 缓入替弹跳: elastic=False 同时自动去掉踩拍上跳与砸入过冲 (JSX 侧按 elastic 门控)
             # 取色按背景反差, 但用**奶白/近墨**而非纯白/纯黑 (纯白在画面里是最亮的白, 显"喊")
             if not _punch:
-                _pool_light = LIGHT_POOLS["drop_calm"][scl]
-                font = _pool_light[font_pos.get(("drop_calm", scl), 0) % len(_pool_light)]
-                font_pos[("drop_calm", scl)] = font_pos.get(("drop_calm", scl), 0) + 1
+                # v55: Boss 时间线显式指定的字体优先于细体池 (無下限 DengXian-Bold
+                # 被 Light 池顶掉 = "细字没高级感"的直接来源之一)
+                if not _tl_font_override:
+                    _pool_light = LIGHT_POOLS["drop_calm"][scl]
+                    font = _pool_light[font_pos.get(("drop_calm", scl), 0) % len(_pool_light)]
+                    font_pos[("drop_calm", scl)] = font_pos.get(("drop_calm", scl), 0) + 1
                 # 字色改用**字期中段亮度**选 (与空心字同一教训): bg_class 取字期内最亮时刻,
                 #   对"白字+粗描边"安全, 但克制档默认无描边 → 字色必须匹配"文字真正停在那儿"
                 #   的背景。实测 #17 被判亮底配近墨, 而中段区域仅 51 → 近墨压深背景 ΔL 35, 隐形。
