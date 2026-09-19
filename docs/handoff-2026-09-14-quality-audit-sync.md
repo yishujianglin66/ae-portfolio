@@ -403,4 +403,11 @@ Boss 授权"按最推荐步骤推进"（=选项①：曝光/泛光过冲修正 +
 py-spy 控制器死锁栈、round5 `-v` 的 gw3 重启与整模块缺失。
 **规约建议**：全量跑/全量验证与任何写入会话应**互斥**；跨会话改动务必 `git status` 先看再动。
 
+**⚠️ 当前仓库处于"不可收集"状态（他方 WIP，非我方）**：`tests/test_faiss_knowledge_service.py`
+→ `integrations/faiss_knowledge_service.py` 顶层 `import faiss`（未安装）→ 全量 pytest 在**收集阶段**
+即 `Interrupted: 1 error during collection`（我方串行+cov 验证因此 0 测试运行）。
+**含义**：在对方收敛（补 `importorskip`/依赖或提交）前，**任何仓库级验证都不可信/不可行**；
+我方 CI 修复（串行）与 S1 去重的**代码层面**已提交，但其端到端确证需待环境可收集后重跑。
+本地新增子进程超时加固（`test_audio_budget.py` ×3, `timeout=120`）与 CI `--durations=25` 已隔离验证。
+
 

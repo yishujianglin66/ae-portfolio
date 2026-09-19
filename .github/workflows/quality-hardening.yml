@@ -102,7 +102,7 @@ jobs:
         env:
           AEK_ENVIRONMENT: test
         run: |
-          python -m pytest -q --timeout=300 -p no:cacheprovider --ignore=mcp-extension --cov --cov-branch --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=29 2>&1 | Tee-Object full_sharded.txt
+          python -m pytest -q --timeout=300 --durations=25 -p no:cacheprovider --ignore=mcp-extension --cov --cov-branch --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=29 2>&1 | Tee-Object full_sharded.txt
       - name: upload result
         if: always()
         uses: actions/upload-artifact@v4

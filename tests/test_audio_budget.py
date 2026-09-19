@@ -109,7 +109,7 @@ def quiet_video(tmp_path_factory) -> Path:
          "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=4",
          "-af", "volume=-20dB",
          "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", str(out)],
-        check=True,
+        check=True, timeout=120,
     )
     return out
 
@@ -153,7 +153,7 @@ def hot_video(tmp_path_factory) -> Path:
          "-filter_complex", "[1:a][2:a]amix=inputs=2:normalize=0,volume=20dB[a]",
          "-map", "0:v", "-map", "[a]",
          "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", str(out)],
-        check=True,
+        check=True, timeout=120,
     )
     return out
 
@@ -171,7 +171,7 @@ def test_budget_closes_loop_on_hot_video(hot_video, tmp_path):
          "-af", (f"volume={b['base_gain_db']:.2f}dB,"
                  "alimiter=limit=0.8414:attack=1:release=50:level=disabled"),
          "-c:v", "copy", "-c:a", "aac", str(out)],
-        check=True,
+        check=True, timeout=120,
     )
     m2 = measure(out)
     assert m2.get("tp_dbfs", 99) <= TARGET_TP_DBTP
