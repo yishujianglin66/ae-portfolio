@@ -98,8 +98,11 @@ class TestS1AssetNormalize:
         assert result.success is False
         assert "3" in result.errors[0]
 
-    def test_normalize_real_videos(self, tmp_path):
-        """真实视频规范化（需要测试素材）"""
+    # 真实规范化很重（实测单例 ~160s，含 3 视频 1080p 重编码）：全类**共享一次**执行。
+    # 原先两个用例各编码一遍 = 重复劳动，既拖慢全量，又让单例逼近 pytest --timeout 上限
+    # （全量冷缓存下曾越过 300s → xdist worker 被杀 → 控制器死锁，见 handoff §9.5）。
+    @pytest.fixture(scope="class")
+    def normalized(self, tmp_path_factory):
         videos = _find_test_videos(3)
         audio = _find_test_audio()
         if len(videos) < 3 or audio is None:
@@ -107,13 +110,17 @@ class TestS1AssetNormalize:
 
         from pipeline.stages.asset_normalize import AssetNormalizeStage
         stage = AssetNormalizeStage()
-        out_dir = tmp_path / "S1_assets"
-
+        out_dir = tmp_path_factory.mktemp("S1_assets")
         result = stage.run(
             source_videos=[str(v) for v in videos],
             source_audio=str(audio),
             output_dir=out_dir,
         )
+        return stage, result
+
+    def test_normalize_real_videos(self, normalized):
+        """真实视频规范化（需要测试素材）"""
+        _stage, result = normalized
 
         # 验证结果
         assert result.success is True, f"errors: {result.errors}"
@@ -133,34 +140,22 @@ class TestS1AssetNormalize:
         lines = md5_file.read_text(encoding="utf-8").strip().split("\n")
         assert len(lines) >= 4  # 3 视频 + 1 音频
 
-    def test_output_is_1080p_h264(self, tmp_path):
+    def test_output_is_1080p_h264(self, normalized):
         """输出视频确实是 1920x1080 H.264"""
-        videos = _find_test_videos(3)
-        audio = _find_test_audio()
-        if len(videos) < 3 or audio is None:
-            pytest.skip("测试素材不足")
-
-        from pipeline.stages.asset_normalize import AssetNormalizeStage
-        stage = AssetNormalizeStage()
-        out_dir = tmp_path / "S1_assets"
-
-        result = stage.run(
-            source_videos=[str(v) for v in videos],
-            source_audio=str(audio),
-            output_dir=out_dir,
-        )
+        stage, result = normalized
         if not result.success:
             pytest.skip(f"S1 失败: {result.errors}")
 
-        # 用 ffprobe 验证第一个输出
-        ffprobe = Path("C:/ffmpeg/bin/ffprobe.exe")
+        # 用 stage 自带的 ffprobe（原先硬编码 C:/ffmpeg/... 换机即碎）
         out_video = Path(result.output_videos[0])
         cmd = [
-            str(ffprobe), "-v", "quiet",
+            str(stage.ffprobe_path), "-v", "quiet",
             "-print_format", "json",
             "-show_streams", str(out_video),
         ]
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        r = subprocess.run(  # noqa: S603 - 参数列表 + shell=False，无 shell 解析
+            cmd, capture_output=True, text=True, timeout=30, shell=False
+        )
         info = json.loads(r.stdout)
         video_stream = next(
             s for s in info["streams"] if s["codec_type"] == "video"
