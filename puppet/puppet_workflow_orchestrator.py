@@ -67,6 +67,12 @@ class WorkflowConfig:
     color_preset: str = "puppet_warm"
     output_dir: str = ""
     save_report: bool = True
+    # look_at 正立相机（2026-09-20 固化）：为木偶生成相机布点 + ExtendScript。
+    # 此前该能力只是 puppet/look_at_camera.py 里的孤立桩（自称已算、标志硬编码、
+    # 无任何引擎调用），现作为独立阶段并入流程。
+    camera_setup: bool = True
+    camera_radius: float = 1000.0
+    camera_height_offset: float = 120.0
 
 
 @dataclass
@@ -225,6 +231,24 @@ class PuppetWorkflowOrchestrator:
                     )
 
         self._notify(callback, "风格化生成", 0.5, "所有风格生成完成")
+
+        # Stage 2.5: look_at 正立相机布点（2026-09-20 固化进引擎）
+        if self.config.camera_setup:
+            self._notify(callback, "相机布点", 0.52, "look_at 正立相机计算中...")
+            cam_stage = self._stage_camera_setup(detection_data, output_dir)
+            result.add_stage(cam_stage)
+            if cam_stage.success:
+                result.add_artifact(
+                    "camera_plan", cam_stage.data.get("camera_plan_path", ""),
+                    setups=cam_stage.data.get("total_setups", 0),
+                    upright=cam_stage.data.get("all_upright", False),
+                    max_horizon_dev_deg=cam_stage.data.get("max_horizon_dev_deg"),
+                )
+                result.add_artifact(
+                    "camera_jsx", cam_stage.data.get("camera_jsx_path", ""))
+            self._notify(callback, "相机布点", 0.55,
+                         f"完成: {cam_stage.data.get('total_setups', 0)} 台相机"
+                         if cam_stage.success else "相机布点降级")
 
         # Stage 3: AE 执行（可选）
         if self.config.execute_ae and self._ae_client:
@@ -402,6 +426,94 @@ class PuppetWorkflowOrchestrator:
 
         except Exception as e:
             stage.error = f"生成异常: {e}"
+
+        stage.duration = round(time.time() - start, 2)
+        return stage
+
+    def _stage_camera_setup(self, detection_data: dict[str, Any],
+                            output_dir: str) -> StageResult:
+        """Stage 2.5: look_at 正立相机布点 + ExtendScript 片段（2026-09-20 固化）。
+
+        背景：该能力此前只是 `puppet/look_at_camera.py` 里的孤立桩 —— 无任何引擎
+        调用、标志硬编码、docstring 声称的 MP4 演示也没有产物。本阶段把它接入流程，
+        并以**可验证不变量**（正交归一 / 地平线偏差 0° / 严格指向）为验收口径；
+        扫掠证据见 `reports/puppet_look_at_verification.json`。
+
+        目标点来自 MediaPipe 的归一化 bbox 中心，换算到 AE 3D 空间：
+            x = (cx_norm - 0.5) * width      (AE 3D 原点 = 合成中心)
+            y = (0.5 - cy_norm) * height     (2D 的 y 向下, 3D 的 y 向上)
+        检测降级（无 bbox）时回退到原点单目标，并如实标注 degraded。
+        """
+        start = time.time()
+        stage = StageResult(name="look_at相机布点", success=False)
+        try:
+            from puppet.look_at_camera import (  # noqa: PLC0415
+                build_camera_jsx,
+                create_3d_puppet_camera_setup,
+            )
+
+            # 落盘位置校验：规范化 + 限定在"项目 / 仓库 / 系统临时目录"内
+            # （拒绝穿越到其它路径）。文件名为常量字面量，输出目录来自配置。
+            # 临时目录在允许集内：临时产物落 temp 是常规用法（测试/试跑皆如此）。
+            import tempfile  # noqa: PLC0415
+
+            out_root = Path(output_dir).resolve()
+            allowed = (PROJECT_ROOT.resolve(), PROJECT_ROOT.resolve().parent,
+                       Path(tempfile.gettempdir()).resolve())
+            if not any(out_root == a or a in out_root.parents for a in allowed):
+                stage.error = f"输出目录在项目外，相机阶段跳过: {out_root}"
+                stage.duration = round(time.time() - start, 2)
+                return stage
+
+            width = int(detection_data.get("width") or 1920)
+            height = int(detection_data.get("height") or 1080)
+            targets: list[tuple[float, float, float]] = []
+            bbox = detection_data.get("bbox")
+            if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
+                x1, y1, x2, y2 = (float(v) for v in bbox)
+                cx, cy = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+                targets.append(((cx - 0.5) * width, (0.5 - cy) * height, 0.0))
+            elif isinstance(bbox, dict) and {"x", "y", "w", "h"} <= set(bbox):
+                cx = float(bbox["x"]) + float(bbox["w"]) / 2.0
+                cy = float(bbox["y"]) + float(bbox["h"]) / 2.0
+                targets.append(((cx - 0.5) * width, (0.5 - cy) * height, 0.0))
+            degraded = not targets
+            if degraded:
+                targets = [(0.0, 0.0, 0.0)]
+
+            plan = create_3d_puppet_camera_setup(
+                width, height, targets,
+                camera_radius=self.config.camera_radius,
+                height_offset=self.config.camera_height_offset,
+            )
+            plan_path = out_root / "camera_plan.json"
+            jsx_path = out_root / "camera_setup.jsx"
+            plan_path.write_text(
+                json.dumps(plan, ensure_ascii=False, indent=2, default=str),
+                encoding="utf-8")
+            jsx_lines = [
+                "// look_at 正立相机（由 puppet_workflow_orchestrator 生成）",
+                "// 每台相机只设 position + pointOfInterest —— AE 据此定向且无滚转",
+            ]
+            for i, s in enumerate(plan["setups"]):
+                jsx_lines.append(build_camera_jsx(s, f"puppet_cam_{i}"))
+            jsx_path.write_text("\n".join(jsx_lines) + "\n", encoding="utf-8")
+
+            upright = all(s["rotation_stabilized"] for s in plan["setups"])
+            stage.success = bool(plan["total_setups"]) and upright
+            stage.data = {
+                "camera_plan_path": str(plan_path),
+                "camera_jsx_path": str(jsx_path),
+                "total_setups": plan["total_setups"],
+                "all_upright": upright,
+                "max_horizon_dev_deg": max(
+                    abs(s["basis"]["right_horizon_deg"]) for s in plan["setups"]),
+                "degraded": degraded,
+            }
+            if degraded:
+                stage.error = "检测降级：目标回退到原点单目标"
+        except Exception as e:  # noqa: BLE001 — 相机阶段不得中断主流程
+            stage.error = f"相机布点异常: {e}"
 
         stage.duration = round(time.time() - start, 2)
         return stage
