@@ -322,3 +322,21 @@ Start 脚本放错版本目录则静默不执行且无任何报错。可靠注�
 即可继续桥接；ping 往返 <1s。
 6. 真执行链基准：ping 0s → listCompositions 1s → 建合成+2层 2s → 渲染 640x360x3s
 QuickTime/H.264 共 6s，产物 34KB 经 ffprobe 验证 h264/3.0s。
+7. **Startup 自动拉起正确姿势（2026-09-24 23:32 复验成功）**：唯一生效位置是
+**程序级** `<AE>\Support Files\Scripts\Startup\`（需提权写入）；正本 loader 为
+`.ae-mcp-bridge/z_mcp_bridge_startup.jsx`（v5：延迟 3s + read/eval 兜底，$.evalFile 本机不可用）。
+用户级 `%APPDATA%\...\Config\Scripts\Start\` 目录 AE 根本不读（静默无效）；
+用户级 `Scripts\Startup` 未验证且与程序级双部署会造成 listener 双实例轮询竞争，禁止双部。
+8. **AE 冷启动可能超过 100 秒**：进程存活但 RAM ~200MB、无窗口是正常早期阶段，
+勿误判为卡死而强杀（铁律：关 AE 用正常退出，禁 Stop-Process -Force，防配置损坏）。
+9. `CLOSE_PROJECT_DO_NOT_SAVE_CHANGES` 枚举在 executeAtomScript 上下文未定义（ReferenceError）；
+关工程需先查证正确枚举值或用 app.project 其它 API。
+7. **Startup 自动拉起正确姿势（2026-09-24 23:32 复验成功）**：唯一生效位置是
+**程序级** `<AE>\Support Files\Scripts\Startup\`（需提权写入）；正本 loader 为
+`.ae-mcp-bridge/z_mcp_bridge_startup.jsx`（v5：延迟 3s + read/eval 兜底，$.evalFile 本机不可用）。
+用户级 `%APPDATA%\...\Config\Scripts\Start\` 目录 AE 根本不读（静默无效）；
+用户级 `Scripts\Startup` 未验证且与程序级双部署会造成 listener 双实例轮询竞争，禁止双部。
+8. **AE 冷启动可能超过 100 秒**：进程存活但 RAM ~200MB、无窗口是正常早期阶段，
+勿误判为卡死而强杀（铁律：关 AE 用正常退出，禁 Stop-Process -Force，防配置损坏）。
+9. `CLOSE_PROJECT_DO_NOT_SAVE_CHANGES` 枚举在 executeAtomScript 上下文未定义（ReferenceError）；
+关工程需先查证正确枚举值或用 app.project 其它 API。
