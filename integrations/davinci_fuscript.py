@@ -60,6 +60,7 @@ from integrations.resolve_engine import (
 from integrations.resolve_engine import (
     TransformConfig as _TransformConfig,
 )
+from core.resolve_discovery import find_fuscript_exe
 
 # ============================================================================
 # Data Models
@@ -493,14 +494,17 @@ class ResolveColorEngine:
         lut_dirs: list[str] | None = None,
         custom_lut_dir: str | None = None,
     ):
-        # fuscript.exe 路径
-        self.fuscript_path = Path(resolve_home or os.environ.get(
-            "AEKV_RESOLVE_HOME", r"D:\app"
-        )) / "fuscript.exe"
+        # fuscript.exe 路径：显式 resolve_home 优先，否则用统一发现器。
+        # 旧实现回退到硬编码 r"D:\app"，是同一工具第 7 份独立路径实现；
+        # 而未找到时旧写法会退化成 Path(".")（目录存在 → 误判为可用）。
+        if resolve_home:
+            self.fuscript_path: Path | None = Path(resolve_home) / "fuscript.exe"
+        else:
+            self.fuscript_path = find_fuscript_exe()
         
         # 创建内部引擎
         self._engine = ResolveAutomationEngine(
-            fuscript_path=str(self.fuscript_path),
+            fuscript_path=str(self.fuscript_path) if self.fuscript_path else "",
             timeout=120,
         )
         

@@ -35,10 +35,24 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from core.config import ConfigManager
+from core.resolve_discovery import find_resolve_exe, resolve_home
 
 _config = ConfigManager()
-DEFAULT_RESOLVE_HOME = Path(_config.get("davinci.install_path", r"D:\DaVinci Resolve"))
+# 安装目录：配置项优先，缺省时取 core.resolve_discovery 的实际发现结果。
+# 旧默认值 r"D:\DaVinci Resolve" 是历史机器路径，本机真实安装在 D:\app，
+# 结果已安装的 Resolve Studio 21 仍被判成不可用。
+_discovered_home = resolve_home()
+DEFAULT_RESOLVE_HOME = Path(
+    _config.get(
+        "davinci.install_path",
+        str(_discovered_home) if _discovered_home is not None else r"D:\DaVinci Resolve",
+    )
+)
 RESOLVE_HOME = Path(os.environ.get("RESOLVE_HOME", str(DEFAULT_RESOLVE_HOME)))
+# 机器级 RESOLVE_HOME 可能是历史遗留：本机实测它指向不存在的 D:\DaVinci Resolve，
+# 而真实安装在 D:\app。显式覆盖只在目录真实存在时采信，否则回退到发现结果。
+if not RESOLVE_HOME.exists():
+    RESOLVE_HOME = DEFAULT_RESOLVE_HOME
 
 RESOLVE_EXE_CANDIDATES = [
     RESOLVE_HOME / "Resolve.exe",
@@ -650,18 +664,20 @@ class DavinciColorist:
     def _find_resolve_exe(self) -> Path | None:
         """查找 DaVinci Resolve 可执行文件。
 
+        先按 config.install_path 的两种布局探测；未命中时回退到全局发现器
+        （core.resolve_discovery），避免过期配置把已安装的 Resolve 判成未安装。
+
         Returns:
             Resolve 可执行文件路径，找不到返回 None
         """
         install_path = Path(self.config.install_path)
-        candidates = [
+        for candidate in (
             install_path / "Resolve.exe",
             install_path / "Resolve" / "Resolve.exe",
-        ]
-        for candidate in candidates:
+        ):
             if candidate.exists():
                 return candidate
-        return None
+        return find_resolve_exe()
 
     def _check_availability(self) -> bool:
         """检查 DaVinci Resolve 是否已安装可用。
@@ -999,16 +1015,11 @@ class DavinciColorist:
         if self._exe_path:
             resolve_install_candidates.append(self._exe_path.parent)
         
-        # 2.2 常见安装路径
-        default_install_paths = [
-            Path(r"C:\Program Files\Blackmagic Design\DaVinci Resolve"),
-            Path(r"D:\DaVinci Resolve"),
-            Path(r"E:\DaVinci Resolve"),
-            Path(r"F:\DaVinci Resolve"),
-        ]
-        for p in default_install_paths:
-            if p.exists():
-                resolve_install_candidates.append(p)
+        # 2.2 全局发现器给出的安装目录（core.resolve_discovery）
+        # 原实现自持一张 C:/D:/E:/F: 硬编码表，本机真实安装目录 D:\app 不在其中。
+        _home = resolve_home()
+        if _home is not None and _home not in resolve_install_candidates:
+            resolve_install_candidates.append(_home)
         
         # 2.3 注册表探测（Windows）— 尝试从注册表读取安装路径
         try:

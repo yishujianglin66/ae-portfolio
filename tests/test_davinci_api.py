@@ -5,6 +5,18 @@ import subprocess
 import sys
 import time
 
+
+# ==== 脚本守卫 (2026-09-24) ====
+# 本文件是**手工运行的脚本**（无 test 函数），不是 pytest 用例。模块级代码会
+# 启动 DaVinci Resolve GUI（subprocess.Popen）
+# 被 pytest 收集/导入时这些副作用会立刻发生（显式传文件路径会绕过 python_files 模式）。
+# 故被 import 时立刻失败；`python tests/test_davinci_api.py` 直接运行不受影响。
+if __name__ != "__main__":
+    raise ImportError(
+        "这是脚本而非 pytest 用例，请用 `python tests/test_davinci_api.py` 直接运行；"
+        "不要用 pytest 指定该文件路径。"
+    )
+# ==== /脚本守卫 ====
 sys.path.insert(0, r"c:\Users\Administrator\Desktop\AE-Knowledge-Vault")
 
 # 设置环境变量

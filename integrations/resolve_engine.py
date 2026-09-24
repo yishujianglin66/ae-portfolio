@@ -21,10 +21,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from core.resolve_discovery import find_fuscript_exe, is_process_running
+
 logger = logging.getLogger(__name__)
 
-# fuscript.exe 路径
-FUSCRIPT_PATH = r"D:\app\fuscript.exe"
+# fuscript.exe 路径：由 core/resolve_discovery 统一发现（唯一权威来源）。
+# 此前本常量硬编码 r"D:\app\fuscript.exe"，与 ai/resolve_executor.py、
+# integrations/resolve_mcp_adapter.py、pipeline/flagship_runner.py 的各自实现
+# 互不一致 —— 换台机器就会出现"已安装却被判定未找到"。
+# 未找到时为空串：调用方惯用的 os.path.exists(FUSCRIPT_PATH) 自然为 False。
+_fuscript_found = find_fuscript_exe()
+FUSCRIPT_PATH = str(_fuscript_found) if _fuscript_found is not None else ""
 
 # ============================================================================
 # 数据模型
@@ -154,7 +161,10 @@ class ResolveAutomationEngine:
     - 渲染输出
     """
     
-    def __init__(self, fuscript_path: str = FUSCRIPT_PATH, timeout: int = 120):
+    def __init__(self, fuscript_path: str | None = None, timeout: int = 120):
+        if fuscript_path is None:
+            _found = find_fuscript_exe()
+            fuscript_path = str(_found) if _found is not None else ""
         self.fuscript = fuscript_path
         self.timeout = timeout
         self._temp_dir = tempfile.mkdtemp(prefix="resolve_engine_")
@@ -169,9 +179,76 @@ class ResolveAutomationEngine:
         self._lut_file_map: dict[str, dict[int, str]] = {}  # 阶段3：LUT 文件映射
         self._cache_dir = os.path.join(tempfile.gettempdir(), "resolve_render_cache")
         os.makedirs(self._cache_dir, exist_ok=True)
-        
-        if not os.path.exists(fuscript_path):
-            raise FileNotFoundError(f"fuscript.exe not found: {fuscript_path}")
+
+        # 可用性探测：**不再在构造期抛异常**（2026-09-23 集成测试暴露的缺陷）。
+        # 原实现 fuscript.exe 缺失即 raise FileNotFoundError，后果是
+        # `UnifiedVideoPipeline()` 在没装 Resolve 的机器上**整个构造不出来** ——
+        # 连不需要 Resolve 的能力（智能调色推荐 / FFmpeg 补帧 / 风格预设）也一起
+        # 不可达。实测该缺陷把 tests/test_unified_v21_e2e.py 的 5 个用例逼成
+        # "整文件 skip"：用跳过掩盖问题，而不是修问题。
+        # 现改为优雅降级（与本项目 CNN+VLM 分层降级、ComfyUI 降级同一原则）：
+        # 构造成功并标记不可用；真正需要 Resolve 的调用点由 _require_available()
+        # 抛带修复指引的明确错误。
+        self.available = bool(fuscript_path) and os.path.exists(fuscript_path)
+        self.unavailable_reason = (
+            "" if self.available else
+            f"fuscript.exe not found: {fuscript_path or '(未发现安装目录)'} "
+            f"(设 AEKV_RESOLVE_HOME 指向 DaVinci Resolve 安装目录, 或先安装 Resolve)"
+        )
+        # API 需 Resolve.exe 处于运行状态：fuscript 本身可无头执行，但脚本内
+        # Resolve() 只在活实例存在时返回句柄。可运行不代表此刻可调用。
+        self.api_reachable = self.available and is_process_running()
+        if not self.available:
+            print(f"[ResolveAutomationEngine] 不可用, 已降级: {self.unavailable_reason}")
+        elif not self.api_reachable:
+            print(
+                "[ResolveAutomationEngine] fuscript 已就绪但 Resolve 未运行；"
+                "需 Resolve API 的调用会失败，可用 core.resolve_discovery.launch_resolve() 启动"
+            )
+
+    def _require_available(self) -> None:
+        """需 Resolve 的调用点前置检查：不可用时抛可执行的明确错误。"""
+        if not getattr(self, "available", False):
+            raise ResolveError(f"DaVinci Resolve 不可用: {self.unavailable_reason}")
+
+    def _ok_from(self, res: Any, what: str, *, void_api: bool = False) -> bool:
+        """从 Lua 回传里取**真实**成功标志（2026-09-24 返回值诚实性审计）。
+
+        Lua 侧契约：调 API 后 emit `{{ok = <API返回值>, ret_type = type(<API返回值>), completed = true}}`。
+        Lua 表里 **nil 值会被 pairs 丢掉**，故三态天然可辨：
+          · API 返回 true  → 有 "ok":true
+          · API 返回 false → 有 "ok":false
+          · API 返回 nil   → **没有 ok 键**（配 ret_type="nil"）
+
+        判据按 API 契约分级、**不假设**（真机探针 2026-09-24）：
+          1. 有布尔 `ok` → 用它（最硬的证据）；
+          2. `void_api=True` 且 `ret_type=="nil"` → 该 API 实测不返回结果
+             （`OpenPage` 对合法页与非法页**都**返回 nil），无法据返回值判定；
+             按「调用已发出且未报错」记为成功，并**明确标注未经效果验证**；
+          3. 其余（Bool 型 API 却拿到 nil、或回传缺字段/垃圾）→ **判为失败**，
+             不得默认成功 —— 被修掉的原实现正是"注解 `-> bool` 却无条件 `return True`"。
+        """
+        if not isinstance(res, dict):
+            logger.warning(
+                f"{what}: 回传不是字典（{type(res).__name__}），无法确认成功 → 判为失败")
+            return False
+
+        ok = res.get("ok")
+        if isinstance(ok, bool):
+            if not ok:
+                logger.warning(f"{what}: Resolve API 返回 false（操作未生效）")
+            return ok
+
+        if void_api and res.get("ret_type") == "nil" and res.get("completed") is True:
+            logger.info(
+                f"{what}: 该 API 无返回值（type=nil），按「调用未报错」记为成功；"
+                f"注意这是**未经效果验证**的结论")
+            return True
+
+        logger.warning(
+            f"{what}: 回传缺少布尔 ok（ret_type={res.get('ret_type')!r}）→ 判为失败")
+        return False
+
     
     def __del__(self):
         """清理临时文件"""
@@ -338,44 +415,65 @@ end
         return result.get("name", name)
     
     def delete_project(self, name: str) -> bool:
-        """删除项目"""
+        """删除项目。返回 Resolve API 的真实结果（2026-09-24 修：原实现无条件 return True）。"""
+        self._require_available()
         lua = self._wrap_lua(f'''
     local resolve = Resolve()
     local pm = resolve:GetProjectManager()
-    pm:DeleteProject("{name}")
-    emit_ok({{deleted = "{name}"}})
+    local ok = pm:DeleteProject("{name}")
+    emit_ok({{ok = ok, ret_type = type(ok), completed = true, deleted = "{name}"}})
 ''')
-        self._execute_lua(lua)
-        return True
+        return self._ok_from(self._execute_lua(lua), f"delete_project({name})")
     
     def get_project_info(self) -> ProjectInfo:
-        """获取当前项目信息"""
+        """获取当前项目信息。
+
+        修复（2026-09-23）：原实现执行了 Lua 却**丢弃返回值**，无条件返回空的
+        ProjectInfo —— 调用方永远拿到 name="" / timeline_count=0。即"执行过但没接线"。
+        现按 _execute_lua 的真实契约（返回 data 字典）填充字段。
+        仅使用本机实测可用的 API 面（GetName / GetTimelineCount / GetCurrentTimeline）。
+        """
         lua = self._wrap_lua('''
     local resolve = Resolve()
+    if resolve == nil then
+        emit_ok({available = false})
+        return
+    end
     local pm = resolve:GetProjectManager()
-    local proj = pm:GetCurrentTimeline()
-    -- 获取项目信息
-    local resolve2 = Resolve()
-    local pm2 = resolve2:GetProjectManager()
-    
-    -- 通过 GetCurrentTimeline 判断是否有项目打开
-    local tl = resolve2:GetProjectManager()
-    
-    -- 获取所有项目列表
-    local projects = pm2:GetProjectsInCurrentFolder()
-    local proj_list = {}
-    if projects then
-        for k, v in pairs(projects) do
-            if type(v) == "string" then
-                table.insert(proj_list, v)
+    local name = ""
+    local timeline_count = 0
+    local current_timeline = ""
+    if pm ~= nil then
+        local proj = pm:GetCurrentProject()
+        if proj ~= nil then
+            local ok_n, n = pcall(function() return proj:GetName() end)
+            if ok_n and n ~= nil then name = tostring(n) end
+            local ok_c, c = pcall(function() return proj:GetTimelineCount() end)
+            if ok_c and c ~= nil then timeline_count = tonumber(c) or 0 end
+            local ok_t, tl = pcall(function() return proj:GetCurrentTimeline() end)
+            if ok_t and tl ~= nil then
+                local ok_tn, tn = pcall(function() return tl:GetName() end)
+                if ok_tn and tn ~= nil then current_timeline = tostring(tn) end
             end
         end
     end
-    
-    emit_ok({project_count = #proj_list, projects = proj_list})
+    emit_ok({available = true, name = name,
+             timeline_count = timeline_count,
+             current_timeline = current_timeline})
 ''')
-        result = self._execute_lua(lua)
+        raw = self._execute_lua(lua)
         info = ProjectInfo()
+        if not isinstance(raw, dict):
+            return info
+        if raw.get("available") is False:
+            # fuscript 在但 Resolve 未运行：Resolve() 返回 nil
+            return info
+        info.name = str(raw.get("name") or "")
+        try:
+            info.timeline_count = int(raw.get("timeline_count") or 0)
+        except (TypeError, ValueError):
+            info.timeline_count = 0
+        info.current_timeline = str(raw.get("current_timeline") or "")
         return info
     
     # ----------------------------------------------------------------
@@ -488,7 +586,14 @@ end
     
     def apply_cdl(self, project_name: str, timeline_name: str,
                   item_index: int, cdl: CDLConfig) -> bool:
-        """对指定片段应用 CDL 调色"""
+        """对指定片段应用 CDL 调色。
+
+        返回 Resolve API 的真实结果（2026-09-24 修）：原实现 Lua 里已经把
+        `local ok = item:SetCDL(...)` 接住了，却只 emit `cdl_applied = true` —— 真相在手上被丢掉。
+        注意：`_cdl_config_map` 的登记是**为 FFmpeg 渲染路径**服务的（与 Resolve 调用成败无关），
+        故仍在调用前记录，不随返回值回滚。
+        """
+        self._require_available()
         # 记录 CDL 配置用于后续 FFmpeg 渲染
         if project_name not in self._cdl_config_map:
             self._cdl_config_map[project_name] = {}
@@ -516,14 +621,15 @@ end
         Saturation = {cdl.saturation}
     }})
     
-    emit_ok({{item = item:GetName(), cdl_applied = true}})
+    emit_ok({{ok = ok, ret_type = type(ok), completed = true, item = item:GetName()}})
 ''')
-        self._execute_lua(lua)
-        return True
+        return self._ok_from(
+            self._execute_lua(lua), f"apply_cdl({project_name}#{item_index})")
     
     def apply_lut(self, project_name: str, timeline_name: str,
                   item_index: int, lut_path: str) -> bool:
-        """对指定片段应用 LUT"""
+        """对指定片段应用 LUT。返回 Resolve API 的真实结果（2026-09-24 修）。"""
+        self._require_available()
         lut_lua = lut_path.replace("\\", "/")
         lua = self._wrap_lua(f'''
     local resolve = Resolve()
@@ -538,11 +644,11 @@ end
     local item = items[{item_index}]
     if not item then error("Item {item_index} not found") end
     
-    item:SetLUT("{lut_lua}")
-    emit_ok({{item = item:GetName(), lut = "{lut_lua}"}})
+    local ok = item:SetLUT("{lut_lua}")
+    emit_ok({{ok = ok, ret_type = type(ok), completed = true, item = item:GetName(), lut = "{lut_lua}"}})
 ''')
-        self._execute_lua(lua)
-        return True
+        return self._ok_from(
+            self._execute_lua(lua), f"apply_lut({project_name}#{item_index})")
     
     # ----------------------------------------------------------------
     # 变速控制
@@ -550,7 +656,8 @@ end
     
     def set_speed(self, project_name: str, item_index: int, 
                   speed: float, retime_process: int = 0) -> bool:
-        """设置片段播放速度"""
+        """设置片段播放速度。返回 Resolve API 的真实结果（2026-09-24 修）。"""
+        self._require_available()
         lua = self._wrap_lua(f'''
     local resolve = Resolve()
     local pm = resolve:GetProjectManager()
@@ -564,15 +671,16 @@ end
     local item = items[{item_index}]
     if not item then error("Item {item_index} not found") end
     
-    item:SetProperty("Speed", {speed})
+    local ok = item:SetProperty("Speed", {speed})
     if {retime_process} > 0 then
-        item:SetProperty("RetimeProcess", {retime_process})
+        ok = item:SetProperty("RetimeProcess", {retime_process}) and ok
     end
     
-    emit_ok({{item = item:GetName(), speed = {speed}, duration = item:GetDuration()}})
+    emit_ok({{ok = ok, ret_type = type(ok), completed = true,
+             item = item:GetName(), speed = {speed}, duration = item:GetDuration()}})
 ''')
-        self._execute_lua(lua)
-        return True
+        return self._ok_from(
+            self._execute_lua(lua), f"set_speed({project_name}#{item_index})")
     
     # ----------------------------------------------------------------
     # 变换控制
@@ -580,7 +688,11 @@ end
     
     def set_transform(self, project_name: str, item_index: int,
                       transform: TransformConfig) -> bool:
-        """设置片段变换参数"""
+        """设置片段变换参数。返回 Resolve API 的真实结果（2026-09-24 修）。
+
+        6 个 SetProperty 逐个与 `ok` 相与 —— 任一项失败即整体 False（不再一律 True）。
+        """
+        self._require_available()
         lua = self._wrap_lua(f'''
     local resolve = Resolve()
     local pm = resolve:GetProjectManager()
@@ -592,17 +704,17 @@ end
     local item = items[{item_index}]
     if not item then error("Item {item_index} not found") end
     
-    item:SetProperty("Zoom X", {transform.zoom_x})
-    item:SetProperty("Zoom Y", {transform.zoom_y})
-    item:SetProperty("Position X", {transform.position_x})
-    item:SetProperty("Position Y", {transform.position_y})
-    item:SetProperty("Rotation", {transform.rotation})
-    item:SetProperty("Opacity", {transform.opacity})
+    local ok = item:SetProperty("Zoom X", {transform.zoom_x})
+    ok = item:SetProperty("Zoom Y", {transform.zoom_y}) and ok
+    ok = item:SetProperty("Position X", {transform.position_x}) and ok
+    ok = item:SetProperty("Position Y", {transform.position_y}) and ok
+    ok = item:SetProperty("Rotation", {transform.rotation}) and ok
+    ok = item:SetProperty("Opacity", {transform.opacity}) and ok
     
-    emit_ok({{item = item:GetName(), transform_applied = true}})
+    emit_ok({{ok = ok, ret_type = type(ok), completed = true, item = item:GetName()}})
 ''')
-        self._execute_lua(lua)
-        return True
+        return self._ok_from(
+            self._execute_lua(lua), f"set_transform({project_name}#{item_index})")
     
     # ----------------------------------------------------------------
     # 高级特效（FFmpeg 渲染时应用）
@@ -613,6 +725,8 @@ end
         """
         对片段应用变速曲线。
         在 Resolve 中设置基础速度，实际曲线效果在 FFmpeg 渲染时应用。
+
+        2026-09-24 修：原实现丢弃 `set_speed` 的结果并无条件 return True —— 现原样返回。
         """
         # Resolve 中设置平均速度
         avg_speed = (curve.start_speed + curve.end_speed) / 2.0
@@ -623,6 +737,8 @@ end
         """
         对片段应用 Ken Burns 拉镜效果。
         在 Resolve 中设置起始/结束变换，实际动画在 FFmpeg 渲染时生成。
+
+        2026-09-24 修：原实现丢弃 `set_transform` 的结果并无条件 return True —— 现原样返回。
         """
         # 设置起始变换
         start_tf = TransformConfig(
@@ -630,8 +746,7 @@ end
             position_x=(config.start_x - 0.5) * 100,
             position_y=(config.start_y - 0.5) * 100,
         )
-        self.set_transform(project_name, item_index, start_tf)
-        return True
+        return self.set_transform(project_name, item_index, start_tf)
     
     def get_timeline_info(self, project_name: str) -> dict:
         """获取时间线详细信息（用于 FFmpeg 渲染决策）"""
@@ -1909,14 +2024,22 @@ end
     # ----------------------------------------------------------------
     
     def switch_page(self, page: str) -> bool:
-        """切换页面 (edit/color/fusion/deliver)"""
+        """切换页面 (edit/color/fusion/deliver)。
+
+        2026-09-24 返回值诚实性审计：原实现无条件 return True。
+        真机探针结论：`resolve:OpenPage(...)` **不返回任何结果** ——
+        对合法页（"edit"）与非法页（"__bogus__"）**都返回 nil**，故无法据返回值判定成败。
+        现按 void_api 处理：调用未报错即返回 True，但日志明确标注"未经效果验证"，
+        不再把 nil 误判成失败（第一版写死 `ok == true` 曾把成功页切换报成 False）。
+        """
+        self._require_available()
         lua = self._wrap_lua(f'''
     local resolve = Resolve()
-    resolve:OpenPage("{page}")
-    emit_ok({{page = "{page}"}})
+    local ok = resolve:OpenPage("{page}")
+    emit_ok({{ok = ok, ret_type = type(ok), completed = true, page = "{page}"}})
 ''')
-        self._execute_lua(lua)
-        return True
+        return self._ok_from(self._execute_lua(lua), f"switch_page({page})",
+                             void_api=True)
     
     # ----------------------------------------------------------------
     # 高级操作

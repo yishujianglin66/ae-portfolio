@@ -33,23 +33,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from core.resolve_discovery import find_fuscript_exe
+
 logger = logging.getLogger(__name__)
 
-# Resolve 安装路径 (多候选)
-_RESOLVE_CANDIDATES = [
-    Path(r"D:\app"),
-    Path(r"D:\DaVinci Resolve"),
-    Path(os.environ.get("RESOLVE_HOME", r"D:\app")),
-    Path(r"C:\Program Files\Blackmagic Design\DaVinci Resolve"),
-]
-FUSCRIPT_PATH = ""
-for _c in _RESOLVE_CANDIDATES:
-    _fp = str(_c / "fuscript.exe")
-    if os.path.isfile(_fp):
-        FUSCRIPT_PATH = _fp
-        break
-if not FUSCRIPT_PATH:
-    FUSCRIPT_PATH = str(_RESOLVE_CANDIDATES[0] / "fuscript.exe")  # fallback
+# Resolve 安装路径：由 core/resolve_discovery 统一发现（唯一权威来源）
+# 此前本模块自持一份候选表，与 resolve_engine / resolve_executor / flagship_runner
+# 的实现互不一致。未找到时为空串，调用方的 os.path.isfile(FUSCRIPT_PATH) 自然为 False。
+_fuscript_found = find_fuscript_exe()
+FUSCRIPT_PATH = str(_fuscript_found) if _fuscript_found is not None else ""
 
 # MCP 外部项目路径
 MCP_PROJECT_DIR = Path(__file__).parent.parent / "external" / "davinci-resolve-mcp"
