@@ -51,11 +51,26 @@ class AdobeMCPManager:
         self.bridges: dict[str, AdobeUniversalBridge] = {}
         self.installed_apps: dict[str, dict] = {}
         self.jsx_files: dict[str, str] = {
-            "photoshop": str(self.project_root / "photoshop_mcp_listener.jsx"),
-            "premiere": str(self.project_root / "premiere_mcp_listener.jsx"),
-            "media_encoder": str(self.project_root / "media_encoder_mcp_listener.jsx"),
-            "after_effects": str(self.project_root / "ae_mcp_auto_listener.jsx"),
+            "photoshop": self._locate_listener("photoshop_mcp_listener.jsx"),
+            "premiere": self._locate_listener("premiere_mcp_listener.jsx"),
+            "media_encoder": self._locate_listener("media_encoder_mcp_listener.jsx"),
+            "after_effects": self._locate_listener("ae_mcp_auto_listener.jsx"),
         }
+
+    def _locate_listener(self, filename: str) -> str:
+        """定位 JSX 监听器文件 (2026-09-19 修复)。
+
+        监听器实际放在**仓库根**, 而本模块默认 project_root = bridges/,
+        原实现按 project_root 解析 → 四个监听器全部指向 bridges/*.jsx
+        (不存在), 于是 install_bridge 必然在"JSX文件不存在"分支返回 False,
+        交互通道的 Bridge 安装一直是坏的。
+        改为依次在 project_root 与其上一层查找, 命中即用。
+        """
+        for base in (self.project_root, self.project_root.parent):
+            p = base / filename
+            if p.exists():
+                return str(p)
+        return str(self.project_root / filename)   # 保底: 报缺失时路径可读
     
     # ------------------------------------------------------------------
     # 检测
@@ -118,22 +133,50 @@ class AdobeMCPManager:
         return results
     
     def uninstall_bridge(self, app_key: str) -> bool:
-        """卸载指定软件的 Startup Listener"""
+        """卸载指定软件的 Startup Listener。
+
+        2026-09-24 修复：原实现只认 `mcp_{app_key}_listener.jsx`（即
+        `adobe_universal_bridge.install_startup_jsx` 写出的名字）。但现场实际存在的是
+        **另一条手工安装路径**留下的 `z_mcp_bridge_startup.jsx`（AE 那份，靠
+        app.scheduleTask 延迟 eval 监听器）——旧实现在这种情形下会"什么也没删却返回 True"，
+        于是那个已经失效的加载器一直留在 AE 的 Startup 目录里（实测：它在 AE 25.3 上
+        根本不执行，日志停在 2026-09-19）。
+        现改为按**候选名单**逐个尝试，并把"一个都没找到"与"删失败"区分开。
+        """
         startup_dir = self.installed_apps.get(app_key, {}).get("startup_dir")
         if not startup_dir:
             return False
-        
-        loader_name = f"mcp_{app_key}_listener.jsx"
-        loader_path = Path(startup_dir) / loader_name
-        
-        if loader_path.exists():
+
+        candidates = [
+            f"mcp_{app_key}_listener.jsx",          # 官方安装器写法
+            "z_mcp_bridge_startup.jsx",             # 手工路径（AE 现场就是这个）
+            f"z_mcp_{app_key}_startup.jsx",
+            f"mcp_{app_key}_bridge_startup.jsx",
+        ]
+        removed: list[str] = []
+        failed: list[str] = []
+        for name in candidates:
+            p = Path(startup_dir) / name
+            if not p.exists():
+                continue
             try:
-                loader_path.unlink()
-                log(f"[{app_key}] Startup listener removed")
-                return True
+                # 先留档再删：出问题可人工恢复（Startup 目录里留 .bak 也不会被执行）
+                backup = p.with_suffix(p.suffix + ".uninstalled.bak")
+                if backup.exists():
+                    backup.unlink()
+                p.rename(backup)
+                removed.append(name)
             except Exception as e:
-                log(f"[{app_key}] 卸载失败: {e}", "ERROR")
-                return False
+                failed.append(f"{name}: {e}")
+
+        if failed:
+            log(f"[{app_key}] 卸载失败: {'; '.join(failed)}", "ERROR")
+            return False
+        if removed:
+            log(f"[{app_key}] Startup listener 已移除（留档为 .uninstalled.bak）: "
+                f"{', '.join(removed)}")
+            return True
+        log(f"[{app_key}] Startup 目录未见任何已知加载器（可能本就未安装）")
         return True
     
     # ------------------------------------------------------------------

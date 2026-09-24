@@ -1,7 +1,7 @@
 // ae/scripts/puppet/spring_expression.jsx
 // 木偶动画：弹性物理表达式（Overshoot/Spring）
 // 对 Puppet Pin 控制点应用弹性跟随，产生过冲回弹效果
-// 用法: 通过 ae_command.json {command:"runScript", args:{code: "..."}} 下发
+// 用法: 通过 ae_command.json {command:"executeAtomScript", args:{script: "..."}} 下发
 
 (function() {
     // ===== 参数（由 Python 端参数化注入） =====

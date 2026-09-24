@@ -1,16 +1,15 @@
 {
   "version": "2.0",
   "schema_version": "2.0",
-  "last_updated": "2026-08-18",
+  "last_updated": "2026-09-24",
   "description": "统一多工具集成调度器 - 工具路径配置（真实执行模式）",
   "platform": "windows",
   "search_paths": {
     "adobe": [
-      "C:\\Program Files\\Adobe\\Adobe After Effects 2026",
-      "D:\\pr\\Adobe Premiere Pro 2026",
-      "D:\\ps\\Adobe Photoshop 2026",
-      "D:\\Ai\\Adobe Illustrator 2026",
-      "D:\\Me\\Adobe Media Encoder 2026"
+      "C:\\Program Files\\Adobe\\Adobe After Effects 2025",
+      "D:\\Pr25\\Adobe Premiere Pro 2025",
+      "D:\\ps\\Adobe Photoshop 2025",
+      "D:\\Me\\Adobe Media Encoder 2025"
     ],
     "ffmpeg": [
       "C:\\ffmpeg\\bin"
@@ -20,13 +19,14 @@
     ],
     "blender": [
       "D:\\Blender\\Blender 5.1.0"
-    ]
+    ],
+    "_note_adobe": "2026-09-24 修正：原列表 5 条全部指向 2026（AE 2026 是只有空 Support Files 的残留空壳目录，PR/PS/AI/ME 的 2026 目录根本不存在），任何按此搜索的代码都会落空。现按实测「目录存在且含可执行文件」重写；Illustrator 两个年份都不存在故移除。权威来源：core/adobe_discovery.py（本仓 Adobe 路径单一真相源）"
   },
   "tools": {
     "after_effects": {
-      "name": "Adobe After Effects 2026",
+      "name": "Adobe After Effects 2025",
       "executable": "AfterFX.exe",
-      "install_path": "C:\\Program Files\\Adobe\\Adobe After Effects 2026\\Support Files",
+      "install_path": "C:\\Program Files\\Adobe\\Adobe After Effects 2025\\Support Files",
       "enabled": true
     },
     "premiere_pro": {

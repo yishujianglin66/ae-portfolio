@@ -341,6 +341,35 @@ def check_one(path: Path, spec: dict) -> Report:
         mitigation="" if ok_dur else
         f"AKROSS 要求 1-15 分钟；短样片可用 --min-duration {int(dur)} 放宽"))
 
+    # 5b. 音视频等长 (2026-09-19)
+    # 事故背景: 20s/27s 集成片视频流分别只有 19.79s/25.33s, 而音轨为
+    # 20.02s/27.00s。容器时长 = max(视频流, 音轨) 恰好达标, 五项硬指标全过,
+    # 画面却在音乐结束前 1.67s 就没了 —— 本检查专门堵这个盲区。
+    vdur = float((v or {}).get("duration", 0) or 0)
+    adur = float((a or {}).get("duration", 0) or 0)
+    gap = (adur - vdur) if (vdur > 0 and adur > 0) else 0.0
+    if not a or vdur <= 0 or adur <= 0:
+        av_status, av_detail = "WARN", "音/视频流时长不可测，跳过等长核对"
+    elif abs(gap) <= spec.get("av_sync_tol", 0.15):
+        av_status, av_detail = "PASS", f"视频 {vdur:.2f}s ≈ 音频 {adur:.2f}s"
+    elif gap > 0:
+        av_status = "FAIL"
+        av_detail = (f"视频流 {vdur:.2f}s 短于音轨 {adur:.2f}s "
+                     f"(差 {gap:.2f}s ≈ {round(gap * max(fps, 24))} 帧): "
+                     f"画面提前结束")
+    else:
+        av_status = "WARN"
+        av_detail = (f"视频流 {vdur:.2f}s 长于音轨 {adur:.2f}s "
+                     f"(差 {-gap:.2f}s): 尾部无音乐")
+    rep.probe["video_duration_sec"] = round(vdur, 2)
+    rep.probe["audio_duration_sec"] = round(adur, 2)
+    rep.checks.append(Check(
+        "音视频等长", av_status, av_detail,
+        value=round(gap, 3), expected=f"|Δ| ≤ {spec.get('av_sync_tol', 0.15)}s",
+        mitigation="" if av_status == "PASS" else
+        "查合成环节帧数: production_director 会打印 [帧数核对]/[拼接核对]; "
+        "-f concat 流拷贝在输入参数不一致时会静默截断, 走 _concat_filter 兜底"))
+
     # 6. 台标/水印（启发式）
     wm_status, wm_detail, wm_metrics = detect_watermark(path)
     rep.checks.append(Check(

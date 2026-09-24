@@ -497,19 +497,40 @@ def create_bridge(app_key: str, **kwargs) -> AdobeUniversalBridge:
 
 def detect_installed_adobe_apps() -> dict[str, dict]:
     """检测系统上已安装的 Adobe 软件
-    
+
     Returns:
         {"photoshop": {"path": "...", "running": True/False}, ...}
+
+    2026-09-24 修复：原实现**只查 install_path 目录是否存在**就取第一个命中，
+    于是 `C:\\Program Files\\Adobe\\Adobe After Effects 2026`（一个只有空 Support Files 的
+    残留空壳目录，连 AfterFX.exe 都没有）会被当成"已安装"，startup_dir 指向不存在的
+    `...2026\\Support Files\\Scripts\\Startup`，**install/uninstall 全部空转**
+    （uninstall 还静默返回 True）—— 现场那个已失效的加载器就是这么留下来的。
+    现改为优先选"startup_subdir 真实存在"的路径（与 get_startup_dir 的判据一致），
+    都不满足时才退回存在性判断并告警。
     """
     detected = {}
     for app_key, config in ADOBE_APPS.items():
-        install_path = None
+        startup_sub = config.get("startup_subdir", "")
+        existing: list[str] = []
+        usable: list[str] = []
         for path_tpl in config.get("install_paths", []):
             path = path_tpl.replace("{year}", str(time.localtime().tm_year))
-            if Path(path).exists():
-                install_path = path
-                break
-        
+            if not Path(path).exists():
+                continue
+            existing.append(path)
+            if startup_sub and (Path(path) / startup_sub).exists():
+                usable.append(path)
+
+        if usable:
+            install_path = usable[0]
+        elif existing:
+            install_path = existing[0]
+            log(f"{config.get('short', app_key)}: 仅目录存在但 {startup_sub} 不在，"
+                f"按存在性采用 {install_path}（Bridge 安装/卸载可能空转）", "WARN")
+        else:
+            install_path = None
+
         if install_path:
             # 检查是否运行
             running = False
@@ -524,15 +545,15 @@ def detect_installed_adobe_apps() -> dict[str, dict]:
                         break
             except Exception:
                 pass
-            
+
             detected[app_key] = {
                 "name": config["name"],
                 "short": config["short"],
                 "path": install_path,
                 "running": running,
-                "startup_dir": str(Path(install_path) / config.get("startup_subdir", "")),
+                "startup_dir": str(Path(install_path) / startup_sub),
             }
-    
+
     return detected
 
 

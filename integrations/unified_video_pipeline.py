@@ -81,7 +81,13 @@ OPENMONTAGE_STYLE_MAP = {
 class UnifiedVideoPipeline:
     """统一视频处理管线"""
 
-    def __init__(self, resolve_home: str = r"D:\DaVinci Resolve"):
+    def __init__(self, resolve_home: str | None = None):
+        """resolve_home 为 None 时由 core.resolve_discovery 统一发现。
+
+        旧默认值是硬编码的 r"D:\\DaVinci Resolve"（本机不存在），导致
+        `UnifiedVideoPipeline()` 的 Resolve 调色步骤**永远处于降级态**，
+        即使 Resolve 已安装。
+        """
         self.engine = ResolveColorEngine(resolve_home=resolve_home)
         self.video_use_helpers = HELPERS_DIR
 
@@ -95,18 +101,55 @@ class UnifiedVideoPipeline:
         threshold: float = 27.0,
         max_scenes: int = 20,
     ) -> list[dict[str, Any]]:
-        """PySceneDetect 自动场景检测"""
+        """场景检测（委托 integrations.scene_detector，含三级降级）。
+
+        2026-09-23 修复（集成测试暴露）：原实现调用 `self.engine.detect_scenes(...)`，
+        但 `self.engine` 是 **Resolve 调色引擎**（ResolveColorEngine），没有该方法
+        —— 本方法每次调用都会 AttributeError，即**场景检测从未真正工作过**。
+        正确的引擎在 `integrations/scene_detector.py`（PySceneDetect → FFmpeg →
+        固定切分），此前从未接上。
+
+        返回契约仍是 `list[dict]`；补齐调用方要用的 `duration_frames`
+        （新引擎只给 `duration` 秒）。
+        """
         print(f"\n[SceneDetect] Analyzing: {os.path.basename(video_path)}")
-        scenes = self.engine.detect_scenes(
-            video_path, threshold=threshold, max_scenes=max_scenes
-        )
+        from integrations.scene_detector import SceneDetector  # noqa: PLC0415
+
+        raw = SceneDetector(threshold=threshold).detect(video_path)
+        fps = self._probe_fps(video_path)
+        scenes: list[dict[str, Any]] = []
+        for s in raw[:max_scenes]:
+            start, end = float(s.get("start", 0.0)), float(s.get("end", 0.0))
+            scenes.append({
+                **s,
+                "start": start,
+                "end": end,
+                "duration_frames": int(round((end - start) * fps)),
+            })
         if scenes and "error" in scenes[0]:
             print(f"  ERROR: {scenes[0]['error']}")
             return []
         print(f"  Found {len(scenes)} scenes")
         for i, s in enumerate(scenes[:10]):
-            print(f"    Scene {i}: {s['start']} -> {s['end']} ({s['duration_frames']} frames)")
+            print(f"    Scene {i}: {s['start']} -> {s['end']} "
+                  f"({s['duration_frames']} frames)")
         return scenes
+
+    @staticmethod
+    def _probe_fps(video_path: str, default: float = 24.0) -> float:
+        """探测素材帧率（duration_frames 换算用；失败回退 default）。"""
+        try:
+            proc = subprocess.run(
+                ["ffprobe", "-v", "error", "-select_streams", "v:0",
+                 "-show_entries", "stream=r_frame_rate", "-of", "csv=p=0",
+                 str(video_path)],
+                capture_output=True, text=True, timeout=30)
+            frac = (proc.stdout or "").strip().splitlines()[0]
+            num, den = frac.split("/")
+            val = float(num) / float(den)
+            return val if val > 0 else default
+        except Exception:  # noqa: BLE001
+            return default
 
     # ----------------------------------------------------------------
     # FFmpeg 快速预览调色（video-use grade.py）

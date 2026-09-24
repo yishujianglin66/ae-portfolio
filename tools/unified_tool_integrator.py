@@ -2509,8 +2509,33 @@ class UnifiedToolIntegrator:
         tools_config = self._tool_config.get("tools", {})
         
         def get_install_path(tool_id: str) -> str:
+            """取工具安装目录，但**必须验到真实可执行文件**才算数。
+
+            2026-09-24 修复：原实现直接返回配置里的 install_path，零校验。而
+            tool_config.json 里 AE 曾指向 `...\\Adobe After Effects 2026\\Support Files`
+            —— 一个**只有空 Support Files 的残留空壳目录**（连 AfterFX.exe 都没有）。
+            路径"存在"但装的是空气，下游 os.path.join(install_path, "AfterFX.exe") 必然失败。
+            这与 bridges 侧 detect_installed_adobe_apps 是同一类缺陷：
+            **存在性检查必须落到"器官"上，不能只看容器。**
+            验不过时回退到统一发现器（core.adobe_discovery，本仓 Adobe 路径的单一真相源）；
+            仍找不到就返回空串，让下游走"诚实降级"而不是拿着幻影路径去报错。
+            """
             tool_info = tools_config.get(tool_id, {})
-            return tool_info.get("install_path", "")
+            raw = str(tool_info.get("install_path", "") or "")
+            exe = str(tool_info.get("executable", "") or "")
+            if raw and exe and Path(raw, exe).exists():
+                return raw
+
+            # 回退：Adobe 产品用统一发现器（返回 exe 全路径，取其父目录）
+            try:
+                from core.adobe_discovery import find_adobe_exe
+
+                found = find_adobe_exe(tool_id)
+                if found is not None:
+                    return str(found.parent)
+            except Exception:  # noqa: BLE001 — 发现器不可用不应影响启动
+                pass
+            return ""
         
         tool_configs = {
             # Adobe 全家桶

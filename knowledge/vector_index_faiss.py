@@ -64,6 +64,17 @@ class VectorIndex:
         else:
             print("[VectorIndex] FAISS 未安装，使用 numpy 暴力搜索", file=sys.stderr)
 
+    def _reset_index(self, dim: int) -> None:
+        """把底层索引重建到指定维度 (faiss 索引与 numpy 降级缓冲都要换)。
+
+        2026-09-19: `migrate_from_json` 原先只改 `self.dim` 而不重建底层索引,
+        于是 512 维的 IndexFlatIP 收到 64 维向量 → faiss 内部 `assert d == self.d`
+        崩在 C 层, 报错信息完全看不出根因。维度变更必须连带重建。
+        """
+        self.dim = dim
+        self._numpy_vectors = None
+        self._faiss_index = faiss.IndexFlatIP(dim) if FAISS_AVAILABLE else None
+
     @property
     def size(self) -> int:
         return len(self._file_paths)
@@ -92,6 +103,15 @@ class VectorIndex:
             vectors = vectors.reshape(1, -1)
         if vectors.shape[1] != self.dim:
             raise ValueError(f"向量维度不匹配: 期望 {self.dim}, 实际 {vectors.shape[1]}")
+        # 防御: 底层 faiss 索引维度必须与 self.dim 一致, 否则会崩在 C 层
+        # (assert d == self.d)。空索引时自动重建, 非空则明确报错而不是静默混维。
+        if self.using_faiss and getattr(self._faiss_index, "d", self.dim) != self.dim:
+            if self.size == 0:
+                self._reset_index(self.dim)
+            else:
+                raise ValueError(
+                    f"底层索引维度 {getattr(self._faiss_index, 'd', '?')} 与 "
+                    f"self.dim {self.dim} 不一致且索引非空; 请重建 VectorIndex")
 
         # 归一化（使内积等价于余弦相似度）
         norms = np.linalg.norm(vectors, axis=1, keepdims=True)
@@ -238,8 +258,6 @@ class VectorIndex:
             data = json.load(f)
 
         items = data.get("items", [])
-        dim = data.get("vector_dim", self.dim)
-        self.dim = dim
 
         file_paths = []
         vectors = []
@@ -256,7 +274,18 @@ class VectorIndex:
 
         if vectors:
             vec_array = np.array(vectors, dtype=np.float32)
+            # 维度以**实际向量长度**为准 (声明字段可能缺失或与实际不符),
+            # 并连带重建底层索引 —— 只改 self.dim 会让 faiss 索引维度失配。
+            dim = int(vec_array.shape[1])
+            if dim != self.dim:
+                if self.size:
+                    raise ValueError(
+                        f"目标索引已有 {self.size} 条 {self.dim} 维向量, "
+                        f"无法迁移 {dim} 维数据; 请新建 VectorIndex(dim={dim})")
+                self._reset_index(dim)
             self.add(file_paths, vec_array, metadata_list)
+        else:
+            dim = int(data.get("vector_dim", self.dim))
 
         return {
             "migrated": len(file_paths),

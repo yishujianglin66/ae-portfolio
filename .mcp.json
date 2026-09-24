@@ -1,10 +1,5 @@
 {
   "mcpServers": {
-    "AfterEffectsMCP": {
-      "command": "node",
-      "args": ["c:\\Users\\Administrator\\Desktop\\after-effects-mcp-main\\build\\index.js"],
-      "cwd": "c:\\Users\\Administrator\\Desktop\\after-effects-mcp-main"
-    },
     "AdobeMCP": {
       "command": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
       "args": ["bridges/adobe_mcp_server.py", "--app", "after_effects"],

@@ -340,10 +340,19 @@ JSON.stringify(info);
         exec_jsx(client, jsx_status, "检查渲染状态")
 
     # 12. 关闭 AE
+    # 2026-09-24: 原来无条件 /F 强杀。实测若 AE 停在"是否保存对 xxx.aep 的更改?"
+    # 确认框上，强杀会把确认框和 AE 一起打断、未保存工作一起丢（用户反馈
+    # "点取消 AE 就被杀了"）。改为默认**不杀**：确认无人在用时设
+    # AEKV_ALLOW_FORCE_KILL_AE=1 才执行。顺带把 shell=True 字符串改成参数列表。
     log("=== 完成，关闭 AE ===")
-    subprocess.run('taskkill /IM "AfterFX.exe" /F', shell=True, capture_output=True, timeout=15)
-    time.sleep(3)
-    log("AE 已关闭")
+    if os.environ.get("AEKV_ALLOW_FORCE_KILL_AE") == "1":
+        subprocess.run(["taskkill", "/IM", "AfterFX.exe", "/F"],
+                       capture_output=True, timeout=15)
+        time.sleep(3)
+        log("AE 已关闭")
+    else:
+        log("跳过关闭 AE（保护正在使用的会话与未保存工作）。"
+            "如需强制关闭：设 AEKV_ALLOW_FORCE_KILL_AE=1")
 
     print("\n" + "=" * 60)
     print("  AE 特效流水线完成!")

@@ -21,7 +21,7 @@ Phase 4 - 自然语言→解析词汇映射库 (Python 版)
 """
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 # 复用现有数据类（向后兼容）
@@ -43,9 +43,9 @@ class VocabMapEntry:
     vocab_name: str         # 词汇名
     suggested_effect: str | None = None  # 建议的效果 matchName
     confidence: float = 0.0
-    keywords: list[str] = None              # 同义关键词列表
+    keywords: list[str] = field(default_factory=list)              # 同义关键词列表
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.keywords is None:
             self.keywords = []
 

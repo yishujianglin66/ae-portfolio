@@ -1,7 +1,7 @@
 // ae/scripts/manga/speed_lines.jsx
 // 漫剪特效：速度线（Speed Lines）— 转场/冲击时使用
 // 从中心向外辐射的动态线条，模拟漫画中的速度感
-// 用法: 通过 ae_command.json {command:"runScript", args:{code: "..."}} 下发
+// 用法: 通过 ae_command.json {command:"executeAtomScript", args:{script: "..."}} 下发
 
 (function() {
     // ===== 参数（由 Python 端参数化注入） =====

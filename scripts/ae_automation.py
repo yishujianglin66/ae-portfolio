@@ -229,10 +229,25 @@ def full_start() -> bool:
     return False
 
 
+def _force_kill_ae_allowed() -> bool:
+    """是否允许 /F 强杀 AfterFX.exe（2026-09-24 起默认**不允许**）。
+
+    用户实测：AE 若停在"是否保存对 xxx.aep 的更改?"确认框上，/F 会把这个确认框
+    连同 AE 一起打断 —— 表现就是"点了取消，AE 自己被杀了"。未保存的工作也会一起丢。
+    确需强杀（例如 CI 里确认无人在用）时设 AEKV_ALLOW_FORCE_KILL_AE=1。
+    """
+    return os.environ.get("AEKV_ALLOW_FORCE_KILL_AE") == "1"
+
+
 def stop_ae():
     """关闭AE"""
     if not is_ae_running():
         print("  AE 未在运行")
+        return
+
+    if not _force_kill_ae_allowed():
+        print("  跳过关闭 AE：/F 强杀会打断保存确认框并丢失未保存工作。")
+        print("  若要强制关闭（确认无人在用 AE），设 AEKV_ALLOW_FORCE_KILL_AE=1 后重跑。")
         return
 
     print("  正在关闭 AE...")

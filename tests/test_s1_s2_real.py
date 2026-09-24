@@ -118,6 +118,13 @@ class TestS1AssetNormalize:
         )
         return stage, result
 
+    # 超时预算：本用例的 fixture 要真实重编码 3 段 1080p（实测 setup 单例 163.78s），
+    # 全量冷缓存 + 机器有其他负载时（实测：Resolve 常驻、并行跑别的 pytest）
+    # 会越过全局 --timeout=300 → pytest-timeout 直接杀掉整个会话、**连汇总行都不出**。
+    # 这已发生 2 次（2026-09-23），代价是每次丢掉一整轮 15 分钟的回归结果。
+    # 故显式给 900s：不是"放过慢测试"，而是让"它就该慢"这件事在代码里留痕，
+    # 且避免用超时把**别的**用例的结果一起牺牲掉。
+    @pytest.mark.timeout(900)
     def test_normalize_real_videos(self, normalized):
         """真实视频规范化（需要测试素材）"""
         _stage, result = normalized

@@ -1,7 +1,7 @@
 // ae/scripts/amv/particles.jsx
 // 静止系 AMV：粒子氛围（尘埃/光斑/雪花）
 // 使用 CC Particle World 创建氛围粒子
-// 用法: 通过 ae_command.json {command:"runScript", args:{code: "..."}} 下发
+// 用法: 通过 ae_command.json {command:"executeAtomScript", args:{script: "..."}} 下发
 
 (function() {
     // ===== 参数（由 Python 端参数化注入） =====

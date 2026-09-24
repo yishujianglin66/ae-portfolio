@@ -1,7 +1,7 @@
 // ae/scripts/puppet/breathing_idle.jsx
 // 木偶动画：呼吸待机动画（循环表达式）
 // 让角色产生自然的呼吸起伏 + 轻微摇摆，无需关键帧
-// 用法: 通过 ae_command.json {command:"runScript", args:{code: "..."}} 下发
+// 用法: 通过 ae_command.json {command:"executeAtomScript", args:{script: "..."}} 下发
 
 (function() {
     // ===== 参数（由 Python 端参数化注入） =====

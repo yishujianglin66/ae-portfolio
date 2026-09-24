@@ -237,17 +237,24 @@ async def main() -> int:
     await asyncio.sleep(1)
 
     # 完全关闭 AE GUI 进程，确保 aerender 不会因文件锁而挂起
+    # 2026-09-24: 默认不再 /F 强杀。实测 AE 若停在"是否保存对 xxx.aep 的更改?"
+    # 确认框上，强杀会连人正在用的 AE 一起杀掉（用户反馈"点取消 AE 就被杀了"）。
+    # 确认无人在用 AI 时设 AEKV_ALLOW_FORCE_KILL_AE=1 恢复旧行为。
     log("  关闭 AfterFX.exe 进程...")
-    try:
-        proc_ae = subprocess.run(
-            ["taskkill", "/F", "/IM", "AfterFX.exe"],
-            capture_output=True, text=True, timeout=10,
-        )
-        log(f"  taskkill returncode: {proc_ae.returncode}")
-        if proc_ae.stdout:
-            log(f"  taskkill stdout: {proc_ae.stdout.strip()}")
-    except Exception as e:
-        log(f"  taskkill 异常（非致命）: {e}")
+    if os.environ.get("AEKV_ALLOW_FORCE_KILL_AE") == "1":
+        try:
+            proc_ae = subprocess.run(
+                ["taskkill", "/F", "/IM", "AfterFX.exe"],
+                capture_output=True, text=True, timeout=10,
+            )
+            log(f"  taskkill returncode: {proc_ae.returncode}")
+            if proc_ae.stdout:
+                log(f"  taskkill stdout: {proc_ae.stdout.strip()}")
+        except Exception as e:
+            log(f"  taskkill 异常（非致命）: {e}")
+    else:
+        log("  跳过强杀 AfterFX.exe（保护正在使用的会话与未保存工作）。"
+            "如需强制关闭：设 AEKV_ALLOW_FORCE_KILL_AE=1")
     await asyncio.sleep(3)  # 等待 AE 完全释放文件锁
 
     # 清理旧输出

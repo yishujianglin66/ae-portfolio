@@ -90,7 +90,7 @@ class LayerOrchestrator:
         "soft_dreamy": ["ADBE Gaussian Blur 2", "ADBE Glo2"],
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.track_mattes: list[TrackMateConfig] = []
         self.parent_relationships: list[tuple[str, str]] = []
         self.adjustment_layers: list[AdjustmentLayerConfig] = []

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 class TextAnimationGenerator:
     """文字动画生成器"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.width = 576
         self.height = 768
     

@@ -1,8 +1,19 @@
-"""回归测试: 静态镜头必须真正静态 — onset 逐拍"拉进-闪回"不得覆盖 static/pan 镜头.
+"""回归测试: 撞击运镜的适用范围 (onset 逐拍"拉进-闪回"允许作用于哪些镜头).
 
 根因 (2026-08-15): `_extract_clip` 中 onset 推拉分支优先级高于 zoompan_effect,
-导致 227/229 段 (含 173 个 static) 全部被鼓点 punch 覆盖 — 用户"每个镜头都
-晃动推拉闪回"的真实原因。v22 无此分支, 静态镜头真静态。
+而当时的触发源是**全量 onset**(~10 事件/秒), 于是 227/229 段 (含 173 个 static)
+全部被鼓点 punch 覆盖 — 用户"每个镜头都晃动推拉闪回"的真实原因。
+
+根因 (2026-09-19 二次反馈): 用户"不够, 没跟小提琴节奏变换, 视觉冲击力不到位"
+→ 撞击改由**精选重音**驱动 (强鼓点≥0.5 ∪ 小提琴重音≥0.85, 约 2 事件/秒),
+static 重新纳入可撞击类型 (落在静止镜头上的小提琴重音不该被忽略; 静止镜头里
+撞击的视觉对比度最高)。此时"每镜头都晃动"的成因(全量触发源)已不存在。
+
+不变式:
+  · static 无 onset      → 真静态 (无 zoompan)
+  · static 有 onset      → 承载撞击 (PUNCH_ELIGIBLE_EFFECTS)
+  · 平移/斜移类          → 永不承载撞击 (基础运镜与撞击叠加会互相干扰)
+  · push / zoom_in       → 承载撞击, 幅度顶到 1.15 上限
 """
 import subprocess
 import types
@@ -46,11 +57,13 @@ def _run_and_capture(d, monkeypatch, **kwargs):
     return captured["cmd"][vf_idx]
 
 
-def test_static_with_onsets_has_no_zoompan(director, monkeypatch):
-    """静态镜头即使含鼓点 onset 也不得注入任何 zoompan"""
+def test_static_with_onsets_gets_punch(director, monkeypatch):
+    """static 含精选重音时承载撞击 (2026-09-19 起; 见模块 docstring 的不变式)"""
     vf = _run_and_capture(director, monkeypatch,
                           zoompan_effect="static", onset_times=[0.5])
-    assert "zoompan" not in vf
+    assert "zoompan" in vf
+    assert "between(on," in vf     # 撞击曲线标记
+    assert "1.15" in vf            # 幅度上限
 
 
 def test_static_without_onsets_has_no_zoompan(director, monkeypatch):

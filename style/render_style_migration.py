@@ -6,6 +6,7 @@ r"""P3P4 风格迁移 - 保存工程并渲染最终产物
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -145,15 +146,24 @@ def main():
         return
 
     # Step 4: 关闭 AE（aerender 需要独占工程文件）
+    # 2026-09-24: 上面 close_ae_graceful() 走 WM_CLOSE，若工程有未保存改动会弹
+    # "是否保存对 xxx.aep 的更改?" 确认框；原来这里紧跟 /F /T 强杀，等于把确认框
+    # 连人正在用的 AE 一起打断（用户反馈"点取消 AE 就被杀了"，未保存工作一起丢）。
+    # 现在强杀需显式授权：设 AEKV_ALLOW_FORCE_KILL_AE=1。未授权时下面那句
+    # is_ae_running() 会自然判定失败并 return，属**明确失败**而非破坏性成功。
     print("\n--- Step 4: 关闭 AE（aerender 需要独占工程文件）---")
     log("正在关闭 AE...")
     AELauncher.close_ae_graceful()
     time.sleep(3)
     if AELauncher.is_ae_running():
-        log("WM_CLOSE 未生效，使用 taskkill /F /T", "WARN")
-        subprocess.run(["taskkill", "/F", "/T", "/IM", "AfterFX.exe"],
-                       capture_output=True, timeout=30)
-        time.sleep(5)
+        if os.environ.get("AEKV_ALLOW_FORCE_KILL_AE") == "1":
+            log("WM_CLOSE 未生效，使用 taskkill /F /T", "WARN")
+            subprocess.run(["taskkill", "/F", "/T", "/IM", "AfterFX.exe"],
+                           capture_output=True, timeout=30)
+            time.sleep(5)
+        else:
+            log("WM_CLOSE 未生效；默认不 /F 强杀（保护未保存工作）。"
+                "请手动关闭 AE（或先保存），或设 AEKV_ALLOW_FORCE_KILL_AE=1", "WARN")
     if AELauncher.is_ae_running():
         print("[FAIL] 无法关闭 AE")
         return

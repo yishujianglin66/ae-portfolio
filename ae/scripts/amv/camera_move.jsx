@@ -1,7 +1,7 @@
 // ae/scripts/amv/camera_move.jsx
 // 静止系 AMV：摄像机运动路径
 // 创建摄像机 + Null 控制器 + 贝塞尔运动路径 + 缓动
-// 用法: 通过 ae_command.json {command:"runScript", args:{code: "..."}} 下发
+// 用法: 通过 ae_command.json {command:"executeAtomScript", args:{script: "..."}} 下发
 
 (function() {
     // ===== 参数（由 Python 端参数化注入） =====

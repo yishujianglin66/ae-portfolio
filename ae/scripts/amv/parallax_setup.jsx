@@ -1,7 +1,7 @@
 // ae/scripts/amv/parallax_setup.jsx
 // 静止系 AMV：2.5D 视差初始化
 // 将静态图拆分为前景/中景/背景图层，启用 3D + 设置 Z 深度
-// 用法: 通过 ae_command.json {command:"runScript", args:{code: "..."}} 下发
+// 用法: 通过 ae_command.json {command:"executeAtomScript", args:{script: "..."}} 下发
 
 (function() {
     // ===== 参数（由 Python 端参数化注入） =====

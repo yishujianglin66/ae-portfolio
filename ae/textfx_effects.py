@@ -5,7 +5,7 @@ TextFX 特效组合生成器
 =====================
 
 封装 5 种可复用的特效组合，每种组合生成自包含的 JSX 代码片段。
-可通过 Bridge runScript 发送到 AE 执行。
+可通过 Bridge executeAtomScript 发送到 AE 执行。
 
 特效组合:
 - cyberGlow()   — Glow + Ramp + Grid → 赛博朋克

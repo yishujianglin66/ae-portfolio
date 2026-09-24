@@ -1,7 +1,7 @@
 // ae/scripts/amv/light_rays.jsx
 // 静止系 AMV：光影动画（God Rays / 体积光 / Lens Flare）
 // 创建光线扫描 + 体积光效果 + 可选镜头光晕
-// 用法: 通过 ae_command.json {command:"runScript", args:{code: "..."}} 下发
+// 用法: 通过 ae_command.json {command:"executeAtomScript", args:{script: "..."}} 下发
 
 (function() {
     // ===== 参数（由 Python 端参数化注入） =====

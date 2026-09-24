@@ -484,6 +484,14 @@ def main() -> int:
     report = {"sources": sources, "bgm": args.bgm, "theme": args.theme,
               "capabilities_used": {}, "stages": {}}
 
+    # 成本记账上下文 (2026-09-19): 本次出片的所有 LLM 调用按 tag 归组,
+    # cost_report 才能算"单条视频平均成本"（验收指标 ≤ $0.05/条）。
+    try:
+        from core.cost_logger import set_context as _set_cost_ctx
+        _set_cost_ctx(pipeline=args.tag, stage="stage1_beat")
+    except Exception:  # noqa: BLE001 — 记账不可用不阻断出片
+        pass
+
     print("=" * 62)
     print("统一编排入口 — 自动启用全部积累能力")
     print("=" * 62)
@@ -506,6 +514,11 @@ def main() -> int:
     def _render_chain(cut_times_override=None):
         print("\n[能力③] V23 编排引擎..."
               + (" (切点修复重渲)" if cut_times_override else ""))
+        try:
+            from core.cost_logger import set_context as _sc
+            _sc(stage="stage3_render")     # 剧本/镜头设计等 LLM 调用在此段
+        except Exception:  # noqa: BLE001
+            pass
         render_result = stage3_render_cut(
             sources=sources,
             bgm_path=args.bgm,
@@ -593,6 +606,10 @@ def main() -> int:
     # ±1帧微调主要消除拼接咔哒; flash 为人工项不自动修。
     try:
         from scripts.cutpoint_selfeval import analyze_cutpoints, repair_cutpoints
+        from core.beat_anchors import load_for_bgm, strong_times
+        # 强鼓点锚 (2026-09-19): 修复必须保节拍。缓存缺席 → 空表, 修复退回
+        # 原"丢弃"策略并跳过节拍回归守卫 (fail-safe, 不阻断出片)。
+        _anchors_strong = strong_times(load_for_bgm(args.bgm))
         _edl_path = out_dir / "edl.json"
         if _edl_path.exists():
             _edl_j = json.loads(_edl_path.read_text(encoding="utf-8"))
@@ -609,7 +626,20 @@ def main() -> int:
             _rnd = 0
             while (_cp_rep["verdict"] == "FAIL" and _repair_on
                    and _rnd < max(args.repair_rounds - 1, 0)):
-                _new_cuts = repair_cutpoints(_cuts, _cp_rep["issues"])
+                _rstats: dict = {}
+                _new_cuts = repair_cutpoints(_cuts, _cp_rep["issues"],
+                                             anchors=_anchors_strong,
+                                             stats=_rstats)
+                if _rstats.get("beat_before") is not None:
+                    print(f"    节拍守卫: 修前 {_rstats['beat_before']:.3f} → "
+                          f"修后 {_rstats.get('beat_after', 0):.3f} "
+                          f"[{_rstats.get('guard')}] "
+                          f"重锚 {len(_rstats.get('reanchored', []))} / "
+                          f"丢弃 {len(_rstats.get('dropped', []))}")
+                _history[-1] = dict(_history[-1], repair_stats=_rstats)
+                if _rstats.get("guard") == "aborted":
+                    print(f"    切点修复: 已中止 — {_rstats.get('guard_reason')}")
+                    break
                 if not _new_cuts or _new_cuts == sorted(_cuts):
                     print("    切点修复: 修表无变化(仅剩人工项), 停止重渲转人工")
                     break
@@ -703,6 +733,11 @@ def main() -> int:
     # 评分依赖 open_clip + 本地权重；缺失时应降级跳过，不能中断整条链路
     # （否则后续闸门/经验采集/报告落盘全部丢失——2026-09-09 实测踩到）。
     print("\n[能力⑤] 成片评分...")
+    try:
+        from core.cost_logger import set_context as _sc
+        _sc(stage="stage5_score")          # 评分/VLM 复核的云端调用在此段
+    except Exception:  # noqa: BLE001
+        pass
     try:
         score_result = stage5_score_video(final_video)
         if "scores" in score_result and score_result["scores"]:

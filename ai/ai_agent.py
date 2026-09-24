@@ -98,6 +98,21 @@ API_BASE = "https://api.deepseek.com"
 FLASH_MODEL = "deepseek-v4-flash"
 PRO_MODEL = "deepseek-v4-pro"
 
+
+def _log_llm_cost(provider: str, action: str, usage: dict, cost_cny: float,
+                  **meta) -> None:
+    """把一次 LLM 调用的成本写入 data/cost_log.jsonl (2026-09-19 接入生产)。
+
+    此前只 print/logger.info, 数据落不了盘 —— cost_report 报表因此长期为空
+    (评审 §五)。记账失败必须静默: 出片不能因为记账挂掉。
+    """
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+        from core.cost_logger import log_usage
+        log_usage(provider, action, usage, cost_cny, metadata=meta)
+    except Exception:  # noqa: BLE001
+        pass
+
 # 豆包模型可用性检查
 DOUBAO_AVAILABLE = False
 try:
@@ -368,6 +383,9 @@ class V4Agent:
                     self.total_tokens += usage.get("total_tokens", 0)
                     cost = self._calc_cost(usage, model_name)
                     print(f"\n[{self.provider.upper()} {model_name} | {duration:.1f}s | {usage.get('total_tokens', 0)} tokens | ¥{cost:.4f}]")
+                    _log_llm_cost(self.provider, "ask", usage, cost,
+                                  model=model_name,
+                                  duration_s=round(duration, 2))
                 
                 return content
             else:
@@ -543,6 +561,9 @@ class V4Agent:
                     f"\n[{self.provider.upper()} {model_name} | tool_calls={len(all_tool_calls)} "
                     f"| {duration:.1f}s | {total_usage['total_tokens']} tokens | ¥{cost:.4f}]"
                 )
+                _log_llm_cost(self.provider, "chat_tools", total_usage, cost,
+                              model=model_name, duration_s=round(duration, 2),
+                              tool_calls=len(all_tool_calls))
                 return {
                     "content": content,
                     "tool_calls": all_tool_calls,
@@ -824,6 +845,8 @@ class V4Agent:
                 usage = result["usage"]
                 cost = self._calc_cost(usage, model)
                 logger.info(f"[ARK {model} | {duration:.1f}s | {usage.get('total_tokens', 0)} tokens | ¥{cost:.4f}]")
+                _log_llm_cost("ark", "ark_chat", usage, cost,
+                              model=model, duration_s=round(duration, 2))
             
             return content
         return f"API异常: {result}"
@@ -1067,6 +1090,9 @@ class V4Agent:
             latency = getattr(response, "latency_ms", 0.0) / 1000.0
             logger.info(f"[gateway {response.model} | {latency:.1f}s | "
                         f"{usage['total_tokens']} tokens | ¥{cost:.4f}]")
+            _log_llm_cost("gateway", "gateway_chat", usage, cost,
+                          model=getattr(response, "model", ""),
+                          duration_s=round(latency, 2))
         return response.content
 
     def list_available_models(self) -> dict[str, list[str]]:

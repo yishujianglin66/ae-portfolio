@@ -1,7 +1,7 @@
 // ae/scripts/manga/flash_shake.jsx
 // 漫剪特效：闪白 + 震动（在 drop 点触发）
-// 参数通过 Bridge runScript 注入，或作为独立脚本执行
-// 用法: 通过 ae_command.json {command:"runScript", args:{code: "..."}} 下发
+// 参数通过 Bridge executeAtomScript 注入，或作为独立脚本执行
+// 用法: 通过 ae_command.json {command:"executeAtomScript", args:{script: "..."}} 下发
 
 (function() {
     // ===== 参数（由 Python 端参数化注入） =====

@@ -220,6 +220,153 @@ def export_decision_log(script: DirectorScript, path,
     return p
 
 
+# 脉冲运镜撞击的鼓点强度门槛 (2026-09-19): 仅 kick/snare 强度 ≥ 此值的真值
+# 事件才触发"拉进-闪回"。0.5 与 _anchor_strong / 强鼓点集 的口径一致。
+PUNCH_STRENGTH_DEFAULT = 0.5
+
+# 旋律(小提琴)撞击门槛 (2026-09-19 用户二次反馈): 用户要求"跟小提琴节奏变换",
+# 但旋律锚在铺垫段 4.43/s、爆发段 5.92/s —— 全接必然与撞击包络重叠成糊
+# (v4 的 92% 占空比就是这么来的)。取 P80=0.868 作为"节奏变换/重音级"事件门槛
+# (强度 ≥0.85 约 0.9-1.2 事件/秒), 只让结构性重音触发撞击。
+MELODY_PUNCH_STRENGTH_DEFAULT = 0.85
+
+# 可承载脉冲撞击的运镜类型 (2026-09-19): 在原 push/zoom_in 之外纳入 static。
+# 撞击改由音乐事件驱动后, 落在静止镜头上的小提琴重音不该被忽略 —— 静止镜头
+# 里的撞击视觉对比度最高。触发源已收敛为精选重音, 不会重现 2026-08-15 的
+# 「每个镜头都晃动推拉闪回」(那次是"全量 onset × 全部镜头"导致)。
+# 平移/斜移类 (pan_*/diag_pan) 仍不承载撞击: 基础运镜与撞击叠加会互相干扰。
+PUNCH_ELIGIBLE_EFFECTS = ("push", "zoom_in", "static")
+
+# 脉冲撞击包络 (2026-09-19 二次反馈提速) —— 渲染表达式与质检脚本共用同一组
+# 常量, 避免"改了渲染忘了改指标"的漂移。语义: 冲近 N 帧 (二次加速) →
+# 弹回 M 帧 (easeOut)。用户 2026-08-14 定义冲击力来源 = "快起快回",
+# 故 2026-09-19 把 3+8=11 帧收到 2+5=7 帧并提高峰值 0.12→0.15。
+PUNCH_PEAK = 0.15            # 缩放峰值 (z = 1.0 → 1.0+PUNCH_PEAK, 上限 1.15)
+PUNCH_ATTACK_FRAMES = 2      # 冲近帧数
+PUNCH_RELEASE_FRAMES = 5     # 弹回帧数
+PUNCH_ENVELOPE = PUNCH_ATTACK_FRAMES + PUNCH_RELEASE_FRAMES   # 7 帧
+PUNCH_MIN_GAP_FRAMES = PUNCH_ENVELOPE   # 间隔 ≥ 包络 → 每次撞击完整走完
+PUNCH_PEAK_PAIR = 0.15       # 双鼓点对分支的峰值 (单峰曲线, 4+6 帧)
+
+# 包络完整度归一 (2026-09-23, POC 实测驱动) —— 用户裁决为 "(c)+(a) 分段处置":
+#   · 短段 (帧数 ≤ PUNCH_SHORT_SEGMENT_FRAMES): 承认"急推入切"是一种风格, 不动排程。
+#     短视频段本就装不下 7 帧包络, 强行改会让撞击数断崖式下降。
+#   · 中长段: 把装不下的 onset **前移**到"还能完整走完包络"的最近帧。
+#     前移量 ≤ PUNCH_MAX_SHIFT_FRAMES, 保证峰值仍落在重音容差内 (见下), 超出则丢弃。
+# 背景: POC 实测 v9 计划 45 次撞击中, 9 次因 onset 帧 ≥ 段帧数而根本不触发,
+# 进入渲染的 36 次里仅 11 次完整播完包络, 13 次切走时镜头仍压在峰上 ——
+# 成品里"闪回"没播出来, 而当时的验收指标只数排程次数, 看不到这件事。
+PUNCH_SHORT_SEGMENT_FRAMES = 8   # ≤ 此帧数视为短段, 承认风格不修
+# 前移上限: 2 帧 = 83.3ms @24fps。R-9002 的重音容差是 80ms, 本值比它宽 3.3ms ——
+# 取 2 而非 1 的依据是实测收益差: 全库 v2~v9 的 274 个截断里, 缺口=2 帧的有 103 个
+# (最大桶), 允许前移 2 帧可救回 183 个, 只允许 1 帧只能救 80 个。
+# 若要严格 ≤80ms, 设 AEKV_PUNCH_MAX_SHIFT=1 即可。
+try:
+    PUNCH_MAX_SHIFT_FRAMES = max(0, int(os.environ.get("AEKV_PUNCH_MAX_SHIFT", "2")))
+except ValueError:
+    PUNCH_MAX_SHIFT_FRAMES = 2
+
+# 段长自适应包络 (2026-09-23, P12) —— **默认关闭**, 需 AEKV_PUNCH_ADAPTIVE_ENVELOPE=1 启用。
+# 动机: POC 实测 v9 的 25 次截断里 19 次是"段长 4-6 帧 < 包络 7 帧"——物理装不下,
+# 排程无解。此时唯一能让撞击读成"一次命中"的办法是**按可用帧数压缩包络**
+# (即 R-2026-9012 已写下的"包络 ≤ 节拍间隔（快起快回）")。
+# 默认关闭的原因: 它会明显改变短镜头的观感, 属用户裁决项; 本开关用于出 A/B 对照。
+PUNCH_ADAPTIVE_ENVELOPE = os.environ.get("AEKV_PUNCH_ADAPTIVE_ENVELOPE", "") == "1"
+
+
+def effective_punch_envelope(seg_frames: int, last_onset_frame: int,
+                             *, attack: int = PUNCH_ATTACK_FRAMES,
+                             release: int = PUNCH_RELEASE_FRAMES,
+                             adaptive: bool | None = None) -> tuple[int, int]:
+    """按可用帧数给出实际的 (冲近帧数, 弹回帧数)。
+
+    默认(adaptive=False)恒返回 (attack, release) —— 与历史行为逐字一致。
+    开启自适应时: 若最后一个 onset 之后装不下完整包络, 就按默认比例把包络压到
+    刚好装下, 冲/弹各至少 1 帧(否则读不出"起落", 不构成一次撞击)。
+    段太短以致连 1+1 都塞不进时返回 (0, 0), 表示这一处无法构成完整撞击。
+    """
+    if adaptive is None:
+        adaptive = PUNCH_ADAPTIVE_ENVELOPE
+    if not adaptive:
+        return attack, release
+    room = seg_frames - 1 - last_onset_frame      # 最后一个 onset 之后还剩几帧
+    if room >= attack + release:
+        return attack, release
+    if room < 2:
+        return 0, 0
+    a = max(1, min(attack, int(round(room * attack / (attack + release)))))
+    r = max(1, room - a)
+    return a, r
+
+
+def punch_onsets_from_anchors(anchor_events: dict,
+                              strength: float = PUNCH_STRENGTH_DEFAULT) -> list[float]:
+    """kick/snare 真值事件 → 脉冲运镜触发时刻表 (绝对 BGM 时间, 升序去重)。
+
+    2026-09-19 听感修复: 撞击是"重音强调", 触发源必须是感知得到的重音。
+    旧行为用全部鼓锚(含弱)+全部旋律锚, 0-27s 达 ~10 事件/秒且 2/3 不在
+    感知强拍上 → 缩放持续泵动、读不出离散命中 (包络占空比 92%)。
+    """
+    return sorted({round(float(t), 3)
+                   for kind in ("kick", "snare")
+                   for t, s in (anchor_events.get(kind) or [])
+                   if float(s) >= strength})
+
+
+def fit_punch_envelope(onset_frames: list[int],
+                       seg_frames: int,
+                       *,
+                       envelope: int = PUNCH_ENVELOPE,
+                       min_gap: int = PUNCH_MIN_GAP_FRAMES,
+                       short_segment_frames: int = PUNCH_SHORT_SEGMENT_FRAMES,
+                       max_shift: int = PUNCH_MAX_SHIFT_FRAMES
+                       ) -> tuple[list[int], int, int]:
+    """把 onset 帧表归一成"包络装得下"的排程（用户裁决 (c)+(a) 分段处置）。
+
+    · 短段（`seg_frames <= short_segment_frames`）：承认"急推入切"风格，**原样返回**。
+      实测依据：v9 的 25 次截断里 19 次的段长只有 4-6 帧，**比包络本身还短**，
+      排程无论怎么改都装不下 —— 对这些只能承认风格或改动剪辑长度。
+    · 中长段：把装不下的 onset 前移到"还能完整走完包络"的最近帧（= seg - envelope）；
+      前移量超过 `max_shift` 则丢弃（再往前就偏离重音了）。
+    · 前移会缩短相邻间距，故最后**重跑一次 min_gap 门**，保证包络不叠成糊。
+
+    Returns:
+        (归一后的帧表, 前移次数, 丢弃次数)
+
+    契约自洽（不依赖调用方先做什么）：返回值恒满足
+        ① 每个帧都装得下完整包络（中长段）或落在段内（短段）；
+        ② 相邻帧间距 >= min_gap —— 包络不叠成糊。
+    故本函数对 min_gap 是**幂等**的：调用方先滤过也不会被重复剔除。
+    """
+    # 1) 排序去重 + 间隔门（幂等）
+    gated: list[int] = []
+    for f in sorted(set(onset_frames)):
+        if not gated or f - gated[-1] >= min_gap:
+            gated.append(f)
+
+    # 2) 短段原样返回（承认"急推入切"）
+    if seg_frames <= short_segment_frames:
+        return gated, 0, 0
+
+    # 3) 中长段：前移到可容纳帧，超限丢弃；再补一次间隔门
+    latest = seg_frames - envelope
+    kept: list[int] = []
+    shifted = dropped = 0
+    for f in gated:
+        if f <= latest:
+            kept.append(f)
+        elif f - latest <= max_shift:
+            kept.append(latest)
+            shifted += 1
+        else:
+            dropped += 1
+    refit: list[int] = []
+    for f in sorted(set(kept)):
+        if not refit or f - refit[-1] >= min_gap:
+            refit.append(f)
+    return refit, shifted, dropped
+
+
 @dataclass
 class RenderResult:
     """渲染结果"""
@@ -235,6 +382,9 @@ class RenderResult:
     # 生产级内容复核
     content_verified: bool | None = None   # None=未复核, True/False=复核结果
     verification_reason: str = ""
+    # 视频流时长 (2026-09-19): 容器时长 = max(视频流, 音轨), 音轨更长时
+    # 容器时长会把"视频短于音乐"的交付缺陷掩盖成达标。此字段单独记录视频流时长。
+    video_duration: float = 0.0
 
 
 # ================================================================
@@ -584,9 +734,15 @@ class ProductionDirector:
 
             # 3.5 时长守卫 (2026-08-16): 帧量化后的最后防线 — 实测成片与
             # 剧本时长差 >0.15s 时重编码裁齐, 杜绝"多出几秒"类交付缺陷
+            # 2026-09-19 修正: 原实现只处理"超长"(裁齐), 却对"偏短"同样走
+            # 裁剪并在无变化时仍报"→ 裁齐 X.XXs", 把缺陷谎报成修复。实测:
+            # 20s/27s 集成片视频流分别短 0.22s/1.67s, 因音频更长使容器时长
+            # 达标而层层放行。现在分开处理: 超长→裁; 偏短→明确标注交付缺陷
+            # (裁剪无法补帧), 交由合成完整性核对定位丢帧环节。
             try:
-                _vdur = self._probe_duration(temp_video)
-                if abs(_vdur - actual_duration) > 0.15:
+                _vdur = self._probe_video_duration(temp_video)
+                _delta = _vdur - actual_duration
+                if _delta > 0.15:
                     _trimmed = Path(temp_video).with_name("trimmed_final.mp4")
                     _tr = subprocess.run(
                         [self.ffmpeg, "-y", "-i", temp_video,
@@ -602,6 +758,13 @@ class ProductionDirector:
                         temp_video = str(_trimmed)
                     else:
                         print(f"  [时长守卫] 裁剪失败, 保持原片({_vdur:.2f}s)")
+                elif _delta < -0.15:
+                    self._duration_shortfall = -_delta
+                    _fps_g = getattr(self, "_render_fps", 24) or 24
+                    print(f"  [时长守卫] ⚠ 视频流 {_vdur:.2f}s 短于目标 "
+                          f"{actual_duration:.2f}s (差 {-_delta:.2f}s ≈ "
+                          f"{round(-_delta * _fps_g)} 帧) — 裁剪不能补帧, "
+                          f"标记交付缺陷 DURATION_SHORT")
             except Exception as _guard_e:  # noqa: BLE001
                 print(f"  [时长守卫] 跳过({_guard_e})")
 
@@ -682,6 +845,17 @@ class ProductionDirector:
                 print(f"输出: {output_path}")
                 print(f"大小: {result.file_size_mb:.2f} MB")
                 print(f"时长: {result.duration:.2f}s")
+                # 视频流 vs 容器核对 (2026-09-19): 容器时长含音轨, 音轨更长时
+                # 会掩盖画面提前结束; 两者差 >0.15s 即视为交付缺陷并显式打印。
+                if result.video_duration > 0:
+                    _dshort = result.duration - result.video_duration
+                    if _dshort > 0.15:
+                        print(f"  ⚠ 视频流仅 {result.video_duration:.2f}s, "
+                              f"短于容器/音乐 {_dshort:.2f}s "
+                              f"(≈{round(_dshort * max(result.fps, 24))} 帧) "
+                              f"— 交付缺陷 DURATION_SHORT, 画面提前结束")
+                    else:
+                        print(f"视频流: {result.video_duration:.2f}s ✓ (与容器一致)")
                 print(f"分辨率: {result.resolution[0]}x{result.resolution[1]}")
                 print(f"帧率: {result.fps}fps")
                 print(f"音频: {'有' if result.has_audio else '无'}")
@@ -1202,6 +1376,51 @@ class ProductionDirector:
                     # 律动层 = 全部 kick/snare 真值（hihat 已被 stem 分离天然排除）
                     self._groove_onsets = sorted(float(t) for t in self._onset_types)
                     self._anchor_strong = sorted(_strong_anchors)
+                    # ── 脉冲运镜撞击触发源 (2026-09-19) ────────────────
+                    # 撞击是"重音强调", 触发源必须是感知得到的重音: kick/snare
+                    # 强度 ≥ 0.5。旧行为把全部鼓锚(含弱)+全部旋律锚都当触发源,
+                    # 0-27s 达 ~10 事件/秒且 2/3 不在感知强拍上 → 缩放持续泵动、
+                    # 读不出"踩点"。旋律锚的服务范围见 _punch_melody_allowed。
+                    _ps = PUNCH_STRENGTH_DEFAULT
+                    _ps_env = _os_da.environ.get("MASTER_PUNCH_STRENGTH")
+                    if _ps_env:  # 阈值可调 (A/B 用)
+                        try:
+                            _ps = float(_ps_env)
+                        except ValueError:
+                            pass
+                    self._punch_onsets = punch_onsets_from_anchors(
+                        self._anchor_events, _ps)
+                    # 小提琴撞击源 (2026-09-19 二次反馈): 只取"节奏变换/
+                    # 重音级"旋律事件 (强度 ≥ MELODY_PUNCH_STRENGTH_DEFAULT)。
+                    # 旋律锚仍全量驱动切点池, 此处只是撞击用的精选子集。
+                    _ms = MELODY_PUNCH_STRENGTH_DEFAULT
+                    _ms_env = _os_da.environ.get("MASTER_PUNCH_MELODY_STRENGTH")
+                    if _ms_env:
+                        try:
+                            _ms = float(_ms_env)
+                        except ValueError:
+                            pass
+                    self._melody_punch_onsets = sorted({
+                        round(float(t), 3)
+                        for t, s in (_anch.get("melody_onsets") or [])
+                        if float(s) >= _ms})
+                    # 2026-09-24 用户裁决「要纯」: 撞击只落**强鼓点**(≥0.5),
+                    # 旋律重音不再触发撞击。依据: v6(纯) 21 次/强鼓点 100% vs
+                    # v9(all) 36 次/仅 50% —— 用户选纯度。
+                    # 注意: 旋律锚**仍全量驱动切点池**（见 _onsets），踩点密度不受影响,
+                    # 收敛的只是"哪些事件触发脉冲运镜"。
+                    self._melody_punch_scope = _os_da.environ.get(
+                        "MASTER_PUNCH_MELODY_SCOPE", "off")
+                    # 显式打印触发源构成: 这类"旋钮默认值静默关掉用户要的行为"
+                    # 的错误必须能在日志里一眼看出 (2026-09-19 踩过一次:
+                    # 旋律默认值留在 off, 白跑一版渲染才发现没跟小提琴；
+                    # 2026-09-24 反向: 用户明确要纯, 故默认改为 off)。
+                    print(f"  [punch] 撞击触发源: 强鼓点(≥{_ps}) "
+                          f"{len(self._punch_onsets)} 个 + 小提琴重音(≥{_ms}) "
+                          f"{len(self._melody_punch_onsets)} 个 | "
+                          f"旋律范围={self._melody_punch_scope} | "
+                          f"可撞击运镜={list(PUNCH_ELIGIBLE_EFFECTS)} | "
+                          f"包络={PUNCH_ENVELOPE}帧(峰值+{PUNCH_PEAK})")
                     self._drum_anchor_mode = True
                     # E0-1 关键注入: 切点候选池消费方全部升级为 stem 真值。
                     # （此前只改 _onset_types 时切点层不受影响——第一轮 A/B已证伪：
@@ -2633,14 +2852,35 @@ class ProductionDirector:
                     _recent_cams.pop(0)
 
                 # 计算该镜头内的 onset 时间点（用于脉冲运镜）
+                # ── 撞击触发源收敛 (2026-09-19 听感修复) ──────────────────
+                # 此前直接用 _onsets(= 全部鼓锚, 无强度过滤 + 全部旋律锚)。
+                # 实测 0-27s: 该源 ~10 事件/秒, 而人耳感知的强拍(kick/snare
+                # ≥0.5)只有 1.07/s —— 三分之二的撞击打在弱鼓点或旋律音上,
+                # 听感"拉镜不踩点"。修复:
+                #   · 鼓点侧只取强锚 (阈值 MASTER_PUNCH_STRENGTH, 默认 0.5)
+                #   · 旋律侧按 2026-09-05 用户反馈的**原始范围**服务高潮段
+                #     (当年原话"高潮段没卡小提琴节奏变换") — 该需求落地时被
+                #     全局并入了 _onsets, 铺垫段也在按旋律音泵动, 本轮回收到
+                #     需求范围 (MASTER_PUNCH_MELODY_SCOPE=drop|all|off)
+                #   锚点缓存缺席时 _punch_onsets 不存在 → 完全退回旧行为。
                 seg_onsets = []
-                if hasattr(self, '_onsets') and self._onsets:
-                    for ot in self._onsets:
-                        # onset 在 BGM 文件时间，转换为输出视频时间
-                        out_t = ot - bgm_start_sec
-                        if seg_start <= out_t < seg_end:
-                            # 转换为镜头内相对时间
-                            seg_onsets.append(out_t - seg_start)
+                _punch_src = getattr(self, '_punch_onsets', None)
+                if _punch_src is None:
+                    _punch_src = getattr(self, '_onsets', None) or []
+                else:
+                    _punch_src = set(_punch_src)
+                    if self._punch_melody_allowed(mood):
+                        # 只用"节奏变换/重音级"旋律事件 (非全部旋律锚)
+                        _punch_src |= {round(float(t), 3) for t in
+                                       (getattr(self, '_melody_punch_onsets',
+                                                None) or [])}
+                    _punch_src = sorted(_punch_src)
+                for ot in _punch_src:
+                    # onset 在 BGM 文件时间，转换为输出视频时间
+                    out_t = ot - bgm_start_sec
+                    if seg_start <= out_t < seg_end:
+                        # 转换为镜头内相对时间
+                        seg_onsets.append(out_t - seg_start)
 
                 seg = DirectorSegment(
                     index=seg_idx,
@@ -4279,9 +4519,40 @@ class ProductionDirector:
                             _gd, _g0 = abs(g - _bt), g
                     _snapped.append(max(_bt0, _g0 if _g0 is not None else _bt))
                 _bounds = _snapped + [_bt0 + render_dur]
+                # ── 子片段帧数守恒 (2026-09-19) ──────────────────────────
+                # 事故: 各子片段按 round(_sub_dur*fps) 独立取整, 21 个曲线段
+                # 累积少 40 帧 (1.667s) —— 27s 片子视频流只有 25.33s, 画面比
+                # 音乐提前 1.67s 结束。修法: 由**边界帧号差分**分配帧数, 末位
+                # 回填段计划帧数, 使 Σ 子片段帧数 == round(render_dur*fps)
+                # (帧级守恒, 与 EDL 声明的切点网格一致)。
+                _plan_f = max(2, round(render_dur * fps))
+                _bf = [0]
+                for _b in _bounds[:-1]:
+                    _bf.append(int(round((_b - _bt0) * fps)))
+                _bf.append(_plan_f)
+                for _i in range(1, len(_bf)):        # 单调化: 每段至少 1 帧
+                    _bf[_i] = max(_bf[_i], _bf[_i - 1] + 1)
+                _alloc = [_bf[_i + 1] - _bf[_i] for _i in range(len(_bf) - 1)]
+                # 超标退让: 从末位向前逐级减 (每个子片段保底 1 帧)。
+                # 只减末位会在"末位已是 1 帧"时减不动 → 残余偏差; 逐级退让
+                # 后, 只要 plan_f ≥ 子片段数 (render_dur ≥ 0.125s@24fps) 即守恒。
+                _over = sum(_alloc) - _plan_f
+                _i = len(_alloc) - 1
+                while _over > 0 and _i >= 0:
+                    _take = min(_alloc[_i] - 1, _over)
+                    if _take > 0:
+                        _alloc[_i] -= _take
+                        _over -= _take
+                    _i -= 1
+                if sum(_alloc) != _plan_f:
+                    print(f"    [帧数守恒] {Path(seg.source_file).name} "
+                          f"seg{seg.index}: 分配 {_alloc} ≠ {_plan_f} 帧 "
+                          f"(±{abs(sum(_alloc) - _plan_f)} 帧)")
                 _prev_b = _bt0
                 for _ci, ((_frac, _v), _sb) in enumerate(zip(_curve, _bounds)):
-                    _sub_dur = max(0.08, _sb - _prev_b)
+                    # 子段时长按分配帧数回写, 与 -frames:v 严格一致 (若沿用
+                    # 未量化的 _sub_dur, 输出级 -t 会先截断到 floor(dur*fps))
+                    _sub_dur = _alloc[_ci] / fps
                     _prev_b = _sb
                     _vv = _v * _k
                     _sub_path = run_dir / f"clip_{seg.index:03d}s{_ci}.mp4"
@@ -4291,7 +4562,7 @@ class ProductionDirector:
                         resolution=resolution, fps=fps, color=preset,
                         speed=_vv, lut_path=getattr(self, '_lut_path', None),
                         zoompan_effect=None, onset_times=None,
-                        out_frames=max(2, round(_sub_dur * fps)),
+                        out_frames=max(1, _alloc[_ci]),   # 帧级守恒分配
                         flash=(_flash_c if _ci == 0 else ""),
                         trans=(_trans_c if _ci == 0 else ""),
                     )
@@ -4337,6 +4608,49 @@ class ProductionDirector:
             raise RuntimeError("所有素材裁剪失败，无法生成视频")
 
         print(f"  [3.2] 合成 {len(clips)} 个片段（xfade真转场）...")
+
+        # ── 合成完整性核对 (2026-09-19) ──────────────────────────────
+        # 事故背景: 20s/27s 集成片视频流分别只有 19.79s/25.33s, 而剧本为
+        # 20s/27s; 帧在"片段渲染 → 链分组 → 拼接"链中静默丢失, 全程无任何
+        # 告警 (拼接用 -c:v copy, 部分输入被丢弃时 ffmpeg 仍返回 0)。此处
+        # 逐环节打印帧数, 把"哪一环丢帧"直接暴露在日志里。
+        _cb_fps = float(fps) or 24.0
+        _plan_f = 0
+        for _s in segs:
+            _plan_f += max(2, round(float(_s.duration) * _cb_fps))
+        _clip_f, _clip_bad = 0, []
+        for _cp, _cs in clips:
+            _n = self._probe_nframes(_cp)
+            if _n < 0:
+                continue
+            _clip_f += _n
+            _exp_n = max(2, round(float(_cs.duration) * _cb_fps))
+            if _n < max(2, round(_exp_n * 0.5)):
+                _clip_bad.append((Path(_cp).name, _n, _exp_n))
+        print(f"    [帧数核对] 剧本 {_plan_f} 帧 / 片段合计 {_clip_f} 帧 "
+              f"({len(clips)} 片段) — 差 {_plan_f - _clip_f} 帧")
+        if _clip_bad:
+            print(f"    [帧数核对] ⚠ 少见短片段 {len(_clip_bad)} 个 "
+                  f"(速度曲线首段落在吸拍点上, 为帧级守恒的正常分配): "
+                  f"{_clip_bad[:4]}")
+
+        # ── 段级帧数对账 (2026-09-19) ────────────────────────────────
+        # 每段实际帧数必须等于 round(段时长 × fps) —— 这是 EDL 切点网格的
+        # 定义。实测 27s 片差 11 帧 (0.46s): 漂移累加器的亚帧级系统偏差
+        # 逐段累积, 时间线整体压缩, 切点随之离开鼓点网格。
+        # 修正只作用在**段末片段**的尾部, 因此段内子片段边界与段间切点位置
+        # 都不动 → 鼓点网格对齐不受影响, 而成片总帧数 == 剧本帧数。
+        _rec = self._reconcile_segment_frames(clips, _cb_fps)
+        if _rec["pads"]:
+            print(f"    [段级对账] 段末补帧 {_rec['pads']} 处 "
+                  f"(计划 {_rec['plan']} 帧 / 修正前 {_rec['act']} 帧)")
+        if _rec["trims"]:
+            print(f"    [段级对账] ⚠ 段超长需裁剪 {len(_rec['trims'])} 处: "
+                  f"{_rec['trims'][:4]}")
+        if _rec["act"] != _rec["plan"] and not _rec["pads"]:
+            print(f"    [段级对账] ⚠ 账不平: 计划 {_rec['plan']} 帧 / "
+                  f"实测 {_rec['act']} 帧 (差 {_rec['plan'] - _rec['act']})")
+
         concat_output = run_dir / "concatenated.mp4"
 
         if len(clips) == 1:
@@ -4369,6 +4683,51 @@ class ProductionDirector:
             print("    [WARN] 组间拼接失败，使用首片段")
             shutil.copy(group_outputs[0], str(concat_output))
 
+        # ── 拼接核对 (2026-09-19): 链输出帧数必须等于输入片段合计 ──
+        # _concat_hard 走 -c:v copy, 输入参数不一致时 ffmpeg 可能丢弃后续
+        # 输入却仍返回 0 → 静默截断。这里显式比对, 不一致直接降级重编码。
+        _g_out_f = sum(max(0, self._probe_nframes(_g)) for _g in group_outputs)
+        _cat_f = self._probe_nframes(str(concat_output))
+        if _cat_f >= 0 and _g_out_f > 0 and _cat_f != _g_out_f:
+            print(f"    [拼接核对] ⚠ 链 {_g_out_f} 帧 → 成片 {_cat_f} 帧 "
+                  f"(差 {_g_out_f - _cat_f} 帧), 流拷贝截断 → 重编码兜底")
+            _re_out = str(concat_output) + ".reenc.mp4"
+            _best, _best_f = _cat_f, None
+            if self._concat_hard(group_outputs, _re_out, force_reencode=True):
+                _re_f = self._probe_nframes(_re_out)
+                if _re_f > _best:
+                    _best, _best_f = _re_f, _re_out
+                else:
+                    Path(_re_out).unlink(missing_ok=True)
+            if _best < _g_out_f:
+                # 重编码仍丢帧 → 滤镜级 concat (逐输入解码归一化, 最终兜底)
+                _ff_out = str(concat_output) + ".fcat.mp4"
+                if self._concat_filter(group_outputs, _ff_out):
+                    _ff_f = self._probe_nframes(_ff_out)
+                    if _ff_f > _best:
+                        if _best_f:
+                            Path(_best_f).unlink(missing_ok=True)
+                        _best, _best_f = _ff_f, _ff_out
+                    else:
+                        Path(_ff_out).unlink(missing_ok=True)
+            if _best_f and _best > _cat_f:
+                shutil.move(_best_f, str(concat_output))
+                print(f"    [拼接核对] 恢复 {_best} 帧 "
+                      f"(仍差 {_g_out_f - _best} 帧)")
+            elif _best_f:
+                Path(_best_f).unlink(missing_ok=True)
+        elif _cat_f >= 0:
+            print(f"    [拼接核对] 链 {_g_out_f} 帧 = 成片 {_cat_f} 帧 ✓")
+
+        # 与剧本帧数比对: 差异即"视频短于音乐"类交付缺陷的源头
+        _final_f = self._probe_nframes(str(concat_output))
+        if _final_f >= 0 and _plan_f > 0 and abs(_final_f - _plan_f) > 1:
+            _fps_cb = _cb_fps
+            print(f"    [帧数核对] ⚠ 成片 {_final_f} 帧 ≠ 剧本 {_plan_f} 帧 "
+                  f"(差 {_plan_f - _final_f} 帧 ≈ "
+                  f"{( _plan_f - _final_f) / _fps_cb:.3f}s)")
+            self._composition_frame_deficit = _plan_f - _final_f
+
         n_xfade = sum(1 for _, seg in clips[1:] if self._xfade_for(seg)[1] > 0)
         print(f"      生效转场: {n_xfade} 处, 链数: {len(group_outputs)}")
 
@@ -4393,6 +4752,38 @@ class ProductionDirector:
             print(f"    [WARN] 中间产物清理失败(不影响交付): {_clean_e}")
 
         return str(concat_output)
+
+    def _punch_melody_allowed(self, mood: str) -> bool:
+        """旋律(小提琴)事件是否可参与**该段**的撞击触发 (2026-09-19)。
+
+        演变:
+          2026-09-05  用户「高潮段没卡小提琴节奏变换/重音没有适配镜头」→
+                      旋律锚接入脉冲运镜, 但实现是**全量**并入 _onsets。
+          2026-09-19  用户「镜头动感拉镜不如之前踩点」→ 实测撞点源 ~10 事件/秒、
+                      包络占空比 92% (全量旋律 + 全量鼓锚) → 收成纯强鼓点。
+          2026-09-19  用户「不够, 没跟小提琴节奏变换, 视觉冲击力不到位」→
+                      确认要跟小提琴, 但必须是**节奏变换/重音级**事件而非每个音:
+                      全量旋律在铺垫 4.43/s、爆发 5.92/s, 与包络必然重叠;
+                      按强度门槛 (MELODY_PUNCH_STRENGTH_DEFAULT=0.85 ≈ P80)
+                      精选到 ~1 事件/秒, 叠加撞击包络缩短到 7 帧后不再重叠。
+
+          2026-09-24  用户裁决「要纯」(原话: 要纯, 能完美踩点) → 默认改为 **off**：
+                      撞击只落强鼓点；v6(纯: 21 次/100% 强鼓点) vs v9(all: 36 次/50%)
+                      之间用户选纯度。旋律锚**不再触发撞击**，但**仍全量驱动切点池**。
+          off (现行默认) — 不跟随 (纯打击乐)
+           drop        — 仅 drop/climax 段跟随 (2026-09-05 需求的原始范围)
+           all         — 全曲跟随小提琴重音/音变点 (2026-09-19 版行为)
+
+        旋律锚全量仍驱动**切点池**（见 _onsets），此处只是撞击用的精选子集。
+        锚点缓存缺席时本函数不会被调用（调用方直接退回 _onsets 旧路径）。
+        """
+        scope = getattr(self, "_melody_punch_scope", "off")
+
+        if scope == "all":
+            return True
+        if scope == "off":
+            return False
+        return str(mood) in ("drop", "climax")
 
     def _xfade_for(self, seg) -> tuple[str, float]:
         """进入该段落的转场 → (xfade滤镜名, 时长秒)；cut 返回 ('', 0)"""
@@ -4482,13 +4873,17 @@ class ProductionDirector:
             print("    [WARN] xfade链合成超时")
             return False
 
-    def _concat_hard(self, clip_paths, output) -> bool:
+    def _concat_hard(self, clip_paths, output, force_reencode: bool = False) -> bool:
         """硬切 concat 拼接（基线路径，也是 xfade 的兜底）
 
         2026-08-14 修复: 此前用 libx264 preset slow 重编码整片 + 600s 超时,
         229 组长片 (165s) 在机器负载高时超时 → 回退首片段 (13.5s 截断 bug)。
         改为: 优先 -c:v copy 流拷贝 (各组同编码参数, 秒级完成);
         失败 (混合编码) 再回退重编码。
+
+        force_reencode=True: 跳过流拷贝直接重编码。用于"流拷贝成功但输出
+        帧数少于输入"的静默截断场景 (2026-09-19) —— 此时 copy 的 returncode
+        为 0, 仅凭返回码无法识别, 必须走重编码路径才能保帧。
         """
         concat_file = Path(output).parent / f"concat_{Path(output).stem}.txt"
         with open(concat_file, "w", encoding="utf-8") as f:
@@ -4498,21 +4893,22 @@ class ProductionDirector:
                 f.write(f"file '{safe_path}'\n")
 
         # 1) 流拷贝 (同参数 H.264 片段直接拼接)
-        cmd_copy = [
-            self.ffmpeg, "-y",
-            "-f", "concat", "-safe", "0",
-            "-i", str(concat_file),
-            "-c:v", "copy", "-an",
-            "-movflags", "+faststart",
-            output,
-        ]
-        try:
-            r = subprocess.run(cmd_copy, capture_output=True, text=True, timeout=600)
-            if r.returncode == 0 and Path(output).exists() \
-                    and Path(output).stat().st_size > 0:
-                return True
-        except subprocess.TimeoutExpired:
-            pass
+        if not force_reencode:
+            cmd_copy = [
+                self.ffmpeg, "-y",
+                "-f", "concat", "-safe", "0",
+                "-i", str(concat_file),
+                "-c:v", "copy", "-an",
+                "-movflags", "+faststart",
+                output,
+            ]
+            try:
+                r = subprocess.run(cmd_copy, capture_output=True, text=True, timeout=600)
+                if r.returncode == 0 and Path(output).exists() \
+                        and Path(output).stat().st_size > 0:
+                    return True
+            except subprocess.TimeoutExpired:
+                pass
 
         # 2) 回退: 重编码 (混合编码/流拷贝失败时)
         cmd = [
@@ -4529,6 +4925,48 @@ class ProductionDirector:
         try:
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
             if r.returncode != 0 or not Path(output).exists() or Path(output).stat().st_size == 0:
+                return False
+            return True
+        except subprocess.TimeoutExpired:
+            return False
+
+    def _concat_filter(self, clip_paths, output, *, size=(1920, 1080),
+                       fps: int = 24) -> bool:
+        """滤镜级 concat 兜底 (2026-09-19)。
+
+        事故背景: `-f concat -c:v copy` 在某个片段编码参数与前面不一致
+        (分辨率 / SAR / 时基, 典型来源是 4K 源素材经不同 vf 链产出) 时会
+        **静默丢弃该片段及其后全部输入, 而 ffmpeg 仍返回 0** —— 实测 27s
+        集成片 109 片段只拼出 88 段 (608/648 帧), 画面比音乐早结束 1.67s。
+
+        滤镜 concat 对每个输入独立解码并逐流归一化 (scale+pad+setsar+fps+
+        format), 参数不一致也能全量拼出。代价是整片重编码, 故仅作为
+        帧数核对失败后的最终兜底。
+        """
+        n = len(clip_paths)
+        if n == 0:
+            return False
+        w, h = size
+        inputs: list[str] = []
+        for p in clip_paths:
+            inputs.extend(["-i", str(p)])
+        norm = (f"scale={w}:{h}:force_original_aspect_ratio=decrease,"
+                f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps={fps},"
+                f"format=yuv420p")
+        fc = ";".join(f"[{i}:v]{norm}[c{i}]" for i in range(n))
+        fc += ";" + "".join(f"[c{i}]" for i in range(n)) \
+            + f"concat=n={n}:v=1:a=0[outv]"
+        cmd = [self.ffmpeg, "-y"] + inputs + [
+            "-filter_complex", fc, "-map", "[outv]",
+            "-c:v", "libx264", "-preset", "fast",
+            "-b:v", "50M", "-maxrate", "60M", "-bufsize", "100M",
+            "-pix_fmt", "yuv420p", "-an",
+            "-movflags", "+faststart", str(output),
+        ]
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
+            if r.returncode != 0 or not Path(output).exists() \
+                    or Path(output).stat().st_size == 0:
                 return False
             return True
         except subprocess.TimeoutExpired:
@@ -4620,23 +5058,35 @@ class ProductionDirector:
         # static, 导致 173 个静态镜头全被鼓点推拉覆盖 (用户"每个镜头
         # 都晃动推拉闪回"的真实原因)。static/pan/diag/zoom_back 不再被覆盖。
         if onset_times and len(onset_times) > 0 and \
-                zoompan_effect in ("push", "zoom_in"):
+                zoompan_effect in PUNCH_ELIGIBLE_EFFECTS:
             # === Onset 驱动"拉进-闪回"撞击运镜 ===
             # 每个鼓点做一次完整撞击: 拉进(快速冲近) + 闪回(快速弹回),
             # 冲击力来自"快起快回", 而非单调推拉/交替阶梯。
             # (用户 2026-08-14: "先拉进后闪回, 有视觉冲击力, 踩鼓点节拍")
+            # 2026-09-19 二次反馈「视觉冲击力不到位」→ 包络提速 (3+8→2+5 帧)
+            # 且幅度 0.12→0.15 (顶到既有 1.15 上限): 更快的起落=更硬的撞击。
+            # PUNCH_ELIGIBLE_EFFECTS 纳入 static (2026-09-19): 撞击改由
+            # 音乐事件驱动后, 落在 static 镜头上的小提琴重音不该被忽略 ——
+            # 静止镜头里的撞击对比度最高。触发源已收敛为精选重音 (~2 事件/秒),
+            # 不会重现 2026-08-15「每个镜头都晃动」的问题。
             _zp_fps = fps
             _zp_w, _zp_h = w, h
             # 将 onset 时间转换为帧号 (zoompan 处理输出帧, 直接用 ot*fps)
             onset_frames = sorted(set(
                 max(0, int(round(ot * fps))) for ot in onset_times))
-            # 密集连击合并: <0.17s(4帧) 的合并, 避免 punch 重叠成糊
-            _min_gap = 4
-            _filtered = []
-            for _f in onset_frames:
-                if not _filtered or _f - _filtered[-1] >= _min_gap:
-                    _filtered.append(_f)
-            onset_frames = _filtered
+            # 密集连击合并 (2026-09-19: 4→8→7 帧): 间隔必须 ≥ 包络帧数,
+            # 否则前一次还没弹回下一次就冲上去, 缩放被 max() 一直顶在高位,
+            # 读不出离散的"命中"。包络已提速到 7 帧 (2 冲 + 5 弹回), 故门槛
+            # 取 7 帧 (0.29s) —— 既保证每次撞击完整走完, 又允许密集段
+            # (~3 次/秒) 仍然连击。
+            # 间隔门与包络完整度归一统一由 fit_punch_envelope 负责（幂等）,
+            # 这里不再各做一遍, 避免两处规则漂移。
+            _seg_frames = max(1, int(round(duration * _zp_fps)))
+            onset_frames, _shifted, _dropped_shift = fit_punch_envelope(
+                onset_frames, _seg_frames)
+            if _dropped_shift:
+                print(f"    [punch] 段 {_seg_frames} 帧装不下包络, "
+                      f"丢弃 {_dropped_shift} 次前移超限(>{PUNCH_MAX_SHIFT_FRAMES} 帧)的撞击")
             # v23.1 双鼓点对编排 (用户 2026-08-14):
             # "第一个镜头有两个跳动鼓点, 第一个鼓点推进, 第二个鼓点拉回"
             # 镜头内恰好 2 个鼓点(间隔≥3帧) → 单峰曲线:
@@ -4646,7 +5096,7 @@ class ProductionDirector:
             if len(onset_frames) == 2 and \
                     onset_frames[1] - onset_frames[0] >= 3:
                 _f1, _f2 = onset_frames
-                _pk, _at, _rl = 0.12, 4, 6
+                _pk, _at, _rl = PUNCH_PEAK_PAIR, 4, 6
                 _z_pair = (
                     f"if(lt(on,{_f1}),1.0,"
                     f"if(lt(on,{_f1+_at}),"
@@ -4661,10 +5111,19 @@ class ProductionDirector:
                        f":d=1:s={_zp_w}x{_zp_h}:fps={_zp_fps}")
                 vf_parts.append(_zp)
             else:
-                # 每个鼓点: 拉进(3帧 0→peak 二次加速=冲) + 闪回(8帧 peak→0 easeOut=弹)
-                _peak = 0.12
-                _attack = 3
-                _release = 8
+                # 每个重音: 拉进(2帧 0→peak 二次加速=冲) + 闪回(5帧 peak→0 easeOut=弹)
+                # 2026-09-19: 3+8→2+5 (11→7 帧), 峰值 0.12→0.15 —— 更快的
+                # 起落让撞击更硬, 且 7 帧包络使重音密集段 (~3 次/秒) 不重叠。
+                # 2026-09-23 (P12): 段短到装不下 7 帧包络时, 可用自适应压缩
+                # （默认关闭, 见 PUNCH_ADAPTIVE_ENVELOPE）。压缩值按**本段最后一个
+                # onset 之后的剩余帧数**算, 一次算给整段用, 保证每个 onset 都装得下。
+                _peak = PUNCH_PEAK
+                _attack, _release = effective_punch_envelope(
+                    _seg_frames, onset_frames[-1])
+                if _attack == 0:
+                    # 极端短段（连 1 冲 1 弹都塞不进）：保留原默认包络，
+                    # 让行为退化到"定长包络被段边界截断"的历史表现，不做新花样。
+                    _attack, _release = PUNCH_ATTACK_FRAMES, PUNCH_RELEASE_FRAMES
                 _z = "1.0"
                 for _fi in onset_frames:
                     _p = (
@@ -4676,6 +5135,10 @@ class ProductionDirector:
                     )
                     _z = f"max({_z},1.0+({_p}))"
                 z_final = f"min({_z},1.15)"
+                if (_attack, _release) != (PUNCH_ATTACK_FRAMES, PUNCH_RELEASE_FRAMES):
+                    print(f"    [punch] 段 {_seg_frames} 帧自适应包络: "
+                          f"{PUNCH_ATTACK_FRAMES}+{PUNCH_RELEASE_FRAMES} → "
+                          f"{_attack}+{_release}")
                 _zp = (f"zoompan=z='{z_final}'"
                        f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
                        f":d=1:s={_zp_w}x{_zp_h}:fps={_zp_fps}")
@@ -5115,7 +5578,7 @@ class ProductionDirector:
 
         cmd = [
             self.ffprobe, "-v", "error",
-            "-show_entries", "format=duration,size:stream=width,height,r_frame_rate,codec_name,codec_type",
+            "-show_entries", "format=duration,size:stream=width,height,r_frame_rate,codec_name,codec_type,duration",
             "-of", "json", output_path,
         ]
 
@@ -5135,6 +5598,13 @@ class ProductionDirector:
                     if "/" in fps_str:
                         num, den = fps_str.split("/")
                         result.fps = int(num) // int(den) if int(den) > 0 else 24
+                    # 视频流时长 (2026-09-19): 见 RenderResult.video_duration 注释
+                    try:
+                        _vd = float(stream.get("duration", ""))
+                    except (TypeError, ValueError):
+                        _vd = 0.0
+                    if _vd > 0:
+                        result.video_duration = _vd
 
             result.success = True
         except Exception as e:
@@ -5312,6 +5782,43 @@ class ProductionDirector:
         except Exception:
             return -1
 
+    def _reconcile_segment_frames(self, clips, fps: float) -> dict:
+        """段级帧数对账 (2026-09-19)。
+
+        输入 clips = [(path, seg)] 按时间线顺序排列, 同一段落的多个子片段
+        相邻。每段实际帧数必须等于 round(seg.duration × fps) —— 这是 EDL
+        切点网格的定义; 不平时在**段末片段**尾部补帧 (tpad 克隆末帧),
+        段内子片段边界与段间切点位置均不变。
+
+        返回 {'pads', 'trims', 'plan', 'act'}。trims 只记录不执行:
+        _ensure_frame_count 只支持补帧, 裁帧需要重渲该片段 (另有专门路径)。
+        """
+        by_seg: dict[int, dict] = {}
+        order: list[int] = []
+        for p, s in clips:
+            if s.index not in by_seg:
+                by_seg[s.index] = {"dur": float(s.duration), "paths": []}
+                order.append(s.index)
+            by_seg[s.index]["paths"].append(p)
+
+        pads, trims = 0, []
+        plan_tot = act_tot = 0
+        for idx in order:
+            ent = by_seg[idx]
+            plan = max(2, round(ent["dur"] * fps))
+            act = sum(max(0, self._probe_frame_count(p)) for p in ent["paths"])
+            plan_tot += plan
+            act_tot += act
+            d = plan - act
+            if d > 0 and ent["paths"]:
+                last = ent["paths"][-1]
+                got = self._probe_frame_count(last)
+                if got >= 0 and self._ensure_frame_count(last, got + d, fps) > 0:
+                    pads += 1
+            elif d < 0:
+                trims.append((Path(ent["paths"][-1]).name, d))
+        return {"pads": pads, "trims": trims, "plan": plan_tot, "act": act_tot}
+
     def _ensure_frame_count(self, path, want: int, fps: float) -> int:
         """帧数兜底 (2026-09-10 R1 第五类根因)。
 
@@ -5367,6 +5874,50 @@ class ProductionDirector:
             return float(info["format"]["duration"])
         except Exception:
             return 60.0
+
+    def _probe_video_duration(self, path) -> float:
+        """探测**视频流**时长 (2026-09-19)。
+
+        与 _probe_duration(容器时长) 的区别: 容器时长 = max(视频流, 音轨)。
+        实测事故: 27s 集成片上音轨 27.0s、视频流仅 25.33s, 容器读回 27.0s
+        → 时长校验显示"达标", 而画面比音乐早结束 1.67s。凡用于"成片是否
+        与音乐等长"的判断, 必须读视频流时长, 不能用容器时长。
+        """
+        cmd = [
+            self.ffprobe, "-v", "error", "-select_streams", "v:0",
+            "-show_entries", "stream=duration", "-of", "csv=p=0", str(path),
+        ]
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            s = (r.stdout or "").strip().splitlines()[0]
+            if s and s != "N/A":
+                return float(s)
+        except Exception:  # noqa: BLE001
+            pass
+        return self._probe_duration(path)
+
+    def _probe_nframes(self, path) -> int:
+        """探测视频流实际帧数 (合成完整性核对用, 2026-09-19)。**失败返回 -1**。
+
+        2026-09-20 修正：原实现在文件缺失/不可解析时经 `int("" or 0)` 返回 **0**，
+        与同族的 `_probe_frame_count`（失败返回 -1）语义不一致 —— 而调用方
+        （帧数核对/拼接核对）统一用 `if _n < 0: continue` 判失败，
+        于是"探测失败"会被当成"合法读到 0 帧"，核对逻辑静默失效。
+        现与 _probe_frame_count 对齐：无法解析出一帧数即返回 -1。
+        """
+        cmd = [
+            self.ffprobe, "-v", "error", "-select_streams", "v:0",
+            "-count_frames", "-show_entries", "stream=nb_read_frames",
+            "-of", "csv=p=0", str(path),
+        ]
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            lines = (r.stdout or "").strip().splitlines()
+            if not lines or not lines[0].strip():
+                return -1
+            return int(lines[0].strip())
+        except Exception:  # noqa: BLE001
+            return -1
 
     def _probe_has_audio(self, path) -> bool:
         """检查文件是否有音频流"""

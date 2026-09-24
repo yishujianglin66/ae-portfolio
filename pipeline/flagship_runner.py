@@ -1135,83 +1135,19 @@ def _ensure_ae_bridge_ready(timeout: float = 120.0) -> bool:
 
 
 def find_resolve_exe() -> Path | None:
-    """自动发现 Resolve.exe（修复：单一硬编码路径导致已安装也误报“未找到”）。
+    """自动发现 Resolve.exe：委托 core.resolve_discovery（唯一权威来源）。
 
-    发现顺序：settings 中央配置（支持 AEKV_DAVINCI_PATH 环境变量覆盖）
-    → 常见安装路径候选 → Windows 注册表 Uninstall 条目。
+    本函数原持有第四份独立发现实现（settings → 候选路径 → 注册表）。
+    2026-09-23 收敛到 core/resolve_discovery.py，避免各调用点再次漂移：
+    同一台已装 Resolve Studio 21 的机器上，resolve_executor 的旧候选表
+    三个路径全不存在，把"已安装"误报成"未找到"。
     """
-    candidates: list[Path] = []
-    # 1. 中央 settings
-    try:
-        from puppet_automation.src.config.settings import get_settings
-        candidates.append(get_settings().davinci_path / "Resolve.exe")
-    except Exception:
-        pass
-    # 2. 常见安装位置候选
-    candidates.extend(
-        Path(p) / "Resolve.exe"
-        for p in (
-            "D:/app",
-            "D:/DaVinci Resolve",
-            "C:/Program Files/Blackmagic Design/DaVinci Resolve",
-            "D:/Program Files/Blackmagic Design/DaVinci Resolve",
-            "C:/Blackmagic Design/DaVinci Resolve",
-            "D:/Blackmagic Design/DaVinci Resolve",
-        )
-    )
-    seen = set()
-    for cand in candidates:
-        if cand in seen:
-            continue
-        seen.add(cand)
-        if cand.exists():
-            logger.info(f"[Resolve] Resolve.exe 已定位: {cand}")
-            return cand
-    # 3. Windows 注册表 Uninstall 条目（DisplayIcon / InstallSource / InstallLocation）
-    try:
-        import winreg
-        for hive, keypath in (
-            (winreg.HKEY_LOCAL_MACHINE,
-             r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"),
-            (winreg.HKEY_LOCAL_MACHINE,
-             r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"),
-        ):
-            try:
-                with winreg.OpenKey(hive, keypath) as key:
-                    n_sub = winreg.QueryInfoKey(key)[0]
-            except OSError:
-                continue
-            for i in range(n_sub):
-                try:
-                    name = winreg.EnumKey(key, i)
-                    with winreg.OpenKey(hive, f"{keypath}\\{name}") as sub:
-                        try:
-                            dn, _ = winreg.QueryValueEx(sub, "DisplayName")
-                        except OSError:
-                            continue
-                        if "DaVinci Resolve" not in str(dn):
-                            continue
-                        for field in ("DisplayIcon", "InstallLocation", "InstallSource"):
-                            try:
-                                val, _ = winreg.QueryValueEx(sub, field)
-                            except OSError:
-                                continue
-                            p = Path(str(val).strip())
-                            if not str(p):
-                                continue
-                            if p.suffix.lower() == ".exe" and p.exists():
-                                logger.info(f"[Resolve] Resolve.exe 已定位（注册表 {field}）: {p}")
-                                return p
-                            cand2 = p / "Resolve.exe"
-                            if cand2.exists():
-                                logger.info(f"[Resolve] Resolve.exe 已定位（注册表 {field}）: {cand2}")
-                                return cand2
-                except OSError:
-                    continue
-    except Exception:
-        pass
-    logger.warning("[Resolve] Resolve.exe 未找到（settings/候选路径/注册表均未命中）")
-    return None
+    from core.resolve_discovery import find_resolve_exe as _discover_exe
+
+    exe = _discover_exe()
+    if exe is None:
+        logger.warning("[Resolve] Resolve.exe 未找到（core.resolve_discovery 未命中）")
+    return exe
 
 
 def _ensure_resolve_ready(timeout: float = 120.0) -> bool:

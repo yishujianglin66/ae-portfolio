@@ -1,7 +1,7 @@
 // ae/scripts/manga/chromatic_aberration.jsx
 // 漫剪特效：色差（Chromatic Aberration）— 在 energy peak 点触发
 // 模拟 RGB 通道偏移，产生赛博朋克/故障艺术效果
-// 用法: 通过 ae_command.json {command:"runScript", args:{code: "..."}} 下发
+// 用法: 通过 ae_command.json {command:"executeAtomScript", args:{script: "..."}} 下发
 
 (function() {
     // ===== 参数（由 Python 端参数化注入） =====

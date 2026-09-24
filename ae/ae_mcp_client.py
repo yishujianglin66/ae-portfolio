@@ -759,7 +759,7 @@ class AECommandClient(AEBridgeClient):
             '})();\n'
         )
         try:
-            return self.send_command("executeAtomScript", {"scriptContent": jsx_code})
+            return self.send_command("executeAtomScript", {"script": jsx_code, "scriptContent": jsx_code})
         except Exception as e:
             return {"status": "error", "error": str(e)}
 
@@ -826,7 +826,7 @@ class AECommandClient(AEBridgeClient):
             '})();\n'
         )
         try:
-            return self.send_command("executeAtomScript", {"scriptContent": jsx_code})
+            return self.send_command("executeAtomScript", {"script": jsx_code, "scriptContent": jsx_code})
         except Exception as e:
             return {"status": "error", "error": str(e)}
 

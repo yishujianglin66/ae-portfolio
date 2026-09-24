@@ -1,12 +1,12 @@
 {
   "version": "1.0",
-  "description": "逆向工程提取的风格预设 (5 个)",
-  "generated_at": "2026-08-26T12:48:57.308593",
+  "description": "逆向工程提取的风格预设 (7 个)",
+  "generated_at": "2026-09-18T23:43:41.149047",
   "source": "aep_analyzer/preset_generator.py",
   "category": {
     "style_reverse": {
       "display_name": "逆向提取风格预设",
-      "count": 5,
+      "count": 7,
       "presets": [
         {
           "id": "cyberpunk_neon",
@@ -148,7 +148,7 @@
           "id": "audio_reactive",
           "name": "音频响应风格",
           "name_en": "音频响应风格",
-          "description": "Audio Spectrum频谱 + LED点阵 + 光学变速",
+          "description": "Audio Spectrum 频谱 + LED 点阵 + 光学变速",
           "tags": [
             "音频响应",
             "频谱",
@@ -172,6 +172,74 @@
           "source": "reverse_engineered",
           "effect_chain": [
             "ADBE Audiospectrum"
+          ]
+        },
+        {
+          "id": "cyber_glitch",
+          "name": "赛博故障风格",
+          "name_en": "赛博故障风格",
+          "description": "RGB 分离 + 像素化 + 信号干扰 + 故障抖动",
+          "tags": [
+            "赛博",
+            "故障",
+            " glitch",
+            "数字艺术",
+            "MV"
+          ],
+          "difficulty": 4,
+          "duration_default": 2.0,
+          "parameters": [
+            {
+              "name": "targetLayerName",
+              "type": "string",
+              "default": "目标图层",
+              "description": "目标图层名称"
+            }
+          ],
+          "applies": [
+            "AnyLayer"
+          ],
+          "jsx_template": "(function(){\nvar _r = {};\ntry {\n  var c = app.project.activeItem;\n  if (!c || !(c instanceof CompItem)) {\n    _r = {status: 'error', message: 'No active composition'};\n    return JSON.stringify(_r);\n  }\n  var layerName = '{{targetLayerName}}';\n  var L = null;\n  for (var i = 1; i <= c.numLayers; i++) {\n    if (c.layer(i).name === layerName) { L = c.layer(i); break; }\n  }\n  if (!L) {\n    _r = {status: 'error', message: 'Layer not found: ' + layerName};\n    return JSON.stringify(_r);\n  }\n  // === Style: 赛博故障风格 ===\n  // Effect: Tint (ADBE Tint)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Tint');\n_ef.property('ADBE Tint-0001').setValue([0, 0, 0]);\n_ef.property('ADBE Tint-0002').setValue([255, 0, 255]);\n// Effect: Sphere (ADBE CC Sphere)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE CC Sphere');\n// Effect: Noise (ADBE Noise)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Noise');\n_ef.property('ADBE Noise-0001').setValue(25);\n// Effect: Turbulent Displace (ADBE Turbulent Displace)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Turbulent Displace');\n_ef.property('ADBE Turbulent Displace-0001').setValue(80);\n_ef.property('ADBE Turbulent Displace-0002').setValue(10);\n  _r = {status: 'success', preset: 'cyber_glitch', layer: layerName};\n} catch(e) {\n  _r = {status: 'error', message: e.toString()};\n}\nreturn JSON.stringify(_r);\n})();",
+          "source": "reverse_engineered",
+          "effect_chain": [
+            "ADBE Tint",
+            "ADBE CC Sphere",
+            "ADBE Noise",
+            "ADBE Turbulent Displace"
+          ]
+        },
+        {
+          "id": "ink_chinese",
+          "name": "水墨国风风格",
+          "name_en": "水墨国风风格",
+          "description": "黑白滤镜 + 水彩扩散 + 墨迹纹理 + 柔光叠加",
+          "tags": [
+            "水墨",
+            "国风",
+            "中国风",
+            "传统",
+            "艺术"
+          ],
+          "difficulty": 4,
+          "duration_default": 2.0,
+          "parameters": [
+            {
+              "name": "targetLayerName",
+              "type": "string",
+              "default": "目标图层",
+              "description": "目标图层名称"
+            }
+          ],
+          "applies": [
+            "AnyLayer"
+          ],
+          "jsx_template": "(function(){\nvar _r = {};\ntry {\n  var c = app.project.activeItem;\n  if (!c || !(c instanceof CompItem)) {\n    _r = {status: 'error', message: 'No active composition'};\n    return JSON.stringify(_r);\n  }\n  var layerName = '{{targetLayerName}}';\n  var L = null;\n  for (var i = 1; i <= c.numLayers; i++) {\n    if (c.layer(i).name === layerName) { L = c.layer(i); break; }\n  }\n  if (!L) {\n    _r = {status: 'error', message: 'Layer not found: ' + layerName};\n    return JSON.stringify(_r);\n  }\n  // === Style: 水墨国风风格 ===\n  // Effect: Black & White (Color Suite) (CSL BlackAndWhite)\nvar _ef = L.property('ADBE Effect Parade').addProperty('CSL BlackAndWhite');\n// Effect: Blur (ADBE Gaussian Blur)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Gaussian Blur');\n// Effect: Fractal Noise (ADBE Fractal Noise)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Fractal Noise');\n_ef.property('ADBE Fractal Noise-0002').setValue(1);\n_ef.property('ADBE Fractal Noise-0005').setValue(40);\n_ef.property('ADBE Fractal Noise-0008').setValue(2);\nL.blendingMode = 0; // Multiply\nL.opacity.setValue(30);\n// Effect: Glow (ADBE Glow)\nvar _ef = L.property('ADBE Effect Parade').addProperty('ADBE Glow');\n  _r = {status: 'success', preset: 'ink_chinese', layer: layerName};\n} catch(e) {\n  _r = {status: 'error', message: e.toString()};\n}\nreturn JSON.stringify(_r);\n})();",
+          "source": "reverse_engineered",
+          "effect_chain": [
+            "CSL BlackAndWhite",
+            "ADBE Gaussian Blur",
+            "ADBE Fractal Noise",
+            "ADBE Glow"
           ]
         }
       ]

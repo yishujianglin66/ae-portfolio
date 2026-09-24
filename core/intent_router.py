@@ -356,15 +356,15 @@ class IntentRouter:
             type="silhouette_only",
             silhouette_operations=silhouette_ops,
             execution_order=["silhouette"],
-            fallback=FALLBACK_MAP.get(task_type, {
+            fallback=FALLBACK_MAP.get(task_type or "default", {
                 "condition": "Silhouette 不可用",
                 "ae_fallback_ops": [],
                 "message": "无法降级，请安装 Silhouette 或手动操作",
             }),
-            reason=f"纯 Silhouette 任务: {user_input[:30]}",
+            reason=f"纯 Silhouette 任务：{user_input[:30]}",
             confidence=0.85,
         )
-
+    
     def _route_hybrid(self, user_input: str) -> TaskRoute:
         """混合路由 — Silhouette 前置 + AE 后置"""
         ae_ops = self._generate_ae_ops(user_input)
@@ -375,7 +375,7 @@ class IntentRouter:
             ae_operations=ae_ops,
             silhouette_operations=silhouette_ops,
             execution_order=["silhouette", "ae"],
-            fallback=FALLBACK_MAP.get(task_type, {
+            fallback=FALLBACK_MAP.get(task_type or "default", {
                 "condition": "Silhouette 不可用",
                 "ae_fallback_ops": [],
                 "message": "无法降级，请安装 Silhouette 或手动操作",

@@ -198,45 +198,42 @@ class TestDaVinciScriptingAPIDetection:
         assert "InstallPath" in content, "缺少 InstallPath 注册表值读取"
         assert "WOW6432Node" in content, "缺少 WOW6432Node 32位兼容注册表路径"
 
-    def test_init_resolve_api_has_multiple_install_paths(self):
-        """验证多盘符常见安装路径探测"""
+    def test_init_resolve_api_delegates_to_single_discovery_source(self):
+        """安装位置探测已收敛：本模块不再自持候选表，改由 core.resolve_discovery 统一负责。
+
+        原测（test_init_resolve_api_has_multiple_install_paths）用**源码文本**断言本文件里
+        出现 C:/D:/E:/F: 四个盘符字面量。2026-09-23 收敛后那串硬编码被删除，但"多位置探测"
+        这个**意图反而更强**：注册表 + 活进程反查能定位**任意**自定义安装目录
+        （本机真实安装就在 D:\\app，不在任何 Program Files 候选里，枚举 E:/F: 也覆盖不到它）。
+        故本测改为断言新契约：① 本模块委托统一发现器；② 发现器具备多位置能力；
+        ③ 原测里仍然有效的 Scripting API 路径构造断言予以保留。
+        """
         resolve_int_path = (
             Path(__file__).parent.parent / "integrations" / "davinci_resolve_integration.py"
         )
         content = resolve_int_path.read_text(encoding="utf-8")
 
-        # 多盘符覆盖 - 必须出现在字符串字面量中（作为路径前缀）
-        for drive in ["C:\\", "D:\\", "E:\\", "F:\\"]:
-            has_drive = False
-            # 检查常见形式: "C:\\Program Files", r"C:\", '"C:\\' 等
-            for variant in [
-                f'{drive}Program Files',
-                f'"{drive}',
-                f'r"{drive}',
-                f"r'{drive}",
-                f'{drive}Blackmagic',
-            ]:
-                if variant in content:
-                    has_drive = True
-                    break
-            # 也检查 resolve_install_candidates 列表的定义（通过盘符拼接）
-            if not has_drive:
-                has_drive = "resolve_install_candidates" in content and (
-                    f'Path("{drive}")' in content or f"Path('{drive}')" in content
-                    or f'for d in ["{drive[0]}",' in content  # 盘符列表
-                    or f'"{drive[0]}:\\\\"' in content.lower()
-                )
-            assert has_drive, f"缺少盘符 {drive} 的安装路径候选（可在字符串字面量或 resolve_install_candidates 列表中）"
+        # ① 委托统一发现器（不再自持候选表）
+        assert "from core.resolve_discovery import" in content, "未委托统一发现器"
+        assert "resolve_home()" in content, "未调用 resolve_home()"
+        assert "find_resolve_exe()" in content, "未调用 find_resolve_exe()"
 
-        # Scripting Modules 子目录多路径 - 使用 Path 对象拼接（/ 运算符），通过子路径名验证
-        script_api_candidates_block = content.split("script_api_candidates: List[Path]")[1].split("fusionscript_candidates")[0] if "script_api_candidates: List[Path]" in content else ""
-        # 验证至少有这些子路径片段
+        # ② 发现器本身具备多位置能力
+        from core.resolve_discovery import CANDIDATE_HOMES
+        import core.resolve_discovery as _rd
+
+        joined = " ".join(CANDIDATE_HOMES)
+        assert "C:\\Program Files" in joined, "候选缺少 C: 盘常见安装目录"
+        assert "D:" in joined, "候选缺少 D: 盘安装目录"
+        for probe in ("_env_home", "_settings_home", "_search_registry", "_process_home"):
+            assert callable(getattr(_rd, probe)), f"缺少发现来源 {probe}"
+
+        # ③ Scripting Modules 子路径构造（原测的有效部分）
         for segment in ['"Support"', '"Developer"', '"Scripting"', '"Modules"']:
             assert segment in content, f"Scripting API 路径构造缺少 {segment} 子路径"
-        # 同时验证 script_api_candidates.extend 调用存在
         assert "script_api_candidates.extend" in content or (
-            "for install_dir in resolve_install_candidates:" in content and
-            '"Modules"' in content
+            "for install_dir in resolve_install_candidates:" in content
+            and '"Modules"' in content
         ), "缺少 Scripting Modules 路径的批量添加"
 
     def test_init_resolve_api_python_get_resolve_support(self):
@@ -305,13 +302,15 @@ class TestDaVinciScriptingAPIDetection:
         resolve_int_file = Path(__file__).parent.parent / "integrations" / "davinci_resolve_integration.py"
         content = resolve_int_file.read_text(encoding="utf-8")
 
-        # 验证 List[Path] 类型注解使用正确
-        assert "python_get_resolve_paths: List[Path]" in content, \
-            "python_get_resolve_paths 缺少 List[Path] 类型注解"
-        assert "fusionscript_candidates: List[Path]" in content, \
-            "fusionscript_candidates 缺少 List[Path] 类型注解"
-        assert "script_api_candidates: List[Path]" in content, \
-            "script_api_candidates 缺少 List[Path] 类型注解"
+        # 验证候选列表被标注为 Path 列表
+        # 2026-09-19 校正: 源码已从 typing.List[Path] 现代化为 PEP 585 的
+        # list[Path]; 断言意图是"类型注解存在", 不该锁死某一种拼写, 两种都接受。
+        import re as _re
+        for _name in ("python_get_resolve_paths", "fusionscript_candidates",
+                      "script_api_candidates"):
+            assert _re.search(
+                rf"{_name}\s*:\s*(?:typing\.)?[Ll]ist\[Path\]", content), \
+                f"{_name} 缺少 list[Path] 类型注解"
 
 
 # =========================================================================

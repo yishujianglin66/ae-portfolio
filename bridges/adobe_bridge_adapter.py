@@ -1,12 +1,25 @@
 """
-DEPRECATED - Adobe Bridge Adapter（已弃用）
+DEPRECATED - Adobe Bridge Adapter（本包装类已弃用）
 ====================================
 
 .. deprecated::
-    本模块属于自研 .ae-mcp-bridge 文件轮询协议栈，已整体弃用。
-    AE MCP 已转向开源基线（after-effects-mcp + 原版 mcp-bridge-auto.jsx）。
-    AU/PS 暂无开源替代，保留功能但不应新增依赖。
-    参见: archive/deprecated_self_built_bridge/README.md
+    弃用的是**本模块这个统一适配器包装类** —— 它已无生产消费方，
+    仅保留向后兼容的导入面（自 2026-09-19 起改为惰性导出，
+    访问 `bridges.AdobeBridgeAdapter` 时才触发 DeprecationWarning）。
+    不应新增依赖；新代码请用 `bridges/adobe_mcp_server.py`（agent 面向的
+    多 app MCP 通道）或 `ai/ae_render_channel.py`（自动化渲染通道）。
+
+.. warning::
+    **不要把上面的弃用读成"`.ae-mcp-bridge` 协议已弃用"** —— 那是两回事。
+    该文件轮询协议**仍在产**：`ai/ae_render_channel.py` 自带一份独立实现
+    （含 HMAC 签名与 `core.bridge_failure` 失败链），承载本项目全部自动化
+    AE comp 构建 + aerender 渲染。本模块只是同一协议上的一个旧包装层。
+
+    三轨接入现状（2026-09-19 盘点，详见
+    `03-阶段报告/AE三轨通道收敛决策_2026-09-19.md`）：
+      · 执行通道 = ai/ae_render_channel.py       （活，自动化渲染必用）
+      · 交互通道 = bridges/adobe_mcp_server.py   （活，AE/PS/PR/ME 四 app MCP）
+      · 本模块   = 无消费方                       （弃用，惰性导出）
 
 原始功能说明：
 统一适配器，提供对所有 Adobe 应用（AE、PR、PS、AU）的统一访问接口。
@@ -48,8 +61,8 @@ from __future__ import annotations
 import warnings as _warnings
 
 _warnings.warn(
-    "bridges.adobe_bridge_adapter 已弃用：自研 .ae-mcp-bridge 协议已弃用，"
-    "AE MCP 已转向开源 after-effects-mcp 基线。",
+    "bridges.adobe_bridge_adapter 已弃用（本包装类无生产消费方）。"
+    "注意: .ae-mcp-bridge 协议本身仍在产, 由 ai/ae_render_channel.py 承载。",
     DeprecationWarning,
     stacklevel=2,
 )

@@ -15,6 +15,19 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+
+# ==== 脚本守卫 (2026-09-24) ====
+# 本文件是**手工运行的脚本**，不是 pytest 用例。模块级代码会启动 AfterFX.exe GUI
+# 并在结束时 sys.exit()，被 pytest 收集时会把 pytest 杀掉、把 AE 留在桌面上
+# （实测事故：用户看到"是否保存对 xxx.aep 的更改?"，点取消后 AE 关闭）。
+# 故被 import 时立刻失败；`python tests/<file>.py` 直接运行不受影响。
+if __name__ != "__main__":
+    raise ImportError(
+        "这是脚本而非 pytest 用例，请用 `python tests/"
+        + __file__.replace("\\", "/").split("tests/")[-1] +
+        "` 直接运行；不要用 pytest 指定该文件路径（会拉起 AE）。"
+    )
+# ==== /脚本守卫 ====
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "rendering"))

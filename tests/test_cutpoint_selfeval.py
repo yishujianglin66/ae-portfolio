@@ -176,3 +176,88 @@ def test_repair_loop_max_rounds_manual(video_frozen_cut, tmp_path):
     # 冻结切第一轮就被丢弃, 但若传入两个相同切点, min_gap 修复后仍可能 FAIL
     assert out["rounds_used"] <= 3
     assert "manual_review" in out or out["verdict"] == "PASS"
+
+
+# ══════════════════════════════════════════════════════════════════════
+# 2026-09-19 事故回归 (用户听感"踩点没跟上" → 20s 集成片强锚命中 10.3%→5.5%)
+#
+# 根因链: frozen_cut 判据只比 fi-1/fi 两帧, 而真实视觉边界比标称切点滞后
+# 1-4 帧 (变速/慢动作起步) → 比较落在新镜头内部 → 慢镜被误判"冻结"; 慢镜
+# 恰是网格量化锚放踩点刀的位置 → repair 把踩点刀按堆丢弃。
+# 实测: 踩点刀误报率 67% vs 非踩点刀 17%; 同窗口 7 把踩点刀只剩 2 把。
+# ══════════════════════════════════════════════════════════════════════
+
+def _frozen_window_check(tmp_path, *, window: int, lag_frames: int):
+    """合成"切后静止/慢镜"片段, 验证标称切点滞后于真实边界时的判定。
+
+    构造: 0.5s 噪点(testsrc, 帧间差异大) + 1.0s 纯色静止帧间完全相同;
+    真实硬切边界在 0.5s = 帧 12 (帧 12 起进入纯色段)。
+    标称切点声明在 边界 + lag_frames 帧处 —— 复现实测的 1-4 帧滞后。
+    窗口判据要成立, 需 window ≥ lag_frames 才能覆盖到 (11,12) 这对边界帧。
+    """
+    seg_a = tmp_path / "seg_a.mp4"
+    seg_b = tmp_path / "seg_b.mp4"
+    _run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+          "-i", "testsrc=size=320x240:rate=24:duration=0.5",
+          "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+          "-bf", "0", str(seg_a)])
+    _run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+          "-i", "color=c=steelblue:size=320x240:rate=24:duration=1.0",
+          "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p",
+          "-bf", "0", str(seg_b)])
+    joined = tmp_path / "joined.mp4"
+    _run(["ffmpeg", "-y", "-v", "error", "-i", str(seg_a), "-i", str(seg_b),
+          "-filter_complex", "[0:v][1:v]concat=n=2:v=1:a=0[outv]",
+          "-map", "[outv]", "-c:v", "libx264", "-preset", "ultrafast",
+          "-pix_fmt", "yuv420p", "-bf", "0", str(joined)])
+    cut = 0.5 + lag_frames / 24.0
+    rep = analyze_cutpoints(str(joined), [cut], freeze_window=window)
+    frozen = [i for i in rep["issues"] if i["type"] == "frozen_cut"]
+    return bool(frozen)
+
+
+def test_frozen_window_ignores_frame_lag(tmp_path):
+    """标称切点滞后真实边界 3 帧时, ±3 窗口判据不误报 frozen_cut。"""
+    assert _frozen_window_check(tmp_path, window=3, lag_frames=3) is False
+
+
+def test_frozen_k0_false_positive_reproduced(tmp_path):
+    """窗口=0 (历史判据) 复现误报 —— 对照证明回归测试确实盯住该缺陷。"""
+    assert _frozen_window_check(tmp_path, window=0, lag_frames=1) is True
+
+
+def test_repair_keeps_beat_anchors():
+    """有锚点时 frozen 切点重锚到最近强鼓点, 而不是直接丢弃。"""
+    cuts = [1.000, 2.000, 3.000]
+    issues = [{"type": "frozen_cut", "cut_index": 0, "time": 1.000, "detail": {}}]
+    anchors = [1.040, 5.000]
+    stats: dict = {}
+    fixed = repair_cutpoints(cuts, issues, anchors=anchors, stats=stats)
+    assert len(fixed) == len(cuts)          # 一刀未丢
+    assert any(abs(t - 1.040) < 1e-6 for t in fixed)   # 重锚到强鼓点
+    assert stats["guard"] == "ok"
+    assert len(stats["reanchored"]) == 1
+
+
+def test_repair_guard_aborts_beat_regression():
+    """修复会把踩点刀全丢时, 节拍守卫中止并退回原表。"""
+    cuts = [1.000, 2.000]
+    issues = [{"type": "frozen_cut", "cut_index": i, "time": t, "detail": {}}
+              for i, t in enumerate(cuts)]
+    anchors = [1.005, 2.005]        # 两刀都踩点, 且窗口外无锚可重锚
+    stats: dict = {}
+    fixed = repair_cutpoints(cuts, issues, anchors=anchors,
+                             anchor_tol=0.001, stats=stats)
+    assert fixed == cuts            # 原表退回
+    assert stats["guard"] == "aborted"
+    assert stats["beat_after"] < stats["beat_before"]
+
+
+def test_repair_failsafe_without_anchors():
+    """无锚点 (缓存缺席) 时必须 fail-safe 退回原"丢弃"策略, 不抛异常。"""
+    cuts = [1.0, 2.0]
+    issues = [{"type": "frozen_cut", "cut_index": 0, "time": 1.0, "detail": {}}]
+    stats: dict = {}
+    fixed = repair_cutpoints(cuts, issues, anchors=[], stats=stats)
+    assert fixed == [2.0]
+    assert "guard" not in stats

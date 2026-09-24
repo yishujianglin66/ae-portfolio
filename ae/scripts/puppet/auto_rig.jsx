@@ -1,7 +1,7 @@
 // ae/scripts/puppet/auto_rig.jsx
 // 木偶动画：自动骨骼绑定（Puppet Pin 布局）
 // 对角色图层应用 Puppet Pin 工具，按双足标准布局放置控制点
-// 用法: 通过 ae_command.json {command:"runScript", args:{code: "..."}} 下发
+// 用法: 通过 ae_command.json {command:"executeAtomScript", args:{script: "..."}} 下发
 
 (function() {
     // ===== 参数（由 Python 端参数化注入） =====

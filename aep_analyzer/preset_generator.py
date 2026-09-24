@@ -213,13 +213,38 @@ STYLE_RECIPES: dict[str, dict[str, Any]] = {
     },
     "audio_reactive": {
         "display_name": "音频响应风格",
-        "description": "Audio Spectrum频谱 + LED点阵 + 光学变速",
+        "description": "Audio Spectrum 频谱 + LED 点阵 + 光学变速",
         "tags": ["音频响应", "频谱", "可视化", "LED"],
         "effect_chain": [
             {"matchName": "ADBE Audiospectrum"},
         ],
         "applies_to_layer": "any",
         "requires_audio_layer": True,
+    },
+    "cyber_glitch": {
+        "display_name": "赛博故障风格",
+        "description": "RGB 分离 + 像素化 + 信号干扰 + 故障抖动",
+        "tags": ["赛博", "故障", " glitch", "数字艺术", "MV"],
+        "effect_chain": [
+            {"matchName": "ADBE Tint", "param_overrides": {"black_to": [0, 0, 0], "white_to": [255, 0, 255]}},
+            {"matchName": "ADBE CC Sphere", "param_overrides": {"radius": 50}},
+            {"matchName": "ADBE Noise", "param_overrides": {"amount": 25}},
+            {"matchName": "ADBE Turbulent Displace", "param_overrides": {"amount": 80, "size": 10}},
+        ],
+        "applies_to_layer": "any",
+    },
+    "ink_chinese": {
+        "display_name": "水墨国风风格",
+        "description": "黑白滤镜 + 水彩扩散 + 墨迹纹理 + 柔光叠加",
+        "tags": ["水墨", "国风", "中国风", "传统", "艺术"],
+        "effect_chain": [
+            {"matchName": "CSL BlackAndWhite"},
+            {"matchName": "ADBE Gaussian Blur", "param_overrides": {"blurriness": 8}},
+            {"matchName": "ADBE Fractal Noise", "param_overrides": {"noise_type": 1, "size": 40, "complexity": 2},
+             "blend_mode": "Multiply", "opacity": 30},
+            {"matchName": "ADBE Glow", "param_overrides": {"threshold": 70, "radius": 8}},
+        ],
+        "applies_to_layer": "any",
     },
 }
 

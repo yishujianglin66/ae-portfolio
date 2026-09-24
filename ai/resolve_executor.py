@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 import json
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -26,6 +25,11 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
 from ai.shot_script import ShotScript, ShotUnit
+from core.resolve_discovery import (
+    find_fuscript_exe,
+    is_process_running,
+    launch_resolve as launch_resolve_exe,
+)
 
 
 class ResolveExecutor:
@@ -37,47 +41,26 @@ class ResolveExecutor:
         self._log("ResolveExecutor初始化")
 
     def _find_fuscript(self) -> str:
-        """查找fuscript.exe路径"""
-        # 常见安装路径
-        candidates = [
-            r"C:\Program Files\Blackmagic Design\DaVinci Resolve\fuscript.exe",
-            r"C:\Program Files (x86)\Blackmagic Design\DaVinci Resolve\fuscript.exe",
-            r"D:\Blackmagic Design\DaVinci Resolve\fuscript.exe",
-        ]
-        for p in candidates:
-            if Path(p).exists():
-                return p
+        """查找fuscript.exe路径（委托 core.resolve_discovery，未找到返回空串）"""
+        exe = find_fuscript_exe()
+        if exe is not None:
+            return str(exe)
+        self._log("未找到 fuscript.exe；可设 AEKV_RESOLVE_HOME 指向 Resolve 安装目录")
         return ""
 
     def _log(self, msg: str):
         print(f"[ResolveExecutor] {msg}", flush=True)
 
     def check_resolve_running(self) -> bool:
-        """检查Resolve是否运行"""
-        try:
-            result = subprocess.run(
-                ["tasklist", "/FI", "IMAGENAME eq Resolve.exe"],
-                capture_output=True, text=True, timeout=5
-            )
-            return "Resolve.exe" in result.stdout
-        except Exception:
-            return False
+        """检查Resolve是否运行（委托 core.resolve_discovery）"""
+        return is_process_running()
 
     def launch_resolve(self) -> bool:
-        """启动Resolve"""
-        candidates = [
-            r"C:\Program Files\Blackmagic Design\DaVinci Resolve\Resolve.exe",
-            r"C:\Program Files (x86)\Blackmagic Design\DaVinci Resolve\Resolve.exe",
-            r"D:\Blackmagic Design\DaVinci Resolve\Resolve.exe",
-        ]
-        for p in candidates:
-            if Path(p).exists():
-                self._log(f"启动Resolve: {p}")
-                subprocess.Popen([p], shell=True)
-                time.sleep(5)  # 等待启动
-                return True
-        self._log("❌ 未找到Resolve安装")
-        return False
+        """启动Resolve（委托 core.resolve_discovery，含路径校验）"""
+        started = launch_resolve_exe()
+        if not started:
+            self._log("❌ 未找到Resolve安装或启动被拒")
+        return started
 
     def execute(self, script: ShotScript, dry_run: bool = False) -> dict:
         """执行ShotScript→Resolve时间线

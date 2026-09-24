@@ -1,12 +1,20 @@
 """
-DEPRECATED - 统一 Adobe Bridge 基类（已弃用）
+DEPRECATED - 统一 Adobe Bridge 基类（本基类已弃用）
 ======================================
 
 .. deprecated::
-    本模块属于自研 .ae-mcp-bridge 文件轮询协议栈，已整体弃用。
-    AE MCP 已转向开源基线（after-effects-mcp + 原版 mcp-bridge-auto.jsx）。
-    AU/PS 暂无开源替代，保留功能但不应新增依赖。
-    参见: archive/deprecated_self_built_bridge/README.md
+    弃用的是**本基类** —— 它已无生产消费方，仅保留向后兼容的导入面
+    （自 2026-09-19 起改为惰性导出，访问时才触发 DeprecationWarning）。
+    不应新增依赖。
+
+.. warning::
+    **不要把上面的弃用读成"`.ae-mcp-bridge` 协议已弃用"** —— 那是两回事。
+    该文件轮询协议**仍在产**：`ai/ae_render_channel.py` 自带独立实现
+    （含 HMAC 签名与 `core.bridge_failure` 失败链），承载本项目全部自动化
+    AE comp 构建 + aerender 渲染。
+
+    三轨接入现状见 `03-阶段报告/AE三轨通道收敛决策_2026-09-19.md`，
+    可复跑盘点见 `scripts/ae_channel_status.py`。
 
 原始功能说明：
 提取 ae_bridge_base + pr_bridge_client + ps_bridge_client + au_bridge_client 的共性，
@@ -33,8 +41,8 @@ from __future__ import annotations
 import warnings as _warnings
 
 _warnings.warn(
-    "bridges.unified_bridge_base 已弃用：自研 .ae-mcp-bridge 协议已弃用，"
-    "AE MCP 已转向开源 after-effects-mcp 基线。",
+    "bridges.unified_bridge_base 已弃用（本基类无生产消费方）。"
+    "注意: .ae-mcp-bridge 协议本身仍在产, 由 ai/ae_render_channel.py 承载。",
     DeprecationWarning,
     stacklevel=2,
 )
