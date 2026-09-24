@@ -2,8 +2,15 @@
 """test_rl_run61_realistic.py — 用真实 run61 EDL 模拟漂移累加
 
 108 段实际 speed 分布 + 时长，验证 _TL_DRIFT_LIMIT 在真实场景下能控住漂移。
+
+⚠️ 2026-09-24：本文件依赖的历史构建产物 **`output/unified_run61/edl.json` 已被清理**
+（该产物从未入版本库）。产物不在时本文件**显式跳过**（跳因里写明缺什么），不再硬失败 ——
+原先它会在全量回归里直接 FileNotFoundError，使"代码没改却全量变红"。
+
+真实分布的等价不变量检验已迁到 **`tests/test_rl_real_distribution.py`**（用密封夹具
+`tests/fixtures/real_run_segment_distribution_v9.json`，不依赖 output/）。
+本文件保留：若 run61 产物被重新生成，它会自动恢复运行。
 """
-import json
 import sys
 from pathlib import Path
 
@@ -11,32 +18,23 @@ import pytest
 
 PROJ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJ))
+sys.path.insert(0, str(Path(__file__).resolve().parent))   # 便于 import rl_drift_sim
+
+from rl_drift_sim import load_segs_from_edl, simulate_segs  # noqa: E402
+
+RUN61_EDL = PROJ / "output" / "unified_run61" / "edl.json"
+
+pytestmark = pytest.mark.skipif(
+    not RUN61_EDL.exists(),
+    reason=(
+        f"缺历史构建产物 {RUN61_EDL}（未入版本库，已被产物治理清理）。"
+        "真实分布的等价检验见 tests/test_rl_real_distribution.py"
+    ),
+)
 
 
 def load_run61_segs():
-    edl = json.loads((PROJ / "output/unified_run61/edl.json").read_text(encoding="utf-8"))
-    return [(float(s["end_time"]) - float(s["start_time"]), float(s["speed"]))
-            for s in edl["cuts"]]
-
-
-def simulate_segs(segs, with_clamp: bool = True) -> dict:
-    """模拟 _execute 累加, return 最大漂移与最终漂移"""
-    fps = 24.0
-    TL_DRIFT_LIMIT = 2.0 / 24.0
-    drift = 0.0
-    history = []
-    for plan_dur, speed in segs:
-        if with_clamp and abs(drift) > TL_DRIFT_LIMIT:
-            drift = 0.0
-        render_dur = plan_dur + drift
-        read_dur = plan_dur * max(0.25, min(4.0, speed))
-        actual_dur = read_dur + 1.0 / 24.0 * 0.5  # ±0.5 帧 jitter
-        actual_dur = min(actual_dur, plan_dur)
-        drift += render_dur - actual_dur
-        history.append(drift)
-    return {"max_drift": max(abs(d) for d in history),
-            "final_drift": drift,
-            "max_drift_at": history.index(max(history, key=abs))}
+    return load_segs_from_edl(RUN61_EDL)
 
 
 def test_run61_old_logic_runaway():

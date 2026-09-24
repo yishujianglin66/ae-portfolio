@@ -41,6 +41,10 @@ from scripts.render_regression import (  # noqa: E402
 
 MIN_GAP_DEFAULT = 0.12          # 相邻切点最小间距 (秒, ≈3帧@24fps)
 FREEZE_HAMMING_DEFAULT = 10     # 切点两侧 Hamming 距离低于此 → frozen_cut
+FREEZE_WINDOW_DEFAULT = 3       # C1 窗口半径 (帧): 取 ±N 帧内最大帧差判可见边界
+                                # (2026-09-19: 真实边界比标称切点滞后 1-4 帧,
+                                #  只比 fi-1/fi 会在慢镜上误报; ±3 实测消除
+                                #  27s 集成片全部 21 个误报)
 POP_ABS_DEFAULT = 0.35          # 单样本跳变绝对阈值 (归一化幅值, 带限音频物理上不可能)
 POP_RATIO_DEFAULT = 60.0        # 兜底: 切点邻域跳变 / 全局 P99.9 的倍数 (极端数字咔哒)
 FLASH_LUMA_DEFAULT = 6.0        # 帧均亮度(0-255) <6 或 >249 → flash 帧
@@ -81,6 +85,7 @@ def analyze_cutpoints(
     pop_abs: float = POP_ABS_DEFAULT,
     pop_ratio: float = POP_RATIO_DEFAULT,
     sr: int = POP_SR_DEFAULT,
+    freeze_window: int = FREEZE_WINDOW_DEFAULT,
 ) -> dict:
     """对渲染成品在切点边界做技术事故检测。返回报告 dict (含 issues)。"""
     v = str(video_path)
@@ -106,11 +111,23 @@ def analyze_cutpoints(
     for i, t in enumerate(times):
         fi = int(round(t * fps))
         if 0 < fi < len(frames):
-            d = _hamming(hashes[fi - 1], hashes[fi])
+            # C1 frozen_cut — 窗口判据 (2026-09-19 修正)
+            # 原实现只比 hashes[fi-1] vs hashes[fi]: 实测真实视觉边界比 EDL
+            # 标称切点滞后 1-4 帧 (变速/慢动作起步), 于是比较落在新镜头内部
+            # → 两帧相同 → 恒判"冻结"。慢镜正是网格量化锚放踩点刀的位置,
+            # 故误报集中在踩点刀上 (实测踩点刀误报率 67% vs 非踩点刀 17%)。
+            # 判据修正: 取 ±freeze_window 帧内**最大**帧差; 只要窗口内存在
+            # 可见边界, 这一刀就是真切的 —— 全部 87 刀实测窗口内 d≥15。
+            d = 0
+            for k in range(-freeze_window, freeze_window + 1):
+                j = fi - 1 + k
+                if 0 <= j < len(hashes) - 1:
+                    d = max(d, _hamming(hashes[j], hashes[j + 1]))
             if d <= freeze_hamming:
                 issues.append({
                     "type": "frozen_cut", "cut_index": i, "time": t,
-                    "detail": {"hamming": d, "threshold": freeze_hamming},
+                    "detail": {"hamming": d, "threshold": freeze_hamming,
+                               "window": freeze_window},
                 })
         # C4: flash — 切点±2帧内出现极端亮度帧
         for j in range(max(0, fi - 2), min(len(means), fi + 3)):
@@ -157,23 +174,119 @@ def analyze_cutpoints(
     }
 
 
-def repair_cutpoints(cut_times: list, issues: list, *, fps: float = 24.0) -> list:
-    """根据 issues 修复切点表 (不动渲染), 返回新切点表。"""
+def repair_cutpoints(
+    cut_times: list,
+    issues: list,
+    *,
+    fps: float = 24.0,
+    anchors: list | None = None,
+    beat_tol: float = 0.080,
+    anchor_tol: float = 0.120,
+    max_beat_drop: float = 0.15,
+    stats: dict | None = None,
+) -> list:
+    """根据 issues 修复切点表 (不动渲染), 返回新切点表。
+
+    节拍感知 (2026-09-19, 事故驱动): 原实现无条件丢弃 frozen_cut/min_gap 切点,
+    而 `frozen_cut` 判定在慢镜头上高误报 (帧对齐偏 1-4 帧 → 比到同一镜头内部两帧
+    → 恒判"冻结"), 慢镜恰是网格量化锚放踩点刀的位置。实测 20s 集成片: 同窗口内
+    7 把踩点刀被 repair 丢到只剩 2 把, 强锚命中 10.3%→5.5%, 用户听感"踩点没跟上"。
+
+    传入 anchors (强鼓点时间表) 时:
+      - frozen_cut → 不丢: 在 ±anchor_tol 内吸附到最近强鼓点 (刀从"看不见"变踩点);
+        找不到锚点才丢弃。
+      - min_gap    → 丢"更不踩点"的那一个, 保留踩点刀。
+      - audio_pop  → ±1 帧微调, 方向优先朝向 ±anchor_tol 内的强锚。
+      - flash      → 人工项, 不自动修 (同原行为)。
+    修复后做**节拍回归守卫**: 若修复表的强锚命中率比原表低 max_beat_drop (相对),
+    判定修复伤节拍 → 原表退回 (stats['guard'] = 'aborted')。
+
+    stats: 可选出参 dict, 回填 {'beat_before','beat_after','guard','dropped',
+          'reanchored'} 供调用方记录/断言。
+    """
     times = sorted(float(t) for t in cut_times if float(t) > 1e-6)
-    drop = set()
-    nudge = {}
+    strong = sorted(float(t) for t in (anchors or []))
+    out = {} if stats is None else stats
+    out.setdefault("dropped", [])
+    out.setdefault("reanchored", [])
+
+    def _near_anchor(t: float) -> float | None:
+        if not strong:
+            return None
+        best, bd = None, anchor_tol
+        for a in strong:
+            d = abs(a - t)
+            if d <= bd:
+                best, bd = a, d
+        return best
+
+    def _is_beat(t: float) -> bool:
+        return bool(strong) and min(abs(t - a) for a in strong) <= beat_tol
+
+    drop, nudge = set(), {}
     for it in issues:
         idx = it["cut_index"]
-        t = it["time"]
-        if it["type"] in ("frozen_cut", "min_gap"):
-            drop.add(t)
+        t = float(it["time"])
+        if it["type"] == "frozen_cut":
+            a = _near_anchor(t)
+            if a is not None and not any(abs(a - x) < 1e-6 for x in times):
+                nudge[t] = a
+                out["reanchored"].append((t, a))
+            else:
+                drop.add(t)
+                out["dropped"].append(t)
+        elif it["type"] == "min_gap":
+            # 丢更不踩点的一个: 后一个踩点而前一个不踩点 → 丢前一个
+            prev_t = times[idx - 1] if 0 < idx <= len(times) - 1 else None
+            if prev_t is not None and _is_beat(t) and not _is_beat(prev_t):
+                drop.add(prev_t)
+                out["dropped"].append(prev_t)
+            else:
+                drop.add(t)
+                out["dropped"].append(t)
         elif it["type"] == "audio_pop":
-            # ±1 帧微调, 交替方向
             step = 1.0 / fps
-            nudge[t] = nudge.get(t, t) + (step if idx % 2 == 0 else -step)
+            a = _near_anchor(t)
+            if a is not None:
+                nudge[t] = a
+            else:
+                nudge[t] = nudge.get(t, t) + (step if idx % 2 == 0 else -step)
         # flash: 人工项, 不自动修
+
     repaired = [nudge.get(t, t) for t in times if t not in drop]
-    return [round(t, 4) for t in sorted(repaired)]
+    repaired = [round(t, 4) for t in sorted(repaired)]
+
+    # ── 节拍回归守卫: 修复不得让踩点质量下降 ──
+    if strong:
+        before = _rate(times, strong, beat_tol)
+        after = _rate(repaired, strong, beat_tol)
+        out["beat_before"], out["beat_after"] = round(before, 4), round(after, 4)
+        if before > 0 and after < before * (1.0 - max_beat_drop):
+            out["guard"] = "aborted"
+            out["guard_reason"] = (
+                f"修复伤节拍: {before:.3f} → {after:.3f} (相对降幅 "
+                f"{(before - after) / before:.1%} > {max_beat_drop:.0%})")
+            return [round(t, 4) for t in times]
+        out["guard"] = "ok"
+    return repaired
+
+
+def _rate(times: list, anchors: list, tol: float) -> float:
+    """times 落在 anchors ±tol 内的比例 (节拍命中率)。"""
+    if not times or not anchors:
+        return 0.0
+    import bisect
+    a = sorted(anchors)
+    hit = 0
+    for t in times:
+        i = bisect.bisect_left(a, t)
+        best = 1e9
+        for j in (i - 1, i):
+            if 0 <= j < len(a):
+                best = min(best, abs(a[j] - t))
+        if best <= tol:
+            hit += 1
+    return hit / len(times)
 
 
 def repair_loop(

@@ -167,3 +167,59 @@ def test_pad_is_idempotent():
         d._ensure_frame_count(p, 5, FPS)
         assert d._ensure_frame_count(p, 5, FPS) == 0
         assert _count(p) == 5
+
+
+# ══════════════════════════════════════════════════════════════════════
+# 2026-09-19 事故回归: 27s 集成片视频流 25.33s (短 40 帧 ≈ 1.67s), 画面比
+# 音乐提前结束。定位过程见 production_director 的 [帧数核对]/[段级对账]:
+#   ① 速度曲线段把段落拆成 2-3 个子片段, 各子片段按 round(子段时长×fps)
+#      独立取整 → 21 个曲线段累积少 40 帧 (缺口主要来源)
+#   ② 漂移累加器的亚帧级系统偏差逐段累积 → 再少 11 帧
+# 修法: 子片段帧数由边界帧号差分得出 (帧级守恒) + 段级对账在段末片段补齐。
+# ══════════════════════════════════════════════════════════════════════
+
+def test_reconcile_pads_only_segment_tail():
+    """段内缺口补在段末片段, 段间切点与后续段不受影响。"""
+    from types import SimpleNamespace
+    d = _director()
+    with tempfile.TemporaryDirectory() as td:
+        a = _mk_clip(os.path.join(td, "s1a.mp4"), 3)
+        b = _mk_clip(os.path.join(td, "s1b.mp4"), 2)
+        c = _mk_clip(os.path.join(td, "s2.mp4"), 12)
+        clips = [(a, SimpleNamespace(index=1, duration=0.25)),   # 计划 6
+                 (b, SimpleNamespace(index=1, duration=0.25)),
+                 (c, SimpleNamespace(index=2, duration=0.5))]    # 计划 12
+        rec = d._reconcile_segment_frames(clips, FPS)
+        assert rec["pads"] == 1 and rec["trims"] == []
+        assert _count(a) == 3          # 段内首片段不动
+        assert _count(b) == 3          # 段末片段 +1 → 该段回到 6 帧计划
+        assert _count(c) == 12         # 下一段不受影响
+
+
+def test_reconcile_reports_oversize_segment():
+    """段落超长只记录不减帧 (_ensure_frame_count 只支持补帧)。"""
+    from types import SimpleNamespace
+    d = _director()
+    with tempfile.TemporaryDirectory() as td:
+        a = _mk_clip(os.path.join(td, "s1.mp4"), 8)
+        rec = d._reconcile_segment_frames(
+            [(a, SimpleNamespace(index=1, duration=0.25))], FPS)   # 计划 6
+        assert rec["pads"] == 0
+        assert rec["trims"] and rec["trims"][0][1] == -2
+
+
+def test_reconcile_conserves_total_frames():
+    """对账后总帧数 == Σ round(段时长×fps)。"""
+    from types import SimpleNamespace
+    d = _director()
+    with tempfile.TemporaryDirectory() as td:
+        specs = [(1, 0.25, [3, 2]), (2, 0.5, [12]), (3, 0.375, [4, 3, 2])]
+        clips = []
+        for idx, dur, fr in specs:
+            for j, n in enumerate(fr):
+                p = _mk_clip(os.path.join(td, f"s{idx}_{j}.mp4"), n)
+                clips.append((p, SimpleNamespace(index=idx, duration=dur)))
+        d._reconcile_segment_frames(clips, FPS)
+        plan = sum(max(2, round(dur * FPS)) for _, dur, _ in specs)
+        got = sum(_count(p) for p, _ in clips)
+        assert got == plan, f"{got} != {plan}"

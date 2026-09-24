@@ -13,8 +13,10 @@ ROOT = Path(__file__).resolve().parent.parent
 RULESET = ROOT / "data" / "rules" / "ruleset.jsonl"
 RULE_ID_RE = re.compile(r"^R-\d{4}-\d{4}$")
 FORMS = ("constraint", "mapping", "dosage", "curve")
+# 2026-09-19 增补 material_assign: 素材选择是真实管线阶段 (单源占比/源数/
+# 同源连续段都作用在这里), R8③ 首轮有两条候选指向它 —— 没有这个注入点它们无处安放。
 INJECT_POINTS = ("cut_anchor", "effect_map", "transition", "speed_curve",
-                 "sfx_gain", "narrative")
+                 "sfx_gain", "narrative", "material_assign")
 STATUSES = ("active", "standby", "retired")
 
 # 规则晋升/降级/退役阈值（§7.3 治理机制，消除"何时转正"的人工解释空间）:
