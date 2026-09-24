@@ -357,12 +357,99 @@ else:
                 duration_seconds=time.time() - t0,
             )
 
+    async def run_script(
+        self,
+        script: str,
+        timeout: int = 300,
+        unsafe: bool = False,
+    ) -> EngineResult:
+        """通过 Resolve 21.1 官方 MCP（ResolveMCP.exe）执行 DaVinciResolveScript Python 脚本。
+
+        与旧 GRADE_SCRIPT_TEMPLATE 方案的区别：不依赖本地 Python 环境的
+        DaVinciResolveScript/fusionscript 加载（历史痛点），由官方沙箱解释器执行。
+        前置：Resolve 正在运行；非默认安装目录时适配器自动注入 RESOLVE_SCRIPT_LIB。
+        """
+        from .official_mcp import ResolveMCPClient, extract_text, is_available
+
+        if not is_available():
+            return EngineResult(
+                success=False,
+                available=False,
+                error="ResolveMCP.exe/fusionscript.dll 未找到（需 Resolve 21.1+）",
+                error_code="DAVINCI_NOT_AVAILABLE",
+            )
+        client = ResolveMCPClient()
+        tool = "run_script_unsafe" if unsafe else "run_script"
+        # 官方 timeout 参数 max=60s，钳到 55s 防边界；HTTP 层超时用 timeout+富余
+        args = {"script": script, "timeout": max(5, min(int(timeout), 55))}
+        try:
+            result = await asyncio.to_thread(
+                client.call_tool, tool, args, max(timeout, 60) + 15
+            )
+            text = extract_text(result)
+            return EngineResult(
+                success=True,
+                metadata={"output": text[:4000], "tool": tool},
+            )
+        except Exception as exc:  # noqa: BLE001
+            return EngineResult(
+                success=False,
+                error=f"官方 MCP {tool} 失败: {exc}",
+                error_code="ENGINE_INTERNAL_ERROR",
+            )
+
+    async def mcp_status(self) -> EngineResult:
+        """查询官方 MCP 视角的 Resolve 运行状态（get_resolve_status）。"""
+        from .official_mcp import ResolveMCPClient, extract_text, is_available
+
+        if not is_available():
+            return EngineResult(success=False, available=False,
+                                error="ResolveMCP.exe 未找到", error_code="DAVINCI_NOT_AVAILABLE")
+        client = ResolveMCPClient()
+        try:
+            result = await asyncio.to_thread(client.call_tool, "get_resolve_status", {}, 60)
+            return EngineResult(success=True, metadata={"status": extract_text(result)[:1000]})
+        except Exception as exc:  # noqa: BLE001
+            return EngineResult(success=False, error=str(exc))
+
+    async def call(
+        self,
+        tool: str,
+        arguments: dict[str, Any] | None = None,
+        timeout: int = 120,
+    ) -> EngineResult:
+        """通用透传：调用官方 MCP 的任意工具（launch_resolve/get_whats_new/
+        search_scripting_api/list_luts/generate_lut 等 14 个）。
+
+        注意官方 run_script 约束：沙箱禁 os/sys/pathlib，超时 max 60s，
+        resolve/project 预注入——长任务必须拆成多次调用。
+        """
+        from .official_mcp import ResolveMCPClient, extract_text, is_available
+
+        if not is_available():
+            return EngineResult(success=False, available=False,
+                                error="ResolveMCP.exe 未找到（需 Resolve 21.1+）",
+                                error_code="DAVINCI_NOT_AVAILABLE")
+        client = ResolveMCPClient()
+        try:
+            result = await asyncio.to_thread(
+                client.call_tool, tool, arguments or {}, timeout
+            )
+            return EngineResult(success=True,
+                                metadata={"output": extract_text(result)[:4000], "tool": tool})
+        except Exception as exc:  # noqa: BLE001
+            return EngineResult(success=False, error=f"官方 MCP {tool} 失败: {exc}",
+                                error_code="ENGINE_INTERNAL_ERROR")
+
     async def _execute_impl(self, **kwargs) -> EngineResult:
         """【子类实现】action 调度；available 短路/异常包裹/时长统计由基类 execute() 模板处理。"""
         action = kwargs.pop("action", "apply_color_grade")
         handlers = {
             "apply_color_grade": self.apply_color_grade,
             "export_lut": self.export_lut,
+            "run_script": self.run_script,
+            "mcp_status": self.mcp_status,
+            "call": self.call,
         }
         handler = handlers.get(action)
         if handler is None:

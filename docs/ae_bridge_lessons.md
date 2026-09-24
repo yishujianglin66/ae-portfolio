@@ -298,3 +298,27 @@ ExtendScript 提供了完整的关键帧插值 API，可以实现从简单淡入
 
 每种均包含完整的"入场→展示→出场"生命周期，通过 setValuesAtTimes 实现
 贝塞尔平滑过渡。
+
+---
+
+## 10. 全系统实战 smoke 新增踩坑（2026-09-24，ae_smoke_0924.py 真渲染验证通过）
+
+1. **listener 两代协议分叉**（**已于 2026-09-24 晚统一修复**：ae_mcp_auto_listener.jsx::executeScript
+改为双兑底——先按表达式 eval，遇 SyntaxError 自动包成函数体执行；PROTO_CHECK 实测两种风格全过，
+客户端无需再适配）：根目录 `ae_mcp_auto_listener.jsx` 的 `executeScript` 用
+`eval(scriptStr)` 执行——**不能带 `return` 前缀**（报 SyntaxError: 函数体外的非法 return）；
+而 `AEBridgeLite.execute_jsx` 按新协议自动拼 `"return "+body`（适配 new Function 型 listener）。
+两者不兼容。对策：对 eval 型 listener 直接 `_send({"command":"executeAtomScript",
+"args":{"script":"(function(){...})()"}})` 发裸 IIFE（见 tmp/ae_smoke_0924.py::exec_raw）。
+2. **Start 文件夹自动拉起不可靠**：AE 实机配置目录存在 2025/25.0/25.3 多版本并存，
+Start 脚本放错版本目录则静默不执行且无任何报错。可靠注入方式：GUI
+文件>脚本>运行脚本文件…手动执行 listener（非阻塞 setTimeout 轮询型），或先确认
+最近 LastWriteTime 的版本目录再放 Start。
+3. **渲染 API 是 `app.project.renderQueue.render()`**，RenderQueueItem 无 render() 方法
+（报 ReferenceError: 函数 rqi.render 未定义）；与第 3 节原始结论一致，勿凭直觉改写。
+4. **om.file 后缀不代表实际输出**：设 `.mov` + format=QuickTime，实际按输出模块模板
+落盘为 `.mp4`；结果回传的 `om.file.fsName` 才是真实路径，校验应以它为准。
+5. **杀 AE 进程重启不弹崩溃恢复框**（本实测），Responding=True + 主窗口标题正常
+即可继续桥接；ping 往返 <1s。
+6. 真执行链基准：ping 0s → listCompositions 1s → 建合成+2层 2s → 渲染 640x360x3s
+QuickTime/H.264 共 6s，产物 34KB 经 ffprobe 验证 h264/3.0s。

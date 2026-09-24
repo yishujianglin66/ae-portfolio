@@ -40,7 +40,10 @@ def _validate_token(
     - 空 token 或已知弱 token 在生产环境一律拒绝。
     """
     token = credentials.credentials if credentials else ""
-    configured = settings.mcp_auth_token
+    raw = settings.mcp_auth_token
+    # 与 main.py 的 _get_configured_mcp_token 保持一致：SecretStr 必须解包后比较，
+    # 否则 SecretStr != str 恒成立，开发/生产环境都会误拒（MCP 端点全量 401 回归）。
+    configured = raw.get_secret_value() if hasattr(raw, "get_secret_value") else raw
 
     if settings.env == "production":
         if configured in WEAK_TOKENS:
@@ -412,6 +415,40 @@ def _build_tool_definitions() -> list[MCPTool]:
                     "lut_size": {"type": "integer", "default": 33},
                 },
                 "required": ["grade_preset", "output_path"],
+            },
+        },
+        {
+            "name": "davinci_run_script",
+            "description": "通过 Resolve 21.1 官方 MCP 执行 DaVinciResolveScript Python 脚本（需 Resolve 运行中）",
+            "action": "run_script",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "script": {"type": "string", "description": "Python 脚本源码，可 import DaVinciResolveScript"},
+                    "timeout": {"type": "integer", "default": 300},
+                    "unsafe": {"type": "boolean", "default": False, "description": "true 时走 run_script_unsafe（无沙箱限制）"},
+                },
+                "required": ["script"],
+            },
+        },
+        {
+            "name": "davinci_mcp_status",
+            "description": "查询官方 MCP 视角的 Resolve 运行/连接状态",
+            "action": "mcp_status",
+            "input_schema": {"type": "object", "properties": {}, "required": []},
+        },
+        {
+            "name": "davinci_mcp_call",
+            "description": "透传调用 Resolve 21.1 官方 MCP 任意工具（launch_resolve/get_whats_new/search_scripting_api/get_scripting_api/list_luts/list_dctls/generate_lut 等）",
+            "action": "call",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "tool": {"type": "string", "description": "官方 MCP 工具名"},
+                    "arguments": {"type": "object", "default": {}},
+                    "timeout": {"type": "integer", "default": 120},
+                },
+                "required": ["tool"],
             },
         },
     ]

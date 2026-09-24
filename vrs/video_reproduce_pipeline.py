@@ -45,13 +45,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# 项目根目录
-_PROJECT_ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(_PROJECT_ROOT))
+# 项目根目录（vrs/ 的上一级；原写法少一层 parent，导致 import vrs.* 必炸）
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
-from color_grading_applier import ColorGradingApplier
-from effect_reproducer import EffectReproducer
-from transition_rebuilder import TransitionRebuilder
+from style.color_grading_applier import ColorGradingApplier
+from effects.effect_reproducer import EffectReproducer
+from transition.transition_rebuilder import TransitionRebuilder
 
 
 class VideoReproducePipeline:

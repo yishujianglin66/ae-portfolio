@@ -30,7 +30,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from effect_registry import (
+from .effect_registry import (
     EFFECT_CATEGORIES,
     EFFECT_PARAMS_DB,
     KEYWORD_TO_EFFECT_MAP,

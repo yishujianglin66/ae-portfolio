@@ -289,7 +289,18 @@
     }
 
     function executeScript(scriptStr) {
-        return eval(scriptStr);
+        // 双协议兼容（2026-09-24）：新版客户端（AEBridgeLite）会拼 "return " 前缀
+        // （new Function 风格），裸 IIFE 则是 eval 风格。先按表达式 eval；
+        // 若因非法 return 报 SyntaxError，再包成函数体执行，两种调用方都能拿到返回值。
+        try {
+            return eval(scriptStr);
+        } catch (e) {
+            if (String(e.message || "").indexOf("return") >= 0 ||
+                String(e.name || "") === "SyntaxError") {
+                return eval("(function(){" + scriptStr + "})()");
+            }
+            throw e;
+        }
     }
 
     // ===== Command handlers =====
