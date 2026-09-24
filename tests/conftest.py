@@ -81,6 +81,24 @@ collect_ignore = [
         "test_safe_lut_path.py",  # 导入时AttributeError(_build_fusion_lua缺失)
 ]
 
+# ---------------------------------------------------------------------------
+# 关于"显式传文件路径"的防护说明（2026-09-24 实测结论，勿再尝试用 hook 解决）
+#
+# `pytest <文件路径>` 会**绕过 python_files 模式**，把 tests/ 下的脚本式文件当测试导入，
+# 而它们的模块级代码会启动 AfterFX.exe GUI / 外连 / sys.exit(1)。
+#
+# **实测：这类绕过无法用 conftest 机制挡住。**
+#   · `collect_ignore`          —— 只作用于目录收集，显式路径不受影响；
+#   · `pytest_ignore_collect()` —— 对显式参数同样不生效（我加过，实测无效，已删除）；
+#   · pytest 自带的 `--ignore=` —— 同样挡不住（实测：仍报 ImportError）。
+# 故真正的防护是**每个脚本式文件自带的"脚本守卫"**：
+#     if __name__ != "__main__": raise ImportError("这是脚本而非 pytest 用例…")
+# 它让"被 pytest 导入"变成**立即、明确、无副作用**的失败，而不是拉起 AE。
+# 已加守卫（7 个）：tests/{quick_render_test,direct_render_test,e2e_aerender_real,
+# test_davinci_api,test_cookie_read,test_davinci_dll,test_preview_inheritance}.py
+# 新增同类脚本时请照此加守卫；详见 03-阶段报告/AE启动弹窗与桥失效诊断_2026-09-24.md
+# ---------------------------------------------------------------------------
+
 
 # ============================================================
 # 重型可选依赖的优雅降级（CI 等轻量环境无 torch/whisper 时注入 stub）
@@ -192,6 +210,51 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "whisper: Whisper 音频模型集成")
     config.addinivalue_line("markers", "rife: RIFE 视频插帧模型集成")
     config.addinivalue_line("markers", "sam2: SAM2 分割模型集成")
+
+
+def _dedupe_sys_path() -> int:
+    """按"保留首次出现"去重 sys.path（保持原顺序 ⇒ 各唯一路径的解析优先级不变）。
+
+    返回移除的重复条目数。度量与背景见本文件 pytest_collection_finish 的说明。
+    """
+    seen = set()
+    deduped = []
+    for entry in sys.path:
+        try:
+            key = os.path.normcase(os.path.abspath(entry)) if entry else ""
+        except (OSError, ValueError):
+            key = entry
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(entry)
+    removed = len(sys.path) - len(deduped)
+    if removed:
+        sys.path[:] = deduped
+    return removed
+
+
+def pytest_collection_finish(session):
+    """收集结束后收敛 sys.path 膨胀（P1-E, 2026-09-19）。
+
+    量化现状：全量收集 5863 项时 `len(sys.path) == 287`，其中**唯一项只有 44**
+    —— 243 条是重复条目。成因是历史遗留的 283 处测试文件模块级
+    `sys.path.insert(0, PROJECT_ROOT)` 各自插入同一路径（根目录治理之前
+    写下的防导入失败写法，如今已由 pytest.ini 的 `pythonpath = .` 承担）。
+
+    只做收集后一次去重是不够的：部分用例在**运行期**动态导入模块，会再次触发
+    模块级插入（实测全量跑完又涨回 37 条重复）。故 pytest_runtest_setup 每次
+    也会收敛一次 —— 单次开销约 50 次 abspath（微秒级），换来整场会话路径恒定。
+    防回涨闸门：tests/test_syspath_hygiene.py。
+    """
+    removed = _dedupe_sys_path()
+    if removed:
+        session.config._aekv_path_dedup_removed = removed
+
+
+def pytest_runtest_setup(item):
+    """每个用例前收敛一次（运行期动态导入会重新插入重复条目）。"""
+    _dedupe_sys_path()
 
 
 def pytest_collection_modifyitems(config, items):

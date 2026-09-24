@@ -170,26 +170,14 @@ py-modules = [
 packages = ["core", "config", "puppet_effects", "performance", "vrs", "software_sdk"]
 
 # ============================================================
-# pytest 配置
+# pytest 配置 —— 已迁移至 pytest.ini（2026-09-19）
 # ============================================================
-[tool.pytest.ini_options]
-minversion = "7.4"
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "function"
-markers = [
-    "slow: 标记慢测试",
-    "integration: 集成测试",
-    "real_ae: 需要真实 AE 环境的测试",
-    "silhouette: 需要 Silhouette 环境的测试",
-]
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::PendingDeprecationWarning",
-]
+# 此处原有一段 [tool.pytest.ini_options]，但它**从未生效**：pytest 的配置优先级
+# 是 pytest.ini > pyproject.toml > tox.ini > setup.cfg，而仓库根存在 pytest.ini。
+# 死段的实际代价：里面写的 markers 与 filterwarnings（忽略弃用告警）都不起作用 ——
+# 测试输出因此长期被弃用告警刷屏，而维护者以为自己已经关掉了。
+# 现所有 pytest 配置统一写在 pytest.ini；防回涨闸门见
+# tests/test_syspath_hygiene.py::test_no_dead_pytest_config_in_pyproject。
 
 # ============================================================
 # 覆盖率配置
@@ -198,7 +186,10 @@ filterwarnings = [
 # T0.2 修复(2026-09-14, 审计发现 C3): 原 source 只列 ~17 个根模块, 遗漏代码主体
 # (core/ai/pipeline/integrations/agents, 含全部 god 文件) → 主体覆盖率从未被测量。
 # 现纳入核心库主包; scripts/(553 个 CLI 入口/一次性脚本)不计入单元覆盖, 由 e2e/集成测试覆盖。
-# ⚠️ 真实基线待 pytest-cov 就绪后测量(当前未装, 且 coverage 未被任何 CI 强制执行)。
+# 现状(2026-09-20 校正): pytest-cov 已就绪, 且 **coverage 已由 CI 强制执行** ——
+# .github/workflows/quality-hardening.yml 的 full-suite-sharded 作业会跑
+# `--cov --cov-fail-under=29`（该作业当前 continue-on-error: true，即"观察期"，
+# 连续两周绿后转 required）。原注释"未装/未被任何 CI 强制执行"已过时。
 source = [
     "core",
     "ai",
@@ -243,7 +234,19 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "@abstractmethod",
 ]
-fail_under = 29  # 实测基线(2026-09-14, 全量5503passed/7failed/18分): core/ai/pipeline/integrations/agents 真实覆盖 29.70%(77189语句/52551未覆盖, --branch)。设 29 为 ratchet 地板(略低于实测,不立即红),逐步上调。⚠️ god 文件几乎零覆盖(filter_engine/transition_engine/text_animation_engine=0%, production_director=10%)→分解前必须先补 characterization 测试。coverage 仍未被 CI 强制执行(待接入)。
+# ratchet 地板 = 29。单一真相源就是本字段：CI 传的 `--cov-fail-under=29` 与它一致。
+# 2026-09-20 修正: 原值写成 35（与同段注释"设 29 为地板"及 CI 命令**互相矛盾**）。
+# 因 CLI 覆盖配置，CI 行为一直正确，但**本地不带 flag 跑 --cov 会被 35 卡红**；
+# 而实测覆盖约 32-33%，不到 35 → 本地假红。故把字段改回 29 与注释/CI 对齐。
+# 实测基线(2026-09-14, 全量5503passed/7failed/18分): 29.70%(77189语句/52551未覆盖, --branch)。
+# 逐步上调: 补测后同步上调本值（改一处即同时约束 CI 与本地）。
+# ⚠️ god 文件曾几乎零覆盖(filter_engine/transition_engine/text_animation_engine=0%,
+# production_director=10%) → 分解前必须先补 characterization 测试。
+#    2026-09-22 现状: filter_engine 51% / transition_engine 41% / text_animation 42%
+#    (特征化测试补齐后), production_director 14%(助手层已测, 剩余需整链集成)。
+# 水位(2026-09-22, 6106 passed / 0 failed): **34.18%**, 距本地板余量 ~5.2pp。
+# 补测的方法与坑(噪声带/先比断言/枚举身份) 见 docs/contributing.md §三。
+fail_under = 29
 
 # ============================================================
 # flake8 配置 (通过 setup.cfg 或 .flake8)
@@ -269,4 +272,4 @@ warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
 check_untyped_defs = true
-disallow_untyped_defs = false
+disallow_untyped_defs = true  # 2026-09-19 升级：严格类型检查，推动 any 类型减少 50%

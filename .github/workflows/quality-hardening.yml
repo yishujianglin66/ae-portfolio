@@ -84,6 +84,22 @@ jobs:
     #     -v 日志见 worker 重启至 gw3, 差集缺整模块结果, 无任何 timeout/失败标记)。
     #     改**串行**: 无 worker 即无死锁面; --timeout=300 在串行下超时会直接点名失败而非挂死。
     #     代价: wall time 约 2x(预算 90min 内)。先 continue-on-error 摸基线; 连续两周绿后转 required(解 C2)。
+    #
+    #     ── 2026-09-22 覆盖率补测四轮后的操作要点(实测, 详见 docs/contributing.md)──
+    #     · ⚠️ **本地复现本作业必须带 `--timeout=300`**。漏掉它会怎样: coverage 拖慢执行后
+    #       个别轮询型用例挂住, 表现为"永远不结束"而非失败 —— 实测两次卡在 78% 逾 13 分钟。
+    #       命令模板:
+    #         pytest -q --timeout=300 -p no:cacheprovider --ignore=mcp-extension \
+    #                --cov --cov-branch --cov-report=json:reports/coverage.json --cov-fail-under=29
+    #     · **单文件覆盖率有 ±15 行噪声**: 增减 A 模块的测试可能让 B 模块的被测行数漂移
+    #       (导入时序/追踪附着时机; coverage 自己的 module-not-measured 警告即此类)。
+    #       故只有大幅增量才可作为战果, ±20 行以内不作结论。
+    #     · 水位: 34.18%(2026-09-22, 6106 passed)。地板 29% 之上余量 ~5.2pp;
+    #       剩余未覆盖多为**编排/集成层**, 纯逻辑补测边际收益已明显下降 ——
+    #       继续提覆盖请优先做集成测试(真实素材+引擎在场), 而非再切纯函数。
+    #     · 补测前先按"**行为**"(不是模块名)比对既有断言, 只写差集:
+    #       已有 tests/test_pipeline_config_validation.py / test_llm_gateway*.py 等
+    #       把对应层断言得很完整, 重复补测会得到"零增益"。
     runs-on: windows-latest
     timeout-minutes: 90
     continue-on-error: true
