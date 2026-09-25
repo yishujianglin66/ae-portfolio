@@ -1,0 +1,76 @@
+skill_id: word_rough_cut
+domain: edit
+skill_type: pipeline_step
+version: 1.0.0
+stage: active
+requires_host:
+- app: local_python
+  version: '*'
+headless: headless
+cost:
+  class: gpu_local
+  typical_duration_sec: 20
+  notes: 21s 音频转写实测 ~15s（whisper small + cuda:0）；CPU 可跑仅 slow；模型 461MB 已缓存 ~/.cache/whisper
+contract:
+  inputs:
+    type: object
+    properties:
+      media:
+        type: string
+        description: 口播/对白媒体路径（须含音轨，纯视频会被 ffmpeg s16le 管道报 does not contain
+          any stream）
+      model_name:
+        type: string
+        enum:
+        - tiny
+        - base
+        - small
+        - medium
+        - large-v3
+        default: small
+      language:
+        type: string
+        description: 语言代码（zh/en...），None=自动检测
+      footage:
+        type: array
+        items:
+          type: string
+        description: 可选 B-roll 素材池；空=口播驱动模式（绝对时间轴）
+      max_gap:
+        type: number
+        default: 0.65
+      max_chars:
+        type: integer
+        default: 16
+    required:
+    - media
+  outputs:
+    type: object
+    description: EDL 1.1（cuts=短语级，text_events=词级）+ <stem>.words.json 词时间轴 + summary
+recipe_ref: core/word_rough_cut.py::rough_cut
+intended_use: 口播/对白素材的词级粗剪——转写→停顿断短语→生成可直接进 unified_edit/文字动画系统的
+  EDL 1.1；也是歌词驱动漫剪的通用化（任何语言人声）
+out_of_scope: 无音轨素材（先 mux 音频）；音乐 BPM 卡点走 beat_sync_edit 不走本卡；中文 small
+  模型同音字错率偏高，正式发布建议 medium（词时间戳结构不受影响）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: real_execution
+  was_generated_by:
+    test_media: tmp/vo_test.wav（Windows TTS 合成 21s 中文口播）
+    run: python core/word_rough_cut.py tmp/vo_test.wav --language zh
+    result: 65 词/10 短语/20.32s/lint PASS（首跑曾报 L7 时间轴错位，已修复：口播模式改绝对时间）
+  artifacts:
+  - tmp/word_cut_demo/edl.json
+  - tmp/word_cut_demo/word_cut_summary.json
+  - tmp/vo_test.words.json
+  host_version: torch 2.9.0+cu126 cuda=True / ffmpeg 8.1.1 / whisper 20250625
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: P1-3 词级粗剪链路落地（Whisper→短语规划→EDL1.1→lint）
+tags:
+- pipeline
+- word-level
+- whisper
+- edl
+- verified-0925

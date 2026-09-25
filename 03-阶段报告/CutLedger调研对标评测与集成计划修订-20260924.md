@@ -288,3 +288,31 @@ VRS 节拍分析(bpm=143.6, 50 beats, librosa_direct)
 - PowerShell `$args` 是自动变量，**不可用作函数形参名**：会被 positional 参数数组悄悄覆盖，导致 JSON-RPC arguments 变成 list（报错信息还藏在服务端 str(e) 里难定位）。
 
 测试基线：test_skill_service 13 + test_mcp_gateway 修复后全绿；网关侧本改动域零回归。puppet 套件另有 26 个与本次无关的存量红（sam2 弃用残测/registry 计数等），另立任务处理。
+
+---
+
+## 九、P1-3 落地记录：词级粗剪链路 Whisper→EDL（2026-09-25）
+
+P1 最后一块 Tier-2 大件落地，剪辑驱动从"只有音乐节拍"升级为**"节拍 + 语音词级"双入口**。
+
+### 安装与环境（本次实测）
+- `openai-whisper 20250625 + tiktoken` 安装：清华镜像无此包（versions: none），改阿里云镜像成功（已记入 requirements.txt 注释）
+- whisper small 模型 461MB 自动下载至 `~/.cache/whisper`；torch 2.9.0+cu126 环境已有，cuda:0 加载，21s 音频转写 ~15s（含模型加载）
+
+### 链路（core/word_rough_cut.py，199 行）
+```
+口播媒体 --whisper(word_timestamps)--> 词时间轴(带 sha1 缓存 <stem>.words.json)
+  --plan_phrases(停顿>0.65s / 超 16 字 / 句末标点 断句)--> 短语
+  --build_word_edl--> EDL 1.1（cuts=短语级，text_events=词级）--lint_edl--> 可渲染
+```
+两种模式：**口播驱动**（cut=音频绝对时间，字幕/对型场景）与 **B-roll 对位**（素材轮询紧凑排布，画面对位场景）。
+
+### 实战验证（Windows TTS 合成 21s 中文口播，素材库当日无带音轨文件）
+- 65 词 / 10 短语 / 20.32s / **lint PASS**，产物 tmp/word_cut_demo/edl.json
+- 首跑即被自家 lint L7 抓住真 bug：口播模式时长累加丢失句间停顿 → 词级时间戳与 timeline 错位；修为绝对时间轴，并加回归锁 test_vo_mode_absolute_alignment
+- 已知精度边界：small 模型中文同音字错率偏高（"词级粗剪"→"磁级粗简"），不影响时间戳结构；正式发布选 medium（卡内 out_of_scope 已声明）
+
+### 沉淀
+- 新卡 `word_rough_cut`（pipeline_step，**stage=active** 附真实证据链），卡片库 64→**65**，active 9→10
+- 测试：tests/test_word_rough_cut.py 5 项（纯逻辑不依 whisper）+ skill 体系回归 71 项 → **76 passed**；test_skill_service 12 绿
+- 坑归档：无音轨媒体喂 whisper 报 ffmpeg "Error opening output files: Invalid argument"（实为 does not contain any stream，误导型报错）；Add-Content 默认 GBK 会污染 UTF-8 文件，追加中文注释一律改走 python utf-8 写盘

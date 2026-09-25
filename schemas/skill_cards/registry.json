@@ -2,27 +2,27 @@
  "registry": "skill_cards",
  "schema_version": "0.1",
  "built_at": "2026-09-25",
- "count": 64,
+ "count": 65,
  "summary": {
   "by_stage": {
    "validated": 40,
    "experimental": 15,
-   "active": 9
+   "active": 10
   },
   "by_headless": {
    "requires_running_host": 39,
-   "headless": 25
+   "headless": 26
   },
   "by_cost": {
    "free_local": 60,
-   "gpu_local": 4
+   "gpu_local": 5
   },
   "by_domain": {
    "render": 12,
    "resource": 10,
    "blur": 7,
+   "edit": 6,
    "media": 6,
-   "edit": 5,
    "plugin": 5,
    "color": 4,
    "distortion": 4,
@@ -306,6 +306,19 @@
     "local_python"
    ],
    "path": "schemas/skill_cards/edit/resolve_project_timeline_mcp.yaml"
+  },
+  "word_rough_cut": {
+   "domain": "edit",
+   "skill_type": "pipeline_step",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "headless",
+   "cost_class": "gpu_local",
+   "cost_sec": 20,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/edit/word_rough_cut.yaml"
   },
   "fx_bloom": {
    "domain": "glow",

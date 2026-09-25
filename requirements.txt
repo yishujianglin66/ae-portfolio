@@ -47,3 +47,10 @@ httpx>=0.25
 # SCAIL-2 / MuseTalk / MatAnyone2 的依赖在各自 external/ 子目录的 requirements.txt 中
 # 以下为 MG 模板引擎 + Lottie 导出 + 手绘风格化的直接依赖
 # (Pillow/numpy/opencv 已在上方核心依赖中)
+
+# P1-3
+
+# P1-3 word-level rough cut (Whisper->EDL, installed 2026-09-25)
+# NOTE: not on Tsinghua mirror; use Aliyun: -i https://mirrors.aliyun.com/pypi/simple/
+openai-whisper>=20250625
+tiktoken>=0.14
