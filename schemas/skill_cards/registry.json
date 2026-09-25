@@ -1,0 +1,870 @@
+{
+ "registry": "skill_cards",
+ "schema_version": "0.1",
+ "built_at": "2026-09-25",
+ "count": 64,
+ "summary": {
+  "by_stage": {
+   "validated": 40,
+   "experimental": 15,
+   "active": 9
+  },
+  "by_headless": {
+   "requires_running_host": 39,
+   "headless": 25
+  },
+  "by_cost": {
+   "free_local": 60,
+   "gpu_local": 4
+  },
+  "by_domain": {
+   "render": 12,
+   "resource": 10,
+   "blur": 7,
+   "media": 6,
+   "edit": 5,
+   "plugin": 5,
+   "color": 4,
+   "distortion": 4,
+   "glow": 3,
+   "particle": 3,
+   "pipeline": 2,
+   "roto": 2,
+   "beat": 1
+  }
+ },
+ "skills": {
+  "vrs_beat_analysis": {
+   "domain": "beat",
+   "skill_type": "pipeline_step",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 10,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/beat/vrs_beat_analysis.yaml"
+  },
+  "fx_bokeh": {
+   "domain": "blur",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/blur/fx_bokeh.yaml"
+  },
+  "fx_fmb": {
+   "domain": "blur",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/blur/fx_fmb.yaml"
+  },
+  "fx_fmb_dir": {
+   "domain": "blur",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/blur/fx_fmb_dir.yaml"
+  },
+  "fx_fmb_dir_light": {
+   "domain": "blur",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/blur/fx_fmb_dir_light.yaml"
+  },
+  "fx_fmb_light": {
+   "domain": "blur",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/blur/fx_fmb_light.yaml"
+  },
+  "fx_radial": {
+   "domain": "blur",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/blur/fx_radial.yaml"
+  },
+  "fx_radial_soft": {
+   "domain": "blur",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/blur/fx_radial_soft.yaml"
+  },
+  "cdl_grade_lua_bridge": {
+   "domain": "color",
+   "skill_type": "pipeline_step",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 30,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/color/cdl_grade_lua_bridge.yaml"
+  },
+  "davinci_apply_grade": {
+   "domain": "color",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "resolve"
+   ],
+   "path": "schemas/skill_cards/color/davinci_apply_grade.yaml"
+  },
+  "davinci_export_lut": {
+   "domain": "color",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 10,
+   "hosts": [
+    "resolve"
+   ],
+   "path": "schemas/skill_cards/color/davinci_export_lut.yaml"
+  },
+  "fx_magic_bullet_looks": {
+   "domain": "color",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/color/fx_magic_bullet_looks.yaml"
+  },
+  "fx_badtv": {
+   "domain": "distortion",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/distortion/fx_badtv.yaml"
+  },
+  "fx_badtv_hard": {
+   "domain": "distortion",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/distortion/fx_badtv_hard.yaml"
+  },
+  "fx_badtv_light": {
+   "domain": "distortion",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/distortion/fx_badtv_light.yaml"
+  },
+  "fx_glitch": {
+   "domain": "distortion",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/distortion/fx_glitch.yaml"
+  },
+  "beat_sync_edit": {
+   "domain": "edit",
+   "skill_type": "pipeline_step",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 60,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/edit/beat_sync_edit.yaml"
+  },
+  "davinci_mcp_call": {
+   "domain": "edit",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "resolve"
+   ],
+   "path": "schemas/skill_cards/edit/davinci_mcp_call.yaml"
+  },
+  "davinci_mcp_status": {
+   "domain": "edit",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 3,
+   "hosts": [
+    "resolve"
+   ],
+   "path": "schemas/skill_cards/edit/davinci_mcp_status.yaml"
+  },
+  "davinci_run_script": {
+   "domain": "edit",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "resolve"
+   ],
+   "path": "schemas/skill_cards/edit/davinci_run_script.yaml"
+  },
+  "resolve_project_timeline_mcp": {
+   "domain": "edit",
+   "skill_type": "pipeline_step",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 25,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/edit/resolve_project_timeline_mcp.yaml"
+  },
+  "fx_bloom": {
+   "domain": "glow",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/glow/fx_bloom.yaml"
+  },
+  "fx_bloom_soft": {
+   "domain": "glow",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/glow/fx_bloom_soft.yaml"
+  },
+  "fx_sapphire_glow": {
+   "domain": "glow",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/glow/fx_sapphire_glow.yaml"
+  },
+  "comfyui_get_status": {
+   "domain": "media",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 2,
+   "hosts": [
+    "comfyui"
+   ],
+   "path": "schemas/skill_cards/media/comfyui_get_status.yaml"
+  },
+  "comfyui_upload_image": {
+   "domain": "media",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 3,
+   "hosts": [
+    "comfyui"
+   ],
+   "path": "schemas/skill_cards/media/comfyui_upload_image.yaml"
+  },
+  "ffmpeg_concat_videos": {
+   "domain": "media",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ffmpeg"
+   ],
+   "path": "schemas/skill_cards/media/ffmpeg_concat_videos.yaml"
+  },
+  "ffmpeg_convert_video": {
+   "domain": "media",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ffmpeg"
+   ],
+   "path": "schemas/skill_cards/media/ffmpeg_convert_video.yaml"
+  },
+  "ffmpeg_extract_audio": {
+   "domain": "media",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 5,
+   "hosts": [
+    "ffmpeg"
+   ],
+   "path": "schemas/skill_cards/media/ffmpeg_extract_audio.yaml"
+  },
+  "ffmpeg_extract_frames": {
+   "domain": "media",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 8,
+   "hosts": [
+    "ffmpeg"
+   ],
+   "path": "schemas/skill_cards/media/ffmpeg_extract_frames.yaml"
+  },
+  "fx_burst_badtv": {
+   "domain": "particle",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/particle/fx_burst_badtv.yaml"
+  },
+  "fx_burst_radial": {
+   "domain": "particle",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/particle/fx_burst_radial.yaml"
+  },
+  "fx_particular": {
+   "domain": "particle",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/particle/fx_particular.yaml"
+  },
+  "ae_listener_dual_proto": {
+   "domain": "pipeline",
+   "skill_type": "pipeline_step",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 5,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/pipeline/ae_listener_dual_proto.yaml"
+  },
+  "ae_startup_bridge_autoload": {
+   "domain": "pipeline",
+   "skill_type": "pipeline_step",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 8,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/pipeline/ae_startup_bridge_autoload.yaml"
+  },
+  "fx_optical_flares": {
+   "domain": "plugin",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/plugin/fx_optical_flares.yaml"
+  },
+  "plugin_apply_optical_flares": {
+   "domain": "plugin",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/plugin/plugin_apply_optical_flares.yaml"
+  },
+  "plugin_apply_particular": {
+   "domain": "plugin",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 20,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/plugin/plugin_apply_particular.yaml"
+  },
+  "plugin_apply_saber": {
+   "domain": "plugin",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/plugin/plugin_apply_saber.yaml"
+  },
+  "plugin_apply_twitch": {
+   "domain": "plugin",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 10,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/plugin/plugin_apply_twitch.yaml"
+  },
+  "ae_comp_render_smoke": {
+   "domain": "render",
+   "skill_type": "pipeline_step",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 64,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/render/ae_comp_render_smoke.yaml"
+  },
+  "ae_render_composition": {
+   "domain": "render",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 60,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/render/ae_render_composition.yaml"
+  },
+  "ae_run_script": {
+   "domain": "render",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 10,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/render/ae_run_script.yaml"
+  },
+  "blender_create_stage": {
+   "domain": "render",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 10,
+   "hosts": [
+    "blender"
+   ],
+   "path": "schemas/skill_cards/render/blender_create_stage.yaml"
+  },
+  "blender_render_animation": {
+   "domain": "render",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "gpu_local",
+   "cost_sec": 300,
+   "hosts": [
+    "blender"
+   ],
+   "path": "schemas/skill_cards/render/blender_render_animation.yaml"
+  },
+  "blender_run_script": {
+   "domain": "render",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 30,
+   "hosts": [
+    "blender"
+   ],
+   "path": "schemas/skill_cards/render/blender_run_script.yaml"
+  },
+  "comfyui_run_workflow": {
+   "domain": "render",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "gpu_local",
+   "cost_sec": 120,
+   "hosts": [
+    "comfyui"
+   ],
+   "path": "schemas/skill_cards/render/comfyui_run_workflow.yaml"
+  },
+  "media_encoder_batch_encode": {
+   "domain": "render",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 180,
+   "hosts": [
+    "media_encoder"
+   ],
+   "path": "schemas/skill_cards/render/media_encoder_batch_encode.yaml"
+  },
+  "media_encoder_encode": {
+   "domain": "render",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 60,
+   "hosts": [
+    "media_encoder"
+   ],
+   "path": "schemas/skill_cards/render/media_encoder_encode.yaml"
+  },
+  "media_encoder_list_presets": {
+   "domain": "render",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "media_encoder"
+   ],
+   "path": "schemas/skill_cards/render/media_encoder_list_presets.yaml"
+  },
+  "resolve_render_poll_mcp": {
+   "domain": "render",
+   "skill_type": "pipeline_step",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 90,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/render/resolve_render_poll_mcp.yaml"
+  },
+  "topaz_enhance_video": {
+   "domain": "render",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "gpu_local",
+   "cost_sec": 240,
+   "hosts": [
+    "topaz"
+   ],
+   "path": "schemas/skill_cards/render/topaz_enhance_video.yaml"
+  },
+  "config_get_paths": {
+   "domain": "resource",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/resource/config_get_paths.yaml"
+  },
+  "config_get_settings": {
+   "domain": "resource",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/resource/config_get_settings.yaml"
+  },
+  "resource_find_audio": {
+   "domain": "resource",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/resource/resource_find_audio.yaml"
+  },
+  "resource_find_effect_image": {
+   "domain": "resource",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/resource/resource_find_effect_image.yaml"
+  },
+  "resource_find_font": {
+   "domain": "resource",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/resource/resource_find_font.yaml"
+  },
+  "resource_find_lut": {
+   "domain": "resource",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/resource/resource_find_lut.yaml"
+  },
+  "resource_find_script": {
+   "domain": "resource",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/resource/resource_find_script.yaml"
+  },
+  "resource_find_template": {
+   "domain": "resource",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/resource/resource_find_template.yaml"
+  },
+  "resource_get_stats": {
+   "domain": "resource",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/resource/resource_get_stats.yaml"
+  },
+  "resource_list_by_type": {
+   "domain": "resource",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 1,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/resource/resource_list_by_type.yaml"
+  },
+  "silhouette_roto_video": {
+   "domain": "roto",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "gpu_local",
+   "cost_sec": 180,
+   "hosts": [
+    "silhouette"
+   ],
+   "path": "schemas/skill_cards/roto/silhouette_roto_video.yaml"
+  },
+  "silhouette_track_points": {
+   "domain": "roto",
+   "skill_type": "tool_wrapper",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 30,
+   "hosts": [
+    "silhouette"
+   ],
+   "path": "schemas/skill_cards/roto/silhouette_track_points.yaml"
+  }
+ }
+}

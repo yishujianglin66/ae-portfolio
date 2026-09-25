@@ -1,0 +1,37 @@
+skill_id: vrs_beat_analysis
+domain: beat
+skill_type: pipeline_step
+version: 1.0.0
+stage: active
+requires_host:
+- app: local_python
+  version: '*'
+headless: headless
+cost:
+  class: free_local
+  typical_duration_sec: 10
+  notes: bpm143.6 实测 3/3 通过
+contract:
+  inputs:
+    type: object
+    description: 见 recipe_ref 指向的脚本参数（v0.1 从简）
+  outputs:
+    type: object
+    description: 产物见 evidence_chain.artifacts
+recipe_ref: tmp/pytest_mainline_20260924.log
+intended_use: 参考视频/BGM 的 BPM 与节拍网格分析（librosa+VRS），混剪前置
+out_of_scope: 无音频素材；变奏曲式整曲单 BPM 场景需人工复核
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: real_execution
+  host_version: 本机实测 2026-09-24
+  artifacts:
+  - tmp/pytest_mainline_20260924.log
+  - 03-阶段报告/CutLedger调研对标评测与集成计划修订-20260924.md
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: bpm143.6 实测 3/3 通过
+tags:
+- pipeline
+- verified-0924

@@ -1,0 +1,57 @@
+skill_id: media_encoder_encode
+domain: render
+skill_type: tool_wrapper
+version: 1.0.0
+stage: validated
+requires_host:
+- app: media_encoder
+  version: '*'
+headless: headless
+cost:
+  class: free_local
+  typical_duration_sec: 60
+contract:
+  inputs:
+    type: object
+    properties:
+      input_path:
+        type: string
+        description: 输入视频路径
+      output_path:
+        type: string
+        description: 输出视频路径
+      platform:
+        type: string
+        default: douyin
+        description: 平台预设（douyin/bilibili/youtube/xiaohongshu/wechat/master）
+      preset_file:
+        type: string
+        description: 自定义 .epr 预设文件路径（优先于 platform）
+      overwrite:
+        type: boolean
+        default: true
+        description: 是否覆盖输出
+    required:
+    - input_path
+    - output_path
+  outputs:
+    type: object
+    description: 网关统一响应 {status, result|message}
+tool_ref:
+  gateway_tool: media_encoder_encode
+  action: encode
+intended_use: 使用 Adobe Media Encoder 编码视频（支持平台预设）
+out_of_scope: （auto-generated，待补）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: auto_generated
+  was_generated_by:
+    tool: skill_cli gen-tool-cards
+    source: gateway.py AST
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自网关工具定义自动生成
+tags:
+- auto-generated
+- mcp-gateway

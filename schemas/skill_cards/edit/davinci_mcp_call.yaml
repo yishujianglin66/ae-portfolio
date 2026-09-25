@@ -1,0 +1,49 @@
+skill_id: davinci_mcp_call
+domain: edit
+skill_type: tool_wrapper
+version: 1.0.0
+stage: experimental
+requires_host:
+- app: resolve
+  version: '>=19.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 15
+contract:
+  inputs:
+    type: object
+    properties:
+      tool:
+        type: string
+        description: 官方 MCP 工具名
+      arguments:
+        type: object
+        default: {}
+      timeout:
+        type: integer
+        default: 120
+    required:
+    - tool
+  outputs:
+    type: object
+    description: 网关统一响应 {status, result|message}
+tool_ref:
+  gateway_tool: davinci_mcp_call
+  action: call
+intended_use: 透传调用 Resolve 21.1 官方 MCP 任意工具（launch_resolve/get_whats_new/search_scripting_api/get_scripting_api/list_luts/list_dctls/generate_lut
+  等）
+out_of_scope: （auto-generated，待补）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: auto_generated
+  was_generated_by:
+    tool: skill_cli gen-tool-cards
+    source: gateway.py AST
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自网关工具定义自动生成
+tags:
+- auto-generated
+- mcp-gateway

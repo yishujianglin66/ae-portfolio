@@ -1,0 +1,45 @@
+skill_id: resource_find_script
+domain: resource
+skill_type: tool_wrapper
+version: 1.0.0
+stage: validated
+requires_host:
+- app: local_python
+  version: '*'
+headless: headless
+cost:
+  class: free_local
+  typical_duration_sec: 1
+contract:
+  inputs:
+    type: object
+    properties:
+      name:
+        type: string
+        description: 脚本名称关键词
+      exact:
+        type: boolean
+        default: false
+    required:
+    - name
+  outputs:
+    type: object
+    description: 网关统一响应 {status, result|message}
+tool_ref:
+  gateway_tool: resource_find_script
+  action: ''
+intended_use: 在资源库中查找 AE 脚本文件
+out_of_scope: （auto-generated，待补）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: auto_generated
+  was_generated_by:
+    tool: skill_cli gen-tool-cards
+    source: gateway.py AST
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自网关工具定义自动生成
+tags:
+- auto-generated
+- mcp-gateway

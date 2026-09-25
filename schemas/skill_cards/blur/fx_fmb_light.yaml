@@ -1,0 +1,56 @@
+skill_id: fx_fmb_light
+domain: blur
+skill_type: effect_recipe
+effect_type: motion_blur
+version: 1.0.0
+stage: validated
+requires_host:
+- app: ae
+  version: '>=25.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 20
+  notes: ''
+contract:
+  inputs:
+    type: object
+    properties:
+      target_range:
+        type: object
+        properties:
+          t_in:
+            type: number
+          t_out:
+            type: number
+        required:
+        - t_in
+        - t_out
+      intensity_scale:
+        type: number
+        default: 1.0
+      '0001':
+        type: number
+        default: 22
+    required:
+    - target_range
+  outputs:
+    type: object
+    description: 带效果的 AE 图层/预合成
+recipe_ref: build_master_polish.RECIPES['fmb_light']
+intended_use: motion_blur 效果配方（matchName=CC Force Motion Blur，探针实证参数）
+out_of_scope: （待补人工复核）
+evidence_chain:
+  validated_at: '2026-09-08'
+  status: unit_verified
+  was_generated_by:
+    report: 02-开发文档 visual_effect_schema 10/18 类型可渲染（09-08 接入 build_master_polish）
+  host_version: AE 25.x
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自 RECIPES 自动封装（Top50 P1）
+tags:
+- effect
+- auto-wrapped
+- motion_blur

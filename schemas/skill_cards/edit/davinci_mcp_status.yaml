@@ -1,0 +1,38 @@
+skill_id: davinci_mcp_status
+domain: edit
+skill_type: tool_wrapper
+version: 1.0.0
+stage: validated
+requires_host:
+- app: resolve
+  version: '>=19.0'
+headless: headless
+cost:
+  class: free_local
+  typical_duration_sec: 3
+contract:
+  inputs:
+    type: object
+    properties: {}
+    required: []
+  outputs:
+    type: object
+    description: 网关统一响应 {status, result|message}
+tool_ref:
+  gateway_tool: davinci_mcp_status
+  action: mcp_status
+intended_use: 查询官方 MCP 视角的 Resolve 运行/连接状态
+out_of_scope: （auto-generated，待补）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: auto_generated
+  was_generated_by:
+    tool: skill_cli gen-tool-cards
+    source: gateway.py AST
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自网关工具定义自动生成
+tags:
+- auto-generated
+- mcp-gateway

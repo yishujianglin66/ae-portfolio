@@ -1,0 +1,36 @@
+skill_id: resolve_project_timeline_mcp
+domain: edit
+skill_type: pipeline_step
+version: 1.0.0
+stage: active
+requires_host:
+- app: local_python
+  version: '*'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 25
+  notes: 09-24 建工程+渲染 Complete
+contract:
+  inputs:
+    type: object
+    description: 见 recipe_ref 指向的脚本参数（v0.1 从简）
+  outputs:
+    type: object
+    description: 产物见 evidence_chain.artifacts
+recipe_ref: 03-阶段报告/CutLedger调研对标评测与集成计划修订-20260924.md
+intended_use: 官方 ResolveMCP run_script 建工程/时间线/导入媒体（编排层）
+out_of_scope: 沙箱禁 import os/json；单脚本超 55s 需拆多次调用
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: real_execution
+  host_version: 本机实测 2026-09-24
+  artifacts:
+  - 03-阶段报告/CutLedger调研对标评测与集成计划修订-20260924.md
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 09-24 建工程+渲染 Complete
+tags:
+- pipeline
+- verified-0924

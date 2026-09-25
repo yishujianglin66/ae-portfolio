@@ -1,0 +1,45 @@
+skill_id: comfyui_run_workflow
+domain: render
+skill_type: tool_wrapper
+version: 1.0.0
+stage: experimental
+requires_host:
+- app: comfyui
+  version: '*'
+headless: requires_running_host
+cost:
+  class: gpu_local
+  typical_duration_sec: 120
+contract:
+  inputs:
+    type: object
+    properties:
+      workflow:
+        type: object
+        description: ComfyUI 工作流 JSON（节点 ID -> 节点配置）
+      output_dir:
+        type: string
+        description: 输出文件保存目录
+    required:
+    - workflow
+  outputs:
+    type: object
+    description: 网关统一响应 {status, result|message}
+tool_ref:
+  gateway_tool: comfyui_run_workflow
+  action: run_workflow
+intended_use: 执行 ComfyUI 工作流（AI 图像/视频生成）
+out_of_scope: （auto-generated，待补）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: auto_generated
+  was_generated_by:
+    tool: skill_cli gen-tool-cards
+    source: gateway.py AST
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自网关工具定义自动生成
+tags:
+- auto-generated
+- mcp-gateway

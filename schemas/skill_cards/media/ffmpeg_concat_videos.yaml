@@ -1,0 +1,49 @@
+skill_id: ffmpeg_concat_videos
+domain: media
+skill_type: tool_wrapper
+version: 1.0.0
+stage: validated
+requires_host:
+- app: ffmpeg
+  version: '*'
+headless: headless
+cost:
+  class: free_local
+  typical_duration_sec: 15
+contract:
+  inputs:
+    type: object
+    properties:
+      input_paths:
+        type: array
+        items:
+          type: string
+      output_path:
+        type: string
+      reencode:
+        type: boolean
+        default: false
+    required:
+    - input_paths
+    - output_path
+  outputs:
+    type: object
+    description: 网关统一响应 {status, result|message}
+tool_ref:
+  gateway_tool: ffmpeg_concat_videos
+  action: concat
+intended_use: Concatenate multiple video files
+out_of_scope: （auto-generated，待补）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: auto_generated
+  was_generated_by:
+    tool: skill_cli gen-tool-cards
+    source: gateway.py AST
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自网关工具定义自动生成
+tags:
+- auto-generated
+- mcp-gateway

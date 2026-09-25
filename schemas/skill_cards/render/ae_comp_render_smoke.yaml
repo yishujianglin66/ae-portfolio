@@ -1,0 +1,36 @@
+skill_id: ae_comp_render_smoke
+domain: render
+skill_type: pipeline_step
+version: 1.0.0
+stage: active
+requires_host:
+- app: local_python
+  version: '*'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 64
+  notes: SMOKE PASS h264 34KB/3.0s，总 64s
+contract:
+  inputs:
+    type: object
+    description: 见 recipe_ref 指向的脚本参数（v0.1 从简）
+  outputs:
+    type: object
+    description: 产物见 evidence_chain.artifacts
+recipe_ref: tmp/ae_smoke_0924.py
+intended_use: AE 真执行链：建合成+图层+渲染队列出片（AEBridgeLite 原子写防竞态）
+out_of_scope: Start 文件夹以外的手动注入方式（已自动拉起闭环）；rq.render 不存在须用 renderQueue.render()
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: real_execution
+  host_version: 本机实测 2026-09-24
+  artifacts:
+  - tmp/ae_smoke_0924.py
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: SMOKE PASS h264 34KB/3.0s，总 64s
+tags:
+- pipeline
+- verified-0924

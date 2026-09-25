@@ -1,0 +1,50 @@
+skill_id: ffmpeg_extract_audio
+domain: media
+skill_type: tool_wrapper
+version: 1.0.0
+stage: validated
+requires_host:
+- app: ffmpeg
+  version: '*'
+headless: headless
+cost:
+  class: free_local
+  typical_duration_sec: 5
+contract:
+  inputs:
+    type: object
+    properties:
+      video_path:
+        type: string
+      output_path:
+        type: string
+      audio_codec:
+        type: string
+        default: pcm_s16le
+      sample_rate:
+        type: integer
+        default: 16000
+    required:
+    - video_path
+    - output_path
+  outputs:
+    type: object
+    description: 网关统一响应 {status, result|message}
+tool_ref:
+  gateway_tool: ffmpeg_extract_audio
+  action: extract_audio
+intended_use: Extract audio track from video
+out_of_scope: （auto-generated，待补）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: auto_generated
+  was_generated_by:
+    tool: skill_cli gen-tool-cards
+    source: gateway.py AST
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自网关工具定义自动生成
+tags:
+- auto-generated
+- mcp-gateway

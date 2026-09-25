@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "skill_card_schema_v0.1",
+  "title": "Skill Card Schema v0.1 (2026-09-25)",
+  "description": "剪辑自动化能力单元的统一声明格式。基于 2026-09-11《管线集成与Skill封装落地方案》§2.3 卡片模板扩展，并入 P1 无头能力矩阵(headless)与成本计量(cost)。三类 skill_type：effect_recipe(效果配方) / tool_wrapper(MCP工具封装) / pipeline_step(管线步骤)。存放位置 schemas/skill_cards/<domain>/<skill_id>.yaml，索引由 skill_cli build-registry 生成。",
+  "type": "object",
+  "required": [
+    "skill_id", "domain", "skill_type", "version", "stage",
+    "requires_host", "headless", "cost", "contract",
+    "intended_use", "out_of_scope", "evidence_chain"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "skill_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{2,63}$",
+      "description": "全局唯一，= evidence_chain.skill_id 引用锚，与文件名一致"
+    },
+    "domain": {
+      "type": "string",
+      "enum": [
+        "glow", "blur", "distortion", "particle", "text-style", "text-3d",
+        "transition", "color", "audio", "beat", "edit", "render", "media",
+        "resource", "roto", "plugin", "pipeline"
+      ],
+      "description": "功能域分组（按 效果类型×功能域，不按管线阶段——9-11方案 §2.2）"
+    },
+    "skill_type": {
+      "type": "string",
+      "enum": ["effect_recipe", "tool_wrapper", "pipeline_step"],
+      "description": "effect_recipe=可复用效果配方(recipe_ref 指向实现); tool_wrapper=MCP 网关工具封装; pipeline_step=管线级能力(如VRS节拍分析)"
+    },
+    "effect_type": {
+      "type": "string",
+      "description": "对齐 visual_effect_schema enum（effect_recipe 必填）"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "SemVer：PATCH=参数收紧/bugfix；MINOR=新增可选参数；MAJOR=破坏 contract（9-11方案 §3.1）"
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["experimental", "validated", "active", "deprecated", "archived"],
+      "description": "MLflow 式生命周期。仅 active 允许进 production（治理闸门）"
+    },
+    "requires_host": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["app", "version"],
+        "properties": {
+          "app": {"type": "string", "enum": ["ae", "resolve", "blender", "ffmpeg", "comfyui", "topaz", "media_encoder", "silhouette", "local_python", "any"]},
+          "version": {"type": "string", "description": "semver range，如 >=25.0；无版本要求填 *"}
+        }
+      },
+      "description": "宿主及版本兼容声明（OFX kOfxPropVersion 式）"
+    },
+    "headless": {
+      "type": "string",
+      "enum": ["headless", "requires_gui", "requires_running_host"],
+      "description": "无头能力矩阵（P1 并行项）。headless=可全自动无界面执行；requires_gui=必须 GUI 会话（如经 listener 的真 AE）；requires_running_host=需要宿主进程已启动（如 Resolve Lua 桥/AE listener）。编排器据此决定是否预启动应用或排队人工注入"
+    },
+    "cost": {
+      "type": "object",
+      "required": ["class", "typical_duration_sec"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "enum": ["free_local", "gpu_local", "api_paid"],
+          "description": "成本分类（P1 成本计量表）。free_local=CPU本地零成本；gpu_local=占 GPU（如 ComfyUI/Topaz/训练）；api_paid=外部 API 计费（如 LLM/VLM）"
+        },
+        "typical_duration_sec": {
+          "type": "number",
+          "minimum": 0,
+          "description": "单次执行典型耗时（秒），供编排器排期与预算"
+        },
+        "api_unit": {"type": "string", "description": "api_paid 时注明计价单位，如 token/秒"},
+        "notes": {"type": "string"}
+      },
+      "description": "执行成本画像，接入 core/cost_logger.py 计量"
+    },
+    "contract": {
+      "type": "object",
+      "required": ["inputs"],
+      "properties": {
+        "inputs": {
+          "type": "object",
+          "description": "JSON Schema 片段（type:object）。tool_wrapper 直接取网关 input_schema；effect_recipe 至少含 target_range+params"
+        },
+        "outputs": {
+          "type": "object",
+          "description": "JSON Schema 片段或产物说明（file/report/metrics）"
+        }
+      },
+      "description": "参数与数据契约（MLT YAML / Nuke Export gizmo 式，含参数范围）"
+    },
+    "recipe_ref": {
+      "type": "string",
+      "description": "实现位置（定义外置、按名引用——Nuke gizmo 式）。effect_recipe 必填，如 build_master_polish.RECIPES['bloom']"
+    },
+    "tool_ref": {
+      "type": "object",
+      "properties": {
+        "gateway_tool": {"type": "string", "description": "MCP 网关工具名，如 ffmpeg_concat_videos"},
+        "action": {"type": "string"}
+      },
+      "description": "tool_wrapper 必填：对应的网关工具"
+    },
+    "intended_use": {"type": "string", "description": "适用场景（含上下文条件）"},
+    "out_of_scope": {"type": "string", "description": "不适用场景（含教训引用，如 会洗白见v8教训）"},
+    "evidence_chain": {
+      "type": "object",
+      "required": ["validated_at", "status"],
+      "properties": {
+        "validated_at": {"type": "string", "description": "ISO 日期"},
+        "status": {"type": "string", "enum": ["real_execution", "unit_verified", "auto_generated"]},
+        "was_generated_by": {"type": "object"},
+        "source_commit": {"type": "string"},
+        "inputs_sha1": {"type": "string"},
+        "output_digest": {"type": "string"},
+        "host_version": {"type": "string"},
+        "artifacts": {"type": "array", "items": {"type": "string"}, "description": "验证产物路径（mp4/png/log）"}
+      },
+      "description": "in-toto 式 attestation（SLSA+W3C PROV）。auto_generated 卡片 status=auto_generated，待真实验证后升级——stage 不许超过 validated"
+    },
+    "checksum": {"type": "string", "description": "钉死 recipe 实现的 sha256（Terraform lock 式），可选 v0.1"},
+    "version_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["version", "date"],
+        "properties": {
+          "version": {"type": "string"},
+          "date": {"type": "string"},
+          "commit": {"type": "string"},
+          "note": {"type": "string"}
+        }
+      }
+    },
+    "tags": {"type": "array", "items": {"type": "string"}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"skill_type": {"const": "effect_recipe"}}},
+      "then": {"required": ["effect_type", "recipe_ref"]}
+    },
+    {
+      "if": {"properties": {"skill_type": {"const": "tool_wrapper"}}},
+      "then": {"required": ["tool_ref"]}
+    },
+    {
+      "if": {"properties": {"stage": {"const": "active"}}},
+      "then": {"properties": {"evidence_chain": {"properties": {"status": {"enum": ["real_execution"]}}}}}
+    }
+  ]
+}

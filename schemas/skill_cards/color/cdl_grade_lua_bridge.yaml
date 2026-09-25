@@ -1,0 +1,36 @@
+skill_id: cdl_grade_lua_bridge
+domain: color
+skill_type: pipeline_step
+version: 1.0.0
+stage: active
+requires_host:
+- app: local_python
+  version: '*'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 30
+  notes: SATAVG 3.94→6.81 量化生效
+contract:
+  inputs:
+    type: object
+    description: 见 recipe_ref 指向的脚本参数（v0.1 从简）
+  outputs:
+    type: object
+    description: 产物见 evidence_chain.artifacts
+recipe_ref: tmp/graded_master.mp4
+intended_use: fuscript Lua 桥 SetCDL 调色 + H.264 Master 渲染（SetCDL 仅 Studio Lua 可用）
+out_of_scope: Python API 调 SetCDL（返回 falsy，官方 API 哑）；Lua 1-based 索引勿传 0
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: real_execution
+  host_version: 本机实测 2026-09-24
+  artifacts:
+  - tmp/graded_master.mp4
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: SATAVG 3.94→6.81 量化生效
+tags:
+- pipeline
+- verified-0924

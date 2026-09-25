@@ -1,0 +1,37 @@
+skill_id: comfyui_get_status
+domain: media
+skill_type: tool_wrapper
+version: 1.0.0
+stage: validated
+requires_host:
+- app: comfyui
+  version: '*'
+headless: headless
+cost:
+  class: free_local
+  typical_duration_sec: 2
+contract:
+  inputs:
+    type: object
+    properties: {}
+  outputs:
+    type: object
+    description: 网关统一响应 {status, result|message}
+tool_ref:
+  gateway_tool: comfyui_get_status
+  action: get_status
+intended_use: 查询 ComfyUI 服务器状态（可用性、系统统计、队列）
+out_of_scope: （auto-generated，待补）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: auto_generated
+  was_generated_by:
+    tool: skill_cli gen-tool-cards
+    source: gateway.py AST
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自网关工具定义自动生成
+tags:
+- auto-generated
+- mcp-gateway

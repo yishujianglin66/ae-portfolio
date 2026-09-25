@@ -1,0 +1,63 @@
+skill_id: fx_bloom
+domain: glow
+skill_type: effect_recipe
+effect_type: bloom
+version: 1.0.0
+stage: active
+requires_host:
+- app: ae
+  version: '>=25.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 20
+  notes: ''
+contract:
+  inputs:
+    type: object
+    properties:
+      target_range:
+        type: object
+        properties:
+          t_in:
+            type: number
+          t_out:
+            type: number
+        required:
+        - t_in
+        - t_out
+      intensity_scale:
+        type: number
+        default: 1.0
+      '0002':
+        type: number
+        default: 0.8
+      '0003':
+        type: number
+        default: 6
+      '0004':
+        type: number
+        default: 0.38
+    required:
+    - target_range
+  outputs:
+    type: object
+    description: 带效果的 AE 图层/预合成
+recipe_ref: build_master_polish.RECIPES['bloom']
+intended_use: bloom 效果配方（matchName=ADBE Glo2，探针实证参数）
+out_of_scope: 整片静态叠加（洗白风险见 v8 教训）；跨宿主使用
+evidence_chain:
+  validated_at: '2026-09-04'
+  status: real_execution
+  was_generated_by:
+    run: run50
+    render_diff: v11_grid.png
+  host_version: AE 25.x
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自 RECIPES 自动封装（Top50 P1）
+tags:
+- effect
+- auto-wrapped
+- bloom

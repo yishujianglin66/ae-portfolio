@@ -1,0 +1,54 @@
+skill_id: blender_create_stage
+domain: render
+skill_type: tool_wrapper
+version: 1.0.0
+stage: validated
+requires_host:
+- app: blender
+  version: '>=4.0'
+headless: headless
+cost:
+  class: free_local
+  typical_duration_sec: 10
+contract:
+  inputs:
+    type: object
+    properties:
+      output_dir:
+        type: string
+      style:
+        type: string
+        default: wooden
+      resolution:
+        type: array
+        items:
+          type: integer
+        default:
+        - 1920
+        - 1080
+      render_engine:
+        type: string
+        default: BLENDER_EEVEE
+    required:
+    - output_dir
+  outputs:
+    type: object
+    description: 网关统一响应 {status, result|message}
+tool_ref:
+  gateway_tool: blender_create_stage
+  action: create_puppet_stage
+intended_use: Generate a puppet theatre stage scene in Blender
+out_of_scope: （auto-generated，待补）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: auto_generated
+  was_generated_by:
+    tool: skill_cli gen-tool-cards
+    source: gateway.py AST
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自网关工具定义自动生成
+tags:
+- auto-generated
+- mcp-gateway

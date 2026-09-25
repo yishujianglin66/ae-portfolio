@@ -233,3 +233,30 @@ VRS 节拍分析(bpm=143.6, 50 beats, librosa_direct)
 **晚间补充（2026-09-24）**：P0 全部落地后，① listener 协议分叉已在 `ae_mcp_auto_listener.jsx::executeScript` 层统一（双兑底，PROTO_CHECK 双风格实测 PASS，客户端零改动）；② 达芬奇 4 个测试工程（KV_E2E_*/KV_LUA_*）已经官方 MCP 定点删除（因 API 不能删当前工程的限制，留有空工程 `__cleanup_holder__` 可直接手动删）；③ 发现新问题：系统盘/缓存盘空间告警（网关 resource_monitor disk=93.7%，AE 启动也弹磁盘缓存警告），建议列入待办清理。
 
 *SkillHub 26 技能逐项整合清单见：`03-阶段报告/SkillHub生态整合清单报告-20260924.md`*
+
+---
+
+## 七、P1-1 落地记录：Skill schema v0.1 + Top50 封装（2026-09-25）
+
+针对六维对标唯一落后项（Skill 标准化 5 vs 7）的翻身仗，已完成：
+
+### 产物清单
+| 产物 | 位置 | 说明 |
+|---|---|---|
+| 元 schema | `schemas/skill_card_schema_v0.1.json` | Draft-07；三类 skill_type（effect_recipe / tool_wrapper / pipeline_step）；**headless 无头矩阵 + cost 成本计量并入字段**（P1 并行两项提前闭环） |
+| CLI | `scripts/skill_cli.py` | validate / gen-tool-cards / build-registry / list / show |
+| 卡片库 | `schemas/skill_cards/<domain>/*.yaml` | **64 张**：37 tool_wrapper（AST 自 gateway 提取，一工具一卡）+ 19 effect_recipe（自 RECIPES）+ 8 pipeline_step（09-24 实战链附实测证据） |
+| 索引 | `schemas/skill_cards/registry.json` | 含 by_stage/headless/cost/domain 四维统计 |
+| 守门测试 | `tests/test_skill_schema.py` | 六条不变式，**70 passed/1.4s** |
+
+### 关键设计决策
+1. **治理闸门写进 schema**：`stage:active` 条件约束 `evidence_chain.status=real_execution`，自动生成的卡诚实停在 experimental/validated，防"假晋升"；active 当前 9 张（bloom + 8 条实战链）。
+2. **无头能力矩阵即 registry 统计**：headless 25 / requires_running_host 39 / requires_gui 0；成本 gpu_local 仅 4 项（ComfyUI/Topaz/Blender anim/Silhouette）——编排器可直接消费 registry.json 做调度预判。
+3. **定义外置按名引用**（Nuke gizmo 式）：recipe_ref 指向实现位置，卡片不拷贝代码；checksum 留 v0.1 可选。
+4. 粒度按 9-11 方案「效果类型×功能域」17 域，不按管线阶段。
+
+### 小坎
+- 早前正则数出"43 工具"实为嵌套 `name` 字段误计；AST 提取为准 = 37 真工具（含 1 占位 tool_name 已排除）。教训：工具清单统计用 AST 不用正则。
+
+### 遗留（P1 后续）
+- 词级粗剪链路（Whisper→EDL）未动；文本动画 60 预设成卡（第二批）；卡片 checksum 实钉；网关消费 registry（skill_list/skill_invoke 工具）待 P1-4。
