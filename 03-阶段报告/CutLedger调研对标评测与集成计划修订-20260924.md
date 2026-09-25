@@ -366,3 +366,16 @@ puppet-automation 套件 29 红 → **632 passed / 14 xfailed / 0 failed**：cel
 ### 已知限制/待办
 - fcp_xml 导出对 Resolve 的完全兼容需后续用控制变量法再调（当前首选 .otio）
 - AE/Blender VSE 方向的 OTIO 导出（计划里 Resolve↔AE↔VSE 三角）：AE 侧可经 aerender+脚本接，VSE 侧 bpy 可直接读 OTIO JSON——待下一役
+
+---
+
+## 十二、P2-13 落地记录：技能台账静态分发页（2026-09-25）
+
+修订计划 P2-13「先可看后可装」的第一步完成：
+
+- **产物**：`portfolio/skills/index.html`（单文件 187KB，零外部依赖，可随仓库 Pages 分发），生成器 `scripts/skill_catalog_html.py`（重跑即同步卡片库）
+- **四标签**（CutLedger 台账形态 + 我们的增量维度）：全景卡片墙 / 功能域分组 / 无头能力矩阵 / 成本计量表；另有全文搜索、stage/headless/cost 三重筛选、详情抽屉（参数契约+证据链+禁忌+版本史）
+- **顶部六统计**：123 卡 / 17 active / 17 附实测证据 / 27 可无头 / 5 GPU 成本 / 14 功能域
+- **验收**：browser-use 真实渲染 DOM 断言全过（123 卡渲染、搜 otio 命中 5、矩阵表 124 行、抽屉含证据链/契约）；首验发现并修复「功能域统计显示 0」的 `Object.keys(Set)` bug；截图 tmp/skill_catalog_screenshot.png
+- **守门**：tests/test_skill_catalog.py（卡片数与 registry 同步 + 全 skill_id 入页 + 结构锚点）
+- 环境备注：本机无 Chrome（chrome-devtools MCP 不可用），browser-use MCP 可用——后续页面验收直接走 browser-use
