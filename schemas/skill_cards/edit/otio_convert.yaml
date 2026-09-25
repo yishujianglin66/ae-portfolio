@@ -1,0 +1,63 @@
+skill_id: otio_convert
+domain: edit
+skill_type: pipeline_step
+version: 1.0.0
+stage: active
+requires_host:
+- app: local_python
+  version: '*'
+headless: headless
+cost:
+  class: free_local
+  typical_duration_sec: 5
+  notes: 纯转换无渲染；含 ffprobe 媒体探测（每素材毫秒级，带缓存）
+contract:
+  inputs:
+    type: object
+    properties:
+      edl:
+        type: object
+        description: EDL 1.1 dict（scripts/edl.py 产物，词级/节拍/管线混剪均可）
+      out_path:
+        type: string
+        description: 输出 .otio 或 .xml（扩展名决定适配器；.otio=Resolve 实测可导入）
+      format:
+        type: string
+        enum:
+        - otio
+        - fcp_xml
+        default: otio
+    required:
+    - edl
+    - out_path
+  outputs:
+    type: object
+    description: OTIO/FCPXML 文件 + roundtrip 一致性报告（cuts/text_events 计数与最大时间误差，容忍<1帧）
+recipe_ref: core/otio_bridge.py::edl_to_otio / otio_to_edl / roundtrip_check
+intended_use: 项目 EDL 1.1 与行业标准 OTIO 双向互换——把剪辑时间线交给 Resolve/剪映/FCP/Kdenlive
+  等任何支持 OTIO/FCPXML 的工具接续；反向可把外部时间线导回本管线再加工。含无损信封（kv_edl
+  metadata），本系统往返零损失
+out_of_scope: 媒体文件搬运（OTIO 只存引用）；.otio 导入 Resolve 需 19+；fcp_xml 导出对
+  Resolve 仍有兼容限制（见已知问题），优先用 .otio；AAF 未接
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: real_execution
+  was_generated_by:
+    run: tmp/e2e_otio_resolve2.py（MediaPool.ImportTimelineFromFile 真实导入）
+    result: edl.otio 导入成功返回 Timeline 对象，end_frame=108609（1h 起点+609 帧=20.3s
+      与源时间线精确一致）
+    roundtrip: 真实词级 EDL 10 cuts/65 词事件往返误差 0.0
+    unit_tests: tests/test_otio_bridge.py 4 项 + 结构/warp/信封/第三方推断
+  artifacts:
+  - tmp/word_cut_demo/edl.otio
+  - tmp/word_cut_demo/edl.xml
+  host_version: Resolve Studio 21.1 / OpenTimelineIO 0.18.1 + Plugins
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: P2-11 OTIO 时间线互换层落地（行业空白卡位）
+tags:
+- pipeline
+- otio
+- interchange
+- verified-0925

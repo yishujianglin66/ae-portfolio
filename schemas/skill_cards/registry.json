@@ -2,19 +2,19 @@
  "registry": "skill_cards",
  "schema_version": "0.1",
  "built_at": "2026-09-25",
- "count": 122,
+ "count": 123,
  "summary": {
   "by_stage": {
    "experimental": 66,
    "validated": 40,
-   "active": 16
+   "active": 17
   },
   "by_headless": {
    "requires_running_host": 96,
-   "headless": 26
+   "headless": 27
   },
   "by_cost": {
-   "free_local": 117,
+   "free_local": 118,
    "gpu_local": 5
   },
   "by_domain": {
@@ -22,7 +22,7 @@
    "render": 12,
    "resource": 10,
    "blur": 7,
-   "edit": 6,
+   "edit": 7,
    "media": 6,
    "plugin": 5,
    "color": 4,
@@ -294,6 +294,19 @@
     "resolve"
    ],
    "path": "schemas/skill_cards/edit/davinci_run_script.yaml"
+  },
+  "otio_convert": {
+   "domain": "edit",
+   "skill_type": "pipeline_step",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 5,
+   "hosts": [
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/edit/otio_convert.yaml"
   },
   "resolve_project_timeline_mcp": {
    "domain": "edit",

@@ -54,3 +54,8 @@ httpx>=0.25
 # NOTE: not on Tsinghua mirror; use Aliyun: -i https://mirrors.aliyun.com/pypi/simple/
 openai-whisper>=20250625
 tiktoken>=0.14
+
+# P2-11 OTIO interchange (installed 2026-09-25, aliyun mirror)
+# NOTE: adapters split from core since OTIO 0.17; Plugins gives fcp_xml/cmx_3600/AAF etc.
+OpenTimelineIO>=0.18.1
+OpenTimelineIO-Plugins>=0.18.1

@@ -338,3 +338,31 @@ puppet-automation 套件 29 红 → **632 passed / 14 xfailed / 0 failed**：cel
 | 存量测试红 | ✅ 29→0 |
 
 至此六维对标唯一落后项（Skill 标准化）彻底反超：122 张带证据链、可被 AI 调用、受治理闸门约束的活卡片体系，公开生态（CutLedger 26 条静态台账）无对应物。下一步进 P2：OTIO 时间线互换层 / 生态收编。
+
+---
+
+## 十一、P2-11 落地记录：OTIO 时间线互换层（2026-09-25）
+
+差距矩阵行 8（全行业空白）的卡位项，当日落地并真实导入达芬奇验收。
+
+### 产物
+| 项 | 说明 |
+|---|---|
+| `core/otio_bridge.py` | EDL 1.1 ↔ OTIO 双向：cuts→Clip(+Gap)、text_events→Marker 轨、speed→LinearTimeWarp、overlays→独立轨；**kv_edl 无损信封**（本系统往返零损失，外部工具读标准字段）；第三方无信封 OTIO 走标准推断 |
+| 依赖 | OpenTimelineIO 0.18.1 + **OpenTimelineIO-Plugins**（0.17 起适配器从核心拆分，fcpx/cmx3600/AAF 在 Plugins 里；实际适配器名是 `fcp_xml` 非发布页写的 fcpx_xml） |
+| 新卡 `otio_convert` | active，卡片库 122→**123**，active 16→17；守门测试 133 passed |
+
+### 实战验收链（全真实）
+1. 词级 EDL（10 cuts/65 词）→ `.otio` + `.xml` 导出，roundtrip 误差 **0.0**
+2. **达芬奇 21.1 真实导入成功**：`MediaPool.ImportTimelineFromFile(edl.otio)` 返回 Timeline 对象，end_frame=108609（1h 起点+609 帧=20.3s，与源时间线精确一致）
+3. 测试工程全部清理（含 9-24 遗留 holder，工程列表已空）
+
+### 本役挖出的硬事实（已入记忆/卡内 out_of_scope）
+- **Resolve 脚本 API 无 Project.ImportTimeline**——真实入口是 `MediaPool.ImportTimelineFromFile`（GUI 菜单同源）；官方 `search_scripting_api`/`get_scripting_api` 工具是权威查询面
+- **Resolve 远端代理对不存在属性返回 None**——`dir()`/`hasattr()` 全部失真，只能用官方文档探针或 try-call
+- **Resolve fcp_xml 解析器严格**：音频文件挂视频轨+空 format → 整序列拒收（返回 None）；修法是 ffprobe 流分类分流音频轨（已内置 bridge）。分流后 `.xml` 仍未验证通过（`.otio` 通道已通，fcp_xml 降级为备选）
+- 无音轨媒体喂 whisper 报误导型 ffmpeg 错误（已在 word_rough_cut 卡 out_of_scope）
+
+### 已知限制/待办
+- fcp_xml 导出对 Resolve 的完全兼容需后续用控制变量法再调（当前首选 .otio）
+- AE/Blender VSE 方向的 OTIO 导出（计划里 Resolve↔AE↔VSE 三角）：AE 侧可经 aerender+脚本接，VSE 侧 bpy 可直接读 OTIO JSON——待下一役
