@@ -1,0 +1,53 @@
+skill_id: tx_anim_squash_stretch
+domain: text-style
+skill_type: effect_recipe
+effect_type: text_entrance
+version: 1.0.0
+stage: experimental
+requires_host:
+- app: ae
+  version: '>=25.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 15
+contract:
+  inputs:
+    type: object
+    properties:
+      comp:
+        type: string
+        description: 目标合成
+      layer:
+        type: string
+        description: 目标文字图层
+      intensity_scale:
+        type: number
+        default: 1.0
+    required:
+    - comp
+    - layer
+  outputs:
+    type: object
+    description: 应用预设后的文字图层（含表达式/动画器）
+recipe_ref: data/text_presets_database.json#entrance_animations[].id=='anim_squash_stretch'
+intended_use: '挤压拉伸（-）适用: 卡通风格/趣味标题/弹性展示'
+out_of_scope: 先纵向拉伸(60x140)再横向挤压(130x80)再回弹。；未过真实验证（experimental），投产前先在测试合成跑通并回写证据
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: unit_verified
+  was_generated_by:
+    database: '1.0'
+    ground_truth: temp/textfx_showcase_build.jsx
+    reference_video: D:/AE-Work/output/TextFX_Showcase.mp4
+    quality_rating: null
+  host_version: AE 25.x
+checksum: sha256:4f45bbf4333742de
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自 text_presets_database 批量成卡（P1 尾巴）
+tags:
+- text
+- entrance_animations
+- unverified

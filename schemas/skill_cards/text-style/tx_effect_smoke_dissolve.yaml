@@ -1,0 +1,63 @@
+skill_id: tx_effect_smoke_dissolve
+domain: text-style
+skill_type: effect_recipe
+effect_type: text_combo
+version: 1.0.0
+stage: experimental
+requires_host:
+- app: ae
+  version: '>=25.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 15
+contract:
+  inputs:
+    type: object
+    properties:
+      comp:
+        type: string
+        description: 目标合成
+      layer:
+        type: string
+        description: 目标文字图层
+      intensity_scale:
+        type: number
+        default: 1.0
+      adbe_fractal_noise:
+        type: object
+        description: '覆盖参数，默认 {"noise_type": 1, "contrast": 2.5, "brightness": -50}'
+      adbe_tint:
+        type: object
+        description: '覆盖参数，默认 {"black": [0.2, 0.2, 0.25, 1], "white": [0.7, 0.7, 0.75, 1]}'
+      adbe_glo2:
+        type: object
+        description: '覆盖参数，默认 {"threshold": 0.5, "radius": 30, "intensity": 0.8, "color_mode": 3, "colorA": [0.6,
+          0.6, 0.65, 1], "colorB": [0.3, 0.3, '
+    required:
+    - comp
+    - layer
+  outputs:
+    type: object
+    description: 应用预设后的文字图层（含表达式/动画器）
+recipe_ref: data/text_presets_database.json#effect_combos[].id=='effect_smoke_dissolve'
+intended_use: '烟雾消散（烟雾弥漫）适用: 消散效果/神秘场景/过渡转场'
+out_of_scope: Fractal Noise+灰调+Range反向揭示。；未过真实验证（experimental），投产前先在测试合成跑通并回写证据
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: unit_verified
+  was_generated_by:
+    database: '1.0'
+    ground_truth: temp/textfx_showcase_build.jsx
+    reference_video: D:/AE-Work/output/TextFX_Showcase.mp4
+    quality_rating: 3
+  host_version: AE 25.x
+checksum: sha256:9c8398e27fc994a0
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自 text_presets_database 批量成卡（P1 尾巴）
+tags:
+- text
+- effect_combos
+- unverified

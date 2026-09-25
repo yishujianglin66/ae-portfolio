@@ -1,0 +1,60 @@
+skill_id: tx_effect_glitch_mirror
+domain: text-style
+skill_type: effect_recipe
+effect_type: text_combo
+version: 1.0.0
+stage: experimental
+requires_host:
+- app: ae
+  version: '>=25.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 15
+contract:
+  inputs:
+    type: object
+    properties:
+      comp:
+        type: string
+        description: 目标合成
+      layer:
+        type: string
+        description: 目标文字图层
+      intensity_scale:
+        type: number
+        default: 1.0
+      adbe_turbulent_displace:
+        type: object
+        description: '覆盖参数，默认 {"amount": 5, "size": 40}'
+      adbe_glo2:
+        type: object
+        description: '覆盖参数，默认 {"threshold": 0.2, "radius": 15, "intensity": 1.5, "color_mode": 3, "colorA": [1,
+          0, 1, 1], "colorB": [0, 1, 1, 1]}'
+    required:
+    - comp
+    - layer
+  outputs:
+    type: object
+    description: 应用预设后的文字图层（含表达式/动画器）
+recipe_ref: data/text_presets_database.json#effect_combos[].id=='effect_glitch_mirror'
+intended_use: '镜像故障（镜像故障）适用: 故障艺术/实验视觉/电子音乐'
+out_of_scope: 品红+青色双色Glow营造镜像色差。；未过真实验证（experimental），投产前先在测试合成跑通并回写证据
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: unit_verified
+  was_generated_by:
+    database: '1.0'
+    ground_truth: temp/textfx_showcase_build.jsx
+    reference_video: D:/AE-Work/output/TextFX_Showcase.mp4
+    quality_rating: 4
+  host_version: AE 25.x
+checksum: sha256:e8458dceb1bb9efd
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自 text_presets_database 批量成卡（P1 尾巴）
+tags:
+- text
+- effect_combos
+- unverified

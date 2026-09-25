@@ -1,0 +1,62 @@
+skill_id: tx_effect_data_corrupt
+domain: text-style
+skill_type: effect_recipe
+effect_type: text_combo
+version: 1.0.0
+stage: experimental
+requires_host:
+- app: ae
+  version: '>=25.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 15
+contract:
+  inputs:
+    type: object
+    properties:
+      comp:
+        type: string
+        description: 目标合成
+      layer:
+        type: string
+        description: 目标文字图层
+      intensity_scale:
+        type: number
+        default: 1.0
+      adbe_turbulent_displace:
+        type: object
+        description: '覆盖参数，默认 {"amount": 6, "size": 15}'
+      adbe_fractal_noise:
+        type: object
+        description: '覆盖参数，默认 {"noise_type": 3, "contrast": 2, "brightness": -50}'
+      adbe_tint:
+        type: object
+        description: '覆盖参数，默认 {"black": [0, 1, 0, 1], "white": [0, 0.3, 0, 1]}'
+    required:
+    - comp
+    - layer
+  outputs:
+    type: object
+    description: 应用预设后的文字图层（含表达式/动画器）
+recipe_ref: data/text_presets_database.json#effect_combos[].id=='effect_data_corrupt'
+intended_use: '数据损坏（数据故障）适用: 黑客主题/科技惊悚/数据可视化'
+out_of_scope: 绿色终端风格，Fractal Noise type=3(Block)数字噪点。；未过真实验证（experimental），投产前先在测试合成跑通并回写证据
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: unit_verified
+  was_generated_by:
+    database: '1.0'
+    ground_truth: temp/textfx_showcase_build.jsx
+    reference_video: D:/AE-Work/output/TextFX_Showcase.mp4
+    quality_rating: 4
+  host_version: AE 25.x
+checksum: sha256:3354950123b317f7
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自 text_presets_database 批量成卡（P1 尾巴）
+tags:
+- text
+- effect_combos
+- unverified

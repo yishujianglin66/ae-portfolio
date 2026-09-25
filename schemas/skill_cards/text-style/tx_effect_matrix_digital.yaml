@@ -1,0 +1,60 @@
+skill_id: tx_effect_matrix_digital
+domain: text-style
+skill_type: effect_recipe
+effect_type: text_combo
+version: 1.0.0
+stage: experimental
+requires_host:
+- app: ae
+  version: '>=25.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 15
+contract:
+  inputs:
+    type: object
+    properties:
+      comp:
+        type: string
+        description: 目标合成
+      layer:
+        type: string
+        description: 目标文字图层
+      intensity_scale:
+        type: number
+        default: 1.0
+      adbe_glo2:
+        type: object
+        description: '覆盖参数，默认 {"threshold": 0.3, "radius": 12, "intensity": 1.8, "color_mode": 3, "colorA": [0,
+          1, 0, 1], "colorB": [0, 0.4, 0, 1]}'
+      adbe_fractal_noise:
+        type: object
+        description: '覆盖参数，默认 {"noise_type": 1, "contrast": 3, "brightness": -60}'
+    required:
+    - comp
+    - layer
+  outputs:
+    type: object
+    description: 应用预设后的文字图层（含表达式/动画器）
+recipe_ref: data/text_presets_database.json#effect_combos[].id=='effect_matrix_digital'
+intended_use: '矩阵数字（黑客帝国）适用: 黑客主题/代码展示/科幻片头'
+out_of_scope: 经典Matrix绿色调，Range Selector逐字揭示。；未过真实验证（experimental），投产前先在测试合成跑通并回写证据
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: unit_verified
+  was_generated_by:
+    database: '1.0'
+    ground_truth: temp/textfx_showcase_build.jsx
+    reference_video: D:/AE-Work/output/TextFX_Showcase.mp4
+    quality_rating: 4
+  host_version: AE 25.x
+checksum: sha256:878e079518485310
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自 text_presets_database 批量成卡（P1 尾巴）
+tags:
+- text
+- effect_combos
+- unverified

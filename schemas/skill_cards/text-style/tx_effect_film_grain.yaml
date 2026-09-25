@@ -1,0 +1,59 @@
+skill_id: tx_effect_film_grain
+domain: text-style
+skill_type: effect_recipe
+effect_type: text_combo
+version: 1.0.0
+stage: experimental
+requires_host:
+- app: ae
+  version: '>=25.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 15
+contract:
+  inputs:
+    type: object
+    properties:
+      comp:
+        type: string
+        description: 目标合成
+      layer:
+        type: string
+        description: 目标文字图层
+      intensity_scale:
+        type: number
+        default: 1.0
+      adbe_fractal_noise:
+        type: object
+        description: '覆盖参数，默认 {"noise_type": 1, "contrast": 1.8, "brightness": -65}'
+      adbe_tint:
+        type: object
+        description: '覆盖参数，默认 {"black": [0.12, 0.1, 0.08, 1], "white": [0.9, 0.85, 0.75, 1]}'
+    required:
+    - comp
+    - layer
+  outputs:
+    type: object
+    description: 应用预设后的文字图层（含表达式/动画器）
+recipe_ref: data/text_presets_database.json#effect_combos[].id=='effect_film_grain'
+intended_use: '胶片颗粒（胶片复古）适用: 电影字幕/文艺片/复古风格'
+out_of_scope: 暖色调Tint+微弱噪点模拟胶片。；未过真实验证（experimental），投产前先在测试合成跑通并回写证据
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: unit_verified
+  was_generated_by:
+    database: '1.0'
+    ground_truth: temp/textfx_showcase_build.jsx
+    reference_video: D:/AE-Work/output/TextFX_Showcase.mp4
+    quality_rating: 3
+  host_version: AE 25.x
+checksum: sha256:412f26073c115ede
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自 text_presets_database 批量成卡（P1 尾巴）
+tags:
+- text
+- effect_combos
+- unverified

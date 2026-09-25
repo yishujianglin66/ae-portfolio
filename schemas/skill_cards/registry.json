@@ -2,22 +2,23 @@
  "registry": "skill_cards",
  "schema_version": "0.1",
  "built_at": "2026-09-25",
- "count": 65,
+ "count": 122,
  "summary": {
   "by_stage": {
+   "experimental": 66,
    "validated": 40,
-   "experimental": 15,
-   "active": 10
+   "active": 16
   },
   "by_headless": {
-   "requires_running_host": 39,
+   "requires_running_host": 96,
    "headless": 26
   },
   "by_cost": {
-   "free_local": 60,
+   "free_local": 117,
    "gpu_local": 5
   },
   "by_domain": {
+   "text-style": 57,
    "render": 12,
    "resource": 10,
    "blur": 7,
@@ -878,6 +879,747 @@
     "silhouette"
    ],
    "path": "schemas/skill_cards/roto/silhouette_track_points.yaml"
+  },
+  "tx_anim_baseline_wave": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_baseline_wave.yaml"
+  },
+  "tx_anim_blur_reveal": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_blur_reveal.yaml"
+  },
+  "tx_anim_bounce_in": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_bounce_in.yaml"
+  },
+  "tx_anim_cascade_fall": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_cascade_fall.yaml"
+  },
+  "tx_anim_color_wipe": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_color_wipe.yaml"
+  },
+  "tx_anim_domino_fall": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_domino_fall.yaml"
+  },
+  "tx_anim_elastic_overshoot": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_elastic_overshoot.yaml"
+  },
+  "tx_anim_flip_3d_x": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_flip_3d_x.yaml"
+  },
+  "tx_anim_flip_3d_y": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_flip_3d_y.yaml"
+  },
+  "tx_anim_glitch_pop": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_glitch_pop.yaml"
+  },
+  "tx_anim_kinetic_smash": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_kinetic_smash.yaml"
+  },
+  "tx_anim_letter_pop": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_letter_pop.yaml"
+  },
+  "tx_anim_random_pop": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_random_pop.yaml"
+  },
+  "tx_anim_rotate_spin": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_rotate_spin.yaml"
+  },
+  "tx_anim_scale_zoom": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_scale_zoom.yaml"
+  },
+  "tx_anim_scatter_converge": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_scatter_converge.yaml"
+  },
+  "tx_anim_slide_from_bottom": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_slide_from_bottom.yaml"
+  },
+  "tx_anim_slide_from_left": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_slide_from_left.yaml"
+  },
+  "tx_anim_slide_from_right": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_slide_from_right.yaml"
+  },
+  "tx_anim_slide_from_top": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_slide_from_top.yaml"
+  },
+  "tx_anim_spiral_in": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_spiral_in.yaml"
+  },
+  "tx_anim_squash_stretch": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_squash_stretch.yaml"
+  },
+  "tx_anim_stroke_draw": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_stroke_draw.yaml"
+  },
+  "tx_anim_tracking_fade": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_tracking_fade.yaml"
+  },
+  "tx_anim_typewriter": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_typewriter.yaml"
+  },
+  "tx_anim_wave_per_char": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_anim_wave_per_char.yaml"
+  },
+  "tx_effect_aurora": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_aurora.yaml"
+  },
+  "tx_effect_chrome_reflect": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_chrome_reflect.yaml"
+  },
+  "tx_effect_circuit_board": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_circuit_board.yaml"
+  },
+  "tx_effect_clean_shadow": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_clean_shadow.yaml"
+  },
+  "tx_effect_cyber_glitch": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_cyber_glitch.yaml"
+  },
+  "tx_effect_data_corrupt": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_data_corrupt.yaml"
+  },
+  "tx_effect_electric_shock": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_electric_shock.yaml"
+  },
+  "tx_effect_elegant_fade": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_elegant_fade.yaml"
+  },
+  "tx_effect_film_grain": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_film_grain.yaml"
+  },
+  "tx_effect_fire_burn": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_fire_burn.yaml"
+  },
+  "tx_effect_fire_ice": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_fire_ice.yaml"
+  },
+  "tx_effect_glass_crystal": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_glass_crystal.yaml"
+  },
+  "tx_effect_glitch_mirror": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_glitch_mirror.yaml"
+  },
+  "tx_effect_golden_logo": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_golden_logo.yaml"
+  },
+  "tx_effect_hologram_hud": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_hologram_hud.yaml"
+  },
+  "tx_effect_ice_frost": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_ice_frost.yaml"
+  },
+  "tx_effect_ink_wash": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_ink_wash.yaml"
+  },
+  "tx_effect_laser_scan": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_laser_scan.yaml"
+  },
+  "tx_effect_light_leak": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_light_leak.yaml"
+  },
+  "tx_effect_matrix_digital": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_matrix_digital.yaml"
+  },
+  "tx_effect_metallic_bevel": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_metallic_bevel.yaml"
+  },
+  "tx_effect_minimal_line": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_minimal_line.yaml"
+  },
+  "tx_effect_neon_pulse": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_neon_pulse.yaml"
+  },
+  "tx_effect_neon_sign": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_neon_sign.yaml"
+  },
+  "tx_effect_old_tv": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_old_tv.yaml"
+  },
+  "tx_effect_retro_vhs": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_retro_vhs.yaml"
+  },
+  "tx_effect_rgb_split": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_rgb_split.yaml"
+  },
+  "tx_effect_smoke_dissolve": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_smoke_dissolve.yaml"
+  },
+  "tx_effect_soft_glow": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_soft_glow.yaml"
+  },
+  "tx_effect_stone_carve": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_stone_carve.yaml"
+  },
+  "tx_effect_vintage_print": {
+   "domain": "text-style",
+   "skill_type": "effect_recipe",
+   "version": "1.0.0",
+   "stage": "experimental",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 15,
+   "hosts": [
+    "ae"
+   ],
+   "path": "schemas/skill_cards/text-style/tx_effect_vintage_print.yaml"
   }
  }
 }

@@ -316,3 +316,25 @@ P1 最后一块 Tier-2 大件落地，剪辑驱动从"只有音乐节拍"升级�
 - 新卡 `word_rough_cut`（pipeline_step，**stage=active** 附真实证据链），卡片库 64→**65**，active 9→10
 - 测试：tests/test_word_rough_cut.py 5 项（纯逻辑不依 whisper）+ skill 体系回归 71 项 → **76 passed**；test_skill_service 12 绿
 - 坑归档：无音轨媒体喂 whisper 报 ffmpeg "Error opening output files: Invalid argument"（实为 does not contain any stream，误导型报错）；Add-Content 默认 GBK 会污染 UTF-8 文件，追加中文注释一律改走 python utf-8 写盘
+
+---
+
+## 十、P1 收官补录（2026-09-25 下午）
+
+### 存量测试红清零（提交 72808f8）
+puppet-automation 套件 29 红 → **632 passed / 14 xfailed / 0 failed**：celery 空引擎真债真修、sam2 测试跟重构重写、premiere 13 项预支承诺如实 xfail、registry 17→18、接口/环境依赖解耦。
+
+### 文字预设成卡（P1 最后一项尾巴）
+`data/text_presets_database.json`（v 实测库，107 条）→ **57 张卡**（31 效果组合 + 26 入场动画；font_library 50 条是元数据不成卡）。诚实分级：verified 6 条 → active（附 ground_truth 证据），其余 51 条 → experimental（out_of_scope 明确提示投产前需验证）。顺带落地 **checksum 实钉**（sha256 前 16 位，fx 配方卡后续批次补）。
+
+### P1 终态盘点（对修订计划逐项销账）
+| P1 项 | 终态 |
+|---|---|
+| Skill schema v0.1 + Top50 | ✅ **122 卡**（目标 50，达成 244%），validate 全绿，守门测试 128 项 |
+| 无头矩阵 / 成本计量 | ✅ headless 26 / 需宿主 96；gpu_local 5 项 |
+| 网关消费 registry | ✅ skill_list/show/invoke，真实 HTTP E2E 7/7 |
+| 词级粗剪 Whisper→EDL | ✅ 实战 lint PASS，word_rough_cut 卡 active |
+| 文字 60 预设成卡 | ✅ 57 卡（库里实有 57 能力条目，非 60） |
+| 存量测试红 | ✅ 29→0 |
+
+至此六维对标唯一落后项（Skill 标准化）彻底反超：122 张带证据链、可被 AI 调用、受治理闸门约束的活卡片体系，公开生态（CutLedger 26 条静态台账）无对应物。下一步进 P2：OTIO 时间线互换层 / 生态收编。

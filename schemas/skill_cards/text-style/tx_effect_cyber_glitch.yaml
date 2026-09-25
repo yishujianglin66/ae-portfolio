@@ -1,0 +1,60 @@
+skill_id: tx_effect_cyber_glitch
+domain: text-style
+skill_type: effect_recipe
+effect_type: text_combo
+version: 1.0.0
+stage: active
+requires_host:
+- app: ae
+  version: '>=25.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 15
+contract:
+  inputs:
+    type: object
+    properties:
+      comp:
+        type: string
+        description: 目标合成
+      layer:
+        type: string
+        description: 目标文字图层
+      intensity_scale:
+        type: number
+        default: 1.0
+      adbe_glo2:
+        type: object
+        description: '覆盖参数，默认 {"threshold": 0.2, "radius": 20, "intensity": 2.0, "color_mode": 3, "colorA": [0,
+          0.8, 1, 1], "colorB": [0, 0.3, 0.5, 1]'
+      adbe_turbulent_displace:
+        type: object
+        description: '覆盖参数，默认 {"amount": 25, "size": 30}'
+    required:
+    - comp
+    - layer
+  outputs:
+    type: object
+    description: 应用预设后的文字图层（含表达式/动画器）
+recipe_ref: data/text_presets_database.json#effect_combos[].id=='effect_cyber_glitch'
+intended_use: '赛博故障（赛博朋克）适用: 科技片头/游戏标题/赛博朋克/故障艺术'
+out_of_scope: 基准S1。TurbulentDisplace Amount在AE2025范围1-11需clamp。；
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: real_execution
+  was_generated_by:
+    database: '1.0'
+    ground_truth: temp/textfx_showcase_build.jsx
+    reference_video: D:/AE-Work/output/TextFX_Showcase.mp4
+    quality_rating: 5
+  host_version: AE 25.x
+checksum: sha256:9e9c07877ec90851
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: 自 text_presets_database 批量成卡（P1 尾巴）
+tags:
+- text
+- effect_combos
+- verified
