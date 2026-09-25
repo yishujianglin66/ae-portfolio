@@ -14,14 +14,17 @@ class MockEngine(BaseEngine):
 
     def __init__(self, name: str = "mock", tmp_path=None):
         self._name = name
-        if tmp_path:
-            path = Path(tmp_path) / f"{name}.exe"
-            path.touch()
-        else:
-            path = Path(f"/tmp/mock_{name}.exe")
+        # BaseEngine 新增可用性护栏：exe 不存在时 execute() 短路。
+        # 不传 tmp_path 也要造出可执行文件，否则所有 mock 调用被护栏拦截。
+        import tempfile
+        base = Path(tmp_path) if tmp_path else Path(tempfile.mkdtemp(prefix=f"mock_{name}_"))
+        path = base / f"{name}.exe"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch()
         super().__init__(path)
 
-    async def execute(self, action: str, **kwargs) -> EngineResult:
+    async def _execute_impl(self, action: str, **kwargs) -> EngineResult:
+        # BaseEngine.execute 为模板方法，子类实现 _execute_impl（接口演进后同步）
         return EngineResult(
             success=True,
             output_path=None,
@@ -245,9 +248,14 @@ class TestToolDefinitions:
         blender_tools = [n for n in tool_names if n.startswith("blender_")]
         assert len(blender_tools) == 3
 
-        # DaVinci: apply_grade, export_lut = 2
+        # DaVinci: apply_grade, export_lut, run_script, mcp_status, mcp_call = 5
+        #（P0 接入官方 ResolveMCP 新增 3 工具，断言同步）
         dav_tools = [n for n in tool_names if n.startswith("davinci_")]
-        assert len(dav_tools) == 2
+        assert len(dav_tools) == 5
 
-        # Total: 4 + 2 + 1 + 2 + 3 + 2 = 14
-        assert len(tool_names) == 14
+        # Skill registry: list, show, invoke = 3（P1-2 消费卡片库，引擎无关总是注册）
+        skill_tools = [n for n in tool_names if n.startswith("skill_")]
+        assert len(skill_tools) == 3
+
+        # Total: 4 + 2 + 1 + 2 + 3 + 5 + 3 = 20
+        assert len(tool_names) == 20

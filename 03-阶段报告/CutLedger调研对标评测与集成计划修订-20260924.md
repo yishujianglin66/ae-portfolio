@@ -259,4 +259,32 @@ VRS 节拍分析(bpm=143.6, 50 beats, librosa_direct)
 - 早前正则数出"43 工具"实为嵌套 `name` 字段误计；AST 提取为准 = 37 真工具（含 1 占位 tool_name 已排除）。教训：工具清单统计用 AST 不用正则。
 
 ### 遗留（P1 后续）
-- 词级粗剪链路（Whisper→EDL）未动；文本动画 60 预设成卡（第二批）；卡片 checksum 实钉；网关消费 registry（skill_list/skill_invoke 工具）待 P1-4。
+- 词级粗剪链路（Whisper→EDL）未动；文本动画 60 预设成卡（第二批）；卡片 checksum 实钉；网关消费 registry（skill_list/skill_invoke 工具）——已于同日 P1-2 落地，见下。
+
+---
+
+## 八、P1-2 落地记录：网关消费技能卡片库（2026-09-25）
+
+卡片库从"躺在目录里的 YAML"变成"AI 可直接调用的活接口"，MCP 网关 37→**40 工具**：
+
+| 新工具 | 能力 |
+|---|---|
+| `skill_list` | 按 domain/stage/headless/skill_type/cost_class/keyword 六维过滤查卡 |
+| `skill_show` | 单卡完整内容（契约/证据链/无头/成本） |
+| `skill_invoke` | 按卡执行：tool_wrapper 卡经 jsonschema 契约校验后路由到真实网关工具；recipe/pipeline 卡返回执行指引；deprecated/archived 拒绝 |
+
+实现：`puppet-automation/src/mcp_gateway/skill_service.py`（SkillRegistryService，registry.json mtime 热重载）+ gateway.py 尾部接入（引擎无关总是注册，卡片库缺失不阻断启动）。治理三闸门：生命周期/契约/工具可用性，全部"拒绝时诚实报因"。
+
+### 真实 HTTP E2E 验收（网关起 8791，7/7 通过）
+1. tools/list=40 含三工具 ✓ 2. skill_list(active)=9/64 ✓ 3. headless+free_local 过滤=24 ✓
+4. skill_show 中文卡 ✓ 5. fx_badtv → mode=guidance+recipe_ref ✓
+6. **resource_get_stats → mode=tool_call 真执行成功** ✓ 7. 缺 required 参数 → "契约校验失败：'input_paths' is a required property" 拦截 ✓
+
+### 顺带修掉两处存量漂移（test_mcp_gateway 旧断言）
+- MockEngine 未实现 BaseEngine 新抽象方法 `_execute_impl` + 新可用性护栏（exe 不存在短路）导致 5 个旧测试红 → 同步修复
+- davinci 工具数 2→5（P0 新增官方 MCP 三工具后未同步）、总数 14→20（含 skill 三工具），并新增 skill_* 断言
+
+### 踩坑（已入 PS 陷阱清单）
+- PowerShell `$args` 是自动变量，**不可用作函数形参名**：会被 positional 参数数组悄悄覆盖，导致 JSON-RPC arguments 变成 list（报错信息还藏在服务端 str(e) 里难定位）。
+
+测试基线：test_skill_service 13 + test_mcp_gateway 修复后全绿；网关侧本改动域零回归。puppet 套件另有 26 个与本次无关的存量红（sam2 弃用残测/registry 计数等），另立任务处理。

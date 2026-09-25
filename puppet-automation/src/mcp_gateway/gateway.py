@@ -869,6 +869,64 @@ def initialize_gateway(engines: dict[str, Any], services: dict[str, Any] | None 
         )
         mcp_registry.register_tool(tool)
 
+    # --- Skill registry tools（P1-2：消费 schemas/skill_cards 卡片库，不依赖引擎，总是注册）---
+    try:
+        from src.mcp_gateway.skill_service import SkillRegistryService
+
+        skill_svc = SkillRegistryService()
+        skill_svc.bind(mcp_registry)
+
+        def _tool_filter_schema(props: dict[str, Any]) -> dict[str, Any]:
+            return {"type": "object", "properties": props}
+
+        def make_skill_sync_handler(method_name):
+            import asyncio
+
+            async def handler(**kwargs):
+                result = await asyncio.to_thread(getattr(skill_svc, method_name), **kwargs)
+                return EngineResult(success=bool(result.get("success")), metadata=result,
+                                    error=result.get("error"))
+            return handler
+
+        mcp_registry.register_tool(MCPTool(
+            name="skill_list",
+            description="查询技能卡片库（P1 Top50 封装）。按 domain/stage/headless/skill_type/cost_class/keyword 过滤，返回卡片摘要+无头/成本矩阵字段",
+            input_schema=_tool_filter_schema({
+                "domain": {"type": "string"}, "stage": {"type": "string"},
+                "headless": {"type": "string", "enum": ["headless", "requires_gui", "requires_running_host"]},
+                "skill_type": {"type": "string", "enum": ["effect_recipe", "tool_wrapper", "pipeline_step"]},
+                "cost_class": {"type": "string", "enum": ["free_local", "gpu_local", "api_paid"]},
+                "keyword": {"type": "string"}, "limit": {"type": "integer", "default": 50},
+            }),
+            handler=make_skill_sync_handler("list_skills"),
+            engine="skill_registry", action="list_skills",
+        ))
+        mcp_registry.register_tool(MCPTool(
+            name="skill_show",
+            description="查看单张技能卡完整内容（参数契约/证据链/无头能力/成本）",
+            input_schema=_tool_filter_schema({"skill_id": {"type": "string"}}),
+            handler=make_skill_sync_handler("show_skill"),
+            engine="skill_registry", action="show_skill",
+        ))
+
+        async def _skill_invoke_handler(**kwargs):
+            result = await skill_svc.invoke(kwargs.get("skill_id", ""), kwargs.get("inputs") or {})
+            return EngineResult(success=bool(result.get("success")), metadata=result,
+                                error=result.get("error"))
+
+        mcp_registry.register_tool(MCPTool(
+            name="skill_invoke",
+            description="按技能卡执行：tool_wrapper 卡经契约校验后路由到对应网关工具；recipe/pipeline 卡返回执行指引。deprecated/archived 卡拒绝",
+            input_schema=_tool_filter_schema({
+                "skill_id": {"type": "string"},
+                "inputs": {"type": "object", "description": "按卡片 contract.inputs 校验的参数"},
+            }),
+            handler=_skill_invoke_handler,
+            engine="skill_registry", action="invoke",
+        ))
+    except Exception as e:  # 卡片库缺失不阻断网关启动
+        logger.warning(f"MCP: skill registry tools 未注册: {e}")
+
     logger.info(f"MCP Gateway initialized with {len(mcp_registry.tools)} tools ({len(engines)} engines, {len(services)} services)")
     return mcp_registry
 
