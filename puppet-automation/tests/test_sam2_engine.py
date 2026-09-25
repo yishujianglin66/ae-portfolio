@@ -45,56 +45,54 @@ def sam2_engine_with_fake_weights():
         yield engine, model_dir
 
 
-class TestModelConfigs:
-    """模型档位映射测试。"""
+class TestModelSizeParam:
+    """模型档位现状：engine 重构后走 model_size 参数 + 权重目录扫描（非旧 4 档字典）。
 
-    def test_model_configs_has_four_tiers(self):
-        """_MODEL_CONFIGS 应包含 4 个档位。"""
-        from src.engines.sam2.engine import _MODEL_CONFIGS
+    断言同步 2026-09-25：旧 _MODEL_CONFIGS 字典已随重构移除，
+    现行契约是 auto_mask/segment_object/extract_foreground 的 model_size 参数（base/large）。
+    """
 
-        expected = {"base", "large", "small", "tiny"}
-        assert set(_MODEL_CONFIGS.keys()) == expected
+    def test_public_methods_accept_model_size(self):
+        import inspect
 
-    def test_base_is_default_recommended(self):
-        """base 应存在于配置中（8GB 显存最优平衡）。"""
-        from src.engines.sam2.engine import _MODEL_CONFIGS
+        from src.engines.sam2.engine import SAM2Engine
 
-        assert "base" in _MODEL_CONFIGS
-        assert "base_plus" in _MODEL_CONFIGS["base"]["checkpoint"]
+        for meth in ("auto_mask", "segment_object", "extract_foreground", "export_mask_sequence"):
+            sig = inspect.signature(getattr(SAM2Engine, meth))
+            assert "model_size" in sig.parameters, f"{meth} 缺 model_size 参数"
 
-    def test_each_config_has_checkpoint_and_cfg(self):
-        """每个档位应有 checkpoint 和 model_cfg 字段。"""
-        from src.engines.sam2.engine import _MODEL_CONFIGS
-
-        for name, cfg in _MODEL_CONFIGS.items():
-            assert "checkpoint" in cfg, f"{name} 缺少 checkpoint"
-            assert "model_cfg" in cfg, f"{name} 缺少 model_cfg"
+    def test_missing_weights_error_is_honest(self, sam2_engine_no_weights):
+        """无权重失败结果必须明说拒绝推理，绝不假成功。"""
+        result = sam2_engine_no_weights._missing_weights_error()
+        assert result.success is False
+        assert "拒绝推理" in result.error
 
 
-class TestResolveCheckpoint:
-    """权重解析测试。"""
+class TestFindCheckpoint:
+    """权重查找测试（引擎重构后 API：_find_checkpoint，无档位回退概念）。"""
 
     def test_no_weights_returns_none(self, sam2_engine_no_weights):
-        """无权重文件时应返回 (None, None)。"""
-        checkpoint, cfg = sam2_engine_no_weights._resolve_checkpoint("base")
-        assert checkpoint is None
-        assert cfg is None  # 无权重时返回 (None, None)
+        """空目录应返回 None。"""
+        assert sam2_engine_no_weights._find_checkpoint() is None
 
-    def test_exact_match(self, sam2_engine_with_fake_weights):
-        """有权重时应返回正确路径。"""
-        engine, model_dir = sam2_engine_with_fake_weights
-        checkpoint, cfg = engine._resolve_checkpoint("base")
-        assert checkpoint is not None
-        assert checkpoint.name == "sam2.1_hiera_base_plus.pt"
-        assert "sam2.1_hiera_b+" in cfg
+    def test_finds_pt_file(self, sam2_engine_with_fake_weights):
+        engine, _ = sam2_engine_with_fake_weights
+        found = engine._find_checkpoint()
+        assert found is not None
+        assert found.name == "sam2.1_hiera_base_plus.pt"
 
-    def test_fallback_to_any_pt(self, sam2_engine_with_fake_weights):
-        """档位不匹配时回退到目录中任意 .pt 文件。"""
-        engine, model_dir = sam2_engine_with_fake_weights
-        checkpoint, cfg = engine._resolve_checkpoint("large")
-        # 目录中只有 base_plus，large 精确匹配失败，应回退
-        assert checkpoint is not None
-        assert checkpoint.suffix == ".pt"
+    def test_falls_back_to_pth_ckpt(self):
+        """目录内只有 .pth/.ckpt 时也能发现（诚实：发现权重≠能推理，后续子进程会自检）。"""
+        import tempfile as _tf
+
+        from src.engines.sam2.engine import SAM2Engine
+
+        with _tf.TemporaryDirectory() as tmpdir:
+            d = Path(tmpdir)
+            (d / "model.ckpt").write_bytes(b"x")
+            engine = SAM2Engine(executable_path=Path("python"), model_dir=d)
+            assert engine._find_checkpoint() is not None
+            assert engine._find_checkpoint().suffix == ".ckpt"
 
 
 class TestAutoMaskNoWeights:
@@ -138,17 +136,16 @@ class TestAutoMaskNoWeights:
 
 
 class TestGetInfo:
-    """get_info 方法测试。"""
+    """get_info 方法测试（断言同步引擎重构后字段）。"""
 
-    def test_get_info_contains_model_configs(self, sam2_engine_no_weights):
-        """get_info 应包含 model_configs 字段。"""
+    def test_get_info_contains_model_dir_fields(self, sam2_engine_no_weights):
         info = sam2_engine_no_weights.get_info()
-        assert "model_configs" in info
-        assert "base" in info["model_configs"]
-        assert "large" in info["model_configs"]
+        assert "model_dir" in info
+        assert "model_dir_exists" in info
+        assert "capabilities" in info
+        assert "auto_mask" in info["capabilities"]
 
-    def test_get_info_contains_checkpoint_info(self, sam2_engine_with_fake_weights):
-        """有权重时 get_info 应显示 checkpoint 路径。"""
-        engine, _ = sam2_engine_with_fake_weights
-        info = engine.get_info()
-        assert info["checkpoint"] is not None
+    def test_get_info_installed_flag(self, sam2_engine_no_weights):
+        """installed 字段如实反映 sam2 包是否可导入（本机未装则必为 False）。"""
+        info = sam2_engine_no_weights.get_info()
+        assert info["installed"] is (sam2_engine_no_weights._sam2 is not None)

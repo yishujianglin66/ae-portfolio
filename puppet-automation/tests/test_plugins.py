@@ -546,6 +546,13 @@ class TestBuiltinPlugins:
 # Orchestrator integration tests
 # ============================================================
 
+def _touch_video(tmp_path):
+    """phase1 校验已收紧（拒绝不存在文件），插件验收用真实存在的占位媒体。"""
+    p = Path(tmp_path) / "in.mp4"
+    p.write_bytes(b"\x00\x00\x00\x18ftypmp42")  # 最小 mp4 魔数头
+    return p
+
+
 class TestOrchestratorPluginIntegration:
 
     @pytest.mark.asyncio
@@ -588,7 +595,7 @@ class TestOrchestratorPluginIntegration:
 
         job = PipelineJob(
             job_id="plugin_integration_test",
-            input_video="nonexistent.mp4",
+            input_video=str(_touch_video(tmp_path)),
             phases=[PipelinePhase.PHASE1_PREPROCESS],
         )
         state = await orch.run_pipeline(job)
@@ -613,7 +620,7 @@ class TestOrchestratorPluginIntegration:
         )
         job = PipelineJob(
             job_id="no_plugin_test",
-            input_video="nonexistent.mp4",
+            input_video=str(_touch_video(tmp_path)),
             phases=[PipelinePhase.PHASE1_PREPROCESS],
         )
         state = await orch.run_pipeline(job)

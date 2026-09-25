@@ -22,9 +22,9 @@ def test_engine_classes_contains_core_engines():
 
 
 def test_engine_classes_count():
-    """应有 17 个标准引擎类。"""
+    """应有 18 个标准引擎类（17 + cinema4d，断言同步 2026-09-25）。"""
     from src.engines.registry import ENGINE_CLASSES
-    assert len(ENGINE_CLASSES) == 17
+    assert len(ENGINE_CLASSES) == 18
 
 
 @patch("src.engines.registry.logger")

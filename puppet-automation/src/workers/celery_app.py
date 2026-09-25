@@ -263,9 +263,11 @@ def run_pipeline_task(self, job_dict: dict[str, Any]) -> dict[str, Any]:
         return {"job_id": job.job_id, "status": "skipped", "reason": "locked"}
 
     try:
-        orchestrator = PipelineOrchestrator(engines={})  # no engines in worker - phases mock gracefully
-        # The real engine instances are looked up via the app.state.engines
-        # registry; here we let phases handle their own engine discovery.
+        # 真实修复（test_registry 长期红）：worker 侧用 build_engine_registry 构造引擎，
+        # 不再空 engines={}（只探测路径不启动应用，开销毫秒级；失败引擎自行诚实降级）
+        from ..engines.registry import build_engine_registry
+
+        orchestrator = PipelineOrchestrator(engines=build_engine_registry())
         import asyncio
         state = asyncio.run(orchestrator.run_pipeline(job))
         # Persist final state for API polling

@@ -52,7 +52,8 @@ class TestBaseEngine:
         exe.touch()
 
         class CompleteEngine(BaseEngine):
-            async def execute(self, action: str, **kwargs):
+            # 接口演进同步（2026-09-25）：execute 是模板方法，子类实现 _execute_impl
+            async def _execute_impl(self, *args, **kwargs):
                 return EngineResult(success=True)
 
         engine = CompleteEngine(exe)
