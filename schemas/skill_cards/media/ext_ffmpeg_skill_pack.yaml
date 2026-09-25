@@ -1,0 +1,61 @@
+skill_id: ext_ffmpeg_skill_pack
+domain: media
+skill_type: knowledge_pack
+version: 1.0.0
+stage: active
+requires_host:
+- app: ffmpeg
+  version: '>=5.1'
+- app: local_python
+  version: '>=3.9'
+headless: headless
+cost:
+  class: free_local
+  typical_duration_sec: 30
+  notes: 纯本地 ffmpeg + Python 标准库，零依赖零网络
+contract:
+  inputs:
+    type: object
+    properties:
+      script:
+        type: string
+        description: 42 个脚本入口之一（fit/cut/silence/speedramp/loudness/check/look/scenes…），见
+          external/ffmpeg-skill/SKILL.md 请求路由表
+      args:
+        type: array
+        items:
+          type: string
+        description: 传给脚本的参数（通用旗标 --dry-run/--json/--json-brief/--overwrite/--codec/--quality）
+    required:
+    - script
+  outputs:
+    type: object
+    description: 产物文件 + --json 探针回执（duration/分辨率/fps 实测值）
+recipe_ref: external/ffmpeg-skill/SKILL.md
+intended_use: 自然语言驱动的本地媒体处理技能包收编——静音跳剪(speech-aware)、变速坡道(speedramp)、9:16/1:1
+  适配(blur pad)、LUFS 响度归一、节拍吸附剪点(scenes --beats + cut --snap，与本项目 beat_sync_edit
+  同思路可交叉验证)、平台合规检查(check --platform)、接触镜自检(look)。42 脚本统一 dry-run/json/verify
+  纪律，MIT 许可
+out_of_scope: 云处理/API 计费（本包纯本地）；调色决策（其设计边界明确"执行不判断"，grade 归我们
+  color 卡/Lua 桥）；逐脚本封装成卡（按需取用，避免卡片库噪音）
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: real_execution
+  was_generated_by:
+    repo: https://github.com/kajisho5/ffmpeg-skill
+    commit: df5d273
+    license: MIT
+    security_review: 全脚本网络/动态执行扫描零命中（requests/urllib/socket/eval/exec 均无）
+    real_test: fit.py 1280x720 3s -> 9:16 blur pad 输出 406x720 ffprobe 验证有效（tmp/ffskill_out.mp4）
+  artifacts:
+  - tmp/ffskill_out.mp4
+  host_version: ffmpeg 8.1.1 / Python 3.12
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: P2-12 生态收编（选择性策略：整包一张卡+实测锚点，不逐脚本立卡）
+tags:
+- external
+- knowledge-pack
+- ffmpeg
+- absorbed

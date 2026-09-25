@@ -2,28 +2,28 @@
  "registry": "skill_cards",
  "schema_version": "0.1",
  "built_at": "2026-09-25",
- "count": 123,
+ "count": 125,
  "summary": {
   "by_stage": {
    "experimental": 66,
-   "validated": 40,
-   "active": 17
+   "validated": 41,
+   "active": 18
   },
   "by_headless": {
-   "requires_running_host": 96,
-   "headless": 27
+   "requires_running_host": 97,
+   "headless": 28
   },
   "by_cost": {
-   "free_local": 118,
+   "free_local": 120,
    "gpu_local": 5
   },
   "by_domain": {
    "text-style": 57,
-   "render": 12,
+   "render": 13,
    "resource": 10,
    "blur": 7,
    "edit": 7,
-   "media": 6,
+   "media": 7,
    "plugin": 5,
    "color": 4,
    "distortion": 4,
@@ -399,6 +399,20 @@
    ],
    "path": "schemas/skill_cards/media/comfyui_upload_image.yaml"
   },
+  "ext_ffmpeg_skill_pack": {
+   "domain": "media",
+   "skill_type": "knowledge_pack",
+   "version": "1.0.0",
+   "stage": "active",
+   "headless": "headless",
+   "cost_class": "free_local",
+   "cost_sec": 30,
+   "hosts": [
+    "ffmpeg",
+    "local_python"
+   ],
+   "path": "schemas/skill_cards/media/ext_ffmpeg_skill_pack.yaml"
+  },
   "ffmpeg_concat_videos": {
    "domain": "media",
    "skill_type": "tool_wrapper",
@@ -671,6 +685,19 @@
     "comfyui"
    ],
    "path": "schemas/skill_cards/render/comfyui_run_workflow.yaml"
+  },
+  "ext_blender_skills_pack": {
+   "domain": "render",
+   "skill_type": "knowledge_pack",
+   "version": "1.0.0",
+   "stage": "validated",
+   "headless": "requires_running_host",
+   "cost_class": "free_local",
+   "cost_sec": 120,
+   "hosts": [
+    "blender"
+   ],
+   "path": "schemas/skill_cards/render/ext_blender_skills_pack.yaml"
   },
   "media_encoder_batch_encode": {
    "domain": "render",

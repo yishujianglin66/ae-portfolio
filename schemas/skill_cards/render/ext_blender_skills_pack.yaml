@@ -1,0 +1,50 @@
+skill_id: ext_blender_skills_pack
+domain: render
+skill_type: knowledge_pack
+version: 1.0.0
+stage: validated
+requires_host:
+- app: blender
+  version: '>=4.0'
+headless: requires_running_host
+cost:
+  class: free_local
+  typical_duration_sec: 120
+  notes: 知识包本体零成本；其指向的 Blender MCP 执行需 Blender 运行 + MCP addon
+contract:
+  inputs:
+    type: object
+    properties:
+      skill:
+        type: string
+        description: 94 技能目录名之一（rendering/lighting/camera-cinematography/geometry-nodes/compositing/export-pipeline/qa-review/anime-style…），位于
+          external/blender-skills/.claude/skills/<skill>/SKILL.md
+    required:
+    - skill
+  outputs:
+    type: object
+    description: 生产标准知识（命名规范/面数预算/game-ready 校验清单/MCP 工具路由），供 headless bpy 脚本编写时引用
+recipe_ref: external/blender-skills/.claude/skills/
+intended_use: 94 个 Blender 专业生产技能包收编为**知识参考**——3D 资产/木偶舞台/布光/相机/几何节点
+  任务写 bpy 脚本前先查对应 SKILL.md 的行业标准（如 rendering 的 Cycles 采样/降噪/render pass
+  分层、qa-review 的导出前校验清单）。blender-director 路由思路可对照我们编排器
+out_of_scope: 不可直接执行（面向 Blender MCP addon 交互场景，本项目 Blender 通道是 headless
+  bpy -b -P，无 MCP addon）；游戏美术风格类（horror/voxel/genre 共 60+ 个）与剪辑管线无关，按需查阅不预载
+evidence_chain:
+  validated_at: '2026-09-25'
+  status: unit_verified
+  was_generated_by:
+    repo: https://github.com/arjun988/blender-skills
+    commit: 8f778d2
+    license: MIT
+    review: 抽查 rendering/pipeline 类 frontmatter 结构完整（name/description/triggers/related-skills）；安全扫描零命中（纯 markdown 知识）
+  host_version: Blender 5.1.0（本项目 headless 通道）
+version_history:
+- version: 1.0.0
+  date: '2026-09-25'
+  note: P2-12 生态收编（知识参考级，stage=validated 不虚标 active——未逐技能实测）
+tags:
+- external
+- knowledge-pack
+- blender
+- absorbed

@@ -379,3 +379,22 @@ puppet-automation 套件 29 红 → **632 passed / 14 xfailed / 0 failed**：cel
 - **验收**：browser-use 真实渲染 DOM 断言全过（123 卡渲染、搜 otio 命中 5、矩阵表 124 行、抽屉含证据链/契约）；首验发现并修复「功能域统计显示 0」的 `Object.keys(Set)` bug；截图 tmp/skill_catalog_screenshot.png
 - **守门**：tests/test_skill_catalog.py（卡片数与 registry 同步 + 全 skill_id 入页 + 结构锚点）
 - 环境备注：本机无 Chrome（chrome-devtools MCP 不可用），browser-use MCP 可用——后续页面验收直接走 browser-use
+
+---
+
+## 十三、P2-12 落地记录：外部生态收编（2026-09-25）
+
+计划原文：「arjun988/blender-skills、kajisho5/ffmpeg-skill 经评测后注册进本项目 Skill 库」——已按**选择性收编**完成：
+
+### 评测结论（两仓库浅克隆至 external/，不入库）
+| 仓库 | 内容 | 重叠度 | 处置 |
+|---|---|---|---|
+| kajisho5/ffmpeg-skill @df5d273 | 42 脚本（静音跳剪/变速坡道/9:16适配/LUFS/节拍吸附/平台合规/接触镜自检），纯标准库 | 中高（我们只有 4 个 ffmpeg 工具卡） | **active 卡**：fit.py 实测 1280x720→406x720 blur pad 有效；安全扫描零命中；其 scenes --beats+cut --snap 与 beat_sync_edit 同思路可互验 |
+| arjun988/blender-skills @8f778d2 | 94 个 Blender MCP prompt 包（建模/风格/游戏向占多数） | 低中（我们走 headless bpy 无 MCP addon） | **validated 知识参考卡**：不虚标 active（未逐技能实测）；rendering/qa-review 类作 3D 任务写 bpy 前的行业标准手册 |
+
+其 `.claude/skills` 下 13 个开发工程类技能（CI/git-hygiene）与剪辑无关，列入**不收编清单**。
+
+### 体系增量
+- schema MINOR：`skill_type` 新增 `knowledge_pack`（条件约束 recipe_ref 必填）——外部收编有了正式户口，证据字段强制记录 repo/commit/license/安全审查结论
+- 卡片库 123→**125**（active 18），validate 0 违规，守门测试 132 passed，台账页已同步重生成（192KB）
+- 收编哲学沉淀：**整包一张卡+实测锚点，不逐脚本/逐技能立卡**（避免 136 条噪音淹没自有能力）；可执行性、安全、重叠三评估缺一不可

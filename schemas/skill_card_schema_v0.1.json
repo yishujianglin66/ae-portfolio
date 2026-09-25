@@ -27,8 +27,8 @@
     },
     "skill_type": {
       "type": "string",
-      "enum": ["effect_recipe", "tool_wrapper", "pipeline_step"],
-      "description": "effect_recipe=可复用效果配方(recipe_ref 指向实现); tool_wrapper=MCP 网关工具封装; pipeline_step=管线级能力(如VRS节拍分析)"
+      "enum": ["effect_recipe", "tool_wrapper", "pipeline_step", "knowledge_pack"],
+      "description": "effect_recipe=可复用效果配方(recipe_ref 指向实现); tool_wrapper=MCP 网关工具封装; pipeline_step=管线级能力(如VRS节拍分析); knowledge_pack=外部收编技能包(MINOR 2026-09-25 P2-12，recipe_ref 指向包入口，证据记录 commit 针)"
     },
     "effect_type": {
       "type": "string",
@@ -149,6 +149,10 @@
     {
       "if": {"properties": {"skill_type": {"const": "tool_wrapper"}}},
       "then": {"required": ["tool_ref"]}
+    },
+    {
+      "if": {"properties": {"skill_type": {"const": "knowledge_pack"}}},
+      "then": {"required": ["recipe_ref"]}
     },
     {
       "if": {"properties": {"stage": {"const": "active"}}},
