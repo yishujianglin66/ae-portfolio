@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os  # FIX 2026-09-26: 下方使用 os.environ 但缺导入（ruff F821，系 7040636 归档批预存）
 import subprocess
 import sys
 import time
