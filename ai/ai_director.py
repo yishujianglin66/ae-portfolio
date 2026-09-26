@@ -50,6 +50,22 @@ def log(msg: str, level: str = "INFO"):
     print(f"  [{ts}][{level}] {msg}")
 
 
+def _is_trusted_material_result(r: dict) -> bool:
+    """FIX-05/契约 §1：AI 生成素材入池白名单。
+
+    拒收：非 success / 无路径 / source=="Mock" 占位片 / execution_path=="simulated"。
+    旧行为只判 success，导致降级链末端 Mock 蓝色占位片被静默剪进成片（0924 审计 F6）。
+    未带 execution_path 标记的历史适配器结果暂按 real 兼容（全量标记由 FIX-09 扫描器接管）。
+    """
+    if not (r.get("success") and r.get("path")):
+        return False
+    if str(r.get("source", "")) == "Mock":
+        return False
+    if r.get("execution_path") == "simulated":
+        return False
+    return True
+
+
 # ================================================================
 #  Phase 1: 素材搜集
 # ================================================================
@@ -1147,9 +1163,12 @@ class AIDirector:
                     material_type="video",
                 )
                 for r in aigc_results:
-                    if r.get("success") and r.get("path"):
+                    if _is_trusted_material_result(r):  # FIX-05/契约 §1：Mock/simulated 永不入池
                         material_files.append(r["path"])
                         log(f"  AI素材已添加: {Path(r['path']).name}")
+                    else:
+                        log(f"  AI素材拒收(不可信来源: source={r.get('source')} "
+                            f"execution_path={r.get('execution_path')})，不得静默入池", "WARN")
             except Exception as e:
                 log(f"AI生成失败(非致命): {e}", "WARN")
 

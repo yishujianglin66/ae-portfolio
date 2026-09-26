@@ -175,8 +175,11 @@ class VisualFeatureExtractor:
             else:
                 return features
             
-            features.available = True
-            features.confidence = 0.7
+            # FIX-04/契约 §4：不再无条件置 available=True+confidence 0.7——
+            # 仅子路径自身声明做了真实内容计算（array 路径）才放行；
+            # video/images 路径为文件大小启发式，已在各自函数内标 available=False。
+            if features.available:
+                features.confidence = 0.7
             
         except Exception as e:
             logger.warning(f"[VisualExtractor] 提取失败: {e}")
@@ -251,18 +254,23 @@ class VisualFeatureExtractor:
         return np.array(features) / 255.0
     
     async def _extract_from_video(self, video_path: str) -> VisualFeatures:
-        """从视频文件提取特征（采样关键帧）"""
+        """从视频文件提取特征 — ⚠ 未解码视频，仅文件大小启发式（FIX-04 诚实化）
+
+        旧实现在此伪造亮度/对比度常量与随机嵌入却返回 available=True+confidence=0.7，
+        使随机特征参与 fused_decision 真实决策（0924 审计 F4）。现改为 available=False，
+        融合层（按其门控）将自动排除本模态；需真实视觉分析请接 models/ CNN 链路。
+        """
         # 简化: 读取文件头获取基本信息
         file_size = Path(video_path).stat().st_size
         
-        # 基于文件大小估算特征
+        # 基于文件大小估算特征（启发式，非内容分析）
         features = VisualFeatures()
         features.brightness_mean = 0.5
         features.contrast = 0.3
         features.motion_intensity = min(1.0, file_size / (100 * 1024 * 1024))
         features.visual_energy = features.brightness_mean * features.motion_intensity
         
-        # 生成嵌入
+        # 生成嵌入（随机占位，仅供结构完整；不得参与决策）
         raw = np.random.randn(256) * 0.1  # 简化: 用随机特征近似
         raw[0] = features.brightness_mean
         raw[1] = features.contrast
@@ -272,11 +280,13 @@ class VisualFeatureExtractor:
         if norm > 0:
             features.embedding /= norm
         
-        features.available = True
+        features.available = False   # FIX-04/契约 §4：不解码内容不得声称可用
+        features.confidence = 0.0
+        logger.warning("[VisualExtractor] video 路径为文件大小启发式，未解码内容 → 标 unavailable")
         return features
     
     async def _extract_from_images(self, image_paths: list[str]) -> VisualFeatures:
-        """从图片列表提取特征"""
+        """从图片列表提取特征 — ⚠ 未读像素，仅文件总大小启发式（FIX-04 诚实化）"""
         features = VisualFeatures()
         
         total_size = sum(Path(p).stat().st_size for p in image_paths if Path(p).exists())
@@ -293,7 +303,8 @@ class VisualFeatureExtractor:
         if norm > 0:
             features.embedding /= norm
         
-        features.available = True
+        features.available = False   # FIX-04/契约 §4
+        features.confidence = 0.0
         return features
 
 
@@ -330,8 +341,8 @@ class AudioFeatureExtractor:
             else:
                 return features
             
-            features.available = True
-            features.confidence = 0.7
+            if features.available:
+                features.confidence = 0.7
             
         except Exception as e:
             logger.warning(f"[AudioExtractor] 提取失败: {e}")
@@ -404,7 +415,11 @@ class AudioFeatureExtractor:
         return features
     
     async def _extract_from_file(self, audio_path: str) -> AudioFeatures:
-        """从音频文件提取"""
+        """从音频文件提取 — ⚠ 未解码音频，bpm=120 常量+文件大小启发式（FIX-04 诚实化，契约 §4）。
+
+        旧实现与真实信号分析（_extract_from_array）同构且 available=True，下游无法分辨；
+        现标 unavailable，需真实音频分析请传 audio_data 或接 librosa/core.audio_edit_engine 链路。
+        """
         file_size = Path(audio_path).stat().st_size
         
         features = AudioFeatures()
@@ -421,7 +436,8 @@ class AudioFeatureExtractor:
         if norm > 0:
             features.embedding /= norm
         
-        features.available = True
+        features.available = False   # FIX-04/契约 §4：伪造分析不得声称可用
+        features.confidence = 0.0
         return features
 
 
@@ -995,22 +1011,10 @@ _global_hub: MultimodalFusionHub | None = None
 
 def get_fusion_hub(data_dir: str = MultimodalFusionHub.DEFAULT_DATA_DIR
                    ) -> MultimodalFusionHub:
-    """获取全局融合中枢单例"""
-    global _global_hub
-    if _global_hub is None:
-        _global_hub = MultimodalFusionHub(data_dir)
-    return _global_hub
+    """获取全局融合中枢单例
 
-def get_fusion_hub(data_dir: str = MultimodalFusionHub.DEFAULT_DATA_DIR
-                   ) -> MultimodalFusionHub:
-    """获取全局融合中枢单例"""
-    global _global_hub
-    if _global_hub is None:
-        _global_hub = MultimodalFusionHub(data_dir)
-    return _global_hub
-def get_fusion_hub(data_dir: str = MultimodalFusionHub.DEFAULT_DATA_DIR
-                   ) -> MultimodalFusionHub:
-    """获取全局融合中枢单例"""
+    FIX-04：旧文件尾部存在 3 份逐字重复定义（后定义静默覆盖前两者）——已去重保留唯一实现。
+    """
     global _global_hub
     if _global_hub is None:
         _global_hub = MultimodalFusionHub(data_dir)

@@ -1107,19 +1107,36 @@ class ComfyUIAdapter(BaseAIGCAdapter):
 #  模拟生成器 (用于测试/无API时)
 # ================================================================
 class MockAIGCAdapter(BaseAIGCAdapter):
-    """模拟生成器 - 用于测试或API不可用时"""
+    """模拟生成器 — 仅供测试/演示，永不进生产素材（FIX-05，契约 §2.4/§4）。
+
+    旧行为：is_available 恒 True + 蓝色占位片返回 success=True，被 ai_director
+    只判 success 的消费逻辑静默剪进成片（0924 审计 F6）。
+    新行为：默认禁用；需显式 AEKV_AIGC_ALLOW_MOCK=1 才可用，且所有结果带
+    execution_path="simulated"，消费端白名单另判 source=="Mock"。
+    """
 
     name = "Mock"
     supports_video = True
     supports_image = True
     priority = 0
 
+    @staticmethod
+    def _allow_mock() -> bool:
+        return os.environ.get("AEKV_AIGC_ALLOW_MOCK") == "1"
+
     def is_available(self) -> bool:
-        return True  # 总是可用
+        return self._allow_mock()  # FIX-05：不再恒可用（opt-in）
 
     def generate_video(self, prompt: str, output_path: str,
                        duration: int = 4, size: str = "720x1280") -> dict:
-        """生成一个测试视频 (纯色+文字)"""
+        """生成一个测试视频 (纯色+文字)——仅显式开启时"""
+        if not self._allow_mock():
+            return {
+                "success": False,
+                "error": "Mock disabled (FIX-05): set AEKV_AIGC_ALLOW_MOCK=1 for demo use; never trusted in production",
+                "source": "Mock",
+                "execution_path": "simulated",
+            }
         try:
             import subprocess
 
@@ -1141,6 +1158,7 @@ class MockAIGCAdapter(BaseAIGCAdapter):
                     "success": True,
                     "path": output_path,
                     "source": "Mock",
+                    "execution_path": "simulated",  # FIX-05：即使显式开启也如实标记
                     "prompt": prompt,
                     "note": "This is a placeholder video. Set up API keys for real generation.",
                 }
@@ -1152,7 +1170,14 @@ class MockAIGCAdapter(BaseAIGCAdapter):
 
     def generate_image(self, prompt: str, output_path: str,
                        size: str = "1024x1024") -> dict:
-        """生成一个测试图片 (纯色)"""
+        """生成一个测试图片 (纯色)——仅显式开启时（FIX-05）"""
+        if not self._allow_mock():
+            return {
+                "success": False,
+                "error": "Mock disabled (FIX-05): set AEKV_AIGC_ALLOW_MOCK=1 for demo use; never trusted in production",
+                "source": "Mock",
+                "execution_path": "simulated",
+            }
         try:
             from PIL import Image
             w, h = size.split("x") if "x" in size else (1024, 1024)
@@ -1162,6 +1187,7 @@ class MockAIGCAdapter(BaseAIGCAdapter):
                 "success": True,
                 "path": output_path,
                 "source": "Mock",
+                "execution_path": "simulated",  # FIX-05
                 "prompt": prompt,
                 "note": "This is a placeholder image. Set up API keys for real generation.",
             }
@@ -1194,7 +1220,7 @@ class AIGCGenerator:
             SoraAdapter(),      # P4: OpenAI Sora
             DALLEAdapter(),     # P5: DALL-E 图片
             ImagenAdapter(),    # P6: Imagen 图片
-            MockAIGCAdapter(),  # P-1: 模拟 (兆底)
+            MockAIGCAdapter(),  # P-1: 占位兜底 — 默认禁用，需 AEKV_AIGC_ALLOW_MOCK=1 显式开启（FIX-05，结果永远标 simulated）
         ]
 
     def generate_supplementary(self, user_prompt: str,

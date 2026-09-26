@@ -154,27 +154,44 @@ class TestPromptGenerator:
 
 
 # ---------------------------------------------------------------------------
-# Mock 通道（离线可跑：代表"无 API key 时的兜底路径"）
+# Mock 通道 — FIX-05/契约 §2.4§4：默认禁用、AEKV_AIGC_ALLOW_MOCK=1 显式开启、
+# 结果永远标 simulated。旧版本测试把"Mock 恒可用可写盘"当规格钉住，正是
+# 0924 审计指出的"测试锁桩"案例（F6 源头）；现已升级为钉诚实契约。
 # ---------------------------------------------------------------------------
 
 class TestMockAdapter:
-    def test_always_available(self):
+    def test_disabled_by_default_opt_in_only(self, monkeypatch):
+        monkeypatch.delenv("AEKV_AIGC_ALLOW_MOCK", raising=False)
+        assert ag.MockAIGCAdapter().is_available() is False
+        monkeypatch.setenv("AEKV_AIGC_ALLOW_MOCK", "1")
         assert ag.MockAIGCAdapter().is_available() is True
 
-    def test_generate_image_writes_file(self, tmp_path):
+    def test_disabled_generate_does_not_touch_disk(self, tmp_path, monkeypatch):
+        """禁用态连占位文件都不应落盘（不造假产物）。"""
+        monkeypatch.delenv("AEKV_AIGC_ALLOW_MOCK", raising=False)
+        out = tmp_path / "placeholder.png"
+        res = ag.MockAIGCAdapter().generate_image("x", str(out))
+        assert res["success"] is False and not out.exists()
+        assert res["execution_path"] == "simulated"
+
+    def test_generate_image_writes_file_when_opted_in(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("AEKV_AIGC_ALLOW_MOCK", "1")
         out = tmp_path / "placeholder.png"
         res = ag.MockAIGCAdapter().generate_image("x", str(out), size="32x24")
         assert res["success"] is True and out.exists() and out.stat().st_size > 0
         assert res["source"] == "Mock"
+        assert res["execution_path"] == "simulated"  # 显式开启也如实标记
 
-    def test_generate_image_bad_size_reports_error_not_raise(self, tmp_path):
+    def test_generate_image_bad_size_reports_error_not_raise(self, tmp_path, monkeypatch):
         """解析失败的 size 要**返回错误字典**而非抛异常（适配器契约：永不抛）。"""
+        monkeypatch.setenv("AEKV_AIGC_ALLOW_MOCK", "1")
         res = ag.MockAIGCAdapter().generate_image("x", str(tmp_path / "p.png"),
                                                   size="10x")
         assert res["success"] is False and "error" in res
 
-    def test_generate_image_unparsable_size_falls_back_to_default(self, tmp_path):
+    def test_generate_image_unparsable_size_falls_back_to_default(self, tmp_path, monkeypatch):
         """无 "x" 分隔符时按默认 1024x1024 兜底（实现是容错而非报错）。"""
+        monkeypatch.setenv("AEKV_AIGC_ALLOW_MOCK", "1")
         out = tmp_path / "d.png"
         res = ag.MockAIGCAdapter().generate_image("x", str(out), size="bad")
         assert res["success"] is True and out.exists()
@@ -187,7 +204,9 @@ class TestGeneratorFacade:
 
     def test_mock_is_in_adapter_chain(self):
         names = [a.name for a in ag.AIGCGenerator().adapters]
-        assert "Mock" in names, "Mock 必须常备 —— 它是无 key 时的兜底通道"
+        # FIX-05：Mock 仍在注册链（保留演示能力），但 is_available 默认 False，
+        # 不再"无 key 自动兜底进生产"——占位品入池被 ai_director 白名单拦下。
+        assert "Mock" in names
 
     def test_generate_supplementary_returns_list(self, tmp_path, monkeypatch):
         """离线环境下（无任何 key）也必须返回列表而非抛异常。"""
