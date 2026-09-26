@@ -68,19 +68,32 @@ def probe_shot(frames: list[np.ndarray]) -> dict:
     F = np.stack(flows)                      # (t, H, W, 2)
     mag = np.hypot(F[..., 0], F[..., 1])     # (t, H, W)
 
-    # rigid_blocks：8x8 分块，块内流标准差/块均值 低（刚体）→ 木偶部件证据
+    # rigid_blocks：运动块的光流方向与全局主方向一致率（平移/刚体→高，多向形变→低）
     bs = SCALE_H // 8
-    rigid_scores = []
+    bw = SCALE_W // 8
+    consistent = []
     for t in range(F.shape[0]):
+        m_all = mag[t]
+        if m_all.mean() < 0.15:  # 整帧几乎静止，不采样本帧
+            continue
+        # 全局主方向：运动像素光流方向的中位数
+        sel = m_all > 0.3
+        if sel.sum() < 50:
+            continue
+        ang = np.arctan2(F[t][..., 1][sel], F[t][..., 0][sel])
+        main_ang = float(np.median(ang))
         for by in range(8):
             for bx in range(8):
-                blk = F[t, by * bs:(by + 1) * bs, bx * bs // (SCALE_W // 8) * (SCALE_W // 8):
-                        (bx + 1) * (SCALE_W // 8)]
-                m = np.hypot(blk[..., 0], blk[..., 1]).mean()
-                if m > 0.3:  # 只看运动块
-                    s = np.hypot(blk[..., 0], blk[..., 1]).std()
-                    rigid_scores.append(s / max(m, 1e-6))
-    rigid_consistency = round(1.0 - float(np.mean(rigid_scores)), 3) if rigid_scores else 0.0
+                blk_m = m_all[by * bs:(by + 1) * bs, bx * bw:(bx + 1) * bw]
+                if blk_m.mean() <= 0.3:
+                    continue  # 只看运动块
+                ba = np.arctan2(F[t, by * bs:(by + 1) * bs, bx * bw:(bx + 1) * bw, 1][blk_m > 0.3],
+                                F[t, by * bs:(by + 1) * bs, bx * bw:(bx + 1) * bw, 0][blk_m > 0.3])
+                if len(ba) == 0:
+                    continue
+                d = np.abs(np.angle(np.exp(1j * (ba - main_ang))))
+                consistent.append(float((d < np.pi / 6).mean()))  # ±30° 内算一致
+    rigid_consistency = round(float(np.mean(consistent)), 3) if consistent else 0.0
 
     # parallax_split：上半 vs 下半平均流幅差比（2.5D 视差/投影分层）
     top, bot = mag[:, :SCALE_H // 2].mean(), mag[:, SCALE_H // 2:].mean()

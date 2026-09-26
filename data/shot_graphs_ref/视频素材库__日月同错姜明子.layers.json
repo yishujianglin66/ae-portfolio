@@ -1,0 +1,354 @@
+{
+ "video": "D:\\AE-Work\\视频素材库\\日月同错姜明子.mp4",
+ "shots_layers": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 0.033,
+   "dur": 0.033,
+   "layers": {
+    "n_frames": 1,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 1,
+   "start": 0.033,
+   "end": 2.433,
+   "dur": 2.4,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1253,
+    "edge_stability": 0.159,
+    "rigid_consistency": 0.546,
+    "parallax_split": 0.077,
+    "flow_diverge": 0.179,
+    "edge_halo": 22.6,
+    "color_banding": 0.0431,
+    "flat_share": 0.001
+   }
+  },
+  {
+   "idx": 2,
+   "start": 2.433,
+   "end": 4.0,
+   "dur": 1.567,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1371,
+    "edge_stability": 0.292,
+    "rigid_consistency": 0.642,
+    "parallax_split": 0.029,
+    "flow_diverge": 0.213,
+    "edge_halo": 0.0,
+    "color_banding": 0.0189,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 3,
+   "start": 4.0,
+   "end": 5.033,
+   "dur": 1.033,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1312,
+    "edge_stability": 0.364,
+    "rigid_consistency": 0.381,
+    "parallax_split": 0.995,
+    "flow_diverge": 0.177,
+    "edge_halo": 25.2,
+    "color_banding": 0.0228,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 4,
+   "start": 5.033,
+   "end": 6.8,
+   "dur": 1.767,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1297,
+    "edge_stability": 0.293,
+    "rigid_consistency": 0.483,
+    "parallax_split": 0.11,
+    "flow_diverge": 0.253,
+    "edge_halo": 39.1,
+    "color_banding": 0.056,
+    "flat_share": 0.059
+   }
+  },
+  {
+   "idx": 5,
+   "start": 6.8,
+   "end": 6.833,
+   "dur": 0.033,
+   "layers": {
+    "n_frames": 1,
+    "flat_share": 0.059
+   }
+  },
+  {
+   "idx": 6,
+   "start": 6.833,
+   "end": 9.333,
+   "dur": 2.5,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1078,
+    "edge_stability": 0.246,
+    "rigid_consistency": 0.561,
+    "parallax_split": 0.07,
+    "flow_diverge": 0.252,
+    "edge_halo": 0.0,
+    "color_banding": 0.0564,
+    "flat_share": 0.114
+   }
+  },
+  {
+   "idx": 7,
+   "start": 9.333,
+   "end": 9.4,
+   "dur": 0.067,
+   "layers": {
+    "n_frames": 3,
+    "line_boil": 0.0,
+    "edge_stability": 0.024,
+    "rigid_consistency": 0.187,
+    "parallax_split": 0.471,
+    "flow_diverge": 0.348,
+    "edge_halo": 0.0,
+    "color_banding": 0.0232,
+    "flat_share": 0.149
+   }
+  },
+  {
+   "idx": 8,
+   "start": 9.4,
+   "end": 10.233,
+   "dur": 0.833,
+   "layers": {
+    "n_frames": 25,
+    "line_boil": 0.2934,
+    "edge_stability": 0.339,
+    "rigid_consistency": 0.77,
+    "parallax_split": 0.846,
+    "flow_diverge": 0.198,
+    "edge_halo": 11.5,
+    "color_banding": 0.0224,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 9,
+   "start": 10.233,
+   "end": 12.233,
+   "dur": 2.0,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.0946,
+    "edge_stability": 0.207,
+    "rigid_consistency": 0.772,
+    "parallax_split": 0.099,
+    "flow_diverge": 0.164,
+    "edge_halo": 0.0,
+    "color_banding": 0.0413,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 10,
+   "start": 12.233,
+   "end": 12.3,
+   "dur": 0.067,
+   "layers": {
+    "n_frames": 3,
+    "line_boil": 0.0,
+    "edge_stability": 0.044,
+    "rigid_consistency": 0.286,
+    "parallax_split": 0.081,
+    "flow_diverge": 0.227,
+    "edge_halo": 0.0,
+    "color_banding": 0.003,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 11,
+   "start": 12.3,
+   "end": 13.267,
+   "dur": 0.967,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1131,
+    "edge_stability": 0.266,
+    "rigid_consistency": 0.609,
+    "parallax_split": 0.072,
+    "flow_diverge": 0.14,
+    "edge_halo": 10.3,
+    "color_banding": 0.0343,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 12,
+   "start": 13.267,
+   "end": 15.267,
+   "dur": 2.0,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1653,
+    "edge_stability": 0.265,
+    "rigid_consistency": 0.686,
+    "parallax_split": 0.353,
+    "flow_diverge": 0.196,
+    "edge_halo": 0.0,
+    "color_banding": 0.0156,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 13,
+   "start": 15.267,
+   "end": 15.3,
+   "dur": 0.033,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.003
+   }
+  },
+  {
+   "idx": 14,
+   "start": 15.3,
+   "end": 17.0,
+   "dur": 1.7,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.2092,
+    "edge_stability": 0.298,
+    "rigid_consistency": 0.726,
+    "parallax_split": 0.17,
+    "flow_diverge": 0.237,
+    "edge_halo": 0.0,
+    "color_banding": 0.016,
+    "flat_share": 0.318
+   }
+  },
+  {
+   "idx": 15,
+   "start": 17.0,
+   "end": 17.033,
+   "dur": 0.033,
+   "layers": {
+    "n_frames": 1,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 16,
+   "start": 17.033,
+   "end": 19.333,
+   "dur": 2.3,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1442,
+    "edge_stability": 0.224,
+    "rigid_consistency": 0.856,
+    "parallax_split": 0.119,
+    "flow_diverge": 0.106,
+    "edge_halo": 0.0,
+    "color_banding": 0.0104,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 17,
+   "start": 19.333,
+   "end": 21.2,
+   "dur": 1.867,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.173,
+    "edge_stability": 0.257,
+    "rigid_consistency": 0.647,
+    "parallax_split": 0.037,
+    "flow_diverge": 0.225,
+    "edge_halo": 0.0,
+    "color_banding": 0.0147,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 18,
+   "start": 21.2,
+   "end": 24.633,
+   "dur": 3.433,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.0816,
+    "edge_stability": 0.176,
+    "rigid_consistency": 0.76,
+    "parallax_split": 0.004,
+    "flow_diverge": 0.144,
+    "edge_halo": 7.4,
+    "color_banding": 0.009,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 19,
+   "start": 24.633,
+   "end": 24.667,
+   "dur": 0.034,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.578
+   }
+  },
+  {
+   "idx": 20,
+   "start": 24.667,
+   "end": 26.367,
+   "dur": 1.7,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1682,
+    "edge_stability": 0.209,
+    "rigid_consistency": 0.593,
+    "parallax_split": 0.262,
+    "flow_diverge": 0.214,
+    "edge_halo": 0.0,
+    "color_banding": 0.0255,
+    "flat_share": 0.098
+   }
+  },
+  {
+   "idx": 21,
+   "start": 26.367,
+   "end": 26.4,
+   "dur": 0.033,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.148
+   }
+  },
+  {
+   "idx": 22,
+   "start": 26.4,
+   "end": 38.767,
+   "dur": 12.367,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.0769,
+    "edge_stability": 0.19,
+    "rigid_consistency": 0.774,
+    "parallax_split": 0.072,
+    "flow_diverge": 0.26,
+    "edge_halo": 0.0,
+    "color_banding": 0.0,
+    "flat_share": 0.926
+   }
+  }
+ ]
+}

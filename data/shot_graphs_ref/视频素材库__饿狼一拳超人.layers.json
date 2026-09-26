@@ -1,0 +1,401 @@
+{
+ "video": "D:\\AE-Work\\视频素材库\\饿狼一拳超人.mp4",
+ "shots_layers": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 0.833,
+   "dur": 0.833,
+   "layers": {
+    "n_frames": 20,
+    "line_boil": 0.1081,
+    "edge_stability": 0.65,
+    "rigid_consistency": 0.656,
+    "parallax_split": 0.776,
+    "flow_diverge": 0.433,
+    "edge_halo": 162.1,
+    "color_banding": 0.0145,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 1,
+   "start": 0.833,
+   "end": 1.375,
+   "dur": 0.542,
+   "layers": {
+    "n_frames": 14,
+    "line_boil": 0.1067,
+    "edge_stability": 0.241,
+    "rigid_consistency": 0.275,
+    "parallax_split": 0.045,
+    "flow_diverge": 0.26,
+    "edge_halo": 0.8,
+    "color_banding": 0.0156,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 2,
+   "start": 1.375,
+   "end": 3.375,
+   "dur": 2.0,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1518,
+    "edge_stability": 0.339,
+    "rigid_consistency": 0.139,
+    "parallax_split": 0.409,
+    "flow_diverge": 0.251,
+    "edge_halo": 0.0,
+    "color_banding": 0.0183,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 3,
+   "start": 3.375,
+   "end": 4.583,
+   "dur": 1.208,
+   "layers": {
+    "n_frames": 29,
+    "line_boil": 0.1169,
+    "edge_stability": 0.295,
+    "rigid_consistency": 0.369,
+    "parallax_split": 0.007,
+    "flow_diverge": 0.319,
+    "edge_halo": 121.6,
+    "color_banding": 0.0209,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 4,
+   "start": 4.583,
+   "end": 5.583,
+   "dur": 1.0,
+   "layers": {
+    "n_frames": 24,
+    "line_boil": 0.0309,
+    "edge_stability": 0.147,
+    "rigid_consistency": 0.548,
+    "parallax_split": 0.672,
+    "flow_diverge": 0.348,
+    "edge_halo": 13.8,
+    "color_banding": 0.0584,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 5,
+   "start": 5.583,
+   "end": 5.625,
+   "dur": 0.042,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.006
+   }
+  },
+  {
+   "idx": 6,
+   "start": 5.625,
+   "end": 6.792,
+   "dur": 1.167,
+   "layers": {
+    "n_frames": 29,
+    "line_boil": 0.0227,
+    "edge_stability": 0.09,
+    "rigid_consistency": 0.303,
+    "parallax_split": 0.852,
+    "flow_diverge": 0.387,
+    "edge_halo": 0.0,
+    "color_banding": 0.0,
+    "flat_share": 1.0
+   }
+  },
+  {
+   "idx": 7,
+   "start": 6.792,
+   "end": 6.833,
+   "dur": 0.041,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.003
+   }
+  },
+  {
+   "idx": 8,
+   "start": 6.833,
+   "end": 6.875,
+   "dur": 0.042,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.002
+   }
+  },
+  {
+   "idx": 9,
+   "start": 6.875,
+   "end": 7.583,
+   "dur": 0.708,
+   "layers": {
+    "n_frames": 17,
+    "line_boil": 0.1288,
+    "edge_stability": 0.236,
+    "rigid_consistency": 0.222,
+    "parallax_split": 0.321,
+    "flow_diverge": 0.386,
+    "edge_halo": 4.4,
+    "color_banding": 0.0411,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 10,
+   "start": 7.583,
+   "end": 8.458,
+   "dur": 0.875,
+   "layers": {
+    "n_frames": 21,
+    "line_boil": 0.2414,
+    "edge_stability": 0.681,
+    "rigid_consistency": 0.246,
+    "parallax_split": 0.453,
+    "flow_diverge": 0.453,
+    "edge_halo": 8.4,
+    "color_banding": 0.011,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 11,
+   "start": 8.458,
+   "end": 9.792,
+   "dur": 1.334,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.2832,
+    "edge_stability": 0.382,
+    "rigid_consistency": 0.33,
+    "parallax_split": 0.185,
+    "flow_diverge": 0.381,
+    "edge_halo": 0.0,
+    "color_banding": 0.0,
+    "flat_share": 1.0
+   }
+  },
+  {
+   "idx": 12,
+   "start": 9.792,
+   "end": 9.875,
+   "dur": 0.083,
+   "layers": {
+    "n_frames": 3,
+    "line_boil": 0.0,
+    "edge_stability": 0.0,
+    "rigid_consistency": 0.44,
+    "parallax_split": 0.69,
+    "flow_diverge": 0.215,
+    "edge_halo": 0.0,
+    "color_banding": 0.044,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 13,
+   "start": 9.875,
+   "end": 9.917,
+   "dur": 0.042,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 14,
+   "start": 9.917,
+   "end": 9.958,
+   "dur": 0.041,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 15,
+   "start": 9.958,
+   "end": 10.333,
+   "dur": 0.375,
+   "layers": {
+    "n_frames": 9,
+    "line_boil": 0.0225,
+    "edge_stability": 0.073,
+    "rigid_consistency": 0.37,
+    "parallax_split": 0.356,
+    "flow_diverge": 0.418,
+    "edge_halo": 0.0,
+    "color_banding": 0.0618,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 16,
+   "start": 10.333,
+   "end": 10.375,
+   "dur": 0.042,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 17,
+   "start": 10.375,
+   "end": 11.167,
+   "dur": 0.792,
+   "layers": {
+    "n_frames": 20,
+    "line_boil": 0.0295,
+    "edge_stability": 0.13,
+    "rigid_consistency": 0.359,
+    "parallax_split": 0.134,
+    "flow_diverge": 0.529,
+    "edge_halo": 0.0,
+    "color_banding": 0.01,
+    "flat_share": 0.001
+   }
+  },
+  {
+   "idx": 18,
+   "start": 11.167,
+   "end": 11.458,
+   "dur": 0.291,
+   "layers": {
+    "n_frames": 8,
+    "line_boil": 0.3289,
+    "edge_stability": 0.198,
+    "rigid_consistency": 0.304,
+    "parallax_split": 0.175,
+    "flow_diverge": 0.429,
+    "edge_halo": 0.0,
+    "color_banding": 0.0191,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 19,
+   "start": 11.458,
+   "end": 11.5,
+   "dur": 0.042,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 20,
+   "start": 11.5,
+   "end": 11.542,
+   "dur": 0.042,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 21,
+   "start": 11.542,
+   "end": 11.667,
+   "dur": 0.125,
+   "layers": {
+    "n_frames": 4,
+    "line_boil": 0.4535,
+    "edge_stability": 0.359,
+    "rigid_consistency": 0.156,
+    "parallax_split": 0.563,
+    "flow_diverge": 0.294,
+    "edge_halo": 0.0,
+    "color_banding": 0.049,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 22,
+   "start": 11.667,
+   "end": 15.5,
+   "dur": 3.833,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.1164,
+    "edge_stability": 0.114,
+    "rigid_consistency": 0.296,
+    "parallax_split": 0.131,
+    "flow_diverge": 0.396,
+    "edge_halo": 0.0,
+    "color_banding": 0.0506,
+    "flat_share": 0.001
+   }
+  },
+  {
+   "idx": 23,
+   "start": 15.5,
+   "end": 15.542,
+   "dur": 0.042,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 24,
+   "start": 15.542,
+   "end": 15.792,
+   "dur": 0.25,
+   "layers": {
+    "n_frames": 7,
+    "line_boil": 0.3389,
+    "edge_stability": 0.243,
+    "rigid_consistency": 0.525,
+    "parallax_split": 0.007,
+    "flow_diverge": 0.383,
+    "edge_halo": 0.0,
+    "color_banding": 0.0086,
+    "flat_share": 0.001
+   }
+  },
+  {
+   "idx": 25,
+   "start": 15.792,
+   "end": 16.25,
+   "dur": 0.458,
+   "layers": {
+    "n_frames": 12,
+    "line_boil": 0.2609,
+    "edge_stability": 0.177,
+    "rigid_consistency": 0.283,
+    "parallax_split": 0.225,
+    "flow_diverge": 0.431,
+    "edge_halo": 0.0,
+    "color_banding": 0.0077,
+    "flat_share": 0.003
+   }
+  },
+  {
+   "idx": 26,
+   "start": 16.25,
+   "end": 18.924,
+   "dur": 2.674,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.0145,
+    "edge_stability": 0.095,
+    "rigid_consistency": 0.454,
+    "parallax_split": 0.25,
+    "flow_diverge": 0.418,
+    "edge_halo": 8.8,
+    "color_banding": 0.0996,
+    "flat_share": 0.0
+   }
+  }
+ ]
+}
