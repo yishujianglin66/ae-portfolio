@@ -29,7 +29,8 @@
   │   └── QualityCheckFailedError
   ├── WorkflowError         (工作流错误)
   │   ├── StageFailedError
-  │   └── PipelineBrokenError
+  │   ├── PipelineBrokenError
+  │   └── UntrustedSuccessError
   ├── ResourceError         (资源相关错误)
   │   ├── OutOfMemoryError
   │   ├── DiskSpaceError
@@ -107,6 +108,8 @@ class ErrorCode(str, Enum):
     STAGE_FAILED = "E501"
     PIPELINE_BROKEN = "E502"
     DEPENDENCY_MISSING = "E503"
+    # 成功语义契约（docs/execution_result_contract.md）：success 无可信执行路径标记
+    UNTRUSTED_SUCCESS = "E504"
 
     # E6xx - 资源错误
     OUT_OF_MEMORY = "E600"
@@ -181,6 +184,7 @@ ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.STAGE_FAILED: "阶段执行失败",
     ErrorCode.PIPELINE_BROKEN: "流水线中断",
     ErrorCode.DEPENDENCY_MISSING: "依赖项缺失",
+    ErrorCode.UNTRUSTED_SUCCESS: "success 声明缺乏可信执行路径标记",
 
     ErrorCode.OUT_OF_MEMORY: "内存不足",
     ErrorCode.DISK_SPACE_LOW: "磁盘空间不足",
@@ -720,6 +724,32 @@ class PipelineBrokenError(WorkflowError):
             self.details["reason"] = reason
 
 
+class UntrustedSuccessError(WorkflowError):
+    """不可信成功声明（执行结果契约违规）
+
+    依据 docs/execution_result_contract.md：任何 success=True 的结果必须携带
+    execution_path ∈ {real, simulated, fallback} 标记；无标记或消费端接收到
+    未声明的 simulate 产物时，一律抛出本异常而非静默放行。
+
+    背景：0924 审计确认的 16 条"伪造成功"路径族（ai/auto_produce、
+    integrations/*_integration 默认 simulate、Mock 占位片入素材池等）。
+    """
+
+    def __init__(
+        self,
+        producer: str,
+        reason: str = "missing_execution_path",
+        **kwargs,
+    ):
+        super().__init__(
+            message=f"不可信 success 声明: {producer} (原因: {reason})",
+            error_code=ErrorCode.UNTRUSTED_SUCCESS,
+            **kwargs,
+        )
+        self.details["producer"] = producer
+        self.details["reason"] = reason
+
+
 # ============================================================================
 # 资源异常
 # ============================================================================
@@ -1010,6 +1040,7 @@ __all__ = [
     "WorkflowError",
     "StageFailedError",
     "PipelineBrokenError",
+    "UntrustedSuccessError",
     # 资源
     "ResourceError",
     "OutOfMemoryError",
