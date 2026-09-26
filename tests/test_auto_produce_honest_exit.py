@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import random
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -93,7 +94,6 @@ class TestRealModeArtifactGating:
         assert rep["execution_path"] == "real"
 
 
-@pytest.mark.skipif(shutil.which("ffprobe") is None, reason="本机无 ffprobe，跳过内容级验证实测")
 class TestArtifactVerifiedFailClosed:
     def test_nonexistent_false(self, tmp_path):
         assert ap._artifact_verified(tmp_path / "nope.mp4") is False
@@ -103,6 +103,38 @@ class TestArtifactVerifiedFailClosed:
         f = tmp_path / "fake.mp4"
         f.write_bytes(b"AI_VIDEO_SIMULATED_OUTPUT" + b"\x00" * 4096)
         assert ap._artifact_verified(f) is False
+
+    @pytest.mark.skipif(shutil.which("ffmpeg") is None or shutil.which("ffprobe") is None,
+                        reason="本机缺 ffmpeg/ffprobe，跳过真产物正例")
+    def test_real_ffmpeg_output_passes(self, tmp_path):
+        """正例实证：lavfi 生成的真 mp4 必须通过内容级验证（与 garbage 负例成对，
+        防"永远 False"退化——负例已在 test_garbage_file_false）。"""
+        out = tmp_path / "real.mp4"
+        r = subprocess.run(
+            ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+             "-i", "color=c=navy:s=64x64:d=1", "-pix_fmt", "yuv420p", str(out)],
+            capture_output=True, text=True, timeout=60, encoding="utf-8", errors="ignore",
+        )
+        assert r.returncode == 0 and out.exists(), f"ffmpeg 生成失败: {r.stderr[:200]}"
+        assert ap._artifact_verified(out) is True, \
+            "真 mp4 被误拒：验证器在伪造'永远失败'，与伪造成功同等恶劣"
+
+
+class TestExitCodeMapping:
+    """CLI 退出码三态映射（FIX-02 欠账闭环：原仅手工实锤 exit=4，现加自动化守卫）"""
+
+    def test_real_success_maps_zero(self):
+        assert ap.exit_code_for({"success": True, "dry_run_completed": False}) == 0
+
+    def test_dryrun_smoke_maps_four_not_zero(self):
+        # 审计 F1 核心场景：dry_run 绝不得映射为 0
+        assert ap.exit_code_for({"success": False, "dry_run_completed": True}) == 4
+
+    def test_failure_maps_one(self):
+        assert ap.exit_code_for({"success": False, "dry_run_completed": False}) == 1
+
+    def test_empty_report_maps_one(self):
+        assert ap.exit_code_for({}) == 1
 
 
 class TestDownstreamDefaultsHonest:

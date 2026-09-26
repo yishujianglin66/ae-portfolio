@@ -160,6 +160,18 @@ def _fallback_shots(theme: str, duration_target: float) -> list[dict]:
     return selected
 
 
+def exit_code_for(report: dict) -> int:
+    """退出码映射（FIX-02，供 CLI 与测试共用，可测化）：
+
+    0=真实产物已验证 / 4=dry_run 冒烟通过（simulated，非生产结论）/ 1=失败。
+    """
+    if report.get("success"):
+        return 0
+    if report.get("dry_run_completed"):
+        return 4
+    return 1
+
+
 def auto_produce(
     bgm: str = "",
     theme: str = "",
@@ -405,8 +417,4 @@ if __name__ == "__main__":
     )
 
     # FIX-02: 退出码反映真实产物存在性（审计 F1 根治点）——dry_run 不得以 0 冒充生产成功
-    if report.get("success"):
-        sys.exit(0)
-    if report.get("dry_run_completed"):
-        sys.exit(4)
-    sys.exit(1)
+    sys.exit(exit_code_for(report))
