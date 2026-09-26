@@ -83,6 +83,8 @@ class AudioAnalyzerAdapter:
             "sections": section_types,
             "mood": features.get("mood", "neutral"),
             "genre": features.get("genre", "unknown"),
+            # FIX-03/契约 §1：真实分析路径必须可辨识（与 _fallback_analyze 同构返回曾被下游无法分辨）
+            "analysis_path": "real",
         }
 
     def _fallback_analyze(self, audio_path: str) -> dict[str, Any]:
@@ -117,6 +119,8 @@ class AudioAnalyzerAdapter:
             energy_vals.append(round(e, 3))
 
         log(f"  回退分析: BPM={bpm}, duration={duration:.1f}s, {len(beats)} beats")
+        log("  ⚠ 启发式回退：BPM/能量曲线为常量与正弦伪造（FIX-03/审计 F5），" 
+            "不得当作踩拍真值参与生产对齐；报告/返回值已标 analysis_path=fallback", "WARN")
 
         return {
             "bpm": bpm,
@@ -128,6 +132,10 @@ class AudioAnalyzerAdapter:
             "sections": ["intro", "build", "drop", "breakdown", "outro"],
             "mood": "energetic",
             "genre": "edm",
+            # FIX-03/契约 §1：降级必须显式标——旧返回与真实分析完全同构无标记（F5 根治点）
+            "analysis_path": "fallback",
+            "is_heuristic": True,
+            "fallback_reason": "no_librosa_or_enhanced_analyzer",
         }
 
     def _get_duration(self, audio_path: str) -> float:
@@ -550,6 +558,9 @@ class AudioEditEngine:
         n_beats = len(audio_features.get("beats", []))
         log(f"  BPM={bpm}, duration={duration:.1f}s, beats={n_beats}")
         log(f"  mood={audio_features.get('mood', '?')}, genre={audio_features.get('genre', '?')}")
+        # FIX-03/契约 §1：启发式降级透传到报告——下游不得把常量 BPM 当真值而不自知
+        if audio_features.get("is_heuristic"):
+            log("  ⚠ 音频分析为启发式回退（非真实节拍检测），本结果不得用于踩拍真值场景", "WARN")
 
         # Step 2: 生成 EDL
         print("\n--- Step 2: 剪辑决策 (EDL) ---")
@@ -579,6 +590,7 @@ class AudioEditEngine:
         edl_path = self.output_dir / "audio_edit_edl.json"
         with open(edl_path, "w", encoding="utf-8") as f:
             json.dump({"audio": audio_path, "bpm": bpm, "duration": duration,
+                       "analysis_path": audio_features.get("analysis_path", "unknown"),
                        "beats": n_beats, "clips": edl}, f, ensure_ascii=False, indent=2)
 
         # 报告
@@ -586,6 +598,8 @@ class AudioEditEngine:
         report = {
             "audio": audio_path,
             "bpm": bpm,
+            "audio_analysis_path": audio_features.get("analysis_path", "unknown"),
+            "audio_is_heuristic": bool(audio_features.get("is_heuristic", False)),
             "duration": duration,
             "beats": n_beats,
             "mood": audio_features.get("mood"),

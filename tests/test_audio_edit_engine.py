@@ -722,3 +722,42 @@ class TestFallbackAnalysis:
         result = self.adapter._fallback_analyze("nonexistent_audio.wav")
         assert result["duration"] == 30.0
         assert len(result["beats"]) > 0
+
+
+# ============================================================================
+# FIX-03/契约 §1：分析来源可辨识性（审计 F5 根治断言，与上方结构断言不重复）
+# ============================================================================
+class TestAnalysisProvenance:
+    def setup_method(self):
+        self.adapter = AudioAnalyzerAdapter()
+
+    def test_normalize_marks_real_path(self):
+        result = self.adapter._normalize({})
+        assert result["analysis_path"] == "real"
+        assert "is_heuristic" not in result
+
+    def test_fallback_marks_heuristic_triplet(self):
+        result = self.adapter._fallback_analyze("nonexistent_audio.wav")
+        assert result["analysis_path"] == "fallback"
+        assert result["is_heuristic"] is True
+        assert result["fallback_reason"] == "no_librosa_or_enhanced_analyzer"
+        # 旧字段保留（下游兼容），但来源已可辨——F5"完全同构无标记"不再成立
+        assert result["bpm"] == 128.0
+
+    def test_edit_report_surfaces_heuristic(self):
+        """降级透传：engine.edit() 的报告/EDL 落盘件必须携带分析来源，
+        下游（ai_director 等）不得拿着常量 BPM 而不自知。"""
+        import json
+        import tempfile
+        engine = AudioEditEngine()
+        features = self.adapter._fallback_analyze("nonexistent_audio.wav")
+        engine.analyzer.analyze = lambda x: features
+        with tempfile.TemporaryDirectory() as tmpdir:
+            engine.output_dir = __import__("pathlib").Path(tmpdir)
+            report = engine.edit("dummy.mp3", ["material.mp4"])
+            assert report["audio_is_heuristic"] is True
+            assert report["audio_analysis_path"] == "fallback"
+            edl_doc = json.loads(
+                (engine.output_dir / "audio_edit_edl.json").read_text(encoding="utf-8")
+            )
+            assert edl_doc["analysis_path"] == "fallback"
