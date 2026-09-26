@@ -28,6 +28,7 @@ evidence_chain:
   artifacts:
   - tmp/e2e_0924/beat_mix.mp4   # h264 1920x1080 20.52s 7MB，sha1前16=3DEAACB310E382CE（2026-09-25 ffprobe+哈希复验）
   - output/unified_proof0925/proof0925_final_mastered.mp4   # 2026-09-25 主管线新出片：h264 1920x1080 19.41s 17MB sha1=91de69699adbca3b；七关闸门 6/7（切点踩拍96%/无削波/鼓点保留均PASS，速度分层FAIL被真拦）；unified_report.json 含 skill_preflight 融入证据
+  - output/unified_proof0926/proof0926_final_mastered.mp4   # 2026-09-26 速度分层补丁后：同料 **7/7 全过 ACCEPT**，sha1=1fd5f700cbd307be；前半档位 1→21（dens 分位重映射，单调性保留），闸门闭环首次“拦→修→过”全链路实证
 version_history:
 - version: 1.0.0
   date: '2026-09-25'

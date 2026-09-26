@@ -241,12 +241,19 @@ PUNCH_ELIGIBLE_EFFECTS = ("push", "zoom_in", "static")
 # 常量, 避免"改了渲染忘了改指标"的漂移。语义: 冲近 N 帧 (二次加速) →
 # 弹回 M 帧 (easeOut)。用户 2026-08-14 定义冲击力来源 = "快起快回",
 # 故 2026-09-19 把 3+8=11 帧收到 2+5=7 帧并提高峰值 0.12→0.15。
-PUNCH_PEAK = 0.15            # 缩放峰值 (z = 1.0 → 1.0+PUNCH_PEAK, 上限 1.15)
+# 2026-09-25 用户反馈「踩点的时间段可以推进镜头拉近，有震动感」:
+#   峰值 0.15→0.22(推进更明显) + 包络期逐帧交替抖动(震动感)。
+#   抖动幅度按输入宽占比(0.008×1920≈15px), 方向逐帧交替、相位随 onset
+#   错开(非真随机, 保证可复现), 幅度随包络分数同步起落 — 与 zoom 余量
+#   (iw×0.15×frac) 恒满足 amp×frac ≤ 余量, 不会越界。
+PUNCH_PEAK = float(os.environ.get("AEKV_PUNCH_PEAK", "0.22"))
 PUNCH_ATTACK_FRAMES = 2      # 冲近帧数
 PUNCH_RELEASE_FRAMES = 5     # 弹回帧数
 PUNCH_ENVELOPE = PUNCH_ATTACK_FRAMES + PUNCH_RELEASE_FRAMES   # 7 帧
 PUNCH_MIN_GAP_FRAMES = PUNCH_ENVELOPE   # 间隔 ≥ 包络 → 每次撞击完整走完
-PUNCH_PEAK_PAIR = 0.15       # 双鼓点对分支的峰值 (单峰曲线, 4+6 帧)
+PUNCH_PEAK_PAIR = PUNCH_PEAK  # 双鼓点对分支的峰值 (单峰曲线, 4+6 帧)
+# 震动感: 包络期画面抖动幅度(输入宽占比); 0 = 关闭
+PUNCH_SHAKE_AMP = float(os.environ.get("AEKV_PUNCH_SHAKE", "0.008"))
 
 # 包络完整度归一 (2026-09-23, POC 实测驱动) —— 用户裁决为 "(c)+(a) 分段处置":
 #   · 短段 (帧数 ≤ PUNCH_SHORT_SEGMENT_FRAMES): 承认"急推入切"是一种风格, 不动排程。
@@ -1404,17 +1411,30 @@ class ProductionDirector:
                         round(float(t), 3)
                         for t, s in (_anch.get("melody_onsets") or [])
                         if float(s) >= _ms})
-                    # 2026-09-24 用户裁决「要纯」: 撞击只落**强鼓点**(≥0.5),
-                    # 旋律重音不再触发撞击。依据: v6(纯) 21 次/强鼓点 100% vs
-                    # v9(all) 36 次/仅 50% —— 用户选纯度。
-                    # 注意: 旋律锚**仍全量驱动切点池**（见 _onsets），踩点密度不受影响,
-                    # 收敛的只是"哪些事件触发脉冲运镜"。
+                    # 小提琴重拍对齐数据 (2026-09-25, "镜头没精确卡点小提琴重拍"):
+                    # 强锚表(≥0.85, 带强度供"取最强"排序) + 鼓点相位表(kick/snare
+                    # 全集) — 融合边界吸附与强锚补切只用**在鼓点相位上**的锚
+                    # (R-0001 教训: 跟离格装饰音走会被判"完全不在点上")。
+                    self._strong_melody_anchors = sorted(
+                        (round(float(t), 3), float(s))
+                        for t, s in (_anch.get("melody_onsets") or [])
+                        if float(s) >= 0.85)
+                    self._grid_melody_anchors = sorted(
+                        (round(float(t), 3), float(s))
+                        for t, s in (_anch.get("melody_onsets") or []))
+                    self._anchor_drums = sorted({
+                        float(t) for ev in self._anchor_events.values()
+                        for t, _ in ev})
+                    # 2026-09-24 用户裁决两段演变：
+                    #   「要纯」→ off（撞击只落强鼓点）
+                    #   「铺垫段例外」→ **segmented**（现行默认）：铺垫/蓄力段保留
+                    #     旋律锚触发（≥0.85 重音级，那段 BGM 首个强鼓点在 14.5s，
+                    #     纯打击乐会让前 14.5 秒完全没撞击）；爆发段仍只落强鼓点。
                     self._melody_punch_scope = _os_da.environ.get(
-                        "MASTER_PUNCH_MELODY_SCOPE", "off")
+                        "MASTER_PUNCH_MELODY_SCOPE", "segmented")
                     # 显式打印触发源构成: 这类"旋钮默认值静默关掉用户要的行为"
                     # 的错误必须能在日志里一眼看出 (2026-09-19 踩过一次:
-                    # 旋律默认值留在 off, 白跑一版渲染才发现没跟小提琴；
-                    # 2026-09-24 反向: 用户明确要纯, 故默认改为 off)。
+                    # 旋律默认值留在 off, 白跑一版渲染才发现没跟小提琴)。
                     print(f"  [punch] 撞击触发源: 强鼓点(≥{_ps}) "
                           f"{len(self._punch_onsets)} 个 + 小提琴重音(≥{_ms}) "
                           f"{len(self._melody_punch_onsets)} 个 | "
@@ -2402,6 +2422,40 @@ class ProductionDirector:
             "break": "break", "outro": "outro", "breath_break": "break",
         }
         
+        # ── 小提琴重拍对齐预计算 (2026-09-25) ────────────────────────
+        # 用户反馈「镜头没精确卡点小提琴重拍」: 融合边界落在能量弧边界上,
+        # 离强旋律锚最远 1.3s; 实测强锚切点覆盖率仅 60%(23/38)。
+        # 修法: 融合边界吸附到"最强且在鼓点相位上"的锚 — flash 让白闪
+        # **峰值**对准锚(边界=锚+t/2, t≈0.12s), zoom/叠化让新镜头**落定**
+        # 在锚上(边界=锚)。预算决策与段循环的 _section_fusion 同序同参,
+        # 两处结论一致。
+        _fusion_head_shift: dict[float, float] = {}
+        _bf_last, _bsf_last = -99.0, -99.0
+        for _ai2 in range(1, len(arc_segments)):
+            _pt2 = str(arc_segments[_ai2 - 1].get("type", ""))
+            _ct2 = str(arc_segments[_ai2].get("type", ""))
+            _as2 = float(arc_segments[_ai2]["start"])
+            if _ct2 in ("break", "breath_break") or _pt2 == _ct2:
+                continue
+            _fus2 = self._section_fusion(_pt2, _ct2, _as2,
+                                         _bf_last, _bsf_last)
+            if not _fus2:
+                continue
+            _bf_last = _as2
+            if _fus2 == "flash":
+                _bsf_last = _as2
+            # 两级找锚: 最强锚(≥0.85)±0.5s → 任意在相位锚±0.12s(帧级校准)
+            _hit2 = (self._pick_anchor_hit(_as2, self.ANCHOR_FUSION_WINDOW_SEC,
+                                           min_strength=0.85)
+                     or self._pick_anchor_hit(_as2, self.ANCHOR_TRUE_WINDOW_SEC))
+            if _hit2 is None:
+                print(f"  [重拍对齐] 融合边界 {_as2:.2f}s 附近无在相位锚, 保持弧边界")
+                continue
+            _tgt = round(_hit2 + (0.06 if _fus2 == "flash" else 0.0), 4)
+            _fusion_head_shift[round(_as2, 3)] = _tgt
+            print(f"  [重拍对齐] 融合({_fus2})边界 {_as2:.2f}s → {_tgt:.3f}s "
+                  f"(小提琴锚, 位移{(_tgt - _as2) * 1000:+.0f}ms)")
+
         for arc_idx, arc_seg in enumerate(arc_segments):
             arc_start = arc_seg["start"]
             arc_end = arc_seg["end"]
@@ -2425,9 +2479,16 @@ class ProductionDirector:
             cut_times = arc_seg.get("cut_times", [])
             
             # 构建切点列表：将 arc 的 cut_times 转为段落内边界
-            boundaries = [arc_start] + sorted(cut_times) + [arc_end]
-            # 去重 + 过滤范围外
-            boundaries = sorted(set(b for b in boundaries if arc_start <= b <= arc_end))
+            # 小提琴重拍对齐 (2026-09-25): 本弧头/尾若带融合位移(预计算表),
+            # 头尾两侧同步用位移值 — 保持相邻弧接缝连续不重叠
+            _head_t = _fusion_head_shift.get(round(arc_start, 3))
+            _tail_t = _fusion_head_shift.get(round(arc_end, 3))
+            _lo = min(arc_start, _head_t) if _head_t else arc_start
+            _hi = max(arc_end, _tail_t) if _tail_t else arc_end
+            boundaries = [_head_t or arc_start] + sorted(cut_times) \
+                + [_tail_t or arc_end]
+            # 去重 + 过滤范围外(范围放宽到位移后的头尾)
+            boundaries = sorted(set(b for b in boundaries if _lo <= b <= _hi))
             # 边界吸附到最近拍点 (2026-08-13 修复):
             # 弧段 start/end 来自 music_dynamics 能量分层边界(非拍点),
             # 产生"不在拍上"的镜头边界(实测7个偏移84-307ms)。
@@ -2464,6 +2525,34 @@ class ProductionDirector:
                 else:
                     _snapped[-1] = boundaries[-1]
                 boundaries = _snapped
+            # ══ 强锚补切 (2026-09-25, "镜头没精确卡点小提琴重拍") ══════
+            # 实测强锚切点覆盖率 60%(23/38), 含最强锚 0.99@23.963s 差 204ms。
+            # 对**在鼓点相位上**的强锚: 若本弧内无边界覆盖(±1帧), 把最近的
+            # 中间边界移到锚上(≤0.25s, 移后段长 ≥0.18s 才动)。
+            # 离格装饰音不动(R-0001 教训); 弧头尾不动(融合位移已管)。
+            _fps_grid0 = getattr(self, "_render_fps", 24) or 24
+            for _ta, _sa in (getattr(self, "_strong_melody_anchors",
+                                     None) or []):
+                if not (arc_start < _ta < arc_end):
+                    continue
+                if not self._anchor_on_grid(_ta):
+                    continue
+                if len(boundaries) < 3:
+                    continue
+                _bi = min(range(1, len(boundaries) - 1),
+                          key=lambda k: abs(boundaries[k] - _ta))
+                if abs(boundaries[_bi] - _ta) <= 1.5 / _fps_grid0:
+                    continue  # 已覆盖
+                if abs(boundaries[_bi] - _ta) > self.ANCHOR_CUT_WINDOW_SEC:
+                    continue  # 太远不动, 保节奏
+                _nb2 = round(_ta, 4)
+                if (_nb2 - boundaries[_bi - 1] < 0.18
+                        or boundaries[_bi + 1] - _nb2 < 0.18):
+                    continue  # 移后产生过短段
+                _old_b = boundaries[_bi]
+                boundaries[_bi] = _nb2
+                print(f"  [重拍补切] 边界 {_old_b:.3f}s → {_nb2:.3f}s "
+                      f"(强锚{_sa:.2f}, 位移{(_nb2 - _old_b) * 1000:+.0f}ms)")
             # 帧网格吸附: 边界对齐到 1/fps 整数倍, 使每片段时长为整帧数,
             # 消除逐片段舍入误差的累积漂移(根因: 计划切点62%踩拍但成片仅18%)
             _fps_grid = getattr(self, "_render_fps", 24) or 24
@@ -2593,8 +2682,34 @@ class ProductionDirector:
                 _is_strong = (_bs_val == "strong") or _is_db
 
                 # 转场：叙事段类型驱动
+                # ══ 段落边界融合 (2026-09-25, "高级剪辑技巧融合镜头") ══
+                # 弧切换点(新弧首段)用融合转场标记章节感; 同弧内保持硬切节奏。
+                # 词典按能量走向选型; 进入喘息(break)除外——瞬间静止本身是
+                # 节奏设计, 硬切才对比强烈(与下方 breath_break 规则一致)。
+                # 时长安全性不用在这里管: 渲染端转场安全化
+                # (t ≤ min(d前,d后)-0.1, 容不下降级 cut)统一兜底。
+                _prev_arc = (str(arc_segments[arc_idx - 1].get("type", ""))
+                             if arc_idx > 0 else "")
+                # 弧首段判定 (2026-09-25): bi==0 即本弧头边界 — 头部可能被
+                # 融合位移到小提琴锚上(±0.5s), 不能再跟 arc_start 比距离
+                # (旧严格判等因帧量化永不成立, 见 git 历史)
+                _is_section_boundary = bool(
+                    arc_idx > 0 and _prev_arc != arc_type and bi == 0)
+                _sec_fusion = None
+                if _is_section_boundary:
+                    _sec_fusion = self._section_fusion(
+                        _prev_arc, arc_type, seg_start,
+                        getattr(self, "_last_fusion_sec", -99.0),
+                        getattr(self, "_last_sec_flash_sec", -99.0))
+                    if _sec_fusion:
+                        self._last_fusion_sec = seg_start
+                        if _sec_fusion == "flash":
+                            self._last_sec_flash_sec = seg_start
+
                 transition = "cut"
-                if style_spec and style_spec.get("transitions"):
+                if _sec_fusion:
+                    transition = _sec_fusion
+                elif style_spec and style_spec.get("transitions"):
                     import random as _rng
                     _trans_pool = style_spec["transitions"]
                     _weights = [t.get("probability", 0.2) for t in _trans_pool]
@@ -2615,16 +2730,18 @@ class ProductionDirector:
                     transition = "fade"
                 elif mood == "build":
                     # 蓄力段转场轮转 (主体硬切保节奏, 每 6 镜插入闪白/叠化)
-                    # (修复: 此前 build 段一律 cut。注: 变速镜头渲染层强制硬切
-                    #  防切点漂移, 此轮转仅在原速镜头间生效)
+                    # (修复: 此前 build 段一律 cut。2026-09-25: 变速禁令已由
+                    #  受控实验解除, 见 _xfade_for 注释)
                     _r = seg_idx % 6
                     transition = {2: "flash", 5: "fade"}.get(_r, "cut")
                 elif mood == "break":
                     transition = "fade"  # break段用淡入淡出
 
                 # 高密度踩拍段强制硬切：xfade重叠期(0.12-0.35s)会模糊切点,
-                # 导致"有几帧速度和时间跟不上"的拖沓感(漫剪惯例: drop硬切卡点)
-                if mood in ("drop", "climax") and bi_local > 0 and seg_dur <= bi_local * 1.5:
+                # 导致"有几帧速度和时间跟不上"的拖沓感(漫剪惯例: drop硬切卡点)。
+                # 段落边界融合豁免: 章节切换点本来就该"换个呼吸", 不算拖沓
+                if (mood in ("drop", "climax") and bi_local > 0
+                        and seg_dur <= bi_local * 1.5 and not _sec_fusion):
                     transition = "cut"
                 # 喘息点进入/退出用硬切：瞬间静止是节奏设计的一部分,
                 # 淡入淡出会糊掉"突然安静"的对比感
@@ -2644,8 +2761,12 @@ class ProductionDirector:
 
                 # 闪白间距门控 (2026-08-14 用户反馈): 非 hard_stop 的 flash
                 # 最少间隔 25s — 闪白是冲击符号, 泛滥即失效。
+                # 段落边界闪白(2026-09-25)跳过检查(有自己的 8s 预算)但同样
+                # 记账 — 对观众而言闪白只有一种, 感知预算必须合并
                 if transition == "flash" and not _is_hard_stop:
-                    if seg_start - self._last_flash_sec < 25.0:
+                    if _sec_fusion == "flash":
+                        self._last_flash_sec = seg_start
+                    elif seg_start - self._last_flash_sec < 25.0:
                         transition = "cut"
                     else:
                         self._last_flash_sec = seg_start
@@ -2894,6 +3015,11 @@ class ProductionDirector:
                     text_overlay=text_overlay,
                     color_grade=color_grade,
                     transition=transition,
+                    transition_params=(
+                        # 段落边界融合标记: beat_lock 全局降级(4397)凭此豁免 —
+                        # 否则规划器分配的融合转场在渲染前被一律砍成 cut
+                        {"type": _sec_fusion, "section_fusion": True}
+                        if _sec_fusion else None),
                     speed=speed,
                     zoompan_effect=zoompan_effect,
                     onset_times=seg_onsets,
@@ -4307,6 +4433,37 @@ class ProductionDirector:
             print("  [速度终审] "
                   + str(dict(sorted(_CS(round(x.speed, 2) for x in segs).items()))))
 
+        # ══ 速度分层补丁 (2026-09-26, proof0925 前半饱和塌档根治) ═════════
+        # 公式 0.28+0.21*dens 在 dens>=6 饱和钉死 1.55：高密集 BGM 前半
+        # 25 镜全 1.55，闸门"速度分层"前半 1 档 FAIL。与 run26 终审教训的
+        # 区别：只在某半程档位<3 时重映射（已丰富的半程不动），且按 dens
+        # 分位数映射保留单调性（密处仍快），不抹平既有层次。
+        try:
+            _ons_pf = (getattr(self, "_groove_onsets", None)
+                       or getattr(self, "_onsets", None) or [])
+            if _ons_pf:
+                _mid_pf = max(float(s.start_time) + float(s.duration)
+                              for s in segs) / 2
+                for _lo, _hi in ((0.0, _mid_pf), (_mid_pf, 1e9)):
+                    _sub = [s for s in segs if _lo <= float(s.start_time) < _hi]
+                    if len(_sub) < 4:
+                        continue
+                    if len({round(float(getattr(s, "speed", 1.0)), 2)
+                            for s in _sub}) >= 3:
+                        continue  # 该半程档位已丰富，不动
+                    _d_pf = {id(s): sum(1 for o in _ons_pf
+                                        if abs(o - float(s.start_time)) <= 0.6) / 1.2
+                             for s in _sub}
+                    _ord = sorted(_sub, key=lambda s: _d_pf[id(s)])
+                    _n = len(_ord)
+                    for _rk, _s in enumerate(_ord):
+                        _q = _rk / (_n - 1) if _n > 1 else 0.5
+                        _s.speed = round((0.55 + 1.0 * _q) / 0.05) * 0.05
+                    print(f"  [分层补丁] {_lo:.1f}s 起半程档位<3 → 按 dens 分位"
+                          f"重映射 {_n} 镜 (0.55~1.55)")
+        except Exception as _pf_e:  # noqa: BLE001
+            print(f"  [分层补丁] 跳过: {_pf_e}")
+
         # 全局帧网格对齐 (2026-09-02 踩坑#29 根治): 每片独立量化累计 p50 85ms
         # 随机漂移(下一片补偿修不了已发生边界的随机量化)。切点吸附全局 fps 帧
         # 网格 + 逐片精确帧数渲染(-frames:v), concat 累计边界=网格=计划切点。
@@ -4367,8 +4524,18 @@ class ProductionDirector:
         # 时长, 由 _tl_drift 累加器锁死在计划切点 (±1帧)。
         if beat_lock_hard_cuts:
             _demoted = 0
+            _spared = 0
             for _s in segs:
                 if getattr(_s, "transition", "cut") != "cut":
+                    # 段落边界融合豁免 (2026-09-25): beat_lock 源于 2026-09-02
+                    # 实测"xfade 链内边界漂移 p50 122ms" — 该测量早于帧量化
+                    # 重构; 段落融合是稀疏章节标记(全片仅数处), 受转场安全化
+                    # 钳制且实验证明漂移 ≤2帧, 保留它们正是"高级融合镜头"的
+                    # 交付物。密集段内转场仍全量降级保踩点纯度。
+                    if isinstance(getattr(_s, "transition_params", None), dict) \
+                            and _s.transition_params.get("section_fusion"):
+                        _spared += 1
+                        continue
                     _s.transition = "cut"
                     if isinstance(getattr(_s, "transition_params", None), dict):
                         _s.transition_params.pop("type", None)
@@ -4376,17 +4543,37 @@ class ProductionDirector:
                     _demoted += 1
 
             # ══ 2026-09-10 R1 二次根因修复 ══════════════════════════════
-            # chain_last_extra 在 L3839 按**降级前**的转场时长计算, 用于给
-            # 链内最后一个 clip 预补偿 Σt (xfade 会消耗掉这部分时长)。
-            # 但 beat_lock 把全部转场降级为 cut 后, xfade 根本不执行,
-            # 补偿时长无人消耗 → 该 clip 被渲染成计划的 3-5 倍长
-            # (r1_fixed_v1 实测: seg#5 计划 7 帧 → 实际 33 帧;
-            #  seg#11 计划 8 → 24 帧; 59 段累计多渲 62 帧 = 2.58s,
-            #  正是 [时长守卫] 22.12s → 19.40s 的 2.72s 超长来源)。
-            # 时间线被整体拉长 14% → EDL 声明切点落在段内部而非边界
-            # → 切点两侧同段画面 → frozen_cut。
-            # 修复: 全量降级后无任何转场需要补偿, 直接清空。
-            if chain_last_extra:
+            # chain_last_extra 在降级前按"本链全部转场"计算, 用于给链内最后
+            # 一个 clip 预补偿 Σt (xfade 会消耗掉这部分时长)。
+            # beat_lock 全量降级后 xfade 根本不执行, 补偿时长无人消耗 →
+            # 该 clip 被渲染成计划的 3-5 倍长 (r1_fixed_v1 实测: 59 段累计
+            # 多渲 62 帧 = 2.58s, 时间线拉长 14% → 切点落段内 → frozen_cut)。
+            # 2026-09-25 修订: 段落边界融合豁免降级后, 不能再全量清空 —
+            # 保留融合的链仍需 Σt 补偿。改为**按降级后实际存活的转场重算**:
+            # 存活转场集合变化后链分组(_compute_heads)随之变化, 逐链重算。
+            _survived = [i for i, _s in enumerate(segs)
+                         if self._xfade_for(_s)[0]]
+            if _survived:
+                chain_last_extra = {}
+                # 重算链分组: 按 cut(含被降级)处断链, 超组上限强断
+                _heads2 = {0}
+                for i in range(1, len(segs)):
+                    if not self._xfade_for(segs[i])[0] or \
+                            i - max(_heads2) >= XFADE_GROUP_SIZE:
+                        _heads2.add(i)
+                _hs = sorted(_heads2)
+                for _hi, _head in enumerate(_hs):
+                    _end = _hs[_hi + 1] if _hi + 1 < len(_hs) else len(segs)
+                    _extra2 = sum(self._xfade_for(segs[_j])[1]
+                                  for _j in range(_head + 1, _end)
+                                  if self._xfade_for(segs[_j])[0])
+                    if _extra2 > 0:
+                        _fg2 = getattr(self, "_render_fps", 24) or 24
+                        chain_last_extra[_end - 1] = round(
+                            _extra2 * _fg2) / _fg2
+                print(f"  [节拍锁定] 补偿按存活转场重算: "
+                      f"{len(_survived)} 处融合保留, {len(chain_last_extra)} 条链带补偿")
+            elif chain_last_extra:
                 _cleared_extra = sum(chain_last_extra.values())
                 chain_last_extra.clear()
                 print(f"  [节拍锁定] 转场补偿已清零 (原 Σextra="
@@ -4394,6 +4581,8 @@ class ProductionDirector:
 
             if _demoted:
                 print(f"  [节拍锁定] {_demoted} 个转场降级硬切 (切点=concat累计, 漂移累加器锁定)")
+            if _spared:
+                print(f"  [节拍锁定] {_spared} 个段落边界融合保留 (section_fusion 豁免)")
 
         # 累计帧量化漂移反馈 (2026-09-02 根因修复 → 2026-09-10 二次根因):
         # 每片段被量化到整帧 (24fps → ±20.8ms), 50 片随机游走累计 ±150ms,
@@ -4767,23 +4956,113 @@ class ProductionDirector:
                       按强度门槛 (MELODY_PUNCH_STRENGTH_DEFAULT=0.85 ≈ P80)
                       精选到 ~1 事件/秒, 叠加撞击包络缩短到 7 帧后不再重叠。
 
-          2026-09-24  用户裁决「要纯」(原话: 要纯, 能完美踩点) → 默认改为 **off**：
-                      撞击只落强鼓点；v6(纯: 21 次/100% 强鼓点) vs v9(all: 36 次/50%)
-                      之间用户选纯度。旋律锚**不再触发撞击**，但**仍全量驱动切点池**。
-          off (现行默认) — 不跟随 (纯打击乐)
+          2026-09-24  用户裁决两段演变：先「要纯」(off)，再看 A/B 后要求
+                      「铺垫段例外」→ 默认改 **segmented**（现行）：铺垫/蓄力段
+                      保留旋律锚触发（≥0.85 重音级），爆发段仍只落强鼓点。
+          segmented (现行默认) — 铺垫/蓄力段跟旋律重音，爆发段只落强鼓点
+          off         — 纯打击乐（最纯，但这段 BGM 前 14.5s 无强鼓点 ⇒ 铺垫段 0 撞击）
            drop        — 仅 drop/climax 段跟随 (2026-09-05 需求的原始范围)
            all         — 全曲跟随小提琴重音/音变点 (2026-09-19 版行为)
 
         旋律锚全量仍驱动**切点池**（见 _onsets），此处只是撞击用的精选子集。
         锚点缓存缺席时本函数不会被调用（调用方直接退回 _onsets 旧路径）。
         """
-        scope = getattr(self, "_melody_punch_scope", "off")
+        scope = getattr(self, "_melody_punch_scope", "segmented")
 
         if scope == "all":
             return True
         if scope == "off":
             return False
+        if scope == "segmented":
+            # 2026-09-24 用户裁决「铺垫段例外」: 铺垫/蓄力段**没有强鼓点**
+            # （这段 BGM 首个强鼓点在 14.5s），纯打击乐会让前 14.5 秒完全没撞击；
+            # 故铺垫/蓄力段保留旋律锚触发（重音级 ≥0.85，~1.15 次/秒），
+            # 爆发段仍只落强鼓点 —— 兼得「开头有动感」与「高潮够纯」。
+            return str(mood) in ("intro", "build")
         return str(mood) in ("drop", "climax")
+
+    # 段落边界融合词典 (2026-09-25, "高级剪辑技巧融合镜头"):
+    # 弧切换点用融合转场标记章节感, 同弧内保持硬切节奏。
+    # 键 = (前一弧类型, 新弧类型), 值 = 剧本转场标签(XFADE_MAP 的键);
+    # 缺省 → cross_dissolve(真叠化); 显式 None → 不融合(硬切)。
+    SECTION_FUSION_MAP = {
+        ("build", "drop"): "flash",    # 蓄力→爆发: 白闪融合
+        ("intro", "drop"): "flash",
+        ("break", "drop"): "flash",    # 喘息→爆发
+        ("drop", "climax"): "flash",   # →最高潮
+        ("intro", "build"): "zoom",    # 铺垫→蓄力: zoom 上升感
+        ("break", "build"): "zoom",
+        ("drop", "outro"): "fade",     # →尾声: fadeblack 收
+        ("build", "outro"): "fade",
+        ("climax", "outro"): "fade",
+    }
+    FUSION_MIN_GAP_SEC = 3.0     # 融合密度预算: 两次段落融合至少间隔 3s
+    SEC_FLASH_MIN_GAP_SEC = 8.0  # 段落白闪独立预算(与 hard_stop 的 25s 分开)
+
+    @classmethod
+    def _section_fusion(cls, prev_arc, arc_type, seg_start,
+                        last_fusion_sec, last_sec_flash_sec):
+        """弧切换点 → 融合转场标签; 预算耗尽/进入喘息 → None(硬切)。
+
+        进入喘息(break)一律硬切: 瞬间静止本身是节奏设计, 硬切对比最强。
+        白闪撞独立预算时降级为叠化而非硬切 — 保住边界感。
+        时长安全性不在此管: 渲染端转场安全化(t ≤ min(d前,d后)-0.1,
+        容不下降级 cut)统一兜底。
+        """
+        prev_arc, arc_type = str(prev_arc), str(arc_type)
+        if arc_type in ("break", "breath_break"):
+            return None
+        fusion = cls.SECTION_FUSION_MAP.get((prev_arc, arc_type),
+                                            "cross_dissolve")
+        if seg_start - last_fusion_sec < cls.FUSION_MIN_GAP_SEC:
+            return None
+        if (fusion == "flash"
+                and seg_start - last_sec_flash_sec < cls.SEC_FLASH_MIN_GAP_SEC):
+            fusion = "cross_dissolve"
+        return fusion
+
+    # 强锚判定阈值: 与 kick/snare 距离 ≤65ms(1.5帧)视为"在鼓点相位上"。
+    # 依据(2026-09-25 实测 1_from10s): 片内 9 个漏覆盖强锚中 7 个距鼓点
+    # ≤64ms(小提琴与鼓同相, 移边界到锚不破坏节奏), 2 个(1.585/6.049s)
+    # 距鼓点 192/290ms = 离格装饰音, 跟它们走会重演 R-0001"完全不在点上"。
+    ANCHOR_GRID_TOL_SEC = 0.065
+    ANCHOR_FUSION_WINDOW_SEC = 0.5    # 融合边界找锚窗口(章节标记允许大幅移动)
+    ANCHOR_TRUE_WINDOW_SEC = 0.12     # 无强锚时的帧级校准窗口
+    ANCHOR_CUT_WINDOW_SEC = 0.25      # 强锚补切的边界移动上限
+
+    def _anchor_on_grid(self, t: float) -> bool:
+        """锚点是否落在鼓点相位上(±65ms 内有 kick/snare)"""
+        import bisect as _b2
+        drums = getattr(self, "_anchor_drums", None) or []
+        if not drums:
+            return False
+        _i = _b2.bisect_left(drums, t)
+        _c = [drums[j] for j in (_i - 1, _i) if 0 <= j < len(drums)]
+        return min((abs(x - t) for x in _c), default=9.0) \
+            <= self.ANCHOR_GRID_TOL_SEC + 1e-9
+
+    def _pick_anchor_hit(self, t: float, window: float,
+                         min_strength: float = 0.0):
+        """t 附近取"最该卡"的小提琴锚: 强度最高优先(并列取最近)。
+
+        只返回**在鼓点相位上**的锚; 找不到返回 None。min_strength>0 时
+        只考虑强锚(≥该值)。
+        """
+        _pool = (getattr(self, "_strong_melody_anchors", None)
+                 if min_strength else getattr(self, "_grid_melody_anchors",
+                                              None)) or []
+        _best = None
+        for _ta, _sa in _pool:
+            if min_strength and _sa < min_strength:
+                continue
+            if abs(_ta - t) > window:
+                continue
+            if not self._anchor_on_grid(_ta):
+                continue
+            if (_best is None or _sa > _best[1]
+                    or (_sa == _best[1] and abs(_ta - t) < abs(_best[0] - t))):
+                _best = (_ta, _sa)
+        return _best[0] if _best else None
 
     def _xfade_for(self, seg) -> tuple[str, float]:
         """进入该段落的转场 → (xfade滤镜名, 时长秒)；cut 返回 ('', 0)"""
@@ -4791,11 +5070,12 @@ class ProductionDirector:
         tag = str(params.get("type") or getattr(seg, "transition", "cut") or "cut")
         if os.environ.get("V23_FORCE_CUT") == "1":
             return None, 0.0
-        # 变速镜头强制硬切 (2026-08-12): 变速(setpts)与 xfade 预补偿叠加会
-        # 引入渲染漂移(实测变速版98%切点滞后)。变速镜头用硬切隔离,
-        # 避免漂移经 xfade 链累积传播; 转场只用于原速镜头之间。
-        if getattr(seg, "speed", 1.0) != 1.0:
-            return "", 0.0
+        # 变速镜头融合解禁 (2026-09-25): 旧禁令(2026-08-12)基于实测"变速版
+        # 98% 切点滞后", 但 v21b 帧量化 + 链尾一次性补偿重构后未复测。受控
+        # 实验(tmp/xfade_drift_exp2.py, 真实 _extract_clip+_xfade_chain, 合成
+        # 色块源逐帧定位): 1.5x/0.8x/0.55x 变速段 3 处融合边界漂移全部 ≤2 帧,
+        # 帧守恒 32/32 精确 → 禁令解除。防线仍由下方转场安全化钳制
+        # (t ≤ min(d前,d后)-0.1) 与帧量化承担。
         if tag == "cut" or tag not in XFADE_MAP:
             return "", 0.0
         name, default_dur = XFADE_MAP[tag]
@@ -5105,44 +5385,87 @@ class ProductionDirector:
                     f"if(lt(on,{_f2+_rl}),"
                     f"1.0+{_pk}*(1-(on-{_f2})/{_rl})*(1-(on-{_f2})/{_rl}),1.0))))"
                 )
-                z_final = f"min({_z_pair},1.15)"
+                z_final = f"min({_z_pair},1.0+{_pk})"
+                # 震动感 (2026-09-25): 包络期逐帧交替抖动, 幅度随包络分数
+                # 起落 — 与 zoom 余量(iw×pk×frac)恒满足 amp×frac ≤ 余量
+                _x_expr, _y_expr = "iw/2-(iw/zoom/2)", "ih/2-(ih/zoom/2)"
+                if PUNCH_SHAKE_AMP > 0:
+                    _amp2 = PUNCH_SHAKE_AMP * _zp_w
+                    _shk2 = (
+                        f"if(lt(on,{_f1}),0,"
+                        f"if(lt(on,{_f1+_at}),{_amp2}*((on-{_f1})/{_at}),"
+                        f"if(lt(on,{_f2}),{_amp2},"
+                        f"if(lt(on,{_f2+_rl}),{_amp2}*(1-(on-{_f2})/{_rl}),0)))")
+                    _x_expr += f"+({_shk2})*((mod(on+{_f1},2)*2-1))"
+                    _y_expr += f"+({_shk2})*((mod(on+{_f1}+1,2)*2-1))"
                 _zp = (f"zoompan=z='{z_final}'"
-                       f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+                       f":x='{_x_expr}':y='{_y_expr}'"
                        f":d=1:s={_zp_w}x{_zp_h}:fps={_zp_fps}")
                 vf_parts.append(_zp)
             else:
-                # 每个重音: 拉进(2帧 0→peak 二次加速=冲) + 闪回(5帧 peak→0 easeOut=弹)
-                # 2026-09-19: 3+8→2+5 (11→7 帧), 峰值 0.12→0.15 —— 更快的
-                # 起落让撞击更硬, 且 7 帧包络使重音密集段 (~3 次/秒) 不重叠。
-                # 2026-09-23 (P12): 段短到装不下 7 帧包络时, 可用自适应压缩
-                # （默认关闭, 见 PUNCH_ADAPTIVE_ENVELOPE）。压缩值按**本段最后一个
-                # onset 之后的剩余帧数**算, 一次算给整段用, 保证每个 onset 都装得下。
-                _peak = PUNCH_PEAK
-                _attack, _release = effective_punch_envelope(
-                    _seg_frames, onset_frames[-1])
-                if _attack == 0:
-                    # 极端短段（连 1 冲 1 弹都塞不进）：保留原默认包络，
-                    # 让行为退化到"定长包络被段边界截断"的历史表现，不做新花样。
-                    _attack, _release = PUNCH_ATTACK_FRAMES, PUNCH_RELEASE_FRAMES
-                _z = "1.0"
-                for _fi in onset_frames:
-                    _p = (
-                        f"if(between(on,{_fi},{_fi+_attack}),"
-                        f"{_peak}*((on-{_fi})/{_attack})*((on-{_fi})/{_attack}),"
-                        f"if(between(on,{_fi+_attack},{_fi+_attack+_release}),"
-                        f"{_peak}*(1-(on-{_fi}-{_attack})/{_release})"
-                        f"*(1-(on-{_fi}-{_attack})/{_release}),0))"
-                    )
-                    _z = f"max({_z},1.0+({_p}))"
-                z_final = f"min({_z},1.15)"
-                if (_attack, _release) != (PUNCH_ATTACK_FRAMES, PUNCH_RELEASE_FRAMES):
-                    print(f"    [punch] 段 {_seg_frames} 帧自适应包络: "
-                          f"{PUNCH_ATTACK_FRAMES}+{PUNCH_RELEASE_FRAMES} → "
-                          f"{_attack}+{_release}")
-                _zp = (f"zoompan=z='{z_final}'"
-                       f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
-                       f":d=1:s={_zp_w}x{_zp_h}:fps={_zp_fps}")
-                vf_parts.append(_zp)
+                if not onset_frames:
+                    # 2026-09-24 实测事故：中长段里全部 onset 都装不下包络时，
+                    # fit_punch_envelope 会返回空表（丢弃不可容纳的撞击——这本身
+                    # 是对的），但下面的 onset_frames[-1] 没防空 → IndexError
+                    # → 进程崩在 aiohttp 收尾不退出 → 表现为"流水线卡死"
+                    # （purity1 那次 12 分钟假死就是它）。
+                    # 正确行为：该段**不挂撞击**（保持基础画面，不加 zoompan）。
+                    print(f"    [punch] 段 {_seg_frames} 帧无可容纳撞击的 onset，跳过撞击")
+                else:
+                    # 每个重音: 拉进(2帧 0→peak 二次加速=冲) + 闪回(5帧 peak→0 easeOut=弹)
+                    # 2026-09-19: 3+8→2+5 (11→7 帧), 峰值 0.12→0.15 —— 更快的
+                    # 起落让撞击更硬, 且 7 帧包络使重音密集段 (~3 次/秒) 不重叠。
+                    # 2026-09-23 (P12): 段短到装不下 7 帧包络时, 可用自适应压缩
+                    # （默认关闭, 见 PUNCH_ADAPTIVE_ENVELOPE）。压缩值按**本段最后一个
+                    # onset 之后的剩余帧数**算, 一次算给整段用, 保证每个 onset 都装得下。
+                    _peak = PUNCH_PEAK
+                    _attack, _release = effective_punch_envelope(
+                        _seg_frames, onset_frames[-1])
+                    if _attack == 0:
+                        # 极端短段（连 1 冲 1 弹都塞不进）：保留原默认包络，
+                        # 让行为退化到"定长包络被段边界截断"的历史表现，不做新花样。
+                        _attack, _release = PUNCH_ATTACK_FRAMES, PUNCH_RELEASE_FRAMES
+                    _z = "1.0"
+                    # 震动感 (2026-09-25): 与 zoom 同一包络分数(r²)驱动逐帧
+                    # 交替抖动, 相位随 onset 错开; 包络窗口互不重叠(fit 保证
+                    # 间隔 ≥ 包络帧数) → 各 onset 抖动项用加法合成, 重叠帧
+                    # 双方分数同为 0, 不会双计。
+                    _amp1 = PUNCH_SHAKE_AMP * _zp_w if PUNCH_SHAKE_AMP > 0 else 0.0
+                    _sx, _sy = "0", "0"
+                    for _fi in onset_frames:
+                        _p = (
+                            f"if(between(on,{_fi},{_fi+_attack}),"
+                            f"{_peak}*((on-{_fi})/{_attack})*((on-{_fi})/{_attack}),"
+                            f"if(between(on,{_fi+_attack},{_fi+_attack+_release}),"
+                            f"{_peak}*(1-(on-{_fi}-{_attack})/{_release})"
+                            f"*(1-(on-{_fi}-{_attack})/{_release}),0))"
+                        )
+                        _z = f"max({_z},1.0+({_p}))"
+                        if _amp1:
+                            _f = (
+                                f"if(between(on,{_fi},{_fi+_attack}),"
+                                f"((on-{_fi})/{_attack})*((on-{_fi})/{_attack}),"
+                                f"if(between(on,{_fi+_attack},{_fi+_attack+_release}),"
+                                f"(1-(on-{_fi}-{_attack})/{_release})"
+                                f"*(1-(on-{_fi}-{_attack})/{_release}),0))")
+                            _sx = (f"({_sx})+({_amp1}*{_f}"
+                                   f"*((mod(on+{_fi},2)*2-1)))")
+                            _sy = (f"({_sy})+({_amp1}*{_f}"
+                                   f"*((mod(on+{_fi}+1,2)*2-1)))")
+                    z_final = f"min({_z},1.0+{_peak})"
+                    if (_attack, _release) != (PUNCH_ATTACK_FRAMES, PUNCH_RELEASE_FRAMES):
+                        print(f"    [punch] 段 {_seg_frames} 帧自适应包络: "
+                              f"{PUNCH_ATTACK_FRAMES}+{PUNCH_RELEASE_FRAMES} → "
+                              f"{_attack}+{_release}")
+                    _x_expr = "iw/2-(iw/zoom/2)"
+                    _y_expr = "ih/2-(ih/zoom/2)"
+                    if _amp1:
+                        _x_expr += f"+({_sx})"
+                        _y_expr += f"+({_sy})"
+                    _zp = (f"zoompan=z='{z_final}'"
+                           f":x='{_x_expr}':y='{_y_expr}'"
+                           f":d=1:s={_zp_w}x{_zp_h}:fps={_zp_fps}")
+                    vf_parts.append(_zp)
         elif zoompan_effect:
             _zp_fps = fps  # zoompan fps 必须用字面数字
             _zp_w, _zp_h = w, h
