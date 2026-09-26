@@ -217,7 +217,7 @@ class TopazResult:
     original_fps: float = 0.0
     output_fps: float = 0.0
     error: str | None = None
-    mode: str = "simulate"
+    mode: str = ""  # FIX-03/契约 §1：旧默认 "simulate" 使裸结果对象谎称"已仿真执行"；现置空=未设置
     model: str = ""
 
 
@@ -707,7 +707,9 @@ class TopazEnhancer:
 
         mode = cfg.mode
         if mode == "auto":
-            mode = "real" if self._available else "simulate"
+            # FIX-03/契约 §3：auto 不再静默选仿真——统一解为 real；
+            # CLI 不可用时 _run_real_mode 返显式失败（旧行为：不可用→simulate 假产物入期望路径）
+            mode = "real"
 
         if callback:
             callback(0.0, f"Starting enhancement in {mode} mode...")
@@ -725,18 +727,11 @@ class TopazEnhancer:
         )
 
         if mode == "real":
-            real_result = self._run_real_mode(
+            result = self._run_real_mode(
                 input_path, output_path, cfg, callback
             )
-            result = real_result
-            if not real_result.success and cfg.mode == "auto":
-                print("[TopazEnhancer] Real mode failed, falling back to simulate")
-                if callback:
-                    callback(0.3, "Real mode failed, falling back to simulate mode...")
-                sim_result = self._run_simulate_mode(
-                    input_path, output_path, cfg, callback
-                )
-                result = sim_result
+            # FIX-03：删除 auto 模式下"real 失败静默转 simulate 假成功"降级（审计 §3.3b②/F3 族）。
+            # 真实失败即失败；需仿真预览必须显式 mode="simulate" 请求。
         else:
             sim_result = self._run_simulate_mode(
                 input_path, output_path, cfg, callback
@@ -843,16 +838,20 @@ class TopazEnhancer:
         config: TopazConfig,
         callback: Callable[[float, str], None] | None = None,
     ) -> TopazResult:
-        """模拟模式：不真正调用 Topaz，生成模拟结果。
+        """模拟模式（仅限显式 mode="simulate" 请求，FIX-03）：
+
+        不真正调用 Topaz，产生结构正确的占位结果。产物**不再占用期望路径**
+        （审计 A 类：连 Path.exists() 都会被假产物骗过），改写入 <dir>/simulated/
+        并附 .meta.json 标记；消费端必须按 result.mode=="simulate" 拒入生产链。
 
         Args:
             input_path: 输入视频路径
-            output_path: 输出视频路径
+            output_path: 用户期望路径（仅用于推导 simulated 目录与命名）
             config: Topaz 配置
             callback: 进度回调函数
 
         Returns:
-            TopazResult 处理结果
+            TopazResult 处理结果（mode="simulate"，产物路径为仿真目录内真实写入位置）
         """
         video_info = self._get_video_info(input_path)
         original_size = (video_info["width"], video_info["height"])
@@ -874,7 +873,11 @@ class TopazEnhancer:
                 callback(progress, msg)
 
         output_file = Path(output_path)
-        output_file.parent.mkdir(parents=True, exist_ok=True)
+        # FIX-03/契约 §2.1：仿真产物禁止占用期望路径——落 <parent>/simulated/ 并附 meta 标记
+        sim_dir = output_file.parent / "simulated"
+        sim_dir.mkdir(parents=True, exist_ok=True)
+        output_file = sim_dir / output_file.name
+        meta_file = output_file.with_suffix(output_file.suffix + ".meta.json")
 
         input_file = Path(input_path)
         if input_file.exists():
@@ -889,11 +892,16 @@ class TopazEnhancer:
                 output_file.write_bytes(b"TOPAZ_SIMULATED_OUTPUT")
         else:
             output_file.write_bytes(b"TOPAZ_SIMULATED_OUTPUT")
+        meta_file.write_text(
+            json.dumps({"execution_path": "simulated", "producer": "topaz_integration",
+                        "requested_path": str(output_path)}, ensure_ascii=False),
+            encoding="utf-8",
+        )
 
         result = TopazResult(
             success=True,
             input_path=input_path,
-            output_path=output_path,
+            output_path=str(output_file),  # 如实指向仿真产物（非期望路径）
             duration=sim_duration,
             original_size=original_size,
             output_size=output_size,
