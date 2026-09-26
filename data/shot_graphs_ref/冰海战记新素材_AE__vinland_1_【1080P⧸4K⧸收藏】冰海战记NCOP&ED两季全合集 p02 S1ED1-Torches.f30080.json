@@ -1,0 +1,132 @@
+{
+ "template": "冰海战记新素材_AE__vinland_1_【1080P⧸4K⧸收藏】冰海战记NCOP&ED两季全合集 p02 S1ED1-Torches.f30080",
+ "video": "D:\\AE-Work\\视频素材库\\冰海战记新素材_AE\\vinland_1_【1080P⧸4K⧸收藏】冰海战记NCOP&ED两季全合集 p02 S1ED1-Torches.f30080.mp4",
+ "duration": 90.09,
+ "fps": 23.976023976023978,
+ "n_shots": 4,
+ "n_cuts": 3,
+ "shot_dur_stats": {
+  "mean": 22.523,
+  "median": 19.707,
+  "p10": 6.803,
+  "p90": 40.495,
+  "min": 3.462,
+  "max": 47.214
+ },
+ "cut_rate_per_sec": 0.03,
+ "transition_dist": {
+  "cut": 3
+ },
+ "flash_ratio": 0.0,
+ "frozen_shots": [
+  0
+ ],
+ "black_shots": [
+  0
+ ],
+ "beat_sync": {
+  "bpm_error": "[WinError 32] 另一个程序正在使用此文件，进程无法访问。: 'C:\\\\Users\\\\ADMINI~1\\\\AppData\\\\Local\\\\Temp\\\\tmp0cjb4yrb.wav'"
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 47.0,
+   "energy_class": "mid",
+   "dur": 47.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 47.0,
+   "t1": 47.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 47.5,
+   "t1": 50.5,
+   "energy_class": "mid",
+   "dur": 3.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 50.5,
+   "t1": 51.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 51.0,
+   "t1": 75.0,
+   "energy_class": "mid",
+   "dur": 24.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 75.0,
+   "t1": 75.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 75.5,
+   "t1": 90.09,
+   "energy_class": "mid",
+   "dur": 14.59,
+   "cuts": 0,
+   "cut_rate": 0.0
+  }
+ ],
+ "shots": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 47.214,
+   "dur": 47.214,
+   "head_bright": 0.0,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": true
+  },
+  {
+   "idx": 1,
+   "start": 47.214,
+   "end": 50.676,
+   "dur": 3.462,
+   "head_bright": 146.5208282470703,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 2,
+   "start": 50.676,
+   "end": 75.492,
+   "dur": 24.816,
+   "head_bright": 140.31944274902344,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 3,
+   "start": 75.492,
+   "end": 90.09,
+   "dur": 14.598,
+   "head_bright": 91.5,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  }
+ ],
+ "extracted_at": "2026-09-26T04:44:45",
+ "stage": "A_signal_only (B=camera/shotsize pending)"
+}

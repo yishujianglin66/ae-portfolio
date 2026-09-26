@@ -35,21 +35,13 @@ SCALE_W = 320  # 取证分辨率（速度优先；px 类指标按比例换算说
 def _decode_range(v: str, t0: float, t1: float) -> list[np.ndarray]:
     """解 [t0,t1) 全部帧到 320px BGR（内存安全：>6s 的镜头降采样到 15fps）。"""
     dur = max(t1 - t0, 1 / 120)
+    H = 180  # 强制 320x180：兼容方屏/竖屏全部画幅（取证为统计信号，拉伸不影响）
     r = subprocess.run(
         [FF, "-ss", f"{t0:.3f}", "-t", f"{dur:.3f}", "-i", v,
-         "-vf", f"scale={SCALE_W}:-2", "-f", "image2pipe",
-         "-vcodec", "rawvideo", "-pix_fmt", "bgr24", "-"],
+         "-vf", f"scale={SCALE_W}:{H}:force_original_aspect_ratio=disable",
+         "-f", "image2pipe", "-vcodec", "rawvideo", "-pix_fmt", "bgr24", "-"],
         capture_output=True, timeout=300)
-    h = int(SCALE_W * 9 / 16)  # 16:9 假设；非 16:9 模板由调用方校正
-    # 用第一帧实际尺寸反推 h：从字节数算
-    n = len(r.stdout)
-    if n == 0:
-        return []
-    # 反推 h: n = frames * W * H * 3，取常见 H
-    for cand_h in (180, 240, 135, 144, 270, 360):
-        if n % (SCALE_W * cand_h * 3) == 0:
-            h = cand_h
-            break
+    h = H
     arr = np.frombuffer(r.stdout, dtype=np.uint8).reshape(-1, h, SCALE_W, 3)
     return [a for a in arr]
 

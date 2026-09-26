@@ -1,0 +1,156 @@
+{
+ "template": "冰海战记片段__clip_10_2",
+ "video": "D:\\AE-Work\\视频素材库\\冰海战记片段\\clip_10_2.mp4",
+ "duration": 3.5,
+ "fps": 30.0,
+ "n_shots": 8,
+ "n_cuts": 7,
+ "shot_dur_stats": {
+  "mean": 0.438,
+  "median": 0.2,
+  "p10": 0.09,
+  "p90": 0.937,
+  "min": 0.067,
+  "max": 1.1
+ },
+ "cut_rate_per_sec": 2.0,
+ "transition_dist": {
+  "cut": 7
+ },
+ "flash_ratio": 0.0,
+ "frozen_shots": [
+  0
+ ],
+ "black_shots": [
+  0
+ ],
+ "beat_sync": {
+  "bpm_error": "[WinError 32] 另一个程序正在使用此文件，进程无法访问。: 'C:\\\\Users\\\\ADMINI~1\\\\AppData\\\\Local\\\\Temp\\\\tmp4964t1b_.wav'"
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 1.0,
+   "energy_class": "calm",
+   "dur": 1.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 1.0,
+   "t1": 1.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 1.5,
+   "t1": 2.0,
+   "energy_class": "calm",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 2.0,
+   "t1": 3.0,
+   "energy_class": "burst",
+   "dur": 1.0,
+   "cuts": 4,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 3.0,
+   "t1": 3.5,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  }
+ ],
+ "shots": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 1.1,
+   "dur": 1.1,
+   "head_bright": 5.458333492279053,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": true
+  },
+  {
+   "idx": 1,
+   "start": 1.1,
+   "end": 1.333,
+   "dur": 0.233,
+   "head_bright": 72.49305725097656,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 2,
+   "start": 1.333,
+   "end": 2.2,
+   "dur": 0.867,
+   "head_bright": 102.66666412353516,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 3,
+   "start": 2.2,
+   "end": 2.367,
+   "dur": 0.167,
+   "head_bright": 89.15277862548828,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 4,
+   "start": 2.367,
+   "end": 2.533,
+   "dur": 0.166,
+   "head_bright": 88.70833587646484,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 5,
+   "start": 2.533,
+   "end": 2.6,
+   "dur": 0.067,
+   "head_bright": 77.73611450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 6,
+   "start": 2.6,
+   "end": 3.4,
+   "dur": 0.8,
+   "head_bright": 85.23611450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 7,
+   "start": 3.4,
+   "end": 3.5,
+   "dur": 0.1,
+   "head_bright": 92.50694274902344,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  }
+ ],
+ "extracted_at": "2026-09-26T04:56:20",
+ "stage": "A_signal_only (B=camera/shotsize pending)"
+}

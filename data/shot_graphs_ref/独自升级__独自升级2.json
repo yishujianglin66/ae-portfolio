@@ -1,0 +1,440 @@
+{
+ "template": "独自升级__独自升级2",
+ "video": "D:\\AE-Work\\视频素材库\\独自升级\\独自升级2.mp4",
+ "duration": 54.1,
+ "fps": 30.0,
+ "n_shots": 16,
+ "n_cuts": 15,
+ "shot_dur_stats": {
+  "mean": 3.381,
+  "median": 3.2,
+  "p10": 3.0,
+  "p90": 3.933,
+  "min": 2.633,
+  "max": 4.967
+ },
+ "cut_rate_per_sec": 0.28,
+ "transition_dist": {
+  "cut": 15
+ },
+ "flash_ratio": 0.0,
+ "frozen_shots": [],
+ "black_shots": [],
+ "beat_sync": {
+  "bpm": 0.0
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 3.0,
+   "energy_class": "mid",
+   "dur": 3.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 3.0,
+   "t1": 3.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 3.5,
+   "t1": 7.0,
+   "energy_class": "mid",
+   "dur": 3.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 7.0,
+   "t1": 7.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 7.5,
+   "t1": 10.0,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 10.0,
+   "t1": 10.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 10.5,
+   "t1": 14.0,
+   "energy_class": "mid",
+   "dur": 3.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 14.0,
+   "t1": 14.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 14.5,
+   "t1": 19.0,
+   "energy_class": "mid",
+   "dur": 4.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 19.0,
+   "t1": 19.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 19.5,
+   "t1": 22.0,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 22.0,
+   "t1": 22.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 22.5,
+   "t1": 25.5,
+   "energy_class": "mid",
+   "dur": 3.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 25.5,
+   "t1": 26.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 26.0,
+   "t1": 28.5,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 28.5,
+   "t1": 29.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 29.0,
+   "t1": 31.5,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 31.5,
+   "t1": 32.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 32.0,
+   "t1": 34.5,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 34.5,
+   "t1": 35.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 35.0,
+   "t1": 37.5,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 37.5,
+   "t1": 38.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 38.0,
+   "t1": 41.0,
+   "energy_class": "mid",
+   "dur": 3.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 41.0,
+   "t1": 41.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 41.5,
+   "t1": 44.0,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 44.0,
+   "t1": 44.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 44.5,
+   "t1": 47.5,
+   "energy_class": "mid",
+   "dur": 3.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 47.5,
+   "t1": 48.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 48.0,
+   "t1": 50.5,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 50.5,
+   "t1": 51.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 51.0,
+   "t1": 54.1,
+   "energy_class": "mid",
+   "dur": 3.1,
+   "cuts": 0,
+   "cut_rate": 0.0
+  }
+ ],
+ "shots": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 3.133,
+   "dur": 3.133,
+   "head_bright": 36.36805725097656,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 1,
+   "start": 3.133,
+   "end": 7.0,
+   "dur": 3.867,
+   "head_bright": 44.13194274902344,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 2,
+   "start": 7.0,
+   "end": 10.033,
+   "dur": 3.033,
+   "head_bright": 83.99305725097656,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 3,
+   "start": 10.033,
+   "end": 14.033,
+   "dur": 4.0,
+   "head_bright": 94.92361450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 4,
+   "start": 14.033,
+   "end": 19.0,
+   "dur": 4.967,
+   "head_bright": 124.78472137451172,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 5,
+   "start": 19.0,
+   "end": 22.2,
+   "dur": 3.2,
+   "head_bright": 49.78472137451172,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 6,
+   "start": 22.2,
+   "end": 25.767,
+   "dur": 3.567,
+   "head_bright": 89.25,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 7,
+   "start": 25.767,
+   "end": 28.967,
+   "dur": 3.2,
+   "head_bright": 168.6666717529297,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 8,
+   "start": 28.967,
+   "end": 31.6,
+   "dur": 2.633,
+   "head_bright": 184.54861450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 9,
+   "start": 31.6,
+   "end": 34.9,
+   "dur": 3.3,
+   "head_bright": 99.20833587646484,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 10,
+   "start": 34.9,
+   "end": 37.967,
+   "dur": 3.067,
+   "head_bright": 216.45138549804688,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 11,
+   "start": 37.967,
+   "end": 41.067,
+   "dur": 3.1,
+   "head_bright": 64.82638549804688,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 12,
+   "start": 41.067,
+   "end": 44.133,
+   "dur": 3.066,
+   "head_bright": 22.56944465637207,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 13,
+   "start": 44.133,
+   "end": 47.567,
+   "dur": 3.434,
+   "head_bright": 200.59722900390625,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 14,
+   "start": 47.567,
+   "end": 50.533,
+   "dur": 2.966,
+   "head_bright": 73.875,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 15,
+   "start": 50.533,
+   "end": 54.101,
+   "dur": 3.568,
+   "head_bright": 58.94444274902344,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  }
+ ],
+ "extracted_at": "2026-09-26T04:54:39",
+ "stage": "A_signal_only (B=camera/shotsize pending)"
+}

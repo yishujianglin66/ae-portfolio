@@ -1,0 +1,542 @@
+{
+ "template": "冰海战记新素材_AE__vinland_3_【授权转载】冰海战记第二季最精彩的打戏 托尔芬VS蛇.f30077",
+ "video": "D:\\AE-Work\\视频素材库\\冰海战记新素材_AE\\vinland_3_【授权转载】冰海战记第二季最精彩的打戏 托尔芬VS蛇.f30077.mp4",
+ "duration": 87.43,
+ "fps": 30.0,
+ "n_shots": 141,
+ "measured_grammar": {
+  "intra_shot_ramp_rate": 0.511,
+  "freeze_n": 6,
+  "aberration_share": 0.319,
+  "glow_share": 0.021,
+  "glow_curve": [
+   [
+    20,
+    0.579
+   ],
+   [
+    26,
+    0.858
+   ],
+   [
+    140,
+    1.319
+   ]
+  ],
+  "particle_share": 0.823,
+  "grain_shots": [
+   8,
+   10,
+   19,
+   20,
+   24,
+   39,
+   46,
+   47,
+   48,
+   49,
+   50,
+   53,
+   56,
+   57,
+   58,
+   59,
+   60,
+   61,
+   65,
+   66,
+   100,
+   101,
+   102,
+   103,
+   104,
+   105,
+   109,
+   110,
+   115,
+   120,
+   122,
+   123,
+   130,
+   131,
+   132
+  ],
+  "duration_bimodal": {
+   "fast_n": 89,
+   "slow_n": 9,
+   "median": 0.4,
+   "last_share": 0.128
+  },
+  "sat_range": [
+   55,
+   168
+  ]
+ },
+ "beat_policy": {
+  "bpm_error": "[WinError 32] 另一个程序正在使用此文件，进程无法访问。: 'C:\\\\Users\\\\ADMINI~1\\\\AppData\\\\Local\\\\Temp\\\\tmpen7sng3q.wav'"
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 11.0,
+   "energy_class": "mid",
+   "dur": 11.0,
+   "cuts": 8,
+   "cut_rate": 0.73
+  },
+  {
+   "t0": 11.0,
+   "t1": 11.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 11.5,
+   "t1": 12.0,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 12.0,
+   "t1": 12.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 3,
+   "cut_rate": 6.0
+  },
+  {
+   "t0": 12.5,
+   "t1": 13.5,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 2,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 13.5,
+   "t1": 14.5,
+   "energy_class": "burst",
+   "dur": 1.0,
+   "cuts": 6,
+   "cut_rate": 6.0
+  },
+  {
+   "t0": 14.5,
+   "t1": 15.5,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 1,
+   "cut_rate": 1.0
+  },
+  {
+   "t0": 15.5,
+   "t1": 16.5,
+   "energy_class": "burst",
+   "dur": 1.0,
+   "cuts": 6,
+   "cut_rate": 6.0
+  },
+  {
+   "t0": 16.5,
+   "t1": 24.5,
+   "energy_class": "mid",
+   "dur": 8.0,
+   "cuts": 5,
+   "cut_rate": 0.62
+  },
+  {
+   "t0": 24.5,
+   "t1": 25.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 4,
+   "cut_rate": 8.0
+  },
+  {
+   "t0": 25.0,
+   "t1": 26.0,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 1,
+   "cut_rate": 1.0
+  },
+  {
+   "t0": 26.0,
+   "t1": 26.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 26.5,
+   "t1": 31.0,
+   "energy_class": "mid",
+   "dur": 4.5,
+   "cuts": 3,
+   "cut_rate": 0.67
+  },
+  {
+   "t0": 31.0,
+   "t1": 31.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 31.5,
+   "t1": 32.0,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 32.0,
+   "t1": 32.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 32.5,
+   "t1": 33.0,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 33.0,
+   "t1": 34.0,
+   "energy_class": "burst",
+   "dur": 1.0,
+   "cuts": 4,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 34.0,
+   "t1": 34.5,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 34.5,
+   "t1": 35.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 35.0,
+   "t1": 39.5,
+   "energy_class": "mid",
+   "dur": 4.5,
+   "cuts": 5,
+   "cut_rate": 1.11
+  },
+  {
+   "t0": 39.5,
+   "t1": 40.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 4,
+   "cut_rate": 8.0
+  },
+  {
+   "t0": 40.0,
+   "t1": 40.5,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 40.5,
+   "t1": 41.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 4,
+   "cut_rate": 8.0
+  },
+  {
+   "t0": 41.0,
+   "t1": 41.5,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 41.5,
+   "t1": 42.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 42.0,
+   "t1": 43.5,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 1,
+   "cut_rate": 0.67
+  },
+  {
+   "t0": 43.5,
+   "t1": 44.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 3,
+   "cut_rate": 6.0
+  },
+  {
+   "t0": 44.0,
+   "t1": 46.0,
+   "energy_class": "mid",
+   "dur": 2.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 46.0,
+   "t1": 46.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 46.5,
+   "t1": 47.0,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 47.0,
+   "t1": 49.0,
+   "energy_class": "burst",
+   "dur": 2.0,
+   "cuts": 11,
+   "cut_rate": 5.5
+  },
+  {
+   "t0": 49.0,
+   "t1": 53.0,
+   "energy_class": "mid",
+   "dur": 4.0,
+   "cuts": 2,
+   "cut_rate": 0.5
+  },
+  {
+   "t0": 53.0,
+   "t1": 54.0,
+   "energy_class": "burst",
+   "dur": 1.0,
+   "cuts": 6,
+   "cut_rate": 6.0
+  },
+  {
+   "t0": 54.0,
+   "t1": 56.0,
+   "energy_class": "mid",
+   "dur": 2.0,
+   "cuts": 2,
+   "cut_rate": 1.0
+  },
+  {
+   "t0": 56.0,
+   "t1": 56.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 56.5,
+   "t1": 58.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 1,
+   "cut_rate": 0.67
+  },
+  {
+   "t0": 58.0,
+   "t1": 59.0,
+   "energy_class": "burst",
+   "dur": 1.0,
+   "cuts": 4,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 59.0,
+   "t1": 61.5,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 3,
+   "cut_rate": 1.2
+  },
+  {
+   "t0": 61.5,
+   "t1": 62.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 62.0,
+   "t1": 63.0,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 2,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 63.0,
+   "t1": 64.0,
+   "energy_class": "burst",
+   "dur": 1.0,
+   "cuts": 6,
+   "cut_rate": 6.0
+  },
+  {
+   "t0": 64.0,
+   "t1": 66.5,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 5,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 66.5,
+   "t1": 67.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 67.0,
+   "t1": 71.5,
+   "energy_class": "mid",
+   "dur": 4.5,
+   "cuts": 7,
+   "cut_rate": 1.56
+  },
+  {
+   "t0": 71.5,
+   "t1": 72.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 3,
+   "cut_rate": 6.0
+  },
+  {
+   "t0": 72.0,
+   "t1": 87.43,
+   "energy_class": "mid",
+   "dur": 15.43,
+   "cuts": 4,
+   "cut_rate": 0.26
+  }
+ ],
+ "min_repro": {
+  "intra_shot_speed_ramp": {
+   "measured_rate": [
+    0.39,
+    0.64
+   ],
+   "tool": "ffmpeg setpts 分段（dynamic_speed_ramp）",
+   "spec": "≥50% 镜头带镜内坡道；ramp_down 起点≈均值×1.3 终点×0.8"
+  },
+  "chromatic_aberration": {
+   "measured_shot_share": [
+    0.32,
+    0.61
+   ],
+   "strong_px": ">=5px 每片 1-31 镜（打戏峰值 31）",
+   "tool": "ffmpeg rgbashift / AE Chromatic Aberration",
+   "spec": "常规 2-3px，情绪/动作峰值 5-6px；打戏可高频"
+  },
+  "glow": {
+   "measured_shot_share": [
+    0.41,
+    0.78
+   ],
+   "tool": "AE 双栈 Glow（主 T50 R30 I2.0 + 核心 T80 R10 I1.5）",
+   "spec": "覆盖 4-8 成镜头；爆发段内剂量爬升（实测序列如 0.41→4.17 收于情绪落点）"
+  },
+  "particles": {
+   "measured_shot_share": [
+    0.4,
+    0.82
+   ],
+   "tool": "AE Particular（Glow Sphere 灰尘配方）",
+   "spec": "动作/打戏近全铺（82%），文戏 40%；n≈10-37 小连通域"
+  },
+  "film_grain": {
+   "measured_shots_per_piece": [
+    3,
+    9
+   ],
+   "tool": "ffmpeg noise=alls=18:allf=t+u",
+   "spec": "每片 3-9 镜，质感镜与落幕镜"
+  },
+  "punctuation": {
+   "freeze_shots": [
+    1,
+    6
+   ],
+   "black_shots": [
+    0,
+    2
+   ],
+   "flash_shots": [
+    0,
+    3
+   ],
+   "tool": "tpad=stop_mode=clone / colorsrc / 2-3帧白闪"
+  },
+  "dof_blur": {
+   "measured_shot_share": [
+    0.07,
+    0.3
+   ],
+   "tool": "AE 镜头模糊 / boxblur 遮罩"
+  },
+  "saturation_contrast": {
+   "finding": "同片内 sat 0-219 双极（黑白帧与高饱和帧交替）",
+   "tool": "curves/colorbalance 分段 + 去色镜",
+   "spec": "叙事工具：黑白-高饱和对切制造重音（教程批样本未见，参照集新发现）"
+  },
+  "beat_policy": {
+   "measured_sync_range": [
+    0.27,
+    0.44
+   ],
+   "measured_offset_median_ms": [
+    89,
+    169
+   ],
+   "spec": "目标踩拍 0.25-0.45；落点(ramp_down 终点)对齐优先于切点对齐"
+  }
+ },
+ "provenance": {
+  "stage_a": "data/shot_graphs_ref\\冰海战记新素材_AE__vinland_3_【授权转载】冰海战记第二季最精彩的打戏 托尔芬VS蛇.f30077.json",
+  "stage_b": "data/shot_graphs_ref\\冰海战记新素材_AE__vinland_3_【授权转载】冰海战记第二季最精彩的打戏 托尔芬VS蛇.f30077.forensics.json",
+  "corpus": "D:\\AE-Work\\视频素材库（正式参照集，2026-09-26 用户指定）"
+ }
+}

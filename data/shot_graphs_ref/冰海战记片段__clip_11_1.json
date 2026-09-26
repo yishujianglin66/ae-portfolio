@@ -1,0 +1,135 @@
+{
+ "template": "冰海战记片段__clip_11_1",
+ "video": "D:\\AE-Work\\视频素材库\\冰海战记片段\\clip_11_1.mp4",
+ "duration": 3.5,
+ "fps": 30.0,
+ "n_shots": 6,
+ "n_cuts": 5,
+ "shot_dur_stats": {
+  "mean": 0.583,
+  "median": 0.467,
+  "p10": 0.366,
+  "p90": 0.917,
+  "min": 0.3,
+  "max": 1.234
+ },
+ "cut_rate_per_sec": 1.43,
+ "transition_dist": {
+  "cut": 4,
+  "black": 1
+ },
+ "flash_ratio": 0.0,
+ "frozen_shots": [],
+ "black_shots": [
+  4
+ ],
+ "beat_sync": {
+  "bpm_error": "[WinError 32] 另一个程序正在使用此文件，进程无法访问。: 'C:\\\\Users\\\\ADMINI~1\\\\AppData\\\\Local\\\\Temp\\\\tmpn8gl0z9g.wav'"
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 1.0,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 2,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 1.0,
+   "t1": 1.5,
+   "energy_class": "calm",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 1.5,
+   "t1": 2.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 2.0,
+   "t1": 3.0,
+   "energy_class": "calm",
+   "dur": 1.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 3.0,
+   "t1": 3.5,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  }
+ ],
+ "shots": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 0.467,
+   "dur": 0.467,
+   "head_bright": 32.02777862548828,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 1,
+   "start": 0.467,
+   "end": 0.933,
+   "dur": 0.466,
+   "head_bright": 44.875,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 2,
+   "start": 0.933,
+   "end": 1.533,
+   "dur": 0.6,
+   "head_bright": 60.60416793823242,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 3,
+   "start": 1.533,
+   "end": 1.833,
+   "dur": 0.3,
+   "head_bright": 90.41666412353516,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 4,
+   "start": 1.833,
+   "end": 3.067,
+   "dur": 1.234,
+   "head_bright": 11.208333015441895,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": false
+  },
+  {
+   "idx": 5,
+   "start": 3.067,
+   "end": 3.5,
+   "dur": 0.433,
+   "head_bright": 160.63888549804688,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  }
+ ],
+ "extracted_at": "2026-09-26T04:56:35",
+ "stage": "A_signal_only (B=camera/shotsize pending)"
+}

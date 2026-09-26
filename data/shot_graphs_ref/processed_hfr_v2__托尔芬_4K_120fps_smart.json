@@ -1,0 +1,39 @@
+{
+ "template": "processed_hfr_v2__托尔芬_4K_120fps_smart",
+ "video": "D:\\AE-Work\\视频素材库\\processed_hfr_v2\\托尔芬_4K_120fps_smart.mp4",
+ "duration": 3.92,
+ "fps": 120.0,
+ "n_shots": 1,
+ "n_cuts": 0,
+ "shot_dur_stats": {
+  "mean": 3.924,
+  "median": 3.924,
+  "p10": 3.924,
+  "p90": 3.924,
+  "min": 3.924,
+  "max": 3.924
+ },
+ "cut_rate_per_sec": 0.0,
+ "transition_dist": {},
+ "flash_ratio": 0.0,
+ "frozen_shots": [],
+ "black_shots": [],
+ "beat_sync": {
+  "bpm": 78.30255681818181
+ },
+ "sections": [],
+ "shots": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 3.924,
+   "dur": 3.924,
+   "head_bright": 42.08333206176758,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  }
+ ],
+ "extracted_at": "2026-09-26T04:54:57",
+ "stage": "A_signal_only (B=camera/shotsize pending)"
+}

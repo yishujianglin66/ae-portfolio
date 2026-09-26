@@ -227,7 +227,8 @@ def main() -> int:
     vids = a.videos or [str(p) for p in Path(a.dir).rglob("成品.mp4")]
     print(f"模板数: {len(vids)}")
     for v in vids:
-        name = Path(v).parent.name
+        pth = Path(v)
+        name = f"{pth.parent.name}__{pth.stem}"[:80]  # 含目录前缀防同目录多文件覆盖
         print(f"\n=== {name} ===")
         g = extract(v, name)
         p = out / f"{name}.json"

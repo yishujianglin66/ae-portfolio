@@ -1,0 +1,472 @@
+{
+ "template": "视频素材库__日月同错姜明子",
+ "video": "D:\\AE-Work\\视频素材库\\日月同错姜明子.mp4",
+ "duration": 38.77,
+ "fps": 30.0,
+ "n_shots": 23,
+ "n_cuts": 22,
+ "shot_dur_stats": {
+  "mean": 1.686,
+  "median": 1.567,
+  "p10": 0.033,
+  "p90": 2.48,
+  "min": 0.033,
+  "max": 12.367
+ },
+ "cut_rate_per_sec": 0.57,
+ "transition_dist": {
+  "flash": 1,
+  "cut": 21
+ },
+ "flash_ratio": 0.045,
+ "frozen_shots": [],
+ "black_shots": [],
+ "beat_sync": {
+  "bpm": 135.99917763157896,
+  "n_beats": 88,
+  "sync_hist_ms": {
+   "<=50ms": 2,
+   "<=80ms": 7,
+   "<=120ms": 7,
+   ">120ms": 15
+  },
+  "sync_rate_80ms": 0.318,
+  "gap_median_ms": 168.7
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 4.0,
+   "energy_class": "mid",
+   "dur": 4.0,
+   "cuts": 2,
+   "cut_rate": 0.5
+  },
+  {
+   "t0": 4.0,
+   "t1": 4.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 4.5,
+   "t1": 5.0,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 5.0,
+   "t1": 5.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 5.5,
+   "t1": 6.5,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 6.5,
+   "t1": 7.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 7.0,
+   "t1": 9.0,
+   "energy_class": "mid",
+   "dur": 2.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 9.0,
+   "t1": 9.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 9.5,
+   "t1": 10.0,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 10.0,
+   "t1": 10.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 10.5,
+   "t1": 12.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 12.0,
+   "t1": 12.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 12.5,
+   "t1": 15.0,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 1,
+   "cut_rate": 0.4
+  },
+  {
+   "t0": 15.0,
+   "t1": 15.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 15.5,
+   "t1": 17.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 17.0,
+   "t1": 17.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 17.5,
+   "t1": 19.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 19.0,
+   "t1": 19.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 19.5,
+   "t1": 21.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 21.0,
+   "t1": 21.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 21.5,
+   "t1": 24.5,
+   "energy_class": "mid",
+   "dur": 3.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 24.5,
+   "t1": 25.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 25.0,
+   "t1": 26.0,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 26.0,
+   "t1": 26.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 26.5,
+   "t1": 38.77,
+   "energy_class": "mid",
+   "dur": 12.27,
+   "cuts": 0,
+   "cut_rate": 0.0
+  }
+ ],
+ "shots": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 0.033,
+   "dur": 0.033,
+   "head_bright": 153.51388549804688,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 1,
+   "start": 0.033,
+   "end": 2.433,
+   "dur": 2.4,
+   "head_bright": 158.46527099609375,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 2,
+   "start": 2.433,
+   "end": 4.0,
+   "dur": 1.567,
+   "head_bright": 154.6666717529297,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 3,
+   "start": 4.0,
+   "end": 5.033,
+   "dur": 1.033,
+   "head_bright": 200.3958282470703,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 4,
+   "start": 5.033,
+   "end": 6.8,
+   "dur": 1.767,
+   "head_bright": 171.20138549804688,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 5,
+   "start": 6.8,
+   "end": 6.833,
+   "dur": 0.033,
+   "head_bright": 103.83333587646484,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 6,
+   "start": 6.833,
+   "end": 9.333,
+   "dur": 2.5,
+   "head_bright": 105.375,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 7,
+   "start": 9.333,
+   "end": 9.4,
+   "dur": 0.067,
+   "head_bright": 103.0,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 8,
+   "start": 9.4,
+   "end": 10.233,
+   "dur": 0.833,
+   "head_bright": 106.78472137451172,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 9,
+   "start": 10.233,
+   "end": 12.233,
+   "dur": 2.0,
+   "head_bright": 165.48611450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 10,
+   "start": 12.233,
+   "end": 12.3,
+   "dur": 0.067,
+   "head_bright": 179.4791717529297,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 11,
+   "start": 12.3,
+   "end": 13.267,
+   "dur": 0.967,
+   "head_bright": 233.375,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 12,
+   "start": 13.267,
+   "end": 15.267,
+   "dur": 2.0,
+   "head_bright": 205.34027099609375,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 13,
+   "start": 15.267,
+   "end": 15.3,
+   "dur": 0.033,
+   "head_bright": 159.22222900390625,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 14,
+   "start": 15.3,
+   "end": 17.0,
+   "dur": 1.7,
+   "head_bright": 143.4791717529297,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 15,
+   "start": 17.0,
+   "end": 17.033,
+   "dur": 0.033,
+   "head_bright": 161.63888549804688,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 16,
+   "start": 17.033,
+   "end": 19.333,
+   "dur": 2.3,
+   "head_bright": 164.15277099609375,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 17,
+   "start": 19.333,
+   "end": 21.2,
+   "dur": 1.867,
+   "head_bright": 179.98611450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 18,
+   "start": 21.2,
+   "end": 24.633,
+   "dur": 3.433,
+   "head_bright": 181.04861450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 19,
+   "start": 24.633,
+   "end": 24.667,
+   "dur": 0.034,
+   "head_bright": 67.10416412353516,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 20,
+   "start": 24.667,
+   "end": 26.367,
+   "dur": 1.7,
+   "head_bright": 71.63194274902344,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 21,
+   "start": 26.367,
+   "end": 26.4,
+   "dur": 0.033,
+   "head_bright": 53.61111068725586,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 22,
+   "start": 26.4,
+   "end": 38.767,
+   "dur": 12.367,
+   "head_bright": 51.74305725097656,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  }
+ ],
+ "extracted_at": "2026-09-26T04:55:30",
+ "stage": "A_signal_only (B=camera/shotsize pending)"
+}

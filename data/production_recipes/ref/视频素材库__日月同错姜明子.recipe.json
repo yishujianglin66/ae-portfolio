@@ -1,0 +1,383 @@
+{
+ "template": "视频素材库__日月同错姜明子",
+ "video": "D:\\AE-Work\\视频素材库\\日月同错姜明子.mp4",
+ "duration": 38.77,
+ "fps": 30.0,
+ "n_shots": 23,
+ "measured_grammar": {
+  "intra_shot_ramp_rate": 0.391,
+  "freeze_n": 2,
+  "aberration_share": 0.609,
+  "glow_share": 0.783,
+  "glow_curve": [
+   [
+    0,
+    0.411
+   ],
+   [
+    1,
+    1.313
+   ],
+   [
+    2,
+    1.136
+   ],
+   [
+    3,
+    0.311
+   ],
+   [
+    4,
+    1.077
+   ],
+   [
+    5,
+    1.077
+   ],
+   [
+    6,
+    1.585
+   ],
+   [
+    7,
+    4.173
+   ],
+   [
+    8,
+    3.082
+   ],
+   [
+    9,
+    2.013
+   ],
+   [
+    10,
+    0.372
+   ],
+   [
+    12,
+    1.649
+   ]
+  ],
+  "particle_share": 0.565,
+  "grain_shots": [
+   4,
+   8,
+   9,
+   11,
+   16,
+   17,
+   18
+  ],
+  "duration_bimodal": {
+   "fast_n": 8,
+   "slow_n": 12,
+   "median": 1.567,
+   "last_share": 0.319
+  },
+  "sat_range": [
+   4,
+   126
+  ]
+ },
+ "beat_policy": {
+  "bpm": 135.99917763157896,
+  "n_beats": 88,
+  "sync_hist_ms": {
+   "<=50ms": 2,
+   "<=80ms": 7,
+   "<=120ms": 7,
+   ">120ms": 15
+  },
+  "sync_rate_80ms": 0.318,
+  "gap_median_ms": 168.7
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 4.0,
+   "energy_class": "mid",
+   "dur": 4.0,
+   "cuts": 2,
+   "cut_rate": 0.5
+  },
+  {
+   "t0": 4.0,
+   "t1": 4.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 4.5,
+   "t1": 5.0,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 5.0,
+   "t1": 5.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 5.5,
+   "t1": 6.5,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 6.5,
+   "t1": 7.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 7.0,
+   "t1": 9.0,
+   "energy_class": "mid",
+   "dur": 2.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 9.0,
+   "t1": 9.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 9.5,
+   "t1": 10.0,
+   "energy_class": "mid",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 10.0,
+   "t1": 10.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 10.5,
+   "t1": 12.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 12.0,
+   "t1": 12.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 12.5,
+   "t1": 15.0,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 1,
+   "cut_rate": 0.4
+  },
+  {
+   "t0": 15.0,
+   "t1": 15.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 15.5,
+   "t1": 17.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 17.0,
+   "t1": 17.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 17.5,
+   "t1": 19.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 19.0,
+   "t1": 19.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 19.5,
+   "t1": 21.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 21.0,
+   "t1": 21.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 21.5,
+   "t1": 24.5,
+   "energy_class": "mid",
+   "dur": 3.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 24.5,
+   "t1": 25.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 25.0,
+   "t1": 26.0,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 26.0,
+   "t1": 26.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 26.5,
+   "t1": 38.77,
+   "energy_class": "mid",
+   "dur": 12.27,
+   "cuts": 0,
+   "cut_rate": 0.0
+  }
+ ],
+ "min_repro": {
+  "intra_shot_speed_ramp": {
+   "measured_rate": [
+    0.39,
+    0.64
+   ],
+   "tool": "ffmpeg setpts 分段（dynamic_speed_ramp）",
+   "spec": "≥50% 镜头带镜内坡道；ramp_down 起点≈均值×1.3 终点×0.8"
+  },
+  "chromatic_aberration": {
+   "measured_shot_share": [
+    0.32,
+    0.61
+   ],
+   "strong_px": ">=5px 每片 1-31 镜（打戏峰值 31）",
+   "tool": "ffmpeg rgbashift / AE Chromatic Aberration",
+   "spec": "常规 2-3px，情绪/动作峰值 5-6px；打戏可高频"
+  },
+  "glow": {
+   "measured_shot_share": [
+    0.41,
+    0.78
+   ],
+   "tool": "AE 双栈 Glow（主 T50 R30 I2.0 + 核心 T80 R10 I1.5）",
+   "spec": "覆盖 4-8 成镜头；爆发段内剂量爬升（实测序列如 0.41→4.17 收于情绪落点）"
+  },
+  "particles": {
+   "measured_shot_share": [
+    0.4,
+    0.82
+   ],
+   "tool": "AE Particular（Glow Sphere 灰尘配方）",
+   "spec": "动作/打戏近全铺（82%），文戏 40%；n≈10-37 小连通域"
+  },
+  "film_grain": {
+   "measured_shots_per_piece": [
+    3,
+    9
+   ],
+   "tool": "ffmpeg noise=alls=18:allf=t+u",
+   "spec": "每片 3-9 镜，质感镜与落幕镜"
+  },
+  "punctuation": {
+   "freeze_shots": [
+    1,
+    6
+   ],
+   "black_shots": [
+    0,
+    2
+   ],
+   "flash_shots": [
+    0,
+    3
+   ],
+   "tool": "tpad=stop_mode=clone / colorsrc / 2-3帧白闪"
+  },
+  "dof_blur": {
+   "measured_shot_share": [
+    0.07,
+    0.3
+   ],
+   "tool": "AE 镜头模糊 / boxblur 遮罩"
+  },
+  "saturation_contrast": {
+   "finding": "同片内 sat 0-219 双极（黑白帧与高饱和帧交替）",
+   "tool": "curves/colorbalance 分段 + 去色镜",
+   "spec": "叙事工具：黑白-高饱和对切制造重音（教程批样本未见，参照集新发现）"
+  },
+  "beat_policy": {
+   "measured_sync_range": [
+    0.27,
+    0.44
+   ],
+   "measured_offset_median_ms": [
+    89,
+    169
+   ],
+   "spec": "目标踩拍 0.25-0.45；落点(ramp_down 终点)对齐优先于切点对齐"
+  }
+ },
+ "provenance": {
+  "stage_a": "data/shot_graphs_ref\\视频素材库__日月同错姜明子.json",
+  "stage_b": "data/shot_graphs_ref\\视频素材库__日月同错姜明子.forensics.json",
+  "corpus": "D:\\AE-Work\\视频素材库（正式参照集，2026-09-26 用户指定）"
+ }
+}
