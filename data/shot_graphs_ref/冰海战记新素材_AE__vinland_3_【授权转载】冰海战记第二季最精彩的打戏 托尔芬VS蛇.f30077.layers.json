@@ -1,0 +1,324 @@
+{
+ "video": "D:\\AE-Work\\视频素材库\\冰海战记新素材_AE\\vinland_3_【授权转载】冰海战记第二季最精彩的打戏 托尔芬VS蛇.f30077.mp4",
+ "shots_layers": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 2.333,
+   "dur": 2.333,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.3736,
+    "edge_stability": 0.567,
+    "rigid_consistency": 0.14,
+    "parallax_split": 0.055,
+    "flow_diverge": 0.33,
+    "edge_halo": 133.6,
+    "color_banding": 0.0273,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 1,
+   "start": 2.333,
+   "end": 3.067,
+   "dur": 0.734,
+   "layers": {
+    "n_frames": 23,
+    "line_boil": 0.2065,
+    "edge_stability": 0.893,
+    "rigid_consistency": -0.534,
+    "parallax_split": 0.339,
+    "flow_diverge": 0.279,
+    "edge_halo": 0.0,
+    "color_banding": 0.0083,
+    "flat_share": 0.001
+   }
+  },
+  {
+   "idx": 2,
+   "start": 3.067,
+   "end": 4.3,
+   "dur": 1.233,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.2061,
+    "edge_stability": 0.743,
+    "rigid_consistency": -0.27,
+    "parallax_split": 0.682,
+    "flow_diverge": 0.404,
+    "edge_halo": 7.0,
+    "color_banding": 0.0097,
+    "flat_share": 0.007
+   }
+  },
+  {
+   "idx": 3,
+   "start": 4.3,
+   "end": 6.0,
+   "dur": 1.7,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.0657,
+    "edge_stability": 0.743,
+    "rigid_consistency": 0.086,
+    "parallax_split": 0.156,
+    "flow_diverge": 0.399,
+    "edge_halo": 3.1,
+    "color_banding": 0.0096,
+    "flat_share": 0.001
+   }
+  },
+  {
+   "idx": 4,
+   "start": 6.0,
+   "end": 7.067,
+   "dur": 1.067,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.2404,
+    "edge_stability": 0.496,
+    "rigid_consistency": 0.523,
+    "parallax_split": 0.425,
+    "flow_diverge": 0.318,
+    "edge_halo": 0.0,
+    "color_banding": 0.0174,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 5,
+   "start": 7.067,
+   "end": 8.533,
+   "dur": 1.466,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.3148,
+    "edge_stability": 0.293,
+    "rigid_consistency": 0.61,
+    "parallax_split": 0.012,
+    "flow_diverge": 0.252,
+    "edge_halo": 59.5,
+    "color_banding": 0.0257,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 6,
+   "start": 8.533,
+   "end": 9.2,
+   "dur": 0.667,
+   "layers": {
+    "n_frames": 21,
+    "line_boil": 0.3398,
+    "edge_stability": 0.812,
+    "rigid_consistency": 0.518,
+    "parallax_split": 0.005,
+    "flow_diverge": 0.357,
+    "edge_halo": 0.0,
+    "color_banding": 0.0193,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 7,
+   "start": 9.2,
+   "end": 10.9,
+   "dur": 1.7,
+   "layers": {
+    "n_frames": 30,
+    "line_boil": 0.3552,
+    "edge_stability": 0.479,
+    "rigid_consistency": -0.493,
+    "parallax_split": 0.532,
+    "flow_diverge": 0.309,
+    "edge_halo": 0.0,
+    "color_banding": 0.0006,
+    "flat_share": 0.001
+   }
+  },
+  {
+   "idx": 8,
+   "start": 10.9,
+   "end": 11.167,
+   "dur": 0.267,
+   "layers": {
+    "n_frames": 9,
+    "line_boil": 0.3442,
+    "edge_stability": 0.442,
+    "rigid_consistency": 0.449,
+    "parallax_split": 0.353,
+    "flow_diverge": 0.329,
+    "edge_halo": 48.1,
+    "color_banding": 0.0214,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 9,
+   "start": 11.167,
+   "end": 11.267,
+   "dur": 0.1,
+   "layers": {
+    "n_frames": 3,
+    "line_boil": 0.0,
+    "edge_stability": 0.524,
+    "rigid_consistency": 0.321,
+    "parallax_split": 0.457,
+    "flow_diverge": 0.461,
+    "edge_halo": 57.1,
+    "color_banding": 0.0215,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 10,
+   "start": 11.267,
+   "end": 11.567,
+   "dur": 0.3,
+   "layers": {
+    "n_frames": 9,
+    "line_boil": 0.2933,
+    "edge_stability": 0.321,
+    "rigid_consistency": 0.457,
+    "parallax_split": 0.248,
+    "flow_diverge": 0.324,
+    "edge_halo": 81.6,
+    "color_banding": 0.0239,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 11,
+   "start": 11.567,
+   "end": 12.0,
+   "dur": 0.433,
+   "layers": {
+    "n_frames": 13,
+    "line_boil": 0.3011,
+    "edge_stability": 0.362,
+    "rigid_consistency": 0.129,
+    "parallax_split": 0.243,
+    "flow_diverge": 0.304,
+    "edge_halo": 0.0,
+    "color_banding": 0.0298,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 12,
+   "start": 12.0,
+   "end": 12.067,
+   "dur": 0.067,
+   "layers": {
+    "n_frames": 3,
+    "line_boil": 0.0,
+    "edge_stability": 0.529,
+    "rigid_consistency": 0.44,
+    "parallax_split": 0.172,
+    "flow_diverge": 0.427,
+    "edge_halo": 6.5,
+    "color_banding": 0.0336,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 13,
+   "start": 12.067,
+   "end": 12.133,
+   "dur": 0.066,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 14,
+   "start": 12.133,
+   "end": 12.7,
+   "dur": 0.567,
+   "layers": {
+    "n_frames": 18,
+    "line_boil": 0.3076,
+    "edge_stability": 0.337,
+    "rigid_consistency": 0.543,
+    "parallax_split": 0.277,
+    "flow_diverge": 0.309,
+    "edge_halo": 106.4,
+    "color_banding": 0.0201,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 15,
+   "start": 12.7,
+   "end": 13.467,
+   "dur": 0.767,
+   "layers": {
+    "n_frames": 24,
+    "line_boil": 0.2932,
+    "edge_stability": 0.526,
+    "rigid_consistency": 0.306,
+    "parallax_split": 0.159,
+    "flow_diverge": 0.356,
+    "edge_halo": 0.0,
+    "color_banding": 0.0122,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 16,
+   "start": 13.467,
+   "end": 13.533,
+   "dur": 0.066,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.044
+   }
+  },
+  {
+   "idx": 17,
+   "start": 13.533,
+   "end": 13.567,
+   "dur": 0.034,
+   "layers": {
+    "n_frames": 2,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 18,
+   "start": 13.567,
+   "end": 13.8,
+   "dur": 0.233,
+   "layers": {
+    "n_frames": 7,
+    "line_boil": 0.4347,
+    "edge_stability": 0.392,
+    "rigid_consistency": -0.222,
+    "parallax_split": 1.09,
+    "flow_diverge": 0.27,
+    "edge_halo": 0.5,
+    "color_banding": 0.0265,
+    "flat_share": 0.0
+   }
+  },
+  {
+   "idx": 19,
+   "start": 13.8,
+   "end": 13.967,
+   "dur": 0.167,
+   "layers": {
+    "n_frames": 6,
+    "line_boil": 0.3495,
+    "edge_stability": 0.298,
+    "rigid_consistency": 0.66,
+    "parallax_split": 0.065,
+    "flow_diverge": 0.29,
+    "edge_halo": 36.9,
+    "color_banding": 0.0286,
+    "flat_share": 0.0
+   }
+  }
+ ]
+}
