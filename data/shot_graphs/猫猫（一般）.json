@@ -1,0 +1,274 @@
+{
+ "template": "猫猫（一般）",
+ "video": "D:\\AE-Work\\resources\\video\\猫猫（一般）\\成品.mp4",
+ "duration": 13.1,
+ "fps": 60.0,
+ "n_shots": 16,
+ "n_cuts": 18,
+ "shot_dur_stats": {
+  "mean": 0.816,
+  "median": 0.491,
+  "p10": 0.034,
+  "p90": 2.083,
+  "min": 0.033,
+  "max": 3.683
+ },
+ "cut_rate_per_sec": 1.37,
+ "transition_dist": {
+  "cut": 14,
+  "black": 4
+ },
+ "flash_ratio": 0.0,
+ "frozen_shots": [
+  4,
+  11
+ ],
+ "black_shots": [
+  1,
+  4,
+  11,
+  13
+ ],
+ "beat_sync": {
+  "bpm": 129.19921875,
+  "n_beats": 24,
+  "sync_hist_ms": {
+   "<=50ms": 1,
+   "<=80ms": 3,
+   "<=120ms": 8,
+   ">120ms": 10
+  },
+  "sync_rate_80ms": 0.167,
+  "gap_median_ms": 133.4
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 1.5,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 4,
+   "cut_rate": 2.67
+  },
+  {
+   "t0": 1.5,
+   "t1": 2.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 4,
+   "cut_rate": 8.0
+  },
+  {
+   "t0": 2.0,
+   "t1": 3.0,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 2,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 3.0,
+   "t1": 3.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 4,
+   "cut_rate": 8.0
+  },
+  {
+   "t0": 3.5,
+   "t1": 8.0,
+   "energy_class": "mid",
+   "dur": 4.5,
+   "cuts": 3,
+   "cut_rate": 0.67
+  },
+  {
+   "t0": 8.0,
+   "t1": 8.5,
+   "energy_class": "calm",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 8.5,
+   "t1": 12.5,
+   "energy_class": "mid",
+   "dur": 4.0,
+   "cuts": 1,
+   "cut_rate": 0.25
+  },
+  {
+   "t0": 12.5,
+   "t1": 13.1,
+   "energy_class": "calm",
+   "dur": 0.6,
+   "cuts": 0,
+   "cut_rate": 0.0
+  }
+ ],
+ "shots": [
+  {
+   "idx": 0,
+   "start": 0.017,
+   "end": 0.6,
+   "dur": 0.583,
+   "head_bright": 113.76388549804688,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 1,
+   "start": 0.6,
+   "end": 1.083,
+   "dur": 0.483,
+   "head_bright": 6.173611164093018,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": false
+  },
+  {
+   "idx": 2,
+   "start": 1.1,
+   "end": 1.6,
+   "dur": 0.5,
+   "head_bright": 102.56944274902344,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 3,
+   "start": 1.6,
+   "end": 1.633,
+   "dur": 0.033,
+   "head_bright": 84.4375,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 4,
+   "start": 1.633,
+   "end": 1.967,
+   "dur": 0.334,
+   "head_bright": 0.0,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": true
+  },
+  {
+   "idx": 5,
+   "start": 1.983,
+   "end": 2.483,
+   "dur": 0.5,
+   "head_bright": 98.08333587646484,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 6,
+   "start": 2.483,
+   "end": 2.517,
+   "dur": 0.034,
+   "head_bright": 41.58333206176758,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 7,
+   "start": 2.517,
+   "end": 3.033,
+   "dur": 0.516,
+   "head_bright": 69.15972137451172,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 8,
+   "start": 3.033,
+   "end": 3.067,
+   "dur": 0.034,
+   "head_bright": 44.47222137451172,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 9,
+   "start": 3.067,
+   "end": 3.4,
+   "dur": 0.333,
+   "head_bright": 69.90277862548828,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 10,
+   "start": 3.4,
+   "end": 3.433,
+   "dur": 0.033,
+   "head_bright": 57.93055725097656,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 11,
+   "start": 3.433,
+   "end": 4.833,
+   "dur": 1.4,
+   "head_bright": 0.0,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": true
+  },
+  {
+   "idx": 12,
+   "start": 4.833,
+   "end": 5.25,
+   "dur": 0.417,
+   "head_bright": 61.22222137451172,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 13,
+   "start": 5.25,
+   "end": 7.617,
+   "dur": 2.367,
+   "head_bright": 6.75694465637207,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": false
+  },
+  {
+   "idx": 14,
+   "start": 7.617,
+   "end": 9.417,
+   "dur": 1.8,
+   "head_bright": 38.28472137451172,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 15,
+   "start": 9.417,
+   "end": 13.1,
+   "dur": 3.683,
+   "head_bright": 141.95138549804688,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  }
+ ],
+ "extracted_at": "2026-09-26T04:19:04",
+ "stage": "A_signal_only (B=camera/shotsize pending)"
+}

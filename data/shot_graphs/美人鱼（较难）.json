@@ -1,0 +1,246 @@
+{
+ "template": "美人鱼（较难）",
+ "video": "D:\\AE-Work\\resources\\video\\美人鱼（较难）\\成品.mp4",
+ "duration": 17.63,
+ "fps": 60.0,
+ "n_shots": 10,
+ "n_cuts": 11,
+ "shot_dur_stats": {
+  "mean": 1.76,
+  "median": 1.7,
+  "p10": 0.048,
+  "p90": 3.645,
+  "min": 0.033,
+  "max": 4.05
+ },
+ "cut_rate_per_sec": 0.62,
+ "transition_dist": {
+  "flash": 1,
+  "cut": 8,
+  "black": 2
+ },
+ "flash_ratio": 0.091,
+ "frozen_shots": [
+  2,
+  5,
+  6
+ ],
+ "black_shots": [
+  2,
+  5
+ ],
+ "beat_sync": {
+  "bpm": 95.703125,
+  "n_beats": 23,
+  "sync_hist_ms": {
+   "<=50ms": 0,
+   "<=80ms": 2,
+   "<=120ms": 5,
+   ">120ms": 6
+  },
+  "sync_rate_80ms": 0.182,
+  "gap_median_ms": 140.0
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 1.5,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 1,
+   "cut_rate": 0.67
+  },
+  {
+   "t0": 1.5,
+   "t1": 2.5,
+   "energy_class": "burst",
+   "dur": 1.0,
+   "cuts": 4,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 2.5,
+   "t1": 4.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 4.0,
+   "t1": 4.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 4.5,
+   "t1": 7.0,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 1,
+   "cut_rate": 0.4
+  },
+  {
+   "t0": 7.0,
+   "t1": 7.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 7.5,
+   "t1": 12.0,
+   "energy_class": "mid",
+   "dur": 4.5,
+   "cuts": 1,
+   "cut_rate": 0.22
+  },
+  {
+   "t0": 12.0,
+   "t1": 12.5,
+   "energy_class": "calm",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 12.5,
+   "t1": 14.5,
+   "energy_class": "mid",
+   "dur": 2.0,
+   "cuts": 1,
+   "cut_rate": 0.5
+  },
+  {
+   "t0": 14.5,
+   "t1": 15.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 15.0,
+   "t1": 17.0,
+   "energy_class": "mid",
+   "dur": 2.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 17.0,
+   "t1": 17.5,
+   "energy_class": "calm",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  }
+ ],
+ "shots": [
+  {
+   "idx": 0,
+   "start": 0.017,
+   "end": 1.567,
+   "dur": 1.55,
+   "head_bright": 160.2916717529297,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 1,
+   "start": 1.567,
+   "end": 1.6,
+   "dur": 0.033,
+   "head_bright": 222.46527099609375,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 2,
+   "start": 1.617,
+   "end": 2.267,
+   "dur": 0.65,
+   "head_bright": 0.0,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": true
+  },
+  {
+   "idx": 3,
+   "start": 2.267,
+   "end": 4.117,
+   "dur": 1.85,
+   "head_bright": 97.61111450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 4,
+   "start": 4.117,
+   "end": 4.167,
+   "dur": 0.05,
+   "head_bright": 187.8958282470703,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 5,
+   "start": 4.167,
+   "end": 5.033,
+   "dur": 0.866,
+   "head_bright": 0.0,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": true
+  },
+  {
+   "idx": 6,
+   "start": 5.033,
+   "end": 7.15,
+   "dur": 2.117,
+   "head_bright": 255.0,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": true
+  },
+  {
+   "idx": 7,
+   "start": 7.15,
+   "end": 10.75,
+   "dur": 3.6,
+   "head_bright": 46.58333206176758,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 8,
+   "start": 10.75,
+   "end": 13.583,
+   "dur": 2.833,
+   "head_bright": 130.29861450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 9,
+   "start": 13.583,
+   "end": 17.633,
+   "dur": 4.05,
+   "head_bright": 74.92361450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  }
+ ],
+ "extracted_at": "2026-09-26T04:19:12",
+ "stage": "A_signal_only (B=camera/shotsize pending)"
+}

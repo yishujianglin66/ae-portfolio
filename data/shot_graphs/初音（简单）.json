@@ -1,0 +1,223 @@
+{
+ "template": "初音（简单）",
+ "video": "D:\\AE-Work\\resources\\video\\初音（简单）\\成品.mp4",
+ "duration": 14.23,
+ "fps": 60.0,
+ "n_shots": 8,
+ "n_cuts": 7,
+ "shot_dur_stats": {
+  "mean": 1.779,
+  "median": 1.917,
+  "p10": 0.663,
+  "p90": 2.827,
+  "min": 0.034,
+  "max": 2.85
+ },
+ "cut_rate_per_sec": 0.49,
+ "transition_dist": {
+  "flash": 1,
+  "cut": 5,
+  "black": 1
+ },
+ "flash_ratio": 0.143,
+ "frozen_shots": [
+  0
+ ],
+ "black_shots": [
+  4
+ ],
+ "beat_sync": {
+  "bpm": 103.359375,
+  "n_beats": 21,
+  "sync_hist_ms": {
+   "<=50ms": 3,
+   "<=80ms": 4,
+   "<=120ms": 4,
+   ">120ms": 3
+  },
+  "sync_rate_80ms": 0.571,
+  "gap_median_ms": 66.5
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 0.5,
+   "energy_class": "calm",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 0.5,
+   "t1": 2.5,
+   "energy_class": "mid",
+   "dur": 2.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 2.5,
+   "t1": 3.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 3.0,
+   "t1": 4.5,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 4.5,
+   "t1": 5.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 5.0,
+   "t1": 8.5,
+   "energy_class": "mid",
+   "dur": 3.5,
+   "cuts": 1,
+   "cut_rate": 0.29
+  },
+  {
+   "t0": 8.5,
+   "t1": 9.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 9.0,
+   "t1": 10.0,
+   "energy_class": "mid",
+   "dur": 1.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 10.0,
+   "t1": 10.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 10.5,
+   "t1": 12.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 12.0,
+   "t1": 12.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 12.5,
+   "t1": 14.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  }
+ ],
+ "shots": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 2.817,
+   "dur": 2.817,
+   "head_bright": 42.97222137451172,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": true
+  },
+  {
+   "idx": 1,
+   "start": 2.817,
+   "end": 4.75,
+   "dur": 1.933,
+   "head_bright": 219.4375,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 2,
+   "start": 4.75,
+   "end": 7.6,
+   "dur": 2.85,
+   "head_bright": 242.00694274902344,
+   "flash_in": true,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 3,
+   "start": 7.6,
+   "end": 8.533,
+   "dur": 0.933,
+   "head_bright": 199.5208282470703,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 4,
+   "start": 8.533,
+   "end": 8.567,
+   "dur": 0.034,
+   "head_bright": 3.7013888359069824,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": false
+  },
+  {
+   "idx": 5,
+   "start": 8.567,
+   "end": 10.35,
+   "dur": 1.783,
+   "head_bright": 195.50694274902344,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 6,
+   "start": 10.35,
+   "end": 12.333,
+   "dur": 1.983,
+   "head_bright": 219.0208282470703,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 7,
+   "start": 12.333,
+   "end": 14.233,
+   "dur": 1.9,
+   "head_bright": 63.10416793823242,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  }
+ ],
+ "extracted_at": "2026-09-26T04:18:05",
+ "stage": "A_signal_only (B=camera/shotsize pending)"
+}

@@ -1,0 +1,166 @@
+{
+ "template": "do you mean（简单）",
+ "video": "D:\\AE-Work\\resources\\video\\do you mean（简单）\\成品.mp4",
+ "duration": 11.08,
+ "fps": 60.0,
+ "n_shots": 8,
+ "n_cuts": 8,
+ "shot_dur_stats": {
+  "mean": 1.383,
+  "median": 0.992,
+  "p10": 0.678,
+  "p90": 2.37,
+  "min": 0.084,
+  "max": 3.116
+ },
+ "cut_rate_per_sec": 0.72,
+ "transition_dist": {
+  "cut": 7,
+  "black": 1
+ },
+ "flash_ratio": 0.0,
+ "frozen_shots": [
+  7
+ ],
+ "black_shots": [
+  6
+ ],
+ "beat_sync": {
+  "bpm": 123.046875,
+  "n_beats": 20,
+  "sync_hist_ms": {
+   "<=50ms": 1,
+   "<=80ms": 3,
+   "<=120ms": 7,
+   ">120ms": 1
+  },
+  "sync_rate_80ms": 0.375,
+  "gap_median_ms": 96.7
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 2.0,
+   "energy_class": "mid",
+   "dur": 2.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 2.0,
+   "t1": 2.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 2.5,
+   "t1": 7.5,
+   "energy_class": "mid",
+   "dur": 5.0,
+   "cuts": 4,
+   "cut_rate": 0.8
+  },
+  {
+   "t0": 7.5,
+   "t1": 8.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 8.0,
+   "t1": 11.0,
+   "energy_class": "mid",
+   "dur": 3.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  }
+ ],
+ "shots": [
+  {
+   "idx": 0,
+   "start": 0.0,
+   "end": 2.05,
+   "dur": 2.05,
+   "head_bright": 130.2708282470703,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 1,
+   "start": 2.067,
+   "end": 4.0,
+   "dur": 1.933,
+   "head_bright": 159.47222900390625,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 2,
+   "start": 4.0,
+   "end": 4.983,
+   "dur": 0.983,
+   "head_bright": 133.1666717529297,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 3,
+   "start": 4.983,
+   "end": 5.95,
+   "dur": 0.967,
+   "head_bright": 66.59722137451172,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 4,
+   "start": 5.95,
+   "end": 6.883,
+   "dur": 0.933,
+   "head_bright": 139.54861450195312,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 5,
+   "start": 6.883,
+   "end": 7.883,
+   "dur": 1.0,
+   "head_bright": 97.29166412353516,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": false
+  },
+  {
+   "idx": 6,
+   "start": 7.883,
+   "end": 7.967,
+   "dur": 0.084,
+   "head_bright": 0.2430555522441864,
+   "flash_in": false,
+   "black_in": true,
+   "frozen": false
+  },
+  {
+   "idx": 7,
+   "start": 7.967,
+   "end": 11.083,
+   "dur": 3.116,
+   "head_bright": 125.52083587646484,
+   "flash_in": false,
+   "black_in": false,
+   "frozen": true
+  }
+ ],
+ "extracted_at": "2026-09-26T04:17:41",
+ "stage": "A_signal_only (B=camera/shotsize pending)"
+}

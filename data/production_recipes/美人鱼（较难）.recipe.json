@@ -1,0 +1,216 @@
+{
+ "template": "美人鱼（较难）",
+ "video": "D:\\AE-Work\\resources\\video\\美人鱼（较难）\\成品.mp4",
+ "duration": 17.63,
+ "fps": 60.0,
+ "beat_policy": {
+  "measured_sync_rate_80ms": 0.182,
+  "measured_bpm": 95.7,
+  "median_offset_ms": 140.0,
+  "target_sync_rate_range": [
+   0.2,
+   0.45
+  ],
+  "landing_point_rule": "ramp_down 终点±80ms 对齐 onset（非切点硬踩）"
+ },
+ "grammar": {
+  "n_shots": 10,
+  "intra_shot_ramp_rate": 0.6,
+  "duration_bimodal": {
+   "fast_cluster_n": 2,
+   "fast_mean": 0.042,
+   "slow_cluster_n": 6,
+   "slow_mean": 2.667,
+   "last_shot_share": 0.23
+  },
+  "punctuation_dose": {
+   "black": 2,
+   "frozen": 2,
+   "flash_frame": 2,
+   "measured_shots": {
+    "black": [
+     2,
+     5
+    ],
+    "frozen": [
+     2,
+     5
+    ],
+    "flash": [
+     1,
+     4
+    ]
+   }
+  }
+ },
+ "effects_placement": {
+  "glow_shots": [
+   [
+    0,
+    0.337
+   ],
+   [
+    3,
+    0.416
+   ]
+  ],
+  "glow_progressive": false,
+  "aberration_shots": {
+   "3": -2,
+   "4": -2,
+   "6": -2,
+   "8": -6
+  },
+  "grain_shots": [],
+  "grain_placement": "分散"
+ },
+ "grade_profile": {
+  "sat_range": [
+   0.0,
+   58.7
+  ],
+  "hue_conc_range": [
+   0.185,
+   1.0
+  ]
+ },
+ "sections": [
+  {
+   "t0": 0,
+   "t1": 1.5,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 1,
+   "cut_rate": 0.67
+  },
+  {
+   "t0": 1.5,
+   "t1": 2.5,
+   "energy_class": "burst",
+   "dur": 1.0,
+   "cuts": 4,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 2.5,
+   "t1": 4.0,
+   "energy_class": "mid",
+   "dur": 1.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 4.0,
+   "t1": 4.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 2,
+   "cut_rate": 4.0
+  },
+  {
+   "t0": 4.5,
+   "t1": 7.0,
+   "energy_class": "mid",
+   "dur": 2.5,
+   "cuts": 1,
+   "cut_rate": 0.4
+  },
+  {
+   "t0": 7.0,
+   "t1": 7.5,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 1,
+   "cut_rate": 2.0
+  },
+  {
+   "t0": 7.5,
+   "t1": 12.0,
+   "energy_class": "mid",
+   "dur": 4.5,
+   "cuts": 1,
+   "cut_rate": 0.22
+  },
+  {
+   "t0": 12.0,
+   "t1": 12.5,
+   "energy_class": "calm",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 12.5,
+   "t1": 14.5,
+   "energy_class": "mid",
+   "dur": 2.0,
+   "cuts": 1,
+   "cut_rate": 0.5
+  },
+  {
+   "t0": 14.5,
+   "t1": 15.0,
+   "energy_class": "burst",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 15.0,
+   "t1": 17.0,
+   "energy_class": "mid",
+   "dur": 2.0,
+   "cuts": 0,
+   "cut_rate": 0.0
+  },
+  {
+   "t0": 17.0,
+   "t1": 17.5,
+   "energy_class": "calm",
+   "dur": 0.5,
+   "cuts": 0,
+   "cut_rate": 0.0
+  }
+ ],
+ "min_repro": {
+  "intra_shot_speed_ramp": {
+   "tool": "ffmpeg setpts 分段表达式（resolve_engine.dynamic_speed_ramp 已有）",
+   "spec": "每镜 2-4 段线性逼近 ease-out；ramp_down 起点=镜均值×1.35，终点=×0.75",
+   "evidence_source": "flow_seq 实测"
+  },
+  "rgb_chromatic_aberration": {
+   "tool": "ffmpeg rgbashift=Rh=Rb=N（AE 等价: Chromatic Aberration 0.02-0.06）",
+   "spec": "常规镜 2px / 情绪峰值镜 6px（1920 基准）",
+   "evidence_source": "aberr_px 实测 -2/-6"
+  },
+  "glow_progressive": {
+   "tool": "AE 双栈 Glow（主 T=50 R=30 I=2.0 + 核心 T=80 R=10 I=1.5，知识库配方）",
+   "spec": "爆发段内 I 随能量线性爬升，glow_score 实测 0.96→3.52 对应 I×0.5→×2.0",
+   "evidence_source": "glow_score 逐镜序列"
+  },
+  "film_grain": {
+   "tool": "ffmpeg noise=alls=18:allf=t+u（顶层叠加）",
+   "spec": "只铺首段与末段质感镜，爆发段禁用（模板实测 grain 仅现于镜3/20/21/22）",
+   "evidence_source": "grain_energy>8 且 temporal_corr<0.3 的镜位"
+  },
+  "punctuation": {
+   "black_frame": "colorsrc 0.6-0.9s，≤2 次/片，置于开场高潮后",
+   "freeze": "tpad=stop_mode=clone，0.3-0.9s，≤3 镜/片，快切段急停用",
+   "flash_frame": "2-3 帧白闪，≤2 处/片（当前系统剂量需下调对齐）"
+  },
+  "bimodal_shot_duration": {
+   "tool": "编排层采样策略（无渲染依赖）",
+   "spec": "快簇 N(0.22s,0.12) 截断[0.05,0.5] 占 60% + 慢簇 N(2.8s,1.2) 截断[1.5,4.5] 占 40%；末镜=全片 25-40%",
+   "evidence_source": "shot_dur 双峰实测（独自升级中位0.30+尾4.47 / 美人鱼中位1.70）"
+  },
+  "beat_policy": {
+   "spec": "切点踩拍目标区间 0.20-0.45（模板实测 0.18-0.38）；踩拍语义=减速落点(ramp_down 终点)±80ms 对齐 onset，非切点硬对齐",
+   "evidence_source": "sync_rate_80ms + ramp_down 镜位联合"
+  }
+ },
+ "provenance": {
+  "stage_a": "data/shot_graphs/美人鱼（较难）.json",
+  "stage_b": "data/shot_graphs/美人鱼（较难）.forensics.json",
+  "extractor": "core/shot_graph_extractor.py + core/shot_forensics.py"
+ }
+}
