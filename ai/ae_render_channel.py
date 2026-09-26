@@ -450,6 +450,25 @@ class AERenderChannel:
         lines.append("          for (var k2 = 1; k2 <= nk; k2++) {")
         lines.append("            sp.setTemporalEaseAtKey(k2, easeN(sp, ez(0, 10)), easeN(sp, ez(0, 60)));")
         lines.append("          }")
+        # 震动 (2026-09-25 用户「踩点推进+震动感」在 AE 侧的专业实现):
+        # Position 抖动表达式 — 以 Scale 关键帧为撞击锚, 最近关键帧后 7 帧内
+        # 逐帧随机抖动(幅度 36px×二次衰减, posterizeTime 锁 24fps, seedRandom
+        # 按帧确定性), comp/layer 的 motionBlur(16 samples) 会让抖动带上
+        # 真实运动模糊 — 这是 ffmpeg zoompan 给不了的质感。
+        _shake_expr = (
+            "var sp=thisLayer.property('Scale');"
+            "if(sp.numKeys<2){value;}else{"
+            "var kk=sp.nearestKey(time);var dt=time-kk.time;"
+            "var win=7.0/24.0;"
+            "if(dt>=-1/24.0&&dt<win&&kk.index<sp.numKeys){"
+            "posterizeTime(24);"
+            "seedRandom(Math.floor(time*24)*13+kk.index,true);"
+            "var dec=Math.pow(1-Math.max(dt,0)/win,2);"
+            "var a=36*dec;"
+            "[value[0]+(random()*2-1)*a,value[1]+(random()*2-1)*a];"
+            "}else{value;}}")
+        lines.append("          var pos = layer.property('Position');")
+        lines.append("          pos.expression = " + json.dumps(_shake_expr) + ";")
         lines.append("        }")
         lines.append("        var rqItem = app.project.renderQueue.items.add(comp);")
         lines.append("        var om = rqItem.outputModule(1);")

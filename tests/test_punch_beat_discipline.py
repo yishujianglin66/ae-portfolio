@@ -85,27 +85,31 @@ def test_melody_scope_drop_limits_to_climax():
     assert _scope("build", "drop") is False
 
 
-def test_melody_scope_default_is_off_pure_drums():
-    """默认(未设 scope)是 **off**: 撞击只落强鼓点, 不接旋律锚。
+def test_melody_scope_default_is_segmented():
+    """默认(未设 scope)是 **segmented**: 铺垫/蓄力段跟旋律重音，爆发段只落强鼓点。
 
     需求演变（都来自用户原话，记录以免来回摇摆）：
       2026-09-19 「不够, 没跟小提琴节奏变换, 视觉冲击力不到位」→ 默认改 all
-      2026-09-24 「要纯, 能完美踩点」                          → 默认改 **off**
-        依据：v6(纯) 21 次撞击 / 强鼓点 100%；
-              v9(all) 36 次 / 强鼓点仅 50%（一半落在 strength<0.5 的弱鼓点上）。
-    注意：旋律锚**仍全量驱动切点池**（见 _onsets），踩点密度不受影响；
-    收敛的只是"哪些事件触发脉冲运镜"。故本测试只锁撞击触发源，不涉及切点。
+      2026-09-24 「要纯, 能完美踩点」                          → 默认改 off
+      2026-09-24 「铺垫段(前 14.5s)完全没撞击」                 → 默认改 **segmented**
+        （这段 BGM 首个强鼓点在 14.5s，纯打击乐会让铺垫段 0 撞击；用户选铺垫段例外。）
+    注意：旋律锚**仍全量驱动切点池**；本测试只锁撞击触发源，不涉及切点。
     """
     d = ProductionDirector.__new__(ProductionDirector)   # 不设 _melody_punch_scope
-    for mood in ("intro", "build", "drop", "climax", "outro"):
-        assert ProductionDirector._punch_melody_allowed(d, mood) is False
+    assert ProductionDirector._punch_melody_allowed(d, "intro") is True
+    assert ProductionDirector._punch_melody_allowed(d, "build") is True
+    for mood in ("drop", "climax", "outro"):
+        assert ProductionDirector._punch_melody_allowed(d, mood) is False, mood
 
 
 def test_melody_scope_override_still_available():
-    """裁决可回退：显式设 scope=all/drop 仍能恢复跟小提琴（不改代码即可回退）"""
+    """裁决可回退：显式设 scope=off/all/drop 仍可切换（不改代码即可回退）"""
     d = ProductionDirector.__new__(ProductionDirector)
     d._melody_punch_scope = "all"
     assert ProductionDirector._punch_melody_allowed(d, "intro") is True
+    d._melody_punch_scope = "off"
+    for mood in ("intro", "drop", "climax"):
+        assert ProductionDirector._punch_melody_allowed(d, mood) is False
     d._melody_punch_scope = "drop"
     assert ProductionDirector._punch_melody_allowed(d, "drop") is True
     assert ProductionDirector._punch_melody_allowed(d, "intro") is False

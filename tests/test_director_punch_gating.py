@@ -13,14 +13,16 @@ static 重新纳入可撞击类型 (落在静止镜头上的小提琴重音不�
   · static 无 onset      → 真静态 (无 zoompan)
   · static 有 onset      → 承载撞击 (PUNCH_ELIGIBLE_EFFECTS)
   · 平移/斜移类          → 永不承载撞击 (基础运镜与撞击叠加会互相干扰)
-  · push / zoom_in       → 承载撞击, 幅度顶到 1.15 上限
+  · push / zoom_in       → 承载撞击, 幅度峰值 = 1+PUNCH_PEAK (env 可调, 默认 0.22)
+    (2026-09-26: 峰值 0.15→0.22 时本文件漏改红过 — 故契约改为**跟随常量
+    PUNCH_PEAK**, 不再硬编码字面量, 调参不再需要同步这里)
 """
 import subprocess
 import types
 
 import pytest
 
-from ai.production_director import ProductionDirector
+from ai.production_director import PUNCH_PEAK, ProductionDirector
 
 
 @pytest.fixture()
@@ -63,7 +65,7 @@ def test_static_with_onsets_gets_punch(director, monkeypatch):
                           zoompan_effect="static", onset_times=[0.5])
     assert "zoompan" in vf
     assert "between(on," in vf     # 撞击曲线标记
-    assert "1.15" in vf            # 幅度上限
+    assert f"{PUNCH_PEAK:g}" in vf  # 幅度峰值跟随 PUNCH_PEAK (env 可调)
 
 
 def test_static_without_onsets_has_no_zoompan(director, monkeypatch):
@@ -89,11 +91,11 @@ def test_zoom_back_with_onsets_no_punch(director, monkeypatch):
 
 
 def test_push_with_onsets_gets_punch(director, monkeypatch):
-    """撞击镜头(push)才允许 onset 逐拍 punch, 且幅度收敛至 1.15"""
+    """撞击镜头(push)才允许 onset 逐拍 punch, 幅度峰值跟随 PUNCH_PEAK"""
     vf = _run_and_capture(director, monkeypatch,
                           zoompan_effect="push", onset_times=[0.5, 1.0])
     assert "zoompan" in vf
-    assert "1.15" in vf
+    assert f"{PUNCH_PEAK:g}" in vf
 
 
 def test_zoom_in_single_onset_gets_punch(director, monkeypatch):
@@ -101,4 +103,4 @@ def test_zoom_in_single_onset_gets_punch(director, monkeypatch):
                           zoompan_effect="zoom_in", onset_times=[0.5])
     assert "zoompan" in vf
     assert "between(on," in vf
-    assert "1.15" in vf
+    assert f"{PUNCH_PEAK:g}" in vf

@@ -28,6 +28,7 @@ from ai.production_director import (  # noqa: E402
     PUNCH_ENVELOPE,
     PUNCH_PEAK,
     PUNCH_RELEASE_FRAMES,
+    PUNCH_SHAKE_AMP,
     PUNCH_STRENGTH_DEFAULT,
     SPEED_PRESETS,
     XFADE_MAP,
@@ -104,8 +105,16 @@ class TestConstants:
         assert pd.PUNCH_MIN_GAP_FRAMES >= PUNCH_ENVELOPE
 
     def test_punch_peak_within_ae_clamp(self):
-        """幅度上限 1.15 是既有约定；PUNCH_PEAK 不得越过。"""
-        assert 0 < PUNCH_PEAK <= 0.15
+        """峰值契约。
+
+        旧约定: ≤0.15 (上限 1.15) — 2026-09-19 提速时的自我约束。
+        2026-09-25 用户反馈「踩点的时间段可以推进镜头拉近，有震动感」→
+        峰值提到 0.22 (z 上限 1.22) + 包络期逐帧抖动 (PUNCH_SHAKE_AMP,
+        AEKV_PUNCH_SHAKE=0 可关)。上限只约束"峰值非负且 ≤0.5"(再大
+        zoompan 放大质量不可接受), 具体幅度由产品裁决。
+        """
+        assert 0 < PUNCH_PEAK <= 0.5
+        assert 0 <= PUNCH_SHAKE_AMP <= 0.05
         assert PUNCH_STRENGTH_DEFAULT == 0.5
 
     def test_punch_eligible_effects_are_real_effects(self):
@@ -163,9 +172,17 @@ class TestXfadeFor:
         assert dur == pytest.approx(0.5)
         assert abs(dur * FPS - round(dur * FPS)) < 1e-9
 
-    def test_speed_changed_forces_hard_cut(self):
-        """变速镜头强制硬切（xfade×setpts 叠加会造成切点漂移）。"""
-        assert _director()._xfade_for(_seg(transition="fade", speed=0.55)) == ("", 0.0)
+    def test_speed_changed_no_longer_forces_hard_cut(self):
+        """变速镜头融合解禁（2026-09-25）。
+
+        旧契约(2026-08-12): 变速镜头一律硬切 — 依据是当时实测"变速版
+        98% 切点滞后"。v21b 帧量化 + 链尾一次性补偿重构后, 受控实验
+        (tmp/xfade_drift_exp2.py, 真实渲染链 + 合成色块源逐帧定位)证明
+        1.5x/0.8x/0.55x 变速段的融合边界漂移 ≤2帧、帧守恒精确,
+        禁令解除。防线转由转场安全化钳制(t ≤ min(d前,d后)-0.1)承担。
+        """
+        # 0.35s 经帧量化吸附到 8/24 帧
+        assert _director()._xfade_for(_seg(transition="fade", speed=0.55)) == ("fadeblack", 8 / 24)
 
     def test_force_cut_env_returns_none(self, monkeypatch):
         monkeypatch.setenv("V23_FORCE_CUT", "1")

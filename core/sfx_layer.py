@@ -316,7 +316,11 @@ def mix_sfx(video_in: str, video_out: str, sfx_plan: list[tuple[str, float, floa
     mix_labels = []
     n_inputs = 1  # 0 = 视频
     for i, (f, t, g) in enumerate(sfx_plan, start=1):
-        parts.append(f"[{i}:a]adelay={int(t * 1000)}|{int(t * 1000)},volume={g:.2f}[s{i}]")
+        # afade 5ms 淡入 (2026-09-26): 硬起音的音效素材在叠加点产生采样阶跃
+        # = 可闻咔哒 (purity7/8 自检 audio_pop×3)。5ms 足够消阶跃,
+        # 对撞击音 10-50ms 的瞬态包络无感知影响。
+        parts.append(f"[{i}:a]adelay={int(t * 1000)}|{int(t * 1000)},"
+                     f"afade=t=in:st=0:d=0.005,volume={g:.2f}[s{i}]")
         mix_labels.append(f"[s{i}]")
         n_inputs += 1
     if bgm:
