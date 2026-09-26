@@ -12,9 +12,11 @@ from pathlib import Path
 from typing import Any, Dict
 
 from core.multimodal_fusion_hub import (
+    AudioFeatureExtractor,
     FusedDecision,
     MultimodalEmbedding,
     MultimodalFusionHub,
+    VisualFeatureExtractor,
     get_fusion_hub,
 )
 
@@ -144,3 +146,46 @@ class TestSingleton:
         b = get_fusion_hub()
         assert a is b
         assert isinstance(a, MultimodalFusionHub)
+
+
+class TestHeuristicPathsHonestMarking:
+    """FIX-04 规格钉（与 tests/test_fake_success_packs_fix0405.py 双保险）：
+
+    文件大小启发式的 video/images/audio-file 路径必须 available=False（未解码内容
+    不得声称可用，0924 审计 F4）；array 真实轻计算路径必须保持可用（误伤检测）。
+    """
+
+    def test_video_file_path_marked_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            v = Path(tmp) / "clip.mp4"
+            v.write_bytes(b"\x00" * 2048)
+            feats = asyncio.run(VisualFeatureExtractor()._extract_from_video(str(v)))
+            assert feats.available is False
+            assert feats.confidence == 0.0
+
+    def test_images_path_marked_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            img = Path(tmp) / "f.png"
+            img.write_bytes(b"\x00" * 1024)
+            feats = asyncio.run(VisualFeatureExtractor()._extract_from_images([str(img)]))
+            assert feats.available is False
+
+    def test_audio_file_path_marked_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            a = Path(tmp) / "bgm.mp3"
+            a.write_bytes(b"\x00" * 2048)
+            feats = asyncio.run(AudioFeatureExtractor()._extract_from_file(str(a)))
+            assert feats.available is False, "bpm=120 常量伪造分析不得参与融合决策"
+
+    def test_encode_all_with_fake_files_degrades_to_text_only(self) -> None:
+        """集成层：传启发式文件路径 + 文本 → 仅 text 模态存活，融合权重不含 visual/audio。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            v = Path(tmp) / "clip.mp4"
+            v.write_bytes(b"\x00" * 2048)
+            hub = MultimodalFusionHub(data_dir=str(Path(tmp) / "hub"))
+            emb = asyncio.run(hub.encode_all(
+                video_path=str(v), text_description="节快 热血",
+            ))
+            assert emb.visual.available is False
+            assert emb.text.available is True
+            assert "visual" not in emb.modality_weights
