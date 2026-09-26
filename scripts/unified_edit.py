@@ -496,6 +496,16 @@ def main() -> int:
     print("统一编排入口 — 自动启用全部积累能力")
     print("=" * 62)
 
+    # [技能注册表预检] P2 真融入（2026-09-25）：开工前自动读卡——
+    # 依赖卡存在性/stage 闸门/宿主就绪/成本预算，预检结果进 report。
+    try:
+        from core.skill_preflight import preflight_for_pipeline, format_report as _pf_fmt
+        _pf = preflight_for_pipeline("unified_edit")
+        report["skill_preflight"] = _pf
+        print(_pf_fmt(_pf))
+    except Exception as _pf_e:  # noqa: BLE001 — 预检不可用不阻断出片
+        print(f"  (技能预检未启用: {_pf_e})")
+
     # Stage 1: Beat analysis (optional, for evidence chain)
     print("\n[能力①] BGM 节拍分析...")
     beat_result = stage1_beat_analysis(args.bgm)

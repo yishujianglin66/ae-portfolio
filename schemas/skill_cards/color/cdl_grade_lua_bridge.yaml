@@ -26,7 +26,7 @@ evidence_chain:
   status: real_execution
   host_version: 本机实测 2026-09-24
   artifacts:
-  - tmp/graded_master.mp4
+  - tmp/e2e_0924/graded_master.mp4   # h264 1920x1080 20.38s 11MB，sha1前16=A4DAA12CA280A0BD（2026-09-25 ffprobe+哈希复验；SATAVG 3.94→6.81）
 version_history:
 - version: 1.0.0
   date: '2026-09-25'

@@ -398,3 +398,26 @@ puppet-automation 套件 29 红 → **632 passed / 14 xfailed / 0 failed**：cel
 - schema MINOR：`skill_type` 新增 `knowledge_pack`（条件约束 recipe_ref 必填）——外部收编有了正式户口，证据字段强制记录 repo/commit/license/安全审查结论
 - 卡片库 123→**125**（active 18），validate 0 违规，守门测试 132 passed，台账页已同步重生成（192KB）
 - 收编哲学沉淀：**整包一张卡+实测锚点，不逐脚本/逐技能立卡**（避免 136 条噪音淹没自有能力）；可执行性、安全、重叠三评估缺一不可
+
+---
+
+## 十四、真融入 + 实际作品证明（2026-09-25/26，应三问审计）
+
+用户三问：①卡片库真融入编排了吗？②别处用项目能自动用到调研结果吗？③有实际作品证明而非直面推理？
+
+### 诚实自检发现的三个差距（全部已修）
+1. **主管线不读卡**：网关有 skill 三工具但 unified_edit 运行时从不读 registry——报告里"编排器可消费"是潜力描述非事实 → 新建 `core/skill_preflight.py`（依赖卡存在性/stage 闸门/宿主就绪探测/成本预算）接入 `unified_edit.main()` 开头，预检结果写进 `unified_report.json`
+2. **卡片证据路径错写**（直面推理的直接证据）：beat_sync_edit/cdl_grade 两卡 artifacts 凭记忆写 `tmp/beat_mix.mp4`，实际在 `tmp/e2e_0924/` → 已修+哈希入证；预检首跑又现场抓到真问题：`resource_find_font` 被管线过度声明（实际走 font_registry 数据文件）→ 删声明，预检从 NEEDS-ATTENTION 转 READY
+3. **证据文件无内容级验证**：只记路径不验内容 → 全部 ffprobe+sha1 复验：beat_mix h264 1080p 20.52s sha1=3DEAACB3…；graded_master 20.38s sha1=A4DAA12C…
+
+### 实际作品（非推理铁证）：proof0925 端到端新出片
+主管线带预检真跑 676.88s：`output/unified_proof0925/proof0925_final_mastered.mp4`（h264 1920x1080 19.41s 17MB aac，sha1=91de69699adbca3b），已登记 output_registry（verify_all 双 OK）+ manifest。
+**七关闸门 6/7：切点踩拍 96%、无削波、鼓点保留、快档占比、变速档位、切点可见均 PASS；速度分层 FAIL（前半仅 1 档 vs 阈 3）被真拦 REJECT**——闸门在真拦而非自评自夸；待优化：前半段变速分层。
+`unified_report.json` 内含 `skill_preflight: {ready:true, budget 130s, headless_matrix {headless:3, requires_running_host:1}}` = 融入的运行时证据。
+
+### 三问终答
+| 问 | 答 |
+|---|---|
+| 真融入？ | 是：主管线每次开工自动读卡（预检已入报告），预检有 5 项守门测试锁死"声明与卡片库不许脱节"；网关 skill_list/show/invoke 三工具另一路 | 
+| 别处自动用到？ | 仓库层：卡片/预检/台账页全部随 git 分发，clone 即得；运行层：任何会话跑主管线即自动预检；MCP 层：接入网关的 AI 可见 40 工具含 skill 三工具 |
+| 实际作品？ | 三片在手可播：proof0925_final_mastered.mp4（新）+ e2e_0924 双片（哈希复验）；且闸门 6/7 的 FAIL 细节反证测量真实（帧差/高频能量/逐声道峰值都是对视频内容做的） |
