@@ -147,9 +147,10 @@ class MediaPipeResult:
         fps: 视频帧率
         detections: 逐帧人物检测列表
         error: 错误信息（如果失败）
+        is_simulated: True 表示关键点是正弦伪数据，禁止驱动生产骨架（FIX-03/R21）
     """
     success: bool = False
-    mode: str = "simulate"
+    mode: str = ""  # FIX-03/契约 §1：旧默认 "simulate" 使裸结果谎称已仿真执行；置空=未设置
     video_path: str = ""
     frame_count: int = 0
     duration: float = 0.0
@@ -158,6 +159,7 @@ class MediaPipeResult:
     fps: float = 30.0
     detections: list[dict[str, Any]] = field(default_factory=list)
     error: str = ""
+    is_simulated: bool = False
 
 
 class MediaPipeIntegrator:
@@ -203,18 +205,18 @@ class MediaPipeIntegrator:
         self._face_detector = None
         self._hands_detector = None
         self._mode = self.config.mode
+        self._init_error: str | None = None
         
         if self._mode == "auto":
+            # FIX-03/契约 §3：auto 不再静默换轨 simulate——恒解为 real；
+            # 依赖缺失时 process_video() 返回显式失败（旧行为：无声伪造正弦假关键点）
+            self._mode = "real"
             if _MEDIAPIPE_AVAILABLE and CV2_AVAILABLE:
-                self._mode = "real"
                 self._init_detectors()
-            else:
-                self._mode = "simulate"
         elif self._mode == "real":
             if _MEDIAPIPE_AVAILABLE and CV2_AVAILABLE:
                 self._init_detectors()
-            else:
-                self._mode = "simulate"
+            # 依赖缺失保持 real 不解为 simulate；process_video 会显式报错
     
     def is_available(self) -> bool:
         """检查 MediaPipe 是否可用"""
@@ -261,7 +263,8 @@ class MediaPipeIntegrator:
                 self._hands_detector = vision.HandLandmarker.create_from_options(hands_options)
                 
         except Exception as e:
-            self._mode = "simulate"
+            # FIX-03：检测器初始化失败不得静默转 simulate 伪造数据——记错误，显式失败
+            self._init_error = str(e)
             self._pose_detector = None
             self._face_detector = None
             self._hands_detector = None
@@ -282,6 +285,15 @@ class MediaPipeIntegrator:
         
         if not os.path.exists(video_path):
             result.error = f"文件不存在: {video_path}"
+            return result
+        
+        # FIX-03/契约 §3：real 模式下依赖缺失/初始化失败 → 显式失败，绝不回退伪造关键点
+        if self._mode == "real" and not self.is_available():
+            result.error = ("MediaPipe/OpenCV 未安装：real 模式需真实依赖（FIX-03 已取消静默仿真回退）；"
+                            "需演示数据请显式 mode=\"simulate\" 并检查 is_simulated 标记")
+            return result
+        if self._mode == "real" and (self._init_error or self._pose_detector is None):
+            result.error = f"MediaPipe 检测器初始化失败: {self._init_error or 'pose detector 未就绪'}"
             return result
         
         if self._mode == "simulate":
@@ -552,19 +564,21 @@ class MediaPipeIntegrator:
         return hand_data
     
     def _process_video_simulate(self, video_path: str) -> MediaPipeResult:
-        """模拟模式处理视频
+        """模拟模式处理视频（仅限显式 mode="simulate"，FIX-03/R21）
         
-        当 MediaPipe 不可用时，生成合理的模拟数据。
+        生成的是正弦摆动假关键点（is_simulated=True），只能用于离线 UI/结构联调，
+        禁止驱动生产骨架动画（消费端判据：result.is_simulated 为 True 即拒）。
         
         Args:
             video_path: 视频文件路径
             
         Returns:
-            模拟检测结果
+            模拟检测结果（success=True 但 is_simulated=True + mode="simulate"）
         """
         result = MediaPipeResult(
             video_path=video_path,
             mode="simulate",
+            is_simulated=True,
         )
         
         if CV2_AVAILABLE:
