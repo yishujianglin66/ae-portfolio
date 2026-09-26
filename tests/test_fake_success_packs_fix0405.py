@@ -16,7 +16,7 @@ import numpy as np
 import pytest
 
 import ai.aigc_generator as ag
-from ai.ai_director import _is_trusted_material_result
+from ai.ai_director import _ingest_aigc_results, _is_trusted_material_result
 from core.multimodal_fusion_hub import (
     AudioFeatureExtractor,
     TextFeatureExtractor,
@@ -120,3 +120,35 @@ class TestMaterialWhitelistLogic:
         assert _is_trusted_material_result(
             {"success": True, "path": "x.mp4", "source": "Kling"}
         ) is True
+
+
+class TestAigcIngestEndToEnd:
+    """D-3 欠账：全 Mock 降级链场景的**入池循环节**端到端断言（方案 FIX-05 验收栏）。"""
+
+    def test_all_mock_results_never_enter_pool(self, tmp_path):
+        placeholder = tmp_path / "blue_placeholder.mp4"
+        placeholder.write_bytes(b"\x00" * 128)
+        aigc_results = [
+            # 旧行为下这两条都会静默入池（success 且有 path）
+            {"success": True, "path": str(placeholder), "source": "Mock",
+             "execution_path": "simulated", "note": "placeholder"},
+            {"success": False, "error": "Mock disabled (FIX-05)", "source": "Mock",
+             "execution_path": "simulated"},
+        ]
+        files: list = []
+        accepted, rejected = _ingest_aigc_results(aigc_results, files)
+        assert files == [], "Mock 占位片绝不入素材池（F6 根治判据）"
+        assert (accepted, rejected) == (0, 2)
+
+    def test_real_provider_results_flow(self, tmp_path):
+        real = tmp_path / "kling_shot.mp4"
+        real.write_bytes(b"\x00" * 128)
+        files: list = []
+        accepted, rejected = _ingest_aigc_results(
+            [{"success": True, "path": str(real), "source": "Kling"},
+             {"success": True, "path": str(real), "source": "Mock",
+              "execution_path": "simulated"}],
+            files,
+        )
+        assert (accepted, rejected) == (1, 1)   # 真源入池、Mock 拒收，互不误伤
+        assert files == [str(real)]

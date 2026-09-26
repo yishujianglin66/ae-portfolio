@@ -66,6 +66,24 @@ def _is_trusted_material_result(r: dict) -> bool:
     return True
 
 
+def _ingest_aigc_results(aigc_results: list[dict], material_files: list) -> tuple[int, int]:
+    """AI 生成结果入池循环（FIX-05 可测化接缝；白名单见 _is_trusted_material_result）。
+
+    Returns: (accepted, rejected) 计数，供调用方/测试断言"Mock 永不入池"。
+    """
+    accepted = rejected = 0
+    for r in aigc_results:
+        if _is_trusted_material_result(r):
+            material_files.append(r["path"])
+            log(f"  AI素材已添加: {Path(r['path']).name}")
+            accepted += 1
+        else:
+            log(f"  AI素材拒收(不可信来源: source={r.get('source')} "
+                f"execution_path={r.get('execution_path')})，不得静默入池", "WARN")
+            rejected += 1
+    return accepted, rejected
+
+
 # ================================================================
 #  Phase 1: 素材搜集
 # ================================================================
@@ -1162,13 +1180,7 @@ class AIDirector:
                     style=style,
                     material_type="video",
                 )
-                for r in aigc_results:
-                    if _is_trusted_material_result(r):  # FIX-05/契约 §1：Mock/simulated 永不入池
-                        material_files.append(r["path"])
-                        log(f"  AI素材已添加: {Path(r['path']).name}")
-                    else:
-                        log(f"  AI素材拒收(不可信来源: source={r.get('source')} "
-                            f"execution_path={r.get('execution_path')})，不得静默入池", "WARN")
+                _ingest_aigc_results(aigc_results, material_files)  # FIX-05：Mock/simulated 永不入池
             except Exception as e:
                 log(f"AI生成失败(非致命): {e}", "WARN")
 
