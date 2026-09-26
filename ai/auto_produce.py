@@ -5,11 +5,18 @@
 验收: 进击的巨人主题90s AMV从命令到成片零人工点击。
 
 v2: 接入真实语料库(D:\aot_corpus)镜头数据，自动编排满足目标时长。
+
+v3 (2026-09-26, FIX-02/契约 docs/execution_result_contract.md):
+  诚实化退出码与成功语义——未真实渲染不得报 success=True/exit 0。
+  退出码: 0=真实生产完成且产物 ffprobe 可验; 4=dry_run 流程冒烟通过(仿真，非生产结论); 1=失败。
+  报告字段: execution_path ∈ {real, simulated, failed}; dry_run_completed 与 success 分离。
 """
 from __future__ import annotations
 
 import json
 import random
+import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -42,6 +49,25 @@ TEXT_TEMPLATES = [
 ]
 
 CORPUS_META_PATH = Path(r"D:\aot_corpus\corpus_meta.json")
+
+
+def _artifact_verified(path: Path) -> bool:
+    """内容级产物验证（契约 §2.3）：存在 + ffprobe 可读且时长>0。"""
+    if not path.exists() or path.stat().st_size < 1024:
+        return False
+    ffprobe = shutil.which("ffprobe")
+    if not ffprobe:
+        # 无 ffprobe 时不得盲判成功（fail-closed）
+        return False
+    try:
+        r = subprocess.run(
+            [ffprobe, "-v", "error", "-show_entries", "format=duration",
+             "-of", "csv=p=0", str(path)],
+            capture_output=True, text=True, timeout=30, encoding="utf-8", errors="ignore",
+        )
+        return r.returncode == 0 and float((r.stdout or "0").strip() or 0) > 0
+    except Exception:
+        return False
 
 
 def _load_corpus_shots(theme: str, duration_target: float) -> list[dict]:
@@ -181,9 +207,10 @@ def auto_produce(
 
     report["candidates"] = candidates[:5]
     report["step1_retrieve"] = {
-        "ok": True,
+        "ok": len(candidates) > 0,
         "count": len(candidates),
         "source": source_label,
+        "execution_path": "real",
         "time_s": round(time.time() - t0, 2),
     }
     print(f"  ✅ [{source_label}] 检索到 {len(candidates)} 个候选视频")
@@ -214,6 +241,7 @@ def auto_produce(
             mood=data["mood"],
             scene_type=data["scene_type"],
             speed_curve=[SpeedSegment(0.0, 1.0, data["speed_factor"])],
+            # ⚠占位评分（非模型产出，契约 §1 要求显式标记，见 step2 报告 score_source）
             aesthetic_score=round(random.uniform(0.75, 0.95), 3),
             rhythm_score=round(random.uniform(0.80, 0.98), 3),
         )
@@ -236,6 +264,8 @@ def auto_produce(
         "shot_count": len(script.shots),
         "total_duration": total_dur,
         "corpus_driven": corpus_available,
+        "execution_path": "real",
+        "score_source": "random_placeholder",  # 非真实美学模型，显式声明（契约 §1）
         "time_s": round(time.time() - t0, 2),
     }
     print(f"  ✅ 编排 {len(script.shots)} 个镜头，总时长 {total_dur:.1f}s (目标 {duration_target}s)")
@@ -252,6 +282,7 @@ def auto_produce(
     report["step3_validate"] = {
         "ok": len(errors) == 0,
         "errors": errors,
+        "execution_path": "real",
         "time_s": round(time.time() - t0, 2),
     }
     if errors:
@@ -275,6 +306,7 @@ def auto_produce(
         "ok": resolve_report.get("success", False),
         "media_count": resolve_report.get("media_count", 0),
         "dry_run": dry_run,
+        "execution_path": "simulated" if dry_run else ("real" if resolve_report.get("success") else "failed"),
         "time_s": round(time.time() - t0, 2),
     }
     if resolve_report.get("success"):
@@ -292,6 +324,7 @@ def auto_produce(
         "overlay_count": ae_report.get("total_overlays", 0),
         "success_count": ae_report.get("success_count", 0),
         "dry_run": dry_run,
+        "execution_path": "simulated" if dry_run else ("real" if ae_report.get("success") else "failed"),
         "time_s": round(time.time() - t0, 2),
     }
     if ae_report.get("success"):
@@ -299,36 +332,48 @@ def auto_produce(
     else:
         print(f"  ❌ AE执行失败: {ae_report.get('error')}")
 
-    # Step 6: 渲染交付(模拟)
+    # Step 6: 渲染交付 — 成功与否以磁盘真实产物为准（FIX-02，严禁未渲染报 ok）
     print("\n[6/6] 渲染交付...")
     t0 = time.time()
-    # 实际渲染需要Resolve完成时间线后触发
-    # 这里简化为模拟
     final_output = output_dir / f"{theme}_AMV.mp4"
+    verified = (not dry_run) and _artifact_verified(final_output)
     report["step6_render"] = {
-        "ok": True,
+        # dry_run 未执行任何渲染 → ok 必为 False；真实模式仅当产物内容级验证通过才 True
+        "ok": verified,
+        "executed": not dry_run,
+        "artifact_verified": verified,
         "output_path": str(final_output),
         "dry_run": dry_run,
+        "execution_path": "simulated" if dry_run else ("real" if verified else "failed"),
         "time_s": round(time.time() - t0, 2),
     }
     if dry_run:
-        print(f"  📝 [dry_run] 渲染产物路径: {final_output}")
+        print(f"  📝 [dry_run/simulated] 未执行渲染，不产出真实产物: {final_output}")
+    elif verified:
+        print(f"  🎬 渲染产物已验证(ffprobe): {final_output}")
     else:
-        print(f"  🎬 渲染产物: {final_output}")
+        print(f"  ❌ 渲染产物缺失或未通过 ffprobe 验证: {final_output}")
 
-    # 总结
-    report["success"] = all([
-        report["step1_retrieve"]["ok"],
-        report["step2_direct"]["ok"],
-        report["step3_validate"]["ok"],
-        report["step4_resolve"]["ok"],
-        report["step5_ae"]["ok"],
-        report["step6_render"]["ok"],
-    ])
+    # 总结（契约 §1：success 只属于真实执行；dry-run 另有 dry_run_completed）
+    steps_ok = all(
+        report[k]["ok"]
+        for k in ("step1_retrieve", "step2_direct", "step3_validate",
+                  "step4_resolve", "step5_ae", "step6_render")
+    )
+    dry_flow_ok = dry_run and all(
+        report[k]["ok"]
+        for k in ("step1_retrieve", "step2_direct", "step3_validate",
+                  "step4_resolve", "step5_ae")
+    )
+    report["dry_run_completed"] = bool(dry_flow_ok)
+    report["success"] = bool((not dry_run) and steps_ok)
+    report["execution_path"] = "simulated" if dry_run else ("real" if report["success"] else "failed")
 
     print("\n" + "=" * 70)
     if report["success"]:
-        print(f"✅ 端到端生产完成 | 主题: {theme} | 模式: {'dry_run' if dry_run else '实际执行'}")
+        print(f"✅ 端到端生产完成(真实产物已验证) | 主题: {theme}")
+    elif dry_flow_ok:
+        print(f"📝 DRY_RUN 流程冒烟通过(execution_path=simulated)——不是生产结论 | 主题: {theme}")
     else:
         print("❌ 端到端生产失败")
     print("=" * 70)
@@ -343,11 +388,13 @@ def auto_produce(
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="T18 端到端零点击生产")
+    parser = argparse.ArgumentParser(
+        description="T18 端到端零点击生产（退出码: 0=真实产物已验证 / 4=dry_run冒烟通过(simulated) / 1=失败）",
+    )
     parser.add_argument("--bgm", type=str, default="", help="BGM文件路径")
     parser.add_argument("--theme", type=str, default="进击的巨人", help="主题关键词")
     parser.add_argument("--duration", type=float, default=90.0, help="目标时长(秒)")
-    parser.add_argument("--dry-run", action="store_true", help="仅模拟不实际执行")
+    parser.add_argument("--dry-run", action="store_true", help="仅模拟不实际执行（报告 execution_path=simulated）")
     args = parser.parse_args()
 
     report = auto_produce(
@@ -357,4 +404,9 @@ if __name__ == "__main__":
         dry_run=args.dry_run,
     )
 
-    sys.exit(0 if report["success"] else 1)
+    # FIX-02: 退出码反映真实产物存在性（审计 F1 根治点）——dry_run 不得以 0 冒充生产成功
+    if report.get("success"):
+        sys.exit(0)
+    if report.get("dry_run_completed"):
+        sys.exit(4)
+    sys.exit(1)

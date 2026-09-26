@@ -269,50 +269,34 @@ def _execute_puppet_style_task(config: dict[str, Any]) -> dict[str, Any]:
     style = config.get("style", "wood")
     auto_detect = config.get("auto_detect", True)
     quality = config.get("quality", "high")
-    mode = config.get("mode", "simulate")
+    # FIX-02/契约 §3：默认 real；simulate 仅限显式请求，且不得在异常时伪造成功
+    mode = config.get("mode", "real")
 
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, f"puppet_{style}_{uuid.uuid4().hex[:8]}.mp4")
 
-    try:
-        from puppet_workflow_orchestrator import PuppetWorkflowOrchestrator
-        orchestrator = PuppetWorkflowOrchestrator()
+    # FIX-02：原 except 分支在异常时伪造 frames_processed=100 等指标回 success=True，
+    # 违反执行结果契约 §1/§5（诚实失败），已删除——异常直接上抛由任务队列记录失败。
+    from puppet_workflow_orchestrator import PuppetWorkflowOrchestrator
+    orchestrator = PuppetWorkflowOrchestrator()
 
-        result = orchestrator.process_video(
-            input_path=input_video,
-            output_dir=output_dir,
-            style=style,
-            auto_detect=auto_detect,
-            quality=quality,
-            mode=mode,
-        )
+    result = orchestrator.process_video(
+        input_path=input_video,
+        output_dir=output_dir,
+        style=style,
+        auto_detect=auto_detect,
+        quality=quality,
+        mode=mode,
+    )
 
-        return {
-            "success": True,
-            "style": style,
-            "input_video": input_video,
-            "output_dir": output_dir,
-            "mode": mode,
-            "result": result if hasattr(result, '__dict__') else str(result),
-        }
-    except Exception as e:
-        if mode == "simulate" or mode == "auto":
-            _logger.info(f"使用模拟模式生成木偶风格化结果: {style}")
-            time.sleep(2.0)
-            return {
-                "success": True,
-                "style": style,
-                "input_video": input_video,
-                "output_path": output_path,
-                "output_dir": output_dir,
-                "mode": "simulate",
-                "frames_processed": 100,
-                "joints_detected": 17 if auto_detect else 0,
-                "effects_applied": 8,
-                "duration_seconds": 30.0,
-                "message": "模拟模式 - 木偶风格化处理完成",
-            }
-        raise
+    return {
+        "success": True,
+        "style": style,
+        "input_video": input_video,
+        "output_dir": output_dir,
+        "mode": mode,
+        "execution_path": "real" if mode == "real" else ("simulated" if mode == "simulate" else "fallback"),
+        "result": result if hasattr(result, '__dict__') else str(result),
+    }
 
 
 def _execute_quality_assessment(config: dict[str, Any]) -> dict[str, Any]:
@@ -320,74 +304,40 @@ def _execute_quality_assessment(config: dict[str, Any]) -> dict[str, Any]:
     reference = config.get("reference_video", "")
     test = config.get("test_video", "")
     metrics = config.get("metrics", ["psnr", "ssim", "vmaf"])
-    mode = config.get("mode", "simulate")
+    # FIX-02/契约 §3：默认 real；异常不再回伪造分数（原假 psnr/ssim/vmaf 分支已删，契约 §1）
+    mode = config.get("mode", "real")
 
-    try:
-        from video_quality_assessor import VideoQualityAssessor
-        assessor = VideoQualityAssessor()
-        result = assessor.assess(reference, test, mode=mode)
-        return {
-            "success": True,
-            "reference_video": reference,
-            "test_video": test,
-            "metrics": metrics,
-            "result": result if hasattr(result, '__dict__') else str(result),
-        }
-    except Exception as e:
-        if mode == "simulate" or mode == "auto":
-            _logger.info("使用模拟模式进行质量评估")
-            time.sleep(1.0)
-            return {
-                "success": True,
-                "reference_video": reference,
-                "test_video": test,
-                "metrics": metrics,
-                "mode": "simulate",
-                "scores": {
-                    "psnr": 38.5,
-                    "ssim": 0.965,
-                    "vmaf": 92.3,
-                },
-                "overall_quality": "excellent",
-                "message": "模拟模式 - 质量评估完成",
-            }
-        raise
+    from video_quality_assessor import VideoQualityAssessor
+    assessor = VideoQualityAssessor()
+    result = assessor.assess(reference, test, mode=mode)
+    return {
+        "success": True,
+        "reference_video": reference,
+        "test_video": test,
+        "metrics": metrics,
+        "result": result if hasattr(result, '__dict__') else str(result),
+        "execution_path": "real" if mode == "real" else ("simulated" if mode == "simulate" else "fallback"),
+    }
 
 
 def _execute_parameter_optimize(config: dict[str, Any]) -> dict[str, Any]:
     """执行参数优化任务"""
     context = config.get("context", {})
     use_feedback = config.get("use_feedback", True)
-    mode = config.get("mode", "simulate")
+    # FIX-02/契约 §3：默认 real；异常不再回伪造优化结果（原假 optimized_params 分支已删，契约 §1）
+    mode = config.get("mode", "real")
 
-    try:
-        from parameter_optimizer import EnhancedParameterOptimizer
-        optimizer = EnhancedParameterOptimizer()
-        from parameter_optimizer import ParameterContext
-        ctx = ParameterContext(**context) if context else ParameterContext()
-        result = optimizer.optimize_with_feedback(ctx, use_feedback=use_feedback)
-        return {
-            "success": True,
-            "mode": mode,
-            "result": result if hasattr(result, '__dict__') else str(result),
-        }
-    except Exception as e:
-        if mode == "simulate" or mode == "auto":
-            _logger.info("使用模拟模式进行参数优化")
-            time.sleep(0.8)
-            return {
-                "success": True,
-                "mode": "simulate",
-                "optimized_params": {
-                    "effect_intensity": 0.75,
-                    "animation_speed": 1.2,
-                    "render_quality": "high",
-                },
-                "confidence": 0.85,
-                "feedback_used": use_feedback,
-                "message": "模拟模式 - 参数优化完成",
-            }
-        raise
+    from parameter_optimizer import EnhancedParameterOptimizer
+    optimizer = EnhancedParameterOptimizer()
+    from parameter_optimizer import ParameterContext
+    ctx = ParameterContext(**context) if context else ParameterContext()
+    result = optimizer.optimize_with_feedback(ctx, use_feedback=use_feedback)
+    return {
+        "success": True,
+        "mode": mode,
+        "execution_path": "real" if mode == "real" else ("simulated" if mode == "simulate" else "fallback"),
+        "result": result if hasattr(result, '__dict__') else str(result),
+    }
 
 
 _TASK_HANDLERS = {

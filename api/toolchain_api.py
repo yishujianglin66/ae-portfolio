@@ -120,7 +120,8 @@ class ToolExecuteRequest(BaseModel):
     tool_name: str = Field(..., description="工具名称")
     operation: str = Field(..., description="操作名称")
     params: dict[str, Any] = Field(default_factory=dict, description="操作参数")
-    mode: str = Field("auto", description="执行模式: real, simulate, auto")
+    # FIX-02/契约 §3：默认 real；simulate/auto 降级链已由静默改为显式
+    mode: str = Field("real", description="执行模式: real(默认), simulate, auto（均须显式传入）")
 
 
 class ToolExecuteResponse(BaseModel):
@@ -141,7 +142,7 @@ class WorkflowExecuteRequest(BaseModel):
     workflow_name: str = Field(..., description="工作流名称")
     input_path: str = Field(..., description="输入文件路径")
     output_path: str = Field(..., description="输出文件路径")
-    mode: str = Field("auto", description="执行模式")
+    mode: str = Field("real", description="执行模式（默认 real，FIX-02）")
     steps: list[str] | None = Field(None, description="指定执行步骤")
 
 
@@ -292,7 +293,7 @@ async def execute_tool_by_name(
     tool_name: str,
     operation: str = Query(..., description="操作名称"),
     params: dict[str, Any] | None = None,
-    mode: str = Query("auto", description="执行模式"),
+    mode: str = Query("real", description="执行模式（默认 real，FIX-02/契约 §3）"),
     user: Any = Depends(require_auth),
 ):
     """按名称执行工具"""
@@ -394,7 +395,7 @@ async def execute_workflow_by_name(
     workflow_name: str,
     input_path: str = Query(..., description="输入路径"),
     output_path: str = Query(..., description="输出路径"),
-    mode: str = Query("auto", description="执行模式"),
+    mode: str = Query("real", description="执行模式（默认 real，FIX-02/契约 §3）"),
     user: Any = Depends(require_auth),
 ):
     """按名称执行工作流"""
@@ -435,7 +436,7 @@ async def quick_render(
     project_path: str = Query(..., description="AE项目路径"),
     comp_name: str = Query(..., description="合成名称"),
     output_path: str = Query(..., description="输出路径"),
-    mode: str = Query("auto", description="执行模式"),
+    mode: str = Query("real", description="执行模式（默认 real，FIX-02/契约 §3）"),
     user: Any = Depends(require_auth),
 ):
     """快捷渲染 - 使用AE渲染合成"""
@@ -464,7 +465,7 @@ async def quick_enhance(
     output_path: str = Query(..., description="输出视频路径"),
     model: str = Query("proteus", description="Topaz模型"),
     scale: float = Query(2.0, description="缩放倍数"),
-    mode: str = Query("auto", description="执行模式"),
+    mode: str = Query("real", description="执行模式（默认 real，FIX-02/契约 §3）"),
     user: Any = Depends(require_auth),
 ):
     """快捷增强 - 使用Topaz增强视频"""
@@ -493,7 +494,7 @@ async def quick_encode(
     input_path: str = Query(..., description="输入文件路径"),
     output_path: str = Query(..., description="输出文件路径"),
     codec: str = Query("h264", description="编码格式"),
-    mode: str = Query("auto", description="执行模式"),
+    mode: str = Query("real", description="执行模式（默认 real，FIX-02/契约 §3）"),
     user: Any = Depends(require_auth),
 ):
     """快捷编码 - 使用FFmpeg转码"""
